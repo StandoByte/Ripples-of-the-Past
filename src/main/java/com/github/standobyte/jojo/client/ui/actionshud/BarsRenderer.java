@@ -351,7 +351,7 @@ public abstract class BarsRenderer {
 
     protected void drawText(MatrixStack matrixStack, ITextComponent text, int x, int y, Alignment alignment, 
             int color, float partialTick, FontRenderer font, ActionsOverlayGui hud) {
-        hud.drawBackdrop(matrixStack, x, y, font.width(text), alignment, null, partialTick);
+        hud.drawBackdrop(matrixStack, x, y, font.width(text), alignment, null, 1.0F, partialTick);
         hud.drawString(matrixStack, font, text, x, y, alignment, color);
     }
 }

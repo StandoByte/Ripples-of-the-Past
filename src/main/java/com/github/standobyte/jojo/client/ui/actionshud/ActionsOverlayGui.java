@@ -64,7 +64,6 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.settings.AttackIndicatorStatus;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.util.ColorHelper;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
@@ -806,7 +805,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();
                 
-                drawBackdrop(matrixStack, x, y, width, position.alignment, null, 1);
+                drawBackdrop(matrixStack, x, y, width, position.alignment, null, alpha, 0);
                 drawString(matrixStack, mc.font, actionName, x, y, position.alignment, currentMode.getPower().getColor(), alpha);
                 
                 RenderSystem.disableBlend();
@@ -874,7 +873,7 @@ public class ActionsOverlayGui extends AbstractGui {
             int y = position.y + (16 - mc.font.lineHeight) / 2;
             IPower<?, ?> power = currentMode.getPower();
             ITextComponent name = power.getName();
-            drawBackdrop(matrixStack, x, y, mc.font.width(name), position.alignment, null, 1.0F);
+            drawBackdrop(matrixStack, x, y, mc.font.width(name), position.alignment, null, alpha, 0);
             drawString(matrixStack, mc.font, name, x, y, position.alignment, power.getColor(), alpha);
         }
     }
@@ -903,7 +902,7 @@ public class ActionsOverlayGui extends AbstractGui {
             break;
         }
         for (ITextComponent line : warningLines) {
-            drawBackdrop(matrixStack, x, y, mc.font.width(line), position.alignment, null, 1.0F);
+            drawBackdrop(matrixStack, x, y, mc.font.width(line), position.alignment, null, 1.0F, 0);
             drawString(matrixStack, mc.font, line, x, y, position.alignment, 0xFFFFFF);
             y += 16;
         }
@@ -914,12 +913,12 @@ public class ActionsOverlayGui extends AbstractGui {
         int y = standStrengthPosition.y;
         Alignment alignment = standStrengthPosition.alignment;
         ITextComponent distanceString = new StringTextComponent(String.format("%.2f m", distance));
-        drawBackdrop(matrixStack, x, y, mc.font.width(distanceString), alignment, null, 0);
+        drawBackdrop(matrixStack, x, y, mc.font.width(distanceString), alignment, null, 1.0F, 0);
         drawString(matrixStack, mc.font, distanceString, x, y, alignment, 0xFFFFFF);
         if (damageFactor < 1) {
             y += 12;
             ITextComponent strength = new TranslationTextComponent("jojo.overlay.stand_strength", String.format("%.2f%%", damageFactor * 100F));
-            drawBackdrop(matrixStack, x, y, mc.font.width(strength), alignment, null, 0);
+            drawBackdrop(matrixStack, x, y, mc.font.width(strength), alignment, null, 1.0F, 0);
             drawString(matrixStack, mc.font, strength, x, y, alignment, 0xFF4040);
         }
     }
@@ -1002,7 +1001,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 ITextComponent name = getModeNameForSelector(mode);
                 if (name != null) {
                     int color = getModeColor(mode);
-                    drawBackdrop(matrixStack, x, y, mc.font.width(name), position.alignment, modeSelectorTransparency, partialTick);
+                    drawBackdrop(matrixStack, x, y, mc.font.width(name), position.alignment, modeSelectorTransparency, 0, partialTick);
                     drawString(matrixStack, mc.font, name, x, y, position.alignment, modeSelectorTransparency.makeTextColorTranclucent(color, partialTick));
                 }
                 y += 22;
@@ -1211,14 +1210,14 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     void drawBackdrop(MatrixStack matrixStack, int x, int y, int width, Alignment alignment, 
-            @Nullable ElementTransparency transparency, float partialTick) {
+            @Nullable ElementTransparency transparency, float alpha, float partialTick) {
         int backdropColor = mc.options.getBackgroundColor(0.0F);
         if (backdropColor != 0) {
             if (alignment == Alignment.RIGHT) {
                 x -= width;
             }
-            fill(matrixStack, x - 2, y - 2, x + width + 2, y + mc.font.lineHeight + 2, ColorHelper.PackedColor.multiply(backdropColor, 
-                            transparency != null ? transparency.makeTextColorTranclucent(0xFFFFFF, partialTick) : 0xFFFFFFFF));
+            ClientUtil.drawBackdrop(matrixStack, x, y, width, 
+                    transparency != null ? transparency.getAlpha(partialTick) : alpha);
         }
     }
     

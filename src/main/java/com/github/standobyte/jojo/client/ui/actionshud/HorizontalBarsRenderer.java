@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.client.ui.actionshud;
 
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.Alignment;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.BarsOrientation;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -125,13 +126,13 @@ public class HorizontalBarsRenderer extends BarsRenderer {
                 AbstractGui.fill(matrixStack, 
                         x + 1 - diff + length - costFill,  y + yOffset + 1, 
                         x + 1 - diff + length,             y + yOffset + (height / 2) - 1, 
-                        ElementTransparency.addAlpha(0xFFFFFF, alpha));
+                        ClientUtil.addAlpha(0xFFFFFF, alpha));
             }
             else {
                 AbstractGui.fill(matrixStack, 
                         x + 1 + diff,                y + yOffset + 1, 
                         x + 1 + diff + costFill,     y + yOffset + (height / 2) - 1, 
-                        ElementTransparency.addAlpha(0xFFFFFF, alpha));
+                        ClientUtil.addAlpha(0xFFFFFF, alpha));
             }
             RenderSystem.enableBlend();
         }
@@ -145,7 +146,7 @@ public class HorizontalBarsRenderer extends BarsRenderer {
         AbstractGui.fill(matrixStack, 
                 x + 1,          y + 1, 
                 x + 1 + length, y + height - 1, 
-                ElementTransparency.addAlpha(0xFF0000, alpha));
+                ClientUtil.addAlpha(0xFF0000, alpha));
         RenderSystem.enableBlend();
     }
     

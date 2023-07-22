@@ -109,19 +109,7 @@ public class StandStatsRenderer {
                         statVal[3], statVal[4], statVal[5], 
                         rgb[0], rgb[1], rgb[2], (int) (192 * alpha));
                 RenderSystem.disableBlend();
-
-
-                for (int i = 0; i < statRank.length; i++) {
-                    float statX = xCenter + STAT_RANK_NAME_OFFSETS[i][0];
-                    float statY = yCenter + STAT_RANK_NAME_OFFSETS[i][1];
-                    ITextComponent rank = new StringTextComponent(statRank[i]).withStyle(TextFormatting.BOLD);
-                    ClientUtil.drawCenteredStringNoShadow(matrixStack, mc.font, rank, statX, statY, 0x000000);
-                    int letterWidth = mc.font.width(rank);
-                    if (mouseX >= statX - letterWidth / 2 && mouseX <= statX + letterWidth / 2 && mouseY >= statY && mouseY <= statY + mc.font.lineHeight) {
-                        GuiUtils.drawHoveringText(matrixStack, Arrays.asList(new TranslationTextComponent(STAT_NAME_KEYS[i])), 
-                                mouseX, mouseY, screenWidth, screenHeight, -1, mc.font);
-                    }
-                }
+                
 
                 List<IReorderingProcessor> standName = mc.font.split(new TranslationTextComponent("jojo.stand_stat.stand_name", power.getName()), maxTextWidth);
                 List<IReorderingProcessor> standUser = mc.font.split(new TranslationTextComponent("jojo.stand_stat.stand_user", mc.player.getDisplayName()), maxTextWidth);
@@ -153,7 +141,7 @@ public class StandStatsRenderer {
                 mc.getTextureManager().bind(power.getType().getIconTexture());
                 AbstractGui.blit(matrixStack, x + 135 - width, standIconY, 0, 0, 16, 16, 16, 16);
                 ClientUtil.drawLines(matrixStack, mc.font, standName, 
-                        x + 153 - width, standNameY, 0, color, false);
+                        x + 153 - width, standNameY, 0, color, false, true);
 
                 ResourceLocation playerFace = mc.player.getSkinTextureLocation();
                 mc.getTextureManager().bind(playerFace);
@@ -168,9 +156,22 @@ public class StandStatsRenderer {
                     matrixStack.popPose();
                 }
                 ClientUtil.drawLines(matrixStack, mc.font, standUser, 
-                        x + 153 - width, standUserY, 0, color, false);
+                        x + 153 - width, standUserY, 0, color, false, true);
 
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+
+
+                for (int i = 0; i < statRank.length; i++) {
+                    float statX = xCenter + STAT_RANK_NAME_OFFSETS[i][0];
+                    float statY = yCenter + STAT_RANK_NAME_OFFSETS[i][1];
+                    ITextComponent rank = new StringTextComponent(statRank[i]).withStyle(TextFormatting.BOLD);
+                    ClientUtil.drawCenteredStringNoShadow(matrixStack, mc.font, rank, statX, statY, 0x000000);
+                    int letterWidth = mc.font.width(rank);
+                    if (mouseX >= statX - letterWidth / 2 && mouseX <= statX + letterWidth / 2 && mouseY >= statY && mouseY <= statY + mc.font.lineHeight) {
+                        GuiUtils.drawHoveringText(matrixStack, Arrays.asList(new TranslationTextComponent(STAT_NAME_KEYS[i])), 
+                                mouseX, mouseY, screenWidth, screenHeight, -1, mc.font);
+                    }
+                }
             }
         });
     }

@@ -11,7 +11,7 @@ import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.entity.MRDetectorEntity;
 import com.github.standobyte.jojo.entity.PillarmanTempleEngravingEntity;
 import com.github.standobyte.jojo.entity.RoadRollerEntity;
-import com.github.standobyte.jojo.entity.SendoHamonOverdriveEntity;
+import com.github.standobyte.jojo.entity.HamonSendoOverdriveEntity;
 import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.damaging.LightBeamEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDBlockBulletEntity;
@@ -89,8 +89,8 @@ public class ModEntityTypes {
             () -> EntityType.Builder.<HamonTurquoiseBlueOverdriveEntity>of(HamonTurquoiseBlueOverdriveEntity::new, EntityClassification.MISC).sized(4F, 4F).noSummon().setUpdateInterval(20).fireImmune()
             .build(new ResourceLocation(JojoMod.MOD_ID, "turquoise_blue_overdrive").toString()));
     
-    public static final RegistryObject<EntityType<SendoHamonOverdriveEntity>> SENDO_HAMON_OVERDRIVE = ENTITIES.register("sendo_hamon_overdrive", 
-            () -> EntityType.Builder.<SendoHamonOverdriveEntity>of(SendoHamonOverdriveEntity::new, EntityClassification.MISC).sized(4, 4).setUpdateInterval(Integer.MAX_VALUE).setShouldReceiveVelocityUpdates(false).fireImmune()
+    public static final RegistryObject<EntityType<HamonSendoOverdriveEntity>> SENDO_HAMON_OVERDRIVE = ENTITIES.register("sendo_hamon_overdrive", 
+            () -> EntityType.Builder.<HamonSendoOverdriveEntity>of(HamonSendoOverdriveEntity::new, EntityClassification.MISC).sized(4, 4).setUpdateInterval(Integer.MAX_VALUE).setShouldReceiveVelocityUpdates(false).fireImmune()
             .build(new ResourceLocation(JojoMod.MOD_ID, "sendo_hamon_overdrive").toString()));
     
     public static final RegistryObject<EntityType<ZoomPunchEntity>> ZOOM_PUNCH = ENTITIES.register("zoom_punch", 

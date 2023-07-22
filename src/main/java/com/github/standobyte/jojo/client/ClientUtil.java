@@ -28,6 +28,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
+import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.ActiveRenderInfo;
@@ -46,6 +47,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.network.play.server.SSpawnParticlePacket;
 import net.minecraft.particles.IParticleData;
+import net.minecraft.util.ColorHelper;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
@@ -184,15 +186,22 @@ public class ClientUtil {
         font.draw(matrixStack, line, x - font.width(line) / 2, y, color);
     }
     
-    public static void drawLines(MatrixStack matrixStack, FontRenderer font, List<IReorderingProcessor> lines, float x, float y, float lineGap, int color, boolean shadow) {
-        if (shadow) {
-            for (int i = 0; i < lines.size(); i++) {
-                font.drawShadow(matrixStack, lines.get(i), x, y + i * (font.lineHeight + lineGap), color);
+    public static void drawLines(MatrixStack matrixStack, FontRenderer font, List<IReorderingProcessor> lines, 
+            float x, float y, float lineGap, int color, boolean shadow, boolean backdrop) {
+        for (int i = 0; i < lines.size(); i++) {
+            IReorderingProcessor line = lines.get(i);
+            float lineX = x;
+            float lineY = y + i * (font.lineHeight + lineGap);
+            
+            if (backdrop) {
+                ClientUtil.drawBackdrop(matrixStack, (int) lineX, (int) lineY, font.width(line), 1.0F);
             }
-        }
-        else {
-            for (int i = 0; i < lines.size(); i++) {
-                font.draw(matrixStack, lines.get(i), x, y + i * (font.lineHeight + lineGap), color);
+            
+            if (shadow) {
+                font.drawShadow(matrixStack, line, lineX, lineY, color);
+            }
+            else {
+                font.draw(matrixStack, line, lineX, lineY, color);
             }
         }
     }
@@ -267,6 +276,15 @@ public class ClientUtil {
         bufferBuilder.vertex(x + width , y + height, 0.0D).color(red, green, blue, alpha).endVertex();
         bufferBuilder.vertex(x + width , y + 0, 0.0D).color(red, green, blue, alpha).endVertex();
         Tessellator.getInstance().end();
+    }
+    
+    public static void drawBackdrop(MatrixStack matrixStack, int x, int y, int width, float alpha) {
+        Minecraft mc = Minecraft.getInstance();
+        int backdropColor = mc.options.getBackgroundColor(0.0F);
+        if (backdropColor != 0) {
+            AbstractGui.fill(matrixStack, x - 2, y - 2, x + width + 2, y + mc.font.lineHeight + 2, 
+                    ColorHelper.PackedColor.multiply(backdropColor, addAlpha(0xFFFFFF, alpha)));
+        }
     }
     
     
@@ -358,6 +376,10 @@ public class ClientUtil {
     
     public static int discColor(int color) {
         return (((0xFFFFFF - color) & 0xFEFEFE) >> 1) + color;
+    }
+    
+    public static int addAlpha(int color, float alpha) {
+        return color | ((int) (255F * alpha)) << 24 & -0x1000000;
     }
     
     public static void vertex(MatrixStack.Entry matrixEntry, IVertexBuilder vertexBuilder, 

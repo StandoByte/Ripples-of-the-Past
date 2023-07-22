@@ -93,8 +93,6 @@ public class HamonData extends TypeSpecificData {
     public static final int MAX_STAT_LEVEL = 60;
     public static final float MAX_BREATHING_LEVEL = 100;
     
-    private static final int LVL_1_POINTS = 2;
-    private static final int NEXT_LVL_DIFF = 3;
     public static final int MAX_HAMON_POINTS = pointsAtLevel(MAX_STAT_LEVEL);
     
     private final Random random = new Random();
@@ -440,8 +438,10 @@ public class HamonData extends TypeSpecificData {
         prevBreathStability = breathStability;
     }
     
-    
-    public static int pointsAtLevel(int level) {
+
+    private static final int LVL_1_POINTS = 2;
+    private static final int NEXT_LVL_DIFF = 3;
+    public static int pointsAtLevel(int level) { // inverse formula to levelFromPoints
         return level * (
                 LVL_1_POINTS
                 + LVL_1_POINTS + (level - 1) * NEXT_LVL_DIFF)

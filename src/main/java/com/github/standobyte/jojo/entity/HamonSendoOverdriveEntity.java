@@ -40,7 +40,7 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
 
-public class SendoHamonOverdriveEntity extends Entity implements IEntityAdditionalSpawnData {
+public class HamonSendoOverdriveEntity extends Entity implements IEntityAdditionalSpawnData {
     private Entity user;
     private UUID userUUID;
     private int userNetworkId;
@@ -61,7 +61,7 @@ public class SendoHamonOverdriveEntity extends Entity implements IEntityAddition
     private float damage;
     public static final float KNOCKBACK_FACTOR = 0.5F;
 
-    public SendoHamonOverdriveEntity(World world, LivingEntity user, Direction.Axis axis) {
+    public HamonSendoOverdriveEntity(World world, LivingEntity user, Direction.Axis axis) {
         this(ModEntityTypes.SENDO_HAMON_OVERDRIVE.get(), world);
         this.user = user;
         this.userUUID = user.getUUID();
@@ -69,27 +69,27 @@ public class SendoHamonOverdriveEntity extends Entity implements IEntityAddition
         refreshDimensions();
     }
 
-    public SendoHamonOverdriveEntity(EntityType<?> type, World world) {
+    public HamonSendoOverdriveEntity(EntityType<?> type, World world) {
         super(type, world);
     }
     
-    public SendoHamonOverdriveEntity setRadius(float radius) {
+    public HamonSendoOverdriveEntity setRadius(float radius) {
         this.radius = radius;
         return this;
     }
     
-    public SendoHamonOverdriveEntity setWaveDamage(float damage) {
+    public HamonSendoOverdriveEntity setWaveDamage(float damage) {
         this.damage = damage;
         return this;
     }
     
-    public SendoHamonOverdriveEntity setWavesCount(int waves) {
+    public HamonSendoOverdriveEntity setWavesCount(int waves) {
         this.wavesToAdd = waves;
         this.tickLifeSpan = waves * WAVE_ADD_TICK + WAVE_TICK_LENGTH;
         return this;
     }
     
-    public SendoHamonOverdriveEntity setStatPoints(float cost) {
+    public HamonSendoOverdriveEntity setStatPoints(float cost) {
         this.points = cost;
         return this;
     }
@@ -136,7 +136,7 @@ public class SendoHamonOverdriveEntity extends Entity implements IEntityAddition
         private final int length = WAVE_TICK_LENGTH;
         private List<Entity> hitEntities = new ArrayList<>();
         
-        private void tick(SendoHamonOverdriveEntity entity) {
+        private void tick(HamonSendoOverdriveEntity entity) {
             if (!entity.level.isClientSide()) {
                 List<LivingEntity> targets = entity.level.getEntitiesOfClass(LivingEntity.class, 
                         entity.getHurtHitbox(tick), entity.filter.and(target -> !hitEntities.contains(target)));

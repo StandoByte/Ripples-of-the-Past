@@ -13,7 +13,7 @@ import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.entity.RoadRollerEntity;
-import com.github.standobyte.jojo.entity.SendoHamonOverdriveEntity;
+import com.github.standobyte.jojo.entity.HamonSendoOverdriveEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModParticles;
@@ -81,8 +81,8 @@ public class DamageUtil {
             if (msgId != null && (msgId.startsWith(BLOOD_DRAIN_MSG) || msgId.startsWith(COLD.msgId) || msgId.startsWith(ROAD_ROLLER_MSG))) {
                 return 0;
             }
-            if (source.getDirectEntity() instanceof SendoHamonOverdriveEntity) {
-                return SendoHamonOverdriveEntity.KNOCKBACK_FACTOR;
+            if (source.getDirectEntity() instanceof HamonSendoOverdriveEntity) {
+                return HamonSendoOverdriveEntity.KNOCKBACK_FACTOR;
             }
         }
         return 1;

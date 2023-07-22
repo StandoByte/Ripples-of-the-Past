@@ -180,7 +180,7 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
         List<IReorderingProcessor> skillName = minecraft.font.split(selectedSkill.getName(), 120);
         ClientUtil.drawLines(matrixStack, minecraft.font, skillName, 
                 intScrollX + 22, intScrollY + 8 - minecraft.font.lineHeight * (skillName.size() - 1) * 0.5F, 
-                0, 0xFFFFFF, true);
+                0, 0xFFFFFF, true, false);
         
         ClientUtil.drawRightAlignedString(matrixStack, minecraft.font, 
                 selectedSkill.getHamonSkill().getRewardType().getName(), 

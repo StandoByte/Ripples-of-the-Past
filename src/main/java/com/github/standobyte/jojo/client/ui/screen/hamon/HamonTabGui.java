@@ -185,7 +185,7 @@ public abstract class HamonTabGui extends AbstractGui {
     protected void drawDesc(MatrixStack matrixStack) {
         ClientUtil.drawLines(matrixStack, minecraft.font, descLines, 
                 (float) scrollX + 6, (float) scrollY + 22, 
-                0, 0xFFFFFF, false);
+                0, 0xFFFFFF, false, false);
     }
     
     void onTabSelected(HamonTabGui selectedTab) {

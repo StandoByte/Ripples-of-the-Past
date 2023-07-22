@@ -405,7 +405,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
 
     
     public static void cancelCactusDamage(LivingAttackEvent event) {
-        if (event.getSource() == DamageSource.CACTUS) {
+        if (event.getSource() == DamageSource.CACTUS || event.getSource() == DamageSource.SWEET_BERRY_BUSH) {
             LivingEntity entity = event.getEntityLiving();
             INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
                 power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {

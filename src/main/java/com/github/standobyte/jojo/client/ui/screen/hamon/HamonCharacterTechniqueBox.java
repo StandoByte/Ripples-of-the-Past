@@ -77,7 +77,7 @@ public class HamonCharacterTechniqueBox {
         int perksCount = renderPerks(hamon) ? (int) perks.stream().filter(HamonSkillElementTechniquePerk::isVisible).count() : 0;
         ClientUtil.drawLines(matrixStack, font, name, 
                 this.x + x + perksCount * 18 + 3, this.y + y + 1, 
-                0, 0xFFFFFF, true);
+                0, 0xFFFFFF, true, false);
     }
     
     public void drawTooltip(HamonScreen hamonScreen, MatrixStack matrixStack, int x, int y, int mouseX, int mouseY) {
