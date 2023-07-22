@@ -519,10 +519,7 @@
   "hamonSkill.life_magnetism.desc": "Trasforma un blocco di foglie in un deltaplano. Se non viene continuamente caricato con l'energia Hamon, l'aliante si disintegrerà.",
   "hamonSkill.hamon_spread.name": "Diffusione Hamon",
   "hamonSkill.hamon_spread.desc": "Ogni volta che l'utilizzatore attacca un non morto con Hamon, questo continua a diffondersi attraverso il corpo del bersaglio, infliggendo danni aggiuntivi.",
-  "hamonSkill.repelling_overdrive.name": "Overdrive Repellente",
-  "hamonSkill.repelling_overdrive.desc": "Dà all'utente l'effetto Resistenza.",
   "hamonSkill.projectile_shield.name": "Scudo Proiettili",
-  "hamonSkill.projectile_shield.desc": "Crea un proiettile che riflette l'aura intorno all'utilizzatore.",
   
   "hamon.technique.jonathan": "Cuore tremante! Calore ardente!",
   "hamon.technique.zeppeli": "La Via dell'Eremita",
@@ -576,7 +573,6 @@
   "action.jojo.hamon_detector": "Rilevatore di vita Hamon",
   "action.jojo.hamon_life_magnetism": "Magnetismo Vitale",
   "action.jojo.hamon_projectile_shield": "Scudo Proiettili",
-  "action.jojo.hamon_repelling_overdrive": "Overdrive Repellente",
   
   "action.jojo.jonathan_overdrive_barrage": "Serie Continua di Overdrive",
   "action.jojo.jonathan_scarlet_overdrive": "Scarlet Overdrive",

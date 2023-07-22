@@ -381,8 +381,7 @@
   "hamonSkill.wall_climbing.name": "Лазание по стенам",
   "hamonSkill.life_magnetism.name": "Биомагнетизм",
   "hamonSkill.hamon_spread.name": "Распространение Хамона",
-  "hamonSkill.water_walking.name": "Ходьба по воде",
-  "hamonSkill.lava_walking.name": "Ходьба по жидкостям",
+  "hamonSkill.liquid_walking.name": "Ходьба по жидкостям",
   
   "hamon.technique.jonathan": "Бьющееся сердце! Пылающий жар!",
   "hamon.technique.zeppeli": "Путь Отшельника",

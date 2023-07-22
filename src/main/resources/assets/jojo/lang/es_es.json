@@ -696,14 +696,7 @@
   "hamonSkill.life_magnetism.desc": "Convierte un bloque de hojas en un ala delta. Si no se carga continuamente con energía Hamon, el planeador se desintegrará.",
   "hamonSkill.hamon_spread.name": "Propagación de Hamon",
   "hamonSkill.hamon_spread.desc": "Cada vez que el usuario ataca a un no-muerto con Hamon, continúa extendiéndose por el cuerpo del objetivo, causando daño adicional.",
-  "hamonSkill.repelling_overdrive.name": "Repelling Overdrive",
-  "hamonSkill.repelling_overdrive.desc": "Le da al usuario un efecto de Resistencia.",
   "hamonSkill.projectile_shield.name": "Escudo de proyectiles",
-  "hamonSkill.projectile_shield.desc": "Crea un aura que refleja un proyectil alrededor del usuario.",
-  "hamonSkill.water_walking.name": "Caminar sobre el agua",
-  "hamonSkill.water_walking.desc": "Permite al usuario caminar libremente sobre la superficie del agua.",
-  "hamonSkill.lava_walking.name": "Caminar sobre Líquido",
-  "hamonSkill.lava_walking.desc": "El usuario ahora puede caminar sobre la superficie de cualquier líquido.",
   
   "hamon.technique.jonathan": "¡Corazón Palpitante! ¡Calor abrasador!",
   "hamon.technique.zeppeli": "camino del ermitaño",
@@ -768,7 +761,6 @@
   "action.jojo.hamon_detector": "Detector de vida Hamon",
   "action.jojo.hamon_life_magnetism": "Magnetismo de la vida",
   "action.jojo.hamon_projectile_shield": "Escudo de proyectiles",
-  "action.jojo.hamon_repelling_overdrive": "Repelling Overdrive",
   
   "action.jojo.jonathan_overdrive_barrage": "Overdrive Barrage",
   "action.jojo.jonathan_metal_silver_overdrive": "Metal Silver Overdrive",

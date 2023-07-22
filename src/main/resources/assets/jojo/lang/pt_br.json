@@ -502,10 +502,7 @@
   "hamonSkill.life_magnetism.desc": "Transforma um bloco de folhas em uma asa-delta. Se não for continuamente carregado com energia Hamon, o planador se desintegrará.",
   "hamonSkill.hamon_spread.name": "Hamon Spread",
   "hamonSkill.hamon_spread.desc": "Sempre que o usuário ataca um morto-vivo com Hamon, ele continua se espalhando pelo corpo do alvo, causando dano adicional.",
-  "hamonSkill.repelling_overdrive.name": "Sobrecarga de Repelição",
-  "hamonSkill.repelling_overdrive.desc": "Dá ao usuário efeito de resistência.",
   "hamonSkill.projectile_shield.name": "Escudo de Projétil",
-  "hamonSkill.projectile_shield.desc": "Cria um projétil refletindo aura ao redor do usuário.",
   
   "hamon.technique.jonathan": "Coração tremendo! Calor Ardente!",
   "hamon.technique.zeppeli": "Caminho do Eremita",
@@ -559,7 +556,6 @@
   "action.jojo.hamon_detector": "Detector de Vida Hamon",
   "action.jojo.hamon_life_magnetism": "Magnetismo de Vida",
   "action.jojo.hamon_projectile_shield": "Escudo de Projétil",
-  "action.jojo.hamon_repelling_overdrive": "Sobrecarga de Repulsão",
   
   "action.jojo.jonathan_overdrive_barrage": "Sobrecarga de Barragem",
   "action.jojo.jonathan_scarlet_overdrive": "Sobrecarga Escarlarte",
