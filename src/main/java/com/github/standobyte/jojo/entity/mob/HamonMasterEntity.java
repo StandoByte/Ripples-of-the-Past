@@ -41,7 +41,7 @@ import net.minecraftforge.fml.network.NetworkHooks;
 public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser, IEntityAdditionalSpawnData {
     private final INonStandPower hamonPower = new NonStandPower(this);
     @Deprecated
-    private boolean iAmDumbForNotUsingFinalizeSpawn; // TODO remove in later versions
+    private boolean reAddBaseHamon; // TODO remove in later versions
     
     public HamonMasterEntity(EntityType<? extends HamonMasterEntity> type, World world) {
         super(type, world);
@@ -110,9 +110,9 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser,
     
     @Deprecated
     private void restoreHamon() {
-        if (iAmDumbForNotUsingFinalizeSpawn && !level.isClientSide()) {
+        if (reAddBaseHamon && !level.isClientSide()) {
             addMasterHamon(hamonPower);
-            iAmDumbForNotUsingFinalizeSpawn = false; // i still am
+            reAddBaseHamon = false; // i still am
         }
     }
     
@@ -141,9 +141,7 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser,
         if (nbt.contains("HamonPower", MCUtil.getNbtId(CompoundNBT.class))) {
             hamonPower.readNBT(nbt.getCompound("HamonPower"));
         }
-        if (hamonPower.getType() != ModPowers.HAMON.get()) {
-            iAmDumbForNotUsingFinalizeSpawn = true;
-        }
+        reAddBaseHamon = true;
     }
 
     @Deprecated
