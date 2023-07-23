@@ -441,14 +441,14 @@ public class HamonData extends TypeSpecificData {
 
     private static final int LVL_1_POINTS = 2;
     private static final int NEXT_LVL_DIFF = 3;
-    public static int pointsAtLevel(int level) { // inverse formula to levelFromPoints
+    public static int pointsAtLevel(int level) {
         return level * (
                 LVL_1_POINTS
                 + LVL_1_POINTS + (level - 1) * NEXT_LVL_DIFF)
                 / 2;
     }
     
-    public static int levelFromPoints(int points) {
+    public static int levelFromPoints(int points) { // inverse formula to pointsAtLevel
         int b = 2 * LVL_1_POINTS - NEXT_LVL_DIFF;
         return MathHelper.floor(Math.sqrt((b * b + 8 * NEXT_LVL_DIFF * points)) - b) / (2 * NEXT_LVL_DIFF);
     }

@@ -57,7 +57,7 @@ public class HamonGeneralSkillsTabGui extends HamonSkillsTabGui {
     }
     
     private int xOffset(int gridX) { return 3 + gridX * 13; }
-    private int yOffset(int gridY) { return 18 + gridY * (gridY < 2 ? 26 : 27); }
+    private int yOffset(int gridY) { return WINDOW_HEIGHT - 113 + gridY * (gridY < 2 ? 26 : 27); }
     private void fillSkillLines() {
         skills.clear();
         BaseHamonSkillTree[] skillTrees = SKILL_TREES.get(skillsType);
@@ -73,7 +73,7 @@ public class HamonGeneralSkillsTabGui extends HamonSkillsTabGui {
                     AbstractHamonSkill skill = tier.get(tierI);
                     
                     int x = 9 + treeIndex * 68 + xOffset(gridX);
-                    int y = WINDOW_HEIGHT - 131 + yOffset(gridY);
+                    int y = yOffset(gridY);
                     skills.put(skill, new HamonSkillElementLearnable(skill, 
                             screen.hamon, minecraft.player, screen.teacherSkills, gridY == 2, x, y));
                 }
@@ -121,7 +121,7 @@ public class HamonGeneralSkillsTabGui extends HamonSkillsTabGui {
             for (int line = 0; line < nameLines.size(); line++) {
                 ClientUtil.drawCenteredString(matrixStack, minecraft.font, nameLines.get(line), 
                         9 + i * 68 + xOffset(1) + 13 + intScrollX, 
-                        WINDOW_HEIGHT - 131 + yOffset(0) - 18 + line * 9 + intScrollY, 
+                        yOffset(0) - 18 + line * minecraft.font.lineHeight + intScrollY, 
                         0xFFFFFF);
             }
         }
@@ -150,6 +150,19 @@ public class HamonGeneralSkillsTabGui extends HamonSkillsTabGui {
         if (getSelectedSkill() == null) {
             if (mouseX >= 193 && mouseX <= 205 && mouseY >= 4 && mouseY <= 12) {
                 screen.renderTooltip(matrixStack, nextPointHintLines, mouseX, mouseY);
+            }
+        }
+        
+        int yMax = yOffset(0) + intScrollY;
+        if (mouseY >= yMax - minecraft.font.lineHeight * 2 && mouseY < yMax) {
+            int x0 = 6 + intScrollX;
+            int xWidth = 68;
+            int i = (mouseX - x0) / xWidth;
+            if (i >= 0 && i < 3) {
+                BaseHamonSkillTree skillTree = SKILL_TREES.get(skillsType)[i];
+                ITextComponent toooltip = new TranslationTextComponent(String.format("hamon.skills.%s.desc", skillTree.getName()))
+                        .withStyle(TextFormatting.ITALIC);
+                screen.renderTooltip(matrixStack, minecraft.font.split(toooltip, 200), mouseX, mouseY);
             }
         }
     }
