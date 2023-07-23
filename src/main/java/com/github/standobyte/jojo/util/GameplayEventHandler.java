@@ -33,6 +33,7 @@ import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.ProjectileHamonChargeCap;
 import com.github.standobyte.jojo.capability.entity.ProjectileHamonChargeCapProvider;
+import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDBloodCutterEntity;
@@ -61,6 +62,7 @@ import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.bowcharge.BowChargeEffectInstance;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonCharge;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismData;
@@ -397,36 +399,12 @@ public class GameplayEventHandler {
     
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void replaceStrayArrow(EntityJoinWorldEvent event) {
-        if (event.getEntity() instanceof ArrowEntity) {
-            ArrowEntity arrow = (ArrowEntity) event.getEntity();
+        Entity newEntity = event.getEntity();
+        if (newEntity instanceof ArrowEntity) {
+            ArrowEntity arrow = (ArrowEntity) newEntity;
             if (arrow.getOwner() instanceof StrayEntity) {
                 arrow.setEffectsFromItem(new ItemStack(Items.ARROW));
                 arrow.addEffect(new EffectInstance(ModEffects.FREEZE.get(), 300));
-            }
-        }
-        
-        else if (!event.getWorld().isClientSide()) {
-            if (event.getEntity() instanceof ChickenEntity) {
-//                List<EggEntity> eggList = event.getWorld().getEntitiesOfClass(EggEntity.class, event.getEntity().getBoundingBox());
-//                if (!eggList.isEmpty()) {
-//                    eggList.stream()
-//                    .map(egg -> egg.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).resolve())
-//                    .filter(chargeOptional -> chargeOptional.map(charge -> charge.hamonBaseDmg > 0).orElse(false))
-//                    .findAny().ifPresent(chargeOptional -> {
-//                        event.getEntity().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-//                            ProjectileHamonChargeCap eggCharge = chargeOptional.get();
-//                            Entity eggThrower = ((EggEntity) eggCharge.projectile).getOwner();
-//                            LivingEntity throwerLiving = eggThrower instanceof LivingEntity ? (LivingEntity) eggThrower : null;
-//                            Optional<HamonData> userHamon = throwerLiving != null ? INonStandPower.getNonStandPowerOptional(throwerLiving)
-//                                    .map(power -> power.getTypeSpecificData(ModNonStandPowers.HAMON.get())).map(Optional::get)
-//                                    : Optional.empty();
-//                            cap.setHamonCharge(
-//                                    eggCharge.hamonBaseDmg * userHamon.map(hamon -> hamon.getHamonDamageMultiplier() * hamon.getBloodstreamEfficiency()).orElse(1F), 
-//                                    100 + userHamon.map(hamon -> MathHelper.floor((float) (1100 * hamon.getHamonStrengthLevel())
-//                                            / (float) HamonData.MAX_STAT_LEVEL * hamon.getBloodstreamEfficiency() * hamon.getBloodstreamEfficiency())).orElse(0), throwerLiving, 0);
-//                        });
-//                    });
-//                }
             }
         }
     }
@@ -1307,6 +1285,7 @@ public class GameplayEventHandler {
                 if (projectile.getOwner() instanceof LivingEntity) {
                     LivingEntity shooter = (LivingEntity) projectile.getOwner();
                     if (projectile instanceof AbstractArrowEntity) {
+                        // TODO stand effects on arrows
                         IStandPower.getStandPowerOptional(shooter).ifPresent(stand -> {
                             BowChargeEffectInstance<?, ?> bowCharge = stand.getBowChargeEffect();
                             if (bowCharge != null) {
@@ -1349,6 +1328,26 @@ public class GameplayEventHandler {
                         });
                     }
                 }
+            }
+            
+            // charge chicken coming out of a charged egg
+            if (entity instanceof ChickenEntity) {
+                event.getWorld().getCapability(WorldUtilCapProvider.CAPABILITY).resolve()
+                .flatMap(worldCap -> worldCap.eggChargingChicken(entity)).ifPresent(eggEntity -> {
+                    eggEntity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(eggCharge -> {
+                        entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(chickenCharge -> {
+                            Entity eggThrower = eggEntity.getOwner();
+                            LivingEntity throwerLiving = eggThrower instanceof LivingEntity ? (LivingEntity) eggThrower : null;
+                            Optional<HamonData> userHamon = throwerLiving != null ? INonStandPower.getNonStandPowerOptional(throwerLiving)
+                                    .map(power -> power.getTypeSpecificData(ModPowers.HAMON.get())).map(Optional::get)
+                                    : Optional.empty();
+                            chickenCharge.setHamonCharge(
+                                    eggCharge.getHamonDamage() * userHamon.map(hamon -> hamon.getHamonDamageMultiplier() * hamon.getBloodstreamEfficiency()).orElse(1F), 
+                                    Integer.MAX_VALUE, 
+                                    throwerLiving, 0);
+                        });
+                    });
+                });
             }
         }
     }
