@@ -23,6 +23,7 @@ import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
+import dev.kosmx.playerAnim.api.AnimUtils;
 import dev.kosmx.playerAnim.api.TransformType;
 import dev.kosmx.playerAnim.api.layered.IAnimation;
 import dev.kosmx.playerAnim.api.layered.KeyframeAnimationPlayer;
@@ -36,6 +37,7 @@ import dev.kosmx.playerAnim.impl.Helper;
 import dev.kosmx.playerAnim.impl.IAnimatedPlayer;
 import dev.kosmx.playerAnim.impl.IBendHelper;
 import dev.kosmx.playerAnim.impl.IMutableModel;
+import dev.kosmx.playerAnim.impl.IPlayerModel;
 import dev.kosmx.playerAnim.impl.IUpperPartHelper;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationAccess;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationFactory;
@@ -203,6 +205,13 @@ public class PlayerAnimatorInstalled implements PlayerAnimationHandler.IPlayerAn
                 matrices.mulPose(Vector3f.YP.rotation(rot.getY()));    //pitch
                 matrices.mulPose(Vector3f.XP.rotation(rot.getX()));    //yaw
             }
+        }
+    }
+    
+    @Override
+    public void setupGlovesFirstPersonRender(PlayerModel<?> glovesModel) {
+        if (glovesModel instanceof IPlayerModel && AnimUtils.disableFirstPersonAnim) {
+            ((IPlayerModel) glovesModel).playerAnimator_prepForFirstPersonRender();
         }
     }
     

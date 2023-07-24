@@ -120,6 +120,7 @@ public class GlovesLayer<T extends LivingEntity, M extends PlayerModel<T>> exten
         model.attackTime = 0.0F;
         model.crouching = false;
         model.swimAmount = 0.0F;
+        PlayerAnimationHandler.getPlayerAnimator().setupGlovesFirstPersonRender(model);
         model.setupAnim(player, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
     }
 

@@ -58,6 +58,7 @@ public class PlayerAnimationHandler {
                 LivingEntity livingEntity, MatrixStack matrices, HandSide arm) {}
         default <T extends LivingEntity, M extends BipedModel<T>> void heldItemLayerChangeItemLocation(
                 LivingEntity livingEntity, MatrixStack matrices, HandSide arm) {}
+        default void setupGlovesFirstPersonRender(PlayerModel<?> glovesModel) {}
         
         default void onVehicleMount(AbstractClientPlayerEntity player, @Nullable EntityType<?> vehicleType) {}
     }
