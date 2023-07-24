@@ -7,8 +7,6 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.entity.AfterimageEntity;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonCharge;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
@@ -35,7 +33,6 @@ public class LivingUtilCap {
     private float futureKnockbackFactor;
     @Nullable private Explosion latestExplosion;
     
-    private HamonCharge hamonCharge;
     private float receivedHamonDamage = 0;
     private final List<AfterimageEntity> afterimages = new ArrayList<>();
     public boolean hasUsedTimeStopToday = false;
@@ -50,7 +47,6 @@ public class LivingUtilCap {
     
     public void tick() {
         lastHurtByStandTick();
-        hamonChargeTick();
         tickNoLerp();
         tickHurtAnim();
         tickDownHamonDamage();
@@ -123,37 +119,6 @@ public class LivingUtilCap {
             dmgSource.preventDamagingArmor();
         }
         hurtThroughInvulTime = 5;
-    }
-    
-    
-    
-    public void setHamonCharge(float tickDamage, int chargeTicks, LivingEntity hamonUser, float energySpent) {
-        this.hamonCharge = new HamonCharge(tickDamage, chargeTicks, hamonUser, energySpent);
-    }
-    
-    private void hamonChargeTick() {
-        if (!entity.level.isClientSide()) {
-            if (hamonCharge == null) {
-                return;
-            }
-            if (hamonCharge.shouldBeRemoved()) {
-                hamonCharge = null;
-                return;
-            }
-            hamonCharge.tick(entity, null, entity.level, entity.getBoundingBox().inflate(1.0D));
-            if (entity.getRandom().nextInt(10) == 0) {
-                HamonPowerType.createHamonSparkParticlesEmitter(entity, hamonCharge.getTickDamage() / 40F);
-            }
-        }
-    }
-    
-    public boolean hasHamonCharge() {
-        return hamonCharge != null && !hamonCharge.shouldBeRemoved();
-    }
-    
-    @Nullable
-    public HamonCharge getHamonCharge() {
-        return hasHamonCharge() ? hamonCharge : null;
     }
     
     
@@ -237,18 +202,12 @@ public class LivingUtilCap {
     
     public CompoundNBT toNBT() {
         CompoundNBT nbt = new CompoundNBT();
-        if (hamonCharge != null) {
-            nbt.put("HamonCharge", hamonCharge.toNBT());
-        }
         nbt.putFloat("HamonSpread", receivedHamonDamage);
         nbt.putBoolean("UsedTimeStop", hasUsedTimeStopToday);
         return nbt;
     }
     
     public void fromNBT(CompoundNBT nbt) {
-        if (nbt.contains("HamonCharge", 10)) {
-            hamonCharge = HamonCharge.fromNBT(nbt.getCompound("HamonCharge"));
-        }
         receivedHamonDamage = nbt.getFloat("HamonSpread");
         hasUsedTimeStopToday = nbt.getBoolean("UsedTimeStop");
     }

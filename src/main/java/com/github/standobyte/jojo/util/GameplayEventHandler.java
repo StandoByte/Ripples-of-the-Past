@@ -16,6 +16,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.JojoModConfig.Common;
+import com.github.standobyte.jojo.action.non_stand.HamonOrganismInfusion;
 import com.github.standobyte.jojo.action.non_stand.HamonSendoWaveKick;
 import com.github.standobyte.jojo.action.non_stand.VampirismFreeze;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
@@ -31,8 +32,9 @@ import com.github.standobyte.jojo.capability.entity.EntityUtilCap;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
-import com.github.standobyte.jojo.capability.entity.ProjectileHamonChargeCap;
-import com.github.standobyte.jojo.capability.entity.ProjectileHamonChargeCapProvider;
+import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
+import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCap;
+import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.SoulEntity;
@@ -120,6 +122,9 @@ import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.EggItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.play.server.SChatPacket;
@@ -173,6 +178,7 @@ import net.minecraftforge.event.TickEvent.WorldTickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
+import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingConversionEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
@@ -412,9 +418,10 @@ public class GameplayEventHandler {
     @SuppressWarnings("resource")
     @SubscribeEvent
     public static void onWorldTick(WorldTickEvent event) {
-        if (event.side == LogicalSide.SERVER && event.phase == TickEvent.Phase.END) {
+        if (event.side == LogicalSide.SERVER /* actually only ticks on server but ok */ && event.phase == TickEvent.Phase.END) {
             ((ServerWorld) event.world).getAllEntities().forEach(entity -> {
                 entity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
+                entity.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
             });
 
             ((ServerWorld) event.world).getChunkSource().chunkMap.getChunks().forEach(chunkHolder -> {
@@ -443,7 +450,7 @@ public class GameplayEventHandler {
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void onItemPickup(EntityItemPickupEvent event) {
+    public static void cancelItemPickupInStun(EntityItemPickupEvent event) {
         if (ModEffects.isStunned(event.getPlayer())) {
             event.setCanceled(true);
         }
@@ -1316,7 +1323,7 @@ public class GameplayEventHandler {
                             });
 
                             // projectiles charged by an infused entity
-                            shooter.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                            shooter.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> {
                                 if (cap.hasHamonCharge()) {
                                     HamonCharge hamonCharge = cap.getHamonCharge();
                                     hamonCharge.setTicks(hamonCharge.getTicks() - (int) 
@@ -1335,7 +1342,7 @@ public class GameplayEventHandler {
                 event.getWorld().getCapability(WorldUtilCapProvider.CAPABILITY).resolve()
                 .flatMap(worldCap -> worldCap.eggChargingChicken(entity)).ifPresent(eggEntity -> {
                     eggEntity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(eggCharge -> {
-                        entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(chickenCharge -> {
+                        entity.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(chickenCharge -> {
                             Entity eggThrower = eggEntity.getOwner();
                             LivingEntity throwerLiving = eggThrower instanceof LivingEntity ? (LivingEntity) eggThrower : null;
                             Optional<HamonData> userHamon = throwerLiving != null ? INonStandPower.getNonStandPowerOptional(throwerLiving)
@@ -1433,7 +1440,7 @@ public class GameplayEventHandler {
         if (!(explosion instanceof HamonBlastExplosion)) {
             Entity exploder = explosion.getExploder();
             if (exploder != null) {
-                exploder.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                exploder.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> {
                     if (cap.hasHamonCharge()) {
                         HamonCharge hamonCharge = cap.getHamonCharge();
                         float radius = CommonReflection.getRadius(explosion);
@@ -1443,6 +1450,52 @@ public class GameplayEventHandler {
                     }
                 });
             }
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void onItemThrown(ItemTossEvent event) {
+        LivingEntity player = event.getPlayer();
+        ItemEntity itemEntity = event.getEntityItem();
+        if (!player.level.isClientSide() && isItemLivingMatter(itemEntity.getItem())) {
+            INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
+                if (power.getEnergy() > 0) {
+                    power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
+                        if (hamon.isSkillLearned(ModHamonSkills.PLANT_ITEM_INFUSION.get())) {
+                            hamon.consumeHamonEnergyTo(hamonEfficiency -> {
+                                int chargeTicks = 100 + MathHelper.floor((float) (1100 * hamon.getHamonStrengthLevel())
+                                        / (float) HamonData.MAX_STAT_LEVEL * hamonEfficiency * hamonEfficiency);
+                                
+                                itemEntity.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> 
+                                cap.setHamonCharge(0.1F * hamon.getHamonDamageMultiplier() * hamonEfficiency, chargeTicks, player, 200));
+                                return null;
+                            }, 200);
+                        }
+                    });
+                }
+            });
+        }
+    }
+    
+    private static boolean isItemLivingMatter(ItemStack itemStack) {
+        if (itemStack.isEmpty()) {
+            return false;
+        }
+        
+        Item item = itemStack.getItem();
+        if (item instanceof BlockItem) {
+            return HamonOrganismInfusion.isBlockLiving(((BlockItem) item).getBlock().defaultBlockState());
+        }
+        
+        return item instanceof EggItem;
+    }
+    
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void cancelChargedItemPickup(EntityItemPickupEvent event) {
+        LivingEntity player = event.getEntityLiving();
+        if (JojoModUtil.isUndead(player) && GeneralUtil.orElseFalse(event.getItem().getCapability(EntityHamonChargeCapProvider.CAPABILITY), 
+                cap -> cap.hasHamonCharge())) {
+            event.setCanceled(true);
         }
     }
     

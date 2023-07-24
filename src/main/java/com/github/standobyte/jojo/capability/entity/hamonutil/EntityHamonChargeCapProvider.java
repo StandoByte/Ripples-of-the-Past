@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.capability.entity;
+package com.github.standobyte.jojo.capability.entity.hamonutil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.nbt.INBT;
@@ -8,13 +8,13 @@ import net.minecraftforge.common.capabilities.CapabilityInject;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
 
-public class ProjectileHamonChargeCapProvider implements ICapabilitySerializable<INBT> {
-    @CapabilityInject(ProjectileHamonChargeCap.class)
-    public static Capability<ProjectileHamonChargeCap> CAPABILITY = null;
-    private LazyOptional<ProjectileHamonChargeCap> instance;
+public class EntityHamonChargeCapProvider implements ICapabilitySerializable<INBT>{
+    @CapabilityInject(EntityHamonChargeCap.class)
+    public static Capability<EntityHamonChargeCap> CAPABILITY = null;
+    private LazyOptional<EntityHamonChargeCap> instance;
     
-    public ProjectileHamonChargeCapProvider(Entity projectile) {
-        this.instance = LazyOptional.of(() -> new ProjectileHamonChargeCap(projectile));
+    public EntityHamonChargeCapProvider(Entity entity) {
+        this.instance = LazyOptional.of(() -> new EntityHamonChargeCap(entity));
     }
 
     @Override
@@ -25,13 +25,12 @@ public class ProjectileHamonChargeCapProvider implements ICapabilitySerializable
     @Override
     public INBT serializeNBT() {
         return CAPABILITY.getStorage().writeNBT(CAPABILITY, instance.orElseThrow(
-                () -> new IllegalArgumentException("Projectile capability LazyOptional is not attached.")), null);
+                () -> new IllegalArgumentException("Hamon charge capability LazyOptional is not attached.")), null);
     }
 
     @Override
     public void deserializeNBT(INBT nbt) {
         CAPABILITY.getStorage().readNBT(CAPABILITY, instance.orElseThrow(
-                () -> new IllegalArgumentException("Projectile capability LazyOptional is not attached.")), null, nbt);
+                () -> new IllegalArgumentException("Hamon charge capability LazyOptional is not attached.")), null, nbt);
     }
-
 }

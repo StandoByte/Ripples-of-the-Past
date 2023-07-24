@@ -6,7 +6,7 @@ import java.util.Set;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
-import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.entity.HamonBlockChargeEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
@@ -91,7 +91,7 @@ public class HamonOrganismInfusion extends HamonAction {
             Optional<Entity> entityInside = world.getEntities(null, world.getBlockState(blockPos).getShape(world, blockPos).bounds().move(blockPos))
                     .stream()
                     .filter(entity -> (entity instanceof AnimalEntity || entity instanceof AmbientEntity)
-                            && ((LivingEntity) entity).getCapability(LivingUtilCapProvider.CAPABILITY).map(cap -> !cap.hasHamonCharge()).orElse(false))
+                            && entity.getCapability(EntityHamonChargeCapProvider.CAPABILITY).map(cap -> !cap.hasHamonCharge()).orElse(false))
                     .findAny();
             if (entityInside.isPresent()) {
                 return new ActionTarget(entityInside.get());
@@ -118,7 +118,7 @@ public class HamonOrganismInfusion extends HamonAction {
                 break;
             case ENTITY:
                 LivingEntity entity = (LivingEntity) target.getEntity();
-                entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> 
+                entity.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> 
                 cap.setHamonCharge(0.2F * hamon.getHamonDamageMultiplier() * hamonEfficiency, chargeTicks, user, getEnergyCost(power, target)));
                 break;
             default:

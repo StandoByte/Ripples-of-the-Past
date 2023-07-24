@@ -8,16 +8,40 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.capability.chunk.ChunkCap;
 import com.github.standobyte.jojo.capability.chunk.ChunkCapProvider;
+import com.github.standobyte.jojo.capability.chunk.ChunkCapStorage;
+import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.EntityUtilCap;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.EntityUtilCapStorage;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapStorage;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
-import com.github.standobyte.jojo.capability.entity.ProjectileHamonChargeCapProvider;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCapStorage;
+import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCap;
+import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
+import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapStorage;
+import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCap;
+import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
+import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapStorage;
 import com.github.standobyte.jojo.capability.entity.power.NonStandCapProvider;
+import com.github.standobyte.jojo.capability.entity.power.NonStandCapStorage;
 import com.github.standobyte.jojo.capability.entity.power.StandCapProvider;
+import com.github.standobyte.jojo.capability.entity.power.StandCapStorage;
+import com.github.standobyte.jojo.capability.item.cassette.CassetteCap;
+import com.github.standobyte.jojo.capability.item.cassette.CassetteCapStorage;
+import com.github.standobyte.jojo.capability.item.walkman.WalkmanDataCap;
+import com.github.standobyte.jojo.capability.item.walkman.WalkmanDataCapStorage;
+import com.github.standobyte.jojo.capability.world.SaveFileUtilCap;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
+import com.github.standobyte.jojo.capability.world.SaveFileUtilCapStorage;
+import com.github.standobyte.jojo.capability.world.WorldUtilCap;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
+import com.github.standobyte.jojo.capability.world.WorldUtilCapStorage;
 import com.github.standobyte.jojo.command.ConfigPackCommand;
 import com.github.standobyte.jojo.command.HamonStatCommand;
 import com.github.standobyte.jojo.command.JojoCommandsCommand;
@@ -33,7 +57,9 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCachePacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.impl.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.StandPower;
 import com.github.standobyte.jojo.util.GameplayEventHandler.ProjectileChargeProperties;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.mojang.brigadier.CommandDispatcher;
@@ -41,9 +67,12 @@ import com.mojang.brigadier.CommandDispatcher;
 import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.nbt.INBT;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
@@ -54,6 +83,9 @@ import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.gen.settings.DimensionStructuresSettings;
 import net.minecraft.world.gen.settings.StructureSeparationSettings;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.Capability.IStorage;
+import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.minecraftforge.event.RegisterCommandsEvent;
@@ -77,6 +109,7 @@ public class ForgeBusEventSubscriber {
     private static final ResourceLocation CLIENT_PLAYER_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "client_player_util");
     private static final ResourceLocation LIVING_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "living_util");
     private static final ResourceLocation ENTITY_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "entity_util");
+    private static final ResourceLocation ENTITY_HAMON_CHARGE_CAP = new ResourceLocation(JojoMod.MOD_ID, "entity_hamon_charge");
     private static final ResourceLocation PROJECTILE_HAMON_CAP = new ResourceLocation(JojoMod.MOD_ID, "projectile_hamon");
     private static final ResourceLocation WORLD_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "world_util");
     private static final ResourceLocation SAVE_FILE_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "save_file_util");
@@ -96,6 +129,8 @@ public class ForgeBusEventSubscriber {
         ConfigPackCommand.register(dispatcher);
         JojoCommandsCommand.register(dispatcher);
     }
+    
+    
     
     @SubscribeEvent
     public static void onAttachCapabilitiesWorld(AttachCapabilitiesEvent<World> event) {
@@ -131,7 +166,34 @@ public class ForgeBusEventSubscriber {
         if (entity instanceof ProjectileEntity && (ProjectileChargeProperties.canBeChargedWithHamon(entity))) {
             event.addCapability(PROJECTILE_HAMON_CAP, new ProjectileHamonChargeCapProvider(entity));
         }
+        if (entity instanceof LivingEntity || entity instanceof ItemEntity) {
+            event.addCapability(ENTITY_HAMON_CHARGE_CAP, new EntityHamonChargeCapProvider(entity));
+        }
     }
+    
+    public static void registerCapabilities() { // moved the registration here just so that it's in the same place as the attachment
+        CapabilityManager.INSTANCE.register(IStandPower.class, new StandCapStorage(), () -> new StandPower(null));
+        CapabilityManager.INSTANCE.register(INonStandPower.class, new NonStandCapStorage(), () -> new NonStandPower(null));
+        CapabilityManager.INSTANCE.register(PlayerUtilCap.class, new PlayerUtilCapStorage(), () -> new PlayerUtilCap(null));
+        CapabilityManager.INSTANCE.register(ClientPlayerUtilCap.class, new IStorage<ClientPlayerUtilCap>() {
+            @Override public INBT writeNBT(Capability<ClientPlayerUtilCap> capability, ClientPlayerUtilCap instance, Direction side) { return null; }
+            @Override public void readNBT(Capability<ClientPlayerUtilCap> capability, ClientPlayerUtilCap instance, Direction side, INBT nbt) {}
+        }, () -> new ClientPlayerUtilCap(null));
+        CapabilityManager.INSTANCE.register(LivingUtilCap.class, new LivingUtilCapStorage(), () -> new LivingUtilCap(null));
+        CapabilityManager.INSTANCE.register(EntityUtilCap.class, new EntityUtilCapStorage(), () -> new EntityUtilCap(null));
+        CapabilityManager.INSTANCE.register(EntityHamonChargeCap.class, new EntityHamonChargeCapStorage(), () -> new EntityHamonChargeCap(null));
+        CapabilityManager.INSTANCE.register(ProjectileHamonChargeCap.class, new ProjectileHamonChargeCapStorage(), () -> new ProjectileHamonChargeCap(null));
+        
+        CapabilityManager.INSTANCE.register(WorldUtilCap.class, new WorldUtilCapStorage(), () -> new WorldUtilCap(null));
+        CapabilityManager.INSTANCE.register(SaveFileUtilCap.class, new SaveFileUtilCapStorage(), () -> new SaveFileUtilCap(null));
+
+        CapabilityManager.INSTANCE.register(ChunkCap.class, new ChunkCapStorage(), () -> new ChunkCap(null));
+        
+        CapabilityManager.INSTANCE.register(CassetteCap.class, new CassetteCapStorage(), () -> new CassetteCap(null));
+        CapabilityManager.INSTANCE.register(WalkmanDataCap.class, new WalkmanDataCapStorage(), () -> new WalkmanDataCap(null));
+    }
+    
+    
     
     @SubscribeEvent
     public static void onEntityTracking(PlayerEvent.StartTracking event) {

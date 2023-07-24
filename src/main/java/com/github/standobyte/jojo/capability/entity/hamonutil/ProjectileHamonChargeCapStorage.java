@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.capability.entity;
+package com.github.standobyte.jojo.capability.entity.hamonutil;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;

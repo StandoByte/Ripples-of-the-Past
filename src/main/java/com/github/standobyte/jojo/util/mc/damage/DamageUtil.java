@@ -10,10 +10,11 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
-import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
-import com.github.standobyte.jojo.entity.RoadRollerEntity;
+import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCap;
+import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.entity.HamonSendoOverdriveEntity;
+import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModParticles;
@@ -143,7 +144,7 @@ public class DamageUtil {
                 attackProperties.accept(attack);
             }
             
-            if (livingTarget.getCapability(LivingUtilCapProvider.CAPABILITY).map(LivingUtilCap::hasHamonCharge).orElse(false)) {
+            if (livingTarget.getCapability(EntityHamonChargeCapProvider.CAPABILITY).map(EntityHamonChargeCap::hasHamonCharge).orElse(false)) {
                 return false;
             }
             
