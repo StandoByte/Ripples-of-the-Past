@@ -68,7 +68,7 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
         else {
             Vector3d sparkVec = Vector3d.directionFromRotation(random.nextFloat() * 360F, random.nextFloat() * 360F)
                     .scale(getBbWidth() / 2).add(getX(), getY(0.5), getZ());
-            HamonPowerType.createHamonSparkParticles(level, ClientUtil.getClientPlayer(), sparkVec, 0.1F);
+            HamonPowerType.emitHamonSparkParticles(level, ClientUtil.getClientPlayer(), sparkVec, 0.1F);
         }
     }
     

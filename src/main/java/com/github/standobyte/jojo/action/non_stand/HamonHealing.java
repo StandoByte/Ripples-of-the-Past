@@ -58,7 +58,7 @@ public class HamonHealing extends HamonAction {
                 bonemealEffect(user.level, (PlayerEntity) user, target.getBlockPos(), face);
             }
             Vector3d sparksPos = new Vector3d(entityToHeal.getX(), entityToHeal.getY(0.5), entityToHeal.getZ());
-            HamonPowerType.createHamonSparkParticles(world, null, sparksPos, Math.max(0.5F * hamonControl * hamonEfficiency, 0.1F));
+            HamonPowerType.emitHamonSparkParticles(world, null, sparksPos, Math.max(0.5F * hamonControl * hamonEfficiency, 0.1F));
         }
     }
     

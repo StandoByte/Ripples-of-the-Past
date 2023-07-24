@@ -162,7 +162,7 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
                         (random.nextDouble() - 0.5) * getBbWidth(), 
                         getBbHeight(),
                         (random.nextDouble() - 0.5) * getBbWidth());
-                HamonPowerType.createHamonSparkParticles(level, ClientUtil.getClientPlayer(), sparkVec, getEnergy() * 0.0015F);
+                HamonPowerType.emitHamonSparkParticles(level, ClientUtil.getClientPlayer(), sparkVec, getEnergy() * 0.0015F);
             }
             
             for (Entity passenger : getPassengers()) { 

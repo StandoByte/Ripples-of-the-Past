@@ -51,7 +51,7 @@ public class HamonTornadoOverdrive extends HamonAction {
             if (user.isShiftKeyDown()) {
                 user.setDeltaMovement(0, movement.y < 0 ? movement.y * 1.05 : 0, 0);
             }
-            HamonPowerType.createHamonSparkParticles(world, user instanceof PlayerEntity ? (PlayerEntity) user : null, user.position(), 
+            HamonPowerType.emitHamonSparkParticles(world, user instanceof PlayerEntity ? (PlayerEntity) user : null, user.position(), 
                     hamon.getHamonDamageMultiplier() / HamonData.MAX_HAMON_STRENGTH_MULTIPLIER * 0.25F);
         }
     }

@@ -46,6 +46,6 @@ public class HamonSpeedBoost extends HamonAction {
             user.addEffect(new EffectInstance(Effects.MOVEMENT_SPEED, duration, speedLvl));
             user.addEffect(new EffectInstance(Effects.DIG_SPEED, duration, hasteLvl));
         }
-        HamonPowerType.createHamonSparkParticles(world, user instanceof PlayerEntity ? (PlayerEntity) user : null, user.position(), (speedLvl + 1) * 0.25F);
+        HamonPowerType.emitHamonSparkParticles(world, user instanceof PlayerEntity ? (PlayerEntity) user : null, user.position(), (speedLvl + 1) * 0.25F);
     }
 }

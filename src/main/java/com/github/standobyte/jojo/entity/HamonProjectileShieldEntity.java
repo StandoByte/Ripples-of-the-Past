@@ -113,7 +113,7 @@ public class HamonProjectileShieldEntity extends Entity implements IEntityAdditi
             }
         }
         if (level.isClientSide()) {
-            HamonPowerType.createHamonSparkParticles(level, ClientUtil.getClientPlayer(), projectile.position(), speed / 2.5F);
+            HamonPowerType.emitHamonSparkParticles(level, ClientUtil.getClientPlayer(), projectile.position(), speed / 2.5F);
         }
     }
 

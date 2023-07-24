@@ -410,7 +410,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
             INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
                 power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                     if (power.consumeEnergy(event.getAmount() * 0.5F)) {
-                        HamonPowerType.createHamonSparkParticles(entity.level, null, entity.getX(), entity.getY(0.5), entity.getZ(), 0.1F);
+                        HamonPowerType.emitHamonSparkParticles(entity.level, null, entity.getX(), entity.getY(0.5), entity.getZ(), 0.1F);
                         event.setCanceled(true);
                     }
                 });
@@ -473,7 +473,9 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
         CustomExplosion.explodePreCreated(hamonBlast, world, CustomExplosionType.HAMON);
     }
     
-    public static void createHamonSparkParticles(World world, @Nullable PlayerEntity clientHandled, 
+    
+    
+    public static void emitHamonSparkParticles(World world, @Nullable PlayerEntity clientHandled, 
             double x, double y, double z, float intensity, @Nullable SoundEvent hamonSound) {
         if (intensity > 0) {
             intensity = Math.min(intensity, 4F);
@@ -491,17 +493,18 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
         }
     }
     
-    public static void createHamonSparkParticles(World world, @Nullable PlayerEntity clientHandled, double x, double y, double z, float intensity) {
-        createHamonSparkParticles(world, clientHandled, x, y, z, intensity, ModSounds.HAMON_SPARK.get());
+    public static void emitHamonSparkParticles(World world, @Nullable PlayerEntity clientHandled, double x, double y, double z, float intensity) {
+        emitHamonSparkParticles(world, clientHandled, x, y, z, intensity, ModSounds.HAMON_SPARK.get());
     }
     
-    public static void createHamonSparkParticles(World world, @Nullable PlayerEntity clientHandled, Vector3d vec, float intensity) {
-        createHamonSparkParticles(world, clientHandled, vec.x, vec.y, vec.z, intensity);
+    public static void emitHamonSparkParticles(World world, @Nullable PlayerEntity clientHandled, Vector3d vec, float intensity) {
+        emitHamonSparkParticles(world, clientHandled, vec.x, vec.y, vec.z, intensity);
     }
     
-    public static void createHamonSparkParticles(World world, @Nullable PlayerEntity clientHandled, Vector3d vec, float intensity, @Nullable SoundEvent hamonSound) {
-        createHamonSparkParticles(world, clientHandled, vec.x, vec.y, vec.z, intensity, hamonSound);
+    public static void emitHamonSparkParticles(World world, @Nullable PlayerEntity clientHandled, Vector3d vec, float intensity, @Nullable SoundEvent hamonSound) {
+        emitHamonSparkParticles(world, clientHandled, vec.x, vec.y, vec.z, intensity, hamonSound);
     }
+    
     
     public static void createHamonSparkParticlesEmitter(Entity entity, float intensity) {
         createHamonSparkParticlesEmitter(entity, intensity, 1, ModParticles.HAMON_SPARK.get());
@@ -519,7 +522,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
                 float volume = intensity * 2 * soundVolumeMultiplier;
                 for (int i = (int) (intensity * 9.5F); i >= 0; i--) {
                     ClientUtil.createParticlesEmitter(entity, hamonParticle, Math.max(1, (int) (intensity * 9.5) - i));
-                    if (i % 2 == 0 && i < 6) {
+                    if (i % 2 == 0 && i < 4) {
                         ClientTickingSoundsHelper.playHamonSparksSound(entity, Math.min(volume, 1.0F), 1.0F + (world.random.nextFloat() - 0.5F) * 0.15F);
                     }
                 }

@@ -74,7 +74,7 @@ public class ClackersItem extends Item {
             if (ticksUsed >= ticksMaxPower / 2 && !world.isClientSide()) {
                 Vector3d sparkVec = entity.getLookAngle().scale(0.75)
                         .add(entity.getX(), entity.getY(0.6), entity.getZ());
-                HamonPowerType.createHamonSparkParticles(world, entity instanceof PlayerEntity ? (PlayerEntity) entity : null, 
+                HamonPowerType.emitHamonSparkParticles(world, entity instanceof PlayerEntity ? (PlayerEntity) entity : null, 
                         sparkVec, ticksUsed >= ticksMaxPower ? 0.25F : 0.1F);
             }
         }

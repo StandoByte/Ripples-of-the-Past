@@ -52,7 +52,7 @@ public class AjaStoneItem extends Item {
                         }
                         Vector3d sparkVec = player.getLookAngle().scale(0.75)
                                 .add(player.getX(), player.getY(0.6), player.getZ());
-                        HamonPowerType.createHamonSparkParticles(world, player, sparkVec, 
+                        HamonPowerType.emitHamonSparkParticles(world, player, sparkVec, 
                                 hamon.getHamonDamageMultiplier() / HamonData.MAX_HAMON_STRENGTH_MULTIPLIER * 1.5F);
                         return ActionResult.success(stack);
                     }

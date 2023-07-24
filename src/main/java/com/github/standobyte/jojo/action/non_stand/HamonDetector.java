@@ -37,7 +37,7 @@ public class HamonDetector extends HamonAction {
                 }
             }
             if (ticksHeld % 3 == 0) {
-                HamonPowerType.createHamonSparkParticles(world, user instanceof PlayerEntity ? (PlayerEntity) user : null, 
+                HamonPowerType.emitHamonSparkParticles(world, user instanceof PlayerEntity ? (PlayerEntity) user : null, 
                         user.getX(), user.getY(0.5), user.getZ(), 0.1F);
             }
         }
