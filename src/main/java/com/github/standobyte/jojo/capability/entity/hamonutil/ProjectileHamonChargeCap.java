@@ -64,6 +64,7 @@ public class ProjectileHamonChargeCap {
     
     public void tick() {
         if (hamonBaseDmg > 0 && projectile.canUpdate()) {
+            // FIXME !!!!!!!!!!!!!!!!!! sfx
             HamonUtil.emitHamonSparkParticles(projectile.level, null, 
                     projectile.getX(), projectile.getY(0.5), projectile.getZ(), getHamonDamage());
         }

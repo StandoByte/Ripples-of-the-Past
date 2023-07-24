@@ -48,6 +48,7 @@ public class HamonCutterEntity extends ModdedProjectileEntity {
     public void tick() {
         super.tick();
         if (level.isClientSide() && tickCount % 7 == getId() % 7) {
+            // FIXME !!!!!!!!!!!!!!!!!! sfx
             HamonUtil.emitHamonSparkParticles(level, ClientUtil.getClientPlayer(), getX(), getY(0.5), getZ(), 0.1F);
         }
     }

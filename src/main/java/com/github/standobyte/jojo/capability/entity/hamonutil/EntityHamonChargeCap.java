@@ -40,6 +40,7 @@ public class EntityHamonChargeCap {
                 return;
             }
             hamonCharge.tick(entity, null, entity.level, entity.getBoundingBox().inflate(1.0D));
+            // FIXME !!!!!!!!!!!!!!!!!! nope
             if (RANDOM.nextInt(10) == 0) {
                 HamonUtil.createHamonSparkParticlesEmitter(entity, hamonCharge.getTickDamage() / 40F);
             }

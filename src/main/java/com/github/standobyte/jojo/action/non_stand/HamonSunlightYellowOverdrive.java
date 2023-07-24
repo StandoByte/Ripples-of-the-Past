@@ -54,7 +54,7 @@ public class HamonSunlightYellowOverdrive extends HamonAction {
     public void startedHolding(World world, LivingEntity user, INonStandPower power, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled && world.isClientSide()) {
             ClientTickingSoundsHelper.playStoppableEntitySound(user, ModSounds.HAMON_SYO_CHARGE.get(), 
-                    1.0F, 1.0F, false, entity -> power.getHeldAction() != this);
+                    1.0F, 1.0F, false, entity -> power.getHeldAction() == this);
         }
     }
     

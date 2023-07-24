@@ -237,6 +237,7 @@ public class HamonUtil {
             INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
                 power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                     if (power.consumeEnergy(event.getAmount() * 0.5F)) {
+                        // FIXME !!!!!!!!!!!!!!!!!! sfx
                         emitHamonSparkParticles(entity.level, null, entity.getX(), entity.getY(0.5), entity.getZ(), 0.1F);
                         event.setCanceled(true);
                     }

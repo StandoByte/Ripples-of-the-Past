@@ -230,6 +230,7 @@ public class DamageUtil {
                 }
                 NonStandPowerType<?> powerType = power.getType();
                 if (powerType == ModPowers.HAMON.get() && power.consumeEnergy(2F)) {
+                    // FIXME !!!!!!!!!!!!!!!!!! sfx
                     HamonUtil.emitHamonSparkParticles(target.level, null, target.getX(), target.getY(0.5), target.getZ(), 0.1F);
                     return false;
                 }

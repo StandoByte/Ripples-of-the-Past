@@ -87,6 +87,7 @@ public class HamonTurquoiseBlueOverdriveEntity extends ModdedProjectileEntity {
                     level.addParticle(ModParticles.HAMON_SPARK_BLUE.get(), false, sparkVec.x, sparkVec.y, sparkVec.z, 0, 0, 0);
                 }
             }
+            // FIXME !!!!!!!!!!!!!!!!!! hmmmm
             level.playSound(ClientUtil.getClientPlayer(), center.x, center.y, center.z, ModSounds.HAMON_SPARK.get(), 
                     SoundCategory.AMBIENT, Math.min(0.1F + radius * 0.15F, 1), 1.0F + (random.nextFloat() - 0.5F) * 0.15F);
         }

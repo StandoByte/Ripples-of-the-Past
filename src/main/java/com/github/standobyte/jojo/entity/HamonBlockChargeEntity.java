@@ -78,6 +78,7 @@ public class HamonBlockChargeEntity extends Entity {
             }
             float rng = random.nextFloat();
             if (rng <= 0.02F || rng <= 0.1F && level.getBlockState(blockPos).getBlock() != Blocks.COBWEB) {
+                // FIXME !!!!!!!!!!!!!!!!!! ffs dude
                 HamonUtil.createHamonSparkParticlesEmitter(this, hamonCharge.getTickDamage() / 4F);
             }
         }

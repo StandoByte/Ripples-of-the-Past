@@ -103,8 +103,8 @@ public class CDBlockBulletEntity extends ModdedProjectileEntity {
                         ClientTickingSoundsHelper.playEntitySound(this, ModSounds.CRAZY_DIAMOND_FIX_STARTED.get(), 1, 1, false);
                         ClientTickingSoundsHelper.playEntitySound(this, ModSounds.CRAZY_DIAMOND_FIX_LOOP.get(), 1, 1, true);
                         
-                        ClientTickingSoundsHelper.playStoppableEntitySound(target, ModSounds.CRAZY_DIAMOND_FIX_STARTED.get(), 1, 1, false, e -> !this.isAlive());
-                        ClientTickingSoundsHelper.playStoppableEntitySound(target, ModSounds.CRAZY_DIAMOND_FIX_LOOP.get(), 1, 1, true, e -> !this.isAlive());
+                        ClientTickingSoundsHelper.playStoppableEntitySound(target, ModSounds.CRAZY_DIAMOND_FIX_STARTED.get(), 1, 1, false, e -> this.isAlive());
+                        ClientTickingSoundsHelper.playStoppableEntitySound(target, ModSounds.CRAZY_DIAMOND_FIX_LOOP.get(), 1, 1, true, e -> this.isAlive());
                         soundStarted = true;
                     }
                 }

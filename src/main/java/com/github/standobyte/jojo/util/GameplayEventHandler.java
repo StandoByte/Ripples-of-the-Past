@@ -338,6 +338,7 @@ public class GameplayEventHandler {
                                 }
                                 return false;
                             }).orElse(true);
+                            // FIXME !!!!!!!!!!!!!!!!!! particles
                             if (doSound) {
                                 HamonUtil.emitHamonSparkParticles(player.level, player, 
                                         player.getRandomX(0.5), player.getY(), player.getRandomZ(0.5), 0.05F);
