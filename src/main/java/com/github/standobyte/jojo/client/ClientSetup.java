@@ -81,6 +81,7 @@ import com.github.standobyte.jojo.client.render.entity.renderer.stand.StarPlatin
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.TheWorldRenderer;
 import com.github.standobyte.jojo.client.render.item.RoadRollerBakedModel;
 import com.github.standobyte.jojo.client.resources.CustomResources;
+import com.github.standobyte.jojo.client.sound.loopplayer.LoopPlayerHandler;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.marker.CrazyDiamondAnchorMarker;
 import com.github.standobyte.jojo.client.ui.marker.CrazyDiamondBloodHomingMarker;
@@ -252,6 +253,7 @@ public class ClientSetup {
             SoulController.init(mc);
             InputHandler.init(mc);
             InputHandler.getInstance().setActionsOverlay(ActionsOverlayGui.getInstance());
+            LoopPlayerHandler.init();
             
             Map<String, PlayerRenderer> skinMap = mc.getEntityRenderDispatcher().getSkinMap();
             addLayers(skinMap.get("default"), false);

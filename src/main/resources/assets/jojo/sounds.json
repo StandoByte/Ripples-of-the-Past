@@ -113,9 +113,11 @@
     "subtitle": "jojo.subtitle.hamon_sparks",
     "sounds": [ "jojo:hamon_sparks_long", "jojo:hamon_sparks_long_2", "jojo:hamon_sparks_long_3" ]
   },
-  "hamon_sparks_loop": {
+  "hamon_spark_short": {
     "subtitle": "jojo.subtitle.hamon_sparks",
-    "sounds": [ "jojo:hamon_sparks_loop" ]
+    "sounds": [ "jojo:hamon_spark_short_1", "jojo:hamon_spark_short_2", "jojo:hamon_spark_short_3",
+    			"jojo:hamon_spark_short_4", "jojo:hamon_spark_short_5", "jojo:hamon_spark_short_6",
+    			"jojo:hamon_spark_short_7", "jojo:hamon_spark_short_8", "jojo:hamon_spark_short_9" ]
   },
   "hamon_syo_charge": {
     "subtitle": "jojo.subtitle.hamon_syo_charge",

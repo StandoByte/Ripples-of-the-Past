@@ -88,7 +88,7 @@ public class ModSounds {
             
     public static final RegistryObject<SoundEvent> HAMON_SPARKS_LONG = register("hamon_sparks_long");
     
-    public static final RegistryObject<SoundEvent> HAMON_SPARKS_LOOP = register("hamon_sparks_loop");
+    public static final RegistryObject<SoundEvent> HAMON_SPARK_SHORT = register("hamon_spark_short");
     
     public static final RegistryObject<SoundEvent> HAMON_CONCENTRATION = register("hamon_concentration");
     

@@ -332,7 +332,7 @@ public class GameplayEventHandler {
                                 if (!cap.isWalkingOnLiquid) {
                                     cap.isWalkingOnLiquid = true;
                                     ClientTickingSoundsHelper.playHamonSparksLoopSound(player, 
-                                            entity -> !cap.isWalkingOnLiquid, 
+                                            entity -> cap.isWalkingOnLiquid, 
                                             1.0F);
                                     return true;
                                 }
