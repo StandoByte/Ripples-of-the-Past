@@ -39,6 +39,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClHamonResetSkillsB
 import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillAddPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillRemovePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.HamonSyncOnLoadPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonUiEffectPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonAuraColorPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonAuraColorPacket.HamonAuraColor;
@@ -1304,6 +1305,7 @@ public class HamonData extends TypeSpecificData {
         nbt.putFloat("TrainingBonus", breathingTrainingDayBonus);
         nbt.putFloat("BreathStability", breathStability);
         nbt.putInt("EnergyTicks", noEnergyDecayTicks);
+        nbt.putInt("MaskNoBreathTicks", ticksMaskWithNoHamonBreath);
         nbt.putBoolean("TCSA", tcsa);
         return nbt;
     }
@@ -1328,6 +1330,7 @@ public class HamonData extends TypeSpecificData {
         breathStability = nbt.contains("BreathStability") ? nbt.getFloat("BreathStability") : getMaxBreathStability();
         prevBreathStability = breathStability;
         noEnergyDecayTicks = nbt.getInt("EnergyTicks");
+        ticksMaskWithNoHamonBreath = nbt.getInt("MaskNoBreathTicks");
         tcsa = nbt.getBoolean("TCSA");
     }
     
@@ -1337,7 +1340,12 @@ public class HamonData extends TypeSpecificData {
         updateExerciseAttributes(user);
         hamonSkills.syncWithUser(user, this);
         PacketManager.sendToClient(new HamonExercisesPacket(this), user);
+        PacketManager.sendToClient(new HamonSyncOnLoadPacket(ticksMaskWithNoHamonBreath), user);
         ModCriteriaTriggers.HAMON_STATS.get().trigger(user, hamonStrengthLevel, hamonControlLevel, breathingTrainingLevel);
+    }
+    
+    public void handleSyncPacket(HamonSyncOnLoadPacket packet) {
+        this.ticksMaskWithNoHamonBreath = packet.ticksMaskWithNoHamonBreath;
     }
     
     @Override
