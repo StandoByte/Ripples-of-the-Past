@@ -65,7 +65,7 @@ import com.github.standobyte.jojo.power.bowcharge.BowChargeEffectInstance;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonCharge;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismPowerType;
@@ -339,11 +339,11 @@ public class GameplayEventHandler {
                                 return false;
                             }).orElse(true);
                             if (doSound) {
-                                HamonPowerType.emitHamonSparkParticles(player.level, player, 
+                                HamonUtil.emitHamonSparkParticles(player.level, player, 
                                         player.getRandomX(0.5), player.getY(), player.getRandomZ(0.5), 0.05F);
                             }
                             else {
-                                HamonPowerType.emitHamonSparkParticles(player.level, player, 
+                                HamonUtil.emitHamonSparkParticles(player.level, player, 
                                         player.getRandomX(0.5), player.getY(), player.getRandomZ(0.5), 0.1F, null);
                             }
                         }
@@ -637,7 +637,7 @@ public class GameplayEventHandler {
             };
         });
         
-        HamonPowerType.cancelCactusDamage(event);
+        HamonUtil.cancelCactusDamage(event);
         if (VampirismFreeze.onUserAttacked(event)) {
             event.setCanceled(true);
         }
@@ -708,7 +708,7 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void cancelLivingAttack(LivingAttackEvent event) {
         if (HamonSendoWaveKick.protectFromMeleeAttackInKick(event.getEntityLiving(), event.getSource(), event.getAmount())
-                || HamonPowerType.snakeMuffler(event.getEntityLiving(), event.getSource(), event.getAmount())) 
+                || HamonUtil.snakeMuffler(event.getEntityLiving(), event.getSource(), event.getAmount())) 
             event.setCanceled(true);
     }
     
@@ -1049,7 +1049,7 @@ public class GameplayEventHandler {
                 if (targetPower != null && playerPower != null && 
                         targetPower.getType() == ModPowers.HAMON.get()
                         && (!playerPower.hasPower() || playerPower.getType().isReplaceableWith(ModPowers.HAMON.get()))) {
-                    HamonPowerType.interactWithHamonTeacher(target.level, event.getPlayer(), targetPlayer, 
+                    HamonUtil.interactWithHamonTeacher(target.level, event.getPlayer(), targetPlayer, 
                             targetPower.getTypeSpecificData(ModPowers.HAMON.get()).get());
                     event.setCanceled(true);
                     event.setCancellationResult(ActionResultType.sidedSuccess(target.level.isClientSide));
@@ -1080,7 +1080,7 @@ public class GameplayEventHandler {
                                 event.setCanceled(true);
                                 event.setCancellationResult(ActionResultType.SUCCESS);
                                 if (!world.isClientSide()) {
-                                    HamonPowerType.ropeTrap(player, pos, blockState, world, power, hamon);
+                                    HamonUtil.ropeTrap(player, pos, blockState, world, power, hamon);
                                 }
                             }
                         });
@@ -1134,7 +1134,7 @@ public class GameplayEventHandler {
         LivingEntity dead = event.getEntityLiving();
         DamageSource dmgSource = event.getSource();
         if (!dead.level.isClientSide()) {
-            HamonPowerType.hamonPerksOnDeath(dead);
+            HamonUtil.hamonPerksOnDeath(dead);
             Entity killer = dmgSource.getEntity();
             if (killer instanceof StandEntity) {
                 StandEntity killerStand = (StandEntity) killer;
@@ -1444,7 +1444,7 @@ public class GameplayEventHandler {
                     if (cap.hasHamonCharge()) {
                         HamonCharge hamonCharge = cap.getHamonCharge();
                         float radius = CommonReflection.getRadius(explosion);
-                        HamonPowerType.hamonExplosion(exploder.level, exploder, 
+                        HamonUtil.hamonExplosion(exploder.level, exploder, 
                                 hamonCharge.getUserServerSide(exploder.level), explosion.getPosition(),
                                 radius, hamonCharge.getTickDamage());
                     }

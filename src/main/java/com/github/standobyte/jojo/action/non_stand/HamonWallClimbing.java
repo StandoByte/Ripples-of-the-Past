@@ -5,7 +5,7 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 
 import net.minecraft.entity.LivingEntity;
@@ -45,7 +45,7 @@ public class HamonWallClimbing extends HamonAction {
         }
         if (ticksHeld % 4 == 0) {
             Vector3d sparkVec = user.getLookAngle().scale(0.25).add(user.getX(), user.getY(1.0), user.getZ());
-            HamonPowerType.emitHamonSparkParticles(world, user instanceof PlayerEntity ? (PlayerEntity) user : null, sparkVec, 0.1F);
+            HamonUtil.emitHamonSparkParticles(world, user instanceof PlayerEntity ? (PlayerEntity) user : null, sparkVec, 0.1F);
         }
     }
 

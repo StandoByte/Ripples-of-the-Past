@@ -3,9 +3,6 @@ package com.github.standobyte.jojo.init.power.non_stand.hamon;
 import static com.github.standobyte.jojo.init.power.ModCommonRegisters.ACTIONS;
 import static com.github.standobyte.jojo.init.power.ModCommonRegisters.NON_STAND_POWERS;
 
-import java.util.List;
-import java.util.function.Supplier;
-
 import com.github.standobyte.jojo.action.non_stand.HamonAction;
 import com.github.standobyte.jojo.action.non_stand.HamonBreath;
 import com.github.standobyte.jojo.action.non_stand.HamonBubbleBarrier;
@@ -34,7 +31,6 @@ import com.github.standobyte.jojo.action.non_stand.HamonZoomPunch;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
 
 import net.minecraftforge.fml.RegistryObject;
 

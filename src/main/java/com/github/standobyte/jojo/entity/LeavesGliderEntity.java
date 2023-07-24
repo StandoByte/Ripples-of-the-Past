@@ -14,7 +14,7 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClLeavesGliderColorPacket;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -162,7 +162,7 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
                         (random.nextDouble() - 0.5) * getBbWidth(), 
                         getBbHeight(),
                         (random.nextDouble() - 0.5) * getBbWidth());
-                HamonPowerType.emitHamonSparkParticles(level, ClientUtil.getClientPlayer(), sparkVec, getEnergy() * 0.0015F);
+                HamonUtil.emitHamonSparkParticles(level, ClientUtil.getClientPlayer(), sparkVec, getEnergy() * 0.0015F);
             }
             
             for (Entity passenger : getPassengers()) { 

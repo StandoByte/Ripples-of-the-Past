@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -64,7 +64,7 @@ public class ProjectileHamonChargeCap {
     
     public void tick() {
         if (hamonBaseDmg > 0 && projectile.canUpdate()) {
-            HamonPowerType.emitHamonSparkParticles(projectile.level, null, 
+            HamonUtil.emitHamonSparkParticles(projectile.level, null, 
                     projectile.getX(), projectile.getY(0.5), projectile.getZ(), getHamonDamage());
         }
     }

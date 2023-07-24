@@ -5,7 +5,7 @@ import java.util.Random;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonCharge;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -41,7 +41,7 @@ public class EntityHamonChargeCap {
             }
             hamonCharge.tick(entity, null, entity.level, entity.getBoundingBox().inflate(1.0D));
             if (RANDOM.nextInt(10) == 0) {
-                HamonPowerType.createHamonSparkParticlesEmitter(entity, hamonCharge.getTickDamage() / 40F);
+                HamonUtil.createHamonSparkParticlesEmitter(entity, hamonCharge.getTickDamage() / 40F);
             }
         }
     }

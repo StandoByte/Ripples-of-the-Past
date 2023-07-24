@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonCharge;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -78,7 +78,7 @@ public class HamonBlockChargeEntity extends Entity {
             }
             float rng = random.nextFloat();
             if (rng <= 0.02F || rng <= 0.1F && level.getBlockState(blockPos).getBlock() != Blocks.COBWEB) {
-                HamonPowerType.createHamonSparkParticlesEmitter(this, hamonCharge.getTickDamage() / 4F);
+                HamonUtil.createHamonSparkParticlesEmitter(this, hamonCharge.getTickDamage() / 4F);
             }
         }
     }

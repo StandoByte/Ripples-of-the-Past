@@ -10,7 +10,7 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
@@ -120,7 +120,7 @@ public class CrimsonBubbleEntity extends Entity {
             HamonData hamon = hamonOptional.get();
             hamon.setHamonStatPoints(HamonStat.STRENGTH, hamon.getHamonStrengthPoints() + (int) (hamonStrengthPoints * 0.8), true, false);
             hamon.setHamonStatPoints(HamonStat.CONTROL, hamon.getHamonControlPoints() + (int) (hamonControlPoints * 0.8), true, false);
-            HamonPowerType.createHamonSparkParticlesEmitter(entity, 2.0F);
+            HamonUtil.createHamonSparkParticlesEmitter(entity, 2.0F);
             if (hamon.characterIs(ModHamonSkills.CHARACTER_JOSEPH.get())) {
                 JojoModUtil.sayVoiceLine(entity, ModSounds.JOSEPH_CRIMSON_BUBBLE_REACTION.get());
             }

@@ -5,7 +5,7 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -74,7 +74,7 @@ public class ClackersItem extends Item {
             if (ticksUsed >= ticksMaxPower / 2 && !world.isClientSide()) {
                 Vector3d sparkVec = entity.getLookAngle().scale(0.75)
                         .add(entity.getX(), entity.getY(0.6), entity.getZ());
-                HamonPowerType.emitHamonSparkParticles(world, entity instanceof PlayerEntity ? (PlayerEntity) entity : null, 
+                HamonUtil.emitHamonSparkParticles(world, entity instanceof PlayerEntity ? (PlayerEntity) entity : null, 
                         sparkVec, ticksUsed >= ticksMaxPower ? 0.25F : 0.1F);
             }
         }

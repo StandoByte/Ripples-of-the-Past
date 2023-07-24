@@ -4,7 +4,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
@@ -43,7 +43,7 @@ public class HamonBubbleCutterEntity extends ModdedProjectileEntity { // TODO bu
     public void tick() {
         super.tick();
         if (level.isClientSide() && tickCount % 7 == getId() % 7) {
-            HamonPowerType.emitHamonSparkParticles(level, ClientUtil.getClientPlayer(), getX(), getY(0.5), getZ(), 0.1F);
+            HamonUtil.emitHamonSparkParticles(level, ClientUtil.getClientPlayer(), getX(), getY(0.5), getZ(), 0.1F);
         }
     }
 

@@ -4,7 +4,7 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 
 import net.minecraft.entity.LivingEntity;
@@ -28,7 +28,7 @@ public class HamonRepellingOverdrive extends HamonAction {
             int resistLvl = MathHelper.floor(1.5F * effectStr);
             hamon.hamonPointsFromAction(HamonStat.CONTROL, getEnergyCost(power, target));
             user.addEffect(new EffectInstance(Effects.DAMAGE_RESISTANCE, resistDuration, resistLvl));
-            HamonPowerType.createHamonSparkParticlesEmitter(user, effectStr / 2F);
+            HamonUtil.createHamonSparkParticlesEmitter(user, effectStr / 2F);
         }
     }
 

@@ -8,7 +8,7 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -113,7 +113,7 @@ public class HamonProjectileShieldEntity extends Entity implements IEntityAdditi
             }
         }
         if (level.isClientSide()) {
-            HamonPowerType.emitHamonSparkParticles(level, ClientUtil.getClientPlayer(), projectile.position(), speed / 2.5F);
+            HamonUtil.emitHamonSparkParticles(level, ClientUtil.getClientPlayer(), projectile.position(), speed / 2.5F);
         }
     }
 

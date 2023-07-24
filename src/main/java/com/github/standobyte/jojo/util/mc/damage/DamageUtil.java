@@ -24,7 +24,7 @@ import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.google.common.collect.Multimap;
@@ -187,7 +187,7 @@ public class DamageUtil {
             // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! logger
             JojoMod.LOGGER.debug("{}    {} {}", amount, target.getType().getRegistryName().getPath(), target.getId());
             if (hurtThroughInvulTicks(target, dmgSource, amount)) {
-                HamonPowerType.createHamonSparkParticlesEmitter(target, amount / (HamonData.MAX_HAMON_STRENGTH_MULTIPLIER * 5), attack.soundVolumeMultiplier, attack.hamonParticle);
+                HamonUtil.createHamonSparkParticlesEmitter(target, amount / (HamonData.MAX_HAMON_STRENGTH_MULTIPLIER * 5), attack.soundVolumeMultiplier, attack.hamonParticle);
                 if (scarf && undeadTarget && livingTarget instanceof ServerPlayerEntity) {
                     ModCriteriaTriggers.VAMPIRE_HAMON_DAMAGE_SCARF.get().trigger((ServerPlayerEntity) livingTarget);
                 }
@@ -230,7 +230,7 @@ public class DamageUtil {
                 }
                 NonStandPowerType<?> powerType = power.getType();
                 if (powerType == ModPowers.HAMON.get() && power.consumeEnergy(2F)) {
-                    HamonPowerType.emitHamonSparkParticles(target.level, null, target.getX(), target.getY(0.5), target.getZ(), 0.1F);
+                    HamonUtil.emitHamonSparkParticles(target.level, null, target.getX(), target.getY(0.5), target.getZ(), 0.1F);
                     return false;
                 }
                 return true;

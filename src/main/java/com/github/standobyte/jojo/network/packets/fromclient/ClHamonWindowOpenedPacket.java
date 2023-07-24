@@ -9,7 +9,7 @@ import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonTeachersSkillsPacket;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -38,7 +38,7 @@ public class ClHamonWindowOpenedPacket {
             INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
                 power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                     PacketManager.sendToClient(new HamonExercisesPacket(hamon), player);
-                    Set<AbstractHamonSkill> skills = HamonPowerType.nearbyTeachersSkills(player);
+                    Set<AbstractHamonSkill> skills = HamonUtil.nearbyTeachersSkills(player);
                     PacketManager.sendToClient(skills == null ? new HamonTeachersSkillsPacket() : 
                         new HamonTeachersSkillsPacket(skills), player);
                 });

@@ -7,7 +7,7 @@ import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
@@ -68,7 +68,7 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
         else {
             Vector3d sparkVec = Vector3d.directionFromRotation(random.nextFloat() * 360F, random.nextFloat() * 360F)
                     .scale(getBbWidth() / 2).add(getX(), getY(0.5), getZ());
-            HamonPowerType.emitHamonSparkParticles(level, ClientUtil.getClientPlayer(), sparkVec, 0.1F);
+            HamonUtil.emitHamonSparkParticles(level, ClientUtil.getClientPlayer(), sparkVec, 0.1F);
         }
     }
     

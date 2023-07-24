@@ -9,7 +9,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketBuffer;
@@ -71,7 +71,7 @@ public class TrHamonParticlesPacket {
         public void handle(TrHamonParticlesPacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity != null) {
-                HamonPowerType.createHamonSparkParticlesEmitter(entity, msg.intensity, msg.soundVolumeMultiplier, msg.particleType);
+                HamonUtil.createHamonSparkParticlesEmitter(entity, msg.intensity, msg.soundVolumeMultiplier, msg.particleType);
             }
         }
 

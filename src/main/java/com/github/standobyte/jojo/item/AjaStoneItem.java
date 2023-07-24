@@ -11,7 +11,7 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
@@ -52,7 +52,7 @@ public class AjaStoneItem extends Item {
                         }
                         Vector3d sparkVec = player.getLookAngle().scale(0.75)
                                 .add(player.getX(), player.getY(0.6), player.getZ());
-                        HamonPowerType.emitHamonSparkParticles(world, player, sparkVec, 
+                        HamonUtil.emitHamonSparkParticles(world, player, sparkVec, 
                                 hamon.getHamonDamageMultiplier() / HamonData.MAX_HAMON_STRENGTH_MULTIPLIER * 1.5F);
                         return ActionResult.success(stack);
                     }

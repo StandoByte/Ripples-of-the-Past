@@ -954,7 +954,7 @@ public class HamonData extends TypeSpecificData {
             float lvlInc = getBreathingIncrease(user, true);
             setBreathingLevel(getBreathingLevel() + lvlInc);
             if (isSkillLearned(ModHamonSkills.CHEAT_DEATH.get())) {
-                HamonPowerType.updateCheatDeathEffect(power.getUser());
+                HamonUtil.updateCheatDeathEffect(power.getUser());
             }
         }
         for (Exercise exercise : exerciseTicks.keySet()) {
@@ -1008,12 +1008,12 @@ public class HamonData extends TypeSpecificData {
     }
 
     public boolean addHamonSkill(LivingEntity user, AbstractHamonSkill skill, boolean checkRequirements, boolean sync) {
-        if (!checkRequirements || !isSkillLearned(skill) && canLearnSkill(user, skill, HamonPowerType.nearbyTeachersSkills(power.getUser())).isPositive()) {
+        if (!checkRequirements || !isSkillLearned(skill) && canLearnSkill(user, skill, HamonUtil.nearbyTeachersSkills(power.getUser())).isPositive()) {
             hamonSkills.addSkill(skill);
             addSkillAction(skill);
             serverPlayer.ifPresent(player -> {
                 if (skill == ModHamonSkills.CHEAT_DEATH.get()) {
-                    HamonPowerType.updateCheatDeathEffect(player);
+                    HamonUtil.updateCheatDeathEffect(player);
                 }
                 else if (skill == ModHamonSkills.SATIPOROJA_SCARF.get()) {
                     player.addItem(new ItemStack(ModItems.SATIPOROJA_SCARF.get()));
@@ -1173,7 +1173,7 @@ public class HamonData extends TypeSpecificData {
     
     public void interactWithNewLearner(PlayerEntity player) {
         if (newLearners.contains(player)) {
-            HamonPowerType.startLearningHamon(player.level, player, INonStandPower.getPlayerNonStandPower(player), power.getUser(), this);
+            HamonUtil.startLearningHamon(player.level, player, INonStandPower.getPlayerNonStandPower(player), power.getUser(), this);
             newLearners.remove(player);
         }
     }

@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.capability.entity;
 
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
 import com.github.standobyte.jojo.util.mod.JojoModVersion;
 
 import net.minecraft.nbt.CompoundNBT;

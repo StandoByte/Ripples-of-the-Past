@@ -11,7 +11,7 @@ import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -61,7 +61,7 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser,
     public ActionResultType mobInteract(PlayerEntity player, Hand hand) {
         if (hand == Hand.MAIN_HAND) {
             getPower().getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                HamonPowerType.interactWithHamonTeacher(level, player, this, hamon);
+                HamonUtil.interactWithHamonTeacher(level, player, this, hamon);
             });
         }
         return super.mobInteract(player, hand);
@@ -80,7 +80,7 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser,
             if (!fluidHeight.isEmpty()) {
                 for (Map.Entry<ITag<Fluid>, Double> entry : fluidHeight.object2DoubleEntrySet()) {
                     if (entry.getValue() > 0 && entry.getValue() < 0.4) {
-                        HamonPowerType.emitHamonSparkParticles(level, ClientUtil.getClientPlayer(), position(), 0.1F);
+                        HamonUtil.emitHamonSparkParticles(level, ClientUtil.getClientPlayer(), position(), 0.1F);
                         break;
                     }
                 }
