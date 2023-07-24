@@ -228,6 +228,9 @@ public class HudLayoutEditingScreen extends Screen {
             int x, int y, int mouseX, int mouseY, 
             P power, Action<P> action, 
             boolean isEnabled, boolean fitsForDragged, boolean isHoveredOver, boolean renderActionIcon) {
+        Action<P> actionResolved = power.getActionOnClick(action, shift, ActionTarget.EMPTY);
+        if (actionResolved != null) action = actionResolved;
+        
         minecraft.getTextureManager().bind(WINDOW);
         int texX = isHoveredOver ? 82 : 64;
         if (fitsForDragged) {
@@ -241,9 +244,12 @@ public class HudLayoutEditingScreen extends Screen {
             }
             TextureAtlasSprite textureAtlasSprite = CustomResources.getActionSprites().getSprite(action, power);
             minecraft.getTextureManager().bind(textureAtlasSprite.atlas().location());
-            if (!isEnabled) {
-                RenderSystem.color4f(0.0F, 0.0F, 0.0F, 0.25F);
-            }
+            
+            boolean isUnlocked = action.isUnlocked(power);
+            float alpha = isEnabled ? isUnlocked ? 1.0F : 0.6F : 0.2F;
+            float color = isEnabled && isUnlocked ? 1.0F : 0.0F;
+            
+            RenderSystem.color4f(color, color, color, alpha);
             blit(matrixStack, x + 1, y + 1, 0, 16, 16, textureAtlasSprite);
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         }
