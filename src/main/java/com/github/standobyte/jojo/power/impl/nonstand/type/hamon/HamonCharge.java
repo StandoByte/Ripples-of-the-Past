@@ -49,7 +49,7 @@ public class HamonCharge {
         if (!world.isClientSide() && (chargedEntity == null || chargedEntity.canUpdate())) {
             List<LivingEntity> entities = world.getEntitiesOfClass(LivingEntity.class, aabb, EntityPredicates.NO_CREATIVE_OR_SPECTATOR);
             for (LivingEntity target : entities) {
-                if (!target.is(chargedEntity) && target.isAlive() && target.getUUID() != hamonUserId) {
+                if (!target.is(chargedEntity) && target.isAlive() && !target.getUUID().equals(hamonUserId)) {
                     if (DamageUtil.dealHamonDamage(target, tickDamage, chargedEntity, null, HamonAttackProperties::noSrcEntityHamonMultiplier)) {
                         Entity user = getUser((ServerWorld) world);
                         if (!target.isAlive() && user instanceof ServerPlayerEntity) {
