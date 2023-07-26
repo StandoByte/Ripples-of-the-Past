@@ -36,7 +36,9 @@ import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeC
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCap;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
+import com.github.standobyte.jojo.client.sound.loopplayer.HamonSparksLoopPlayer.SparksPosition;
 import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDBloodCutterEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -302,13 +304,14 @@ public class GameplayEventHandler {
             return power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
                 boolean liquidWalking = hamon.isSkillLearned(ModHamonSkills.LIQUID_WALKING.get());
                 if (liquidWalking) {
+                    World world = player.level;
                     BlockPos blockPos = new BlockPos(player.position().add(0, -0.3, 0));
-                    FluidState fluidBelow = player.level.getBlockState(blockPos).getFluidState();
+                    FluidState fluidBelow = world.getBlockState(blockPos).getFluidState();
                     Fluid fluidType = fluidBelow.getType();
                     if (!fluidBelow.isEmpty() && 
                             !(fluidType.is(FluidTags.WATER) && player.isOnFire())) {
                         player.setOnGround(true);
-                        if (!player.level.isClientSide() || player.isLocalPlayer()) {
+                        if (!world.isClientSide() || player.isLocalPlayer()) {
 //                            InputHandler input = InputHandler.getInstance();
 //                            if (input.pressedDoubleShift) {
 //                                input.cancelingLiquidWalking = true;
@@ -328,24 +331,20 @@ public class GameplayEventHandler {
                         }
 
                         if (player.level.isClientSide()) {
-                            boolean doSound = player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).map(cap -> {
+                            boolean wasWalking = player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).map(cap -> {
                                 if (!cap.isWalkingOnLiquid) {
                                     cap.isWalkingOnLiquid = true;
                                     ClientTickingSoundsHelper.playHamonSparksLoopSound(player, 
                                             entity -> cap.isWalkingOnLiquid, 
-                                            1.0F);
-                                    return true;
+                                            1.0F, SparksPosition.BOTTOM);
+                                    return false;
                                 }
-                                return false;
-                            }).orElse(true);
-                            // FIXME !!!!!!!!!!!!!!!!!! particles
-                            if (doSound) {
-                                HamonUtil.emitHamonSparkParticles(player.level, player, 
-                                        player.getRandomX(0.5), player.getY(), player.getRandomZ(0.5), 0.05F);
-                            }
-                            else {
-                                HamonUtil.emitHamonSparkParticles(player.level, player, 
-                                        player.getRandomX(0.5), player.getY(), player.getRandomZ(0.5), 0.1F, null);
+                                return true;
+                            }).orElse(false);
+                            if (!wasWalking) {
+                                Vector3d pos = player.position();
+                                HamonUtil.emitHamonSparkParticles(world, player, pos.x, pos.y, pos.z, 0.05F);
+                                ClientUtil.createHamonSparkParticles(pos.x, pos.y, pos.z, 10);
                             }
                         }
                         else {

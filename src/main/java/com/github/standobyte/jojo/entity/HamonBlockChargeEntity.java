@@ -6,7 +6,6 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonCharge;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -15,6 +14,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -26,9 +26,10 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
 
-public class HamonBlockChargeEntity extends Entity {
+public class HamonBlockChargeEntity extends Entity implements IEntityAdditionalSpawnData {
     private static final DataParameter<Boolean> CACTUS_EXPLOSION = EntityDataManager.defineId(HamonBlockChargeEntity.class, DataSerializers.BOOLEAN);
     private BlockPos blockPos;
     private HamonCharge hamonCharge;
@@ -75,11 +76,6 @@ public class HamonBlockChargeEntity extends Entity {
                     entityData.set(CACTUS_EXPLOSION, true);
                     level.destroyBlock(blockPos, false);
                 }
-            }
-            float rng = random.nextFloat();
-            if (rng <= 0.02F || rng <= 0.1F && level.getBlockState(blockPos).getBlock() != Blocks.COBWEB) {
-                // FIXME !!!!!!!!!!!!!!!!!! ffs dude
-                HamonUtil.createHamonSparkParticlesEmitter(this, hamonCharge.getTickDamage() / 4F);
             }
         }
     }
@@ -131,6 +127,15 @@ public class HamonBlockChargeEntity extends Entity {
     @Override
     public IPacket<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
+    }
+
+    @Override
+    public void writeSpawnData(PacketBuffer buffer) {
+    }
+
+    // FIXME !!!!!!!!!!!!!!!!!! sfx
+    @Override
+    public void readSpawnData(PacketBuffer additionalData) {
     }
 
 }

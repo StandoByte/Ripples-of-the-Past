@@ -9,13 +9,14 @@ import net.minecraft.world.World;
 
 public abstract class SoundLoopPlayer {
     protected static final Random RANDOM = new Random();
-    private final World world;
+    protected final World world;
     private SoundEvent sound;
     private SoundCategory soundCategory;
     private float volume;
     private float pitch;
     private int tickCount = 0;
     private int nextSoundIn = 0;
+    protected boolean playedSoundThisTick;
     private boolean stopped = false;
     
     public SoundLoopPlayer(World world, SoundEvent sound, SoundCategory soundCategory, float volume, float pitch) {
@@ -36,6 +37,10 @@ public abstract class SoundLoopPlayer {
             Vector3d pos = soundPos();
             world.playLocalSound(pos.x, pos.y, pos.z, sound, soundCategory, volume, pitch, true);
             nextSoundIn = tickCount + soundDelayTicks();
+            playedSoundThisTick = true;
+        }
+        else {
+            playedSoundThisTick = false;
         }
     }
     

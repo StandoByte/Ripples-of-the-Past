@@ -30,6 +30,7 @@ import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tags.ITag;
 import net.minecraft.util.ActionResultType;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.world.DifficultyInstance;
 import net.minecraft.world.IServerWorld;
@@ -113,8 +114,13 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser,
     private void restoreHamon() {
         if (reAddBaseHamon && !level.isClientSide()) {
             addMasterHamon(hamonPower);
-            reAddBaseHamon = false; // i still am
+            reAddBaseHamon = false;
         }
+    }
+    
+    @Override
+    public boolean isInvulnerableTo(DamageSource pDamageSource) {
+        return super.isInvulnerableTo(pDamageSource) || pDamageSource.getMsgId().startsWith("hamon");
     }
     
     public void addMasterHamon(INonStandPower power) {

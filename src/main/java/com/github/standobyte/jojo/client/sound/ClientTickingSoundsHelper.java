@@ -152,7 +152,13 @@ public abstract class ClientTickingSoundsHelper {
     }
     
     public static <T extends Entity> void playHamonSparksLoopSound(T entity, Predicate<T> playWhile, float volume) {
+        playHamonSparksLoopSound(entity, playWhile, volume, null);
+    }
+    
+    public static <T extends Entity> void playHamonSparksLoopSound(T entity, Predicate<T> playWhile, float volume,
+            HamonSparksLoopPlayer.SparksPosition position) {
         HamonSparksLoopPlayer<T> sparksLoop = new HamonSparksLoopPlayer<>(entity, playWhile, volume, 1.0F);
+        sparksLoop.setPosition(position);
         LoopPlayerHandler.getInstance().add(sparksLoop);
     }
     

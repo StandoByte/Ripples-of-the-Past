@@ -117,7 +117,15 @@
     "subtitle": "jojo.subtitle.hamon_sparks",
     "sounds": [ "jojo:hamon_spark_short_1", "jojo:hamon_spark_short_2", "jojo:hamon_spark_short_3",
     			"jojo:hamon_spark_short_4", "jojo:hamon_spark_short_5", "jojo:hamon_spark_short_6",
-    			"jojo:hamon_spark_short_7", "jojo:hamon_spark_short_8", "jojo:hamon_spark_short_9" ]
+    			"jojo:hamon_spark_short_7", "jojo:hamon_spark_short_8", "jojo:hamon_spark_short_9",
+    			"jojo:hamon_spark_short_10", "jojo:hamon_spark_short_11", "jojo:hamon_spark_short_12",
+    			"jojo:hamon_spark_short_13", "jojo:hamon_spark_short_14", "jojo:hamon_spark_short_15",
+    			"jojo:hamon_spark_short_16", "jojo:hamon_spark_short_17", "jojo:hamon_spark_short_18",
+    			"jojo:hamon_spark_short_19", "jojo:hamon_spark_short_20", "jojo:hamon_spark_short_21",
+    			"jojo:hamon_spark_short_22", "jojo:hamon_spark_short_23", "jojo:hamon_spark_short_24",
+    			"jojo:hamon_spark_short_25", "jojo:hamon_spark_short_26", "jojo:hamon_spark_short_27",
+    			"jojo:hamon_spark_short_28", "jojo:hamon_spark_short_29", "jojo:hamon_spark_short_30",
+    			"jojo:hamon_spark_short_31", "jojo:hamon_spark_short_32", "jojo:hamon_spark_short_33" ]
   },
   "hamon_syo_charge": {
     "subtitle": "jojo.subtitle.hamon_syo_charge",
