@@ -6,6 +6,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 
+@Deprecated
 public abstract class EntitySoundLoopPlayer<T extends Entity> extends SoundLoopPlayer {
     protected final T entity;
     protected final Predicate<T> playWhile;

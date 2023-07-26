@@ -7,6 +7,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
+@Deprecated
 public abstract class SoundLoopPlayer {
     protected static final Random RANDOM = new Random();
     protected final World world;

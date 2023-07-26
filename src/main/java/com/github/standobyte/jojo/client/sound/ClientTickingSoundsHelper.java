@@ -8,8 +8,6 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.sound.loopplayer.HamonSparksLoopPlayer;
-import com.github.standobyte.jojo.client.sound.loopplayer.LoopPlayerHandler;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.entity.MRDetectorEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.BladeHatEntity;
@@ -149,17 +147,6 @@ public abstract class ClientTickingSoundsHelper {
     
     public static void playHamonSparksSound(Entity entity, float volume, float pitch) {
         Minecraft.getInstance().getSoundManager().play(new HamonSparksSound(entity, volume, pitch));
-    }
-    
-    public static <T extends Entity> void playHamonSparksLoopSound(T entity, Predicate<T> playWhile, float volume) {
-        playHamonSparksLoopSound(entity, playWhile, volume, null);
-    }
-    
-    public static <T extends Entity> void playHamonSparksLoopSound(T entity, Predicate<T> playWhile, float volume,
-            HamonSparksLoopPlayer.SparksPosition position) {
-        HamonSparksLoopPlayer<T> sparksLoop = new HamonSparksLoopPlayer<>(entity, playWhile, volume, 1.0F);
-        sparksLoop.setPosition(position);
-        LoopPlayerHandler.getInstance().add(sparksLoop);
     }
     
     public static void playHamonEnergyConcentrationSound(LivingEntity entity, float volume) {

@@ -37,8 +37,7 @@ import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonCha
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
-import com.github.standobyte.jojo.client.sound.loopplayer.HamonSparksLoopPlayer.SparksPosition;
+import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDBloodCutterEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -331,20 +330,21 @@ public class GameplayEventHandler {
                         }
 
                         if (player.level.isClientSide()) {
+                            Vector3d pos = player.position();
                             boolean wasWalking = player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).map(cap -> {
                                 if (!cap.isWalkingOnLiquid) {
                                     cap.isWalkingOnLiquid = true;
-                                    ClientTickingSoundsHelper.playHamonSparksLoopSound(player, 
-                                            entity -> cap.isWalkingOnLiquid, 
-                                            1.0F, SparksPosition.BOTTOM);
                                     return false;
                                 }
                                 return true;
                             }).orElse(false);
                             if (!wasWalking) {
-                                Vector3d pos = player.position();
                                 HamonUtil.emitHamonSparkParticles(world, player, pos.x, pos.y, pos.z, 0.05F);
                                 ClientUtil.createHamonSparkParticles(pos.x, pos.y, pos.z, 10);
+                            }
+                            else {
+                                HamonSparksLoopSound.playSparkSound(player, pos, 1.0F);
+                                ClientUtil.createHamonSparkParticles(pos.x, pos.y, pos.z, 1);
                             }
                         }
                         else {
