@@ -1438,7 +1438,8 @@ public class GameplayEventHandler {
             }
         });
         
-        if (!(explosion instanceof HamonBlastExplosion)) {
+        World world = event.getWorld();
+        if (!world.isClientSide() && !(explosion instanceof HamonBlastExplosion)) {
             Entity exploder = explosion.getExploder();
             if (exploder != null) {
                 exploder.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> {
@@ -1446,7 +1447,7 @@ public class GameplayEventHandler {
                         HamonCharge hamonCharge = cap.getHamonCharge();
                         float radius = CommonReflection.getRadius(explosion);
                         HamonUtil.hamonExplosion(exploder.level, exploder, 
-                                hamonCharge.getUserServerSide(exploder.level), explosion.getPosition(),
+                                hamonCharge.getUser((ServerWorld) world), explosion.getPosition(),
                                 radius, hamonCharge.getTickDamage());
                     }
                 });
@@ -1494,8 +1495,8 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void cancelChargedItemPickup(EntityItemPickupEvent event) {
         LivingEntity player = event.getEntityLiving();
-        if (JojoModUtil.isUndead(player) && GeneralUtil.orElseFalse(event.getItem().getCapability(EntityHamonChargeCapProvider.CAPABILITY), 
-                cap -> cap.hasHamonCharge())) {
+        if (!player.level.isClientSide() && GeneralUtil.orElseFalse(event.getItem().getCapability(EntityHamonChargeCapProvider.CAPABILITY), 
+                cap -> cap.hasHamonCharge() && player != cap.getHamonCharge().getUser((ServerWorld) player.level))) {
             event.setCanceled(true);
         }
     }
