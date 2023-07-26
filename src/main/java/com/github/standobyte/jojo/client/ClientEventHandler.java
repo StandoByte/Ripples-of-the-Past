@@ -20,6 +20,8 @@ import com.github.standobyte.jojo.action.stand.TimeStop;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
+import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.client.render.block.overlay.TranslucentBlockRenderHelper;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.GlovesLayer;
@@ -328,6 +330,11 @@ public class ClientEventHandler {
                     
                     mc.level.getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                         cap.tick();
+                    });
+                    
+                    mc.level.entitiesForRendering().forEach(entity -> {
+                        entity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
+                        entity.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
                     });
                 }
             }

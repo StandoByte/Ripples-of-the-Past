@@ -198,9 +198,9 @@ public class ForgeBusEventSubscriber {
     @SubscribeEvent
     public static void onEntityTracking(PlayerEvent.StartTracking event) {
         Entity entityTracked = event.getTarget();
+        ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
         if (entityTracked instanceof LivingEntity) {
             LivingEntity livingTracked = (LivingEntity) entityTracked;
-            ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
             INonStandPower.getNonStandPowerOptional(livingTracked).ifPresent(power -> {
                 power.syncWithTrackingOrUser(player);
             });
@@ -216,6 +216,12 @@ public class ForgeBusEventSubscriber {
                 });
             }
         }
+        entityTracked.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> {
+            cap.onTracking(player);
+        });
+        entityTracked.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> {
+            cap.onTracking(player);
+        });
     }
 
     @SubscribeEvent

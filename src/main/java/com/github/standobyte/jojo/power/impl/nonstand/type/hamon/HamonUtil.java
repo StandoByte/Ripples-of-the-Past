@@ -316,8 +316,9 @@ public class HamonUtil {
                 ClientUtil.createHamonSparkParticles(x, y, z, count);
             }
             if (hamonSound != null) {
+                float volume = Math.min(intensity * 2, 1.0F);
                 world.playSound(clientHandled, x, y, z, hamonSound, 
-                        SoundCategory.AMBIENT, intensity * 2, 1.0F + (world.random.nextFloat() - 0.5F) * 0.15F);
+                        SoundCategory.AMBIENT, volume, 1.0F + (world.random.nextFloat() - 0.5F) * 0.15F);
             }
         }
     }

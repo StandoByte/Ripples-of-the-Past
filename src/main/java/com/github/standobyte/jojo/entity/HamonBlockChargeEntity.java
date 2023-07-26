@@ -4,6 +4,8 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonCharge;
 
@@ -14,7 +16,6 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
-import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -26,17 +27,14 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
 
-public class HamonBlockChargeEntity extends Entity implements IEntityAdditionalSpawnData {
+public class HamonBlockChargeEntity extends Entity {
     private static final DataParameter<Boolean> CACTUS_EXPLOSION = EntityDataManager.defineId(HamonBlockChargeEntity.class, DataSerializers.BOOLEAN);
-    private BlockPos blockPos;
     private HamonCharge hamonCharge;
     
     public HamonBlockChargeEntity(World world, BlockPos blockPos) {
         this(ModEntityTypes.HAMON_BLOCK_CHARGE.get(), world);
-        this.blockPos = blockPos;
         this.moveTo(Vector3d.atBottomCenterOf(blockPos));
     }
 
@@ -54,6 +52,8 @@ public class HamonBlockChargeEntity extends Entity implements IEntityAdditionalS
     @Override
     public void tick() {
         super.tick();
+        BlockPos blockPos = blockPosition();
+        Vector3d pos = Vector3d.atCenterOf(blockPos);
         if (!level.isClientSide()) {
             if (hamonCharge == null || hamonCharge.shouldBeRemoved() || blockPos == null || level.isEmptyBlock(blockPos)) {
                 if (level.getBlockState(blockPos).getBlock() == Blocks.COBWEB) {
@@ -62,7 +62,6 @@ public class HamonBlockChargeEntity extends Entity implements IEntityAdditionalS
                 remove();
                 return;
             }
-            Vector3d pos = Vector3d.atCenterOf(blockPos);
             hamonCharge.tick(null, blockPos, level, getBoundingBox().inflate(0.1D));
             if (tickCount == 60) {
                 Block block = level.getBlockState(blockPos).getBlock();
@@ -77,6 +76,10 @@ public class HamonBlockChargeEntity extends Entity implements IEntityAdditionalS
                     level.destroyBlock(blockPos, false);
                 }
             }
+        }
+        else {
+            HamonSparksLoopSound.playSparkSound(this, pos, 0.2F);
+            ClientUtil.createHamonSparkParticles(getRandomX(0.5), getRandomY(), getRandomZ(0.5), 1);
         }
     }
     
@@ -104,10 +107,6 @@ public class HamonBlockChargeEntity extends Entity implements IEntityAdditionalS
     @Override
     protected void readAdditionalSaveData(CompoundNBT nbt) {
         this.tickCount = nbt.getInt("Age");
-        int[] posArray = nbt.getIntArray("BlockPos");
-        if (posArray.length == 3) {
-            blockPos = new BlockPos(posArray[0], posArray[1], posArray[2]);
-        }
         if (nbt.contains("HamonCharge", 10)) {
             this.hamonCharge = HamonCharge.fromNBT(nbt.getCompound("HamonCharge"));
         }
@@ -116,9 +115,6 @@ public class HamonBlockChargeEntity extends Entity implements IEntityAdditionalS
     @Override
     protected void addAdditionalSaveData(CompoundNBT nbt) {
         nbt.putInt("Age", tickCount);
-        if (blockPos != null) {
-            nbt.putIntArray("BlockPos", new int[] { blockPos.getX(), blockPos.getY(), blockPos.getZ() } );
-        }
         if (hamonCharge != null) {
             nbt.put("HamonCharge", hamonCharge.toNBT());
         }
@@ -128,14 +124,4 @@ public class HamonBlockChargeEntity extends Entity implements IEntityAdditionalS
     public IPacket<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
     }
-
-    @Override
-    public void writeSpawnData(PacketBuffer buffer) {
-    }
-
-    // FIXME !!!!!!!!!!!!!!!!!! sfx
-    @Override
-    public void readSpawnData(PacketBuffer additionalData) {
-    }
-
 }

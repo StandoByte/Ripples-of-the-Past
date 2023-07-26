@@ -1,14 +1,19 @@
 package com.github.standobyte.jojo.capability.entity.hamonutil;
 
 import java.util.List;
+import java.util.Random;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
+import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
+import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHamonEntityChargePacket;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -17,6 +22,7 @@ import com.github.standobyte.jojo.util.mc.damage.DamageUtil.HamonAttackPropertie
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.EggEntity;
 import net.minecraft.entity.projectile.PotionEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
@@ -26,12 +32,18 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 
 public class ProjectileHamonChargeCap {
+    private static final Random RANDOM = new Random();
+    
     @Nonnull private final Entity projectile;
     private float hamonBaseDmg;
+    private int tickCount;
     private int maxChargeTicks;
+    private boolean hasCharge;
     
     private boolean multiplyWithUserStrength;
     private float spentEnergy;
@@ -42,6 +54,7 @@ public class ProjectileHamonChargeCap {
     
     public void setBaseDmg(float damage) {
         this.hamonBaseDmg = damage;
+        setHasCharge(damage > 0);
     }
     
     public void setMaxChargeTicks(int ticks) {
@@ -63,26 +76,48 @@ public class ProjectileHamonChargeCap {
     
     
     public void tick() {
-        if (hamonBaseDmg > 0 && projectile.canUpdate()) {
-            // FIXME !!!!!!!!!!!!!!!!!! sfx
-            HamonUtil.emitHamonSparkParticles(projectile.level, null, 
-                    projectile.getX(), projectile.getY(0.5), projectile.getZ(), getHamonDamage());
+        if (!hasCharge || !projectile.canUpdate()) return;
+        
+        if (!projectile.level.isClientSide()) {
+            if (chargeWearsOff() && tickCount++ > maxChargeTicks) {
+                setHasCharge(false);
+            }
+        }
+        else {
+            if (!chargeWearsOff() || tickCount++ <= maxChargeTicks) {
+                float chargeWearOff = chargeWearOffMultiplier();
+                Vector3d pos = projectile.position();
+                HamonSparksLoopSound.playSparkSound(projectile, pos, chargeWearOff);
+                if (chargeWearOff == 1 || RANDOM.nextFloat() < chargeWearOff) {
+                    ClientUtil.createHamonSparkParticles(pos.x, pos.y, pos.z, 1);
+                }
+            }
         }
     }
     
     public float getHamonDamage() {
-        float damage = hamonBaseDmg;
-        if (maxChargeTicks >= 0) {
-            damage *= MathHelper.clamp((float) (maxChargeTicks - projectile.tickCount) / (float) maxChargeTicks, 0F, 1F);
+        return hamonBaseDmg * chargeWearOffMultiplier();
+    }
+    
+    private float chargeWearOffMultiplier() {
+        if (chargeWearsOff()) {
+            return MathHelper.clamp((float) (maxChargeTicks - tickCount) / (float) maxChargeTicks, 0F, 1F);
         }
-        return damage;
+        else {
+            return 1;
+        }
+    }
+    
+    private boolean chargeWearsOff() {
+        return maxChargeTicks >= 0;
     }
     
     public void onTargetHit(RayTraceResult target) {
         World world = projectile.level;
-        if (!world.isClientSide()) {
+        if (hasCharge && !world.isClientSide()) {
             // adds hamon damage to splash water bottle
             if (projectile instanceof PotionEntity) {
+                Vector3d pos = projectile.getBoundingBox().getCenter();
                 PotionEntity potionEntity = (PotionEntity) projectile;
                 if (MCUtil.isPotionWaterBottle(potionEntity)) {
                     AxisAlignedBB waterSplashArea = projectile.getBoundingBox().inflate(4.0D, 2.0D, 4.0D);
@@ -90,12 +125,15 @@ public class ProjectileHamonChargeCap {
                             EntityPredicates.LIVING_ENTITY_STILL_ALIVE.and(EntityPredicates.NO_SPECTATORS).and(entity -> !entity.is(potionEntity.getOwner())));
                     if (!splashedEntity.isEmpty()) {
                         for (LivingEntity targetEntity : splashedEntity) {
-                            double distSqr = projectile.distanceToSqr(targetEntity);
+                            double distSqr = targetEntity.distanceToSqr(pos);
                             if (distSqr < 16.0) {
-                                dealHamonDamageToTarget(targetEntity, hamonBaseDmg * (1 - (float) (distSqr / 16)));
+                                dealHamonDamageToTarget(targetEntity, getHamonDamage() * (1 - (float) (distSqr / 16)));
                             }
                         }
                     }
+                    
+                    ((ServerWorld) world).sendParticles(ModParticles.HAMON_SPARK.get(), 
+                            pos.x, pos.y, pos.z, 32, 0.75, 0.05, 0.75, 0.25);
                 }
                 
                 return;
@@ -103,7 +141,7 @@ public class ProjectileHamonChargeCap {
             
             // add hamon damage on direct hit
             if (target.getType() == RayTraceResult.Type.ENTITY) {
-                dealHamonDamageToTarget(((EntityRayTraceResult) target).getEntity(), hamonBaseDmg);
+                dealHamonDamageToTarget(((EntityRayTraceResult) target).getEntity(), getHamonDamage());
             }
             
             // memorize charged egg entity to potentially charge the chicken(s) coming out of it
@@ -146,11 +184,31 @@ public class ProjectileHamonChargeCap {
         return null;
     }
     
+    private void setHasCharge(boolean hasCharge) {
+        this.hasCharge = hasCharge;
+        PacketManager.sendToClientsTracking(TrHamonEntityChargePacket
+                .projectileCharge(projectile.getId(), hasCharge, tickCount, maxChargeTicks), projectile);
+    }
+    
+    public void onTracking(ServerPlayerEntity tracking) {
+        if (hasCharge) {
+            PacketManager.sendToClient(TrHamonEntityChargePacket
+                    .projectileCharge(projectile.getId(), hasCharge, tickCount, maxChargeTicks), tracking);
+        }
+    }
+    
+    public void handleMsgFromServer(TrHamonEntityChargePacket msg) {
+        this.hasCharge = msg.hasCharge;
+        this.tickCount = msg.tickCount;
+        this.maxChargeTicks = msg.maxTicks;
+    }
+    
     
     
     public CompoundNBT toNBT() {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putFloat("HamonDamage", hamonBaseDmg);
+        nbt.putInt("ChargeAge", tickCount);
         nbt.putInt("ChargeTicks", maxChargeTicks);
         nbt.putFloat("SpentEnergy", spentEnergy);
         return nbt;
@@ -158,7 +216,9 @@ public class ProjectileHamonChargeCap {
     
     public void fromNBT(CompoundNBT nbt) {
         this.hamonBaseDmg = nbt.getFloat("HamonDamage");
+        this.tickCount = nbt.getInt("ChargeAge");
         this.maxChargeTicks = nbt.getInt("ChargeTicks");
         this.spentEnergy = nbt.getFloat("SpentEnergy");
+        this.hasCharge = hamonBaseDmg > 0 && tickCount > maxChargeTicks;
     }
 }

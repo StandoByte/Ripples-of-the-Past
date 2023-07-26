@@ -1,59 +1,78 @@
 package com.github.standobyte.jojo.capability.entity.hamonutil;
 
-import java.util.Random;
-
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHamonEntityChargePacket;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonCharge;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 
 public class EntityHamonChargeCap {
-    private static final Random RANDOM = new Random();
     private final Entity entity;
     private HamonCharge hamonCharge;
+    private boolean clHasCharge = false;
     
     public EntityHamonChargeCap(Entity entity) {
         this.entity = entity;
     }
     
     public void tick() {
-        hamonChargeTick();
+        if (!entity.canUpdate()) {
+            return;
+        }
+        
+        if (!entity.level.isClientSide()) {
+            if (hamonCharge != null) {
+                hamonCharge.tick(entity, null, entity.level, entity.getBoundingBox().inflate(1.0D));
+                if (hamonCharge.shouldBeRemoved()) {
+                    setHamonCharge(null);
+                }
+            }
+        }
+        
+        else if (clHasCharge) {
+            HamonSparksLoopSound.playSparkSound(entity, entity.getBoundingBox().getCenter(), 1.0F);
+            ClientUtil.createHamonSparkParticles(entity.getRandomX(0.5), entity.getRandomY(), entity.getRandomZ(0.5), 1);
+        }
     }
     
     
     
     public void setHamonCharge(float tickDamage, int chargeTicks, LivingEntity hamonUser, float energySpent) {
-        this.hamonCharge = new HamonCharge(tickDamage, chargeTicks, hamonUser, energySpent);
+        setHamonCharge(new HamonCharge(tickDamage, chargeTicks, hamonUser, energySpent));
     }
     
-    private void hamonChargeTick() {
+    public void setHamonCharge(HamonCharge charge) {
+        this.hamonCharge = charge;
         if (!entity.level.isClientSide()) {
-            if (hamonCharge == null) {
-                return;
-            }
-            if (hamonCharge.shouldBeRemoved()) {
-                hamonCharge = null;
-                return;
-            }
-            hamonCharge.tick(entity, null, entity.level, entity.getBoundingBox().inflate(1.0D));
-            // FIXME !!!!!!!!!!!!!!!!!! nope
-            if (RANDOM.nextInt(10) == 0) {
-                HamonUtil.createHamonSparkParticlesEmitter(entity, hamonCharge.getTickDamage() / 40F);
-            }
+            PacketManager.sendToClientsTrackingAndSelf(TrHamonEntityChargePacket.entityCharge(entity.getId(), hamonCharge != null), entity);
         }
     }
     
     public boolean hasHamonCharge() {
-        return hamonCharge != null && !hamonCharge.shouldBeRemoved();
+        return !entity.level.isClientSide() ? hamonCharge != null && !hamonCharge.shouldBeRemoved() : clHasCharge;
     }
     
     @Nullable
     public HamonCharge getHamonCharge() {
         return hasHamonCharge() ? hamonCharge : null;
+    }
+    
+    public void onTracking(ServerPlayerEntity tracking) {
+        boolean hasCharge = hasHamonCharge();
+        if (hasCharge) {
+            PacketManager.sendToClient(TrHamonEntityChargePacket.entityCharge(entity.getId(), hasCharge), tracking);
+        }
+    }
+    
+    public void setClSideHasCharge(boolean hasCharge) {
+        this.clHasCharge = hasCharge;
     }
     
     
