@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
@@ -91,7 +92,9 @@ public class HamonLifeMagnetism extends HamonAction {
         if (mount) {
             user.startRiding(glider);
         }
+        glider.setEnergy(Math.min(power.getEnergy(), LeavesGliderEntity.MAX_ENERGY));
         HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
         hamon.hamonPointsFromAction(HamonStat.CONTROL, getEnergyCost(power, ActionTarget.EMPTY));
+        HamonUtil.emitHamonSparkParticles(world, null, pos.x, glider.getY(1.0F), pos.z, 0.1F);
     }
 }

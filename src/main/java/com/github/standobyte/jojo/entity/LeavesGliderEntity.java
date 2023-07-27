@@ -8,13 +8,14 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
+import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClLeavesGliderColorPacket;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -24,6 +25,7 @@ import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.SoundType;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntitySize;
@@ -39,10 +41,14 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.particles.BlockParticleData;
+import net.minecraft.particles.IParticleData;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -54,10 +60,12 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
     private static final double GRAVITY = -0.01D;
     public static final float MAX_ENERGY = 200;
     private static final float MAX_HEALTH = 4F;
+    private static final int MAX_PASSENGERS = 4;
 
     private static final DataParameter<Boolean> IS_FLYING = EntityDataManager.defineId(LeavesGliderEntity.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Float> ENERGY = EntityDataManager.defineId(LeavesGliderEntity.class, DataSerializers.FLOAT);
     private static final DataParameter<Float> HEALTH = EntityDataManager.defineId(LeavesGliderEntity.class, DataSerializers.FLOAT);
+    private static final DataParameter<Byte> HAMON_USERS_CHARGING = EntityDataManager.defineId(LeavesGliderEntity.class, DataSerializers.BYTE);
     
     private BlockState leavesBlock = Blocks.OAK_LEAVES.defaultBlockState();
     private ResourceLocation leavesBlockTex = null;
@@ -115,36 +123,7 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
         }
         
         if (!level.isClientSide()) {
-            Iterator<INonStandPower> iter = passengerPowers.iterator();
-            boolean infiniteEnergy = false;
-            while (iter.hasNext()) {
-                INonStandPower power = iter.next();
-                if (power.getType() != ModPowers.HAMON.get()) {
-                    iter.remove();
-                }
-                else if (!infiniteEnergy && power.isUserCreative()) {
-                    infiniteEnergy = true;
-                }
-            }
-            if (infiniteEnergy) {
-                setEnergy(MAX_ENERGY);
-            }
-            else {
-                setEnergy(Math.max(getEnergy() - 2, 0));
-                float energyToReplenish = MAX_ENERGY - getEnergy();
-                int hamonUsersWithEnergy = passengerPowers.size();
-                while (energyToReplenish > 0 && hamonUsersWithEnergy > 0) {
-                    float energyFromEach = energyToReplenish / hamonUsersWithEnergy;
-                    for (INonStandPower power : passengerPowers) {
-                        float energyConsumed = consumeEnergy(power, energyFromEach);
-                        if (energyConsumed < energyFromEach) {
-                            hamonUsersWithEnergy--;
-                        }
-                        energyToReplenish -= energyConsumed;
-                    }
-                }
-                setEnergy(MAX_ENERGY - energyToReplenish);
-            }
+            rechargeFromHamonUsers();
             
             if (getEnergy() <= 0) {
                 setHealth(getHealth() - 0.04F);
@@ -157,21 +136,91 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
             }
         }
         else {
-            if (tickCount % 20 == 0 && getEnergy() > 0) {
-                Vector3d sparkVec = position().add(
-                        (random.nextDouble() - 0.5) * getBbWidth(), 
-                        getBbHeight(),
-                        (random.nextDouble() - 0.5) * getBbWidth());
-                // FIXME !!!!!!!!!!!!!!!!!! sfx
-                HamonUtil.emitHamonSparkParticles(level, ClientUtil.getClientPlayer(), sparkVec, getEnergy() * 0.0015F);
+            float energy = getEnergy();
+            if (energy > 0) {
+                boolean[] chargingHamonUsers = getHamonChargers();
+                boolean isBeingCharged = false;
+                for (int i = 0; i < MAX_PASSENGERS; i++) {
+                    if (chargingHamonUsers[i] && i < getPassengers().size()) {
+                        Entity charger = getPassengers().get(i);
+                        if (charger != null && charger.isAlive() && charger instanceof LivingEntity) {
+                            CustomParticlesHelper.createHamonGliderChargeParticles((LivingEntity) charger);
+                            isBeingCharged = true;
+                        }
+                        
+                    }
+                }
+                
+                float energyRatio = energy / MAX_ENERGY;
+                Vector3d soundPos = clSoundPos();
+                if (isBeingCharged || random.nextFloat() < energyRatio * 0.2F) {
+                    HamonSparksLoopSound.playSparkSound(this, soundPos, energyRatio);
+                    ClientUtil.createHamonSparkParticles(this.getRandomX(0.5F), this.getY(1.0F), this.getRandomZ(0.5F), 
+                            MathUtil.fractionRandomInc(energyRatio * 2));
+                }
             }
             
             for (Entity passenger : getPassengers()) { 
                 if (passenger instanceof ClientPlayerEntity) {
+                    // FIXME !!!!!!!!!! make stands usable when hands are busy
                     ClientReflection.setHandsBusy((ClientPlayerEntity) passenger, true);
                 }
             }
         }
+    }
+    
+    @Override
+    public void onRemovedFromWorld() {
+        super.onRemovedFromWorld();
+        if (level.isClientSide()) {
+            Vector3d soundPos = clSoundPos();
+            SoundType soundType = leavesBlock.getSoundType();
+            level.playLocalSound(soundPos.x, soundPos.y, soundPos.z, 
+                    soundType.getBreakSound(), SoundCategory.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F, false);
+            
+            addLeavesParticles(200);
+        }
+    }
+    
+    private void rechargeFromHamonUsers() {
+        boolean[] hamonUsersCharging = new boolean[MAX_PASSENGERS];
+        
+        Iterator<INonStandPower> iter = passengerPowers.iterator();
+        boolean infiniteEnergy = false;
+        while (iter.hasNext()) {
+            INonStandPower power = iter.next();
+            if (power.getType() != ModPowers.HAMON.get()) {
+                iter.remove();
+            }
+            else if (power.isUserCreative()) {
+                infiniteEnergy = true;
+                addPassengerIndex(hamonUsersCharging, power.getUser());
+            }
+        }
+        if (infiniteEnergy) {
+            setEnergy(MAX_ENERGY);
+        }
+        else {
+            setEnergy(Math.max(getEnergy() - 2, 0));
+            float energyToReplenish = MAX_ENERGY - getEnergy();
+            int hamonUsersWithEnergy = passengerPowers.size();
+            while (energyToReplenish > 0 && hamonUsersWithEnergy > 0) {
+                float energyFromEach = energyToReplenish / hamonUsersWithEnergy;
+                for (INonStandPower power : passengerPowers) {
+                    float energyConsumed = consumeEnergy(power, energyFromEach);
+                    if (energyConsumed > 0) {
+                        addPassengerIndex(hamonUsersCharging, power.getUser());
+                    }
+                    if (energyConsumed < energyFromEach) {
+                        hamonUsersWithEnergy--;
+                    }
+                    energyToReplenish -= energyConsumed;
+                }
+            }
+            setEnergy(MAX_ENERGY - energyToReplenish);
+        }
+        
+        setHamonChargers(hamonUsersCharging);
     }
     
     private float consumeEnergy(INonStandPower power, float energy) {
@@ -179,6 +228,34 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
         power.getTypeSpecificData(ModPowers.HAMON.get()).get().hamonPointsFromAction(HamonStat.CONTROL, energy);
         power.consumeEnergy(energy);
         return energy;
+    }
+    
+    private void addPassengerIndex(boolean[] arr, Entity passenger) {
+        int index = getPassengers().indexOf(passenger);
+        if (index >= 0) {
+            arr[index] = true;
+        }
+    }
+    
+    private void setHamonChargers(boolean[] passengerIndices) {
+        byte data = 0;
+        for (int i = MAX_PASSENGERS - 1; i >= 0; i--) {
+            data <<= 1;
+            if (passengerIndices[i]) {
+                data |= 1;
+            }
+        }
+        entityData.set(HAMON_USERS_CHARGING, data);
+    }
+    
+    private boolean[] getHamonChargers() {
+        boolean[] passengerIndices = new boolean[MAX_PASSENGERS];
+        byte data = entityData.get(HAMON_USERS_CHARGING);
+        for (int i = 0; i < MAX_PASSENGERS; i++) {
+            passengerIndices[i] = (data & 1) > 0;
+            data >>= 1;
+        }
+        return passengerIndices;
     }
 
     private void tickLerp() {
@@ -259,10 +336,10 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
     }
     
     
-
+    
     @Override
     protected boolean canAddPassenger(Entity entity) {
-        return getPassengers().size() < 4;
+        return getPassengers().size() < MAX_PASSENGERS;
     }
 
     @Override
@@ -323,9 +400,9 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
         EntitySize defaultSize = super.getDimensions(pose);
         return new EntitySize(defaultSize.width, defaultSize.height + passengersHeight, defaultSize.fixed);
     }
-
     
-
+    
+    
     private static final Vector3d[] OFFSETS = {
         new Vector3d(0, 0, 0.625), 
         new Vector3d(0.625, 0, 0), 
@@ -336,7 +413,7 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
     public void positionRider(Entity entity) {
         if (hasPassenger(entity)) {
             int i = getPassengers().indexOf(entity);
-            if (i < 4) {
+            if (i < MAX_PASSENGERS) {
                 Vector3d rotatedVec = OFFSETS[i].yRot(-yRot * MathUtil.DEG_TO_RAD);
                 entity.setPos(
                         getX() + rotatedVec.x, 
@@ -455,12 +532,40 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
     public int getFoliageColor() {
         return foliageColor;
     }
-
+    
+    private float prevHealth = 0;
     @Override
     public void onSyncedDataUpdated(DataParameter<?> parameter) {
         super.onSyncedDataUpdated(parameter);
-        if (level.isClientSide() && IS_FLYING.equals(parameter) && isFlying()) {
-            ClientTickingSoundsHelper.playGliderFlightSound(this);
+        if (level.isClientSide()) {
+            if (IS_FLYING.equals(parameter) && isFlying()) {
+                ClientTickingSoundsHelper.playGliderFlightSound(this);
+            }
+            else if (HEALTH.equals(parameter)) {
+                float health = entityData.get(HEALTH);
+                if (health < prevHealth) {
+                    float diff = prevHealth - health;
+                    addLeavesParticles(Math.max((int) (diff * 100), 1));
+                }
+                prevHealth = health;
+            }
+        }
+    }
+    
+    private Vector3d clSoundPos() {
+        PlayerEntity clientPlayer = ClientUtil.getClientPlayer();
+        return clientPlayer.getVehicle() == this ? 
+                new Vector3d(clientPlayer.getX(), this.getY(1.0F), clientPlayer.getZ()) 
+                : new Vector3d(this.getX(), this.getY(1.0F), this.getZ());
+    }
+    
+    private void addLeavesParticles(int count) {
+        IParticleData leavesParticle = new BlockParticleData(ParticleTypes.BLOCK, leavesBlock);
+        for (int i = 0; i < count; i++) {
+            level.addParticle(leavesParticle, 
+                    getRandomX(0.5F), 
+                    getY(1.0F), 
+                    getRandomZ(0.5F), 0, 0, 0);
         }
     }
 
@@ -469,6 +574,7 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
         entityData.define(IS_FLYING, false);
         entityData.define(ENERGY, MAX_ENERGY);
         entityData.define(HEALTH, MAX_HEALTH);
+        entityData.define(HAMON_USERS_CHARGING, (byte) 0);
     }
 
     @Override
@@ -500,20 +606,19 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
 
     @Override
     public void writeSpawnData(PacketBuffer buffer) {
-        buffer.writeInt(foliageColor);
-        
         buffer.writeVarInt(Block.getId(leavesBlock));
+        buffer.writeInt(foliageColor);
     }
 
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
+        setLeavesBlock(GameData.getBlockStateIDMap().byId(additionalData.readVarInt()));
+        
         foliageColor = additionalData.readInt();
         if (foliageColor < 0) {
-            foliageColor = ClientUtil.getFoliageColor(Blocks.OAK_LEAVES.defaultBlockState(), level, this.blockPosition());
+            foliageColor = ClientUtil.getFoliageColor(leavesBlock, level, this.blockPosition());
             PacketManager.sendToServer(new ClLeavesGliderColorPacket(getId(), foliageColor));
         }
-        
-        setLeavesBlock(GameData.getBlockStateIDMap().byId(additionalData.readVarInt()));
     }
 
 }

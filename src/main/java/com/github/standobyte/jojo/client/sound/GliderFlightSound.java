@@ -1,21 +1,23 @@
 package com.github.standobyte.jojo.client.sound;
 
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
+import com.github.standobyte.jojo.init.ModSounds;
 
 import net.minecraft.client.audio.TickableSound;
-import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.MathHelper;
 
 public class GliderFlightSound extends TickableSound {
     private final LeavesGliderEntity glider;
     private int time;
-
+    
     public GliderFlightSound(LeavesGliderEntity glider) {
-        super(SoundEvents.ELYTRA_FLYING, glider.getSoundSource());
+        super(
+                ModSounds.GLIDER_FLIGHT.get(),  // FIXME !!!!!!!!!!!!!!! is the fucking elytra flight sound in particular bugged? why doesn't the volume decrease with distance??? aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa kill me kill me kill me kill me
+                glider.getSoundSource());
         this.glider = glider;
         this.looping = true;
         this.delay = 0;
-        this.volume = 0.1F;
+        this.volume = 0.05F;
     }
 
     private static final float VOLUME_HIGHER_PITCH = 0.8F;
@@ -27,7 +29,7 @@ public class GliderFlightSound extends TickableSound {
             z = glider.getZ();
             double movementSqr = glider.getDeltaMovement().lengthSqr();
             if (movementSqr >= 1.0E-7D) {
-                volume = MathHelper.clamp((float) movementSqr * 3F, 0.0F, 1.0F);
+                volume = MathHelper.clamp((float) movementSqr * 1.5F, 0.0F, 1.0F);
             } 
             else {
                 volume = 0;
@@ -37,7 +39,7 @@ public class GliderFlightSound extends TickableSound {
                 volume = 0;
             } 
             else if (time < 40) {
-                volume = (float) (volume * (float) (time - 20) / 20.0F);
+                volume *= (float) (time - 20) / 20.0F;
             }
 
             if (volume > VOLUME_HIGHER_PITCH) {
@@ -46,7 +48,6 @@ public class GliderFlightSound extends TickableSound {
             else {
                 pitch = 1.0F;
             }
-
         } 
         else {
             stop();

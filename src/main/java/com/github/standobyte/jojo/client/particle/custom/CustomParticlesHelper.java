@@ -109,6 +109,13 @@ public class CustomParticlesHelper {
         addParticle(particle, new Vector3d(pX, pY, pZ), pParticleData.getType().getOverrideLimiter(), false);
     }
     
+    public static void createHamonGliderChargeParticles(LivingEntity entity) {
+        EntityPosParticle particleLeft = HamonGliderChargingParticle.createCustomParticle((ClientWorld) entity.level, entity, Hand.MAIN_HAND);
+        EntityPosParticle particleRight = HamonGliderChargingParticle.createCustomParticle((ClientWorld) entity.level, entity, Hand.OFF_HAND);
+        addParticle(particleLeft, particleLeft.getPos(), false, false);
+        addParticle(particleRight, particleRight.getPos(), false, false);
+    }
+    
     public static boolean addParticle(Particle particle, Vector3d particlePos, boolean overrideLimiter, boolean alwaysVisible) {
         Minecraft mc = Minecraft.getInstance();
         ActiveRenderInfo activerenderinfo = mc.gameRenderer.getMainCamera();

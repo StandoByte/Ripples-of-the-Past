@@ -145,6 +145,10 @@
     ]
   },
   
+  "glider_flight": {
+    "sounds": [ "minecraft:item/elytra/elytra_loop" ]
+  },
+  
   "hamon_concentration": {
     "subtitle": "jojo.subtitle.hamon_concentration",
     "sounds": [ "jojo:hamon_concentration" ]
