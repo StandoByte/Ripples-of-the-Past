@@ -1326,8 +1326,7 @@ public class GameplayEventHandler {
                             shooter.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> {
                                 if (cap.hasHamonCharge()) {
                                     HamonCharge hamonCharge = cap.getHamonCharge();
-                                    hamonCharge.setTicks(hamonCharge.getTicks() - (int) 
-                                            (hamonCharge.getInitialTicks() * hamonChargeProperties.energyRequired / 1000F));
+                                    hamonCharge.decreaseTicks((int) (hamonCharge.getInitialTicks() * hamonChargeProperties.energyRequired / 1000F));
                                     hamonChargeProperties.applyCharge(projCharge, hamonCharge.getTickDamage() * 5, null);
                                     projCharge.setMultiplyWithUserStrength(false);
                                 }

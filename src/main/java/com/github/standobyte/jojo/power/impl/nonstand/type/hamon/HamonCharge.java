@@ -87,6 +87,10 @@ public class HamonCharge {
         this.chargeTicks = ticks;
     }
     
+    public void decreaseTicks(int ticks) {
+        setTicks(chargeTicks - ticks);
+    }
+    
     public int getTicks() {
         return chargeTicks;
     }

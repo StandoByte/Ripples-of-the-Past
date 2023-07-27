@@ -22,7 +22,6 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
@@ -222,21 +221,6 @@ public class DamageUtil {
         if (target instanceof LivingEntity) {
             LivingEntity livingTarget = (LivingEntity) target;
             if (!JojoModUtil.canBleed(livingTarget)) {
-                return false;
-            }
-            boolean dealDamage = INonStandPower.getNonStandPowerOptional(livingTarget).map(power -> {
-                if (!power.hasPower()) {
-                    return true;
-                }
-                NonStandPowerType<?> powerType = power.getType();
-                if (powerType == ModPowers.HAMON.get() && power.consumeEnergy(2F)) {
-                    // FIXME !!!!!!!!!!!!!!!!!! sfx
-                    HamonUtil.emitHamonSparkParticles(target.level, null, target.getX(), target.getY(0.5), target.getZ(), 0.1F);
-                    return false;
-                }
-                return true;
-            }).orElse(true);
-            if (!dealDamage) {
                 return false;
             }
             DamageSource dmgSource = 

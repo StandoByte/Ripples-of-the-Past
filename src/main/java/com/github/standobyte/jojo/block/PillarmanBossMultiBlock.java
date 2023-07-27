@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModTileEntities;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.tileentity.PillarmanBossTileEntity;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
@@ -131,7 +132,8 @@ public class PillarmanBossMultiBlock extends Block {
             return NORTH_SHAPE;
         }
     }
-
+    
+    private static final float DAMAGE_AMOUNT = 4;
     @Override
     public void entityInside(BlockState state, World world, BlockPos pos, Entity entity) {
         if (!world.isClientSide()) {
@@ -140,7 +142,12 @@ public class PillarmanBossMultiBlock extends Block {
             }
             if (entity instanceof LivingEntity) {
                 LivingEntity livingEntity = (LivingEntity) entity;
-                if (DamageUtil.dealPillarmanAbsorptionDamage(livingEntity, 4, null)) {
+                if (HamonUtil.preventBlockDamage(livingEntity, world, 
+                        pos, state, DamageUtil.PILLAR_MAN_ABSORPTION, DAMAGE_AMOUNT)) {
+                    return;
+                }
+                
+                if (DamageUtil.dealPillarmanAbsorptionDamage(livingEntity, DAMAGE_AMOUNT, null)) {
                     livingEntity.addEffect(new EffectInstance(ModEffects.STUN.get(), 10, 0));
                     BlockPos tileEntityPos = posByPart(state, pos, PART_WITH_TILE_ENTITY);
                     TileEntity tileEntity = world.getBlockEntity(tileEntityPos);

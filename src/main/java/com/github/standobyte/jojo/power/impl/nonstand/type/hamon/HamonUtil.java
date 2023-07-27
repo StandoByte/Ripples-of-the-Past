@@ -13,14 +13,16 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
+import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.CrimsonBubbleEntity;
 import com.github.standobyte.jojo.entity.HamonBlockChargeEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.SnakeMufflerEntity;
 import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
@@ -31,11 +33,12 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrHamonParticlesPac
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mc.damage.explosion.CustomExplosion;
-import com.github.standobyte.jojo.util.mc.damage.explosion.HamonBlastExplosion;
 import com.github.standobyte.jojo.util.mc.damage.explosion.CustomExplosion.CustomExplosionType;
+import com.github.standobyte.jojo.util.mc.damage.explosion.HamonBlastExplosion;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.google.common.collect.ImmutableMap;
 
@@ -60,7 +63,9 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -301,6 +306,61 @@ public class HamonUtil {
         CustomExplosion.explodePreCreated(hamonBlast, world, CustomExplosionType.HAMON);
     }
     
+    public static boolean preventBlockDamage(LivingEntity entity, World world, 
+            @Nullable BlockPos blockPos, @Nullable BlockState block, DamageSource dmgSource, float dmgAmount) {
+        if (world.isClientSide()) {
+            return false;
+        }
+        
+        boolean damagePrevented = GeneralUtil.orElseFalse(INonStandPower.getNonStandPowerOptional(entity), power -> {
+            if (power.getType() == ModPowers.HAMON.get()) {
+                if (entity.getType() == ModEntityTypes.HAMON_MASTER.get()) {
+                    return true;
+                }
+
+                float energyCost = dmgAmount * 0.5F;
+                if (power.getEnergy() >= energyCost) {
+                    power.consumeEnergy(energyCost);
+                    return true;
+                }
+                else {
+                    power.consumeEnergy(power.getEnergy());
+                }
+            }
+            return false;
+            
+        }) || GeneralUtil.orElseFalse(entity.getCapability(EntityHamonChargeCapProvider.CAPABILITY), cap -> {
+            if (cap.hasHamonCharge()) {
+                cap.getHamonCharge().decreaseTicks(Math.max((int) dmgAmount, 1));
+                return true;
+            }
+            return false;
+        });
+        
+        if (damagePrevented) {
+            Vector3d sparkPos;
+            if (blockPos != null && block != null) {
+                AxisAlignedBB entityHitbox = entity.getBoundingBox();
+                AxisAlignedBB blockAABB = block.getCollisionShape(world, blockPos).bounds().move(blockPos);
+                AxisAlignedBB intersection = entityHitbox.intersect(blockAABB);
+                sparkPos = new Vector3d(
+                        MathHelper.lerp(Math.random(), intersection.minX, intersection.maxX), 
+                        MathHelper.lerp(Math.random(), intersection.minY, intersection.maxY), 
+                        MathHelper.lerp(Math.random(), intersection.minZ, intersection.maxZ));
+            }
+            else {
+                sparkPos = dmgSource.getSourcePosition();
+            }
+            
+            if (sparkPos != null) {
+                PacketManager.sendToClientsTrackingAndSelf(TrHamonParticlesPacket
+                        .shortSpark(entity.getId(), sparkPos, Math.max((int) (dmgAmount * 0.5F), 1), Math.min(dmgAmount * 0.25F, 1)), entity);
+            }
+            return true;
+        }
+        return false;
+    }
+    
     
     
     // one-time particle emit (like crit particles) + 'generic electricity sound'
@@ -346,7 +406,7 @@ public class HamonUtil {
             intensity = Math.min(intensity, 4F);
             World world = entity.level;
             if (!world.isClientSide()) {
-                PacketManager.sendToClientsTrackingAndSelf(new TrHamonParticlesPacket(entity.getId(), intensity, soundVolumeMultiplier, 
+                PacketManager.sendToClientsTrackingAndSelf(TrHamonParticlesPacket.emitter(entity.getId(), intensity, soundVolumeMultiplier, 
                         hamonParticle != ModParticles.HAMON_SPARK.get() ? hamonParticle : null), entity);
             }
             else {
