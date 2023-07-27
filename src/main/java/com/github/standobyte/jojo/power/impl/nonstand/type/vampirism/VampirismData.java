@@ -148,25 +148,6 @@ public class VampirismData extends TypeSpecificData {
         }
     }
     
-    public static void onEnchantedGoldenAppleEaten(LivingEntity entity) {
-        if (!entity.level.isClientSide()) {
-            EffectInstance weakness = entity.getEffect(Effects.WEAKNESS);
-            if (!(weakness != null && weakness.getAmplifier() >= 4)) {
-                return;
-            }
-            
-            INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
-                power.getTypeSpecificData(ModPowers.VAMPIRISM.get()).ifPresent(vampirism -> {
-                    if (!entity.isSilent()) {
-                        entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), 
-                                ModSounds.VAMPIRE_CURE_START.get(), entity.getSoundSource(), 1.0F, 1.0F);
-                    }
-                    vampirism.setCuringTicks(1);
-                });
-            });
-        }
-    }
-    
     private int getCuringTickProgress() {
         int i = 1;
         LivingEntity user = power.getUser();

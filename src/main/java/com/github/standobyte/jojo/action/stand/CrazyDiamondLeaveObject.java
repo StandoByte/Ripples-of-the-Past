@@ -21,7 +21,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
-import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismData;
+import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
@@ -83,7 +83,7 @@ public class CrazyDiamondLeaveObject extends StandEntityActionModifier {
         map.put(item -> item.getItem() == Items.MILK_BUCKET, (target, item, user) ->            target.curePotionEffects(item));
         map.put(item -> !PotionUtils.getMobEffects(item).isEmpty(), (target, item, user) ->     PotionUtils.getMobEffects(item).forEach(effect -> target.addEffect(effect)));
         map.put(item -> item.isEdible(), (target, item, user) ->                                target.eat(target.level, item.copy()));
-        map.put(item -> item.getItem() == Items.ENCHANTED_GOLDEN_APPLE, (target, item, user) -> VampirismData.onEnchantedGoldenAppleEaten(target));
+        map.put(item -> item.getItem() == Items.ENCHANTED_GOLDEN_APPLE, (target, item, user) -> VampirismUtil.onEnchantedGoldenAppleEaten(target));
     });
 
     public CrazyDiamondLeaveObject(Builder builder) {

@@ -12,12 +12,14 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
+import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
+import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.entity.CrimsonBubbleEntity;
 import com.github.standobyte.jojo.entity.HamonBlockChargeEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.SnakeMufflerEntity;
@@ -45,11 +47,14 @@ import com.google.common.collect.ImmutableMap;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.TripWireBlock;
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.fluid.Fluid;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particles.IParticleData;
@@ -57,6 +62,7 @@ import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.Property;
+import net.minecraft.tags.FluidTags;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
@@ -359,6 +365,86 @@ public class HamonUtil {
             return true;
         }
         return false;
+    }
+    
+    
+
+    // FIXME ! (liquid walking) sound & sparks for tracking players
+    // FIXME ! (liquid walking) double shift
+    // FIXME ! (liquid walking) energy cost
+    // FIXME ! (liquid walking) camera bobbing
+    public static boolean liquidWalking(PlayerEntity player) {
+        // FIXME fix not being able to walk on liquid on shift (PlayerEntity#maybeBackOffFromEdge (989))
+        // FIXME !!!! (liquid walking) double-shift
+        if (player.abilities.flying || player.isInWater()) {
+            return false;
+        }
+        boolean doubleShift = player.isShiftKeyDown() && player.getCapability(PlayerUtilCapProvider.CAPABILITY).map(
+                cap -> cap.getDoubleShiftPress()).orElse(false);
+        if (doubleShift) {
+            return false;
+        }
+        
+        return INonStandPower.getNonStandPowerOptional(player).map(power -> {
+            return power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
+                boolean liquidWalking = hamon.isSkillLearned(ModHamonSkills.LIQUID_WALKING.get());
+                if (liquidWalking) {
+                    World world = player.level;
+                    BlockPos blockPos = new BlockPos(player.position().add(0, -0.3, 0));
+                    FluidState fluidBelow = world.getBlockState(blockPos).getFluidState();
+                    Fluid fluidType = fluidBelow.getType();
+                    if (!fluidBelow.isEmpty() && 
+                            !(fluidType.is(FluidTags.WATER) && player.isOnFire())) {
+                        player.setOnGround(true);
+                        if (!world.isClientSide() || player.isLocalPlayer()) {
+//                            InputHandler input = InputHandler.getInstance();
+//                            if (input.pressedDoubleShift) {
+//                                input.cancelingLiquidWalking = true;
+//                            }
+//                            if (input.cancelingLiquidWalking) {
+//                                return false;
+//                            }
+                            Vector3d deltaMovement = player.getDeltaMovement();
+                            if (player.isShiftKeyDown()) {
+                                deltaMovement = new Vector3d(deltaMovement.x, 0, deltaMovement.z);
+                            }
+                            else {
+                                deltaMovement = new Vector3d(deltaMovement.x, Math.max(deltaMovement.y, 0), deltaMovement.z);
+                            }
+                            player.setDeltaMovement(deltaMovement);
+                            player.fallDistance = 0;
+                        }
+
+                        if (player.level.isClientSide()) {
+                            Vector3d pos = player.position();
+                            boolean wasWalking = player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).map(cap -> {
+                                if (!cap.isWalkingOnLiquid) {
+                                    cap.isWalkingOnLiquid = true;
+                                    return false;
+                                }
+                                return true;
+                            }).orElse(false);
+                            if (!wasWalking) {
+                                HamonUtil.emitHamonSparkParticles(world, player, pos.x, pos.y, pos.z, 0.05F);
+                                ClientUtil.createHamonSparkParticles(pos.x, pos.y, pos.z, 10);
+                            }
+                            else {
+                                HamonSparksLoopSound.playSparkSound(player, pos, 1.0F);
+                                ClientUtil.createHamonSparkParticles(pos.x, pos.y, pos.z, 1);
+                            }
+                        }
+                        else {
+                            if (fluidType.is(FluidTags.LAVA) 
+                                    && !player.fireImmune() && !EnchantmentHelper.hasFrostWalker(player)) {
+                                player.hurt(DamageSource.HOT_FLOOR, 1.0F);
+                            }
+                        }
+                        return true;
+                    }
+                }
+                return false;
+            }).orElse(false);
+        }).orElse(false);
     }
     
     

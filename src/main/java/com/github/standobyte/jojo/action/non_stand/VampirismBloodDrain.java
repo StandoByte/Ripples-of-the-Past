@@ -12,7 +12,7 @@ import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismUtil;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -98,7 +98,7 @@ public class VampirismBloodDrain extends VampirismAction {
                             user.heal(bloodAndHealModifier * 0.5F);
                             healed = user.getHealth() - healed;
                             if (healed > 0) {
-                                power.addEnergy(healed * VampirismPowerType.healCost(world));
+                                power.addEnergy(healed * VampirismUtil.healCost(world));
                             }
                         }
                         if (targetEntity.isDeadOrDying()) {

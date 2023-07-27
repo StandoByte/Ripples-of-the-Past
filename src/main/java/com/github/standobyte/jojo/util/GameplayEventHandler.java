@@ -7,9 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Random;
-import java.util.Set;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
@@ -36,8 +34,6 @@ import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeC
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCap;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
-import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDBloodCutterEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -70,6 +66,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
@@ -94,25 +91,17 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.HorizontalFaceBlock;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityClassification;
-import net.minecraft.entity.EntityPredicate;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
-import net.minecraft.entity.ai.goal.Goal;
-import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
-import net.minecraft.entity.ai.goal.PrioritizedGoal;
-import net.minecraft.entity.item.BoatEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.item.PaintingEntity;
 import net.minecraft.entity.item.PaintingType;
 import net.minecraft.entity.monster.StrayEntity;
 import net.minecraft.entity.passive.ChickenEntity;
-import net.minecraft.entity.passive.IronGolemEntity;
 import net.minecraft.entity.player.ChatVisibility;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -120,8 +109,6 @@ import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.PotionEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
-import net.minecraft.fluid.Fluid;
-import net.minecraft.fluid.FluidState;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.EggItem;
@@ -139,7 +126,6 @@ import net.minecraft.potion.Effects;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
@@ -217,28 +203,7 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingTick(LivingUpdateEvent event) {
         LivingEntity entity = event.getEntityLiving();
-        if (!entity.level.isClientSide() && entity.invulnerableTime <= 10) {
-            float sunDamage = getSunDamage(entity);
-            if (    
-                    sunDamage > 0
-                    && DamageUtil.dealUltravioletDamage(entity, sunDamage, null, null, true)
-                    && entity instanceof PlayerEntity) {
-                EffectInstance weaknessEffect = entity.getEffect(Effects.WEAKNESS);
-                int duration;
-                int amplifier;
-                if (weaknessEffect == null) {
-                    duration = 60;
-                    amplifier = 0;
-                }
-                else {
-                    int difficulty = Math.max(entity.level.getDifficulty().getId(), 1);
-                    duration = weaknessEffect.getDuration() + 60 / difficulty;
-                    amplifier = duration / 60;
-                }
-                entity.addEffect(new EffectInstance(Effects.WEAKNESS, duration, amplifier, false, false, true));
-                entity.addEffect(new EffectInstance(ModEffects.VAMPIRE_SUN_BURN.get(), duration, amplifier, false, false, false));
-            }
-        }
+        VampirismUtil.tickSunDamage(entity);
         entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
             cap.tick();
         });
@@ -270,11 +235,8 @@ public class GameplayEventHandler {
                 }
             }
         }
-        // FIXME ! (liquid walking) sound & sparks for tracking players
-        // FIXME ! (liquid walking) double shift
-        // FIXME ! (liquid walking) energy cost
-        // FIXME ! (liquid walking) camera bobbing
-        boolean liquidWalking = checkLiquidWalking(player);
+        
+        boolean liquidWalking = HamonUtil.liquidWalking(player);
         if (player.level.isClientSide() && !liquidWalking) {
             player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.isWalkingOnLiquid = liquidWalking);
         }
@@ -285,122 +247,6 @@ public class GameplayEventHandler {
         IStandPower.getStandPowerOptional(player).ifPresent(power -> {
             power.tick();
         }); 
-    }
-    
-    private static boolean checkLiquidWalking(PlayerEntity player) {
-        // FIXME fix not being able to walk on liquid on shift (PlayerEntity#maybeBackOffFromEdge (989))
-        // FIXME !!!! (liquid walking) double-shift
-        if (player.abilities.flying || player.isInWater()) {
-            return false;
-        }
-        boolean doubleShift = player.isShiftKeyDown() && player.getCapability(PlayerUtilCapProvider.CAPABILITY).map(
-                cap -> cap.getDoubleShiftPress()).orElse(false);
-        if (doubleShift) {
-            return false;
-        }
-        
-        return INonStandPower.getNonStandPowerOptional(player).map(power -> {
-            return power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
-                boolean liquidWalking = hamon.isSkillLearned(ModHamonSkills.LIQUID_WALKING.get());
-                if (liquidWalking) {
-                    World world = player.level;
-                    BlockPos blockPos = new BlockPos(player.position().add(0, -0.3, 0));
-                    FluidState fluidBelow = world.getBlockState(blockPos).getFluidState();
-                    Fluid fluidType = fluidBelow.getType();
-                    if (!fluidBelow.isEmpty() && 
-                            !(fluidType.is(FluidTags.WATER) && player.isOnFire())) {
-                        player.setOnGround(true);
-                        if (!world.isClientSide() || player.isLocalPlayer()) {
-//                            InputHandler input = InputHandler.getInstance();
-//                            if (input.pressedDoubleShift) {
-//                                input.cancelingLiquidWalking = true;
-//                            }
-//                            if (input.cancelingLiquidWalking) {
-//                                return false;
-//                            }
-                            Vector3d deltaMovement = player.getDeltaMovement();
-                            if (player.isShiftKeyDown()) {
-                                deltaMovement = new Vector3d(deltaMovement.x, 0, deltaMovement.z);
-                            }
-                            else {
-                                deltaMovement = new Vector3d(deltaMovement.x, Math.max(deltaMovement.y, 0), deltaMovement.z);
-                            }
-                            player.setDeltaMovement(deltaMovement);
-                            player.fallDistance = 0;
-                        }
-
-                        if (player.level.isClientSide()) {
-                            Vector3d pos = player.position();
-                            boolean wasWalking = player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).map(cap -> {
-                                if (!cap.isWalkingOnLiquid) {
-                                    cap.isWalkingOnLiquid = true;
-                                    return false;
-                                }
-                                return true;
-                            }).orElse(false);
-                            if (!wasWalking) {
-                                HamonUtil.emitHamonSparkParticles(world, player, pos.x, pos.y, pos.z, 0.05F);
-                                ClientUtil.createHamonSparkParticles(pos.x, pos.y, pos.z, 10);
-                            }
-                            else {
-                                HamonSparksLoopSound.playSparkSound(player, pos, 1.0F);
-                                ClientUtil.createHamonSparkParticles(pos.x, pos.y, pos.z, 1);
-                            }
-                        }
-                        else {
-                            if (fluidType.is(FluidTags.LAVA) 
-                                    && !player.fireImmune() && !EnchantmentHelper.hasFrostWalker(player)) {
-                                player.hurt(DamageSource.HOT_FLOOR, 1.0F);
-                            }
-                        }
-                        return true;
-                    }
-                }
-                return false;
-            }).orElse(false);
-        }).orElse(false);
-    }
-    
-//    private static final float MAX_SUN_DAMAGE = 10;
-//    private static final float MIN_SUN_DAMAGE = 2;
-    private static float getSunDamage(LivingEntity entity) {
-        if (entity.hasEffect(ModEffects.SUN_RESISTANCE.get())
-                || !(entity instanceof PlayerEntity || JojoModConfig.getCommonConfigInstance(false).undeadMobsSunDamage.get())
-                || entity.isSleeping() && entity.getSleepingPos().map(sleepingPos -> {
-                    BlockState blockState = entity.level.getBlockState(sleepingPos);
-                    return blockState.getBlock() instanceof WoodenCoffinBlock && blockState.getValue(WoodenCoffinBlock.CLOSED);
-                }).orElse(false)) {
-            return 0;
-        }
-        World world = entity.level;
-        if (world.isDay()) {
-            float brightness = entity.getBrightness();
-            BlockPos blockPos = entity.getVehicle() instanceof BoatEntity ? 
-                    (new BlockPos(entity.getX(), (double)Math.round(entity.getY(1.0)), entity.getZ())).above()
-                    : new BlockPos(entity.getX(), (double)Math.round(entity.getY(1.0)), entity.getZ());
-            if (brightness > 0.5F && world.canSeeSky(blockPos)) {
-                return 4;
-//                int time = (int) (world.getDayTime() % 24000L);
-//                float damage = MAX_SUN_DAMAGE;
-//                float diff = MAX_SUN_DAMAGE - MIN_SUN_DAMAGE;
-//                
-//                // sunrise
-//                if (time > 23460) { 
-//                    time -= 24000;
-//                }
-//                if (time <= 60) {
-//                    damage -= diff * (1F - (float) (time + 540) / 600F);
-//                }
-//                
-//                // sunset
-//                else if (time > 11940 && time <= 12540) {
-//                    damage -= diff * (float) (time - 11940) / 600F;
-//                }
-//                
-//                return damage;
-            }
-        }
-        return 0;
     }
     
     @SubscribeEvent(priority = EventPriority.HIGH)
@@ -474,45 +320,11 @@ public class GameplayEventHandler {
     public static void onEntityJoinWorld(EntityJoinWorldEvent event) {
         Entity entity = event.getEntity();
         if (!entity.level.isClientSide() && entity instanceof MobEntity) {
-            MobEntity mob = (MobEntity) entity;
-            if (entity.getClassification(false) == EntityClassification.MONSTER) {
-                makeMobNeutralToVampirePlayers(mob);
-            }
-            else if (entity instanceof IronGolemEntity) {
-                mob.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(mob, PlayerEntity.class, 5, false, false, 
-                        target -> target instanceof PlayerEntity && JojoModUtil.isPlayerUndead((PlayerEntity) target)));
-            }
+            VampirismUtil.editMobAiGoals((MobEntity) entity);
         }
 //        else if (entity.getType() == EntityType.PAINTING) {
 //            cutOutHands((PaintingEntity) event.getEntity());
 //        }
-    }
-    
-    private static void makeMobNeutralToVampirePlayers(MobEntity mob) {
-        if (JojoModConfig.getCommonConfigInstance(false).vampiresAggroMobs.get()) return;
-        Set<PrioritizedGoal> goals = CommonReflection.getGoalsSet(mob.targetSelector);
-        for (PrioritizedGoal prGoal : goals) {
-            Goal goal = prGoal.getGoal();
-            if (goal instanceof NearestAttackableTargetGoal) {
-                NearestAttackableTargetGoal<?> targetGoal = (NearestAttackableTargetGoal<?>) goal;
-                Class<? extends LivingEntity> targetClass = CommonReflection.getTargetClass(targetGoal);
-                
-                if (targetClass == PlayerEntity.class) {
-                    EntityPredicate selector = CommonReflection.getTargetConditions(targetGoal);
-                    if (selector != null) {
-                        Predicate<LivingEntity> oldPredicate = CommonReflection.getTargetSelector(selector);
-                        Predicate<LivingEntity> undeadPredicate = target -> 
-                            target instanceof PlayerEntity && !(
-//                                    JojoModUtil.isPlayerUndead((PlayerEntity) target) &&
-                                    INonStandPower.getNonStandPowerOptional(target).map(
-                                            power -> power.getTypeSpecificData(ModPowers.VAMPIRISM.get())
-                                            .map(vampirism -> vampirism.getCuringStage() < 3).orElse(false)).orElse(false));
-                        CommonReflection.setTargetConditions(targetGoal, new EntityPredicate().range(CommonReflection.getTargetDistance(targetGoal)).selector(
-                                oldPredicate != null ? oldPredicate.and(undeadPredicate) : undeadPredicate));
-                    }
-                }
-            }
-        }
     }
     
     @SubscribeEvent(priority = EventPriority.LOW)
@@ -540,7 +352,7 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onFoodEaten(LivingEntityUseItemEvent.Finish event) {
         if (event.getItem().getItem() == Items.ENCHANTED_GOLDEN_APPLE) {
-            VampirismData.onEnchantedGoldenAppleEaten(event.getEntityLiving());
+            VampirismUtil.onEnchantedGoldenAppleEaten(event.getEntityLiving());
         }
     }
     
@@ -584,7 +396,7 @@ public class GameplayEventHandler {
     
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingHeal(LivingHealEvent event) {
-        VampirismPowerType.consumeEnergyOnHeal(event);
+        VampirismUtil.consumeEnergyOnHeal(event);
     }
     
     @SubscribeEvent(priority = EventPriority.LOWEST)
