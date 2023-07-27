@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.init.ModParticles;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonEntityChargePacket;
@@ -28,6 +29,7 @@ import net.minecraft.entity.projectile.PotionEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.EntityPredicates;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
@@ -132,6 +134,8 @@ public class ProjectileHamonChargeCap {
                         }
                     }
                     
+                    world.playSound(null, pos.x, pos.y, pos.z, ModSounds.HAMON_SPARK.get(), 
+                            SoundCategory.AMBIENT, 0.1F, 1.0F + (world.random.nextFloat() - 0.5F) * 0.15F);
                     ((ServerWorld) world).sendParticles(ModParticles.HAMON_SPARK.get(), 
                             pos.x, pos.y, pos.z, 32, 0.75, 0.05, 0.75, 0.25);
                 }

@@ -78,7 +78,7 @@ public class HamonBlockChargeEntity extends Entity {
             }
         }
         else {
-            HamonSparksLoopSound.playSparkSound(this, pos, 0.2F);
+            HamonSparksLoopSound.playSparkSound(this, pos, 1.0F, true);
             ClientUtil.createHamonSparkParticles(getRandomX(0.5), getRandomY(), getRandomZ(0.5), 1);
         }
     }

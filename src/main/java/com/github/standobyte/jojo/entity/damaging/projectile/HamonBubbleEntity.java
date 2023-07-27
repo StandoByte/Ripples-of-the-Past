@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.entity.damaging.projectile;
 
+import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
@@ -23,6 +25,15 @@ public class HamonBubbleEntity extends ModdedProjectileEntity {
 
     public HamonBubbleEntity(EntityType<? extends HamonBubbleEntity> type, World world) {
         super(type, world);
+    }
+    
+    @Override
+    public void tick() {
+        super.tick();
+        if (level.isClientSide() && tickCount % 10 == getId() % 10) {
+            HamonSparksLoopSound.playSparkSound(this, position(), 0.25F, true);
+            ClientUtil.createHamonSparkParticles(getX(), getY(), getZ(), 1);
+        }
     }
     
     @Override
