@@ -50,6 +50,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix3f;
 import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Quaternion;
@@ -465,8 +466,7 @@ public class ClientUtil {
     }
     
     
-    @Nullable
-    public static Vector2f posOnScreen(Vector3d posInWorld, ActiveRenderInfo camera, MatrixStack matrixStack, Matrix4f projection) {
+    public static PosOnScreen posOnScreen(Vector3d posInWorld, ActiveRenderInfo camera, MatrixStack matrixStack, Matrix4f projection) {
         Vector3d cameraPos = camera.getPosition();
         Vector3d vecToEntity = posInWorld.subtract(cameraPos);
         
@@ -475,9 +475,20 @@ public class ClientUtil {
         projectionMatrix.multiply(viewMatrix);
         Vector3f clip = MathUtil.multiplyPoint(projectionMatrix, vecToEntity);
         
-//        if (Math.abs(clip.x()) > 1 || Math.abs(clip.y()) > 1) {}
-        
         Vector2f posOnScreen = new Vector2f(clip.x() * 0.5F + 0.5F, clip.y() * 0.5F + 0.5F);
-        return posOnScreen;
+        boolean isOnScreen = MathHelper.abs(clip.x()) < 1 && MathHelper.abs(clip.y()) < 1 && clip.z() < 1;
+        return new PosOnScreen(posOnScreen, isOnScreen);
+    }
+    
+    public static class PosOnScreen {
+        public static final PosOnScreen SCREEN_CENTER = new PosOnScreen(new Vector2f(0.5F, 0.5F), true);
+        
+        public final Vector2f pos;
+        public final boolean isOnScreen;
+        
+        private PosOnScreen(Vector2f pos, boolean isOnScreen) {
+            this.pos = pos;
+            this.isOnScreen = isOnScreen;
+        }
     }
 }

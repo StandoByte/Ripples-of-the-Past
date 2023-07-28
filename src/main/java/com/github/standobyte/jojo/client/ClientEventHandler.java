@@ -43,7 +43,6 @@ import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
-import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
@@ -88,12 +87,10 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Timer;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector3i;
@@ -480,7 +477,7 @@ public class ClientEventHandler {
                 tsShader.safeGetUniform("TSEffectLength").set(0);
             }
             if (tsPosOnScreen != null) {
-                tsShader.safeGetUniform("CenterScreenCoord").set(new float[] {tsPosOnScreen.x, tsPosOnScreen.y});
+                tsShader.safeGetUniform("CenterScreenCoord").set(new float[] {tsPosOnScreen.pos.x, tsPosOnScreen.pos.y});
             }
         }
         else {
@@ -493,8 +490,7 @@ public class ClientEventHandler {
     // TODO determine the position of the time stopper entity on the screen
     private Entity timeStopper;
     private TimeStop timeStopAction;
-    @Nullable private Vector2f tsPosOnScreen;
-    private static final Vector2f TS_POS_DEFAULT = new Vector2f(0.5F, 0.5F);
+    @Nullable private ClientUtil.PosOnScreen tsPosOnScreen;
     public void setTimeStopVisuals(Entity timeStopper, TimeStop action) {
         if (!tsShaderStarted) {
             this.timeStopper = timeStopper;
@@ -514,11 +510,23 @@ public class ClientEventHandler {
     }
     
     private void updateTimeStopperScreenPos(MatrixStack matrixStack, Matrix4f projection, ActiveRenderInfo camera) {
-        if (isTimeStopped && timeStopper != null && timeStopper != mc.player) {
-            tsPosOnScreen = ClientUtil.posOnScreen(timeStopper.getBoundingBox().getCenter(), camera, matrixStack, projection);
-        }
-        else {
-            tsPosOnScreen = TS_POS_DEFAULT;
+        if (isTimeStopped) {
+            if (timeStopper == mc.player) {
+                tsPosOnScreen = ClientUtil.PosOnScreen.SCREEN_CENTER;
+            }
+            else if (timeStopper != null) {
+                tsPosOnScreen = ClientUtil.posOnScreen(timeStopper.getBoundingBox().getCenter(), camera, matrixStack, projection);
+                if (tsShaderStarted) {
+                    if (tsPosOnScreen == null || !tsPosOnScreen.isOnScreen) {
+                        tsPosOnScreen = null;
+                        timeStopper = null;
+                    }
+                    tsShaderStarted = false;
+                }
+            }
+            else {
+                tsPosOnScreen = null;
+            }
         }
     }
     
