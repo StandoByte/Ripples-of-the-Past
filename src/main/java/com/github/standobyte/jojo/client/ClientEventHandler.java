@@ -21,7 +21,6 @@ import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.action.stand.TimeStop;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
@@ -175,15 +174,29 @@ public class ClientEventHandler {
 
     public void setTimeStopClientState(boolean canSee, boolean canMove) {
         canSeeInStoppedTime = canSee;
-        canMoveInStoppedTime = canSee && canMove;
+        setCanMoveInStoppedTime(canSee && canMove);
         partialTickStoppedAt = canMove ? mc.getFrameTime() : 0.0F;
         resetShader = true;
     }
 
     public void updateCanMoveInStoppedTime(boolean canMove, ChunkPos chunkPos) {
         if (isTimeStopped(chunkPos)) {
-            this.canMoveInStoppedTime = canMove;
+            setCanMoveInStoppedTime(canMove);
         }
+    }
+    
+    private void setCanMoveInStoppedTime(boolean canMove) {
+        this.canMoveInStoppedTime = canMove;
+        mc.player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+            if (!canMove) {
+                cap.lockXRot();
+                cap.lockYRot();
+            }
+            else {
+                cap.clearLockedXRot();
+                cap.clearLockedYRot();
+            }
+        });
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -304,17 +317,8 @@ public class ClientEventHandler {
                     }
                 }
                 
-                mc.player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                    cap.getLockedYRot().ifPresent(yRot -> {
-                        mc.player.yBodyRot = yRot;
-                        mc.player.yBodyRotO = yRot;
-                        mc.player.yRot = yRot;
-                        mc.player.yRotO = yRot;
-                    });
-                    cap.getLockedXRot().ifPresent(xRot -> {
-                        mc.player.xRot = xRot;
-                        mc.player.xRotO = xRot;
-                    });
+                mc.player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                    cap.applyLockedRotation();
                 });
             }
         }

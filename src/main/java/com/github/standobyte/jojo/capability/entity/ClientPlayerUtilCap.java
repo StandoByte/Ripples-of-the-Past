@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.barrage.BarrageSwingsHolder;
+import com.github.standobyte.jojo.util.general.OptionalFloat;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
@@ -27,6 +28,9 @@ public class ClientPlayerUtilCap {
     private boolean isBarraging;
     
     @Nullable private EntityType<?> vehicleType;
+    
+    private OptionalFloat lockedYRot = OptionalFloat.empty();
+    private OptionalFloat lockedXRot = OptionalFloat.empty();
     
     private Action<?> heldWithAnim;
     
@@ -75,5 +79,41 @@ public class ClientPlayerUtilCap {
     public void setVehicleType(@Nullable EntityType<?> vehicleType) {
         this.vehicleType = vehicleType;
         PlayerAnimationHandler.getPlayerAnimator().onVehicleMount(player, vehicleType);
+    }
+    
+    
+    public void lockYRot() {
+        lockedYRot = OptionalFloat.of(player.yRot);
+    }
+    
+    public void clearLockedYRot() {
+        lockedYRot = OptionalFloat.empty();
+    }
+    
+    public OptionalFloat getLockedYRot() {
+        return lockedYRot;
+    }
+    
+    public void lockXRot() {
+        lockedXRot = OptionalFloat.of(player.xRot);
+    }
+    
+    public void clearLockedXRot() {
+        lockedXRot = OptionalFloat.empty();
+    }
+    
+    public OptionalFloat getLockedXRot() {
+        return lockedXRot;
+    }
+    
+    public void applyLockedRotation() {
+        lockedYRot.ifPresent(yRot -> {
+            player.yRot = yRot;
+            player.yRotO = yRot;
+        });
+        lockedXRot.ifPresent(xRot -> {
+            player.xRot = xRot;
+            player.xRotO = xRot;
+        });
     }
 }

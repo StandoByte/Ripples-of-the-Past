@@ -19,7 +19,6 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerContinuousA
 import com.github.standobyte.jojo.network.packets.fromserver.TrWalkmanEarbudsPacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
-import com.github.standobyte.jojo.util.general.OptionalFloat;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -48,8 +47,6 @@ public class PlayerUtilCap {
     private boolean walkmanEarbuds = false;
     
     private Optional<ContinuousActionInstance<?, ?>> continuousAction = Optional.empty();
-    private OptionalFloat lockedYRot = OptionalFloat.empty();
-    private OptionalFloat lockedXRot = OptionalFloat.empty();
     
     private boolean doubleShiftPress = false;
     private boolean shiftSynced = false;
@@ -111,32 +108,6 @@ public class PlayerUtilCap {
             return (Optional<T>) continuousAction;
         }
         return Optional.empty();
-    }
-    
-    
-    
-    public void lockYRot(float value) {
-        lockedYRot = OptionalFloat.of(value);
-    }
-    
-    public void clearLockedYRot() {
-        lockedYRot = OptionalFloat.empty();
-    }
-    
-    public OptionalFloat getLockedYRot() {
-        return lockedYRot;
-    }
-    
-    public void lockXRot(float value) {
-        lockedXRot = OptionalFloat.of(value);
-    }
-    
-    public void clearLockedXRot() {
-        lockedXRot = OptionalFloat.empty();
-    }
-    
-    public OptionalFloat getLockedXRot() {
-        return lockedXRot;
     }
     
     
