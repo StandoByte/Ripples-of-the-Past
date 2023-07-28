@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.entity.damaging.projectile;
 
 import java.util.List;
 
-import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
@@ -49,7 +49,7 @@ public class HamonCutterEntity extends ModdedProjectileEntity {
         super.tick();
         if (level.isClientSide()) {
             HamonSparksLoopSound.playSparkSound(this, position(), 0.25F);
-            ClientUtil.createHamonSparkParticles(getX(), getY(), getZ(), 1);
+            CustomParticlesHelper.createHamonSparkParticles(this, position(), 1);
         }
     }
     

@@ -7,7 +7,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
-import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
@@ -91,7 +91,7 @@ public class ProjectileHamonChargeCap {
                 Vector3d pos = projectile.position();
                 HamonSparksLoopSound.playSparkSound(projectile, pos, chargeWearOff);
                 if (chargeWearOff == 1 || RANDOM.nextFloat() < chargeWearOff) {
-                    ClientUtil.createHamonSparkParticles(pos.x, pos.y, pos.z, 1);
+                    CustomParticlesHelper.createHamonSparkParticles(projectile, pos.x, pos.y, pos.z, 1);
                 }
             }
         }

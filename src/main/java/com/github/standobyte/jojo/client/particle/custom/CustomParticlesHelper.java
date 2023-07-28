@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.client.particle.custom;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import javax.annotation.Nullable;
 
@@ -114,6 +115,40 @@ public class CustomParticlesHelper {
         EntityPosParticle particleRight = HamonGliderChargingParticle.createCustomParticle((ClientWorld) entity.level, entity, Hand.OFF_HAND);
         addParticle(particleLeft, particleLeft.getPos(), false, false);
         addParticle(particleRight, particleRight.getPos(), false, false);
+    }
+    
+    public static void createHamonSparkParticles(@Nullable Entity entityToFollow, Vector3d pos, int particlesCount) {
+        createHamonSparkParticles(entityToFollow, pos.x, pos.y, pos.z, particlesCount);
+    }
+    
+    private static final Random RANDOM = new Random();
+    private static final double SPARK_PARTICLE_DIST = 0.05;
+    private static final double SPARK_PARTICLE_SPEED = 0.25;
+    public static void createHamonSparkParticles(@Nullable Entity entityToFollow, double x, double y, double z, int particlesCount) {
+        Minecraft mc = Minecraft.getInstance();
+        IParticleData particleData = ModParticles.HAMON_SPARK.get();
+        for (int i = 0; i < particlesCount; ++i) {
+            double xOffset = RANDOM.nextGaussian() * SPARK_PARTICLE_DIST;
+            double yOffset = RANDOM.nextGaussian() * SPARK_PARTICLE_DIST;
+            double zOffset = RANDOM.nextGaussian() * SPARK_PARTICLE_DIST;
+            double xSpeed = RANDOM.nextGaussian() * SPARK_PARTICLE_SPEED;
+            double ySpeed = RANDOM.nextGaussian() * SPARK_PARTICLE_SPEED;
+            double zSpeed = RANDOM.nextGaussian() * SPARK_PARTICLE_SPEED;
+            
+            if (entityToFollow == null) {
+                mc.level.addParticle(particleData, false, x + xOffset, y + yOffset, z + zOffset, xSpeed, ySpeed, zSpeed);
+            }
+            else {
+                Particle particle = new HamonSparkEntityOffsetParticle(mc.level, entityToFollow, 
+                        x, y, z, xSpeed, ySpeed, zSpeed, particleData.getType());
+                CustomParticlesHelper.addParticle(particle, new Vector3d(x, y, z), particleData.getType().getOverrideLimiter(), false);
+            }
+        }
+    }
+    
+    @SuppressWarnings("resource")
+    public static void createParticlesEmitter(Entity entity, IParticleData type, int ticks) {
+        Minecraft.getInstance().particleEngine.createTrackingEmitter(entity, type, ticks);
     }
     
     public static boolean addParticle(Particle particle, Vector3d particlePos, boolean overrideLimiter, boolean alwaysVisible) {

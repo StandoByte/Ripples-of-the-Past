@@ -12,7 +12,6 @@ import com.github.standobyte.jojo.client.render.world.shader.CustomShaderGroup;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
 import com.github.standobyte.jojo.client.ui.screen.mob.RockPaperScissorsScreen;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
-import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.general.MathUtil.Matrix4ZYX;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
@@ -45,8 +44,6 @@ import net.minecraft.client.shader.ShaderGroup;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
-import net.minecraft.network.play.server.SSpawnParticlePacket;
-import net.minecraft.particles.IParticleData;
 import net.minecraft.util.ColorHelper;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
@@ -322,15 +319,6 @@ public class ClientUtil {
                 SoundCategory.RECORDS, 
                 volume, pitch, false, 0, ISound.AttenuationType.NONE, 
                 0, 0, 0, true));
-    }
-    
-    public static void createHamonSparkParticles(double x, double y, double z, int particlesCount) {
-        Minecraft.getInstance().getConnection().handleParticleEvent(new SSpawnParticlePacket(
-                ModParticles.HAMON_SPARK.get(), false, x, y, z, 0.05F, 0.05F, 0.05F, 0.25F, particlesCount));
-    }
-    
-    public static void createParticlesEmitter(Entity entity, IParticleData type, int ticks) {
-        Minecraft.getInstance().particleEngine.createTrackingEmitter(entity, type, ticks);
     }
     
     public static boolean decreasedParticlesSetting() {

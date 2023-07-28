@@ -23,6 +23,7 @@ public class HamonGliderChargingParticle extends EntityPosParticle {
                 (random.nextDouble() - 0.5), 
                 random.nextDouble() * 0.5, 
                 (random.nextDouble() - 0.5)).scale(0.5);
+        setLifetime(3);
         initPos();
     }
     
@@ -43,7 +44,7 @@ public class HamonGliderChargingParticle extends EntityPosParticle {
     }
     
     @Override
-    protected Vector3d getNextPos(Vector3d entityPos) {
+    protected Vector3d getNextTickPos(Vector3d entityPos) {
         return livingEntity != null ? entityPos.add(randomOffset).add(new Vector3d(
                 livingEntity.getBbWidth() * 0.6 * (livingEntity.getMainArm() == (hand == Hand.MAIN_HAND ? HandSide.RIGHT : HandSide.LEFT) ? -1 : 1), 
                 livingEntity.getBbHeight(), 

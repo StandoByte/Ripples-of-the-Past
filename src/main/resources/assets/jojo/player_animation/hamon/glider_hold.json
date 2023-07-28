@@ -14,30 +14,6 @@
                 "tick":0,
                 "easing": "EASEINOUTQUAD",
                 "turn": 0,
-                "head":{
-                    "y":-0.0
-                }
-            },
-            {
-                "tick":0,
-                "easing": "EASEINOUTQUAD",
-                "turn": 0,
-                "head":{
-                    "z":-0.0
-                }
-            },
-            {
-                "tick":0,
-                "easing": "EASEINOUTQUAD",
-                "turn": 0,
-                "head":{
-                    "x":-0.0
-                }
-            },
-            {
-                "tick":0,
-                "easing": "EASEINOUTQUAD",
-                "turn": 0,
                 "torso":{
                     "y":0.0
                 }

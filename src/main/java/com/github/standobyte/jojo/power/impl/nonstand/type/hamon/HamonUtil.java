@@ -15,9 +15,10 @@ import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
-import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.entity.CrimsonBubbleEntity;
@@ -359,8 +360,9 @@ public class HamonUtil {
             }
             
             if (sparkPos != null) {
-                PacketManager.sendToClientsTrackingAndSelf(TrHamonParticlesPacket
-                        .shortSpark(entity.getId(), sparkPos, Math.max((int) (dmgAmount * 0.5F), 1), Math.min(dmgAmount * 0.25F, 1)), entity);
+                PacketManager.sendToClientsTrackingAndSelf(TrHamonParticlesPacket.shortSpark(
+                        entity.getId(), sparkPos, false, 
+                        Math.max((int) (dmgAmount * 0.5F), 1), Math.min(dmgAmount * 0.25F, 1)), entity);
             }
             return true;
         }
@@ -416,7 +418,6 @@ public class HamonUtil {
                         }
 
                         if (player.level.isClientSide()) {
-                            Vector3d pos = player.position();
                             boolean wasWalking = player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).map(cap -> {
                                 if (!cap.isWalkingOnLiquid) {
                                     cap.isWalkingOnLiquid = true;
@@ -425,12 +426,14 @@ public class HamonUtil {
                                 return true;
                             }).orElse(false);
                             if (!wasWalking) {
-                                HamonUtil.emitHamonSparkParticles(world, player, pos.x, pos.y, pos.z, 0.05F);
-                                ClientUtil.createHamonSparkParticles(pos.x, pos.y, pos.z, 10);
+                                HamonUtil.emitHamonSparkParticles(world, player, player.position(), 0.05F);
+                                CustomParticlesHelper.createHamonSparkParticles(null, player.position(), 10);
                             }
                             else {
-                                HamonSparksLoopSound.playSparkSound(player, pos, 1.0F);
-                                ClientUtil.createHamonSparkParticles(pos.x, pos.y, pos.z, 1);
+                                HamonSparksLoopSound.playSparkSound(player, player.position(), 1.0F);
+                                CustomParticlesHelper.createHamonSparkParticles(player, 
+                                        player.getRandomX(0.5), player.getY(Math.random() * 0.1), player.getRandomZ(0.5), 
+                                        1);
                             }
                         }
                         else {
@@ -459,7 +462,7 @@ public class HamonUtil {
                 ((ServerWorld) world).sendParticles(ModParticles.HAMON_SPARK.get(), x, y, z, count, 0.05, 0.05, 0.05, 0.25);
             }
             else if (clientHandled == ClientUtil.getClientPlayer()) {
-                ClientUtil.createHamonSparkParticles(x, y, z, count);
+                CustomParticlesHelper.createHamonSparkParticles(null, x, y, z, count);
             }
             if (hamonSound != null) {
                 float volume = Math.min(intensity * 2, 1.0F);
@@ -498,7 +501,7 @@ public class HamonUtil {
             else {
                 float volume = intensity * 2 * soundVolumeMultiplier;
                 for (int i = (int) (intensity * 9.5F); i >= 0; i--) {
-                    ClientUtil.createParticlesEmitter(entity, hamonParticle, Math.max(1, (int) (intensity * 9.5) - i));
+                    CustomParticlesHelper.createParticlesEmitter(entity, hamonParticle, Math.max(1, (int) (intensity * 9.5) - i));
                     if (i % 2 == 0 && i < 4) {
                         ClientTickingSoundsHelper.playHamonSparksSound(entity, Math.min(volume, 1.0F), 1.0F + (world.random.nextFloat() - 0.5F) * 0.15F);
                     }

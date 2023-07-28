@@ -4,7 +4,6 @@ import com.github.standobyte.jojo.client.particle.CDRestorationParticle;
 import com.github.standobyte.jojo.util.general.MathUtil;
 
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
@@ -24,7 +23,7 @@ public class CDRestorationHandItemParticle extends EntityPosParticle {
     }
     
     @Override
-    protected Vector3d getNextPos(Vector3d entityPos) {
+    protected Vector3d getNextTickPos(Vector3d entityPos) {
         return livingEntity != null ? entityPos.add(randomOffset).add(new Vector3d(
                 livingEntity.getBbWidth() * 0.6 * (livingEntity.getMainArm() == (hand == Hand.MAIN_HAND ? HandSide.RIGHT : HandSide.LEFT) ? -1 : 1), 
                 livingEntity.getBbHeight() * (entity.isShiftKeyDown() ? 0.25 : 0.45), 

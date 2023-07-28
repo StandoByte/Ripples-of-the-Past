@@ -21,9 +21,9 @@ public abstract class EntityPosParticle extends SpriteTexturedParticle {
     }
     
     protected final void initPos() {
-        Vector3d pos = getNextPos(entity.getPosition(2.0F));
+        Vector3d pos = getNextTickPos(entity.getPosition(2.0F));
         this.setPos(pos.x, pos.y, pos.z);
-        Vector3d posPrev = getNextPos(entity.getPosition(1.0F));
+        Vector3d posPrev = getNextTickPos(entity.getPosition(1.0F));
         this.xo = posPrev.x;
         this.yo = posPrev.y;
         this.zo = posPrev.z;
@@ -40,7 +40,7 @@ public abstract class EntityPosParticle extends SpriteTexturedParticle {
             remove();
             return;
         }
-        Vector3d nextPos = getNextPos(entity.position());
+        Vector3d nextPos = getNextTickPos(entity.position());
         if (nextPos == null) {
             remove();
             return;
@@ -73,5 +73,5 @@ public abstract class EntityPosParticle extends SpriteTexturedParticle {
         return new Vector3d(x, y, z);
     }
     
-    protected abstract Vector3d getNextPos(Vector3d entityPos);
+    protected abstract Vector3d getNextTickPos(Vector3d entityPos);
 }

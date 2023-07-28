@@ -155,7 +155,7 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
                 Vector3d soundPos = clSoundPos();
                 if (isBeingCharged || random.nextFloat() < energyRatio * 0.2F) {
                     HamonSparksLoopSound.playSparkSound(this, soundPos, energyRatio);
-                    ClientUtil.createHamonSparkParticles(this.getRandomX(0.5F), this.getY(1.0F), this.getRandomZ(0.5F), 
+                    CustomParticlesHelper.createHamonSparkParticles(this, this.getRandomX(0.5F), this.getY(1.0F), this.getRandomZ(0.5F), 
                             MathUtil.fractionRandomInc(energyRatio * 2));
                 }
             }
