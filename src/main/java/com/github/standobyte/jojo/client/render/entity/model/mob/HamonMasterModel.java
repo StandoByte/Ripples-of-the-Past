@@ -146,7 +146,6 @@ public class HamonMasterModel extends BipedModel<HamonMasterEntity> {
     
     public void initPose() {
         if (!animInit) {
-            // FIXME !!! (hamon master model) the outer layer still has leftArm and leftLeg bendable cuboids
             sittingAnim = PlayerAnimationHandler.getPlayerAnimator().initHamonMasterPose(this);
             animInit = true;
         }

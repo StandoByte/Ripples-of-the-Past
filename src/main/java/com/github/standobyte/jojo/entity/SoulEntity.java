@@ -144,10 +144,8 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
 
     @Override
     public boolean isControlledByLocalInstance() {
-        if (super.isControlledByLocalInstance()) {
-            return true;
-        }
-        return level.isClientSide() && originEntity instanceof PlayerEntity && ((PlayerEntity) originEntity).isLocalPlayer();
+        return super.isControlledByLocalInstance() || 
+                level.isClientSide() && originEntity instanceof PlayerEntity && ((PlayerEntity) originEntity).isLocalPlayer();
     }
 
     private void addCloudParticles() {

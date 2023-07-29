@@ -467,7 +467,7 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
 
     @Override
     public boolean isPickable() {
-        return true;
+        return !level.isClientSide() || ClientUtil.getClientPlayer().getRootVehicle() != this.getRootVehicle();
     }
 
     private void setIsFlying(boolean isGliding) {

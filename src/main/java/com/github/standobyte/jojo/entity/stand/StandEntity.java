@@ -1987,8 +1987,10 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     
     @Override
     public boolean isPickable() {
-        return super.isPickable() && 
-                !(level.isClientSide() && (ClientUtil.getClientPlayer().is(getUser()) || !ClientUtil.canSeeStands()));
+        if (level.isClientSide()) {
+            return !ClientUtil.getClientPlayer().is(getUser()) && ClientUtil.canSeeStands();
+        }
+        return super.isPickable();
     }
 
     @Override

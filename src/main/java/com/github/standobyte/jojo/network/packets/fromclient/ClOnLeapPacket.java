@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
@@ -37,7 +38,8 @@ public class ClOnLeapPacket {
 
         @Override
         public ClOnLeapPacket decode(PacketBuffer buf) {
-            return new ClOnLeapPacket(buf.readEnum(PowerClassification.class));
+            PowerClassification power = buf.readEnum(PowerClassification.class);
+            return new ClOnLeapPacket(power);
         }
 
         @Override
@@ -63,6 +65,11 @@ public class ClOnLeapPacket {
                                 SoundType soundType = blockState.getSoundType(world, posOn, player);
                                 player.playSound(soundType.getBreakSound(), soundType.getVolume() * 0.25F * leapStrength, soundType.getPitch() * 0.75F);
                             }
+                        }
+                        
+                        Entity vehicle = player.getVehicle();
+                        if (vehicle != null && vehicle.getControllingPassenger() != player) {
+                            MCUtil.leap(vehicle, leapStrength);
                         }
                     }
                 }

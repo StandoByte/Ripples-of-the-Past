@@ -726,9 +726,11 @@ public class InputHandler {
                                     input.shiftKeyDown = false;
                                 }
                                 input.jumping = false;
+                                
+                                Entity entity = playerVehicle != null ? playerVehicle : mc.player;
                                 PacketManager.sendToServer(new ClOnLeapPacket(power.getPowerClassification()));
                                 if (groundLeap) {
-                                    leap(playerVehicle != null ? playerVehicle : mc.player, leapStrength);
+                                    MCUtil.leap(entity, leapStrength);
                                 }
                                 else if (wallLeap) {
                                     wallLeap(mc.player, input, leapStrength);
@@ -806,13 +808,6 @@ public class InputHandler {
             return true;
         }
         return false;
-    }
-    
-    private void leap(Entity player, float strength) {
-        player.setOnGround(false);
-        player.hasImpulse = true;
-        Vector3d leap = Vector3d.directionFromRotation(Math.min(player.xRot, -30F), player.yRot).scale(strength);
-        player.setDeltaMovement(leap.x, leap.y * 0.5, leap.z);
     }
     
     private void wallLeap(ClientPlayerEntity player, MovementInput input, float strength) {
