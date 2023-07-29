@@ -909,17 +909,6 @@ public class HamonData extends TypeSpecificData {
             else {
                 updateBbHeight(user);
             }
-            
-//            user.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-//                if (isMeditating) {
-//                    cap.lockYRot(user.yBodyRot);
-//                    cap.lockXRot(0);
-//                }
-//                else {
-//                    cap.clearLockedYRot();
-//                    cap.clearLockedXRot();
-//                }
-//            });
         }
     }
     

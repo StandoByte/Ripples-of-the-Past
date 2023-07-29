@@ -164,6 +164,7 @@ public class CommonReflection {
     }
     
     
+    
     private static final Field LIVING_ENTITY_ATTACK_STRENGTH_TICKER = ObfuscationReflectionHelper.findField(LivingEntity.class, "field_184617_aD");
     public static int getAttackStrengthTicker(LivingEntity entity) {
         return ReflectionUtil.getFieldValue(LIVING_ENTITY_ATTACK_STRENGTH_TICKER, entity);

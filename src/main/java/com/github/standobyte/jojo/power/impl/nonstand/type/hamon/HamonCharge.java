@@ -50,8 +50,10 @@ public class HamonCharge {
             List<LivingEntity> entities = world.getEntitiesOfClass(LivingEntity.class, aabb, EntityPredicates.NO_CREATIVE_OR_SPECTATOR);
             for (LivingEntity target : entities) {
                 if (!target.is(chargedEntity) && target.isAlive() && !target.getUUID().equals(hamonUserId)) {
-                    if (DamageUtil.dealHamonDamage(target, tickDamage, chargedEntity, null, HamonAttackProperties::noSrcEntityHamonMultiplier)) {
-                        Entity user = getUser((ServerWorld) world);
+                    Entity user = getUser((ServerWorld) world);
+                    
+                    if (DamageUtil.dealHamonDamage(target, tickDamage, chargedEntity, 
+                            chargedEntity instanceof LivingEntity ? null : user, HamonAttackProperties::noSrcEntityHamonMultiplier)) {
                         if (!target.isAlive() && user instanceof ServerPlayerEntity) {
                             ModCriteriaTriggers.HAMON_CHARGE_KILL.get().trigger((ServerPlayerEntity) user, target, chargedEntity, chargedBlock);
                         }
