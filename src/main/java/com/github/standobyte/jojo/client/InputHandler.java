@@ -270,6 +270,7 @@ public class InputHandler {
             }
             
             tickEffects();
+            clickWithBusyHands();
         }
         else {
             pickMouseTarget();
@@ -452,7 +453,18 @@ public class InputHandler {
             event.setSwingHand(false);
         }
     }
-
+    
+    private void clickWithBusyHands() {
+        if (ClientUtil.arePlayerHandsBusy()) {
+            while (mc.options.keyAttack.consumeClick()) {
+                handleMouseClickPowerHud(ActionKey.ATTACK);
+            }
+            while (mc.options.keyUse.consumeClick()) {
+                handleMouseClickPowerHud(ActionKey.ABILITY);
+            }
+        }
+    }
+    
     private <P extends IPower<P, ?>> HudClickResult handleMouseClickPowerHud(ActionKey key) {
         HudClickResult result = new HudClickResult();
         if (mc.player.isSpectator()) {
@@ -548,7 +560,7 @@ public class InputHandler {
     }
     
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public void onClickInput(ClickInputEvent event) {
+    public void fixArrowPunchKick(ClickInputEvent event) {
         if (event.isAttack() && mc.hitResult.getType() == Type.ENTITY) {
             Entity entity = ((EntityRayTraceResult) mc.hitResult).getEntity();
             if (entity == mc.player || entity instanceof ItemProjectileEntity) {

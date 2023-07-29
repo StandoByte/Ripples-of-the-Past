@@ -48,7 +48,6 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -162,7 +161,6 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
             
             for (Entity passenger : getPassengers()) { 
                 if (passenger instanceof ClientPlayerEntity) {
-                    // FIXME !!!!!!!!!! make stands usable when hands are busy
                     ClientReflection.setHandsBusy((ClientPlayerEntity) passenger, true);
                 }
             }
@@ -176,7 +174,8 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
             Vector3d soundPos = clSoundPos();
             SoundType soundType = leavesBlock.getSoundType();
             level.playLocalSound(soundPos.x, soundPos.y, soundPos.z, 
-                    soundType.getBreakSound(), SoundCategory.BLOCKS, (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F, false);
+                    soundType.getBreakSound(), getSoundSource(), 
+                    (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F, false);
             
             addLeavesParticles(200);
         }
@@ -546,6 +545,12 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
                 if (health < prevHealth) {
                     float diff = prevHealth - health;
                     addLeavesParticles(Math.max((int) (diff * 100), 1));
+                    
+                    SoundType soundType = leavesBlock.getSoundType();
+                    Vector3d soundPos = clSoundPos();
+                    level.playLocalSound(soundPos.x, soundPos.y, soundPos.z, 
+                            soundType.getHitSound(), getSoundSource(), 
+                            (soundType.getVolume() + 1.0F) / 8.0F, soundType.getPitch() * 0.8F, false);
                 }
                 prevHealth = health;
             }

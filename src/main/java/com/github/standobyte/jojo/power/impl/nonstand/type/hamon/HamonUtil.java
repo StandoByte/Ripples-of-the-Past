@@ -372,12 +372,10 @@ public class HamonUtil {
     
 
     // FIXME ! (liquid walking) sound & sparks for tracking players
-    // FIXME ! (liquid walking) double shift
     // FIXME ! (liquid walking) energy cost
     // FIXME ! (liquid walking) camera bobbing
     public static boolean liquidWalking(PlayerEntity player) {
         // FIXME fix not being able to walk on liquid on shift (PlayerEntity#maybeBackOffFromEdge (989))
-        // FIXME !!!! (liquid walking) double-shift
         if (player.abilities.flying || player.isInWater()) {
             return false;
         }
