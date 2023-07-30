@@ -46,13 +46,13 @@ public class ModdedDamageSourceWrapper extends DamageSource implements IModdedDa
     }
     
     @Override
-    public ModdedDamageSourceWrapper setPreventsDamagingArmor() {
+    public ModdedDamageSourceWrapper setPreventDamagingArmor() {
         this.preventDamagingArmor = true;
         return this;
     }
     
     @Override
-    public boolean preventDamagingArmor() {
+    public boolean preventsDamagingArmor() {
         return preventDamagingArmor;
     }
     

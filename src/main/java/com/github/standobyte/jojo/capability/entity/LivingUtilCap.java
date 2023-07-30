@@ -117,7 +117,7 @@ public class LivingUtilCap {
     
     public void onHurtThroughInvul(IModdedDamageSource dmgSource) {
         if (hurtThroughInvulTime > 0) {
-            dmgSource.preventDamagingArmor();
+            dmgSource.setPreventDamagingArmor();
         }
         hurtThroughInvulTime = 5;
     }

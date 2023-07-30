@@ -83,13 +83,13 @@ public class StandEntityDamageSource extends EntityDamageSource implements IStan
     }
     
     @Override
-    public StandEntityDamageSource setPreventsDamagingArmor() {
+    public StandEntityDamageSource setPreventDamagingArmor() {
         this.preventDamagingArmor = true;
         return this;
     }
     
     @Override
-    public boolean preventDamagingArmor() {
+    public boolean preventsDamagingArmor() {
         return preventDamagingArmor;
     }
 

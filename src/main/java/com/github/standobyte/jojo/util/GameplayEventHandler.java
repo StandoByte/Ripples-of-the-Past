@@ -509,7 +509,7 @@ public class GameplayEventHandler {
     }
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void onLivingHurt(LivingHurtEvent event) {
+    public static void reduceDamage(LivingHurtEvent event) {
         LivingEntity target = event.getEntityLiving();
         if (!target.canUpdate() && target.getCapability(EntityUtilCapProvider.CAPABILITY)
                 .map(cap -> cap.wasStoppedInTime()).orElse(false)) {
@@ -556,7 +556,7 @@ public class GameplayEventHandler {
     public static void preventDamagingArmor(LivingHurtEvent event) {
         DamageSource dmgSource = event.getSource();
         if (!dmgSource.isBypassArmor() && dmgSource instanceof IModdedDamageSource
-                && ((IModdedDamageSource) dmgSource).preventDamagingArmor()) {
+                && ((IModdedDamageSource) dmgSource).preventsDamagingArmor()) {
             dmgSource.bypassArmor();
             LivingEntity target = event.getEntityLiving();
             event.setAmount(CombatRules.getDamageAfterAbsorb(event.getAmount(), 

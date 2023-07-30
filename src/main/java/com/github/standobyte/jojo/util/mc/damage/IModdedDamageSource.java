@@ -7,6 +7,6 @@ public interface IModdedDamageSource {
     IModdedDamageSource setBypassInvulTicksInEvent();
     boolean bypassInvulTicks();
 
-    IModdedDamageSource setPreventsDamagingArmor();
-    boolean preventDamagingArmor();
+    IModdedDamageSource setPreventDamagingArmor();
+    boolean preventsDamagingArmor();
 }
