@@ -83,7 +83,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 @SuppressWarnings("deprecation")
 public class ActionsOverlayGui extends AbstractGui {
-    public static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/widgets.png");
+    public static final ResourceLocation HOTBAR_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/overlay_hotbar.png");
     public static final ResourceLocation OVERLAY_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/overlay.png");
     private static final ResourceLocation RADIAL_INDICATOR = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/radial_indicator.png");
     
@@ -510,7 +510,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 }
                 
                 // hotbar
-                mc.getTextureManager().bind(WIDGETS_LOCATION);
+                mc.getTextureManager().bind(HOTBAR_LOCATION);
                 renderHotbar(matrixStack, x, y, actions.size(), alpha);
                 
                 // action icons
@@ -640,10 +640,32 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     private void renderHotbar(MatrixStack matrixStack, int x, int y, int slots, float alpha) {
+        if (slots <= 0) return;
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
-        int hotbarLength = 20 * slots + 1;
-        blit(matrixStack, x, y, 0, 0, hotbarLength, 22);
-        blit(matrixStack, x + hotbarLength, y, 181, 0, 1, 22);
+        int slotWidth = 20;
+        
+        // first slot
+        blit(matrixStack, 
+                x, y, 
+                0, 0, 
+                1 + slotWidth, 22);
+        
+        // middle slots
+        int slotsRendered = 1;
+        while (slotsRendered < slots - 1) {
+            int slotsNext = MathHelper.clamp(slots - slotsRendered - 1, 1, 8);
+            blit(matrixStack, 
+                    x + 1 + slotWidth * slotsRendered, y, 
+                    1, 0, 
+                    slotWidth * slotsNext, 22);
+            slotsRendered += slotsNext;
+        }
+        
+        // last slot
+        blit(matrixStack, 
+                x + 1 + slotsRendered * slotWidth, y, 
+                slotWidth * 8 + 1, 0, 
+                slotWidth + 1, 22);
     }
     
     private <P extends IPower<P, ?>> void renderActionIcon(MatrixStack matrixStack, InputHandler.ActionKey actionKey, ActionsModeConfig<P> mode, 
@@ -697,7 +719,7 @@ public class ActionsOverlayGui extends AbstractGui {
             }
             // selected slot
             if (isSelected) {
-                mc.getTextureManager().bind(WIDGETS_LOCATION);
+                mc.getTextureManager().bind(HOTBAR_LOCATION);
                 boolean greenSelection = heldReadyToFire || action.greenSelection(power, result);
                 if (greenSelection) {
                     RenderSystem.color4f(0.0F, 1.0F, 0.0F, hotbarAlpha);
@@ -960,7 +982,7 @@ public class ActionsOverlayGui extends AbstractGui {
             ));
     private void renderModeSelector(MatrixStack matrixStack, ElementPosition position, float partialTick) {
         if (modeSelectorTransparency.shouldRender()) {
-            mc.getTextureManager().bind(WIDGETS_LOCATION);
+            mc.getTextureManager().bind(HOTBAR_LOCATION);
             int x = position.x;
             int y = position.y;
             matrixStack.pushPose();

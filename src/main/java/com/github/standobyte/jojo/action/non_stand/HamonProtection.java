@@ -1,8 +1,8 @@
 package com.github.standobyte.jojo.action.non_stand;
 
-public class HamonBodyProtection extends HamonAction {
+public class HamonProtection extends HamonAction {
     
-    public HamonBodyProtection(HamonAction.Builder builder) {
+    public HamonProtection(HamonAction.Builder builder) {
         super(builder);
     }
     

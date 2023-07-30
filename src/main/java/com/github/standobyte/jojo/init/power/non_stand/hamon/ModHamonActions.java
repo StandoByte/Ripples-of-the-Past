@@ -4,7 +4,7 @@ import static com.github.standobyte.jojo.init.power.ModCommonRegisters.ACTIONS;
 import static com.github.standobyte.jojo.init.power.ModCommonRegisters.NON_STAND_POWERS;
 
 import com.github.standobyte.jojo.action.non_stand.HamonAction;
-import com.github.standobyte.jojo.action.non_stand.HamonBodyProtection;
+import com.github.standobyte.jojo.action.non_stand.HamonProtection;
 import com.github.standobyte.jojo.action.non_stand.HamonBreath;
 import com.github.standobyte.jojo.action.non_stand.HamonBubbleBarrier;
 import com.github.standobyte.jojo.action.non_stand.HamonBubbleCutter;
@@ -104,9 +104,12 @@ public class ModHamonActions {
                     .shout(ModHamonSkills.CHARACTER_JOSEPH, ModSounds.JOSEPH_BARRIER)));
     
     public static final RegistryObject<HamonAction> HAMON_PROTECTION = ACTIONS.register("hamon_protection", 
-            () -> new HamonBodyProtection(new HamonAction.Builder().holdEnergyCost(25)));
+            () -> new HamonProtection(new HamonAction.Builder().holdEnergyCost(25)));
     
     public static final RegistryObject<HamonAction> HAMON_HYPNOSIS = ACTIONS.register("hamon_hypnosis", 
+            () -> new HamonHypnosis(new HamonAction.Builder().holdToFire(60, false).holdEnergyCost(15)));
+    
+    public static final RegistryObject<HamonAction> HAMON_SHOCK = ACTIONS.register("hamon_shock", 
             () -> new HamonHypnosis(new HamonAction.Builder().holdToFire(60, false).holdEnergyCost(15)));
     
     
@@ -120,17 +123,20 @@ public class ModHamonActions {
                             HAMON_SUNLIGHT_YELLOW_OVERDRIVE.get(), 
                             HAMON_PLANT_INFUSION.get(), 
                             HAMON_ZOOM_PUNCH.get(), 
-                            HAMON_TURQUOISE_BLUE_OVERDRIVE.get()}, 
+                            HAMON_TURQUOISE_BLUE_OVERDRIVE.get()
+                            }, 
                     new HamonAction[] {
                             HAMON_BREATH.get(), 
                             HAMON_HEALING.get(), 
                             HAMON_SPEED_BOOST.get(), 
                             HAMON_WALL_CLIMBING.get(), 
-                            HAMON_DETECTOR.get(), 
                             HAMON_LIFE_MAGNETISM.get(), 
                             HAMON_PROJECTILE_SHIELD.get(), 
                             HAMON_PROTECTION.get(), 
-                            HAMON_HYPNOSIS.get()}
+                            HAMON_DETECTOR.get(), 
+                            HAMON_HYPNOSIS.get(), 
+                            HAMON_SHOCK.get()
+                            }
                     ));
     
     

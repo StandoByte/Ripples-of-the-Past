@@ -36,7 +36,7 @@ public class HamonGeneralSkillsTabGui extends HamonSkillsTabGui {
         map.put(HamonStat.CONTROL, new BaseHamonSkillTree[] {
                 BaseHamonSkillTree.LIFE_ENERGY,
                 BaseHamonSkillTree.ATTRACTANT_REPELLENT,
-                BaseHamonSkillTree.BODY_WATER_VIBRATION
+                BaseHamonSkillTree.BODY_MANIPULATION
         });
     });
     

@@ -519,9 +519,10 @@ public class GameplayEventHandler {
     }
     
     @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void blockDamageWithStand(LivingHurtEvent event) {
+    public static void blockDamage(LivingHurtEvent event) {
         DamageSource dmgSource = event.getSource();
         LivingEntity target = event.getEntityLiving();
+        // block explosion with stand
         if (dmgSource.isExplosion()) {
             target.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(util -> {
                 Explosion explosion = util.getSourceExplosion(dmgSource);
@@ -540,6 +541,7 @@ public class GameplayEventHandler {
                 }
             });
         }
+        // block physical damage with stand
         else {
             standBlockUserAttack(dmgSource, target, stand -> {
                 if (stand.isInvulnerableTo(dmgSource)) {
@@ -550,6 +552,8 @@ public class GameplayEventHandler {
                 }
             });
         }
+        
+        
     }
     
     @SubscribeEvent(priority = EventPriority.LOWEST)

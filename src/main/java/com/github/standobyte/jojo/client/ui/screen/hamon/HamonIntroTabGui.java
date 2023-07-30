@@ -191,12 +191,12 @@ public class HamonIntroTabGui extends HamonTabGui {
     private void renderHamonBreathIcon(MatrixStack matrixStack, int x, int y) {
         minecraft.getTextureManager().bind(ActionsOverlayGui.OVERLAY_LOCATION);
         blit(matrixStack, x - 15, y - 1, 236, 128, 9, 16);
-        minecraft.getTextureManager().bind(ActionsOverlayGui.WIDGETS_LOCATION);
+        minecraft.getTextureManager().bind(ActionsOverlayGui.HOTBAR_LOCATION);
         blit(matrixStack, x - 3, y - 3, 0, 0, 22, 22);
         TextureAtlasSprite textureAtlasSprite = CustomResources.getActionSprites().getSprite(ModHamonActions.HAMON_BREATH.get().getRegistryName());
         minecraft.getTextureManager().bind(textureAtlasSprite.atlas().location());
         blit(matrixStack, x, y, 0, 16, 16, textureAtlasSprite);
-        minecraft.getTextureManager().bind(ActionsOverlayGui.WIDGETS_LOCATION);
+        minecraft.getTextureManager().bind(ActionsOverlayGui.HOTBAR_LOCATION);
         blit(matrixStack, x - 4, y - 4, 0, 22, 24, 22);
     }
     

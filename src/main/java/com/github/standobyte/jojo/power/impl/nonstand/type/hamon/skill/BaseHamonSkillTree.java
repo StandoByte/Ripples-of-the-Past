@@ -36,10 +36,10 @@ public class BaseHamonSkillTree {
             .addSkill(ModHamonSkills.LIFE_MAGNETISM).addSkill(ModHamonSkills.PROJECTILE_SHIELD).endTier()
             .addSkill(ModHamonSkills.PROTECTION).build("attractant_repellent");
     
-    public static final BaseHamonSkillTree BODY_WATER_VIBRATION = new BaseHamonSkillTree.Builder()
+    public static final BaseHamonSkillTree BODY_MANIPULATION = new BaseHamonSkillTree.Builder()
             .addSkill(ModHamonSkills.DETECTOR).endTier()
             .addSkill(ModHamonSkills.HYPNOSIS).addSkill(ModHamonSkills.HAMON_SHOCK).endTier()
-            .addSkill(ModHamonSkills.HAMON_SPREAD).build("body_water_vibration");
+            .addSkill(ModHamonSkills.HAMON_SPREAD).build("body_manipulation");
     
     protected List<List<? extends AbstractHamonSkill>> tiers;
     private final String name;

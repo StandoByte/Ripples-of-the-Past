@@ -717,13 +717,13 @@
   "hamon.skills.flexibility": "Flexibility",
   "hamon.skills.life": "Life Energy",
   "hamon.skills.attractant_repellent": "Attractant & Repellent",
-  "hamon.skills.body_water_vibration": "Body Water Vibration",
+  "hamon.skills.body_manipulation": "Body Manipulation",
   "hamon.skills.overdrive.desc": "The most basic application of Hamon. The user channels the Hamon energy through their fist, and deals damage either with a direct punch, or by transmitting the energy through a solid or liquid material.",
   "hamon.skills.infusion.desc": "Various materials can be imbued with Hamon energy. Living organisms can retain the energy for a longer time.",
   "hamon.skills.flexibility.desc": "Hamon can help its user exceed the limits of their movement capabilities and attack range.",
   "hamon.skills.life.desc": "Hamon energy can speed up the regeneration of a living body.",
   "hamon.skills.attractant_repellent.desc": "Attractant and repellent Hamon are two opposite types of Hamon energy, each having their special use cases.",
-  "hamon.skills.body_water_vibration.desc": "Hamon energy can affect organisms by vibrating the water inside their bodies.",
+  "hamon.skills.body_manipulation.desc": "Hamon energy can affect organisms by vibrating the water inside their bodies.",
   
   "hamon.skill_type.attack": "Attack",
   "hamon.skill_type.ability": "Ability",
@@ -848,6 +848,7 @@
   "action.jojo.hamon_projectile_shield": "Projectile Shield",
   "action.jojo.hamon_protection": "__________",
   "action.jojo.hamon_hypnosis": "Hypnosis",
+  "action.jojo.hamon_shock": "__________",
   
   "action.jojo.jonathan_overdrive_barrage": "Overdrive Barrage",
   "action.jojo.jonathan_metal_silver_overdrive": "Metal Silver Overdrive",

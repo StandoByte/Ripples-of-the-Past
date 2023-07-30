@@ -141,6 +141,7 @@ public class ModHamonSkills {
     
     public static final RegistryObject<BaseHamonSkill> HAMON_SHOCK = HAMON_SKILLS.register("hamon_shock", 
             () -> new BaseHamonSkill.Builder(HamonStat.CONTROL, RewardType.PASSIVE)
+            .unlocks(ModHamonActions.HAMON_SHOCK)
             .requiredSkill(DETECTOR).build());
     
     public static final RegistryObject<BaseHamonSkill> HAMON_SPREAD = HAMON_SKILLS.register("hamon_spread", 
