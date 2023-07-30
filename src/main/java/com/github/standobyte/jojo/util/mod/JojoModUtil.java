@@ -292,7 +292,7 @@ public class JojoModUtil {
     }
     
     
-
+    
     public static void sayVoiceLine(LivingEntity entity, SoundEvent voiceLine) {
         sayVoiceLine(entity, voiceLine, null);
     }

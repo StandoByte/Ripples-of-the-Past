@@ -33,12 +33,13 @@ public class LivingUtilCap {
     private float futureKnockbackFactor;
     @Nullable private Explosion latestExplosion;
     
-    private float receivedHamonDamage = 0;
-    private final List<AfterimageEntity> afterimages = new ArrayList<>();
     public boolean hasUsedTimeStopToday = false;
     private int noLerpTicks = 0;
     private int hurtTimeSaved;
     
+    private float receivedHamonDamage = 0;
+    
+    private final List<AfterimageEntity> afterimages = new ArrayList<>();
     private boolean usedZoomPunch = false;
     
     public LivingUtilCap(LivingEntity entity) {

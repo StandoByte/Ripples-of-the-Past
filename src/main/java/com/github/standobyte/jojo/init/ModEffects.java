@@ -6,6 +6,7 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.potion.FreezeEffect;
 import com.github.standobyte.jojo.potion.HamonSpreadEffect;
+import com.github.standobyte.jojo.potion.HypnosisEffect;
 import com.github.standobyte.jojo.potion.ImmobilizeEffect;
 import com.github.standobyte.jojo.potion.ResolveEffect;
 import com.github.standobyte.jojo.potion.StaminaRegenEffect;
@@ -55,6 +56,9 @@ public class ModEffects {
     public static final RegistryObject<ImmobilizeEffect> IMMOBILIZE = EFFECTS.register("immobilize", 
             () -> new ImmobilizeEffect(0x404040));
     
+    public static final RegistryObject<HypnosisEffect> HYPNOSIS = EFFECTS.register("hypnosis", 
+            () -> new HypnosisEffect(0x998CBC));
+    
     public static final RegistryObject<UncurableEffect> CHEAT_DEATH = EFFECTS.register("cheat_death", 
             () -> new UncurableEffect(EffectType.BENEFICIAL, 0xEADB84));
     
@@ -91,7 +95,15 @@ public class ModEffects {
         VampirismPowerType.initVampiricEffects();
         StandEntity.addSharedEffectsFromUser(TIME_STOP.get(), Effects.BLINDNESS);
         StandEntity.addSharedEffectsFromStand(STUN.get(), IMMOBILIZE.get());
-        TRACKED_EFFECTS = ImmutableSet.of(RESOLVE.get(), TIME_STOP.get(), IMMOBILIZE.get(), STUN.get(), HAMON_SPREAD.get(), FULL_INVISIBILITY.get(), VAMPIRE_SUN_BURN.get());
+        TRACKED_EFFECTS = ImmutableSet.of(
+                RESOLVE.get(), 
+                TIME_STOP.get(), 
+                IMMOBILIZE.get(), 
+                STUN.get(), 
+                HYPNOSIS.get(), 
+                HAMON_SPREAD.get(), 
+                FULL_INVISIBILITY.get(), 
+                VAMPIRE_SUN_BURN.get());
     }
     
     public static boolean isEffectTracked(Effect effect) {

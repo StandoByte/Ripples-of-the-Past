@@ -72,6 +72,7 @@ public class HamonOrganismInfusion extends HamonAction {
         return ActionConditionResult.POSITIVE;
     }
     
+    @Override
     public TargetRequirement getTargetRequirement() {
         return TargetRequirement.ANY;
     }

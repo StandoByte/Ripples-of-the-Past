@@ -790,10 +790,10 @@ public class GameplayEventHandler {
     }
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void onPotionRemoved(PotionRemoveEvent event) {
+    public static void cancelPotionRemoval(PotionRemoveEvent event) {
         VampirismPowerType.cancelVampiricEffectRemoval(event);
     }
-
+    
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void trackedPotionRemoved(PotionRemoveEvent event) {
         EntityStandType.removeEffectSharedWithStand(event.getEntityLiving(), event.getPotion());

@@ -4,6 +4,7 @@ import static com.github.standobyte.jojo.init.power.ModCommonRegisters.ACTIONS;
 import static com.github.standobyte.jojo.init.power.ModCommonRegisters.NON_STAND_POWERS;
 
 import com.github.standobyte.jojo.action.non_stand.HamonAction;
+import com.github.standobyte.jojo.action.non_stand.HamonBodyProtection;
 import com.github.standobyte.jojo.action.non_stand.HamonBreath;
 import com.github.standobyte.jojo.action.non_stand.HamonBubbleBarrier;
 import com.github.standobyte.jojo.action.non_stand.HamonBubbleCutter;
@@ -11,6 +12,7 @@ import com.github.standobyte.jojo.action.non_stand.HamonBubbleLauncher;
 import com.github.standobyte.jojo.action.non_stand.HamonCutter;
 import com.github.standobyte.jojo.action.non_stand.HamonDetector;
 import com.github.standobyte.jojo.action.non_stand.HamonHealing;
+import com.github.standobyte.jojo.action.non_stand.HamonHypnosis;
 import com.github.standobyte.jojo.action.non_stand.HamonLifeMagnetism;
 import com.github.standobyte.jojo.action.non_stand.HamonMetalSilverOverdrive;
 import com.github.standobyte.jojo.action.non_stand.HamonOrganismInfusion;
@@ -18,7 +20,6 @@ import com.github.standobyte.jojo.action.non_stand.HamonOverdrive;
 import com.github.standobyte.jojo.action.non_stand.HamonOverdriveBarrage;
 import com.github.standobyte.jojo.action.non_stand.HamonPlantInfusion;
 import com.github.standobyte.jojo.action.non_stand.HamonProjectileShield;
-import com.github.standobyte.jojo.action.non_stand.HamonRepellingOverdrive;
 import com.github.standobyte.jojo.action.non_stand.HamonScarletOverdrive;
 import com.github.standobyte.jojo.action.non_stand.HamonSendoOverdrive;
 import com.github.standobyte.jojo.action.non_stand.HamonSendoWaveKick;
@@ -103,10 +104,10 @@ public class ModHamonActions {
                     .shout(ModHamonSkills.CHARACTER_JOSEPH, ModSounds.JOSEPH_BARRIER)));
     
     public static final RegistryObject<HamonAction> HAMON_PROTECTION = ACTIONS.register("hamon_protection", 
-            () -> new HamonRepellingOverdrive(new HamonAction.Builder().energyCost(1000F)));
+            () -> new HamonBodyProtection(new HamonAction.Builder().holdEnergyCost(25)));
     
     public static final RegistryObject<HamonAction> HAMON_HYPNOSIS = ACTIONS.register("hamon_hypnosis", 
-            () -> new HamonRepellingOverdrive(new HamonAction.Builder().energyCost(1000F)));
+            () -> new HamonHypnosis(new HamonAction.Builder().holdToFire(60, false).holdEnergyCost(15)));
     
     
     

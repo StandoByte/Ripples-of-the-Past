@@ -38,6 +38,7 @@ public class HamonPlantInfusion extends HamonOrganismInfusion {
         return ActionConditionResult.POSITIVE;
     }
     
+    @Override
     public TargetRequirement getTargetRequirement() {
         return TargetRequirement.BLOCK;
     }

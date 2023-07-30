@@ -121,6 +121,7 @@
   "effect.jojo.sun_burn": "Sun Burn",
   "effect.jojo.stun": "Stun",
   "effect.jojo.immobilize": "Immobilize",
+  "effect.jojo.hypnosis": "Hypnosis",
   "effect.jojo.undead_regeneration": "Undead Regeneration",
   "effect.jojo.cheat_death": "Cheat Death",
   "effect.jojo.stamina_regen": "Stamina Regen",
@@ -452,6 +453,7 @@
   "jojo.message.action_condition.living_mob": "Only living entities can be infused",
   "jojo.message.action_condition.living_plant": "Only blocks made of a living matter can be infused",
   "jojo.message.action_condition.leaves": "You need a block of leaves",
+  "jojo.message.action_condition.hypnosis": "This entity cannot be hypnotized",
   "jojo.message.action_condition.potion": "You need to hold a bottle with a liquid",
   
   "multiplayer.disconnect.invalid_stand_movement": "Invalid move Stand packet received",
@@ -844,7 +846,8 @@
   "action.jojo.hamon_detector": "Hamon Life Detector",
   "action.jojo.hamon_life_magnetism": "Life Magnetism",
   "action.jojo.hamon_projectile_shield": "Projectile Shield",
-  "action.jojo.hamon_repelling_overdrive": "Repelling Overdrive",
+  "action.jojo.hamon_protection": "__________",
+  "action.jojo.hamon_hypnosis": "Hypnosis",
   
   "action.jojo.jonathan_overdrive_barrage": "Overdrive Barrage",
   "action.jojo.jonathan_metal_silver_overdrive": "Metal Silver Overdrive",
