@@ -16,7 +16,13 @@ public class HamonProjectileShield extends HamonAction {
     @Override
     public void startedHolding(World world, LivingEntity user, INonStandPower power, ActionTarget target, boolean requirementsFulfilled) {
         if (!world.isClientSide() && requirementsFulfilled) {
-            world.addFreshEntity(new HamonProjectileShieldEntity(world, user));
+            float width = 8;
+            float height = 4;
+            HamonProjectileShieldEntity shield = new HamonProjectileShieldEntity(world, user, width, height);
+            shield.yRot = user.yRot;
+            shield.xRot = user.xRot;
+            shield.updateShieldPos();
+            world.addFreshEntity(shield);
         }
     }
 

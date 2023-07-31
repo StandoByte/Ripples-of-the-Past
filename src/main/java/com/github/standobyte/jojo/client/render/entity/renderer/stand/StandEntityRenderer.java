@@ -64,14 +64,17 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
     }
 
     protected RenderType getRenderType(T entity, ResourceLocation modelTexture) {
-        return renderType(entity, getModel(), modelTexture, isBodyVisible(entity), visibleForSpectator(entity), Minecraft.getInstance().shouldEntityAppearGlowing(entity));
+        return renderType(entity, getModel(), modelTexture, 
+                isBodyVisible(entity), visibleForSpectator(entity), Minecraft.getInstance().shouldEntityAppearGlowing(entity));
     }
 
     public RenderType getRenderType(T entity, M model, ResourceLocation modelTexture) {
-        return renderType(entity, model, modelTexture, isBodyVisible(entity), visibleForSpectator(entity), Minecraft.getInstance().shouldEntityAppearGlowing(entity));
+        return renderType(entity, model, modelTexture, 
+                isBodyVisible(entity), visibleForSpectator(entity), Minecraft.getInstance().shouldEntityAppearGlowing(entity));
     }
 
-    protected RenderType renderType(T entity, M model, ResourceLocation modelTexture, boolean isVisible, boolean isVisibleForSpectator, boolean isGlowing) {
+    protected RenderType renderType(T entity, M model, ResourceLocation modelTexture, 
+            boolean isVisible, boolean isVisibleForSpectator, boolean isGlowing) {
         if (isVisible || isVisibleForSpectator) {
             return model.renderType(modelTexture);
         }

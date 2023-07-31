@@ -100,7 +100,7 @@ public class ModHamonActions {
                     .shout(ModHamonSkills.CHARACTER_ZEPPELI, ModSounds.ZEPPELI_LIFE_MAGNETISM_OVERDRIVE)));
     
     public static final RegistryObject<HamonAction> HAMON_PROJECTILE_SHIELD = ACTIONS.register("hamon_projectile_shield", 
-            () -> new HamonProjectileShield(new HamonAction.Builder().holdEnergyCost(15F).heldWalkSpeed(0.5F)
+            () -> new HamonProjectileShield(new HamonAction.Builder().holdEnergyCost(15F).heldWalkSpeed(0.3F)
                     .shout(ModHamonSkills.CHARACTER_JOSEPH, ModSounds.JOSEPH_BARRIER)));
     
     public static final RegistryObject<HamonAction> HAMON_PROTECTION = ACTIONS.register("hamon_protection", 
