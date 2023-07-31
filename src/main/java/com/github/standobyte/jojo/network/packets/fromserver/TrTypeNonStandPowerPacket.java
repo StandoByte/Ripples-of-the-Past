@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
@@ -11,6 +12,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
@@ -61,6 +63,9 @@ public class TrTypeNonStandPowerPacket {
                             }
                         }
                         power.clear();
+                        if (entity instanceof PlayerEntity) {
+                            PlayerAnimationHandler.getPlayerAnimator().onMeditationSet((PlayerEntity) entity, false);
+                        }
                     }
                     else {
                         power.givePower(msg.powerType);

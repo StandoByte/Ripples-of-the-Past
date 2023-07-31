@@ -42,7 +42,7 @@ public abstract class HamonAction extends NonStandAction {
                 return ActionConditionResult.NEGATIVE;
             }
             return ActionConditionResult.POSITIVE;
-        }).orElseThrow(() -> new IllegalStateException("Non-Hamon users can't have Hamon actions!"));
+        }).orElse(ActionConditionResult.NEGATIVE);
         if (!hamonCheck.isPositive()) {
             return hamonCheck;
         }

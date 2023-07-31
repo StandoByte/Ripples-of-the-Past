@@ -59,7 +59,7 @@ public class HamonSendoOverdriveEntity extends Entity implements IEntityAddition
     private List<Wave> waves = new LinkedList<>();
     private int tickLifeSpan;
     private float damage;
-    public static final float KNOCKBACK_FACTOR = 0.5F;
+    public static final float KNOCKBACK_FACTOR = 0.0F;
 
     public HamonSendoOverdriveEntity(World world, LivingEntity user, Direction.Axis axis) {
         this(ModEntityTypes.SENDO_HAMON_OVERDRIVE.get(), world);

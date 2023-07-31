@@ -4,6 +4,7 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.potion.HypnosisEffect;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -25,7 +26,7 @@ public class HamonHypnosis extends HamonAction {
     
     @Override
     public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, INonStandPower power) {
-        if (!(target.getEntity() instanceof LivingEntity && HypnosisEffect.canBeHypnotized((LivingEntity) target.getEntity(), user))) {
+        if (!(target.getEntity() instanceof LivingEntity && LivingUtilCap.canBeHypnotized((LivingEntity) target.getEntity(), user))) {
             JojoMod.LOGGER.debug("!!");
             conditionMessage("hypnosis");
         }

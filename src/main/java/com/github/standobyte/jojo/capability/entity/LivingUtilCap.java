@@ -3,18 +3,24 @@ package com.github.standobyte.jojo.capability.entity;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.entity.AfterimageEntity;
+import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.passive.TameableEntity;
+import net.minecraft.entity.passive.horse.AbstractHorseEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.Explosion;
@@ -38,6 +44,7 @@ public class LivingUtilCap {
     private int hurtTimeSaved;
     
     private float receivedHamonDamage = 0;
+    @Nullable private UUID preHypnosisOwner = null;
     
     private final List<AfterimageEntity> afterimages = new ArrayList<>();
     private boolean usedZoomPunch = false;
@@ -197,6 +204,71 @@ public class LivingUtilCap {
     
     public boolean isUsingZoomPunch() {
         return usedZoomPunch;
+    }
+    
+    
+    
+    public static boolean canBeHypnotized(LivingEntity entity, LivingEntity hypnotizer) {
+        if (hypnotizer instanceof PlayerEntity) {
+            if (entity instanceof TameableEntity) {
+                TameableEntity tameable = (TameableEntity) entity;
+                return !hypnotizer.getUUID().equals(tameable.getOwnerUUID());
+            }
+            if (entity instanceof AbstractHorseEntity) {
+                AbstractHorseEntity horse = (AbstractHorseEntity) entity;
+                return !hypnotizer.getUUID().equals(horse.getOwnerUUID());
+            }
+        }
+        return false;
+    }
+    
+    public void hypnotizeEntity(LivingEntity hypnotizer, int duration) {
+        if (!entity.level.isClientSide()) {
+            boolean giveEffect = false;
+            
+            if (hypnotizer instanceof PlayerEntity) {
+                PlayerEntity player = (PlayerEntity) hypnotizer;
+                if (entity instanceof TameableEntity) {
+                    TameableEntity tameable = (TameableEntity) entity;
+                    preHypnosisOwner = tameable.getOwnerUUID();
+                    tameable.tame(player);
+                    giveEffect = true;
+                }
+                
+                else if (entity instanceof AbstractHorseEntity) {
+                    AbstractHorseEntity horse = (AbstractHorseEntity) entity;
+                    preHypnosisOwner = horse.getOwnerUUID();
+                    horse.tameWithName(player);
+                    giveEffect = true;
+                }
+                
+                entity.level.broadcastEntityEvent(entity, (byte) 7); // spawn tame heart particles
+            }
+            
+            if (giveEffect) {
+                entity.addEffect(new EffectInstance(ModEffects.HYPNOSIS.get(), duration, 0, false, false, true));
+            }
+        }
+    }
+    
+    public void relieveHypnosis() {
+        if (!entity.level.isClientSide()) {
+            if (entity instanceof TameableEntity) {
+                TameableEntity tameable = (TameableEntity) entity;
+                tameable.setTame(preHypnosisOwner != null);
+                tameable.setOwnerUUID(preHypnosisOwner);
+                tameable.setInSittingPose(false);
+            }
+            
+            else if (entity instanceof AbstractHorseEntity) {
+                AbstractHorseEntity horse = (AbstractHorseEntity) entity;
+                horse.setTamed(preHypnosisOwner != null);
+                horse.setOwnerUUID(preHypnosisOwner);
+                horse.makeMad();
+            }
+            
+            entity.level.broadcastEntityEvent(entity, (byte) 6); // spawn smoke particles
+        }
     }
     
     
