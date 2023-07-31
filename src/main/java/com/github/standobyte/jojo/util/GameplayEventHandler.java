@@ -23,11 +23,10 @@ import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.block.StoneMaskBlock;
 import com.github.standobyte.jojo.block.WoodenCoffinBlock;
 import com.github.standobyte.jojo.capability.chunk.ChunkCapProvider;
-import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCap;
-import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCap;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
@@ -51,7 +50,6 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveEffectStartPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SpawnParticlePacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrHamonLiquidWalkingPacket;
 import com.github.standobyte.jojo.potion.IApplicableEffect;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
@@ -199,7 +197,8 @@ public class GameplayEventHandler {
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent event) {
         PlayerEntity player = event.player;
-        if (event.phase == TickEvent.Phase.START) {
+        switch (event.phase) {
+        case START:
             if (ModEffects.isStunned(player)) {
                 player.setSprinting(false);
             }
@@ -220,18 +219,12 @@ public class GameplayEventHandler {
                 }
             }
             
-            LazyOptional<ClientPlayerUtilCap> liquidWalkingCap = player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY);
+            LazyOptional<PlayerUtilCap> liquidWalkingCap = player.getCapability(PlayerUtilCapProvider.CAPABILITY);
             if (!player.level.isClientSide() || player.isLocalPlayer()) {
                 boolean liquidWalking = HamonUtil.liquidWalking(player);
-                if (player.level.isClientSide()) {
-                    liquidWalkingCap.ifPresent(cap -> {
-                        cap.tickWaterWalking();
-                        cap.setWaterWalking(liquidWalking);
-                    });
-                }
-                else {
-                    PacketManager.sendToClientsTracking(new TrHamonLiquidWalkingPacket(player.getId(), liquidWalking), player);
-                }
+                liquidWalkingCap.ifPresent(cap -> {
+                    cap.setWaterWalking(liquidWalking);
+                });
             }
             liquidWalkingCap.ifPresent(cap -> {
                 cap.tickWaterWalking();
@@ -243,14 +236,17 @@ public class GameplayEventHandler {
             IStandPower.getStandPowerOptional(player).ifPresent(power -> {
                 power.tick();
             }); 
-        }
-        else if (player.level.isClientSide()) {
-            boolean waterWalking = GeneralUtil.orElseFalse(player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY), cap -> cap.isWaterWalking());
-            if (waterWalking) {
-                float bob = player.bob / 0.6F;
-                float f = Math.min(0.1F, MathHelper.sqrt(Entity.getHorizontalDistanceSqr(player.getDeltaMovement())));
-                player.bob = bob + (f - bob) * 0.4F;
+            break;
+        case END:
+            if (player.level.isClientSide()) {
+                boolean waterWalking = GeneralUtil.orElseFalse(player.getCapability(PlayerUtilCapProvider.CAPABILITY), cap -> cap.isWaterWalking());
+                if (waterWalking) {
+                    float bob = player.bob / 0.6F;
+                    float f = Math.min(0.1F, MathHelper.sqrt(Entity.getHorizontalDistanceSqr(player.getDeltaMovement())));
+                    player.bob = bob + (f - bob) * 0.4F;
+                }
             }
+            break;
         }
     }
     

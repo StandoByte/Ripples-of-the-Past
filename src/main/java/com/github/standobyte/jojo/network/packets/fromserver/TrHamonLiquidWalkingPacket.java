@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 
 import java.util.function.Supplier;
 
-import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 
@@ -39,7 +39,7 @@ public class TrHamonLiquidWalkingPacket {
         public void handle(TrHamonLiquidWalkingPacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity entity = ClientUtil.getEntityById(msg.userId);
             if (entity instanceof PlayerEntity) {
-                ((PlayerEntity) entity).getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                entity.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                     cap.setWaterWalking(msg.liquidWalking);
                 });
             }
