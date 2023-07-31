@@ -101,7 +101,7 @@ public abstract class BarsRenderer {
             }
             
             if (type != null) {
-                // FIXME ! (hamon energy) bar render effect
+                // FIXME ! (hamon 2) bar render effect
                 renderBarStart(matrixStack, type, 
                         currentModeType == PowerClassification.NON_STAND, nonStandPower.getType().getColor(), 1, 
                         energy, maxEnergy, 

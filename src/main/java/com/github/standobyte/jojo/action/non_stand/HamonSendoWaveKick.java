@@ -106,7 +106,7 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
             }
         }
         
-        // FIXME ! (hamon) sound & particles
+        // FIXME ! (hamon 2) sound & particles
         else {
         }
         

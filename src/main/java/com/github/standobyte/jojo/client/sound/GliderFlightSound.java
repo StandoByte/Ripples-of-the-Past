@@ -3,27 +3,32 @@ package com.github.standobyte.jojo.client.sound;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.init.ModSounds;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.TickableSound;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
 
 public class GliderFlightSound extends TickableSound {
     private final LeavesGliderEntity glider;
     private int time;
+    private float trueVolume;
     
     public GliderFlightSound(LeavesGliderEntity glider) {
-        super(
-                ModSounds.GLIDER_FLIGHT.get(),  // FIXME !!!!!!!!!!!!!!! is the fucking elytra flight sound in particular bugged? why doesn't the volume decrease with distance??? aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa kill me kill me kill me kill me
-                glider.getSoundSource());
+        super(ModSounds.GLIDER_FLIGHT.get(), SoundCategory.AMBIENT);
         this.glider = glider;
         this.looping = true;
         this.delay = 0;
         this.volume = 0.05F;
     }
-
+    
     private static final float VOLUME_HIGHER_PITCH = 0.8F;
     public void tick() {
         ++time;
         if (glider.isAlive() && (time <= 20 || glider.isFlying())) {
+            volume = trueVolume;
+            
             x = glider.getX();
             y = glider.getY();
             z = glider.getZ();
@@ -48,9 +53,25 @@ public class GliderFlightSound extends TickableSound {
             else {
                 pitch = 1.0F;
             }
+            
+            trueVolume = volume;
+            manualAttenuation();
         } 
         else {
             stop();
+        }
+    }
+    
+    // looping sounds only change position when the sound plays over, the elytra loop sound is too long for that
+    private void manualAttenuation() {
+        if (attenuation == ISound.AttenuationType.LINEAR) {
+            Minecraft mc = Minecraft.getInstance();
+            if (mc.player.getVehicle() != glider) {
+                Vector3d cameraPos = mc.gameRenderer.getMainCamera().getPosition();
+                Vector3d vecTo = new Vector3d(x, y, z).subtract(cameraPos);
+                double maxDist = getSound().getAttenuationDistance();
+                volume *= Math.max(1 - vecTo.length() / maxDist, 0);
+            }
         }
     }
 

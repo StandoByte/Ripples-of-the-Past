@@ -387,7 +387,7 @@ public class HamonUtil {
     
     
     
-    // FIXME ! (liquid walking) energy cost
+    // FIXME !! (hamon) liquid walking energy cost
     // TODO fix not being able to walk on liquid on shift (PlayerEntity#maybeBackOffFromEdge (989))
     public static boolean liquidWalking(PlayerEntity player) {
         World world = player.level;

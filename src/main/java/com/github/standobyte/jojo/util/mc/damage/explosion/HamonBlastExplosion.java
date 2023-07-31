@@ -85,6 +85,8 @@ public class HamonBlastExplosion extends CustomExplosion {
 //        }
     }
     
+    // FIXME !! (hamon) charge nearby living blocks
+    
     @Deprecated // not the actual DamageSource object
     @Override
     public DamageSource getDamageSource() {
