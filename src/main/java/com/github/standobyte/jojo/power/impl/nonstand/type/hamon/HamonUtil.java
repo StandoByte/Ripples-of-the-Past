@@ -14,7 +14,6 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.non_stand.HamonOrganismInfusion;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
-import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
@@ -25,7 +24,6 @@ import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
-import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.entity.CrimsonBubbleEntity;
 import com.github.standobyte.jojo.entity.HamonBlockChargeEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.SnakeMufflerEntity;
@@ -388,11 +386,11 @@ public class HamonUtil {
     }
     
     
-
-    // FIXME ! (liquid walking) sound & sparks for tracking players
+    
     // FIXME ! (liquid walking) energy cost
+    // TODO fix not being able to walk on liquid on shift (PlayerEntity#maybeBackOffFromEdge (989))
     public static boolean liquidWalking(PlayerEntity player) {
-        // TODO fix not being able to walk on liquid on shift (PlayerEntity#maybeBackOffFromEdge (989))
+        World world = player.level;
         if (player.abilities.flying || player.isInWater()) {
             return false;
         }
@@ -406,7 +404,6 @@ public class HamonUtil {
             return power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
                 boolean liquidWalking = hamon.isSkillLearned(ModHamonSkills.LIQUID_WALKING.get());
                 if (liquidWalking) {
-                    World world = player.level;
                     BlockPos blockPos = new BlockPos(player.position().add(0, -0.3, 0));
                     FluidState fluidBelow = world.getBlockState(blockPos).getFluidState();
                     Fluid fluidType = fluidBelow.getType();
@@ -425,22 +422,7 @@ public class HamonUtil {
                             player.fallDistance = 0;
                         }
 
-                        if (player.level.isClientSide()) {
-                            boolean wasWalking = player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).map(cap -> {
-                                return cap.isWalkingOnLiquid;
-                            }).orElse(false);
-                            if (!wasWalking) {
-                                HamonUtil.emitHamonSparkParticles(world, player, player.position(), 0.05F);
-                                CustomParticlesHelper.createHamonSparkParticles(null, player.position(), 10);
-                            }
-                            else {
-                                HamonSparksLoopSound.playSparkSound(player, player.position(), 1.0F);
-                                CustomParticlesHelper.createHamonSparkParticles(player, 
-                                        player.getRandomX(0.5), player.getY(Math.random() * 0.1), player.getRandomZ(0.5), 
-                                        1);
-                            }
-                        }
-                        else {
+                        if (!player.level.isClientSide()) {
                             if (fluidType.is(FluidTags.LAVA) 
                                     && !player.fireImmune() && !EnchantmentHelper.hasFrostWalker(player)) {
                                 player.hurt(DamageSource.HOT_FLOOR, 1.0F);

@@ -75,8 +75,9 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrEnergyPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonAuraColorPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonBreathStabilityPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonCharacterTechniquePacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrHamonEntityChargePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonEnergyTicksPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHamonEntityChargePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHamonLiquidWalkingPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonMeditationPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonParticlesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonStatsPacket;
@@ -174,6 +175,7 @@ public class PacketManager {
         registerMessage(channel, new TrHamonEnergyTicksPacket.Handler(),             Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrHamonEntityChargePacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrHamonAuraColorPacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(channel, new TrHamonLiquidWalkingPacket.Handler(),           Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new HamonUiEffectPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new HamonSyncOnLoadPacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new TrVampirismDataPacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_CLIENT));

@@ -23,6 +23,7 @@ import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.block.StoneMaskBlock;
 import com.github.standobyte.jojo.block.WoodenCoffinBlock;
 import com.github.standobyte.jojo.capability.chunk.ChunkCapProvider;
+import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCap;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
@@ -50,6 +51,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveEffectStartPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SpawnParticlePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHamonLiquidWalkingPacket;
 import com.github.standobyte.jojo.potion.IApplicableEffect;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
@@ -218,10 +220,22 @@ public class GameplayEventHandler {
                 }
             }
             
-            boolean liquidWalking = HamonUtil.liquidWalking(player);
-            if (player.level.isClientSide()) {
-                player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.isWalkingOnLiquid = liquidWalking);
+            LazyOptional<ClientPlayerUtilCap> liquidWalkingCap = player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY);
+            if (!player.level.isClientSide() || player.isLocalPlayer()) {
+                boolean liquidWalking = HamonUtil.liquidWalking(player);
+                if (player.level.isClientSide()) {
+                    liquidWalkingCap.ifPresent(cap -> {
+                        cap.tickWaterWalking();
+                        cap.setWaterWalking(liquidWalking);
+                    });
+                }
+                else {
+                    PacketManager.sendToClientsTracking(new TrHamonLiquidWalkingPacket(player.getId(), liquidWalking), player);
+                }
             }
+            liquidWalkingCap.ifPresent(cap -> {
+                cap.tickWaterWalking();
+            });
             
             INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
                 power.tick();
@@ -230,8 +244,8 @@ public class GameplayEventHandler {
                 power.tick();
             }); 
         }
-        else {
-            boolean waterWalking = GeneralUtil.orElseFalse(player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY), cap -> cap.isWalkingOnLiquid);
+        else if (player.level.isClientSide()) {
+            boolean waterWalking = GeneralUtil.orElseFalse(player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY), cap -> cap.isWaterWalking());
             if (waterWalking) {
                 float bob = player.bob / 0.6F;
                 float f = Math.min(0.1F, MathHelper.sqrt(Entity.getHorizontalDistanceSqr(player.getDeltaMovement())));
