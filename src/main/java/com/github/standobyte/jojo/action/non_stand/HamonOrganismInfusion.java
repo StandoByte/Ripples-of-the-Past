@@ -20,6 +20,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.FlowerPotBlock;
+import net.minecraft.block.SnowyDirtBlock;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -144,7 +145,12 @@ public class HamonOrganismInfusion extends HamonAction {
             Material.EGG
             ).build();
     public static boolean isBlockLiving(BlockState blockState) {
-        return LIVING_MATERIALS.contains(blockState.getMaterial());
+        if (LIVING_MATERIALS.contains(blockState.getMaterial())) {
+            return true;
+        }
+        
+        Block block = blockState.getBlock();
+        return block instanceof SnowyDirtBlock || block.getRegistryName().getPath().contains("mossy");
     }
 
 }

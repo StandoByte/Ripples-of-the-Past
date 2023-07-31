@@ -155,16 +155,16 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
         model.setVisibility(entity, visibilityMode(entity), viewObstructionPrevention.armsOnly);
         float yBodyRotation = MathHelper.rotLerp(partialTick, entity.yBodyRotO, entity.yBodyRot);
         float yHeadRotation = MathHelper.rotLerp(partialTick, entity.yHeadRotO, entity.yHeadRot);
-        float f2 = yHeadRotation - yBodyRotation;
+        float yRotationOffset = yHeadRotation - yBodyRotation;
         if (shouldSit && entity.getVehicle() instanceof LivingEntity) {
             LivingEntity vehicle = (LivingEntity)entity.getVehicle();
             yBodyRotation = MathHelper.rotLerp(partialTick, vehicle.yBodyRotO, vehicle.yBodyRot);
-            float f3 = MathHelper.clamp(MathHelper.wrapDegrees(yHeadRotation - yBodyRotation), -85F, 85F);
-            yBodyRotation = yHeadRotation - f3;
+            float f3 = MathHelper.clamp(MathHelper.wrapDegrees(yRotationOffset - yBodyRotation), -85F, 85F);
+            yBodyRotation = yRotationOffset - f3;
             if (Math.abs(f3) > 50F) {
                 yBodyRotation += f3 * 0.2F;
             }
-            f2 = yHeadRotation - yBodyRotation;
+            yRotationOffset = yRotationOffset - yBodyRotation;
         }
 
         float xRotation = MathHelper.lerp(partialTick, entity.xRotO, entity.xRot);
@@ -202,7 +202,7 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
         }
         
         model.prepareMobModel(entity, walkAnimPos, walkAnimSpeed, partialTick);
-        model.setupAnim(entity, walkAnimPos, walkAnimSpeed, ticks, f2, xRotation);
+        model.setupAnim(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
         entity.getBarrageSwingsHolder().updateSwings(Minecraft.getInstance());
         model.addBarrageSwings(entity);
         RenderType renderType = getRenderType(entity, getTextureLocation(entity));
@@ -215,7 +215,8 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
         
         if (!entity.isSpectator()) {
             for (LayerRenderer<T, M> layerRenderer : this.layers) {
-                layerRenderer.render(matrixStack, buffer, packedLight, entity, walkAnimPos, walkAnimSpeed, partialTick, ticks, f2, xRotation);
+                layerRenderer.render(matrixStack, buffer, packedLight, entity, 
+                        walkAnimPos, walkAnimSpeed, partialTick, ticks, yRotationOffset, xRotation);
             }
         }
 
@@ -236,8 +237,10 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
             ResourceLocation layerModelTexture, M model) {
         getModel().copyPropertiesTo(model);
         model.setVisibility(entity, visibilityMode(entity), viewObstructionPrevention.armsOnly);
+        // TODO get rid of these two method calls?
         model.prepareMobModel(entity, walkAnimSpeed, walkAnimPos, partialTick);
         model.setupAnim(entity, walkAnimSpeed, walkAnimPos, ticks, yRotationOffset, xRotation);
+        
         int packedOverlay = getOverlayCoords(entity, getWhiteOverlayProgress(entity, partialTick));
         model.render(entity, matrixStack, vertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, alpha);
     }

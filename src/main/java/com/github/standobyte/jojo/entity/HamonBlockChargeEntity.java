@@ -29,6 +29,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkHooks;
 
+// TODO hitbox depending on the block hitbox
 public class HamonBlockChargeEntity extends Entity {
     private static final DataParameter<Boolean> CACTUS_EXPLOSION = EntityDataManager.defineId(HamonBlockChargeEntity.class, DataSerializers.BOOLEAN);
     private HamonCharge hamonCharge;
