@@ -29,8 +29,6 @@ public class HypnosisEffect extends UncurableEffect {
     }
     
     public static void hypnotizeEntity(LivingEntity target, LivingEntity hypnotizer, int duration) {
-        duration = 80;
-        
         if (!target.level.isClientSide()) {
             boolean giveEffect = false;
             

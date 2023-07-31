@@ -196,41 +196,48 @@ public class GameplayEventHandler {
     private static final int AFK_PARTICLE_SECONDS = 30;
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent event) {
-        if (event.phase != TickEvent.Phase.START) {
-            return;
-        }
         PlayerEntity player = event.player;
-        if (ModEffects.isStunned(player)) {
-            player.setSprinting(false);
-        }
-        player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-            cap.tick();
-        });
-        if (event.side == LogicalSide.SERVER) {
-            if (player.tickCount % 60 == 0 && !player.isInvisible() && player instanceof ServerPlayerEntity) {
-                ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
-                long timeNotActive = Util.getMillis() - serverPlayer.getLastActionTime();
-                if (timeNotActive > AFK_PARTICLE_SECONDS * 1000 &&
-                        serverPlayer.getCapability(PlayerUtilCapProvider.CAPABILITY).map(cap -> cap.getNoClientInputTimer() > AFK_PARTICLE_SECONDS * 20).orElse(true)) {
-                    MCUtil.sendParticles((ServerWorld) player.level, ModParticles.MENACING.get(), player.getX(), player.getEyeY(), player.getZ(), 
-                            0, MathHelper.cos(player.yRot * MathUtil.DEG_TO_RAD), 0.5F, MathHelper.sin(player.yRot * MathUtil.DEG_TO_RAD), 0.005F, 
-                            SpawnParticlePacket.SpecialContext.AFK);
-                    ModCriteriaTriggers.AFK.get().trigger(serverPlayer);
+        if (event.phase == TickEvent.Phase.START) {
+            if (ModEffects.isStunned(player)) {
+                player.setSprinting(false);
+            }
+            player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                cap.tick();
+            });
+            if (event.side == LogicalSide.SERVER) {
+                if (player.tickCount % 60 == 0 && !player.isInvisible() && player instanceof ServerPlayerEntity) {
+                    ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
+                    long timeNotActive = Util.getMillis() - serverPlayer.getLastActionTime();
+                    if (timeNotActive > AFK_PARTICLE_SECONDS * 1000 &&
+                            serverPlayer.getCapability(PlayerUtilCapProvider.CAPABILITY).map(cap -> cap.getNoClientInputTimer() > AFK_PARTICLE_SECONDS * 20).orElse(true)) {
+                        MCUtil.sendParticles((ServerWorld) player.level, ModParticles.MENACING.get(), player.getX(), player.getEyeY(), player.getZ(), 
+                                0, MathHelper.cos(player.yRot * MathUtil.DEG_TO_RAD), 0.5F, MathHelper.sin(player.yRot * MathUtil.DEG_TO_RAD), 0.005F, 
+                                SpawnParticlePacket.SpecialContext.AFK);
+                        ModCriteriaTriggers.AFK.get().trigger(serverPlayer);
+                    }
                 }
             }
+            
+            boolean liquidWalking = HamonUtil.liquidWalking(player);
+            if (player.level.isClientSide()) {
+                player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.isWalkingOnLiquid = liquidWalking);
+            }
+            
+            INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
+                power.tick();
+            });
+            IStandPower.getStandPowerOptional(player).ifPresent(power -> {
+                power.tick();
+            }); 
         }
-        
-        boolean liquidWalking = HamonUtil.liquidWalking(player);
-        if (player.level.isClientSide() && !liquidWalking) {
-            player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.isWalkingOnLiquid = liquidWalking);
+        else {
+            boolean waterWalking = GeneralUtil.orElseFalse(player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY), cap -> cap.isWalkingOnLiquid);
+            if (waterWalking) {
+                float bob = player.bob / 0.6F;
+                float f = Math.min(0.1F, MathHelper.sqrt(Entity.getHorizontalDistanceSqr(player.getDeltaMovement())));
+                player.bob = bob + (f - bob) * 0.4F;
+            }
         }
-        
-        INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
-            power.tick();
-        });
-        IStandPower.getStandPowerOptional(player).ifPresent(power -> {
-            power.tick();
-        }); 
     }
     
     @SubscribeEvent(priority = EventPriority.HIGH)
@@ -509,7 +516,7 @@ public class GameplayEventHandler {
     }
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void reduceDamage(LivingHurtEvent event) {
+    public static void reduceDamageFromConfig(LivingHurtEvent event) {
         LivingEntity target = event.getEntityLiving();
         if (!target.canUpdate() && target.getCapability(EntityUtilCapProvider.CAPABILITY)
                 .map(cap -> cap.wasStoppedInTime()).orElse(false)) {

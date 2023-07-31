@@ -391,9 +391,8 @@ public class HamonUtil {
 
     // FIXME ! (liquid walking) sound & sparks for tracking players
     // FIXME ! (liquid walking) energy cost
-    // FIXME ! (liquid walking) camera bobbing
     public static boolean liquidWalking(PlayerEntity player) {
-        // FIXME fix not being able to walk on liquid on shift (PlayerEntity#maybeBackOffFromEdge (989))
+        // TODO fix not being able to walk on liquid on shift (PlayerEntity#maybeBackOffFromEdge (989))
         if (player.abilities.flying || player.isInWater()) {
             return false;
         }
@@ -415,13 +414,6 @@ public class HamonUtil {
                             !(fluidType.is(FluidTags.WATER) && player.isOnFire())) {
                         player.setOnGround(true);
                         if (!world.isClientSide() || player.isLocalPlayer()) {
-//                            InputHandler input = InputHandler.getInstance();
-//                            if (input.pressedDoubleShift) {
-//                                input.cancelingLiquidWalking = true;
-//                            }
-//                            if (input.cancelingLiquidWalking) {
-//                                return false;
-//                            }
                             Vector3d deltaMovement = player.getDeltaMovement();
                             if (player.isShiftKeyDown()) {
                                 deltaMovement = new Vector3d(deltaMovement.x, 0, deltaMovement.z);
@@ -435,11 +427,7 @@ public class HamonUtil {
 
                         if (player.level.isClientSide()) {
                             boolean wasWalking = player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).map(cap -> {
-                                if (!cap.isWalkingOnLiquid) {
-                                    cap.isWalkingOnLiquid = true;
-                                    return false;
-                                }
-                                return true;
+                                return cap.isWalkingOnLiquid;
                             }).orElse(false);
                             if (!wasWalking) {
                                 HamonUtil.emitHamonSparkParticles(world, player, player.position(), 0.05F);

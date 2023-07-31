@@ -38,7 +38,7 @@ public class EntityHamonChargeCap {
         
         else if (clHasCharge) {
             HamonSparksLoopSound.playSparkSound(entity, entity.getBoundingBox().getCenter(), 1.0F, true);
-            CustomParticlesHelper.createHamonSparkParticles(entity, entity.getRandomX(0.5), entity.getY(Math.random() * 2), entity.getRandomZ(0.5), 1);
+            CustomParticlesHelper.createHamonSparkParticles(entity, entity.getRandomX(0.5), entity.getY(Math.random()), entity.getRandomZ(0.5), 1);
         }
     }
     
