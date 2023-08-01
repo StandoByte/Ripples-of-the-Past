@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.client.ui.screen.hamon;
 
-import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_HEIGHT;
 import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_THIN_BORDER;
 import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_WIDTH;
 
@@ -65,7 +64,20 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
     }
     
     @Override
+    void drawTab(MatrixStack matrixStack, int windowX, int windowY, boolean isSelected, boolean red) {
+        TmpHamonWipTabGui.makeCompilerShoutAtMeWhenIDeleteThis(); // delete this method overriding
+        super.drawTab(matrixStack, windowX, windowY + HamonScreen.WINDOW_HEIGHT - (index + 1) * 32, isSelected, red);
+    }
+    
+    @Override
+    boolean isMouseOnTabIcon(int windowX, int windowY, double mouseX, double mouseY) {
+        TmpHamonWipTabGui.makeCompilerShoutAtMeWhenIDeleteThis(); // delete this method overriding
+        return super.isMouseOnTabIcon(windowX, windowY + HamonScreen.WINDOW_HEIGHT - (index + 1) * 32, mouseX, mouseY);
+    }
+    
+    @Override
     protected ITextComponent createTabDescription(String key) {
+        TmpHamonWipTabGui.makeCompilerShoutAtMeWhenIDeleteThis(); // uncomment this
         return new TranslationTextComponent(key, 
                 JojoModConfig.getCommonConfigInstance(true).mixHamonTechniques.get() ? ""
                         : new TranslationTextComponent("hamon.techniques.tab.desc.only_one"));
@@ -165,13 +177,15 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
     
     @Override
     void drawIcon(MatrixStack matrixStack, int windowX, int windowY, ItemRenderer itemRenderer) {
-        if (screen.hamon.getTechniqueData().canLearnNewTechniqueSkill(screen.hamon, minecraft.player)) {
-            int x = tabPositioning.getIconX(windowX, index, WINDOW_WIDTH);
-            int y = tabPositioning.getIconY(windowY, index, WINDOW_HEIGHT);
-            
-            minecraft.getTextureManager().bind(HamonScreen.WINDOW);
-            blit(matrixStack, x - 6, y - 3, 248, 206, 8, 8);
-        }
+        TmpHamonWipTabGui.makeCompilerShoutAtMeWhenIDeleteThis(); // uncomment this
+//        if (screen.hamon.getTechniqueData().canLearnNewTechniqueSkill(screen.hamon, minecraft.player)) {
+//            int x = tabPositioning.getIconX(windowX, index, WINDOW_WIDTH);
+//            int y = tabPositioning.getIconY(windowY, index, WINDOW_HEIGHT);
+//            
+//            minecraft.getTextureManager().bind(HamonScreen.WINDOW);
+//            
+//            blit(matrixStack, x - 6, y - 3, 248, 206, 8, 8);
+//        }
     }
 
     @Override
@@ -187,9 +201,10 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
     
     @Override
     List<IReorderingProcessor> additionalTabNameTooltipInfo() {
-        if (screen.hamon.getTechniqueData().canLearnNewTechniqueSkill(screen.hamon, minecraft.player)) {
-            return availableTechniqueSkillLines;
-        }
+        TmpHamonWipTabGui.makeCompilerShoutAtMeWhenIDeleteThis(); // uncomment this
+//        if (screen.hamon.getTechniqueData().canLearnNewTechniqueSkill(screen.hamon, minecraft.player)) {
+//            return availableTechniqueSkillLines;
+//        }
         return super.additionalTabNameTooltipInfo();
     }
     
