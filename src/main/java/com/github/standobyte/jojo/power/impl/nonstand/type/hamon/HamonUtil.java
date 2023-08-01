@@ -24,6 +24,8 @@ import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
+import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer;
+import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer.BarType;
 import com.github.standobyte.jojo.entity.CrimsonBubbleEntity;
 import com.github.standobyte.jojo.entity.HamonBlockChargeEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.SnakeMufflerEntity;
@@ -387,7 +389,6 @@ public class HamonUtil {
     
     
     
-    // FIXME !! (hamon) liquid walking energy cost
     // TODO fix not being able to walk on liquid on shift (PlayerEntity#maybeBackOffFromEdge (989))
     public static boolean liquidWalking(PlayerEntity player) {
         World world = player.level;
@@ -409,26 +410,34 @@ public class HamonUtil {
                     Fluid fluidType = fluidBelow.getType();
                     if (!fluidBelow.isEmpty() && 
                             !(fluidType.is(FluidTags.WATER) && player.isOnFire())) {
-                        player.setOnGround(true);
-                        if (!world.isClientSide() || player.isLocalPlayer()) {
-                            Vector3d deltaMovement = player.getDeltaMovement();
-                            if (player.isShiftKeyDown()) {
-                                deltaMovement = new Vector3d(deltaMovement.x, 0, deltaMovement.z);
+                        if (power.getEnergy() > 0) {
+                            player.setOnGround(true);
+                            if (!world.isClientSide() || player.isLocalPlayer()) {
+                                Vector3d deltaMovement = player.getDeltaMovement();
+                                if (player.isShiftKeyDown()) {
+                                    deltaMovement = new Vector3d(deltaMovement.x, 0, deltaMovement.z);
+                                }
+                                else {
+                                    deltaMovement = new Vector3d(deltaMovement.x, Math.max(deltaMovement.y, 0), deltaMovement.z);
+                                }
+                                player.setDeltaMovement(deltaMovement);
+                                player.fallDistance = 0;
                             }
-                            else {
-                                deltaMovement = new Vector3d(deltaMovement.x, Math.max(deltaMovement.y, 0), deltaMovement.z);
+    
+                            if (!player.level.isClientSide()) {
+                                if (fluidType.is(FluidTags.LAVA) 
+                                        && !player.fireImmune() && !EnchantmentHelper.hasFrostWalker(player)) {
+                                    player.hurt(DamageSource.HOT_FLOOR, 1.0F);
+                                }
+                                boolean wasWaterWalking = player.getCapability(PlayerUtilCapProvider.CAPABILITY)
+                                        .map(cap -> cap.isWaterWalking()).orElse(false);
+                                power.consumeEnergy(wasWaterWalking ? 1.0F : 50.0F);
                             }
-                            player.setDeltaMovement(deltaMovement);
-                            player.fallDistance = 0;
+                            return true;
                         }
-
-                        if (!player.level.isClientSide()) {
-                            if (fluidType.is(FluidTags.LAVA) 
-                                    && !player.fireImmune() && !EnchantmentHelper.hasFrostWalker(player)) {
-                                player.hurt(DamageSource.HOT_FLOOR, 1.0F);
-                            }
+                        else if (player.isLocalPlayer()) {
+                            BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).triggerRedHighlight(19);
                         }
-                        return true;
                     }
                 }
                 return false;
