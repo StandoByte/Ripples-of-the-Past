@@ -15,7 +15,7 @@ public class CDRestorationHandItemParticle extends EntityPosParticle {
     private final Hand hand;
 
     private CDRestorationHandItemParticle(ClientWorld world, LivingEntity entity, Hand hand) {
-        super(world, entity);
+        super(world, entity, true);
         this.livingEntity = entity;
         this.hand = hand;
         this.randomOffset = new Vector3d((random.nextDouble() - 0.5), (random.nextDouble() - 0.5), (random.nextDouble() - 0.5)).scale(0.5);

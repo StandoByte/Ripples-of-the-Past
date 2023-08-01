@@ -15,7 +15,7 @@ public class EntityOffsetParticle extends EntityPosParticle {
     
     protected EntityOffsetParticle(ClientWorld world, Entity entity, 
             double x, double y, double z) {
-        super(world, entity);
+        super(world, entity, false);
         setPos(x, y, z);
         this.entityLiving = entity instanceof LivingEntity ? ((LivingEntity) entity) : null;
         this.offset = new Vector3d(x, y, z).subtract(entity.position())

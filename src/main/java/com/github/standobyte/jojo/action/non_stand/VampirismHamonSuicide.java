@@ -31,7 +31,7 @@ public class VampirismHamonSuicide extends VampirismAction {
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             DamageUtil.dealHamonDamage(user, 1024, user, null);
-            // FIXME !! (hamon) hamon suicide explosion
+            // FIXME !!! (hamon) hamon suicide explosion
         }
     }
 }

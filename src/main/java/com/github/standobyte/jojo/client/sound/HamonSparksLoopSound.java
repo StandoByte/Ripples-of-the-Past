@@ -27,6 +27,14 @@ public class HamonSparksLoopSound implements ITicking {
         ClientTicking.addTicking(this);
     }
     
+    public static boolean playSparkSound(Entity entity, Vector3d soundPos, float volume, float reducedFrequency) {
+        if (RANDOM.nextFloat() < 1F / getDelay() * reducedFrequency) {
+            return playSparkSound(entity, soundPos, volume);
+        }
+        
+        return false;
+    }
+    
     public static boolean playSparkSound(Entity entity, Vector3d soundPos, float volume) {
         return playSparkSound(entity, soundPos, volume, false);
     }
@@ -55,12 +63,16 @@ public class HamonSparksLoopSound implements ITicking {
         entity.level.playLocalSound(soundPos.x, soundPos.y, soundPos.z, 
                 ModSounds.HAMON_SPARK_SHORT.get(), SoundCategory.AMBIENT, volume, 1.0F, false);
         
-        curDelay.setValue(3 + RANDOM.nextInt(3));
+        curDelay.setValue(getDelay());
         if (limitForEntityType) {
             typeDelay.setValue(1);
         }
         
         return true;
+    }
+    
+    private static int getDelay() {
+        return 3 + RANDOM.nextInt(3);
     }
 
     @Override

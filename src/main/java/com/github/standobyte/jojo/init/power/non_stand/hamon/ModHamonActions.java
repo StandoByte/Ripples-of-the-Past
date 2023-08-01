@@ -103,8 +103,8 @@ public class ModHamonActions {
             () -> new HamonProjectileShield(new HamonAction.Builder().holdEnergyCost(15F).heldWalkSpeed(0.3F)
                     .shout(ModHamonSkills.CHARACTER_JOSEPH, ModSounds.JOSEPH_BARRIER)));
     
-    public static final RegistryObject<HamonAction> HAMON_PROTECTION = ACTIONS.register("hamon_protection", 
-            () -> new HamonProtection(new HamonAction.Builder().holdEnergyCost(25)));
+    public static final RegistryObject<HamonProtection> HAMON_PROTECTION = ACTIONS.register("hamon_protection", 
+            () -> new HamonProtection(new HamonAction.Builder().holdEnergyCost(20).heldWalkSpeed(0.3F)));
     
     public static final RegistryObject<HamonAction> HAMON_HYPNOSIS = ACTIONS.register("hamon_hypnosis", 
             () -> new HamonHypnosis(new HamonAction.Builder().holdToFire(60, false).holdEnergyCost(15)));

@@ -67,7 +67,7 @@ public class HamonBlastExplosion extends CustomExplosion {
         
     }
     
-    // FIXME !! hamon blast visuals & sound
+    // FIXME !!! hamon blast visuals & sound
     @Override
     protected void playSound() {
         Vector3d pos = getPosition();
@@ -85,7 +85,7 @@ public class HamonBlastExplosion extends CustomExplosion {
 //        }
     }
     
-    // FIXME !! (hamon) charge nearby living blocks
+    // FIXME !!! (hamon) charge nearby living blocks
     
     @Deprecated // not the actual DamageSource object
     @Override

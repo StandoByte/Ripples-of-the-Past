@@ -16,7 +16,7 @@ public class HamonGliderChargingParticle extends EntityPosParticle {
     private final Hand hand;
 
     private HamonGliderChargingParticle(ClientWorld world, LivingEntity entity, Hand hand) {
-        super(world, entity);
+        super(world, entity, false);
         this.livingEntity = entity;
         this.hand = hand;
         this.randomOffset = new Vector3d(

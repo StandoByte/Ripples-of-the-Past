@@ -405,10 +405,10 @@ public class HamonData extends TypeSpecificData {
         float efficiency = 1;
         LivingEntity user = power.getUser();
         
-        float healthRatio = user.getHealth() / user.getMaxHealth();
-        if (healthRatio < 0.25F) {
-            efficiency *= healthRatio * 3F + 0.25F;
-        }
+//        float healthRatio = user.getHealth() / user.getMaxHealth();
+//        if (healthRatio < 0.25F) {
+//            efficiency *= healthRatio * 3F + 0.25F;
+//        }
         
         float freeze = 0;
         EffectInstance freezeEffect = user.getEffect(ModEffects.FREEZE.get());

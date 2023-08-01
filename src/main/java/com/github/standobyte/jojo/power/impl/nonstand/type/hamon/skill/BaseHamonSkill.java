@@ -57,7 +57,7 @@ public class BaseHamonSkill extends AbstractHamonSkill {
             this.rewardType = rewardType;
         }
         
-        public Builder unlocks(Supplier<HamonAction> rewardAction) {
+        public Builder unlocks(Supplier<? extends HamonAction> rewardAction) {
             this.rewardAction = rewardAction;
             return this;
         }

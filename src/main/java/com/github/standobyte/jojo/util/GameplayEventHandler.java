@@ -40,6 +40,7 @@ import com.github.standobyte.jojo.init.ModPaintings;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
@@ -558,7 +559,7 @@ public class GameplayEventHandler {
                 }
             });
         }
-        // block physical damage with stand
+        // block other physical damage with stand
         else {
             standBlockUserAttack(dmgSource, target, stand -> {
                 if (stand.isInvulnerableTo(dmgSource)) {
@@ -570,21 +571,17 @@ public class GameplayEventHandler {
             });
         }
         
-        
-    }
-    
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void preventDamagingArmor(LivingHurtEvent event) {
-        DamageSource dmgSource = event.getSource();
-        if (!dmgSource.isBypassArmor() && dmgSource instanceof IModdedDamageSource
-                && ((IModdedDamageSource) dmgSource).preventsDamagingArmor()) {
-            dmgSource.bypassArmor();
-            LivingEntity target = event.getEntityLiving();
-            event.setAmount(CombatRules.getDamageAfterAbsorb(event.getAmount(), 
-                    (float) target.getArmorValue(), (float) target.getAttributeValue(Attributes.ARMOR_TOUGHNESS)));
+        // block physical damage with hamon
+        if (!dmgSource.isBypassArmor() && dmgSource.getDirectEntity() != null) {
+            INonStandPower.getNonStandPowerOptional(target).ifPresent(power -> {
+                if (power.getHeldAction() == ModHamonActions.HAMON_PROTECTION.get()) {
+                    event.setAmount(ModHamonActions.HAMON_PROTECTION.get().reduceDamageAmount(
+                            power, power.getUser(), dmgSource, event.getAmount()));
+                }
+            });
         }
     }
-
+    
     @Nullable
     private static StandEntity getTargetStand(LivingEntity target) {
         return IStandPower.getStandPowerOptional(target).map(stand -> {
@@ -599,6 +596,18 @@ public class GameplayEventHandler {
                     && stand.canBlockDamage(dmgSource) && stand.canBlockOrParryFromAngle(dmgSource.getSourcePosition())) {
                 standBehavior.accept(stand);
             }
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void preventDamagingArmor(LivingHurtEvent event) {
+        DamageSource dmgSource = event.getSource();
+        if (!dmgSource.isBypassArmor() && dmgSource instanceof IModdedDamageSource
+                && ((IModdedDamageSource) dmgSource).preventsDamagingArmor()) {
+            dmgSource.bypassArmor();
+            LivingEntity target = event.getEntityLiving();
+            event.setAmount(CombatRules.getDamageAfterAbsorb(event.getAmount(), 
+                    (float) target.getArmorValue(), (float) target.getAttributeValue(Attributes.ARMOR_TOUGHNESS)));
         }
     }
     

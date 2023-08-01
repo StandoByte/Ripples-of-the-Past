@@ -59,7 +59,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
         return 2;
     }
 
-    // FIXME !! (breath stability) move all hasEnergy and consumeEnergy calls into actions?
+    // FIXME !!!!! (breath stability) move all hasEnergy and consumeEnergy calls into actions?
     @Override
     public boolean hasEnergy(INonStandPower power, float amount) {
         return amount == 0 || power.getEnergy() > 0 || power.getTypeSpecificData(this).get().getBreathStability() > 0;

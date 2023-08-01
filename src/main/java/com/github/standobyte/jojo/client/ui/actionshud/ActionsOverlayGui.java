@@ -662,10 +662,12 @@ public class ActionsOverlayGui extends AbstractGui {
         }
         
         // last slot
-        blit(matrixStack, 
-                x + 1 + slotsRendered * slotWidth, y, 
-                slotWidth * 8 + 1, 0, 
-                slotWidth + 1, 22);
+        if (slotsRendered < slots) {
+            blit(matrixStack, 
+                    x + 1 + slotsRendered * slotWidth, y, 
+                    slotWidth * 8 + 1, 0, 
+                    slotWidth + 1, 22);
+        }
     }
     
     private <P extends IPower<P, ?>> void renderActionIcon(MatrixStack matrixStack, InputHandler.ActionKey actionKey, ActionsModeConfig<P> mode, 

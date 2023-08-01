@@ -13,11 +13,14 @@ import net.minecraft.util.math.vector.Vector3d;
 
 public abstract class EntityPosParticle extends SpriteTexturedParticle {
     protected final Entity entity;
+    private final boolean firstPersonSeparateRender;
     
-    protected EntityPosParticle(ClientWorld world, Entity entity) {
+    protected EntityPosParticle(ClientWorld world, Entity entity, 
+            boolean firstPersonSeparateRender /* for particles spawning at the player's arms */) {
         super(world, 0, 0, 0);
         this.entity = entity;
         this.hasPhysics = false;
+        this.firstPersonSeparateRender = firstPersonSeparateRender;
     }
     
     protected final void initPos() {
@@ -55,7 +58,7 @@ public abstract class EntityPosParticle extends SpriteTexturedParticle {
     
     @Override
     public void render(IVertexBuilder vertexBuilder, ActiveRenderInfo camera, float partialTick) {
-        if (entity != null) {
+        if (firstPersonSeparateRender && entity != null) {
             Minecraft mc = Minecraft.getInstance();
             if (mc.cameraEntity == entity && mc.options.getCameraType() == PointOfView.FIRST_PERSON) {
                 renderFirstPerson(vertexBuilder, camera, partialTick);
