@@ -454,6 +454,7 @@
   "jojo.message.action_condition.living_plant": "Only blocks made of a living matter can be infused",
   "jojo.message.action_condition.leaves": "You need a block of leaves",
   "jojo.message.action_condition.hypnosis": "This entity cannot be hypnotized",
+  "jojo.message.action_condition.already_tamed": "This animal is tamed by you",
   "jojo.message.action_condition.potion": "You need to hold a bottle with a liquid",
   
   "multiplayer.disconnect.invalid_stand_movement": "Invalid move Stand packet received",

@@ -8,13 +8,16 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.entity.AfterimageEntity;
+import com.github.standobyte.jojo.entity.ai.LookAtEntityWithoutMovingGoal;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.passive.horse.AbstractHorseEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -58,6 +61,10 @@ public class LivingUtilCap {
         tickNoLerp();
         tickHurtAnim();
         tickDownHamonDamage();
+        
+        if (!entity.level.isClientSide()) {
+            tickHypnosisProcess();
+        }
         
         Iterator<AfterimageEntity> it = afterimages.iterator();
         while (it.hasNext()) {
@@ -276,6 +283,26 @@ public class LivingUtilCap {
             }
             
             entity.level.broadcastEntityEvent(entity, (byte) 6); // spawn smoke particles
+        }
+    }
+    
+    private Goal lookAtHypnotizerGoal;
+    private int resetLookGoalTicks = 0;
+    public void startedHypnosisProcess(LivingEntity hypnotizer) {
+        if (entity instanceof MobEntity) {
+            MobEntity mob = (MobEntity) entity;
+            lookAtHypnotizerGoal = new LookAtEntityWithoutMovingGoal(mob, hypnotizer);
+            mob.goalSelector.addGoal(0, lookAtHypnotizerGoal);
+            resetLookGoalTicks = 3;
+        }
+    }
+    
+    private void tickHypnosisProcess() {
+        if (resetLookGoalTicks > 0 && --resetLookGoalTicks == 0
+                && lookAtHypnotizerGoal != null && entity instanceof MobEntity) {
+            MobEntity mob = (MobEntity) entity;
+            mob.goalSelector.removeGoal(lookAtHypnotizerGoal);
+            lookAtHypnotizerGoal = null;
         }
     }
     

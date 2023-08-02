@@ -11,11 +11,9 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
@@ -163,8 +161,6 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         }
         
         ActionConditionResult targetCheck = checkTarget(target, user, power).setContinueHold(continueHold);
-        if (!user.level.isClientSide() && this == ModHamonActions.HAMON_HYPNOSIS.get()) 
-            JojoMod.LOGGER.debug("!!!!!!!!!!!!!!!!!!! helloooooooooo {} {} {}", continueHold, targetCheck.isPositive(), targetCheck.shouldStopHeldAction());
         return targetCheck;
     }
     

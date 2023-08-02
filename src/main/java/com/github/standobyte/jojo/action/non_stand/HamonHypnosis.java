@@ -5,12 +5,15 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCap.HypnosisTargetCheck;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.potion.HypnosisEffect;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
 
 public class HamonHypnosis extends HamonAction {
@@ -34,10 +37,20 @@ public class HamonHypnosis extends HamonAction {
             case INVALID:
                 return conditionMessage("hypnosis");
             case ALREADY_TAMED_BY_USER:
-                return ActionConditionResult.NEGATIVE;
+                return conditionMessage("already_tamed");
             }
         }
         return conditionMessage("hypnosis");
+    }
+    
+    @Override
+    protected void holdTick(World world, LivingEntity user, INonStandPower power, 
+            int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
+        if (!world.isClientSide() && requirementsFulfilled && target.getEntity() instanceof MobEntity) {
+            target.getEntity().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                cap.startedHypnosisProcess(user);
+            });
+        }
     }
     
     @Override
@@ -59,5 +72,8 @@ public class HamonHypnosis extends HamonAction {
      *  spark visuals on hypnotized entities
      */
     
-    // make the target not walk around
+    @Override
+    public boolean cancelHeldOnGettingAttacked(INonStandPower power, DamageSource dmgSource, float dmgAmount) {
+        return true;
+    }
 }
