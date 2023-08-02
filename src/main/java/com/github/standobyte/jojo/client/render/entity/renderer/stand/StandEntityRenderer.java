@@ -236,8 +236,7 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
 
     public void renderLayer(MatrixStack matrixStack, IVertexBuilder vertexBuilder, int packedLight,
             T entity, float walkAnimSpeed, float walkAnimPos, float partialTick,
-            float ticks, float yRotationOffset, float xRotation, 
-            ResourceLocation layerModelTexture, M model) {
+            float ticks, float yRotationOffset, float xRotation, M model) {
         getModel().copyPropertiesTo(model);
         model.setVisibility(entity, visibilityMode(entity), viewObstructionPrevention.armsOnly);
         // TODO get rid of these two method calls?

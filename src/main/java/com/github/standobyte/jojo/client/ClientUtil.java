@@ -168,7 +168,15 @@ public class ClientUtil {
             options.setCameraType(PointOfView.THIRD_PERSON_FRONT);
         }
     }
-
+    
+    public static boolean resourceExists(ResourceLocation location) {
+        try {
+            return Minecraft.getInstance().getResourceManager().getResource(location) != null;
+        } catch (IOException e) {
+            return false;
+        }
+    }
+    
     public static void drawRightAlignedString(MatrixStack matrixStack, FontRenderer font, String line, float x, float y, int color) {
         font.drawShadow(matrixStack, line, x - font.width(line), y, color);
     }
@@ -289,8 +297,6 @@ public class ClientUtil {
                     ColorHelper.PackedColor.multiply(backdropColor, addAlpha(0xFFFFFF, alpha)));
         }
     }
-    
-    
     
     public static String getShortenedTranslationKey(String originalKey) {
         String shortenedKey = originalKey + ".shortened";

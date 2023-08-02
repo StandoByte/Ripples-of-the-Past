@@ -51,8 +51,7 @@ public abstract class StandModelLayerRenderer<T extends StandEntity, M extends S
             if (renderType != null) {
                 entityRenderer.renderLayer(matrixStack, buffer.getBuffer(renderType), getPackedLight(packedLight), 
                         entity, walkAnimPos, walkAnimSpeed, partialTick, 
-                        ticks, headYRotation, headXRotation, 
-                        getLayerTexture(), getLayerModel());
+                        ticks, headYRotation, headXRotation, getLayerModel());
             }
         }
     }
