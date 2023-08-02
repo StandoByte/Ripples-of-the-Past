@@ -51,7 +51,9 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveEffectStartPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SpawnParticlePacket;
+import com.github.standobyte.jojo.potion.HamonSpreadEffect;
 import com.github.standobyte.jojo.potion.IApplicableEffect;
+import com.github.standobyte.jojo.potion.VampireSunBurnEffect;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.bowcharge.BowChargeEffectInstance;
@@ -391,9 +393,18 @@ public class GameplayEventHandler {
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void cancelLivingHeal(LivingHealEvent event) {
-        if (event.getEntityLiving().hasEffect(ModEffects.VAMPIRE_SUN_BURN.get())) {
+        LivingEntity entity = event.getEntityLiving();
+        float amount = event.getAmount();
+        if (entity.hasEffect(ModEffects.VAMPIRE_SUN_BURN.get())) {
+            amount = VampireSunBurnEffect.reduceUndeadHealing();
+        }
+        if (amount > 0 && entity.hasEffect(ModEffects.HAMON_SPREAD.get())) {
+            amount = HamonSpreadEffect.reduceUndeadHealing(entity.getEffect(ModEffects.HAMON_SPREAD.get()), amount);
+        }
+        if (amount <= 0) {
             event.setCanceled(true);
         }
+        event.setAmount(amount);
     }
     
     @SubscribeEvent(priority = EventPriority.LOWEST)

@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.block.WoodenCoffinBlock;
 import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.potion.VampireSunBurnEffect;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
@@ -40,20 +41,19 @@ public class VampirismUtil {
                     sunDamage > 0
                     && DamageUtil.dealUltravioletDamage(entity, sunDamage, null, null, true)
                     && entity instanceof PlayerEntity) {
-                EffectInstance weaknessEffect = entity.getEffect(Effects.WEAKNESS);
+                EffectInstance sunBurnEffect = entity.getEffect(ModEffects.VAMPIRE_SUN_BURN.get());
                 int duration;
                 int amplifier;
-                if (weaknessEffect == null) {
+                if (sunBurnEffect == null) {
                     duration = 60;
                     amplifier = 0;
                 }
                 else {
                     int difficulty = Math.max(entity.level.getDifficulty().getId(), 1);
-                    duration = weaknessEffect.getDuration() + 60 / difficulty;
+                    duration = sunBurnEffect.getDuration() + 60 / difficulty;
                     amplifier = duration / 60;
                 }
-                entity.addEffect(new EffectInstance(Effects.WEAKNESS, duration, amplifier, false, false, true));
-                entity.addEffect(new EffectInstance(ModEffects.VAMPIRE_SUN_BURN.get(), duration, amplifier, false, false, false));
+                VampireSunBurnEffect.giveEffectTo(entity, duration, amplifier);
             }
         }
     }

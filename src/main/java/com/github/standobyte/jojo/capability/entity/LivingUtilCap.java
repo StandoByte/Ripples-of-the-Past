@@ -11,6 +11,7 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.entity.AfterimageEntity;
 import com.github.standobyte.jojo.entity.ai.LookAtEntityWithoutMovingGoal;
 import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.potion.HamonSpreadEffect;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
@@ -162,14 +163,14 @@ public class LivingUtilCap {
     
     
     
-    private static final float[] DAMAGE_FOR_HAMON_SPREAD_EFFECT = new float[] { 5, 12.5F, 25, 50 };
+    private static final float[] DAMAGE_FOR_HAMON_SPREAD_EFFECT = new float[] { 5, 12.5F, 25, 50, 125 };
     public void hamonSpread(float damageReceived) {
         receivedHamonDamage += damageReceived;
         JojoMod.LOGGER.debug("taken hamon damage = {}", receivedHamonDamage);
         for (int i = DAMAGE_FOR_HAMON_SPREAD_EFFECT.length - 1; i >= 0; i--) {
             if (receivedHamonDamage >= DAMAGE_FOR_HAMON_SPREAD_EFFECT[i]) {
                 int duration = 60 + 40 * i;
-                entity.addEffect(new EffectInstance(ModEffects.HAMON_SPREAD.get(), duration, i, false, false, true));
+                HamonSpreadEffect.giveEffectTo(entity, duration, i);
                 break;
             }
         }

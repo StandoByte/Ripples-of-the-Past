@@ -1,10 +1,13 @@
 package com.github.standobyte.jojo.potion;
 
+import com.github.standobyte.jojo.init.ModEffects;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.FlyingEntity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.EffectType;
+import net.minecraft.potion.Effects;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.common.ForgeMod;
 
@@ -15,11 +18,9 @@ public class HamonSpreadEffect extends UncurableEffect implements IApplicableEff
     }
 
     // FIXME !!!!!!!! (hamon) hamon spread perk rework
-    // reduce healing
     // do smth to mobs too
     @Override
     public void applyEffectTick(LivingEntity livingEntity, int amplifier) {
-//        DamageUtil.dealHamonDamage(livingEntity, 1F, null, null);
         if (!livingEntity.level.isClientSide() && livingEntity instanceof FlyingEntity) {
             double gravity = livingEntity.getAttributeValue(ForgeMod.ENTITY_GRAVITY.get());
             Vector3d deltaMovement = livingEntity.getDeltaMovement();
@@ -29,17 +30,23 @@ public class HamonSpreadEffect extends UncurableEffect implements IApplicableEff
 
     @Override
     public boolean isDurationEffectTick(int duration, int amplifier) {
-//        int j = 25 >> amplifier;
-//        if (j > 0) {
-//            return duration % j == 0;
-//        } else {
-//            return true;
-//        }
         return true;
     }
 
     @Override
     public boolean isApplicable(LivingEntity entity) {
         return JojoModUtil.isUndead(entity);
+    }
+    
+    
+    
+    public static float reduceUndeadHealing(EffectInstance effectInstance, float healAmount) {
+        float multiplier = 1 - (float) Math.min(effectInstance.getAmplifier() + 1, 5) * 0.2F;
+        return healAmount * multiplier;
+    }
+    
+    public static void giveEffectTo(LivingEntity entity, int duration, int amplifier) {
+        entity.addEffect(new EffectInstance(Effects.WEAKNESS, duration, amplifier, false, false, true));
+        entity.addEffect(new EffectInstance(ModEffects.HAMON_SPREAD.get(), duration, amplifier, false, false, false));
     }
 }
