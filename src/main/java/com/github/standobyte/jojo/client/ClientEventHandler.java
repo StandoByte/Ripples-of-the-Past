@@ -714,9 +714,12 @@ public class ClientEventHandler {
                 matrixStack, buffers, light, 
                 partialTick, interpolatedPitch, 
                 swingProgress, equipProgress, entity.getItemInHand(hand))) {
+            HandSide handSide = MCUtil.getHandSide(player, hand);
+            
             matrixStack.pushPose();
             ClientReflection.renderPlayerArm(matrixStack, buffers, light, equipProgress, 
-                    swingProgress, MCUtil.getHandSide(player, hand), renderer);
+                    swingProgress, handSide, renderer);
+            GlovesLayer.renderFirstPerson(handSide, matrixStack, buffers, light, player);
             matrixStack.popPose();
             // i've won... but at what cost?
         }

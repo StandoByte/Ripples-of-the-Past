@@ -209,9 +209,9 @@ public class PlayerAnimatorInstalled implements PlayerAnimationHandler.IPlayerAn
     }
     
     @Override
-    public void setupGlovesFirstPersonRender(PlayerModel<?> glovesModel) {
-        if (glovesModel instanceof IPlayerModel && AnimUtils.disableFirstPersonAnim) {
-            ((IPlayerModel) glovesModel).playerAnimator_prepForFirstPersonRender();
+    public void setupLayerFirstPersonRender(PlayerModel<?> layerModel) {
+        if (layerModel instanceof IPlayerModel && AnimUtils.disableFirstPersonAnim) {
+            ((IPlayerModel) layerModel).playerAnimator_prepForFirstPersonRender();
         }
     }
     

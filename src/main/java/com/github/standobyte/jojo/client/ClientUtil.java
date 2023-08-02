@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import org.lwjgl.opengl.GL11;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
 import com.github.standobyte.jojo.client.render.world.shader.CustomShaderGroup;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
 import com.github.standobyte.jojo.client.ui.screen.mob.RockPaperScissorsScreen;
@@ -35,6 +36,8 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.entity.model.BipedModel;
+import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
@@ -453,6 +456,16 @@ public class ClientUtil {
     
     public static void clearCubes(ModelRenderer modelRenderer) {
         ClientReflection.setCubes(modelRenderer, new ObjectArrayList<>());
+    }
+    
+    public static void setupForFirstPersonRender(PlayerModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player) {
+        model.rightArmPose = BipedModel.ArmPose.EMPTY;
+        model.leftArmPose = BipedModel.ArmPose.EMPTY;
+        model.attackTime = 0.0F;
+        model.crouching = false;
+        model.swimAmount = 0.0F;
+        PlayerAnimationHandler.getPlayerAnimator().setupLayerFirstPersonRender(model);
+        model.setupAnim(player, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
     }
     
     public static void addItemReferenceQuote(List<ITextComponent> tooltip, Item item) {
