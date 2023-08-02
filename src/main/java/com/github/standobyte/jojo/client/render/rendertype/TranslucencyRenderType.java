@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.render.block.overlay;
+package com.github.standobyte.jojo.client.render.rendertype;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;

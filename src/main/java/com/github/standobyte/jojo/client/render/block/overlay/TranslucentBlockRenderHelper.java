@@ -5,6 +5,8 @@ import java.util.stream.Stream;
 
 import com.github.standobyte.jojo.capability.chunk.ChunkCap.PrevBlockInfo;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.render.rendertype.ModifiedRenderTypeBuffers;
+import com.github.standobyte.jojo.client.render.rendertype.TranslucencyRenderType;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.block.BlockRenderType;

@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.render.block.overlay;
+package com.github.standobyte.jojo.client.render.rendertype;
 
 import java.util.Map;
 import java.util.function.UnaryOperator;
