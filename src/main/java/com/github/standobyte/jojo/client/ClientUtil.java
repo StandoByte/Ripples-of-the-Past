@@ -48,6 +48,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.util.ColorHelper;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
@@ -456,6 +457,14 @@ public class ClientUtil {
     
     public static void clearCubes(ModelRenderer modelRenderer) {
         ClientReflection.setCubes(modelRenderer, new ObjectArrayList<>());
+    }
+    
+    public static ModelRenderer getArm(BipedModel<?> model, HandSide side) {
+        return side == HandSide.LEFT ? model.leftArm : model.rightArm;
+    }
+    
+    public static ModelRenderer getArmOuter(PlayerModel<?> model, HandSide side) {
+        return side == HandSide.LEFT ? model.leftSleeve : model.rightSleeve;
     }
     
     public static void setupForFirstPersonRender(PlayerModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player) {

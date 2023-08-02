@@ -26,6 +26,7 @@ import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonCha
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.client.render.block.overlay.TranslucentBlockRenderHelper;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.GlovesLayer;
+import com.github.standobyte.jojo.client.render.entity.layerrenderer.HamonBurnLayer;
 import com.github.standobyte.jojo.client.render.world.ParticleManagerWrapperTS;
 import com.github.standobyte.jojo.client.render.world.TimeStopWeatherHandler;
 import com.github.standobyte.jojo.client.render.world.shader.CustomShaderGroup;
@@ -691,7 +692,7 @@ public class ClientEventHandler {
             });
             
             ItemStack item = player.getItemInHand(Hand.MAIN_HAND);
-            if (GlovesLayer.areGloves(item)) {
+            if (GlovesLayer.areGloves(item) || player.hasEffect(ModEffects.HAMON_SPREAD.get())) {
                 event.setCanceled(true);
                 renderHand(Hand.MAIN_HAND, event.getMatrixStack(), event.getBuffers(), event.getLight(), 
                         event.getPartialTicks(), event.getInterpolatedPitch(), player);
@@ -699,7 +700,7 @@ public class ClientEventHandler {
         }
     }
     
-    private void renderHand(Hand hand, MatrixStack matrixStack, IRenderTypeBuffer buffers, int light,
+    private void renderHand(Hand hand, MatrixStack matrixStack, IRenderTypeBuffer buffer, int light,
             float partialTick, float interpolatedPitch, LivingEntity entity) {
         FirstPersonRenderer renderer = mc.getItemInHandRenderer();
         ClientPlayerEntity player = mc.player;
@@ -711,15 +712,16 @@ public class ClientEventHandler {
         
         modPostedEvent = true;
         if (!ForgeHooksClient.renderSpecificFirstPersonHand(hand, 
-                matrixStack, buffers, light, 
+                matrixStack, buffer, light, 
                 partialTick, interpolatedPitch, 
                 swingProgress, equipProgress, entity.getItemInHand(hand))) {
             HandSide handSide = MCUtil.getHandSide(player, hand);
             
             matrixStack.pushPose();
-            ClientReflection.renderPlayerArm(matrixStack, buffers, light, equipProgress, 
+            ClientReflection.renderPlayerArm(matrixStack, buffer, light, equipProgress, 
                     swingProgress, handSide, renderer);
-            GlovesLayer.renderFirstPerson(handSide, matrixStack, buffers, light, player);
+            HamonBurnLayer.renderFirstPerson(handSide, matrixStack, buffer, light, player);
+            GlovesLayer.renderFirstPerson(handSide, matrixStack, buffer, light, player);
             matrixStack.popPose();
             // i've won... but at what cost?
         }

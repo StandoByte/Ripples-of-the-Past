@@ -18,7 +18,6 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.IEntityRenderer;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
-import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -28,14 +27,16 @@ import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 
 public class GlovesLayer<T extends LivingEntity, M extends PlayerModel<T>> extends LayerRenderer<T, M> {
-    private static final Map<IEntityRenderer<?, ?>, GlovesLayer<?, ?>> RENDERER_LAYERS = new HashMap<>();
+    private static final Map<PlayerRenderer, GlovesLayer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>> RENDERER_LAYERS = new HashMap<>();
     private final M glovesModel;
     private final boolean slim;
     private boolean playerAnimHandled = false;
     
     public GlovesLayer(IEntityRenderer<T, M> renderer, M glovesModel, boolean slim) {
         super(renderer);
-        RENDERER_LAYERS.put(renderer, this);
+        if (renderer instanceof PlayerRenderer) {
+            RENDERER_LAYERS.put((PlayerRenderer) renderer, (GlovesLayer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>) this);
+        }
         this.glovesModel = glovesModel;
         this.slim = slim;
     }
@@ -87,38 +88,28 @@ public class GlovesLayer<T extends LivingEntity, M extends PlayerModel<T>> exten
             IRenderTypeBuffer buffer, int light, AbstractClientPlayerEntity player, 
             PlayerRenderer playerRenderer) {
         if (player.isSpectator()) return;
+        
         ItemStack glovesItemStack = getRenderedGlovesItem(player);
-        if (!glovesItemStack.isEmpty()) {
-            PlayerModel<AbstractClientPlayerEntity> model = playerRenderer.getModel();
-            ClientUtil.setupForFirstPersonRender(model, player);
-            ModelRenderer arm = getArm(model, side);
-            if (arm.visible) {
-                GlovesItem gloves = (GlovesItem) glovesItemStack.getItem();
-                ClientUtil.setupForFirstPersonRender((PlayerModel<AbstractClientPlayerEntity>) glovesModel, player);
-                ModelRenderer glove = getArm(model, side);
-                ModelRenderer gloveOuter = getArmOuter(model, side);
-                ResourceLocation texture = getTexture(gloves);
-                IVertexBuilder vertexBuilder = ItemRenderer.getArmorFoilBuffer(buffer, RenderType.armorCutoutNoCull(texture), false, glovesItemStack.hasFoil());
-                glove.xRot = 0.0F;
-                glove.render(matrixStack, vertexBuilder, light, OverlayTexture.NO_OVERLAY);
-                gloveOuter.xRot = 0.0F;
-                gloveOuter.render(matrixStack, vertexBuilder, light, OverlayTexture.NO_OVERLAY);
-            }
-        }
+        if (glovesItemStack.isEmpty()) return;
+        
+        PlayerModel<AbstractClientPlayerEntity> model = playerRenderer.getModel();
+        ClientUtil.setupForFirstPersonRender(model, player);
+        GlovesItem glovesItem = (GlovesItem) glovesItemStack.getItem();
+        ClientUtil.setupForFirstPersonRender((PlayerModel<AbstractClientPlayerEntity>) glovesModel, player);
+        ModelRenderer glove = ClientUtil.getArm(model, side);
+        ModelRenderer gloveOuter = ClientUtil.getArmOuter(model, side);
+        ResourceLocation texture = getTexture(glovesItem);
+        IVertexBuilder vertexBuilder = ItemRenderer.getArmorFoilBuffer(buffer, RenderType.armorCutoutNoCull(texture), false, glovesItemStack.hasFoil());
+        glove.xRot = 0.0F;
+        glove.render(matrixStack, vertexBuilder, light, OverlayTexture.NO_OVERLAY);
+        gloveOuter.xRot = 0.0F;
+        gloveOuter.render(matrixStack, vertexBuilder, light, OverlayTexture.NO_OVERLAY);
     }
     
     private ResourceLocation getTexture(GlovesItem gloves) {
         return new ResourceLocation(
                 gloves.getRegistryName().getNamespace(), 
                 "textures/entity/biped/layer/" + gloves.getRegistryName().getPath() + (slim ? "_slim" : "") + ".png");
-    }
-
-    private static ModelRenderer getArm(BipedModel<?> model, HandSide side) {
-        return side == HandSide.LEFT ? model.leftArm : model.rightArm;
-    }
-
-    private static ModelRenderer getArmOuter(PlayerModel<?> model, HandSide side) {
-        return side == HandSide.LEFT ? model.leftSleeve : model.rightSleeve;
     }
     
     
