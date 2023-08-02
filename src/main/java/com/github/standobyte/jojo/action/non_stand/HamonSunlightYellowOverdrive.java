@@ -86,7 +86,7 @@ public class HamonSunlightYellowOverdrive extends HamonAction {
                 
                 float efficiency = hamon.getActionEfficiency(0, true);
                 
-                float damage = 2.5F + 10F * holdRatio;
+                float damage = 2.5F + 7.5F * holdRatio;
                 damage *= efficiency;
 
                 if (DamageUtil.dealHamonDamage(targetEntity, damage, user, null, attack -> attack.hamonParticle(ModParticles.HAMON_SPARK_YELLOW.get()))) {

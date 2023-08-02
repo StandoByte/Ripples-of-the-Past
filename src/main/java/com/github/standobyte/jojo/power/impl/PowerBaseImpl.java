@@ -315,7 +315,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                 || !action.getTargetRequirement().checkTargetType(targetContainer.get().getType())) {
             targetContainer.set(ActionTarget.EMPTY);
             if (!action.getTargetRequirement().checkTargetType(TargetType.EMPTY)) {
-                return ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
+                return ActionConditionResult.NEGATIVE.setContinueHold(action.holdOnly(getThis()));
             }
         }
         
@@ -397,7 +397,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                 Container<ActionTarget> targetContainer = new Container<>(target);
                 ActionConditionResult result = checkRequirements(heldActionData.action, targetContainer, true);
                 target = targetContainer.get();
-                if (!result.isPositive() && result.shouldStopHeldAction()) {
+                if (result.shouldStopHeldAction()) {
                     stopHeldAction(false);
                     sendMessage(heldAction, result);
                     return;

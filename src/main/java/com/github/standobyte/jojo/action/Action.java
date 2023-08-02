@@ -11,9 +11,11 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
@@ -122,6 +124,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     public ActionConditionResult checkRangeAndTarget(ActionTarget target, LivingEntity user, P power) {
+        boolean continueHold = holdOnly(power);
+        
         LivingEntity performer = getPerformer(power.getUser(), power);
         boolean targetTooFar = false;
         switch (target.getType()) {
@@ -142,7 +146,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
             if (targetPos.getY() < buildLimit - 1 || target.getFace() != Direction.UP && targetPos.getY() < buildLimit) {
                 double maxDistSq = getMaxRangeSqBlockTarget();
                 if (user.level.getBlockState(targetPos).getBlock() == Blocks.AIR) {
-                    return ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
+                    return ActionConditionResult.NEGATIVE.setContinueHold(continueHold);
                 }
                 targetTooFar = target.getBoundingBox(performer.level).map(aabb -> {
                     double distance = JojoModUtil.getDistance(performer, aabb);
@@ -155,10 +159,12 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         }
 
         if (targetTooFar) {
-            return conditionMessageContinueHold("target_too_far");
+            return conditionMessage("target_too_far").setContinueHold(continueHold);
         }
         
-        ActionConditionResult targetCheck = checkTarget(target, user, power);
+        ActionConditionResult targetCheck = checkTarget(target, user, power).setContinueHold(continueHold);
+        if (!user.level.isClientSide() && this == ModHamonActions.HAMON_HYPNOSIS.get()) 
+            JojoMod.LOGGER.debug("!!!!!!!!!!!!!!!!!!! helloooooooooo {} {} {}", continueHold, targetCheck.isPositive(), targetCheck.shouldStopHeldAction());
         return targetCheck;
     }
     
@@ -217,10 +223,6 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     public static ActionConditionResult conditionMessage(String postfix) {
         return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.message.action_condition." + postfix));
-    }
-    
-    public static ActionConditionResult conditionMessageContinueHold(String postfix) {
-        return ActionConditionResult.createNegativeContinueHold(new TranslationTextComponent("jojo.message.action_condition." + postfix));
     }
     
     public Action<P> getShiftVariationIfPresent() {

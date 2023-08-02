@@ -337,12 +337,13 @@ public class HudLayoutEditingScreen extends Screen {
     
     private <P extends IPower<P, ?>> void renderActionName(MatrixStack matrixStack, P power, Action<P> action, int mouseX, int mouseY, boolean isEnabled) {
         if (action == null) return;
+        Action<P> actionReplacing = power.getActionOnClick(action, shift, ActionTarget.EMPTY);
+        if (actionReplacing != null) {
+            action = actionReplacing;
+        }
         IFormattableTextComponent name;
         
         if (action.isUnlocked(power)) {
-            if (shift) {
-                action = action.getShiftVariationIfPresent();
-            }
             name = action.getTranslatedName(power, action.getTranslationKey(power, ActionTarget.EMPTY));
         }
         

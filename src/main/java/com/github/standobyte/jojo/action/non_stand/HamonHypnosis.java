@@ -4,6 +4,7 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCap.HypnosisTargetCheck;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.potion.HypnosisEffect;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -25,10 +26,18 @@ public class HamonHypnosis extends HamonAction {
     
     @Override
     public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, INonStandPower power) {
-        if (!(target.getEntity() instanceof LivingEntity && LivingUtilCap.canBeHypnotized((LivingEntity) target.getEntity(), user))) {
-            return conditionMessage("hypnosis");
+        if (target.getEntity() instanceof LivingEntity) {
+            HypnosisTargetCheck check = LivingUtilCap.canBeHypnotized((LivingEntity) target.getEntity(), user);
+            switch (check) {
+            case CORRECT:
+                return ActionConditionResult.POSITIVE;
+            case INVALID:
+                return conditionMessage("hypnosis");
+            case ALREADY_TAMED_BY_USER:
+                return ActionConditionResult.NEGATIVE;
+            }
         }
-        return ActionConditionResult.POSITIVE;
+        return conditionMessage("hypnosis");
     }
     
     @Override
@@ -43,11 +52,12 @@ public class HamonHypnosis extends HamonAction {
         }
     }
     
-    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! held keeps going after you move away from the target
     // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! add proper energy check
     
     /* FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! to add
      *  spark visuals on cast
      *  spark visuals on hypnotized entities
      */
+    
+    // make the target not walk around
 }

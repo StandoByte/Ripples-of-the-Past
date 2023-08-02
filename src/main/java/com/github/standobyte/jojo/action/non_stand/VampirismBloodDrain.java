@@ -45,7 +45,7 @@ public class VampirismBloodDrain extends VampirismAction {
         if (entityTarget instanceof LivingEntity) {
             LivingEntity livingTarget = (LivingEntity) entityTarget;
             if (!JojoModUtil.canBleed(livingTarget) || JojoModUtil.isUndead(livingTarget)) {
-                return conditionMessageContinueHold("blood");
+                return conditionMessage("blood");
 //                return livingTarget.tickCount > 20 ? conditionMessageContinueHold("blood") : ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
             }
             return ActionConditionResult.POSITIVE;

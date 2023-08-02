@@ -208,18 +208,26 @@ public class LivingUtilCap {
     
     
     
-    public static boolean canBeHypnotized(LivingEntity entity, LivingEntity hypnotizer) {
+    public static HypnosisTargetCheck canBeHypnotized(LivingEntity entity, LivingEntity hypnotizer) {
         if (hypnotizer instanceof PlayerEntity) {
             if (entity instanceof TameableEntity) {
                 TameableEntity tameable = (TameableEntity) entity;
-                return !hypnotizer.getUUID().equals(tameable.getOwnerUUID());
+                return !hypnotizer.getUUID().equals(tameable.getOwnerUUID()) ? 
+                        HypnosisTargetCheck.CORRECT : HypnosisTargetCheck.ALREADY_TAMED_BY_USER;
             }
             if (entity instanceof AbstractHorseEntity) {
                 AbstractHorseEntity horse = (AbstractHorseEntity) entity;
-                return !hypnotizer.getUUID().equals(horse.getOwnerUUID());
+                return !hypnotizer.getUUID().equals(horse.getOwnerUUID()) ? 
+                        HypnosisTargetCheck.CORRECT : HypnosisTargetCheck.ALREADY_TAMED_BY_USER;
             }
         }
-        return false;
+        return HypnosisTargetCheck.INVALID;
+    }
+    
+    public static enum HypnosisTargetCheck {
+        CORRECT,
+        INVALID,
+        ALREADY_TAMED_BY_USER
     }
     
     public void hypnotizeEntity(LivingEntity hypnotizer, int duration) {
@@ -255,9 +263,9 @@ public class LivingUtilCap {
         if (!entity.level.isClientSide()) {
             if (entity instanceof TameableEntity) {
                 TameableEntity tameable = (TameableEntity) entity;
+                tameable.setOrderedToSit(false);
                 tameable.setTame(preHypnosisOwner != null);
                 tameable.setOwnerUUID(preHypnosisOwner);
-                tameable.setInSittingPose(false);
             }
             
             else if (entity instanceof AbstractHorseEntity) {
@@ -277,11 +285,17 @@ public class LivingUtilCap {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putFloat("HamonSpread", receivedHamonDamage);
         nbt.putBoolean("UsedTimeStop", hasUsedTimeStopToday);
+        if (preHypnosisOwner != null) {
+            nbt.putUUID("PreHypnosisOwner", preHypnosisOwner);
+        }
         return nbt;
     }
     
     public void fromNBT(CompoundNBT nbt) {
         receivedHamonDamage = nbt.getFloat("HamonSpread");
         hasUsedTimeStopToday = nbt.getBoolean("UsedTimeStop");
+        if (nbt.hasUUID("PreHypnosisOwner")) {
+            preHypnosisOwner = nbt.getUUID("PreHypnosisOwner");
+        }
     }
 }

@@ -22,14 +22,14 @@ public class VampirismBloodGift extends VampirismAction {
     public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, INonStandPower power) {
         Entity targetEntity = target.getEntity();
         if (!(targetEntity instanceof PlayerEntity)) {
-            return conditionMessageContinueHold("player_target");
+            return conditionMessage("player_target");
         }
         LivingEntity targetLiving = (LivingEntity) targetEntity;
         if (INonStandPower.getNonStandPowerOptional(targetLiving).map(targetPower -> targetPower.hasPower()).orElse(true)) {
-            return conditionMessageContinueHold("cant_become_vampire");
+            return conditionMessage("cant_become_vampire");
         }
         if (targetLiving.getHealth() > 6.0F) {
-            return conditionMessageContinueHold("target_too_many_health");
+            return conditionMessage("target_too_many_health");
         }
         return ActionConditionResult.POSITIVE;
     }

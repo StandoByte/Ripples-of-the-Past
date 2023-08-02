@@ -19,10 +19,6 @@ public class ActionConditionResult {
         return new ActionConditionResult(false, true, false, warning);
     }
     
-    public static ActionConditionResult createNegativeContinueHold(ITextComponent warning) {
-        return new ActionConditionResult(false, false, false, warning);
-    }
-    
     public static ActionConditionResult noMessage(boolean isPositive) {
         return isPositive ? POSITIVE : NEGATIVE;
     }
@@ -32,6 +28,14 @@ public class ActionConditionResult {
         this.stopHeldAction = stopHeldAction;
         this.isQueued = isQueued;
         this.warning = warning;
+    }
+    
+    public ActionConditionResult setContinueHold() {
+        return setContinueHold(true);
+    }
+    
+    public ActionConditionResult setContinueHold(boolean continueHold) {
+        return new ActionConditionResult(this.positive, !continueHold, this.isQueued, this.warning);
     }
     
     public boolean isPositive() {
