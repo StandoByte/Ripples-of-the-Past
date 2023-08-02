@@ -13,6 +13,7 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
+import com.github.standobyte.jojo.util.general.Container;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.google.common.collect.ImmutableSet;
 
@@ -31,6 +32,7 @@ import net.minecraft.entity.passive.GolemEntity;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
@@ -87,21 +89,25 @@ public class HamonOrganismInfusion extends HamonAction {
     }
     
     @Override
-    public ActionTarget targetBeforePerform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
-        if (target.getType() == TargetType.BLOCK) {
-            BlockPos blockPos = target.getBlockPos();
-            Optional<Entity> entityInside = world.getEntities(null, world.getBlockState(blockPos).getShape(world, blockPos).bounds().move(blockPos))
+    public void overrideVanillaMouseTarget(Container<ActionTarget> targetContainer, World world, LivingEntity user, INonStandPower power) {
+        if (getTargetRequirement().checkTargetType(TargetType.ENTITY) && targetContainer.get().getType() == TargetType.BLOCK) {
+            BlockPos blockPos = targetContainer.get().getBlockPos();
+            VoxelShape shape = world.getBlockState(blockPos).getShape(world, blockPos);
+            if (shape.isEmpty()) {
+                targetContainer.set(ActionTarget.EMPTY);
+                return;
+            }
+            Optional<Entity> entityInside = world.getEntities(user, shape.bounds().move(blockPos))
                     .stream()
                     .filter(entity -> (entity instanceof AnimalEntity || entity instanceof AmbientEntity)
                             && entity.getCapability(EntityHamonChargeCapProvider.CAPABILITY).map(cap -> !cap.hasHamonCharge()).orElse(false))
                     .findAny();
             if (entityInside.isPresent()) {
-                return new ActionTarget(entityInside.get());
+                targetContainer.set(new ActionTarget(entityInside.get()));
             }
         }
-        return super.targetBeforePerform(world, user, power, target);
     }
-
+    
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {

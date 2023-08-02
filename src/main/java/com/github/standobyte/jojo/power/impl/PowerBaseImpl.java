@@ -310,6 +310,9 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     @Override
     public ActionConditionResult checkTarget(Action<P> action, Container<ActionTarget> targetContainer) {
         ActionTarget targetInitial = targetContainer.get();
+        P power = getThis();
+        action.overrideVanillaMouseTarget(targetContainer, user.level, user, power);
+        
         if (targetInitial.getType() == TargetType.ENTITY && targetInitial.getEntity() == null 
                 || targetInitial.getType() == TargetType.BLOCK && targetInitial.getBlockPos() == null
                 || !action.getTargetRequirement().checkTargetType(targetContainer.get().getType())) {
@@ -319,7 +322,6 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             }
         }
         
-        P power = getThis();
         ActionConditionResult preResult = action.checkRangeAndTarget(targetContainer.get(), user, power);
 
         if (!preResult.isPositive()) {

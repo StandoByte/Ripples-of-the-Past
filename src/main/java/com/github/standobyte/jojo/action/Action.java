@@ -17,6 +17,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
+import com.github.standobyte.jojo.util.general.Container;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
@@ -241,6 +242,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     public void onClick(World world, LivingEntity user, P power) {}
     
     public void afterClick(World world, LivingEntity user, P power, boolean passedRequirements) {}
+    
+    public void overrideVanillaMouseTarget(Container<ActionTarget> targetContainer, World world, LivingEntity user, P power) {}
     
     public ActionTarget targetBeforePerform(World world, LivingEntity user, P power, ActionTarget target) {
         return target;

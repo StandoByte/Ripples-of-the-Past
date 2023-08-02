@@ -1,6 +1,8 @@
 package com.github.standobyte.jojo.util.general;
 
-public class Container<T> {
+import java.util.function.Supplier;
+
+public class Container<T> implements Supplier<T> {
     private T object;
     
     public Container(T object) {
@@ -11,6 +13,7 @@ public class Container<T> {
         this.object = object;
     }
     
+    @Override
     public T get() {
         return object;
     }
