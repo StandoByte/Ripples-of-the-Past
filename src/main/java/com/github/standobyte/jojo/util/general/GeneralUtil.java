@@ -85,4 +85,26 @@ public class GeneralUtil {
             return null;
         }
     }
+    
+    public static int largestLessOrEqualBinarySearch(int[] arr, int num) {
+        if (arr.length == 0) return -1;
+        
+        int left = 0;
+        int right = arr.length - 1;
+        if (num >= arr[right]) return right;
+        
+        int index = -1;
+        while (left <= right) {
+            int mid = (left + right) / 2;
+            
+            if (arr[mid] > num) {
+                right = mid - 1;
+            }
+            else {
+                index = mid;
+                left = mid + 1;
+            }
+        }
+        return index;
+    }
 }

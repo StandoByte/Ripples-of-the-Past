@@ -94,6 +94,19 @@ public class HamonData extends TypeSpecificData {
     public static final int MAX_STAT_LEVEL = 60;
     public static final float MAX_BREATHING_LEVEL = 100;
     
+    private static final int[] POINTS_AT_LEVEL;
+    static {
+        POINTS_AT_LEVEL = new int[MAX_STAT_LEVEL + 1];
+        int diff = 0;
+        
+        POINTS_AT_LEVEL[0] = 0;
+        POINTS_AT_LEVEL[1] = 2;
+        for (int i = 2; i < POINTS_AT_LEVEL.length; i++) {
+            diff += 3 + (i - 1) / 20;
+            
+            POINTS_AT_LEVEL[i] = POINTS_AT_LEVEL[i - 1] + POINTS_AT_LEVEL[1] + diff;
+        }
+    }
     public static final int MAX_HAMON_POINTS = pointsAtLevel(MAX_STAT_LEVEL);
     
     private final Random random = new Random();
@@ -439,19 +452,14 @@ public class HamonData extends TypeSpecificData {
         prevBreathStability = breathStability;
     }
     
-
-    private static final int LVL_1_POINTS = 2;
-    private static final int NEXT_LVL_DIFF = 3;
+    
     public static int pointsAtLevel(int level) {
-        return level * (
-                LVL_1_POINTS
-                + LVL_1_POINTS + (level - 1) * NEXT_LVL_DIFF)
-                / 2;
+        level = MathHelper.clamp(level, 0, MAX_STAT_LEVEL);
+        return POINTS_AT_LEVEL[level];
     }
     
-    public static int levelFromPoints(int points) { // inverse formula to pointsAtLevel
-        int b = 2 * LVL_1_POINTS - NEXT_LVL_DIFF;
-        return MathHelper.floor(Math.sqrt((b * b + 8 * NEXT_LVL_DIFF * points)) - b) / (2 * NEXT_LVL_DIFF);
+    public static int levelFromPoints(int points) {
+        return GeneralUtil.largestLessOrEqualBinarySearch(POINTS_AT_LEVEL, points);
     }
     
     public static int pointsAtLevelFraction(float level) {
