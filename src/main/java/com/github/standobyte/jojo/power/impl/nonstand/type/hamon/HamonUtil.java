@@ -55,6 +55,8 @@ import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.CactusBlock;
+import net.minecraft.block.SweetBerryBushBlock;
 import net.minecraft.block.TripWireBlock;
 import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
@@ -96,7 +98,6 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
 
 public class HamonUtil {
 
@@ -258,23 +259,6 @@ public class HamonUtil {
         }
         return;
     }
-    
-
-    
-    public static void cancelCactusDamage(LivingAttackEvent event) {
-        if (event.getSource() == DamageSource.CACTUS || event.getSource() == DamageSource.SWEET_BERRY_BUSH) {
-            LivingEntity entity = event.getEntityLiving();
-            INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
-                power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                    if (power.consumeEnergy(event.getAmount() * 0.5F)) {
-                        // FIXME !!!!!!!!!!!!!!!!!! sfx
-                        emitHamonSparkParticles(entity.level, null, entity.getX(), entity.getY(0.5), entity.getZ(), 0.1F);
-                        event.setCanceled(true);
-                    }
-                });
-            });
-        }
-    }
 
     public static void hamonPerksOnDeath(LivingEntity dead) {
         if (JojoModConfig.getCommonConfigInstance(false).keepHamonOnDeath.get() && !dead.level.getLevelData().isHardcore()) return;
@@ -331,8 +315,71 @@ public class HamonUtil {
         CustomExplosion.explodePreCreated(hamonBlast, world, CustomExplosionType.HAMON);
     }
     
+
+    
+    public static boolean cancelDamageFromBlock(LivingEntity entity, DamageSource dmgSource, float dmgAmount) {
+        DamagingBlockType type = DamagingBlockType.getType(dmgSource);
+        if (type != null) {
+            World world = entity.level;
+            boolean protectedFromDamage = true;
+            boolean fromBlocks = false;
+            
+            AxisAlignedBB hitbox = entity.getBoundingBox();
+            BlockPos posMin = new BlockPos(hitbox.minX + 0.001D, hitbox.minY + 0.001D, hitbox.minZ + 0.001D);
+            BlockPos posMax = new BlockPos(hitbox.maxX - 0.001D, hitbox.maxY - 0.001D, hitbox.maxZ - 0.001D);
+            BlockPos.Mutable blockPos = new BlockPos.Mutable();
+            if (world.hasChunksAt(posMin, posMax)) {
+                for (int x = posMin.getX(); x <= posMax.getX() && protectedFromDamage; ++x) {
+                    for (int y = posMin.getY(); y <= posMax.getY() && protectedFromDamage; ++y) {
+                        for (int z = posMin.getZ(); z <= posMax.getZ() && protectedFromDamage; ++z) {
+                            blockPos.set(x, y, z);
+                            BlockState blockState = world.getBlockState(blockPos);
+                            if (type.rightBlock(blockState)) {
+                                protectedFromDamage &= preventBlockDamage(entity, world, blockPos, blockState, dmgSource, dmgAmount);
+                                fromBlocks = true;
+                            }
+                        }
+                    }
+                }
+            }
+            
+            if (!fromBlocks) {
+                protectedFromDamage = preventBlockDamage(entity, world, null, null, dmgSource, dmgAmount);
+            }
+            
+            return protectedFromDamage;
+        }
+        
+        return false;
+    }
+    
+    private static enum DamagingBlockType {
+        CACTUS {
+            @Override public boolean rightBlock(BlockState blockState) {
+                return blockState.getBlock() instanceof CactusBlock;
+            }
+        },
+        BERRY_BUSH {
+            @Override public boolean rightBlock(BlockState blockState) {
+                return blockState.getBlock() instanceof SweetBerryBushBlock;
+            }
+        };
+        
+        public abstract boolean rightBlock(BlockState blockState);
+        
+        @Nullable public static DamagingBlockType getType(DamageSource dmgSource) {
+            if (dmgSource == DamageSource.CACTUS) {
+                return CACTUS;
+            }
+            else if (dmgSource == DamageSource.SWEET_BERRY_BUSH) {
+                return BERRY_BUSH;
+            }
+            return null;
+        }
+    }
+    
     public static boolean preventBlockDamage(LivingEntity entity, World world, 
-            @Nullable BlockPos blockPos, @Nullable BlockState block, DamageSource dmgSource, float dmgAmount) {
+            @Nullable BlockPos blockPos, @Nullable BlockState blockState, DamageSource dmgSource, float dmgAmount) {
         if (world.isClientSide()) {
             return false;
         }
@@ -364,9 +411,9 @@ public class HamonUtil {
         
         if (damagePrevented) {
             Vector3d sparkPos;
-            if (blockPos != null && block != null) {
+            if (blockPos != null && blockState != null) {
                 AxisAlignedBB entityHitbox = entity.getBoundingBox();
-                AxisAlignedBB blockAABB = block.getCollisionShape(world, blockPos).bounds().move(blockPos);
+                AxisAlignedBB blockAABB = blockState.getCollisionShape(world, blockPos).bounds().move(blockPos);
                 AxisAlignedBB intersection = entityHitbox.intersect(blockAABB);
                 sparkPos = new Vector3d(
                         MathHelper.lerp(Math.random(), intersection.minX, intersection.maxX), 

@@ -462,7 +462,9 @@ public class GameplayEventHandler {
             };
         });
         
-        HamonUtil.cancelCactusDamage(event);
+        if (HamonUtil.cancelDamageFromBlock(event.getEntityLiving(), event.getSource(), event.getAmount())) {
+            event.setCanceled(true);
+        }
         if (VampirismFreeze.onUserAttacked(event)) {
             event.setCanceled(true);
         }
