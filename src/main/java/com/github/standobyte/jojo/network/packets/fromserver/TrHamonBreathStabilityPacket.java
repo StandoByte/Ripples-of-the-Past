@@ -15,10 +15,12 @@ import net.minecraftforge.fml.network.NetworkEvent;
 public class TrHamonBreathStabilityPacket {
     private final int entityId;
     private final float breathStability;
+    private final int noIncTicks;
     
-    public TrHamonBreathStabilityPacket(int entityId, float breathStability) {
+    public TrHamonBreathStabilityPacket(int entityId, float breathStability, int noIncTicks) {
         this.entityId = entityId;
         this.breathStability = breathStability;
+        this.noIncTicks = noIncTicks;
     }
     
     
@@ -29,11 +31,12 @@ public class TrHamonBreathStabilityPacket {
         public void encode(TrHamonBreathStabilityPacket msg, PacketBuffer buf) {
             buf.writeInt(msg.entityId);
             buf.writeFloat(msg.breathStability);
+            buf.writeVarInt(msg.noIncTicks);
         }
 
         @Override
         public TrHamonBreathStabilityPacket decode(PacketBuffer buf) {
-            return new TrHamonBreathStabilityPacket(buf.readInt(), buf.readFloat());
+            return new TrHamonBreathStabilityPacket(buf.readInt(), buf.readFloat(), buf.readVarInt());
         }
 
         @Override
@@ -42,7 +45,7 @@ public class TrHamonBreathStabilityPacket {
             if (entity instanceof LivingEntity) {
                 INonStandPower.getNonStandPowerOptional((LivingEntity) entity).ifPresent(power -> {
                     power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                        hamon.setBreathStability(msg.breathStability);
+                        hamon.setBreathStability(msg.breathStability, msg.noIncTicks);
                     });
                 });
             }

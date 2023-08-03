@@ -135,7 +135,8 @@ public class HamonData extends TypeSpecificData {
     private boolean playedEnergySound = false;
     private float breathStability;
     private float prevBreathStability;
-    private int ticksMaskWithNoHamonBreath; // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! save to nbt
+    private int ticksMaskWithNoHamonBreath;
+    private int ticksNoBreathStabilityInc;
 
     public HamonData() {
         hamonSkills = new MainHamonSkillsManager();
@@ -207,14 +208,20 @@ public class HamonData extends TypeSpecificData {
         return prevBreathStability;
     }
     
-    public void setBreathStability(float value) {
+    public void reduceBreathStability(float value) {
+        setBreathStability(value, 80);
+    }
+    
+    public void setBreathStability(float value, int noIncTicks) {
         value = MathHelper.clamp(value, 0, getMaxBreathStability());
         boolean send = this.breathStability != value;
         this.breathStability = value;
         this.prevBreathStability = value;
+        this.ticksNoBreathStabilityInc = Math.max(noIncTicks, this.ticksNoBreathStabilityInc);
         if (send) {
             serverPlayer.ifPresent(player -> {
-                PacketManager.sendToClientsTrackingAndSelf(new TrHamonBreathStabilityPacket(player.getId(), getBreathStability()), player);
+                PacketManager.sendToClientsTrackingAndSelf(new TrHamonBreathStabilityPacket(
+                        player.getId(), getBreathStability(), ticksNoBreathStabilityInc), player);
             });
         }
     }
@@ -259,6 +266,10 @@ public class HamonData extends TypeSpecificData {
             inc = Math.min(inc, 0);
         }
         
+        if (inc > 0 && ticksNoBreathStabilityInc > 0) {
+            ticksNoBreathStabilityInc--;
+            inc = 0;
+        }
         breathStability = MathHelper.clamp(breathStability + inc, 0, getMaxBreathStability());
         int air = user.getAirSupply();
         if (!user.level.isClientSide()) {
@@ -382,11 +393,11 @@ public class HamonData extends TypeSpecificData {
             float energyRatio = Math.min(energyFromStability / energyNeeded, 1);
             if (doConsume) {
                 if (energyFromStability < energyNeeded) {
-                    setBreathStability(0);
+                    reduceBreathStability(0);
                     outOfBreath(false);
                 }
                 else {
-                    setBreathStability((energyFromStability - energyNeeded) / ENERGY_STABILITY_USAGE_RATIO);
+                    reduceBreathStability((energyFromStability - energyNeeded) / ENERGY_STABILITY_USAGE_RATIO);
                 }
             }
             return 0.25F * energyRatio;
@@ -1269,12 +1280,12 @@ public class HamonData extends TypeSpecificData {
         isBeingSuffocated = false;
         
         if (user.getAirSupply() <= -19) {
-            setBreathStability(0);
+            reduceBreathStability(0);
         }
     }
     
     public void suffocateTick(float suffocationSpeed) {
-        setBreathStability(Math.max(getBreathStability() - getMaxBreathStability() * suffocationSpeed, 1));
+        reduceBreathStability(Math.max(getBreathStability() - getMaxBreathStability() * suffocationSpeed, 1));
         this.isBeingSuffocated = true;
     }
     
@@ -1301,6 +1312,7 @@ public class HamonData extends TypeSpecificData {
         nbt.putFloat("BreathStability", breathStability);
         nbt.putInt("EnergyTicks", noEnergyDecayTicks);
         nbt.putInt("MaskNoBreathTicks", ticksMaskWithNoHamonBreath);
+        nbt.putInt("NoBreathIncTicks", ticksNoBreathStabilityInc);
         nbt.putBoolean("TCSA", tcsa);
         return nbt;
     }
@@ -1326,6 +1338,7 @@ public class HamonData extends TypeSpecificData {
         prevBreathStability = breathStability;
         noEnergyDecayTicks = nbt.getInt("EnergyTicks");
         ticksMaskWithNoHamonBreath = nbt.getInt("MaskNoBreathTicks");
+        ticksNoBreathStabilityInc = nbt.getInt("NoBreathIncTicks");
         tcsa = nbt.getBoolean("TCSA");
     }
     
@@ -1347,7 +1360,7 @@ public class HamonData extends TypeSpecificData {
     public void syncWithTrackingOrUser(LivingEntity user, ServerPlayerEntity entity) {
         PacketManager.sendToClient(new TrHamonStatsPacket(
                 user.getId(), false, getHamonStrengthPoints(), getHamonControlPoints(), getBreathingLevel()), entity);
-        PacketManager.sendToClient(new TrHamonBreathStabilityPacket(user.getId(), getBreathStability()), entity);
+        PacketManager.sendToClient(new TrHamonBreathStabilityPacket(user.getId(), getBreathStability(), ticksNoBreathStabilityInc), entity);
         PacketManager.sendToClient(new TrHamonEnergyTicksPacket(user.getId(), noEnergyDecayTicks), entity);
         hamonSkills.syncWithTrackingOrUser(user, entity, this);
         PacketManager.sendToClient(new TrHamonAuraColorPacket(user.getId(), auraColor), entity);
