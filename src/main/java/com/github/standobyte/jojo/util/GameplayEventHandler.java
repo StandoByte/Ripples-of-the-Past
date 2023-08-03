@@ -1271,8 +1271,12 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onGameModeChange(PlayerEvent.PlayerChangeGameModeEvent event) {
         if (event.getNewGameMode() == GameType.CREATIVE) {
+            PlayerEntity player = event.getPlayer();
             INonStandPower.getNonStandPowerOptional(event.getPlayer()).ifPresent(power -> power.resetCooldowns());
             IStandPower.getStandPowerOptional(event.getPlayer()).ifPresent(stand -> stand.resetCooldowns());
+            player.removeEffect(ModStatusEffects.IMMOBILIZE.get());
+            player.removeEffect(ModStatusEffects.STUN.get());
+            player.removeEffect(ModStatusEffects.HAMON_SHOCK.get());
         }
     }
 }

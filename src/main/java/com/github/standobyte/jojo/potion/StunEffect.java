@@ -40,6 +40,6 @@ public class StunEffect extends ImmobilizeEffect implements IApplicableEffect {
 
     @Override
     public boolean isApplicable(LivingEntity entity) {
-        return !(entity instanceof MobEntity && ((MobEntity) entity).isNoAi());
+        return super.isApplicable(entity) && !(entity instanceof MobEntity && ((MobEntity) entity).isNoAi());
     }
 }

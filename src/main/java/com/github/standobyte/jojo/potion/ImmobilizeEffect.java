@@ -7,8 +7,8 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.potion.EffectType;
 import net.minecraftforge.common.ForgeMod;
 
-public class ImmobilizeEffect extends UncurableEffect {
-
+public class ImmobilizeEffect extends UncurableEffect implements IApplicableEffect {
+    
     public ImmobilizeEffect(int liquidColor) {
         super(EffectType.HARMFUL, liquidColor);
         addAttributeModifier(Attributes.MOVEMENT_SPEED, "7abfcba6-295c-4310-9952-1c58d0eb58fb", -1, AttributeModifier.Operation.MULTIPLY_TOTAL);
@@ -16,7 +16,7 @@ public class ImmobilizeEffect extends UncurableEffect {
         addAttributeModifier(Attributes.ATTACK_SPEED, "018041e0-654d-48cf-a392-8dcb47ca48a3", -1, AttributeModifier.Operation.MULTIPLY_TOTAL);
         addAttributeModifier(ForgeMod.SWIM_SPEED.get(), "f84c1dc3-7b4f-4d5d-8be0-e18c73cb6e59", -1, AttributeModifier.Operation.MULTIPLY_TOTAL);
     }
-
+    
     @Override
     public void applyEffectTick(LivingEntity entity, int amplifier) {
         if (entity instanceof PlayerEntity) {
@@ -36,5 +36,10 @@ public class ImmobilizeEffect extends UncurableEffect {
     public boolean isDurationEffectTick(int duration, int amplifier) {
         return true; 
     }
-
+    
+    @Override
+    public boolean isApplicable(LivingEntity entity) {
+        return !(entity instanceof PlayerEntity && ((PlayerEntity) entity).abilities.instabuild);
+    }
+    
 }
