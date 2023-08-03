@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.item;
 
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.SatiporojaScarfBindingEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.SatiporojaScarfEntity;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -64,7 +64,7 @@ public class SatiporojaScarfItem extends CustomModelArmorItem {
                     if (user.isShiftKeyDown() && hamon.isSkillLearned(ModHamonSkills.SNAKE_MUFFLER.get()) && power.consumeEnergy(100)) {
                         SatiporojaScarfBindingEntity scarf = new SatiporojaScarfBindingEntity(user.level, user);
                         scarf.attachToEntity(target);
-                        target.addEffect(new EffectInstance(ModEffects.STUN.get(), scarf.ticksLifespan()));
+                        target.addEffect(new EffectInstance(ModStatusEffects.STUN.get(), scarf.ticksLifespan()));
                         user.level.addFreshEntity(scarf);
                         if (user instanceof PlayerEntity) {
                             ((PlayerEntity) user).getCooldowns().addCooldown(this, scarf.ticksLifespan());

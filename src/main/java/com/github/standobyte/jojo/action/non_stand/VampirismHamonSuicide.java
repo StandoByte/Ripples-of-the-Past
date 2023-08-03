@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.action.non_stand;
 
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
@@ -22,7 +22,7 @@ public class VampirismHamonSuicide extends VampirismAction {
                 DamageUtil.dealHamonDamage(user, 4, user, null);
             }
             if (ticksHeld == 30) {
-                user.addEffect(new EffectInstance(ModEffects.HAMON_SPREAD.get(), 100, 1));
+                user.addEffect(new EffectInstance(ModStatusEffects.HAMON_SPREAD.get(), 100, 1));
             }
         }
     }

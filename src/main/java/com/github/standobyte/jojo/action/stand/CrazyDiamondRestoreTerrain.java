@@ -26,7 +26,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -63,7 +63,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
         Entity cameraEntity = restorationCenterEntity(user, power);
         Vector3i eyePosI = eyePos(cameraEntity);
-        boolean hasResolveEffect = user.hasEffect(ModEffects.RESOLVE.get());
+        boolean hasResolveEffect = user.hasEffect(ModStatusEffects.RESOLVE.get());
         if (getBlocksInRange(user.level, user, eyePosI, restorationDistManhattan(hasResolveEffect), 
                 block -> blockPosSelectedForRestoration(block, cameraEntity, cameraEntity.getLookAngle(), 
                         cameraEntity.getEyePosition(1.0F), eyePosI, hasResolveEffect, user.isShiftKeyDown())).count() == 0) {
@@ -88,7 +88,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
                 creative = false;
             }
             Entity cameraEntity = restorationCenterEntity(user, userPower);
-            boolean resolveEffect = user.hasEffect(ModEffects.RESOLVE.get());
+            boolean resolveEffect = user.hasEffect(ModStatusEffects.RESOLVE.get());
             int manhattanRange = restorationDistManhattan(resolveEffect);
             List<ItemEntity> itemsAround = world.getEntitiesOfClass(ItemEntity.class, 
                     cameraEntity.getBoundingBox().inflate(manhattanRange * 2),

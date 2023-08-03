@@ -34,7 +34,7 @@ import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDBloodCutterEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModBlocks;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModPaintings;
 import com.github.standobyte.jojo.init.ModParticles;
@@ -202,7 +202,7 @@ public class GameplayEventHandler {
         PlayerEntity player = event.player;
         switch (event.phase) {
         case START:
-            if (ModEffects.isStunned(player)) {
+            if (ModStatusEffects.isStunned(player)) {
                 player.setSprinting(false);
             }
             player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
@@ -260,7 +260,7 @@ public class GameplayEventHandler {
             ArrowEntity arrow = (ArrowEntity) newEntity;
             if (arrow.getOwner() instanceof StrayEntity) {
                 arrow.setEffectsFromItem(new ItemStack(Items.ARROW));
-                arrow.addEffect(new EffectInstance(ModEffects.FREEZE.get(), 300));
+                arrow.addEffect(new EffectInstance(ModStatusEffects.FREEZE.get(), 300));
             }
         }
     }
@@ -293,7 +293,7 @@ public class GameplayEventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void cancelStunnedPlayerInteraction(PlayerInteractEvent event) {
-        if (event.isCancelable() && ModEffects.isStunned(event.getPlayer())) {
+        if (event.isCancelable() && ModStatusEffects.isStunned(event.getPlayer())) {
             event.setCanceled(true);
             event.setCancellationResult(ActionResultType.FAIL);
         }
@@ -301,7 +301,7 @@ public class GameplayEventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void cancelItemPickupInStun(EntityItemPickupEvent event) {
-        if (ModEffects.isStunned(event.getPlayer())) {
+        if (ModStatusEffects.isStunned(event.getPlayer())) {
             event.setCanceled(true);
         }
     }
@@ -395,11 +395,11 @@ public class GameplayEventHandler {
     public static void cancelLivingHeal(LivingHealEvent event) {
         LivingEntity entity = event.getEntityLiving();
         float amount = event.getAmount();
-        if (entity.hasEffect(ModEffects.VAMPIRE_SUN_BURN.get())) {
+        if (entity.hasEffect(ModStatusEffects.VAMPIRE_SUN_BURN.get())) {
             amount = VampireSunBurnEffect.reduceUndeadHealing();
         }
-        if (amount > 0 && entity.hasEffect(ModEffects.HAMON_SPREAD.get())) {
-            amount = HamonSpreadEffect.reduceUndeadHealing(entity.getEffect(ModEffects.HAMON_SPREAD.get()), amount);
+        if (amount > 0 && entity.hasEffect(ModStatusEffects.HAMON_SPREAD.get())) {
+            amount = HamonSpreadEffect.reduceUndeadHealing(entity.getEffect(ModStatusEffects.HAMON_SPREAD.get()), amount);
         }
         if (amount <= 0) {
             event.setCanceled(true);
@@ -417,7 +417,7 @@ public class GameplayEventHandler {
         if (event.getOutcome() instanceof MobEntity) {
             LivingEntity pre = event.getEntityLiving();
             MobEntity converted = (MobEntity) event.getOutcome();
-            if (converted.isNoAi() && ModEffects.isStunned(pre) && !ModEffects.isStunned(converted)) {
+            if (converted.isNoAi() && ModStatusEffects.isStunned(pre) && !ModStatusEffects.isStunned(converted)) {
                 converted.setNoAi(false);
             }
         }
@@ -822,11 +822,11 @@ public class GameplayEventHandler {
         Entity entity = event.getEntity();
         EffectInstance effectInstance = event.getPotionEffect();
         if (!entity.level.isClientSide()) {
-            if (ModEffects.isEffectTracked(effectInstance.getEffect())) {
+            if (ModStatusEffects.isEffectTracked(effectInstance.getEffect())) {
                 ((ServerChunkProvider) entity.getCommandSenderWorld().getChunkSource()).broadcast(entity, 
                         new SPlayEntityEffectPacket(entity.getId(), effectInstance));
             }
-            if (effectInstance.getEffect() == ModEffects.RESOLVE.get() && entity instanceof ServerPlayerEntity) {
+            if (effectInstance.getEffect() == ModStatusEffects.RESOLVE.get() && entity instanceof ServerPlayerEntity) {
                 PacketManager.sendToClient(new ResolveEffectStartPacket(effectInstance.getAmplifier()), (ServerPlayerEntity) entity);
             }
         }
@@ -842,7 +842,7 @@ public class GameplayEventHandler {
         EntityStandType.removeEffectSharedWithStand(event.getEntityLiving(), event.getPotion());
         
         Entity entity = event.getEntity();
-        if (!entity.level.isClientSide() && event.getPotionEffect() != null && ModEffects.isEffectTracked(event.getPotionEffect().getEffect())) {
+        if (!entity.level.isClientSide() && event.getPotionEffect() != null && ModStatusEffects.isEffectTracked(event.getPotionEffect().getEffect())) {
             ((ServerChunkProvider) entity.getCommandSenderWorld().getChunkSource()).broadcast(entity, 
                     new SRemoveEntityEffectPacket(entity.getId(), event.getPotion()));
         }
@@ -853,7 +853,7 @@ public class GameplayEventHandler {
         EntityStandType.removeEffectSharedWithStand(event.getEntityLiving(), event.getPotionEffect().getEffect());
         
         Entity entity = event.getEntity();
-        if (!entity.level.isClientSide() && ModEffects.isEffectTracked(event.getPotionEffect().getEffect())) {
+        if (!entity.level.isClientSide() && ModStatusEffects.isEffectTracked(event.getPotionEffect().getEffect())) {
             ((ServerChunkProvider) entity.getCommandSenderWorld().getChunkSource()).broadcast(entity, 
                     new SRemoveEntityEffectPacket(entity.getId(), event.getPotionEffect().getEffect()));
         }
@@ -865,7 +865,7 @@ public class GameplayEventHandler {
             ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
             LivingEntity tracked = (LivingEntity) event.getTarget();
             for (Map.Entry<Effect, EffectInstance> effectEntry : tracked.getActiveEffectsMap().entrySet()) {
-                if (ModEffects.isEffectTracked(effectEntry.getKey())) {
+                if (ModStatusEffects.isEffectTracked(effectEntry.getKey())) {
                     player.connection.send(new SPlayEntityEffectPacket(tracked.getId(), effectEntry.getValue()));
                 }
             }
@@ -1036,7 +1036,7 @@ public class GameplayEventHandler {
             return 0;
         }
 
-        float resolveRatio = user.hasEffect(ModEffects.RESOLVE.get()) ? 1 : stand.getResolveRatio();
+        float resolveRatio = user.hasEffect(ModStatusEffects.RESOLVE.get()) ? 1 : stand.getResolveRatio();
         int ticks = (int) (60 * (stand.getResolveLevel() + resolveRatio));
         if (user.level.getLevelData().isHardcore()) {
             ticks += ticks / 2;
@@ -1054,10 +1054,10 @@ public class GameplayEventHandler {
 
     private static void cheatDeath(LivingDeathEvent event) {
         LivingEntity dead = event.getEntityLiving();
-        if (dead.hasEffect(ModEffects.CHEAT_DEATH.get())) {
+        if (dead.hasEffect(ModStatusEffects.CHEAT_DEATH.get())) {
             event.setCanceled(true);
             dead.setHealth(dead.getMaxHealth() / 2F);
-            dead.removeEffect(ModEffects.CHEAT_DEATH.get());
+            dead.removeEffect(ModStatusEffects.CHEAT_DEATH.get());
             dead.clearFire();
             ((ServerWorld) dead.level).sendParticles(ParticleTypes.POOF, dead.getX(), dead.getY(), dead.getZ(), 
                     20, (double) dead.getBbWidth() * 2D - 1D, (double) dead.getBbHeight(), (double) dead.getBbWidth() * 2D - 1D, 0.02D);

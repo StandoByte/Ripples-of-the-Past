@@ -7,7 +7,7 @@ import java.util.Set;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.non_stand.VampirismAction;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
@@ -152,7 +152,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismData> {
         }
         if (effect.getCategory() == EffectType.HARMFUL)                     return curingStage >= 4 ? effect == Effects.BLINDNESS ? 0 : 3 - difficulty : -1;
         if (effect == Effects.HEALTH_BOOST)                                 return difficulty * (curingStage > 0 ? 5 - curingStage * 2 : 5) - 1;
-        if (effect == ModEffects.UNDEAD_REGENERATION.get())                 return Math.min(bloodLevel - 2, 4);
+        if (effect == ModStatusEffects.UNDEAD_REGENERATION.get())                 return Math.min(bloodLevel - 2, 4);
         if (effect == Effects.DAMAGE_BOOST)                                 return bloodLevel - 4;
         if (effect == Effects.MOVEMENT_SPEED)                               return bloodLevel - 4;
         if (effect == Effects.DIG_SPEED)                                    return bloodLevel - 4;
@@ -166,7 +166,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismData> {
     public static void initVampiricEffects() {
         Collections.addAll(EFFECTS, 
                 Effects.HEALTH_BOOST,
-                ModEffects.UNDEAD_REGENERATION.get(),
+                ModStatusEffects.UNDEAD_REGENERATION.get(),
                 Effects.DAMAGE_BOOST,
                 Effects.MOVEMENT_SPEED,
                 Effects.DIG_SPEED,

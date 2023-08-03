@@ -27,7 +27,7 @@ import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer;
 import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer.BarType;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
@@ -424,7 +424,7 @@ public class HamonData extends TypeSpecificData {
 //        }
         
         float freeze = 0;
-        EffectInstance freezeEffect = user.getEffect(ModEffects.FREEZE.get());
+        EffectInstance freezeEffect = user.getEffect(ModStatusEffects.FREEZE.get());
         if (freezeEffect != null) {
             freeze = Math.min((freezeEffect.getAmplifier() + 1) * 0.25F, 1);
         }
@@ -1054,7 +1054,7 @@ public class HamonData extends TypeSpecificData {
             serverPlayer.ifPresent(player -> {
                 PacketManager.sendToClient(new HamonSkillRemovePacket(skill), player);
                 if (skill == ModHamonSkills.CHEAT_DEATH.get()) {
-                    player.removeEffect(ModEffects.CHEAT_DEATH.get());
+                    player.removeEffect(ModStatusEffects.CHEAT_DEATH.get());
                 }
             });
         }

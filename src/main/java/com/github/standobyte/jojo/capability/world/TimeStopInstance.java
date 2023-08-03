@@ -6,7 +6,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.stand.TimeStop;
 import com.github.standobyte.jojo.action.stand.TimeStopInstant;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopInstancePacket;
@@ -221,7 +221,7 @@ public class TimeStopInstance {
         }
         else {
             cooldown = stats.timeStopCooldownPerTick * ticks;
-            if (power.getUser() != null && power.getUser().hasEffect(ModEffects.RESOLVE.get())) {
+            if (power.getUser() != null && power.getUser().hasEffect(ModStatusEffects.RESOLVE.get())) {
                 cooldown /= 3F;
             }
         }

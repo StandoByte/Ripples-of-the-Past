@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.block;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModTileEntities;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.tileentity.PillarmanBossTileEntity;
@@ -148,7 +148,7 @@ public class PillarmanBossMultiBlock extends Block {
                 }
                 
                 if (DamageUtil.dealPillarmanAbsorptionDamage(livingEntity, DAMAGE_AMOUNT, null)) {
-                    livingEntity.addEffect(new EffectInstance(ModEffects.STUN.get(), 10, 0));
+                    livingEntity.addEffect(new EffectInstance(ModStatusEffects.STUN.get(), 10, 0));
                     BlockPos tileEntityPos = posByPart(state, pos, PART_WITH_TILE_ENTITY);
                     TileEntity tileEntity = world.getBlockEntity(tileEntityPos);
                     if (tileEntity instanceof PillarmanBossTileEntity) {

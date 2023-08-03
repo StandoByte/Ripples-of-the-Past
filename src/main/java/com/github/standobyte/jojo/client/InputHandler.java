@@ -31,7 +31,7 @@ import com.github.standobyte.jojo.client.ui.screen.hudlayout.HudLayoutEditingScr
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.ItemProjectileEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -556,7 +556,7 @@ public class InputHandler {
     }
     
     private boolean shouldVanillaInputStun() {
-        return ModEffects.isStunned(mc.player) || !mc.player.canUpdate();
+        return ModStatusEffects.isStunned(mc.player) || !mc.player.canUpdate();
     }
     
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -595,7 +595,7 @@ public class InputHandler {
             return;
         }
         
-        if (event.getPlayer().hasEffect(ModEffects.MISSHAPEN_LEGS.get())) {
+        if (event.getPlayer().hasEffect(ModStatusEffects.MISSHAPEN_LEGS.get())) {
             MovementInput input = event.getMovementInput();
             input.forwardImpulse *= -1;
             input.leftImpulse *= -1;
@@ -626,7 +626,7 @@ public class InputHandler {
             return;
         }
         
-        if (ModEffects.isStunned(mc.player)) {
+        if (ModStatusEffects.isStunned(mc.player)) {
             if (!wasStunned) {
                 prevSensitivity = mc.options.sensitivity;
                 wasStunned = true;
@@ -639,7 +639,7 @@ public class InputHandler {
             wasStunned = false;
         }
         
-        boolean invert = mc.player.hasEffect(ModEffects.MISSHAPEN_FACE.get());
+        boolean invert = mc.player.hasEffect(ModStatusEffects.MISSHAPEN_FACE.get());
         if (invert ^ mc.options.sensitivity < 0) {
             mc.options.sensitivity = -mc.options.sensitivity + ZERO_SENSITIVITY * 2;
         }
@@ -673,7 +673,7 @@ public class InputHandler {
     }
     
     private void tickEffects() {
-        if (mc.player != null && mc.player.hasEffect(ModEffects.MISSHAPEN_ARMS.get())) {
+        if (mc.player != null && mc.player.hasEffect(ModStatusEffects.MISSHAPEN_ARMS.get())) {
             mouseButtonsInvertTick();
         }
         else {

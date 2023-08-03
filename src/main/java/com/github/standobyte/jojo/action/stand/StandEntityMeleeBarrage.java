@@ -18,7 +18,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrBarrageHitSoundPacket;
@@ -218,7 +218,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
     @Override
     public int getHoldDurationMax(IStandPower standPower) {
         LivingEntity user = standPower.getUser();
-        if (user != null && user.hasEffect(ModEffects.RESOLVE.get())) {
+        if (user != null && user.hasEffect(ModStatusEffects.RESOLVE.get())) {
             return Integer.MAX_VALUE;
         }
         if (standPower.getStandManifestation() instanceof StandEntity) {
@@ -235,7 +235,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
     @Override
     public boolean isFreeRecovery(IStandPower standPower, StandEntity standEntity) {
         LivingEntity user = standPower.getUser();
-        return user != null && user.hasEffect(ModEffects.RESOLVE.get());
+        return user != null && user.hasEffect(ModStatusEffects.RESOLVE.get());
     }
     
     

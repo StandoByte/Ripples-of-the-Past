@@ -29,7 +29,7 @@ import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer.BarType;
 import com.github.standobyte.jojo.entity.CrimsonBubbleEntity;
 import com.github.standobyte.jojo.entity.HamonBlockChargeEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.SnakeMufflerEntity;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModParticles;
@@ -142,7 +142,7 @@ public class HamonUtil {
     }
     
     public static void updateCheatDeathEffect(LivingEntity user) {
-        user.addEffect(new EffectInstance(ModEffects.CHEAT_DEATH.get(), 120000, 0, false, false, true));
+        user.addEffect(new EffectInstance(ModStatusEffects.CHEAT_DEATH.get(), 120000, 0, false, false, true));
     }
     
     public static boolean snakeMuffler(LivingEntity target, DamageSource dmgSource, float dmgAmount) {

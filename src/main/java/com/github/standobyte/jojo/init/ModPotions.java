@@ -19,13 +19,13 @@ public class ModPotions {
     public static final DeferredRegister<Potion> POTIONS = DeferredRegister.create(ForgeRegistries.POTION_TYPES, JojoMod.MOD_ID);
     
     public static final RegistryObject<Potion> FREEZE_POTION = POTIONS.register("freeze", 
-            () -> new Potion(new EffectInstance(ModEffects.FREEZE.get(), 900, 0)));
+            () -> new Potion(new EffectInstance(ModStatusEffects.FREEZE.get(), 900, 0)));
     
     public static final RegistryObject<Potion> FREEZE_LONG_POTION = POTIONS.register("long_freeze", 
-            () -> new Potion(new EffectInstance(ModEffects.FREEZE.get(), 2400, 0)));
+            () -> new Potion(new EffectInstance(ModStatusEffects.FREEZE.get(), 2400, 0)));
     
     public static final RegistryObject<Potion> FREEZE_STRONG_POTION = POTIONS.register("strong_freeze", 
-            () -> new Potion(new EffectInstance(ModEffects.FREEZE.get(), 450, 1)));
+            () -> new Potion(new EffectInstance(ModStatusEffects.FREEZE.get(), 450, 1)));
     
     
     public static void registerRecipes() {

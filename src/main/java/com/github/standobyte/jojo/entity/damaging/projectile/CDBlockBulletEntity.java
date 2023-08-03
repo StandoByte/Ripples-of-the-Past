@@ -7,7 +7,7 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondHeal;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
@@ -133,13 +133,13 @@ public class CDBlockBulletEntity extends ModdedProjectileEntity {
             
             else if (target instanceof LivingEntity) {
                 if (block == Blocks.ICE) {
-                    ((LivingEntity) target).addEffect(new EffectInstance(ModEffects.FREEZE.get(), 60, 0));
+                    ((LivingEntity) target).addEffect(new EffectInstance(ModStatusEffects.FREEZE.get(), 60, 0));
                 }
                 else if (block == Blocks.PACKED_ICE) {
-                    ((LivingEntity) target).addEffect(new EffectInstance(ModEffects.FREEZE.get(), 60, 1));
+                    ((LivingEntity) target).addEffect(new EffectInstance(ModStatusEffects.FREEZE.get(), 60, 1));
                 }
                 else if (block == Blocks.BLUE_ICE) {
-                    ((LivingEntity) target).addEffect(new EffectInstance(ModEffects.FREEZE.get(), 60, 2));
+                    ((LivingEntity) target).addEffect(new EffectInstance(ModStatusEffects.FREEZE.get(), 60, 2));
                 }
             }
         }

@@ -11,7 +11,7 @@ import java.util.Random;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.StandEntityRenderer;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClStandManualMovementPacket;
 import com.google.common.collect.Lists;
@@ -103,7 +103,7 @@ public class StandController {
             PacketManager.sendToServer(new ClStandManualMovementPacket(stand.getX(), stand.getY(), stand.getZ(), stand.hadInput()));
         }
         else {
-            if ((mc.getCameraEntity() == mc.player || mc.getCameraEntity() == null) && ModEffects.isStunned(mc.player)) {
+            if ((mc.getCameraEntity() == mc.player || mc.getCameraEntity() == null) && ModStatusEffects.isStunned(mc.player)) {
                 MovementInput input = event.getMovementInput();
                 input.forwardImpulse = 0;
                 input.leftImpulse = 0;

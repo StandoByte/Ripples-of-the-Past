@@ -8,7 +8,7 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
@@ -53,7 +53,7 @@ public abstract class StandAction extends Action<IStandPower> {
     @Override
     protected int getCooldownAdditional(IStandPower power, int ticksHeld) {
         int cooldown = super.getCooldownAdditional(power, ticksHeld);
-        if (cooldown > 0 && power.getUser().hasEffect(ModEffects.RESOLVE.get())) {
+        if (cooldown > 0 && power.getUser().hasEffect(ModStatusEffects.RESOLVE.get())) {
             cooldown = (int) ((float) cooldown * this.resolveCooldownMultiplier);
         }
         return cooldown;
@@ -131,7 +131,7 @@ public abstract class StandAction extends Action<IStandPower> {
     public IFormattableTextComponent getNameLocked(IStandPower power) {
         if (resolveLevelToUnlock > power.getResolveLevel()) {
             return new TranslationTextComponent("jojo.layout_edit.locked.stand", 
-                    new TranslationTextComponent("jojo.layout_edit.locked.stand.resolve").withStyle(ClientUtil.textColor(ModEffects.RESOLVE.get().getColor())), 
+                    new TranslationTextComponent("jojo.layout_edit.locked.stand.resolve").withStyle(ClientUtil.textColor(ModStatusEffects.RESOLVE.get().getColor())), 
                     (int) resolveLevelToUnlock);
         }
         return super.getNameLocked(power);

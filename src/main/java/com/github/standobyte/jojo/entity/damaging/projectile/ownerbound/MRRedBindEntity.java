@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -104,10 +104,10 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
                 if (!JojoModUtil.isTargetBlocking(targetLiving)) {
                     attachToEntity(targetLiving);
                     if (!level.isClientSide()) {
-                        boolean thisEffect = immobilizedEffect == targetLiving.getEffect(ModEffects.IMMOBILIZE.get());
-                        targetLiving.addEffect(new EffectInstance(ModEffects.IMMOBILIZE.get(), ticksLifespan() - tickCount));
+                        boolean thisEffect = immobilizedEffect == targetLiving.getEffect(ModStatusEffects.IMMOBILIZE.get());
+                        targetLiving.addEffect(new EffectInstance(ModStatusEffects.IMMOBILIZE.get(), ticksLifespan() - tickCount));
                         if (thisEffect) {
-                            immobilizedEffect = targetLiving.getEffect(ModEffects.IMMOBILIZE.get());
+                            immobilizedEffect = targetLiving.getEffect(ModStatusEffects.IMMOBILIZE.get());
                         }
                     }
                     return true;
@@ -144,8 +144,8 @@ public class MRRedBindEntity extends OwnerBoundProjectileEntity {
         LivingEntity target = getEntityAttachedTo();
         if (target != null) {
             MCUtil.removeEffectInstance(target, immobilizedEffect);
-            target.addEffect(new EffectInstance(ModEffects.STUN.get(), ticksLifespan() - tickCount));
-            immobilizedEffect = target.getEffect(ModEffects.STUN.get());
+            target.addEffect(new EffectInstance(ModStatusEffects.STUN.get(), ticksLifespan() - tickCount));
+            immobilizedEffect = target.getEffect(ModStatusEffects.STUN.get());
         }
     }
     

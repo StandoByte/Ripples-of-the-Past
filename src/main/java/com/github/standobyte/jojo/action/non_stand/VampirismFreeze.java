@@ -4,7 +4,7 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.vampirism.ModVampirismActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -70,16 +70,16 @@ public class VampirismFreeze extends VampirismAction {
                         turnSkeletonIntoStray(targetLiving);
                     }
                     else if (DamageUtil.dealColdDamage(targetLiving, damage, user, null)) {
-                        EffectInstance freezeInstance = targetLiving.getEffect(ModEffects.FREEZE.get());
+                        EffectInstance freezeInstance = targetLiving.getEffect(ModStatusEffects.FREEZE.get());
                         if (freezeInstance == null) {
                             world.playSound(null, targetLiving, ModSounds.VAMPIRE_FREEZE.get(), targetLiving.getSoundSource(), 1.0F, 1.0F);
-                            targetLiving.addEffect(new EffectInstance(ModEffects.FREEZE.get(), (difficulty + 1) * 50, 0));
+                            targetLiving.addEffect(new EffectInstance(ModStatusEffects.FREEZE.get(), (difficulty + 1) * 50, 0));
                         }
                         else {
                             int additionalDuration = (difficulty - 1) * 5 + 1;
                             int duration = freezeInstance.getDuration() + additionalDuration;
                             int lvl = duration / 100;
-                            targetLiving.addEffect(new EffectInstance(ModEffects.FREEZE.get(), duration, lvl));
+                            targetLiving.addEffect(new EffectInstance(ModStatusEffects.FREEZE.get(), duration, lvl));
                         }
                     }
                 }
@@ -157,7 +157,7 @@ public class VampirismFreeze extends VampirismAction {
                 if (power.getHeldAction(true) == ModVampirismActions.VAMPIRISM_FREEZE.get()) {
                     World world = attacker.level;
                     int difficulty = world.getDifficulty().getId();
-                    ((LivingEntity) attacker).addEffect(new EffectInstance(ModEffects.FREEZE.get(), difficulty * 100, difficulty));
+                    ((LivingEntity) attacker).addEffect(new EffectInstance(ModStatusEffects.FREEZE.get(), difficulty * 100, difficulty));
                     world.playSound(null, attacker, ModSounds.VAMPIRE_FREEZE.get(), attacker.getSoundSource(), 1.0F, 1.0F);
                     return true;
                 }

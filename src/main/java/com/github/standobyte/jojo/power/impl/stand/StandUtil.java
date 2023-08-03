@@ -18,7 +18,7 @@ import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.StandController;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.StandControlStatusPacket;
@@ -121,7 +121,7 @@ public class StandUtil {
     }
     
     public static boolean playerCanSeeStands(PlayerEntity player) {
-        return isEntityStandUser(player) || player.hasEffect(ModEffects.SPIRIT_VISION.get());
+        return isEntityStandUser(player) || player.hasEffect(ModStatusEffects.SPIRIT_VISION.get());
     }
     
     public static boolean playerCanHearStands(PlayerEntity player) {
@@ -153,7 +153,7 @@ public class StandUtil {
     }
     
     public static boolean standIgnoresStaminaDebuff(IStandPower power) {
-        return power.getUser() == null || power.getUser().hasEffect(ModEffects.RESOLVE.get()) || power.isUserCreative();
+        return power.getUser() == null || power.getUser().hasEffect(ModStatusEffects.RESOLVE.get()) || power.isUserCreative();
     }
     
     public static LivingEntity getStandUser(LivingEntity standOrUser) {
@@ -176,7 +176,7 @@ public class StandUtil {
                     return 1F;
                 }).orElse(1F);
             }
-            if (target.hasEffect(ModEffects.RESOLVE.get())) {
+            if (target.hasEffect(ModStatusEffects.RESOLVE.get())) {
                 points *= Math.max(1 / (stand.getResolveRatio() + 0.2F), 1);
             }
             

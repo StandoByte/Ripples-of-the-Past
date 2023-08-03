@@ -13,7 +13,7 @@ import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -372,7 +372,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         power.getType() == ModPowers.VAMPIRISM.get()).orElse(false)) {
             return 0;
         }
-        if (user.hasEffect(ModEffects.RESOLVE.get())) {
+        if (user.hasEffect(ModStatusEffects.RESOLVE.get())) {
             return ResolveCounter.RESOLVE_DMG_REDUCTION;
         }
         if (usesResolve()) {
@@ -471,7 +471,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
 
     @Override
     public void addLearningProgressPoints(Action<IStandPower> action, float points) {
-        if (user != null && user.hasEffect(ModEffects.RESOLVE.get())) {
+        if (user != null && user.hasEffect(ModStatusEffects.RESOLVE.get())) {
             points *= 4;
         }
         setLearningProgressPoints(action, getLearningProgressPoints(action) + points, true, true);

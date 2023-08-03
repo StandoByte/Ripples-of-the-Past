@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
@@ -59,7 +59,7 @@ public class HamonBurnLayer<T extends LivingEntity, M extends EntityModel<T>> ex
     
     @Nullable
     private ResourceLocation getTexture(EntityModel<?> model, LivingEntity entity) {
-        EffectInstance hamonSpread = entity.getEffect(ModEffects.HAMON_SPREAD.get());
+        EffectInstance hamonSpread = entity.getEffect(ModStatusEffects.HAMON_SPREAD.get());
         if (hamonSpread != null) {
             int lvl = Math.min(hamonSpread.getAmplifier(), 3);
             TextureSize size = TextureSize.getClosestTexSize(model);

@@ -6,7 +6,7 @@ import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -107,16 +107,16 @@ public class CrazyDiamondMisshapeBodyPart extends StandEntityActionModifier {
             switch (this) {
             case HEAD:
                 target.addEffect(new EffectInstance(Effects.CONFUSION, 60, 0, false, false, true));
-                target.addEffect(new EffectInstance(ModEffects.MISSHAPEN_FACE.get(), 200, 0, false, false, true));
+                target.addEffect(new EffectInstance(ModStatusEffects.MISSHAPEN_FACE.get(), 200, 0, false, false, true));
                 break;
             case TORSO_ARMS:
                 target.addEffect(new EffectInstance(Effects.WEAKNESS, 60, 0, false, false, true));
                 target.addEffect(new EffectInstance(Effects.DIG_SLOWDOWN, 60, 1, false, false, true));
-                target.addEffect(new EffectInstance(ModEffects.MISSHAPEN_ARMS.get(), 200, 0, false, false, true));
+                target.addEffect(new EffectInstance(ModStatusEffects.MISSHAPEN_ARMS.get(), 200, 0, false, false, true));
                 break;
             case LEGS:
                 target.addEffect(new EffectInstance(Effects.MOVEMENT_SLOWDOWN, 60, 1, false, false, true));
-                target.addEffect(new EffectInstance(ModEffects.MISSHAPEN_LEGS.get(), 200, 0, false, false, true));
+                target.addEffect(new EffectInstance(ModStatusEffects.MISSHAPEN_LEGS.get(), 200, 0, false, false, true));
                 break;
             }
         }

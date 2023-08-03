@@ -4,7 +4,7 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.mob.HungryZombieEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -47,7 +47,7 @@ public class VampirismDarkAura extends VampirismAction {
                 entity.addEffect(new EffectInstance(Effects.WEAKNESS, duration, amplifier));
                 entity.addEffect(new EffectInstance(Effects.DIG_SLOWDOWN, duration, amplifier));
                 if (passive) {
-                    entity.addEffect(new EffectInstance(ModEffects.STUN.get(), duration));
+                    entity.addEffect(new EffectInstance(ModStatusEffects.STUN.get(), duration));
                 }
             }
             if (world.getDifficulty() == Difficulty.HARD) {

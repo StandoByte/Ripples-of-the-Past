@@ -5,7 +5,7 @@ import java.util.function.Predicate;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.block.WoodenCoffinBlock;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.potion.VampireSunBurnEffect;
@@ -41,7 +41,7 @@ public class VampirismUtil {
                     sunDamage > 0
                     && DamageUtil.dealUltravioletDamage(entity, sunDamage, null, null, true)
                     && entity instanceof PlayerEntity) {
-                EffectInstance sunBurnEffect = entity.getEffect(ModEffects.VAMPIRE_SUN_BURN.get());
+                EffectInstance sunBurnEffect = entity.getEffect(ModStatusEffects.VAMPIRE_SUN_BURN.get());
                 int duration;
                 int amplifier;
                 if (sunBurnEffect == null) {
@@ -61,7 +61,7 @@ public class VampirismUtil {
 //    private static final float MAX_SUN_DAMAGE = 10;
 //    private static final float MIN_SUN_DAMAGE = 2;
     private static float getSunDamage(LivingEntity entity) {
-        if (entity.hasEffect(ModEffects.SUN_RESISTANCE.get())
+        if (entity.hasEffect(ModStatusEffects.SUN_RESISTANCE.get())
                 || !(entity instanceof PlayerEntity || JojoModConfig.getCommonConfigInstance(false).undeadMobsSunDamage.get())
                 || entity.isSleeping() && entity.getSleepingPos().map(sleepingPos -> {
                     BlockState blockState = entity.level.getBlockState(sleepingPos);

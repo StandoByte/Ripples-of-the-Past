@@ -777,7 +777,7 @@
   "hamonSkill.protection.desc": "Creates a charge around the user's body, reducing the incoming physical damage.",
   "hamonSkill.detector.name": "Detector",
   "hamonSkill.detector.desc": "Gives entities around the user Glowing effect.",
-  "hamonSkill.hypnosis.name": "Hypnosis",
+  "hamonSkill.hypnosis.name": "Animal Hypnosis",
   "hamonSkill.hypnosis.desc": "The user temporarily tames a tameable animal.",
   "hamonSkill.hamon_shock.name": "Hamon Shock",
   "hamonSkill.hamon_shock.desc": "______",
@@ -848,7 +848,7 @@
   "action.jojo.hamon_life_magnetism": "Life Magnetism",
   "action.jojo.hamon_projectile_shield": "Projectile Shield",
   "action.jojo.hamon_protection": "__________",
-  "action.jojo.hamon_hypnosis": "Hypnosis",
+  "action.jojo.hamon_hypnosis": "Animal Hypnosis",
   "action.jojo.hamon_shock": "Hamon Shock",
   
   "action.jojo.jonathan_overdrive_barrage": "Overdrive Barrage",

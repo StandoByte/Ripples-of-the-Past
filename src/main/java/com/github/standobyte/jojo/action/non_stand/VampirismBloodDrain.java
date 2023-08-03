@@ -8,7 +8,7 @@ import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.mob.HungryZombieEntity;
 import com.github.standobyte.jojo.init.ModCustomStats;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -83,7 +83,7 @@ public class VampirismBloodDrain extends VampirismAction {
                             p -> p.getType() == ModPowers.HAMON.get()).orElse(false)) {
                         bloodAndHealModifier *= 4F;
                     }
-                    EffectInstance freeze = targetEntity.getEffect(ModEffects.FREEZE.get());
+                    EffectInstance freeze = targetEntity.getEffect(ModStatusEffects.FREEZE.get());
                     if (freeze != null) {
                         bloodAndHealModifier *= 1 - Math.min((freeze.getAmplifier() + 1) * 0.2F, 1);
                     }

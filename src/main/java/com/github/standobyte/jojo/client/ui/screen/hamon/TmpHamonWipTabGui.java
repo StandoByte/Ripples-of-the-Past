@@ -21,7 +21,7 @@ public class TmpHamonWipTabGui extends HamonTabGui {
         super(minecraft, screen, "", -1, -1);
         int textWidth = HamonScreen.WINDOW_WIDTH - 30;
         descLines = minecraft.font.split(new StringTextComponent(
-                "This part of the Hamon training is undergoing some changes, as the mod's developer isn't yet satisfied with the mechanic. The skills are currently incomplete too.\n" + 
+                "This part of the Hamon training is undergoing some changes, as the mod's developer isn't yet satisfied with the mechanic. The skills are currently unfinished too.\n" + 
                 "This will be addressed in the upcoming updates, where the updated techniques will be added one by one.\n" + 
                 "Please don't throw rotten tomatoes at the developer."
                 ), textWidth); // doesn't need an entry in the lang files really

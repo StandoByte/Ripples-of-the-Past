@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.potion;
 
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.FlyingEntity;
@@ -47,6 +47,6 @@ public class HamonSpreadEffect extends UncurableEffect implements IApplicableEff
     
     public static void giveEffectTo(LivingEntity entity, int duration, int amplifier) {
         entity.addEffect(new EffectInstance(Effects.WEAKNESS, duration, amplifier, false, false, true));
-        entity.addEffect(new EffectInstance(ModEffects.HAMON_SPREAD.get(), duration, amplifier, false, false, false));
+        entity.addEffect(new EffectInstance(ModStatusEffects.HAMON_SPREAD.get(), duration, amplifier, false, false, false));
     }
 }

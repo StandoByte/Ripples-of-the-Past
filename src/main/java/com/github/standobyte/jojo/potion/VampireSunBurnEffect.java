@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.potion;
 
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.LivingEntity;
@@ -71,6 +71,6 @@ public class VampireSunBurnEffect extends UncurableEffect implements IApplicable
     
     public static void giveEffectTo(LivingEntity entity, int duration, int amplifier) {
         entity.addEffect(new EffectInstance(Effects.WEAKNESS, duration, amplifier, false, false, true));
-        entity.addEffect(new EffectInstance(ModEffects.VAMPIRE_SUN_BURN.get(), duration, amplifier, false, false, false));
+        entity.addEffect(new EffectInstance(ModStatusEffects.VAMPIRE_SUN_BURN.get(), duration, amplifier, false, false, false));
     }
 }

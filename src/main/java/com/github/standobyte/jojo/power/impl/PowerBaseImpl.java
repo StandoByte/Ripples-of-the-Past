@@ -14,7 +14,7 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotific
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.command.JojoControlsCommand;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.ActionCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.LeapCooldownPacket;
@@ -282,7 +282,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         }
 
         LivingEntity performer = action.getPerformer(user, getThis());
-        if (!action.ignoresPerformerStun() && performer != null && ModEffects.isStunned(performer)) {
+        if (!action.ignoresPerformerStun() && performer != null && ModStatusEffects.isStunned(performer)) {
             return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.message.action_condition.stun"));
         }
         if (performer != null && !performer.isAlive()) {

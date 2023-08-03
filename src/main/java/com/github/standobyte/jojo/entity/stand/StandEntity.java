@@ -31,7 +31,7 @@ import com.github.standobyte.jojo.entity.damaging.DamagingEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
 import com.github.standobyte.jojo.entity.mob.IMobStandUser;
 import com.github.standobyte.jojo.init.ModDataSerializers;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModEntityAttributes;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
@@ -969,7 +969,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
     
     public boolean canBlockDamage(DamageSource dmgSource) {
-        return dmgSource.getDirectEntity() != null && !dmgSource.isBypassArmor() && !ModEffects.isStunned(this);
+        return dmgSource.getDirectEntity() != null && !dmgSource.isBypassArmor() && !ModStatusEffects.isStunned(this);
     }
 
     @Override
@@ -1043,7 +1043,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
                     if (value < 0.5F) {
                         decay *= 0.5F;
                     }
-                    if (user != null && user.hasEffect(ModEffects.RESOLVE.get())) {
+                    if (user != null && user.hasEffect(ModStatusEffects.RESOLVE.get())) {
                         decay *= 0.5F;
                     }
                     setFinisherMeter(Math.max(value - decay, 0));
@@ -1066,7 +1066,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             summonLockTicks--;
         }
         else {
-            boolean stun = ModEffects.isStunned(this);
+            boolean stun = ModStatusEffects.isStunned(this);
             currentTask.ifPresent(task -> {
                 if (!stun || task.getAction().ignoresPerformerStun()) {
                     task.tick(userPower, this);
@@ -1122,7 +1122,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
 
     public void updatePosition() {
-        if (ModEffects.isStunned(this)) return;
+        if (ModStatusEffects.isStunned(this)) return;
         LivingEntity user = getUser();
         if (user == null) return;
         
@@ -1615,7 +1615,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
     
     public void addFinisherMeter(float value, int noDecayTicks) {
-        if (value > 0 && getUser() != null && getUser().hasEffect(ModEffects.RESOLVE.get())) {
+        if (value > 0 && getUser() != null && getUser().hasEffect(ModStatusEffects.RESOLVE.get())) {
             value *= 2F;
         }
         setFinisherMeter(getFinisherMeter() + value);
@@ -1649,7 +1649,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     public void parryHeavyAttack() {
         if (!level.isClientSide()) {
             stopTask(true);
-            addEffect(new EffectInstance(ModEffects.STUN.get(), 20));
+            addEffect(new EffectInstance(ModStatusEffects.STUN.get(), 20));
             playSound(ModSounds.STAND_PARRY.get(), 1.0F, 1.0F);
         }
     }
@@ -1665,7 +1665,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     public void standCrash() {
         if (!level.isClientSide()) {
             stopTask(true);
-            addEffect(new EffectInstance(ModEffects.STUN.get(), 40));
+            addEffect(new EffectInstance(ModStatusEffects.STUN.get(), 40));
         }
     }
 

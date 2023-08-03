@@ -13,7 +13,7 @@ import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.TimeStopHandler;
 import com.github.standobyte.jojo.capability.world.TimeStopInstance;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
@@ -85,7 +85,7 @@ public class TimeStop extends StandAction {
                         timeManualResumeVoiceLine.get());
             }
             
-            EffectInstance immunityEffect = new EffectInstance(ModEffects.TIME_STOP.get(), timeStopTicks, 0, false, false, true);
+            EffectInstance immunityEffect = new EffectInstance(ModStatusEffects.TIME_STOP.get(), timeStopTicks, 0, false, false, true);
             user.addEffect(immunityEffect);
             instance.setStatusEffectInstance(immunityEffect);
             

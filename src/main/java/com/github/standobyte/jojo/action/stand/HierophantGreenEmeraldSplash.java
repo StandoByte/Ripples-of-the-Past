@@ -8,7 +8,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
@@ -89,7 +89,7 @@ public class HierophantGreenEmeraldSplash extends StandEntityAction {
     
     private boolean noPhases(IStandPower standPower, StandEntity standEntity) {
         return standPower.getResolveLevel() > 2
-                || standPower.getUser() != null && standPower.getUser().hasEffect(ModEffects.RESOLVE.get());
+                || standPower.getUser() != null && standPower.getUser().hasEffect(ModStatusEffects.RESOLVE.get());
     }
     
     @Override

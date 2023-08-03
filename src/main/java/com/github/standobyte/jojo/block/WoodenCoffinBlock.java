@@ -11,7 +11,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -204,8 +204,8 @@ public class WoodenCoffinBlock extends HorizontalBlock {
             world.players().stream()
             .filter(player -> player.isSleeping() && isBlockCoffin(player.level, Optional.of(player.blockPosition())))
             .forEach(player -> {
-                if (player.hasEffect(ModEffects.VAMPIRE_SUN_BURN.get())) {
-                    player.removeEffect(ModEffects.VAMPIRE_SUN_BURN.get());
+                if (player.hasEffect(ModStatusEffects.VAMPIRE_SUN_BURN.get())) {
+                    player.removeEffect(ModStatusEffects.VAMPIRE_SUN_BURN.get());
                     player.removeEffect(Effects.WEAKNESS);
                 }
                 ModCriteriaTriggers.SLEPT_IN_COFFIN.get().trigger(player);

@@ -4,7 +4,7 @@ import java.util.Optional;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.MaxAchievedResolvePacket;
@@ -89,8 +89,8 @@ public class ResolveCounter {
     void tick() {
         prevTickResolve = resolve;
         LivingEntity user = stand.getUser();
-        if (user != null && user.hasEffect(ModEffects.RESOLVE.get())) {
-            EffectInstance effect = user.getEffect(ModEffects.RESOLVE.get());
+        if (user != null && user.hasEffect(ModStatusEffects.RESOLVE.get())) {
+            EffectInstance effect = user.getEffect(ModStatusEffects.RESOLVE.get());
             if (effect.getAmplifier() < RESOLVE_EFFECT_MIN.length) {
                 int effectLevel = effect.getAmplifier();
                 if (effectLevel < 0) {
@@ -99,7 +99,7 @@ public class ResolveCounter {
                 resolve = Math.max(resolve - getMaxResolveValue() / 
                         (float) RESOLVE_EFFECT_MIN[Math.min(effectLevel, RESOLVE_EFFECT_MIN.length)], 0);
                 if (!user.level.isClientSide() && resolve == 0) {
-                    user.removeEffect(ModEffects.RESOLVE.get());
+                    user.removeEffect(ModStatusEffects.RESOLVE.get());
                 }
             }
         }
@@ -206,8 +206,8 @@ public class ResolveCounter {
         }
         
         int resolveLevel = getResolveLevel();
-        if (resolve == getMaxResolveValue() && stand.getUser() != null && !stand.getUser().level.isClientSide() && !stand.getUser().hasEffect(ModEffects.RESOLVE.get())) {
-            stand.getUser().addEffect(new EffectInstance(ModEffects.RESOLVE.get(), 
+        if (resolve == getMaxResolveValue() && stand.getUser() != null && !stand.getUser().level.isClientSide() && !stand.getUser().hasEffect(ModStatusEffects.RESOLVE.get())) {
+            stand.getUser().addEffect(new EffectInstance(ModStatusEffects.RESOLVE.get(), 
                     RESOLVE_EFFECT_MAX[Math.min(resolveLevel, RESOLVE_EFFECT_MAX.length - 1)], resolveLevel, false, 
                     false, true));
         }
@@ -215,7 +215,7 @@ public class ResolveCounter {
 
     public void addResolveValue(float resolve, LivingEntity user) {
         setResolveValue(getResolveValue() + boostAddedValue(resolve, stand.getUser()), RESOLVE_NO_DECAY_TICKS);
-        if (user.hasEffect(ModEffects.RESOLVE.get())) {
+        if (user.hasEffect(ModStatusEffects.RESOLVE.get())) {
             setResolveValue(Math.max(getMaxResolveValue() * 0.5F, getResolveValue()), 0);
         }
     }

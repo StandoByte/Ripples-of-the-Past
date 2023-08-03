@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.entity.damaging.projectile;
 
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
@@ -79,7 +79,7 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
         if (!level.isClientSide()) {
             getPassengers().forEach(entity -> {
                 if (entity instanceof LivingEntity) {
-                    ((LivingEntity) entity).removeEffect(ModEffects.STUN.get());
+                    ((LivingEntity) entity).removeEffect(ModStatusEffects.STUN.get());
                 }
             });
         }
@@ -96,7 +96,7 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
             Entity target = entityRayTraceResult.getEntity();
             if (target instanceof LivingEntity && target.startRiding(this)) {
                 barrier = true;
-                ((LivingEntity) target).addEffect(new EffectInstance(ModEffects.STUN.get(), barrierMaxTicks));
+                ((LivingEntity) target).addEffect(new EffectInstance(ModStatusEffects.STUN.get(), barrierMaxTicks));
                 setDeltaMovement(new Vector3d(0, 0.05D, 0));
             }
             LivingEntity owner = getOwner();

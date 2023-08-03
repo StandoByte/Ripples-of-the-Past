@@ -34,7 +34,7 @@ import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
@@ -214,7 +214,7 @@ public class ClientEventHandler {
     public <T extends LivingEntity, M extends EntityModel<T>> void onRenderLiving(RenderLivingEvent.Pre<T, M> event) {
         LivingEntity entity = event.getEntity();
         
-        if (entity.hasEffect(ModEffects.FULL_INVISIBILITY.get())) {
+        if (entity.hasEffect(ModStatusEffects.FULL_INVISIBILITY.get())) {
             event.setCanceled(true);
             return;
         }
@@ -546,12 +546,12 @@ public class ClientEventHandler {
     }
 
     private void tickResolveEffect() {
-        if (mc.player.isAlive() && mc.player.hasEffect(ModEffects.RESOLVE.get())) {
+        if (mc.player.isAlive() && mc.player.hasEffect(ModStatusEffects.RESOLVE.get())) {
             if (resolveShader == null) {
                 setResolveShader();
             }
 
-            if (mc.player.getEffect(ModEffects.RESOLVE.get()).getDuration() == 100) {
+            if (mc.player.getEffect(ModStatusEffects.RESOLVE.get()).getDuration() == 100) {
                 fadeAwayOst(150);
             }
             
@@ -692,7 +692,7 @@ public class ClientEventHandler {
             });
             
             ItemStack item = player.getItemInHand(Hand.MAIN_HAND);
-            if (GlovesLayer.areGloves(item) || player.hasEffect(ModEffects.HAMON_SPREAD.get())) {
+            if (GlovesLayer.areGloves(item) || player.hasEffect(ModStatusEffects.HAMON_SPREAD.get())) {
                 event.setCanceled(true);
                 renderHand(Hand.MAIN_HAND, event.getMatrixStack(), event.getBuffers(), event.getLight(), 
                         event.getPartialTicks(), event.getInterpolatedPitch(), player);
@@ -807,7 +807,7 @@ public class ClientEventHandler {
                     CrazyDiamondRestoreTerrain.getBlocksInRange(mc.level, mc.player, pos, 32, 
                             block -> CrazyDiamondRestoreTerrain.blockCanBePlaced(mc.level, block.pos, block.state)),
                     block -> CrazyDiamondRestoreTerrain.blockPosSelectedForRestoration(block, entity, lookVec, eyePosD, pos, 
-                            mc.player.hasEffect(ModEffects.RESOLVE.get()), mc.player.isShiftKeyDown()));
+                            mc.player.hasEffect(ModStatusEffects.RESOLVE.get()), mc.player.isShiftKeyDown()));
         }
         
         boolean paused = mc.isPaused();

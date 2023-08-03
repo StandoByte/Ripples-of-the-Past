@@ -14,7 +14,7 @@ import com.github.standobyte.jojo.entity.IHasHealth;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
-import com.github.standobyte.jojo.init.ModEffects;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -98,7 +98,7 @@ public class CrazyDiamondHeal extends StandEntityAction {
     public static boolean healLivingEntity(World world, LivingEntity entity, StandEntity standEntity) {
         // FIXME disable it if the target is a dead body already
         if (entity.deathTime > 0) {
-            boolean resolveEffect = standEntity.getUser() != null && standEntity.getUser().hasEffect(ModEffects.RESOLVE.get());
+            boolean resolveEffect = standEntity.getUser() != null && standEntity.getUser().hasEffect(ModStatusEffects.RESOLVE.get());
             if (!resolveEffect && entity.deathTime > 1 || entity.deathTime > 15) {
                 return false;
             }
@@ -159,7 +159,7 @@ public class CrazyDiamondHeal extends StandEntityAction {
     protected boolean barrageVisuals(StandEntity standEntity, IStandPower standPower, StandEntityTask task) {
         if (!super.barrageVisuals(standEntity, standPower, task)) return false;
         
-        if (standPower.getUser() != null && standPower.getUser().hasEffect(ModEffects.RESOLVE.get())) {
+        if (standPower.getUser() != null && standPower.getUser().hasEffect(ModStatusEffects.RESOLVE.get())) {
             return true;
         }
         
