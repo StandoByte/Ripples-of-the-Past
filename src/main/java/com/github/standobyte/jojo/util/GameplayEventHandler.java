@@ -34,6 +34,7 @@ import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDBloodCutterEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModBlocks;
+import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModPaintings;
@@ -587,7 +588,9 @@ public class GameplayEventHandler {
         // block physical damage with hamon
         if (!dmgSource.isBypassArmor() && dmgSource.getDirectEntity() != null) {
             INonStandPower.getNonStandPowerOptional(target).ifPresent(power -> {
-                if (power.getHeldAction() == ModHamonActions.HAMON_PROTECTION.get()) {
+                if (
+                        target.getType() == ModEntityTypes.HAMON_MASTER.get() || 
+                        power.getHeldAction() == ModHamonActions.HAMON_PROTECTION.get()) {
                     event.setAmount(ModHamonActions.HAMON_PROTECTION.get().reduceDamageAmount(
                             power, power.getUser(), dmgSource, event.getAmount()));
                 }

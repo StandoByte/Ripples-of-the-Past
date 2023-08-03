@@ -111,7 +111,7 @@ public class ModHamonActions {
             () -> new HamonHypnosis(new HamonAction.Builder().holdToFire(60, false).holdEnergyCost(15)));
     
     public static final RegistryObject<HamonAction> HAMON_SHOCK = ACTIONS.register("hamon_shock", 
-            () -> new HamonShock(new HamonAction.Builder().holdToFire(40, false).holdEnergyCost(15)));
+            () -> new HamonShock(new HamonAction.Builder().holdToFire(20, false).holdEnergyCost(15)));
     
     
     

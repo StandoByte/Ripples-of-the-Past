@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.action.non_stand;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
+import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
@@ -38,13 +39,20 @@ public class HamonProtection extends HamonAction {
 
     public float reduceDamageAmount(INonStandPower power, LivingEntity user, 
             DamageSource dmgSource, float dmgAmount) {
-        HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
-        float energyCost = dmgAmount * 50;
-        float damageReductionMult = hamon.consumeHamonEnergyTo(efficiency -> {
-            float baseReduction = 0.2F + hamon.getHamonControlLevelRatio() * 0.4F;
-            hamon.hamonPointsFromAction(HamonStat.CONTROL, Math.min(energyCost, power.getEnergy()) * efficiency);
-            return MathHelper.clamp(baseReduction * efficiency, 0, 1);
-        }, energyCost);
+        float damageReductionMult;
+        if (user.getType() == ModEntityTypes.HAMON_MASTER.get()) {
+            damageReductionMult = 1;
+        }
+        
+        else {
+            HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
+            float energyCost = dmgAmount * 50;
+            damageReductionMult = hamon.consumeHamonEnergyTo(efficiency -> {
+                float baseReduction = 0.2F + hamon.getHamonControlLevelRatio() * 0.4F;
+                hamon.hamonPointsFromAction(HamonStat.CONTROL, Math.min(energyCost, power.getEnergy()) * efficiency);
+                return MathHelper.clamp(baseReduction * efficiency, 0, 1);
+            }, energyCost);
+        }
         
         if (damageReductionMult > 0) {
             float damageReduced = dmgAmount * damageReductionMult;
