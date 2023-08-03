@@ -4,7 +4,6 @@ import static com.github.standobyte.jojo.init.power.ModCommonRegisters.ACTIONS;
 import static com.github.standobyte.jojo.init.power.ModCommonRegisters.NON_STAND_POWERS;
 
 import com.github.standobyte.jojo.action.non_stand.HamonAction;
-import com.github.standobyte.jojo.action.non_stand.HamonProtection;
 import com.github.standobyte.jojo.action.non_stand.HamonBreath;
 import com.github.standobyte.jojo.action.non_stand.HamonBubbleBarrier;
 import com.github.standobyte.jojo.action.non_stand.HamonBubbleCutter;
@@ -20,9 +19,11 @@ import com.github.standobyte.jojo.action.non_stand.HamonOverdrive;
 import com.github.standobyte.jojo.action.non_stand.HamonOverdriveBarrage;
 import com.github.standobyte.jojo.action.non_stand.HamonPlantInfusion;
 import com.github.standobyte.jojo.action.non_stand.HamonProjectileShield;
+import com.github.standobyte.jojo.action.non_stand.HamonProtection;
 import com.github.standobyte.jojo.action.non_stand.HamonScarletOverdrive;
 import com.github.standobyte.jojo.action.non_stand.HamonSendoOverdrive;
 import com.github.standobyte.jojo.action.non_stand.HamonSendoWaveKick;
+import com.github.standobyte.jojo.action.non_stand.HamonShock;
 import com.github.standobyte.jojo.action.non_stand.HamonSpeedBoost;
 import com.github.standobyte.jojo.action.non_stand.HamonSunlightYellowOverdrive;
 import com.github.standobyte.jojo.action.non_stand.HamonTornadoOverdrive;
@@ -110,7 +111,7 @@ public class ModHamonActions {
             () -> new HamonHypnosis(new HamonAction.Builder().holdToFire(60, false).holdEnergyCost(15)));
     
     public static final RegistryObject<HamonAction> HAMON_SHOCK = ACTIONS.register("hamon_shock", 
-            () -> new HamonHypnosis(new HamonAction.Builder().holdToFire(60, false).holdEnergyCost(15)));
+            () -> new HamonShock(new HamonAction.Builder().holdToFire(40, false).holdEnergyCost(15)));
     
     
     

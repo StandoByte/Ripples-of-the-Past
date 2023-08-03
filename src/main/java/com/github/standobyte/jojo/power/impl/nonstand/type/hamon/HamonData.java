@@ -27,9 +27,9 @@ import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer;
 import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer.BarType;
-import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModParticles;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
@@ -608,8 +608,6 @@ public class HamonData extends TypeSpecificData {
             points++;
             pointsIncFrac--;
         }
-        // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!! logger
-        JojoMod.LOGGER.debug("Adding {} points to {}", energyCost / ENERGY_PER_POINT, stat);
         setHamonStatPoints(stat, getStatPoints(stat) + points, false, false);
     }
     
