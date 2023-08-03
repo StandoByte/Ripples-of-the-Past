@@ -6,14 +6,17 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCap.HypnosisTargetCheck;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
+import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.potion.HypnosisEffect;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class HamonHypnosis extends HamonAction {
@@ -46,10 +49,20 @@ public class HamonHypnosis extends HamonAction {
     @Override
     protected void holdTick(World world, LivingEntity user, INonStandPower power, 
             int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
-        if (!world.isClientSide() && requirementsFulfilled && target.getEntity() instanceof MobEntity) {
-            target.getEntity().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                cap.startedHypnosisProcess(user);
-            });
+        if (requirementsFulfilled) {
+            if (!world.isClientSide()) {
+                target.getEntity().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                    cap.startedHypnosisProcess(user);
+                });
+            }
+            else if (target.getEntity() != null) {
+                Vector3d userPos = user.getEyePosition(1.0F);
+                double distanceToTarget = JojoModUtil.getDistance(user, target.getEntity().getBoundingBox());
+                Vector3d targetPos = user.getEyePosition(1.0F).add(user.getLookAngle().scale(distanceToTarget));
+                Vector3d particlesPos = userPos.add(targetPos.subtract(userPos).scale(0.5));
+                HamonSparksLoopSound.playSparkSound(user, particlesPos, 1.0F, true);
+                CustomParticlesHelper.createHamonSparkParticles(null, particlesPos, 1);
+            }
         }
     }
     

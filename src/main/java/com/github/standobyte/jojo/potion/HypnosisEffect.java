@@ -1,6 +1,8 @@
 package com.github.standobyte.jojo.potion;
 
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
+import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.AttributeModifierManager;
@@ -20,5 +22,15 @@ public class HypnosisEffect extends UncurableEffect {
     
     public static void hypnotizeEntity(LivingEntity target, LivingEntity hypnotizer, int duration) {
         target.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.hypnotizeEntity(hypnotizer, duration));
+    }
+    
+    @Override
+    public void applyEffectTick(LivingEntity entity, int amplifier) {
+        super.applyEffectTick(entity, amplifier);
+        
+        if (entity.level.isClientSide() && entity.getRandom().nextFloat() < 0.05F) {
+            HamonSparksLoopSound.playSparkSound(entity, entity.getBoundingBox().getCenter(), 1.0F, true);
+            CustomParticlesHelper.createHamonSparkParticles(entity, entity.getRandomX(0.5), entity.getY(Math.random()), entity.getRandomZ(0.5), 1);
+        }
     }
 }

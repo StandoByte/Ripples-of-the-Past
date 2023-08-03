@@ -289,6 +289,7 @@ public class LivingUtilCap {
                 AbstractHorseEntity horse = (AbstractHorseEntity) entity;
                 horse.setTamed(preHypnosisOwner != null);
                 horse.setOwnerUUID(preHypnosisOwner);
+                preHypnosisOwner = null;
                 horse.makeMad();
             }
             
