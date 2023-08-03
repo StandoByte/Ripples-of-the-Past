@@ -21,6 +21,7 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.non_stand.HamonMetalSilverOverdrive;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
@@ -1022,7 +1023,8 @@ public class HamonData extends TypeSpecificData {
                 if (skill == ModHamonSkills.CHEAT_DEATH.get()) {
                     HamonUtil.updateCheatDeathEffect(player);
                 }
-                else if (skill == ModHamonSkills.SATIPOROJA_SCARF.get()) {
+                else if (skill == ModHamonSkills.SATIPOROJA_SCARF.get()
+                        && user.getCapability(LivingUtilCapProvider.CAPABILITY).map(cap -> cap.onScarfPerk()).orElse(true)) {
                     player.addItem(new ItemStack(ModItems.SATIPOROJA_SCARF.get()));
                 }
                 if (sync) {

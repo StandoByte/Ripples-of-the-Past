@@ -52,6 +52,7 @@ public class LivingUtilCap {
     
     private final List<AfterimageEntity> afterimages = new ArrayList<>();
     private boolean usedZoomPunch = false;
+    private boolean gotScarf = false;
     
     public LivingUtilCap(LivingEntity entity) {
         this.entity = entity;
@@ -221,6 +222,12 @@ public class LivingUtilCap {
         return usedZoomPunch;
     }
     
+    public boolean onScarfPerk() {
+        boolean canGetScarf = !gotScarf;
+        gotScarf = true;
+        return canGetScarf;
+    }
+    
     
     
     public static HypnosisTargetCheck canBeHypnotized(LivingEntity entity, LivingEntity hypnotizer) {
@@ -324,6 +331,7 @@ public class LivingUtilCap {
         if (preHypnosisOwner != null) {
             nbt.putUUID("PreHypnosisOwner", preHypnosisOwner);
         }
+        nbt.putBoolean("GotScarf", gotScarf);
         return nbt;
     }
     
@@ -333,5 +341,6 @@ public class LivingUtilCap {
         if (nbt.hasUUID("PreHypnosisOwner")) {
             preHypnosisOwner = nbt.getUUID("PreHypnosisOwner");
         }
+        gotScarf = nbt.getBoolean("GotScarf");
     }
 }
