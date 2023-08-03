@@ -240,6 +240,15 @@ public class MCUtil {
     }
     
     
+    
+    public static boolean isControlledThisSide(Entity entity) {
+        if (entity instanceof PlayerEntity) {
+            return ((PlayerEntity) entity).isLocalPlayer();
+        }
+        return !entity.level.isClientSide() || entity.isControlledByLocalInstance();
+    }
+    
+    
 
     public static void playSound(World world, @Nullable PlayerEntity clientHandled, BlockPos blockPos, 
             SoundEvent sound, SoundCategory category, float volume, float pitch, Predicate<PlayerEntity> condition) {

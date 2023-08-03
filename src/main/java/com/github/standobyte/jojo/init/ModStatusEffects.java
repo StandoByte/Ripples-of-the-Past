@@ -5,6 +5,7 @@ import java.util.Set;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.potion.FreezeEffect;
+import com.github.standobyte.jojo.potion.HamonShockEffect;
 import com.github.standobyte.jojo.potion.HamonSpreadEffect;
 import com.github.standobyte.jojo.potion.HypnosisEffect;
 import com.github.standobyte.jojo.potion.ImmobilizeEffect;
@@ -53,6 +54,9 @@ public class ModStatusEffects {
     public static final RegistryObject<StunEffect> STUN = EFFECTS.register("stun", 
             () -> new StunEffect(0x404040));
     
+    public static final RegistryObject<StunEffect> HAMON_SHOCK = EFFECTS.register("hamon_shock", 
+            () -> new HamonShockEffect(0xFFC10A));
+    
     public static final RegistryObject<ImmobilizeEffect> IMMOBILIZE = EFFECTS.register("immobilize", 
             () -> new ImmobilizeEffect(0x404040));
     
@@ -100,6 +104,7 @@ public class ModStatusEffects {
                 TIME_STOP.get(), 
                 IMMOBILIZE.get(), 
                 STUN.get(), 
+                HAMON_SHOCK.get(), 
                 HYPNOSIS.get(), 
                 HAMON_SPREAD.get(), 
                 FULL_INVISIBILITY.get(), 
@@ -113,6 +118,6 @@ public class ModStatusEffects {
     
     
     public static boolean isStunned(LivingEntity entity) {
-        return entity.hasEffect(STUN.get());
+        return entity.hasEffect(STUN.get()) || entity.hasEffect(HAMON_SHOCK.get());
     }
 }
