@@ -18,8 +18,8 @@ import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
-import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrBarrageHitSoundPacket;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -85,7 +85,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
         if (barrageHits > 0) {
             standEntity.punch(task, this, task.getTarget());
             if (world.isClientSide()) {
-                clTtickSwingSound(task.getStartingTicks(), standEntity);
+                clTtickSwingSound(task.getTick(), standEntity);
             }
         }
     }
@@ -120,13 +120,11 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
     }
     
     protected void clTtickSwingSound(int tick, StandEntity standEntity) {
-        if (tick % 2 == 0) {
-            SoundEvent swingSound = getPunchSwingSound();
-            if (swingSound != null) {
-                standEntity.playSound(swingSound, 0.25F, 
-                        1.8F - (float) standEntity.getAttackDamage() * 0.05F + standEntity.getRandom().nextFloat() * 0.2F, 
-                        ClientUtil.getClientPlayer());
-            }
+        SoundEvent swingSound = getPunchSwingSound();
+        if (swingSound != null) {
+            standEntity.playSound(swingSound, 0.25F, 
+                    1.8F - (float) standEntity.getAttackDamage() * 0.05F + standEntity.getRandom().nextFloat() * 0.2F, 
+                    ClientUtil.getClientPlayer());
         }
     }
     
