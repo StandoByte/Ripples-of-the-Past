@@ -26,11 +26,14 @@ public class HypnosisEffect extends UncurableEffect {
     
     @Override
     public void applyEffectTick(LivingEntity entity, int amplifier) {
-        super.applyEffectTick(entity, amplifier);
-        
         if (entity.level.isClientSide() && entity.getRandom().nextFloat() < 0.05F) {
             HamonSparksLoopSound.playSparkSound(entity, entity.getBoundingBox().getCenter(), 1.0F, true);
             CustomParticlesHelper.createHamonSparkParticles(entity, entity.getRandomX(0.5), entity.getY(Math.random()), entity.getRandomZ(0.5), 1);
         }
+    }
+    
+    @Override
+    public boolean isDurationEffectTick(int duration, int amplifier) {
+        return true;
     }
 }
