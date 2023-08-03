@@ -11,6 +11,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.general.MathUtil;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -57,7 +58,8 @@ public class HamonProtection extends HamonAction {
         if (damageReductionMult > 0) {
             float damageReduced = dmgAmount * damageReductionMult;
             
-            Vector3d sourcePos = dmgSource.getDirectEntity().getEyePosition(1.0F);
+            Entity sourceEntity = dmgSource.getDirectEntity();
+            Vector3d sourcePos = sourceEntity.getEyePosition(1.0F);
             AxisAlignedBB userHitbox = user.getBoundingBox();
             Vector3d damagePos;
             if (userHitbox.contains(sourcePos)) {
@@ -65,7 +67,7 @@ public class HamonProtection extends HamonAction {
             }
             else {
                 Vector3d userEyePos = user.getEyePosition(1.0F);
-                damagePos = userHitbox.clip(sourcePos, userEyePos).orElse(userEyePos);
+                damagePos = userHitbox.clip(sourcePos, sourcePos.add(sourceEntity.getLookAngle().scale(16))).orElse(userEyePos);
             }
             HamonUtil.emitHamonSparkParticles(user.level, null, damagePos, damageReduced * 0.25F);
             return dmgAmount - damageReduced;
