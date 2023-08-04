@@ -1014,6 +1014,8 @@ public class GameplayEventHandler {
     }
     
     private static void summonSoul(IStandPower stand, LivingEntity user, DamageSource dmgSource) {
+        if (!user.canUpdate()) return; // FIXME fix soul ascension when dying in time stop
+        
         int ticks = getSoulAscensionTicks(user, stand);
 
         if (ticks > 0) {
