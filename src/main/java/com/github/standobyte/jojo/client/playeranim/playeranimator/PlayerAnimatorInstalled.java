@@ -62,6 +62,11 @@ public class PlayerAnimatorInstalled implements PlayerAnimationHandler.IPlayerAn
     private BusyArmsLayer busyArms;
     
     @Override
+    public boolean kosmXAnimatorInstalled() {
+        return true;
+    }
+    
+    @Override
     public void initAnims() {
         heldAction = register(new ResourceLocation(JojoMod.MOD_ID, "hamon_breath"), 1, HeldActionAnimLayer::new);
         barrage = register(new ResourceLocation(JojoMod.MOD_ID, "barrage"), 1, BarrageAnimLayer::new);

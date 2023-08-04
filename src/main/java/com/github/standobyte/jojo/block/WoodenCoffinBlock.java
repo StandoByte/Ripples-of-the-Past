@@ -10,9 +10,10 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModParticles;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.util.GameplayEventHandler;
@@ -29,6 +30,7 @@ import net.minecraft.block.material.PushReaction;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerEntity.SleepResult;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.DyeColor;
@@ -61,6 +63,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerRespawnEvent;
 import net.minecraftforge.event.entity.player.PlayerSetSpawnEvent;
+import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
 import net.minecraftforge.event.entity.player.SleepingTimeCheckEvent;
 import net.minecraftforge.event.world.SleepFinishedTimeEvent;
 import net.minecraftforge.eventbus.api.Event.Result;
@@ -175,6 +178,18 @@ public class WoodenCoffinBlock extends HorizontalBlock {
         }
     }
     
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void preventBedCoffinAlternating(PlayerSleepInBedEvent event) {
+        PlayerEntity player = event.getPlayer();
+        boolean isCoffin = isBlockCoffin(player.level, event.getOptionalPos());
+        boolean canSleep = player.getCapability(PlayerUtilCapProvider.CAPABILITY)
+                .map(cap -> cap.canGoToSleep(isCoffin)).orElse(true);
+        if (!canSleep) {
+            event.setResult(SleepResult.OTHER_PROBLEM);
+            player.displayClientMessage(new TranslationTextComponent("block.jojo.wooden_coffin.full_time_skip_fix"), true);
+        }
+    }
+    
     @SubscribeEvent
     public static void canSleepAtTime(SleepingTimeCheckEvent event) {
         if (isBlockCoffin(event.getEntityLiving().level, event.getSleepingLocation())) {
@@ -191,7 +206,8 @@ public class WoodenCoffinBlock extends HorizontalBlock {
                     .filter(player -> player.isSleeping() && isBlockCoffin(player.level, Optional.of(player.blockPosition())))
                     .count() >= (playersCount + 1) / 2) {
                 long time = world.getDayTime();
-                event.setTimeAddition(time + 24000L - time % 24000L + 12600L);
+                long timeAdded = (24000L - time % 24000L + 12600L) % 24000L;
+                event.setTimeAddition(time + timeAdded);
             }
         }
     }
@@ -199,16 +215,27 @@ public class WoodenCoffinBlock extends HorizontalBlock {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void skippedToNight(SleepFinishedTimeEvent event) {
         int time = (int) (event.getNewTime() % 24000L);
-        if (time >= 12600 && time < 23500 && event.getWorld() instanceof ServerWorld) {
+        if (event.getWorld() instanceof ServerWorld) {
             ServerWorld world = (ServerWorld) event.getWorld();
             world.players().stream()
-            .filter(player -> player.isSleeping() && isBlockCoffin(player.level, Optional.of(player.blockPosition())))
+            .filter(player -> player.isSleeping())
             .forEach(player -> {
-                if (player.hasEffect(ModStatusEffects.VAMPIRE_SUN_BURN.get())) {
-                    player.removeEffect(ModStatusEffects.VAMPIRE_SUN_BURN.get());
-                    player.removeEffect(Effects.WEAKNESS);
+                boolean isCoffin = isBlockCoffin(player.level, Optional.of(player.blockPosition()));
+                
+                if (isCoffin) {
+                    if (player.hasEffect(ModStatusEffects.VAMPIRE_SUN_BURN.get())) {
+                        player.removeEffect(ModStatusEffects.VAMPIRE_SUN_BURN.get());
+                        player.removeEffect(Effects.WEAKNESS);
+                    }
+                    if (time >= 12600 && time < 23500) {
+                        ModCriteriaTriggers.SLEPT_IN_COFFIN.get().trigger(player);
+                    }
                 }
-                ModCriteriaTriggers.SLEPT_IN_COFFIN.get().trigger(player);
+
+                long oldTime = event.getWorld().dayTime();
+                int timeAdded = (int) Math.max(event.getNewTime() - oldTime, 0);
+                player.getCapability(PlayerUtilCapProvider.CAPABILITY)
+                        .ifPresent(cap -> cap.onSleep(isCoffin, timeAdded));
             });
         }
     }

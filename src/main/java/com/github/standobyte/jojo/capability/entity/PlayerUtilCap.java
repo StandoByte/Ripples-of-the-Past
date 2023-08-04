@@ -60,6 +60,10 @@ public class PlayerUtilCap {
     
     private int chatSpamTickCount = 0;
     
+    private BedType lastBedType;
+    private int ticksNoSleep;
+    private long nextSleepTime;
+    
     public PlayerUtilCap(PlayerEntity player) {
         this.player = player;
     }
@@ -71,6 +75,7 @@ public class PlayerUtilCap {
             tickKnivesRemoval();
             tickVoiceLines();
             tickClientInputTimer();
+            tickNoSleepTimer();
             
             if (knivesThrewTicks > 0) knivesThrewTicks--;
             if (chatSpamTickCount > 0) chatSpamTickCount--;
@@ -287,6 +292,37 @@ public class PlayerUtilCap {
     
     public int getNoClientInputTimer() {
         return noClientInputTimer;
+    }
+    
+    
+    
+    private void tickNoSleepTimer() {
+        if (ticksNoSleep > 0) ticksNoSleep--;
+    }
+    
+    public void onSleep(boolean isCoffin, int ticksSkipped) {
+        this.lastBedType = isCoffin ? BedType.COFFIN : BedType.BED;
+        this.ticksNoSleep = ticksSkipped * 2;
+        this.nextSleepTime = player.level.dayTime() + ticksNoSleep;
+    }
+    
+    public boolean canGoToSleep(boolean isCoffin) {
+        return 
+                this.lastBedType == null || 
+                !this.lastBedType.isCoffin && !isCoffin || 
+                ticksNoSleep <= 0 || 
+                nextSleepTime < player.level.dayTime();
+    }
+    
+    private static enum BedType {
+        BED(false),
+        COFFIN(true);
+        
+        private final boolean isCoffin;
+        
+        private BedType(boolean isCoffin) {
+            this.isCoffin = isCoffin;
+        }
     }
     
     

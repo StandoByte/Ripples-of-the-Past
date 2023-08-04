@@ -6,6 +6,7 @@ import java.util.Random;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.vampirism.ModVampirismActions;
@@ -219,6 +220,8 @@ public class VampirismData extends TypeSpecificData {
                             player.getFoodData().setFoodLevel(1);
                             ModCriteriaTriggers.VAMPIRISM_CURED.get().trigger(player);
                         }
+                        entity.removeEffect(ModStatusEffects.VAMPIRE_SUN_BURN.get());
+                        entity.removeEffect(Effects.WEAKNESS);
                         entity.addEffect(new EffectInstance(Effects.MOVEMENT_SLOWDOWN, 600, 1));
                         entity.addEffect(new EffectInstance(Effects.DIG_SLOWDOWN, 600, 1));
                         entity.addEffect(new EffectInstance(Effects.WEAKNESS, 600, 1));

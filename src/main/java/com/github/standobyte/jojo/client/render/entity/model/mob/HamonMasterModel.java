@@ -163,14 +163,16 @@ public class HamonMasterModel extends BipedModel<HamonMasterEntity> {
     public void setupAnim(HamonMasterEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
         setDefaultPivot();
         super.setupAnim(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
-        ClientUtil.setRotationAngleDegrees(leftCapeBinding,     35.298F,            2.2454F,    4.6285F - 5);
-        ClientUtil.setRotationAngleDegrees(leftCape,            56.8726F + 12.5F,   6.8027F,    9.3505F - 10);
-        ClientUtil.setRotationAngleDegrees(lowLeftCape,         14.85F,             0F,         0F);
-        ClientUtil.setRotationAngleDegrees(rightCapeBinding,    37.5939F,           -0.8553F,   -3.8097F + 5);
-        ClientUtil.setRotationAngleDegrees(rightCape,           52.5177F + 12.5F,   -9.1032F,   -9.1693F + 10);
-        ClientUtil.setRotationAngleDegrees(lowRightCape,        21.39F,             0F,         0F);
-        if (sittingAnim != null) {
-            sittingAnim.setEmote();
+        if (PlayerAnimationHandler.getPlayerAnimator().kosmXAnimatorInstalled()) {
+            ClientUtil.setRotationAngleDegrees(leftCapeBinding,     35.298F,            2.2454F,    4.6285F - 5);
+            ClientUtil.setRotationAngleDegrees(leftCape,            56.8726F + 12.5F,   6.8027F,    9.3505F - 10);
+            ClientUtil.setRotationAngleDegrees(lowLeftCape,         14.85F,             0F,         0F);
+            ClientUtil.setRotationAngleDegrees(rightCapeBinding,    37.5939F,           -0.8553F,   -3.8097F + 5);
+            ClientUtil.setRotationAngleDegrees(rightCape,           52.5177F + 12.5F,   -9.1032F,   -9.1693F + 10);
+            ClientUtil.setRotationAngleDegrees(lowRightCape,        21.39F,             0F,         0F);
+            if (sittingAnim != null) {
+                sittingAnim.setEmote();
+            }
         }
         setupOuterLayer();
     }

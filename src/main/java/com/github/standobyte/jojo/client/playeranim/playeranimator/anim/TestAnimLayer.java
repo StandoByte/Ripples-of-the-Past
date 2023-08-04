@@ -29,12 +29,12 @@ public class TestAnimLayer extends AnimLayerHandler {
     
     @SubscribeEvent
     public void onChat(ClientChatReceivedEvent event) {
-        if (event.getMessage().getString().contains("anim start")) {
-            testAnim((AbstractClientPlayerEntity) Minecraft.getInstance().level.getPlayerByUUID(event.getSenderUUID()), true);
-        }
-        else if (event.getMessage().getString().contains("anim end")) {
-            testAnim((AbstractClientPlayerEntity) Minecraft.getInstance().level.getPlayerByUUID(event.getSenderUUID()), false);
-        }
+//        if (event.getMessage().getString().contains("anim start")) {
+//            testAnim((AbstractClientPlayerEntity) Minecraft.getInstance().level.getPlayerByUUID(event.getSenderUUID()), true);
+//        }
+//        else if (event.getMessage().getString().contains("anim end")) {
+//            testAnim((AbstractClientPlayerEntity) Minecraft.getInstance().level.getPlayerByUUID(event.getSenderUUID()), false);
+//        }
     }
 
     @SubscribeEvent

@@ -30,6 +30,7 @@ public class PlayerAnimationHandler {
     private static IPlayerAnimator instance = null;
     
     public static interface IPlayerAnimator {
+        default boolean kosmXAnimatorInstalled() { return false; }
         default void initAnims() {}
         
         default boolean actionStartedHolding(PlayerEntity player, Action<?> action) { return false; }
