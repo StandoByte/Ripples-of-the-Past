@@ -87,7 +87,7 @@ public class VampirismData extends TypeSpecificData {
         if (vampireHamonUser && prevHamon.isPresent()) {
             HamonData hamon = prevHamon.get();
             hamonStrengthLevel = hamon.getHamonStrengthLevel();
-            hamonTechnique = Optional.of(hamon.getCharacterTechnique());
+            hamonTechnique = Optional.ofNullable(hamon.getCharacterTechnique());
         }
         else {
             hamonStrengthLevel = 0;
@@ -241,7 +241,7 @@ public class VampirismData extends TypeSpecificData {
                 ResourceLocation techniqueId = new ResourceLocation(nbt.getString("CharacterTechnique"));
                 IForgeRegistry<CharacterHamonTechnique> registry = JojoCustomRegistries.HAMON_CHARACTER_TECHNIQUES.getRegistry();
                 if (registry.containsKey(techniqueId)) {
-                    this.hamonTechnique = Optional.of(registry.getValue(techniqueId));
+                    this.hamonTechnique = Optional.ofNullable(registry.getValue(techniqueId));
                 }
             }
         }
