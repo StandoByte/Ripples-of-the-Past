@@ -2,6 +2,8 @@ package com.github.standobyte.jojo.power.impl.nonstand;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 
@@ -23,7 +25,7 @@ public abstract class TypeSpecificData {
         return true;
     }
     
-    public void onPowerGiven(NonStandPowerType<?> oldType) {}
+    public void onPowerGiven(@Nullable NonStandPowerType<?> oldType, @Nullable TypeSpecificData oldData) {}
     public void updateExtraActions() {}
     
     public abstract CompoundNBT writeNBT();

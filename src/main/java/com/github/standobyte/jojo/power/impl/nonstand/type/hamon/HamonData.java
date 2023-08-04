@@ -170,7 +170,7 @@ public class HamonData extends TypeSpecificData {
         if (power.getHeldAction() == ModHamonActions.HAMON_BREATH.get() && user.getAirSupply() >= user.getMaxAirSupply()) {
             ticksMaskWithNoHamonBreath = 0;
             if (user.level.isClientSide() && power.getEnergy() > 0 && !playedEnergySound) {
-                ClientTickingSoundsHelper.playHamonEnergyConcentrationSound(user, 1.0F);
+                ClientTickingSoundsHelper.playHamonEnergyConcentrationSound(user, 1.0F, ModHamonActions.HAMON_BREATH.get());
                 playedEnergySound = true;
                 if (user == ClientUtil.getClientPlayer()) {
                     BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).resetRedHighlight();
@@ -457,7 +457,7 @@ public class HamonData extends TypeSpecificData {
     }
     
     @Override
-    public void onPowerGiven(NonStandPowerType<?> oldType) {
+    public void onPowerGiven(NonStandPowerType<?> oldType, TypeSpecificData oldData) {
         hamonSkills.addSkill(ModHamonSkills.OVERDRIVE.get());
         hamonSkills.addSkill(ModHamonSkills.HEALING.get());
         breathStability = getMaxBreathStability();

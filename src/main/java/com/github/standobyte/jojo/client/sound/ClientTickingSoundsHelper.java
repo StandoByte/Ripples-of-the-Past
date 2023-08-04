@@ -149,8 +149,8 @@ public abstract class ClientTickingSoundsHelper {
         Minecraft.getInstance().getSoundManager().play(new HamonSparksSound(entity, volume, pitch));
     }
     
-    public static void playHamonEnergyConcentrationSound(LivingEntity entity, float volume) {
-        Minecraft.getInstance().getSoundManager().play(new HamonEnergySound(entity, volume, 1.0F));
+    public static void playHamonEnergyConcentrationSound(LivingEntity entity, float volume, Action<?> action) {
+        Minecraft.getInstance().getSoundManager().play(new HamonEnergySound(entity, volume, 1.0F, action));
     }
     
     public static void playGliderFlightSound(LeavesGliderEntity entity) {

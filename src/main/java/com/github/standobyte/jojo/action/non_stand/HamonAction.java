@@ -56,18 +56,23 @@ public abstract class HamonAction extends NonStandAction {
         SoundEvent shout = null;
         CharacterHamonTechnique technique = power.getTypeSpecificData(ModPowers.HAMON.get()).get().getCharacterTechnique();
         if (technique != null) {
-            if (voiceLines == null) {
-                voiceLines = voiceLinesUnregistered.entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey().get(), entry -> entry.getValue()));
-            }
-            Supplier<SoundEvent> shoutSupplier = voiceLines.get(technique);
-            if (shoutSupplier != null) {
-                shout = shoutSupplier.get();
-            }
+            shout = getCharacterShout(technique);
         }
         if (shout == null) {
             shout = super.getShout(user, power, target, wasActive);
         }
         return shout;
+    }
+    
+    public SoundEvent getCharacterShout(CharacterHamonTechnique character) {
+        if (voiceLines == null) {
+            voiceLines = voiceLinesUnregistered.entrySet().stream().collect(Collectors.toMap(entry -> entry.getKey().get(), entry -> entry.getValue()));
+        }
+        Supplier<SoundEvent> shoutSupplier = voiceLines.get(character);
+        if (shoutSupplier != null) {
+            return shoutSupplier.get();
+        }
+        return null;
     }
     
     @Override

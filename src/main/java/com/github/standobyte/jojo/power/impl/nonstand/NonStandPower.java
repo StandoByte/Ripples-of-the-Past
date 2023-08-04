@@ -60,9 +60,10 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
             return false;
         }
         NonStandPowerType<?> oldType = this.getType();
+        TypeSpecificData oldData = typeSpecificData;
         setType(type);
         onNewPowerGiven(type);
-        typeSpecificData.onPowerGiven(oldType);
+        typeSpecificData.onPowerGiven(oldType, oldData);
         typeSpecificData.updateExtraActions();
         addHadPowerBefore(type);
         return true;

@@ -1,18 +1,24 @@
 package com.github.standobyte.jojo.power.impl.nonstand.type.vampirism;
 
+import java.util.Optional;
 import java.util.Random;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.vampirism.ModVampirismActions;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrVampirismDataPacket;
+import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.TypeSpecificData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterHamonTechnique;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.block.BedBlock;
 import net.minecraft.block.Block;
@@ -20,26 +26,33 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.StringNBT;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.registries.IForgeRegistry;
 
 public class VampirismData extends TypeSpecificData {
     private static final int CURING_MAX_TICKS = 72000;
-    private boolean vampireHamonUser = false;
     private boolean vampireFullPower = false;
     private int lastBloodLevel = -999;
+    
     private int curingTicks = 0;
     private boolean curingStageChanged = false;
 
+    private boolean vampireHamonUser = false;
+    private float hamonStrengthLevel;
+    private Optional<CharacterHamonTechnique> hamonTechnique = Optional.empty();
+
     @Override
-    public void onPowerGiven(NonStandPowerType<?> oldType) {
+    public void onPowerGiven(NonStandPowerType<?> oldType, TypeSpecificData oldData) {
         LivingEntity user = power.getUser();
         
         if (!user.level.isClientSide()) {
-            if (oldType == ModPowers.HAMON.get()) {
-                setVampireHamonUser(true);
+            if (oldType == ModPowers.HAMON.get() && oldData instanceof HamonData) {
+                setVampireHamonUser(true, Optional.of((HamonData) oldData));
             }
             power.addEnergy(300);
         }
@@ -63,7 +76,7 @@ public class VampirismData extends TypeSpecificData {
         return vampireHamonUser;
     }
 
-    public void setVampireHamonUser(boolean vampireHamonUser) {
+    public void setVampireHamonUser(boolean vampireHamonUser, Optional<HamonData> prevHamon) {
         if (!this.vampireHamonUser == vampireHamonUser) {
             serverPlayer.ifPresent(player -> {
                 PacketManager.sendToClientsTrackingAndSelf(TrVampirismDataPacket.wasHamonUser(
@@ -71,18 +84,34 @@ public class VampirismData extends TypeSpecificData {
             });
         }
         this.vampireHamonUser = vampireHamonUser;
-        if (vampireHamonUser) {
-            addHamonSuicideAbility();
+        if (vampireHamonUser && prevHamon.isPresent()) {
+            HamonData hamon = prevHamon.get();
+            hamonStrengthLevel = hamon.getHamonStrengthLevel();
+            hamonTechnique = Optional.of(hamon.getCharacterTechnique());
         }
+        else {
+            hamonStrengthLevel = 0;
+        }
+        addHamonSuicideAbility();
     }
     
-    // FIXME !!! (layout editing) hamon suicide addition
+    public float getPrevHamonStrengthLevel() {
+        return hamonStrengthLevel;
+    }
+    
+    public Optional<CharacterHamonTechnique> getPrevHamonCharacter() {
+        return hamonTechnique;
+    }
+    
+    @Override
+    public void updateExtraActions() {
+        addHamonSuicideAbility();
+    }
+    
     private void addHamonSuicideAbility() {
-//        VampirismAction hamonAbility = ModActions.VAMPIRISM_HAMON_SUICIDE.get();
-//        List<Action<INonStandPower>> abilities = power.getAbilities();
-//        if (vampireHamonUser && !abilities.contains(hamonAbility)) {
-//            abilities.add(hamonAbility);
-//        }
+        if (vampireHamonUser) {
+            power.getActions(ActionType.ABILITY).addExtraAction(ModVampirismActions.VAMPIRISM_HAMON_SUICIDE.get());
+        }
     }
 
     public boolean isVampireAtFullPower() {
@@ -202,24 +231,35 @@ public class VampirismData extends TypeSpecificData {
     @Override
     public CompoundNBT writeNBT() {
         CompoundNBT nbt = new CompoundNBT();
-        nbt.putBoolean("VampireHamonUser", vampireHamonUser);
         nbt.putBoolean("VampireFullPower", vampireFullPower);
         nbt.putInt("CuringTicks", curingTicks);
+        
+        nbt.putBoolean("VampireHamonUser", vampireHamonUser);
+        if (vampireHamonUser) {
+            nbt.putFloat("HamonStrength", hamonStrengthLevel);
+            if (nbt.contains("CharacterTechnique", MCUtil.getNbtId(StringNBT.class))) {
+                ResourceLocation techniqueId = new ResourceLocation(nbt.getString("CharacterTechnique"));
+                IForgeRegistry<CharacterHamonTechnique> registry = JojoCustomRegistries.HAMON_CHARACTER_TECHNIQUES.getRegistry();
+                if (registry.containsKey(techniqueId)) {
+                    this.hamonTechnique = Optional.of(registry.getValue(techniqueId));
+                }
+            }
+        }
         return nbt;
     }
     
     @Override
     public void readNBT(CompoundNBT nbt) {
-        this.vampireHamonUser = nbt.getBoolean("VampireHamonUser");
         this.vampireFullPower = nbt.getBoolean("VampireFullPower");
         this.curingTicks = nbt.getInt("CuringTicks");
+
+        this.vampireHamonUser = nbt.getBoolean("VampireHamonUser");
+        this.hamonStrengthLevel = nbt.getFloat("HamonStrength");
+        this.hamonTechnique.ifPresent(character -> nbt.putString("HamonTechnique", character.getRegistryName().toString()));
     }
     
     @Override
     public void syncWithUserOnly(ServerPlayerEntity user) {
-        if (vampireHamonUser) {
-            addHamonSuicideAbility();
-        }
         lastBloodLevel = -999;
     }
     

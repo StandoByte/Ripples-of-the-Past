@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.network.packets.fromserver;
 
+import java.util.Optional;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -76,7 +77,7 @@ public class TrVampirismDataPacket {
                     switch(msg.field) {
                     case WAS_HAMON_USER:
                         power.getTypeSpecificData(ModPowers.VAMPIRISM.get()).ifPresent(vampirism -> {
-                            vampirism.setVampireHamonUser(msg.valueBool);
+                            vampirism.setVampireHamonUser(msg.valueBool, Optional.empty());
                         });
                         break;
                     case AT_FULL_POWER:
