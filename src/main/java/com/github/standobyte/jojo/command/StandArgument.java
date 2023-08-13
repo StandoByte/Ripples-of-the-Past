@@ -72,7 +72,7 @@ public class StandArgument implements ArgumentType<StandType<?>> {
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(final CommandContext<S> context, final SuggestionsBuilder builder) {
         boolean isClientSide = Thread.currentThread().getThreadGroup() == SidedThreadGroups.CLIENT;
-        return suggestIterable(StandUtil.availableStands(null, isClientSide).map(IForgeRegistryEntry::getRegistryName), builder);
+        return suggestIterable(StandUtil.availableStands(isClientSide).map(IForgeRegistryEntry::getRegistryName), builder);
     }
 
     private static CompletableFuture<Suggestions> suggestIterable(Stream<ResourceLocation> registryKeys, SuggestionsBuilder builder) {

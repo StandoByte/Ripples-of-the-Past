@@ -14,14 +14,12 @@ public class StandStats {
     private final UpgradeableStats statsDevPotential;
     private final double rangeEffective;
     private final double rangeMax;
-    private final int tier;
 
     protected StandStats(AbstractBuilder<?, ?> builder) {
         this.statsBase = new UpgradeableStats(builder.powerBase, builder.speedBase, builder.durabilityBase, builder.precisionBase);
         this.statsDevPotential = new UpgradeableStats(builder.powerMax, builder.speedMax, builder.durabilityMax, builder.precisionMax);
         this.rangeEffective = builder.rangeEffective;
         this.rangeMax = builder.rangeMax;
-        this.tier = builder.tier;
     }
     
     protected StandStats(PacketBuffer buf) {
@@ -29,7 +27,6 @@ public class StandStats {
         this.statsDevPotential = new UpgradeableStats(buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble());
         this.rangeEffective = buf.readDouble();
         this.rangeMax = buf.readDouble();
-        this.tier = buf.readVarInt();
     }
     
     public void write(PacketBuffer buf) {
@@ -45,8 +42,6 @@ public class StandStats {
         
         buf.writeDouble(rangeEffective);
         buf.writeDouble(rangeMax);
-        
-        buf.writeVarInt(tier);
     }
     
     public void onNewDay(LivingEntity user, IStandPower power) {}
@@ -122,10 +117,6 @@ public class StandStats {
         return rangeMax;
     }
     
-    public int getTier() {
-        return tier;
-    }
-    
     public double getArmor() {
         return 0;
     }
@@ -160,12 +151,6 @@ public class StandStats {
         private double durabilityMax = 8.0;
         private double precisionBase = 8.0;
         private double precisionMax = 8.0;
-        private int tier = -1;
-        
-        public B tier(int tier) {
-            this.tier = tier;
-            return getThis();
-        }
         
         public B power(double power) {
             return power(power, power);
@@ -222,18 +207,20 @@ public class StandStats {
             return getThis();
         }
         
+        @Deprecated
+        public B tier(int tier) {
+            return getThis();
+        }
+        
         protected abstract B getThis();
         
         public S build() {
-            return build("A stand");
+            return createStats();
         }
         
         @Deprecated
         public S build(String standName) {
-            if (tier < 0) {
-                throw new IllegalStateException(standName + "'s tier has not beed initialized!");
-            }
-            return createStats();
+            return build();
         }
         
         protected abstract S createStats();

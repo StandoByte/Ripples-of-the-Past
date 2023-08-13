@@ -1,16 +1,10 @@
 package com.github.standobyte.jojo.power.impl.stand;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
-
-import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.power.StandCapProvider;
@@ -25,7 +19,6 @@ import com.github.standobyte.jojo.network.packets.fromserver.StandControlStatusP
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
-import com.github.standobyte.jojo.util.general.GeneralUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -39,17 +32,10 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.world.server.ServerWorld;
 
 public class StandUtil {
-    public static final int getMaxTier(boolean isClientSide) {
-        return Collections.max(getAvailableTiers(JojoModConfig.getCommonConfigInstance(isClientSide)));
-    }
     
     public static StandType<?> randomStand(LivingEntity entity, Random random) {
-        return randomStandFromTiers(null, entity, random);
-    }
-    
-    public static StandType<?> randomStandFromTiers(@Nullable int[] tiers, LivingEntity entity, Random random) {
         if (!entity.level.isClientSide()) {
-            List<StandType<?>> stands = availableStands(tiers, entity.level.isClientSide()).collect(Collectors.toList());
+            List<StandType<?>> stands = availableStands(entity.level.isClientSide()).collect(Collectors.toList());
 
             if (stands.isEmpty()) {
                 return null;
@@ -66,54 +52,12 @@ public class StandUtil {
         return null;
     }
     
-    public static Stream<StandType<?>> availableStands(@Nullable int[] tiers, boolean clientSide) {
+    public static Stream<StandType<?>> availableStands(boolean clientSide) {
         Collection<StandType<?>> stands = JojoCustomRegistries.STANDS.getRegistry().getValues();
         return stands.stream()
-                .filter(stand -> (
-                        tiers == null ||
-                        Arrays.stream(tiers).anyMatch(tier -> tier == stand.getTier()))
+                .filter(stand -> 
+                        stand.canPlayerGetFromArrow()
                         && !JojoModConfig.getCommonConfigInstance(clientSide).isStandBanned(stand));
-    }
-    
-    public static int[] standTiersFromXp(int playerXpLvl, boolean withConfigBans, boolean isClientSide) {
-        List<Integer> tiers = new ArrayList<>();
-        int closestLvlBorder = -1;
-        for (int i = getMaxTier(isClientSide); i >= 0; i--) {
-            int tierLvlBorder = tierLowerBorder(i, isClientSide);
-            if (closestLvlBorder == -1 || closestLvlBorder == tierLvlBorder) {
-                if (playerXpLvl >= tierLvlBorder
-                        && (!withConfigBans || JojoModConfig.getCommonConfigInstance(isClientSide).tierHasUnbannedStands(i))) {
-                    closestLvlBorder = tierLvlBorder;
-                    tiers.add(i);
-                }
-            }
-            else {
-                break;
-            }
-        }
-        return tiers.stream().mapToInt(Integer::intValue).toArray();
-    }
-    
-    public static int arrowPoolNextTier(int startingFrom, boolean isClientSide) {
-        for (int i = startingFrom; i <= getMaxTier(isClientSide); i++) {
-            if (JojoModConfig.getCommonConfigInstance(isClientSide).tierHasUnbannedStands(i)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-    
-    public static int tierLowerBorder(int tier, boolean isClientSide) {
-        List<? extends Integer> xpBorders = JojoModConfig.getCommonConfigInstance(isClientSide).standTierXpLevels.get();
-        return GeneralUtil.getOrLast(xpBorders, tier).intValue();
-    }
-    
-    public static Set<Integer> getAvailableTiers(JojoModConfig.Common config) {
-        return JojoCustomRegistries.STANDS.getRegistry().getValues()
-                .stream()
-                .filter(stand -> !config.isStandBanned(stand))
-                .map(StandType::getTier)
-                .collect(Collectors.toSet());
     }
     
     public static boolean isEntityStandUser(LivingEntity entity) {

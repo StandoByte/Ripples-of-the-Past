@@ -13,8 +13,8 @@ import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
-import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtStandEntityPacket;
@@ -42,7 +42,7 @@ import net.minecraft.util.text.StringTextComponent;
 
 public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> implements IStandPower {
     private Optional<StandInstance> standInstance = Optional.empty();
-    private int tier = 0;
+    private boolean hadStand = false;
     @Nullable
     private IStandManifestation standManifestation = null;
     private float stamina;
@@ -133,7 +133,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             resolveCounter.onStandAcquired(standType);
         }
         if (standType != null) {
-            tier = Math.max(tier, standType.getTier());
+            hadStand = true;
         }
         if (user != null && !user.level.isClientSide()) {
             continuousEffects.onStandChanged(user);
@@ -509,8 +509,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     }
     
     @Override
-    public int getUserTier() {
-        return tier;
+    public boolean hadStand() {
+        return hadStand;
     }
     
 //    @Override // TODO Stand Sealing effect
@@ -591,6 +591,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     public CompoundNBT writeNBT() {
         CompoundNBT cnbt = super.writeNBT();
         standInstance.ifPresent(stand -> cnbt.put("StandInstance", stand.writeNBT()));
+        
+        cnbt.putBoolean("HadStand", hadStand);
         if (usesStamina()) {
             cnbt.putFloat("Stamina", stamina);
         }
@@ -610,6 +612,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                         : LegacyUtil.readOldStandCapType(nbt).orElse(null);
         setStandInstance(standInstance);
             
+        hadStand = nbt.getBoolean("HadStand");
         if (usesStamina()) {
             stamina = nbt.getFloat("Stamina");
         }
