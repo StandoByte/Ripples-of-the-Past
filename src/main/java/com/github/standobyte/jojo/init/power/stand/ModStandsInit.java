@@ -77,6 +77,7 @@ import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.power.impl.stand.type.EntityStandType;
 import com.github.standobyte.jojo.power.impl.stand.type.NoManifestationStandType;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
+import com.github.standobyte.jojo.power.impl.stand.type.StandType.StandSurvivalGameplayPool;
 
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -219,8 +220,9 @@ public class ModStandsInit {
                             .build())
                     .addSummonShout(ModSounds.JOTARO_STAR_PLATINUM)
                     .addOst(ModSounds.STAR_PLATINUM_OST)
+                    .addAttackerResolveMultTier(1)
                     .build(), 
-                    
+
                     ENTITIES, 
                     () -> new StandEntityType<StarPlatinumEntity>(StarPlatinumEntity::new, 0.7F, 2.1F)
                     .summonSound(ModSounds.STAR_PLATINUM_SUMMON)
@@ -313,6 +315,7 @@ public class ModStandsInit {
                             .build())
                     .addSummonShout(ModSounds.DIO_THE_WORLD)
                     .addOst(ModSounds.THE_WORLD_OST)
+                    .addAttackerResolveMultTier(1)
 //                    .addItemOnResolveLevel(4, new ItemStack(ModItems.ROAD_ROLLER.get()))
                     .build(), 
 
@@ -743,7 +746,7 @@ public class ModStandsInit {
                         .durability(0)
                         .precision(0)
                         .build())
-                .setPlayerAccess(false)
+                .setSurvivalGameplayPool(StandSurvivalGameplayPool.NPC_ENCOUNTER)
                 .build()
             );
     

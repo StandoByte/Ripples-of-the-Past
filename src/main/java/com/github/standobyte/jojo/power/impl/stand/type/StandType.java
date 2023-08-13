@@ -48,10 +48,11 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     private final ITextComponent partName;
     private final T defaultStats;
     private final Class<T> statsClass;
-    private final boolean canPlayerGet;
+    private final StandSurvivalGameplayPool survivalGameplayPool;
     private final Supplier<SoundEvent> summonShoutSupplier;
     private final OstSoundList ostSupplier;
     private final Map<Integer, List<ItemStack>> resolveLevelItems;
+    private final int resolveMultiplierTier;
     
     @Deprecated
     public StandType(int color, ITextComponent partName, 
@@ -68,8 +69,9 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         if (additions == null) additions = new StandTypeOptionals();
         this.ostSupplier = additions.ostSupplier;
         this.summonShoutSupplier = additions.summonShoutSupplier;
-        this.canPlayerGet = additions.canPlayerGet;
+        this.survivalGameplayPool = additions.survivalGameplayPool;
         this.resolveLevelItems = additions.resolveLevelItems;
+        this.resolveMultiplierTier = additions.resolveMultiplierTier;
     }
     
     protected StandType(AbstractBuilder<?, T> builder) {
@@ -142,8 +144,13 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
             return getThis();
         }
         
-        public B setPlayerAccess(boolean canPlayerGet) {
-            getOptionals().canPlayerGet = canPlayerGet;
+        public B setSurvivalGameplayPool(StandSurvivalGameplayPool survivalGameplayPool) {
+            getOptionals().survivalGameplayPool = survivalGameplayPool;
+            return getThis();
+        }
+        
+        public B addAttackerResolveMultTier(int tierAdd) {
+            getOptionals().resolveMultiplierTier += tierAdd;
             return getThis();
         }
         
@@ -188,6 +195,10 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     @Override
     public boolean isReplaceableWith(StandType<?> newType) {
         return false;
+    }
+    
+    public boolean canPlayerGetFromArrow() {
+        return survivalGameplayPool == StandSurvivalGameplayPool.PLAYER_ARROW;
     }
 
     @Override
@@ -274,9 +285,9 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     
     @Override
     public float getTargetResolveMultiplier(IStandPower power, IStandPower attackingStand) {
-        float multiplier = getTier() + 1;
+        float multiplier = resolveMultiplierTier + 1;
         if (attackingStand.hasPower()) {
-            multiplier = Math.max(multiplier - attackingStand.getType().getTier(), 1);
+            multiplier = Math.max(multiplier - attackingStand.getType().resolveMultiplierTier, 1);
         }
         return multiplier;
     }
@@ -306,10 +317,6 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     
     public ITextComponent getPartName() {
         return partName;
-    }
-
-    public int getTier() {
-        return getStats().getTier();
     }
     
     public void toggleSummon(IStandPower standPower) {
@@ -371,10 +378,11 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     
     @Deprecated
     public static class StandTypeOptionals {
-        private boolean canPlayerGet = true;
+        private StandSurvivalGameplayPool survivalGameplayPool = StandSurvivalGameplayPool.PLAYER_ARROW; 
         private Supplier<SoundEvent> summonShoutSupplier = () -> null;
         private OstSoundList ostSupplier = null;
         private Map<Integer, List<ItemStack>> resolveLevelItems = new HashMap<>();
+        private int resolveMultiplierTier = 5;
         
         public StandTypeOptionals addSummonShout(Supplier<SoundEvent> summonShoutSupplier) {
             if (summonShoutSupplier != null) {
@@ -396,11 +404,11 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
             }
             return this;
         }
-        
-        public StandTypeOptionals setPlayerAccess(boolean canPlayerGet) {
-            this.canPlayerGet = canPlayerGet;
-            return this;
-        }
-        
+    }
+    
+    
+    public static enum StandSurvivalGameplayPool {
+        PLAYER_ARROW,
+        NPC_ENCOUNTER
     }
 }

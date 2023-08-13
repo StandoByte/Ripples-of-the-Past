@@ -35,7 +35,7 @@ public class StandArrowHitPredicate {
         if (this == ANY) {
             return true;
         }
-        return this.arrowEntity.matches(player, arrow) && this.targetStand.matches(PowerClassification.STAND, targetStand)
+        return this.arrowEntity.matches(player, arrow) && this.targetStand.matchesPower(PowerClassification.STAND, targetStand)
                 && (this.gaveStand == null || this.gaveStand == gaveStand)
                 && (this.shotSelf == null || this.shotSelf == shotSelf);
     }
