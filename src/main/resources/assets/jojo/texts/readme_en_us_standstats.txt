@@ -33,4 +33,6 @@ However, if you do not want to change a certain Stand's stats, its whole file ca
 3) Save the edited file(s).
 4) Open the Minecraft world, or type /reload command in the chat if you're editing it while playing in that world (basically the standard process of data pack loading).
 
+If your Stand was summoned during this process, you'll have to resummon it for the changes to take effect.
+
 This data pack's format will stay the same throughout v0.2.X versions of the mod, however, it may or may not change by the time v0.3 comes out.

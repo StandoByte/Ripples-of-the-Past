@@ -29,11 +29,11 @@ import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer.BarType;
 import com.github.standobyte.jojo.entity.CrimsonBubbleEntity;
 import com.github.standobyte.jojo.entity.HamonBlockChargeEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.SnakeMufflerEntity;
-import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -92,6 +92,7 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -410,17 +411,21 @@ public class HamonUtil {
         });
         
         if (damagePrevented) {
-            Vector3d sparkPos;
+            Vector3d sparkPos = null;
             if (blockPos != null && blockState != null) {
                 AxisAlignedBB entityHitbox = entity.getBoundingBox();
-                AxisAlignedBB blockAABB = blockState.getCollisionShape(world, blockPos).bounds().move(blockPos);
-                AxisAlignedBB intersection = entityHitbox.intersect(blockAABB);
-                sparkPos = new Vector3d(
-                        MathHelper.lerp(Math.random(), intersection.minX, intersection.maxX), 
-                        MathHelper.lerp(Math.random(), intersection.minY, intersection.maxY), 
-                        MathHelper.lerp(Math.random(), intersection.minZ, intersection.maxZ));
+                VoxelShape blockShape = blockState.getCollisionShape(world, blockPos);
+                if (!blockShape.isEmpty()) {
+                    AxisAlignedBB blockAABB = blockShape.bounds().move(blockPos);
+                    AxisAlignedBB intersection = entityHitbox.intersect(blockAABB);
+                    sparkPos = new Vector3d(
+                            MathHelper.lerp(Math.random(), intersection.minX, intersection.maxX), 
+                            MathHelper.lerp(Math.random(), intersection.minY, intersection.maxY), 
+                            MathHelper.lerp(Math.random(), intersection.minZ, intersection.maxZ));
+                }
             }
-            else {
+            
+            if (sparkPos == null) {
                 sparkPos = dmgSource.getSourcePosition();
             }
             
