@@ -140,6 +140,5 @@ public class ZoomPunchModel extends EntityModel<ZoomPunchEntity> {
             visibleArm = leftSide ? mobPunchLeft : mobPunchRight;
         }
         visibleArm.visible = true;
-        playerPunchRight.visible = true;
     }
 }
