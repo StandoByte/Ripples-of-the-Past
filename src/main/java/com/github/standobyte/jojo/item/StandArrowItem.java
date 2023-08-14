@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.item;
 
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -10,6 +11,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.itemprojectile.StandArrowEntity;
 import com.github.standobyte.jojo.init.ModEnchantments;
 import com.github.standobyte.jojo.init.ModItems;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
@@ -139,7 +141,9 @@ public class StandArrowItem extends ArrowItem {
         if (player != null) {
             IFormattableTextComponent mainText = null;
             
-            Collection<StandType<?>> unbannedStands = StandUtil.availableStands(true).collect(Collectors.toList());
+            Collection<StandType<?>> unbannedStands = StandUtil.availableStands(true)
+                    .sorted(Comparator.comparingInt(stand -> JojoCustomRegistries.STANDS.getNumericId(stand.getRegistryName())))
+                    .collect(Collectors.toList());
             
             if (unbannedStands.isEmpty()) {
                 mainText = new TranslationTextComponent("jojo.arrow.no_stands").withStyle(TextFormatting.OBFUSCATED);

@@ -19,6 +19,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.StandControlStatusP
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
+import com.github.standobyte.jojo.power.impl.stand.type.StandType.StandSurvivalGameplayPool;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -55,9 +56,13 @@ public class StandUtil {
     public static Stream<StandType<?>> availableStands(boolean clientSide) {
         Collection<StandType<?>> stands = JojoCustomRegistries.STANDS.getRegistry().getValues();
         return stands.stream()
-                .filter(stand -> 
-                        stand.canPlayerGetFromArrow()
-                        && !JojoModConfig.getCommonConfigInstance(clientSide).isStandBanned(stand));
+                .filter(stand -> StandUtil.canPlayerGetFromArrow(stand, clientSide));
+    }
+    
+    public static boolean canPlayerGetFromArrow(StandType<?> standType, boolean clientSide) {
+        return standType.getSurvivalGameplayPool() == StandSurvivalGameplayPool.PLAYER_ARROW && 
+                (!JojoModConfig.getCommonConfigInstance(clientSide).isConfigLoaded() || // to make it work when adding items to creative search tab on client initialization, when the config isn't loaded yet
+                !JojoModConfig.getCommonConfigInstance(clientSide).isStandBanned(standType));
     }
     
     public static boolean isEntityStandUser(LivingEntity entity) {

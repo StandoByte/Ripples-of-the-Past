@@ -11,6 +11,7 @@ import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
+import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.LegacyUtil;
@@ -72,6 +73,7 @@ public class StandDiscItem extends Item {
                     player.displayClientMessage(new TranslationTextComponent("jojo.chat.message.cant_put_stand_disc"), true);
                     return ActionResult.fail(stack);
                 }
+                
                 if (!player.abilities.instabuild) {
                     Optional<StandInstance> previousDiscStand = power.putOutStand();
                     previousDiscStand.ifPresent(prevStand -> player.drop(withStand(new ItemStack(this), prevStand), false));
@@ -79,6 +81,7 @@ public class StandDiscItem extends Item {
                 else {
                     power.clear();
                 }
+                
                 if (power.giveStand(stand, !stack.getTag().getBoolean(WS_TAG))) {
                     if (!player.abilities.instabuild) {
                         stack.shrink(1);
@@ -86,7 +89,6 @@ public class StandDiscItem extends Item {
                     return ActionResult.success(stack);
                 }
                 else {
-                    player.displayClientMessage(new TranslationTextComponent("jojo.chat.message.already_have_stand"), true);
                     return ActionResult.fail(stack);
                 }
             } 
@@ -110,8 +112,7 @@ public class StandDiscItem extends Item {
         if (this.allowdedIn(group)) {
             boolean isClientSide = Thread.currentThread().getThreadGroup() == SidedThreadGroups.CLIENT;
             for (StandType<?> standType : JojoCustomRegistries.STANDS.getRegistry()) {
-                if (!JojoModConfig.getCommonConfigInstance(isClientSide).isConfigLoaded()
-                        || !JojoModConfig.getCommonConfigInstance(isClientSide).isStandBanned(standType)) {
+                if (StandUtil.canPlayerGetFromArrow(standType, isClientSide)) {
                     items.add(withStand(new ItemStack(this), new StandInstance(standType)));
                 }
             }
