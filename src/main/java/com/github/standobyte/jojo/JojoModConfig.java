@@ -15,7 +15,6 @@ import com.electronwill.nightconfig.core.InMemoryCommentedFormat;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
-import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.CommonConfigPacket;
@@ -337,8 +336,6 @@ public class JojoModConfig {
         }
         
         public boolean isStandBanned(StandType<?> stand) {
-            // FIXME (BIIM) temporary
-            if (stand == ModStandsInit.BOY_II_MAN.get()) return true;
             return bannedStandsResLocs.contains(stand.getRegistryName());
         }
         

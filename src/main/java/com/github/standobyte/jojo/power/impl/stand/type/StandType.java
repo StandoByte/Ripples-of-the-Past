@@ -197,8 +197,8 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         return false;
     }
     
-    public boolean canPlayerGetFromArrow() {
-        return survivalGameplayPool == StandSurvivalGameplayPool.PLAYER_ARROW;
+    public StandSurvivalGameplayPool getSurvivalGameplayPool() {
+        return survivalGameplayPool;
     }
 
     @Override
