@@ -312,7 +312,7 @@ public class PlayerUtilCap {
     
     
     private int xpLevelsTakenByArrow;
-    private int standsGotFromArrow;
+    private int standsGotFromArrow; // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! keep this on death
     private UUID standArrowShooterUUID;
     
     public int decXpLevelsTakenByArrow() {
@@ -332,7 +332,7 @@ public class PlayerUtilCap {
     }
     
     public int getStandXpLevelsRequirement() {
-        return 40 + standsGotFromArrow * 5;
+        return 30 + standsGotFromArrow * 5;
     }
     
     public void onGettingStandFromArrow() {
@@ -348,11 +348,18 @@ public class PlayerUtilCap {
                 }
                 standArrowShooterUUID = null;
             }
+            
+//            healStandArrowDamage = true;
         }
     }
     
     public void setStandArrowShooter(LivingEntity shooter) {
         this.standArrowShooterUUID = shooter.getUUID();
+    }
+    
+    public void setFromPacket(ArrowXpLevelsDataPacket packet) {
+        this.xpLevelsTakenByArrow = packet.levels;
+        this.standsGotFromArrow = packet.gotStands;
     }
     
     

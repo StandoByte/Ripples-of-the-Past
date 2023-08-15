@@ -11,8 +11,8 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 public class ArrowXpLevelsDataPacket {
-    private final int levels;
-    private final int gotStands;
+    public final int levels;
+    public final int gotStands;
     
     public ArrowXpLevelsDataPacket(int levels, int gotStands) {
         this.levels = levels;
@@ -38,7 +38,7 @@ public class ArrowXpLevelsDataPacket {
         public void handle(ArrowXpLevelsDataPacket msg, Supplier<NetworkEvent.Context> ctx) {
             PlayerEntity player = ClientUtil.getClientPlayer();
             player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                cap.setXpLevelsTakenByArrow(msg.levels);
+                cap.setFromPacket(msg);
             });
         }
 

@@ -73,7 +73,7 @@ public class ModStatusEffects {
     public static final RegistryObject<UncurableEffect> TIME_STOP = EFFECTS.register("time_stop", 
             () -> new UncurableEffect(EffectType.BENEFICIAL, 0x707070));
     
-    public static final RegistryObject<UncurableEffect> STAND_VIRUS = EFFECTS.register("stand_virus", 
+    public static final RegistryObject<StandVirusEffect> STAND_VIRUS = EFFECTS.register("stand_virus", 
             () -> new StandVirusEffect(0xC10019));
     
     public static final RegistryObject<UncurableEffect> RESOLVE = EFFECTS.register("resolve", 
