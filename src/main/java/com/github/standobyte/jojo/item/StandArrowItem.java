@@ -97,13 +97,19 @@ public class StandArrowItem extends ArrowItem {
                         return false;
                     }
                     
-                    int inhibitionLevel = StandVirusEffect.getEffectLevelToApply(EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.VIRUS_INHIBITION.get(), stack));
-                    player.addEffect(new EffectInstance(ModStatusEffects.STAND_VIRUS.get(), 
-                            Integer.MAX_VALUE, inhibitionLevel, false, false, true));
-                    
-                    arrowShooter.ifPresent(shooter -> {
-                        player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.setStandArrowShooter(shooter));
-                    });
+                    if (player.abilities.instabuild) { // instantly give a stand in creative
+                        StandType<?> stand = StandUtil.randomStand(player, player.getRandom());
+                        return standCap.givePower(stand);
+                    }
+                    else { // 
+                        int inhibitionLevel = StandVirusEffect.getEffectLevelToApply(EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.VIRUS_INHIBITION.get(), stack));
+                        player.addEffect(new EffectInstance(ModStatusEffects.STAND_VIRUS.get(), 
+                                Integer.MAX_VALUE, inhibitionLevel, false, false, true));
+                        
+                        arrowShooter.ifPresent(shooter -> {
+                            player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.setStandArrowShooter(shooter));
+                        });
+                    }
                     
                     return true;
                 });

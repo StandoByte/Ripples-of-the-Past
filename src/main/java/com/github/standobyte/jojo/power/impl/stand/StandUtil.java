@@ -6,6 +6,8 @@ import java.util.Random;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.power.StandCapProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
@@ -20,6 +22,7 @@ import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType.StandSurvivalGameplayPool;
+import com.github.standobyte.jojo.util.general.MathUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -34,6 +37,7 @@ import net.minecraft.world.server.ServerWorld;
 
 public class StandUtil {
     
+    @Nullable
     public static StandType<?> randomStand(LivingEntity entity, Random random) {
         if (!entity.level.isClientSide()) {
             List<StandType<?>> stands = availableStands(entity.level.isClientSide()).collect(Collectors.toList());
@@ -47,7 +51,7 @@ public class StandUtil {
             }
             
             if (!stands.isEmpty()) {
-                return stands.get(random.nextInt(stands.size()));
+                return MathUtil.getRandomWeighted(stands, stand -> stand.getStats().getRandomWeight(), random).orElse(null);
             }
         }
         return null;
