@@ -308,6 +308,8 @@
   "death.attack.pillarManAbsorption.entity.item": "%s was absorbed by %s",
   "death.attack.standVirus": "%s was exposed to a lethal virus",
   "death.attack.standVirus.player": "%s was exposed to a lethal virus whilst fighting %s",
+  "death.attack.standVirusMeteorite": "%s caught a lethal virus through their injuries",
+  "death.attack.standVirusMeteorite.player": "%s caught a lethal virus through their injuries",
   "death.attack.stand": "%s was slain by %s",
   "death.attack.stand.stand_user": "%s was slain by %s's Stand, %s",
   "death.attack.arrow.stand_user": "%s was shot by %s's Stand, %s",

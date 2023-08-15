@@ -34,6 +34,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandSummon
 import com.github.standobyte.jojo.network.packets.fromclient.ClWalkmanControlsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ActionCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ActionsLayoutPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ArrowXpLevelsDataPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.BrokenChunkBlocksPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.CommonConfigPacket;
@@ -61,7 +62,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.ResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SkippedStandProgressionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SpawnParticlePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandActionLearningPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.StandActionsClearLearningPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.StandFullClearPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandCancelManualMovementPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandControlStatusPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandStatsDataPacket;
@@ -189,6 +190,7 @@ public class PacketManager {
         registerMessage(serverChannel, new HamonSyncOnLoadPacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrVampirismDataPacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrStaminaPacket.Handler(),                      Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(serverChannel, new ArrowXpLevelsDataPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new HadPowerTypesPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new ResolvePacket.Handler(),                        Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrStandEffectPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
@@ -199,7 +201,7 @@ public class PacketManager {
         registerMessage(serverChannel, new SkippedStandProgressionPacket.Handler(),        Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new ResolveEffectStartPacket.Handler(),             Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new StandActionLearningPacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        registerMessage(serverChannel, new StandActionsClearLearningPacket.Handler(),      Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(serverChannel, new StandFullClearPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrSetStandEntityPacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new StandStatsDataPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new StandControlStatusPacket.Handler(),             Optional.of(NetworkDirection.PLAY_TO_CLIENT));

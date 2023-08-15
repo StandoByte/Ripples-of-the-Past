@@ -66,7 +66,7 @@ public class HGEmeraldEntity extends ModdedProjectileEntity {
     protected void afterEntityHit(EntityRayTraceResult entityRayTraceResult, boolean entityHurt) {
         if (!level.isClientSide() && entityHurt && userStandPower != null) {
             Entity target = entityRayTraceResult.getEntity();
-            if (StandUtil.worthyTarget(target)) {
+            if (StandUtil.attackingTargetGivesResolve(target)) {
                 userStandPower.addLearningProgressPoints(ModStandsInit.HIEROPHANT_GREEN_EMERALD_SPLASH.get(), 0.002F);
             }
         }

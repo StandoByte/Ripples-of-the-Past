@@ -133,7 +133,7 @@ public class StandCommand {
             if (power != null) {
                 removedStand = power.getType();
                 power.clear();
-                power.clearActionLearning();
+                power.fullStandClear();
                 i++;
             }
         }
