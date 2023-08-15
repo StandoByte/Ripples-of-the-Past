@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.potion;
 
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
@@ -9,9 +8,9 @@ import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.AttributeModifierManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.potion.EffectType;
-import net.minecraftforge.common.util.LazyOptional;
 
 public class StandVirusEffect extends UncurableEffect implements IApplicableEffect {
     
@@ -30,15 +29,14 @@ public class StandVirusEffect extends UncurableEffect implements IApplicableEffe
             
             boolean tookAwayLevel = player.abilities.instabuild || player.experienceLevel > 0;
             boolean stopEffect = false;
-            LazyOptional<PlayerUtilCap> utilData = player.getCapability(PlayerUtilCapProvider.CAPABILITY);
             if (tookAwayLevel) {
                 player.giveExperienceLevels(-1);
-                stopEffect = utilData.map(cap -> {
+                stopEffect = player.getCapability(PlayerUtilCapProvider.CAPABILITY).map(cap -> {
                     return cap.decXpLevelsTakenByArrow() >= cap.getStandXpLevelsRequirement();
                 }).orElse(true); // fail-safe, better to give a stand for 1 level than to have the effect permanently
             }
             
-            float damage = 0.2F + amplifier * 0.1F;
+            float damage = 0.15F + amplifier * 0.2F;
             if (tookAwayLevel) {
                 if (damage > entity.getHealth()) {
                     damage = 0.001F;
@@ -51,10 +49,18 @@ public class StandVirusEffect extends UncurableEffect implements IApplicableEffe
             
             if (stopEffect) {
                 entity.removeEffect(this);
-                StandType<?> stand = StandUtil.randomStand(player, player.getRandom());
-                if (stand != null && GeneralUtil.orElseFalse(IStandPower.getStandPowerOptional(player), power -> power.givePower(stand))) {
-                    utilData.ifPresent(cap -> cap.onGettingStandFromArrow());
-                }
+            }
+        }
+    }
+    
+    @Override
+    public void removeAttributeModifiers(LivingEntity entity, AttributeModifierManager attributeMap, int amplifier) {
+        super.removeAttributeModifiers(entity, attributeMap, amplifier);
+        if (!entity.level.isClientSide() && entity.isAlive() && entity instanceof PlayerEntity) {
+            PlayerEntity player = (PlayerEntity) entity;
+            StandType<?> stand = StandUtil.randomStand(player, player.getRandom());
+            if (stand != null && GeneralUtil.orElseFalse(IStandPower.getStandPowerOptional(player), power -> power.givePower(stand))) {
+                player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.onGettingStandFromArrow());
             }
         }
     }
@@ -70,5 +76,10 @@ public class StandVirusEffect extends UncurableEffect implements IApplicableEffe
     
     public static int getEffectLevelToApply(int inhibition) {
         return Math.max(MAX_VIRUS_INHIBITION - inhibition, 0);
+    }
+    
+    public static int getEffectDurationToApply(PlayerEntity player) {
+        return player.getCapability(PlayerUtilCapProvider.CAPABILITY)
+                .map(cap -> (cap.getStandXpLevelsRequirement() + 1) * 10).orElse(0) * 2;
     }
 }

@@ -38,6 +38,7 @@ import net.minecraft.item.ArrowItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
@@ -64,7 +65,9 @@ public class StandArrowItem extends ArrowItem {
     @Override
     public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         ItemStack stack = player.getItemInHand(hand);
-        if (onPiercedByArrow(player, stack, world, Optional.empty())) {
+        
+        if (!world.isClientSide() && onPiercedByArrow(player, stack, world, Optional.empty())) {
+            player.hurt(DamageSource.playerAttack(player), Math.min(1.0F, Math.max(player.getHealth() - 1.0F, 0)));
             stack.hurtAndBreak(1, player, pl -> {});
             return ActionResult.success(stack);
         }
@@ -77,7 +80,7 @@ public class StandArrowItem extends ArrowItem {
     }
     
     /** 
-     * @return  if the entity got the Stand Virus effect
+     * @return  if the entity got the Stand Virus effect or a Stand
      */
     public static boolean onPiercedByArrow(Entity entity, ItemStack stack, World world, Optional<LivingEntity> arrowShooter) {
         if (!world.isClientSide() && entity instanceof LivingEntity) {
@@ -101,10 +104,18 @@ public class StandArrowItem extends ArrowItem {
                         StandType<?> stand = StandUtil.randomStand(player, player.getRandom());
                         return standCap.givePower(stand);
                     }
-                    else { // 
-                        int inhibitionLevel = StandVirusEffect.getEffectLevelToApply(EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.VIRUS_INHIBITION.get(), stack));
-                        player.addEffect(new EffectInstance(ModStatusEffects.STAND_VIRUS.get(), 
-                                Integer.MAX_VALUE, inhibitionLevel, false, false, true));
+                    else {
+                        int virusEffectDuration = StandVirusEffect.getEffectDurationToApply(player);
+                        if (virusEffectDuration > 0) {
+                            int inhibitionLevel = EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.VIRUS_INHIBITION.get(), stack);
+                            int effectLevel = StandVirusEffect.getEffectLevelToApply(inhibitionLevel);
+                            player.addEffect(new EffectInstance(ModStatusEffects.STAND_VIRUS.get(), 
+                                    virusEffectDuration, effectLevel, false, false, true));
+                        }
+                        else { // instantly give a stand if there was no stand virus effect given
+                            StandType<?> stand = StandUtil.randomStand(player, player.getRandom());
+                            return standCap.givePower(stand);
+                        }
                         
                         arrowShooter.ifPresent(shooter -> {
                             player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.setStandArrowShooter(shooter));
@@ -201,6 +212,17 @@ public class StandArrowItem extends ArrowItem {
                 else {
                     tooltip.add(new TranslationTextComponent("jojo.arrow.stands_hint", new KeybindTextComponent("key.sneak"))
                             .withStyle(TextFormatting.GRAY));
+                }
+                
+                if (!player.abilities.instabuild) {
+                    int levelsNeeded = player.getCapability(PlayerUtilCapProvider.CAPABILITY)
+                            .map(cap -> cap.getStandXpLevelsRequirement()).orElse(0);
+                    if (levelsNeeded > 0) {
+                        boolean playerHasStand = StandUtil.isEntityStandUser(player);
+                        boolean playerHasLevels = player.experienceLevel >= levelsNeeded;
+                        tooltip.add(new TranslationTextComponent("jojo.arrow.stand_arrow_xp", levelsNeeded).withStyle(
+                                playerHasStand ? TextFormatting.DARK_GRAY : playerHasLevels ? TextFormatting.GREEN : TextFormatting.RED));
+                    }
                 }
             }
             

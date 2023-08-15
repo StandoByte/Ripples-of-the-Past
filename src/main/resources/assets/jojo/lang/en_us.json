@@ -128,6 +128,7 @@
   "effect.jojo.cheat_death": "Cheat Death",
   "effect.jojo.stamina_regen": "Stamina Regen",
   "effect.jojo.time_stop": "Time Stop",
+  "effect.jojo.stand_virus": "Meteorite Virus",
   "effect.jojo.resolve": "Resolve",
   "effect.jojo.sun_resistance": "Sun Resistance",
   "effect.jojo.spirit_vision": "Spirit Vision",
@@ -910,6 +911,7 @@
   "jojo.stand_stat.stand_user": "Stand User: %s",
   
   "jojo.disc.stand": "Stand: %s",
+  "jojo.arrow.stand_arrow_xp": "Spend %s levels to have a higher chance at surviving",
   "jojo.arrow.stands_hint": "%s to see the list of available Stands",
   "jojo.arrow.stands_list": "Available Stands:",
   "jojo.arrow.no_stands": "All Stands are banned",
