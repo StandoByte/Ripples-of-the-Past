@@ -14,12 +14,14 @@ public class StandStats {
     private final UpgradeableStats statsDevPotential;
     private final double rangeEffective;
     private final double rangeMax;
+    private final int randomWeight;
 
     protected StandStats(AbstractBuilder<?, ?> builder) {
         this.statsBase = new UpgradeableStats(builder.powerBase, builder.speedBase, builder.durabilityBase, builder.precisionBase);
         this.statsDevPotential = new UpgradeableStats(builder.powerMax, builder.speedMax, builder.durabilityMax, builder.precisionMax);
         this.rangeEffective = builder.rangeEffective;
         this.rangeMax = builder.rangeMax;
+        this.randomWeight = builder.randomWeight;
     }
     
     protected StandStats(PacketBuffer buf) {
@@ -27,6 +29,7 @@ public class StandStats {
         this.statsDevPotential = new UpgradeableStats(buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble());
         this.rangeEffective = buf.readDouble();
         this.rangeMax = buf.readDouble();
+        this.randomWeight = buf.readVarInt();
     }
     
     public void write(PacketBuffer buf) {
@@ -42,6 +45,8 @@ public class StandStats {
         
         buf.writeDouble(rangeEffective);
         buf.writeDouble(rangeMax);
+        
+        buf.writeVarInt(randomWeight);
     }
     
     public void onNewDay(LivingEntity user, IStandPower power) {}
@@ -125,6 +130,10 @@ public class StandStats {
         return 0;
     }
     
+    public int getRandomWeight() {
+        return randomWeight;
+    }
+    
     
     
     public static class Builder extends AbstractBuilder<Builder, StandStats> {
@@ -143,14 +152,20 @@ public class StandStats {
     protected abstract static class AbstractBuilder<B extends AbstractBuilder<B, S>, S extends StandStats> {
         private double powerBase = 8.0;
         private double powerMax = 8.0;
+        
         private double speedBase = 8.0;
         private double speedMax = 8.0;
+        
         private double rangeEffective = 2.0;
         private double rangeMax = 5.0;
+        
         private double durabilityBase = 8.0;
         private double durabilityMax = 8.0;
+        
         private double precisionBase = 8.0;
         private double precisionMax = 8.0;
+        
+        private int randomWeight = 2;
         
         public B power(double power) {
             return power(power, power);
@@ -209,6 +224,11 @@ public class StandStats {
         
         @Deprecated
         public B tier(int tier) {
+            return getThis();
+        }
+        
+        public B randomWeight(int randomWeight) {
+            this.randomWeight = randomWeight;
             return getThis();
         }
         
