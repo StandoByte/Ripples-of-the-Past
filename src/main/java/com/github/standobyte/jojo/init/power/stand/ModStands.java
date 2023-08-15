@@ -18,8 +18,7 @@ import com.github.standobyte.jojo.power.impl.stand.type.EntityStandType;
  * while keeping the initialization of stand types and related stand actions in the same file
  * ("ModStands.STAR_PLATINUM" looks nicer, but stuff like 
  * "STAR_PLATINUM_HEAVY_PUNCH" interfering with the auto-complete makes it less convenient)
- * 
- * totally optional, also kinda cringe but k
+ * so it's totally optional
  */
 public class ModStands {
 

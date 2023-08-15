@@ -18,6 +18,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.StandStatsDataPacke
 import com.github.standobyte.jojo.network.packets.fromserver.StandStatsDataPacket.StandStatsDataEntry;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
+import com.github.standobyte.jojo.util.general.JsonModUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.google.common.io.Files;
 import com.google.gson.JsonElement;
@@ -197,8 +198,10 @@ public class StandStatsConfig extends JsonReloadListener implements IDataConfig 
                 StandType<?> stand = registry.getValue(location);
                 if (stand != null) {
                     try {
-                        JsonObject jsonObject = JSONUtils.convertToJsonObject(object, RESOURCE_NAME);
-                        stats.put(stand, GSON.fromJson(jsonObject, stand.getStatsClass()));
+                        JsonObject parsedJson = JSONUtils.convertToJsonObject(object, RESOURCE_NAME);
+                        JsonObject statsJson = GSON.toJsonTree(stand.getDefaultStats()).getAsJsonObject();
+                        JsonModUtil.replaceValues(statsJson, parsedJson);
+                        stats.put(stand, GSON.fromJson(statsJson, stand.getStatsClass()));
                         // FIXME can i also update all summoned stand entities' data parameters?
                     }
                     catch (IllegalArgumentException | JsonParseException jsonparseexception) {
