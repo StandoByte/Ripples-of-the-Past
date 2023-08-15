@@ -1,7 +1,6 @@
 package com.github.standobyte.jojo.advancements.criterion;
 
 import com.github.standobyte.jojo.advancements.criterion.predicate.StandArrowHitPredicate;
-import com.github.standobyte.jojo.entity.itemprojectile.StandArrowEntity;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.google.gson.JsonObject;
 
@@ -27,11 +26,11 @@ public class StandArrowHitTrigger extends AbstractCriterionTrigger<StandArrowHit
         return this.id;
     }
 
-    public void trigger(ServerPlayerEntity player, StandArrowEntity arrow, LivingEntity target, boolean gaveStand) {
+    public void trigger(ServerPlayerEntity player, LivingEntity target, boolean gaveStand) {
         LootContext targetCtx = EntityPredicate.createContext(player, target);
         IStandPower targetStand = IStandPower.getStandPowerOptional(target).orElse(null);
         trigger(player, (criterion) -> {
-            return criterion.matches(player, arrow, targetCtx, gaveStand, targetStand, player.is(target));
+            return criterion.matches(player, targetCtx, gaveStand, targetStand, player.is(target));
         });
     }
 
@@ -55,9 +54,9 @@ public class StandArrowHitTrigger extends AbstractCriterionTrigger<StandArrowHit
             this.standArrowHitPredicate = standArrowHitPredicate;
         }
 
-        public boolean matches(ServerPlayerEntity player, StandArrowEntity arrow, LootContext targetCtx, 
+        public boolean matches(ServerPlayerEntity player, LootContext targetCtx, 
                 boolean gaveStand, IStandPower targetStand, boolean shotSelf) {
-            return targetPredicate.matches(targetCtx) && standArrowHitPredicate.matches(player, arrow, gaveStand, targetStand, shotSelf);
+            return targetPredicate.matches(targetCtx) && standArrowHitPredicate.matches(player, gaveStand, targetStand, shotSelf);
         }
 
         @Override

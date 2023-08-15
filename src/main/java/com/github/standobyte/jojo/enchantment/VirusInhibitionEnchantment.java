@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.enchantment;
 
 import com.github.standobyte.jojo.init.ModEnchantments;
+import com.github.standobyte.jojo.potion.StandVirusEffect;
 
 import net.minecraft.enchantment.Enchantment;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -13,7 +14,7 @@ public class VirusInhibitionEnchantment extends Enchantment {
 
     @Override
     public int getMaxLevel() {
-        return 3;
+        return StandVirusEffect.MAX_VIRUS_INHIBITION;
     }
 
     @Override

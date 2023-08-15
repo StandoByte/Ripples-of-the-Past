@@ -116,7 +116,7 @@ public class StandUtil {
     public static void addResolve(IStandPower stand, LivingEntity target, float points) {
         target = getStandUser(target);
         boolean hitSelf = target != null && stand.getUser() != null && getStandUser(target).is(stand.getUser());
-        if (!hitSelf && worthyTarget(target)) {
+        if (!hitSelf && attackingTargetGivesResolve(target)) {
             for (PowerClassification classification : PowerClassification.values()) {
                 points *= IPower.getPowerOptional(target, classification).map(power -> {
                     if (power.hasPower()) {
@@ -133,7 +133,7 @@ public class StandUtil {
         }
     }
     
-    public static boolean worthyTarget(Entity target) {
+    public static boolean attackingTargetGivesResolve(Entity target) {
         if (!target.isAlive()) {
             return false;
         }

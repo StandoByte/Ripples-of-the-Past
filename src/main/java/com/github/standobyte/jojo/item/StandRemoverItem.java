@@ -73,7 +73,7 @@ public class StandRemoverItem extends Item {
             switch (mode) {
             case CLEAR:
                 power.clear();
-                power.clearActionLearning();
+                power.fullStandClear();
                 break;
             case EJECT:
                 Optional<StandInstance> previousDiscStand = power.putOutStand();

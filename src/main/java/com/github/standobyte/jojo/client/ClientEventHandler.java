@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.client;
 
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.AIR;
+import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.EXPERIENCE;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.FOOD;
 
 import java.util.Set;
@@ -11,6 +12,7 @@ import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
@@ -37,11 +39,14 @@ import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
 
+import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.IngameMenuScreen;
 import net.minecraft.client.gui.screen.MainMenuScreen;
@@ -367,6 +372,71 @@ public class ClientEventHandler {
                 }
             });
         }
+        
+        if (event.getType() == EXPERIENCE && mc.gameMode.hasExperience()
+                && mc.player.hasEffect(ModStatusEffects.STAND_VIRUS.get())) {
+            mc.player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                int standArrowLevels = cap.getXpLevelsTakenByArrow();
+                if (standArrowLevels > 0) {
+                    MatrixStack matrixStack = event.getMatrixStack();
+                    renderExperienceBar(matrixStack, standArrowLevels, event.getWindow());
+                    event.setCanceled(true);
+                    MinecraftForge.EVENT_BUS.post(new RenderGameOverlayEvent.Post(matrixStack, 
+                            new RenderGameOverlayEvent(matrixStack, event.getPartialTicks(), event.getWindow()), EXPERIENCE));
+                }
+            });
+        }
+    }
+    
+    @SuppressWarnings("deprecation")
+    private void renderExperienceBar(MatrixStack matrixStack, int standArrowLevels, MainWindow window) {
+        int screenWidth = window.getGuiScaledWidth();
+        int screenHeight = window.getGuiScaledHeight();
+        FontRenderer font = mc.font;
+        int xPos = screenWidth / 2 - 91;
+        
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.disableBlend();
+        
+        mc.getProfiler().push("expBar");
+        mc.getTextureManager().bind(AbstractGui.GUI_ICONS_LOCATION);
+        int i = mc.player.getXpNeededForNextLevel();
+        if (i > 0) {
+            int k = (int)(mc.player.experienceProgress * 183.0F);
+            int yPos = screenHeight - 32 + 3;
+            mc.gui.blit(matrixStack, xPos, yPos, 0, 64, 182, 5);
+            if (k > 0) {
+                mc.gui.blit(matrixStack, xPos, yPos, 0, 69, k, 5);
+            }
+        }
+        
+        mc.getProfiler().pop();
+        
+        mc.getProfiler().push("expLevel");
+        
+        String xpLevels = mc.player.experienceLevel > 0 ? "" + mc.player.experienceLevel + " " : "";
+        String arrowLevels = "(" + standArrowLevels + ")";
+        
+        float xpNumX = (screenWidth - font.width(xpLevels + arrowLevels)) / 2F;
+        float arrowXpNumX = xpNumX + font.width(xpLevels);
+        float numberY = screenHeight - 31 - 4;
+        
+        font.draw(matrixStack, xpLevels, xpNumX + 1, numberY, 0);
+        font.draw(matrixStack, xpLevels, xpNumX - 1, numberY, 0);
+        font.draw(matrixStack, xpLevels, xpNumX, numberY + 1, 0);
+        font.draw(matrixStack, xpLevels, xpNumX, numberY - 1, 0);
+        font.draw(matrixStack, xpLevels, xpNumX, numberY, 0x80FF20);
+        
+        font.draw(matrixStack, arrowLevels, arrowXpNumX + 1, numberY, 0);
+        font.draw(matrixStack, arrowLevels, arrowXpNumX - 1, numberY, 0);
+        font.draw(matrixStack, arrowLevels, arrowXpNumX, numberY + 1, 0);
+        font.draw(matrixStack, arrowLevels, arrowXpNumX, numberY - 1, 0);
+        font.draw(matrixStack, arrowLevels, arrowXpNumX, numberY, 0xFFD820);
+        
+        mc.getProfiler().pop();
+        
+        RenderSystem.enableBlend();
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)

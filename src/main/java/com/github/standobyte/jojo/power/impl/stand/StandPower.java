@@ -20,7 +20,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtStandEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SkippedStandProgressionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandActionLearningPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.StandActionsClearLearningPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.StandFullClearPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStaminaPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrTypeStandInstancePacket;
 import com.github.standobyte.jojo.power.impl.PowerBaseImpl;
@@ -478,14 +478,16 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     }
     
     @Override
-    public ActionLearningProgressMap<IStandPower> clearActionLearning() {
-        ActionLearningProgressMap<IStandPower> previousMap = actionLearningProgressMap;
+    public void fullStandClear() {
+//        ActionLearningProgressMap<IStandPower> previousMap = actionLearningProgressMap;
         this.actionLearningProgressMap = new ActionLearningProgressMap<>();
         resolveCounter.clearLevels();
         serverPlayerUser.ifPresent(player -> {
-            PacketManager.sendToClient(new StandActionsClearLearningPacket(), player);
+            PacketManager.sendToClient(new StandFullClearPacket(), player);
         });
-        return previousMap;
+        if (!hasPower()) {
+            hadStand = false;
+        }
     }
     
     @Override
