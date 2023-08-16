@@ -69,8 +69,9 @@ public class JojoModConfig {
         public final ForgeConfigSpec.BooleanValue undeadMobsSunDamage;
         public final ForgeConfigSpec.IntValue vampirismCuringDuration;
 
+        public final ForgeConfigSpec.IntValue standXpCostInitial;
+        public final ForgeConfigSpec.IntValue standXpCostIncrease;
         public final ForgeConfigSpec.BooleanValue prioritizeLeastTakenStands;
-        
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> bannedStands;
         private List<StandType<?>> bannedStandsSynced = null;
         private List<ResourceLocation> bannedStandsResLocs;
@@ -218,6 +219,16 @@ public class JojoModConfig {
             builder.pop();
             
             builder.comment(" Settings of Stand-giving Arrows and the commands giving Stands at random.").push("Arrow");
+                standXpCostInitial = builder
+                        .comment("    The initial cost of getting a Stand from a Stand Arrow (in experience levels).")
+                        .translation("jojo.config.standXpCostInitial")
+                        .defineInRange("standXpCostInitial", 30, 0, 9999);
+
+                standXpCostIncrease = builder
+                        .comment("    The increase of the cost for getting a Stand for each previous one the player has got before.")
+                        .translation("jojo.config.standXpCostIncrease")
+                        .defineInRange("standXpCostIncrease", 5, 0, 9999);
+                
                 prioritizeLeastTakenStands = builder
                         .comment("    If enabled, random Stand gain effects (Stand-giving Arrow, \"/stand random\") give Stands that less players already have.", 
                                  "     Otherwise the Stand selection is random.")
@@ -364,7 +375,9 @@ public class JojoModConfig {
 //            private final float[] bloodDrainMultiplier;
             private final float[] bloodTickDown;
 //            private final float[] bloodHealCost;
-            
+
+            private final int standXpCostInitial;
+            private final int standXpCostIncrease;
             private final boolean prioritizeLeastTakenStands;
             private final List<StandType<?>> bannedStands;
 
@@ -384,14 +397,20 @@ public class JojoModConfig {
 //                breathingTrainingMultiplier = buf.readDouble();
                 breathingStatGap = buf.readVarInt();
                 techniqueSkillsRequirement = buf.readVarIntArray();
+                
                 maxBloodMultiplier = NetworkUtil.readFloatArray(buf);
 //                bloodDrainMultiplier = NetworkUtil.readFloatArray(buf);
                 bloodTickDown = NetworkUtil.readFloatArray(buf);
 //                bloodHealCost = NetworkUtil.readFloatArray(buf);
+                
+                standXpCostInitial = buf.readVarInt();
+                standXpCostIncrease = buf.readVarInt();
                 bannedStands = NetworkUtil.readRegistryIdsSafe(buf, StandType.class);
+                
 //                standDamageMultiplier = buf.readDouble();
                 resolvePoints = NetworkUtil.readFloatArray(buf);
                 timeStopChunkRange = buf.readVarInt();
+                
                 byte[] flags = buf.readByteArray();
                 keepStandOnDeath =                  (flags[0] & 1) > 0;
                 keepHamonOnDeath =                  (flags[0] & 2) > 0;
@@ -417,11 +436,16 @@ public class JojoModConfig {
 //                buf.writeDouble(breathingTrainingMultiplier);
                 buf.writeVarInt(breathingStatGap);
                 buf.writeVarIntArray(techniqueSkillsRequirement);
+                
                 NetworkUtil.writeFloatArray(buf, maxBloodMultiplier);
 //                NetworkUtil.writeFloatArray(buf, bloodDrainMultiplier);
                 NetworkUtil.writeFloatArray(buf, bloodTickDown);
 //                NetworkUtil.writeFloatArray(buf, bloodHealCost);
+                
+                buf.writeVarInt(standXpCostInitial);
+                buf.writeVarInt(standXpCostIncrease);
                 NetworkUtil.writeRegistryIds(buf, bannedStands);
+                
 //                buf.writeDouble(standDamageMultiplier);
                 NetworkUtil.writeFloatArray(buf, resolvePoints);
                 buf.writeVarInt(timeStopChunkRange);
@@ -451,26 +475,33 @@ public class JojoModConfig {
                 keepHamonOnDeath = config.keepHamonOnDeath.get();
                 keepVampirismOnDeath = config.keepVampirismOnDeath.get();
                 dropStandDisc = config.dropStandDisc.get();
+                
                 hamonTempleSpawn = config.hamonTempleSpawn.get();
                 meteoriteSpawn = config.meteoriteSpawn.get();
                 pillarManTempleSpawn = config.pillarManTempleSpawn.get();
                 hamonEnergyTicksDown = config.hamonEnergyTicksDown.get();
+                
 //                hamonPointsMultiplier = config.standDamageMultiplier.get();
 //                breathingTrainingMultiplier = config.breathingTrainingMultiplier.get();
                 breathingTrainingDeterioration = config.breathingTrainingDeterioration.get();
                 breathingStatGap = config.breathingStatGap.get();
                 mixHamonTechniques = config.mixHamonTechniques.get();
                 techniqueSkillsRequirement = config.techniqueSkillsRequirement.get().stream().mapToInt(Integer::intValue).toArray();
+                
                 maxBloodMultiplier = Floats.toArray(config.maxBloodMultiplier.get());
 //                bloodDrainMultiplier = Floats.toArray(config.bloodDrainMultiplier.get());
                 bloodTickDown = Floats.toArray(config.bloodTickDown.get());
 //                bloodHealCost = Floats.toArray(config.bloodHealCost.get());
 //                vampiresAggroMobs = config.vampiresAggroMobs.get();
 //                undeadMobsSunDamage = config.undeadMobsSunDamage.get();
+                
+                standXpCostInitial = config.standXpCostInitial.get();
+                standXpCostIncrease = config.standXpCostIncrease.get();
                 prioritizeLeastTakenStands = config.prioritizeLeastTakenStands.get();
                 bannedStands = config.bannedStandsResLocs.stream()
                         .map(key -> JojoCustomRegistries.STANDS.getRegistry().getValue(key))
                         .collect(Collectors.toList());
+                
                 abilitiesBreakBlocks = config.abilitiesBreakBlocks.get();
 //                standDamageMultiplier = config.standDamageMultiplier.get()
                 skipStandProgression = config.skipStandProgression.get();
@@ -486,22 +517,29 @@ public class JojoModConfig {
                 COMMON_SYNCED_TO_CLIENT.keepHamonOnDeath.set(keepHamonOnDeath);
                 COMMON_SYNCED_TO_CLIENT.keepVampirismOnDeath.set(keepVampirismOnDeath);
                 COMMON_SYNCED_TO_CLIENT.dropStandDisc.set(dropStandDisc);
+                
                 COMMON_SYNCED_TO_CLIENT.hamonTempleSpawn.set(hamonTempleSpawn);
                 COMMON_SYNCED_TO_CLIENT.meteoriteSpawn.set(meteoriteSpawn);
                 COMMON_SYNCED_TO_CLIENT.pillarManTempleSpawn.set(pillarManTempleSpawn);
                 COMMON_SYNCED_TO_CLIENT.hamonEnergyTicksDown.set(hamonEnergyTicksDown);
+                
 //                COMMON_SYNCED_TO_CLIENT.hamonPointsMultiplier.set(hamonPointsMultiplier);
 //                COMMON_SYNCED_TO_CLIENT.breathingTrainingMultiplier.set(breathingTrainingMultiplier);
                 COMMON_SYNCED_TO_CLIENT.breathingTrainingDeterioration.set(breathingTrainingDeterioration);
                 COMMON_SYNCED_TO_CLIENT.breathingStatGap.set(breathingStatGap);
                 COMMON_SYNCED_TO_CLIENT.mixHamonTechniques.set(mixHamonTechniques);
                 COMMON_SYNCED_TO_CLIENT.techniqueSkillsRequirement.set(IntStream.of(techniqueSkillsRequirement).boxed().collect(Collectors.toList()));
+                
                 COMMON_SYNCED_TO_CLIENT.maxBloodMultiplier.set(Floats.asList(maxBloodMultiplier).stream().map(Float::doubleValue).collect(Collectors.toList()));
 //                COMMON_SYNCED_TO_CLIENT.bloodDrainMultiplier.set(Floats.asList(bloodDrainMultiplier).stream().map(Float::doubleValue).collect(Collectors.toList()));
                 COMMON_SYNCED_TO_CLIENT.bloodTickDown.set(Floats.asList(bloodTickDown).stream().map(Float::doubleValue).collect(Collectors.toList()));
 //                COMMON_SYNCED_TO_CLIENT.bloodHealCost.set(Floats.asList(bloodHealCost).stream().map(Float::doubleValue).collect(Collectors.toList()));
+                
+                COMMON_SYNCED_TO_CLIENT.standXpCostInitial.set(standXpCostInitial);
+                COMMON_SYNCED_TO_CLIENT.standXpCostIncrease.set(standXpCostIncrease);
                 COMMON_SYNCED_TO_CLIENT.prioritizeLeastTakenStands.set(prioritizeLeastTakenStands);
                 COMMON_SYNCED_TO_CLIENT.bannedStandsSynced = bannedStands;
+                
                 COMMON_SYNCED_TO_CLIENT.abilitiesBreakBlocks.set(abilitiesBreakBlocks);
 //                COMMON_SYNCED_TO_CLIENT.standDamageMultiplier.set(standDamageMultiplier);
                 COMMON_SYNCED_TO_CLIENT.skipStandProgression.set(skipStandProgression);
@@ -519,20 +557,26 @@ public class JojoModConfig {
                 COMMON_SYNCED_TO_CLIENT.keepHamonOnDeath.clearCache();
                 COMMON_SYNCED_TO_CLIENT.keepVampirismOnDeath.clearCache();
                 COMMON_SYNCED_TO_CLIENT.dropStandDisc.clearCache();
+                
                 COMMON_SYNCED_TO_CLIENT.hamonTempleSpawn.clearCache();
                 COMMON_SYNCED_TO_CLIENT.meteoriteSpawn.clearCache();
                 COMMON_SYNCED_TO_CLIENT.pillarManTempleSpawn.clearCache();
                 COMMON_SYNCED_TO_CLIENT.hamonEnergyTicksDown.clearCache();
+                
 //                COMMON_SYNCED_TO_CLIENT.hamonPointsMultiplier.clearCache();
 //                COMMON_SYNCED_TO_CLIENT.breathingTrainingMultiplier.clearCache();
                 COMMON_SYNCED_TO_CLIENT.breathingTrainingDeterioration.clearCache();
                 COMMON_SYNCED_TO_CLIENT.breathingStatGap.clearCache();
                 COMMON_SYNCED_TO_CLIENT.mixHamonTechniques.clearCache();
                 COMMON_SYNCED_TO_CLIENT.techniqueSkillsRequirement.clearCache();
+                
                 COMMON_SYNCED_TO_CLIENT.maxBloodMultiplier.clearCache();
                 COMMON_SYNCED_TO_CLIENT.bloodDrainMultiplier.clearCache();
                 COMMON_SYNCED_TO_CLIENT.bloodTickDown.clearCache();
                 COMMON_SYNCED_TO_CLIENT.bloodHealCost.clearCache();
+                
+                COMMON_SYNCED_TO_CLIENT.standXpCostInitial.clearCache();
+                COMMON_SYNCED_TO_CLIENT.standXpCostIncrease.clearCache();
                 COMMON_SYNCED_TO_CLIENT.prioritizeLeastTakenStands.clearCache();
                 COMMON_SYNCED_TO_CLIENT.bannedStandsSynced = null;
                 COMMON_SYNCED_TO_CLIENT.abilitiesBreakBlocks.clearCache();
