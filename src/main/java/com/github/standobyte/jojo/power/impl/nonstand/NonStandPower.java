@@ -12,7 +12,7 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.HadPowerTypesPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.PreviousPowerTypesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrEnergyPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrTypeNonStandPowerPacket;
 import com.github.standobyte.jojo.power.IPowerType;
@@ -241,7 +241,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     public void addHadPowerBefore(NonStandPowerType<?> type) {
         hadPowers.add(type);
         serverPlayerUser.ifPresent(player -> {
-            PacketManager.sendToClient(new HadPowerTypesPacket(hadPowers), player);
+            PacketManager.sendToClient(new PreviousPowerTypesPacket(hadPowers), player);
         });
     }
     
@@ -323,7 +323,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
                 });
                 PacketManager.sendToClient(new TrEnergyPacket(player.getId(), energy), player);
             }
-            PacketManager.sendToClient(new HadPowerTypesPacket(hadPowers), player);
+            PacketManager.sendToClient(new PreviousPowerTypesPacket(hadPowers), player);
         });
         syncLayoutWithUser();
     }

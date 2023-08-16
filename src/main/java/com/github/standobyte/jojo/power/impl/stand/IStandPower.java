@@ -18,7 +18,10 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     Optional<StandInstance> getStandInstance();
     boolean giveStand(StandInstance standInstance, boolean newInstance);
     Optional<StandInstance> putOutStand();
-
+    
+    PreviousStandsSet getPreviousStandsSet();
+    boolean hadAnyStand();
+    
     boolean usesStamina();
     float getStamina();
     float getMaxStamina();
@@ -61,8 +64,6 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     @Nullable
     IStandManifestation getStandManifestation();
     void toggleSummon();
-    
-    boolean hadStand();
     
     void onDash();
     

@@ -42,7 +42,10 @@ import net.minecraft.util.text.StringTextComponent;
 
 public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> implements IStandPower {
     private Optional<StandInstance> standInstance = Optional.empty();
+    
     private boolean hadStand = false;
+    private PreviousStandsSet previousStands = new PreviousStandsSet();
+    
     @Nullable
     private IStandManifestation standManifestation = null;
     private float stamina;
@@ -109,11 +112,14 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     protected void onNewPowerGiven(StandType<?> standType) {
         super.onNewPowerGiven(standType);
+        
         serverPlayerUser.ifPresent(player -> {
             PacketManager.sendToClientsTrackingAndSelf(new TrTypeStandInstancePacket(
                     player.getId(), getStandInstance().get(), resolveCounter.getResolveLevel()), player);
         });
+        
         setStamina(getMaxStamina() * 0.5F);
+        
         if (user != null && (JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).skipStandProgression.get()
                 || user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild)) {
             skipProgression();
@@ -121,6 +127,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         else {
             standType.unlockNewActions(this);
         }
+        
+        previousStands.addStand(standType, user);
     }
     
     @Override
@@ -175,6 +183,16 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             return true;
         }
         return false;
+    }
+    
+    @Override
+    public PreviousStandsSet getPreviousStandsSet() {
+        return previousStands;
+    }
+    
+    @Override
+    public boolean hadAnyStand() {
+        return hadStand;
     }
     
     @Override
@@ -510,11 +528,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         }
     }
     
-    @Override
-    public boolean hadStand() {
-        return hadStand;
-    }
-    
 //    @Override // TODO Stand Sealing effect
 //    public boolean canUsePower() {
 //        return super.canUsePower() && !user.hasEffect(ModEffects.STAND_SEALING.get());
@@ -604,6 +617,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         cnbt.putBoolean("Skipped", skippedProgression);
         cnbt.put("ActionLearning", actionLearningProgressMap.toNBT());
         cnbt.put("Effects", continuousEffects.toNBT());
+        cnbt.put("PrevStands", previousStands.toNBT());
         return cnbt;
     }
 
@@ -627,6 +641,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         }
         if (nbt.contains("Effects", MCUtil.getNbtId(CompoundNBT.class))) {
             continuousEffects.fromNBT(nbt.getCompound("Effects"));
+        }
+        if (nbt.contains("PrevStands", MCUtil.getNbtId(CompoundNBT.class))) {
+            previousStands.fromNBT(nbt.getCompound("PrevStands"));
         }
         super.readNBT(nbt);
     }
@@ -661,6 +678,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 PacketManager.sendToClient(new SkippedStandProgressionPacket(), player);
             }
             continuousEffects.syncWithUserOnly(player);
+            previousStands.syncWithUser(player);
         });
         syncLayoutWithUser();
     }
