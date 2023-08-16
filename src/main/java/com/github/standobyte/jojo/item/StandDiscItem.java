@@ -102,7 +102,7 @@ public class StandDiscItem extends Item {
     private static boolean canGetStandFromDisc(LivingEntity entity, IStandPower entityStandPower, StandType<?> stand) {
         if (entity instanceof PlayerEntity) {
             PlayerEntity player = (PlayerEntity) entity;
-            return player.abilities.instabuild || entityStandPower.hadStand();
+            return player.abilities.instabuild || entityStandPower.hadAnyStand();
         }
         return false;
     }
