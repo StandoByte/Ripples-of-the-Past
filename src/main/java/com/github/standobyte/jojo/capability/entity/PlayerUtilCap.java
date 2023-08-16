@@ -9,6 +9,8 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.JojoModConfig.Common;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.player.IPlayerAction;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
@@ -57,6 +59,7 @@ public class PlayerUtilCap {
             tickVoiceLines();
             tickClientInputTimer();
             tickNoSleepTimer();
+            tickStandArrowHealing();
             
             if (knivesThrewTicks > 0) knivesThrewTicks--;
             if (chatSpamTickCount > 0) chatSpamTickCount--;
@@ -64,6 +67,11 @@ public class PlayerUtilCap {
         
         tickContinuousAction();
         tickDoubleShift();
+    }
+    
+    public void saveOnDeath(PlayerUtilCap cap) {
+        this.notificationsSent = cap.notificationsSent;
+        this.standsGotFromArrow = cap.standsGotFromArrow;
     }
     
     public CompoundNBT toNBT() {
@@ -220,10 +228,6 @@ public class PlayerUtilCap {
         }
     }
     
-    public void moveNotificationsSet(PlayerUtilCap cap) {
-        this.notificationsSent = cap.notificationsSent;
-    }
-    
     public static enum OneTimeNotification {
         POWER_CONTROLS,
         HAMON_WINDOW,
@@ -312,8 +316,9 @@ public class PlayerUtilCap {
     
     
     private int xpLevelsTakenByArrow;
-    private int standsGotFromArrow; // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! keep this on death
+    private int standsGotFromArrow;
     private UUID standArrowShooterUUID;
+    private boolean healStandArrowDamage;
     
     public int decXpLevelsTakenByArrow() {
         setXpLevelsTakenByArrow(this.xpLevelsTakenByArrow + 1);
@@ -331,8 +336,9 @@ public class PlayerUtilCap {
         return xpLevelsTakenByArrow;
     }
     
-    public int getStandXpLevelsRequirement() {
-        return 30 + standsGotFromArrow * 5;
+    public int getStandXpLevelsRequirement(boolean clientSide) {
+        Common config = JojoModConfig.getCommonConfigInstance(clientSide);
+        return config.standXpCostInitial.get() + config.standXpCostIncrease.get() * 5;
     }
     
     public void onGettingStandFromArrow() {
@@ -349,7 +355,7 @@ public class PlayerUtilCap {
                 standArrowShooterUUID = null;
             }
             
-//            healStandArrowDamage = true;
+            healStandArrowDamage = true;
         }
     }
     
@@ -360,6 +366,18 @@ public class PlayerUtilCap {
     public void setFromPacket(ArrowXpLevelsDataPacket packet) {
         this.xpLevelsTakenByArrow = packet.levels;
         this.standsGotFromArrow = packet.gotStands;
+    }
+    
+    private void tickStandArrowHealing() {
+        if (healStandArrowDamage) {
+            float health = player.getHealth();
+            if (health < player.getMaxHealth()) {
+                player.heal(0.25F);
+            }
+            else {
+                healStandArrowDamage = false;
+            }
+        }
     }
     
     

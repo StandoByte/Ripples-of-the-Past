@@ -32,7 +32,7 @@ public class StandVirusEffect extends UncurableEffect implements IApplicableEffe
             if (tookAwayLevel) {
                 player.giveExperienceLevels(-1);
                 stopEffect = player.getCapability(PlayerUtilCapProvider.CAPABILITY).map(cap -> {
-                    return cap.decXpLevelsTakenByArrow() >= cap.getStandXpLevelsRequirement();
+                    return cap.decXpLevelsTakenByArrow() >= cap.getStandXpLevelsRequirement(player.level.isClientSide());
                 }).orElse(true); // fail-safe, better to give a stand for 1 level than to have the effect permanently
             }
             
@@ -80,6 +80,6 @@ public class StandVirusEffect extends UncurableEffect implements IApplicableEffe
     
     public static int getEffectDurationToApply(PlayerEntity player) {
         return player.getCapability(PlayerUtilCapProvider.CAPABILITY)
-                .map(cap -> (cap.getStandXpLevelsRequirement() + 1) * 10).orElse(0) * 2;
+                .map(cap -> (cap.getStandXpLevelsRequirement(player.level.isClientSide()) + 1) * 10).orElse(0) * 2;
     }
 }

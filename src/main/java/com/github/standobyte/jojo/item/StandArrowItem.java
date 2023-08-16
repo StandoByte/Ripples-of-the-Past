@@ -216,7 +216,7 @@ public class StandArrowItem extends ArrowItem {
                 
                 if (!player.abilities.instabuild) {
                     int levelsNeeded = player.getCapability(PlayerUtilCapProvider.CAPABILITY)
-                            .map(cap -> cap.getStandXpLevelsRequirement()).orElse(0);
+                            .map(cap -> cap.getStandXpLevelsRequirement(true)).orElse(0);
                     if (levelsNeeded > 0) {
                         boolean playerHasStand = StandUtil.isEntityStandUser(player);
                         boolean playerHasLevels = player.experienceLevel >= levelsNeeded;
