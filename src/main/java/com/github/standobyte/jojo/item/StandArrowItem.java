@@ -3,13 +3,11 @@ package com.github.standobyte.jojo.item;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.itemprojectile.StandArrowEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -20,6 +18,7 @@ import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.potion.StandVirusEffect;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.PreviousStandsSet;
+import com.github.standobyte.jojo.power.impl.stand.StandArrowHandler;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
@@ -104,7 +103,7 @@ public class StandArrowItem extends ArrowItem {
                     
                     if (player.abilities.instabuild) { // instantly give a stand in creative
                         StandType<?> stand = StandUtil.randomStand(player, player.getRandom());
-                        return standCap.givePower(stand);
+                        return giveStandFromArrow(player, standCap, stand);
                     }
                     else {
                         int virusEffectDuration = StandVirusEffect.getEffectDurationToApply(player);
@@ -116,11 +115,14 @@ public class StandArrowItem extends ArrowItem {
                         }
                         else { // instantly give a stand if there was no stand virus effect given
                             StandType<?> stand = StandUtil.randomStand(player, player.getRandom());
-                            return standCap.givePower(stand);
+                            return giveStandFromArrow(player, standCap, stand);
                         }
                         
                         arrowShooter.ifPresent(shooter -> {
-                            player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.setStandArrowShooter(shooter));
+                            IStandPower.getStandPowerOptional(player).ifPresent(power -> {
+                                StandArrowHandler handler = power.getStandArrowHandler();
+                                handler.setStandArrowShooter(shooter);
+                            });
                         });
                     }
                     
@@ -128,6 +130,16 @@ public class StandArrowItem extends ArrowItem {
                 });
             }
         }
+        return false;
+    }
+    
+    public static boolean giveStandFromArrow(LivingEntity entity, IStandPower standCap, StandType<?> standType) {
+        if (standCap.givePower(standType)) {
+            StandArrowHandler handler = standCap.getStandArrowHandler();
+            handler.onGettingStandFromArrow(entity);
+            return true;
+        }
+        
         return false;
     }
     
@@ -212,26 +224,17 @@ public class StandArrowItem extends ArrowItem {
                     
                     IStandPower.getStandPowerOptional(player).ifPresent(power -> {
                         PreviousStandsSet prevStands = power.getPreviousStandsSet();
-                        boolean hadAllStands = prevStands.containsAll(unbannedStands);
-                        if (hadAllStands) {
-                            unbannedStands.forEach(stand -> {
-                                ITextComponent standName = stand.getName().withStyle(TextFormatting.GRAY);
-                                tooltip.add(standName);
-                            });
-                        }
-                        else {
-                            Map<StandType<?>, Boolean> hadStand = prevStands.contains(unbannedStands);
-                            unbannedStands.forEach(stand -> {
-                                IFormattableTextComponent standName = stand.getName();
-                                if (hadStand.get(stand)) {
-                                    standName.withStyle(TextFormatting.GREEN, TextFormatting.STRIKETHROUGH);
-                                }
-                                else {
-                                    standName.withStyle(TextFormatting.GRAY);
-                                }
-                                tooltip.add(standName);
-                            });
-                        }
+                        Collection<StandType<?>> notUsedStands = prevStands.filterAlreadyUsedStands(unbannedStands);
+                        unbannedStands.forEach(stand -> {
+                            IFormattableTextComponent standName = stand.getName();
+                            if (notUsedStands.contains(stand)) {
+                                standName.withStyle(TextFormatting.GRAY);
+                            }
+                            else {
+                                standName.withStyle(TextFormatting.GREEN, TextFormatting.STRIKETHROUGH);
+                            }
+                            tooltip.add(standName);
+                        });
                     });
                 }
                 else {
@@ -240,8 +243,10 @@ public class StandArrowItem extends ArrowItem {
                 }
                 
                 if (!player.abilities.instabuild) {
-                    int levelsNeeded = player.getCapability(PlayerUtilCapProvider.CAPABILITY)
-                            .map(cap -> cap.getStandXpLevelsRequirement(true)).orElse(0);
+                    int levelsNeeded = IStandPower.getStandPowerOptional(player).map(power -> {
+                        StandArrowHandler handler = power.getStandArrowHandler();
+                        return handler.getStandXpLevelsRequirement(true);
+                    }).orElse(0);
                     if (levelsNeeded > 0) {
                         boolean playerHasStand = StandUtil.isEntityStandUser(player);
                         boolean playerHasLevels = player.experienceLevel >= levelsNeeded;

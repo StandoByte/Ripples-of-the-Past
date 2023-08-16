@@ -21,6 +21,7 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     
     PreviousStandsSet getPreviousStandsSet();
     boolean hadAnyStand();
+    StandArrowHandler getStandArrowHandler();
     
     boolean usesStamina();
     float getStamina();

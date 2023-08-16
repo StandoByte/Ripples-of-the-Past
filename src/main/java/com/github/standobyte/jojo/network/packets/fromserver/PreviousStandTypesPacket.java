@@ -13,19 +13,25 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 public class PreviousStandTypesPacket {
+    public final boolean clear;
     public final boolean sendingAll;
     public final Collection<StandType<?>> allStands;
     public final StandType<?> newStand;
     
     public static PreviousStandTypesPacket allStands(Collection<StandType<?>> allStands) {
-        return new PreviousStandTypesPacket(true, allStands, null);
+        return new PreviousStandTypesPacket(false, true, allStands, null);
     }
 
     public static PreviousStandTypesPacket newStand(StandType<?> newStand) {
-        return new PreviousStandTypesPacket(false, null, newStand);
+        return new PreviousStandTypesPacket(false, false, null, newStand);
     }
     
-    private PreviousStandTypesPacket(boolean sendingAll, Collection<StandType<?>> allStands, StandType<?> newStand) {
+    public static PreviousStandTypesPacket clear() {
+        return new PreviousStandTypesPacket(true, false, null, null);
+    }
+    
+    private PreviousStandTypesPacket(boolean clear, boolean sendingAll, Collection<StandType<?>> allStands, StandType<?> newStand) {
+        this.clear = clear;
         this.sendingAll = sendingAll;
         this.allStands = allStands;
         this.newStand = newStand;
@@ -36,17 +42,24 @@ public class PreviousStandTypesPacket {
 
         @Override
         public void encode(PreviousStandTypesPacket msg, PacketBuffer buf) {
-            buf.writeBoolean(msg.sendingAll);
-            if (msg.sendingAll) {
-                NetworkUtil.writeCollection(buf, msg.allStands, type -> buf.writeRegistryId(type), false);
-            }
-            else {
-                buf.writeRegistryId(msg.newStand);
+            buf.writeBoolean(msg.clear);
+            if (!msg.clear) {
+                buf.writeBoolean(msg.sendingAll);
+                if (msg.sendingAll) {
+                    NetworkUtil.writeCollection(buf, msg.allStands, type -> buf.writeRegistryId(type), false);
+                }
+                else {
+                    buf.writeRegistryId(msg.newStand);
+                }
             }
         }
 
         @Override
         public PreviousStandTypesPacket decode(PacketBuffer buf) {
+            boolean clear = buf.readBoolean();
+            if (clear) {
+                return clear();
+            }
             boolean sentAll = buf.readBoolean();
             if (sentAll) {
                 return allStands(NetworkUtil.readCollection(buf, () -> buf.readRegistryIdSafe(StandType.class)));

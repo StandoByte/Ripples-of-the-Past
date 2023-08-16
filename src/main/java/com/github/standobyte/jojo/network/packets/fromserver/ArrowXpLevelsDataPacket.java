@@ -2,9 +2,10 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 
 import java.util.function.Supplier;
 
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.StandArrowHandler;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
@@ -37,8 +38,9 @@ public class ArrowXpLevelsDataPacket {
         @Override
         public void handle(ArrowXpLevelsDataPacket msg, Supplier<NetworkEvent.Context> ctx) {
             PlayerEntity player = ClientUtil.getClientPlayer();
-            player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                cap.setFromPacket(msg);
+            IStandPower.getStandPowerOptional(player).ifPresent(power -> {
+                StandArrowHandler handler = power.getStandArrowHandler();
+                handler.setFromPacket(msg);
             });
         }
 

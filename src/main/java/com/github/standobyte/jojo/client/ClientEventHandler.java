@@ -12,7 +12,6 @@ import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
@@ -32,6 +31,7 @@ import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.StandArrowHandler;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
@@ -375,8 +375,9 @@ public class ClientEventHandler {
         
         if (event.getType() == EXPERIENCE && mc.gameMode.hasExperience()
                 && mc.player.hasEffect(ModStatusEffects.STAND_VIRUS.get())) {
-            mc.player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                int standArrowLevels = cap.getXpLevelsTakenByArrow();
+            IStandPower.getStandPowerOptional(mc.player).ifPresent(power -> {
+                StandArrowHandler handler = power.getStandArrowHandler();
+                int standArrowLevels = handler.getXpLevelsTakenByArrow();
                 if (standArrowLevels > 0) {
                     MatrixStack matrixStack = event.getMatrixStack();
                     renderExperienceBar(matrixStack, standArrowLevels, event.getWindow());
