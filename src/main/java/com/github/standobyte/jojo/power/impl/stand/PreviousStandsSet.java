@@ -2,9 +2,7 @@ package com.github.standobyte.jojo.power.impl.stand;
 
 import java.util.Collection;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
@@ -32,17 +30,25 @@ public class PreviousStandsSet {
         }
     }
     
+    public void clear() {
+        stands.clear();
+    }
+    
+    
     public boolean contains(StandType<?> standType) {
         return stands.contains(standType);
     }
     
-    public Map<StandType<?>, Boolean> contains(Collection<StandType<?>> standsToCheck) {
-        return standsToCheck.stream()
-                .collect(Collectors.toMap(Function.identity(), stands::contains));
-    }
-    
     public boolean containsAll(Collection<StandType<?>> standsToCheck) {
         return stands.containsAll(standsToCheck);
+    }
+    
+    
+    public Collection<StandType<?>> filterAlreadyUsedStands(Collection<StandType<?>> availableStands) {
+        Collection<StandType<?>> notUsedStands = availableStands.stream()
+                .filter(stand -> !stands.contains(stand))
+                .collect(Collectors.toSet());
+        return !notUsedStands.isEmpty() ? notUsedStands : availableStands;
     }
     
     
@@ -51,7 +57,10 @@ public class PreviousStandsSet {
     }
     
     public void handlePacket(PreviousStandTypesPacket packet) {
-        if (packet.sendingAll) {
+        if (packet.clear) {
+            clear();
+        }
+        else if (packet.sendingAll) {
             if (packet.allStands != null) {
                 stands.addAll(packet.allStands);
             }

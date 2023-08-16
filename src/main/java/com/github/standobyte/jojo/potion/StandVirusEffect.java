@@ -1,10 +1,10 @@
 package com.github.standobyte.jojo.potion;
 
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.item.StandArrowItem;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.StandArrowHandler;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
-import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.entity.LivingEntity;
@@ -31,9 +31,10 @@ public class StandVirusEffect extends UncurableEffect implements IApplicableEffe
             boolean stopEffect = false;
             if (tookAwayLevel) {
                 player.giveExperienceLevels(-1);
-                stopEffect = player.getCapability(PlayerUtilCapProvider.CAPABILITY).map(cap -> {
-                    return cap.decXpLevelsTakenByArrow() >= cap.getStandXpLevelsRequirement(player.level.isClientSide());
-                }).orElse(true); // fail-safe, better to give a stand for 1 level than to have the effect permanently
+                stopEffect = IStandPower.getStandPowerOptional(player).map(power -> {
+                    StandArrowHandler handler = power.getStandArrowHandler();
+                    return handler.decXpLevelsTakenByArrow(player) >= handler.getStandXpLevelsRequirement(player.level.isClientSide());
+                }).orElse(false);
             }
             
             float damage = 0.15F + amplifier * 0.2F;
@@ -59,8 +60,9 @@ public class StandVirusEffect extends UncurableEffect implements IApplicableEffe
         if (!entity.level.isClientSide() && entity.isAlive() && entity instanceof PlayerEntity) {
             PlayerEntity player = (PlayerEntity) entity;
             StandType<?> stand = StandUtil.randomStand(player, player.getRandom());
-            if (stand != null && GeneralUtil.orElseFalse(IStandPower.getStandPowerOptional(player), power -> power.givePower(stand))) {
-                player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.onGettingStandFromArrow());
+            if (stand != null) {
+                IStandPower.getStandPowerOptional(player).ifPresent(
+                        power -> StandArrowItem.giveStandFromArrow(player, power, stand));
             }
         }
     }
@@ -79,7 +81,9 @@ public class StandVirusEffect extends UncurableEffect implements IApplicableEffe
     }
     
     public static int getEffectDurationToApply(PlayerEntity player) {
-        return player.getCapability(PlayerUtilCapProvider.CAPABILITY)
-                .map(cap -> (cap.getStandXpLevelsRequirement(player.level.isClientSide()) + 1) * 10).orElse(0) * 2;
+        return IStandPower.getStandPowerOptional(player).map(power -> {
+            StandArrowHandler handler = power.getStandArrowHandler();
+            return (handler.getStandXpLevelsRequirement(player.level.isClientSide()) + 1) * 10;
+        }).orElse(0) * 2;
     }
 }

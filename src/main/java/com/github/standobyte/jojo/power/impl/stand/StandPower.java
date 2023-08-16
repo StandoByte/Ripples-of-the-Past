@@ -45,6 +45,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     private boolean hadStand = false;
     private PreviousStandsSet previousStands = new PreviousStandsSet();
+    private StandArrowHandler standArrowHandler = new StandArrowHandler();
     
     @Nullable
     private IStandManifestation standManifestation = null;
@@ -191,6 +192,11 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     }
     
     @Override
+    public StandArrowHandler getStandArrowHandler() {
+        return standArrowHandler;
+    }
+    
+    @Override
     public boolean hadAnyStand() {
         return hadStand;
     }
@@ -211,6 +217,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 standInstance.ifPresent(stand -> stand.tick(this, user, user.level));
             }
             continuousEffects.tick();
+        }
+        if (!user.level.isClientSide()) {
+            standArrowHandler.tick(user);
         }
     }
     
@@ -506,6 +515,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         if (!hasPower()) {
             hadStand = false;
         }
+        previousStands.clear();
+        standArrowHandler.clear();
     }
     
     @Override
@@ -618,6 +629,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         cnbt.put("ActionLearning", actionLearningProgressMap.toNBT());
         cnbt.put("Effects", continuousEffects.toNBT());
         cnbt.put("PrevStands", previousStands.toNBT());
+        cnbt.put("ArrowHandler", standArrowHandler.toNBT());
         return cnbt;
     }
 
@@ -645,6 +657,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         if (nbt.contains("PrevStands", MCUtil.getNbtId(CompoundNBT.class))) {
             previousStands.fromNBT(nbt.getCompound("PrevStands"));
         }
+        if (nbt.contains("ArrowHandler", MCUtil.getNbtId(CompoundNBT.class))) {
+            standArrowHandler.fromNBT(nbt.getCompound("ArrowHandler"));
+        }
         super.readNBT(nbt);
     }
     
@@ -660,6 +675,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         this.actionLearningProgressMap = ((StandPower) oldPower).actionLearningProgressMap; // FIXME can i remove this cast?
         this.continuousEffects = oldPower.getContinuousEffects();
         this.stamina = getMaxStamina();
+        this.standArrowHandler.keepOnDeath(oldPower.getStandArrowHandler());
     }
     
     @Override
@@ -679,6 +695,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             }
             continuousEffects.syncWithUserOnly(player);
             previousStands.syncWithUser(player);
+            standArrowHandler.syncWithUser(player);
         });
         syncLayoutWithUser();
     }
