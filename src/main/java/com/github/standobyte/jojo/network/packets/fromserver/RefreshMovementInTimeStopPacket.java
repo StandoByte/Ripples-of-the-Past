@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
-import com.github.standobyte.jojo.client.ClientEventHandler;
+import com.github.standobyte.jojo.client.ClientTimeStopHandler;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 
@@ -47,7 +47,7 @@ public class RefreshMovementInTimeStopPacket {
                 entity.level.getCapability(WorldUtilCapProvider.CAPABILITY).orElseThrow(() -> new IllegalStateException("World util capability is empty."))
                 .getTimeStopHandler().updateEntityTimeStop(entity, msg.canMove, false);
                 if (entity.is(ClientUtil.getClientPlayer())) {
-                    ClientEventHandler.getInstance().updateCanMoveInStoppedTime(msg.canMove, msg.chunkPos);
+                    ClientTimeStopHandler.getInstance().updateCanMoveInStoppedTime(msg.canMove, msg.chunkPos);
                 }
             }
         }

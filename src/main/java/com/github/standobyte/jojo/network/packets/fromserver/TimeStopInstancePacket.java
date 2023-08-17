@@ -7,8 +7,9 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.stand.TimeStop;
 import com.github.standobyte.jojo.capability.world.TimeStopInstance;
-import com.github.standobyte.jojo.client.ClientEventHandler;
+import com.github.standobyte.jojo.client.ClientTimeStopHandler;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.util.mod.TimeUtil;
 
@@ -110,8 +111,8 @@ public class TimeStopInstancePacket {
                             JojoModConfig.getCommonConfigInstance(true).timeStopChunkRange.get(), 
                             entity instanceof LivingEntity ? (LivingEntity) entity : null, msg.action,
                                     msg.instanceId));
-                    ClientEventHandler.getInstance().updateTimeStopTicksLeft();
-                    ClientEventHandler.getInstance().setTimeStopVisuals(entity, msg.action);
+                    ClientTimeStopHandler.getInstance().updateTimeStopTicksLeft();
+                    ShaderEffectApplier.getInstance().setTimeStopVisuals(entity, msg.action);
                 }
                 break;
             case SET_TICKS:
@@ -119,7 +120,7 @@ public class TimeStopInstancePacket {
                 if (timeStop != null) {
                     timeStop.setTicksLeft(msg.timeStopTicks);
                 }
-                ClientEventHandler.getInstance().updateTimeStopTicksLeft();
+                ClientTimeStopHandler.getInstance().updateTimeStopTicksLeft();
                 break;
             case RESUME_TIME:
                 TimeUtil.resumeTime(world, msg.instanceId);

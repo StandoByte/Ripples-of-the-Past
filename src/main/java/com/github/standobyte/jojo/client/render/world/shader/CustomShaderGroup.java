@@ -34,7 +34,7 @@ public class CustomShaderGroup extends ShaderGroup {
         passes.add(passes.size(), shader);
         return shader;
     }
-
+    
     public static final ResourceLocation TIME_STOP_PREV_EFFECT = new ResourceLocation("shaders/post/desaturate.json");
     
     public static final ResourceLocation TIME_STOP_TW = new ResourceLocation(JojoMod.MOD_ID, "shaders/post/time_stop_tw.json");

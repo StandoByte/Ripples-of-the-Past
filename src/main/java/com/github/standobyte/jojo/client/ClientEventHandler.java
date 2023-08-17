@@ -3,22 +3,12 @@ package com.github.standobyte.jojo.client;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.AIR;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.FOOD;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Random;
 import java.util.Set;
-
-import javax.annotation.Nullable;
-
-import org.apache.commons.lang3.tuple.Pair;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
-import com.github.standobyte.jojo.action.stand.TimeStop;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
@@ -27,15 +17,13 @@ import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.client.render.block.overlay.TranslucentBlockRenderHelper;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.GlovesLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.HamonBurnLayer;
-import com.github.standobyte.jojo.client.render.world.ParticleManagerWrapperTS;
-import com.github.standobyte.jojo.client.render.world.TimeStopWeatherHandler;
-import com.github.standobyte.jojo.client.render.world.shader.CustomShaderGroup;
+import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
-import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
@@ -46,21 +34,17 @@ import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
-import com.github.standobyte.jojo.util.mod.TimeUtil;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableSet;
-import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
-import net.minecraft.client.audio.ISound.AttenuationType;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.IngameMenuScreen;
 import net.minecraft.client.gui.screen.MainMenuScreen;
-import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.FirstPersonRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.OutlineLayerBuffer;
@@ -68,12 +52,6 @@ import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.client.renderer.texture.ITickable;
-import net.minecraft.client.renderer.texture.TextureManager;
-import net.minecraft.client.shader.ShaderGroup;
-import net.minecraft.client.shader.ShaderInstance;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.client.world.DimensionRenderInfo;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -86,11 +64,7 @@ import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Timer;
-import net.minecraft.util.Util;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector3i;
@@ -98,8 +72,6 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.ForgeHooksClient;
-import net.minecraftforge.client.IWeatherParticleRenderHandler;
-import net.minecraftforge.client.IWeatherRenderHandler;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent;
@@ -128,19 +100,9 @@ public class ClientEventHandler {
     private boolean prevPause = false;
 
     private Timer clientTimer;
-    private boolean isTimeStopped = false;
-    private boolean canSeeInStoppedTime = true;
-    private boolean canMoveInStoppedTime = true;
-    private float partialTickStoppedAt;
-    private int timeStopTicks = 0;
-    private int timeStopLength = 0;
-
-    private Random random = new Random();
-    private ResourceLocation resolveShader = null;
-    private static final ResourceLocation DUMMY = new ResourceLocation("dummy", "dummy");
+    
     private StandOstSound ost;
-
-    private boolean resetShader;
+    
     private double zoomModifier;
     public boolean isZooming;
 
@@ -163,53 +125,16 @@ public class ClientEventHandler {
         return instance;
     }
     
-    
-    
-    private boolean isTimeStopped(BlockPos blockPos) {
-        return isTimeStopped(new ChunkPos(blockPos));
-    }
 
-    private boolean isTimeStopped(ChunkPos chunkPos) {
-        return mc.level != null && TimeUtil.isTimeStopped(mc.level, chunkPos);
-    }
-
-    public void setTimeStopClientState(boolean canSee, boolean canMove) {
-        canSeeInStoppedTime = canSee;
-        setCanMoveInStoppedTime(canSee && canMove);
-        partialTickStoppedAt = canMove ? mc.getFrameTime() : 0.0F;
-        resetShader = true;
-    }
-
-    public void updateCanMoveInStoppedTime(boolean canMove, ChunkPos chunkPos) {
-        if (isTimeStopped(chunkPos)) {
-            setCanMoveInStoppedTime(canMove);
-        }
-    }
-    
-    private void setCanMoveInStoppedTime(boolean canMove) {
-        this.canMoveInStoppedTime = canMove;
-        mc.player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-            if (!canMove) {
-                cap.lockXRot();
-                cap.lockYRot();
-            }
-            else {
-                cap.clearLockedXRot();
-                cap.clearLockedYRot();
-            }
-        });
-    }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onPlaySound(PlaySoundEvent event) {
-        if (!canSeeInStoppedTime) {
-            ISound sound = event.getResultSound();
-            if (sound != null && sound.getAttenuation() == AttenuationType.LINEAR) {
-                event.setResultSound(null);
-            }
+        ISound sound = event.getResultSound();
+        if (ClientTimeStopHandler.getInstance().shouldCancelSound(sound)) {
+            event.setCanceled(true);
         }
     }
-
+    
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public <T extends LivingEntity, M extends EntityModel<T>> void onRenderLiving(RenderLivingEvent.Pre<T, M> event) {
         LivingEntity entity = event.getEntity();
@@ -219,15 +144,13 @@ public class ClientEventHandler {
             return;
         }
         
-        if (isTimeStopped(entity.blockPosition())) {
-            if (!entity.canUpdate()) {
-                if (event.getPartialRenderTick() != partialTickStoppedAt) {
-                    event.getRenderer().render((T) entity, MathHelper.lerp(partialTickStoppedAt, entity.yRotO, entity.yRot), 
-                            partialTickStoppedAt, event.getMatrixStack(), event.getBuffers(), event.getLight());
-                    event.setCanceled(true);
-                }
-                return;
-            }
+        float partialTick = event.getPartialRenderTick();
+        float changePartialTick = ClientTimeStopHandler.getInstance().getConstantEntityPartialTick(entity, partialTick);
+        if (partialTick != changePartialTick) {
+            event.setCanceled(true);
+            event.getRenderer().render((T) entity, MathHelper.lerp(changePartialTick, entity.yRotO, entity.yRot), 
+                    changePartialTick, event.getMatrixStack(), event.getBuffers(), event.getLight());
+            return;
         }
         
         M model = event.getRenderer().getModel();
@@ -312,11 +235,7 @@ public class ClientEventHandler {
             ClientUtil.canSeeStands = StandUtil.playerCanSeeStands(mc.player);
             ClientUtil.canHearStands = /*StandUtil.playerCanHearStands(mc.player)*/ ClientUtil.canSeeStands;
             if (mc.player.isAlive()) {
-                if (isTimeStopped(mc.player.blockPosition())) {
-                    if (!canSeeInStoppedTime) {
-                        clientTimer.partialTick = partialTickStoppedAt;
-                    }
-                }
+                ClientTimeStopHandler.getInstance().setConstantPartialTick(clientTimer);
                 
                 mc.player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                     cap.applyLockedRotation();
@@ -328,14 +247,12 @@ public class ClientEventHandler {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onClientTick(ClientTickEvent event) {
         if (mc.level != null) {
-            if (event.phase == TickEvent.Phase.START) {
+            switch (event.phase) {
+            case START:
                 ActionsOverlayGui.getInstance().tick();
                 
                 if (!mc.isPaused()) {
                     ClientTicking.tickAll();
-                    if (isTimeStopped) {
-                        timeStopTicks++;
-                    }
                     
                     mc.level.getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                         cap.tick();
@@ -346,22 +263,11 @@ public class ClientEventHandler {
                         entity.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
                     });
                 }
-            }
-            
-            setTimeStoppedState(isTimeStopped(mc.player.blockPosition()));
-
-            switch (event.phase) {
-            case START:
-                if (isTimeStopped && !canSeeInStoppedTime) {
-                    ClientReflection.pauseClient(mc);
-                }
+                
                 tickResolveEffect();
                 break;
             case END:
-                if (resetShader) {
-                    mc.gameRenderer.checkEntityPostEffect(mc.options.getCameraType().isFirstPerson() ? mc.getCameraEntity() : null);
-                    resetShader = false;
-                }
+                ShaderEffectApplier.getInstance().shaderTick();
                 
                 // FIXME make stand actions clickable when player hands are busy
                 if (mc.level != null && mc.player != null && mc.player.getVehicle() != null
@@ -371,186 +277,26 @@ public class ClientEventHandler {
                 break;
             }
         }
-        else if (isTimeStopped) {
-            setTimeStoppedState(false);
-        }
-
-        if (mc.gameRenderer.currentEffect() == null) {
-            updateCurrentShader();
+        
+        if (event.phase == TickEvent.Phase.START) {
+            ClientTimeStopHandler.getInstance().tickPauseIrrelevant();
         }
 
         deathScreenTick = mc.screen instanceof DeathScreen ? deathScreenTick + 1 : 0;
         pauseMenuScreenTick = mc.screen instanceof IngameMenuScreen ? pauseMenuScreenTick + 1 : 0;
     }
     
-    private final Map<ClientWorld, Pair<IWeatherRenderHandler, IWeatherParticleRenderHandler>> prevWeatherRender = new HashMap<>();
-    private final TimeStopWeatherHandler timeStopWeatherHandler = new TimeStopWeatherHandler();
-    private Set<ITickable> prevTickableTextures = new HashSet<>();
-    private void setTimeStoppedState(boolean isTimeStopped) {
-        if (this.isTimeStopped != isTimeStopped) {
-            this.isTimeStopped = isTimeStopped;
-            
-            if (!isTimeStopped) {
-                timeStopLength = 0;
-            }
-            
-            if (JojoModConfig.CLIENT.timeStopFreezesVisuals.get()) {
-                if (isTimeStopped) {
-                    if (mc.level != null) {
-                        DimensionRenderInfo effects = mc.level.effects();
-                        prevWeatherRender.put(mc.level, Pair.of(effects.getWeatherRenderHandler(), effects.getWeatherParticleRenderHandler()));
-                        effects.setWeatherRenderHandler(timeStopWeatherHandler);
-                        effects.setWeatherParticleRenderHandler(timeStopWeatherHandler);
-    
-                        TextureManager textureManager = mc.getTextureManager();
-                        prevTickableTextures = ClientReflection.getTickableTextures(textureManager);
-                        ClientReflection.setTickableTextures(textureManager, new HashSet<>());
-                        
-                        ParticleManagerWrapperTS.onTimeStopStart(mc);
-                    }
-                }
-                else {
-                    if (mc.level != null && prevWeatherRender.containsKey(mc.level)) {
-                        timeStopWeatherHandler.onTimeStopEnd();
-                        Pair<IWeatherRenderHandler, IWeatherParticleRenderHandler> prevEffects = prevWeatherRender.get(mc.level);
-                        DimensionRenderInfo effects = mc.level.effects();
-                        effects.setWeatherRenderHandler(prevEffects.getLeft());
-                        effects.setWeatherParticleRenderHandler(prevEffects.getRight());
-                    }
-    
-                    TextureManager textureManager = mc.getTextureManager();
-                    Set<ITickable> allTickableTextures = Util.make(new HashSet<>(), set -> {
-                        set.addAll(prevTickableTextures);
-                        set.addAll(ClientReflection.getTickableTextures(textureManager));
-                    });
-                    ClientReflection.setTickableTextures(textureManager, allTickableTextures);
-                    prevTickableTextures = new HashSet<>();
-    
-                    ParticleManagerWrapperTS.onTimeStopEnd(mc);
-                }
-            }
-            timeStopTicks = 0;
-        }
-    }
-    
-    public void updateCurrentShader() {
-        ResourceLocation shader = getCurrentShader();
-        if (shader != null && shader != DUMMY) {
-            loadShader(shader);
-        }
-    }
-    
-    private ResourceLocation getCurrentShader() {
-        if (mc.level == null) {
-            return null;
-        }
-        
-        if (isTimeStopped && canSeeInStoppedTime) {
-            if (timeStopAction == ModStandsInit.STAR_PLATINUM_TIME_STOP.get()) {
-                return CustomShaderGroup.TIME_STOP_SP;
-            }
-            else {
-                return CustomShaderGroup.TIME_STOP_TW;
-            }
-        }
-        else {
-            tsShaderStarted = false;
-        }
-        
-        if (JojoModConfig.CLIENT.resolveShaders.get() && resolveShader != null) {
-            return resolveShader;
-        }
-        return null;
-    }
-    
-    private void loadShader(ResourceLocation shader) {
-        if (CustomShaderGroup.hasCustomParameters(shader)) {
-            ClientUtil.loadCustomParametersEffect(mc.gameRenderer, mc, shader);
-        }
-        else {
-            mc.gameRenderer.loadEffect(shader);
-        }
-    }
-    
-    public void addTsShaderUniforms(ShaderInstance tsShader, float partialSecond, float tsEffectLength) {
-        if (isTimeStopped) {
-            float partialTick = MathHelper.frac(partialSecond * 20F);
-            float tsTick = timeStopTicks + partialTick;
-            tsShader.safeGetUniform("TSTicks") .set(tsTick);
-            tsShader.safeGetUniform("TSLength").set(timeStopLength);
-            if (!JojoModConfig.CLIENT.timeStopAnimation.get() || tsPosOnScreen == null) {
-                tsShader.safeGetUniform("TSEffectLength").set(0);
-            }
-            if (tsPosOnScreen != null) {
-                tsShader.safeGetUniform("CenterScreenCoord").set(new float[] {tsPosOnScreen.pos.x, tsPosOnScreen.pos.y});
-            }
-        }
-        else {
-            tsShader.safeGetUniform("TSTicks") .set(0);
-            tsShader.safeGetUniform("TSLength").set(-1);
-        }
-    }
-    
-    private boolean tsShaderStarted;
-    // TODO determine the position of the time stopper entity on the screen
-    private Entity timeStopper;
-    private TimeStop timeStopAction;
-    @Nullable private ClientUtil.PosOnScreen tsPosOnScreen;
-    public void setTimeStopVisuals(Entity timeStopper, TimeStop action) {
-        if (!tsShaderStarted) {
-            this.timeStopper = timeStopper;
-            this.timeStopAction = action;
-            tsShaderStarted = true;
-        }
-    }
-    
-    public void updateTimeStopTicksLeft() {
-        if (mc.level != null && mc.player != null) {
-            int ticks = TimeUtil.getTimeStopTicksLeft(mc.level, new ChunkPos(mc.player.blockPosition()));
-            this.timeStopLength = timeStopTicks + ticks;
-        }
-        else {
-            this.timeStopLength = 0;
-        }
-    }
-    
-    private void updateTimeStopperScreenPos(MatrixStack matrixStack, Matrix4f projection, ActiveRenderInfo camera) {
-        if (isTimeStopped) {
-            if (timeStopper == mc.player) {
-                tsPosOnScreen = ClientUtil.PosOnScreen.SCREEN_CENTER;
-            }
-            else if (timeStopper != null) {
-                tsPosOnScreen = ClientUtil.posOnScreen(timeStopper.getBoundingBox().getCenter(), camera, matrixStack, projection);
-                if (tsShaderStarted) {
-                    if (tsPosOnScreen == null || !tsPosOnScreen.isOnScreen) {
-                        tsPosOnScreen = null;
-                        timeStopper = null;
-                    }
-                    tsShaderStarted = false;
-                }
-            }
-            else {
-                tsPosOnScreen = null;
-            }
-        }
-    }
-    
     
     
     public void onResolveEffectStart(int effectAmplifier) {
-        if (resolveShader == null) {
-            setResolveShader();
-        }
-
+        ShaderEffectApplier.getInstance().setRandomResolveShader();
         startPlayingOst(effectAmplifier);
     }
 
     private void tickResolveEffect() {
         if (mc.player.isAlive() && mc.player.hasEffect(ModStatusEffects.RESOLVE.get())) {
-            if (resolveShader == null) {
-                setResolveShader();
-            }
-
+            ShaderEffectApplier.getInstance().setRandomResolveShader();
+            
             if (mc.player.getEffect(ModStatusEffects.RESOLVE.get()).getDuration() == 100) {
                 fadeAwayOst(150);
             }
@@ -560,7 +306,7 @@ public class ClientEventHandler {
             }
         }
         else {
-            stopResolveShader();
+            ShaderEffectApplier.getInstance().stopResolveShader();
             fadeAwayOst(20);
         }
     }
@@ -582,33 +328,6 @@ public class ClientEventHandler {
                     }
                 }
             });
-        }
-    }
-
-    private void setResolveShader() {
-        resolveShader = CustomResources.getResolveShadersListManager()
-                .getRandomShader(IStandPower.getPlayerStandPower(mc.player), random);
-        if (resolveShader == null) {
-            resolveShader = DUMMY;
-        }
-        else {
-            try {
-                @SuppressWarnings("unused")
-                ShaderGroup tryLoadShader = new ShaderGroup(mc.getTextureManager(), mc.getResourceManager(), mc.getMainRenderTarget(), resolveShader);
-            } catch (JsonSyntaxException e) {
-                JojoMod.getLogger().warn("Failed to load shader: {}", resolveShader, e);
-                resolveShader = DUMMY;
-            } catch (IOException e) {
-                JojoMod.getLogger().warn("Failed to parse shader: {}", resolveShader, e);
-                resolveShader = DUMMY;
-            }
-        }
-    }
-
-    private void stopResolveShader() {
-        if (resolveShader != null) {
-            resetShader = true;
-            resolveShader = null;
         }
     }
 
@@ -816,7 +535,8 @@ public class ClientEventHandler {
         }
         prevPause = paused;
         
-        updateTimeStopperScreenPos(event.getMatrixStack(), event.getProjectionMatrix(), mc.gameRenderer.getMainCamera());
+        ShaderEffectApplier.getInstance().updateTimeStopperScreenPos(
+                event.getMatrixStack(), event.getProjectionMatrix(), mc.gameRenderer.getMainCamera());
     }
     
     public float getPartialTick() {

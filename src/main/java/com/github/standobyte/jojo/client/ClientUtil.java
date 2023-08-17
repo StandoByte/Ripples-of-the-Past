@@ -10,6 +10,7 @@ import org.lwjgl.opengl.GL11;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
 import com.github.standobyte.jojo.client.render.world.shader.CustomShaderGroup;
+import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
 import com.github.standobyte.jojo.client.ui.screen.mob.RockPaperScissorsScreen;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
@@ -137,7 +138,7 @@ public class ClientUtil {
     public static void setCameraEntityPreventShaderSwitch(Minecraft mc, Entity entity) {
         mc.setCameraEntity(entity);
         if (mc.gameRenderer.currentEffect() == null) {
-            ClientEventHandler.getInstance().updateCurrentShader();
+            ShaderEffectApplier.getInstance().updateCurrentShader();
         }
     }
     
@@ -335,27 +336,6 @@ public class ClientUtil {
     
     public static boolean decreasedParticlesSetting() {
         return Minecraft.getInstance().options.particles == ParticleStatus.DECREASED;
-    }
-    
-    public static void loadCustomParametersEffect(GameRenderer gameRenderer, Minecraft minecraft, ResourceLocation name) {
-        if (gameRenderer.currentEffect() != null) {
-            gameRenderer.currentEffect().close();
-        }
-
-        try {
-            ShaderGroup effect = new CustomShaderGroup(minecraft.getTextureManager(), minecraft.getResourceManager(), minecraft.getMainRenderTarget(), name);
-            ClientReflection.setPostEffect(gameRenderer, effect);
-            effect.resize(minecraft.getWindow().getWidth(), minecraft.getWindow().getHeight());
-            ClientReflection.setEffectActive(gameRenderer, true);
-        } catch (IOException ioexception) {
-            JojoMod.getLogger().warn("Failed to load shader: {}", name, ioexception);
-            ClientReflection.setEffectIndex(gameRenderer, GameRenderer.EFFECT_NONE);
-            ClientReflection.setEffectActive(gameRenderer, false);
-        } catch (JsonSyntaxException jsonsyntaxexception) {
-            JojoMod.getLogger().warn("Failed to parse shader: {}", name, jsonsyntaxexception);
-            ClientReflection.setEffectIndex(gameRenderer, GameRenderer.EFFECT_NONE);
-            ClientReflection.setEffectActive(gameRenderer, false);
-        }
     }
     
     public static float[] rgb(int color) {

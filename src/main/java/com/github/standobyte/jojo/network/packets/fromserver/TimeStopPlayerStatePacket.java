@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 
 import java.util.function.Supplier;
 
-import com.github.standobyte.jojo.client.ClientEventHandler;
+import com.github.standobyte.jojo.client.ClientTimeStopHandler;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 
 import net.minecraft.network.PacketBuffer;
@@ -41,7 +41,7 @@ public class TimeStopPlayerStatePacket {
 
         @Override
         public void handle(TimeStopPlayerStatePacket msg, Supplier<NetworkEvent.Context> ctx) {
-            ClientEventHandler.getInstance().setTimeStopClientState(msg.canSee, msg.canMove);
+            ClientTimeStopHandler.getInstance().setTimeStopClientState(msg.canSee, msg.canMove);
         }
 
         @Override
