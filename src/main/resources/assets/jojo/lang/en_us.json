@@ -51,6 +51,8 @@
   "item.jojo.stand_remover_one_time": "Remove Stand (one-time)",
   "item.jojo.stand_eject": "Eject Stand",
   "item.jojo.stand_eject_one_time": "Eject Stand (one-time)",
+  "item.jojo.stand_full_clear": "Full Stand Clear",
+  "item.jojo.stand_full_clear_one_time": "Full Stand Clear (one-time)",
   "item.jojo.creative_only_tooltip" : "Creative-only item",
   "item.jojo.cocoa_gum": "Cocoa Gum",
   "item.jojo.walkman": "Walkman",
