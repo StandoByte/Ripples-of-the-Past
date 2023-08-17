@@ -17,7 +17,6 @@ import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.potion.StandVirusEffect;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
-import com.github.standobyte.jojo.power.impl.stand.PreviousStandsSet;
 import com.github.standobyte.jojo.power.impl.stand.StandArrowHandler;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
@@ -223,16 +222,9 @@ public class StandArrowItem extends ArrowItem {
                     tooltip.add(new TranslationTextComponent("jojo.arrow.stands_list"));
                     
                     IStandPower.getStandPowerOptional(player).ifPresent(power -> {
-                        PreviousStandsSet prevStands = power.getPreviousStandsSet();
-                        Collection<StandType<?>> notUsedStands = prevStands.filterAlreadyUsedStands(unbannedStands);
                         unbannedStands.forEach(stand -> {
                             IFormattableTextComponent standName = stand.getName();
-                            if (notUsedStands.contains(stand)) {
-                                standName.withStyle(TextFormatting.GRAY);
-                            }
-                            else {
-                                standName.withStyle(TextFormatting.GREEN, TextFormatting.STRIKETHROUGH);
-                            }
+                            standName.withStyle(TextFormatting.GRAY);
                             tooltip.add(standName);
                         });
                     });
