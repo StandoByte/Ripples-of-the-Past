@@ -71,14 +71,17 @@ public class StandRemoverItem extends Item {
     private boolean useOn(LivingEntity entity, IStandPower power) {
         if (power.hasPower()) {
             switch (mode) {
-            case CLEAR:
+            case REMOVE:
                 power.clear();
-                power.fullStandClear();
                 break;
             case EJECT:
                 Optional<StandInstance> previousDiscStand = power.putOutStand();
                 previousDiscStand.ifPresent(prevStand -> MCUtil.giveItemTo(entity, 
                         StandDiscItem.withStand(new ItemStack(ModItems.STAND_DISC.get()), prevStand), true));
+                break;
+            case FULL_CLEAR:
+                power.clear();
+                power.fullStandClear();
                 break;
             }
             return true;
@@ -92,7 +95,8 @@ public class StandRemoverItem extends Item {
     }
     
     public static enum Mode {
-        CLEAR,
-        EJECT
+        REMOVE,
+        EJECT,
+        FULL_CLEAR
     }
 }
