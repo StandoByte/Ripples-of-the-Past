@@ -51,6 +51,8 @@ public class StandUtil {
             }
             
             if (!stands.isEmpty()) {
+                stands = IStandPower.getStandPowerOptional(entity).resolve().get()
+                        .getPreviousStandsSet().rigForUnusedStands(stands);
                 return MathUtil.getRandomWeighted(stands, stand -> stand.getStats().getRandomWeight(), random).orElse(null);
             }
         }
