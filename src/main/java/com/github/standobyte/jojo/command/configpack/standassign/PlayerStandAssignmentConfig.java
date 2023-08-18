@@ -230,6 +230,9 @@ public class PlayerStandAssignmentConfig extends JsonDataConfig {
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> resourceList, IResourceManager resourceManager, IProfiler profiler) {
         JsonElement json = resourceList.get(FILE_PATH);
-        this.assignedStands = getGson().fromJson(json, StandAssignmentList.class);
+        assignedStands = getGson().fromJson(json, StandAssignmentList.class);
+        if (assignedStands == null) {
+            assignedStands = new StandAssignmentList();
+        }
     }
 }
