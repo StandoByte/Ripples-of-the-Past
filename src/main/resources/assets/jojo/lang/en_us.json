@@ -617,15 +617,25 @@
   "commands.hamon.failed.multiple": "All %s players are not Hamon users",
   
   "commands.jojoconfigpack.base_created.link_name": "Generated",
-  "commands.jojoconfigpack.base_created": "%s config data pack named %s.",
+  "commands.jojoconfigpack.base_created": "%s config data pack named %s",
   "commands.jojoconfigpack.folder_link": "%s data pack link",
   "commands.jojoconfigpack.folder_link.tooltip": "Click to open the data pack (inside the %s folder of this save).",
+  
   "commands.jojoconfigpack.standstats.all.link_name": "Generated",
-  "commands.jojoconfigpack.standstats.all": "%s default Stand stats files.",
-  "commands.jojoconfigpack.standstats.all.folder_link": "Click to open the file path.",
+  "commands.jojoconfigpack.standstats.all": "%s default Stand stats files",
+  "commands.jojoconfigpack.standstats.all.folder_link": "Click to open the file path",
   "commands.jojoconfigpack.standstats.single.link_name": "Generated",
-  "commands.jojoconfigpack.standstats.single": "%s default Stand stats file for %s.",
-  "commands.jojoconfigpack.standstats.single.folder_link": "Click to open the file path.",
+  "commands.jojoconfigpack.standstats.single": "%s default Stand stats file for %s",
+  "commands.jojoconfigpack.standstats.single.folder_link": "Click to open the file path",
+  
+  "commands.jojoconfigpack.stand_assign.added": "Added %s to the list of Stands assigned to %s",
+  "commands.jojoconfigpack.stand_assign.removed": "Removed %s from the list of Stands assigned to %s",
+  "commands.jojoconfigpack.stand_assign.cleared": "Cleared Stand assignments from %s",
+  "commands.jojoconfigpack.stand_assign.cleared_all": "Cleared Stand assignments list",
+  "commands.jojoconfigpack.stand_assign.folder_link": "Click to open the file path",
+  "commands.jojoconfigpack.stand_assign.failed.add": "%s was already assigned to %s",
+  "commands.jojoconfigpack.stand_assign.failed.remove": "%s wasn't assigned to %s",
+  "commands.jojoconfigpack.stand_assign.failed.clear": "%s didn't have any Stands assigned",
   
   "chat.stand_remote_reveal_name": "%s (Stand User: %s)",
   

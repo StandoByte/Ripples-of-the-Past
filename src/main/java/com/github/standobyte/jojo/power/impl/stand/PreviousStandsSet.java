@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.power.impl.stand;
 
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -44,10 +45,10 @@ public class PreviousStandsSet {
     }
     
     
-    public Collection<StandType<?>> filterAlreadyUsedStands(Collection<StandType<?>> availableStands) {
-        Collection<StandType<?>> notUsedStands = availableStands.stream()
+    public List<StandType<?>> rigForUnusedStands(List<StandType<?>> availableStands) {
+        List<StandType<?>> notUsedStands = availableStands.stream()
                 .filter(stand -> !stands.contains(stand))
-                .collect(Collectors.toSet());
+                .collect(Collectors.toList());
         return !notUsedStands.isEmpty() ? notUsedStands : availableStands;
     }
     
