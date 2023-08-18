@@ -13,6 +13,7 @@ import com.github.standobyte.jojo.capability.entity.power.StandCapProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.StandController;
+import com.github.standobyte.jojo.command.configpack.standassign.PlayerStandAssignmentConfig;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
@@ -38,13 +39,15 @@ import net.minecraft.world.server.ServerWorld;
 public class StandUtil {
     
     @Nullable
-    public static StandType<?> randomStand(LivingEntity entity, Random random) {
+    public static StandType<?> randomStand(PlayerEntity entity, Random random) {
         if (!entity.level.isClientSide()) {
             List<StandType<?>> stands = availableStands(entity.level.isClientSide()).collect(Collectors.toList());
 
             if (stands.isEmpty()) {
                 return null;
             }
+            
+            stands = PlayerStandAssignmentConfig.getInstance().limitToAssignedStands(entity, stands);
             
             if (JojoModConfig.getCommonConfigInstance(false).prioritizeLeastTakenStands.get()) {
                 stands = SaveFileUtilCapProvider.getSaveFileCap(((ServerWorld) entity.level).getServer()).leastTakenStands(stands);

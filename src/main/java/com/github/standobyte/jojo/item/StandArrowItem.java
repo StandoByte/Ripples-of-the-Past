@@ -9,6 +9,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.command.configpack.standassign.PlayerStandAssignmentConfig;
 import com.github.standobyte.jojo.entity.itemprojectile.StandArrowEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEnchantments;
@@ -220,11 +221,19 @@ public class StandArrowItem extends ArrowItem {
                 boolean shift = ClientUtil.isShiftPressed();
                 if (shift) {
                     tooltip.add(new TranslationTextComponent("jojo.arrow.stands_list"));
+
+                    List<StandType<?>> assignedByDataConfig = PlayerStandAssignmentConfig.getInstance().getAssignedStands(player);
                     
                     IStandPower.getStandPowerOptional(player).ifPresent(power -> {
                         unbannedStands.forEach(stand -> {
                             IFormattableTextComponent standName = stand.getName();
-                            standName.withStyle(TextFormatting.GRAY);
+                            
+                            if (assignedByDataConfig != null && !assignedByDataConfig.contains(stand)) {
+                                standName.withStyle(TextFormatting.STRIKETHROUGH, TextFormatting.DARK_GRAY);
+                            }
+                            else {
+                                standName.withStyle(TextFormatting.GRAY);
+                            }
                             tooltip.add(standName);
                         });
                     });

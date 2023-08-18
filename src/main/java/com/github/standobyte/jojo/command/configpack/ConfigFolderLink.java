@@ -62,8 +62,7 @@ public class ConfigFolderLink implements IDataConfig {
             throw exceptionType.create();
         }
     }
-
-
+    
     @Override
     public void syncToClient(ServerPlayerEntity player) {}
 }
