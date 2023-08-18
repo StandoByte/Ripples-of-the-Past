@@ -441,8 +441,6 @@
  "jojo.config.undeadMobsSunDamage.tooltip": "究极生物在阳光下是否会像吸血鬼一样晒伤.",
  "jojo.config.vampiresAggroMobs": "敌对生物仇恨吸血鬼",
  "jojo.config.vampiresAggroMobs.tooltip": "敌对生物是否对吸血鬼玩家有攻击性",
- "jojo.config.prioritizeLeastTakenStands": "优先考虑拥有人数最少的『替身』",
- "jojo.config.prioritizeLeastTakenStands.tooltip": "随机『替身』获得效果（『箭』/指令 ）是否会提供相同的『替身』。",
  "jojo.config.bannedStands": "禁用『替身』",
  "jojo.config.bannedStands.tooltip": "从『箭』/随机替身中排除替身的列表，格式与for/stand give指令相同（比如“jojo:star\\u platinum”）.",
  "jojo.config.skipStandProgression": "跳过『替身』进度",

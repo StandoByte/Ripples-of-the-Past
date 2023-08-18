@@ -21,6 +21,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.CommonConfigPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResetSyncedCommonConfigPacket;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.stand.ResolveCounter;
+import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.google.common.collect.Lists;
 import com.google.common.primitives.Floats;
@@ -71,7 +72,7 @@ public class JojoModConfig {
 
         public final ForgeConfigSpec.IntValue standXpCostInitial;
         public final ForgeConfigSpec.IntValue standXpCostIncrease;
-        public final ForgeConfigSpec.BooleanValue prioritizeLeastTakenStands;
+        public final ForgeConfigSpec.EnumValue<StandUtil.StandRandomPoolFilter> standRandomPoolFilter;
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> bannedStands;
         private List<StandType<?>> bannedStandsSynced = null;
         private List<ResourceLocation> bannedStandsResLocs;
@@ -229,11 +230,13 @@ public class JojoModConfig {
                         .translation("jojo.config.standXpCostIncrease")
                         .defineInRange("standXpCostIncrease", 5, 0, 9999);
                 
-                prioritizeLeastTakenStands = builder
-                        .comment("    If enabled, random Stand gain effects (Stand-giving Arrow, \"/stand random\") give Stands that less players already have.", 
-                                 "     Otherwise the Stand selection is random.")
-                        .translation("jojo.config.prioritizeLeastTakenStands")
-                        .define("prioritizeLeastTakenStands", false);
+                standRandomPoolFilter = builder
+                        .comment("    Special rule limiting the pool of Stands randomly chosen from on multiplayer servers.", 
+                                 "     NONE -        can randomly give any of the available Stands", 
+                                 "     LEAST_TAKEN - can only choose from the Stands less players on the server have", 
+                                 "     NOT_TAKEN -   can only give a Stand no other player on the server has gotten")
+                        .translation("jojo.config.standArrowMode")
+                        .defineEnum("standArrowMode", StandUtil.StandRandomPoolFilter.NONE);
                 
                 bannedStands = builder
                         .comment("    List of Stands excluded from the pool used by Arrows, \"/stand random\" and \"/standdisc random\".",
@@ -379,9 +382,9 @@ public class JojoModConfig {
 
             private final int standXpCostInitial;
             private final int standXpCostIncrease;
-            private final boolean prioritizeLeastTakenStands;
+            private final StandUtil.StandRandomPoolFilter standRandomPoolMode;
             private final List<StandType<?>> bannedStands;
-
+            
             private final boolean abilitiesBreakBlocks;
 //            private final double standDamageMultiplier;
             private final boolean skipStandProgression;
@@ -406,6 +409,7 @@ public class JojoModConfig {
                 
                 standXpCostInitial = buf.readVarInt();
                 standXpCostIncrease = buf.readVarInt();
+                standRandomPoolMode = buf.readEnum(StandUtil.StandRandomPoolFilter.class);
                 bannedStands = NetworkUtil.readRegistryIdsSafe(buf, StandType.class);
                 
 //                standDamageMultiplier = buf.readDouble();
@@ -420,7 +424,7 @@ public class JojoModConfig {
                 meteoriteSpawn =                    (flags[0] & 16) > 0;
                 pillarManTempleSpawn =              (flags[0] & 32) > 0;
                 breathingTrainingDeterioration =    (flags[0] & 64) > 0;
-                prioritizeLeastTakenStands =        (flags[0] & 128) > 0;
+//                _ =                      (flags[0] & 128) > 0;
                 
                 abilitiesBreakBlocks =              (flags[1] & 1) > 0;
                 skipStandProgression =              (flags[1] & 2) > 0;
@@ -445,6 +449,7 @@ public class JojoModConfig {
                 
                 buf.writeVarInt(standXpCostInitial);
                 buf.writeVarInt(standXpCostIncrease);
+                buf.writeEnum(standRandomPoolMode);
                 NetworkUtil.writeRegistryIds(buf, bannedStands);
                 
 //                buf.writeDouble(standDamageMultiplier);
@@ -458,7 +463,7 @@ public class JojoModConfig {
                 if (meteoriteSpawn)                     flags[0] |= 16;
                 if (pillarManTempleSpawn)               flags[0] |= 32;
                 if (breathingTrainingDeterioration)     flags[0] |= 64;
-                if (prioritizeLeastTakenStands)         flags[0] |= 128;
+//                if (_)                       flags[0] |= 128;
                 
                 if (abilitiesBreakBlocks)               flags[1] |= 1;
                 if (skipStandProgression)               flags[1] |= 2;
@@ -498,7 +503,7 @@ public class JojoModConfig {
                 
                 standXpCostInitial = config.standXpCostInitial.get();
                 standXpCostIncrease = config.standXpCostIncrease.get();
-                prioritizeLeastTakenStands = config.prioritizeLeastTakenStands.get();
+                standRandomPoolMode = config.standRandomPoolFilter.get();
                 bannedStands = config.bannedStandsResLocs.stream()
                         .map(key -> JojoCustomRegistries.STANDS.getRegistry().getValue(key))
                         .collect(Collectors.toList());
@@ -538,7 +543,7 @@ public class JojoModConfig {
                 
                 COMMON_SYNCED_TO_CLIENT.standXpCostInitial.set(standXpCostInitial);
                 COMMON_SYNCED_TO_CLIENT.standXpCostIncrease.set(standXpCostIncrease);
-                COMMON_SYNCED_TO_CLIENT.prioritizeLeastTakenStands.set(prioritizeLeastTakenStands);
+                COMMON_SYNCED_TO_CLIENT.standRandomPoolFilter.set(standRandomPoolMode);
                 COMMON_SYNCED_TO_CLIENT.bannedStandsSynced = bannedStands;
                 
                 COMMON_SYNCED_TO_CLIENT.abilitiesBreakBlocks.set(abilitiesBreakBlocks);
@@ -578,8 +583,9 @@ public class JojoModConfig {
                 
                 COMMON_SYNCED_TO_CLIENT.standXpCostInitial.clearCache();
                 COMMON_SYNCED_TO_CLIENT.standXpCostIncrease.clearCache();
-                COMMON_SYNCED_TO_CLIENT.prioritizeLeastTakenStands.clearCache();
+                COMMON_SYNCED_TO_CLIENT.standRandomPoolFilter.clearCache();
                 COMMON_SYNCED_TO_CLIENT.bannedStandsSynced = null;
+                
                 COMMON_SYNCED_TO_CLIENT.abilitiesBreakBlocks.clearCache();
 //                COMMON_SYNCED_TO_CLIENT.standDamageMultiplier.clearCache();
                 COMMON_SYNCED_TO_CLIENT.skipStandProgression.clearCache();

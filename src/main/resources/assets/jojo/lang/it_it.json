@@ -344,8 +344,6 @@
   "jojo.config.bloodTickDown.tooltip": "Decrementazione dell'energia vampirica per tick per ogni difficoltà.",
   "jojo.config.bloodHealCost": "Costo curamento con il Sangue",
   "jojo.config.bloodHealCost.tooltip": "Costo di energia vampirica per 1 hp di curamento su ogni difficoltà.",
-  "jojo.config.prioritizeLeastTakenStands": "Priorità all'ultimo stand preso",
-  "jojo.config.prioritizeLeastTakenStands.tooltip": "Se uno stand ottiene effetti (Freccia Stand, /stand random) da degli stand che pochi giocatori di già hanno.",
   "jojo.config.bannedStands": "Stand Banditi",
   "jojo.config.bannedStands.tooltip": "Lista di stand esclusi dalla freccia stand e /stand random pool. Il format è lo stesso di /stand give command (p.e., \"jojo:star_platinum\").",
   "jojo.config.skipStandProgression": "Salta la progressione degli stand",

@@ -474,8 +474,6 @@
   "jojo.config.undeadMobsSunDamage.tooltip": "Ya sea que las turbas de muertos vivientes sufran o no daño bajo el sol de manera similar a los vampiros.",
   "jojo.config.vampiresAggroMobs": "Mobs Agresivos Vampiros",
   "jojo.config.vampiresAggroMobs.tooltip": "Si los mobs hostiles son o no agresivas con los jugadores vampiros.",
-  "jojo.config.prioritizeLeastTakenStands": "Priorizar los Stands menos tomados",
-  "jojo.config.prioritizeLeastTakenStands.tooltip": "Independientemente de si los efectos de ganancia de Stand aleatorios (Flecha de Stand, /stand aleatorio) otorgan Stands que ya tienen menos jugadores.",
   "jojo.config.bannedStands": "Stands baneados",
   "jojo.config.bannedStands.tooltip": "Lista de Stands excluidos de Stand Arrow y /stand pool aleatorio. El formato es el mismo que para /stand give command (ejemplo., \"jojo:star_platinum\").",
   "jojo.config.skipStandProgression": "Saltar progresión Stand",

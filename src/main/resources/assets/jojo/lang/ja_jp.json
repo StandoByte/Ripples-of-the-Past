@@ -344,8 +344,6 @@
   "jojo.config.bloodTickDown.tooltip": "各難易度でのティックごとの吸血鬼のエネルギー減少",
   "jojo.config.bloodHealCost": "回復への血のコスト",
   "jojo.config.bloodHealCost.tooltip": "各難易度における治癒の 1 hp あたりの吸血鬼のエネルギーコスト",
-  "jojo.config.prioritizeLeastTakenStands": "最も取られなかったスタンドを優先する",
-  "jojo.config.prioritizeLeastTakenStands.tooltip": "ランダムなスタンド獲得効果 (スタンド アロー、/スタンド ランダム) が、すでに持っているスタンドを少ないプレイヤーに与えるかどうか。",
   "jojo.config.bannedStands": "禁止されたスタンド",
   "jojo.config.bannedStands.tooltip": "スタンドの矢および /stand ランダムで発現するリストから除外されたスタンドのリスト。形式は /stand give コマンドと同じです (例: \"jojo:star_platinum\")。",
   "jojo.config.skipStandProgression": "スタンドの進行をスキップする",

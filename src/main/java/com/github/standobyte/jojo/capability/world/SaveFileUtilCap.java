@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.capability.world;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -68,9 +67,19 @@ public class SaveFileUtilCap {
         }
     }
     
-    public List<StandType<?>> leastTakenStands(Collection<StandType<?>> fromStands) {
+    public List<StandType<?>> getNotTakenStands(List<StandType<?>> fromStands) {
         if (fromStands.isEmpty()) {
-            return Collections.emptyList();
+            return fromStands;
+        }
+        return fromStands
+                .stream()
+                .filter(stand -> !timesStandsTaken.containsKey(stand) || timesStandsTaken.get(stand) <= 0)
+                .collect(Collectors.toList());
+    }
+    
+    public List<StandType<?>> getLeastTakenStands(List<StandType<?>> fromStands) {
+        if (fromStands.isEmpty()) {
+            return fromStands;
         }
         Set<Map.Entry<StandType<?>, Integer>> entriesRequested = timesStandsTaken
                 .entrySet()
@@ -85,7 +94,7 @@ public class SaveFileUtilCap {
                     .map(entry -> entry.getKey())
                     .collect(Collectors.toList());
         }
-        else {
+        else { // means there are stands with no record of being given to someone
             List<StandType<?>> st = entriesRequested.stream().map(Map.Entry::getKey).collect(Collectors.toList());
             return fromStands
                     .stream()
