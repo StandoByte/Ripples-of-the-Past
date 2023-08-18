@@ -347,8 +347,6 @@
   "jojo.config.bloodHealCost.tooltip" : "Вартість енергії вампірів за 1 одиницю здоров'я на кожному рівні складності.",
   "jojo.config.undeadMobsSunDamage" : "Воскресші зомбі беруть пошкодження від сонця",
   "jojo.config.undeadMobsSunDamage.tooltip" : "Не залежнр від цього воскресші зомбі будуть отримувати пошкодження при контакті з Сонцем, також як і вампіри.",
-  "jojo.config.prioritizeLeastTakenStands" : "Розставте пріоритети для найменш зайнятих Стандів",
-  "jojo.config.prioritizeLeastTakenStands.tooltip" : "Не залежно від цього рандомні Станди отримають еффекти (Stand Arrow, /stand random) надають Станди що меньша кількість гравців вже мають.",
   "jojo.config.bannedStands" : "Заблоковані Станди",
   "jojo.config.bannedStands.tooltip" : "Список стендів, виключених із Stand Arrow і /stand random pool. Формат такий самий, як і для команди /stand give (e.g., \"jojo:star_platinum\").",
   "jojo.config.skipStandProgression" : "Пропустити прогресс Станду",

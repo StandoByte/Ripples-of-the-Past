@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.command.configpack.standassign.PlayerStandAssignmentConfig;
 import com.github.standobyte.jojo.entity.itemprojectile.StandArrowEntity;
@@ -20,6 +21,7 @@ import com.github.standobyte.jojo.potion.StandVirusEffect;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandArrowHandler;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
+import com.github.standobyte.jojo.power.impl.stand.StandUtil.StandRandomPoolFilter;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 
@@ -44,6 +46,7 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.KeybindTextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
@@ -214,11 +217,13 @@ public class StandArrowItem extends ArrowItem {
                     .collect(Collectors.toList());
             
             if (unbannedStands.isEmpty()) {
-                mainText = new TranslationTextComponent("jojo.arrow.no_stands").withStyle(TextFormatting.OBFUSCATED);
+                mainText = new TranslationTextComponent("jojo.arrow.no_stands").withStyle(TextFormatting.GRAY, TextFormatting.OBFUSCATED);
                 tooltip.add(mainText);
             }
             else {
+                StandRandomPoolFilter poolFilter = JojoModConfig.getCommonConfigInstance(true).standRandomPoolFilter.get();
                 boolean shift = ClientUtil.isShiftPressed();
+                
                 if (shift) {
                     tooltip.add(new TranslationTextComponent("jojo.arrow.stands_list"));
 
@@ -236,6 +241,8 @@ public class StandArrowItem extends ArrowItem {
                             }
                             tooltip.add(standName);
                         });
+                        
+                        tooltip.add(StringTextComponent.EMPTY);
                     });
                 }
                 else {
@@ -255,10 +262,20 @@ public class StandArrowItem extends ArrowItem {
                                 playerHasStand ? TextFormatting.DARK_GRAY : playerHasLevels ? TextFormatting.GREEN : TextFormatting.RED));
                     }
                 }
-            }
-            
-            if (mainText != null) {
-                mainText.withStyle(TextFormatting.GRAY);
+                
+                boolean isOnServer = !ClientUtil.isInSinglePlayer();
+                if (isOnServer) {
+                    switch (poolFilter) {
+                    case LEAST_TAKEN:
+                        tooltip.add(new TranslationTextComponent("jojo.arrow.least_taken_mode").withStyle(TextFormatting.GRAY));
+                        break;
+                    case NOT_TAKEN: 
+                        tooltip.add(new TranslationTextComponent("jojo.arrow.not_taken_mode").withStyle(TextFormatting.GRAY));
+                        break;
+                    default:
+                        break;
+                    }
+                }
             }
         }
     }
@@ -276,11 +293,5 @@ public class StandArrowItem extends ArrowItem {
     @Override
     public boolean isValidRepairItem(ItemStack item, ItemStack repairItem) {
         return repairItem.getItem() == ModItems.METEORIC_INGOT.get();
-    }
-    
-    public enum StandGivingMode {
-        RANDOM,
-        LEAST_TAKEN,
-        UNIQUE
     }
 }

@@ -49,9 +49,8 @@ public class StandUtil {
             
             stands = PlayerStandAssignmentConfig.getInstance().limitToAssignedStands(entity, stands);
             
-            if (JojoModConfig.getCommonConfigInstance(false).prioritizeLeastTakenStands.get()) {
-                stands = SaveFileUtilCapProvider.getSaveFileCap(((ServerWorld) entity.level).getServer()).leastTakenStands(stands);
-            }
+            
+            stands = JojoModConfig.getCommonConfigInstance(false).standRandomPoolFilter.get().limitStandPool((ServerWorld) entity.level, stands);
             
             if (!stands.isEmpty()) {
                 stands = IStandPower.getStandPowerOptional(entity).resolve().get()
@@ -60,6 +59,31 @@ public class StandUtil {
             }
         }
         return null;
+    }
+    
+    
+    
+    public enum StandRandomPoolFilter {
+        NONE {
+            @Override
+            public List<StandType<?>> limitStandPool(ServerWorld world, List<StandType<?>> availableStands) {
+                return availableStands;
+            }
+        },
+        LEAST_TAKEN {
+            @Override
+            public List<StandType<?>> limitStandPool(ServerWorld world, List<StandType<?>> availableStands) {
+                return SaveFileUtilCapProvider.getSaveFileCap(world.getServer()).getNotTakenStands(availableStands);
+            }
+        },
+        NOT_TAKEN {
+            @Override
+            public List<StandType<?>> limitStandPool(ServerWorld world, List<StandType<?>> availableStands) {
+                return SaveFileUtilCapProvider.getSaveFileCap(world.getServer()).getNotTakenStands(availableStands);
+            }
+        };
+        
+        public abstract List<StandType<?>> limitStandPool(ServerWorld world /*TODO get stand pool limit data on client*/, List<StandType<?>> availableStands);
     }
     
     public static Stream<StandType<?>> availableStands(boolean clientSide) {
