@@ -234,6 +234,11 @@ public class StandStats {
         
         protected abstract B getThis();
         
+        @Deprecated
+        public S build(String logName) {
+            return build();
+        }
+        
         public S build() {
             return createStats();
         }
