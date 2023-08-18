@@ -321,8 +321,9 @@ public class JojoModConfig {
             initBannedStands();
         }
         
+        @Deprecated
         public void onStatsDataPackLoad() {
-            initBannedStands();
+//            initBannedStands();
         }
         
         private void initBannedStands() {
