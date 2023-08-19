@@ -83,6 +83,6 @@ public class MeteoricOreBlock extends OreBlock {
     }
     
     public static boolean isImmuneToMeteoriteStrain(LivingEntity entity) {
-        return GeneralUtil.orElseFalse(IStandPower.getStandPowerOptional(entity), power -> !power.hadAnyStand() && !power.hasPower());
+        return GeneralUtil.orElseFalse(IStandPower.getStandPowerOptional(entity), power -> power.hadAnyStand() || power.hasPower());
     }
 }
