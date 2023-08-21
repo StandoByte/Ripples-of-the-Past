@@ -674,6 +674,7 @@
   "hamon.exercise.meditation.completion_buff": "-%s seconds for full Hamon charge %s",
   "hamon.exercise.full_completion_buff": "+%s%% efficiency of all Hamon skills %s",
   "hamon.exercise.completion_buff_hint2": "until the end of the day",
+  "hamon.exercise.full_completion_hint3": "If you don't train the next day, your training level will not go down",
   "hamon.exercise.all.count": "Completed %s/%s exercises for today",
   "hamon.exercise.all.day_end_increase": "Breathing training will %s by %s levels",
   "hamon.exercise.all.day_end_increase.bonus": "Breathing training will %s by %s (+%s) levels",

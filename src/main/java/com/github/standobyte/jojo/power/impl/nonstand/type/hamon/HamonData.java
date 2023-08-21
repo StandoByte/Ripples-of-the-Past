@@ -122,6 +122,7 @@ public class HamonData extends TypeSpecificData {
     
     private float breathingTrainingLevel;
     private float breathingTrainingDayBonus;
+    private float prevDayExercisesCount;
     private EnumMap<Exercise, Integer> exerciseTicks = new EnumMap<Exercise, Integer>(Exercise.class);
     
     private boolean isMeditating;
@@ -818,7 +819,7 @@ public class HamonData extends TypeSpecificData {
         
         if (incExerciseLastTick && !incExerciseThisTick || exerciseCompleted) {
             serverPlayer.ifPresent(player -> {
-                PacketManager.sendToClient(new HamonExercisesPacket(this), player);
+                PacketManager.sendToClient(HamonExercisesPacket.exercisesOnly(this), player);
             });
         }
         if (exerciseCompleted) {
@@ -956,6 +957,14 @@ public class HamonData extends TypeSpecificData {
         this.breathingTrainingDayBonus = trainingBonus;
     }
     
+    public float getPrevDayExercises() {
+        return prevDayExercisesCount;
+    }
+    
+    public void setPrevDayExercises(float exerciseCount) {
+        this.prevDayExercisesCount = exerciseCount;
+    }
+    
     public void breathingTrainingDay(PlayerEntity user) {
         World world = user.level;
         if (!world.isClientSide()) {
@@ -975,17 +984,20 @@ public class HamonData extends TypeSpecificData {
         float completedExercises = getCompleteExercisesCount() + getMaxIncompleteExercise();
         /* at least 2 exercises to get positive increase, 
            >= 3 exercises give max increase */
-        float lvlInc = MathHelper.clamp(completedExercises - 2, -1, 1); 
+        float lvlInc = MathHelper.clamp(completedExercises - 2, -1, 1);
+        boolean keepLvlThisDay = prevDayExercisesCount >= 4;
         
         if (lvlInc <= 0) {
-            if (!JojoModConfig.getCommonConfigInstance(false).breathingTrainingDeterioration.get() || user.abilities.instabuild) {
+            if (!JojoModConfig.getCommonConfigInstance(false).breathingTrainingDeterioration.get() 
+                    || keepLvlThisDay
+                    || user.abilities.instabuild) {
                 lvlInc = 0;
             }
             else {
                 lvlInc *= 0.25F;
             }
             
-            if (newTrainingDay) {
+            if (newTrainingDay && !keepLvlThisDay) {
                 breathingTrainingDayBonus = 0;
             }
         }
@@ -996,6 +1008,9 @@ public class HamonData extends TypeSpecificData {
                 breathingTrainingDayBonus += lvlInc * 0.25F;
             }
             lvlInc = multiplyPositiveBreathingTraining(lvlInc + bonus);
+        }
+        if (newTrainingDay) {
+            prevDayExercisesCount = completedExercises;
         }
         
         return lvlInc;
@@ -1311,6 +1326,7 @@ public class HamonData extends TypeSpecificData {
         }
         nbt.put("Exercises", exercises);
         nbt.putFloat("TrainingBonus", breathingTrainingDayBonus);
+        nbt.putFloat("PrevDayExercises", prevDayExercisesCount);
         nbt.putFloat("BreathStability", breathStability);
         nbt.putInt("EnergyTicks", noEnergyDecayTicks);
         nbt.putInt("MaskNoBreathTicks", ticksMaskWithNoHamonBreath);
@@ -1336,6 +1352,7 @@ public class HamonData extends TypeSpecificData {
         }
         setExerciseTicks(exercisesNbt[0], exercisesNbt[1], exercisesNbt[2], exercisesNbt[3], false);
         breathingTrainingDayBonus = nbt.getFloat("TrainingBonus");
+        prevDayExercisesCount = nbt.getFloat("PrevDayExercises");
         breathStability = nbt.contains("BreathStability") ? nbt.getFloat("BreathStability") : getMaxBreathStability();
         prevBreathStability = breathStability;
         noEnergyDecayTicks = nbt.getInt("EnergyTicks");
@@ -1349,7 +1366,7 @@ public class HamonData extends TypeSpecificData {
         giveBreathingTrainingBuffs(user);
         updateExerciseAttributes(user);
         hamonSkills.syncWithUser(user, this);
-        PacketManager.sendToClient(new HamonExercisesPacket(this), user);
+        PacketManager.sendToClient(HamonExercisesPacket.allData(this), user);
         PacketManager.sendToClient(new HamonSyncOnLoadPacket(ticksMaskWithNoHamonBreath), user);
         ModCriteriaTriggers.HAMON_STATS.get().trigger(user, hamonStrengthLevel, hamonControlLevel, breathingTrainingLevel);
     }

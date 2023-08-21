@@ -37,7 +37,7 @@ public class ClHamonWindowOpenedPacket {
             ServerPlayerEntity player = ctx.get().getSender();
             INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
                 power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                    PacketManager.sendToClient(new HamonExercisesPacket(hamon), player);
+                    PacketManager.sendToClient(HamonExercisesPacket.allData(hamon), player);
                     Set<AbstractHamonSkill> skills = HamonUtil.nearbyTeachersSkills(player);
                     PacketManager.sendToClient(skills == null ? new HamonTeachersSkillsPacket() : 
                         new HamonTeachersSkillsPacket(skills), player);

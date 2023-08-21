@@ -7,6 +7,7 @@ import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WIND
 
 import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -425,33 +426,39 @@ public class HamonStatsTabGui extends HamonTabGui {
             @Nullable Exercise exercise /*null signifies the tooltip about the bonus for completing all 4 exercises */) {
         String tooltip1Key;
         boolean hasBuff;
-        IFormattableTextComponent tooltip2;
+        List<IFormattableTextComponent> tooltip2 = new ArrayList<>();
         
         if (exercise != null) {
             tooltip1Key = "hamon.exercise.completion_buff_hint";
             hasBuff = screen.hamon.isExerciseComplete(exercise);
-            tooltip2 = new TranslationTextComponent(String.format("hamon.exercise.%s.completion_buff", exercise.name().toLowerCase()), 
+            tooltip2.add(new TranslationTextComponent(String.format("hamon.exercise.%s.completion_buff", exercise.name().toLowerCase()), 
                     PERCENTAGE_FORMAT.format(exercise.getBuffPercentage()), 
-                    new TranslationTextComponent("hamon.exercise.completion_buff_hint2"));
+                    new TranslationTextComponent("hamon.exercise.completion_buff_hint2")));
         }
         
         else {
             tooltip1Key = "hamon.exercise.full_completion_hint";
             hasBuff = screen.hamon.allExercisesCompleted();
-            tooltip2 = new TranslationTextComponent("hamon.exercise.full_completion_buff", 
+            tooltip2.add(new TranslationTextComponent("hamon.exercise.full_completion_buff", 
                     PERCENTAGE_FORMAT.format((HamonData.ALL_EXERCISES_EFFICIENCY_MULTIPLIER - 1F) * 100F), 
-                    new TranslationTextComponent("hamon.exercise.completion_buff_hint2"));
+                    new TranslationTextComponent("hamon.exercise.completion_buff_hint2")));
+            Collections.addAll(tooltip2,
+                    new StringTextComponent(" "),
+                    new TranslationTextComponent("hamon.exercise.full_completion_hint3"));
         }
 
-        List<IReorderingProcessor> tooltip;
+        List<IReorderingProcessor> tooltip = new ArrayList<>();
         if (hasBuff) {
-            tooltip = minecraft.font.split(tooltip2, 150);
+            tooltip2.forEach(text -> {
+                tooltip.addAll(minecraft.font.split(text, 150));
+            });
         }
         else {
-            tooltip = new ArrayList<>();
             tooltip.addAll(minecraft.font.split(new TranslationTextComponent(tooltip1Key), 150));
-            tooltip2.withStyle(TextFormatting.GRAY, TextFormatting.ITALIC);
-            tooltip.addAll(minecraft.font.split(tooltip2, 150));
+            tooltip2.forEach(text -> {
+                text.withStyle(TextFormatting.GRAY, TextFormatting.ITALIC);
+                tooltip.addAll(minecraft.font.split(text, 150));
+            });
         }
         return tooltip;
     }
