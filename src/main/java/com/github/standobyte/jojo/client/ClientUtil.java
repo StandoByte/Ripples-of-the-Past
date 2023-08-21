@@ -9,7 +9,6 @@ import org.lwjgl.opengl.GL11;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
-import com.github.standobyte.jojo.client.render.world.shader.CustomShaderGroup;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
 import com.github.standobyte.jojo.client.ui.screen.mob.RockPaperScissorsScreen;
@@ -17,7 +16,6 @@ import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.general.MathUtil.Matrix4ZYX;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
-import com.google.gson.JsonSyntaxException;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -34,7 +32,6 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.model.BipedModel;
@@ -44,7 +41,6 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.client.settings.PointOfView;
-import net.minecraft.client.shader.ShaderGroup;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -54,6 +50,7 @@ import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix3f;
@@ -62,6 +59,7 @@ import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.Color;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -302,6 +300,10 @@ public class ClientUtil {
     public static String getShortenedTranslationKey(String originalKey) {
         String shortenedKey = originalKey + ".shortened";
         return I18n.exists(shortenedKey) ? shortenedKey : originalKey;
+    }
+    
+    public static void setOverlayMessage(ITextComponent message) {
+        Minecraft.getInstance().gui.handleChat(ChatType.GAME_INFO, message, Util.NIL_UUID);
     }
     
     public static Style textColor(int color) {

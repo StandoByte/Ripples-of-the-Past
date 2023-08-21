@@ -248,9 +248,11 @@ public class HamonData extends TypeSpecificData {
                 maskNoBreath = true;
                 
                 if (user.level.isClientSide() && ClientUtil.getClientPlayer() == user &&
-                        breathStability / maxStability > 0.2F &&
                         (breathStability + inc) / maxStability < 0.2F) {
-                    BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).triggerRedHighlight(999999);
+                    if (breathStability / maxStability > 0.2F) {
+                        BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).triggerRedHighlight(999999);
+                    }
+                    ClientUtil.setOverlayMessage(new TranslationTextComponent("hamon.breath_control_mask.restore_stab"));
                 }
             }
         }

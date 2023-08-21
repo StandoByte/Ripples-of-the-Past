@@ -645,6 +645,8 @@
   "hamon.intro.breath.text5": "If you manage your Hamon energy well, you will not have to worry about that.",
   "hamon.intro.stats_transition": "With proper training you can become a stronger Hamon warrior. The next tab shows your Hamon stats and explains the training process.",
   
+  "hamon.breath_control_mask.restore_stab": "Use Hamon Breath to breathe through the mask",
+  
   "hamon.stats.tab": "Stats",
   "hamon.strength_level": "Hamon Strength: %s/%s",
   "hamon.strength_stat.desc": "Determines the power of your Hamon attacks. Is trained by using Hamon attacks.",

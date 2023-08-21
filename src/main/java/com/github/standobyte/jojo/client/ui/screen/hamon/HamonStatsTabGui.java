@@ -27,6 +27,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.renderer.ItemRenderer;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.math.MathHelper;
@@ -70,7 +71,9 @@ public class HamonStatsTabGui extends HamonTabGui {
         breathMaskHoverable = new TranslationTextComponent("hamon.breathing_stat.desc2.mask")
                 .withStyle(TextFormatting.UNDERLINE)
                 .withStyle(style -> {
-                    return style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemHover(new ItemStack(ModItems.BREATH_CONTROL_MASK.get()))));
+                    ItemStack item = new ItemStack(ModItems.BREATH_CONTROL_MASK.get());
+                    item.enchant(Enchantments.BINDING_CURSE, 1);
+                    return style.withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_ITEM, new HoverEvent.ItemHover(item)));
                 });
         exercisesDescLines = minecraft.font.split(new TranslationTextComponent("hamon.breathing_stat.desc2", breathMaskHoverable), textWidth);
         breathingDeteriorationLines = minecraft.font.split(new TranslationTextComponent("hamon.breathing_stat.desc3"), textWidth);
