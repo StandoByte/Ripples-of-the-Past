@@ -8,6 +8,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.entity.AfterimageEntity;
+import com.github.standobyte.jojo.entity.HamonSendoOverdriveEntity;
 import com.github.standobyte.jojo.entity.ai.LookAtEntityWithoutMovingGoal;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.potion.HamonSpreadEffect;
@@ -47,6 +48,9 @@ public class LivingUtilCap {
     private int noLerpTicks = 0;
     private int hurtTimeSaved;
     
+    private HamonSendoOverdriveEntity hurtFromSendoOverdrive;
+    private int sendoOverdriveWaveTicks;
+    
     private float receivedHamonDamage = 0;
     @Nullable private UUID preHypnosisOwner = null;
     
@@ -65,6 +69,7 @@ public class LivingUtilCap {
         tickDownHamonDamage();
         
         if (!entity.level.isClientSide()) {
+            tickSendoOverdriveHurtTimer();
             tickHypnosisProcess();
         }
         
@@ -209,6 +214,23 @@ public class LivingUtilCap {
         else if (hurtTimeSaved > 0) {
             entity.hurtTime = hurtTimeSaved;
             hurtTimeSaved = 0;
+        }
+    }
+    
+    
+    
+    public boolean tryHurtFromSendoOverdrive(HamonSendoOverdriveEntity overdrive, int otherWavesImmuneTicks) {
+        boolean canBeHurt = hurtFromSendoOverdrive == null || hurtFromSendoOverdrive == overdrive;
+        if (canBeHurt) {
+            this.hurtFromSendoOverdrive = overdrive;
+            this.sendoOverdriveWaveTicks = otherWavesImmuneTicks;
+        }
+        return canBeHurt;
+    }
+    
+    private void tickSendoOverdriveHurtTimer() {
+        if (sendoOverdriveWaveTicks > 0 && --sendoOverdriveWaveTicks == 0) {
+            hurtFromSendoOverdrive = null;
         }
     }
     

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.UUID;
 import java.util.function.Predicate;
 
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModParticles;
@@ -141,7 +142,8 @@ public class HamonSendoOverdriveEntity extends Entity implements IEntityAddition
                 List<LivingEntity> targets = entity.level.getEntitiesOfClass(LivingEntity.class, 
                         entity.getHurtHitbox(tick), entity.filter.and(target -> !hitEntities.contains(target)));
                 for (LivingEntity target : targets) {
-                    if (DamageUtil.dealHamonDamage(target, entity.damage, entity, entity.getUser())) {
+                    if (target.getCapability(LivingUtilCapProvider.CAPABILITY).map(cap -> cap.tryHurtFromSendoOverdrive(entity, WAVE_ADD_TICK)).orElse(true)
+                            && DamageUtil.dealHamonDamage(target, entity.damage, entity, entity.getUser())) {
                         entity.givePointsToUser();
                     }
                     hitEntities.add(target);
@@ -181,7 +183,7 @@ public class HamonSendoOverdriveEntity extends Entity implements IEntityAddition
         }
     }
     
-
+    
     
     private static final int WAVE_TICK_LENGTH = 15;
     private static final int WAVE_ADD_TICK = 4;
