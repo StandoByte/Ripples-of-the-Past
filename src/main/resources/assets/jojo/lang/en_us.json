@@ -340,6 +340,8 @@
   "jojo.key.scroll_mode": "Switch Mode",
   "jojo.key.scroll_attack": "Select Next Attack",
   "jojo.key.scroll_ability": "Select Next Ability",
+  "jojo.key.lock_attack": "Lock 1-9/scroll for Attacks",
+  "jojo.key.lock_ability": "Lock 1-9/scroll for Abilities",
   "jojo.key.quick_access": "Quick Access Slot",
   
   "key.categories.jojo.hud.slots": "JoJo HUD Slot Hotkeys",

@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.client;
 
+import java.io.File;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
@@ -150,6 +151,8 @@ public class ClientSetup {
     
     @SubscribeEvent
     public static void onFMLClientSetup(FMLClientSetupEvent event) {
+        Minecraft mc = event.getMinecraftSupplier().get();
+        
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.BLADE_HAT.get(), BladeHatRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SPACE_RIPPER_STINGY_EYES.get(), SpaceRipperStingyEyesRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.TURQUOISE_BLUE_OVERDRIVE.get(), TurquoiseBlueOverdriveRenderer::new);
@@ -207,10 +210,10 @@ public class ClientSetup {
         ArmorModelRegistry.registerArmorModel(BladeHatArmorModel::new, ModItems.BLADE_HAT.get());
         ArmorModelRegistry.registerArmorModel(BreathControlMaskModel::new, ModItems.BREATH_CONTROL_MASK.get());
         ArmorModelRegistry.registerArmorModel(SatiporojaScarfArmorModel::new, ModItems.SATIPOROJA_SCARF.get());
+        
+        ClientModSettings.init(mc, new File(mc.gameDirectory, "jojo_rotp_settings.json"));
 
         event.enqueueWork(() -> {
-            Minecraft mc = event.getMinecraftSupplier().get();
-
             ItemModelsProperties.register(ModItems.METEORIC_SCRAP.get(), new ResourceLocation(JojoMod.MOD_ID, "icon"), (itemStack, clientWorld, livingEntity) -> {
                 return itemStack.getOrCreateTag().getInt("Icon");
             });

@@ -24,6 +24,7 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.resources.CustomResources;
@@ -352,7 +353,7 @@ public class ActionsOverlayGui extends AbstractGui {
 
 
 
-    private static final int HOTBARS_ELEMENT_HEIGHT_PX = 86;
+    private static final int HOTBARS_ELEMENT_HEIGHT_PX = 110;
     
     private final ElementPosition barsPosition = new ElementPosition();
     private BarsRenderer barsRenderer;
@@ -565,6 +566,20 @@ public class ActionsOverlayGui extends AbstractGui {
                 }
                 
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+                
+                // hotbar controls lock icon
+                if (actionHotbar != null) {
+                    ClientModSettings settings = ClientModSettings.getInstance();
+                    if (settings.areControlsLockedForHotbar(actionHotbar)) {
+                        mc.getTextureManager().bind(OVERLAY_LOCATION);
+                        if (position.alignment == Alignment.LEFT) {
+                            blit(matrixStack, x + hotbarLength - 2, y, 240, 240, 16, 16);
+                        }
+                        else {
+                            blit(matrixStack, x - 20, y, 240, 240, 16, 16);
+                        }
+                    }
+                }
                 
                 // hold progress indicator
                 x += 11;

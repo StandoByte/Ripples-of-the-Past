@@ -109,6 +109,8 @@ public class InputHandler {
     private KeyBinding abilityHotbar;
     private KeyBinding scrollAttack;
     private KeyBinding scrollAbility;
+    private KeyBinding lockAttackHotbar;
+    private KeyBinding lockAbilityHotbar;
 
     private static final String HUD_ALTERNATIVE_CATEGORY = new String("key.categories." + JojoMod.MOD_ID + ".hud.alternative");
     @Nullable
@@ -170,6 +172,8 @@ public class InputHandler {
         ClientRegistry.registerKeyBinding(scrollMode = new KeyBinding(JojoMod.MOD_ID + ".key.scroll_mode", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
         ClientRegistry.registerKeyBinding(scrollAttack = new KeyBinding(JojoMod.MOD_ID + ".key.scroll_attack", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
         ClientRegistry.registerKeyBinding(scrollAbility = new KeyBinding(JojoMod.MOD_ID + ".key.scroll_ability", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
+        ClientRegistry.registerKeyBinding(lockAttackHotbar = new KeyBinding(JojoMod.MOD_ID + ".key.lock_attack", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
+        ClientRegistry.registerKeyBinding(lockAbilityHotbar = new KeyBinding(JojoMod.MOD_ID + ".key.lock_ability", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
         
         if (JojoModConfig.CLIENT.actionSlotHotkeys.get()) {
             attackSlots = new KeyBinding[9];
@@ -190,8 +194,9 @@ public class InputHandler {
         }
 
         if (actionsOverlay.isActive() && !mc.player.isSpectator()) {
-            boolean scrollAttack = attackHotbar.isDown();
-            boolean scrollAbility = abilityHotbar.isDown();
+            ClientModSettings clientSettings = ClientModSettings.getInstance();
+            boolean scrollAttack = attackHotbar.isDown() || clientSettings.areControlsLockedForHotbar(ActionType.ATTACK);
+            boolean scrollAbility = abilityHotbar.isDown() || clientSettings.areControlsLockedForHotbar(ActionType.ABILITY);
             if (scrollAttack || scrollAbility) {
                 if (scrollAttack) {
                     actionsOverlay.scrollAction(ActionType.ATTACK, event.getScrollDelta() > 0.0D);
@@ -211,9 +216,11 @@ public class InputHandler {
         }
         
         if (event.phase == TickEvent.Phase.START) {
+            ClientModSettings clientSettings = ClientModSettings.getInstance();
+            
             if (actionsOverlay.isActive()) {
-                boolean chooseAttack = attackHotbar.isDown();
-                boolean chooseAbility = abilityHotbar.isDown();
+                boolean chooseAttack = attackHotbar.isDown() || clientSettings.areControlsLockedForHotbar(ActionType.ATTACK);
+                boolean chooseAbility = abilityHotbar.isDown() || clientSettings.areControlsLockedForHotbar(ActionType.ABILITY);
                 actionsOverlay.setHotbarButtonsDows(chooseAttack, chooseAbility);
                 actionsOverlay.setHotbarsEnabled(!disableHotbars.isDown());
                 if (chooseAttack || chooseAbility) {
@@ -251,6 +258,14 @@ public class InputHandler {
                 
                 if (scrollAbility.consumeClick()) {
                     actionsOverlay.scrollAction(ActionType.ABILITY, mc.player.isShiftKeyDown());
+                }
+                
+                if (lockAttackHotbar.consumeClick()) {
+                    clientSettings.switchLockedHotbarControls(ActionType.ATTACK);
+                }
+                
+                if (lockAbilityHotbar.consumeClick()) {
+                    clientSettings.switchLockedHotbarControls(ActionType.ABILITY);
                 }
                 
                 if (actionQuickAccess.isDown() && quickAccessMmbDelay <= 0

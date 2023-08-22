@@ -238,7 +238,11 @@ public class HamonData extends TypeSpecificData {
         
         if (isUserWearingBreathMask()) {
             float breathMaskHandicap = MathHelper.clamp((400f - ticksMaskWithNoHamonBreath) / 200f, -1, 1);
-            // slowed down recovery when not using hamon breath for too long (10s)
+            boolean canIndicateInHud = user.level.isClientSide() && ClientUtil.getClientPlayer() == user;
+            if (canIndicateInHud && breathMaskHandicap == 0) {
+                BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).triggerRedHighlight(79);
+            }
+            // normal recovery, slowed down when not using hamon breath for too long (10s)
             if (breathMaskHandicap >= 0) {
                 inc = maxStability / fullBreathStabilityTicks() * breathMaskHandicap;
             }
@@ -247,8 +251,7 @@ public class HamonData extends TypeSpecificData {
                 inc = maxStability / 1200 * breathMaskHandicap;
                 maskNoBreath = true;
                 
-                if (user.level.isClientSide() && ClientUtil.getClientPlayer() == user &&
-                        (breathStability + inc) / maxStability < 0.2F) {
+                if (canIndicateInHud && (breathStability + inc) / maxStability < 0.2F) {
                     if (breathStability / maxStability > 0.2F) {
                         BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).triggerRedHighlight(999999);
                     }

@@ -17,8 +17,6 @@ public class HamonSpreadEffect extends UncurableEffect implements IApplicableEff
         super(type, liquidColor);
     }
 
-    // FIXME !!!!!!!! (hamon) hamon spread perk rework
-    // do smth to mobs too
     @Override
     public void applyEffectTick(LivingEntity livingEntity, int amplifier) {
         if (!livingEntity.level.isClientSide() && livingEntity instanceof FlyingEntity) {
