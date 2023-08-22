@@ -8,7 +8,6 @@ import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public class HamonTurquoiseBlueOverdrive extends HamonAction {
@@ -31,13 +30,14 @@ public class HamonTurquoiseBlueOverdrive extends HamonAction {
             HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
             float energyCost = getEnergyCost(power, target);
             float hamonEfficiency = hamon.getActionEfficiency(energyCost, true);
+            float hamonControl = hamon.getHamonControlLevelRatio();
             
             HamonTurquoiseBlueOverdriveEntity overdriveWave = new HamonTurquoiseBlueOverdriveEntity(world, user)
-                    .setRadius(1.5F + (float) (4.5F * hamon.getHamonControlLevelRatio() * hamonEfficiency))
+                    .setRadius(1.5F + (float) (4.5F * hamonControl * hamonEfficiency))
                     .setDamage(1F * hamonEfficiency)
                     .setPoints(Math.min(energyCost, power.getEnergy()) * hamonEfficiency)
-                    .setDuration(MathHelper.floor(300 * hamonEfficiency));
-            overdriveWave.shootFromRotation(user, 2F, 0);
+                    .setDuration(30 + (int) (70 * hamonControl));
+            overdriveWave.shootFromRotation(user, 1.5F, 0);
             world.addFreshEntity(overdriveWave);
         }
     }

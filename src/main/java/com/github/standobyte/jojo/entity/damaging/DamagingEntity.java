@@ -280,7 +280,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
 
     protected abstract float getBaseDamage();
     
-    protected final float getDamageAmount() {
+    protected float getDamageAmount() {
         float configMultiplier = standDamage() || getOwner() instanceof StandEntity ? JojoModConfig.getCommonConfigInstance(false).standDamageMultiplier.get().floatValue() : 1;
         float damage = getBaseDamage() * configMultiplier;
         if (debuffsFromStand()) {

@@ -21,7 +21,6 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.EntityRayTraceResult;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -30,7 +29,7 @@ public class HamonTurquoiseBlueOverdriveEntity extends ModdedProjectileEntity {
     private float radius;
     private float damage;
     private float points;
-    private int sparksCount;
+    private float sparksCount;
     private boolean gaveHamonPoints;
     private int duration;
 
@@ -40,7 +39,7 @@ public class HamonTurquoiseBlueOverdriveEntity extends ModdedProjectileEntity {
     
     public HamonTurquoiseBlueOverdriveEntity setRadius(float radius) {
         this.radius = radius;
-        this.sparksCount = Math.max(MathHelper.floor(radius * radius * 3), 1);
+        this.sparksCount = radius * radius * 3;
         Vector3d pos = getBoundingBox().getCenter();
         refreshDimensions();
         setBoundingBox(new AxisAlignedBB(pos, pos).inflate(radius));
@@ -77,6 +76,7 @@ public class HamonTurquoiseBlueOverdriveEntity extends ModdedProjectileEntity {
         super.tick();
         if (level.isClientSide()) {
             Vector3d center = getBoundingBox().getCenter();
+            int sparksCount = Math.max((int) (this.sparksCount * damageWearOffMultiplier()), 1);
             for (int i = 0; i < sparksCount; i++) {
                 Vector3d sparkVec = center.add(new Vector3d(
                         (random.nextDouble() - 0.5), 
@@ -87,7 +87,6 @@ public class HamonTurquoiseBlueOverdriveEntity extends ModdedProjectileEntity {
                     level.addParticle(ModParticles.HAMON_SPARK_BLUE.get(), false, sparkVec.x, sparkVec.y, sparkVec.z, 0, 0, 0);
                 }
             }
-            // FIXME !!!!!!!!!!!!!!!!!! hmmmm
             level.playSound(ClientUtil.getClientPlayer(), center.x, center.y, center.z, ModSounds.HAMON_SPARK.get(), 
                     SoundCategory.AMBIENT, Math.min(0.1F + radius * 0.15F, 1), 1.0F + (random.nextFloat() - 0.5F) * 0.15F);
         }
@@ -108,7 +107,8 @@ public class HamonTurquoiseBlueOverdriveEntity extends ModdedProjectileEntity {
     
     @Override
     protected boolean hurtTarget(Entity target, LivingEntity owner) {
-        return DamageUtil.dealHamonDamage(target, damage, this, owner, attack -> attack.hamonParticle(ModParticles.HAMON_SPARK_BLUE.get()));
+        return DamageUtil.dealHamonDamage(target, getDamageAmount(), 
+                this, owner, attack -> attack.hamonParticle(ModParticles.HAMON_SPARK_BLUE.get()));
     }
 
     @Override
@@ -141,6 +141,11 @@ public class HamonTurquoiseBlueOverdriveEntity extends ModdedProjectileEntity {
         EntitySize defaultSize = super.getDimensions(pose);
         return new EntitySize(radius * 2, radius * 2, defaultSize.fixed);
     }
+    
+    @Override
+    public boolean isPickable() {
+        return false;
+    }
 
     @Override
     public int ticksLifespan() {
@@ -149,7 +154,17 @@ public class HamonTurquoiseBlueOverdriveEntity extends ModdedProjectileEntity {
 
     @Override
     protected float getBaseDamage() {
-        return 0;
+        return damage;
+    }
+    
+    @Override
+    protected float getDamageAmount() {
+        return damage * damageWearOffMultiplier();
+    }
+    
+    private float damageWearOffMultiplier() {
+        float ageRatio = (float) tickCount / (float) duration;
+        return Math.min(2 - ageRatio * 2, 1);
     }
 
     @Override
@@ -186,11 +201,13 @@ public class HamonTurquoiseBlueOverdriveEntity extends ModdedProjectileEntity {
     public void writeSpawnData(PacketBuffer buffer) {
         super.writeSpawnData(buffer);
         buffer.writeFloat(radius);
+        buffer.writeVarInt(duration);
     }
 
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
         super.readSpawnData(additionalData);
         setRadius(additionalData.readFloat());
+        setDuration(additionalData.readVarInt());
     }
 }
