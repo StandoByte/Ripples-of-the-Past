@@ -54,7 +54,10 @@ public class JojoModConfig {
         public final ForgeConfigSpec.BooleanValue hamonTempleSpawn;
         public final ForgeConfigSpec.BooleanValue meteoriteSpawn;
         public final ForgeConfigSpec.BooleanValue pillarManTempleSpawn;
-
+        
+        public final ForgeConfigSpec.DoubleValue hamonDamageMultiplier;
+        public final ForgeConfigSpec.BooleanValue hamonEnergyTicksDown;
+        
         public final ForgeConfigSpec.DoubleValue hamonPointsMultiplier;
         public final ForgeConfigSpec.DoubleValue breathingTrainingMultiplier;
         public final ForgeConfigSpec.BooleanValue breathingTrainingDeterioration;
@@ -86,8 +89,7 @@ public class JojoModConfig {
         public final ForgeConfigSpec.BooleanValue soulAscension;
         public final ForgeConfigSpec.IntValue timeStopChunkRange;
         public final ForgeConfigSpec.DoubleValue timeStopDamageMultiplier;
-
-        public final ForgeConfigSpec.DoubleValue hamonDamageMultiplier;
+        
         public final ForgeConfigSpec.BooleanValue endermenBeyondTimeSpace;
         public final ForgeConfigSpec.BooleanValue saveDestroyedBlocks;
         
@@ -135,41 +137,53 @@ public class JojoModConfig {
                         .define("pillarManTempleSpawn", true);
             builder.pop();
             
-            builder.comment(" Settings which affect the speed of Hamon training.").push("Hamon training");
-                hamonPointsMultiplier = builder
-                        .comment("    Hamon Strength and Control levels growth multiplier.")
-                        .translation("jojo.config.hamonPointsMultiplier")
-                        .defineInRange("hamonPointsMultiplier", 1.0, 0.0, 5000.0);
+            builder.push("Hamon Settings");
+                hamonDamageMultiplier = builder
+                        .comment("    Damage multiplier applied to all Hamon attacks.")
+                        .translation("jojo.config.hamonDamageMultiplier")
+                        .defineInRange("hamonDamageMultiplier", 1.0, 0.0, 128.0);
                 
-                breathingTrainingMultiplier = builder
-                        .comment("    Breathing training growth multiplier.")
-                        .translation("jojo.config.breathingTrainingMultiplier")
-                        .defineInRange("breathingTrainingMultiplier", 1.0, 0.0, HamonData.MAX_BREATHING_LEVEL);
-                
-                breathingTrainingDeterioration = builder
-                        .comment("    Whether or not breathing training deteriorates over time.")
-                        .translation("jojo.config.breathingTrainingDeterioration")
-                        .define("breathingTrainingDeterioration", true);
-                
-                breathingStatGap = builder
-                        .comment("    The maximum difference between Hamon Strength/Control and Breathing training.",
-                                "     If the Breathing training level is too low, the player won't be able to reach higher levels of the Hamon stats.",
-                                "     Defaults to 15.")
-                       .translation("jojo.config.breathingStatGap")
-                       .defineInRange("breathingStatGap", 15, 0, HamonData.MAX_STAT_LEVEL);
-                
-                mixHamonTechniques = builder
-                        .comment("    Whether or not picking skills from different character-specific Hamon techniques is allowed.")
-                        .translation("jojo.config.mixHamonTechniques")
-                        .define("mixHamonTechniques", false);
-                
-                techniqueSkillsRequirement = builder
-                        .comment("    At what levels of Hamon Strength and Hamon Control each slot for a skill from the Technique tab is unlocked, and how many slots are there.", 
-                                "     Could be used to increase the default limit of 3 slots when paired with mixHamonTechniques setting enabled.")
-                        .translation("jojo.config.techniqueSkillRequirements")
-                        .defineListAllowEmpty(Lists.newArrayList("techniqueSkillRequirements"), 
-                                () -> Arrays.asList(20, 30, 40), 
-                                s -> s instanceof Integer && (Integer) s >= 0);
+                hamonEnergyTicksDown = builder
+                        .comment("    Whether or not Hamon energy ticks down a few seconds after the user performs Hamon Breath.")
+                        .translation("jojo.config.hamonEnergyTicksDown")
+                        .define("hamonEnergyTicksDown", true);
+            
+                builder.comment(" Settings which affect the speed of Hamon training.").push("Hamon training");
+                    hamonPointsMultiplier = builder
+                            .comment("    Hamon Strength and Control levels growth multiplier.")
+                            .translation("jojo.config.hamonPointsMultiplier")
+                            .defineInRange("hamonPointsMultiplier", 1.0, 0.0, 5000.0);
+                    
+                    breathingTrainingMultiplier = builder
+                            .comment("    Breathing training growth multiplier.")
+                            .translation("jojo.config.breathingTrainingMultiplier")
+                            .defineInRange("breathingTrainingMultiplier", 1.0, 0.0, HamonData.MAX_BREATHING_LEVEL);
+                    
+                    breathingTrainingDeterioration = builder
+                            .comment("    Whether or not breathing training deteriorates over time.")
+                            .translation("jojo.config.breathingTrainingDeterioration")
+                            .define("breathingTrainingDeterioration", true);
+                    
+                    breathingStatGap = builder
+                            .comment("    The maximum difference between Hamon Strength/Control and Breathing training.",
+                                    "     If the Breathing training level is too low, the player won't be able to reach higher levels of the Hamon stats.",
+                                    "     Defaults to 15.")
+                           .translation("jojo.config.breathingStatGap")
+                           .defineInRange("breathingStatGap", 15, 0, HamonData.MAX_STAT_LEVEL);
+                    
+                    mixHamonTechniques = builder
+                            .comment("    Whether or not picking skills from different character-specific Hamon techniques is allowed.")
+                            .translation("jojo.config.mixHamonTechniques")
+                            .define("mixHamonTechniques", false);
+                    
+                    techniqueSkillsRequirement = builder
+                            .comment("    At what levels of Hamon Strength and Hamon Control each slot for a skill from the Technique tab is unlocked, and how many slots are there.", 
+                                    "     Could be used to increase the default limit of 3 slots when paired with mixHamonTechniques setting enabled.")
+                            .translation("jojo.config.techniqueSkillRequirements")
+                            .defineListAllowEmpty(Lists.newArrayList("techniqueSkillRequirements"), 
+                                    () -> Arrays.asList(20, 30, 40), 
+                                    s -> s instanceof Integer && (Integer) s >= 0);
+                builder.pop();
             builder.pop();
             
             builder.push("Vampirism settings");
@@ -286,11 +300,6 @@ public class JojoModConfig {
                         .define("soulAscension", true);
             builder.pop();
             
-            hamonDamageMultiplier = builder
-                    .comment("    Damage multiplier applied to all Hamon attacks.")
-                    .translation("jojo.config.hamonDamageMultiplier")
-                    .defineInRange("hamonDamageMultiplier", 1.0, 0.0, 128.0);
-            
             saveDestroyedBlocks = builder
                     .comment("    Whether or not blocks which can be restored by Crazy Diamond's terrain restoration ability are saved in the save files.", 
                              "     It may cause longer saving & loading time for larger worlds.")
@@ -371,7 +380,10 @@ public class JojoModConfig {
             private final boolean hamonTempleSpawn;
             private final boolean meteoriteSpawn;
             private final boolean pillarManTempleSpawn;
-
+            
+//            private final double hamonDamageMultiplier;
+            private final boolean hamonEnergyTicksDown;
+          
 //            private final double hamonPointsMultiplier;
 //            private final double breathingTrainingMultiplier;
             private final boolean breathingTrainingDeterioration;
@@ -397,8 +409,7 @@ public class JojoModConfig {
             private final float[] resolvePoints;
             private final boolean soulAscension;
             private final int timeStopChunkRange;
-
-//            private final double hamonDamageMultiplier;
+            
             private final boolean endermenBeyondTimeSpace;
             
             public SyncedValues(PacketBuffer buf) {
@@ -433,6 +444,8 @@ public class JojoModConfig {
                 soulAscension =                     (flags[1] & 32) > 0;
                 endermenBeyondTimeSpace =           (flags[1] & 64) > 0;
                 mixHamonTechniques =                (flags[1] & 128) > 0;
+                
+                hamonEnergyTicksDown =              (flags[2] & 1) > 0;
             }
 
             public void writeToBuf(PacketBuffer buf) {
@@ -449,7 +462,7 @@ public class JojoModConfig {
 //                buf.writeDouble(standDamageMultiplier);
                 NetworkUtil.writeFloatArray(buf, resolvePoints);
                 buf.writeVarInt(timeStopChunkRange);
-                byte[] flags = new byte[] {0, 0};
+                byte[] flags = new byte[] {0, 0, 0};
                 if (keepStandOnDeath)                   flags[0] |= 1;
                 if (keepHamonOnDeath)                   flags[0] |= 2;
                 if (keepVampirismOnDeath)               flags[0] |= 4;
@@ -467,6 +480,8 @@ public class JojoModConfig {
                 if (soulAscension)                      flags[1] |= 32;
                 if (endermenBeyondTimeSpace)            flags[1] |= 64;
                 if (mixHamonTechniques)                 flags[1] |= 128;
+                
+                if (hamonEnergyTicksDown)               flags[2] |= 1;
                 buf.writeByteArray(flags);
             }
 
@@ -478,6 +493,7 @@ public class JojoModConfig {
                 hamonTempleSpawn = config.hamonTempleSpawn.get();
                 meteoriteSpawn = config.meteoriteSpawn.get();
                 pillarManTempleSpawn = config.pillarManTempleSpawn.get();
+                hamonEnergyTicksDown = config.hamonEnergyTicksDown.get();
 //                hamonPointsMultiplier = config.standDamageMultiplier.get();
 //                breathingTrainingMultiplier = config.breathingTrainingMultiplier.get();
                 breathingTrainingDeterioration = config.breathingTrainingDeterioration.get();
@@ -514,6 +530,7 @@ public class JojoModConfig {
                 COMMON_SYNCED_TO_CLIENT.hamonTempleSpawn.set(hamonTempleSpawn);
                 COMMON_SYNCED_TO_CLIENT.meteoriteSpawn.set(meteoriteSpawn);
                 COMMON_SYNCED_TO_CLIENT.pillarManTempleSpawn.set(pillarManTempleSpawn);
+                COMMON_SYNCED_TO_CLIENT.hamonEnergyTicksDown.set(hamonEnergyTicksDown);
 //                COMMON_SYNCED_TO_CLIENT.hamonPointsMultiplier.set(hamonPointsMultiplier);
 //                COMMON_SYNCED_TO_CLIENT.breathingTrainingMultiplier.set(breathingTrainingMultiplier);
                 COMMON_SYNCED_TO_CLIENT.breathingTrainingDeterioration.set(breathingTrainingDeterioration);
@@ -548,6 +565,7 @@ public class JojoModConfig {
                 COMMON_SYNCED_TO_CLIENT.hamonTempleSpawn.clearCache();
                 COMMON_SYNCED_TO_CLIENT.meteoriteSpawn.clearCache();
                 COMMON_SYNCED_TO_CLIENT.pillarManTempleSpawn.clearCache();
+                COMMON_SYNCED_TO_CLIENT.hamonEnergyTicksDown.clearCache();
 //                COMMON_SYNCED_TO_CLIENT.hamonPointsMultiplier.clearCache();
 //                COMMON_SYNCED_TO_CLIENT.breathingTrainingMultiplier.clearCache();
                 COMMON_SYNCED_TO_CLIENT.breathingTrainingDeterioration.clearCache();

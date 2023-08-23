@@ -192,8 +192,11 @@ public class HamonData extends TypeSpecificData {
                 noEnergyDecayTicks--;
                 return power.getEnergy();
             }
-            else {
+            else if (JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).hamonEnergyTicksDown.get()) {
                 return power.getEnergy() - 20F;
+            }
+            else {
+                return power.getEnergy();
             }
         }
     }

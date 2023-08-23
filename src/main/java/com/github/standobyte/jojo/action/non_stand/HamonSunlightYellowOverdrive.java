@@ -15,7 +15,6 @@ import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
@@ -118,10 +117,4 @@ public class HamonSunlightYellowOverdrive extends HamonAction {
     public boolean isHeldSentToTracking() {
         return true;
     }
-    
-    @Override
-    public boolean cancelHeldOnGettingAttacked(INonStandPower power, DamageSource dmgSource, float dmgAmount) {
-        return true;
-    }
-    
 }

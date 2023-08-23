@@ -375,6 +375,9 @@ public class MCUtil {
     public static void leap(Entity entity, float leapStrength) {
         entity.setOnGround(false);
         entity.hasImpulse = true;
+        if (entity instanceof LivingEntity) {
+            ((LivingEntity) entity).setJumping(true);
+        }
         Vector3d leap = Vector3d.directionFromRotation(Math.min(entity.xRot, -30F), entity.yRot).scale(leapStrength);
         entity.setDeltaMovement(leap.x, leap.y * 0.5, leap.z);
     }

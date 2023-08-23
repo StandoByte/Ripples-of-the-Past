@@ -520,6 +520,8 @@
   "jojo.config.abilitiesBreakBlocks.tooltip": "Whether or not Stands and abilities from the mod can break blocks.",
   "jojo.config.hamonDamageMultiplier": "Hamon damage multiplier",
   "jojo.config.hamonDamageMultiplier.tooltip": "Damage multiplier applied to all Hamon attacks.",
+  "jojo.config.hamonEnergyTicksDown": "Hamon energy ticks down",
+  "jojo.config.hamonEnergyTicksDown.tooltip": "Whether or not Hamon energy ticks down a few seconds after the user performs Hamon Breath.",
   "jojo.config.timeStopChunkRange": "Time Stop chunk range",
   "jojo.config.timeStopChunkRange.tooltip": "Range of Time Stop ability in chunks. If set to 0, the whole dimension is frozen in time.",
   "jojo.config.timeStopDamageMultiplier": "Time Stop damage multiplier",

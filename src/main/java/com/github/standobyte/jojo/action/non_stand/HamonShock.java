@@ -37,13 +37,13 @@ public class HamonShock extends HamonAction {
     @Override
     public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, INonStandPower power) {
         Entity entity = target.getEntity();
-        if (entity == null || entity.getType() == ModEntityTypes.HAMON_MASTER.get()) {
-            return ActionConditionResult.NEGATIVE;
-        }
         
         boolean isLiving;
         if (entity instanceof LivingEntity) {
             LivingEntity targetLiving = (LivingEntity) entity;
+            if (entity.getType() == ModEntityTypes.HAMON_MASTER.get() || ModStatusEffects.isStunned(targetLiving)) {
+                return ActionConditionResult.NEGATIVE;
+            }
             // not the best way to determine living mobs in other mods
             isLiving = !(targetLiving instanceof StandEntity || targetLiving instanceof ArmorStandEntity || targetLiving instanceof GolemEntity)
                     && !JojoModUtil.isUndead(targetLiving);
