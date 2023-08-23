@@ -71,6 +71,7 @@ public class JojoModConfig {
         public final ForgeConfigSpec.ConfigValue<List<? extends Double>> bloodHealCost;
         public final ForgeConfigSpec.BooleanValue vampiresAggroMobs;
         public final ForgeConfigSpec.BooleanValue undeadMobsSunDamage;
+        public final ForgeConfigSpec.IntValue vampirismCuringDuration;
 
         public final ForgeConfigSpec.BooleanValue prioritizeLeastTakenStands;
         public final ForgeConfigSpec.BooleanValue standTiers;
@@ -216,6 +217,11 @@ public class JojoModConfig {
                         .comment("    Whether or not undead mobs take damage under the sun similarly to vampires.")
                         .translation("jojo.config.undeadMobsSunDamage")
                         .define("undeadMobsSunDamage", false);
+                
+                vampirismCuringDuration = builder
+                        .comment("    Duration of the vampirism curing process in ticks.")
+                        .translation("jojo.config.vampirismCuringDuration")
+                        .defineInRange("vampirismCuringDuration", 48000, 1, Integer.MAX_VALUE);
             builder.pop();
             
             builder.comment(" Settings of Stand Arrow and the Stands pool.").push("Stand Arrow");

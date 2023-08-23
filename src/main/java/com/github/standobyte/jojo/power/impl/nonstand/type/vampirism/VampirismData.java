@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.power.impl.nonstand.type.vampirism;
 import java.util.Optional;
 import java.util.Random;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.init.ModSounds;
@@ -32,11 +33,11 @@ import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.registries.IForgeRegistry;
 
 public class VampirismData extends TypeSpecificData {
-    private static final int CURING_MAX_TICKS = 72000;
     private boolean vampireFullPower = false;
     private int lastBloodLevel = -999;
     
@@ -134,11 +135,13 @@ public class VampirismData extends TypeSpecificData {
     }
     
     public float getCuringProgress() {
-        return (float) curingTicks / (float) CURING_MAX_TICKS;
+        int curingMaxTicks = getMaxCuringTicks(power.getUser());
+        return (float) curingTicks / (float) curingMaxTicks;
     }
     
     public int getCuringStage() {
-        return isBeingCured() ? Math.min(curingTicks * 4 / CURING_MAX_TICKS + 1, 4) : 0;
+        float curingProgress = getCuringProgress();
+        return (int) MathHelper.clamp(curingProgress * 4, 0, 3) + 1;
     }
     
     public boolean isBeingCured() {
@@ -155,13 +158,15 @@ public class VampirismData extends TypeSpecificData {
             if (curingStage >= 2 && user.getRandom().nextDouble() <= NAUSEA_CHANCE[Math.min(curingStage, NAUSEA_CHANCE.length + 1)]) {
                 user.addEffect(new EffectInstance(Effects.CONFUSION, 200));
             }
-            if (!user.level.isClientSide() && curingTicks >= CURING_MAX_TICKS && user instanceof ServerPlayerEntity) {
+            
+            int curingMaxTicks = getMaxCuringTicks(user);
+            if (!user.level.isClientSide() && curingTicks >= curingMaxTicks && user instanceof ServerPlayerEntity) {
                 ((ServerPlayerEntity) user).displayClientMessage(new TranslationTextComponent("jojo.vampire.ready_to_cure"), true);
             }
             
-            if (curingTicks < CURING_MAX_TICKS) {
+            if (curingTicks < curingMaxTicks) {
                 if (power.getEnergy() == 0) {
-                    curingTicks = Math.min(curingTicks + getCuringTickProgress(), CURING_MAX_TICKS);
+                    curingTicks = Math.min(curingTicks + getCuringTickProgress(), curingMaxTicks);
                 }
                 curingStageChanged = curingStage != getCuringStage();
             }
@@ -209,7 +214,7 @@ public class VampirismData extends TypeSpecificData {
         if (!entity.level.isClientSide()) {
             INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
                 power.getTypeSpecificData(ModPowers.VAMPIRISM.get()).ifPresent(vampirism -> {
-                    if (vampirism.curingTicks >= CURING_MAX_TICKS) {
+                    if (vampirism.curingTicks >= getMaxCuringTicks(entity)) {
                         if (!entity.isSilent()) {
                             entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), 
                                     ModSounds.VAMPIRE_CURE_END.get(), entity.getSoundSource(), 1.0F, 1.0F);
@@ -229,6 +234,10 @@ public class VampirismData extends TypeSpecificData {
                 });
             });
         }
+    }
+    
+    private static int getMaxCuringTicks(LivingEntity entity) {
+        return JojoModConfig.getCommonConfigInstance(entity.level.isClientSide()).vampirismCuringDuration.get();
     }
     
     @Override

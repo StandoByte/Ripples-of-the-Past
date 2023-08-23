@@ -498,6 +498,8 @@
   "jojo.config.undeadMobsSunDamage.tooltip": "Whether or not undead mobs take damage under the sun similarly to vampires.",
   "jojo.config.vampiresAggroMobs": "Vampires aggro mobs",
   "jojo.config.vampiresAggroMobs.tooltip": "Whether or not hostile mobs are agressive towards vampire players.",
+  "jojo.config.vampirismCuringDuration": "Vampirism curing duration",
+  "jojo.config.vampirismCuringDuration.tooltip": "Duration of the vampirism curing process in ticks.",
   "jojo.config.prioritizeLeastTakenStands": "Prioritize least taken Stands",
   "jojo.config.prioritizeLeastTakenStands.tooltip": "Whether or not random Stand gain effects (Stand Arrow, /stand random) give Stands that less players already have.",
   "jojo.config.standTiers": "Stand tiers",
