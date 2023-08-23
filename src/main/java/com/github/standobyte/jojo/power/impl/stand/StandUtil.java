@@ -129,27 +129,27 @@ public class StandUtil {
     }
     
     public static void setManualControl(PlayerEntity player, boolean manualControl, boolean keepPosition) {
-        IStandPower standPower = IStandPower.getPlayerStandPower(player);
-        IStandManifestation stand = standPower.getStandManifestation();
-        if (stand instanceof StandEntity) {
-            StandEntity standEntity = ((StandEntity) stand);
-            if (!standEntity.isArmsOnlyMode()) {
-                if (!player.level.isClientSide()) {
-                    standEntity.setManualControl(manualControl, keepPosition);
-                    PacketManager.sendToClient(new StandControlStatusPacket(manualControl, keepPosition), (ServerPlayerEntity) player);
-                }
-                else {
-                    Minecraft mc = Minecraft.getInstance();
-                    ClientUtil.setCameraEntityPreventShaderSwitch(mc, manualControl ? standEntity : player);
-                    if (manualControl) {
-                        mc.player.xxa = 0;
-                        mc.player.zza = 0;
-                        mc.player.setJumping(false);
-                        StandController.setStartedControllingStand();
+        IStandPower.getStandPowerOptional(player).ifPresent(standPower -> {
+            if (standPower.getStandManifestation() instanceof StandEntity) {
+                StandEntity standEntity = ((StandEntity) standPower.getStandManifestation());
+                if (!standEntity.isArmsOnlyMode()) {
+                    if (!player.level.isClientSide()) {
+                        standEntity.setManualControl(manualControl, keepPosition);
+                        PacketManager.sendToClient(new StandControlStatusPacket(manualControl, keepPosition), (ServerPlayerEntity) player);
+                    }
+                    else {
+                        Minecraft mc = Minecraft.getInstance();
+                        ClientUtil.setCameraEntityPreventShaderSwitch(mc, manualControl ? standEntity : player);
+                        if (manualControl) {
+                            mc.player.xxa = 0;
+                            mc.player.zza = 0;
+                            mc.player.setJumping(false);
+                            StandController.setStartedControllingStand();
+                        }
                     }
                 }
             }
-        }
+        });
     }
     
     public static boolean standIgnoresStaminaDebuff(IStandPower power) {
