@@ -4,8 +4,6 @@ import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.EXPERIENCE;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.FOOD;
 
-import java.util.Set;
-
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
@@ -37,7 +35,6 @@ import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.ImmutableSet;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -613,9 +610,7 @@ public class ClientEventHandler {
     public float getPartialTick() {
         return mc.isPaused() ? pausePartialTick : mc.getFrameTime();
     }
-
-    private static final Set<ResourceLocation> ENCHANTMENTS_DESC = ImmutableSet.of(
-            new ResourceLocation(JojoMod.MOD_ID, "virus_inhibition"));
+    
     @SubscribeEvent
     public void addTooltipLines(ItemTooltipEvent event) {
         PlayerEntity player = event.getPlayer();
@@ -633,7 +628,7 @@ public class ClientEventHandler {
                 if (nbt.getId() == MCUtil.getNbtId(CompoundNBT.class)) {
                     CompoundNBT enchNbt = (CompoundNBT) nbt;
                     ResourceLocation enchId = ResourceLocation.tryParse(enchNbt.getString("id"));
-                    if (enchId != null && ENCHANTMENTS_DESC.contains(enchId)) {
+                    if (enchId != null && enchId.getNamespace().equals(JojoMod.MOD_ID)) {
                         event.getToolTip().add(new TranslationTextComponent(
                                 String.format("enchantment.%s.%s.desc", enchId.getNamespace(), enchId.getPath()))
                                 .withStyle(TextFormatting.GRAY));
