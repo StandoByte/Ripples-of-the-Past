@@ -140,8 +140,13 @@ public class VampirismData extends TypeSpecificData {
     }
     
     public int getCuringStage() {
-        float curingProgress = getCuringProgress();
-        return (int) MathHelper.clamp(curingProgress * 4, 0, 3) + 1;
+        if (isBeingCured()) {
+            float curingProgress = getCuringProgress();
+            return (int) MathHelper.clamp(curingProgress * 4, 0, 3) + 1;
+        }
+        else {
+            return 0;
+        }
     }
     
     public boolean isBeingCured() {
