@@ -46,6 +46,8 @@
   "item.jojo.stand_arrow_beetle": "Beetle Arrow",
   "enchantment.jojo.virus_inhibition": "Virus Inhibition",
   "enchantment.jojo.virus_inhibition.desc": "Decreases the virus damage dealt by an Arrow.",
+  "enchantment.jojo.stand_arrow_xp_reduction": "Spiritual Strength",
+  "enchantment.jojo.stand_arrow_xp_reduction.desc": "Reduces the amount of experience levels consumed by an Arrow to give a Stand.",
   "item.jojo.stand_disc": "Stand Disc",
   "item.jojo.stand_remover": "Remove Stand",
   "item.jojo.stand_remover_one_time": "Remove Stand (one-time)",

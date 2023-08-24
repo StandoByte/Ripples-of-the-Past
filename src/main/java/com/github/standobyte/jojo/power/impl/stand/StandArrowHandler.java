@@ -5,10 +5,13 @@ import java.util.UUID;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.JojoModConfig.Common;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
+import com.github.standobyte.jojo.enchantment.StandArrowXpReductionEnchantment;
+import com.github.standobyte.jojo.init.ModEnchantments;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.ArrowXpLevelsDataPacket;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
+import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -85,7 +88,10 @@ public class StandArrowHandler {
     
     public int getStandXpLevelsRequirement(boolean clientSide, ItemStack arrowItem) {
         Common config = JojoModConfig.getCommonConfigInstance(clientSide);
-        return config.standXpCostInitial.get() + standsGotFromArrow * config.standXpCostIncrease.get();
+        int levels = config.standXpCostInitial.get() + standsGotFromArrow * config.standXpCostIncrease.get();
+        levels = Math.max(levels - StandArrowXpReductionEnchantment.getXpRequirementReduction(
+                EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.STAND_ARROW_XP_REDUCTION.get(), arrowItem)), 0);
+        return levels;
     }
     
     public void onGettingStandFromArrow(LivingEntity user) {
