@@ -202,7 +202,7 @@ public class StandArrowEntity extends AbstractArrowEntity {
     public void readAdditionalSaveData(CompoundNBT compound) {
         super.readAdditionalSaveData(compound);
         if (compound.contains("Arrow", 10)) {
-            arrowItem = ItemStack.of(compound.getCompound("Trident"));
+            arrowItem = ItemStack.of(compound.getCompound("Arrow"));
         }
         entityData.set(LOYALTY, (byte) EnchantmentHelper.getLoyalty(arrowItem));
         dealtDamage = compound.getBoolean("DealtDamage");
