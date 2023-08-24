@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.power.impl.stand;
 
 import java.util.UUID;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.JojoModConfig.Common;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
@@ -12,6 +13,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.ArrowXpLevelsDataPa
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -114,12 +116,13 @@ public class StandArrowHandler {
         }
     }
     
-    public void setStandArrowShooter(LivingEntity shooter) {
+    public void setStandArrowShooter(Entity shooter) {
         this.standArrowShooterUUID = shooter.getUUID();
     }
     
     public void setStandArrowItem(ItemStack item) {
         if (item != null) {
+            JojoMod.LOGGER.debug(EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.STAND_ARROW_XP_REDUCTION.get(), item));
             this.standArrowItem = item.copy();
         }
     }

@@ -52,9 +52,11 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
 public class StandArrowItem extends ArrowItem {
+    private final int enchantability;
 
-    public StandArrowItem(Properties properties) {
+    public StandArrowItem(Properties properties, int enchantability) {
         super(properties);
+        this.enchantability = enchantability;
         
         DispenserBlock.registerBehavior(this, new ProjectileDispenseBehavior() {
             @Override
@@ -86,9 +88,9 @@ public class StandArrowItem extends ArrowItem {
     /** 
      * @return  if the entity got the Stand Virus effect or a Stand
      */
-    public static boolean onPiercedByArrow(Entity entity, ItemStack stack, World world, Optional<LivingEntity> arrowShooter) {
-        if (!world.isClientSide() && entity instanceof LivingEntity) {
-            LivingEntity livingEntity = (LivingEntity) entity;
+    public static boolean onPiercedByArrow(Entity target, ItemStack stack, World world, Optional<Entity> arrowShooter) {
+        if (!world.isClientSide() && target instanceof LivingEntity) {
+            LivingEntity livingEntity = (LivingEntity) target;
             if (livingEntity.hasEffect(ModStatusEffects.STAND_VIRUS.get())) {
                 return false;
             }
@@ -121,12 +123,12 @@ public class StandArrowItem extends ArrowItem {
                             return giveStandFromArrow(player, standCap, stand);
                         }
                         
-                        arrowShooter.ifPresent(shooter -> {
-                            IStandPower.getStandPowerOptional(player).ifPresent(power -> {
-                                StandArrowHandler handler = power.getStandArrowHandler();
+                        IStandPower.getStandPowerOptional(player).ifPresent(power -> {
+                            StandArrowHandler handler = power.getStandArrowHandler();
+                            arrowShooter.ifPresent(shooter -> {
                                 handler.setStandArrowShooter(shooter);
-                                handler.setStandArrowItem(stack);
                             });
+                            handler.setStandArrowItem(stack);
                         });
                     }
                     
@@ -247,8 +249,7 @@ public class StandArrowItem extends ArrowItem {
                     });
                 }
                 else {
-                    tooltip.add(new TranslationTextComponent("jojo.arrow.stands_hint", new KeybindTextComponent("key.sneak"))
-                            .withStyle(TextFormatting.GRAY));
+                    tooltip.add(new TranslationTextComponent("jojo.arrow.stands_hint", new KeybindTextComponent("key.sneak")));
                 }
                 
                 if (!player.abilities.instabuild) {
@@ -290,7 +291,7 @@ public class StandArrowItem extends ArrowItem {
 
     @Override
     public int getEnchantmentValue() {
-        return 1;
+        return enchantability;
     }
 
     @Override
