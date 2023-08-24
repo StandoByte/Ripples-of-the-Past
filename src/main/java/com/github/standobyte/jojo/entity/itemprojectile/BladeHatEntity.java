@@ -110,8 +110,8 @@ public class BladeHatEntity extends ItemNbtProjectileEntity implements IEntityAd
     }
     
     @Override
-    protected float getActualDamage() {
-        return super.getActualDamage() + EnchantmentHelper.getDamageBonus(thrownStack, CreatureAttribute.UNDEFINED);
+    public double getBaseDamage() {
+        return super.getBaseDamage() + EnchantmentHelper.getDamageBonus(thrownStack, CreatureAttribute.UNDEFINED);
     }
 
     @Override

@@ -125,6 +125,7 @@ public class StandArrowItem extends ArrowItem {
                             IStandPower.getStandPowerOptional(player).ifPresent(power -> {
                                 StandArrowHandler handler = power.getStandArrowHandler();
                                 handler.setStandArrowShooter(shooter);
+                                handler.setStandArrowItem(stack);
                             });
                         });
                     }
@@ -253,7 +254,7 @@ public class StandArrowItem extends ArrowItem {
                 if (!player.abilities.instabuild) {
                     int levelsNeeded = IStandPower.getStandPowerOptional(player).map(power -> {
                         StandArrowHandler handler = power.getStandArrowHandler();
-                        return handler.getStandXpLevelsRequirement(true);
+                        return handler.getStandXpLevelsRequirement(true, stack);
                     }).orElse(0);
                     if (levelsNeeded > 0) {
                         boolean playerHasStand = StandUtil.isEntityStandUser(player);
@@ -282,7 +283,9 @@ public class StandArrowItem extends ArrowItem {
     
     @Override
     public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
-        return super.canApplyAtEnchantingTable(stack, enchantment) || enchantment.equals(Enchantments.LOYALTY);
+        return super.canApplyAtEnchantingTable(stack, enchantment)
+                || enchantment == Enchantments.LOYALTY
+                || enchantment == Enchantments.SHARPNESS;
     }
 
     @Override
