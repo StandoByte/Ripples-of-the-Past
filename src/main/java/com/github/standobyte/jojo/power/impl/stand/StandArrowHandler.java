@@ -7,10 +7,12 @@ import com.github.standobyte.jojo.JojoModConfig.Common;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.ArrowXpLevelsDataPacket;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.world.server.ServerWorld;
 
@@ -18,6 +20,7 @@ public class StandArrowHandler {
     private int xpLevelsTakenByArrow;
     private int standsGotFromArrow;
     private UUID standArrowShooterUUID;
+    private ItemStack standArrowItem = ItemStack.EMPTY;
     private boolean healStandArrowDamage;
     
     
@@ -50,12 +53,16 @@ public class StandArrowHandler {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putInt("ArrowLevels", xpLevelsTakenByArrow);
         nbt.putInt("ArrowStands", standsGotFromArrow);
+        nbt.put("ArrowItem", standArrowItem.save(new CompoundNBT()));
         return nbt;
     }
     
     public void fromNBT(CompoundNBT nbt) {
         xpLevelsTakenByArrow = nbt.getInt("ArrowLevels");
         standsGotFromArrow = nbt.getInt("ArrowStands");
+        if (nbt.contains("ArrowItem", MCUtil.getNbtId(CompoundNBT.class))) {
+            standArrowItem = ItemStack.of(nbt.getCompound("ArrowItem"));
+        }
     }
     
     
@@ -76,7 +83,7 @@ public class StandArrowHandler {
         return xpLevelsTakenByArrow;
     }
     
-    public int getStandXpLevelsRequirement(boolean clientSide) {
+    public int getStandXpLevelsRequirement(boolean clientSide, ItemStack arrowItem) {
         Common config = JojoModConfig.getCommonConfigInstance(clientSide);
         return config.standXpCostInitial.get() + standsGotFromArrow * config.standXpCostIncrease.get();
     }
@@ -103,6 +110,16 @@ public class StandArrowHandler {
     
     public void setStandArrowShooter(LivingEntity shooter) {
         this.standArrowShooterUUID = shooter.getUUID();
+    }
+    
+    public void setStandArrowItem(ItemStack item) {
+        if (item != null) {
+            this.standArrowItem = item.copy();
+        }
+    }
+    
+    public ItemStack getStandArrowItem() {
+        return standArrowItem;
     }
     
     public void setFromPacket(ArrowXpLevelsDataPacket packet) {

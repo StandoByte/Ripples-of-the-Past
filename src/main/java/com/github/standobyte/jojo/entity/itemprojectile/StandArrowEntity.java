@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.init.ModItems;
 
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -132,7 +133,12 @@ public class StandArrowEntity extends AbstractArrowEntity {
     protected EntityRayTraceResult findHitEntity(Vector3d pos, Vector3d nextPos) {
         return dealtDamage ? null : super.findHitEntity(pos, nextPos);
     }
-
+    
+    @Override
+    public double getBaseDamage() {
+        return super.getBaseDamage() + EnchantmentHelper.getDamageBonus(arrowItem, CreatureAttribute.UNDEFINED);
+    }
+    
     @Override
     public void tick() {
         if (inGroundTime > 4) {

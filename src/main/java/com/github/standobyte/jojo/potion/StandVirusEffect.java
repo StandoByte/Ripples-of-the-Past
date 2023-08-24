@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.AttributeModifierManager;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.potion.EffectType;
 
 public class StandVirusEffect extends UncurableEffect implements IApplicableEffect {
@@ -33,7 +34,8 @@ public class StandVirusEffect extends UncurableEffect implements IApplicableEffe
                 player.giveExperienceLevels(-1);
                 stopEffect = IStandPower.getStandPowerOptional(player).map(power -> {
                     StandArrowHandler handler = power.getStandArrowHandler();
-                    return handler.decXpLevelsTakenByArrow(player) >= handler.getStandXpLevelsRequirement(player.level.isClientSide());
+                    ItemStack arrowPiercedBy = handler.getStandArrowItem();
+                    return handler.decXpLevelsTakenByArrow(player) >= handler.getStandXpLevelsRequirement(player.level.isClientSide(), arrowPiercedBy);
                 }).orElse(false);
             }
             
@@ -74,7 +76,6 @@ public class StandVirusEffect extends UncurableEffect implements IApplicableEffe
     
     
     public static final int MAX_VIRUS_INHIBITION = 3;
-    public static final int STAND_XP_REQUIREMENT = 40;
     
     public static int getEffectLevelToApply(int inhibition) {
         return Math.max(MAX_VIRUS_INHIBITION - inhibition, 0);
@@ -83,7 +84,7 @@ public class StandVirusEffect extends UncurableEffect implements IApplicableEffe
     public static int getEffectDurationToApply(PlayerEntity player) {
         return IStandPower.getStandPowerOptional(player).map(power -> {
             StandArrowHandler handler = power.getStandArrowHandler();
-            return (handler.getStandXpLevelsRequirement(player.level.isClientSide()) + 1) * 10;
+            return (handler.getStandXpLevelsRequirement(player.level.isClientSide(), ItemStack.EMPTY) + 1) * 10;
         }).orElse(0) * 2;
     }
 }
