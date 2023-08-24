@@ -298,7 +298,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
 
         @Override
         protected void afterAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, StandEntityTask task, boolean hurt, boolean killed) {
-            if (hurt && dmgSource.getBarrageHitsCount() > 0) {
+            if (dmgSource.getBarrageHitsCount() > 0) {
                 addFinisher *= dmgSource.getBarrageHitsCount();
             }
             super.afterAttack(stand, target, dmgSource, task, hurt, killed);

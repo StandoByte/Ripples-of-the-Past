@@ -17,11 +17,13 @@ import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.event.ForgeEventFactory;
 
 public class StandEntityPunch implements IPunch {
     public final StandEntity stand;
@@ -220,9 +222,24 @@ public class StandEntityPunch implements IPunch {
             }
         }
         
-        if (targetHit) {
-            stand.addFinisherMeter(addFinisher, StandEntity.FINISHER_NO_DECAY_TICKS);
+        if (!targetHit && target instanceof LivingEntity) {
+            LivingEntity targetLiving = (LivingEntity) target;
+            boolean isTargetBlocking = targetLiving.isBlocking();
+            if (isTargetBlocking) {
+                ItemStack targetShield = targetLiving.getUseItem();
+                if (targetShield.isShield(targetLiving) && damage < 3.0F && targetLiving instanceof PlayerEntity) {
+                    int shieldItemDamage = MathUtil.fractionRandomInc(damage * 0.5F);
+                    targetShield.hurtAndBreak(shieldItemDamage, targetLiving, e -> {
+                        e.broadcastBreakEvent(targetLiving.getUsedItemHand());
+                        ForgeEventFactory.onPlayerDestroyItem((PlayerEntity) targetLiving, 
+                                targetShield, targetLiving.getUsedItemHand());
+                    });
+                }
+            }
         }
+        
+        stand.addFinisherMeter(addFinisher, StandEntity.FINISHER_NO_DECAY_TICKS);
+        
         return targetHit;
     }
 

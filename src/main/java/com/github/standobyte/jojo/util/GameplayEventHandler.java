@@ -479,10 +479,23 @@ public class GameplayEventHandler {
             event.setCanceled(true);
         }
     }
-
-    @SubscribeEvent(priority = EventPriority.HIGHEST, receiveCanceled = true)
-    public static void addResolveOnAttack(LivingAttackEvent event) {
+    
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void cancelLivingAttack(LivingAttackEvent event) {
+        if (HamonSendoWaveKick.protectFromMeleeAttackInKick(event.getEntityLiving(), event.getSource(), event.getAmount())
+                || HamonUtil.snakeMuffler(event.getEntityLiving(), event.getSource(), event.getAmount())) 
+            event.setCanceled(true);
+    }
+    
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void reduceDamageFromConfig(LivingHurtEvent event) {
         LivingEntity target = event.getEntityLiving();
+        if (!target.canUpdate() && target.getCapability(EntityUtilCapProvider.CAPABILITY)
+                .map(cap -> cap.wasStoppedInTime()).orElse(false)) {
+            event.setAmount(event.getAmount() * JojoModConfig.getCommonConfigInstance(false)
+                    .timeStopDamageMultiplier.get().floatValue());
+        }
+        
         if (!target.level.isClientSide()) {
             DamageSource damageSrc = event.getSource();
             if (target.is(damageSrc.getEntity())) return;
@@ -533,23 +546,6 @@ public class GameplayEventHandler {
         }
         //
         return 1234;
-    }
-
-    @SubscribeEvent(priority = EventPriority.LOW)
-    public static void cancelLivingAttack(LivingAttackEvent event) {
-        if (HamonSendoWaveKick.protectFromMeleeAttackInKick(event.getEntityLiving(), event.getSource(), event.getAmount())
-                || HamonUtil.snakeMuffler(event.getEntityLiving(), event.getSource(), event.getAmount())) 
-            event.setCanceled(true);
-    }
-    
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void reduceDamageFromConfig(LivingHurtEvent event) {
-        LivingEntity target = event.getEntityLiving();
-        if (!target.canUpdate() && target.getCapability(EntityUtilCapProvider.CAPABILITY)
-                .map(cap -> cap.wasStoppedInTime()).orElse(false)) {
-            event.setAmount(event.getAmount() * JojoModConfig.getCommonConfigInstance(false)
-                    .timeStopDamageMultiplier.get().floatValue());
-        }
     }
     
     @SubscribeEvent(priority = EventPriority.HIGH)
