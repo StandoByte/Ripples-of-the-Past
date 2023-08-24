@@ -1,9 +1,11 @@
 package com.github.standobyte.jojo.entity.itemprojectile;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
+import com.github.standobyte.jojo.item.StandArrowItem;
 
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -57,6 +59,13 @@ public class StandArrowEntity extends AbstractArrowEntity {
     protected void defineSynchedData() {
        super.defineSynchedData();
        entityData.define(LOYALTY, (byte)0);
+    }
+    
+    @Override
+    protected void doPostHurtEffects(LivingEntity target) {
+        if (!level.isClientSide() && target.isAlive()) {
+            StandArrowItem.onPiercedByArrow(target, arrowItem, level, Optional.ofNullable(getOwner()));
+        }
     }
     
     @Override

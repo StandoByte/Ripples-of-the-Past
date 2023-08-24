@@ -121,10 +121,10 @@ public class ModItems {
             () -> new Item(new Item.Properties().tab(JojoMod.MAIN_TAB).rarity(Rarity.UNCOMMON)));
 
     public static final RegistryObject<StandArrowItem> STAND_ARROW = ITEMS.register("stand_arrow", 
-            () -> new StandArrowItem(new Item.Properties().tab(JojoMod.MAIN_TAB).rarity(Rarity.UNCOMMON).durability(25)));
+            () -> new StandArrowItem(new Item.Properties().tab(JojoMod.MAIN_TAB).rarity(Rarity.UNCOMMON).durability(25), 10));
 
     public static final RegistryObject<StandArrowItem> STAND_ARROW_BEETLE = ITEMS.register("stand_arrow_beetle", 
-            () -> new StandArrowItem(new Item.Properties().tab(JojoMod.MAIN_TAB).rarity(Rarity.RARE).durability(250)));
+            () -> new StandArrowItem(new Item.Properties().tab(JojoMod.MAIN_TAB).rarity(Rarity.RARE).durability(250), 25));
 
     public static final RegistryObject<StandDiscItem> STAND_DISC = ITEMS.register("stand_disc",
             () -> new StandDiscItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1)));
