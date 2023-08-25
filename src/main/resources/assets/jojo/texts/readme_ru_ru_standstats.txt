@@ -26,9 +26,6 @@ Currently, The World and Star Platinum have additional settings which affect the
     timeStopDecayPerDay - time stop duration limit (in ticks) subtracted by the end of the day, if you haven't used a time stop ability that day at least once.
     timeStopCooldownPerTick - time stop ability cooldown multiplier
         Example: after stopping time for 5 seconds, if this value is set to 3.0, time stop will go on 15 seconds cooldown.
-
-Important: if you remove a value from the file, it will be automatically set to 0 in game, so make sure the file has the same amount of lines as it had before.
-However, if you do not want to change a certain Stand's stats, its whole file can be deleted.
 ----
 3) Save the edited file(s).
 4) Open the Minecraft world, or type /reload command in the chat if you're editing it while playing in that world (basically the standard process of data pack loading).
