@@ -81,14 +81,13 @@ public class ShaderEffectApplier {
         
         ClientTimeStopHandler tsFields = ClientTimeStopHandler.getInstance();
         if (tsFields.isTimeStopped() && tsFields.canSeeInStoppedTime()) {
-            if (!JojoModConfig.CLIENT.timeStopAnimation.get()) {
-                return CustomShaderGroup.TIME_STOP_PREV_EFFECT;
-            }
-            if (timeStopAction == ModStandsInit.STAR_PLATINUM_TIME_STOP.get()) {
-                return CustomShaderGroup.TIME_STOP_SP;
+            boolean animationConfig = JojoModConfig.CLIENT.timeStopAnimation.get();
+            boolean starPlatinumVariation = timeStopAction == ModStandsInit.STAR_PLATINUM_TIME_STOP.get();
+            if (animationConfig) {
+                return starPlatinumVariation ? CustomShaderGroup.TIME_STOP_SP : CustomShaderGroup.TIME_STOP_TW;
             }
             else {
-                return CustomShaderGroup.TIME_STOP_TW;
+                return starPlatinumVariation ? CustomShaderGroup.TIME_STOP_SP_OLD : CustomShaderGroup.TIME_STOP_TW_OLD;
             }
         }
         else {

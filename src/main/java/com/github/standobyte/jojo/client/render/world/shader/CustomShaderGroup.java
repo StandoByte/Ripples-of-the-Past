@@ -35,10 +35,10 @@ public class CustomShaderGroup extends ShaderGroup {
         return shader;
     }
     
-    public static final ResourceLocation TIME_STOP_PREV_EFFECT = new ResourceLocation("shaders/post/desaturate.json");
-    
     public static final ResourceLocation TIME_STOP_TW = new ResourceLocation(JojoMod.MOD_ID, "shaders/post/time_stop_tw.json");
     public static final ResourceLocation TIME_STOP_SP = new ResourceLocation(JojoMod.MOD_ID, "shaders/post/time_stop_sp.json");
+    public static final ResourceLocation TIME_STOP_TW_OLD = new ResourceLocation(JojoMod.MOD_ID, "shaders/post/time_stop_tw_old.json");
+    public static final ResourceLocation TIME_STOP_SP_OLD = new ResourceLocation(JojoMod.MOD_ID, "shaders/post/time_stop_sp_old.json");
     
     public static boolean hasCustomParameters(ResourceLocation shaderGroup) {
         return TIME_STOP_TW.equals(shaderGroup) || TIME_STOP_SP.equals(shaderGroup);
