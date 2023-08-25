@@ -224,15 +224,15 @@ public class JojoModConfig {
                         .defineInRange("vampirismCuringDuration", 48000, 1, Integer.MAX_VALUE);
             builder.pop();
             
-            builder.comment(" Settings of Stand Arrow and the Stands pool.").push("Stand Arrow");
+            builder.comment(" Settings of Stand-giving Arrows and the commands giving Stands at random.").push("Arrow");
                 prioritizeLeastTakenStands = builder
-                        .comment("    If enabled, random Stand gain effects (Stand Arrow, \"/stand random\") give Stands that less players already have.", 
+                        .comment("    If enabled, random Stand gain effects (Stand-giving Arrow, \"/stand random\") give Stands that less players already have.", 
                                  "     Otherwise the Stand selection is random.")
                         .translation("jojo.config.prioritizeLeastTakenStands")
                         .define("prioritizeLeastTakenStands", false);
                 
                 bannedStands = builder
-                        .comment("    List of Stands excluded from Stand Arrow, as well as \"/stand random\" and \"/standdisc random\" pools.",
+                        .comment("    List of Stands excluded from the pool used by Arrows, \"/stand random\" and \"/standdisc random\".",
                                  "     These stands will still be available via commands such as \"/stand give\", but won't be suggested for autocompletion.",
                                  "     Their Discs won't be added to the mod's Creative tab, but they can still be found in the Search tab (although they can't be used to gain a banned Stand).\"",
                                  "     The format is the same as for \"/stand give\" command (e.g., \"jojo:star_platinum\").")
