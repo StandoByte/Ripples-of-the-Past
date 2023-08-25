@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.ui.actionshud;
+package com.github.standobyte.jojo.client.ui.actionshud.hotbar;
 
 import java.util.function.Consumer;
 
@@ -68,8 +68,8 @@ public class HotbarFold {
             slotsInRenderOrder[order[i]] = slot;
             
             slot.slotFramePosX = i == 0 ? slot.pos : slot.pos + 1;
-            slot.slotTexX = i == 0 ? 0 : i == slotsCount - 1 ? 161 : i * 20 + 1;
-            slot.slotWidth = i == 0 || i == slotsCount - 1 ? 21 : 20;
+            slot.slotTexX = i == 0 ? 0 : i * 20 + 1;
+            slot.slotWidth = i == 0 || i == slotsCount - 1 ? 35 : 20;
             
             slot.slotRenderedLeftEdge = slot.slotFramePosX;
             slot.slotRenderedWidth = slot.slotWidth;
@@ -105,7 +105,7 @@ public class HotbarFold {
         }
     }
     
-    public int slotsCount() {
+    public int getSlotsCount() {
         return slotsCount;
     }
     
