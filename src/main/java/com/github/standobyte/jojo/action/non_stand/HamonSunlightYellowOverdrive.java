@@ -60,9 +60,10 @@ public class HamonSunlightYellowOverdrive extends HamonAction {
     
     @Override
     public void stoppedHolding(World world, LivingEntity user, INonStandPower power, int ticksHeld, boolean willFire) {
-        if (!world.isClientSide() && !power.isUserCreative()) {
+        if (!willFire && !world.isClientSide() && !power.isUserCreative()) {
             float holdRatio = (float) ticksHeld / (float) Math.max(getHoldDurationToFire(power), 1);
-            power.setEnergy(Math.min(power.getEnergy(), power.getMaxEnergy() * (1F - holdRatio)));
+            float energySpent = power.getMaxEnergy() * holdRatio;
+            power.setEnergy(Math.min(power.getMaxEnergy(), power.getEnergy() + energySpent));
         }
     }
     
