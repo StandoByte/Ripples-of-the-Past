@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.client.ui.actionshud;
 
 import java.util.function.Consumer;
 
+import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.Alignment;
 import com.github.standobyte.jojo.power.layout.ActionHotbarLayout;
 
 public class HotbarFold {
@@ -11,21 +12,21 @@ public class HotbarFold {
     private final Slot[] slotsInIndexOrder;
     private final int slotsCount;
     
-    public static HotbarFold makeHotbarFold(int slotsCount, int selectedSlot, float foldProgress) {
+    public static HotbarFold makeHotbarFold(int slotsCount, int selectedSlot, float foldProgress, Alignment alignment) {
         if (foldProgress <= 0) {
             return createNoFold(slotsCount);
         }
-        return new HotbarFold(slotsCount, selectedSlot, Math.min(foldProgress, 1));
+        return new HotbarFold(slotsCount, selectedSlot, Math.min(foldProgress, 1), alignment);
     }
     
     private static HotbarFold createNoFold(int slotsCount) {
         if (NO_FOLD[slotsCount] == null) {
-            NO_FOLD[slotsCount] = new HotbarFold(slotsCount, -1, 0);
+            NO_FOLD[slotsCount] = new HotbarFold(slotsCount, -1, 0, Alignment.LEFT);
         }
         return NO_FOLD[slotsCount];
     }
     
-    private HotbarFold(int slotsCount, int selectedSlot, float foldProgress) {
+    private HotbarFold(int slotsCount, int selectedSlot, float foldProgress, Alignment alignment) {
         this.slotsCount = slotsCount;
         this.slotsInIndexOrder = new Slot[slotsCount];
         this.slotsInRenderOrder = new Slot[slotsCount];
@@ -49,7 +50,15 @@ public class HotbarFold {
         
         float[] posArr = new float[slotsCount];
         for (int i = 0; i < slotsCount; i++) {
-            float pos = i * 20 * (1 - foldProgress);
+            float pos = i * 20;
+            switch (alignment) {
+            case LEFT:
+                pos *= (1 - foldProgress);
+                break;
+            case RIGHT:
+                pos += ((slotsCount - 1) * 20 - pos) * foldProgress;
+                break;
+            }
             posArr[i] = pos;
         }
         

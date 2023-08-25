@@ -498,7 +498,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! config option
                 boolean foldHotbar = true;
                 float foldProgress = foldHotbar && actionHotbar != null ? (1 - actionHotbarFold.get(actionHotbar).getValue(partialTick)) : 0;
-                HotbarFold hotbarFold = HotbarFold.makeHotbarFold(actions.size(), selected, foldProgress);
+                HotbarFold hotbarFold = HotbarFold.makeHotbarFold(actions.size(), selected, foldProgress, position.alignment);
                 
                 int hotbarLength = actions.size() * 20 + 2;
                 if (position.alignment == Alignment.RIGHT) {
