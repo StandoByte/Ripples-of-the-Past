@@ -7,6 +7,6 @@ import net.minecraft.util.HandSide;
 
 public interface IModelPose<T extends Entity> {
     void poseModel(float rotationAmount, T entity, float ticks, 
-            float yRotationOffset, float xRotation, HandSide side);
+            float yRotOffsetRad, float xRotRad, HandSide side);
     IModelPose<T> setEasing(UnaryOperator<Float> function);
 }

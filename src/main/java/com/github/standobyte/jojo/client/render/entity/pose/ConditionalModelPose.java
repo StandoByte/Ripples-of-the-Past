@@ -19,11 +19,11 @@ public class ConditionalModelPose<T extends Entity> implements IModelPose<T> {
     }
 
     @Override
-    public void poseModel(float rotationAmount, T entity, float ticks, float yRotationOffset, float xRotation,
+    public void poseModel(float rotationAmount, T entity, float ticks, float yRotOffsetRad, float xRotRad,
             HandSide side) {
         for (PoseCondition<T> poseCondition : poseConditions) {
             if (poseCondition.condition.test(entity)) {
-                poseCondition.pose.poseModel(rotationAmount, entity, ticks, yRotationOffset, xRotation, side);
+                poseCondition.pose.poseModel(rotationAmount, entity, ticks, yRotOffsetRad, xRotRad, side);
                 return;
             }
         }

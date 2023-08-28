@@ -11,7 +11,6 @@ import com.github.standobyte.jojo.client.render.entity.pose.RotationAngle;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.PosedActionAnimation;
 import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
-import com.github.standobyte.jojo.util.general.MathUtil;
 
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -193,10 +192,10 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
                         new RotationAngle(leftLeg, -0.3927F, 0.0F, 0.0873F),
                         new RotationAngle(leftLowerLeg, 0.7854F, 0.0F, 0.0F),
                         new RotationAngle(rightLeg, 0.2618F, 0.0F, -0.0873F)
-                }).setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
+                }).setAdditionalAnim((rotationAmount, entity, ticks, yRotOffsetRad, xRotRad) -> {
                     leftArm.setPos(4.0F, -10.0F, 0.0F);
                     rightArm.setPos(-4.0F, -10.0F, 0.0F);
-                    setRotationAngle(head, (xRotation - 22.5F) * MathUtil.DEG_TO_RAD, 0.0F, 0.0F);
+                    setRotationAngle(head, xRotRad - 0.3927F, 0.0F, 0.0F);
                 }).createRigid())
                 .build(idlePose));
 

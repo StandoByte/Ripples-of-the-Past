@@ -23,7 +23,7 @@ public class CopyBipedUserPose<T extends StandEntity> implements IModelPose<T> {
     }
 
     @Override
-    public void poseModel(float rotationAmount, T entity, float ticks, float yRotationOffset, float xRotation,
+    public void poseModel(float rotationAmount, T entity, float ticks, float yRotOffsetRad, float xRotRad,
             HandSide side) {
         LivingEntity user = entity.getUser();
         if (user != null) {

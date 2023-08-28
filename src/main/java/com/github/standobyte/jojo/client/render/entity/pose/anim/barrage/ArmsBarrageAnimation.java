@@ -25,16 +25,16 @@ public abstract class ArmsBarrageAnimation<T extends LivingEntity, M extends Ent
 
     @Override
     public void animate(Phase phase, float phaseCompletion, T entity, float ticks, 
-            float yRotationOffset, float xRotation, HandSide side) {
+            float yRotOffsetRad, float xRotRad, HandSide side) {
         float loop = ticks / getLoopLen();
         side = getHandSide(phase, entity, ticks);
         
         switch (phase) {
         case PERFORM:
-            animateSwing(entity, model, MathHelper.frac(loop), side, yRotationOffset, xRotation, 0);
+            animateSwing(entity, model, MathHelper.frac(loop), side, yRotOffsetRad, xRotRad, 0);
             break;
         case RECOVERY:
-            recovery.poseModel(phaseCompletion, entity, ticks, yRotationOffset, xRotation, side);
+            recovery.poseModel(phaseCompletion, entity, ticks, yRotOffsetRad, xRotRad, side);
         default:
             break;
         }
@@ -61,8 +61,8 @@ public abstract class ArmsBarrageAnimation<T extends LivingEntity, M extends Ent
     
     @Override
     public void animateSwing(T entity, M model, float loopCompletion, HandSide side, 
-            float yRotationOffset, float xRotation, float zRotationOffset) {
-        loop.poseModel(loopCompletion, entity, 0, yRotationOffset, xRotation, side);
+            float yRotOffsetRad, float xRotRad, float zRotOffsetRad) {
+        loop.poseModel(loopCompletion, entity, 0, yRotOffsetRad, xRotRad, side);
     }
     
     protected float getLoopLen() {

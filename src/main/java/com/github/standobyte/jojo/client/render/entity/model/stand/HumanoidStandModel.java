@@ -47,10 +47,10 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
     protected XRotationModelRenderer rightArm;
     protected ModelRenderer rightArmJoint;
     protected ModelRenderer rightForeArm;
-    protected XRotationModelRenderer leftLeg;
+    protected ModelRenderer leftLeg;
     protected ModelRenderer leftLegJoint;
     protected ModelRenderer leftLowerLeg;
-    protected XRotationModelRenderer rightLeg;
+    protected ModelRenderer rightLeg;
     protected ModelRenderer rightLegJoint;
     protected ModelRenderer rightLowerLeg;
     
@@ -114,7 +114,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
         rightForeArm.setPos(0.0F, 4.0F, 0.0F);
         rightArm.addChild(rightForeArm);
 
-        leftLeg = new XRotationModelRenderer(this);
+        leftLeg = new ModelRenderer(this);
         leftLeg.setPos(1.9F, 12.0F, 0.0F);
         body.addChild(leftLeg);
 
@@ -126,7 +126,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
         leftLowerLeg.setPos(0.0F, 6.0F, 0.0F);
         leftLeg.addChild(leftLowerLeg);
 
-        rightLeg = new XRotationModelRenderer(this);
+        rightLeg = new ModelRenderer(this);
         rightLeg.setPos(-1.9F, 12.0F, 0.0F);
         body.addChild(rightLeg);
 
@@ -266,20 +266,26 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
                 RotationAngle.fromDegrees(rightForeArm, -75, 0, 0)
         };
         
-        ModelAnim<T> armsRotation = (rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
-            float xRot = xRotation * MathUtil.DEG_TO_RAD * rotationAmount;
+        ModelAnim<T> armsRotation = (rotationAmount, entity, ticks, yRotOffsetRad, xRotRad) -> {
+            float xRot = xRotRad * rotationAmount;
+//            ClientUtil.rotateAngles(leftArm, xRot);
+//            ClientUtil.rotateAngles(rightArm, xRot);
             leftArm.xRotSecond = xRot;
             rightArm.xRotSecond = xRot;
         };
         
-        ModelAnim<T> armsRotationFull = (rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
-            float xRot = xRotation * MathUtil.DEG_TO_RAD;
+        ModelAnim<T> armsRotationFull = (rotationAmount, entity, ticks, yRotOffsetRad, xRotRad) -> {
+            float xRot = xRotRad;
+//            ClientUtil.rotateAngles(leftArm, xRot);
+//            ClientUtil.rotateAngles(rightArm, xRot);
             leftArm.xRotSecond = xRot;
             rightArm.xRotSecond = xRot;
         };
         
-        ModelAnim<T> armsRotationBack = (rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
-            float xRot = xRotation * MathUtil.DEG_TO_RAD * (1 - rotationAmount);
+        ModelAnim<T> armsRotationBack = (rotationAmount, entity, ticks, yRotOffsetRad, xRotRad) -> {
+            float xRot = xRotRad * (1 - rotationAmount);
+//            ClientUtil.rotateAngles(leftArm, xRot);
+//            ClientUtil.rotateAngles(rightArm, xRot);
             leftArm.xRotSecond = xRot;
             rightArm.xRotSecond = xRot;
         };
@@ -381,8 +387,8 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
                         new RotationAngle(upperPart, 0.0F, 0.0F, 0.0F),
                         RotationAngle.fromDegrees(rightForeArm, -90, 30, -90),
                         RotationAngle.fromDegrees(leftForeArm, -90, -30, 90)
-                }).setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
-                    float blockXRot = MathHelper.clamp(xRotation, -60, 60) * MathUtil.DEG_TO_RAD / 2;
+                }).setAdditionalAnim((rotationAmount, entity, ticks, yRotOffsetRad, xRotRad) -> {
+                    float blockXRot = MathHelper.clamp(xRotRad, -60 * MathUtil.DEG_TO_RAD, 60 * MathUtil.DEG_TO_RAD) / 2;
                     rightArm.xRot = -1.5708F + blockXRot;
                     leftArm.xRot = rightArm.xRot;
 
@@ -434,6 +440,37 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
                 .addPose(0.25F, barrageRecovery)
                 .addPose(0.5F, barrageRecovery)
                 .build(idlePose)));
+//        
+//
+//
+//        // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//        RotationAngle[] qwe = new RotationAngle[] {
+//                RotationAngle.fromDegrees(body, 0, 0, 0),
+//                RotationAngle.fromDegrees(leftArm, 22.5F, 0, -60),
+//                RotationAngle.fromDegrees(leftForeArm, -135, 0, 0),
+//                RotationAngle.fromDegrees(rightArm, 22.5F, 0, -60),
+//                RotationAngle.fromDegrees(rightForeArm, -135, 0, 0)
+//        };
+//        RotationAngle[] qwe2 = new RotationAngle[] {
+//                RotationAngle.fromDegrees(body, 0, 0, 0),
+//                RotationAngle.fromDegrees(leftArm, -90, 0, 90),
+//                RotationAngle.fromDegrees(leftForeArm, 0, 0, 0),
+//                RotationAngle.fromDegrees(rightArm, -90, 0, 90),
+//                RotationAngle.fromDegrees(rightForeArm, 0, 0, 0)
+//        };
+//        
+//        actionAnim.putIfAbsent(StandPose.BARRAGE, new StandTwoHandedBarrageAnimation<T>(this, 
+//                new ModelPoseTransition<T>(new ModelPose<>(qwe), new ModelPose<>(qwe2)).setEasing(HumanoidStandModel::barrageHitEasing), 
+//                new ModelPoseTransitionMultiple.Builder<T>(new ModelPose<T>(
+//                        RotationAngle.fromDegrees(body, 0, 0, 0),
+//                        RotationAngle.fromDegrees(upperPart, 0, 0, 0),
+//                        RotationAngle.fromDegrees(leftArm, -33.75F, 0, -75),
+//                        RotationAngle.fromDegrees(leftForeArm, -67.5F, 0, 0),
+//                        RotationAngle.fromDegrees(rightArm, -33.75F, 0, 75),
+//                        RotationAngle.fromDegrees(rightForeArm, -67.5F, 0, 0)).setAdditionalAnim(armsRotationFull))
+//                .addPose(0.25F, barrageRecovery)
+//                .addPose(0.5F, barrageRecovery)
+//                .build(idlePose)));
     }
     
     public static float barrageHitEasing(float loopProgress) {
@@ -457,7 +494,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
     }
     
     @Override
-    public XRotationModelRenderer getArm(HandSide side) {
+    public ModelRenderer getArm(HandSide side) {
         switch (side) {
         case LEFT:
             return leftArm;
@@ -515,10 +552,6 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
 
     @Override
     public void setupAnim(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
-        this.leftArm.xRotSecond = 0;
-        this.rightArm.xRotSecond = 0;
-        this.leftLeg.xRotSecond = 0;
-        this.rightLeg.xRotSecond = 0;
         super.setupAnim(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
         rotateJoint(leftArmJoint, leftForeArm);
         rotateJoint(rightArmJoint, rightForeArm);

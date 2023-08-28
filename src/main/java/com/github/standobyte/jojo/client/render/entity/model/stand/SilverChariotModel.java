@@ -5,21 +5,21 @@ import java.util.Map;
 import java.util.function.Function;
 
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.render.entity.pose.ConditionalModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.IModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose;
+import com.github.standobyte.jojo.client.render.entity.pose.ModelPose.ModelAnim;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPoseSided;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPoseTransition;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPoseTransitionMultiple;
 import com.github.standobyte.jojo.client.render.entity.pose.RigidModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.RotationAngle;
-import com.github.standobyte.jojo.client.render.entity.pose.ModelPose.ModelAnim;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.IActionAnimation;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.PosedActionAnimation;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.barrage.StandOneHandedBarrageAnimation;
 import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
-import com.github.standobyte.jojo.util.general.MathUtil;
 
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -187,9 +187,11 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
     protected final Map<StandPose, IActionAnimation<SilverChariotEntity>> rapierAnim = new HashMap<>();
     @Override
     protected void initActionPoses() {
-        ModelAnim<SilverChariotEntity> armsRotation = (rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
-            leftArm.xRotSecond = xRotation * MathUtil.DEG_TO_RAD;
-            rightArm.xRotSecond = xRotation * MathUtil.DEG_TO_RAD;
+        ModelAnim<SilverChariotEntity> armsRotation = (rotationAmount, entity, ticks, yRotOffsetRad, xRotRad) -> {
+            leftArm.xRotSecond = xRotRad;
+            rightArm.xRotSecond = xRotRad;
+//            ClientUtil.rotateAngles(leftArm, xRotRad);
+//            ClientUtil.rotateAngles(rightArm, xRotRad);
         };
         
         RotationAngle[] barrageRightStart = new RotationAngle[] {
@@ -240,8 +242,8 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
                         new RotationAngle(rightArm, 0.0F, 1.5708F, 1.5708F),
                         new RotationAngle(rightForeArm, 0.0F, 0.0F, 0.0F),
                         new RotationAngle(rapier, 1.5708F, 0.0F, 0.0F)
-                }).setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
-                    rightArm.zRot -= xRotation * MathUtil.DEG_TO_RAD;
+                }).setAdditionalAnim((rotationAmount, entity, ticks, yRotOffsetRad, xRotRad) -> {
+                    rightArm.zRot -= xRotRad;
                 })).build(idlePose));
 
 
@@ -283,8 +285,8 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
                         new RotationAngle(leftArm, 0.2618F, 0.0F, -0.1309F),
                         new RotationAngle(rightArm, 0.0F, 1.5708F, 1.5708F),
                         new RotationAngle(rapier, 1.5708F, 0.0F, 0.0F)
-                }).setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
-                    rightArm.zRot -= xRotation * MathUtil.DEG_TO_RAD;
+                }).setAdditionalAnim((rotationAmount, entity, ticks, yRotOffsetRad, xRotRad) -> {
+                    rightArm.zRot -= xRotRad;
                 })).build(idlePose));
         
         rapierAnim.putIfAbsent(StandPose.BLOCK, new PosedActionAnimation.Builder<SilverChariotEntity>()

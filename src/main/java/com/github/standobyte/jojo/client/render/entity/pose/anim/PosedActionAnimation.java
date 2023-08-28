@@ -41,9 +41,10 @@ public class PosedActionAnimation<T extends Entity> implements IActionAnimation<
         }
     }
     
+    @Override
     public void animate(StandEntityAction.Phase phase, float phaseCompletion, 
-            T entity, float ticks, float yRotationOffset, float xRotation, HandSide side) {
-        phasePoses.get(phase).poseModel(phaseCompletion, entity, ticks, yRotationOffset, xRotation, side);
+            T entity, float ticks, float yRotOffsetRad, float xRotRad, HandSide side) {
+        phasePoses.get(phase).poseModel(phaseCompletion, entity, ticks, yRotOffsetRad, xRotRad, side);
     }
 
     

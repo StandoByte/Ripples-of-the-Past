@@ -16,8 +16,8 @@ public class ModelPoseSided<T extends Entity> implements IModelPose<T> {
     }
 
     @Override
-    public void poseModel(float rotationAmount, T entity, float ticks, float yRotationOffset, float xRotation, HandSide side) {
-        poses.get(side).poseModel(rotationAmount, entity, ticks, yRotationOffset, xRotation, side);
+    public void poseModel(float rotationAmount, T entity, float ticks, float yRotOffsetRad, float xRotRad, HandSide side) {
+        poses.get(side).poseModel(rotationAmount, entity, ticks, yRotOffsetRad, xRotRad, side);
     }
     
     @Override

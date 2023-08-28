@@ -153,7 +153,7 @@ public class PlayerBarrageAnim implements IAnimation, IModelPose<AbstractClientP
 
     @Override
     public void poseModel(float rotationAmount, AbstractClientPlayerEntity entity, 
-            float ticks, float yRotationOffset, float xRotation, HandSide side) {
+            float ticks, float yRotOffsetRad, float xRotRad, HandSide side) {
         if (model != null) {
             float loopTick = getBarrageEffectLoopingTick(rotationAmount, side);
             int tick = (int) loopTick;

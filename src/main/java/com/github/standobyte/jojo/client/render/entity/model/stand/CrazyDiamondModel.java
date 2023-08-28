@@ -3,18 +3,18 @@ package com.github.standobyte.jojo.client.render.entity.model.stand;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockBullet;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRepairItem;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.render.entity.pose.ConditionalModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.IModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose;
+import com.github.standobyte.jojo.client.render.entity.pose.ModelPose.ModelAnim;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPoseTransition;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPoseTransitionMultiple;
 import com.github.standobyte.jojo.client.render.entity.pose.RotationAngle;
-import com.github.standobyte.jojo.client.render.entity.pose.ModelPose.ModelAnim;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.CopyBipedUserPose;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.PosedActionAnimation;
 import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.stands.CrazyDiamondEntity;
-import com.github.standobyte.jojo.util.general.MathUtil;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.HandSide;
@@ -671,9 +671,11 @@ public class CrazyDiamondModel extends HumanoidStandModel<CrazyDiamondEntity> {
         
 
         
-        ModelAnim<CrazyDiamondEntity> armsRotationFull = (rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
-            leftArm.xRotSecond = xRotation * MathUtil.DEG_TO_RAD;
-            rightArm.xRotSecond = xRotation * MathUtil.DEG_TO_RAD;
+        ModelAnim<CrazyDiamondEntity> armsRotationFull = (rotationAmount, entity, ticks, yRotOffsetRad, xRotRad) -> {
+            leftArm.xRotSecond = xRotRad;
+            rightArm.xRotSecond = xRotRad;
+//            ClientUtil.rotateAngles(leftArm, xRotRad);
+//            ClientUtil.rotateAngles(rightArm, xRotRad);
         };
         
         RotationAngle[] blockBulletRotations = new RotationAngle[] {

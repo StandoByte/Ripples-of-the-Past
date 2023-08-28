@@ -42,10 +42,10 @@ public class ModelPose<T extends Entity> implements IModelPose<T> {
     }
     
     @Override
-    public void poseModel(float rotationAmount, T entity, float ticks, float yRotationOffset, float xRotation, HandSide side) {
+    public void poseModel(float rotationAmount, T entity, float ticks, float yRotOffsetRad, float xRotRad, HandSide side) {
         rotationAmount = easingFunc.apply(rotationAmount);
         applyRotations(rotationAmount);
-        additionalAnim(rotationAmount, entity, ticks, yRotationOffset, xRotation);
+        additionalAnim(rotationAmount, entity, ticks, yRotOffsetRad, xRotRad);
     }
     
     protected void applyRotations(float rotationAmount) {
@@ -54,9 +54,9 @@ public class ModelPose<T extends Entity> implements IModelPose<T> {
         }
     }
     
-    protected void additionalAnim(float rotationAmount, T entity, float ticks, float yRotationOffset, float xRotation) {
+    protected void additionalAnim(float rotationAmount, T entity, float ticks, float yRotOffsetRad, float xRotRad) {
         if (additionalAnim != null) {
-            additionalAnim.setupAnim(rotationAmount, entity, ticks, yRotationOffset, xRotation);
+            additionalAnim.setupAnim(rotationAmount, entity, ticks, yRotOffsetRad, xRotRad);
         }
     }
     
@@ -71,6 +71,6 @@ public class ModelPose<T extends Entity> implements IModelPose<T> {
     
     
     public static interface ModelAnim<T extends Entity> {
-        void setupAnim(float rotationAmount, T entity, float ticks, float yRotationOffset, float xRotation);
+        void setupAnim(float rotationAmount, T entity, float ticks, float yRotOffsetRad, float xRotRad);
     }
 }

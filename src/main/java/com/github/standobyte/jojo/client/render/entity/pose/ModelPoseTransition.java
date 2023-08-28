@@ -16,9 +16,9 @@ public class ModelPoseTransition<T extends Entity> implements IModelPose<T> {
     }
 
     @Override
-    public void poseModel(float transition, T entity, float ticks, float yRotationOffset, float xRotation, HandSide side) {
-        pose1.poseModel(1.0F, entity, ticks, yRotationOffset, xRotation, side);
-        pose2.poseModel(easingFunc.apply(transition), entity, ticks, yRotationOffset, xRotation, side);
+    public void poseModel(float transition, T entity, float ticks, float yRotOffsetRad, float xRotRad, HandSide side) {
+        pose1.poseModel(1.0F, entity, ticks, yRotOffsetRad, xRotRad, side);
+        pose2.poseModel(easingFunc.apply(transition), entity, ticks, yRotOffsetRad, xRotRad, side);
     }
 
     @Override

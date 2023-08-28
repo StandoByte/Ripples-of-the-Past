@@ -38,9 +38,9 @@ public class BarrageSwingsHolder<T extends Entity, M extends EntityModel<T>> {
     }
 
     public void renderBarrageSwings(M model, T entity, MatrixStack matrixStack, IVertexBuilder buffer, 
-            int packedLight, int packedOverlay, float yRotation, float xRotation, float red, float green, float blue, float alpha) {
+            int packedLight, int packedOverlay, float yRotRad, float xRotRad, float red, float green, float blue, float alpha) {
         for (AdditionalBarrageSwing<T, M> swing : barrageSwings) {
-            swing.poseAndRender(entity, model, matrixStack, buffer, yRotation, xRotation, packedLight, packedOverlay, red, green, blue, alpha);
+            swing.poseAndRender(entity, model, matrixStack, buffer, yRotRad, xRotRad, packedLight, packedOverlay, red, green, blue, alpha);
         }
     }
     

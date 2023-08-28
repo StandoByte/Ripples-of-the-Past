@@ -38,9 +38,9 @@ public class StandTwoHandedBarrageAnimation<T extends StandEntity> extends TwoHa
     
     @Override
     public void animateSwing(T entity, StandEntityModel<T> model, float loopCompletion, 
-            HandSide side, float yRotationOffset, float xRotation, float zRotationOffset) {
-        super.animateSwing(entity, model, loopCompletion, side, yRotationOffset, xRotation, zRotationOffset);
+            HandSide side, float yRotOffsetRad, float xRotRad, float zRotOffsetRad) {
+        super.animateSwing(entity, model, loopCompletion, side, yRotOffsetRad, xRotRad, zRotOffsetRad);
         ModelRenderer arm = model.getArm(side);
-        arm.zRot = arm.zRot + HumanoidStandModel.barrageHitEasing(loopCompletion) * zRotationOffset;
+        arm.zRot = arm.zRot + HumanoidStandModel.barrageHitEasing(loopCompletion) * zRotOffsetRad;
     }
 }
