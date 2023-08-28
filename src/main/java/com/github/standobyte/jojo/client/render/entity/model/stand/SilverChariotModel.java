@@ -5,7 +5,6 @@ import java.util.Map;
 import java.util.function.Function;
 
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
-import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.render.entity.pose.ConditionalModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.IModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose;
@@ -188,10 +187,8 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
     @Override
     protected void initActionPoses() {
         ModelAnim<SilverChariotEntity> armsRotation = (rotationAmount, entity, ticks, yRotOffsetRad, xRotRad) -> {
-            leftArm.xRotSecond = xRotRad;
-            rightArm.xRotSecond = xRotRad;
-//            ClientUtil.rotateAngles(leftArm, xRotRad);
-//            ClientUtil.rotateAngles(rightArm, xRotRad);
+            setSecondXRot(leftArm, xRotRad);
+            setSecondXRot(rightArm, xRotRad);
         };
         
         RotationAngle[] barrageRightStart = new RotationAngle[] {

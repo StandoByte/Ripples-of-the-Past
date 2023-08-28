@@ -3,7 +3,6 @@ package com.github.standobyte.jojo.client.render.entity.model.stand;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockBullet;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRepairItem;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
-import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.render.entity.pose.ConditionalModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.IModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose;
@@ -672,10 +671,9 @@ public class CrazyDiamondModel extends HumanoidStandModel<CrazyDiamondEntity> {
 
         
         ModelAnim<CrazyDiamondEntity> armsRotationFull = (rotationAmount, entity, ticks, yRotOffsetRad, xRotRad) -> {
-            leftArm.xRotSecond = xRotRad;
-            rightArm.xRotSecond = xRotRad;
-//            ClientUtil.rotateAngles(leftArm, xRotRad);
-//            ClientUtil.rotateAngles(rightArm, xRotRad);
+            float xRot = Math.min(xRotRad, 1.0467F);
+            setSecondXRot(leftArm, xRot);
+            setSecondXRot(rightArm, xRot);
         };
         
         RotationAngle[] blockBulletRotations = new RotationAngle[] {
