@@ -21,7 +21,6 @@ import net.minecraft.util.math.MathHelper;
 
 
 public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
-    private final List<ModelRenderer> hairToAnimate;
 
     public StarPlatinumModel() {
         super();
@@ -422,40 +421,18 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
 
         rightLeg.texOffs(76, 119).addBox(-0.6F, 4.5F, -2.5F, 1.0F, 2.0F, 1.0F, 0.0F, false);
 
-        hairToAnimate = new ArrayList<>();
-        Collections.addAll(hairToAnimate, hair2, hair4, hair6, hair8, hair10, 
+        hairToAnimateManually = new ArrayList<>();
+        Collections.addAll(hairToAnimateManually, hair2, hair4, hair6, hair8, hair10, 
                 hair11, hair12, hair13, hair14, hair15, hair16, hair17, hair18, hair19, hair20, 
                 hair21, hair22, hair23, hair24, hair25, hair26, hair27, hair28, hair29, hair30, 
                 hair31, hair32, hair33, hair34, hair35, hair36, hair37, hair38, hair39, hair40, 
                 hair41, hair42, hair43, hair44, hair45, hair46, hair47, hair48);
     }
-
-    private static final float TWO_PI = (float) Math.PI * 2;
-    private float ticksPrev;
+    
     @Override
     public void setupAnim(StarPlatinumEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
         super.setupAnim(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
-        for (int i = 0; i < hairToAnimate.size(); i++) {
-            ModelRenderer hair = hairToAnimate.get(i);
-            float xV = (ticks + hair.x) / 71F;
-            xV -= (int) xV;
-            float yV = (ticks + hair.y) / 31F;
-            yV -= (int) yV;
-            float xRotAnim = MathHelper.sin(xV * TWO_PI);
-            float yRotAnim = MathHelper.sin(yV * TWO_PI);
-
-            float xVPrev = (ticksPrev + hair.x) / 71F;
-            xVPrev -= (int) xVPrev;
-            float yVPrev = (ticksPrev + hair.y) / 31F;
-            yVPrev -= (int) yVPrev;
-            xRotAnim -= MathHelper.sin(xVPrev * TWO_PI);
-            yRotAnim -= MathHelper.sin(yVPrev * TWO_PI);
-
-            hair.xRot += xRotAnim * 0.05F;
-            hair.yRot += yRotAnim * 0.0125F;
-        }
-        ticksPrev = ticks;
-        
+        manualAnimateHair();
 //        rotateShoulderPad(rightShoulder, rightArm);
 //        rotateShoulderPad(leftShoulder, leftArm);
     }
@@ -570,5 +547,33 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
                 new RotationAngle(rightArm, -0.2618F, 0.5236F, 0.2618F),
                 new RotationAngle(rightForeArm, -1.5708F, 0.8727F, -1.5708F)
         });
+    }
+    
+    
+    
+    private final List<ModelRenderer> hairToAnimateManually;
+    private static final float TWO_PI = (float) Math.PI * 2;
+    private float ticksPrev;
+    private void manualAnimateHair() {
+        for (int i = 0; i < hairToAnimateManually.size(); i++) {
+            ModelRenderer hair = hairToAnimateManually.get(i);
+            float xV = (ticks + hair.x) / 71F;
+            xV -= (int) xV;
+            float yV = (ticks + hair.y) / 31F;
+            yV -= (int) yV;
+            float xRotAnim = MathHelper.sin(xV * TWO_PI);
+            float yRotAnim = MathHelper.sin(yV * TWO_PI);
+
+            float xVPrev = (ticksPrev + hair.x) / 71F;
+            xVPrev -= (int) xVPrev;
+            float yVPrev = (ticksPrev + hair.y) / 31F;
+            yVPrev -= (int) yVPrev;
+            xRotAnim -= MathHelper.sin(xVPrev * TWO_PI);
+            yRotAnim -= MathHelper.sin(yVPrev * TWO_PI);
+
+            hair.xRot += xRotAnim * 0.05F;
+            hair.yRot += yRotAnim * 0.0125F;
+        }
+        ticksPrev = ticks;
     }
 }
