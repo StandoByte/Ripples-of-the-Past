@@ -28,6 +28,7 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.model.RenderMaterial;
 import net.minecraft.client.renderer.texture.ITickable;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.shader.Shader;
 import net.minecraft.client.shader.ShaderGroup;
 import net.minecraft.util.HandSide;
@@ -184,5 +185,23 @@ public class ClientReflection {
     private static final Field CLIENT_PLAYER_ENTITY_HANDS_BUSY = ObfuscationReflectionHelper.findField(ClientPlayerEntity.class, "field_184844_co");
     public static void setHandsBusy(ClientPlayerEntity player, boolean handsBusy) {
         ReflectionUtil.setFieldValue(CLIENT_PLAYER_ENTITY_HANDS_BUSY, player, handsBusy);
+    }
+    
+    
+    private static final Field KEY_BINDING_IS_DOWN = ObfuscationReflectionHelper.findField(KeyBinding.class, "field_74513_e");
+    /*
+     * Doesn't check the conflict context and Shift/Ctrl/... modifiers
+     */
+    public static boolean isDownFieldOnly(KeyBinding key) {
+        return ReflectionUtil.getFieldValue(KEY_BINDING_IS_DOWN, key);
+    }
+
+    private static final Field KEY_BINDING_CLICK_COUNT = ObfuscationReflectionHelper.findField(KeyBinding.class, "field_151474_i");
+    public static int getClickCount(KeyBinding key) {
+        return ReflectionUtil.getFieldValue(KEY_BINDING_CLICK_COUNT, key);
+    }
+    
+    public static void setClickCount(KeyBinding key, int clickCount) {
+        ReflectionUtil.setFieldValue(KEY_BINDING_CLICK_COUNT, key, clickCount);
     }
 }

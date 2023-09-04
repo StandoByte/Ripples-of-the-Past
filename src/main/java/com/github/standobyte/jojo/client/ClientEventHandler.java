@@ -274,6 +274,7 @@ public class ClientEventHandler {
                         && mc.player.getVehicle().getType() == ModEntityTypes.LEAVES_GLIDER.get()) {
                     ClientReflection.setHandsBusy(mc.player, true);
                 }
+                
                 break;
             }
         }

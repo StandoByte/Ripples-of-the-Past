@@ -19,6 +19,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.lwjgl.glfw.GLFW;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
@@ -27,12 +28,13 @@ import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.actionshud.QuickAccess.QuickAccessKeyConflictContext;
+import com.github.standobyte.jojo.client.ui.screen.WasdAllowingScreen;
 import com.github.standobyte.jojo.client.ui.screen.hudlayout.HudLayoutEditingScreen;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.ItemProjectileEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
-import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClDoubleShiftPressPacket;
@@ -70,8 +72,10 @@ import net.minecraft.util.math.RayTraceResult.Type;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.event.InputEvent.ClickInputEvent;
+import net.minecraftforge.client.event.InputEvent.KeyInputEvent;
 import net.minecraftforge.client.event.InputEvent.MouseScrollEvent;
 import net.minecraftforge.client.event.InputUpdateEvent;
 import net.minecraftforge.client.settings.KeyBindingMap;
@@ -83,6 +87,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 
 public class InputHandler {
+    @Deprecated
+    public KeyBinding tmp;
     private static InputHandler instance = null;
 
     private Minecraft mc;
@@ -156,6 +162,7 @@ public class InputHandler {
     }
     
     public void registerKeyBindings() {
+        ClientRegistry.registerKeyBinding(tmp = new KeyBinding(JojoMod.MOD_ID + ".key.tmp_test", GLFW.GLFW_KEY_L, MAIN_CATEGORY));
         ClientRegistry.registerKeyBinding(toggleStand = new KeyBinding(JojoMod.MOD_ID + ".key.toggle_stand", GLFW_KEY_M, MAIN_CATEGORY));
         ClientRegistry.registerKeyBinding(standRemoteControl = new KeyBinding(JojoMod.MOD_ID + ".key.stand_remote_control", GLFW_KEY_O, MAIN_CATEGORY));
         ClientRegistry.registerKeyBinding(hamonSkillsWindow = new KeyBinding(JojoMod.MOD_ID + ".key.hamon_skills_window", GLFW_KEY_H, MAIN_CATEGORY));
@@ -346,6 +353,11 @@ public class InputHandler {
             
             if (editHotbars.consumeClick() && (standPower.hasPower() || nonStandPower.hasPower())) {
                 HudLayoutEditingScreen screen = new HudLayoutEditingScreen();
+                mc.setScreen(screen);
+            }
+            
+            if (tmp.consumeClick()) {
+                WasdAllowingScreen screen = new WasdAllowingScreen(StringTextComponent.EMPTY);
                 mc.setScreen(screen);
             }
             
@@ -586,6 +598,10 @@ public class InputHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void invertMovementInput(InputUpdateEvent event) {
+        if (event.getPlayer() == mc.player && mc.screen instanceof WasdAllowingScreen) {
+            ((WasdAllowingScreen) mc.screen).tickInput(mc, mc.player, event.getMovementInput());
+        }
+        
         if (GeneralUtil.orElseFalse(INonStandPower.getNonStandPowerOptional(event.getPlayer()).resolve().flatMap(
                 power -> power.getTypeSpecificData(ModPowers.HAMON.get())), hamon -> {
                     if (hamon.isMeditating()) {
@@ -848,6 +864,16 @@ public class InputHandler {
         player.hasImpulse = true;
         Vector3d dash = Vector3d.directionFromRotation(0, player.yRot + yRot).scale(0.5).add(0, 0.2, 0);
         player.setDeltaMovement(player.getDeltaMovement().add(dash));
+    }
+    
+    
+    
+    @SubscribeEvent
+    public void onKeyClick(KeyInputEvent event) {
+        if (mc.screen instanceof WasdAllowingScreen) {
+            ((WasdAllowingScreen) mc.screen).clickKey(mc, event.getKey(), event.getScanCode(), 
+                    event.getAction(), event.getModifiers(), keyBindingMap);
+        }
     }
     
     
