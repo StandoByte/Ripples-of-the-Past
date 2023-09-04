@@ -13,7 +13,6 @@ public class CustomResources {
     private static HamonSkillSpriteUploader hamonSkillSprites;
     private static ResolveShadersListManager resolveShadersListManager;
     private static ModSplashes modSplashes;
-    private static StandGlowTextureChecker standGlowTextureChecker;
 
     public static void initCustomResourceManagers(Minecraft mc) {
         IReloadableResourceManager resourceManager = (IReloadableResourceManager) mc.getResourceManager();
@@ -22,7 +21,7 @@ public class CustomResources {
         resourceManager.registerReloadListener(hamonSkillSprites = new HamonSkillSpriteUploader(mc.textureManager));
         resourceManager.registerReloadListener(resolveShadersListManager = new ResolveShadersListManager());
         resourceManager.registerReloadListener(modSplashes = new ModSplashes(mc.getUser(), new ResourceLocation(JojoMod.MOD_ID, "texts/splashes.txt")));
-        resourceManager.registerReloadListener(standGlowTextureChecker = new StandGlowTextureChecker());
+        resourceManager.registerReloadListener(new ResourceReloadNotifier());
     }
     
     public static ActionSpriteUploader getActionSprites() {
@@ -39,10 +38,6 @@ public class CustomResources {
     
     public static ModSplashes getModSplashes() {
         return modSplashes;
-    }
-    
-    public static StandGlowTextureChecker getStandGlowTextureChecker() {
-        return standGlowTextureChecker;
     }
 
 }
