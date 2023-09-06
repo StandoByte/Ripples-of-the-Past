@@ -1093,6 +1093,14 @@
   "jojo.subtitle.fixed": "Something being fixed",
   "jojo.subtitle.blood_splash": "Blood splashes",
   
+  "entity.jojo.gold_experience": "Gold Experience",
+  "stand.jojo.gold_experience": "Gold Experience",
+  "action.jojo.gold_experience_choose_lifeform": "Choose lifeform",
+  "action.jojo.gold_experience_create_lifeform": "Create lifeform",
+  "lifeform.mob_category.hostile": "Hostile",
+  "lifeform.mob_category.neutral": "Neutral",
+  "lifeform.mob_category.passive": "Passive",
+  
   "stand.jojo.boy_ii_man": "Boy II Man",
   "entity.jojo.rps_kid": "Rock-Paper-Scissors Kid",
   "item.jojo.rps_kid_spawn_egg": "Rock-Paper-Scissors Kid Spawn Egg",

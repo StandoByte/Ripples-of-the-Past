@@ -11,6 +11,7 @@ import com.mojang.serialization.Codec;
 import net.minecraft.entity.EntityPredicate;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.GoalSelector;
+import net.minecraft.entity.ai.goal.HurtByTargetGoal;
 import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
 import net.minecraft.entity.ai.goal.PrioritizedGoal;
 import net.minecraft.entity.ai.goal.TargetGoal;
@@ -60,6 +61,11 @@ public class CommonReflection {
     private static final Method TARGET_GOAL_GET_FOLLOW_DISTANCE = ObfuscationReflectionHelper.findMethod(TargetGoal.class, "func_111175_f");
     public static double getTargetDistance(NearestAttackableTargetGoal<?> goal) {
         return ReflectionUtil.invokeMethod(TARGET_GOAL_GET_FOLLOW_DISTANCE, goal);
+    }
+
+    private static final Field HURT_BY_TARGET_GOAL_TO_IGNORE = ObfuscationReflectionHelper.findField(HurtByTargetGoal.class, "field_179447_c");
+    public static Class<?>[] getToIgnoreDamage(HurtByTargetGoal goal) {
+        return ReflectionUtil.getFieldValue(HURT_BY_TARGET_GOAL_TO_IGNORE, goal);
     }
     
     

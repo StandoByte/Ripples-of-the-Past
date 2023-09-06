@@ -18,6 +18,8 @@ import com.github.standobyte.jojo.action.stand.CrazyDiamondMisshapingPunch;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondPreviousState;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRepairItem;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
+import com.github.standobyte.jojo.action.stand.GoldExperienceChooseLifeform;
+import com.github.standobyte.jojo.action.stand.GoldExperienceCreateLifeform;
 import com.github.standobyte.jojo.action.stand.HierophantGreenBarrier;
 import com.github.standobyte.jojo.action.stand.HierophantGreenEmeraldSplash;
 import com.github.standobyte.jojo.action.stand.HierophantGreenGrapple;
@@ -75,7 +77,7 @@ import com.github.standobyte.jojo.power.impl.stand.stats.ArmoredStandStats;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.power.impl.stand.type.EntityStandType;
-import com.github.standobyte.jojo.power.impl.stand.type.NoManifestationStandType;
+import com.github.standobyte.jojo.power.impl.stand.type.NoSummonStandType;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 
 import net.minecraft.util.text.ITextComponent;
@@ -726,13 +728,53 @@ public class ModStandsInit {
     
     
     
+// ======================================== Gold Experience ========================================
+    
+    public static final RegistryObject<StandAction> GOLD_EXPERIENCE_CHOOSE_LIFEFORM = ACTIONS.register("gold_experience_choose_lifeform", 
+            () -> new GoldExperienceChooseLifeform(new StandAction.Builder()));
+    
+    public static final RegistryObject<StandAction> GOLD_EXPERIENCE_CREATE_LIFEFORM = ACTIONS.register("gold_experience_create_lifeform", 
+            () -> new GoldExperienceCreateLifeform(new StandAction.Builder()
+                    .partsRequired(StandPart.ARMS)));
+    
+    
+    public static final RegistryObject<StandType<StandStats>> GOLD_EXPERIENCE = STAND_TYPES.register("gold_experience", 
+            () -> {
+                return new NoSummonStandType<>(
+                        0xD88F1F, PART_5_NAME,
+                        
+                        new StandAction[] {},
+                        new StandAction[] {
+                                GOLD_EXPERIENCE_CHOOSE_LIFEFORM.get(),
+                                GOLD_EXPERIENCE_CREATE_LIFEFORM.get()
+                        },
+                        StandStats.class, new StandStats.Builder()
+                        .tier(5)
+                        .power(10.0)
+                        .speed(14.0)
+                        .range(2.0, 4.0)
+                        .durability(7.0)
+                        .precision(10.0)
+                        .build(), 
+                        
+                        new StandType.StandTypeOptionals()
+                        .setPlayerAccess(false));
+            });
+    
+    
+    
+// ======================================== Boy II Man ========================================
+    
+    //
+    
+    
     public static final RegistryObject<StandType<StandStats>> BOY_II_MAN = STAND_TYPES.register("boy_ii_man", 
             () -> 
 //                StandArrowEntity.EntityPierce.addBehavior(
 //                        () -> RockPaperScissorsKidEntity::canTurnFromArrow, 
 //                        () -> RockPaperScissorsKidEntity::turnFromArrow);
                 
-                new NoManifestationStandType.Builder<>()
+                new NoSummonStandType.Builder<>()
                 .color(0x749FA5)
                 .storyPartName(PART_4_NAME)
                 .defaultStats(StandStats.class, new StandStats.Builder()

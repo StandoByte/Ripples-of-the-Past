@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.client.resources;
 
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.layer.StandGlowLayer;
-import com.github.standobyte.jojo.client.ui.EntityTypeIcon;
+import com.github.standobyte.jojo.client.ui.screen.stand.ge.EntityTypeIcon;
 
 import net.minecraft.client.resources.ReloadListener;
 import net.minecraft.profiler.IProfiler;

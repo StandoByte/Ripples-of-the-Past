@@ -1,7 +1,11 @@
-package com.github.standobyte.jojo.client.ui;
+package com.github.standobyte.jojo.client.ui.screen.stand.ge;
 
 import java.util.HashMap;
 import java.util.Map;
+
+import javax.annotation.Nullable;
+
+import com.github.standobyte.jojo.util.mc.EntityTypeToInstance;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -39,11 +43,17 @@ public class EntityTypeIcon {
         return UNKNOWN;
     }
     
+    @Nullable
     private static <T extends Entity> ResourceLocation getEntityTexture(EntityType<T> entityType) {
         Minecraft mc = Minecraft.getInstance();
         EntityRenderer<? super T> renderer = (EntityRenderer<? super T>) mc.getEntityRenderDispatcher().renderers.get(entityType);
-        ResourceLocation entityTex = renderer.getTextureLocation(entityType.create(mc.level));
-        return entityTex;
+        T entity = EntityTypeToInstance.getEntityInstance(entityType);
+        try {
+            return renderer.getTextureLocation(entity);
+        }
+        catch (Exception e) {
+            return null;
+        }
     }
     
     public static void onResourceReload() {

@@ -30,6 +30,7 @@ import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.actionshud.QuickAccess.QuickAccessKeyConflictContext;
 import com.github.standobyte.jojo.client.ui.screen.WasdAllowingScreen;
 import com.github.standobyte.jojo.client.ui.screen.hudlayout.HudLayoutEditingScreen;
+import com.github.standobyte.jojo.client.ui.screen.stand.ge.ChooseLifeformScreen;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.ItemProjectileEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -72,7 +73,6 @@ import net.minecraft.util.math.RayTraceResult.Type;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.event.InputEvent.ClickInputEvent;
 import net.minecraftforge.client.event.InputEvent.KeyInputEvent;
@@ -356,8 +356,8 @@ public class InputHandler {
                 mc.setScreen(screen);
             }
             
-            if (tmp.consumeClick()) {
-                WasdAllowingScreen screen = new WasdAllowingScreen(StringTextComponent.EMPTY);
+            if (tmp.isDown() && mc.screen == null) {
+                WasdAllowingScreen screen = new ChooseLifeformScreen();
                 mc.setScreen(screen);
             }
             
