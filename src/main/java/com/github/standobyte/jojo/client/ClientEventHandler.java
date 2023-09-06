@@ -131,7 +131,7 @@ public class ClientEventHandler {
     public void onPlaySound(PlaySoundEvent event) {
         ISound sound = event.getResultSound();
         if (ClientTimeStopHandler.getInstance().shouldCancelSound(sound)) {
-            event.setCanceled(true);
+            event.setResultSound(null);
         }
     }
     
