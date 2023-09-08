@@ -1,6 +1,9 @@
 package com.github.standobyte.jojo.client.ui.screen.stand.ge;
 
+import java.text.DecimalFormat;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -11,6 +14,8 @@ import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.ui.screen.ScreenCloseMode;
 import com.github.standobyte.jojo.client.ui.screen.WasdAllowingScreen;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
+import com.github.standobyte.jojo.util.mc.EntityTypeToInstance;
+import com.github.standobyte.jojo.util.mc.MobAggroCategory;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -20,6 +25,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.util.InputMappings;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
@@ -54,7 +60,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         super.init();
 //        this.currentlyHovered = this.previousHovered.isPresent() ? this.previousHovered : Mode.getFromGameType(this.minecraft.gameMode.getPlayerMode());
 
-        Iterable<EntityType<?>> entityTypes = ForgeRegistries.ENTITIES.getValues()
+        Collection<EntityType<?>> entityTypes = ForgeRegistries.ENTITIES.getValues()
                 .stream().filter(GoldExperienceChooseLifeform::isValidLifeform)
                 .collect(Collectors.toList());
         int x = 8;
@@ -71,6 +77,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
                 y = 8;
             }
         }
+        MobAggroCategory.requestCategoryOnClient(entityTypes);
     }
     
     
@@ -129,16 +136,31 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
             }
         }
     }
-    
+
+    private static final DecimalFormat SIZE_FORMAT = new DecimalFormat("0.0");
     private void renderHoveredTooltip(MatrixStack matrixStack) {
         currentlyHovered.ifPresent(widget -> {
             int x = widget.x;
             int y = widget.y;
             renderTooltip(matrixStack, widget.getMessage(), x, y);
             
+            
             List<ITextComponent> rightSideInfo = new ArrayList<>();
             rightSideInfo.add(widget.getMessage());
             
+            MobAggroCategory aggroCategory = MobAggroCategory.getCategoryOnClient(widget.entityType);
+            if (aggroCategory != null) {
+                rightSideInfo.add(aggroCategory.getName());
+            }
+            
+            Entity entity = EntityTypeToInstance.getEntityInstance(widget.entityType);
+            String width = SIZE_FORMAT.format(entity.getBbWidth());
+            String height = SIZE_FORMAT.format(entity.getBbHeight());
+            rightSideInfo.add(new StringTextComponent(width + "x" + height + "x" + width + "m"));
+            
+            rightSideInfo.stream().map(line -> font.width(line)).max(Comparator.naturalOrder()).ifPresent(tooltipWidth -> {
+                renderComponentTooltip(matrixStack, rightSideInfo, this.width + 4, 24);
+            });
         });
     }
     

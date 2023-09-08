@@ -4,6 +4,7 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.EntityTypeToInstance;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
@@ -26,7 +27,8 @@ public class GoldExperienceChooseLifeform extends StandAction {
     
     public static boolean isValidLifeform(EntityType<?> entityType) {
         // tmp
-        return EntityTypeToInstance.getEntityInstance(entityType) instanceof MobEntity;
+        Entity entity = EntityTypeToInstance.getEntityInstance(entityType);
+        return entity instanceof MobEntity;
     }
 
 }

@@ -25,6 +25,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClRPSGameInputPacke
 import com.github.standobyte.jojo.network.packets.fromclient.ClRPSPickThoughtsPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClReadHamonBreathTabPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClRemovePlayerSoulEntityPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClRequestMobAggroPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClRunAwayPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClSoulRotationPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClStandManualMovementPacket;
@@ -47,6 +48,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.HamonTeachersSkills
 import com.github.standobyte.jojo.network.packets.fromserver.HamonUiEffectPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.LeapCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.MaxAchievedResolvePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.MobAggroCategoryPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.NotificationSyncPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtStandEntityPacket;
@@ -152,6 +154,7 @@ public class PacketManager {
         registerMessage(channel, new ClRemovePlayerSoulEntityPacket.Handler(),       Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(channel, new ClWalkmanControlsPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(channel, new ClReadHamonBreathTabPacket.Handler(),           Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        registerMessage(channel, new ClRequestMobAggroPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(channel, new ClRPSGameInputPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(channel, new ClRPSPickThoughtsPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_SERVER));
         
@@ -219,6 +222,7 @@ public class PacketManager {
         registerMessage(channel, new CustomExplosionPacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new BrokenChunkBlocksPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new CDBlocksRestoredPacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(channel, new MobAggroCategoryPacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new RPSGameStatePacket.Handler(),                   Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(channel, new RPSOpponentPickThoughtsPacket.Handler(),        Optional.of(NetworkDirection.PLAY_TO_CLIENT));
     }
