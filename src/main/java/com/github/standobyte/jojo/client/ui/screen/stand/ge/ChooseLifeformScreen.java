@@ -8,19 +8,22 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.lwjgl.glfw.GLFW;
+
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.GoldExperienceChooseLifeform;
 import com.github.standobyte.jojo.client.InputHandler;
+import com.github.standobyte.jojo.client.ui.screen.GridList;
 import com.github.standobyte.jojo.client.ui.screen.ScreenCloseMode;
 import com.github.standobyte.jojo.client.ui.screen.WasdAllowingScreen;
-import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.EntityTypeToInstance;
 import com.github.standobyte.jojo.util.mc.MobAggroCategory;
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
+import com.github.standobyte.jojo.util.mod.JojoModUtil.Direction2D;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
@@ -28,6 +31,7 @@ import net.minecraft.client.util.InputMappings;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -37,7 +41,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     
     private static final ResourceLocation LIFEFORM_CHOOSE_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/lifeform_choose.png");
     
-    private final BiMap<EntityType<?>, SelectorWidget> entityTypeOptions = HashBiMap.create();
+    private GridList<SelectorWidget> entitySelectionGrid;
     private Optional<SelectorWidget> prevSelected = Optional.empty();
     private Optional<SelectorWidget> currentlyHovered = Optional.empty();
     private int firstMouseX;
@@ -59,24 +63,22 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     protected void init() {
         super.init();
 //        this.currentlyHovered = this.previousHovered.isPresent() ? this.previousHovered : Mode.getFromGameType(this.minecraft.gameMode.getPlayerMode());
-
+        
         Collection<EntityType<?>> entityTypes = ForgeRegistries.ENTITIES.getValues()
-                .stream().filter(GoldExperienceChooseLifeform::isValidLifeform)
+                .stream()
+                .filter(GoldExperienceChooseLifeform::isValidLifeform)
+                .sorted(Comparator.comparing(type -> type.getDescription().getString(), String::compareTo))
                 .collect(Collectors.toList());
-        int x = 8;
-        int y = 8;
-        for (EntityType<?> entityType : entityTypes) {
-            SelectorWidget widget = new SelectorWidget(entityType, x, y);
-            entityTypeOptions.put(entityType, widget);
-            if (entityType == chosenTypeTmp) {
-                prevSelected = Optional.of(widget);
-            }
-            y += 30;
-            if (y >= height - 24) {
-                x += 30;
-                y = 8;
-            }
-        }
+        
+        entitySelectionGrid = GridList.create(entityTypes, Math.max((height - 24) / 30, 1), 
+                (entityType, row, column) -> {
+                    SelectorWidget widget = new SelectorWidget(entityType, 8 + column * 30, 8 + row * 30, row, column);
+                    if (widget.entityType == chosenTypeTmp) {
+                        prevSelected = Optional.of(widget);
+                    }
+                    return widget;
+                });
+        
         MobAggroCategory.requestCategoryOnClient(entityTypes);
     }
     
@@ -125,15 +127,15 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
             
             renderHoveredTooltip(matrixStack);
             
-            for (SelectorWidget entityTypeWidget : entityTypeOptions.values()) {
-                entityTypeWidget.render(matrixStack, mouseX, mouseY, partialTicks);
-                currentlyHovered.ifPresent(widget -> {
-                    entityTypeWidget.setSelected(widget == entityTypeWidget);
+            entitySelectionGrid.forEach(widget -> {
+                widget.render(matrixStack, mouseX, mouseY, partialTicks);
+                currentlyHovered.ifPresent(w -> {
+                    widget.setSelected(widget == w);
                 });
-                if (movedMouse && entityTypeWidget.isHovered()) {
-                    currentlyHovered = Optional.of(entityTypeWidget);
+                if (movedMouse && widget.isHovered()) {
+                    currentlyHovered = Optional.of(widget);
                 }
-            }
+            });
         }
     }
 
@@ -164,16 +166,35 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         });
     }
     
-    // TODO arrow keys
-//    public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
-//        if (pKeyCode == GLFW.GLFW_KEY_F4 && this.currentlyHovered.isPresent()) {
-//            this.setFirstMousePos = false;
-//            this.currentlyHovered = this.currentlyHovered.get().getNext();
-//            return true;
-//        } else {
-//            return super.keyPressed(pKeyCode, pScanCode, pModifiers);
-//        }
-//    }
+    private static final Int2ObjectMap<Direction2D> ARROW_KEYS = Util.make(new Int2ObjectOpenHashMap<>(), map -> {
+        map.put(GLFW.GLFW_KEY_LEFT,  Direction2D.LEFT);
+        map.put(GLFW.GLFW_KEY_UP,    Direction2D.UP);
+        map.put(GLFW.GLFW_KEY_RIGHT, Direction2D.RIGHT);
+        map.put(GLFW.GLFW_KEY_DOWN,  Direction2D.DOWN);
+    });
+    public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
+        if (handleArrowKey(pKeyCode, pScanCode, pModifiers)) {
+            setFirstMousePos = false;
+            return true;
+        }
+
+        return super.keyPressed(pKeyCode, pScanCode, pModifiers);
+    }
+    
+    private boolean handleArrowKey(int pKeyCode, int pScanCode, int pModifiers) {
+        if (!ARROW_KEYS.containsKey(pKeyCode)) return false;
+        
+        boolean control = (pModifiers & GLFW.GLFW_MOD_CONTROL) > 0;
+        Direction2D direction = ARROW_KEYS.get(pKeyCode);
+        if (!currentlyHovered.isPresent()) {
+            currentlyHovered = entitySelectionGrid.get(0, 0);
+        }
+        
+        currentlyHovered = entitySelectionGrid.move(currentlyHovered, direction, control);
+        
+        return true;
+    }
+    
     
     private void chooseAndClose() {
         this.currentlyHovered.ifPresent(widget -> {
@@ -187,13 +208,17 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         return false;
     }
     
-    private class SelectorWidget extends Widget {
+    private class SelectorWidget extends Widget implements GridList.IGridElement {
         private final EntityType<?> entityType;
         private boolean isSelected;
+        public final int row;
+        public final int column;
         
-        private SelectorWidget(EntityType<?> entityType, int x, int y) {
+        private SelectorWidget(EntityType<?> entityType, int x, int y, int row, int column) {
             super(x, y, 24, 24, entityType.getDescription());
             this.entityType = entityType;
+            this.row = row;
+            this.column = column;
         }
         
         @Override
@@ -214,7 +239,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
             if (this.isSelected) {
                 blit(matrixStack, 0, 0, 24, 0, 24, 24, 64, 64);
             }
-            else if (GeneralUtil.orElseFalse(prevSelected, slot -> slot == this)) {
+            else if (this.entityType == chosenTypeTmp) {
                 blit(matrixStack, 0, 0, 0, 24, 24, 24, 64, 64);
             }
             
@@ -230,6 +255,16 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         public void setSelected(boolean isSelected) {
             this.isSelected = isSelected;
             this.narrate();
+        }
+
+        @Override
+        public int getRow() {
+            return row;
+        }
+
+        @Override
+        public int getColumn() {
+            return column;
         }
     }
 }
