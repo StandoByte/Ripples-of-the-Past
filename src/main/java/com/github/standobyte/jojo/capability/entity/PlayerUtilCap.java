@@ -24,6 +24,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrWalkmanEarbudsPac
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
+import com.github.standobyte.jojo.util.mod.JojoModVersion;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -83,6 +84,29 @@ public class PlayerUtilCap {
         
         tickContinuousAction();
         tickDoubleShift();
+    }
+    
+    public CompoundNBT toNBT() {
+        CompoundNBT nbt = new CompoundNBT();
+        nbt.put("NotificationsSent", notificationsToNBT());
+        nbt.put("RotpVersion", JojoModVersion.getCurrentVersion().toNBT());
+        return nbt;
+    }
+    
+    public void fromNBT(CompoundNBT nbt) {
+        if (nbt.contains("NotificationsSent", 10)) {
+            CompoundNBT notificationsMap = nbt.getCompound("NotificationsSent");
+            notificationsFromNBT(notificationsMap);
+        }
+    }
+    
+    public void onTracking(ServerPlayerEntity tracking) {
+        PacketManager.sendToClient(new TrKnivesCountPacket(player.getId(), knives), tracking);
+        PacketManager.sendToClient(new TrWalkmanEarbudsPacket(player.getId(), walkmanEarbuds), tracking);
+    }
+    
+    public void syncWithClient() {
+        PacketManager.sendToClient(new NotificationSyncPacket(notificationsSent), (ServerPlayerEntity) player);
     }
     
     
@@ -260,15 +284,6 @@ public class PlayerUtilCap {
                 setKnives(knives - 1);
             }
         }
-    }
-    
-    public void onTracking(ServerPlayerEntity tracking) {
-        PacketManager.sendToClient(new TrKnivesCountPacket(player.getId(), knives), tracking);
-        PacketManager.sendToClient(new TrWalkmanEarbudsPacket(player.getId(), walkmanEarbuds), tracking);
-    }
-    
-    public void syncWithClient() {
-        PacketManager.sendToClient(new NotificationSyncPacket(notificationsSent), (ServerPlayerEntity) player);
     }
     
     
