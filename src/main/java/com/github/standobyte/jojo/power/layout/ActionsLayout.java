@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.power.layout;
 
 import java.util.EnumMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -10,9 +11,9 @@ import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.ActionsLayoutPacket;
 import com.github.standobyte.jojo.power.IPower;
-import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
+import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -74,6 +75,10 @@ public class ActionsLayout<P extends IPower<P, ?>> {
     
     public boolean hasAction(Action<P> action) {
         return actions.values().stream().anyMatch(hotbar -> hotbar.containsAction(action));
+    }
+    
+    public Stream<Action<P>> getAllActions() {
+        return actions.values().stream().flatMap(hotbar -> hotbar.getAll().stream());
     }
     
     public void keepLayoutOnClone(ActionsLayout<P> oldLayout) {

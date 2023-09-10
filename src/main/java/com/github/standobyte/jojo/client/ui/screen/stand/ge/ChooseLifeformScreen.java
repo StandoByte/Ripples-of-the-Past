@@ -12,10 +12,13 @@ import org.lwjgl.glfw.GLFW;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.GoldExperienceChooseLifeform;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.ui.screen.GridList;
 import com.github.standobyte.jojo.client.ui.screen.ScreenCloseMode;
 import com.github.standobyte.jojo.client.ui.screen.WasdAllowingScreen;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.EntityTypeToInstance;
 import com.github.standobyte.jojo.util.mc.MobAggroCategory;
 import com.github.standobyte.jojo.util.mod.JojoModUtil.Direction2D;
@@ -34,6 +37,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class ChooseLifeformScreen extends WasdAllowingScreen {
@@ -63,10 +67,11 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     protected void init() {
         super.init();
 //        this.currentlyHovered = this.previousHovered.isPresent() ? this.previousHovered : Mode.getFromGameType(this.minecraft.gameMode.getPlayerMode());
+        LazyOptional<PlayerUtilCap> metEntityTypesCap = minecraft.player.getCapability(PlayerUtilCapProvider.CAPABILITY);
         
         Collection<EntityType<?>> entityTypes = ForgeRegistries.ENTITIES.getValues()
                 .stream()
-                .filter(GoldExperienceChooseLifeform::isValidLifeform)
+                .filter(type -> GeneralUtil.orElseFalse(metEntityTypesCap, cap -> cap.metEntityType(type)) && GoldExperienceChooseLifeform.isValidLifeform(type))
                 .sorted(Comparator.comparing(type -> type.getDescription().getString(), String::compareTo))
                 .collect(Collectors.toList());
         

@@ -42,6 +42,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClDoubleShiftPressP
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonMeditationPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHasInputPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHeldActionTargetPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClMetEntityTypePacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnLeapPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnStandDashPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClStopHeldActionPacket;
@@ -97,6 +98,7 @@ public class InputHandler {
     private INonStandPower nonStandPower;
     
     public RayTraceResult mouseTarget;
+    private boolean handleTargetUpdate = false;
 
     private static final String MAIN_CATEGORY = new String("key.categories." + JojoMod.MOD_ID);
     private KeyBinding toggleStand;
@@ -370,16 +372,35 @@ public class InputHandler {
             
             checkHeldActionAndTarget(standPower);
             checkHeldActionAndTarget(nonStandPower);
+            
+            if (handleTargetUpdate) {
+                if (mouseTarget.getType() == RayTraceResult.Type.ENTITY) {
+                    Entity entity = ((EntityRayTraceResult) mouseTarget).getEntity();
+                    mc.player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                        if (cap.addMetEntityType(entity.getType())) {
+                            PacketManager.sendToServer(new ClMetEntityTypePacket(entity.getId()));
+                            // TODO highlight/particle/sound as indication (if CreateLifeform is unlocked)
+                        }
+                    });
+                }
+            }
+            
+            handleTargetUpdate = false;
         }
     }
     
     private void pickMouseTarget() {
-        mouseTarget = mc.hitResult;
+        RayTraceResult target = mc.hitResult;
         if (actionsOverlay != null && actionsOverlay.getCurrentPower() != null) {
             IPower<?, ?> power = actionsOverlay.getCurrentPower();
             if (power.hasPower()) {
-                mouseTarget = power.clientHitResult(mc.getCameraEntity() != null ? mc.getCameraEntity() : mc.player, mouseTarget);
+                target = power.clientHitResult(mc.getCameraEntity() != null ? mc.getCameraEntity() : mc.player, target);
             }
+        }
+        
+        if (target != null && !MCUtil.rayTraceTargetEquals(target, mouseTarget)) {
+            this.mouseTarget = target;
+            handleTargetUpdate = true;
         }
     }
     
@@ -429,7 +450,7 @@ public class InputHandler {
             stopHeldAction(power, power.getPowerClassification() == actionsOverlay.getCurrentMode());
         }
         
-        if (power.isTargetUpdateTick()) {
+        if (power.isTargetUpdateTick() && handleTargetUpdate) {
             PacketManager.sendToServer(ClHeldActionTargetPacket.withRayTraceResult(power.getPowerClassification(), mouseTarget));
         }
     }

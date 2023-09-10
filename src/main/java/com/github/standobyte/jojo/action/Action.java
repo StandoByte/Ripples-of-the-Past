@@ -278,6 +278,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     public void onHoldTickClientEffect(LivingEntity user, P power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {}
     
+    public void passivelyTickUser(World world, LivingEntity user, P power) {}
+    
     public LivingEntity getPerformer(LivingEntity user, P power) {
         return user;
     }

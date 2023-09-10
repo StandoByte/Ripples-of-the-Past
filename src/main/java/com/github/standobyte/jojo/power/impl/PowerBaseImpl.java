@@ -108,13 +108,22 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     @Override
     public void tick() {
         if (hasPower()) {
+            LivingEntity user = getUser();
+            P power = getThis();
+            
             tickHeldAction();
             tickCooldown();
             if (leapCooldown > 0) {
                 leapCooldown--;
             }
-            getType().tickUser(getUser(), getThis());
+            getType().tickUser(user, power);
             tickBowCharge();
+            
+            actionsLayout.getAllActions().forEach(action -> {
+                if (action.isUnlocked(getThis())) {
+                    action.passivelyTickUser(user.level, user, power);
+                }
+            });
         }
         newDayCheck();
     }

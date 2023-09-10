@@ -40,21 +40,21 @@ public class GoldExperienceChooseLifeform extends StandAction {
             MobEntity mob = (MobEntity) entity;
             
             CreatureAttribute mobType = mob.getMobType();
-            if (mobType == CreatureAttribute.UNDEAD || mobType == CreatureAttribute.ILLAGER) {
+            if (mobType == CreatureAttribute.UNDEAD || mobType == CreatureAttribute.ILLAGER) { // no undeads or illagers
                 return false;
             }
             
             if (!(mob instanceof AmbientEntity || mob instanceof CreatureEntity
-                    || mob instanceof FlyingEntity || mob instanceof SlimeEntity)) {
+                    || mob instanceof FlyingEntity || mob instanceof SlimeEntity)) { // another filter for animals/monsters
                 return false;
             }
             
             if (mob instanceof INPC || mob instanceof IMerchant
-                    || mob instanceof GolemEntity || mob instanceof PatrollerEntity) {
+                    || mob instanceof GolemEntity || mob instanceof PatrollerEntity) { // no golems, traders and some gemore illagers
                 return false;
             }
             
-            if (getVolume(entityType) > 4) {
+            if (getVolume(entityType) > 4) { // no too large mobs
                 return false;
             }
             
