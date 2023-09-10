@@ -51,6 +51,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClHamonInteractTeac
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonMeditationPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHasInputPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHeldActionTargetPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClMetEntityTypePacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnLeapPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnStandDashPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClSetStandSkinPacket;
@@ -361,6 +362,15 @@ public class InputHandler {
             
             if (targetChanged) {
                 ClientEventHandler.onMouseTargetChanged(mouseTarget);
+                
+                if (mouseTarget.getType() == RayTraceResult.Type.ENTITY) {
+                    Entity entity = ((EntityRayTraceResult) mouseTarget).getEntity();
+                    mc.player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                        if (cap.addMetEntityType(entity.getType())) {
+                            PacketManager.sendToServer(new ClMetEntityTypePacket(entity.getId()));
+                        }
+                    });
+                }
             }
         }
     }
@@ -540,7 +550,7 @@ public class InputHandler {
             PacketManager.sendToServer(new ClSetStandSkinPacket(standSkin.map(skin -> skin.resLoc), standId));
         }
     }
-    
+
     private boolean pickMouseTarget() {
         RayTraceResult target = mc.hitResult;
         if (actionsOverlay != null && actionsOverlay.getCurrentPower() != null) {
