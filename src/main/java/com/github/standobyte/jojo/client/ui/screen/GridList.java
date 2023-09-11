@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 import com.github.standobyte.jojo.client.ui.screen.GridList.IGridElement;
 import com.github.standobyte.jojo.util.mod.JojoModUtil.Direction2D;
@@ -114,6 +115,18 @@ public class GridList<T extends IGridElement> {
         }
         
         return get(row, column);
+    }
+    
+    public Optional<T> findFirst(Predicate<T> predicate) {
+        for (List<T> column : elementGrid) {
+            for (T element : column) {
+                if (predicate.test(element)) {
+                    return Optional.of(element);
+                }
+            }
+        }
+        
+        return Optional.empty();
     }
     
     

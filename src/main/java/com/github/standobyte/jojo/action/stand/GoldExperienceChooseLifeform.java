@@ -32,6 +32,11 @@ public class GoldExperienceChooseLifeform extends StandAction {
         }
     }
     
+//    @Override
+//    public void onProgressionSkip(IStandPower power) {
+//        
+//    }
+    
     
     
     public static boolean isValidLifeform(EntityType<?> entityType) {
@@ -68,5 +73,11 @@ public class GoldExperienceChooseLifeform extends StandAction {
         float width = entity.getBbWidth();
         float height = entity.getBbHeight();
         return width * width * height;
+    }
+    
+    public static void unlockAll(World world, LivingEntity user, IStandPower power) {
+        if (world.isClientSide()) {
+            
+        }
     }
 }

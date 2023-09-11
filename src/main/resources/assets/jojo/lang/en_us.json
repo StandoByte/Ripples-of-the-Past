@@ -1097,6 +1097,8 @@
   "stand.jojo.gold_experience": "Gold Experience",
   "action.jojo.gold_experience_choose_lifeform": "Choose lifeform",
   "action.jojo.gold_experience_create_lifeform": "Create lifeform",
+  "jojo.ge_lifeform.filter_list": "Filter",
+  "jojo.ge_lifeform.unlock_all": "Unlock all (Creative-only)",
   "lifeform.mob_category.hostile": "Hostile",
   "lifeform.mob_category.neutral": "Neutral",
   "lifeform.mob_category.passive": "Passive",
