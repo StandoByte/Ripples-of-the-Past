@@ -29,21 +29,23 @@ public class EntityTypeToInstance {
     private final Map<EntityType<?>, Entity> entityMap;
     private EntityTypeToInstance(Iterable<EntityType<?>> entityTypes, World world) {
         entityMap = new HashMap<>();
-        for (EntityType<?> entityType : entityTypes) {
-            Entity entity = entityType.create(world);
-            if (entity != null) {
-                entityMap.put(entityType, entity);
-            }
-        }
     }
     
     @SuppressWarnings("unchecked")
-    public static <T extends Entity> T getEntityInstance(EntityType<T> type) {
+    public static <T extends Entity> T getEntityInstance(EntityType<T> type, World world) {
         if (instance == null) {
             JojoMod.getLogger().error("An operation with {} entity type needed an Entity instance, but the map for them hasn't been created yet!", type.getRegistryName());
             return null;
         }
-        return (T) instance.entityMap.get(type);
+        return (T) instance.entityMap.computeIfAbsent(type, t -> createInstance(t, world));
+    }
+    
+    private static <T extends Entity> T createInstance(EntityType<T> type, World world) {
+        T entity = type.create(world);
+        if (entity != null) {
+            entity.refreshDimensions();
+        }
+        return entity;
     }
     
 }

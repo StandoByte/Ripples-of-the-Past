@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.action.stand;
 
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.EntityTypeToInstance;
 
@@ -13,11 +14,19 @@ import net.minecraft.entity.INPC;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.merchant.IMerchant;
+import net.minecraft.entity.monster.BlazeEntity;
+import net.minecraft.entity.monster.CreeperEntity;
+import net.minecraft.entity.monster.EndermanEntity;
+import net.minecraft.entity.monster.GhastEntity;
 import net.minecraft.entity.monster.PatrollerEntity;
 import net.minecraft.entity.monster.SlimeEntity;
+import net.minecraft.entity.monster.VexEntity;
+import net.minecraft.entity.monster.piglin.AbstractPiglinEntity;
 import net.minecraft.entity.passive.AmbientEntity;
 import net.minecraft.entity.passive.GolemEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class GoldExperienceChooseLifeform extends StandAction {
     
@@ -39,27 +48,33 @@ public class GoldExperienceChooseLifeform extends StandAction {
     
     
     
-    public static boolean isValidLifeform(EntityType<?> entityType) {
-        Entity entity = EntityTypeToInstance.getEntityInstance(entityType);
+    public static boolean isValidLifeform(EntityType<?> entityType, World world) {
+        Entity entity = EntityTypeToInstance.getEntityInstance(entityType, world);
         if (entity instanceof MobEntity) {
             MobEntity mob = (MobEntity) entity;
             
             CreatureAttribute mobType = mob.getMobType();
-            if (mobType == CreatureAttribute.UNDEAD || mobType == CreatureAttribute.ILLAGER) { // no undeads or illagers
+            if (mobType == CreatureAttribute.UNDEAD || mobType == CreatureAttribute.ILLAGER) {
+                return false;
+            }
+            
+            if (entityType == EntityType.TRADER_LLAMA) {
                 return false;
             }
             
             if (!(mob instanceof AmbientEntity || mob instanceof CreatureEntity
-                    || mob instanceof FlyingEntity || mob instanceof SlimeEntity)) { // another filter for animals/monsters
+                    || mob instanceof FlyingEntity || mob instanceof SlimeEntity)) {
                 return false;
             }
             
             if (mob instanceof INPC || mob instanceof IMerchant
-                    || mob instanceof GolemEntity || mob instanceof PatrollerEntity) { // no golems, traders and some gemore illagers
+                    || mob instanceof GolemEntity || mob instanceof PatrollerEntity
+                    || mob instanceof GhastEntity || mob instanceof BlazeEntity || mob instanceof VexEntity
+                    || mob instanceof CreeperEntity || mob instanceof EndermanEntity || mob instanceof AbstractPiglinEntity) {
                 return false;
             }
             
-            if (getVolume(entityType) > 4) { // no too large mobs
+            if (getVolume(entity) >= 7.5) { // no too large mobs
                 return false;
             }
             
@@ -68,8 +83,17 @@ public class GoldExperienceChooseLifeform extends StandAction {
         return false;
     }
     
-    public static float getVolume(EntityType<?> mobType) {
-        Entity entity = EntityTypeToInstance.getEntityInstance(mobType);
+    public static void learnAllEntityTypes(PlayerEntity player) {
+        player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+            ForgeRegistries.ENTITIES.getValues()
+            .stream().filter(type -> isValidLifeform(type, player.level))
+            .forEach(entityType -> {
+                cap.addMetEntityType(entityType);
+            });
+        });
+    }
+    
+    public static float getVolume(Entity entity) {
         float width = entity.getBbWidth();
         float height = entity.getBbHeight();
         return width * width * height;

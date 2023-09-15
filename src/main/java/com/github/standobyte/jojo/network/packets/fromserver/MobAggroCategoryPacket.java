@@ -12,14 +12,15 @@ import com.github.standobyte.jojo.util.mc.MobAggroCategory;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.world.World;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 public class MobAggroCategoryPacket {
     private final Collection<Entry> entries;
     
-    public static MobAggroCategoryPacket createFrom(Collection<EntityType<?>> entityTypes) {
+    public static MobAggroCategoryPacket createFrom(Collection<EntityType<?>> entityTypes, World world) {
         Collection<Entry> entries = entityTypes.stream()
-                .map(type -> new Entry(type, MobAggroCategory.getCategoryOnServer(type)))
+                .map(type -> new Entry(type, MobAggroCategory.getCategoryOnServer(type, world)))
                 .collect(Collectors.toList());
         return new MobAggroCategoryPacket(entries);
     }

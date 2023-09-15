@@ -26,6 +26,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.World;
 
 public enum MobAggroCategory {
     /* TODO
@@ -73,9 +74,9 @@ public enum MobAggroCategory {
     }
     
     @Nullable
-    public static MobAggroCategory getCategoryOnServer(EntityType<?> mobType) {
+    public static MobAggroCategory getCategoryOnServer(EntityType<?> mobType, World world) {
         return CLASSIFICATION.computeIfAbsent(mobType, type -> {
-            Entity entity = EntityTypeToInstance.getEntityInstance(type);
+            Entity entity = EntityTypeToInstance.getEntityInstance(type, world);
             if (entity instanceof MobEntity) {
                 GoalSelector targetSelector = ((MobEntity) entity).targetSelector;
                 Set<PrioritizedGoal> targets = CommonReflection.getGoalsSet(targetSelector);

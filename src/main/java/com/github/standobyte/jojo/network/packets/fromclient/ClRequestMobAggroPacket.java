@@ -38,7 +38,7 @@ public class ClRequestMobAggroPacket {
         @Override
         public void handle(ClRequestMobAggroPacket msg, Supplier<NetworkEvent.Context> ctx) {
             ServerPlayerEntity player = ctx.get().getSender();
-            PacketManager.sendToClient(MobAggroCategoryPacket.createFrom(msg.entityTypes), player);
+            PacketManager.sendToClient(MobAggroCategoryPacket.createFrom(msg.entityTypes, player.level), player);
         }
 
         @Override

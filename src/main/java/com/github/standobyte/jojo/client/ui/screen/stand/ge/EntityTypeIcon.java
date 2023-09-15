@@ -6,18 +6,52 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.util.mc.EntityTypeToInstance;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 
 public class EntityTypeIcon {
     private static final Map<EntityType<?>, ResourceLocation> ICONS_CACHE = new HashMap<>();
     private static final ResourceLocation UNKNOWN = new ResourceLocation("textures/entity_icon/unknown.png");
 
-    public static ResourceLocation getIcon(EntityType<?> entityType) {
+    @SuppressWarnings("resource")
+    public static void renderIcon(EntityType<?> entityType, MatrixStack matrixStack, int x, int y) {
+        ResourceLocation icon = getIcon(entityType);
+        if (icon != UNKNOWN) {
+            Minecraft.getInstance().getTextureManager().bind(icon);
+            AbstractGui.blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
+        }
+        else {
+            String name = entityType.getDescription().getString();
+            if (!name.isEmpty()) {
+                FontRenderer font = Minecraft.getInstance().font;
+                
+                ITextComponent firstLetter = StringTextComponent.EMPTY;
+                int width = 0;
+                int widthNext = 0;
+                for (int i = 1; i <= name.length() && widthNext < 12; i++) {
+                    firstLetter = new StringTextComponent(name.substring(0, i));
+                    width = widthNext;
+                    widthNext = font.width(firstLetter);
+                }
+
+                RenderSystem.disableDepthTest();
+                font.draw(matrixStack, firstLetter, x + (16 - widthNext) / 2, y + (16 - font.lineHeight + 1) / 2, 0xFFFFFF);
+                RenderSystem.enableDepthTest();
+            }
+        }
+    }
+
+    private static ResourceLocation getIcon(EntityType<?> entityType) {
         return ICONS_CACHE.computeIfAbsent(entityType, EntityTypeIcon::createIconPath);
     }
 
@@ -47,7 +81,7 @@ public class EntityTypeIcon {
     private static <T extends Entity> ResourceLocation getEntityTexture(EntityType<T> entityType) {
         Minecraft mc = Minecraft.getInstance();
         EntityRenderer<? super T> renderer = (EntityRenderer<? super T>) mc.getEntityRenderDispatcher().renderers.get(entityType);
-        T entity = EntityTypeToInstance.getEntityInstance(entityType);
+        T entity = EntityTypeToInstance.getEntityInstance(entityType, mc.level);
         try {
             return renderer.getTextureLocation(entity);
         }

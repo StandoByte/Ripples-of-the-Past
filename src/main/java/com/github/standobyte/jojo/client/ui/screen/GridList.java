@@ -3,126 +3,246 @@ package com.github.standobyte.jojo.client.ui.screen;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
-import com.github.standobyte.jojo.client.ui.screen.GridList.IGridElement;
 import com.github.standobyte.jojo.util.mod.JojoModUtil.Direction2D;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
-public class GridList<T extends IGridElement> {
-    private final List<List<T>> elementGrid;
-    private final int rowMaxCount;
+import net.minecraft.client.gui.widget.Widget;
 
-    public static <O, T extends IGridElement> GridList<T> create(Iterable<O> originalObjects, int maxColumnSize, ElementSupplier<O, T> createElement) {
-        List<List<T>> columnsList = new ArrayList<>();
-        List<T> column = null;
-        int columnIndex = 0;
-        int rowIndex = 0;
+public class GridList<T extends Widget> {
+    private final List<T> allElements;
+    private final int maxColumnSize;
+    private int visibleElementsCount;
+    
+    private Optional<T> selected = Optional.empty();
+    
+    public int x;
+    public int y;
+    public int xGap;
+    public int yGap;
+    
+    public static <O, T extends Widget> GridList<T> create(Iterable<O> originalObjects, int maxColumnSize, Function<O, T> createElement) {
+        List<T> elements = new ArrayList<>();
         
         for (O obj : originalObjects) {
-            T elem = createElement.create(obj, rowIndex, columnIndex);
-            if (column == null) {
-                column = new ArrayList<>(maxColumnSize);
-            }
-            column.add(elem);
-            rowIndex++;
+            T elem = createElement.apply(obj);
+            elements.add(elem);
+        }
+        
+        return new GridList<T>(elements, maxColumnSize);
+    }
 
-            if (rowIndex >= maxColumnSize) {
-                columnsList.add(column);
-                column = null;
-                rowIndex = 0;
-                columnIndex++;
+    public static <T extends Widget> GridList<T> create(Iterable<T> elements, int maxColumnSize) {
+        return create(elements, maxColumnSize, Function.identity());
+    }
+    
+    private GridList(List<T> elementsList, int maxColumnSize) {
+        this.allElements = elementsList;
+        this.maxColumnSize = maxColumnSize;
+        this.visibleElementsCount = forEachVisible((element, i) -> {});
+    }
+    
+    
+    
+    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+        visibleElementsCount = forEachVisible((element, i) -> {
+            int row = i % maxColumnSize;
+            int column = i / maxColumnSize;
+            element.x = this.x + column * xGap;
+            element.y = this.y + row * yGap;
+            element.render(matrixStack, mouseX, mouseY, partialTicks);
+        });
+    }
+    
+    public Optional<T> getVisibleAt(int row, int column) {
+        int i = column * maxColumnSize + row;
+        if (i < 0 || i >= visibleElementsCount) {
+            return Optional.empty();
+        }
+        
+        for (T element : allElements) {
+            if (element.visible && i-- == 0) {
+                return Optional.of(element);
             }
         }
         
-        if (column != null && column.size() > 0) {
-            columnsList.add(column);
-        }
-        
-        return new GridList<T>(columnsList, maxColumnSize);
-    }
-
-    public static <T extends IGridElement> GridList<T> create(Iterable<T> elements, int maxColumnSize) {
-        return create(elements, maxColumnSize, (obj, row, column) -> obj);
-    }
-    
-    private GridList(List<List<T>> elementGrid, int rowsMaxCount) {
-        this.elementGrid = elementGrid;
-        this.rowMaxCount = rowsMaxCount;
-    }
-    
-    public Optional<T> get(int row, int column) {
-        if (row < 0 || row >= rowMaxCount || column < 0 || column >= elementGrid.size()) {
-            return Optional.empty();
-        }
-        List<T> elementsColumn = elementGrid.get(column);
-        if (row >= elementsColumn.size()) {
-            return Optional.empty();
-        }
-        return Optional.of(elementsColumn.get(row));
+        return Optional.empty();
     }
     
     public void forEach(Consumer<T> action) {
-        for (List<T> column : elementGrid) {
-            for (T element : column) {
-                action.accept(element);
-            }
+        for (T element : allElements) {
+            action.accept(element);
         }
     }
     
     public boolean isEmpty() {
-        return getColumnsCount() == 0;
+        return visibleElementsCount == 0;
     }
     
     public int getColumnsCount() {
-        return elementGrid.size();
+        int columns = visibleElementsCount / maxColumnSize;
+        if (visibleElementsCount % maxColumnSize > 0) columns++;
+        return columns;
     }
     
     public int getColumnSize(int column) {
-        if (column < 0 || column >= getColumnsCount()) {
+        int columnsCount;
+        if (column < 0 || column >= (columnsCount = getColumnsCount())) {
             return -1;
         }
-        return elementGrid.get(column).size();
+        if (column < columnsCount - 1) {
+            return maxColumnSize;
+        }
+        return visibleElementsCount % maxColumnSize;
     }
     
-    public Optional<T> move(Optional<T> initial, Direction2D direction, boolean toTheEdge) {
-        if (isEmpty() || !initial.isPresent()) {
-            return Optional.empty();
+    public void moveSelection(Direction2D direction, ElemMoveMode mode) {
+        if (isEmpty()) {
+            return;
+        }
+        if (!selected.isPresent()) {
+            selected = getVisibleAt(0, 0);
         }
 
-        T initialObj = initial.get();
-        int column = initialObj.getColumn();
-        int row = initialObj.getRow();
-        
+        T initialObj = selected.get();
+        List<T> visible = allElements.stream().filter(widget -> widget.visible)
+                .collect(Collectors.toList());
+        int i = visible.indexOf(initialObj);
+        if (i < 0) {
+            return;
+        }
+
+        int row = i % maxColumnSize;
+        int column = i / maxColumnSize;
+        int thisColumnSize = getColumnSize(column);
         int columnsCount = getColumnsCount();
-        int currentColumnSize = elementGrid.get(column).size();
+        if (getColumnSize(columnsCount - 1) <= row) {
+            columnsCount--;
+        }
         
+        // cursed
         switch (direction) {
         case LEFT:
-            column = toTheEdge ? 0 : (column - 1 + columnsCount) % columnsCount;
-            row = Math.min(row, elementGrid.get(column).size() - 1);
+            switch (mode) {
+            case NEIGHBOR:
+                column = Math.max(column - 1, 0);
+                break;
+            case NEIGHBOR_WRAP:
+                column = (column - 1 + columnsCount) % columnsCount;
+                break;
+            case EDGE:
+                column = 0;
+                break;
+            }
             break;
+            
         case RIGHT:
-            column = toTheEdge ? columnsCount - 1 : (column + 1) % columnsCount;
-            row = Math.min(row, elementGrid.get(column).size() - 1);
+            switch (mode) {
+            case NEIGHBOR:
+                column = Math.min(column + 1, columnsCount - 1);
+                break;
+            case NEIGHBOR_WRAP:
+                column = (column + 1) % columnsCount;
+                break;
+            case EDGE:
+                column = columnsCount - 1;
+                break;
+            }
             break;
+            
         case UP:
-            row = toTheEdge ? 0 : (row - 1 + currentColumnSize) % currentColumnSize;
+            switch (mode) {
+            case NEIGHBOR:
+                row = Math.max(row - 1, 0);
+                break;
+            case NEIGHBOR_WRAP:
+                row = (row - 1 + thisColumnSize) % thisColumnSize;
+                break;
+            case EDGE:
+                row = 0;
+                break;
+            }
             break;
+            
         case DOWN:
-            row = toTheEdge ? currentColumnSize - 1 : (row + 1) % currentColumnSize;
+            switch (mode) {
+            case NEIGHBOR:
+                row = Math.min(row + 1, thisColumnSize - 1);
+                break;
+            case NEIGHBOR_WRAP:
+                row = (row + 1) % thisColumnSize;
+                break;
+            case EDGE:
+                row = thisColumnSize - 1;
+                break;
+            }
             break;
         }
         
-        return get(row, column);
+        Optional<T> newPosElem = getVisibleAt(row, column);
+        if (newPosElem.isPresent()) {
+            setSelected(newPosElem);
+        }
     }
     
+    public enum ElemMoveMode {
+        NEIGHBOR,
+        NEIGHBOR_WRAP,
+        EDGE
+    }
+    
+    public Optional<T> getSelected() {
+        return selected;
+    }
+    
+    public void setSelected(Optional<T> element) {
+        this.selected = element;
+    }
+    
+    public void setSelected(T element) {
+        if (element == null) {
+            setSelected(Optional.empty());
+        }
+        if (isElementVisible(element)) {
+            setSelected(Optional.of(element));
+        }
+    }
+    
+    private int forEachVisible(BiConsumer<T, Integer> actionWithIndex) {
+        int i = 0;
+        for (T element : allElements) {
+            if (isElementVisible(element)) {
+                actionWithIndex.accept(element, i++);
+            }
+        }
+        return i;
+    }
+    
+    private boolean isElementVisible(T element) {
+        return element.visible;
+    }
+    
+    
+    
+    private OptionalInt maxColumnsRenderLimit = OptionalInt.empty();
+    private int limitedColumnsFirst = 0;
+    
+//  public void setMaxColumns(int maxColumns) {
+//      maxColumnsRenderLimit = maxColumns > 0 ? OptionalInt.of(maxColumns) : OptionalInt.empty();
+//  }
+    
+    
+    
     public Optional<T> findFirst(Predicate<T> predicate) {
-        for (List<T> column : elementGrid) {
-            for (T element : column) {
-                if (predicate.test(element)) {
-                    return Optional.of(element);
-                }
+        for (T element : allElements) {
+            if (predicate.test(element)) {
+                return Optional.of(element);
             }
         }
         
@@ -131,12 +251,7 @@ public class GridList<T extends IGridElement> {
     
     
     @FunctionalInterface
-    public static interface ElementSupplier<T, U extends IGridElement> {
-        U create(T obj, int row, int column);
-    }
-    
-    public static interface IGridElement {
-        int getRow();
-        int getColumn();
+    public static interface ElementSupplier<T, U extends Widget> {
+        U create(T obj);
     }
 }

@@ -18,8 +18,11 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.InputHandler.MouseButton;
 import com.github.standobyte.jojo.client.ui.screen.GridList;
+import com.github.standobyte.jojo.client.ui.screen.GridList.ElemMoveMode;
 import com.github.standobyte.jojo.client.ui.screen.ScreenCloseMode;
 import com.github.standobyte.jojo.client.ui.screen.WasdAllowingScreen;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromclient.ClAllGELifeformsButtonPacket;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.EntityTypeToInstance;
 import com.github.standobyte.jojo.util.mc.MobAggroCategory;
@@ -30,7 +33,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.util.InputMappings;
@@ -38,6 +40,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -50,14 +53,13 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     
     public static final ResourceLocation LIFEFORM_CHOOSE_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/lifeform_choose.png");
 
-    private List<EntityType<?>> allAllowedEntityTypes;
-    private List<EntityType<?>> entityTypes;
-    private GridList<SelectorWidget> entitySelectionGrid;
+    private GridList<SelectorWidget> entityIconsGrid;
+    private int gridColumnsMaxCount;
+    private int gridXLeftEdge;
     
-    private Optional<SelectorWidget> currentlyHovered = Optional.empty();
     private int firstMouseX;
     private int firstMouseY;
-    private boolean setFirstMousePos;
+    private boolean ignoreMouseUntilMoved;
     
     private Button filterListButton;
     private FilterList filterList;
@@ -77,50 +79,74 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     @Override
     protected void init() {
         super.init();
-//        this.currentlyHovered = this.previousHovered.isPresent() ? this.previousHovered : Mode.getFromGameType(this.minecraft.gameMode.getPlayerMode());
-        LazyOptional<PlayerUtilCap> metEntityTypesCap = minecraft.player.getCapability(PlayerUtilCapProvider.CAPABILITY);
-        allAllowedEntityTypes = ForgeRegistries.ENTITIES.getValues()
-                .stream()
-                .filter(type -> 
-                    GeneralUtil.orElseFalse(metEntityTypesCap, cap -> cap.metEntityType(type))
-                    && GoldExperienceChooseLifeform.isValidLifeform(type))
-                .sorted(widgetSortComparator())
-                .collect(Collectors.toList());
-        entityTypes = allAllowedEntityTypes
-                .stream()
-                .filter(type -> !hiddenEntriesTmp.contains(type))
-                .collect(Collectors.toList());
         
-        initSelectionGrid();
-        MobAggroCategory.requestCategoryOnClient(allAllowedEntityTypes);
+        initEntityTypes();
         
         addButton(filterListButton = new Button(width - 100, height - 48, 96, 20, new TranslationTextComponent("jojo.ge_lifeform.filter_list"), 
                 button -> filterList.visible = !filterList.visible));
         
         addButton(unlockAllButton = new Button(width - 100, height - 24, 96, 20, new TranslationTextComponent("jojo.ge_lifeform.unlock_all"), 
                 button -> {
-                    // TODO unlock all
+                    GoldExperienceChooseLifeform.learnAllEntityTypes(minecraft.player);
+                    PacketManager.sendToServer(new ClAllGELifeformsButtonPacket());
+                    initEntityTypes();
                 }));
+        unlockAllButton.visible = minecraft.player.abilities.instabuild;
         
-        filterList = new FilterList(allAllowedEntityTypes, width - 8, height - 52, 100, height - 128, this);
+        if (chosenTypeTmp != null) {
+            entityIconsGrid.setSelected(entityIconsGrid.findFirst(widget -> widget.visible && widget.entityType == chosenTypeTmp));
+        }
     }
     
     private Comparator<EntityType<?>> widgetSortComparator() {
         return Comparator.comparing(type -> type.getDescription().getString(), String::compareTo);
     }
     
-    private void initSelectionGrid() {
-        entitySelectionGrid = GridList.create(entityTypes, Math.max((height - 24) / 30, 1), 
-                (entityType, row, column) -> {
-                    SelectorWidget widget = new SelectorWidget(entityType, 8 + column * 30, 8 + row * 30, row, column);
-                    return widget;
-                });
+    private void initEntityTypes() {
+        LazyOptional<PlayerUtilCap> metEntityTypesCap = minecraft.player.getCapability(PlayerUtilCapProvider.CAPABILITY);
+        
+        List<EntityType<?>> entityTypes = ForgeRegistries.ENTITIES.getValues()
+                .stream()
+                .filter(type -> 
+                    GeneralUtil.orElseFalse(metEntityTypesCap, cap -> cap.didPlayerMeetEntityType(type))
+                    && GoldExperienceChooseLifeform.isValidLifeform(type, minecraft.level))
+                .sorted(widgetSortComparator())
+                .collect(Collectors.toList());
+        
+        initSelectionGrid(entityTypes);
+        
+        MobAggroCategory.requestCategoryOnClient(entityTypes);
+        filterList = new FilterList(entityTypes, width - 8, height - 52, 100, height - 128, this);
+    }
+    
+    private void initSelectionGrid(List<EntityType<?>> entityTypes) {
+        int xMin = 36;
+        int xMax = width - 136;
+        int xMiddle = width / 2;
+        
+        entityIconsGrid = GridList.create(entityTypes, Math.max((height - 46) / 30, 1), SelectorWidget::new);
+        entityIconsGrid.forEach(widget -> widget.visible = !hiddenEntriesTmp.contains(widget.entityType));
+        
+        int columnsCount = entityIconsGrid.getColumnsCount();
+        int columnsCanFit = (xMax - xMin) / 30;
+        int x;
+        if (columnsCanFit <= columnsCount) {
+            x = xMin;
+        }
+        else {
+            x = MathHelper.clamp(xMiddle - (columnsCount * 15 - 3), xMin, xMax);
+        }
+        entityIconsGrid.x = x;
+        entityIconsGrid.y = 8;
+        entityIconsGrid.xGap = 30;
+        entityIconsGrid.yGap = 30;
     }
     
     
     
     private int ticks = 0;
     private final int keyHeld;
+    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! the first time you click it, it ALWAYS closes in if in hold mode
     private ScreenCloseMode mode = ScreenCloseMode.CLICK;
     private boolean holdsButton = true;
     
@@ -148,29 +174,31 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     @Override
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         if (this.checkToClose()) {
-            chooseAndClose();
+            chooseHoveredAndClose();
         }
         else {
             super.render(matrixStack, mouseX, mouseY, partialTicks);
             
-            if (!setFirstMousePos) {
+            if (ignoreMouseUntilMoved) {
                 firstMouseX = mouseX;
                 firstMouseY = mouseY;
-                setFirstMousePos = true;
+                ignoreMouseUntilMoved = false;
             }
             boolean movedMouse = firstMouseX != mouseX || firstMouseY != mouseY;
             
-            renderHoveredTooltip(matrixStack);
-            
-            entitySelectionGrid.forEach(widget -> {
-                widget.render(matrixStack, mouseX, mouseY, partialTicks);
-                currentlyHovered.ifPresent(w -> {
-                    widget.setSelected(widget == w);
-                });
-                if (movedMouse && widget.isHovered()) {
-                    currentlyHovered = Optional.of(widget);
+            entityIconsGrid.forEach(widget -> {
+                if (widget.visible) {
+                    entityIconsGrid.getSelected().ifPresent(w -> {
+                        widget.setSelected(widget == w);
+                    });
+                    if (movedMouse && widget.isHovered()) {
+                        entityIconsGrid.setSelected(widget);
+                    }
                 }
             });
+            entityIconsGrid.render(matrixStack, mouseX, mouseY, partialTicks);
+            
+            renderHoveredTooltip(matrixStack);
             
             filterList.render(matrixStack, minecraft, mouseX, mouseY, partialTicks);
         }
@@ -178,7 +206,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
 
     private static final DecimalFormat SIZE_FORMAT = new DecimalFormat("0.0");
     private void renderHoveredTooltip(MatrixStack matrixStack) {
-        currentlyHovered.ifPresent(widget -> {
+        entityIconsGrid.getSelected().ifPresent(widget -> {
             int x = widget.x;
             int y = widget.y;
             renderTooltip(matrixStack, widget.getMessage(), x, y);
@@ -192,7 +220,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
                 rightSideInfo.add(aggroCategory.getName());
             }
             
-            Entity entity = EntityTypeToInstance.getEntityInstance(widget.entityType);
+            Entity entity = EntityTypeToInstance.getEntityInstance(widget.entityType, minecraft.level);
             String width = SIZE_FORMAT.format(entity.getBbWidth());
             String height = SIZE_FORMAT.format(entity.getBbHeight());
             rightSideInfo.add(new StringTextComponent(width + "x" + height + "x" + width + "m"));
@@ -205,16 +233,17 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int buttonId) {
-        if (filterList.mouseClicked(mouseX, mouseY, buttonId)) {
+        if (super.mouseClicked(mouseX, mouseY, buttonId)
+                || filterList.mouseClicked(mouseX, mouseY, buttonId)) {
             return true;
         }
         
-        if (currentlyHovered.isPresent()) {
-            SelectorWidget hovered = currentlyHovered.get();
+        if (entityIconsGrid.getSelected().isPresent()) {
+            SelectorWidget hovered = entityIconsGrid.getSelected().get();
             MouseButton button = MouseButton.getButtonFromId(buttonId);
             switch (button) {
             case LEFT:
-                chooseAndClose();
+                chooseHoveredAndClose();
                 return true;
             case RIGHT:
                 hideEntry(hovered.entityType);
@@ -224,7 +253,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
             }
         }
         
-        return super.mouseClicked(mouseX, mouseY, buttonId);
+        return false;
     }
     
     private static final Int2ObjectMap<Direction2D> ARROW_KEYS = Util.make(new Int2ObjectOpenHashMap<>(), map -> {
@@ -235,7 +264,11 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     });
     public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
         if (handleArrowKey(pKeyCode, pScanCode, pModifiers)) {
-            setFirstMousePos = false;
+            ignoreMouseUntilMoved = true;
+            return true;
+        }
+        if (pKeyCode == GLFW.GLFW_KEY_ENTER || pKeyCode == GLFW.GLFW_KEY_KP_ENTER) {
+            chooseHoveredAndClose();
             return true;
         }
 
@@ -247,68 +280,53 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         
         boolean control = (pModifiers & GLFW.GLFW_MOD_CONTROL) > 0;
         Direction2D direction = ARROW_KEYS.get(pKeyCode);
-        if (!currentlyHovered.isPresent()) {
-            currentlyHovered = entitySelectionGrid.get(0, 0);
-        }
-        
-        currentlyHovered = entitySelectionGrid.move(currentlyHovered, direction, control);
+        entityIconsGrid.moveSelection(direction, control ? ElemMoveMode.EDGE : ElemMoveMode.NEIGHBOR_WRAP);
         
         return true;
     }
     
     
-    private void chooseAndClose() {
-        this.currentlyHovered.ifPresent(widget -> {
+    private void chooseHoveredAndClose() {
+        entityIconsGrid.getSelected().ifPresent(widget -> {
             chosenTypeTmp = widget.entityType;
         });
-        this.minecraft.setScreen((Screen)null);
+        minecraft.setScreen(null);
     }
     
     public void hideEntry(EntityType<?> entityType) {
         if (!hiddenEntriesTmp.contains(entityType)) {
             hiddenEntriesTmp.add(entityType);
+            entityIconsGrid.findFirst(widget -> widget.entityType == entityType).ifPresent(
+                    widget -> widget.visible = false);
             
-            EntityType<?> setHovered = entityType;
-            if (currentlyHovered.isPresent()) {
-                SelectorWidget hovered = currentlyHovered.get();
+            if (entityIconsGrid.getSelected().isPresent()) {
+                SelectorWidget hovered = entityIconsGrid.getSelected().get();
                 if (hovered.entityType == entityType) {
-                    int index = entityTypes.indexOf(entityType) - 1;
-                    if (index >= 0) {
-                        setHovered = entityTypes.get(index);
-                    }
-                }
-                else {
-                    setHovered = hovered.entityType;
+                    entityIconsGrid.setSelected(Optional.empty());
                 }
             }
-            
-            entityTypes.remove(entityType);
-            initSelectionGrid();
-            currentlyHovered = Optional.ofNullable(setHovered).flatMap(
-                    type -> entitySelectionGrid.findFirst(widget -> widget.entityType == type));
         }
     }
     
     public void showEntry(EntityType<?> entityType) {
         if (hiddenEntriesTmp.contains(entityType)) {
             hiddenEntriesTmp.remove(entityType);
+            entityIconsGrid.findFirst(widget -> widget.entityType == entityType).ifPresent(
+                    widget -> widget.visible = true);
             
-            EntityType<?> setHovered = entityType;
-            
-            entityTypes.add(entityType);
-            entityTypes = entityTypes.stream().sorted(widgetSortComparator()).collect(Collectors.toList());
-            initSelectionGrid();
-            currentlyHovered = Optional.ofNullable(setHovered).flatMap(
-                    type -> entitySelectionGrid.findFirst(widget -> widget.entityType == type));
+            entityIconsGrid.setSelected(entityIconsGrid.findFirst(widget -> widget.entityType == entityType));
         }
     }
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        if (filterList.mouseScrolled(mouseX, mouseY, delta)) {
+        if (filterList.mouseScrolled(mouseX, mouseY, delta)
+                || super.mouseScrolled(mouseX, mouseY, delta)) {
             return true;
         }
-        return super.mouseScrolled(mouseX, mouseY, delta);
+        
+        
+        return true;
     }
     
     @Override
@@ -316,42 +334,35 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         return false;
     }
     
-    private class SelectorWidget extends Widget implements GridList.IGridElement {
+    private class SelectorWidget extends Widget {
         private final EntityType<?> entityType;
         private boolean isSelected;
-        public final int row;
-        public final int column;
         
-        private SelectorWidget(EntityType<?> entityType, int x, int y, int row, int column) {
-            super(x, y, 24, 24, entityType.getDescription());
+        private SelectorWidget(EntityType<?> entityType) {
+            super(0, 0, 24, 24, entityType.getDescription());
             this.entityType = entityType;
-            this.row = row;
-            this.column = column;
         }
         
         @Override
         public void renderButton(MatrixStack matrixStack, int pMouseX, int pMouseY, float pPartialTicks) {
+            if (!visible) return;
+            
             Minecraft mc = Minecraft.getInstance();
             RenderSystem.enableBlend();
-            matrixStack.pushPose();
-            matrixStack.translate((double)this.x, (double)this.y, 0.0D);
 
             mc.getTextureManager().bind(LIFEFORM_CHOOSE_LOCATION);
-            blit(matrixStack, 0, 0, 0, 0, 24, 24, 128, 128);
+            blit(matrixStack, x, y, 0, 0, 24, 24, 128, 128);
 
-            ResourceLocation iconTexture = EntityTypeIcon.getIcon(entityType);
-            mc.getTextureManager().bind(iconTexture);
-            blit(matrixStack, 4, 4, 0, 0, 16, 16, 16, 16);
+            EntityTypeIcon.renderIcon(entityType, matrixStack, x + 4, y + 4);
             
             mc.getTextureManager().bind(LIFEFORM_CHOOSE_LOCATION);
             if (this.isSelected) {
-                blit(matrixStack, 0, 0, 24, 0, 24, 24, 128, 128);
+                blit(matrixStack, x, y, 24, 0, 24, 24, 128, 128);
             }
             else if (this.entityType == chosenTypeTmp) {
-                blit(matrixStack, 0, 0, 0, 24, 24, 24, 128, 128);
+                blit(matrixStack, x, y, 0, 24, 24, 24, 128, 128);
             }
             
-            matrixStack.popPose();
             RenderSystem.disableBlend();
         }
         
@@ -363,16 +374,6 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         public void setSelected(boolean isSelected) {
             this.isSelected = isSelected;
             this.narrate();
-        }
-
-        @Override
-        public int getRow() {
-            return row;
-        }
-
-        @Override
-        public int getColumn() {
-            return column;
         }
     }
 }

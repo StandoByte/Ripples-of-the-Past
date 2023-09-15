@@ -411,7 +411,7 @@ public class PlayerUtilCap {
         return metEntityTypesId.add(entityType.getRegistryName());
     }
     
-    public boolean metEntityType(EntityType<?> entityType) {
+    public boolean didPlayerMeetEntityType(EntityType<?> entityType) {
         return metEntityTypesId.contains(entityType.getRegistryName());
     }
     

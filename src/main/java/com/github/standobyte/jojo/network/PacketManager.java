@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.network.packets.fromclient.ClActionsLayoutPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClAllGELifeformsButtonPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClClickActionPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClDoubleShiftPressPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonAbandonButtonPacket;
@@ -19,7 +20,6 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClHamonWindowOpened
 import com.github.standobyte.jojo.network.packets.fromclient.ClHasInputPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHeldActionTargetPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClLeavesGliderColorPacket;
-import com.github.standobyte.jojo.network.packets.fromclient.ClMetEntityTypePacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClMetEntityTypePacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnLeapPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnStandDashPacket;
@@ -159,6 +159,7 @@ public class PacketManager {
         registerMessage(channel, new ClReadHamonBreathTabPacket.Handler(),           Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(channel, new ClRequestMobAggroPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(channel, new ClMetEntityTypePacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        registerMessage(channel, new ClAllGELifeformsButtonPacket.Handler(),         Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(channel, new ClRPSGameInputPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(channel, new ClRPSPickThoughtsPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_SERVER));
         

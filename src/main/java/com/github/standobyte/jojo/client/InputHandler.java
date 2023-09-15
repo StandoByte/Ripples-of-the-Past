@@ -98,7 +98,6 @@ public class InputHandler {
     private INonStandPower nonStandPower;
     
     public RayTraceResult mouseTarget;
-    private boolean handleTargetUpdate = false;
 
     private static final String MAIN_CATEGORY = new String("key.categories." + JojoMod.MOD_ID);
     private KeyBinding toggleStand;
@@ -297,7 +296,7 @@ public class InputHandler {
             clickWithBusyHands();
         }
         else {
-            pickMouseTarget();
+            boolean targetChanged = pickMouseTarget();
             
             if (leftClickBlockDelay > 0) {
                 leftClickBlockDelay--;
@@ -370,10 +369,10 @@ public class InputHandler {
                 quickAccessMmbDelay = 0;
             }
             
-            checkHeldActionAndTarget(standPower);
-            checkHeldActionAndTarget(nonStandPower);
+            checkHeldActionAndTarget(standPower, targetChanged);
+            checkHeldActionAndTarget(nonStandPower, targetChanged);
             
-            if (handleTargetUpdate) {
+            if (targetChanged) {
                 if (mouseTarget.getType() == RayTraceResult.Type.ENTITY) {
                     Entity entity = ((EntityRayTraceResult) mouseTarget).getEntity();
                     mc.player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
@@ -384,12 +383,10 @@ public class InputHandler {
                     });
                 }
             }
-            
-            handleTargetUpdate = false;
         }
     }
     
-    private void pickMouseTarget() {
+    private boolean pickMouseTarget() {
         RayTraceResult target = mc.hitResult;
         if (actionsOverlay != null && actionsOverlay.getCurrentPower() != null) {
             IPower<?, ?> power = actionsOverlay.getCurrentPower();
@@ -400,8 +397,10 @@ public class InputHandler {
         
         if (target != null && !MCUtil.rayTraceTargetEquals(target, mouseTarget)) {
             this.mouseTarget = target;
-            handleTargetUpdate = true;
+            return true;
         }
+        
+        return false;
     }
     
     private final Map<IPower<?, ?>, ActionKey> heldKeys = new HashMap<>();
@@ -434,7 +433,7 @@ public class InputHandler {
         }
     }
     
-    private void checkHeldActionAndTarget(IPower<?, ?> power) {
+    private void checkHeldActionAndTarget(IPower<?, ?> power, boolean targetChanged) {
         boolean keyHeld;
         if (heldKeys.containsKey(power)) {
             keyHeld = heldKeys.get(power).getKey(mc, this).isDown();
@@ -450,7 +449,7 @@ public class InputHandler {
             stopHeldAction(power, power.getPowerClassification() == actionsOverlay.getCurrentMode());
         }
         
-        if (power.isTargetUpdateTick() && handleTargetUpdate) {
+        if (power.isTargetUpdateTick() && targetChanged) {
             PacketManager.sendToServer(ClHeldActionTargetPacket.withRayTraceResult(power.getPowerClassification(), mouseTarget));
         }
     }
