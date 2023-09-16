@@ -37,7 +37,7 @@ public class FilterList {
         this.height = entriesRenderedCount * ENTRY_HEIGHT + 32;
         this.x = xRight - width;
         this.y = yBottom - height;
-        this.entries =  Streams.mapWithIndex(
+        this.entries = Streams.mapWithIndex(
                 entityTypes.stream(), 
                 (entityType, i) -> new Entry(entityType, 
                         new LifeformFilterListCheckbox(xRight - 20, y + 16 + (int) i * 20, 20, 20, 

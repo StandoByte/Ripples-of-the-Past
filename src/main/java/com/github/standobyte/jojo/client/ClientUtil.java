@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.client;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.function.BiPredicate;
 
 import javax.annotation.Nullable;
 
@@ -23,6 +24,7 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.GameSettings;
+import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.SimpleSound;
@@ -286,6 +288,32 @@ public class ClientUtil {
         bufferBuilder.vertex(x + width , y + height, 0.0D).color(red, green, blue, alpha).endVertex();
         bufferBuilder.vertex(x + width , y + 0, 0.0D).color(red, green, blue, alpha).endVertex();
         Tessellator.getInstance().end();
+    }
+    
+    private static final int[] RED_PIXEL =   new int[] { 255, 0, 0, 63 };
+    private static final int[] GREEN_PIXEL = new int[] { 0, 255, 0, 63 };
+    public static void pixelCheckOverlay(BiPredicate<Integer, Integer> pixelCheck) {
+        MainWindow window = Minecraft.getInstance().getWindow();
+        int width = window.getGuiScaledWidth();
+        int height = window.getGuiScaledHeight();
+        RenderSystem.enableBlend();
+        RenderSystem.disableDepthTest();
+        RenderSystem.disableTexture();
+        BufferBuilder bufferBuilder = Tessellator.getInstance().getBuilder();
+        
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                int[] color = pixelCheck.test(x, y) ? GREEN_PIXEL : RED_PIXEL;
+                bufferBuilder.begin(6, DefaultVertexFormats.POSITION_COLOR);
+                bufferBuilder.vertex(x,   y,   0.0D).color(color[0], color[1], color[2], color[3]).endVertex();
+                bufferBuilder.vertex(x,   y+1, 0.0D).color(color[0], color[1], color[2], color[3]).endVertex();
+                bufferBuilder.vertex(x+1, y+1, 0.0D).color(color[0], color[1], color[2], color[3]).endVertex();
+                bufferBuilder.vertex(x+1, y,   0.0D).color(color[0], color[1], color[2], color[3]).endVertex();
+                Tessellator.getInstance().end();
+            }
+        }
+        RenderSystem.enableTexture();
+        RenderSystem.enableDepthTest();
     }
     
     public static void drawBackdrop(MatrixStack matrixStack, int x, int y, int width, float alpha) {

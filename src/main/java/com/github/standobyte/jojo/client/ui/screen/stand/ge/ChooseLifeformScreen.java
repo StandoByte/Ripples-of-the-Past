@@ -54,8 +54,6 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     public static final ResourceLocation LIFEFORM_CHOOSE_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/lifeform_choose.png");
 
     private GridList<SelectorWidget> entityIconsGrid;
-    private int gridColumnsMaxCount;
-    private int gridXLeftEdge;
     
     private int firstMouseX;
     private int firstMouseY;
@@ -73,7 +71,6 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         super(StringTextComponent.EMPTY);
         this.keyHeld = keyHeld;
     }
-    
     
     
     @Override
@@ -114,6 +111,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
                 .collect(Collectors.toList());
         
         initSelectionGrid(entityTypes);
+        ignoreMouseUntilMoved = true;
         
         MobAggroCategory.requestCategoryOnClient(entityTypes);
         filterList = new FilterList(entityTypes, width - 8, height - 52, 100, height - 128, this);
@@ -124,7 +122,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         int xMax = width - 136;
         int xMiddle = width / 2;
         
-        entityIconsGrid = GridList.create(entityTypes, Math.max((height - 46) / 30, 1), SelectorWidget::new);
+        entityIconsGrid = GridList.create(entityTypes, SelectorWidget::new, Math.max((height - 46) / 30, 1), this, this::addButton);
         entityIconsGrid.forEach(widget -> widget.visible = !hiddenEntriesTmp.contains(widget.entityType));
         
         int columnsCount = entityIconsGrid.getColumnsCount();
@@ -138,31 +136,30 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         }
         entityIconsGrid.x = x;
         entityIconsGrid.y = 8;
-        entityIconsGrid.xGap = 30;
-        entityIconsGrid.yGap = 30;
+        entityIconsGrid.columnWidth = 24;
+        entityIconsGrid.columnGap = 6;
+        entityIconsGrid.rowHeight = 24;
+        entityIconsGrid.rowGap = 6;
+        entityIconsGrid.setMaxWidth(xMax + 36 - x);
     }
     
     
     
-    private int ticks = 0;
+    private int ticksKeyHeld = 0;
     private final int keyHeld;
-    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! the first time you click it, it ALWAYS closes in if in hold mode
     private ScreenCloseMode mode = ScreenCloseMode.CLICK;
     private boolean holdsButton = true;
     
     @Override
     public void tick() {
-        if (holdsButton && ++ticks == 5) {
-            mode = ScreenCloseMode.HOLD;
+        if (holdsButton) {
+            if (!isKeyBeingHeld()) {
+                holdsButton = false;
+            }
+            else if (++ticksKeyHeld == 5) {
+                mode = ScreenCloseMode.HOLD;
+            }
         }
-    }
-
-    private boolean checkToClose() {
-        if (holdsButton && !isKeyBeingHeld()) {
-            holdsButton = false;
-        }
-        
-        return !holdsButton && mode == ScreenCloseMode.HOLD;
     }
     
     private boolean isKeyBeingHeld() {
@@ -173,12 +170,10 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     
     @Override
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-        if (this.checkToClose()) {
+        if (!holdsButton && mode == ScreenCloseMode.HOLD) {
             chooseHoveredAndClose();
         }
         else {
-            super.render(matrixStack, mouseX, mouseY, partialTicks);
-            
             if (ignoreMouseUntilMoved) {
                 firstMouseX = mouseX;
                 firstMouseY = mouseY;
@@ -188,15 +183,16 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
             
             entityIconsGrid.forEach(widget -> {
                 if (widget.visible) {
-                    entityIconsGrid.getSelected().ifPresent(w -> {
-                        widget.setSelected(widget == w);
-                    });
                     if (movedMouse && widget.isHovered()) {
                         entityIconsGrid.setSelected(widget);
                     }
+                    entityIconsGrid.getSelected().ifPresent(w -> {
+                        widget.setSelected(widget == w);
+                    });
                 }
             });
             entityIconsGrid.render(matrixStack, mouseX, mouseY, partialTicks);
+            super.render(matrixStack, mouseX, mouseY, partialTicks);
             
             renderHoveredTooltip(matrixStack);
             
@@ -238,7 +234,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
             return true;
         }
         
-        if (entityIconsGrid.getSelected().isPresent()) {
+        if (entityIconsGrid.getSelected().isPresent() && entityIconsGrid.isMouseInsideGrid(mouseX, mouseY)) {
             SelectorWidget hovered = entityIconsGrid.getSelected().get();
             MouseButton button = MouseButton.getButtonFromId(buttonId);
             switch (button) {
@@ -321,6 +317,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
         if (filterList.mouseScrolled(mouseX, mouseY, delta)
+                || entityIconsGrid.mouseScrolled(mouseX, mouseY, delta)
                 || super.mouseScrolled(mouseX, mouseY, delta)) {
             return true;
         }
@@ -334,7 +331,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         return false;
     }
     
-    private class SelectorWidget extends Widget {
+    private class SelectorWidget extends Widget implements GridList.IGridElement{
         private final EntityType<?> entityType;
         private boolean isSelected;
         
@@ -366,14 +363,36 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
             RenderSystem.disableBlend();
         }
         
-        @Override
-        public boolean isHovered() {
-            return super.isHovered() || this.isSelected;
-        }
-        
         public void setSelected(boolean isSelected) {
             this.isSelected = isSelected;
             this.narrate();
+        }
+        
+        public boolean isSelected() {
+            return isHovered() || isSelected;
+        }
+        
+        
+        private int column;
+        private int row;
+        @Override
+        public int getColumn() {
+            return column;
+        }
+
+        @Override
+        public int getRow() {
+            return row;
+        }
+
+        @Override
+        public void setColumn(int column) {
+            this.column = column;
+        }
+
+        @Override
+        public void setRow(int row) {
+            this.row = row;
         }
     }
 }

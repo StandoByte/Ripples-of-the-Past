@@ -4,18 +4,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.mutable.MutableBoolean;
+import org.apache.commons.lang3.mutable.MutableInt;
+
 import com.github.standobyte.jojo.util.mod.JojoModUtil.Direction2D;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
+import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.StringTextComponent;
 
-public class GridList<T extends Widget> {
+public class GridList<T extends Widget & GridList.IGridElement> {
+    private final Screen screen;
+    private final Button scrollLeftButton;
+    private final Button scrollRightButton;
     private final List<T> allElements;
     private final int maxColumnSize;
     private int visibleElementsCount;
@@ -24,10 +33,16 @@ public class GridList<T extends Widget> {
     
     public int x;
     public int y;
-    public int xGap;
-    public int yGap;
+    public int columnWidth;
+    public int columnGap;
+    public int rowHeight;
+    public int rowGap;
+    private OptionalInt maxWidth = OptionalInt.empty();
+    private int leftMostColumn = 0;
     
-    public static <O, T extends Widget> GridList<T> create(Iterable<O> originalObjects, int maxColumnSize, Function<O, T> createElement) {
+    public static <O, T extends Widget & GridList.IGridElement> GridList<T> create(Iterable<O> originalObjects, 
+            Function<O, T> createElement, int maxColumnSize, 
+            Screen screen, Consumer<Button> addButtons) {
         List<T> elements = new ArrayList<>();
         
         for (O obj : originalObjects) {
@@ -35,39 +50,87 @@ public class GridList<T extends Widget> {
             elements.add(elem);
         }
         
-        return new GridList<T>(elements, maxColumnSize);
+        GridList<T> gridList = new GridList<T>(elements, maxColumnSize, screen);
+        addButtons.accept(gridList.scrollLeftButton);
+        addButtons.accept(gridList.scrollRightButton);
+        return gridList;
     }
 
-    public static <T extends Widget> GridList<T> create(Iterable<T> elements, int maxColumnSize) {
-        return create(elements, maxColumnSize, Function.identity());
+    public static <T extends Widget & GridList.IGridElement> GridList<T> create(Iterable<T> elements, int maxColumnSize, 
+            Screen screen, Consumer<Button> addButtons) {
+        return create(elements, Function.identity(), maxColumnSize, screen, addButtons);
     }
     
-    private GridList(List<T> elementsList, int maxColumnSize) {
+    private GridList(List<T> elementsList, int maxColumnSize, Screen screen) {
+        this.screen = screen;
         this.allElements = elementsList;
         this.maxColumnSize = maxColumnSize;
-        this.visibleElementsCount = forEachVisible((element, i) -> {});
+        this.visibleElementsCount = (int) elementsList.stream().filter(e -> e.visible).count();
+        this.scrollLeftButton =  new Button(-1, -1, 20, 20, new StringTextComponent("<"), b -> scrollColumns(-1));
+        this.scrollRightButton = new Button(-1, -1, 20, 20, new StringTextComponent(">"), b -> scrollColumns(1));
+    }
+    
+    public void setMaxWidth(int maxWidth) {
+        this.maxWidth = maxWidth > 0 ? OptionalInt.of(maxWidth) : OptionalInt.empty();
+    }
+    
+    private int getMaxColumns() {
+        return maxWidth.isPresent() ? (maxWidth.getAsInt() - columnWidth) / (columnWidth + columnGap) : Integer.MAX_VALUE;
     }
     
     
     
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-        visibleElementsCount = forEachVisible((element, i) -> {
-            int row = i % maxColumnSize;
-            int column = i / maxColumnSize;
-            element.x = this.x + column * xGap;
-            element.y = this.y + row * yGap;
-            element.render(matrixStack, mouseX, mouseY, partialTicks);
-        });
+        int xDiff = columnWidth + columnGap;
+        int yDiff = rowHeight + rowGap;
+        
+        MutableInt visibleElements = new MutableInt();
+        MutableBoolean elementOutOfBounds = new MutableBoolean(false);
+
+        for (T element : allElements) {
+            if (element.visible) {
+                int index = visibleElements.getValue();
+                
+                int row = index % maxColumnSize;
+                int column = index / maxColumnSize;
+                element.setRow(row);
+                element.setColumn(column);
+                element.x = this.x + column * xDiff;
+                element.y = this.y + row * yDiff;
+                if (maxWidth.isPresent()) {
+                    element.x -= leftMostColumn * xDiff;
+                }
+                boolean outOfBounds = elemOutOfBounds(element);
+                if (outOfBounds) {
+                    elementOutOfBounds.setTrue();
+                }
+                else {
+                    element.render(matrixStack, mouseX, mouseY, partialTicks);
+                }
+                
+                visibleElements.increment();
+            }
+            else {
+                element.setRow(-1);
+                element.setColumn(-1);
+                element.x = -999;
+                element.y = -999;
+            }
+        }
+        this.visibleElementsCount = visibleElements.getValue();
+        
+        scrollLeftButton.x = this.x - scrollLeftButton.getWidth() - 4;
+        scrollLeftButton.y = this.y + maxColumnSize * (rowHeight + rowGap) - rowGap - scrollLeftButton.getHeight();
+        scrollRightButton.x = this.x + maxWidth.orElse(0) + 4;
+        scrollRightButton.y = this.y + maxColumnSize * (rowHeight + rowGap) - rowGap - scrollRightButton.getHeight();
+        scrollLeftButton.visible = scrollRightButton.visible = elementOutOfBounds.booleanValue();
+        scrollLeftButton.active = leftMostColumn > 0;
+        scrollRightButton.active = leftMostColumn < getColumnsCount() - getMaxColumns() - 1;
     }
     
     public Optional<T> getVisibleAt(int row, int column) {
-        int i = column * maxColumnSize + row;
-        if (i < 0 || i >= visibleElementsCount) {
-            return Optional.empty();
-        }
-        
         for (T element : allElements) {
-            if (element.visible && i-- == 0) {
+            if (element.visible && element.getRow() == row && element.getColumn() == column) {
                 return Optional.of(element);
             }
         }
@@ -75,10 +138,24 @@ public class GridList<T extends Widget> {
         return Optional.empty();
     }
     
+    private boolean elemOutOfBounds(T element) {
+        int column = element.getColumn();
+        return maxWidth.isPresent() && (column - leftMostColumn < 0 || column - leftMostColumn > getMaxColumns());
+    }
+    
     public void forEach(Consumer<T> action) {
         for (T element : allElements) {
             action.accept(element);
         }
+    }
+    
+    public boolean isMouseInsideGrid(double mouseX, double mouseY) {
+        return mouseX >= x - columnGap && mouseX <= x + getColumnsCount() * (columnWidth + columnGap) && 
+               mouseY >= y - rowGap &&    mouseY <= y + maxColumnSize * (rowHeight + rowGap);
+    }
+    
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+        return scrollLeftButton.visible && scrollColumns(delta < 0 ? 1 : -1);
     }
     
     public boolean isEmpty() {
@@ -99,7 +176,7 @@ public class GridList<T extends Widget> {
         if (column < columnsCount - 1) {
             return maxColumnSize;
         }
-        return visibleElementsCount % maxColumnSize;
+        return (visibleElementsCount - 1) % maxColumnSize + 1;
     }
     
     public void moveSelection(Direction2D direction, ElemMoveMode mode) {
@@ -108,6 +185,9 @@ public class GridList<T extends Widget> {
         }
         if (!selected.isPresent()) {
             selected = getVisibleAt(0, 0);
+            if (mode == ElemMoveMode.NEIGHBOR_WRAP) {
+                mode = ElemMoveMode.NEIGHBOR;
+            }
         }
 
         T initialObj = selected.get();
@@ -122,7 +202,7 @@ public class GridList<T extends Widget> {
         int column = i / maxColumnSize;
         int thisColumnSize = getColumnSize(column);
         int columnsCount = getColumnsCount();
-        if (getColumnSize(columnsCount - 1) <= row) {
+        if (column < columnsCount - 1 && getColumnSize(columnsCount - 1) <= row) {
             columnsCount--;
         }
         
@@ -203,39 +283,38 @@ public class GridList<T extends Widget> {
     
     public void setSelected(Optional<T> element) {
         this.selected = element;
+        if (element.isPresent() && maxWidth.isPresent()) {
+            int column = element.get().getColumn();
+            this.leftMostColumn = MathHelper.clamp(leftMostColumn, column - getMaxColumns(), column);
+        }
     }
     
     public void setSelected(T element) {
         if (element == null) {
             setSelected(Optional.empty());
         }
-        if (isElementVisible(element)) {
+        if (element.visible && element.active) {
             setSelected(Optional.of(element));
         }
     }
     
-    private int forEachVisible(BiConsumer<T, Integer> actionWithIndex) {
-        int i = 0;
-        for (T element : allElements) {
-            if (isElementVisible(element)) {
-                actionWithIndex.accept(element, i++);
+    private boolean scrollColumns(int add) {
+        if (maxWidth.isPresent()) {
+            int prev = this.leftMostColumn;
+            this.leftMostColumn = MathHelper.clamp(leftMostColumn + add, 0, getColumnsCount() - getMaxColumns() - 1);
+            if (prev != this.leftMostColumn) {
+                getSelected().ifPresent(selected -> {
+                    if (elemOutOfBounds(selected)) {
+                        setSelected(getVisibleAt(
+                                selected.getRow(), 
+                                MathHelper.clamp(selected.getColumn(), leftMostColumn, leftMostColumn + getMaxColumns())));
+                    }
+                });
+                return true;
             }
         }
-        return i;
+        return false;
     }
-    
-    private boolean isElementVisible(T element) {
-        return element.visible;
-    }
-    
-    
-    
-    private OptionalInt maxColumnsRenderLimit = OptionalInt.empty();
-    private int limitedColumnsFirst = 0;
-    
-//  public void setMaxColumns(int maxColumns) {
-//      maxColumnsRenderLimit = maxColumns > 0 ? OptionalInt.of(maxColumns) : OptionalInt.empty();
-//  }
     
     
     
@@ -250,8 +329,11 @@ public class GridList<T extends Widget> {
     }
     
     
-    @FunctionalInterface
-    public static interface ElementSupplier<T, U extends Widget> {
-        U create(T obj);
+    
+    public static interface IGridElement {
+        int getColumn();
+        int getRow();
+        void setColumn(int column);
+        void setRow(int row);
     }
 }
