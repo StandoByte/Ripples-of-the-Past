@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.GoldExperienceChooseLifeform;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.InputHandler.MouseButton;
 import com.github.standobyte.jojo.client.ui.screen.GridList;
@@ -28,7 +29,6 @@ import com.github.standobyte.jojo.util.mc.EntityTypeToInstance;
 import com.github.standobyte.jojo.util.mc.MobAggroCategory;
 import com.github.standobyte.jojo.util.mod.JojoModUtil.Direction2D;
 import com.mojang.blaze3d.matrix.MatrixStack;
-import com.mojang.blaze3d.systems.RenderSystem;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -92,11 +92,13 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         
         if (chosenTypeTmp != null) {
             entityIconsGrid.setSelected(entityIconsGrid.findFirst(widget -> widget.visible && widget.entityType == chosenTypeTmp));
+            entityIconsGrid.getSelected().ifPresent(widget -> {
+                if (widget.visible) {
+                    entityIconsGrid.updateGridLayout();
+                    ClientUtil.setMousePos(widget.x + entityIconsGrid.columnWidth / 2, widget.y + entityIconsGrid.rowHeight / 2);
+                }
+            });
         }
-    }
-    
-    private Comparator<EntityType<?>> widgetSortComparator() {
-        return Comparator.comparing(type -> type.getDescription().getString(), String::compareTo);
     }
     
     private void initEntityTypes() {
@@ -141,6 +143,11 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         entityIconsGrid.rowHeight = 24;
         entityIconsGrid.rowGap = 6;
         entityIconsGrid.setMaxWidth(xMax + 36 - x);
+    }
+    
+    
+    private Comparator<EntityType<?>> widgetSortComparator() {
+        return Comparator.comparing(type -> type.getDescription().getString(), String::compareTo);
     }
     
     
@@ -191,7 +198,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
                     });
                 }
             });
-            entityIconsGrid.render(matrixStack, mouseX, mouseY, partialTicks);
+            entityIconsGrid.renderGrid(matrixStack, mouseX, mouseY, partialTicks);
             super.render(matrixStack, mouseX, mouseY, partialTicks);
             
             renderHoveredTooltip(matrixStack);
@@ -331,9 +338,10 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         return false;
     }
     
-    private class SelectorWidget extends Widget implements GridList.IGridElement{
+    private class SelectorWidget extends Widget implements GridList.IGridElement {
         private final EntityType<?> entityType;
         private boolean isSelected;
+        private boolean shouldRender;
         
         private SelectorWidget(EntityType<?> entityType) {
             super(0, 0, 24, 24, entityType.getDescription());
@@ -341,26 +349,32 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         }
         
         @Override
+        public void setShouldRender(boolean shouldRender) {
+            this.shouldRender = shouldRender;
+        }
+        
+        @Override
+        public boolean shouldRender() {
+            return shouldRender;
+        }
+        
+        @Override
         public void renderButton(MatrixStack matrixStack, int pMouseX, int pMouseY, float pPartialTicks) {
-            if (!visible) return;
-            
             Minecraft mc = Minecraft.getInstance();
-            RenderSystem.enableBlend();
-
-            mc.getTextureManager().bind(LIFEFORM_CHOOSE_LOCATION);
+            Minecraft.getInstance().getTextureManager().bind(LIFEFORM_CHOOSE_LOCATION);
+            
             blit(matrixStack, x, y, 0, 0, 24, 24, 128, 128);
 
             EntityTypeIcon.renderIcon(entityType, matrixStack, x + 4, y + 4);
             
-            mc.getTextureManager().bind(LIFEFORM_CHOOSE_LOCATION);
-            if (this.isSelected) {
+            if (isSelected()) {
+                mc.getTextureManager().bind(LIFEFORM_CHOOSE_LOCATION);
                 blit(matrixStack, x, y, 24, 0, 24, 24, 128, 128);
             }
             else if (this.entityType == chosenTypeTmp) {
+                mc.getTextureManager().bind(LIFEFORM_CHOOSE_LOCATION);
                 blit(matrixStack, x, y, 0, 24, 24, 24, 128, 128);
             }
-            
-            RenderSystem.disableBlend();
         }
         
         public void setSelected(boolean isSelected) {

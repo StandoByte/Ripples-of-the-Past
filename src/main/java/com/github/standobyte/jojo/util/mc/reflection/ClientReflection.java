@@ -10,6 +10,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.MouseHelper;
 import net.minecraft.client.audio.ISoundEventAccessor;
 import net.minecraft.client.audio.Sound;
 import net.minecraft.client.audio.SoundEventAccessor;
@@ -158,6 +159,17 @@ public class ClientReflection {
     private static final Field PARTICLE_MANAGER_TEXTURE_MANAGER = ObfuscationReflectionHelper.findField(ParticleManager.class, "field_78877_c");
     public static void setTextureManager(ParticleManager particleManager, TextureManager textureManager) {
         ReflectionUtil.setFieldValue(PARTICLE_MANAGER_TEXTURE_MANAGER, particleManager, textureManager);
+    }
+    
+    
+    private static final Field MOUSE_HELPER_X_POS = ObfuscationReflectionHelper.findField(MouseHelper.class, "field_198040_e");
+    public static void setXPos(MouseHelper mouseHelper, double xPos) {
+        ReflectionUtil.setFieldValue(MOUSE_HELPER_X_POS, mouseHelper, xPos);
+    }
+    
+    private static final Field MOUSE_HELPER_Y_POS = ObfuscationReflectionHelper.findField(MouseHelper.class, "field_198041_f");
+    public static void setYPos(MouseHelper mouseHelper, double yPos) {
+        ReflectionUtil.setFieldValue(MOUSE_HELPER_Y_POS, mouseHelper, yPos);
     }
     
     

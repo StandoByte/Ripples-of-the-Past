@@ -14,6 +14,7 @@ import org.apache.commons.lang3.mutable.MutableInt;
 
 import com.github.standobyte.jojo.util.mod.JojoModUtil.Direction2D;
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
@@ -78,16 +79,17 @@ public class GridList<T extends Widget & GridList.IGridElement> {
         return maxWidth.isPresent() ? (maxWidth.getAsInt() - columnWidth) / (columnWidth + columnGap) : Integer.MAX_VALUE;
     }
     
+
     
-    
-    public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+    public void updateGridLayout() {
         int xDiff = columnWidth + columnGap;
         int yDiff = rowHeight + rowGap;
         
         MutableInt visibleElements = new MutableInt();
         MutableBoolean elementOutOfBounds = new MutableBoolean(false);
-
+        
         for (T element : allElements) {
+            element.setShouldRender(false);
             if (element.visible) {
                 int index = visibleElements.getValue();
                 
@@ -105,7 +107,7 @@ public class GridList<T extends Widget & GridList.IGridElement> {
                     elementOutOfBounds.setTrue();
                 }
                 else {
-                    element.render(matrixStack, mouseX, mouseY, partialTicks);
+                    element.setShouldRender(true);
                 }
                 
                 visibleElements.increment();
@@ -117,6 +119,7 @@ public class GridList<T extends Widget & GridList.IGridElement> {
                 element.y = -999;
             }
         }
+        
         this.visibleElementsCount = visibleElements.getValue();
         
         scrollLeftButton.x = this.x - scrollLeftButton.getWidth() - 4;
@@ -126,6 +129,23 @@ public class GridList<T extends Widget & GridList.IGridElement> {
         scrollLeftButton.visible = scrollRightButton.visible = elementOutOfBounds.booleanValue();
         scrollLeftButton.active = leftMostColumn > 0;
         scrollRightButton.active = leftMostColumn < getColumnsCount() - getMaxColumns() - 1;
+    }
+    
+    private void doRender(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+        RenderSystem.enableBlend();
+        
+        for (T element : allElements) {
+            if (element.visible && element.shouldRender()) {
+                element.render(matrixStack, mouseX, mouseY, partialTicks);
+            }
+        }
+        
+        RenderSystem.disableBlend();
+    }
+    
+    public void renderGrid(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+        updateGridLayout();
+        doRender(matrixStack, mouseX, mouseY, partialTicks);
     }
     
     public Optional<T> getVisibleAt(int row, int column) {
@@ -335,5 +355,8 @@ public class GridList<T extends Widget & GridList.IGridElement> {
         int getRow();
         void setColumn(int column);
         void setRow(int row);
+        
+        void setShouldRender(boolean shouldRender);
+        boolean shouldRender();
     }
 }

@@ -6,6 +6,7 @@ import java.util.function.BiPredicate;
 
 import javax.annotation.Nullable;
 
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
 import com.github.standobyte.jojo.JojoMod;
@@ -26,6 +27,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.client.GameSettings;
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.MouseHelper;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
@@ -43,6 +45,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.client.settings.PointOfView;
+import net.minecraft.client.util.InputMappings;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -425,6 +428,19 @@ public class ClientUtil {
         float coeff = maxAlpha / maxAlphaTicks;
         float alpha = ticks <= cycleTicks / 2 ? coeff * ticks : coeff * (cycleTicks - ticks);
         return Math.min(alpha, maxAlpha - minAlpha) + minAlpha;
+    }
+    
+    public static void setMousePos(int mouseX, int mouseY) {
+        Minecraft mc = Minecraft.getInstance();
+        MainWindow window = mc.getWindow();
+        
+        double xPos = mouseX * window.getScreenWidth()  / window.getGuiScaledWidth();
+        double yPos = mouseY * window.getScreenHeight() / window.getGuiScaledHeight();
+        
+        MouseHelper mouseHandler = mc.mouseHandler;
+        ClientReflection.setXPos(mouseHandler, xPos);
+        ClientReflection.setYPos(mouseHandler, yPos);
+        InputMappings.grabOrReleaseMouse(window.getWindow(), GLFW.GLFW_CURSOR_NORMAL, xPos, yPos);
     }
     
     public static DefaultPlayerSkinType getPlayerDefaultSkinType(AbstractClientPlayerEntity player) {
