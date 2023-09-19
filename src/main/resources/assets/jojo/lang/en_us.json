@@ -1099,9 +1099,6 @@
   "action.jojo.gold_experience_create_lifeform": "Create lifeform",
   "jojo.ge_lifeform.filter_list": "Filter",
   "jojo.ge_lifeform.unlock_all": "Unlock all",
-  "lifeform.mob_category.hostile": "Hostile",
-  "lifeform.mob_category.neutral": "Neutral",
-  "lifeform.mob_category.passive": "Passive",
   
   "stand.jojo.boy_ii_man": "Boy II Man",
   "entity.jojo.rps_kid": "Rock-Paper-Scissors Kid",

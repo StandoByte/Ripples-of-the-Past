@@ -26,7 +26,6 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClAllGELifeformsButtonPacket;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.EntityTypeToInstance;
-import com.github.standobyte.jojo.util.mc.MobAggroCategory;
 import com.github.standobyte.jojo.util.mod.JojoModUtil.Direction2D;
 import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -118,7 +117,6 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         initSelectionGrid(entityTypes);
         ignoreMouseUntilMoved = true;
         
-        MobAggroCategory.requestCategoryOnClient(entityTypes);
         filterList = new FilterList(entityTypes, width - 8, height - 52, 100, height - 128, this);
     }
     
@@ -227,11 +225,6 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
             
             rightSideInfo.add(new StringTextComponent(ModInteractionUtil.getModName(widget.entityType.getRegistryName()))
                     .withStyle(TextFormatting.BLUE, TextFormatting.ITALIC));
-            
-            MobAggroCategory aggroCategory = MobAggroCategory.getCategoryOnClient(widget.entityType);
-            if (aggroCategory != null) {
-                rightSideInfo.add(aggroCategory.getName());
-            }
             
             Entity entity = EntityTypeToInstance.getEntityInstance(widget.entityType, minecraft.level);
             String width = SIZE_FORMAT.format(entity.getBbWidth());

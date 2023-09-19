@@ -47,7 +47,6 @@ public class GoldExperienceChooseLifeform extends StandAction {
 //    }
     
     
-    
     public static boolean isValidLifeform(EntityType<?> entityType, World world) {
         Entity entity = EntityTypeToInstance.getEntityInstance(entityType, world);
         if (entity instanceof MobEntity) {
