@@ -18,6 +18,7 @@ import net.minecraft.entity.monster.BlazeEntity;
 import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.entity.monster.GhastEntity;
+import net.minecraft.entity.monster.GuardianEntity;
 import net.minecraft.entity.monster.PatrollerEntity;
 import net.minecraft.entity.monster.SlimeEntity;
 import net.minecraft.entity.monster.VexEntity;
@@ -69,7 +70,8 @@ public class GoldExperienceChooseLifeform extends StandAction {
             if (mob instanceof INPC || mob instanceof IMerchant
                     || mob instanceof GolemEntity || mob instanceof PatrollerEntity
                     || mob instanceof GhastEntity || mob instanceof BlazeEntity || mob instanceof VexEntity
-                    || mob instanceof CreeperEntity || mob instanceof EndermanEntity || mob instanceof AbstractPiglinEntity) {
+                    || mob instanceof CreeperEntity || mob instanceof EndermanEntity
+                    || mob instanceof AbstractPiglinEntity || mob instanceof GuardianEntity) {
                 return false;
             }
             
