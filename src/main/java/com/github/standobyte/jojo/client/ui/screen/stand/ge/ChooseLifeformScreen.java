@@ -28,6 +28,7 @@ import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.EntityTypeToInstance;
 import com.github.standobyte.jojo.util.mc.MobAggroCategory;
 import com.github.standobyte.jojo.util.mod.JojoModUtil.Direction2D;
+import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -43,6 +44,7 @@ import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -95,6 +97,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
             entityIconsGrid.getSelected().ifPresent(widget -> {
                 if (widget.visible) {
                     entityIconsGrid.updateGridLayout();
+                    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! when trying to resize the window, the mouse freaks out
                     ClientUtil.setMousePos(widget.x + entityIconsGrid.columnWidth / 2, widget.y + entityIconsGrid.rowHeight / 2);
                 }
             });
@@ -181,42 +184,49 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
             chooseHoveredAndClose();
         }
         else {
-            if (ignoreMouseUntilMoved) {
-                firstMouseX = mouseX;
-                firstMouseY = mouseY;
-                ignoreMouseUntilMoved = false;
-            }
-            boolean movedMouse = firstMouseX != mouseX || firstMouseY != mouseY;
-            
-            entityIconsGrid.forEach(widget -> {
-                if (widget.visible) {
-                    if (movedMouse && widget.isHovered()) {
-                        entityIconsGrid.setSelected(widget);
-                    }
-                    entityIconsGrid.getSelected().ifPresent(w -> {
-                        widget.setSelected(widget == w);
-                    });
-                }
-            });
+            updateHoveredElement(mouseX, mouseY);
             entityIconsGrid.renderGrid(matrixStack, mouseX, mouseY, partialTicks);
             super.render(matrixStack, mouseX, mouseY, partialTicks);
-            
-            renderHoveredTooltip(matrixStack);
-            
+            renderHoveredTooltip(matrixStack, mouseX, mouseY, partialTicks);
             filterList.render(matrixStack, minecraft, mouseX, mouseY, partialTicks);
         }
     }
-
+    
+    private void updateHoveredElement(int mouseX, int mouseY) {
+        boolean mouseMoved = checkMouseMoved(mouseX, mouseY);
+        entityIconsGrid.forEach(widget -> {
+            if (widget.visible && widget.shouldRender()) {
+                widget.updateIsHovered(mouseX, mouseY);
+                if (mouseMoved && widget.isHovered() && !widget.isSelected) {
+                    entityIconsGrid.setSelected(widget);
+                }
+                entityIconsGrid.getSelected().ifPresent(w -> {
+                    widget.setSelected(widget == w);
+                });
+            }
+        });
+    }
+    
+    private boolean checkMouseMoved(int mouseX, int mouseY) {
+        if (ignoreMouseUntilMoved) {
+            firstMouseX = mouseX;
+            firstMouseY = mouseY;
+            ignoreMouseUntilMoved = false;
+        }
+        return firstMouseX != mouseX || firstMouseY != mouseY;
+    }
+    
     private static final DecimalFormat SIZE_FORMAT = new DecimalFormat("0.0");
-    private void renderHoveredTooltip(MatrixStack matrixStack) {
+    private void renderHoveredTooltip(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         entityIconsGrid.getSelected().ifPresent(widget -> {
-            int x = widget.x;
-            int y = widget.y;
-            renderTooltip(matrixStack, widget.getMessage(), x, y);
-            
+            renderSelectedTypeTooltip(widget, matrixStack, mouseX, mouseY, partialTicks);
             
             List<ITextComponent> rightSideInfo = new ArrayList<>();
+            
             rightSideInfo.add(widget.getMessage());
+            
+            rightSideInfo.add(new StringTextComponent(ModInteractionUtil.getModName(widget.entityType.getRegistryName()))
+                    .withStyle(TextFormatting.BLUE, TextFormatting.ITALIC));
             
             MobAggroCategory aggroCategory = MobAggroCategory.getCategoryOnClient(widget.entityType);
             if (aggroCategory != null) {
@@ -232,6 +242,25 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
                 renderComponentTooltip(matrixStack, rightSideInfo, this.width + 4, 24);
             });
         });
+    }
+
+    private void renderSelectedTypeTooltip(SelectorWidget widget, MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
+        int x;
+        int y;
+        if (checkMouseMoved(mouseX, mouseY)) {
+            if (entityIconsGrid.isMouseInsideGrid(mouseX, mouseY)) {
+                x = mouseX;
+                y = mouseY;
+            }
+            else {
+                return;
+            }
+        }
+        else {
+            x = widget.x;
+            y = widget.y;
+        }
+        renderTooltip(matrixStack, widget.getMessage(), x, y);
     }
     
     @Override
@@ -323,14 +352,9 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        if (filterList.mouseScrolled(mouseX, mouseY, delta)
-                || entityIconsGrid.mouseScrolled(mouseX, mouseY, delta)
-                || super.mouseScrolled(mouseX, mouseY, delta)) {
-            return true;
-        }
-        
-        
-        return true;
+        return filterList.mouseScrolled(mouseX, mouseY, delta) || 
+                entityIconsGrid.onMouseScroll(mouseX, mouseY, delta) || 
+                super.mouseScrolled(mouseX, mouseY, delta);
     }
     
     @Override
@@ -367,7 +391,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
 
             EntityTypeIcon.renderIcon(entityType, matrixStack, x + 4, y + 4);
             
-            if (isSelected()) {
+            if (isSelected) {
                 mc.getTextureManager().bind(LIFEFORM_CHOOSE_LOCATION);
                 blit(matrixStack, x, y, 24, 0, 24, 24, 128, 128);
             }
@@ -382,8 +406,10 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
             this.narrate();
         }
         
-        public boolean isSelected() {
-            return isHovered() || isSelected;
+        public void updateIsHovered(int mouseX, int mouseY) {
+            isHovered = 
+                    mouseX >= x && mouseX < x + width && 
+                    mouseY >= y && mouseY < y + height;
         }
         
         

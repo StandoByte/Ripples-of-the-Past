@@ -7,6 +7,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.fml.ModList;
 
 public class ModInteractionUtil {
     private static final ResourceLocation MOWZIES_FROZEN_EFFECT = new ResourceLocation("mowziesmobs", "frozen");
@@ -40,5 +41,15 @@ public class ModInteractionUtil {
                 MUTANT_ENDERMAN_ID.equals(typeId) ||
                 MUTANT_ENDERMAN_ID_2.equals(typeId) ||
                 MUTANT_ENDERMAN_ID_3.equals(typeId);
+    }
+    
+    public static String getModName(ResourceLocation registryId) {
+        String modId = registryId.getNamespace();
+        if ("minecraft".equals(modId)) {
+            return "Minecraft";
+        }
+        return ModList.get().getModContainerById(modId)
+                .map(modObject -> modObject.getModInfo().getDisplayName())
+                .orElse(modId);
     }
 }

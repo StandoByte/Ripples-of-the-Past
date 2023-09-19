@@ -75,7 +75,7 @@ public class GridList<T extends Widget & GridList.IGridElement> {
         this.maxWidth = maxWidth > 0 ? OptionalInt.of(maxWidth) : OptionalInt.empty();
     }
     
-    private int getMaxColumns() {
+    private int getMaxRenderedColumns() {
         return maxWidth.isPresent() ? (maxWidth.getAsInt() - columnWidth) / (columnWidth + columnGap) : Integer.MAX_VALUE;
     }
     
@@ -128,7 +128,7 @@ public class GridList<T extends Widget & GridList.IGridElement> {
         scrollRightButton.y = this.y + maxColumnSize * (rowHeight + rowGap) - rowGap - scrollRightButton.getHeight();
         scrollLeftButton.visible = scrollRightButton.visible = elementOutOfBounds.booleanValue();
         scrollLeftButton.active = leftMostColumn > 0;
-        scrollRightButton.active = leftMostColumn < getColumnsCount() - getMaxColumns() - 1;
+        scrollRightButton.active = leftMostColumn < getColumnsCount() - getMaxRenderedColumns() - 1;
     }
     
     private void doRender(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
@@ -160,7 +160,7 @@ public class GridList<T extends Widget & GridList.IGridElement> {
     
     private boolean elemOutOfBounds(T element) {
         int column = element.getColumn();
-        return maxWidth.isPresent() && (column - leftMostColumn < 0 || column - leftMostColumn > getMaxColumns());
+        return maxWidth.isPresent() && (column - leftMostColumn < 0 || column - leftMostColumn > getMaxRenderedColumns());
     }
     
     public void forEach(Consumer<T> action) {
@@ -170,11 +170,11 @@ public class GridList<T extends Widget & GridList.IGridElement> {
     }
     
     public boolean isMouseInsideGrid(double mouseX, double mouseY) {
-        return mouseX >= x - columnGap && mouseX <= x + getColumnsCount() * (columnWidth + columnGap) && 
+        return mouseX >= x - columnGap && mouseX <= x + Math.min(getMaxRenderedColumns() + 1, getColumnsCount()) * (columnWidth + columnGap) && 
                mouseY >= y - rowGap &&    mouseY <= y + maxColumnSize * (rowHeight + rowGap);
     }
     
-    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+    public boolean onMouseScroll(double mouseX, double mouseY, double delta) {
         return scrollLeftButton.visible && scrollColumns(delta < 0 ? 1 : -1);
     }
     
@@ -305,7 +305,7 @@ public class GridList<T extends Widget & GridList.IGridElement> {
         this.selected = element;
         if (element.isPresent() && maxWidth.isPresent()) {
             int column = element.get().getColumn();
-            this.leftMostColumn = MathHelper.clamp(leftMostColumn, column - getMaxColumns(), column);
+            this.leftMostColumn = MathHelper.clamp(leftMostColumn, column - getMaxRenderedColumns(), column);
         }
     }
     
@@ -313,7 +313,8 @@ public class GridList<T extends Widget & GridList.IGridElement> {
         if (element == null) {
             setSelected(Optional.empty());
         }
-        if (element.visible && element.active) {
+        if (element.visible && element.active
+                && !getSelected().map(curSelected -> curSelected == element).orElse(false)) {
             setSelected(Optional.of(element));
         }
     }
@@ -321,13 +322,14 @@ public class GridList<T extends Widget & GridList.IGridElement> {
     private boolean scrollColumns(int add) {
         if (maxWidth.isPresent()) {
             int prev = this.leftMostColumn;
-            this.leftMostColumn = MathHelper.clamp(leftMostColumn + add, 0, getColumnsCount() - getMaxColumns() - 1);
+            this.leftMostColumn = MathHelper.clamp(leftMostColumn + add, 0, getColumnsCount() - getMaxRenderedColumns() - 1);
             if (prev != this.leftMostColumn) {
+                updateGridLayout();
                 getSelected().ifPresent(selected -> {
                     if (elemOutOfBounds(selected)) {
                         setSelected(getVisibleAt(
                                 selected.getRow(), 
-                                MathHelper.clamp(selected.getColumn(), leftMostColumn, leftMostColumn + getMaxColumns())));
+                                MathHelper.clamp(selected.getColumn(), leftMostColumn, leftMostColumn + getMaxRenderedColumns())));
                     }
                 });
                 return true;

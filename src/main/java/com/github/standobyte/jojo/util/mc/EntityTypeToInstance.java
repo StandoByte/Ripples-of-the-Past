@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.JojoMod;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.monster.SlimeEntity;
 import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -29,6 +30,9 @@ public class EntityTypeToInstance {
     private final Map<EntityType<?>, Entity> entityMap;
     private EntityTypeToInstance(Iterable<EntityType<?>> entityTypes, World world) {
         entityMap = new HashMap<>();
+        for (EntityType<?> type : entityTypes) {
+            entityMap.put(type, createInstance(type, world));
+        }
     }
     
     @SuppressWarnings("unchecked")
@@ -42,7 +46,7 @@ public class EntityTypeToInstance {
     
     private static <T extends Entity> T createInstance(EntityType<T> type, World world) {
         T entity = type.create(world);
-        if (entity != null) {
+        if (entity instanceof SlimeEntity) {
             entity.refreshDimensions();
         }
         return entity;
