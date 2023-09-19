@@ -9,7 +9,6 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.RenderState;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.texture.OverlayTexture;
@@ -17,6 +16,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3d;
 
 public class HamonProjectileShieldRenderer extends EntityRenderer<HamonProjectileShieldEntity> {
+    private static final ResourceLocation GLINT_TEXTURE = new ResourceLocation(JojoMod.MOD_ID, "textures/entity/projectile_shield.png");
     
     public HamonProjectileShieldRenderer(EntityRendererManager renderManager) {
         super(renderManager);
@@ -24,10 +24,9 @@ public class HamonProjectileShieldRenderer extends EntityRenderer<HamonProjectil
     
     @Override
     public ResourceLocation getTextureLocation(HamonProjectileShieldEntity entity) {
-        return new ResourceLocation(JojoMod.MOD_ID, "textures/entity/projectile_shield.png");
+        return GLINT_TEXTURE;
     }
     
-    protected static final RenderState.CullState CULL = new RenderState.CullState(true);
     @Override
     public void render(HamonProjectileShieldEntity entity, float yRotation, float partialTick, 
             MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
