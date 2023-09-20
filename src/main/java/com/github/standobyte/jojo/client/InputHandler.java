@@ -163,7 +163,7 @@ public class InputHandler {
     }
     
     public void registerKeyBindings() {
-        ClientRegistry.registerKeyBinding(tmp = new KeyBinding(JojoMod.MOD_ID + ".key.tmp_test", GLFW.GLFW_KEY_L, MAIN_CATEGORY));
+        ClientRegistry.registerKeyBinding(tmp = new KeyBinding(JojoMod.MOD_ID + ".key.tmp_test", GLFW.GLFW_KEY_Z, MAIN_CATEGORY));
         ClientRegistry.registerKeyBinding(toggleStand = new KeyBinding(JojoMod.MOD_ID + ".key.toggle_stand", GLFW_KEY_M, MAIN_CATEGORY));
         ClientRegistry.registerKeyBinding(standRemoteControl = new KeyBinding(JojoMod.MOD_ID + ".key.stand_remote_control", GLFW_KEY_O, MAIN_CATEGORY));
         ClientRegistry.registerKeyBinding(hamonSkillsWindow = new KeyBinding(JojoMod.MOD_ID + ".key.hamon_skills_window", GLFW_KEY_H, MAIN_CATEGORY));

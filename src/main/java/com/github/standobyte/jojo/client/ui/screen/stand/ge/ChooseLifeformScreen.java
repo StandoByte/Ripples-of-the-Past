@@ -3,10 +3,8 @@ package com.github.standobyte.jojo.client.ui.screen.stand.ge;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.lwjgl.glfw.GLFW;
@@ -49,9 +47,6 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class ChooseLifeformScreen extends WasdAllowingScreen {
-    public static EntityType<?> chosenTypeTmp = null;
-    public static Set<EntityType<?>> hiddenEntriesTmp = new HashSet<>();
-    
     public static final ResourceLocation LIFEFORM_CHOOSE_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/lifeform_choose.png");
 
     private GridList<SelectorWidget> entityIconsGrid;
@@ -85,14 +80,15 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         
         addButton(unlockAllButton = new Button(width - 100, height - 24, 96, 20, new TranslationTextComponent("jojo.ge_lifeform.unlock_all"), 
                 button -> {
-                    GoldExperienceChooseLifeform.learnAllEntityTypes(minecraft.player);
+                    GoldExperienceChooseLifeform.unlockAllEntityTypes(minecraft.player);
                     PacketManager.sendToServer(new ClAllGELifeformsButtonPacket());
                     initEntityTypes();
                 }));
         unlockAllButton.visible = minecraft.player.abilities.instabuild;
         
-        if (chosenTypeTmp != null) {
-            entityIconsGrid.setSelected(entityIconsGrid.findFirst(widget -> widget.visible && widget.entityType == chosenTypeTmp));
+        if (GoldExperienceChooseLifeform.chosenTypeTmp != null) {
+            entityIconsGrid.setSelected(entityIconsGrid.findFirst(
+                    widget -> widget.visible && widget.entityType == GoldExperienceChooseLifeform.chosenTypeTmp));
             entityIconsGrid.getSelected().ifPresent(widget -> {
                 if (widget.visible) {
                     entityIconsGrid.updateGridLayout();
@@ -126,7 +122,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         int xMiddle = width / 2;
         
         entityIconsGrid = GridList.create(entityTypes, SelectorWidget::new, Math.max((height - 46) / 30, 1), this, this::addButton);
-        entityIconsGrid.forEach(widget -> widget.visible = !hiddenEntriesTmp.contains(widget.entityType));
+        entityIconsGrid.forEach(widget -> widget.visible = !GoldExperienceChooseLifeform.hiddenEntriesTmp.contains(widget.entityType));
         
         int columnsCount = entityIconsGrid.getColumnsCount();
         int columnsCanFit = (xMax - xMin) / 30;
@@ -313,14 +309,14 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     
     private void chooseHoveredAndClose() {
         entityIconsGrid.getSelected().ifPresent(widget -> {
-            chosenTypeTmp = widget.entityType;
+            GoldExperienceChooseLifeform.chosenTypeTmp = widget.entityType;
         });
         minecraft.setScreen(null);
     }
     
     public void hideEntry(EntityType<?> entityType) {
-        if (!hiddenEntriesTmp.contains(entityType)) {
-            hiddenEntriesTmp.add(entityType);
+        if (!GoldExperienceChooseLifeform.hiddenEntriesTmp.contains(entityType)) {
+            GoldExperienceChooseLifeform.hiddenEntriesTmp.add(entityType);
             entityIconsGrid.findFirst(widget -> widget.entityType == entityType).ifPresent(
                     widget -> widget.visible = false);
             
@@ -334,8 +330,8 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     }
     
     public void showEntry(EntityType<?> entityType) {
-        if (hiddenEntriesTmp.contains(entityType)) {
-            hiddenEntriesTmp.remove(entityType);
+        if (GoldExperienceChooseLifeform.hiddenEntriesTmp.contains(entityType)) {
+            GoldExperienceChooseLifeform.hiddenEntriesTmp.remove(entityType);
             entityIconsGrid.findFirst(widget -> widget.entityType == entityType).ifPresent(
                     widget -> widget.visible = true);
             
@@ -388,7 +384,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
                 mc.getTextureManager().bind(LIFEFORM_CHOOSE_LOCATION);
                 blit(matrixStack, x, y, 24, 0, 24, 24, 128, 128);
             }
-            else if (this.entityType == chosenTypeTmp) {
+            else if (this.entityType == GoldExperienceChooseLifeform.chosenTypeTmp) {
                 mc.getTextureManager().bind(LIFEFORM_CHOOSE_LOCATION);
                 blit(matrixStack, x, y, 0, 24, 24, 24, 128, 128);
             }

@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.client.render.rendertype;
 
+import com.github.standobyte.jojo.JojoMod;
+
 import net.minecraft.client.renderer.RenderState;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
@@ -24,5 +26,18 @@ public class CustomRenderType extends RenderType {
                 .setTexturingState(ENTITY_GLINT_TEXTURING)
                 .createCompositeState(false);
         return RenderType.create("jojo_proj_shield", DefaultVertexFormats.BLOCK, 7, 256, false, true, renderType$state);
+    }
+    
+    public static RenderType goldExperienceLifeformCreation() {
+        RenderType.State renderType$state = RenderType.State.builder()
+                .setTextureState(new RenderState.TextureState(new ResourceLocation(JojoMod.MOD_ID, "textures/entity/projectile_shield.png"), true, false))
+                .setWriteMaskState(COLOR_WRITE)
+                .setFogState(NO_FOG)
+                .setCullState(NO_CULL)
+                .setTransparencyState(GLINT_TRANSPARENCY)
+                .setOutputState(ITEM_ENTITY_TARGET)
+                .setTexturingState(ENTITY_GLINT_TEXTURING)
+                .createCompositeState(false);
+        return RenderType.create("jojo_ge_lifeform", DefaultVertexFormats.BLOCK, 7, 256, false, true, renderType$state);
     }
 }

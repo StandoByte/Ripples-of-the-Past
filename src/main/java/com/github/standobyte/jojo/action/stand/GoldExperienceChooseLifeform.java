@@ -1,5 +1,8 @@
 package com.github.standobyte.jojo.action.stand;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -30,6 +33,8 @@ import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class GoldExperienceChooseLifeform extends StandAction {
+    public static EntityType<?> chosenTypeTmp = null;
+    public static Set<EntityType<?>> hiddenEntriesTmp = new HashSet<>();
     
     public GoldExperienceChooseLifeform(StandAction.Builder builder) {
         super(builder);
@@ -75,7 +80,7 @@ public class GoldExperienceChooseLifeform extends StandAction {
                 return false;
             }
             
-            if (getVolume(entity) >= 7.5) { // no too large mobs
+            if (GoldExperienceCreateLifeform.getVolume(entity) >= 7.5) { // no too large mobs
                 return false;
             }
             
@@ -84,7 +89,7 @@ public class GoldExperienceChooseLifeform extends StandAction {
         return false;
     }
     
-    public static void learnAllEntityTypes(PlayerEntity player) {
+    public static void unlockAllEntityTypes(PlayerEntity player) {
         player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
             ForgeRegistries.ENTITIES.getValues()
             .stream().filter(type -> isValidLifeform(type, player.level))
@@ -92,17 +97,5 @@ public class GoldExperienceChooseLifeform extends StandAction {
                 cap.addMetEntityType(entityType);
             });
         });
-    }
-    
-    public static float getVolume(Entity entity) {
-        float width = entity.getBbWidth();
-        float height = entity.getBbHeight();
-        return width * width * height;
-    }
-    
-    public static void unlockAll(World world, LivingEntity user, IStandPower power) {
-        if (world.isClientSide()) {
-            
-        }
     }
 }

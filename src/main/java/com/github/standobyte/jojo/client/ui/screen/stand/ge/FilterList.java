@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.github.standobyte.jojo.action.stand.GoldExperienceChooseLifeform;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.google.common.collect.Streams;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -42,7 +43,7 @@ public class FilterList {
                 (entityType, i) -> new Entry(entityType, 
                         new LifeformFilterListCheckbox(xRight - 20, y + 16 + (int) i * 20, 20, 20, 
                                 entityType.getDescription(), 
-                                () -> !ChooseLifeformScreen.hiddenEntriesTmp.contains(entityType),
+                                () -> !GoldExperienceChooseLifeform.hiddenEntriesTmp.contains(entityType),
                                 stateBeingSet -> {
                                     if (stateBeingSet) {
                                         screen.showEntry(entityType);
