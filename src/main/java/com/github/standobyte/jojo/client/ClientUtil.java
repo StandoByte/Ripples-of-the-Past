@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
 import com.github.standobyte.jojo.client.ui.screen.mob.RockPaperScissorsScreen;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.general.MathUtil.Matrix4ZYX;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
@@ -136,6 +137,15 @@ public class ClientUtil {
     
     public static boolean canHearStands() {
         return canHearStands;
+    }
+    
+    private static IStandPower playerStandCached;
+    public static IStandPower getStandPowerClCached() {
+        return playerStandCached;
+    }
+    
+    public static void updatePowersCapCache() {
+        playerStandCached = IStandPower.getPlayerStandPower(Minecraft.getInstance().player);
     }
     
     public static void setCameraEntityPreventShaderSwitch(Minecraft mc, Entity entity) {

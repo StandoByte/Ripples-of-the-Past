@@ -107,13 +107,14 @@ public class GETransformationRenderer<T extends GETransformationEntity> extends 
         if (rendertype != null) {
             IVertexBuilder ivertexbuilder = buffer.getBuffer(rendertype);
             int overlay = OverlayTexture.NO_OVERLAY;
-            this.shadowRadius = 0.15F + (ClientReflection.getShadowRadius(renderer) - 0.15F) * progress; // cache this?
+            this.shadowRadius = ClientReflection.getShadowRadius(renderer) * progress; // cache this?
             
             ModelStateEntry modelState = getModelState(targetModel);
             modelState.saveState();
             modelState.lerp(progress);
             
-            targetModel.renderToBuffer(matrixStack, ivertexbuilder, packedLight, overlay, 1.0F, 1.0F, 1.0F, 1.0F);
+            float color = 0.25F + progress * 0.75F;
+            targetModel.renderToBuffer(matrixStack, ivertexbuilder, packedLight, overlay, color, color, color, 1.0F);
             for (LayerRenderer<E, M> layerrenderer : ClientReflection.getLayers(renderer)) {
                 layerrenderer.render(matrixStack, buffer, packedLight, living, 0, 0, partialTick, ticks, f2, xRotation);
             }

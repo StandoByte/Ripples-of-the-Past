@@ -112,6 +112,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 
+ // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! skips the transformation entirely when you go to esc menu and back wtf
     @Override
     public void writeSpawnData(PacketBuffer buffer) {
         buffer.writeVarInt(duration);

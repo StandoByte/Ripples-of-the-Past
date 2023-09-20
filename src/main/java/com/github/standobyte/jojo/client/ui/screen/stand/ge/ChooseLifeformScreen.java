@@ -11,6 +11,7 @@ import org.lwjgl.glfw.GLFW;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.GoldExperienceChooseLifeform;
+import com.github.standobyte.jojo.action.stand.GoldExperienceCreateLifeform;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -20,6 +21,11 @@ import com.github.standobyte.jojo.client.ui.screen.GridList;
 import com.github.standobyte.jojo.client.ui.screen.GridList.ElemMoveMode;
 import com.github.standobyte.jojo.client.ui.screen.ScreenCloseMode;
 import com.github.standobyte.jojo.client.ui.screen.WasdAllowingScreen;
+import com.github.standobyte.jojo.client.ui.tooltip.CustomTooltipRender;
+import com.github.standobyte.jojo.client.ui.tooltip.ITooltipLine;
+import com.github.standobyte.jojo.client.ui.tooltip.IconTooltipLine;
+import com.github.standobyte.jojo.client.ui.tooltip.MultiTooltipLine;
+import com.github.standobyte.jojo.client.ui.tooltip.TextTooltipLine;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClAllGELifeformsButtonPacket;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
@@ -39,7 +45,6 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -215,20 +220,36 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         entityIconsGrid.getSelected().ifPresent(widget -> {
             renderSelectedTypeTooltip(widget, matrixStack, mouseX, mouseY, partialTicks);
             
-            List<ITextComponent> rightSideInfo = new ArrayList<>();
+            List<ITooltipLine> rightSideInfo = new ArrayList<>();
             
-            rightSideInfo.add(widget.getMessage());
+            rightSideInfo.add(new TextTooltipLine(widget.getMessage()));
             
-            rightSideInfo.add(new StringTextComponent(ModInteractionUtil.getModName(widget.entityType.getRegistryName()))
-                    .withStyle(TextFormatting.BLUE, TextFormatting.ITALIC));
+            rightSideInfo.add(new TextTooltipLine(new StringTextComponent(ModInteractionUtil.getModName(widget.entityType.getRegistryName()))
+                    .withStyle(TextFormatting.BLUE, TextFormatting.ITALIC)));
             
             Entity entity = EntityTypeToInstance.getEntityInstance(widget.entityType, minecraft.level);
             String width = SIZE_FORMAT.format(entity.getBbWidth());
             String height = SIZE_FORMAT.format(entity.getBbHeight());
-            rightSideInfo.add(new StringTextComponent(width + "x" + height + "x" + width + "m"));
+            double strength = GoldExperienceCreateLifeform.getAttackStrength(entity);
+            int creationTicks = GoldExperienceCreateLifeform.getTicksToCreate(minecraft.player, ClientUtil.getStandPowerClCached(), entity);
+            String creationSecs = String.format("%.2f", (float) creationTicks / 20F);
             
-            rightSideInfo.stream().map(line -> font.width(line)).max(Comparator.naturalOrder()).ifPresent(tooltipWidth -> {
-                renderComponentTooltip(matrixStack, rightSideInfo, this.width + 4, 24);
+            rightSideInfo.add(new MultiTooltipLine(
+                    new IconTooltipLine(IconTooltipLine.Icon.VOLUME),
+                    new TextTooltipLine(new TranslationTextComponent("gold_experience.lifeform_size", width, height, width))));
+            if (strength > 0) {
+                rightSideInfo.add(new MultiTooltipLine(
+                        new IconTooltipLine(IconTooltipLine.Icon.STRENGTH),
+                        new TextTooltipLine(new StringTextComponent(String.format("%.1f", strength)))));
+            }
+            rightSideInfo.add(new MultiTooltipLine(
+                    new IconTooltipLine(IconTooltipLine.Icon.TIME),
+                    new TextTooltipLine(new TranslationTextComponent("gold_experience.lifeform_time", creationSecs))));
+            
+            rightSideInfo.stream().map(line -> line.getWidth(font)).max(Comparator.naturalOrder()).ifPresent(tooltipWidth -> {
+                int x = this.width + 4;
+                int y = 24;
+                CustomTooltipRender.renderWrappedToolTip(matrixStack, rightSideInfo, x, y, font);
             });
         });
     }

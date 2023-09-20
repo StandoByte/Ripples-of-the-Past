@@ -10,6 +10,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -45,14 +46,18 @@ public class GoldExperienceCreateLifeform extends StandAction {
         }
     }
     
-    public static int getTicksToCreate(LivingEntity user, IStandPower power, Entity lifeForm) {
-        double speed = 0;
-        if (power.hasPower()) {
+    public static int getTicksToCreate(LivingEntity user, IStandPower power, Entity targetEntity) {
+        double entityStrength = getAttackStrength(targetEntity);
+        float volume = getVolume(targetEntity);
+        double standSpeed = 0;
+        if (power != null && power.hasPower()) {
             StandStats stats = power.getType().getStats();
-            speed = stats.getBaseAttackSpeed() + stats.getDevAttackSpeed(power.getStatsDevelopment());
+            standSpeed = stats.getBaseAttackSpeed() + stats.getDevAttackSpeed(power.getStatsDevelopment());
         }
-        float modifier = MathHelper.clamp(100 - (float) speed * 2F, 0, 100);
-        float volume = getVolume(lifeForm);
+        
+        double modifier = 
+                MathHelper.clamp(100 - standSpeed * 2, 0, 100) * 
+                (1 + entityStrength * 0.125);
         return 20 + MathHelper.ceil(volume * modifier);
     }
     
@@ -60,6 +65,16 @@ public class GoldExperienceCreateLifeform extends StandAction {
         float width = entity.getBbWidth();
         float height = entity.getBbHeight();
         return width * width * height;
+    }
+    
+    public static double getAttackStrength(Entity entity) {
+        if (entity instanceof LivingEntity) {
+            LivingEntity living = (LivingEntity) entity;
+            if (living.getAttributes().hasAttribute(Attributes.ATTACK_DAMAGE)) {
+                return living.getAttributeValue(Attributes.ATTACK_DAMAGE);
+            }
+        }
+        return 0;
     }
     
     
