@@ -228,6 +228,7 @@ public class StandStats {
             return build("A stand");
         }
         
+        @Deprecated
         public S build(String standName) {
             if (tier < 0) {
                 throw new IllegalStateException(standName + "'s tier has not beed initialized!");

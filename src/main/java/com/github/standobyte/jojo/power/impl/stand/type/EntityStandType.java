@@ -35,11 +35,34 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
     private boolean hasHeavyAttack;
     private boolean hasFastAttack;
 
+    @Deprecated
     public EntityStandType(int color, ITextComponent partName, 
             StandAction[] attacks, StandAction[] abilities, 
             Class<T> statsClass, T defaultStats, @Nullable StandTypeOptionals additions) {
         super(color, partName, attacks, abilities, abilities.length > 0 ? abilities[0] : null, statsClass, defaultStats, additions);
     }
+    
+    protected EntityStandType(Builder<T> builder) {
+        super(builder);
+    }
+    
+    
+    
+    public static class Builder<T extends StandStats> extends StandType.AbstractBuilder<Builder<T>, T>{
+
+        @Override
+        protected Builder<T> getThis() {
+            return this;
+        }
+        
+        @Override
+        public EntityStandType<T> build() {
+            return new EntityStandType<>(this);
+        }
+        
+    }
+    
+    
     
     @Override
     public void onCommonSetup() {

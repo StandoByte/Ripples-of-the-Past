@@ -74,8 +74,8 @@ import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.power.impl.stand.stats.ArmoredStandStats;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
-import com.github.standobyte.jojo.power.impl.stand.type.BoyIIManStandType;
 import com.github.standobyte.jojo.power.impl.stand.type.EntityStandType;
+import com.github.standobyte.jojo.power.impl.stand.type.NoManifestationStandType;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 
 import net.minecraft.util.text.ITextComponent;
@@ -191,20 +191,21 @@ public class ModStandsInit {
     public static final EntityStandRegistryObject<EntityStandType<TimeStopperStandStats>, StandEntityType<StarPlatinumEntity>> STAND_STAR_PLATINUM = 
             new EntityStandRegistryObject<>("star_platinum", 
                     STAND_TYPES, 
-                    () -> new EntityStandType<>(
-                            0x8E45FF, PART_3_NAME,
-
-                            new StandAction[] {
-                                    STAR_PLATINUM_PUNCH.get(), 
-                                    STAR_PLATINUM_BARRAGE.get(), 
-                                    STAR_PLATINUM_STAR_FINGER.get()},
-                            new StandAction[] {
-                                    STAR_PLATINUM_BLOCK.get(), 
-                                    STAR_PLATINUM_ZOOM.get(), 
-                                    STAR_PLATINUM_INHALE.get(), 
-                                    STAR_PLATINUM_TIME_STOP.get()},
-
-                            TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
+                    () -> new EntityStandType.Builder<TimeStopperStandStats>()
+                    .color(0x8E45FF)
+                    .storyPartName(PART_3_NAME)
+                    .attacks(
+                            STAR_PLATINUM_PUNCH.get(), 
+                            STAR_PLATINUM_BARRAGE.get(), 
+                            STAR_PLATINUM_STAR_FINGER.get()
+                            )
+                    .abilities(
+                            STAR_PLATINUM_BLOCK.get(), 
+                            STAR_PLATINUM_ZOOM.get(), 
+                            STAR_PLATINUM_INHALE.get(), 
+                            STAR_PLATINUM_TIME_STOP.get()
+                            )
+                    .defaultStats(TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
                             .tier(6)
                             .power(16.0)
                             .speed(16.0)
@@ -215,12 +216,11 @@ public class ModStandsInit {
                             .timeStopLearningPerTick(0.25F)
                             .timeStopDecayPerDay(0F)
                             .timeStopCooldownPerTick(3F)
-                            .build("Star Platinum"), 
-
-                            new StandType.StandTypeOptionals()
-                            .addSummonShout(ModSounds.JOTARO_STAR_PLATINUM)
-                            .addOst(ModSounds.STAR_PLATINUM_OST)), 
-
+                            .build())
+                    .addSummonShout(ModSounds.JOTARO_STAR_PLATINUM)
+                    .addOst(ModSounds.STAR_PLATINUM_OST)
+                    .build(), 
+                    
                     ENTITIES, 
                     () -> new StandEntityType<StarPlatinumEntity>(StarPlatinumEntity::new, 0.7F, 2.1F)
                     .summonSound(ModSounds.STAR_PLATINUM_SUMMON)
@@ -287,18 +287,19 @@ public class ModStandsInit {
     public static final EntityStandRegistryObject<EntityStandType<TimeStopperStandStats>, StandEntityType<TheWorldEntity>> STAND_THE_WORLD = 
             new EntityStandRegistryObject<>("the_world", 
                     STAND_TYPES,
-                    () -> new EntityStandType<>(
-                            0xFFD800, PART_3_NAME,
-
-                            new StandAction[] {
-                                    THE_WORLD_PUNCH.get(), 
-                                    THE_WORLD_BARRAGE.get(), 
-                                    THE_WORLD_TS_PUNCH.get()},
-                            new StandAction[] {
-                                    THE_WORLD_BLOCK.get(), 
-                                    THE_WORLD_TIME_STOP.get()},
-
-                            TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
+                    () -> new EntityStandType.Builder<TimeStopperStandStats>()
+                    .color(0xFFD800)
+                    .storyPartName(PART_3_NAME)
+                    .attacks(
+                            THE_WORLD_PUNCH.get(), 
+                            THE_WORLD_BARRAGE.get(), 
+                            THE_WORLD_TS_PUNCH.get()
+                            )
+                    .abilities(
+                            THE_WORLD_BLOCK.get(), 
+                            THE_WORLD_TIME_STOP.get()
+                            )
+                    .defaultStats(TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
                             .tier(6)
                             .power(16.0)
                             .speed(16.0)
@@ -309,12 +310,11 @@ public class ModStandsInit {
                             .timeStopLearningPerTick(0.1F)
                             .timeStopDecayPerDay(0F)
                             .timeStopCooldownPerTick(3F)
-                            .build("The World"), 
-
-                            new StandType.StandTypeOptionals()
-                            .addSummonShout(ModSounds.DIO_THE_WORLD)
-                            .addOst(ModSounds.THE_WORLD_OST)
-                            /*.addItemOnResolveLevel(4, new ItemStack(ModItems.ROAD_ROLLER.get()))*/), 
+                            .build())
+                    .addSummonShout(ModSounds.DIO_THE_WORLD)
+                    .addOst(ModSounds.THE_WORLD_OST)
+//                    .addItemOnResolveLevel(4, new ItemStack(ModItems.ROAD_ROLLER.get()))
+                    .build(), 
 
                     ENTITIES, 
                     () -> new StandEntityType<TheWorldEntity>(TheWorldEntity::new, 0.7F, 2.1F)
@@ -375,29 +375,29 @@ public class ModStandsInit {
     public static final EntityStandRegistryObject<EntityStandType<StandStats>, StandEntityType<HierophantGreenEntity>> STAND_HIEROPHANT_GREEN = 
             new EntityStandRegistryObject<>("hierophant_green", 
                     STAND_TYPES, 
-                    () -> new EntityStandType<>(
-                            0x00B319, PART_3_NAME,
-
-                            new StandAction[] {
-                                    HIEROPHANT_GREEN_STRING_ATTACK.get(), 
-                                    HIEROPHANT_GREEN_EMERALD_SPLASH.get()},
-                            new StandAction[] {
-                                    HIEROPHANT_GREEN_BLOCK.get(), 
-                                    HIEROPHANT_GREEN_GRAPPLE.get(), 
-                                    HIEROPHANT_GREEN_BARRIER.get()},
-
-                            StandStats.class, new StandStats.Builder()
+                    () -> new EntityStandType.Builder<>()
+                    .color(0x00B319)
+                    .storyPartName(PART_3_NAME)
+                    .attacks(
+                            HIEROPHANT_GREEN_STRING_ATTACK.get(), 
+                            HIEROPHANT_GREEN_EMERALD_SPLASH.get()
+                            )
+                    .abilities(
+                            HIEROPHANT_GREEN_BLOCK.get(), 
+                            HIEROPHANT_GREEN_GRAPPLE.get(), 
+                            HIEROPHANT_GREEN_BARRIER.get()
+                            )
+                    .defaultStats(StandStats.class, new StandStats.Builder()
                             .tier(5)
                             .power(8.0)
                             .speed(12.0)
                             .range(50.0, 100.0)
                             .durability(10.0)
                             .precision(8.0)
-                            .build("Hierophant Green"), 
-
-                            new StandType.StandTypeOptionals()
-                            .addSummonShout(ModSounds.KAKYOIN_HIEROPHANT_GREEN)
-                            .addOst(ModSounds.HIEROPHANT_GREEN_OST)), 
+                            .build())
+                    .addSummonShout(ModSounds.KAKYOIN_HIEROPHANT_GREEN)
+                    .addOst(ModSounds.HIEROPHANT_GREEN_OST)
+                    .build(), 
 
                     ENTITIES, 
                     () -> new StandEntityType<HierophantGreenEntity>(HierophantGreenEntity::new, 0.6F, 1.9F)
@@ -455,18 +455,19 @@ public class ModStandsInit {
     public static final EntityStandRegistryObject<EntityStandType<ArmoredStandStats>, StandEntityType<SilverChariotEntity>> STAND_SILVER_CHARIOT = 
             new EntityStandRegistryObject<>("silver_chariot", 
                     STAND_TYPES, 
-                    () -> new EntityStandType<>(
-                            0xBEC8D6, PART_3_NAME,
-                            
-                            new StandAction[] {
-                                    SILVER_CHARIOT_ATTACK.get(), 
-                                    SILVER_CHARIOT_RAPIER_BARRAGE.get(), 
-                                    SILVER_CHARIOT_RAPIER_LAUNCH.get()},
-                            new StandAction[] {
-                                    SILVER_CHARIOT_BLOCK.get(), 
-                                    SILVER_CHARIOT_TAKE_OFF_ARMOR.get()},
-                            
-                            ArmoredStandStats.class, new ArmoredStandStats.Builder()
+                    () -> new EntityStandType.Builder<ArmoredStandStats>()
+                    .color(0xBEC8D6)
+                    .storyPartName(PART_3_NAME)
+                    .attacks(
+                            SILVER_CHARIOT_ATTACK.get(), 
+                            SILVER_CHARIOT_RAPIER_BARRAGE.get(), 
+                            SILVER_CHARIOT_RAPIER_LAUNCH.get()
+                            )
+                    .abilities(
+                            SILVER_CHARIOT_BLOCK.get(), 
+                            SILVER_CHARIOT_TAKE_OFF_ARMOR.get()
+                            )
+                    .defaultStats(ArmoredStandStats.class, new ArmoredStandStats.Builder()
                             .tier(5)
                             .power(9.0)
                             .speed(14.0)
@@ -474,11 +475,10 @@ public class ModStandsInit {
                             .durability(12.0)
                             .armor(15.0F)
                             .precision(16.0)
-                            .build("Silver Chariot"), 
-
-                            new StandType.StandTypeOptionals()
-                            .addSummonShout(ModSounds.POLNAREFF_SILVER_CHARIOT)
-                            .addOst(ModSounds.SILVER_CHARIOT_OST)), 
+                            .build())
+                    .addSummonShout(ModSounds.POLNAREFF_SILVER_CHARIOT)
+                    .addOst(ModSounds.SILVER_CHARIOT_OST)
+                    .build(),
 
                     ENTITIES, 
                     () -> new StandEntityType<SilverChariotEntity>(SilverChariotEntity::new, 0.6F, 1.95F)
@@ -550,31 +550,31 @@ public class ModStandsInit {
     public static final EntityStandRegistryObject<EntityStandType<StandStats>, StandEntityType<MagiciansRedEntity>> STAND_MAGICIANS_RED = 
             new EntityStandRegistryObject<>("magicians_red", 
                     STAND_TYPES, 
-                    () -> new EntityStandType<>(
-                            0xDE203A, PART_3_NAME,
-                            
-                            new StandAction[] {
-                                    MAGICIANS_RED_PUNCH.get(), 
-                                    MAGICIANS_RED_FLAME_BURST.get(), 
-                                    MAGICIANS_RED_FIREBALL.get(), 
-                                    MAGICIANS_RED_CROSSFIRE_HURRICANE.get()},
-                            new StandAction[] {
-                                    MAGICIANS_RED_BLOCK.get(), 
-                                    MAGICIANS_RED_RED_BIND.get(), 
-                                    MAGICIANS_RED_DETECTOR.get()},
-                            
-                            StandStats.class, new StandStats.Builder()
+                    () -> new EntityStandType.Builder<>()
+                    .color(0xDE203A)
+                    .storyPartName(PART_3_NAME)
+                    .attacks(
+                            MAGICIANS_RED_PUNCH.get(), 
+                            MAGICIANS_RED_FLAME_BURST.get(), 
+                            MAGICIANS_RED_FIREBALL.get(), 
+                            MAGICIANS_RED_CROSSFIRE_HURRICANE.get()
+                            )
+                    .abilities(
+                            MAGICIANS_RED_BLOCK.get(), 
+                            MAGICIANS_RED_RED_BIND.get(), 
+                            MAGICIANS_RED_DETECTOR.get()
+                            )
+                    .defaultStats(StandStats.class, new StandStats.Builder()
                             .tier(5)
                             .power(12.0)
                             .speed(12.0)
                             .range(5.0, 10.0)
                             .durability(12.0)
                             .precision(8.0)
-                            .build("Magician's Red"), 
-                            
-                            new StandType.StandTypeOptionals()
-                            .addSummonShout(ModSounds.AVDOL_MAGICIANS_RED)
-                            .addOst(ModSounds.MAGICIANS_RED_OST)), 
+                            .build())
+                    .addSummonShout(ModSounds.AVDOL_MAGICIANS_RED)
+                    .addOst(ModSounds.MAGICIANS_RED_OST)
+                    .build(),
                     
                     ENTITIES, 
                     () -> new StandEntityType<MagiciansRedEntity>(MagiciansRedEntity::new, 0.65F, 1.95F)
@@ -690,33 +690,33 @@ public class ModStandsInit {
     public static final EntityStandRegistryObject<EntityStandType<StandStats>, StandEntityType<CrazyDiamondEntity>> STAND_CRAZY_DIAMOND = 
             new EntityStandRegistryObject<>("crazy_diamond", 
                     STAND_TYPES, 
-                    () -> new EntityStandType<>(
-                            0x4BEDE6, PART_4_NAME,
-                            
-                            new StandAction[] {
-                                    CRAZY_DIAMOND_PUNCH.get(), 
-                                    CRAZY_DIAMOND_BARRAGE.get(), 
-                                    CRAZY_DIAMOND_BLOCK_BULLET.get(), 
-                                    CRAZY_DIAMOND_BLOOD_CUTTER.get()},
-                            new StandAction[] {
-                                    CRAZY_DIAMOND_BLOCK.get(), 
-                                    CRAZY_DIAMOND_REPAIR.get(), 
-                                    CRAZY_DIAMOND_HEAL.get(), 
-                                    CRAZY_DIAMOND_RESTORE_TERRAIN.get(), 
-                                    CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE.get()},
-                            
-                            StandStats.class, new StandStats.Builder()
+                    () -> new EntityStandType.Builder<>()
+                    .color(0x4BEDE6)
+                    .storyPartName(PART_4_NAME)
+                    .attacks(
+                            CRAZY_DIAMOND_PUNCH.get(), 
+                            CRAZY_DIAMOND_BARRAGE.get(), 
+                            CRAZY_DIAMOND_BLOCK_BULLET.get(), 
+                            CRAZY_DIAMOND_BLOOD_CUTTER.get()
+                            )
+                    .abilities(
+                            CRAZY_DIAMOND_BLOCK.get(), 
+                            CRAZY_DIAMOND_REPAIR.get(), 
+                            CRAZY_DIAMOND_HEAL.get(), 
+                            CRAZY_DIAMOND_RESTORE_TERRAIN.get(), 
+                            CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE.get()
+                            )
+                    .defaultStats(StandStats.class, new StandStats.Builder()
                             .tier(5)
                             .power(14.0)
                             .speed(14.0)
                             .range(2.0, 4.0)
                             .durability(12.0)
                             .precision(12.0)
-                            .build("Crazy Diamond"), 
-                            
-                            new StandType.StandTypeOptionals()
-                            .addSummonShout(ModSounds.JOSUKE_CRAZY_DIAMOND)
-                            .addOst(ModSounds.CRAZY_DIAMOND_OST)),
+                            .build())
+                    .addSummonShout(ModSounds.JOSUKE_CRAZY_DIAMOND)
+                    .addOst(ModSounds.CRAZY_DIAMOND_OST)
+                    .build(),
                     
                     ENTITIES,
                     () -> new StandEntityType<CrazyDiamondEntity>(CrazyDiamondEntity::new, 0.65F, 1.95F)
@@ -727,27 +727,25 @@ public class ModStandsInit {
     
     
     public static final RegistryObject<StandType<StandStats>> BOY_II_MAN = STAND_TYPES.register("boy_ii_man", 
-            () -> {
+            () -> 
 //                StandArrowEntity.EntityPierce.addBehavior(
 //                        () -> RockPaperScissorsKidEntity::canTurnFromArrow, 
 //                        () -> RockPaperScissorsKidEntity::turnFromArrow);
-                return new BoyIIManStandType<>(
-                        0x749FA5, PART_4_NAME,
-                        
-                        new StandAction[] {},
-                        new StandAction[] {},
-                        StandStats.class, new StandStats.Builder()
+                
+                new NoManifestationStandType.Builder<>()
+                .color(0x749FA5)
+                .storyPartName(PART_4_NAME)
+                .defaultStats(StandStats.class, new StandStats.Builder()
                         .tier(0)
                         .power(0)
                         .speed(0)
                         .range(0)
                         .durability(0)
                         .precision(0)
-                        .build("Boy II Man"), 
-                        
-                        new StandType.StandTypeOptionals()
-                        .setPlayerAccess(false));
-            });
+                        .build())
+                .setPlayerAccess(false)
+                .build()
+            );
     
     
     
