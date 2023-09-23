@@ -196,7 +196,7 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
     
     @Override
     public void onMaxTraining(IStandPower power) {
-        power.unlockAction(getShiftVariationIfPresent());
+        power.unlockAction((StandAction) getShiftVariationIfPresent());
     }
     
     @Override
