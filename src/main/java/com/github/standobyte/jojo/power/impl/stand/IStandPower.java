@@ -4,9 +4,10 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.capability.entity.power.StandCapProvider;
 import com.github.standobyte.jojo.entity.mob.IMobStandUser;
+import com.github.standobyte.jojo.network.packets.fromserver.StandActionLearningPacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 
@@ -51,11 +52,13 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     void setProgressionSkipped();
     boolean wasProgressionSkipped();
     float getStatsDevelopment();
-    
-    boolean unlockAction(Action<IStandPower> action);
-    void setLearningProgressPoints(Action<IStandPower> action, float progress, boolean clamp, boolean notLess);
-    void addLearningProgressPoints(Action<IStandPower> action, float progress);
-    ActionLearningProgressMap<IStandPower> clearActionLearning();
+
+    boolean unlockAction(StandAction action);
+    void setLearningProgressPoints(StandAction action, float progress);
+    void setLearningFromPacket(StandActionLearningPacket packet);
+    float getLearningProgressPoints(StandAction action);
+    void addLearningProgressPoints(StandAction action, float progress);
+    StandActionLearningProgress clearActionLearning();
     
     void setStandManifestation(@Nullable IStandManifestation standManifestation);
     @Nullable

@@ -7,7 +7,6 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
-import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.TimeStopHandler;
@@ -118,7 +117,7 @@ public class TimeStop extends StandAction {
     @Override
     public void onTrainingPoints(IStandPower power, float points) {
         if (getInstantTSVariation() != null) {
-            power.setLearningProgressPoints(getInstantTSVariation(), points, false, false);
+            power.setLearningProgressPoints(getInstantTSVariation(), points);
         }
     }
     
@@ -144,12 +143,12 @@ public class TimeStop extends StandAction {
     }
     
     @Nullable
-    public Action<IStandPower> getInstantTSVariation() {
+    public StandAction getInstantTSVariation() {
         return blink;
     }
     
-    private Action<IStandPower> blink;
-    void setInstantTSVariation(Action<IStandPower> blink) {
+    private StandAction blink;
+    void setInstantTSVariation(StandAction blink) {
         this.blink = blink;
     }
     
