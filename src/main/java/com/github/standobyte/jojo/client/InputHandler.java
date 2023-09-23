@@ -42,7 +42,6 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClDoubleShiftPressP
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonMeditationPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHasInputPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHeldActionTargetPacket;
-import com.github.standobyte.jojo.network.packets.fromclient.ClMetEntityTypePacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnLeapPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnStandDashPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClStopHeldActionPacket;
@@ -373,15 +372,7 @@ public class InputHandler {
             checkHeldActionAndTarget(nonStandPower, targetChanged);
             
             if (targetChanged) {
-                if (mouseTarget.getType() == RayTraceResult.Type.ENTITY) {
-                    Entity entity = ((EntityRayTraceResult) mouseTarget).getEntity();
-                    mc.player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                        if (cap.addMetEntityType(entity.getType())) {
-                            PacketManager.sendToServer(new ClMetEntityTypePacket(entity.getId()));
-                            // TODO highlight/particle/sound as indication (if CreateLifeform is unlocked)
-                        }
-                    });
-                }
+                ClientEventHandler.onMouseTargetChanged(mouseTarget);
             }
         }
     }

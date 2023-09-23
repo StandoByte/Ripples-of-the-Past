@@ -11,6 +11,7 @@ import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
@@ -28,6 +29,8 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromclient.ClMetEntityTypePacket;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
@@ -64,7 +67,9 @@ import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Timer;
+import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector3i;
@@ -285,6 +290,20 @@ public class ClientEventHandler {
 
         deathScreenTick = mc.screen instanceof DeathScreen ? deathScreenTick + 1 : 0;
         pauseMenuScreenTick = mc.screen instanceof IngameMenuScreen ? pauseMenuScreenTick + 1 : 0;
+    }
+    
+    public static void onMouseTargetChanged(RayTraceResult newTarget) {
+        Minecraft mc = Minecraft.getInstance();
+        if (newTarget.getType() == RayTraceResult.Type.ENTITY) {
+            Entity entity = ((EntityRayTraceResult) newTarget).getEntity();
+            mc.player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                if (cap.addMetEntityType(entity.getType())) {
+                    PacketManager.sendToServer(new ClMetEntityTypePacket(entity.getId()));
+                    // TODO highlight/particle/sound as indication (if CreateLifeform is unlocked)
+                    
+                }
+            });
+        }
     }
     
     
