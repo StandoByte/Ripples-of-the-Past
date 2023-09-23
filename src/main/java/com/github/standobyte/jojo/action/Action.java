@@ -196,6 +196,10 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     public abstract boolean isUnlocked(P power);
     
+    public boolean isTrained() {
+        return false;
+    }
+    
     @Nullable
     public Action<P> getVisibleAction(P power, ActionTarget target) {
         if (isUnlocked(power)) {
@@ -391,18 +395,6 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         }
         return null;
     }
-    
-    public boolean isTrained() {
-        return false;
-    }
-    
-    public float getMaxTrainingPoints(P power) {
-        return 1F;
-    }
-    
-    public void onTrainingPoints(P power, float points) {}
-    
-    public void onMaxTraining(P power) {}
     
     public boolean canUserSeeInStoppedTime(LivingEntity user, P power) {
         return false;

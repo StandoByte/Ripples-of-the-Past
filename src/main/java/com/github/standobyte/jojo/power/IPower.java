@@ -81,7 +81,6 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
         return getType() != null ? getType().clientHitResult((P) this, cameraEntity, mcHitResult) : mcHitResult;
     }
     
-    float getLearningProgressPoints(Action<P> action);
     float getLearningProgressRatio(Action<P> action);
 
     void setHeldAction(Action<P> action);

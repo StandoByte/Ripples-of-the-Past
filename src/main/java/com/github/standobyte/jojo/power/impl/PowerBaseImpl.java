@@ -339,13 +339,8 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
 
     @Override
-    public float getLearningProgressPoints(Action<P> action) {
-        return action.isUnlocked(getThis()) ? 1 : -1;
-    }
-    
-    @Override
     public float getLearningProgressRatio(Action<P> action) {
-        return getLearningProgressPoints(action) / action.getMaxTrainingPoints(getThis());
+        return action.isUnlocked(getThis()) ? 1 : -1;
     }
     
     protected void performAction(Action<P> action, ActionTarget target) {

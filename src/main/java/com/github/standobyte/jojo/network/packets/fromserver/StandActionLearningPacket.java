@@ -6,10 +6,10 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.toasts.ActionToast;
-import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.StandActionLearningProgress.StandActionLearningEntry;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.toasts.ToastGui;
@@ -17,13 +17,13 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 public class StandActionLearningPacket {
-    private final Action<?> action;
-    private final float progress;
+    public final StandAction action;
+    public final StandActionLearningEntry entry;
     private final boolean showToast;
     
-    public StandActionLearningPacket(Action<?> action, float progress, boolean showToast) {
+    public StandActionLearningPacket(StandAction action, StandActionLearningEntry entry, boolean showToast) {
         this.action = action;
-        this.progress = progress;
+        this.entry = entry;
         this.showToast = showToast;
     }
     
@@ -33,34 +33,32 @@ public class StandActionLearningPacket {
 
         @Override
         public void encode(StandActionLearningPacket msg, PacketBuffer buf) {
-            buf.writeRegistryIdUnsafe(JojoCustomRegistries.ACTIONS.getRegistry(), msg.action);
-            buf.writeFloat(msg.progress);
+            buf.writeRegistryId(msg.action);
+            msg.entry.toBuf(buf);
             buf.writeBoolean(msg.showToast);
         }
 
         @Override
         public StandActionLearningPacket decode(PacketBuffer buf) {
-            return new StandActionLearningPacket(buf.readRegistryIdUnsafe(JojoCustomRegistries.ACTIONS.getRegistry()), 
-                    buf.readFloat(), buf.readBoolean());
+            StandAction action = (StandAction) buf.readRegistryIdSafe(Action.class);
+            return new StandActionLearningPacket(action, 
+                    StandActionLearningEntry.fromBuf(buf, action), buf.readBoolean());
         }
 
         @Override
         public void handle(StandActionLearningPacket msg, Supplier<NetworkEvent.Context> ctx) {
-            if (msg.action instanceof StandAction) {
-                Action<IStandPower> standAction = (StandAction) msg.action;
-                IStandPower.getStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
-                    boolean showToast = msg.showToast && !standAction.isUnlocked(power);
-                    power.setLearningProgressPoints(standAction, msg.progress, false, false);
-                    ActionType actionType = standAction.getActionType(power);
-                    if (showToast && actionType != null) {
-                        ToastGui toastGui = Minecraft.getInstance().getToasts();
-                        ActionToast.addOrUpdate(toastGui, 
-                                ActionToast.Type.getToastType(
-                                        power.getPowerClassification(), actionType, standAction.isShiftVariation()), 
-                                standAction, power.getType());
-                    }
-                });
-            }
+            IStandPower.getStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
+                boolean showToast = msg.showToast && !msg.action.isUnlocked(power);
+                power.setLearningFromPacket(msg);
+                ActionType actionType = msg.action.getActionType(power);
+                if (showToast && actionType != null) {
+                    ToastGui toastGui = Minecraft.getInstance().getToasts();
+                    ActionToast.addOrUpdate(toastGui, 
+                            ActionToast.Type.getToastType(
+                                    power.getPowerClassification(), actionType, msg.action.isShiftVariation()), 
+                            msg.action, power.getType());
+                }
+            });
         }
 
         @Override

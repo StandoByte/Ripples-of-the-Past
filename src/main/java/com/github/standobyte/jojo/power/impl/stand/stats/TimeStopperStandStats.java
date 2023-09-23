@@ -55,7 +55,7 @@ public class TimeStopperStandStats extends StandStats {
             if (!cap.hasUsedTimeStopToday && timeStopDecayPerDay > 0) {
                 power.getActions(ActionType.ABILITY).getAll().forEach(ability -> {
                     if (ability.isUnlocked(power) && ability instanceof TimeStop) {
-                        power.setLearningProgressPoints(ability, power.getLearningProgressPoints(ability) - timeStopDecayPerDay, true, false);
+                        power.addLearningProgressPoints((TimeStop) ability, -timeStopDecayPerDay);
                     }
                 });
             }
