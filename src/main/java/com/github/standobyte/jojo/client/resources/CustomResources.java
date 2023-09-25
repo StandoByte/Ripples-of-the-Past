@@ -1,6 +1,8 @@
 package com.github.standobyte.jojo.client.resources;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.client.resources.sprites.ActionSpriteUploader;
+import com.github.standobyte.jojo.client.resources.sprites.HamonSkillSpriteUploader;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.IReloadableResourceManager;
@@ -22,11 +24,11 @@ public class CustomResources {
         resourceManager.registerReloadListener(modSplashes = new ModSplashes(mc.getUser(), new ResourceLocation(JojoMod.MOD_ID, "texts/splashes.txt")));
         resourceManager.registerReloadListener(standGlowTextureChecker = new StandGlowTextureChecker());
     }
-
+    
     public static ActionSpriteUploader getActionSprites() {
         return actionSprites;
     }
-
+    
     public static HamonSkillSpriteUploader getHamonSkillSprites() {
         return hamonSkillSprites;
     }

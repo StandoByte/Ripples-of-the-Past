@@ -43,6 +43,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     private final StandAction defaultQuickAccess;
     private String translationKey;
     private ResourceLocation iconTexture;
+    private ResourceLocation iconTextureNoExt;
     
     private final ITextComponent partName;
     private final T defaultStats;
@@ -287,13 +288,20 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         }
         return this.translationKey;
     }
-    
+
     @Override
     public ResourceLocation getIconTexture() {
         if (iconTexture == null) {
             iconTexture = JojoModUtil.makeTextureLocation("power", getRegistryName().getNamespace(), getRegistryName().getPath());
         }
         return this.iconTexture;
+    }
+    
+    public ResourceLocation getIconTextureBlocksAtlas() {
+        if (iconTextureNoExt == null) {
+            iconTextureNoExt = new ResourceLocation(getRegistryName().getNamespace(), "power/" + getRegistryName().getPath());
+        }
+        return this.iconTextureNoExt;
     }
     
     public ITextComponent getPartName() {

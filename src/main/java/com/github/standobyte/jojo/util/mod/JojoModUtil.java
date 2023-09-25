@@ -225,7 +225,11 @@ public class JojoModUtil {
 
 
     public static ResourceLocation makeTextureLocation(String folderName, String namespace, String path) {
-        return new ResourceLocation(namespace, "textures/"+ folderName + "/" + path + ".png");
+        return makeTextureLocation(folderName, namespace, path, true);
+    }
+
+    public static ResourceLocation makeTextureLocation(String folderName, String namespace, String path, boolean addPngExtension) {
+        return new ResourceLocation(namespace, "textures/"+ folderName + "/" + path + (addPngExtension ? ".png" : ""));
     }
     
     

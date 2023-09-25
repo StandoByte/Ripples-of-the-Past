@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.resources;
+package com.github.standobyte.jojo.client.resources.sprites;
 
 import java.util.stream.Stream;
 

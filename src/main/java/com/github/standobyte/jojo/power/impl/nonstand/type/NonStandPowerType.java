@@ -50,7 +50,7 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
         }
         return this.translationKey;
     }
-    
+
     @Override
     public ResourceLocation getIconTexture() {
         if (iconTexture == null) {

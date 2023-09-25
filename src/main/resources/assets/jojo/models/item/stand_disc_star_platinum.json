@@ -1,0 +1,4 @@
+{
+  "_comment": "Discs can also have separate models for each Stand type",
+  "parent": "jojo:item/stand_disc"
+}

@@ -1,7 +1,9 @@
 {
   "parent": "item/generated",
+  "_comment": "Replace layer 1 texture with 'jojo:item/stand_disc' to disable Stand icons; Remove layer 2 to disable disc tint",
   "textures": {
     "layer0": "jojo:item/stand_disc",
-    "layer1": "jojo:item/stand_disc"
+    "layer1": "jojo:dynamic_stand_icon",
+    "layer2": "jojo:item/stand_disc"
   }
 }

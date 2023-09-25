@@ -81,6 +81,8 @@ import com.github.standobyte.jojo.client.render.entity.renderer.stand.SilverChar
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.StarPlatinumRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.TheWorldRenderer;
 import com.github.standobyte.jojo.client.render.item.RoadRollerBakedModel;
+import com.github.standobyte.jojo.client.render.item.standdisc.StandDiscIconModel;
+import com.github.standobyte.jojo.client.render.item.standdisc.StandDiscItemOverrideList;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.loopplayer.LoopPlayerHandler;
@@ -121,6 +123,7 @@ import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.client.renderer.model.RenderMaterial;
+import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.CrossbowItem;
@@ -136,6 +139,7 @@ import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
+import net.minecraftforge.client.event.TextureStitchEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
@@ -317,7 +321,7 @@ public class ClientSetup {
         ItemColors itemColors = event.getItemColors();
         
         itemColors.register((stack, layer) -> {
-            if (layer != 1) return -1;
+            if (layer != 2) return -1;
             
             return ClientUtil.discColor(StandDiscItem.getColor(stack));
         }, ModItems.STAND_DISC.get());
@@ -334,6 +338,9 @@ public class ClientSetup {
     public static void onModelBake(ModelBakeEvent event) {
         registerCustomBakedModel(ModItems.ROAD_ROLLER.get().getRegistryName(), event.getModelRegistry(), 
                 model -> new RoadRollerBakedModel(model));
+        registerCustomBakedModel(ModItems.STAND_DISC.get().getRegistryName(), event.getModelRegistry(), 
+                model -> new StandDiscIconModel(model));
+        StandDiscItemOverrideList.bakeOverrides(event.getModelLoader());
     }
     
     private static void registerCustomBakedModel(ResourceLocation resLoc, 
@@ -341,13 +348,22 @@ public class ClientSetup {
         ModelResourceLocation modelResLoc = new ModelResourceLocation(resLoc, "inventory");
         IBakedModel existingModel = modelRegistry.get(modelResLoc);
         if (existingModel == null) {
-            throw new RuntimeException("Did not find original model in registry");
+            JojoMod.getLogger().error("Did not find original {} model in registry", modelResLoc);
         }
         else if (existingModel.isCustomRenderer()) {
-            throw new RuntimeException("Tried to replace model twice");
+            JojoMod.getLogger().error("Tried to replace {} model twice", modelResLoc);
         }
         else {
             modelRegistry.put(modelResLoc, newModel.apply(existingModel));
+        }
+    }
+    
+    @SubscribeEvent
+    public static void onTextureStitchEvent(TextureStitchEvent.Pre event) { // adds Stand icons for the custom Stand disc model to use
+        if (event.getMap().location().equals(AtlasTexture.LOCATION_BLOCKS)) {
+            JojoCustomRegistries.STANDS.getRegistry().getValues().forEach(stand -> {
+                event.addSprite(stand.getIconTextureBlocksAtlas());
+            });
         }
     }
     
@@ -358,6 +374,7 @@ public class ClientSetup {
             addUnreferencedBlockModels(MagiciansRedRenderer.MR_FIRE_0, MagiciansRedRenderer.MR_FIRE_1);
             spritesAdded = true;
         }
+        StandDiscItemOverrideList.loadOverrides();
     }
     
     public static void addUnreferencedBlockModels(RenderMaterial... renderMaterials) {

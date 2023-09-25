@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.client.ui.marker;
 import java.util.List;
 
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
-import com.github.standobyte.jojo.client.resources.ActionSpriteUploader;
+import com.github.standobyte.jojo.client.resources.sprites.ActionSpriteUploader;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
