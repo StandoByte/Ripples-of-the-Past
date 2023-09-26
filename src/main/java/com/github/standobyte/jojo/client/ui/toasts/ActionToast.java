@@ -54,13 +54,10 @@ public class ActionToast implements IToast {
             toastGui.blit(matrixStack, 0, 0, 0, 32, 160, 32);
             mc.font.draw(matrixStack, NAME, 30.0F, 7.0F, -11534256);
             mc.font.draw(matrixStack, description, 30.0F, 18.0F, -16777216);
-            RenderSystem.pushMatrix();
-//            RenderSystem.scalef(0.6F, 0.6F, 1.0F);
             matrixStack.pushPose();
             matrixStack.scale(0.5F, 0.5F, 1.0F);
             mc.getTextureManager().bind(powerType.getIconTexture());
             ToastGui.blit(matrixStack, 3, 3, 0, 0, 16, 16, 16, 16);
-            RenderSystem.popMatrix();
             matrixStack.popPose();
             renderIcon(matrixStack, toastGui, (int) timeMs);
             return timeMs - lastChanged >= TIME_MS ? IToast.Visibility.HIDE : IToast.Visibility.SHOW;

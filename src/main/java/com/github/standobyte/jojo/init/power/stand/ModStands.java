@@ -39,4 +39,7 @@ public class ModStands {
 
     public static final EntityStandSupplier<EntityStandType<StandStats>, StandEntityType<CrazyDiamondEntity>> 
     CRAZY_DIAMOND = new EntityStandSupplier<>(ModStandsInit.STAND_CRAZY_DIAMOND);
+
+//    public static final EntityStandSupplier<EntityStandType<StandStats>, StandEntityType<GoldExperienceEntity>> 
+//    GOLD_EXPERIENCE = new EntityStandSupplier<>(ModStandsInit.STAND_GOLD_EXPERIENCE);
 }

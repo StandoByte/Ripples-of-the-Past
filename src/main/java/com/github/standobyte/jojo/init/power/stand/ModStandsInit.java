@@ -738,7 +738,7 @@ public class ModStandsInit {
                     .partsRequired(StandPart.ARMS)));
     
     
-    public static final RegistryObject<StandType<StandStats>> GOLD_EXPERIENCE = STAND_TYPES.register("gold_experience", 
+    public static final RegistryObject<StandType<StandStats>> STAND_GOLD_EXPERIENCE = STAND_TYPES.register("gold_experience", 
             () -> {
                 return new NoSummonStandType<>(
                         0xD88F1F, PART_5_NAME,

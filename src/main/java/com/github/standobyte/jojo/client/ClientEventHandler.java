@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
+import com.github.standobyte.jojo.action.stand.GoldExperienceChooseLifeform;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
@@ -23,6 +24,7 @@ import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
+import com.github.standobyte.jojo.client.ui.toasts.MetEntityTypeToast;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
@@ -43,6 +45,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
+import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.screen.DeathScreen;
@@ -65,7 +68,9 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.Timer;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
@@ -297,10 +302,24 @@ public class ClientEventHandler {
         if (newTarget.getType() == RayTraceResult.Type.ENTITY) {
             Entity entity = ((EntityRayTraceResult) newTarget).getEntity();
             mc.player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                if (cap.addMetEntityType(entity.getType())) {
+                EntityType<?> type = entity.getType();
+                if (cap.addMetEntityType(type)) {
                     PacketManager.sendToServer(new ClMetEntityTypePacket(entity.getId()));
-                    // TODO highlight/particle/sound as indication (if CreateLifeform is unlocked)
                     
+                    // TODO highlight/particle/sound as indication (if CreateLifeform is unlocked)
+                    if (GoldExperienceChooseLifeform.isValidLifeform(type, mc.level)) {
+                        IStandPower.getStandPowerOptional(mc.player).ifPresent(power -> {
+                            if (ModStandsInit.GOLD_EXPERIENCE_CHOOSE_LIFEFORM.get().isUnlocked(power)) {
+                                mc.getSoundManager().play(new SimpleSound(SoundEvents.UI_BUTTON_CLICK, 
+                                        SoundCategory.MASTER, 0.5F, 2.0F, 
+                                        entity.getX(), entity.getY(0.5), entity.getZ()));
+                            }
+                        });
+                        
+                        MetEntityTypeToast.addOrUpdate(mc.getToasts(), type);
+                        
+                        // TODO particle
+                    }
                 }
             });
         }
