@@ -23,9 +23,26 @@ public class RotationAngle {
         return new RotationAngle(modelRenderer, angleX * MathUtil.DEG_TO_RAD, angleY * MathUtil.DEG_TO_RAD, angleZ * MathUtil.DEG_TO_RAD);
     }
     
+    // in case you apply the rotations to the model on the Edit tab
+    // if you do it on the Animate tab, use RotationAngle.fromDegrees
     public static RotationAngle blockbenchRotationAngle(ModelRenderer modelRenderer, float angleX, float angleY, float angleZ) {
         return fromDegrees(modelRenderer, -angleX, -angleY, angleZ);
     }
+    
+    
+    
+    public RotationAngle(ModelRenderer modelRenderer, double angleX, double angleY, double angleZ) {
+        this(modelRenderer, (float) angleX, (float) angleY, (float) angleZ);
+    }
+    
+    public static RotationAngle fromDegrees(ModelRenderer modelRenderer, double angleX, double angleY, double angleZ) {
+        return fromDegrees(modelRenderer, (float) angleX, (float) angleY, (float) angleZ);
+    }
+    public static RotationAngle blockbenchRotationAngle(ModelRenderer modelRenderer, double angleX, double angleY, double angleZ) {
+        return blockbenchRotationAngle(modelRenderer, (float) angleX, (float) angleY, (float) angleZ);
+    }
+    
+    
     
     public RotationAngle noDegreesWrapping() {
         wrapDegrees = false;
