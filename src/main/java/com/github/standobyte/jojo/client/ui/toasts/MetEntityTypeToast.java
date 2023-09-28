@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.github.standobyte.jojo.client.ui.screen.stand.ge.EntityTypeIcon;
-import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
+import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -49,7 +49,7 @@ public class MetEntityTypeToast implements IToast {
 
             matrixStack.pushPose();
             matrixStack.scale(0.5F, 0.5F, 1.0F);
-            mc.getTextureManager().bind(ModStandsInit.STAND_GOLD_EXPERIENCE.get().getIconTexture());
+            mc.getTextureManager().bind(ModStands.GOLD_EXPERIENCE.getStandType().getIconTexture());
             ToastGui.blit(matrixStack, 3, 3, 0, 0, 16, 16, 16, 16);
             matrixStack.popPose();
             

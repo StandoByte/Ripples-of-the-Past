@@ -1095,6 +1095,10 @@
   
   "entity.jojo.gold_experience": "Gold Experience",
   "stand.jojo.gold_experience": "Gold Experience",
+  "action.jojo.gold_experience_punch": "Punch",
+  "action.jojo.gold_experience_heavy_punch": "Heavy Punch",
+  "action.jojo.gold_experience_barrage": "Punch Barrage",
+  "action.jojo.gold_experience_block": "Block",
   "action.jojo.gold_experience_choose_lifeform": "Choose lifeform",
   "action.jojo.gold_experience_create_lifeform": "Create lifeform",
   "entity.jojo.ge_lifeform": "Gold Experience's Lifeform",

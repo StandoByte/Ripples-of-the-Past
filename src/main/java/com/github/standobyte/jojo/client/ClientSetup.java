@@ -76,6 +76,7 @@ import com.github.standobyte.jojo.client.render.entity.renderer.mob.HamonMasterR
 import com.github.standobyte.jojo.client.render.entity.renderer.mob.HungryZombieRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.mob.RockPaperScissorsKidRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.CrazyDiamondRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.stand.GoldExperienceRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.HierophantGreenRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.MagiciansRedRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.SilverChariotRenderer;
@@ -211,6 +212,7 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModStands.SILVER_CHARIOT.getEntityType(), SilverChariotRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModStands.MAGICIANS_RED.getEntityType(), MagiciansRedRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModStands.CRAZY_DIAMOND.getEntityType(), CrazyDiamondRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModStands.GOLD_EXPERIENCE.getEntityType(), GoldExperienceRenderer::new);
         
         ArmorModelRegistry.registerArmorModel(StoneMaskModel::new, ModItems.STONE_MASK.get());
         ArmorModelRegistry.registerArmorModel(BladeHatArmorModel::new, ModItems.BLADE_HAT.get());
