@@ -206,8 +206,9 @@ public class StandUtil {
         }
         return false;
     }
-    
-    public static boolean isFinisherUnlocked(IStandPower power) {
-        return power.getResolveLevel() >= 1;
+
+    public static boolean isFinisherMechanicUnlocked(IStandPower stand) {
+        return stand.hasPower() && (stand.getResolveLevel() >= 1
+                || stand.getType().getStandFinisherPunch().map(action -> action.isUnlocked(stand)).orElse(false));
     }
 }

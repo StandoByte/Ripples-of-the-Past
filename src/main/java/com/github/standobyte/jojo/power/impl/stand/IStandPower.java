@@ -1,6 +1,8 @@
 package com.github.standobyte.jojo.power.impl.stand;
 
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.stream.StreamSupport;
 
 import javax.annotation.Nullable;
 
@@ -41,7 +43,7 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
         return getResolve() / getMaxResolve();
     }
     int getResolveLevel();
-    void setResolveLevel(int level, boolean fromEffect);
+    void setResolveLevel(int level);
     int getMaxResolveLevel();
     float getResolveDmgReduction();
     float getPrevTickResolve();
@@ -58,7 +60,12 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     void setLearningFromPacket(StandActionLearningPacket packet);
     float getLearningProgressPoints(StandAction action);
     void addLearningProgressPoints(StandAction action, float progress);
-    StandActionLearningProgress clearActionLearning();
+    void clearActionLearning();
+    Iterable<StandAction> getAllUnlockedActions();
+    default boolean hasUnlockedMatching(Predicate<StandAction> actionPredicate) {
+        return StreamSupport.stream(getAllUnlockedActions().spliterator(), false)
+                .anyMatch(actionPredicate);
+    }
     
     void setStandManifestation(@Nullable IStandManifestation standManifestation);
     @Nullable

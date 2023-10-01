@@ -64,9 +64,10 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         Entity cameraEntity = restorationCenterEntity(user, power);
         Vector3i eyePosI = eyePos(cameraEntity);
         boolean hasResolveEffect = user.hasEffect(ModStatusEffects.RESOLVE.get());
+        boolean onlyAimedAt = user.isShiftKeyDown();
         if (getBlocksInRange(user.level, user, eyePosI, restorationDistManhattan(hasResolveEffect), 
                 block -> blockPosSelectedForRestoration(block, cameraEntity, cameraEntity.getLookAngle(), 
-                        cameraEntity.getEyePosition(1.0F), eyePosI, hasResolveEffect, user.isShiftKeyDown())).count() == 0) {
+                        cameraEntity.getEyePosition(1.0F), eyePosI, hasResolveEffect, onlyAimedAt)).count() == 0) {
             return ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
         }
         return super.checkSpecificConditions(user, power, target);
@@ -101,9 +102,10 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
             float staminaPerBlock = getStaminaCostPerBlock(userPower);
             int blocksToRestore = resolveEffect ? 64 : 
                 Math.min(blocksPerTick(standEntity), (int) (staminaPerBlock * userPower.getStamina()));
+            boolean onlyAimedAt = user.isShiftKeyDown();
             
             Stream<PrevBlockInfo> blocks = getBlocksInRange(world, user, eyePos, manhattanRange, 
-                    block -> blockPosSelectedForRestoration(block, cameraEntity, lookVec, eyePosD, eyePos, resolveEffect, user.isShiftKeyDown()));
+                    block -> blockPosSelectedForRestoration(block, cameraEntity, lookVec, eyePosD, eyePos, resolveEffect, onlyAimedAt));
             
             blocks
             
@@ -124,7 +126,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
             .forEach(block -> {
                 if (tryPlaceBlock(world, block.pos, block.state, blocksPlaced, 
                         creative, block.drops, block.getDroppedXp(), playerUser, userInventory, itemsAround, 
-                        resolveEffect && !user.isShiftKeyDown())) {
+                        resolveEffect && !onlyAimedAt)) {
                     blocksToForget.add(block.pos);
                 }
             });

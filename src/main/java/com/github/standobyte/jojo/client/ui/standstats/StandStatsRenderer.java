@@ -7,7 +7,6 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
-import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -64,7 +63,7 @@ public class StandStatsRenderer {
                 if (statLeveling < 1) {
                     statVal[5] = 1 + (1 - statLeveling) * power.getMaxResolveLevel();
                 }
-                else if (JojoModUtil.hasAction(power, action -> action.isTrained() && power.getLearningProgressRatio(action) < 1)) {
+                else if (power.hasUnlockedMatching(action -> action.isTrained() && power.getLearningProgressRatio(action) < 1)) {
                     statVal[5] = 1;
                 }
 

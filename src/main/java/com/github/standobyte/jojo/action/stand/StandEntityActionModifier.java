@@ -27,11 +27,6 @@ public abstract class StandEntityActionModifier extends StandAction implements I
         return conditionCheck.isPositive();
     }
     
-    @Override
-    public boolean validateInput() {
-        return true;
-    }
-    
     
     
     protected class TriggeredFlag {}

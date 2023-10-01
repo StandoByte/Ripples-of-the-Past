@@ -1,8 +1,6 @@
 package com.github.standobyte.jojo.power.impl.stand;
 
-import java.util.Arrays;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -25,6 +23,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrStaminaPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrTypeStandInstancePacket;
 import com.github.standobyte.jojo.power.impl.PowerBaseImpl;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.impl.stand.StandActionLearningProgress.StandActionLearningEntry;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
@@ -345,9 +344,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     }
     
     @Override
-    public void setResolveLevel(int level, boolean showUnlockToast) {
+    public void setResolveLevel(int level) {
         if (usesResolve()) {
-            resolveCounter.setResolveLevel(level, showUnlockToast);
+            resolveCounter.setResolveLevel(level);
             if (!user.level.isClientSide() && hasPower()) {
                 getType().onNewResolveLevel(this);
                 if (level >= getType().getMaxResolveLevel()) {
@@ -408,13 +407,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         StandType<?> standType = getType();
         if (standType != null) {
             setProgressionSkipped();
-            resolveCounter.setResolveLevel(getMaxResolveLevel(), true);
+            resolveCounter.setResolveLevel(getMaxResolveLevel());
             if (!user.level.isClientSide()) {
-                Stream.concat(
-                        Arrays.stream(standType.getAttacks()), 
-                        Arrays.stream(standType.getAbilities()))
-                .flatMap(action -> action.hasShiftVariation() && action.getShiftVariationIfPresent() instanceof StandAction
-                        ? Stream.of(action, (StandAction) action.getShiftVariationIfPresent()) : Stream.of(action))
+                standType.getAllUnlockableActions()
                 .forEach(action -> {
                     actionLearningProgressMap.addEntry(action, getType());
                     setLearningProgressPoints(action, action.getMaxTrainingPoints(this));
@@ -468,23 +463,22 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     @Override
     public void setLearningProgressPoints(StandAction action, float points) {
-        if (actionLearningProgressMap.setLearningProgressPoints(action, points, this)) {
-            if (this.getUser() != null && !this.getUser().level.isClientSide()) {
-                action.onTrainingPoints(this, getLearningProgressPoints(action));
-                if (getLearningProgressPoints(action) == action.getMaxTrainingPoints(this)) {
-                    action.onMaxTraining(this);
-                }
-                
-                serverPlayerUser.ifPresent(player -> {
-                    actionLearningProgressMap.syncEntryWithUser(action, player);
-                });
+        StandActionLearningEntry learningEntry = actionLearningProgressMap.setLearningProgressPoints(action, points, this);
+        if (this.getUser() != null && !this.getUser().level.isClientSide()) {
+            action.onTrainingPoints(this, getLearningProgressPoints(action));
+            if (getLearningProgressPoints(action) == action.getMaxTrainingPoints(this)) {
+                action.onMaxTraining(this);
             }
+            
+            serverPlayerUser.ifPresent(player -> {
+                actionLearningProgressMap.syncEntryWithUser(learningEntry, player);
+            });
         }
     }
     
     @Override
     public void setLearningFromPacket(StandActionLearningPacket packet) {
-        actionLearningProgressMap.setEntryDirectly((StandAction) packet.action, packet.entry);
+        actionLearningProgressMap.setEntryDirectly(packet.entry);
     }
     
     @Override
@@ -504,15 +498,20 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     }
     
     @Override
-    public StandActionLearningProgress clearActionLearning() {
-        StandActionLearningProgress previousMap = actionLearningProgressMap;
+    public void clearActionLearning() {
         this.actionLearningProgressMap = new StandActionLearningProgress();
         resolveCounter.clearLevels();
         serverPlayerUser.ifPresent(player -> {
             PacketManager.sendToClient(new StandActionsClearLearningPacket(), player);
         });
-        return previousMap;
     }
+    
+    @Override
+    public Iterable<StandAction> getAllUnlockedActions() {
+        return actionLearningProgressMap.getAllUnlocked(this);
+    }
+    
+    
     
     @Override
     public void setStandManifestation(IStandManifestation standManifestation) {

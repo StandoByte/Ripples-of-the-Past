@@ -86,6 +86,16 @@ public class GeneralUtil {
         }
     }
     
+    public static <T> boolean contains(T[] array, T element) {
+        for (T t : array) {
+            if (t == element) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
     public static int largestLessOrEqualBinarySearch(int[] arr, int num) {
         if (arr.length == 0) return -1;
         

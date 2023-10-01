@@ -74,7 +74,7 @@ public class TrTypeStandInstancePacket {
                     else {
                         stand.giveStand(msg.standInstance, false);
                         if (msg.resolveLevel >= 0) {
-                            stand.setResolveLevel(msg.resolveLevel, false);
+                            stand.setResolveLevel(msg.resolveLevel);
                         }
                     }
                 });
