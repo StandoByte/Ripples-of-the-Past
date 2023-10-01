@@ -1,12 +1,14 @@
 package com.github.standobyte.jojo.power.impl.stand.type;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -20,6 +22,7 @@ import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
+import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
 import com.github.standobyte.jojo.util.mc.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -38,8 +41,8 @@ import net.minecraftforge.registries.ForgeRegistryEntry;
 
 public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry<StandType<?>> implements IPowerType<IStandPower, StandType<?>> {
     private final int color;
-    private final StandAction[] attacks;
-    private final StandAction[] abilities;
+    private final StandAction[] leftClickHotbar;
+    private final StandAction[] rightClickHotbar;
     private final StandAction defaultQuickAccess;
     private String translationKey;
     private ResourceLocation iconTexture;
@@ -55,12 +58,12 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     
     @Deprecated
     public StandType(int color, ITextComponent partName, 
-            StandAction[] attacks, StandAction[] abilities, StandAction defaultQuickAccess, 
+            StandAction[] leftClickHotbar, StandAction[] rightClickHotbar, StandAction defaultQuickAccess, 
             Class<T> statsClass, T defaultStats, @Nullable StandTypeOptionals additions) {
         this.color = color;
         this.partName = partName;
-        this.attacks = attacks;
-        this.abilities = abilities;;
+        this.leftClickHotbar = leftClickHotbar;
+        this.rightClickHotbar = rightClickHotbar;
         this.defaultQuickAccess = defaultQuickAccess;
         this.statsClass = statsClass;
         this.defaultStats = defaultStats;
@@ -73,94 +76,35 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     protected StandType(AbstractBuilder<?, T> builder) {
-        this(builder.color, builder.storyPartName, builder.attacks, builder.abilities, 
+        this(builder.color, builder.storyPartName, builder.leftClickHotbar, builder.rightClickHotbar, 
                 builder.quickAccess, builder.statsClass, builder.defaultStats, 
                 builder.additions);
     }
     
+    
 
-    
-    public static abstract class AbstractBuilder<B extends AbstractBuilder<B, T>, T extends StandStats> { // i freaking love chainables and builders
-        private int color = 0x000000;
-        private ITextComponent storyPartName = StringTextComponent.EMPTY;
-        private StandAction[] attacks = {};
-        private StandAction[] abilities = {};
-        private StandAction quickAccess = null;
-        private T defaultStats;
-        private Class<T> statsClass;
-        private StandTypeOptionals additions = null;
+    private Set<StandAction> allUnlockableActions;
+    public void onCommonSetup() {
+        Set<StandAction> unlockables = new HashSet<>();
+        Collections.addAll(unlockables, leftClickHotbar);
+        Collections.addAll(unlockables, rightClickHotbar);
         
-        public B color(int color) {
-            this.color = color;
-            return getThis();
-        }
-        
-        public B storyPartName(ITextComponent storyPartName) {
-            this.storyPartName = storyPartName;
-            return getThis();
-        }
-        
-        public B attacks(StandAction... attacks) {
-            this.attacks = attacks;
-            return getThis();
-        }
-        
-        public B abilities(StandAction... abilities) {
-            this.abilities = abilities;
-            return getThis();
-        }
-        
-        public B defaultQuickAccess(StandAction quickAccess) {
-            this.quickAccess = quickAccess;
-            return getThis();
-        }
-        
-        public B defaultStats(Class<T> statsClass, T stats) {
-            this.statsClass = statsClass;
-            this.defaultStats = stats;
-            return getThis();
-        }
-        
-        public B addSummonShout(Supplier<SoundEvent> summonShoutSupplier) {
-            if (summonShoutSupplier != null) {
-                getOptionals().summonShoutSupplier = summonShoutSupplier;
+        Set<StandAction> tmp = new HashSet<>();
+        for (StandAction action : unlockables) {
+            if (action.hasShiftVariation()) {
+                tmp.add((StandAction) action.getShiftVariationIfPresent());
             }
-            return getThis();
         }
+        unlockables.addAll(tmp);
         
-        public B addOst(OstSoundList ostSupplier) {
-            if (ostSupplier != null) {
-                getOptionals().ostSupplier = ostSupplier;
-            }
-            return getThis();
+        tmp.clear();
+        for (StandAction action : unlockables) {
+            Collections.addAll(tmp, action.getExtraUnlockable());
         }
+        unlockables.addAll(tmp);
         
-        public B addItemOnResolveLevel(int resolveLevel, ItemStack item) {
-            if (item != null && !item.isEmpty()) {
-                getOptionals().resolveLevelItems.computeIfAbsent(resolveLevel, lvl -> new ArrayList<>()).add(item);
-            }
-            return getThis();
-        }
-        
-        public B setPlayerAccess(boolean canPlayerGet) {
-            getOptionals().canPlayerGet = canPlayerGet;
-            return getThis();
-        }
-        
-        private StandTypeOptionals getOptionals() {
-            if (additions == null) {
-                additions = new StandTypeOptionals();
-            }
-            return additions;
-        }
-        
-        protected abstract B getThis();
-        public abstract StandType<T> build();
+        this.allUnlockableActions = Collections.unmodifiableSet(unlockables);
     }
-    
-    
-    
-    public void onCommonSetup() {}
     
     @Override
     public boolean keepOnDeath(IStandPower power) {
@@ -203,18 +147,20 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     @Override
-    public StandAction[] getAttacks() {
-        return attacks;
-    }
-
-    @Override
-    public StandAction[] getAbilities() {
-        return abilities;
+    public ActionsLayout<IStandPower> createDefaultLayout() {
+        return new ActionsLayout<>(leftClickHotbar, rightClickHotbar, defaultQuickAccess);
     }
     
-    @Override
-    public StandAction getDefaultQuickAccess() {
-        return defaultQuickAccess;
+    public StandAction[] getDefaultHotbar(ActionsLayout.Hotbar hotbar) {
+        switch (hotbar) {
+        case LEFT_CLICK: return leftClickHotbar;
+        case RIGHT_CLICK: return rightClickHotbar;
+        default: throw new IllegalArgumentException();
+        }
+    }
+    
+    public Iterable<StandAction> getAllUnlockableActions() {
+        return allUnlockableActions;
     }
     
     public boolean usesStamina() {
@@ -253,12 +199,8 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     public void unlockNewActions(IStandPower power) {
-        Stream.concat(Arrays.stream(attacks), Arrays.stream(abilities))
-        .forEach(action -> {
+        getAllUnlockableActions().forEach(action -> {
             tryUnlock(action, power);
-            if (action.hasShiftVariation()) {
-                tryUnlock((StandAction) action.getShiftVariationIfPresent(), power);
-            }
         });
     }
     
@@ -268,8 +210,9 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         }
     }
     
-    public boolean usesStandFinisherMechanic() {
-        return false;
+    private static final Optional<StandAction> NOPE = Optional.empty();
+    public Optional<StandAction> getStandFinisherPunch() {
+        return NOPE;
     }
     
     @Override
@@ -366,6 +309,86 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
                 cap.setLastHurtByStand(attackerStand, dmgAmount, standDmgSource.getStandInvulTicks());
             });
         }
+    }
+    
+
+    
+    public static abstract class AbstractBuilder<B extends AbstractBuilder<B, T>, T extends StandStats> { // i freaking love chainables and builders
+        private int color = 0x000000;
+        private ITextComponent storyPartName = StringTextComponent.EMPTY;
+        private StandAction[] leftClickHotbar = {};
+        private StandAction[] rightClickHotbar = {};
+        private StandAction quickAccess = null;
+        private T defaultStats;
+        private Class<T> statsClass;
+        private StandTypeOptionals additions = null;
+        
+        public B color(int color) {
+            this.color = color;
+            return getThis();
+        }
+        
+        public B storyPartName(ITextComponent storyPartName) {
+            this.storyPartName = storyPartName;
+            return getThis();
+        }
+        
+        public B leftClickHotbar(StandAction... leftClickHotbar) {
+            this.leftClickHotbar = leftClickHotbar;
+            return getThis();
+        }
+        
+        public B rightClickHotbar(StandAction... rightClickHotbar) {
+            this.rightClickHotbar = rightClickHotbar;
+            return getThis();
+        }
+        
+        public B defaultQuickAccess(StandAction quickAccess) {
+            this.quickAccess = quickAccess;
+            return getThis();
+        }
+        
+        public B defaultStats(Class<T> statsClass, T stats) {
+            this.statsClass = statsClass;
+            this.defaultStats = stats;
+            return getThis();
+        }
+        
+        public B addSummonShout(Supplier<SoundEvent> summonShoutSupplier) {
+            if (summonShoutSupplier != null) {
+                getOptionals().summonShoutSupplier = summonShoutSupplier;
+            }
+            return getThis();
+        }
+        
+        public B addOst(OstSoundList ostSupplier) {
+            if (ostSupplier != null) {
+                getOptionals().ostSupplier = ostSupplier;
+            }
+            return getThis();
+        }
+        
+        public B addItemOnResolveLevel(int resolveLevel, ItemStack item) {
+            if (item != null && !item.isEmpty()) {
+                getOptionals().resolveLevelItems.computeIfAbsent(resolveLevel, lvl -> new ArrayList<>()).add(item);
+            }
+            return getThis();
+        }
+        
+        public B setPlayerAccess(boolean canPlayerGet) {
+            getOptionals().canPlayerGet = canPlayerGet;
+            return getThis();
+        }
+        
+        private StandTypeOptionals getOptionals() {
+            if (additions == null) {
+                additions = new StandTypeOptionals();
+            }
+            return additions;
+        }
+        
+        protected abstract B getThis();
+        public abstract StandType<T> build();
     }
     
     

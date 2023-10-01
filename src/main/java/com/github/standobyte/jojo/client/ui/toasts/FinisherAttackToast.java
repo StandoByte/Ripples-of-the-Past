@@ -5,6 +5,7 @@ import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
+import net.minecraft.client.gui.toasts.IToast;
 import net.minecraft.client.gui.toasts.ToastGui;
 
 public class FinisherAttackToast extends ActionToast {
@@ -25,15 +26,6 @@ public class FinisherAttackToast extends ActionToast {
             super.renderIcon(matrixStack, toastGui, actionRotationTime);
         }
     }
-
-    public static void addOrUpdate(ToastGui toastGui, Action<?> action, IPowerType<?, ?> powerType) {
-        ActionToast toast = toastGui.getToast(ActionToast.class, SpecialToastType.FINISHER_HEAVY_ATTACK);
-        if (toast == null) {
-            toastGui.addToast(new FinisherAttackToast(action, powerType));
-        } else {
-            toast.addAction(action, powerType);
-        }
-    }
     
     public static enum SpecialToastType implements IActionToastType {
         FINISHER_HEAVY_ATTACK("stand.attack.heavy_finisher");
@@ -47,6 +39,11 @@ public class FinisherAttackToast extends ActionToast {
         @Override
         public String getName() {
             return name;
+        }
+        
+        @Override
+        public IToast createToast(Action<?> action, IPowerType<?, ?> powerType) {
+            return new FinisherAttackToast(action, powerType);
         }
     }
 }

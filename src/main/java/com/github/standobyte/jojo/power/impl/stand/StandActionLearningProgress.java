@@ -3,6 +3,8 @@ package com.github.standobyte.jojo.power.impl.stand;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -13,7 +15,6 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.StandActionLearningPacket;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.mc.MCUtil;
-import com.github.standobyte.jojo.util.mod.LegacyUtil;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -22,14 +23,11 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 
 public class StandActionLearningProgress {
-    private final Map<StandAction, StandActionLearningEntry> wrappedMap = new HashMap<>();
+    private final EntriesMap map = new EntriesMap();
     
     @Nullable
     private StandActionLearningEntry getEntry(StandAction action, StandType<?> currentlyUsedStand) {
-        StandActionLearningEntry entry = wrappedMap.get(action);
-        if (entry != null && entry.standType != currentlyUsedStand) {
-            entry = null;
-        }
+        StandActionLearningEntry entry = map.getEntry(currentlyUsedStand, action);
         return entry;
     }
     
@@ -38,69 +36,137 @@ public class StandActionLearningProgress {
         return entry != null ? Math.max(entry.getPoints(), 0) : -1;
     }
     
+    public Iterable<StandAction> getAllUnlocked(IStandPower power) {
+        return map._mapOfMaps
+                .get(power.getType().getRegistryName())
+                .values()
+                .stream()
+                .map(entry -> entry.action)
+                .filter(action -> action.isUnlocked(power))
+                .collect(Collectors.toList());
+    }
+    
     boolean addEntry(StandAction action, StandType<?> standType) {
-        if (wrappedMap.containsKey(action)) {
+        if (map.contains(standType, action)) {
             return false;
         }
         
-        wrappedMap.put(action, new StandActionLearningEntry(action, standType, 0));
+        map.putEntry(new StandActionLearningEntry(action, standType, 0));
         return true;
     }
     
-    boolean setLearningProgressPoints(StandAction action, float points, IStandPower power) {
-        StandActionLearningEntry entry = wrappedMap.computeIfAbsent(action, a -> new StandActionLearningEntry(a, power.getType(), 0));
+    StandActionLearningEntry setLearningProgressPoints(StandAction action, float points, IStandPower power) {
+        StandActionLearningEntry entry = map.computeIfAbsent(power.getType(), action, 0);
         entry.setPoints(points);
-        return true;
+        return entry;
     }
     
-    void setEntryDirectly(StandAction action, StandActionLearningEntry entry) {
-        wrappedMap.put(action, entry);
+    void setEntryDirectly(StandActionLearningEntry entry) {
+        map.putEntry(entry);
     }
     
-    void syncEntryWithUser(StandAction action, ServerPlayerEntity user) {
-        PacketManager.sendToClient(new StandActionLearningPacket(action, wrappedMap.get(action), false), user);
+    void syncEntryWithUser(StandActionLearningEntry entry, ServerPlayerEntity user) {
+        PacketManager.sendToClient(new StandActionLearningPacket(entry, true), user);
     }
     
     void syncFullWithUser(ServerPlayerEntity user) {
-        wrappedMap.forEach((action, progress) -> {
-            PacketManager.sendToClient(new StandActionLearningPacket(action, progress, false), user);
+        map.forEach(entry -> {
+            PacketManager.sendToClient(new StandActionLearningPacket(entry, false), user);
         });
     }
     
     
-    
+
+    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! legacy version nbt load
     public void fromNBT(CompoundNBT nbt) {
-        nbt.getAllKeys().forEach(actionName -> {
-            Action<?> action = JojoCustomRegistries.ACTIONS.getRegistry().getValue(new ResourceLocation(actionName));
-            if (action instanceof StandAction) {
-                StandAction standAction = (StandAction) action;
-                
-                Optional<CompoundNBT> entryNBT = MCUtil.nbtGetCompoundOptional(nbt, action.getRegistryName().toString());
-                Optional<StandActionLearningEntry> entryRead = entryNBT.flatMap(tag -> StandActionLearningEntry.fromNBT(standAction, tag));
-                if (!entryRead.isPresent()) {
-                    entryRead = LegacyUtil.readOldStandActionLearning(nbt, standAction);
-                }
-                
-                entryRead.ifPresent(entry -> {
-                    wrappedMap.put(standAction, entry);
-                });
-            }
-        });
+        map.fromNBT(nbt);
     }
     
     public CompoundNBT toNBT() {
-        CompoundNBT nbt = new CompoundNBT();
-        wrappedMap.forEach((action, entry) -> {
-            nbt.put(action.getRegistryName().toString(), entry.toNBT());
-        });
-        return nbt;
+        return map.toNBT();
+    }
+    
+    
+    
+    private static class EntriesMap {
+        private final Map<ResourceLocation, Map<ResourceLocation, StandActionLearningEntry>> _mapOfMaps = new HashMap<>();
+        
+        @Nullable
+        public StandActionLearningEntry getEntry(StandType<?> standType, StandAction action) {
+            if (!_mapOfMaps.containsKey(standType.getRegistryName())) {
+                return null;
+            }
+            
+            Map<ResourceLocation, StandActionLearningEntry> map = _mapOfMaps.get(standType.getRegistryName());
+            return map.get(action.getRegistryName());
+        }
+        
+        public void putEntry(StandActionLearningEntry entry) {
+            Map<ResourceLocation, StandActionLearningEntry> map = _mapOfMaps.computeIfAbsent(
+                    entry.standType.getRegistryName(), type -> new HashMap<>());
+            map.put(entry.action.getRegistryName(), entry);
+        }
+        
+        public StandActionLearningEntry computeIfAbsent(StandType<?> standType, StandAction action, float newEntryPoints) {
+            Map<ResourceLocation, StandActionLearningEntry> map = _mapOfMaps.computeIfAbsent(
+                    standType.getRegistryName(), type -> new HashMap<>());
+            return map.computeIfAbsent(action.getRegistryName(), a -> new StandActionLearningEntry(action, standType, newEntryPoints));
+        }
+        
+        public boolean contains(StandType<?> standType, StandAction action) {
+            if (!_mapOfMaps.containsKey(standType.getRegistryName())) {
+                return false;
+            }
+            
+            Map<ResourceLocation, StandActionLearningEntry> map = _mapOfMaps.get(standType.getRegistryName());
+            return map.containsKey(action.getRegistryName());
+        }
+        
+        public void forEach(Consumer<StandActionLearningEntry> action) {
+            _mapOfMaps.values().stream()
+            .flatMap(map -> map.values().stream())
+            .forEach(action);
+        }
+        
+        public CompoundNBT toNBT() {
+            CompoundNBT nbt = new CompoundNBT();
+            _mapOfMaps.forEach((standType, map) -> {
+                CompoundNBT standTypeNbt = new CompoundNBT();
+                map.forEach((action, entry) -> {
+                    standTypeNbt.putFloat(action.toString(), entry.getPoints());
+                });
+                nbt.put(standType.toString(), standTypeNbt);
+            });
+            return nbt;
+        }
+        
+        public void fromNBT(CompoundNBT nbt) {
+            _mapOfMaps.clear();
+
+            nbt.getAllKeys().forEach(standTypeName -> {
+                if (standTypeName.isEmpty()) return;
+                StandType<?> standType = JojoCustomRegistries.STANDS.getRegistry().getValue(new ResourceLocation(standTypeName));
+                if (standType == null) return;
+
+                CompoundNBT standTypeNbt = nbt.getCompound(standTypeName);
+                standTypeNbt.getAllKeys().forEach(actionName -> {
+                    if (actionName.isEmpty()) return;
+                    Action<?> action = JojoCustomRegistries.ACTIONS.getRegistry().getValue(new ResourceLocation(actionName));
+                    
+                    if (action instanceof StandAction) {
+                        StandActionLearningEntry entry = new StandActionLearningEntry((StandAction) action, standType, standTypeNbt.getFloat(actionName));
+                        putEntry(entry);
+                    }
+                });
+            });
+        }
     }
     
     
     
     public static class StandActionLearningEntry {
-        private final StandAction action;
-        private final StandType<?> standType;
+        public final StandAction action;
+        public final StandType<?> standType;
         private float points;
         
         public StandActionLearningEntry(StandAction action, StandType<?> standType, float points) {
@@ -137,11 +203,13 @@ public class StandActionLearningProgress {
         
         
         public void toBuf(PacketBuffer buffer) {
+            buffer.writeRegistryId(action);
             buffer.writeFloat(points);
             buffer.writeRegistryId(standType);
         }
         
-        public static StandActionLearningEntry fromBuf(PacketBuffer buffer, StandAction action) {
+        public static StandActionLearningEntry fromBuf(PacketBuffer buffer) {
+            StandAction action = (StandAction) buffer.readRegistryIdSafe(Action.class);
             float points = buffer.readFloat();
             StandType<?> standType = buffer.readRegistryIdSafe(StandType.class);
             return new StandActionLearningEntry(action, standType, points);

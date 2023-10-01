@@ -121,10 +121,6 @@ public class ClientUtil {
         return Minecraft.getInstance().getLanguageManager().getSelected().getCode();
     }
     
-    public static boolean useActionShiftVar(PlayerEntity player) {
-        return player.isShiftKeyDown();
-    }
-    
     public static boolean canSeeStands() {
         return canSeeStands;
     }

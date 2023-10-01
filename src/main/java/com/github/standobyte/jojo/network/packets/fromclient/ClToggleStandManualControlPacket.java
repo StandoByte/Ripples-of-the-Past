@@ -34,7 +34,8 @@ public class ClToggleStandManualControlPacket {
                     if (power.hasPower()) {
                         if (power.getType().canBeManuallyControlled()) {
                             if (power.isActive()) {
-                                StandUtil.setManualControl(player, !((StandEntity) power.getStandManifestation()).isManuallyControlled(), player.isShiftKeyDown());
+                                boolean keepPosition = player.isShiftKeyDown();
+                                StandUtil.setManualControl(player, !((StandEntity) power.getStandManifestation()).isManuallyControlled(), keepPosition);
                             }
                         }
                         else {
