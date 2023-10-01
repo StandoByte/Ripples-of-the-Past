@@ -10,8 +10,8 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.InputHandler.ActionKey;
 import com.github.standobyte.jojo.power.IPower;
-import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
+import com.github.standobyte.jojo.power.layout.ActionsLayout;
 
 import net.minecraft.util.Util;
 
@@ -43,19 +43,19 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
         return power;
     }
     
-    int getSelectedSlot(ActionType hotbar) {
+    int getSelectedSlot(ActionsLayout.Hotbar hotbar) {
         switch (hotbar) {
-        case ATTACK:
+        case LEFT_CLICK:
             return selectedAttack;
-        case ABILITY:
+        case RIGHT_CLICK:
             return selectedAbility;
         }
         return -1;
     }
     
-    void setSelectedSlot(ActionType hotbar, int slot, ActionTarget target) {
+    void setSelectedSlot(ActionsLayout.Hotbar hotbar, int slot, ActionTarget target) {
         if (slot > -1) {
-            List<Action<P>> actions = power.getActions(hotbar).getEnabled();
+            List<Action<P>> actions = power.getActionsHudLayout().getHotbar(hotbar).getEnabled();
             if (slot >= actions.size() || actions.get(slot).getVisibleAction(power, target) == null) {
                 slot = -1;
             }
@@ -65,10 +65,10 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
         }
         
         switch (hotbar) {
-        case ATTACK:
+        case LEFT_CLICK:
             selectedAttack = slot;
             break;
-        case ABILITY:
+        case RIGHT_CLICK:
             selectedAbility = slot;
             break;
         }
@@ -76,12 +76,13 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
     }
     
     @Nullable
-    Action<P> getSelectedAction(ActionType hotbar, boolean shift, ActionTarget target) {
+    Action<P> getSelectedAction(ActionsLayout.Hotbar hotbar, boolean shiftVariation, ActionTarget target) {
         int slot = getSelectedSlot(hotbar);
         if (slot == -1) {
             return null;
         }
-        Action<P> action = getPower().getAction(hotbar, slot, shift, target);
+        P power = getPower();
+        Action<P> action = power.getActionsHudLayout().getVisibleActionInSlot(hotbar, slot, shiftVariation, power, target);
         if (action == null) {
             setSelectedSlot(hotbar, -1, target);
         }

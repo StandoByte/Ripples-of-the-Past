@@ -403,7 +403,7 @@ public class ClientEventHandler {
         if (!event.isCanceled() && !modPostedEvent && event.getHand() == Hand.MAIN_HAND && !player.isInvisible()) {
             INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
                 ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
-                if ((hud.isActionSelectedAndEnabled(ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get()))
+                if ((hud.showExtraActionHud(ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get()))
                         && MCUtil.isHandFree(player, Hand.MAIN_HAND) && MCUtil.isHandFree(player, Hand.OFF_HAND)) {
                     renderHand(Hand.OFF_HAND, event.getMatrixStack(), event.getBuffers(), event.getLight(), 
                             event.getPartialTicks(), event.getInterpolatedPitch(), player);
@@ -515,7 +515,7 @@ public class ClientEventHandler {
     @SubscribeEvent
     public void renderBlocksOverlay(RenderWorldLastEvent event) {
         ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
-        if (hud.isActionSelectedAndEnabled(ModStandsInit.CRAZY_DIAMOND_RESTORE_TERRAIN.get())) {
+        if (hud.showExtraActionHud(ModStandsInit.CRAZY_DIAMOND_RESTORE_TERRAIN.get())) {
             MatrixStack matrixStack = event.getMatrixStack();
             IStandPower stand = ActionsOverlayGui.getInstance().standUiMode.getPower();
             Entity entity = CrazyDiamondRestoreTerrain.restorationCenterEntity(mc.player, stand);
