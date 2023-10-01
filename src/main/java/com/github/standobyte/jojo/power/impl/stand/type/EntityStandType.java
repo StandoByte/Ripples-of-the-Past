@@ -1,15 +1,14 @@
 package com.github.standobyte.jojo.power.impl.stand.type;
 
-import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.StreamSupport;
 
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack;
-import com.github.standobyte.jojo.action.stand.StandEntityLightAttack;
-import com.github.standobyte.jojo.action.stand.StandEntityMeleeBarrage;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
@@ -32,9 +31,8 @@ import net.minecraft.util.text.ITextComponent;
 
 public class EntityStandType<T extends StandStats> extends StandType<T> {
     private Supplier<? extends StandEntityType<? extends StandEntity>> entityTypeSupplier = null;
-    private boolean hasHeavyAttack;
-    private boolean hasFastAttack;
-
+    private Optional<StandAction> finisherPunch = Optional.empty();
+    
     @Deprecated
     public EntityStandType(int color, ITextComponent partName, 
             StandAction[] attacks, StandAction[] abilities, 
@@ -66,10 +64,10 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
     
     @Override
     public void onCommonSetup() {
-        hasHeavyAttack = Arrays.stream(getAttacks()).anyMatch(
-                attack -> attack instanceof StandEntityHeavyAttack || attack.getShiftVariationIfPresent() instanceof StandEntityHeavyAttack);
-        hasFastAttack = Arrays.stream(getAttacks()).anyMatch(
-                attack -> attack instanceof StandEntityLightAttack || attack instanceof StandEntityMeleeBarrage);
+        super.onCommonSetup();
+        finisherPunch = StreamSupport.stream(getAllUnlockableActions().spliterator(), false)
+                .filter(attack -> attack instanceof StandEntityHeavyAttack && ((StandEntityHeavyAttack) attack).isFinisher())
+                .findFirst();
     }
     
     public void setEntityType(Supplier<? extends StandEntityType<? extends StandEntity>> entityTypeSupplier) {
@@ -131,8 +129,8 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
     }
     
     @Override
-    public boolean usesStandFinisherMechanic() {
-        return hasHeavyAttack && hasFastAttack;
+    public Optional<StandAction> getStandFinisherPunch() {
+        return finisherPunch;
     }
     
     @Override

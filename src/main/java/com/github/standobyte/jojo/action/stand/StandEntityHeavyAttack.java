@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.action.stand;
 
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.function.Supplier;
 
@@ -20,7 +21,6 @@ import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
-import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.general.Container;
 import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
 
@@ -190,13 +190,8 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     }
     
     @Override
-    public boolean isUnlocked(IStandPower power) {
-        return isFinisher ? StandUtil.isFinisherUnlocked(power) : super.isUnlocked(power);
-    }
-    
-    @Override
-    protected boolean playsVoiceLineOnShift() {
-        return isFinisher || super.playsVoiceLineOnShift();
+    protected boolean playsVoiceLineOnSneak() {
+        return isFinisher || super.playsVoiceLineOnSneak();
     }
     
     @Override
@@ -215,6 +210,19 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     
     public boolean canBeParried() {
         return !isFinisher;
+    }
+    
+    @Override
+    public StandAction[] getExtraUnlockable() {
+        StandAction[] actions = new StandAction[2];
+        int i = 0;
+        if (finisherVariation.get() != null) {
+            actions[i++] = finisherVariation.get();
+        }
+        if (recoveryAction.get() != null) {
+            actions[i++] = recoveryAction.get();
+        }
+        return Arrays.copyOfRange(actions, 0, i);
     }
     
     

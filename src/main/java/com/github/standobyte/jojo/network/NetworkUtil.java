@@ -14,6 +14,10 @@ import java.util.function.Supplier;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.power.IPower.PowerClassification;
+import com.github.standobyte.jojo.power.IPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
+import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.google.common.base.Preconditions;
 
 import io.netty.handler.codec.DecoderException;
@@ -168,6 +172,7 @@ public class NetworkUtil {
                 buf.readInt() / 8.0);
     }
     
+    
     public static <T> void writeOptionally(PacketBuffer buf, @Nullable T obj, Consumer<T> write) {
         buf.writeBoolean(obj != null);
         if (obj != null) {
@@ -183,6 +188,7 @@ public class NetworkUtil {
     public static <T> Optional<T> readOptional(PacketBuffer buf, Supplier<T> read) {
         return buf.readBoolean() ? Optional.of(read.get()) : Optional.empty();
     }
+    
     
     public static <T> int writeCollection(PacketBuffer buf, Collection<T> collection, Consumer<T> writeElement, 
             boolean removeWrittenFromCollection) {
@@ -223,5 +229,29 @@ public class NetworkUtil {
     
     public static <T> List<T> readCollection(PacketBuffer buf, Supplier<T> readElement) {
         return readCollection(ArrayList::new, buf, readElement);
+    }
+    
+    
+    public static void writePowerType(PacketBuffer buf, IPowerType<?, ?> powerType, PowerClassification powerClassification) {
+        switch (powerClassification) {
+        case STAND:
+            buf.writeRegistryId((StandType<?>) powerType);
+            break;
+        case NON_STAND:
+            buf.writeRegistryId((NonStandPowerType<?>) powerType);
+            break;
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static IPowerType<?, ?> readPowerType(PacketBuffer buf, PowerClassification powerClassification) {
+        switch (powerClassification) {
+        case STAND:
+            return buf.readRegistryIdSafe(StandType.class);
+        case NON_STAND:
+            return buf.readRegistryIdSafe(NonStandPowerType.class);
+        default:
+            throw new IllegalArgumentException();
+        }
     }
 }
