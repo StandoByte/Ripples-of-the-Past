@@ -85,7 +85,7 @@ public class TimeUtil {
     
     public static boolean hasTimeStopAbility(LivingEntity entity) {
         return IStandPower.getStandPowerOptional(entity).map(stand -> 
-        JojoModUtil.hasAction(stand, action -> allowsToSeeInStoppedTime(action, stand, entity)))
+        stand.hasUnlockedMatching(action -> allowsToSeeInStoppedTime(action, stand, entity)))
                 .orElse(false);
     }
     

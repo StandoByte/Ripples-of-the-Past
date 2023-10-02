@@ -21,7 +21,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
 public abstract class StandAction extends Action<IStandPower> {
-    private final int resolveLevelToUnlock;
+    protected final int resolveLevelToUnlock;
     private final float resolveCooldownMultiplier;
     private final boolean isTrained;
     private final boolean autoSummonStand;
@@ -53,6 +53,10 @@ public abstract class StandAction extends Action<IStandPower> {
     @Override
     public boolean isTrained() {
         return isTrained;
+    }
+    
+    public StandAction[] getExtraUnlockable() {
+        return new StandAction[0];
     }
     
     public float getMaxTrainingPoints(IStandPower power) {

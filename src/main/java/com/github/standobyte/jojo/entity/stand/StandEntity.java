@@ -1608,7 +1608,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
     
     public float getFinisherMeter() {
-        if (userPower != null && !StandUtil.isFinisherUnlocked(userPower)) {
+        if (userPower != null && !StandUtil.isFinisherMechanicUnlocked(userPower)) {
             return 0;
         }
         return entityData.get(FINISHER_VALUE);

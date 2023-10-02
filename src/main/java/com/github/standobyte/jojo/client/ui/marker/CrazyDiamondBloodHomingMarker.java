@@ -24,7 +24,7 @@ public class CrazyDiamondBloodHomingMarker extends MarkerRenderer {
     @Override
     protected boolean shouldRender() {
         ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
-        return hud.isActionSelectedAndEnabled(ModStandsInit.CRAZY_DIAMOND_BLOCK_BULLET.get())
+        return hud.showExtraActionHud(ModStandsInit.CRAZY_DIAMOND_BLOCK_BULLET.get())
                && !mc.player.isShiftKeyDown();
     }
 
