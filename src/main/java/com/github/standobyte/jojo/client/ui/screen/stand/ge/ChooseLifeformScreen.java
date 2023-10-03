@@ -59,6 +59,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     private int firstMouseX;
     private int firstMouseY;
     private boolean ignoreMouseUntilMoved;
+    private boolean firstInit = true;
     
     private Button filterListButton;
     private FilterList filterList;
@@ -91,16 +92,19 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
                 }));
         unlockAllButton.visible = minecraft.player.abilities.instabuild;
         
-        if (GoldExperienceChooseLifeform.chosenTypeTmp != null) {
-            entityIconsGrid.setSelected(entityIconsGrid.findFirst(
-                    widget -> widget.visible && widget.entityType == GoldExperienceChooseLifeform.chosenTypeTmp));
-            entityIconsGrid.getSelected().ifPresent(widget -> {
-                if (widget.visible) {
-                    entityIconsGrid.updateGridLayout();
-                    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! when trying to resize the window, the mouse freaks out
-                    ClientUtil.setMousePos(widget.x + entityIconsGrid.columnWidth / 2, widget.y + entityIconsGrid.rowHeight / 2);
-                }
-            });
+        if (firstInit) {
+            if (GoldExperienceChooseLifeform.chosenTypeTmp != null) {
+                entityIconsGrid.setSelected(entityIconsGrid.findFirst(
+                        widget -> widget.visible && widget.entityType == GoldExperienceChooseLifeform.chosenTypeTmp));
+                entityIconsGrid.getSelected().ifPresent(widget -> {
+                    if (widget.visible) {
+                        entityIconsGrid.updateGridLayout();
+                        ClientUtil.setMousePos(widget.x + entityIconsGrid.columnWidth / 2, widget.y + entityIconsGrid.rowHeight / 2);
+                    }
+                });
+            }
+            
+            firstInit = false;
         }
     }
     
@@ -118,7 +122,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         initSelectionGrid(entityTypes);
         ignoreMouseUntilMoved = true;
         
-        filterList = new FilterList(entityTypes, width - 8, height - 52, 100, height - 128, this);
+        filterList = new FilterList(entityTypes, width - 8, height - 52, 100, height - 88, this);
     }
     
     private void initSelectionGrid(List<EntityType<?>> entityTypes) {
@@ -218,7 +222,23 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     private static final DecimalFormat SIZE_FORMAT = new DecimalFormat("0.0");
     private void renderHoveredTooltip(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         entityIconsGrid.getSelected().ifPresent(widget -> {
-            renderSelectedTypeTooltip(widget, matrixStack, mouseX, mouseY, partialTicks);
+            int x;
+            int y;
+            if (checkMouseMoved(mouseX, mouseY)) {
+                if (entityIconsGrid.isMouseInsideGrid(mouseX, mouseY)) {
+                    x = mouseX;
+                    y = mouseY;
+                }
+                else {
+                    return;
+                }
+            }
+            else {
+                x = widget.x + 18;
+                y = widget.y + 16;
+            }
+            
+            
             
             List<ITooltipLine> rightSideInfo = new ArrayList<>();
             
@@ -247,30 +267,9 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
                     new TextTooltipLine(new TranslationTextComponent("gold_experience.lifeform_time", creationSecs))));
             
             rightSideInfo.stream().map(line -> line.getWidth(font)).max(Comparator.naturalOrder()).ifPresent(tooltipWidth -> {
-                int x = this.width + 4;
-                int y = 24;
                 CustomTooltipRender.renderWrappedToolTip(matrixStack, rightSideInfo, x, y, font);
             });
         });
-    }
-
-    private void renderSelectedTypeTooltip(SelectorWidget widget, MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
-        int x;
-        int y;
-        if (checkMouseMoved(mouseX, mouseY)) {
-            if (entityIconsGrid.isMouseInsideGrid(mouseX, mouseY)) {
-                x = mouseX;
-                y = mouseY;
-            }
-            else {
-                return;
-            }
-        }
-        else {
-            x = widget.x;
-            y = widget.y;
-        }
-        renderTooltip(matrixStack, widget.getMessage(), x, y);
     }
     
     @Override
