@@ -1104,7 +1104,10 @@
   "entity.jojo.ge_lifeform": "Gold Experience's Lifeform",
   "gold_experience.lifeform_size": "%sx%sx%sm",
   "gold_experience.lifeform_time": "%ss",
-  "jojo.ge_lifeform.filter_list": "Filter",
+  "jojo.ge_lifeform.filter_list": "Open filter list",
+  "jojo.ge_lifeform.show_all": "Show all",
+  "jojo.ge_lifeform.hide_all": "Hide all",
+  "jojo.ge_lifeform.search_field": "Search",
   "jojo.ge_lifeform.unlock_all": "Unlock all",
   "ge_new_lifeform.toast.title": "New lifeform unlocked!",
   

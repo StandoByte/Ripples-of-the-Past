@@ -39,6 +39,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.widget.button.ImageButton;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -62,6 +63,9 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     private boolean firstInit = true;
     
     private Button filterListButton;
+    private Button showAllButton;
+    private Button hideAllButton;
+    private Button searchButton;
     private FilterList filterList;
     private Button unlockAllButton;
     
@@ -81,10 +85,27 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         
         initEntityTypes();
         
-        addButton(filterListButton = new Button(width - 100, height - 48, 96, 20, new TranslationTextComponent("jojo.ge_lifeform.filter_list"), 
-                button -> filterList.visible = !filterList.visible));
+        addButton(filterListButton = new ImageButton(width - 101, height - 48, 20, 20, 48, 88, 20, LIFEFORM_CHOOSE_LOCATION, 128, 128, 
+                button -> filterList.visible = !filterList.visible, ClientUtil.buttonMessageTooltip(this), new TranslationTextComponent("jojo.ge_lifeform.filter_list")));
         
-        addButton(unlockAllButton = new Button(width - 100, height - 24, 96, 20, new TranslationTextComponent("jojo.ge_lifeform.unlock_all"), 
+        addButton(showAllButton = new ImageButton(width - 76, height - 48, 20, 20, 68, 88, 20, LIFEFORM_CHOOSE_LOCATION, 128, 128, 
+                button -> {
+                    entityIconsGrid.forEach(widget -> widget.visible = true);
+                    GoldExperienceChooseLifeform.hiddenEntriesTmp.clear();
+                }, ClientUtil.buttonMessageTooltip(this), new TranslationTextComponent("jojo.ge_lifeform.show_all")));
+        
+        addButton(hideAllButton = new ImageButton(width - 51, height - 48, 20, 20, 88, 88, 20, LIFEFORM_CHOOSE_LOCATION, 128, 128, 
+                button -> {
+                    entityIconsGrid.forEach(widget -> {
+                        widget.visible = false;
+                        GoldExperienceChooseLifeform.hiddenEntriesTmp.add(widget.entityType);
+                    });
+                }, ClientUtil.buttonMessageTooltip(this), new TranslationTextComponent("jojo.ge_lifeform.hide_all")));
+        
+        addButton(searchButton = new ImageButton(width - 26, height - 48, 20, 20, 108, 88, 20, LIFEFORM_CHOOSE_LOCATION, 128, 128, 
+                button -> {}, ClientUtil.buttonMessageTooltip(this), new TranslationTextComponent("jojo.ge_lifeform.search_field")));
+        
+        addButton(unlockAllButton = new Button(width - 101, height - 24, 95, 20, new TranslationTextComponent("jojo.ge_lifeform.unlock_all"), 
                 button -> {
                     GoldExperienceChooseLifeform.unlockAllEntityTypes(minecraft.player);
                     PacketManager.sendToServer(new ClAllGELifeformsButtonPacket());

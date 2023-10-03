@@ -35,6 +35,7 @@ import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.LightTexture;
@@ -550,5 +551,12 @@ public class ClientUtil {
             this.pos = pos;
             this.isOnScreen = isOnScreen;
         }
+    }
+    
+    
+    public static Button.ITooltip buttonMessageTooltip(Screen screen) {
+        return (Button button, MatrixStack matrixStack, int x, int y) -> {
+            screen.renderTooltip(matrixStack, button.getMessage(), x, y);
+        };
     }
 }
