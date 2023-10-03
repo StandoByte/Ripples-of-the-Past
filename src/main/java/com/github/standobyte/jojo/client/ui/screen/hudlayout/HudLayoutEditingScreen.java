@@ -189,8 +189,7 @@ public class HudLayoutEditingScreen extends Screen {
         renderHotbar(iSuckAtThis, ActionsLayout.Hotbar.LEFT_CLICK, matrixStack, x, ATTACKS_HOTBAR_Y + getWindowY(), mouseX, mouseY);
         renderHotbar(iSuckAtThis, ActionsLayout.Hotbar.RIGHT_CLICK, matrixStack, x, ABILITIES_HOTBAR_Y + getWindowY(), mouseX, mouseY);
         renderActionSlot(matrixStack, x, QUICK_ACCESS_Y + getWindowY(), mouseX, mouseY, 
-                iSuckAtThis, iSuckAtThis.getActionsHudLayout().getVisibleQuickAccessAction(shift, iSuckAtThis, ActionTarget.EMPTY), 
-                true, 
+                iSuckAtThis, iSuckAtThis.getActionsHudLayout().getVisibleQuickAccessAction(shift, iSuckAtThis, ActionTarget.EMPTY), true, 
                 draggedAction.isPresent(), 
                 isQuickActionSlotHovered && draggedAction.isPresent(), 
                 true);
@@ -203,8 +202,7 @@ public class HudLayoutEditingScreen extends Screen {
         int i = 0;
         for (ActionSwitch<P> actionSwitch : power.getActionsHudLayout().getHotbar(hotbar).getLayoutView()) {
             renderActionSlot(matrixStack, hotbarX + i * 18, hotbarY, mouseX, mouseY, 
-                    power, actionSwitch.getAction(), 
-                    actionSwitch.isEnabled(), 
+                    power, actionSwitch, 
                     draggedAction.map(dragged -> dragged.hotbar == hotbar).orElse(false), 
                     hoveredAction.map(slot -> slot.actionSwitch == actionSwitch).orElse(false), 
                     draggedAction.map(dragged -> dragged.actionSwitch != actionSwitch).orElse(true));
@@ -212,13 +210,35 @@ public class HudLayoutEditingScreen extends Screen {
         }
     }
     
+    private <P extends IPower<P, ?>> void renderDragged(MatrixStack matrixStack, int mouseX, int mouseY) {
+        draggedAction.ifPresent(dragged -> {
+            RenderSystem.translatef(0.0F, 0.0F, 32.0F);
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            this.setBlitOffset(200);
+            ActionSwitch<P> actionSwitch = (ActionSwitch<P>) dragged.actionSwitch;
+            renderActionIcon(matrixStack, mouseX - 8, mouseY - 8, 
+                    actionSwitch.getAction(), actionSwitch.isEnabled(), (P) selectedPower);
+            this.setBlitOffset(0);
+            RenderSystem.disableBlend();
+            RenderSystem.translatef(0.0F, 0.0F, -32.0F);
+        });
+    }
+    
     private <P extends IPower<P, ?>> void renderActionSlot(MatrixStack matrixStack, 
             int x, int y, int mouseX, int mouseY, 
-            P power, Action<P> action, 
-            boolean isEnabled, boolean fitsForDragged, boolean isHoveredOver, boolean renderActionIcon) {
-        Action<P> actionResolved = power.getActionsHudLayout().resolveVisibleActionInSlot(action, shift, power, ActionTarget.EMPTY);
-        if (actionResolved != null) action = actionResolved;
-        
+            P power, ActionSwitch<P> actionSwitch, 
+            boolean fitsForDragged, boolean isHoveredOver, boolean renderActionIcon) {
+        renderActionSlot(matrixStack, 
+                x, y, mouseX, mouseY, 
+                power, actionSwitch.getAction(), actionSwitch.isEnabled(), 
+                fitsForDragged, isHoveredOver, renderActionIcon);
+    }
+    
+    private <P extends IPower<P, ?>> void renderActionSlot(MatrixStack matrixStack, 
+            int x, int y, int mouseX, int mouseY, 
+            P power, Action<P> action, boolean isEnabled, 
+            boolean fitsForDragged, boolean isHoveredOver, boolean renderActionIcon) {
         minecraft.getTextureManager().bind(WINDOW);
         int texX = isHoveredOver ? 82 : 64;
         if (fitsForDragged) {
@@ -226,10 +246,19 @@ public class HudLayoutEditingScreen extends Screen {
         }
         blit(matrixStack, x, y, texX, 238, 18, 18);
 
-        if (renderActionIcon && action != null) {
+        if (renderActionIcon) {
+            renderActionIcon(matrixStack, x + 1, y + 1, action, isEnabled, power);
+        }
+    }
+    
+    private <P extends IPower<P, ?>> void renderActionIcon(MatrixStack matrixStack, int x, int y, Action<P> action, boolean isEnabled, P power) {
+        if (action != null) {
+            Action<P> actionResolved = power.getActionsHudLayout().resolveVisibleActionInSlot(action, shift, power, ActionTarget.EMPTY);
+            if (actionResolved != null) action = actionResolved;
             if (shift) {
                 action = action.getShiftVariationIfPresent();
             }
+            
             TextureAtlasSprite textureAtlasSprite = CustomResources.getActionSprites().getSprite(action, power);
             minecraft.getTextureManager().bind(textureAtlasSprite.atlas().location());
             
@@ -238,25 +267,9 @@ public class HudLayoutEditingScreen extends Screen {
             float color = isEnabled && isUnlocked ? 1.0F : 0.0F;
             
             RenderSystem.color4f(color, color, color, alpha);
-            blit(matrixStack, x + 1, y + 1, 0, 16, 16, textureAtlasSprite);
+            blit(matrixStack, x, y, 0, 16, 16, textureAtlasSprite);
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         }
-    }
-    
-    private <P extends IPower<P, ?>> void renderDragged(MatrixStack matrixStack, int mouseX, int mouseY) {
-        draggedAction.ifPresent(dragged -> {
-            RenderSystem.translatef(0.0F, 0.0F, 32.0F);
-            this.setBlitOffset(200);
-            Action<P> action = (Action<P>) dragged.actionSwitch.getAction();
-            if (shift) {
-                action = action.getShiftVariationIfPresent();
-            }
-            TextureAtlasSprite textureAtlasSprite = CustomResources.getActionSprites()
-                    .getSprite(action, (P) selectedPower);
-            blit(matrixStack, mouseX - 8, mouseY - 8, 0, 16, 16, textureAtlasSprite);
-            this.setBlitOffset(0);
-            RenderSystem.translatef(0.0F, 0.0F, -32.0F);
-        });
     }
     
     private Optional<ActionData<?>> getActionAt(int mouseX, int mouseY) {
