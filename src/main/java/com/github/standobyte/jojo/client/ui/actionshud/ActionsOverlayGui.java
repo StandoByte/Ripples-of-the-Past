@@ -1467,9 +1467,17 @@ public class ActionsOverlayGui extends AbstractGui {
             }
         }
         
-        if (getQuickAccessAction(currentMode.getPower(), shift) == action) {
-            return true;
-        }
+        /* Eclipse doesn't show me this compilation error
+             method ... cannot be applied to given types;
+             required: P,boolean
+             found: capture#1 of ?,boolean
+             reason: inference variable P has incompatible bounds
+                 equality constraints: capture#1 of ?
+                 lower bounds: com.github.standobyte.jojo.power.IPower<capture#1 of ?,capture#2 of ?>
+        */
+//        if (getQuickAccessAction(currentMode.getPower(), shift) == action) {
+//            return true;
+//        }
         
         return false;
     }
