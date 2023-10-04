@@ -1,5 +1,8 @@
 package com.github.standobyte.jojo.client.ui.screen;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import org.lwjgl.glfw.GLFW;
 
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
@@ -18,7 +21,6 @@ import net.minecraftforge.client.settings.KeyConflictContext;
 public class WasdAllowingScreen extends Screen {
     /* 
      * TODO
-     * make the game not release the keys when it's opened
      * sprint
      * shift toggle
      * sprint toggle
@@ -28,6 +30,7 @@ public class WasdAllowingScreen extends Screen {
     public WasdAllowingScreen(ITextComponent pTitle) {
         super(pTitle);
         this.passEvents = true;
+        saveHeldKeyBinds();
     }
     
     @Override
@@ -38,6 +41,19 @@ public class WasdAllowingScreen extends Screen {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+    
+    
+    private Collection<KeyBinding> heldKeyBinds;
+    private void saveHeldKeyBinds() {
+        Collection<KeyBinding> allKeyBindings = ClientReflection.getKeyBindingsMap().values();
+        heldKeyBinds = allKeyBindings.stream().filter(KeyBinding::isDown).collect(Collectors.toList());
+    }
+    
+    @Override
+    protected void init() {
+        super.init();
+        heldKeyBinds.forEach(keybind -> keybind.setDown(true));
     }
     
     

@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import com.github.standobyte.jojo.util.general.LazyCacheSupplier;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import it.unimi.dsi.fastutil.objects.ObjectList;
@@ -248,6 +249,13 @@ public class ClientReflection {
      */
     public static boolean isDownFieldOnly(KeyBinding key) {
         return ReflectionUtil.getFieldValue(KEY_BINDING_IS_DOWN, key);
+    }
+
+    private static final Field KEY_BINDING_ALL_MAP = ObfuscationReflectionHelper.findField(KeyBinding.class, "field_74516_a");
+    private static final LazyCacheSupplier<Map<String, KeyBinding>> keyBindingsMapSupplier = new LazyCacheSupplier<>(
+            () -> ReflectionUtil.getFieldValue(KEY_BINDING_ALL_MAP, null));
+    public static Map<String, KeyBinding> getKeyBindingsMap() {
+        return keyBindingsMapSupplier.get();
     }
 
     private static final Field KEY_BINDING_CLICK_COUNT = ObfuscationReflectionHelper.findField(KeyBinding.class, "field_151474_i");
