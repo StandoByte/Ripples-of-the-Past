@@ -19,7 +19,6 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.tuple.Pair;
-import org.lwjgl.glfw.GLFW;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
@@ -37,6 +36,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClDoubleShiftPressPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonMeditationPacket;
@@ -87,8 +87,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 
 public class InputHandler {
-    @Deprecated
-    public KeyBinding tmp;
     private static InputHandler instance = null;
 
     private Minecraft mc;
@@ -162,7 +160,6 @@ public class InputHandler {
     }
     
     public void registerKeyBindings() {
-        ClientRegistry.registerKeyBinding(tmp = new KeyBinding(JojoMod.MOD_ID + ".key.tmp_test", GLFW.GLFW_KEY_Z, MAIN_CATEGORY));
         ClientRegistry.registerKeyBinding(toggleStand = new KeyBinding(JojoMod.MOD_ID + ".key.toggle_stand", GLFW_KEY_M, MAIN_CATEGORY));
         ClientRegistry.registerKeyBinding(standRemoteControl = new KeyBinding(JojoMod.MOD_ID + ".key.stand_remote_control", GLFW_KEY_O, MAIN_CATEGORY));
         ClientRegistry.registerKeyBinding(hamonSkillsWindow = new KeyBinding(JojoMod.MOD_ID + ".key.hamon_skills_window", GLFW_KEY_H, MAIN_CATEGORY));
@@ -277,7 +274,7 @@ public class InputHandler {
                 
                 if (actionQuickAccess.isDown() && quickAccessMmbDelay <= 0
                         && !mc.player.isSpectator() && !disableHotbars.isDown()) {
-                    HudClickResult result = handleMouseClickPowerHud(ActionKey.QUICK_ACCESS);
+                    HudClickResult result = handleMouseClickPowerHud(ActionKey.QUICK_ACCESS, actionQuickAccess);
                     if (result.vanillaInput == HudClickResult.Behavior.CANCEL) {
                         KeyBinding keybinding = keyBindingMap.lookupActive(actionQuickAccess.getKey());
                         if (keybinding != null) {
@@ -353,11 +350,6 @@ public class InputHandler {
             
             if (editHotbars.consumeClick() && (standPower.hasPower() || nonStandPower.hasPower())) {
                 HudLayoutEditingScreen screen = new HudLayoutEditingScreen();
-                mc.setScreen(screen);
-            }
-            
-            if (tmp.isDown() && mc.screen == null) {
-                WasdAllowingScreen screen = new ChooseLifeformScreen();
                 mc.setScreen(screen);
             }
             
@@ -473,17 +465,20 @@ public class InputHandler {
         }
 
         ActionKey key;
+        KeyBinding keyBinding;
         if (event.isAttack()) {
             key = ActionKey.ATTACK;
+            keyBinding = mc.options.keyAttack;
         }
         else if (event.isUseItem()) {
             key = ActionKey.ABILITY;
+            keyBinding = mc.options.keyUse;
         }
         else {
             return;
         }
         
-        HudClickResult clickResult = handleMouseClickPowerHud(key);
+        HudClickResult clickResult = handleMouseClickPowerHud(key, keyBinding);
         if (clickResult.vanillaInput == HudClickResult.Behavior.CANCEL) {
             event.setCanceled(true);
         }
@@ -495,15 +490,15 @@ public class InputHandler {
     private void clickWithBusyHands() {
         if (ClientUtil.arePlayerHandsBusy()) {
             while (mc.options.keyAttack.consumeClick()) {
-                handleMouseClickPowerHud(ActionKey.ATTACK);
+                handleMouseClickPowerHud(ActionKey.ATTACK, mc.options.keyAttack);
             }
             while (mc.options.keyUse.consumeClick()) {
-                handleMouseClickPowerHud(ActionKey.ABILITY);
+                handleMouseClickPowerHud(ActionKey.ABILITY, mc.options.keyUse);
             }
         }
     }
     
-    private <P extends IPower<P, ?>> HudClickResult handleMouseClickPowerHud(ActionKey key) {
+    private <P extends IPower<P, ?>> HudClickResult handleMouseClickPowerHud(ActionKey key, KeyBinding keyBinding) {
         HudClickResult result = new HudClickResult();
         if (mc.player.isSpectator()) {
             return result;
@@ -559,6 +554,13 @@ public class InputHandler {
                 }
                 if (leftClickedBlock && leftClickBlockDelay <= 0) {
                     leftClickBlockDelay = 4;
+                }
+                
+                if (action == ModStandsInit.GOLD_EXPERIENCE_CHOOSE_LIFEFORM.get()) {
+                    if (mc.screen == null) {
+                        WasdAllowingScreen screen = new ChooseLifeformScreen(keyBinding);
+                        mc.setScreen(screen);
+                    }
                 }
             }
             else {

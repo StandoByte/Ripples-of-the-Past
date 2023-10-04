@@ -15,7 +15,6 @@ import com.github.standobyte.jojo.action.stand.GoldExperienceCreateLifeform;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.InputHandler.MouseButton;
 import com.github.standobyte.jojo.client.ui.screen.GridList;
 import com.github.standobyte.jojo.client.ui.screen.GridList.ElemMoveMode;
@@ -40,7 +39,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.gui.widget.button.ImageButton;
-import net.minecraft.client.util.InputMappings;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.ResourceLocation;
@@ -62,18 +61,10 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     private boolean ignoreMouseUntilMoved;
     private boolean firstInit = true;
     
-    private Button filterListButton;
-    private Button showAllButton;
-    private Button hideAllButton;
-    private Button searchButton;
-    private FilterList filterList;
+    private FilterList filterList; // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! "Close filter list"
     private Button unlockAllButton;
     
-    public ChooseLifeformScreen() {
-        this(InputHandler.getInstance().tmp.getKey().getValue());
-    }
-    
-    public ChooseLifeformScreen(int keyHeld) {
+    public ChooseLifeformScreen(KeyBinding keyHeld) {
         super(StringTextComponent.EMPTY);
         this.keyHeld = keyHeld;
     }
@@ -85,16 +76,16 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         
         initEntityTypes();
         
-        addButton(filterListButton = new ImageButton(width - 101, height - 48, 20, 20, 48, 88, 20, LIFEFORM_CHOOSE_LOCATION, 128, 128, 
+        addButton(new ImageButton(width - 101, height - 48, 20, 20, 48, 88, 20, LIFEFORM_CHOOSE_LOCATION, 128, 128, 
                 button -> filterList.visible = !filterList.visible, ClientUtil.buttonMessageTooltip(this), new TranslationTextComponent("jojo.ge_lifeform.filter_list")));
         
-        addButton(showAllButton = new ImageButton(width - 76, height - 48, 20, 20, 68, 88, 20, LIFEFORM_CHOOSE_LOCATION, 128, 128, 
+        addButton(new ImageButton(width - 76, height - 48, 20, 20, 68, 88, 20, LIFEFORM_CHOOSE_LOCATION, 128, 128, 
                 button -> {
                     entityIconsGrid.forEach(widget -> widget.visible = true);
                     GoldExperienceChooseLifeform.hiddenEntriesTmp.clear();
                 }, ClientUtil.buttonMessageTooltip(this), new TranslationTextComponent("jojo.ge_lifeform.show_all")));
         
-        addButton(hideAllButton = new ImageButton(width - 51, height - 48, 20, 20, 88, 88, 20, LIFEFORM_CHOOSE_LOCATION, 128, 128, 
+        addButton(new ImageButton(width - 51, height - 48, 20, 20, 88, 88, 20, LIFEFORM_CHOOSE_LOCATION, 128, 128, 
                 button -> {
                     entityIconsGrid.forEach(widget -> {
                         widget.visible = false;
@@ -102,8 +93,8 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
                     });
                 }, ClientUtil.buttonMessageTooltip(this), new TranslationTextComponent("jojo.ge_lifeform.hide_all")));
         
-        addButton(searchButton = new ImageButton(width - 26, height - 48, 20, 20, 108, 88, 20, LIFEFORM_CHOOSE_LOCATION, 128, 128, 
-                button -> {}, ClientUtil.buttonMessageTooltip(this), new TranslationTextComponent("jojo.ge_lifeform.search_field")));
+//        addButton(new ImageButton(width - 26, height - 48, 20, 20, 108, 88, 20, LIFEFORM_CHOOSE_LOCATION, 128, 128, 
+//                button -> {}, ClientUtil.buttonMessageTooltip(this), new TranslationTextComponent("jojo.ge_lifeform.search_field")));
         
         addButton(unlockAllButton = new Button(width - 101, height - 24, 95, 20, new TranslationTextComponent("jojo.ge_lifeform.unlock_all"), 
                 button -> {
@@ -180,7 +171,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     
     
     private int ticksKeyHeld = 0;
-    private final int keyHeld;
+    private final KeyBinding keyHeld;
     private ScreenCloseMode mode = ScreenCloseMode.CLICK;
     private boolean holdsButton = true;
     
@@ -197,7 +188,10 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     }
     
     private boolean isKeyBeingHeld() {
-        return InputMappings.isKeyDown(minecraft.getWindow().getWindow(), keyHeld);
+        long window = minecraft.getWindow().getWindow();
+        int value = keyHeld.getKey().getValue();
+        int state = value < 8 ? GLFW.glfwGetMouseButton(window, value) : GLFW.glfwGetKey(window, value);
+        return state == 1;
     }
     
     
