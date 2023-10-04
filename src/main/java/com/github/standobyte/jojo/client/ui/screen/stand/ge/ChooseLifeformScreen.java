@@ -45,6 +45,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -61,7 +62,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     private boolean ignoreMouseUntilMoved;
     private boolean firstInit = true;
     
-    private FilterList filterList; // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! "Close filter list"
+    private FilterList filterList;
     private Button unlockAllButton;
     
     public ChooseLifeformScreen(KeyBinding keyHeld) {
@@ -75,9 +76,15 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         super.init();
         
         initEntityTypes();
-        
+
+        ITextComponent messageListShow = new TranslationTextComponent("jojo.ge_lifeform.filter_list.show");
+        ITextComponent messageListHide = new TranslationTextComponent("jojo.ge_lifeform.filter_list.hide");
         addButton(new ImageButton(width - 101, height - 48, 20, 20, 48, 88, 20, LIFEFORM_CHOOSE_LOCATION, 128, 128, 
-                button -> filterList.visible = !filterList.visible, ClientUtil.buttonMessageTooltip(this), new TranslationTextComponent("jojo.ge_lifeform.filter_list")));
+                button -> {
+                    filterList.visible = !filterList.visible;
+                    button.setMessage(filterList.visible ? messageListHide : messageListShow);
+                }, 
+                ClientUtil.buttonMessageTooltip(this), messageListShow));
         
         addButton(new ImageButton(width - 76, height - 48, 20, 20, 68, 88, 20, LIFEFORM_CHOOSE_LOCATION, 128, 128, 
                 button -> {
