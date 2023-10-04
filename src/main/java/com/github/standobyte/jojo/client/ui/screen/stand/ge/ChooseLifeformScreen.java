@@ -439,8 +439,10 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         
         public void updateIsHovered(int mouseX, int mouseY) {
             isHovered = 
-                    mouseX >= x && mouseX < x + width && 
-                    mouseY >= y && mouseY < y + height;
+                    mouseX >= x - entityIconsGrid.columnGap / 2 && 
+                    mouseX <  x + width + entityIconsGrid.columnGap / 2 && 
+                    mouseY >= y - entityIconsGrid.rowGap / 2 && 
+                    mouseY <  y + height + entityIconsGrid.rowGap / 2;
         }
         
         
