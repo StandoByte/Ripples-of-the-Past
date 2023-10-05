@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.GoldExperienceCreateLifeform;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.network.NetworkUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -60,7 +61,6 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         return duration;
     }
     
-    
     public Entity getTransformationSource() {
         return source;
     }
@@ -99,12 +99,30 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
     protected void readAdditionalSaveData(CompoundNBT nbt) {
         this.tickCount = nbt.getInt("Age");
         this.duration = nbt.getInt("Duration");
+        
+        if (nbt.contains("SourceEntity", MCUtil.getNbtId(CompoundNBT.class))) {
+            CompoundNBT entityNbt = nbt.getCompound("SourceEntity");
+            source = EntityType.create(entityNbt, level).orElse(null);
+        }
+        if (nbt.contains("TargetEntity", MCUtil.getNbtId(CompoundNBT.class))) {
+            CompoundNBT entityNbt = nbt.getCompound("TargetEntity");
+            target = EntityType.create(entityNbt, level).orElse(null);
+        }
     }
 
     @Override
     protected void addAdditionalSaveData(CompoundNBT nbt) {
         nbt.putInt("Age", tickCount);
         nbt.putInt("Duration", duration);
+        
+        if (source != null) {
+            CompoundNBT entityNbt = source.serializeNBT();
+            nbt.put("SourceEntity", entityNbt);
+        }
+        if (target != null) {
+            CompoundNBT entityNbt = target.serializeNBT();
+            nbt.put("TargetEntity", entityNbt);
+        }
     }
 
     @Override
@@ -114,6 +132,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
 
     @Override
     public void writeSpawnData(PacketBuffer buffer) {
+        buffer.writeVarInt(tickCount);
         buffer.writeVarInt(duration);
         
         writeEntityData(buffer, target);
@@ -122,6 +141,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
 
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
+        tickCount = additionalData.readVarInt();
         duration = additionalData.readVarInt();
         
         target = readEntityData(additionalData);
