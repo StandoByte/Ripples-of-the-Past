@@ -10,19 +10,21 @@ import java.util.stream.Collectors;
 
 import org.codehaus.plexus.util.ReflectionUtils;
 
+import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.CDBlockBulletRenderer;
+import com.github.standobyte.jojo.client.render.rendertype.CustomRenderType;
 import com.github.standobyte.jojo.entity.GETransformationEntity;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import it.unimi.dsi.fastutil.objects.ObjectList;
+import net.minecraft.block.Block;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.LivingRenderer;
-import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.model.AgeableModel;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.entity.model.SegmentedModel;
@@ -30,6 +32,9 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3f;
@@ -66,18 +71,29 @@ public class GETransformationRenderer<T extends GETransformationEntity> extends 
                 }
             }
             else {
-                LivingEntity target = entity.getTransformationTarget();
+                Entity target = entity.getTransformationTarget();
                 if (target != null) {
                     float progress = MathHelper.clamp((age - itemSourceAge) / (ageMax - itemSourceAge), 0, 1);
-                    renderTransformationTarget(target, entity, 
-                            yRotation, partialTick, matrixStack, buffer, packedLight, progress);
+                    if (target instanceof LivingEntity) {
+                        renderTransformationLiving((LivingEntity) target, entity, 
+                                yRotation, partialTick, matrixStack, buffer, packedLight, progress);
+                    }
+                    else {
+                        renderTransformationNonLiving(target, entity, 
+                                yRotation, partialTick, matrixStack, buffer, packedLight, progress);
+                    }
                 }
             }
             super.render(entity, yRotation, partialTick, matrixStack, buffer, packedLight);
         }
     }
     
-    private <E extends LivingEntity, M extends EntityModel<E>> void renderTransformationTarget(E living, T transformationEntity, 
+    private <E extends Entity> void renderTransformationNonLiving(E target, T transformationEntity, 
+            float yRotation, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, float progress) {
+        
+    }
+    
+    private <E extends LivingEntity, M extends EntityModel<E>> void renderTransformationLiving(E living, T transformationEntity, 
             float yRotation, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, float progress) {
         LivingRenderer<E, M> renderer = (LivingRenderer<E, M>) entityRenderDispatcher.getRenderer(living);
         if (MinecraftForge.EVENT_BUS.post(new RenderLivingEvent.Pre<E, M>(living, renderer, partialTick, matrixStack, buffer, packedLight))) return;
@@ -105,26 +121,57 @@ public class GETransformationRenderer<T extends GETransformationEntity> extends 
         targetModel.setupAnim(living, 0, 0, ticks, f2, xRotation);
         RenderType rendertype = targetModel.renderType(renderer.getTextureLocation(living));
         if (rendertype != null) {
-            IVertexBuilder ivertexbuilder = buffer.getBuffer(rendertype);
-            int overlay = OverlayTexture.NO_OVERLAY;
             this.shadowRadius = ClientReflection.getShadowRadius(renderer) * progress; // cache this?
             
             ModelStateEntry modelState = getModelState(targetModel);
             modelState.saveState();
             modelState.lerp(progress);
             
+            IVertexBuilder ivertexbuilder = buffer.getBuffer(rendertype);
+            int overlay = OverlayTexture.NO_OVERLAY;
+            
+            
             float color = 0.25F + progress * 0.75F;
             targetModel.renderToBuffer(matrixStack, ivertexbuilder, packedLight, overlay, color, color, color, 1.0F);
-            for (LayerRenderer<E, M> layerrenderer : ClientReflection.getLayers(renderer)) {
-                layerrenderer.render(matrixStack, buffer, packedLight, living, 0, 0, partialTick, ticks, f2, xRotation);
+//            for (LayerRenderer<E, M> layerrenderer : ClientReflection.getLayers(renderer)) {
+//                layerrenderer.render(matrixStack, buffer, packedLight, living, 0, 0, partialTick, ticks, f2, xRotation);
+//            }
+            
+            float blockOverlayAlpha = 1.0F - progress;
+            if (blockOverlayAlpha > 0) {
+                ResourceLocation blockSprite = getBlockOverlaySprite(transformationEntity.getTransformationSource());
+                if (blockSprite != null) {
+                    RenderType renderTypeItem = CustomRenderType.goldExperienceLifeformOverlay(
+                            blockSprite, targetModel.texWidth / 16F, targetModel.texHeight / 16F);
+                    if (renderTypeItem != null) {
+                        IVertexBuilder vertexBuilderItem = buffer.getBuffer(renderTypeItem);
+                        targetModel.renderToBuffer(matrixStack, vertexBuilderItem, packedLight, overlay, 1.0F, 1.0F, 1.0F, blockOverlayAlpha);
+                    }
+                }
             }
             
-            modelState.restoreState(); // breaks models
+            modelState.restoreState();
         }
 
         matrixStack.popPose();
         MinecraftForge.EVENT_BUS.post(new RenderLivingEvent.Post<E, M>(living, renderer, partialTick, matrixStack, buffer, packedLight));
     }
+    
+    
+    
+    private <S extends Entity> ResourceLocation getBlockOverlaySprite(S entity) {
+        if (entity instanceof ItemEntity) {
+            ItemStack item = ((ItemEntity) entity).getItem();
+            if (!item.isEmpty() && item.getItem() instanceof BlockItem) {
+                Block block = ((BlockItem) item.getItem()).getBlock();
+                ResourceLocation tex = CDBlockBulletRenderer.getBlockTexture(block.defaultBlockState());
+                return tex;
+            }
+        }
+        
+        return null;
+    }
+    
     
     
     private static Map<ModelRenderer, float[]> createStateZero(Collection<ModelRenderer> modelParts) {

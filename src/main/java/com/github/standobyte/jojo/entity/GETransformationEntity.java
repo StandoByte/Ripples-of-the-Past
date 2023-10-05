@@ -29,12 +29,12 @@ import net.minecraftforge.fml.network.NetworkHooks;
 public class GETransformationEntity extends Entity implements IEntityAdditionalSpawnData {
     private static final DataParameter<Boolean> LIFE_FORM_SPAWNED = EntityDataManager.defineId(GETransformationEntity.class, DataSerializers.BOOLEAN);
     private Entity source;
-    private LivingEntity target;
+    private Entity target;
     private int duration;
 
     public GETransformationEntity(EntityType<?> type, World level) {
         super(type, level);
-        source = new ItemEntity(level, 0, 0, 0, new ItemStack(Items.STONE));
+        source = new ItemEntity(level, 0, 0, 0, new ItemStack(Items.DIRT));
     }
 
     public GETransformationEntity(World pLevel) {
@@ -46,7 +46,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         return this;
     }
     
-    public GETransformationEntity withTransformationTarget(LivingEntity entity) {
+    public GETransformationEntity withTransformationTarget(Entity entity) {
         this.target = entity;
         return this;
     }
@@ -65,7 +65,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         return source;
     }
     
-    public LivingEntity getTransformationTarget() {
+    public Entity getTransformationTarget() {
         return target;
     }
     
@@ -125,10 +125,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
     public void readSpawnData(PacketBuffer additionalData) {
         duration = additionalData.readVarInt();
         
-        Entity readTarget = readEntityData(additionalData);
-        if (readTarget instanceof LivingEntity) {
-            target = (LivingEntity) readTarget;
-        }
+        target = readEntityData(additionalData);
         source = readEntityData(additionalData);
     }
     

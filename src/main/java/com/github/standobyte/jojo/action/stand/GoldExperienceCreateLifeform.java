@@ -11,6 +11,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -27,21 +28,23 @@ public class GoldExperienceCreateLifeform extends StandAction {
             EntityType<?> type = GoldExperienceChooseLifeform.chosenTypeTmp;
             if (type != null) {
                 Entity lifeFormCreated = type.create(world);
-                if (lifeFormCreated instanceof LivingEntity) {
-                    if (lifeFormCreated instanceof MobEntity) {
-                        ((MobEntity) lifeFormCreated).finalizeSpawn((ServerWorld) world, 
-                                world.getCurrentDifficultyAt(user.blockPosition()), 
-                                SpawnReason.COMMAND, null, null);
-                    }
-                    int ticks = getTicksToCreate(user, power, lifeFormCreated);
-                    Entity tf = new GETransformationEntity(world)
-                            .withTransformationTarget((LivingEntity) lifeFormCreated) // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! make it work with any entity?
-                            .withDuration(ticks);
-                    tf.moveTo(user.getX(), user.getY(), user.getZ(), user.yRot, 0);
-                    lifeFormCreated.copyPosition(tf);
-                    lifeFormCreated.setYHeadRot(user.yRot);
-                    world.addFreshEntity(tf);
+                CompoundNBT nbt = new CompoundNBT();
+                nbt.putString("DeathLootTable", "empty");
+                lifeFormCreated.load(nbt);
+                
+                if (lifeFormCreated instanceof MobEntity) {
+                    ((MobEntity) lifeFormCreated).finalizeSpawn((ServerWorld) world, 
+                            world.getCurrentDifficultyAt(user.blockPosition()), 
+                            SpawnReason.COMMAND, null, null);
                 }
+                int ticks = getTicksToCreate(user, power, lifeFormCreated);
+                Entity tf = new GETransformationEntity(world)
+                        .withTransformationTarget(lifeFormCreated)
+                        .withDuration(ticks);
+                tf.moveTo(user.getX(), user.getY(), user.getZ(), user.yRot, 0);
+                lifeFormCreated.copyPosition(tf);
+                lifeFormCreated.setYHeadRot(user.yRot);
+                world.addFreshEntity(tf);
             }
         }
     }
@@ -55,10 +58,10 @@ public class GoldExperienceCreateLifeform extends StandAction {
             standSpeed = stats.getBaseAttackSpeed() + stats.getDevAttackSpeed(power.getStatsDevelopment());
         }
         
-        double modifier = 
-                MathHelper.clamp(100 - standSpeed * 2, 0, 100) * 
-                (1 + entityStrength * 0.125);
-        return 20 + MathHelper.ceil(volume * modifier);
+        
+        
+        return (int) (240 / Math.max(standSpeed, 1)
+                + MathHelper.ceil(volume * (1 + entityStrength * 0.125) * MathHelper.clamp(100 - standSpeed * 2, 0, 100)));
     }
     
     public static float getVolume(Entity entity) {
