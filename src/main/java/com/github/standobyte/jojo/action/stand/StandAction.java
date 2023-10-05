@@ -127,11 +127,16 @@ public abstract class StandAction extends Action<IStandPower> {
     
     @Override
     public void onPerform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
-        if (!world.isClientSide() && !staminaConsumedDifferently(power)) {
-            power.consumeStamina(getStaminaCost(power));
-        }
+        consumeStamina(world, power);
         super.onPerform(world, user, power, target);
     }
+    
+    protected void consumeStamina(World world, IStandPower power) {
+        if (!world.isClientSide()) {
+            power.consumeStamina(getStaminaCost(power));
+        }
+    }
+    
     
     @Override
     public void onClick(World world, LivingEntity user, IStandPower power) {
@@ -142,10 +147,6 @@ public abstract class StandAction extends Action<IStandPower> {
     
     protected boolean autoSummonStand(IStandPower power) {
         return autoSummonStand;
-    }
-    
-    public boolean staminaConsumedDifferently(IStandPower power) {
-        return false;
     }
     
     @Override

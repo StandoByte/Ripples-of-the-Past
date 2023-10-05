@@ -32,6 +32,8 @@ public class ClClickActionPacket {
     private Direction blockFace;
     private boolean sneak;
     
+    private PacketBuffer extraInputData = null;
+    
     public ClClickActionPacket(PowerClassification power, Action<?> action, RayTraceResult target, boolean sneak) {
         this.power = power;
         this.action = action;
@@ -80,6 +82,8 @@ public class ClClickActionPacket {
             else if (msg.targetEntityId > 0){
                 buf.writeInt(msg.targetEntityId);
             }
+            
+            msg.action.clWriteExtraData(buf);
         }
 
         @Override
@@ -100,6 +104,7 @@ public class ClClickActionPacket {
             default: // 0
                 break;
             }
+            packet.extraInputData = buf;
             return packet;
         }
 
@@ -115,12 +120,13 @@ public class ClClickActionPacket {
                         ActionTarget.EMPTY
                         : new ActionTarget(msg.targetBlock, msg.blockFace)
                         : new ActionTarget(targetEntity);
-                clickAction(power, msg.action, msg.sneak, target);
+                clickAction(power, msg.action, msg.sneak, target, msg.extraInputData);
             });
         }
         
-        private <P extends IPower<P, ?>> void clickAction(IPower<?, ?> power, Action<P> action, boolean sneak, ActionTarget target) {
-            ((P) power).clickAction(action, sneak, target);
+        private <P extends IPower<P, ?>> void clickAction(IPower<?, ?> power, 
+                Action<P> action, boolean sneak, ActionTarget target, PacketBuffer extraData) {
+            ((P) power).clickAction(action, sneak, target, extraData);
         }
         
         @Override

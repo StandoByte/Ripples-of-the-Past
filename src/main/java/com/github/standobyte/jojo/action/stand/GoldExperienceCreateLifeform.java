@@ -1,8 +1,11 @@
 package com.github.standobyte.jojo.action.stand;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.GETransformationEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 
@@ -14,6 +17,7 @@ import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.monster.SlimeEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.IFormattableTextComponent;
@@ -26,11 +30,19 @@ public class GoldExperienceCreateLifeform extends StandAction {
     public GoldExperienceCreateLifeform(StandAction.Builder builder) {
         super(builder);
     }
-
+    
     @Override
-    protected void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
-        if (!world.isClientSide()) {
-            EntityType<?> type = GoldExperienceChooseLifeform.chosenTypeTmp;
+    public void clWriteExtraData(PacketBuffer buf) {
+        NetworkUtil.writeOptionally(buf, GoldExperienceChooseLifeform.chosenTypeTmp, 
+                type -> buf.writeRegistryId(type));
+    }
+    
+    @SuppressWarnings("unchecked")
+    @Override
+    public void doPerform(World world, LivingEntity user, IStandPower power, ActionTarget target, @Nullable PacketBuffer extraInput) {
+        if (!world.isClientSide() && extraInput != null) {
+            EntityType<?> type = (EntityType<?>) NetworkUtil.readOptional(extraInput, 
+                    () -> extraInput.readRegistryIdSafe(EntityType.class)).orElse(null);
             if (type != null) {
                 Entity lifeFormCreated = type.create(world);
                 CompoundNBT nbt = new CompoundNBT();

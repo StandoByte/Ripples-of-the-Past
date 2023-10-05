@@ -54,6 +54,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
@@ -64,6 +65,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.settings.AttackIndicatorStatus;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
@@ -1420,6 +1422,7 @@ public class ActionsOverlayGui extends AbstractGui {
         return onActionClick(power, getQuickAccessAction(power, shiftVariant), sneak);
     }
 
+    private final PacketBuffer extraInputBuf = new PacketBuffer(Unpooled.buffer());
     @Nullable
     private <P extends IPower<P, ?>> Pair<Action<P>, Boolean> onActionClick(P power, Action<P> action, boolean sneak) {
         if (power != null && action != null) {
@@ -1431,7 +1434,9 @@ public class ActionsOverlayGui extends AbstractGui {
                     power.getPowerClassification(), action, InputHandler.getInstance().mouseTarget, sneak);
             PacketManager.sendToServer(packet);
             ActionTarget actionTarget = ActionTarget.fromRayTraceResult(target);
-            boolean actionWentOff = power.clickAction(action, sneak, actionTarget);
+            action.clWriteExtraData(extraInputBuf);
+            boolean actionWentOff = power.clickAction(action, sneak, actionTarget, extraInputBuf);
+            extraInputBuf.clear();
             return Pair.of(action, actionWentOff);
         }
         return null;

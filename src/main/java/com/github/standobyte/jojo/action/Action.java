@@ -26,6 +26,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
@@ -214,6 +215,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return this;
     }
     
+    public void clWriteExtraData(PacketBuffer buf) {}
+    
     public boolean enabledInHudDefault() {
         return true;
     }
@@ -253,6 +256,9 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         if (user instanceof ServerPlayerEntity) {
             ModCriteriaTriggers.ACTION_PERFORM.get().trigger((ServerPlayerEntity) user, this);
         }
+    }
+    
+    public void doPerform(World world, LivingEntity user, P power, ActionTarget target, @Nullable PacketBuffer extraInput) {
         perform(world, user, power, target);
     }
     
