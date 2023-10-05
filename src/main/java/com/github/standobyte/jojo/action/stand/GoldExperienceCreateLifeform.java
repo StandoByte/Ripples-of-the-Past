@@ -16,6 +16,8 @@ import net.minecraft.entity.monster.SlimeEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
@@ -106,6 +108,16 @@ public class GoldExperienceCreateLifeform extends StandAction {
     public static void onTransformationFinish(Entity entity) {
         if (entity instanceof MobEntity) {
             ((MobEntity) entity).playAmbientSound();
+        }
+    }
+    
+    @Override
+    public IFormattableTextComponent getTranslatedName(IStandPower power, String key) {
+        if (GoldExperienceChooseLifeform.chosenTypeTmp != null) {
+            return new TranslationTextComponent(key + ".param", GoldExperienceChooseLifeform.chosenTypeTmp.getDescription());
+        }
+        else {
+            return super.getTranslatedName(power, key);
         }
     }
 }

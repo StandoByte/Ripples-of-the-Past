@@ -140,6 +140,11 @@ public class PlayerUtilCap {
         }
     }
     
+    public void saveDataOnDeath(PlayerUtilCap oldInstance) {
+        this.notificationsSent = oldInstance.notificationsSent;
+        this.metEntityTypesId = oldInstance.metEntityTypesId;
+    }
+    
     
     
     public void setContinuousAction(@Nullable ContinuousActionInstance<?, ?> action) {
@@ -255,10 +260,6 @@ public class PlayerUtilCap {
         if (!player.level.isClientSide()) {
             PacketManager.sendToClient(new NotificationSyncPacket(notificationsSent), (ServerPlayerEntity) player);
         }
-    }
-    
-    public void moveNotificationsSet(PlayerUtilCap cap) {
-        this.notificationsSent = cap.notificationsSent;
     }
     
     public static enum OneTimeNotification {
