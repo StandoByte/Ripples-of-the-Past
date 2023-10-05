@@ -1008,7 +1008,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     
     public void defaultRotation() {
         LivingEntity user = getUser();
-        if (user != null && !isRemotePositionFixed()) {
+        if (user != null && !isManuallyControlled() && !isRemotePositionFixed()) {
             setRot(user.yRot, user.xRot);
         }
         setYHeadRot(this.yRot);
