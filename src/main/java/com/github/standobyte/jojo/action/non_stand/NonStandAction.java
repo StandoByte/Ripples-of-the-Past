@@ -2,6 +2,8 @@ package com.github.standobyte.jojo.action.non_stand;
 
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
@@ -10,6 +12,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.TypeSpecificData;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
@@ -75,11 +78,11 @@ public abstract class NonStandAction extends Action<INonStandPower> {
     }
     
     @Override
-    public void onPerform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
-        super.onPerform(world, user, power, target);
+    public void onPerform(World world, LivingEntity user, INonStandPower power, ActionTarget target, @Nullable PacketBuffer extraInput) {
         if (!world.isClientSide()) {
             power.consumeEnergy(getEnergyCost(power, target));
         }
+        super.onPerform(world, user, power, target, extraInput);
     }
     
     @Override

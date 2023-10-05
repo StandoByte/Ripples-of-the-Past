@@ -19,6 +19,8 @@ public class ClClickActionPacket {
     private final ActionTarget target;
     private boolean sneak;
     
+    private PacketBuffer extraInputData = null;
+    
     public ClClickActionPacket(PowerClassification power, Action<?> action, ActionTarget target, boolean sneak) {
         this.power = power;
         this.action = action;
@@ -36,6 +38,8 @@ public class ClClickActionPacket {
             buf.writeRegistryIdUnsafe(JojoCustomRegistries.ACTIONS.getRegistry(), msg.action);
             msg.target.writeToBuf(buf);
             buf.writeBoolean(msg.sneak);
+            
+            msg.action.clWriteExtraData(buf);
         }
 
         @Override
@@ -44,8 +48,9 @@ public class ClClickActionPacket {
             Action<?> action = buf.readRegistryIdUnsafe(JojoCustomRegistries.ACTIONS.getRegistry());
             ActionTarget target = ActionTarget.readFromBuf(buf);
             boolean sneak = buf.readBoolean();
-            
-            return new ClClickActionPacket(power, action, target, sneak);
+            ClClickActionPacket packet = new ClClickActionPacket(power, action, target, sneak);
+            packet.extraInputData = buf;
+            return packet;
         }
 
         @Override
@@ -56,12 +61,13 @@ public class ClClickActionPacket {
             
             IPower.getPowerOptional(player, msg.power).ifPresent(power -> {
                 msg.target.resolveEntityId(player.level);
-                clickAction(power, msg.action, msg.sneak, msg.target);
+                clickAction(power, msg.action, msg.sneak, msg.target, msg.extraInputData);
             });
         }
         
-        private <P extends IPower<P, ?>> void clickAction(IPower<?, ?> power, Action<P> action, boolean sneak, ActionTarget target) {
-            ((P) power).clickAction(action, sneak, target);
+        private <P extends IPower<P, ?>> void clickAction(IPower<?, ?> power, 
+                Action<P> action, boolean sneak, ActionTarget target, PacketBuffer extraData) {
+            ((P) power).clickAction(action, sneak, target, extraData);
         }
         
         @Override

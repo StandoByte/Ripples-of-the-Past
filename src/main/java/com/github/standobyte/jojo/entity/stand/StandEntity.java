@@ -1525,7 +1525,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     public boolean checkInputBuffer() {
         if (inputBuffer != null) {
             LivingEntity user = getUser();
-            if (userPower.clickAction(inputBuffer, user != null && user.isShiftKeyDown(), ActionTarget.EMPTY)) {
+            if (userPower.clickAction(inputBuffer, user != null && user.isShiftKeyDown(), ActionTarget.EMPTY, null)) {
                 inputBuffer = null;
                 return true;
             }

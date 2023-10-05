@@ -33,6 +33,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
@@ -184,14 +185,14 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     
     
     @Override
-    public final boolean clickAction(Action<P> action, boolean sneak, ActionTarget target) {
+    public final boolean clickAction(Action<P> action, boolean sneak, ActionTarget target, @Nullable PacketBuffer extraInput) {
         if (action == null) return false;
-        boolean res = onClickAction(action, sneak, target);
+        boolean res = onClickAction(action, sneak, target, extraInput);
         action.afterClick(user.level, user, getThis(), res);
         return res;
     }
     
-    private boolean onClickAction(Action<P> action, boolean sneak, ActionTarget target) {
+    private boolean onClickAction(Action<P> action, boolean sneak, ActionTarget target, @Nullable PacketBuffer extraInput) {
         if (action == null || getHeldAction() == action) return false;
         boolean wasActive = isActive();
         action.onClick(user.level, user, getThis());
@@ -223,7 +224,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                 if (!user.level.isClientSide()) {
                     action.playVoiceLine(user, getThis(), target, wasActive, sneak);
                 }
-                performAction(action, target);
+                performAction(action, target, extraInput);
                 stopHeldAction(false);
                 return true;
             }
@@ -322,14 +323,14 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         return action.isUnlocked(getThis()) ? 1 : -1;
     }
     
-    protected void performAction(Action<P> action, ActionTarget target) {
+    protected void performAction(Action<P> action, ActionTarget target, @Nullable PacketBuffer extraInput) {
         if (!action.holdOnly(getThis())) {
             World world = user.level;
             target = action.targetBeforePerform(world, user, getThis(), target);
             serverPlayerUser.ifPresent(player -> {
                 ModCriteriaTriggers.ACTION_PERFORM.get().trigger(player, action);
             });
-            action.onPerform(world, user, getThis(), target);
+            action.onPerform(world, user, getThis(), target, extraInput);
             if (!world.isClientSide()) {
                 int cooldown = action.getCooldown(getThis(), -1);
                 if (cooldown > 0) {
@@ -440,7 +441,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                 
                 if (fire) {
                     target = targetContainer.get();
-                    performAction(heldAction, target);
+                    performAction(heldAction, target, null);
                 }
             }
             heldActionData = null;

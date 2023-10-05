@@ -22,6 +22,7 @@ import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.IFormattableTextComponent;
@@ -146,12 +147,17 @@ public abstract class StandAction extends Action<IStandPower> {
     }
     
     @Override
-    public void onPerform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
-        if (!world.isClientSide() && !staminaConsumedDifferently(power)) {
+    public void onPerform(World world, LivingEntity user, IStandPower power, ActionTarget target, @Nullable PacketBuffer extraInput) {
+        consumeStamina(world, power);
+        super.onPerform(world, user, power, target, extraInput);
+    }
+    
+    protected void consumeStamina(World world, IStandPower power) {
+        if (!world.isClientSide()) {
             power.consumeStamina(getStaminaCost(power));
         }
-        super.onPerform(world, user, power, target);
     }
+    
     
     @Override
     public void onClick(World world, LivingEntity user, IStandPower power) {
@@ -164,6 +170,7 @@ public abstract class StandAction extends Action<IStandPower> {
         return autoSummonStand;
     }
     
+    @Deprecated
     public boolean staminaConsumedDifferently(IStandPower power) {
         return false;
     }
