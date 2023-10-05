@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.stand;
 
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.GETransformationEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 
@@ -13,6 +14,7 @@ import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
@@ -38,12 +40,27 @@ public class GoldExperienceCreateLifeform extends StandAction {
                             SpawnReason.COMMAND, null, null);
                 }
                 int ticks = getTicksToCreate(user, power, lifeFormCreated);
+                
+                Entity performer = user;
+                if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
+                    StandEntity stand = (StandEntity) power.getStandManifestation();
+                    if (stand.isManuallyControlled()) {
+                        performer = stand;
+                    }
+                }
+                
                 Entity tf = new GETransformationEntity(world)
                         .withTransformationTarget(lifeFormCreated)
                         .withDuration(ticks);
-                tf.moveTo(user.getX(), user.getY(), user.getZ(), user.yRot, 0);
+                
+                Vector3d pos = performer.position();
+                Vector3d lookVec = performer.getLookAngle();
+                double distScale = lifeFormCreated.getBbWidth() + 1;
+                pos = pos.add(lookVec.x * distScale, 0, lookVec.z * distScale);
+                tf.moveTo(pos.x, pos.y, pos.z, performer.yRot, 0);
+                
                 lifeFormCreated.copyPosition(tf);
-                lifeFormCreated.setYHeadRot(user.yRot);
+                lifeFormCreated.setYHeadRot(performer.yRot);
                 world.addFreshEntity(tf);
             }
         }
@@ -57,8 +74,6 @@ public class GoldExperienceCreateLifeform extends StandAction {
             StandStats stats = power.getType().getStats();
             standSpeed = stats.getBaseAttackSpeed() + stats.getDevAttackSpeed(power.getStatsDevelopment());
         }
-        
-        
         
         return (int) (240 / Math.max(standSpeed, 1)
                 + MathHelper.ceil(volume * (1 + entityStrength * 0.125) * MathHelper.clamp(100 - standSpeed * 2, 0, 100)));

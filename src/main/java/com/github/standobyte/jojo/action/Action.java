@@ -9,6 +9,7 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
@@ -273,6 +274,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     public void onHoldTickClientEffect(LivingEntity user, P power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {}
     
+    @Nonnull
     public LivingEntity getPerformer(LivingEntity user, P power) {
         return user;
     }

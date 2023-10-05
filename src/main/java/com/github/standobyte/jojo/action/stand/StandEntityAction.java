@@ -83,11 +83,6 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     }
     
     @Override
-    public LivingEntity getPerformer(LivingEntity user, IStandPower power) {
-        return power.isActive() ? (StandEntity) power.getStandManifestation() : user;
-    }
-    
-    @Override
     public ActionConditionResult checkConditions(LivingEntity user, IStandPower power, ActionTarget target) {
         StandEntity stand = power.isActive() ? (StandEntity) power.getStandManifestation() : null;
         if (stand != null) {

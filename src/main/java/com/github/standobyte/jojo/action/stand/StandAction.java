@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -74,6 +75,11 @@ public abstract class StandAction extends Action<IStandPower> {
             cooldown = (int) ((float) cooldown * this.resolveCooldownMultiplier);
         }
         return cooldown;
+    }
+    
+    @Override
+    public LivingEntity getPerformer(LivingEntity user, IStandPower power) {
+        return power.isActive() && (power.getStandManifestation() instanceof StandEntity) ? (StandEntity) power.getStandManifestation() : user;
     }
     
     @Override
