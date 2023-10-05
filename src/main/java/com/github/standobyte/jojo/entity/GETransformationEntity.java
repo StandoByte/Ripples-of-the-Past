@@ -97,14 +97,14 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
     
     @Override
     protected void readAdditionalSaveData(CompoundNBT nbt) {
-        nbt.putInt("Age", tickCount);
-        nbt.putInt("Duration", duration);
+        this.tickCount = nbt.getInt("Age");
+        this.duration = nbt.getInt("Duration");
     }
 
     @Override
     protected void addAdditionalSaveData(CompoundNBT nbt) {
-        this.tickCount = nbt.getInt("Age");
-        this.duration = nbt.getInt("Duration");
+        nbt.putInt("Age", tickCount);
+        nbt.putInt("Duration", duration);
     }
 
     @Override
@@ -112,7 +112,6 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         return NetworkHooks.getEntitySpawningPacket(this);
     }
 
- // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! skips the transformation entirely when you go to esc menu and back wtf
     @Override
     public void writeSpawnData(PacketBuffer buffer) {
         buffer.writeVarInt(duration);
