@@ -12,6 +12,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.monster.SlimeEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
@@ -38,6 +39,11 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     ((MobEntity) lifeFormCreated).finalizeSpawn((ServerWorld) world, 
                             world.getCurrentDifficultyAt(user.blockPosition()), 
                             SpawnReason.COMMAND, null, null);
+                    if (lifeFormCreated instanceof SlimeEntity) {
+                        CompoundNBT additionalNbt = lifeFormCreated.serializeNBT();
+                        additionalNbt.putInt("Size", 0);
+                        lifeFormCreated.load(additionalNbt);
+                    }
                 }
                 int ticks = getTicksToCreate(user, power, lifeFormCreated);
                 
