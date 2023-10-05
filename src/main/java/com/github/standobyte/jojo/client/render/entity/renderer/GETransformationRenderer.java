@@ -58,7 +58,7 @@ public class GETransformationRenderer<T extends GETransformationEntity> extends 
         if (!entity.isInvisibleTo(Minecraft.getInstance().player)) {
             float age = entity.tickCount + partialTick;
             float ageMax = entity.getDuration();
-            float itemSourceAge = Math.min(ageMax / 3, 20);
+            float itemSourceAge = GETransformationEntity.getRenderAsItemTime(ageMax);
             if (age < itemSourceAge) {
                 Entity source = entity.getTransformationSource();
                 if (source != null) {

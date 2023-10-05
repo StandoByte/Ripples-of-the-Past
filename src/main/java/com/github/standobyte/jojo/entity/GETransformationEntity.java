@@ -10,8 +10,11 @@ import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MoverType;
+import net.minecraft.entity.Pose;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -21,12 +24,14 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
 
-//FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! match the target entity hitbox size
 public class GETransformationEntity extends Entity implements IEntityAdditionalSpawnData {
     private static final DataParameter<Boolean> LIFE_FORM_SPAWNED = EntityDataManager.defineId(GETransformationEntity.class, DataSerializers.BOOLEAN);
     private Entity source;
@@ -83,7 +88,82 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             }
             return;
         }
+        
+        
+        double f = getEyeHeight() - 0.11111111;
+        Vector3d deltaMovement = getDeltaMovement();
+        if (isInWater() && getFluidHeight(FluidTags.WATER) > f) {
+            setDeltaMovement(
+                    deltaMovement.x * 0.99, 
+                    deltaMovement.y + (deltaMovement.y < 0.06 ? 5.0E-4 : 0), 
+                    deltaMovement.z * 0.99);
+        }
+        else if (isInLava() && getFluidHeight(FluidTags.LAVA) > f) {
+            setDeltaMovement(
+                    deltaMovement.x * 0.95, 
+                    deltaMovement.y + (deltaMovement.y < 0.06 ? 5.0E-4 : 0), 
+                    deltaMovement.z * 0.95);
+        }
+        else if (!isNoGravity()) {
+            setDeltaMovement(deltaMovement.add(0, -0.04, 0));
+        }
+        
+        if (!onGround || getHorizontalDistanceSqr(getDeltaMovement()) > 1.0E-5 || (tickCount + getId()) % 4 == 0) {
+            move(MoverType.SELF, getDeltaMovement());
+            double inertia = 0.98;
+            if (onGround) {
+                inertia = level.getBlockState(new BlockPos(getX(), getY() - 1.0, getZ()))
+                        .getSlipperiness(level, new BlockPos(getX(), getY() - 1.0, getZ()), this) * 0.98;
+            }
+            
+            setDeltaMovement(getDeltaMovement().multiply(inertia, 0.98, inertia));
+            if (onGround) {
+                deltaMovement = getDeltaMovement();
+                if (deltaMovement.y < 0.0D) {
+                    setDeltaMovement(deltaMovement.multiply(1.0, -0.5, 1.0));
+                }
+            }
+        }
+        
+        
+        refreshDimensions();
+        
         super.tick();
+    }
+    
+    // Mojang?!?
+    @Override
+    public void refreshDimensions() {
+        double x = getX();
+        double y = getY();
+        double z = getZ();
+        super.refreshDimensions(); // why does it shift the entity along the XZ axes when it increases in size anyway?...
+        this.setPos(x, y, z);
+    }
+    
+    @Override
+    public EntitySize getDimensions(Pose pPose) {
+        EntitySize size = super.getDimensions(pPose);
+        
+        float renderAsItemTime = getRenderAsItemTime(duration);
+        if (tickCount < renderAsItemTime) {
+            if (source != null) {
+                size = source.getDimensions(pPose);
+                float scale = 1 - tickCount / renderAsItemTime;
+                size = new EntitySize(size.width * scale, size.height * scale, false);
+            }
+        }
+        else if (target != null) {
+            size = target.getDimensions(pPose);
+            float scale = 1 - (duration - tickCount) / (duration - renderAsItemTime);
+            size = new EntitySize(size.width * scale, size.height * scale, false);
+        }
+        
+        return size;
+    }
+    
+    public static float getRenderAsItemTime(float fullDuration) {
+        return Math.min(fullDuration / 3, 20);
     }
 
     @Override
