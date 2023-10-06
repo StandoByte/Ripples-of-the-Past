@@ -204,6 +204,11 @@ public class ClientReflection {
         ReflectionUtil.setFieldValue(PARTICLE_MANAGER_TEXTURE_MANAGER, particleManager, textureManager);
     }
     
+    private static final Field MINECRAFT_MOUSE_HANDLER = ObfuscationReflectionHelper.findField(Minecraft.class, "field_71417_B");
+    public static void setMouseHandler(Minecraft mc, MouseHelper mouseHandler) {
+        ReflectionUtil.setFieldValue(MINECRAFT_MOUSE_HANDLER, mc, mouseHandler);
+    }
+    
     
     private static final Field MOUSE_HELPER_X_POS = ObfuscationReflectionHelper.findField(MouseHelper.class, "field_198040_e");
     public static void setXPos(MouseHelper mouseHelper, double xPos) {
