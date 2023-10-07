@@ -464,7 +464,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public void setLearningProgressPoints(StandAction action, float points) {
         StandActionLearningEntry learningEntry = actionLearningProgressMap.setLearningProgressPoints(action, points, this);
-        if (this.getUser() != null && !this.getUser().level.isClientSide()) {
+        if (learningEntry != null && this.getUser() != null && !this.getUser().level.isClientSide()) {
             action.onTrainingPoints(this, getLearningProgressPoints(action));
             if (getLearningProgressPoints(action) == action.getMaxTrainingPoints(this)) {
                 action.onMaxTraining(this);
