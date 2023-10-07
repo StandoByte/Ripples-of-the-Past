@@ -25,14 +25,8 @@ import net.minecraft.util.ResourceLocation;
 public class StandActionLearningProgress {
     private final EntriesMap map = new EntriesMap();
     
-    @Nullable
-    private StandActionLearningEntry getEntry(StandAction action, StandType<?> currentlyUsedStand) {
+    public float getLearningProgressPoints(StandAction action, @Nullable StandType<?> currentlyUsedStand) {
         StandActionLearningEntry entry = map.getEntry(currentlyUsedStand, action);
-        return entry;
-    }
-    
-    public float getLearningProgressPoints(StandAction action, StandType<?> currentlyUsedStand) {
-        StandActionLearningEntry entry = getEntry(action, currentlyUsedStand);
         return entry != null ? Math.max(entry.getPoints(), 0) : -1;
     }
     
@@ -47,7 +41,7 @@ public class StandActionLearningProgress {
     }
     
     boolean addEntry(StandAction action, StandType<?> standType) {
-        if (map.contains(standType, action)) {
+        if (standType == null || map.contains(standType, action)) {
             return false;
         }
         
@@ -55,9 +49,12 @@ public class StandActionLearningProgress {
         return true;
     }
     
+    @Nullable
     StandActionLearningEntry setLearningProgressPoints(StandAction action, float points, IStandPower power) {
         StandActionLearningEntry entry = map.computeIfAbsent(power.getType(), action, 0);
-        entry.setPoints(points);
+        if (entry != null) {
+            entry.setPoints(points);
+        }
         return entry;
     }
     
@@ -92,8 +89,8 @@ public class StandActionLearningProgress {
         private final Map<ResourceLocation, Map<ResourceLocation, StandActionLearningEntry>> _mapOfMaps = new HashMap<>();
         
         @Nullable
-        public StandActionLearningEntry getEntry(StandType<?> standType, StandAction action) {
-            if (!_mapOfMaps.containsKey(standType.getRegistryName())) {
+        public StandActionLearningEntry getEntry(@Nullable StandType<?> standType, StandAction action) {
+            if (standType == null || !_mapOfMaps.containsKey(standType.getRegistryName())) {
                 return null;
             }
             
@@ -107,14 +104,19 @@ public class StandActionLearningProgress {
             map.put(entry.action.getRegistryName(), entry);
         }
         
+        @Nullable
         public StandActionLearningEntry computeIfAbsent(StandType<?> standType, StandAction action, float newEntryPoints) {
+            if (standType == null) {
+                return null;
+            }
+            
             Map<ResourceLocation, StandActionLearningEntry> map = _mapOfMaps.computeIfAbsent(
                     standType.getRegistryName(), type -> new HashMap<>());
             return map.computeIfAbsent(action.getRegistryName(), a -> new StandActionLearningEntry(action, standType, newEntryPoints));
         }
         
         public boolean contains(StandType<?> standType, StandAction action) {
-            if (!_mapOfMaps.containsKey(standType.getRegistryName())) {
+            if (standType == null || !_mapOfMaps.containsKey(standType.getRegistryName())) {
                 return false;
             }
             
