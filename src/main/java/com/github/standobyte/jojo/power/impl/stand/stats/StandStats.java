@@ -243,11 +243,6 @@ public class StandStats {
             return createStats();
         }
         
-        @Deprecated
-        public S build(String standName) {
-            return build();
-        }
-        
         protected abstract S createStats();
     }
     
