@@ -98,7 +98,7 @@ public abstract class StandAction extends Action<IStandPower> {
                 isUnlockedByDefault());
     }
     
-    protected boolean isUnlockedByDefault() {
+    public boolean isUnlockedByDefault() {
         return resolveLevelToUnlock == 0;
     }
     
