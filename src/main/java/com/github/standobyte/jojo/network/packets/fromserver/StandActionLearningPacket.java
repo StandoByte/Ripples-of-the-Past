@@ -49,19 +49,18 @@ public class StandActionLearningPacket {
         public void handle(StandActionLearningPacket msg, Supplier<NetworkEvent.Context> ctx) {
             IStandPower.getStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
                 StandAction action = msg.entry.action;
-                boolean showToast = msg.showToast && !action.isUnlocked(power);
+                boolean showToast = msg.showToast && !action.isUnlocked(power) && !action.isUnlockedByDefault();
                 power.setLearningFromPacket(msg);
                 
                 if (showToast) {
                     StandType<?> standType = power.getType();
-                    ActionsLayout.Hotbar hotbar = getActionHotbar(action, standType);
                     
                     IActionToastType toastType = null;
                     if (standType.getStandFinisherPunch().map(finisher -> finisher == action).orElse(false)) {
                         toastType = FinisherAttackToast.SpecialToastType.FINISHER_HEAVY_ATTACK;
                     }
                     else {
-                        
+                        ActionsLayout.Hotbar hotbar = getActionHotbar(action, standType);
                         boolean isShiftVariation = action.isShiftVariation();
                         toastType = ActionToast.Type.getToastType(PowerClassification.STAND, hotbar, isShiftVariation);
                     }
