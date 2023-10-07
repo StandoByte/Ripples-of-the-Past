@@ -57,7 +57,7 @@ public class SoulAscensionTrigger extends AbstractCriterionTrigger<SoulAscension
         }
 
         private boolean matches(IStandPower stand, int ascensionTicks) {
-            return this.standPower.matches(PowerClassification.STAND, stand) && this.ascensionTicks.matches(ascensionTicks);
+            return this.standPower.matchesPower(PowerClassification.STAND, stand) && this.ascensionTicks.matches(ascensionTicks);
         }
     }
 

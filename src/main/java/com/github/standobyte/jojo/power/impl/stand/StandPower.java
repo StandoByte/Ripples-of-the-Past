@@ -18,7 +18,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtStandEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SkippedStandProgressionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandActionLearningPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.StandActionsClearLearningPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.StandFullClearPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStaminaPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrTypeStandInstancePacket;
 import com.github.standobyte.jojo.power.impl.PowerBaseImpl;
@@ -41,7 +41,11 @@ import net.minecraft.util.text.StringTextComponent;
 
 public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> implements IStandPower {
     private Optional<StandInstance> standInstance = Optional.empty();
-    private int tier = 0;
+    
+    private boolean hadStand = false;
+    private PreviousStandsSet previousStands = new PreviousStandsSet();
+    private StandArrowHandler standArrowHandler = new StandArrowHandler();
+    
     @Nullable
     private IStandManifestation standManifestation = null;
     private float stamina;
@@ -108,6 +112,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     protected void onNewPowerGiven(StandType<?> standType) {
         super.onNewPowerGiven(standType);
+        
         serverPlayerUser.ifPresent(player -> {
             PacketManager.sendToClientsTrackingAndSelf(new TrTypeStandInstancePacket(
                     player.getId(), getStandInstance().get(), resolveCounter.getResolveLevel()), player);
@@ -121,6 +126,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 standType.unlockNewActions(this);
             }
         }
+        
+        previousStands.addStand(standType, user);
     }
     
     @Override
@@ -133,7 +140,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             resolveCounter.onStandAcquired(standType);
         }
         if (standType != null) {
-            tier = Math.max(tier, standType.getTier());
+            hadStand = true;
         }
         if (user != null && !user.level.isClientSide()) {
             continuousEffects.onStandChanged(user);
@@ -178,6 +185,21 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     }
     
     @Override
+    public PreviousStandsSet getPreviousStandsSet() {
+        return previousStands;
+    }
+    
+    @Override
+    public StandArrowHandler getStandArrowHandler() {
+        return standArrowHandler;
+    }
+    
+    @Override
+    public boolean hadAnyStand() {
+        return hadStand;
+    }
+    
+    @Override
     public ITextComponent getName() {
         return hasPower() ? getStandInstance().map(stand -> stand.getName())
                 .orElse(StringTextComponent.EMPTY) : StringTextComponent.EMPTY;
@@ -193,6 +215,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 standInstance.ifPresent(stand -> stand.tick(this, user, user.level));
             }
             continuousEffects.tick();
+        }
+        if (!user.level.isClientSide()) {
+            standArrowHandler.tick(user);
         }
     }
     
@@ -498,12 +523,17 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     }
     
     @Override
-    public void clearActionLearning() {
+    public void fullStandClear() {
         this.actionLearningProgressMap = new StandActionLearningProgress();
         resolveCounter.clearLevels();
         serverPlayerUser.ifPresent(player -> {
-            PacketManager.sendToClient(new StandActionsClearLearningPacket(), player);
+            PacketManager.sendToClient(new StandFullClearPacket(), player);
         });
+        if (!hasPower()) {
+            hadStand = false;
+        }
+        previousStands.clear();
+        standArrowHandler.clear();
     }
     
     @Override
@@ -531,11 +561,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         if (hasPower()) {
             getType().toggleSummon(this);
         }
-    }
-    
-    @Override
-    public int getUserTier() {
-        return tier;
     }
     
 //    @Override // TODO Stand Sealing effect
@@ -616,6 +641,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     public CompoundNBT writeNBT() {
         CompoundNBT cnbt = super.writeNBT();
         standInstance.ifPresent(stand -> cnbt.put("StandInstance", stand.writeNBT()));
+        
+        cnbt.putBoolean("HadStand", hadStand);
         if (usesStamina()) {
             cnbt.putFloat("Stamina", stamina);
         }
@@ -625,6 +652,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         cnbt.putBoolean("Skipped", skippedProgression);
         cnbt.put("ActionLearning", actionLearningProgressMap.toNBT());
         cnbt.put("Effects", continuousEffects.toNBT());
+        cnbt.put("PrevStands", previousStands.toNBT());
+        cnbt.put("ArrowHandler", standArrowHandler.toNBT());
         return cnbt;
     }
 
@@ -635,6 +664,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                         : LegacyUtil.readOldStandCapType(nbt).orElse(null);
         setStandInstance(standInstance);
             
+        hadStand = nbt.getBoolean("HadStand");
         if (usesStamina()) {
             stamina = nbt.getFloat("Stamina");
         }
@@ -647,6 +677,12 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         }
         if (nbt.contains("Effects", MCUtil.getNbtId(CompoundNBT.class))) {
             continuousEffects.fromNBT(nbt.getCompound("Effects"));
+        }
+        if (nbt.contains("PrevStands", MCUtil.getNbtId(CompoundNBT.class))) {
+            previousStands.fromNBT(nbt.getCompound("PrevStands"));
+        }
+        if (nbt.contains("ArrowHandler", MCUtil.getNbtId(CompoundNBT.class))) {
+            standArrowHandler.fromNBT(nbt.getCompound("ArrowHandler"));
         }
         super.readNBT(nbt);
     }
@@ -663,6 +699,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         this.actionLearningProgressMap = ((StandPower) oldPower).actionLearningProgressMap; // FIXME can i remove this cast?
         this.continuousEffects = oldPower.getContinuousEffects();
         this.stamina = getMaxStamina();
+        this.standArrowHandler.keepOnDeath(oldPower.getStandArrowHandler());
     }
     
     @Override
@@ -679,6 +716,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 PacketManager.sendToClient(new SkippedStandProgressionPacket(), player);
             }
             continuousEffects.syncWithUserOnly(player);
+            previousStands.syncWithUser(player);
+            standArrowHandler.syncWithUser(player);
         });
         syncLayoutWithUser();
     }

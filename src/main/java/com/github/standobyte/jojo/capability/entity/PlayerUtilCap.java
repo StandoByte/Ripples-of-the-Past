@@ -7,16 +7,21 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.JojoModConfig.Common;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.player.IPlayerAction;
+import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
 import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.ArrowXpLevelsDataPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.NotificationSyncPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDirectEntityDataPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDoubleShiftPacket;
@@ -33,6 +38,7 @@ import com.github.standobyte.jojo.util.mod.JojoModVersion;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -46,38 +52,12 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.server.ServerWorld;
 
 public class PlayerUtilCap {
     private final PlayerEntity player;
     
-    private Set<OneTimeNotification> notificationsSent = EnumSet.noneOf(OneTimeNotification.class);
-    
-    private int knives;
-    private int removeKnifeTime;
-    
     public int knivesThrewTicks = 0;
-    
-    private boolean hasClientInput;
-    private int noClientInputTimer;
-    
-    private Optional<RockPaperScissorsGame> currentGame = Optional.empty();
-    
-    private boolean walkmanEarbuds = false;
-    
-    private Optional<ContinuousActionInstance<?, ?>> continuousAction = Optional.empty();
-    
-    private boolean doubleShiftPress = false;
-    private boolean shiftSynced = false;
-    private boolean isWalkingOnLiquid = false;
-    private boolean clTickSpark;
-    
-    private int chatSpamTickCount = 0;
-    
-    private BedType lastBedType;
-    private int ticksNoSleep;
-    private long nextSleepTime;
-    
-    private Set<ResourceLocation> metEntityTypesId = new HashSet<>();
     
     public PlayerUtilCap(PlayerEntity player) {
         this.player = player;
@@ -91,6 +71,7 @@ public class PlayerUtilCap {
             tickVoiceLines();
             tickClientInputTimer();
             tickNoSleepTimer();
+            tickStandArrowHealing();
             
             if (knivesThrewTicks > 0) knivesThrewTicks--;
             if (chatSpamTickCount > 0) chatSpamTickCount--;
@@ -111,6 +92,8 @@ public class PlayerUtilCap {
         }
         
         nbt.put("RotpVersion", JojoModVersion.getCurrentVersion().toNBT());
+        nbt.putInt("ArrowLevels", xpLevelsTakenByArrow);
+        nbt.putInt("ArrowStands", standsGotFromArrow);
         return nbt;
     }
     
@@ -130,6 +113,9 @@ public class PlayerUtilCap {
                 }
             });
         }
+        
+        xpLevelsTakenByArrow = nbt.getInt("ArrowLevels");
+        standsGotFromArrow = nbt.getInt("ArrowStands");
     }
     
     public void onTracking(ServerPlayerEntity tracking) {
@@ -140,6 +126,7 @@ public class PlayerUtilCap {
     public void syncWithClient() {
         ServerPlayerEntity player = (ServerPlayerEntity) this.player;
         PacketManager.sendToClient(new NotificationSyncPacket(notificationsSent), player);
+        PacketManager.sendToClient(new ArrowXpLevelsDataPacket(xpLevelsTakenByArrow, standsGotFromArrow), player);
         if (!metEntityTypesId.isEmpty()) {
             PacketManager.sendToClient(new MetEntityTypesPacket(metEntityTypesId), player);
         }
@@ -148,6 +135,7 @@ public class PlayerUtilCap {
     public void saveDataOnDeath(PlayerUtilCap oldInstance) {
         this.notificationsSent = oldInstance.notificationsSent;
         this.metEntityTypesId = oldInstance.metEntityTypesId;
+        this.standsGotFromArrow = oldInstance.standsGotFromArrow;
     }
     
     
@@ -178,6 +166,8 @@ public class PlayerUtilCap {
     }
     
     
+    
+    private Optional<ContinuousActionInstance<?, ?>> continuousAction = Optional.empty();
     
     public void setContinuousAction(@Nullable ContinuousActionInstance<?, ?> action) {
         continuousAction = Optional.ofNullable(action);
@@ -215,6 +205,11 @@ public class PlayerUtilCap {
     }
     
     
+    
+    private boolean doubleShiftPress = false;
+    private boolean shiftSynced = false;
+    private boolean isWalkingOnLiquid = false;
+    private boolean clTickSpark;
     
     public void setDoubleShiftPress() {
         doubleShiftPress = true;
@@ -271,6 +266,8 @@ public class PlayerUtilCap {
     
     
     
+    private Set<OneTimeNotification> notificationsSent = EnumSet.noneOf(OneTimeNotification.class);
+    
     public void sendNotification(OneTimeNotification notification, ITextComponent message) {
         if (!sentNotification(notification)) {
             player.sendMessage(message, Util.NIL_UUID);
@@ -320,6 +317,9 @@ public class PlayerUtilCap {
     
     
     
+    private int knives;
+    private int removeKnifeTime;
+    
     public void setKnives(int knives) {
         knives = Math.max(knives, 0);
         if (this.knives != knives) {
@@ -352,6 +352,9 @@ public class PlayerUtilCap {
     
     
     
+    private boolean hasClientInput;
+    private int noClientInputTimer;
+    
     public void setHasClientInput(boolean hasInput) {
         this.hasClientInput = hasInput;
         if (hasClientInput) {
@@ -374,6 +377,77 @@ public class PlayerUtilCap {
     }
     
     
+    
+    private int xpLevelsTakenByArrow;
+    private int standsGotFromArrow;
+    private UUID standArrowShooterUUID;
+    private boolean healStandArrowDamage;
+    
+    public int decXpLevelsTakenByArrow() {
+        setXpLevelsTakenByArrow(this.xpLevelsTakenByArrow + 1);
+        return this.xpLevelsTakenByArrow;
+    }
+    
+    public void setXpLevelsTakenByArrow(int levels) {
+        this.xpLevelsTakenByArrow = levels;
+        if (!player.level.isClientSide()) {
+            PacketManager.sendToClient(new ArrowXpLevelsDataPacket(xpLevelsTakenByArrow, standsGotFromArrow), (ServerPlayerEntity) player);
+        }
+    }
+    
+    public int getXpLevelsTakenByArrow() {
+        return xpLevelsTakenByArrow;
+    }
+    
+    public int getStandXpLevelsRequirement(boolean clientSide) {
+        Common config = JojoModConfig.getCommonConfigInstance(clientSide);
+        return config.standXpCostInitial.get() + config.standXpCostIncrease.get() * 5;
+    }
+    
+    public void onGettingStandFromArrow() {
+        xpLevelsTakenByArrow = 0;
+        standsGotFromArrow++;
+        if (!player.level.isClientSide()) {
+            PacketManager.sendToClient(new ArrowXpLevelsDataPacket(xpLevelsTakenByArrow, standsGotFromArrow), (ServerPlayerEntity) player);
+
+            if (standArrowShooterUUID != null) {
+                PlayerEntity shooter = ((ServerWorld) player.level).getPlayerByUUID(standArrowShooterUUID);
+                if (shooter != null) {
+                    ModCriteriaTriggers.STAND_ARROW_HIT.get().trigger((ServerPlayerEntity) shooter, player, true);
+                }
+                standArrowShooterUUID = null;
+            }
+            
+            healStandArrowDamage = true;
+        }
+    }
+    
+    public void setStandArrowShooter(LivingEntity shooter) {
+        this.standArrowShooterUUID = shooter.getUUID();
+    }
+    
+    public void setFromPacket(ArrowXpLevelsDataPacket packet) {
+        this.xpLevelsTakenByArrow = packet.levels;
+        this.standsGotFromArrow = packet.gotStands;
+    }
+    
+    private void tickStandArrowHealing() {
+        if (healStandArrowDamage) {
+            float health = player.getHealth();
+            if (health < player.getMaxHealth()) {
+                player.heal(0.25F);
+            }
+            else {
+                healStandArrowDamage = false;
+            }
+        }
+    }
+    
+    
+    
+    private BedType lastBedType;
+    private int ticksNoSleep;
+    private long nextSleepTime;
     
     private void tickNoSleepTimer() {
         if (ticksNoSleep > 0) ticksNoSleep--;
@@ -406,6 +480,8 @@ public class PlayerUtilCap {
     
     
     
+    private Optional<RockPaperScissorsGame> currentGame = Optional.empty();
+    
     public Optional<RockPaperScissorsGame> getCurrentRockPaperScissorsGame() {
         return currentGame;
     }
@@ -415,6 +491,8 @@ public class PlayerUtilCap {
     }
     
     
+    
+    private boolean walkmanEarbuds = false;
     
     public void setEarbuds(boolean earbuds) {
         if (this.walkmanEarbuds != earbuds) {
@@ -431,6 +509,8 @@ public class PlayerUtilCap {
     
     
     
+    private int chatSpamTickCount = 0;
+    
     public void onChatMsgBypassingSpamCheck(MinecraftServer server, ServerPlayerEntity serverPlayer) {
         chatSpamTickCount += 20;
         if (chatSpamTickCount > 200 && !server.getPlayerList().isOp(player.getGameProfile())) {
@@ -439,6 +519,8 @@ public class PlayerUtilCap {
     }
     
     
+    
+    private Set<ResourceLocation> metEntityTypesId = new HashSet<>();
     
     public boolean addMetEntityType(EntityType<?> entityType) {
         return metEntityTypesId.add(entityType.getRegistryName());

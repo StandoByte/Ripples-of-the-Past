@@ -100,7 +100,7 @@ public interface IDataConfig {
         }
         try (OutputStream outputStream = new FileOutputStream(jsonFile);
             Writer writer = new OutputStreamWriter(outputStream, Charsets.UTF_8.newEncoder())) {
-            GSON.toJson(object, writer);
+            getGson().toJson(object, writer);
         } catch (IOException e) {
             JsonWriteException exception = new JsonWriteException(jsonFile);
             exception.initCause(e);
@@ -133,6 +133,10 @@ public interface IDataConfig {
     
     
     void syncToClient(ServerPlayerEntity player);
+    
+    default Gson getGson() {
+        return GSON;
+    }
     
     
     

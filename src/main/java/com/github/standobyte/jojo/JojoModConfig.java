@@ -1,9 +1,7 @@
 package com.github.standobyte.jojo;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
@@ -17,7 +15,6 @@ import com.electronwill.nightconfig.core.InMemoryCommentedFormat;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
-import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.CommonConfigPacket;
@@ -73,14 +70,12 @@ public class JojoModConfig {
         public final ForgeConfigSpec.BooleanValue undeadMobsSunDamage;
         public final ForgeConfigSpec.IntValue vampirismCuringDuration;
 
-        public final ForgeConfigSpec.BooleanValue prioritizeLeastTakenStands;
-        public final ForgeConfigSpec.BooleanValue standTiers;
-        public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> standTierXpLevels;
-        
+        public final ForgeConfigSpec.IntValue standXpCostInitial;
+        public final ForgeConfigSpec.IntValue standXpCostIncrease;
+        public final ForgeConfigSpec.EnumValue<StandUtil.StandRandomPoolFilter> standRandomPoolFilter;
         public final ForgeConfigSpec.ConfigValue<List<? extends String>> bannedStands;
         private List<StandType<?>> bannedStandsSynced = null;
         private List<ResourceLocation> bannedStandsResLocs;
-        private boolean[] tiersAvailable = new boolean[7];
 
         public final ForgeConfigSpec.BooleanValue abilitiesBreakBlocks;
         public final ForgeConfigSpec.DoubleValue standDamageMultiplier;
@@ -225,11 +220,23 @@ public class JojoModConfig {
             builder.pop();
             
             builder.comment(" Settings of Stand-giving Arrows and the commands giving Stands at random.").push("Arrow");
-                prioritizeLeastTakenStands = builder
-                        .comment("    If enabled, random Stand gain effects (Stand-giving Arrow, \"/stand random\") give Stands that less players already have.", 
-                                 "     Otherwise the Stand selection is random.")
-                        .translation("jojo.config.prioritizeLeastTakenStands")
-                        .define("prioritizeLeastTakenStands", false);
+                standXpCostInitial = builder
+                        .comment("    The initial cost of getting a Stand from a Stand Arrow (in experience levels).")
+                        .translation("jojo.config.standXpCostInitial")
+                        .defineInRange("standXpCostInitial", 30, 0, 9999);
+
+                standXpCostIncrease = builder
+                        .comment("    The increase of the cost for getting a Stand for each previous one the player has got before.")
+                        .translation("jojo.config.standXpCostIncrease")
+                        .defineInRange("standXpCostIncrease", 5, 0, 9999);
+                
+                standRandomPoolFilter = builder
+                        .comment("    Special rule limiting the pool of Stands randomly chosen from on multiplayer servers.", 
+                                 "     NONE -        can randomly give any of the available Stands", 
+                                 "     LEAST_TAKEN - can only choose from the Stands less players on the server have", 
+                                 "     NOT_TAKEN -   can only give a Stand no other player on the server has gotten")
+                        .translation("jojo.config.standArrowMode")
+                        .defineEnum("standArrowMode", StandUtil.StandRandomPoolFilter.NONE);
                 
                 bannedStands = builder
                         .comment("    List of Stands excluded from the pool used by Arrows, \"/stand random\" and \"/standdisc random\".",
@@ -240,21 +247,6 @@ public class JojoModConfig {
                         .defineListAllowEmpty(Lists.newArrayList("bannedStands"), 
                                 () -> Arrays.asList("jojo:example_1", "jojo:example_2"), 
                                 s -> s instanceof String && ResourceLocation.tryParse((String) s) != null);
-                
-                standTiers = builder
-                        .comment("    Whether or not the Stand tiers mechanic is enabled.")
-                        .translation("jojo.config.standTiers")
-                        .define("standTiers", true);
-                
-                standTierXpLevels = builder
-                        .comment("    Experience levels nesessary to get a Stand from each tier.", 
-                                 "     If the list is shorter than the default, next tiers use the last value.",
-                                 "     For example, if the list only contains number 15, you'll be able to get any Stand as long as you have 15 experience levels.", 
-                                 "     Making a value lower that the previous one might lead to an unexpected result.")
-                        .translation("jojo.config.standTierXpLevels")
-                        .defineList("standTierXpLevels", 
-                                () -> Arrays.asList(0, 1, 5, 10, 20, 30, 45), 
-                                s -> s instanceof Integer && (Integer) s >= 0);
             builder.pop();
             
             builder.push("Stand settings");
@@ -332,8 +324,9 @@ public class JojoModConfig {
             initBannedStands();
         }
         
+        @Deprecated
         public void onStatsDataPackLoad() {
-            initBannedStands();
+//            initBannedStands();
         }
         
         private void initBannedStands() {
@@ -355,25 +348,10 @@ public class JojoModConfig {
             
             bannedStandsResLocs = resLocs
                     .collect(Collectors.toList());
-
-            initAvailableTiers();
-        }
-
-        private void initAvailableTiers() {
-            Set<Integer> tiers = StandUtil.getAvailableTiers(this);
-            
-            tiersAvailable = new boolean[Collections.max(tiers) + 1];
-            tiers.forEach(tier -> tiersAvailable[tier] = true);
         }
         
         public boolean isStandBanned(StandType<?> stand) {
-            // FIXME (BIIM) temporary
-            if (stand == ModStandsInit.BOY_II_MAN.get()) return true;
             return bannedStandsResLocs.contains(stand.getRegistryName());
-        }
-        
-        public boolean tierHasUnbannedStands(int tier) {
-            return tiersAvailable[tier];
         }
         
         
@@ -401,12 +379,12 @@ public class JojoModConfig {
 //            private final float[] bloodDrainMultiplier;
             private final float[] bloodTickDown;
 //            private final float[] bloodHealCost;
-            
-            private final boolean prioritizeLeastTakenStands;
-            private final boolean standTiers;
-            private final int[] standTierXpLevels;
-            private final List<StandType<?>> bannedStands;
 
+            private final int standXpCostInitial;
+            private final int standXpCostIncrease;
+            private final StandUtil.StandRandomPoolFilter standRandomPoolMode;
+            private final List<StandType<?>> bannedStands;
+            
             private final boolean abilitiesBreakBlocks;
 //            private final double standDamageMultiplier;
             private final boolean skipStandProgression;
@@ -423,15 +401,21 @@ public class JojoModConfig {
 //                breathingTrainingMultiplier = buf.readDouble();
                 breathingStatGap = buf.readVarInt();
                 techniqueSkillsRequirement = buf.readVarIntArray();
+                
                 maxBloodMultiplier = NetworkUtil.readFloatArray(buf);
 //                bloodDrainMultiplier = NetworkUtil.readFloatArray(buf);
                 bloodTickDown = NetworkUtil.readFloatArray(buf);
 //                bloodHealCost = NetworkUtil.readFloatArray(buf);
-                standTierXpLevels = buf.readVarIntArray();
+                
+                standXpCostInitial = buf.readVarInt();
+                standXpCostIncrease = buf.readVarInt();
+                standRandomPoolMode = buf.readEnum(StandUtil.StandRandomPoolFilter.class);
                 bannedStands = NetworkUtil.readRegistryIdsSafe(buf, StandType.class);
+                
 //                standDamageMultiplier = buf.readDouble();
                 resolvePoints = NetworkUtil.readFloatArray(buf);
                 timeStopChunkRange = buf.readVarInt();
+                
                 byte[] flags = buf.readByteArray();
                 keepStandOnDeath =                  (flags[0] & 1) > 0;
                 keepHamonOnDeath =                  (flags[0] & 2) > 0;
@@ -440,18 +424,16 @@ public class JojoModConfig {
                 meteoriteSpawn =                    (flags[0] & 16) > 0;
                 pillarManTempleSpawn =              (flags[0] & 32) > 0;
                 breathingTrainingDeterioration =    (flags[0] & 64) > 0;
-                prioritizeLeastTakenStands =        (flags[0] & 128) > 0;
+//                _ =                      (flags[0] & 128) > 0;
                 
-                standTiers =                        (flags[1] & 1) > 0;
-                abilitiesBreakBlocks =              (flags[1] & 2) > 0;
-                skipStandProgression =              (flags[1] & 4) > 0;
-                standStamina =                      (flags[1] & 8) > 0;
-                dropStandDisc =                     (flags[1] & 16) > 0;
-                soulAscension =                     (flags[1] & 32) > 0;
-                endermenBeyondTimeSpace =           (flags[1] & 64) > 0;
-                mixHamonTechniques =                (flags[1] & 128) > 0;
-                
-                hamonEnergyTicksDown =              (flags[2] & 1) > 0;
+                abilitiesBreakBlocks =              (flags[1] & 1) > 0;
+                skipStandProgression =              (flags[1] & 2) > 0;
+                standStamina =                      (flags[1] & 4) > 0;
+                dropStandDisc =                     (flags[1] & 8) > 0;
+                soulAscension =                     (flags[1] & 16) > 0;
+                endermenBeyondTimeSpace =           (flags[1] & 32) > 0;
+                mixHamonTechniques =                (flags[1] & 64) > 0;
+                hamonEnergyTicksDown =              (flags[1] & 128) > 0;
             }
 
             public void writeToBuf(PacketBuffer buf) {
@@ -459,16 +441,21 @@ public class JojoModConfig {
 //                buf.writeDouble(breathingTrainingMultiplier);
                 buf.writeVarInt(breathingStatGap);
                 buf.writeVarIntArray(techniqueSkillsRequirement);
+                
                 NetworkUtil.writeFloatArray(buf, maxBloodMultiplier);
 //                NetworkUtil.writeFloatArray(buf, bloodDrainMultiplier);
                 NetworkUtil.writeFloatArray(buf, bloodTickDown);
 //                NetworkUtil.writeFloatArray(buf, bloodHealCost);
-                buf.writeVarIntArray(standTierXpLevels);
+                
+                buf.writeVarInt(standXpCostInitial);
+                buf.writeVarInt(standXpCostIncrease);
+                buf.writeEnum(standRandomPoolMode);
                 NetworkUtil.writeRegistryIds(buf, bannedStands);
+                
 //                buf.writeDouble(standDamageMultiplier);
                 NetworkUtil.writeFloatArray(buf, resolvePoints);
                 buf.writeVarInt(timeStopChunkRange);
-                byte[] flags = new byte[] {0, 0, 0};
+                byte[] flags = new byte[] {0, 0};
                 if (keepStandOnDeath)                   flags[0] |= 1;
                 if (keepHamonOnDeath)                   flags[0] |= 2;
                 if (keepVampirismOnDeath)               flags[0] |= 4;
@@ -476,18 +463,16 @@ public class JojoModConfig {
                 if (meteoriteSpawn)                     flags[0] |= 16;
                 if (pillarManTempleSpawn)               flags[0] |= 32;
                 if (breathingTrainingDeterioration)     flags[0] |= 64;
-                if (prioritizeLeastTakenStands)         flags[0] |= 128;
+//                if (_)                       flags[0] |= 128;
                 
-                if (standTiers)                         flags[1] |= 1;
-                if (abilitiesBreakBlocks)               flags[1] |= 2;
-                if (skipStandProgression)               flags[1] |= 4;
-                if (standStamina)                       flags[1] |= 8;
-                if (dropStandDisc)                      flags[1] |= 16;
-                if (soulAscension)                      flags[1] |= 32;
-                if (endermenBeyondTimeSpace)            flags[1] |= 64;
-                if (mixHamonTechniques)                 flags[1] |= 128;
-                
-                if (hamonEnergyTicksDown)               flags[2] |= 1;
+                if (abilitiesBreakBlocks)               flags[1] |= 1;
+                if (skipStandProgression)               flags[1] |= 2;
+                if (standStamina)                       flags[1] |= 4;
+                if (dropStandDisc)                      flags[1] |= 8;
+                if (soulAscension)                      flags[1] |= 16;
+                if (endermenBeyondTimeSpace)            flags[1] |= 32;
+                if (mixHamonTechniques)                 flags[1] |= 64;
+                if (hamonEnergyTicksDown)               flags[1] |= 128;
                 buf.writeByteArray(flags);
             }
 
@@ -496,28 +481,33 @@ public class JojoModConfig {
                 keepHamonOnDeath = config.keepHamonOnDeath.get();
                 keepVampirismOnDeath = config.keepVampirismOnDeath.get();
                 dropStandDisc = config.dropStandDisc.get();
+                
                 hamonTempleSpawn = config.hamonTempleSpawn.get();
                 meteoriteSpawn = config.meteoriteSpawn.get();
                 pillarManTempleSpawn = config.pillarManTempleSpawn.get();
                 hamonEnergyTicksDown = config.hamonEnergyTicksDown.get();
+                
 //                hamonPointsMultiplier = config.standDamageMultiplier.get();
 //                breathingTrainingMultiplier = config.breathingTrainingMultiplier.get();
                 breathingTrainingDeterioration = config.breathingTrainingDeterioration.get();
                 breathingStatGap = config.breathingStatGap.get();
                 mixHamonTechniques = config.mixHamonTechniques.get();
                 techniqueSkillsRequirement = config.techniqueSkillsRequirement.get().stream().mapToInt(Integer::intValue).toArray();
+                
                 maxBloodMultiplier = Floats.toArray(config.maxBloodMultiplier.get());
 //                bloodDrainMultiplier = Floats.toArray(config.bloodDrainMultiplier.get());
                 bloodTickDown = Floats.toArray(config.bloodTickDown.get());
 //                bloodHealCost = Floats.toArray(config.bloodHealCost.get());
 //                vampiresAggroMobs = config.vampiresAggroMobs.get();
 //                undeadMobsSunDamage = config.undeadMobsSunDamage.get();
-                prioritizeLeastTakenStands = config.prioritizeLeastTakenStands.get();
-                standTiers = config.standTiers.get();
-                standTierXpLevels = config.standTierXpLevels.get().stream().mapToInt(Integer::intValue).toArray();
+                
+                standXpCostInitial = config.standXpCostInitial.get();
+                standXpCostIncrease = config.standXpCostIncrease.get();
+                standRandomPoolMode = config.standRandomPoolFilter.get();
                 bannedStands = config.bannedStandsResLocs.stream()
                         .map(key -> JojoCustomRegistries.STANDS.getRegistry().getValue(key))
                         .collect(Collectors.toList());
+                
                 abilitiesBreakBlocks = config.abilitiesBreakBlocks.get();
 //                standDamageMultiplier = config.standDamageMultiplier.get()
                 skipStandProgression = config.skipStandProgression.get();
@@ -533,24 +523,29 @@ public class JojoModConfig {
                 COMMON_SYNCED_TO_CLIENT.keepHamonOnDeath.set(keepHamonOnDeath);
                 COMMON_SYNCED_TO_CLIENT.keepVampirismOnDeath.set(keepVampirismOnDeath);
                 COMMON_SYNCED_TO_CLIENT.dropStandDisc.set(dropStandDisc);
+                
                 COMMON_SYNCED_TO_CLIENT.hamonTempleSpawn.set(hamonTempleSpawn);
                 COMMON_SYNCED_TO_CLIENT.meteoriteSpawn.set(meteoriteSpawn);
                 COMMON_SYNCED_TO_CLIENT.pillarManTempleSpawn.set(pillarManTempleSpawn);
                 COMMON_SYNCED_TO_CLIENT.hamonEnergyTicksDown.set(hamonEnergyTicksDown);
+                
 //                COMMON_SYNCED_TO_CLIENT.hamonPointsMultiplier.set(hamonPointsMultiplier);
 //                COMMON_SYNCED_TO_CLIENT.breathingTrainingMultiplier.set(breathingTrainingMultiplier);
                 COMMON_SYNCED_TO_CLIENT.breathingTrainingDeterioration.set(breathingTrainingDeterioration);
                 COMMON_SYNCED_TO_CLIENT.breathingStatGap.set(breathingStatGap);
                 COMMON_SYNCED_TO_CLIENT.mixHamonTechniques.set(mixHamonTechniques);
                 COMMON_SYNCED_TO_CLIENT.techniqueSkillsRequirement.set(IntStream.of(techniqueSkillsRequirement).boxed().collect(Collectors.toList()));
+                
                 COMMON_SYNCED_TO_CLIENT.maxBloodMultiplier.set(Floats.asList(maxBloodMultiplier).stream().map(Float::doubleValue).collect(Collectors.toList()));
 //                COMMON_SYNCED_TO_CLIENT.bloodDrainMultiplier.set(Floats.asList(bloodDrainMultiplier).stream().map(Float::doubleValue).collect(Collectors.toList()));
                 COMMON_SYNCED_TO_CLIENT.bloodTickDown.set(Floats.asList(bloodTickDown).stream().map(Float::doubleValue).collect(Collectors.toList()));
 //                COMMON_SYNCED_TO_CLIENT.bloodHealCost.set(Floats.asList(bloodHealCost).stream().map(Float::doubleValue).collect(Collectors.toList()));
-                COMMON_SYNCED_TO_CLIENT.prioritizeLeastTakenStands.set(prioritizeLeastTakenStands);
-                COMMON_SYNCED_TO_CLIENT.standTiers.set(standTiers);
-                COMMON_SYNCED_TO_CLIENT.standTierXpLevels.set(IntStream.of(standTierXpLevels).boxed().collect(Collectors.toList()));
+                
+                COMMON_SYNCED_TO_CLIENT.standXpCostInitial.set(standXpCostInitial);
+                COMMON_SYNCED_TO_CLIENT.standXpCostIncrease.set(standXpCostIncrease);
+                COMMON_SYNCED_TO_CLIENT.standRandomPoolFilter.set(standRandomPoolMode);
                 COMMON_SYNCED_TO_CLIENT.bannedStandsSynced = bannedStands;
+                
                 COMMON_SYNCED_TO_CLIENT.abilitiesBreakBlocks.set(abilitiesBreakBlocks);
 //                COMMON_SYNCED_TO_CLIENT.standDamageMultiplier.set(standDamageMultiplier);
                 COMMON_SYNCED_TO_CLIENT.skipStandProgression.set(skipStandProgression);
@@ -568,24 +563,29 @@ public class JojoModConfig {
                 COMMON_SYNCED_TO_CLIENT.keepHamonOnDeath.clearCache();
                 COMMON_SYNCED_TO_CLIENT.keepVampirismOnDeath.clearCache();
                 COMMON_SYNCED_TO_CLIENT.dropStandDisc.clearCache();
+                
                 COMMON_SYNCED_TO_CLIENT.hamonTempleSpawn.clearCache();
                 COMMON_SYNCED_TO_CLIENT.meteoriteSpawn.clearCache();
                 COMMON_SYNCED_TO_CLIENT.pillarManTempleSpawn.clearCache();
                 COMMON_SYNCED_TO_CLIENT.hamonEnergyTicksDown.clearCache();
+                
 //                COMMON_SYNCED_TO_CLIENT.hamonPointsMultiplier.clearCache();
 //                COMMON_SYNCED_TO_CLIENT.breathingTrainingMultiplier.clearCache();
                 COMMON_SYNCED_TO_CLIENT.breathingTrainingDeterioration.clearCache();
                 COMMON_SYNCED_TO_CLIENT.breathingStatGap.clearCache();
                 COMMON_SYNCED_TO_CLIENT.mixHamonTechniques.clearCache();
                 COMMON_SYNCED_TO_CLIENT.techniqueSkillsRequirement.clearCache();
+                
                 COMMON_SYNCED_TO_CLIENT.maxBloodMultiplier.clearCache();
                 COMMON_SYNCED_TO_CLIENT.bloodDrainMultiplier.clearCache();
                 COMMON_SYNCED_TO_CLIENT.bloodTickDown.clearCache();
                 COMMON_SYNCED_TO_CLIENT.bloodHealCost.clearCache();
-                COMMON_SYNCED_TO_CLIENT.prioritizeLeastTakenStands.clearCache();
-                COMMON_SYNCED_TO_CLIENT.standTiers.clearCache();
-                COMMON_SYNCED_TO_CLIENT.standTierXpLevels.clearCache();
+                
+                COMMON_SYNCED_TO_CLIENT.standXpCostInitial.clearCache();
+                COMMON_SYNCED_TO_CLIENT.standXpCostIncrease.clearCache();
+                COMMON_SYNCED_TO_CLIENT.standRandomPoolFilter.clearCache();
                 COMMON_SYNCED_TO_CLIENT.bannedStandsSynced = null;
+                
                 COMMON_SYNCED_TO_CLIENT.abilitiesBreakBlocks.clearCache();
 //                COMMON_SYNCED_TO_CLIENT.standDamageMultiplier.clearCache();
                 COMMON_SYNCED_TO_CLIENT.skipStandProgression.clearCache();
