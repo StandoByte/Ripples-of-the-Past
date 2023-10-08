@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.StandActionLearningPacket;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.google.common.collect.ImmutableList;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -30,9 +31,14 @@ public class StandActionLearningProgress {
         return entry != null ? Math.max(entry.getPoints(), 0) : -1;
     }
     
+    private static final Iterable<StandAction> EMPTY = ImmutableList.of();
     public Iterable<StandAction> getAllUnlocked(IStandPower power) {
+        StandType<?> currentType = power.getType();
+        if (currentType == null) {
+            return EMPTY;
+        }
         return map._mapOfMaps
-                .get(power.getType().getRegistryName())
+                .get(currentType.getRegistryName())
                 .values()
                 .stream()
                 .map(entry -> entry.action)
