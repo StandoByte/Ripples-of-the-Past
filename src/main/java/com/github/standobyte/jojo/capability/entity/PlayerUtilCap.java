@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -13,13 +12,11 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.JojoModConfig.Common;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.player.IPlayerAction;
-import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.ArrowXpLevelsDataPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.NotificationSyncPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDoubleShiftPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonLiquidWalkingPacket;
@@ -31,7 +28,6 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mod.JojoModVersion;
 
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -40,7 +36,6 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.server.ServerWorld;
 
 public class PlayerUtilCap {
     private final PlayerEntity player;
@@ -59,7 +54,6 @@ public class PlayerUtilCap {
             tickVoiceLines();
             tickClientInputTimer();
             tickNoSleepTimer();
-            tickStandArrowHealing();
             
             if (knivesThrewTicks > 0) knivesThrewTicks--;
             if (chatSpamTickCount > 0) chatSpamTickCount--;
@@ -71,15 +65,12 @@ public class PlayerUtilCap {
     
     public void saveOnDeath(PlayerUtilCap cap) {
         this.notificationsSent = cap.notificationsSent;
-        this.standsGotFromArrow = cap.standsGotFromArrow;
     }
     
     public CompoundNBT toNBT() {
         CompoundNBT nbt = new CompoundNBT();
         nbt.put("NotificationsSent", notificationsToNBT());
         nbt.put("RotpVersion", JojoModVersion.getCurrentVersion().toNBT());
-        nbt.putInt("ArrowLevels", xpLevelsTakenByArrow);
-        nbt.putInt("ArrowStands", standsGotFromArrow);
         return nbt;
     }
     
@@ -88,8 +79,6 @@ public class PlayerUtilCap {
             CompoundNBT notificationsMap = nbt.getCompound("NotificationsSent");
             notificationsFromNBT(notificationsMap);
         }
-        xpLevelsTakenByArrow = nbt.getInt("ArrowLevels");
-        standsGotFromArrow = nbt.getInt("ArrowStands");
     }
     
     public void onTracking(ServerPlayerEntity tracking) {
@@ -99,7 +88,6 @@ public class PlayerUtilCap {
     
     public void syncWithClient() {
         PacketManager.sendToClient(new NotificationSyncPacket(notificationsSent), (ServerPlayerEntity) player);
-        PacketManager.sendToClient(new ArrowXpLevelsDataPacket(xpLevelsTakenByArrow, standsGotFromArrow), (ServerPlayerEntity) player);
     }
     
     
@@ -315,69 +303,9 @@ public class PlayerUtilCap {
     
     
     
-    private int xpLevelsTakenByArrow;
-    private int standsGotFromArrow;
-    private UUID standArrowShooterUUID;
-    private boolean healStandArrowDamage;
-    
-    public int decXpLevelsTakenByArrow() {
-        setXpLevelsTakenByArrow(this.xpLevelsTakenByArrow + 1);
-        return this.xpLevelsTakenByArrow;
-    }
-    
-    public void setXpLevelsTakenByArrow(int levels) {
-        this.xpLevelsTakenByArrow = levels;
-        if (!player.level.isClientSide()) {
-            PacketManager.sendToClient(new ArrowXpLevelsDataPacket(xpLevelsTakenByArrow, standsGotFromArrow), (ServerPlayerEntity) player);
-        }
-    }
-    
-    public int getXpLevelsTakenByArrow() {
-        return xpLevelsTakenByArrow;
-    }
-    
     public int getStandXpLevelsRequirement(boolean clientSide) {
         Common config = JojoModConfig.getCommonConfigInstance(clientSide);
         return config.standXpCostInitial.get() + config.standXpCostIncrease.get() * 5;
-    }
-    
-    public void onGettingStandFromArrow() {
-        xpLevelsTakenByArrow = 0;
-        standsGotFromArrow++;
-        if (!player.level.isClientSide()) {
-            PacketManager.sendToClient(new ArrowXpLevelsDataPacket(xpLevelsTakenByArrow, standsGotFromArrow), (ServerPlayerEntity) player);
-
-            if (standArrowShooterUUID != null) {
-                PlayerEntity shooter = ((ServerWorld) player.level).getPlayerByUUID(standArrowShooterUUID);
-                if (shooter != null) {
-                    ModCriteriaTriggers.STAND_ARROW_HIT.get().trigger((ServerPlayerEntity) shooter, player, true);
-                }
-                standArrowShooterUUID = null;
-            }
-            
-            healStandArrowDamage = true;
-        }
-    }
-    
-    public void setStandArrowShooter(LivingEntity shooter) {
-        this.standArrowShooterUUID = shooter.getUUID();
-    }
-    
-    public void setFromPacket(ArrowXpLevelsDataPacket packet) {
-        this.xpLevelsTakenByArrow = packet.levels;
-        this.standsGotFromArrow = packet.gotStands;
-    }
-    
-    private void tickStandArrowHealing() {
-        if (healStandArrowDamage) {
-            float health = player.getHealth();
-            if (health < player.getMaxHealth()) {
-                player.heal(0.25F);
-            }
-            else {
-                healStandArrowDamage = false;
-            }
-        }
     }
     
     
