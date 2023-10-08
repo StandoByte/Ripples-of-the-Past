@@ -16,6 +16,7 @@ import com.github.standobyte.jojo.client.render.entity.pose.ModelPoseSided;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPoseTransition;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPoseTransitionMultiple;
 import com.github.standobyte.jojo.client.render.entity.pose.RotationAngle;
+import com.github.standobyte.jojo.client.render.entity.pose.XRotationModelRenderer;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.PosedActionAnimation;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.barrage.StandTwoHandedBarrageAnimation;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -40,16 +41,16 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
     protected ModelRenderer body;
     protected ModelRenderer upperPart;
     protected ModelRenderer torso;
-    protected ModelRenderer leftArm;
+    protected XRotationModelRenderer leftArm;
     protected ModelRenderer leftArmJoint;
     protected ModelRenderer leftForeArm;
-    protected ModelRenderer rightArm;
+    protected XRotationModelRenderer rightArm;
     protected ModelRenderer rightArmJoint;
     protected ModelRenderer rightForeArm;
-    protected ModelRenderer leftLeg;
+    protected XRotationModelRenderer leftLeg;
     protected ModelRenderer leftLegJoint;
     protected ModelRenderer leftLowerLeg;
-    protected ModelRenderer rightLeg;
+    protected XRotationModelRenderer rightLeg;
     protected ModelRenderer rightLegJoint;
     protected ModelRenderer rightLowerLeg;
     
@@ -89,7 +90,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
         torso.setPos(0.0F, -12.0F, 0.0F);
         upperPart.addChild(torso);
 
-        leftArm = new ModelRenderer(this);
+        leftArm = new XRotationModelRenderer(this);
         leftArm.setPos(6.0F, -10.0F, 0.0F);
         upperPart.addChild(leftArm);
 
@@ -101,7 +102,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
         leftForeArm.setPos(0.0F, 4.0F, 0.0F);
         leftArm.addChild(leftForeArm);
 
-        rightArm = new ModelRenderer(this);
+        rightArm = new XRotationModelRenderer(this);
         rightArm.setPos(-6.0F, -10.0F, 0.0F);
         upperPart.addChild(rightArm);
 
@@ -113,7 +114,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
         rightForeArm.setPos(0.0F, 4.0F, 0.0F);
         rightArm.addChild(rightForeArm);
 
-        leftLeg = new ModelRenderer(this);
+        leftLeg = new XRotationModelRenderer(this);
         leftLeg.setPos(1.9F, 12.0F, 0.0F);
         body.addChild(leftLeg);
 
@@ -125,7 +126,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
         leftLowerLeg.setPos(0.0F, 6.0F, 0.0F);
         leftLeg.addChild(leftLowerLeg);
 
-        rightLeg = new ModelRenderer(this);
+        rightLeg = new XRotationModelRenderer(this);
         rightLeg.setPos(-1.9F, 12.0F, 0.0F);
         body.addChild(rightLeg);
 
