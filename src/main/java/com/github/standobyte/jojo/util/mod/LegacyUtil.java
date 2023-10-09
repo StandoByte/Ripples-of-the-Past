@@ -2,9 +2,9 @@ package com.github.standobyte.jojo.util.mod;
 
 import java.util.Optional;
 
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
-import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.ResolveLevelsMap;
@@ -15,9 +15,9 @@ import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.FloatNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.registries.IForgeRegistry;
 
 public class LegacyUtil {
     
@@ -55,20 +55,30 @@ public class LegacyUtil {
         levelsMap.readOldValues(standPower, resolveLevel, extraLevel);
     }
     
-    public static Optional<StandActionLearningProgress.StandActionLearningEntry> readOldStandActionLearning(CompoundNBT nbt, StandAction action) { // added in 0.2.2-pre3
-        ResourceLocation actionId = action.getRegistryName();
-        if (nbt.contains(actionId.toString(), MCUtil.getNbtId(FloatNBT.class))) {
-            float points = nbt.getFloat(actionId.toString());
-            
-            String[] actionNameSplit = actionId.getPath().split("_");
-            ResourceLocation standIdGuess = new ResourceLocation(actionId.getNamespace(), actionNameSplit[0] + "_" + actionNameSplit[1]);
-            StandType<?> standType = JojoCustomRegistries.STANDS.getRegistry().getValue(standIdGuess);
-            if (standType == null) {
-                standType = ModStands.STAR_PLATINUM.getStandType();
-            }
-            
-            return Optional.of(new StandActionLearningProgress.StandActionLearningEntry(action, standType, points));
+    public static Optional<StandActionLearningProgress.StandActionLearningEntry> readOldStandActionLearning(CompoundNBT mainNbt, String key) { // added in 0.2.2-pre3
+        IForgeRegistry<Action<?>> actions = JojoCustomRegistries.ACTIONS.getRegistry();
+        ResourceLocation keyResLoc = new ResourceLocation(key);
+        if (!actions.containsKey(keyResLoc)) {
+            return Optional.empty();
         }
-        return Optional.empty();
+        Action<?> action = actions.getValue(keyResLoc);
+        if (!(action instanceof StandAction)) {
+            return Optional.empty();
+        }
+
+        StandType<?> standType = null;
+        String[] actionNameSplit = keyResLoc.getPath().split("_");
+        if (actionNameSplit.length > 1) {
+            ResourceLocation standIdGuess = new ResourceLocation(keyResLoc.getNamespace(), actionNameSplit[0] + "_" + actionNameSplit[1]);
+            IForgeRegistry<StandType<?>> stands = JojoCustomRegistries.STANDS.getRegistry();
+            if (stands.containsKey(standIdGuess)) {
+                standType = stands.getValue(standIdGuess);
+            }
+        }
+        if (standType == null) {
+            return Optional.empty();
+        }
+        
+        return Optional.of(new StandActionLearningProgress.StandActionLearningEntry((StandAction) action, standType, mainNbt.getFloat(key)));
     }
 }

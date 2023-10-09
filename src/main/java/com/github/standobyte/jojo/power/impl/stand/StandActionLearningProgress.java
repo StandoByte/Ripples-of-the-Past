@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.StandActionLearningPacket;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mod.LegacyUtil;
 import com.google.common.collect.ImmutableList;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -154,7 +155,15 @@ public class StandActionLearningProgress {
             nbt.getAllKeys().forEach(standTypeName -> {
                 if (standTypeName.isEmpty()) return;
                 StandType<?> standType = JojoCustomRegistries.STANDS.getRegistry().getValue(new ResourceLocation(standTypeName));
-                if (standType == null) return;
+                if (standType == null) {
+                    
+                    Optional<StandActionLearningEntry> entryLegacy = LegacyUtil.readOldStandActionLearning(nbt, standTypeName);
+                    if (entryLegacy.isPresent()) {
+                        putEntry(entryLegacy.get());
+                    }
+                    
+                    return;
+                }
 
                 CompoundNBT standTypeNbt = nbt.getCompound(standTypeName);
                 standTypeNbt.getAllKeys().forEach(actionName -> {
