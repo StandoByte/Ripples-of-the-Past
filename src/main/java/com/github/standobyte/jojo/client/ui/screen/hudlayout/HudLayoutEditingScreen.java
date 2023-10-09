@@ -61,13 +61,35 @@ public class HudLayoutEditingScreen extends Screen {
     
     @Override
     protected void init() {
-        quickAccessHudVisibilityButton = new VisibilityButton(getWindowX() + 30, getWindowY() + WINDOW_HEIGHT - 28,
+        addButton(new CustomButton(getWindowX() + WINDOW_WIDTH - 30, getWindowY() + WINDOW_HEIGHT - 30, 24, 24, 
+                button -> {
+                    selectedPower.getActionsHudLayout().resetLayout();
+                    markLayoutEdited(selectedPower);
+                }, 
+                (button, matrixStack, x, y) -> {
+                    renderTooltip(matrixStack, new TranslationTextComponent("jojo.screen.edit_hud_layout.reset"), x, y);
+                }) {
+
+            @Override
+            protected void renderCustomButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
+                Minecraft minecraft = Minecraft.getInstance();
+                minecraft.getTextureManager().bind(WINDOW);
+                RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+                RenderSystem.enableDepthTest();
+                blit(matrixStack, x, y, 0, 184 + getYImage(isHovered()) * 24, width, height);
+            }
+        });
+        
+        addButton(quickAccessHudVisibilityButton = new VisibilityButton(getWindowX() + 30, getWindowY() + WINDOW_HEIGHT - 28,
                 button -> {
                     ActionsLayout<?> layout = selectedPower.getActionsHudLayout();
                     boolean newValue = !layout.isMmbActionHudVisible();
                     layout.setMmbActionHudVisibility(newValue);
                     quickAccessHudVisibilityButton.setVisibilityState(newValue);
-                });
+                    markLayoutEdited(selectedPower);
+                }));
         
         if (selectedTab != null) {
             IPower.getPowerOptional(minecraft.player, selectedTab).ifPresent(power -> {
@@ -92,29 +114,6 @@ public class HudLayoutEditingScreen extends Screen {
         if (selectedTab != null && selectedPower == null) {
             selectTab(IPower.getPlayerPower(minecraft.player, selectedTab));
         }
-        
-        addButton(new CustomButton(getWindowX() + WINDOW_WIDTH - 30, getWindowY() + WINDOW_HEIGHT - 30, 24, 24, 
-                button -> {
-                    selectedPower.getActionsHudLayout().resetLayout();
-                    editedLayouts.add(selectedPower);
-                }, 
-                (button, matrixStack, x, y) -> {
-                    renderTooltip(matrixStack, new TranslationTextComponent("jojo.screen.edit_hud_layout.reset"), x, y);
-                }) {
-
-            @Override
-            protected void renderCustomButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
-                Minecraft minecraft = Minecraft.getInstance();
-                minecraft.getTextureManager().bind(WINDOW);
-                RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
-                RenderSystem.enableBlend();
-                RenderSystem.defaultBlendFunc();
-                RenderSystem.enableDepthTest();
-                blit(matrixStack, x, y, 0, 184 + getYImage(isHovered()) * 24, width, height);
-            }
-        });
-        
-        addButton(quickAccessHudVisibilityButton);
     }
     
     public boolean works() {
@@ -518,6 +517,7 @@ public class HudLayoutEditingScreen extends Screen {
 
     private <P extends IPower<P, ?>> void setQuickAccess(IPower<?, ?> power, Action<P> action) {
         ((P) power).getActionsHudLayout().setQuickAccessAction(action);
+        markLayoutEdited(power);
     }
     
     @Override
