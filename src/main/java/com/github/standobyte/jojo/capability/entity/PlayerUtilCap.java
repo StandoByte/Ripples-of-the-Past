@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.capability.entity;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,6 +19,7 @@ import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.NotificationSyncPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrDirectEntityDataPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDoubleShiftPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonLiquidWalkingPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrKnivesCountPacket;
@@ -28,9 +30,12 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mod.JojoModVersion;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
@@ -92,8 +97,34 @@ public class PlayerUtilCap {
     
     
     
-    private Optional<ContinuousActionInstance<?, ?>> continuousAction = Optional.empty();
+    private final Map<Entity, Map<DataParameter<?>, EntityDataManager.DataEntry<?>>> tsDelayedData = new HashMap<>();
+    public void addDataForTSUnfreeze(Entity entity, Iterable<EntityDataManager.DataEntry<?>> newData) {
+        Map<DataParameter<?>, EntityDataManager.DataEntry<?>> data = tsDelayedData.computeIfAbsent(entity, e -> new HashMap<>());
+        for (EntityDataManager.DataEntry<?> dataEntry : newData) {
+            data.put(dataEntry.getAccessor(), dataEntry);
+        }
+    }
     
+    public void sendDataOnTSUnfreeze() {
+        if (player.level.isClientSide()) {
+            return;
+        }
+        
+        ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
+        if (!tsDelayedData.isEmpty()) {
+            tsDelayedData.forEach((entity, data) -> {
+                if (!data.isEmpty()) {
+                    PacketManager.sendToClient(new TrDirectEntityDataPacket(entity.getId(), new ArrayList<>(data.values())), serverPlayer);
+                }
+            });
+        }
+        
+        tsDelayedData.clear();
+    }
+    
+    
+    
+    private Optional<ContinuousActionInstance<?, ?>> continuousAction = Optional.empty();
     public void setContinuousAction(@Nullable ContinuousActionInstance<?, ?> action) {
         continuousAction = Optional.ofNullable(action);
         if (!player.level.isClientSide()) {

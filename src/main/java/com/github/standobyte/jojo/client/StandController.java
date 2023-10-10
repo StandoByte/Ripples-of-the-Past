@@ -8,6 +8,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.StandEntityRenderer;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -90,6 +92,14 @@ public class StandController {
             }
         }
         return isProbablyControllingStand;
+    }
+    
+    @Nullable
+    public StandEntity getManuallyControlledStand() {
+        if (isControllingStand()) {
+            return stand;
+        }
+        return null;
     }
     
     
