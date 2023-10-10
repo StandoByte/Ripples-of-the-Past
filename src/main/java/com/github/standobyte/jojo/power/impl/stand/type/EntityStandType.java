@@ -47,6 +47,17 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
     
     
     public static class Builder<T extends StandStats> extends StandType.AbstractBuilder<Builder<T>, T>{
+        
+        @Override
+        public Builder<T> rightClickHotbar(StandAction... rightClickHotbar) {
+            if (rightClickHotbar.length > 0) {
+                defaultQuickAccess(rightClickHotbar[0]);
+            }
+            else {
+                defaultQuickAccess(null);
+            }
+            return super.rightClickHotbar(rightClickHotbar);
+        }
 
         @Override
         protected Builder<T> getThis() {
