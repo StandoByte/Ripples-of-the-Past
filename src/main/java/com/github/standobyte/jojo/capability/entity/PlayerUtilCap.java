@@ -9,8 +9,6 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoModConfig;
-import com.github.standobyte.jojo.JojoModConfig.Common;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.player.IPlayerAction;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -330,13 +328,6 @@ public class PlayerUtilCap {
     
     public int getNoClientInputTimer() {
         return noClientInputTimer;
-    }
-    
-    
-    
-    public int getStandXpLevelsRequirement(boolean clientSide) {
-        Common config = JojoModConfig.getCommonConfigInstance(clientSide);
-        return config.standXpCostInitial.get() + config.standXpCostIncrease.get() * 5;
     }
     
     
