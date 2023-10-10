@@ -23,6 +23,11 @@ import net.minecraft.client.renderer.FirstPersonRenderer;
 import net.minecraft.client.renderer.GameRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.entity.LivingRenderer;
+import net.minecraft.client.renderer.entity.layers.LayerRenderer;
+import net.minecraft.client.renderer.entity.model.AgeableModel;
+import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.model.ModelBakery;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.model.RenderMaterial;
@@ -30,6 +35,7 @@ import net.minecraft.client.renderer.texture.ITickable;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.shader.Shader;
 import net.minecraft.client.shader.ShaderGroup;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Timer;
@@ -101,6 +107,46 @@ public class ClientReflection {
     public static void addCube(ModelRenderer modelRenderer, ModelRenderer.ModelBox cube) {
         List<ModelRenderer.ModelBox> cubes = ReflectionUtil.getFieldValue(MODEL_RENDERER_CUBES, modelRenderer);
         cubes.add(cube);
+    }
+    
+    public static ObjectList<ModelRenderer.ModelBox> getCubes(ModelRenderer modelRenderer) {
+        return ReflectionUtil.getFieldValue(MODEL_RENDERER_CUBES, modelRenderer);
+    }
+    
+    
+    private static final Field MODEL_RENDERER_CHILDREN = ObfuscationReflectionHelper.findField(ModelRenderer.class, "field_78805_m");
+    public static ObjectList<ModelRenderer> getChildren(ModelRenderer modelRenderer) {
+        return ReflectionUtil.getFieldValue(MODEL_RENDERER_CHILDREN, modelRenderer);
+    }
+    
+    public static void setChildren(ModelRenderer modelRenderer, ObjectList<ModelRenderer> children) {
+        ReflectionUtil.setFieldValue(MODEL_RENDERER_CHILDREN, modelRenderer, children);
+    }
+    
+    private static final Method AGEABLE_MODEL_HEAD_PARTS = ObfuscationReflectionHelper.findMethod(AgeableModel.class, "func_225602_a_");
+    public static Iterable<ModelRenderer> getHeadParts(AgeableModel<?> model) {
+        return ReflectionUtil.invokeMethod(AGEABLE_MODEL_HEAD_PARTS, model);
+    }
+    
+    private static final Method AGEABLE_MODEL_BODY_PARTS = ObfuscationReflectionHelper.findMethod(AgeableModel.class, "func_225600_b_");
+    public static Iterable<ModelRenderer> getBodyParts(AgeableModel<?> model) {
+        return ReflectionUtil.invokeMethod(AGEABLE_MODEL_BODY_PARTS, model);
+    }
+
+    private static final Method LIVING_RENDERER_SCALE = ObfuscationReflectionHelper.findMethod(LivingRenderer.class, "func_225620_a_", 
+            LivingEntity.class, MatrixStack.class, float.class);
+    public static void scale(LivingRenderer<?, ?> renderer, LivingEntity entity, MatrixStack matrixStack, float partialTick) {
+        ReflectionUtil.invokeMethod(LIVING_RENDERER_SCALE, renderer, entity, matrixStack, partialTick);
+    }
+
+    private static final Field ENTITY_RENDERER_SHADOW_RADIUS = ObfuscationReflectionHelper.findField(EntityRenderer.class, "field_76989_e");
+    public static float getShadowRadius(EntityRenderer<?> renderer) {
+        return ReflectionUtil.getFieldValue(ENTITY_RENDERER_SHADOW_RADIUS, renderer);
+    }
+
+    private static final Field LIVING_RENDERER_LAYERS = ObfuscationReflectionHelper.findField(LivingRenderer.class, "field_177097_h");
+    public static <T extends LivingEntity, M extends EntityModel<T>> List<LayerRenderer<T, M>> getLayers(LivingRenderer<T, M> renderer) {
+        return ReflectionUtil.getFieldValue(LIVING_RENDERER_LAYERS, renderer);
     }
     
     
