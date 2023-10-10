@@ -17,6 +17,7 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.util.mod.TimeUtil;
 
@@ -160,8 +161,12 @@ public class TimeStop extends StandAction {
     }
     
     public static int getMaxTimeStopTicks(IStandPower standPower) {
-        return ((TimeStopperStandStats) standPower.getType().getStats())
-                .getMaxTimeStopTicks(TimeStop.vampireTimeStopDuration(standPower.getUser()));
+        StandStats stats = standPower.getType().getStats();
+        if (stats instanceof TimeStopperStandStats) {
+            return ((TimeStopperStandStats) stats).getMaxTimeStopTicks(
+                    TimeStop.vampireTimeStopDuration(standPower.getUser()));
+        }
+        return 100;
     }
     
     public static boolean vampireTimeStopDuration(LivingEntity entity) {

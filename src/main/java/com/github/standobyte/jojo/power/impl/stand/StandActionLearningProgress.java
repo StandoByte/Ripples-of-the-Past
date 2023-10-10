@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.power.impl.stand;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -14,7 +15,8 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.StandActionLearningPacket;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.mc.MCUtil;
-import com.google.common.collect.ImmutableMap;
+import com.github.standobyte.jojo.util.mod.LegacyUtil;
+import com.google.common.collect.ImmutableList;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -30,8 +32,14 @@ public class StandActionLearningProgress {
         return entry != null ? Math.max(entry.getPoints(), 0) : -1;
     }
     
+    private static final Iterable<StandAction> EMPTY = ImmutableList.of();
     public Iterable<StandAction> getAllUnlocked(IStandPower power) {
-        return map.getActionsMapImmutable(power.getType())
+        StandType<?> currentType = power.getType();
+        if (currentType == null) {
+            return EMPTY;
+        }
+        return map._mapOfMaps
+                .get(currentType.getRegistryName())
                 .values()
                 .stream()
                 .map(entry -> entry.action)
@@ -66,9 +74,7 @@ public class StandActionLearningProgress {
     }
     
     void syncFullWithUser(ServerPlayerEntity user) {
-        map._mapOfMaps.values().stream()
-        .flatMap(map -> map.values().stream())
-        .forEach(entry -> {
+        map.forEach(entry -> {
             PacketManager.sendToClient(new StandActionLearningPacket(entry, false), user);
         });
     }
@@ -99,14 +105,6 @@ public class StandActionLearningProgress {
             return map.get(action.getRegistryName());
         }
         
-        private static final Map<ResourceLocation, StandActionLearningEntry> EMPTY = ImmutableMap.of();
-        public Map<ResourceLocation, StandActionLearningEntry> getActionsMapImmutable(@Nullable StandType<?> standType) {
-            if (standType == null) {
-                return EMPTY;
-            }
-            return _mapOfMaps.getOrDefault(standType.getRegistryName(), EMPTY);
-        }
-        
         public void putEntry(StandActionLearningEntry entry) {
             Map<ResourceLocation, StandActionLearningEntry> map = _mapOfMaps.computeIfAbsent(
                     entry.standType.getRegistryName(), type -> new HashMap<>());
@@ -133,6 +131,12 @@ public class StandActionLearningProgress {
             return map.containsKey(action.getRegistryName());
         }
         
+        public void forEach(Consumer<StandActionLearningEntry> action) {
+            _mapOfMaps.values().stream()
+            .flatMap(map -> map.values().stream())
+            .forEach(action);
+        }
+        
         public CompoundNBT toNBT() {
             CompoundNBT nbt = new CompoundNBT();
             _mapOfMaps.forEach((standType, map) -> {
@@ -151,7 +155,15 @@ public class StandActionLearningProgress {
             nbt.getAllKeys().forEach(standTypeName -> {
                 if (standTypeName.isEmpty()) return;
                 StandType<?> standType = JojoCustomRegistries.STANDS.getRegistry().getValue(new ResourceLocation(standTypeName));
-                if (standType == null) return;
+                if (standType == null) {
+                    
+                    Optional<StandActionLearningEntry> entryLegacy = LegacyUtil.readOldStandActionLearning(nbt, standTypeName);
+                    if (entryLegacy.isPresent()) {
+                        putEntry(entryLegacy.get());
+                    }
+                    
+                    return;
+                }
 
                 CompoundNBT standTypeNbt = nbt.getCompound(standTypeName);
                 standTypeNbt.getAllKeys().forEach(actionName -> {
