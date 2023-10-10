@@ -122,6 +122,10 @@ public class ClientReflection {
         return ReflectionUtil.getFieldValue(MODEL_RENDERER_CHILDREN, modelRenderer);
     }
     
+    public static void setChildren(ModelRenderer modelRenderer, ObjectList<ModelRenderer> children) {
+        ReflectionUtil.setFieldValue(MODEL_RENDERER_CHILDREN, modelRenderer, children);
+    }
+    
     private static final Method AGEABLE_MODEL_HEAD_PARTS = ObfuscationReflectionHelper.findMethod(AgeableModel.class, "func_225602_a_");
     public static Iterable<ModelRenderer> getHeadParts(AgeableModel<?> model) {
         return ReflectionUtil.invokeMethod(AGEABLE_MODEL_HEAD_PARTS, model);
