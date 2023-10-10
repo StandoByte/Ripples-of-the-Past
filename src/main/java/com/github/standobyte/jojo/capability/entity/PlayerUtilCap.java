@@ -8,6 +8,8 @@ import java.util.Set;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.JojoModConfig.Common;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.player.IPlayerAction;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -38,32 +40,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 public class PlayerUtilCap {
     private final PlayerEntity player;
     
-    private Set<OneTimeNotification> notificationsSent = EnumSet.noneOf(OneTimeNotification.class);
-    
-    private int knives;
-    private int removeKnifeTime;
-    
     public int knivesThrewTicks = 0;
-    
-    private boolean hasClientInput;
-    private int noClientInputTimer;
-    
-    private Optional<RockPaperScissorsGame> currentGame = Optional.empty();
-    
-    private boolean walkmanEarbuds = false;
-    
-    private Optional<ContinuousActionInstance<?, ?>> continuousAction = Optional.empty();
-    
-    private boolean doubleShiftPress = false;
-    private boolean shiftSynced = false;
-    private boolean isWalkingOnLiquid = false;
-    private boolean clTickSpark;
-    
-    private int chatSpamTickCount = 0;
-    
-    private BedType lastBedType;
-    private int ticksNoSleep;
-    private long nextSleepTime;
     
     public PlayerUtilCap(PlayerEntity player) {
         this.player = player;
@@ -84,6 +61,10 @@ public class PlayerUtilCap {
         
         tickContinuousAction();
         tickDoubleShift();
+    }
+    
+    public void saveOnDeath(PlayerUtilCap cap) {
+        this.notificationsSent = cap.notificationsSent;
     }
     
     public CompoundNBT toNBT() {
@@ -110,6 +91,8 @@ public class PlayerUtilCap {
     }
     
     
+    
+    private Optional<ContinuousActionInstance<?, ?>> continuousAction = Optional.empty();
     
     public void setContinuousAction(@Nullable ContinuousActionInstance<?, ?> action) {
         continuousAction = Optional.ofNullable(action);
@@ -147,6 +130,11 @@ public class PlayerUtilCap {
     }
     
     
+    
+    private boolean doubleShiftPress = false;
+    private boolean shiftSynced = false;
+    private boolean isWalkingOnLiquid = false;
+    private boolean clTickSpark;
     
     public void setDoubleShiftPress() {
         doubleShiftPress = true;
@@ -203,6 +191,8 @@ public class PlayerUtilCap {
     
     
     
+    private Set<OneTimeNotification> notificationsSent = EnumSet.noneOf(OneTimeNotification.class);
+    
     public void sendNotification(OneTimeNotification notification, ITextComponent message) {
         if (!sentNotification(notification)) {
             player.sendMessage(message, Util.NIL_UUID);
@@ -224,10 +214,6 @@ public class PlayerUtilCap {
         if (!player.level.isClientSide()) {
             PacketManager.sendToClient(new NotificationSyncPacket(notificationsSent), (ServerPlayerEntity) player);
         }
-    }
-    
-    public void moveNotificationsSet(PlayerUtilCap cap) {
-        this.notificationsSent = cap.notificationsSent;
     }
     
     public static enum OneTimeNotification {
@@ -255,6 +241,9 @@ public class PlayerUtilCap {
     }
     
     
+    
+    private int knives;
+    private int removeKnifeTime;
     
     public void setKnives(int knives) {
         knives = Math.max(knives, 0);
@@ -288,6 +277,9 @@ public class PlayerUtilCap {
     
     
     
+    private boolean hasClientInput;
+    private int noClientInputTimer;
+    
     public void setHasClientInput(boolean hasInput) {
         this.hasClientInput = hasInput;
         if (hasClientInput) {
@@ -310,6 +302,17 @@ public class PlayerUtilCap {
     }
     
     
+    
+    public int getStandXpLevelsRequirement(boolean clientSide) {
+        Common config = JojoModConfig.getCommonConfigInstance(clientSide);
+        return config.standXpCostInitial.get() + config.standXpCostIncrease.get() * 5;
+    }
+    
+    
+    
+    private BedType lastBedType;
+    private int ticksNoSleep;
+    private long nextSleepTime;
     
     private void tickNoSleepTimer() {
         if (ticksNoSleep > 0) ticksNoSleep--;
@@ -342,6 +345,8 @@ public class PlayerUtilCap {
     
     
     
+    private Optional<RockPaperScissorsGame> currentGame = Optional.empty();
+    
     public Optional<RockPaperScissorsGame> getCurrentRockPaperScissorsGame() {
         return currentGame;
     }
@@ -351,6 +356,8 @@ public class PlayerUtilCap {
     }
     
     
+    
+    private boolean walkmanEarbuds = false;
     
     public void setEarbuds(boolean earbuds) {
         if (this.walkmanEarbuds != earbuds) {
@@ -366,6 +373,8 @@ public class PlayerUtilCap {
     }
     
     
+    
+    private int chatSpamTickCount = 0;
     
     public void onChatMsgBypassingSpamCheck(MinecraftServer server, ServerPlayerEntity serverPlayer) {
         chatSpamTickCount += 20;

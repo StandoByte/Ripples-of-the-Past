@@ -21,7 +21,11 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     Optional<StandInstance> getStandInstance();
     boolean giveStand(StandInstance standInstance, boolean newInstance);
     Optional<StandInstance> putOutStand();
-
+    
+    PreviousStandsSet getPreviousStandsSet();
+    boolean hadAnyStand();
+    StandArrowHandler getStandArrowHandler();
+    
     boolean usesStamina();
     float getStamina();
     float getMaxStamina();
@@ -60,19 +64,17 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     void setLearningFromPacket(StandActionLearningPacket packet);
     float getLearningProgressPoints(StandAction action);
     void addLearningProgressPoints(StandAction action, float progress);
-    void clearActionLearning();
     Iterable<StandAction> getAllUnlockedActions();
     default boolean hasUnlockedMatching(Predicate<StandAction> actionPredicate) {
         return StreamSupport.stream(getAllUnlockedActions().spliterator(), false)
                 .anyMatch(actionPredicate);
     }
+    void fullStandClear();
     
     void setStandManifestation(@Nullable IStandManifestation standManifestation);
     @Nullable
     IStandManifestation getStandManifestation();
     void toggleSummon();
-    
-    int getUserTier();
     
     void onDash();
     

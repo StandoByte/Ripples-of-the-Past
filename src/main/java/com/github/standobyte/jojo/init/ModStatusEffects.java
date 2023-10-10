@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.potion.HamonShockEffect;
 import com.github.standobyte.jojo.potion.HamonSpreadEffect;
 import com.github.standobyte.jojo.potion.HypnosisEffect;
 import com.github.standobyte.jojo.potion.ImmobilizeEffect;
+import com.github.standobyte.jojo.potion.StandVirusEffect;
 import com.github.standobyte.jojo.potion.ResolveEffect;
 import com.github.standobyte.jojo.potion.StaminaRegenEffect;
 import com.github.standobyte.jojo.potion.StatusEffect;
@@ -71,6 +72,9 @@ public class ModStatusEffects {
 
     public static final RegistryObject<UncurableEffect> TIME_STOP = EFFECTS.register("time_stop", 
             () -> new UncurableEffect(EffectType.BENEFICIAL, 0x707070));
+    
+    public static final RegistryObject<StandVirusEffect> STAND_VIRUS = EFFECTS.register("stand_virus", 
+            () -> new StandVirusEffect(0xC10019));
     
     public static final RegistryObject<UncurableEffect> RESOLVE = EFFECTS.register("resolve", 
             () -> new ResolveEffect(EffectType.BENEFICIAL, 0xC6151F));

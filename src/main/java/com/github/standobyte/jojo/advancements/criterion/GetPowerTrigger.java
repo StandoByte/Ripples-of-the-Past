@@ -51,7 +51,7 @@ public class GetPowerTrigger extends AbstractCriterionTrigger<GetPowerTrigger.In
         }
 
         private boolean matches(PowerClassification classification, IPower<?, ?> power) {
-            return this.powerPredicate.matches(classification, power);
+            return this.powerPredicate.matchesPower(classification, power);
         }
     }
 
