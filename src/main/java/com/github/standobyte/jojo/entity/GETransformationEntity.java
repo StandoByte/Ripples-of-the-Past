@@ -143,20 +143,24 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
     
     @Override
     public EntitySize getDimensions(Pose pPose) {
-        EntitySize size = super.getDimensions(pPose);
+        EntitySize size = new EntitySize(getBbWidth(), getBbHeight(), false);
+        float scale = 0;
         
         float renderAsItemTime = getRenderAsItemTime(duration);
         if (tickCount < renderAsItemTime) {
             if (source != null) {
-                size = source.getDimensions(pPose);
-                float scale = 1 - tickCount / renderAsItemTime;
-                size = new EntitySize(size.width * scale, size.height * scale, false);
+                scale = 1 - tickCount / renderAsItemTime;
+                if (scale > 0) {
+                    size = source.getDimensions(pPose).scale(scale);
+                }
             }
         }
+        
         else if (target != null) {
-            size = target.getDimensions(pPose);
-            float scale = 1 - (duration - tickCount) / (duration - renderAsItemTime);
-            size = new EntitySize(size.width * scale, size.height * scale, false);
+            scale = 1 - (duration - tickCount) / (duration - renderAsItemTime);
+            if (scale > 0) {
+                size = target.getDimensions(pPose).scale(scale);
+            }
         }
         
         return size;
