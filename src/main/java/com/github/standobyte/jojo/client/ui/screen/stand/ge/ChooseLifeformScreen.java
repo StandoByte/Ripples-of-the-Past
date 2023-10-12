@@ -62,6 +62,11 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     private boolean ignoreMouseUntilMoved;
     private boolean firstInit = true;
     
+    private static boolean restoreSavedMousePos;
+    private static int savedMouseX;
+    private static int savedMouseY;
+    private static int savedColumn;
+    
     private FilterList filterList;
     private Button unlockAllButton;
     
@@ -115,17 +120,18 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
             if (GoldExperienceChooseLifeform.chosenTypeTmp != null) {
                 entityIconsGrid.setSelected(entityIconsGrid.findFirst(
                         widget -> widget.visible && widget.entityType == GoldExperienceChooseLifeform.chosenTypeTmp));
-                entityIconsGrid.getSelected().ifPresent(widget -> {
-                    if (widget.visible) {
-                        entityIconsGrid.updateGridLayout();
-                        ClientUtil.setMousePos(widget.x + entityIconsGrid.columnWidth / 2, widget.y + entityIconsGrid.rowHeight / 2);
-                    }
-                });
+                entityIconsGrid.setLeftMostColumn(savedColumn);
+                if (restoreSavedMousePos) {
+                    ClientUtil.setMousePos(savedMouseX, savedMouseY);
+                    restoreSavedMousePos = false;
+                }
             }
             
             firstInit = false;
         }
     }
+    
+    
     
     private void initEntityTypes() {
         LazyOptional<PlayerUtilCap> metEntityTypesCap = minecraft.player.getCapability(PlayerUtilCapProvider.CAPABILITY);
@@ -170,9 +176,15 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         entityIconsGrid.setMaxWidth(xMax + 36 - x);
     }
     
-    
     private Comparator<EntityType<?>> widgetSortComparator() {
         return Comparator.comparing(type -> type.getDescription().getString(), String::compareTo);
+    }
+    
+    
+    private static void saveMousePos(int mouseX, int mouseY) {
+        restoreSavedMousePos = true;
+        savedMouseX = mouseX;
+        savedMouseY = mouseY;
     }
     
     
@@ -209,6 +221,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTicks) {
         if (!holdsButton && mode == ScreenCloseMode.HOLD) {
             chooseHoveredAndClose();
+            saveMousePos(mouseX, mouseY);
         }
         else {
             updateHoveredElement(mouseX, mouseY);
@@ -313,6 +326,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
             switch (button) {
             case LEFT:
                 chooseHoveredAndClose();
+                saveMousePos((int) mouseX, (int) mouseY);
                 return true;
             case RIGHT:
                 hideEntry(hovered.entityType);
@@ -331,6 +345,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         map.put(GLFW.GLFW_KEY_RIGHT, Direction2D.RIGHT);
         map.put(GLFW.GLFW_KEY_DOWN,  Direction2D.DOWN);
     });
+    @Override
     public boolean keyPressed(int pKeyCode, int pScanCode, int pModifiers) {
         if (handleArrowKey(pKeyCode, pScanCode, pModifiers)) {
             ignoreMouseUntilMoved = true;
@@ -374,6 +389,12 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
             GoldExperienceChooseLifeform.chosenTypeTmp = widget.entityType;
         });
         onClose();
+    }
+    
+    @Override
+    public void onClose() {
+        super.onClose();
+        savedColumn = entityIconsGrid.getLeftMostColumn();
     }
     
     public void hideEntry(EntityType<?> entityType) {

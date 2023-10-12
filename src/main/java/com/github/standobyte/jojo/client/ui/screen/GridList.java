@@ -76,7 +76,7 @@ public class GridList<T extends Widget & GridList.IGridElement> {
     }
     
     private int getMaxRenderedColumns() {
-        return maxWidth.isPresent() ? (maxWidth.getAsInt() - columnWidth) / (columnWidth + columnGap) : Integer.MAX_VALUE;
+        return maxWidth.isPresent() ? (maxWidth.getAsInt() - columnWidth) / (columnWidth + columnGap) : 999999;
     }
     
 
@@ -305,7 +305,7 @@ public class GridList<T extends Widget & GridList.IGridElement> {
         this.selected = element;
         if (element.isPresent() && maxWidth.isPresent()) {
             int column = element.get().getColumn();
-            this.leftMostColumn = MathHelper.clamp(leftMostColumn, column - getMaxRenderedColumns(), column);
+            this.leftMostColumn = MathHelper.clamp(leftMostColumn, Math.max(column - getMaxRenderedColumns(), 0), column);
         }
     }
     
@@ -322,7 +322,7 @@ public class GridList<T extends Widget & GridList.IGridElement> {
     private boolean scrollColumns(int add) {
         if (maxWidth.isPresent()) {
             int prev = this.leftMostColumn;
-            this.leftMostColumn = MathHelper.clamp(leftMostColumn + add, 0, getColumnsCount() - getMaxRenderedColumns() - 1);
+            setLeftMostColumn(leftMostColumn + add);
             if (prev != this.leftMostColumn) {
                 updateGridLayout();
                 getSelected().ifPresent(selected -> {
@@ -336,6 +336,14 @@ public class GridList<T extends Widget & GridList.IGridElement> {
             }
         }
         return false;
+    }
+    
+    public void setLeftMostColumn(int leftColumn) {
+        this.leftMostColumn = MathHelper.clamp(leftColumn, 0, Math.max(getColumnsCount() - getMaxRenderedColumns() - 1, 0));
+    }
+    
+    public int getLeftMostColumn() {
+        return leftMostColumn;
     }
     
     
