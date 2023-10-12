@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.item;
 import java.util.Optional;
 
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.capability.world.TimeStopHandler;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.entity.itemprojectile.KnifeEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -11,7 +12,6 @@ import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.GameplayEventHandler;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
-import com.github.standobyte.jojo.util.mod.TimeUtil;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableMultimap.Builder;
 import com.google.common.collect.Multimap;
@@ -92,7 +92,7 @@ public class KnifeItem extends Item {
             }
             
             int cooldown = knivesToThrow * 3;
-            if (hasTheWorld && knivesToThrow > 1 && TimeUtil.isTimeStopped(player.level, player.blockPosition())) {
+            if (hasTheWorld && knivesToThrow > 1 && TimeStopHandler.isTimeStopped(player.level, player.blockPosition())) {
                 player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                     cap.knivesThrewTicks = 80;
                 });

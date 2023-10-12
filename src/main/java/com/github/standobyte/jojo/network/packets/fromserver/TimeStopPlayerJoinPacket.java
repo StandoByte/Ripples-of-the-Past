@@ -6,7 +6,6 @@ import com.github.standobyte.jojo.capability.world.TimeStopHandler;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
-import com.github.standobyte.jojo.util.mod.TimeUtil;
 
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
@@ -41,7 +40,7 @@ public class TimeStopPlayerJoinPacket {
                 handler.reset();
                 break;
             case POST:
-                TimeUtil.stopNewEntityInTime(ClientUtil.getClientPlayer(), ClientUtil.getClientWorld());
+                TimeStopHandler.stopNewEntityInTime(ClientUtil.getClientPlayer(), ClientUtil.getClientWorld());
                 break;
             }
         }

@@ -3,9 +3,9 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.capability.world.TimeStopHandler;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
-import com.github.standobyte.jojo.util.mod.TimeUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -38,7 +38,7 @@ public class TrNoMotionLerpPacket {
 
         @Override
         public void handle(TrNoMotionLerpPacket msg, Supplier<NetworkEvent.Context> ctx) {
-            if (!TimeUtil.canPlayerSeeInStoppedTime(ClientUtil.getClientPlayer())) {
+            if (!TimeStopHandler.canPlayerSeeInStoppedTime(ClientUtil.getClientPlayer())) {
                 Entity entity = ClientUtil.getEntityById(msg.entityId);
                 if (entity instanceof LivingEntity) {
                     entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {

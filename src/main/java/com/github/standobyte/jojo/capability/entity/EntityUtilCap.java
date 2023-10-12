@@ -3,8 +3,8 @@ package com.github.standobyte.jojo.capability.entity;
 import java.util.LinkedList;
 import java.util.Queue;
 
+import com.github.standobyte.jojo.capability.world.TimeStopHandler;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
-import com.github.standobyte.jojo.util.mod.TimeUtil;
 
 import net.minecraft.entity.Entity;
 
@@ -37,7 +37,7 @@ public class EntityUtilCap {
     void nbtSetWasStoppedInTime(boolean wasStoppedInTime) {
         if (wasStoppedInTime) {
             stoppedInTime = true;
-            wasStoppedInTime = TimeUtil.isTimeStopped(entity.level, entity.blockPosition());
+            wasStoppedInTime = TimeStopHandler.isTimeStopped(entity.level, entity.blockPosition());
             updateEntityTimeStop(wasStoppedInTime);
         }
     }

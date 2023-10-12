@@ -9,12 +9,12 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
+import com.github.standobyte.jojo.capability.world.TimeStopHandler;
 import com.github.standobyte.jojo.client.ClientTicking.ITicking;
 import com.github.standobyte.jojo.client.render.world.ParticleManagerWrapperTS;
 import com.github.standobyte.jojo.client.render.world.TimeStopWeatherHandler;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
-import com.github.standobyte.jojo.util.mod.TimeUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
@@ -65,7 +65,7 @@ public class ClientTimeStopHandler implements ITicking {
     }
 
     private boolean isTimeStopped(ChunkPos chunkPos) {
-        return mc.level != null && TimeUtil.isTimeStopped(mc.level, chunkPos);
+        return mc.level != null && TimeStopHandler.isTimeStopped(mc.level, chunkPos);
     }
 
     public void setTimeStopClientState(boolean canSee, boolean canMove) {
@@ -99,7 +99,7 @@ public class ClientTimeStopHandler implements ITicking {
     
     public void updateTimeStopTicksLeft() {
         if (mc.level != null && mc.player != null) {
-            int ticks = TimeUtil.getTimeStopTicksLeft(mc.level, new ChunkPos(mc.player.blockPosition()));
+            int ticks = TimeStopHandler.getTimeStopTicksLeft(mc.level, new ChunkPos(mc.player.blockPosition()));
             this.timeStopLength = timeStopTicks + ticks;
         }
         else {

@@ -15,7 +15,6 @@ import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
-import com.github.standobyte.jojo.util.mod.TimeUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -166,7 +165,7 @@ public class TimeStopInstance {
             if (ticksLeft == TIME_RESUME_SOUND_TICKS) {
                 if (timeResumeSound != null) {
                     PacketManager.sendGloballyWithCondition(new PlaySoundAtClientPacket(timeResumeSound, SoundCategory.AMBIENT, user.blockPosition(), 5.0F, 1.0F), 
-                            world.dimension(), player -> inRange(TimeStopHandler.getChunkPos(player)) && TimeUtil.canPlayerSeeInStoppedTime(player));
+                            world.dimension(), player -> inRange(TimeStopHandler.getChunkPos(player)) && TimeStopHandler.canPlayerSeeInStoppedTime(player));
                 }
             }
             else {

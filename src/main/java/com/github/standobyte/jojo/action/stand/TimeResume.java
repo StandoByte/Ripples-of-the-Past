@@ -6,10 +6,10 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.capability.world.TimeStopHandler;
 import com.github.standobyte.jojo.capability.world.TimeStopInstance;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
-import com.github.standobyte.jojo.util.mod.TimeUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.world.World;
@@ -49,7 +49,7 @@ public class TimeResume extends StandAction {
     public Action<IStandPower> getVisibleAction(IStandPower power, ActionTarget target) {
         LivingEntity user = power.getUser();
         if (user != null) {
-            if (TimeUtil.isTimeStopped(user.level, user.blockPosition())) {
+            if (TimeStopHandler.isTimeStopped(user.level, user.blockPosition())) {
                 if (TimeResume.userTimeStopInstance(user.level, user, null)) {
                     return this;
                 }
