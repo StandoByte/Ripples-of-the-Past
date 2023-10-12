@@ -1131,6 +1131,7 @@
   "jojo.ge_lifeform.search_field": "Search",
   "jojo.ge_lifeform.unlock_all": "Unlock all",
   "ge_new_lifeform.toast.title": "New lifeform unlocked!",
+  "jojo.message.action_condition.choose_lifeform": "You have to choose a lifeform first",
   
   "stand.jojo.boy_ii_man": "Boy II Man",
   "entity.jojo.rps_kid": "Rock-Paper-Scissors Kid",

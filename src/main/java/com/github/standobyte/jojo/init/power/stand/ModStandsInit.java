@@ -791,6 +791,9 @@ public class ModStandsInit {
                             GOLD_EXPERIENCE_CHOOSE_LIFEFORM.get(),
                             GOLD_EXPERIENCE_CREATE_LIFEFORM.get()
                             )
+                    .defaultQuickAccess(
+                            GOLD_EXPERIENCE_CHOOSE_LIFEFORM.get()
+                            )
                     .defaultStats(StandStats.class, new StandStats.Builder()
                             .tier(5)
                             .power(10.0)

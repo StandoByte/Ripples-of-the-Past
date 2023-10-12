@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.stand;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.GETransformationEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -16,6 +17,7 @@ import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.monster.SlimeEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.MathHelper;
@@ -29,6 +31,15 @@ public class GoldExperienceCreateLifeform extends StandAction {
 
     public GoldExperienceCreateLifeform(StandAction.Builder builder) {
         super(builder);
+    }
+    
+    @Override
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
+        if (user.level.isClientSide() && GoldExperienceChooseLifeform.chosenTypeTmp == null) {
+            return ActionConditionResult.NEGATIVE;
+        }
+        
+        return ActionConditionResult.POSITIVE;
     }
     
     @Override
@@ -82,6 +93,13 @@ public class GoldExperienceCreateLifeform extends StandAction {
                 lifeFormCreated.copyPosition(tf);
                 lifeFormCreated.setYHeadRot(performer.yRot);
                 world.addFreshEntity(tf);
+                
+                if (!power.isUserCreative()) {
+                    power.setCooldownTimer(this, ticks);
+                }
+            }
+            else if (user instanceof ServerPlayerEntity) {
+                ((ServerPlayerEntity) user).displayClientMessage(new TranslationTextComponent("jojo.message.action_condition.choose_lifeform"), true);
             }
         }
     }
