@@ -135,7 +135,7 @@ public class StandDiscFinalisedModel implements IBakedModel {
         final float DISTANCE_BEHIND_SOUTH_FACE = SOUTH_FACE_POSITION - BUILTIN_GEN_ITEM_Z_MAX;
         final float DISTANCE_BEHIND_NORTH_FACE = BUILTIN_GEN_ITEM_Z_MIN - NORTH_FACE_POSITION;
         
-        float xCenterPosition = 0.6875F;
+        float xCenterPosition = 0.25F;
         float yCenterPosition = 0.5F;
         float width = 0.375F;
         float height = 0.375F;
