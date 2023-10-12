@@ -195,6 +195,8 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     }
     
     private boolean isKeyBeingHeld() {
+        if (keyHeld == null) return false;
+        
         long window = minecraft.getWindow().getWindow();
         int value = keyHeld.getKey().getValue();
         int state = value < 8 ? GLFW.glfwGetMouseButton(window, value) : GLFW.glfwGetKey(window, value);
@@ -301,6 +303,10 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
             return true;
         }
         
+        if (closeOnSecondClick(buttonId)) {
+            return true;
+        }
+        
         if (entityIconsGrid.getSelected().isPresent() && entityIconsGrid.isMouseInsideGrid(mouseX, mouseY)) {
             SelectorWidget hovered = entityIconsGrid.getSelected().get();
             MouseButton button = MouseButton.getButtonFromId(buttonId);
@@ -334,8 +340,22 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
             chooseHoveredAndClose();
             return true;
         }
-
+        
+        if (closeOnSecondClick(pKeyCode)) { // FIXME causes the window to open again
+            return true;
+        }
+        
         return super.keyPressed(pKeyCode, pScanCode, pModifiers);
+    }
+    
+    private boolean closeOnSecondClick(int keyPressedCode) {
+        if (mode == ScreenCloseMode.CLICK && keyHeld != null && keyPressedCode == keyHeld.getKey().getValue()) {
+            keyHeld.setDown(false);
+            onClose();
+            return true;
+        }
+        
+        return false;
     }
     
     private boolean handleArrowKey(int pKeyCode, int pScanCode, int pModifiers) {
@@ -353,7 +373,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         entityIconsGrid.getSelected().ifPresent(widget -> {
             GoldExperienceChooseLifeform.chosenTypeTmp = widget.entityType;
         });
-        minecraft.setScreen(null);
+        onClose();
     }
     
     public void hideEntry(EntityType<?> entityType) {
