@@ -6,12 +6,12 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.stand.TimeStop;
+import com.github.standobyte.jojo.capability.world.TimeStopHandler;
 import com.github.standobyte.jojo.capability.world.TimeStopInstance;
 import com.github.standobyte.jojo.client.ClientTimeStopHandler;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
-import com.github.standobyte.jojo.util.mod.TimeUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -107,7 +107,7 @@ public class TimeStopInstancePacket {
             case NEW_INSTANCE:
                 if (msg.timeStopTicks > 0) {
                     Entity entity = ClientUtil.getEntityById(msg.timeStopperId);
-                    TimeUtil.stopTime(world, new TimeStopInstance(world, msg.timeStopTicks, msg.chunkPos, 
+                    TimeStopHandler.stopTime(world, new TimeStopInstance(world, msg.timeStopTicks, msg.chunkPos, 
                             JojoModConfig.getCommonConfigInstance(true).timeStopChunkRange.get(), 
                             entity instanceof LivingEntity ? (LivingEntity) entity : null, msg.action,
                                     msg.instanceId));
@@ -116,14 +116,14 @@ public class TimeStopInstancePacket {
                 }
                 break;
             case SET_TICKS:
-                TimeStopInstance timeStop = TimeUtil.getTimeStopInstance(world, msg.instanceId);
+                TimeStopInstance timeStop = TimeStopHandler.getTimeStopInstance(world, msg.instanceId);
                 if (timeStop != null) {
                     timeStop.setTicksLeft(msg.timeStopTicks);
                 }
                 ClientTimeStopHandler.getInstance().updateTimeStopTicksLeft();
                 break;
             case RESUME_TIME:
-                TimeUtil.resumeTime(world, msg.instanceId);
+                TimeStopHandler.resumeTime(world, msg.instanceId);
                 break;
             }
         }
