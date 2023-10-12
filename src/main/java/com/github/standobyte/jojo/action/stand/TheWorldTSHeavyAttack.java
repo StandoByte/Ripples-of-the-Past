@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack.HeavyPunch
 import com.github.standobyte.jojo.action.stand.punch.StandBlockPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.capability.world.TimeStopHandler;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
@@ -24,7 +25,6 @@ import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
-import com.github.standobyte.jojo.util.mod.TimeUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -51,7 +51,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
     
     @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
-        if (TimeUtil.isTimeStopped(user.level, user.blockPosition())) {
+        if (TimeStopHandler.isTimeStopped(user.level, user.blockPosition())) {
             return ActionConditionResult.NEGATIVE;
         }
         return super.checkSpecificConditions(user, power, target);
@@ -141,7 +141,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
                 TimeStopInstant.skipTicksForStandAndUser(standPower, timeStopTicks);
                 if (!world.isClientSide()) {
                     MCUtil.playEitherSound(world, null, standEntity.getX(), standEntity.getY(), standEntity.getZ(), 
-                            TimeUtil::canPlayerSeeInStoppedTime, blink.blinkSound.get(), ModSounds.THE_WORLD_TIME_STOP_UNREVEALED.get(), 
+                            TimeStopHandler::canPlayerSeeInStoppedTime, blink.blinkSound.get(), ModSounds.THE_WORLD_TIME_STOP_UNREVEALED.get(), 
                             SoundCategory.AMBIENT, 1.0F, 1.0F);
                     standPower.consumeStamina(staminaCostTS + timeStopTicks * staminaCostTicking);
                     if (standPower.hasPower()) {

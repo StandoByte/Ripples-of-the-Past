@@ -19,7 +19,6 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
-import com.github.standobyte.jojo.util.mod.TimeUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.EffectInstance;
@@ -50,7 +49,7 @@ public class TimeStop extends StandAction {
 
     @Override
     protected SoundEvent getShout(LivingEntity user, IStandPower power, ActionTarget target, boolean wasActive) {
-        if (TimeUtil.isTimeStopped(user.level, user.blockPosition())) {
+        if (TimeStopHandler.isTimeStopped(user.level, user.blockPosition())) {
             return null;
         }
         if (wasActive && voiceLineWithStandSummoned != null && voiceLineWithStandSummoned.get() != null) {
@@ -65,7 +64,7 @@ public class TimeStop extends StandAction {
             int timeStopTicks = getTimeStopTicks(power, this);
             BlockPos blockPos = user.blockPosition();
             ChunkPos chunkPos = new ChunkPos(blockPos);
-            boolean invadingStoppedTime = TimeUtil.isTimeStopped(world, user.blockPosition());
+            boolean invadingStoppedTime = TimeStopHandler.isTimeStopped(world, user.blockPosition());
             TimeStopInstance instance = new TimeStopInstance(world, timeStopTicks, chunkPos, 
                     JojoModConfig.getCommonConfigInstance(world.isClientSide()).timeStopChunkRange.get(), user, this);
             Optional<TimeStopInstance> currentMaxInstance = world.getCapability(WorldUtilCapProvider.CAPABILITY)
@@ -89,11 +88,11 @@ public class TimeStop extends StandAction {
             user.addEffect(immunityEffect);
             instance.setStatusEffectInstance(immunityEffect);
             
-            TimeUtil.stopTime(world, instance);
+            TimeStopHandler.stopTime(world, instance);
             if (timeStopTicks >= 40 && timeStopSound != null && timeStopSound.get() != null
                     && !invadingStoppedTime) {
                 PacketManager.sendGloballyWithCondition(new PlaySoundAtClientPacket(timeStopSound.get(), SoundCategory.AMBIENT, blockPos, 5.0F, 1.0F), 
-                        world.dimension(), player -> instance.inRange(TimeStopHandler.getChunkPos(player)) && TimeUtil.canPlayerSeeInStoppedTime(player));
+                        world.dimension(), player -> instance.inRange(TimeStopHandler.getChunkPos(player)) && TimeStopHandler.canPlayerSeeInStoppedTime(player));
             }
             
             user.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.hasUsedTimeStopToday = true);
@@ -102,7 +101,7 @@ public class TimeStop extends StandAction {
 
     @Override
     public int getHoldDurationToFire(IStandPower power) { 
-        return TimeUtil.isTimeStopped(power.getUser().level, power.getUser().blockPosition()) ? 0 : super.getHoldDurationToFire(power);
+        return TimeStopHandler.isTimeStopped(power.getUser().level, power.getUser().blockPosition()) ? 0 : super.getHoldDurationToFire(power);
     }
 
     @Override
