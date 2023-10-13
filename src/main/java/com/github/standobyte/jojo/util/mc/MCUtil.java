@@ -20,6 +20,9 @@ import com.google.common.collect.ImmutableMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.crash.CrashReport;
+import net.minecraft.crash.CrashReportCategory;
+import net.minecraft.crash.ReportedException;
 import net.minecraft.dispenser.IBlockSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -36,11 +39,13 @@ import net.minecraft.nbt.DoubleNBT;
 import net.minecraft.nbt.EndNBT;
 import net.minecraft.nbt.FloatNBT;
 import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.INBTType;
 import net.minecraft.nbt.IntArrayNBT;
 import net.minecraft.nbt.IntNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.LongArrayNBT;
 import net.minecraft.nbt.LongNBT;
+import net.minecraft.nbt.NBTTypes;
 import net.minecraft.nbt.ShortNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.play.server.SPlaySoundEffectPacket;
@@ -79,23 +84,35 @@ public class MCUtil {
     public static final IFormattableTextComponent EMPTY_TEXT = new StringTextComponent("");
     public static final IFormattableTextComponent NEW_LINE = new StringTextComponent("\n");
     private static final ImmutableMap<Class<? extends INBT>, Integer> NBT_ID = new ImmutableMap.Builder<Class<? extends INBT>, Integer>()
-            .put(EndNBT.class, 0)
-            .put(ByteNBT.class, 1)
-            .put(ShortNBT.class, 2)
-            .put(IntNBT.class, 3)
-            .put(LongNBT.class, 4)
-            .put(FloatNBT.class, 5)
-            .put(DoubleNBT.class, 6)
-            .put(ByteArrayNBT.class, 7)
-            .put(StringNBT.class, 8)
-            .put(ListNBT.class, 9)
-            .put(CompoundNBT.class, 10)
-            .put(IntArrayNBT.class, 11)
+            .put(EndNBT.class, 0)           .put(ByteNBT.class, 1)      .put(ShortNBT.class, 2)         .put(IntNBT.class, 3)
+            .put(LongNBT.class, 4)          .put(FloatNBT.class, 5)     .put(DoubleNBT.class, 6)        .put(ByteArrayNBT.class, 7)
+            .put(StringNBT.class, 8)        .put(ListNBT.class, 9)      .put(CompoundNBT.class, 10)     .put(IntArrayNBT.class, 11)
             .put(LongArrayNBT.class, 12)
             .build();
     
     public static int getNbtId(Class<? extends INBT> clazz) {
         return NBT_ID.getOrDefault(clazz, -1);
+    }
+    
+    public static <T extends INBT> Optional<T> getNbtElement(CompoundNBT nbt, String key, Class<T> clazz) {
+        int id = getNbtId(clazz);
+        if (nbt.contains(key, id)) {
+            try {
+                return Optional.of((T) nbt.get(key));
+            }
+            catch (ClassCastException e) {
+                INBTType<?> nbtType = NBTTypes.getType(id);
+                CrashReport crashreport = CrashReport.forThrowable(e, "Reading NBT data");
+                CrashReportCategory crashreportcategory = crashreport.addCategory("Corrupt NBT tag", 1);
+                crashreportcategory.setDetail("Tag type found", () -> {
+                    return nbt.get(key).getType().getName();
+                });
+                crashreportcategory.setDetail("Tag type expected", nbtType::getName);
+                crashreportcategory.setDetail("Tag name", key);
+                throw new ReportedException(crashreport);
+            }
+        }
+        return Optional.empty();
     }
     
     public static CompoundNBT replaceNbtValues(CompoundNBT original, CompoundNBT replacedEntries, CompoundNBT replacingEntries) {

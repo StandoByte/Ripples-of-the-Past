@@ -236,8 +236,10 @@ public class ClientEventHandler {
         if (mc.level != null && event.phase == TickEvent.Phase.START) {
             ClientUtil.canSeeStands = StandUtil.playerCanSeeStands(mc.player);
             ClientUtil.canHearStands = /*StandUtil.playerCanHearStands(mc.player)*/ ClientUtil.canSeeStands;
+            
+            ClientTimeStopHandler timeStopHandler = ClientTimeStopHandler.getInstance();
             if (mc.player.isAlive()) {
-                ClientTimeStopHandler.getInstance().setConstantPartialTick(clientTimer);
+                timeStopHandler.setConstantPartialTick(clientTimer);
                 
                 mc.player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                     cap.applyLockedRotation();

@@ -1,11 +1,15 @@
 package com.github.standobyte.jojo.capability.entity;
 
 import java.util.ArrayList;
+import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 
 import javax.annotation.Nullable;
 
@@ -26,6 +30,10 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrWalkmanEarbudsPac
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
+import com.github.standobyte.jojo.util.mc.CustomVillagerTrades;
+import com.github.standobyte.jojo.util.mc.CustomVillagerTrades.MapTrade;
+import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mc.PlayerStatListener;
 import com.github.standobyte.jojo.util.mod.JojoModVersion;
 
 import net.minecraft.entity.Entity;
@@ -39,6 +47,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.World;
 
 public class PlayerUtilCap {
     private final PlayerEntity player;
@@ -47,6 +56,9 @@ public class PlayerUtilCap {
     
     public PlayerUtilCap(PlayerEntity player) {
         this.player = player;
+//        if (!player.level.isClientSide()) {
+//            statChangeListeners.add(new CustomVillagerTrades.MapItemStackTradeListener((ServerPlayerEntity) player));
+//        }
     }
     
     
@@ -57,6 +69,8 @@ public class PlayerUtilCap {
             tickVoiceLines();
             tickClientInputTimer();
             tickNoSleepTimer();
+            tickStatUpdates();
+            tickQueuedOnScreenClose();
             
             if (knivesThrewTicks > 0) knivesThrewTicks--;
             if (chatSpamTickCount > 0) chatSpamTickCount--;
@@ -74,14 +88,20 @@ public class PlayerUtilCap {
         CompoundNBT nbt = new CompoundNBT();
         nbt.put("NotificationsSent", notificationsToNBT());
         nbt.put("RotpVersion", JojoModVersion.getCurrentVersion().toNBT());
+        
+        nbt.put("TradeCD", tradeCooldownToNbt());
         return nbt;
     }
-    
+
+
+
     public void fromNBT(CompoundNBT nbt) {
         if (nbt.contains("NotificationsSent", 10)) {
             CompoundNBT notificationsMap = nbt.getCompound("NotificationsSent");
             notificationsFromNBT(notificationsMap);
         }
+        
+        MCUtil.getNbtElement(nbt, "TradeCD", CompoundNBT.class).ifPresent(this::tradeCooldownFromNbt);
     }
     
     public void onTracking(ServerPlayerEntity tracking) {
@@ -424,6 +444,91 @@ public class PlayerUtilCap {
             if (ticks > 0) {
                 voiceLine.setValue(--ticks);
             }
+        }
+    }
+    
+    
+    
+    private final Map<CustomVillagerTrades.MapTrade, Long> lastTradeTime = new EnumMap<>(MapTrade.class);
+    public void setTradeTime(MapTrade type, World world) {
+        lastTradeTime.put(type, world.dayTime());
+    }
+    
+    public boolean canTradeNow(MapTrade type, World world) {
+        if (lastTradeTime.containsKey(type)) {
+            return lastTradeTime.get(type) + type.tradeCooldownTicks < world.dayTime();
+        }
+        else {
+            return true;
+        }
+    }
+    
+    private CompoundNBT tradeCooldownToNbt() {
+        CompoundNBT nbt = new CompoundNBT();
+        lastTradeTime.forEach((cooldown, ticks) -> {
+            if (ticks.intValue() > 0) {
+                nbt.putLong(cooldown.name(), ticks.longValue());
+            }
+        });
+        return nbt;
+    }
+    
+    private void tradeCooldownFromNbt(CompoundNBT nbt) {
+        nbt.getAllKeys().forEach(cdTypeKey -> {
+            try {
+                MapTrade type = Enum.valueOf(MapTrade.class, cdTypeKey);
+                lastTradeTime.put(type, nbt.getLong(cdTypeKey));
+            }
+            catch (IllegalArgumentException nbtError) {}
+        });
+    }
+    
+    
+    
+    private final List<PlayerStatListener<?>> statChangeListeners = new ArrayList<>();
+    private void tickStatUpdates() {
+        statChangeListeners.forEach(PlayerStatListener::tick);
+    }
+    
+    
+    
+    private final List<TimedAction> sendWhenScreenClosed = new ArrayList<>();
+    public void doWhen(Runnable action, BooleanSupplier when) {
+        if (when.getAsBoolean()) {
+            action.run();
+        }
+        else {
+            sendWhenScreenClosed.add(new TimedAction(action, when));
+        }
+    }
+    
+    private void tickQueuedOnScreenClose() {
+        if (!sendWhenScreenClosed.isEmpty()) {
+            Iterator<TimedAction> it = sendWhenScreenClosed.iterator();
+            while (it.hasNext()) {
+                TimedAction action = it.next();
+                if (action.tryRun()) {
+                    it.remove();
+                }
+            }
+        }
+    }
+    
+    private static class TimedAction {
+        private final Runnable action;
+        private final BooleanSupplier timing;
+        
+        public TimedAction(Runnable action, BooleanSupplier timing) {
+            this.action = action;
+            this.timing = timing;
+        }
+        
+        public boolean tryRun() {
+            if (timing.getAsBoolean()) {
+                action.run();
+                return true;
+            }
+            return false;
         }
     }
 
