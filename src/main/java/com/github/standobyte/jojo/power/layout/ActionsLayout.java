@@ -125,6 +125,17 @@ public class ActionsLayout<P extends IPower<P, ?>> {
         return hotbars.values().stream().anyMatch(hotbar -> hotbar.containsAction(action));
     }
     
+    public void addExtraAction(Action<P> action, Hotbar hotbar) {
+        hotbars.get(hotbar).addExtraAction(action);
+    }
+    
+    public void removeExtraAction(Action<P> action) {
+        hotbars.values().forEach(hotbarLayout -> hotbarLayout.removeAction(action));
+        if (mmbActionCurrent == action) {
+            mmbActionCurrent = null;
+        }
+    }
+    
     
     
     public void syncWithUser(ServerPlayerEntity player, PowerClassification powerClassification, IPowerType<?, ?> powerType) {
