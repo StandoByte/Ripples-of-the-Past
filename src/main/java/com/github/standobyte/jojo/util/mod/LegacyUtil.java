@@ -55,7 +55,7 @@ public class LegacyUtil {
         levelsMap.readOldValues(standPower, resolveLevel, extraLevel);
     }
     
-    public static Optional<StandActionLearningProgress.StandActionLearningEntry> readOldStandActionLearning(CompoundNBT mainNbt, String key) { // added in 0.2.2-pre3
+    public static Optional<StandActionLearningProgress.StandActionLearningEntry> readOldStandActionLearning(CompoundNBT mainNbt, String key) {
         IForgeRegistry<Action<?>> actions = JojoCustomRegistries.ACTIONS.getRegistry();
         ResourceLocation keyResLoc = new ResourceLocation(key);
         if (!actions.containsKey(keyResLoc)) {

@@ -81,7 +81,6 @@ public class StandActionLearningProgress {
     
     
 
-    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! legacy version nbt load
     public void fromNBT(CompoundNBT nbt) {
         map.fromNBT(nbt);
     }

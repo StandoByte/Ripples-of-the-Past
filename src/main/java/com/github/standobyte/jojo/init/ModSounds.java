@@ -67,6 +67,10 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> CASSETTE_RED = register("cassette_red");
     public static final RegistryObject<SoundEvent> CASSETTE_BLACK = register("cassette_black");
 
+    public static final RegistryObject<SoundEvent> MAP_BOUGHT_METEORITE = register("map_bought_snowy");
+    public static final RegistryObject<SoundEvent> MAP_BOUGHT_HAMON_TEMPLE = register("map_bought_mountain");
+    public static final RegistryObject<SoundEvent> MAP_BOUGHT_PILLAR_MAN_TEMPLE = register("map_bought_jungle");
+
     public static final RegistryObject<SoundEvent> VAMPIRE_BLOOD_DRAIN = register("vampire_blood_drain");
     
     public static final RegistryObject<SoundEvent> VAMPIRE_FREEZE = register("vampire_freeze");

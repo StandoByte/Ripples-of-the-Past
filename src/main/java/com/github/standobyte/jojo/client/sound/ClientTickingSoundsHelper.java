@@ -139,6 +139,10 @@ public abstract class ClientTickingSoundsHelper {
         Minecraft.getInstance().getSoundManager().play(new LoopingEntityTickableSound(sound, entity.getSoundSource(), volume, pitch, looping, entity));
     }
     
+    public static void playEntitySound(Entity entity, SoundEvent sound, SoundCategory soundSource, float volume, float pitch, boolean looping) {
+        Minecraft.getInstance().getSoundManager().play(new LoopingEntityTickableSound(sound, soundSource, volume, pitch, looping, entity));
+    }
+    
     public static <T extends Entity> void playStoppableEntitySound(T entity, SoundEvent sound, 
             float volume, float pitch, boolean looping, Predicate<T> playWhile) {
         Minecraft.getInstance().getSoundManager().play(new StoppableEntityTickableSound<T>(sound, entity.getSoundSource(), 
