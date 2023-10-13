@@ -174,8 +174,8 @@ public class ActionHotbarLayout<P extends IPower<P, ?>> {
             for (ActionSwitch<?> switchFromNetwork : switches) {
                 Action<?> action = switchFromNetwork.getAction();
                 
-                if (action != null && _actions.containsKey(action)) {
-                    ActionSwitch<P> switchLocal = _actions.get(action);
+                if (action != null) {
+                    ActionSwitch<P> switchLocal = _actions.computeIfAbsent((Action<P>) action, ActionSwitch::new);
                     switchLocal.copyFrom(switchFromNetwork);
                     actionsOrder.add(switchLocal);
                 }
@@ -214,8 +214,8 @@ public class ActionHotbarLayout<P extends IPower<P, ?>> {
                         if (JojoCustomRegistries.ACTIONS.getRegistry().containsKey(actionId)) {
                             Action<?> action = JojoCustomRegistries.ACTIONS.getRegistry().getValue(actionId);
                             
-                            if (action != null && _actions.containsKey(action)) {
-                                ActionSwitch<P> switchLocal = _actions.get(action);
+                            if (action != null) {
+                                ActionSwitch<P> switchLocal = _actions.computeIfAbsent((Action<P>) action, ActionSwitch::new);
                                 switchLocal.fromNBT(actionCNBT);
                                 actionsOrder.add(switchLocal);
                             }

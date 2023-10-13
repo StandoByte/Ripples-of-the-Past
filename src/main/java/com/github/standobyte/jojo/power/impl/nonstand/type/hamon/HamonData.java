@@ -58,6 +58,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamon
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterHamonTechnique;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.HamonTechniqueManager;
+import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -1072,13 +1073,12 @@ public class HamonData extends TypeSpecificData {
     }
 
     private void addSkillAction(AbstractHamonSkill skill) {
-        // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//        if (skill.getRewardAction() != null && skill.addsActionToHUD()) {
-//            ActionType hotbar = skill.getRewardType().getDefaultHotbar();
-//            if (hotbar != null) {
-//                power.getActions(hotbar).addExtraAction(skill.getRewardAction());
-//            }
-//        }
+        if (skill.getRewardAction() != null && skill.addsActionToHUD()) {
+            ActionsLayout.Hotbar hotbar = skill.getRewardType().getDefaultHotbar();
+            if (hotbar != null) {
+                power.getActionsHudLayout().addExtraAction(skill.getRewardAction(), hotbar);
+            }
+        }
     }
     
     public void removeHamonSkill(AbstractHamonSkill skill) {
@@ -1095,13 +1095,9 @@ public class HamonData extends TypeSpecificData {
     }
 
     private void removeSkillAction(AbstractHamonSkill skill) {
-        // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-//        if (skill.getRewardAction() != null && skill.addsActionToHUD()) {
-//            ActionType hotbar = skill.getRewardType().getDefaultHotbar();
-//            if (hotbar != null) {
-//                power.getActions(hotbar).removeAction(skill.getRewardAction());
-//            }
-//        }
+        if (skill.getRewardAction() != null && skill.addsActionToHUD()) {
+            power.getActionsHudLayout().removeExtraAction(skill.getRewardAction());
+        }
     }
     
     public static boolean canResetTab(PlayerEntity user, HamonSkillsTab type) {
