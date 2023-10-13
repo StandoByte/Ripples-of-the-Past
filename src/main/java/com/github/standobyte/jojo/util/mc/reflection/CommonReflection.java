@@ -14,12 +14,14 @@ import net.minecraft.entity.ai.goal.GoalSelector;
 import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
 import net.minecraft.entity.ai.goal.PrioritizedGoal;
 import net.minecraft.entity.ai.goal.TargetGoal;
+import net.minecraft.entity.merchant.IMerchant;
 import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.container.Container;
+import net.minecraft.inventory.container.MerchantContainer;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.inventory.container.WorkbenchContainer;
 import net.minecraft.item.ItemStack;
@@ -179,5 +181,12 @@ public class CommonReflection {
     private static final Field PLAYER_ENTITY_SLEEP_COUNTER = ObfuscationReflectionHelper.findField(PlayerEntity.class, "field_71076_b");
     public static void setSleepCounter(PlayerEntity entity, int sleepCounter) {
         ReflectionUtil.setFieldValue(PLAYER_ENTITY_SLEEP_COUNTER, entity, sleepCounter);
+    }
+    
+    
+
+    private static final Field MERCHANT_CONTAINER_TRADER = ObfuscationReflectionHelper.findField(MerchantContainer.class, "field_75178_e");
+    public static IMerchant getTrader(MerchantContainer merchantContainer) {
+        return ReflectionUtil.getFieldValue(MERCHANT_CONTAINER_TRADER, merchantContainer);
     }
 }

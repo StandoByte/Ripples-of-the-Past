@@ -75,6 +75,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrBarrageHitSoundPa
 import com.github.standobyte.jojo.network.packets.fromserver.TrDirectEntityPosPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDoubleShiftPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrEnergyPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrEntitySpecialEffectPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonAuraColorPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonBreathStabilityPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonCharacterTechniquePacket;
@@ -218,6 +219,7 @@ public class PacketManager {
         registerMessage(serverChannel, new TrWalkmanEarbudsPacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new LeapCooldownPacket.Handler(),                   Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new NotificationSyncPacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(serverChannel, new TrEntitySpecialEffectPacket.Handler(),          Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new PlayVoiceLinePacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new PlaySoundAtClientPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new PlaySoundAtStandEntityPacket.Handler(),         Optional.of(NetworkDirection.PLAY_TO_CLIENT));
