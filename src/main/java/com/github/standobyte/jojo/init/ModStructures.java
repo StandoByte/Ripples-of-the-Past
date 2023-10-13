@@ -56,6 +56,10 @@ public class ModStructures {
             () -> (new PillarmanTempleStructure(NoFeatureConfig.CODEC)));
     public static final ConfiguredStructureSupplier<?, ?> CONFIGURED_PILLARMAN_TEMPLE = new ConfiguredStructureSupplier<>(PILLARMAN_TEMPLE, IFeatureConfig.NONE);
 
+    public static final Predicate<BiomeLoadingEvent> HAMON_TEMPLE_BIOMES = biome -> biome.getCategory() == Biome.Category.EXTREME_HILLS;
+    public static final Predicate<BiomeLoadingEvent> METEORITE_BIOMES = biome -> biome.getClimate().precipitation == Biome.RainType.SNOW && biome.getCategory() != Biome.Category.OCEAN;
+    public static final Predicate<BiomeLoadingEvent> PILLARMAN_TEMPLE_BIOMES = biome -> biome.getCategory() == Biome.Category.JUNGLE;
+    
     
     @SubscribeEvent(priority = EventPriority.LOW)
     public static final void afterStructuresRegister(RegistryEvent.Register<Structure<?>> event) {
@@ -71,16 +75,13 @@ public class ModStructures {
 
         registerConfiguredStructure(registry, CONFIGURED_HAMON_TEMPLE.get(), 
                 new ResourceLocation(JojoMod.MOD_ID, "configured_hamon_temple"), HAMON_TEMPLE.get(), 
-                biome -> JojoModConfig.getCommonConfigInstance(false).hamonTempleSpawn.get()
-                && biome.getCategory() == Biome.Category.EXTREME_HILLS);
+                HAMON_TEMPLE_BIOMES.and(b -> JojoModConfig.getCommonConfigInstance(false).hamonTempleSpawn.get()));
         registerConfiguredStructure(registry, CONFIGURED_METEORITE.get(), 
                 new ResourceLocation(JojoMod.MOD_ID, "configured_meteorite"), METEORITE.get(), 
-                biome -> JojoModConfig.getCommonConfigInstance(false).meteoriteSpawn.get()
-                && biome.getClimate().precipitation == Biome.RainType.SNOW && biome.getCategory() != Biome.Category.OCEAN);
+                METEORITE_BIOMES.and(b -> JojoModConfig.getCommonConfigInstance(false).meteoriteSpawn.get()));
         registerConfiguredStructure(registry, CONFIGURED_PILLARMAN_TEMPLE.get(), 
                 new ResourceLocation(JojoMod.MOD_ID, "configured_pillarman_temple"), PILLARMAN_TEMPLE.get(), 
-                biome -> JojoModConfig.getCommonConfigInstance(false).pillarManTempleSpawn.get()
-                && biome.getCategory() == Biome.Category.JUNGLE);
+                PILLARMAN_TEMPLE_BIOMES.and(b -> JojoModConfig.getCommonConfigInstance(false).pillarManTempleSpawn.get()));
     }
     
     private static <F extends Structure<?>> void setupMapSpacingAndLand(
