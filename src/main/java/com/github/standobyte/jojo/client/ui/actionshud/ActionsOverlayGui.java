@@ -30,6 +30,7 @@ import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsModeConfig.SelectedTargetIcon;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonStatsTabGui;
+import com.github.standobyte.jojo.client.ui.screen.stand.ge.ChooseLifeformScreen;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -222,7 +223,7 @@ public class ActionsOverlayGui extends AbstractGui {
     private ActionTarget _target;
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public void render(RenderGameOverlayEvent.Pre event) {
-        if (mc.gameMode.getPlayerMode() == GameType.SPECTATOR || mc.options.hideGui) {
+        if (mc.gameMode.getPlayerMode() == GameType.SPECTATOR || mc.options.hideGui || mc.screen instanceof ChooseLifeformScreen) {
             return;
         }
         
