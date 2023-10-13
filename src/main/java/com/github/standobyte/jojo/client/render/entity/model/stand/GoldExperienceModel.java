@@ -74,15 +74,48 @@ public class GoldExperienceModel extends HumanoidStandModel<GoldExperienceEntity
         super.initActionPoses();
     }
     
-//    @Override
-//    protected ModelPose<CrazyDiamondEntity> initIdlePose() {
-//    }
-//
-//    @Override
-//    protected ModelPose<CrazyDiamondEntity> initIdlePose2Loop() {
-//    }
-
-
+    @Override
+    protected ModelPose<GoldExperienceEntity> initIdlePose() {
+        return new ModelPose<>(new RotationAngle[] {
+                RotationAngle.fromDegrees(body, 0, 15, 0),
+                RotationAngle.fromDegrees(body, 0, 5, 0),
+                RotationAngle.fromDegrees(leftArm, 53.65728, 76.34635, 8.92854),
+                RotationAngle.fromDegrees(leftForeArm, -87.80728, -3.84393, -18.31017),
+                RotationAngle.fromDegrees(rightArm, 1.22652, -31.70199, 12.47708),
+                RotationAngle.fromDegrees(rightForeArm, -13.89254, 1.92508, 2.30131),
+                RotationAngle.fromDegrees(leftLeg, -6.49097, -14.35901, -4.47622),
+                RotationAngle.fromDegrees(leftLowerLeg, 14.7095, -0.07253, 9.30052),
+                RotationAngle.fromDegrees(leftString, -1.49286, -10.37279, -9.54087),
+                RotationAngle.fromDegrees(rightLeg, -25.10307, 44.08314, 12.38262),
+                RotationAngle.fromDegrees(rightLowerLeg, 77.50415, 0.32462, 1.46446),
+                RotationAngle.fromDegrees(rightString, -9.2073, 20.60715, 29.6771),
+                RotationAngle.fromDegrees(loincloth, 24, 0, 0),
+                RotationAngle.fromDegrees(leftPartLoincloth, 0, -4, 0),
+                RotationAngle.fromDegrees(rightPartLoincloth, 0, 12, 0),
+        });
+    }
+    
+    @Override
+    protected ModelPose<GoldExperienceEntity> initIdlePose2Loop() {
+        return new ModelPose<>(new RotationAngle[] {
+                RotationAngle.fromDegrees(body, 0, 7.5, 0),
+                RotationAngle.fromDegrees(leftArm, 42.9155, 78.27327, -9.53462),
+                RotationAngle.fromDegrees(leftForeArm, -99.00384, 2.77468, -2.9641),
+                RotationAngle.fromDegrees(rightArm, -0.34201, -26.72472, 15.95522),
+                RotationAngle.fromDegrees(rightForeArm, -7.96995, -0.695, -4.95158),
+                RotationAngle.fromDegrees(leftLeg, -1.96205, -20.53064, -4.59351),
+                RotationAngle.fromDegrees(leftLowerLeg, 6.4346, 4.17741, 9.34488),
+                RotationAngle.fromDegrees(leftString, 3.773, -8.05299, -11.18592),
+                RotationAngle.fromDegrees(rightLeg, -30.2726, 46.96286, 14.64503),
+                RotationAngle.fromDegrees(rightLowerLeg, 90, 3.32, 1.46),
+                RotationAngle.fromDegrees(rightString, -13.99938, 26.59254, 32.3964),
+                RotationAngle.fromDegrees(loincloth, 25, 0, 0),
+                RotationAngle.fromDegrees(leftPartLoincloth, 0, -14, 0),
+                RotationAngle.fromDegrees(rightPartLoincloth, 0, 14, 0),
+        });
+    }
+    
+    
     
     @Override
     protected void initOpposites() {

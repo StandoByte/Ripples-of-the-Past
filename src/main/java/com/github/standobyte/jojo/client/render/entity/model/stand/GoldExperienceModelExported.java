@@ -102,12 +102,12 @@ public class GoldExperienceModelExported extends EntityModel<Entity> {
         rightString = new ModelRenderer(this);
         rightString.setPos(-2.325F, -13.5F, -2.4F);
         torso.addChild(rightString);
-        rightString.texOffs(64, 70).addBox(-2.375F, -0.2F, -0.4F, 3.0F, 4.0F, 3.0F, -0.2F, false);
+        rightString.texOffs(73, 64).addBox(-2.375F, -0.2F, -0.4F, 3.0F, 5.0F, 4.0F, -0.2F, false);
 
         leftString = new ModelRenderer(this);
         leftString.setPos(2.425F, -13.5F, -2.4F);
         torso.addChild(leftString);
-        leftString.texOffs(64, 77).addBox(-0.625F, -0.2F, -0.4F, 3.0F, 4.0F, 3.0F, -0.2F, false);
+        leftString.texOffs(89, 64).addBox(-0.625F, -0.2F, -0.4F, 3.0F, 5.0F, 4.0F, -0.2F, false);
 
         loincloth = new ModelRenderer(this);
         loincloth.setPos(0.0F, -13.0F, 2.4F);
