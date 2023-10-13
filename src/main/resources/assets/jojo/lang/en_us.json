@@ -67,6 +67,9 @@
   "jojo.textutil.shortened": "%s...",
   "item.jojo.dono_tooltip": "Brought by: %s",
   "block.jojo.magicians_red_fire": "Magician's Red's Fire",
+  "filled_map.jojo:meteorite": "Tundra Explorer Map",
+  "filled_map.jojo:hamon_temple": "Mountain Explorer Map",
+  "filled_map.jojo:pillarman_temple": "Jungle Explorer Map",
   
   "walkman.button.play": "Play %s",
   "walkman.button.flip": "Flip (play %s)",
