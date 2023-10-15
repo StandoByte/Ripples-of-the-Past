@@ -101,18 +101,18 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
             return getThis();
         }
         
-        public B storyPartName(ITextComponent storyPartName) {
-            this.storyPartName = storyPartName;
+        public B storyPartName(ITextComponent actions) {
+            this.storyPartName = actions;
             return getThis();
         }
         
-        public B leftClickHotbar(StandAction... leftClickHotbar) {
-            this.leftClickHotbar = leftClickHotbar;
+        public B leftClickHotbar(StandAction... actions) {
+            this.leftClickHotbar = actions;
             return getThis();
         }
         
-        public B rightClickHotbar(StandAction... rightClickHotbar) {
-            this.rightClickHotbar = rightClickHotbar;
+        public B rightClickHotbar(StandAction... action) {
+            this.rightClickHotbar = action;
             return getThis();
         }
         
