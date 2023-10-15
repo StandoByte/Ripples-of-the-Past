@@ -33,7 +33,6 @@ public interface IPowerType<P extends IPower<P, T>, T extends IPowerType<P, T>> 
     
     float getTargetResolveMultiplier(P power, IStandPower attackingStand);
     
-    int getColor();
     String getTranslationKey();
     default IFormattableTextComponent getName() {
         return new TranslationTextComponent(getTranslationKey());

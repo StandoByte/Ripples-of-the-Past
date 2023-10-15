@@ -40,6 +40,7 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
 public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry<StandType<?>> implements IPowerType<IStandPower, StandType<?>> {
+    @Deprecated
     private final int color;
     private final StandAction[] leftClickHotbar;
     private final StandAction[] rightClickHotbar;
@@ -81,6 +82,91 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         this(builder.color, builder.storyPartName, builder.leftClickHotbar, builder.rightClickHotbar, 
                 builder.quickAccess, builder.statsClass, builder.defaultStats, 
                 builder.additions);
+    }
+    
+
+    
+    public static abstract class AbstractBuilder<B extends AbstractBuilder<B, T>, T extends StandStats> { // i freaking love chainables and builders
+        private int color = 0x000000;
+        private ITextComponent storyPartName = StringTextComponent.EMPTY;
+        private StandAction[] leftClickHotbar = {};
+        private StandAction[] rightClickHotbar = {};
+        private StandAction quickAccess = null;
+        private T defaultStats;
+        private Class<T> statsClass;
+        private StandTypeOptionals additions = null;
+        
+        public B color(int color) {
+            this.color = color;
+            return getThis();
+        }
+        
+        public B storyPartName(ITextComponent storyPartName) {
+            this.storyPartName = storyPartName;
+            return getThis();
+        }
+        
+        public B leftClickHotbar(StandAction... leftClickHotbar) {
+            this.leftClickHotbar = leftClickHotbar;
+            return getThis();
+        }
+        
+        public B rightClickHotbar(StandAction... rightClickHotbar) {
+            this.rightClickHotbar = rightClickHotbar;
+            return getThis();
+        }
+        
+        public B defaultQuickAccess(StandAction quickAccess) {
+            this.quickAccess = quickAccess;
+            return getThis();
+        }
+        
+        public B defaultStats(Class<T> statsClass, T stats) {
+            this.statsClass = statsClass;
+            this.defaultStats = stats;
+            return getThis();
+        }
+        
+        public B addSummonShout(Supplier<SoundEvent> summonShoutSupplier) {
+            if (summonShoutSupplier != null) {
+                getOptionals().summonShoutSupplier = summonShoutSupplier;
+            }
+            return getThis();
+        }
+        
+        public B addOst(OstSoundList ostSupplier) {
+            if (ostSupplier != null) {
+                getOptionals().ostSupplier = ostSupplier;
+            }
+            return getThis();
+        }
+        
+        public B addItemOnResolveLevel(int resolveLevel, ItemStack item) {
+            if (item != null && !item.isEmpty()) {
+                getOptionals().resolveLevelItems.computeIfAbsent(resolveLevel, lvl -> new ArrayList<>()).add(item);
+            }
+            return getThis();
+        }
+        
+        public B setSurvivalGameplayPool(StandSurvivalGameplayPool survivalGameplayPool) {
+            getOptionals().survivalGameplayPool = survivalGameplayPool;
+            return getThis();
+        }
+        
+        public B addAttackerResolveMultTier(int tierAdd) {
+            getOptionals().resolveMultiplierTier += tierAdd;
+            return getThis();
+        }
+        
+        private StandTypeOptionals getOptionals() {
+            if (additions == null) {
+                additions = new StandTypeOptionals();
+            }
+            return additions;
+        }
+        
+        protected abstract B getThis();
+        public abstract StandType<T> build();
     }
     
     
@@ -126,7 +212,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         return statsClass;
     }
     
-    @Override
+    @Deprecated
     public int getColor() {
         return color;
     }
@@ -311,91 +397,6 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
                 cap.setLastHurtByStand(attackerStand, dmgAmount, standDmgSource.getStandInvulTicks());
             });
         }
-    }
-    
-
-    
-    public static abstract class AbstractBuilder<B extends AbstractBuilder<B, T>, T extends StandStats> { // i freaking love chainables and builders
-        private int color = 0x000000;
-        private ITextComponent storyPartName = StringTextComponent.EMPTY;
-        private StandAction[] leftClickHotbar = {};
-        private StandAction[] rightClickHotbar = {};
-        private StandAction quickAccess = null;
-        private T defaultStats;
-        private Class<T> statsClass;
-        private StandTypeOptionals additions = null;
-        
-        public B color(int color) {
-            this.color = color;
-            return getThis();
-        }
-        
-        public B storyPartName(ITextComponent storyPartName) {
-            this.storyPartName = storyPartName;
-            return getThis();
-        }
-        
-        public B leftClickHotbar(StandAction... leftClickHotbar) {
-            this.leftClickHotbar = leftClickHotbar;
-            return getThis();
-        }
-        
-        public B rightClickHotbar(StandAction... rightClickHotbar) {
-            this.rightClickHotbar = rightClickHotbar;
-            return getThis();
-        }
-        
-        public B defaultQuickAccess(StandAction quickAccess) {
-            this.quickAccess = quickAccess;
-            return getThis();
-        }
-        
-        public B defaultStats(Class<T> statsClass, T stats) {
-            this.statsClass = statsClass;
-            this.defaultStats = stats;
-            return getThis();
-        }
-        
-        public B addSummonShout(Supplier<SoundEvent> summonShoutSupplier) {
-            if (summonShoutSupplier != null) {
-                getOptionals().summonShoutSupplier = summonShoutSupplier;
-            }
-            return getThis();
-        }
-        
-        public B addOst(OstSoundList ostSupplier) {
-            if (ostSupplier != null) {
-                getOptionals().ostSupplier = ostSupplier;
-            }
-            return getThis();
-        }
-        
-        public B addItemOnResolveLevel(int resolveLevel, ItemStack item) {
-            if (item != null && !item.isEmpty()) {
-                getOptionals().resolveLevelItems.computeIfAbsent(resolveLevel, lvl -> new ArrayList<>()).add(item);
-            }
-            return getThis();
-        }
-        
-        public B setSurvivalGameplayPool(StandSurvivalGameplayPool survivalGameplayPool) {
-            getOptionals().survivalGameplayPool = survivalGameplayPool;
-            return getThis();
-        }
-        
-        public B addAttackerResolveMultTier(int tierAdd) {
-            getOptionals().resolveMultiplierTier += tierAdd;
-            return getThis();
-        }
-        
-        private StandTypeOptionals getOptionals() {
-            if (additions == null) {
-                additions = new StandTypeOptionals();
-            }
-            return additions;
-        }
-        
-        protected abstract B getThis();
-        public abstract StandType<T> build();
     }
     
     
