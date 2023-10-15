@@ -8,12 +8,11 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.codehaus.plexus.util.ReflectionUtils;
-
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.CDBlockBulletRenderer;
 import com.github.standobyte.jojo.client.render.rendertype.CustomRenderType;
 import com.github.standobyte.jojo.entity.GETransformationEntity;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
+import com.github.standobyte.jojo.util.mc.reflection.ReflectionUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
@@ -301,7 +300,7 @@ public class GETransformationRenderer<T extends GETransformationEntity> extends 
             segmented.parts().forEach(modelPart -> addSubPartsAndSelf(modelParts, modelPart));
         }
         else {
-            ReflectionUtils.getFieldsIncludingSuperclasses(model.getClass()).forEach(field -> {
+            ReflectionUtil.getFieldsIncludingSuperclasses(model.getClass()).forEach(field -> {
                 if (ModelRenderer.class.isAssignableFrom(field.getType())) {
                     try {
                         field.setAccessible(true);
