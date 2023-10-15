@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.client.render.entity.renderer.stand.layer.Stan
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.layer.StandModelLayerRenderer;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandPose;
+import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
@@ -307,6 +308,7 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
         float yBodyRotation = MathHelper.rotLerp(partialTick, entity.yBodyRotO, entity.yBodyRot);
         float yHeadRotation = MathHelper.rotLerp(partialTick, entity.yHeadRotO, entity.yHeadRot);
         float yRotationOffset = yHeadRotation - yBodyRotation;
+        if (entity.getType() != ModStands.GOLD_EXPERIENCE.getEntityType()) // FIXME !!!!!!!! fix stand first person view
         matrixStack.translate(0, 0.75F, 0);
         model.prepareMobModel(entity, walkAnimSpeed, walkAnimPos, partialTick); 
         model.setupAnim(entity, walkAnimSpeed, walkAnimPos, ticks, yRotationOffset, 0);
