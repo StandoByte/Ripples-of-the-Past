@@ -323,6 +323,8 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         if (entityIconsGrid.getSelected().isPresent() && entityIconsGrid.isMouseInsideGrid(mouseX, mouseY)) {
             SelectorWidget hovered = entityIconsGrid.getSelected().get();
             MouseButton button = MouseButton.getButtonFromId(buttonId);
+            if (button == null) return false;
+            
             switch (button) {
             case LEFT:
                 chooseHoveredAndClose();
