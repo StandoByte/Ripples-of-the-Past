@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.render.entity.standskin.StandSkin;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -40,8 +41,8 @@ public class StandStatsRenderer {
 
                 StandStats stats = power.getType().getStats();
                 float statLeveling = power.getStatsDevelopment();
-
-                int color = power.getColor();
+                
+                int color = StandSkin.getUiColor(power);
                 int[] rgb = ClientUtil.rgbInt(color);
 
                 double[] statVal = new double[6];
