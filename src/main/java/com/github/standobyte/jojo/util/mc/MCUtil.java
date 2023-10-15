@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.util.mc;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -16,6 +17,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.SpawnParticlePacket
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.google.common.collect.ImmutableMap;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.crash.CrashReport;
@@ -70,6 +72,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ChunkManager;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
@@ -141,6 +144,20 @@ public class MCUtil {
             return values[ordinal];
         }
         return null;
+    }
+    
+    
+    
+    public static Set<ServerPlayerEntity> getTrackingPlayers(Entity entity) {
+        if (entity.level.isClientSide()) {
+            throw new IllegalStateException();
+        }
+        
+        @SuppressWarnings("resource")
+        ChunkManager chunkMap = ((ServerWorld) entity.level).getChunkSource().chunkMap;
+        Int2ObjectMap<ChunkManager.EntityTracker> entityMap = chunkMap.entityMap;
+        ChunkManager.EntityTracker tracker = entityMap.get(entity.getId());
+        return tracker.seenBy;
     }
     
     
