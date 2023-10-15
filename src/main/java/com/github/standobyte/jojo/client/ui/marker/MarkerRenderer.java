@@ -6,6 +6,8 @@ import java.util.List;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.render.entity.standskin.StandSkin;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -21,13 +23,19 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 public abstract class MarkerRenderer {
-    private final int color;
     private final ResourceLocation iconTexture;
     private final List<MarkerInstance> positions = new ArrayList<>();
     protected final Minecraft mc;
     
+    @Deprecated
+    /**
+     * @deprecated use {@link MarkerRenderer#MarkerRenderer(ResourceLocation, Minecraft)}
+     */
     public MarkerRenderer(int color, ResourceLocation iconTexture, Minecraft mc) {
-        this.color = color;
+        this(iconTexture, mc);
+    }
+    
+    public MarkerRenderer(ResourceLocation iconTexture, Minecraft mc) {
         this.iconTexture = iconTexture;
         this.mc = mc;
     }
@@ -82,9 +90,8 @@ public abstract class MarkerRenderer {
     protected abstract boolean shouldRender();
     protected abstract void updatePositions(List<MarkerInstance> list, float partialTick);
     
-    // TODO use IPower#getColor();
     protected int getColor() {
-        return color;
+        return IStandPower.getStandPowerOptional(mc.player).map(stand -> StandSkin.getUiColor(stand)).orElse(0xFFFFFF);
     }
     
     protected ResourceLocation getIcon() {

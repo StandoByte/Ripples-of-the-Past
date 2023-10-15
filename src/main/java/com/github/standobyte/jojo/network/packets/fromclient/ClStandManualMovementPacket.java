@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.StandCancelManualMo
 import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.google.common.primitives.Doubles;
+import com.google.common.primitives.Floats;
 
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -22,12 +23,16 @@ public class ClStandManualMovementPacket {
     private final double x;
     private final double y;
     private final double z;
+    private final float xRot;
+    private final float yRot;
     private final boolean resetDeltaMovement;
 
-    public ClStandManualMovementPacket(double x, double y, double z, boolean resetDeltaMovement) {
+    public ClStandManualMovementPacket(double x, double y, double z, float xRot, float yRot, boolean resetDeltaMovement) {
         this.x = x;
         this.y = y;
         this.z = z;
+        this.xRot = xRot;
+        this.yRot = yRot;
         this.resetDeltaMovement = resetDeltaMovement;
     }
     
@@ -40,12 +45,15 @@ public class ClStandManualMovementPacket {
             buf.writeDouble(msg.x);
             buf.writeDouble(msg.y);
             buf.writeDouble(msg.z);
+            buf.writeFloat(msg.xRot);
+            buf.writeFloat(msg.yRot);
             buf.writeBoolean(msg.resetDeltaMovement);
         }
 
         @Override
         public ClStandManualMovementPacket decode(PacketBuffer buf) {
-            return new ClStandManualMovementPacket(buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readBoolean());
+            return new ClStandManualMovementPacket(buf.readDouble(), buf.readDouble(), buf.readDouble(), 
+                    buf.readFloat(), buf.readFloat(), buf.readBoolean());
         }
 
         @Override
@@ -65,6 +73,8 @@ public class ClStandManualMovementPacket {
                     double posXcl = msg.x; // d3
                     double posYcl = msg.y; // d4
                     double posZcl = msg.z; // d5
+                    float xRot = msg.xRot;
+                    float yRot = msg.yRot;
 //                    double diffX = posXcl - firstGoodX;
 //                    double diffY = posYcl - firstGoodY;
 //                    double diffZ = posZcl - firstGoodZ;
@@ -95,7 +105,7 @@ public class ClStandManualMovementPacket {
 //                       flag1 = true;
 //                       LOGGER.warn("{} ({}'s stand) moved wrongly! {}", stand.getName().getString(), player.getName().getString(), Math.sqrt(diffSq));
 //                    }
-                    stand.absMoveTo(posXcl, posYcl, posZcl);
+                    stand.absMoveTo(posXcl, posYcl, posZcl, yRot, xRot);
 //                    boolean flag2 = world.noCollision(stand, stand.getBoundingBox().deflate(0.0625D));
 //                    if (flag && (flag1 || !flag2)) {
 //                       stand.absMoveTo(d0, d1, d2);
@@ -113,7 +123,9 @@ public class ClStandManualMovementPacket {
         }
     
         private boolean isValid(ClStandManualMovementPacket msg) {
-            return Doubles.isFinite(msg.x) && Doubles.isFinite(msg.y) && Doubles.isFinite(msg.z);
+            return Doubles.isFinite(msg.x) && Doubles.isFinite(msg.y) && Doubles.isFinite(msg.z)
+                    && Floats.isFinite(msg.xRot) && Floats.isFinite(msg.yRot)
+                    && Math.abs(msg.x) < 3.0e7 && Math.abs(msg.y) < 3.0e7 && Math.abs(msg.z) < 3.0e7;
         }
 
         @Override

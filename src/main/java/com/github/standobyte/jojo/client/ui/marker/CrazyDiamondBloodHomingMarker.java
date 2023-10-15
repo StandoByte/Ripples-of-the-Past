@@ -7,7 +7,6 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockBullet;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
-import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
@@ -18,7 +17,7 @@ import net.minecraft.util.ResourceLocation;
 public class CrazyDiamondBloodHomingMarker extends MarkerRenderer {
     
     public CrazyDiamondBloodHomingMarker(Minecraft mc) {
-        super(ModStands.CRAZY_DIAMOND.getStandType().getColor(), new ResourceLocation(JojoMod.MOD_ID, "textures/icons/blood_drops.png"), mc);
+        super(new ResourceLocation(JojoMod.MOD_ID, "textures/icons/blood_drops.png"), mc);
     }
     
     @Override

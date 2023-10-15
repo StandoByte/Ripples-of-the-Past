@@ -47,7 +47,6 @@ public class ModVampirismActions {
 
     public static final RegistryObject<VampirismPowerType> VAMPIRISM = NON_STAND_POWERS.register("vampirism", 
             () -> new VampirismPowerType(
-                    0xFF0000, 
                     new VampirismAction[] {
                             VAMPIRISM_BLOOD_DRAIN.get(), 
                             VAMPIRISM_FREEZE.get(),

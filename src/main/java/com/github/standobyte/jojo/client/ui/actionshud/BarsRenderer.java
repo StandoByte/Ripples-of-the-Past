@@ -103,7 +103,7 @@ public abstract class BarsRenderer {
             if (type != null) {
                 // FIXME ! (hamon 2) bar render effect
                 renderBarStart(matrixStack, type, 
-                        currentModeType == PowerClassification.NON_STAND, nonStandPower.getType().getColor(), 1, 
+                        currentModeType == PowerClassification.NON_STAND, ActionsOverlayGui.getPowerUiColor(nonStandPower), 1, 
                         energy, maxEnergy, 
                         attackCost, abilityCost, nonStandMode.getSelectedTick() + partialTick, 
                         translucentVal, 
@@ -124,7 +124,7 @@ public abstract class BarsRenderer {
                 float resolve = MathHelper.lerp(partialTick, 
                         Math.min(standPower.getPrevTickResolve(), standPower.getResolve()), 
                         Math.max(standPower.getPrevTickResolve(), standPower.getResolve()));
-                int color = standPower.getColor();
+                int color = ActionsOverlayGui.getPowerUiColor(standPower);
                 renderBarStart(matrixStack, BarType.RESOLVE, 
                         currentModeType == PowerClassification.STAND, color, (float) standPower.getResolveLevel() / (float) standPower.getMaxResolveLevel(), 
                         resolve, standPower.getMaxResolve(), 
@@ -158,7 +158,7 @@ public abstract class BarsRenderer {
             float bonus = standPower.getResolveCounter().getBoostVisible(standPower.getUser());
             if (bonus > 1) {
                 drawText(matrixStack, new StringTextComponent("x" + String.format("%.2f", bonus)), 
-                        resolveBonusX, resolveBonusY, Alignment.RIGHT, standPower.getColor(), partialTick, font, hud);
+                        resolveBonusX, resolveBonusY, Alignment.RIGHT, ActionsOverlayGui.getPowerUiColor(standPower), partialTick, font, hud);
             }
         }
     }

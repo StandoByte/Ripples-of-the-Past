@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.render.entity.standskin.StandSkin;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
@@ -162,7 +163,7 @@ public class StandDiscItem extends Item {
         if (!validStandDisc(itemStack, true)) {
             return 0xFFFFFF;
         } else {
-            return getStandFromStack(itemStack, true).getType().getColor();
+            return StandSkin.getUiColor(getStandFromStack(itemStack, true));
         }
     }
 }

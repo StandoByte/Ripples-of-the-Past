@@ -23,8 +23,8 @@ public class CrazyDiamondModel2 extends HumanoidStandModel<CrazyDiamondEntity> {
     public CrazyDiamondModel2() {
         super();
         
-        // copy all ModelRenderer fields (AKA model parts) from the model file created by Blockbench (CrazyDiamondModelConvertExample)
-        BlockbenchStandModelHelper.partsFromBlockbenchExport(new CrazyDiamondModelConvertExample(), this);
+        // copies all ModelRenderer fields (AKA model parts) from the model file created by Blockbench (CrazyDiamondModelConvertExample)
+        BlockbenchStandModelHelper.fillFromBlockbenchExport(new CrazyDiamondModelConvertExample(), this);
     }
     
     

@@ -18,7 +18,7 @@ public class GoldExperienceModel extends HumanoidStandModel<GoldExperienceEntity
     public GoldExperienceModel() {
         super();
         
-        BlockbenchStandModelHelper.partsFromBlockbenchExport(new GoldExperienceModelExported(), this);
+        BlockbenchStandModelHelper.fillFromBlockbenchExport(new GoldExperienceModelExported(), this);
 
     }
 

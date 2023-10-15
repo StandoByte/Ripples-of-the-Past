@@ -117,7 +117,6 @@ public class ModHamonActions {
     
     public static final RegistryObject<HamonPowerType> HAMON = NON_STAND_POWERS.register("hamon", 
             () -> new HamonPowerType(
-                    0xFFFF00, 
                     new HamonAction[] {
                             HAMON_OVERDRIVE.get(), 
                             HAMON_SENDO_OVERDRIVE.get(), 
