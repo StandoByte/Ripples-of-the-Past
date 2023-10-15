@@ -194,12 +194,12 @@ public class ModStandsInit {
                     () -> new EntityStandType.Builder<TimeStopperStandStats>()
                     .color(0x8E45FF)
                     .storyPartName(PART_3_NAME)
-                    .attacks(
+                    .leftClickHotbar(
                             STAR_PLATINUM_PUNCH.get(), 
                             STAR_PLATINUM_BARRAGE.get(), 
                             STAR_PLATINUM_STAR_FINGER.get()
                             )
-                    .abilities(
+                    .rightClickHotbar(
                             STAR_PLATINUM_BLOCK.get(), 
                             STAR_PLATINUM_ZOOM.get(), 
                             STAR_PLATINUM_INHALE.get(), 
@@ -290,12 +290,12 @@ public class ModStandsInit {
                     () -> new EntityStandType.Builder<TimeStopperStandStats>()
                     .color(0xFFD800)
                     .storyPartName(PART_3_NAME)
-                    .attacks(
+                    .leftClickHotbar(
                             THE_WORLD_PUNCH.get(), 
                             THE_WORLD_BARRAGE.get(), 
                             THE_WORLD_TS_PUNCH.get()
                             )
-                    .abilities(
+                    .rightClickHotbar(
                             THE_WORLD_BLOCK.get(), 
                             THE_WORLD_TIME_STOP.get()
                             )
@@ -378,11 +378,11 @@ public class ModStandsInit {
                     () -> new EntityStandType.Builder<>()
                     .color(0x00B319)
                     .storyPartName(PART_3_NAME)
-                    .attacks(
+                    .leftClickHotbar(
                             HIEROPHANT_GREEN_STRING_ATTACK.get(), 
                             HIEROPHANT_GREEN_EMERALD_SPLASH.get()
                             )
-                    .abilities(
+                    .rightClickHotbar(
                             HIEROPHANT_GREEN_BLOCK.get(), 
                             HIEROPHANT_GREEN_GRAPPLE.get(), 
                             HIEROPHANT_GREEN_BARRIER.get()
@@ -458,12 +458,12 @@ public class ModStandsInit {
                     () -> new EntityStandType.Builder<ArmoredStandStats>()
                     .color(0xBEC8D6)
                     .storyPartName(PART_3_NAME)
-                    .attacks(
+                    .leftClickHotbar(
                             SILVER_CHARIOT_ATTACK.get(), 
                             SILVER_CHARIOT_RAPIER_BARRAGE.get(), 
                             SILVER_CHARIOT_RAPIER_LAUNCH.get()
                             )
-                    .abilities(
+                    .rightClickHotbar(
                             SILVER_CHARIOT_BLOCK.get(), 
                             SILVER_CHARIOT_TAKE_OFF_ARMOR.get()
                             )
@@ -553,13 +553,13 @@ public class ModStandsInit {
                     () -> new EntityStandType.Builder<>()
                     .color(0xDE203A)
                     .storyPartName(PART_3_NAME)
-                    .attacks(
+                    .leftClickHotbar(
                             MAGICIANS_RED_PUNCH.get(), 
                             MAGICIANS_RED_FLAME_BURST.get(), 
                             MAGICIANS_RED_FIREBALL.get(), 
                             MAGICIANS_RED_CROSSFIRE_HURRICANE.get()
                             )
-                    .abilities(
+                    .rightClickHotbar(
                             MAGICIANS_RED_BLOCK.get(), 
                             MAGICIANS_RED_RED_BIND.get(), 
                             MAGICIANS_RED_DETECTOR.get()
@@ -693,13 +693,13 @@ public class ModStandsInit {
                     () -> new EntityStandType.Builder<>()
                     .color(0x4BEDE6)
                     .storyPartName(PART_4_NAME)
-                    .attacks(
+                    .leftClickHotbar(
                             CRAZY_DIAMOND_PUNCH.get(), 
                             CRAZY_DIAMOND_BARRAGE.get(), 
                             CRAZY_DIAMOND_BLOCK_BULLET.get(), 
                             CRAZY_DIAMOND_BLOOD_CUTTER.get()
                             )
-                    .abilities(
+                    .rightClickHotbar(
                             CRAZY_DIAMOND_BLOCK.get(), 
                             CRAZY_DIAMOND_REPAIR.get(), 
                             CRAZY_DIAMOND_HEAL.get(), 
