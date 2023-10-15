@@ -39,8 +39,8 @@ import net.minecraftforge.registries.ForgeRegistryEntry;
 public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry<StandType<?>> implements IPowerType<IStandPower, StandType<?>> {
     @Deprecated
     private final int color;
-    private final StandAction[] attacks;
-    private final StandAction[] abilities;
+    private final StandAction[] leftClickHotbar;
+    private final StandAction[] rightClickHotbar;
     private final StandAction defaultQuickAccess;
     private String translationKey;
     private ResourceLocation iconTexture;
@@ -56,12 +56,12 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     
     @Deprecated
     public StandType(int color, ITextComponent partName, 
-            StandAction[] attacks, StandAction[] abilities, StandAction defaultQuickAccess, 
+            StandAction[] rightClickHotbar, StandAction[] leftClickHotbar, StandAction defaultQuickAccess, 
             Class<T> statsClass, T defaultStats, @Nullable StandTypeOptionals additions) {
         this.color = color;
         this.partName = partName;
-        this.attacks = attacks;
-        this.abilities = abilities;;
+        this.leftClickHotbar = rightClickHotbar;
+        this.rightClickHotbar = leftClickHotbar;
         this.defaultQuickAccess = defaultQuickAccess;
         this.statsClass = statsClass;
         this.defaultStats = defaultStats;
@@ -74,7 +74,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     protected StandType(AbstractBuilder<?, T> builder) {
-        this(builder.color, builder.storyPartName, builder.attacks, builder.abilities, 
+        this(builder.color, builder.storyPartName, builder.leftClickHotbar, builder.rightClickHotbar, 
                 builder.quickAccess, builder.statsClass, builder.defaultStats, 
                 builder.additions);
     }
@@ -84,8 +84,8 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     public static abstract class AbstractBuilder<B extends AbstractBuilder<B, T>, T extends StandStats> { // i freaking love chainables and builders
         private int color = 0x000000;
         private ITextComponent storyPartName = StringTextComponent.EMPTY;
-        private StandAction[] attacks = {};
-        private StandAction[] abilities = {};
+        private StandAction[] leftClickHotbar = {};
+        private StandAction[] rightClickHotbar = {};
         private StandAction quickAccess = null;
         private T defaultStats;
         private Class<T> statsClass;
@@ -101,18 +101,18 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
             return getThis();
         }
         
-        public B attacks(StandAction... attacks) {
-            this.attacks = attacks;
+        public B leftClickHotbar(StandAction... actions) {
+            this.leftClickHotbar = actions;
             return getThis();
         }
         
-        public B abilities(StandAction... abilities) {
-            this.abilities = abilities;
+        public B rightClickHotbar(StandAction... actions) {
+            this.rightClickHotbar = actions;
             return getThis();
         }
         
-        public B defaultQuickAccess(StandAction quickAccess) {
-            this.quickAccess = quickAccess;
+        public B defaultQuickAccess(StandAction action) {
+            this.quickAccess = action;
             return getThis();
         }
         
@@ -205,12 +205,12 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     
     @Override
     public StandAction[] getAttacks() {
-        return attacks;
+        return leftClickHotbar;
     }
 
     @Override
     public StandAction[] getAbilities() {
-        return abilities;
+        return rightClickHotbar;
     }
     
     @Override
@@ -254,7 +254,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     public void unlockNewActions(IStandPower power) {
-        Stream.concat(Arrays.stream(attacks), Arrays.stream(abilities))
+        Stream.concat(Arrays.stream(leftClickHotbar), Arrays.stream(rightClickHotbar))
         .forEach(action -> {
             tryUnlock(action, power);
             if (action.hasShiftVariation()) {
