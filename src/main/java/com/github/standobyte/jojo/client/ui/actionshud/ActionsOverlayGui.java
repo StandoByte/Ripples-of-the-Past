@@ -27,6 +27,7 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
+import com.github.standobyte.jojo.client.render.entity.standskin.StandSkin;
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsModeConfig.SelectedTargetIcon;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
@@ -42,6 +43,8 @@ import com.github.standobyte.jojo.power.bowcharge.BowChargeEffectInstance;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData.Exercise;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
@@ -280,9 +283,9 @@ public class ActionsOverlayGui extends AbstractGui {
             RenderSystem.defaultBlendFunc();
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 
-            if (showModeSelector) {
-                drawModeSelectorNames(matrixStack, modeSelectorPosition, partialTick);
-            }
+//            if (showModeSelector) {
+//                drawModeSelectorNames(matrixStack, modeSelectorPosition, partialTick);
+//            }
             
             drawBarsText(matrixStack, barsRenderer, partialTick);
             
@@ -323,12 +326,13 @@ public class ActionsOverlayGui extends AbstractGui {
                 RenderSystem.disableBlend();
                 break;
             case TEXT:
-                drawPowerName(matrixStack, hotbarsPosition, currentMode, partialTick);
+                int color = getPowerUiColor(currentMode.getPower());
+                drawPowerName(matrixStack, hotbarsPosition, currentMode, color, partialTick);
                 
-                drawHotbarText(matrixStack, hotbarsPosition, InputHandler.ActionKey.ATTACK, currentMode, getTargetLazy(), partialTick);
-                drawHotbarText(matrixStack, hotbarsPosition, InputHandler.ActionKey.ABILITY, currentMode, getTargetLazy(), partialTick);
+                drawHotbarText(matrixStack, hotbarsPosition, InputHandler.ActionKey.ATTACK, currentMode, getTargetLazy(), color, partialTick);
+                drawHotbarText(matrixStack, hotbarsPosition, InputHandler.ActionKey.ABILITY, currentMode, getTargetLazy(), color, partialTick);
                 if (renderQuickAccessSlot) {
-                    drawHotbarText(matrixStack, hotbarsPosition, InputHandler.ActionKey.QUICK_ACCESS, currentMode, getTargetLazy(), partialTick);
+                    drawHotbarText(matrixStack, hotbarsPosition, InputHandler.ActionKey.QUICK_ACCESS, currentMode, getTargetLazy(), color, partialTick);
                 }
                 
                 drawWarningText(matrixStack, warningsPosition, warningLines);
@@ -349,6 +353,24 @@ public class ActionsOverlayGui extends AbstractGui {
             }
         }
         return _target;
+    }
+    
+    public static int getPowerUiColor(IPower<?, ?> power) {
+        switch (power.getPowerClassification()) {
+        case NON_STAND:
+            if (power.getType() == ModPowers.HAMON.get()) {
+                return HamonPowerType.COLOR;
+            }
+            else if (power.getType() == ModPowers.VAMPIRISM.get()) {
+                return VampirismPowerType.COLOR;
+            }
+            else {
+                return -1;
+            }
+        case STAND:
+            return StandSkin.getUiColor((IStandPower) power);
+        }
+        return -1;
     }
 
 
@@ -803,7 +825,7 @@ public class ActionsOverlayGui extends AbstractGui {
         map.put(InputHandler.ActionKey.QUICK_ACCESS, "jojo.overlay.action.quick_access");
     });
     private <P extends IPower<P, ?>> void drawHotbarText(MatrixStack matrixStack, ElementPosition position, 
-            InputHandler.ActionKey actionKey, @Nonnull ActionsModeConfig<P> mode, ActionTarget target, float partialTick) {
+            InputHandler.ActionKey actionKey, @Nonnull ActionsModeConfig<P> mode, ActionTarget target, int color, float partialTick) {
         P power = mode.getPower();
         int x = position.x;
         int y = position.y + 16 + 3 + getHotbarsYDiff() * actionKey.ordinal();
@@ -845,7 +867,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 RenderSystem.defaultBlendFunc();
                 
                 drawBackdrop(matrixStack, x, y, width, position.alignment, null, alpha, 0);
-                drawString(matrixStack, mc.font, actionName, x, y, position.alignment, currentMode.getPower().getColor(), alpha);
+                drawString(matrixStack, mc.font, actionName, x, y, position.alignment, color, alpha);
                 
                 RenderSystem.disableBlend();
                 RenderSystem.popMatrix();
@@ -905,15 +927,15 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    private void drawPowerName(MatrixStack matrixStack, ElementPosition position, @Nonnull ActionsModeConfig<?> mode, float partialTick) {
+    private void drawPowerName(MatrixStack matrixStack, ElementPosition position, @Nonnull ActionsModeConfig<?> mode, int color, float partialTick) {
         float alpha = getNameAlpha(powerNameTransparency, partialTick);
         if (alpha > 0) {
             int x = position.x + (position.alignment == Alignment.RIGHT ? -19 : 19);
             int y = position.y + (16 - mc.font.lineHeight) / 2;
-            IPower<?, ?> power = currentMode.getPower();
+            IPower<?, ?> power = mode.getPower();
             ITextComponent name = power.getName();
             drawBackdrop(matrixStack, x, y, mc.font.width(name), position.alignment, null, alpha, 0);
-            drawString(matrixStack, mc.font, name, x, y, position.alignment, power.getColor(), alpha);
+            drawString(matrixStack, mc.font, name, x, y, position.alignment, color, alpha);
         }
     }
 
@@ -1032,14 +1054,13 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    private void drawModeSelectorNames(MatrixStack matrixStack, ElementPosition position, float partialTick) {
+    private void drawModeSelectorNames(MatrixStack matrixStack, ElementPosition position, int color, float partialTick) {
         if (modeSelectorTransparency.shouldRender()) {
             int x = position.x + (position.alignment == Alignment.LEFT ? 26 : -4);
             int y = position.y + (22 - mc.font.lineHeight) / 2;
             for (ActionsModeConfig<?> mode : modes) {
                 ITextComponent name = getModeNameForSelector(mode);
                 if (name != null) {
-                    int color = getModeColor(mode);
                     drawBackdrop(matrixStack, x, y, mc.font.width(name), position.alignment, modeSelectorTransparency, 0, partialTick);
                     drawString(matrixStack, mc.font, name, x, y, position.alignment, modeSelectorTransparency.makeTextColorTranclucent(color, partialTick));
                 }
@@ -1087,13 +1108,6 @@ public class ActionsOverlayGui extends AbstractGui {
             return null;
         }
         return new KeybindTextComponent(keySupplier.get().getName());
-    }
-    
-    private int getModeColor(ActionsModeConfig<?> mode) {
-        if (mode == null) {
-            return 0xFFFFFF;
-        }
-        return mode.getPower().getColor();
     }
     
     
