@@ -16,7 +16,6 @@ import net.minecraft.util.Util;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
 public abstract class NonStandPowerType<T extends TypeSpecificData> extends ForgeRegistryEntry<NonStandPowerType<?>> implements IPowerType<INonStandPower, NonStandPowerType<?>> {
-    private final int color;
     protected final Action<INonStandPower>[] attacks;
     protected final Action<INonStandPower>[] abilities;
     protected final Action<INonStandPower> defaultQuickAccess;
@@ -25,18 +24,12 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
     
     private final Supplier<T> dataFactory;
 
-    public NonStandPowerType(int color, Action<INonStandPower>[] startingAttacks, Action<INonStandPower>[] startingAbilities, 
+    public NonStandPowerType(Action<INonStandPower>[] startingAttacks, Action<INonStandPower>[] startingAbilities, 
             Action<INonStandPower> defaultQuickAccess, Supplier<T> dataFactory) {
-        this.color = color;
         this.attacks = startingAttacks;
         this.abilities = startingAbilities;
         this.defaultQuickAccess = defaultQuickAccess;
         this.dataFactory = dataFactory;
-    }
-    
-    @Override
-    public int getColor() {
-        return color;
     }
     
     public void onClear(INonStandPower power) {}
