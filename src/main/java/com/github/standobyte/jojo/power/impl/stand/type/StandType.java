@@ -37,6 +37,7 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
 public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry<StandType<?>> implements IPowerType<IStandPower, StandType<?>> {
+    @Deprecated
     private final int color;
     private final StandAction[] attacks;
     private final StandAction[] abilities;
@@ -89,7 +90,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         private T defaultStats;
         private Class<T> statsClass;
         private StandTypeOptionals additions = null;
-        
+
         public B color(int color) {
             this.color = color;
             return getThis();
@@ -180,7 +181,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         return statsClass;
     }
     
-    @Override
+    @Deprecated
     public int getColor() {
         return color;
     }

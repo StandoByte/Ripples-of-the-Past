@@ -40,9 +40,6 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     void tick();
     boolean isActive();
     
-    default int getColor() {
-        return hasPower() ? getType().getColor() : -1;
-    }
     default ITextComponent getName() {
         return hasPower() ? getType().getName() : StringTextComponent.EMPTY;
     }

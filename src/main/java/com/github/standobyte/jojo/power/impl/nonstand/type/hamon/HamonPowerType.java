@@ -39,9 +39,10 @@ import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.event.ForgeEventFactory;
 
 public class HamonPowerType extends NonStandPowerType<HamonData> {
+    public static final int COLOR = 0xFFFF00;
 
-    public HamonPowerType(int color, HamonAction[] startingAttacks, HamonAction[] startingAbilities) {
-        super(color, startingAttacks, startingAbilities, startingAbilities[0], HamonData::new);
+    public HamonPowerType(HamonAction[] startingAttacks, HamonAction[] startingAbilities) {
+        super(startingAttacks, startingAbilities, startingAbilities[0], HamonData::new);
     }
     
     @Override

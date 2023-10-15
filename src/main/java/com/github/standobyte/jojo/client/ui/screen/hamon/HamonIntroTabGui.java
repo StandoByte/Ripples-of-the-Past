@@ -14,6 +14,7 @@ import com.github.standobyte.jojo.client.ui.screen.widgets.HideScreenPartToggleB
 import com.github.standobyte.jojo.client.ui.screen.widgets.HideScreenPartToggleBox.Direction;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -176,7 +177,7 @@ public class HamonIntroTabGui extends HamonTabGui {
     
     @SuppressWarnings("deprecation")
     private void renderEnergyBar(MatrixStack matrixStack, int x, int y, float fillStab, float fillEnergy) {
-        float[] hamonRGB = ClientUtil.rgb(ModPowers.HAMON.get().getColor());
+        float[] hamonRGB = ClientUtil.rgb(HamonPowerType.COLOR);
         blit(matrixStack, x, y, 0, 128, 202, 8);
         RenderSystem.color4f(hamonRGB[0], hamonRGB[1], hamonRGB[2], 0.4F);
         blit(matrixStack, x + 1, y + 1, 1, 161, (int) (200 * fillStab), 6);
