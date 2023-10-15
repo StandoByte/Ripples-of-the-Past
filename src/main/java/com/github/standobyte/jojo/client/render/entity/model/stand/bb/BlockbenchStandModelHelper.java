@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.client.render.entity.model.stand.bb;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -29,6 +30,7 @@ import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.Direction;
+import net.minecraft.util.Direction.Axis;
 import net.minecraft.util.math.vector.Vector3f;
 
 public class BlockbenchStandModelHelper {
@@ -312,14 +314,15 @@ public class BlockbenchStandModelHelper {
                 JsonObject uvJson = uvJsonElem.getAsJsonObject();
                 Map<Direction, ParsedUv> uv = new EnumMap<>(Direction.class);
                 for (Direction direction : Direction.values()) {
-                    JsonObject faceJson = uvJson.get(direction.name().toLowerCase()).getAsJsonObject();
-                    JsonArray faceUv = faceJson.get("uv").getAsJsonArray();
-                    JsonArray faceUvSize = faceJson.get("uv_size").getAsJsonArray();
-                    uv.put(direction, new ParsedUv(
-                            (float) faceUv.get(0).getAsDouble(),     (float) faceUv.get(1).getAsDouble(), 
-                            (float) faceUvSize.get(0).getAsDouble(), (float) faceUvSize.get(1).getAsDouble()));
-                    cube.perFaceUvSupport = Optional.of(uv);
+                    Optional.ofNullable(uvJson.get(direction.name().toLowerCase())).map(JsonElement::getAsJsonObject).ifPresent(faceJson -> {
+                        JsonArray faceUv = faceJson.get("uv").getAsJsonArray();
+                        JsonArray faceUvSize = faceJson.get("uv_size").getAsJsonArray();
+                        uv.put(direction, new ParsedUv(
+                                (float) faceUv.get(0).getAsDouble(),     (float) faceUv.get(1).getAsDouble(), 
+                                (float) faceUvSize.get(0).getAsDouble(), (float) faceUvSize.get(1).getAsDouble()));
+                    });
                 }
+                cube.perFaceUvSupport = Optional.of(uv);
             }
             
             return cube;
@@ -402,14 +405,19 @@ public class BlockbenchStandModelHelper {
                         x1y0z1, 
                         x1y1z1, 
                         x0y1z1});
+                        
                 
                 int polygonsCount = 0;
-                for (Direction direction : Direction.values()) { // FIXME fix per-face UV support
-                    if (perFaceUv.containsKey(direction)) {
-                        ParsedUv uv = perFaceUv.get(direction);
+                for (Direction direction : Direction.values()) {
+                    Direction uvPart = direction.getAxis() == Axis.Z ? direction : direction.getOpposite();
+                    if (perFaceUv.containsKey(uvPart)) {
+                        ParsedUv uv = perFaceUv.get(uvPart);
                         polygons[polygonsCount++] = new ModelRenderer.TexturedQuad(faceVertices.get(direction), 
-                                uv.u, uv.u + uv.uWidth, uv.v, uv.v + uv.vHeight, texWidth, texHeight, false, direction);
+                                uv.u, uv.v, uv.u + uv.uWidth, uv.v + uv.vHeight, texWidth, texHeight, false, direction);
                     }
+                }
+                if (polygonsCount < polygons.length) {
+                    polygons = Arrays.copyOf(polygons, polygonsCount);
                 }
                 ClientReflection.setPolygons(box, polygons);
                 
@@ -436,37 +444,6 @@ public class BlockbenchStandModelHelper {
 //                float v0 = texCoordV;
 //                float v1 = texCoordV + size.z();
 //                float v2 = texCoordV + size.z() + size.y();
-//                polygons[2] = new ModelRenderer.TexturedQuad(new ModelRenderer.PositionTextureVertex[]{
-//                        x1y0z1, 
-//                        x0y0z1, 
-//                        x0y0z0, 
-//                        x1y0z0}, 
-//                        u1, v0, u2, v1, texWidth, texHeight, mirror, Direction.DOWN);
-//                polygons[3] = new ModelRenderer.TexturedQuad(new ModelRenderer.PositionTextureVertex[]{
-//                        x1y1z0, 
-//                        x0y1z0, 
-//                        x0y1z1, 
-//                        x1y1z1}, u2, v1, u4, v0, texWidth, texHeight, mirror, Direction.UP);
-//                polygons[1] = new ModelRenderer.TexturedQuad(new ModelRenderer.PositionTextureVertex[]{
-//                        x0y0z0, 
-//                        x0y0z1, 
-//                        x0y1z1, 
-//                        x0y1z0}, u0, v1, u1, v2, texWidth, texHeight, mirror, Direction.WEST);
-//                polygons[4] = new ModelRenderer.TexturedQuad(new ModelRenderer.PositionTextureVertex[]{
-//                        x1y0z0, 
-//                        x0y0z0, 
-//                        x0y1z0, 
-//                        x1y1z0}, u1, v1, u2, v2, texWidth, texHeight, mirror, Direction.NORTH);
-//                polygons[0] = new ModelRenderer.TexturedQuad(new ModelRenderer.PositionTextureVertex[]{
-//                        x1y0z1, 
-//                        x1y0z0, 
-//                        x1y1z0, 
-//                        x1y1z1}, u2, v1, u3, v2, texWidth, texHeight, mirror, Direction.EAST);
-//                polygons[5] = new ModelRenderer.TexturedQuad(new ModelRenderer.PositionTextureVertex[]{
-//                        x0y0z1, 
-//                        x1y0z1, 
-//                        x1y1z1, 
-//                        x0y1z1}, u3, v1, u5, v2, texWidth, texHeight, mirror, Direction.SOUTH);
             });
             
             return box;
