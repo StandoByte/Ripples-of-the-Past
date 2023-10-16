@@ -250,9 +250,6 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     public void onPerform(World world, LivingEntity user, P power, ActionTarget target) {
-        if (user instanceof ServerPlayerEntity) {
-            ModCriteriaTriggers.ACTION_PERFORM.get().trigger((ServerPlayerEntity) user, this);
-        }
         perform(world, user, power, target);
     }
     

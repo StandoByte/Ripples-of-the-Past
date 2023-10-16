@@ -352,6 +352,9 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         if (!action.holdOnly(getThis())) {
             World world = user.level;
             target = action.targetBeforePerform(world, user, getThis(), target);
+            serverPlayerUser.ifPresent(player -> {
+                ModCriteriaTriggers.ACTION_PERFORM.get().trigger(player, action);
+            });
             action.onPerform(world, user, getThis(), target);
             if (!world.isClientSide()) {
                 int cooldown = action.getCooldown(getThis(), -1);

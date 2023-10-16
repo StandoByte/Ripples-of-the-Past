@@ -133,13 +133,13 @@ public class ModItems {
             () -> new StandRemoverItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1), StandRemoverItem.Mode.REMOVE, false));
 
     public static final RegistryObject<StandRemoverItem> STAND_REMOVER_ONE_TIME = ITEMS.register("stand_remover_one_time",
-            () -> new StandRemoverItem(new Item.Properties().stacksTo(1), StandRemoverItem.Mode.REMOVE, true));
+            () -> new StandRemoverItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1), StandRemoverItem.Mode.REMOVE, true));
 
     public static final RegistryObject<StandRemoverItem> STAND_EJECT = ITEMS.register("stand_eject",
-            () -> new StandRemoverItem(new Item.Properties().stacksTo(1), StandRemoverItem.Mode.EJECT, false));
+            () -> new StandRemoverItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1), StandRemoverItem.Mode.EJECT, false));
 
     public static final RegistryObject<StandRemoverItem> STAND_EJECT_ONE_TIME = ITEMS.register("stand_eject_one_time",
-            () -> new StandRemoverItem(new Item.Properties().stacksTo(1), StandRemoverItem.Mode.EJECT, true));
+            () -> new StandRemoverItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1), StandRemoverItem.Mode.EJECT, true));
 
     public static final RegistryObject<StandRemoverItem> STAND_FULL_CLEAR = ITEMS.register("stand_full_clear",
             () -> new StandRemoverItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1), StandRemoverItem.Mode.FULL_CLEAR, false));

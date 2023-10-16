@@ -1,30 +1,28 @@
 package com.github.standobyte.jojo.client.render.entity.standskin;
 
-import com.github.standobyte.jojo.power.impl.stand.IStandPower;
-import com.github.standobyte.jojo.power.impl.stand.StandInstance;
-
 import net.minecraft.util.ResourceLocation;
 
 /*
  * TODO Stand skins
- * UI color
  * 
- * in-mod textures
- *   entity textures
- *   in-mod UI
- *     actions atlas
- *   particles
- *   power icon
+ * [V]  UI color
  * 
- * lang
- * 
- * Geckolib format model
- * 
- * sounds
- *   sounds.json
- *   sound files
- * 
- * particles definition?
+ * [_] in-mod textures
+ * [_]   entity textures
+ * [_]   power icon
+ * [_]   in-mod UI
+ * [_]     actions atlas
+ * [_]   particles
+ *     
+ * [_] lang
+ *     
+ * [_] Geckolib format model
+ *     
+ * [_] sounds
+ * [_]   sounds.json
+ * [_]   sound files
+ *     
+ * [_] particles definition?
  * 
  */
 public class StandSkin {
@@ -32,19 +30,9 @@ public class StandSkin {
     private final ResourceLocation standTypeId;
     public final int color;
     
-    private StandSkin(ResourceLocation resLoc, ResourceLocation standTypeId, int color) {
+    public StandSkin(ResourceLocation resLoc, ResourceLocation standTypeId, int color) {
         this.resLoc = resLoc;
         this.standTypeId = standTypeId;
         this.color = color;
-    }
-    
-    
-    
-    public static int getUiColor(IStandPower standPower) {
-        return standPower.getStandInstance().map(StandSkin::getUiColor).orElse(-1);
-    }
-    
-    public static int getUiColor(StandInstance standInstance) {
-        return standInstance.getType() != null ? standInstance.getType().getColor() : -1;
     }
 }
