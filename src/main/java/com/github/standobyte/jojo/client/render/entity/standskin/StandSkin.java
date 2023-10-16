@@ -4,24 +4,25 @@ import net.minecraft.util.ResourceLocation;
 
 /*
  * TODO Stand skins
- * UI color
  * 
- * in-mod textures
- *   entity textures
- *   in-mod UI
- *     actions atlas
- *   particles
- *   power icon
+ * [V]  UI color
  * 
- * lang
- * 
- * Geckolib format model
- * 
- * sounds
- *   sounds.json
- *   sound files
- * 
- * particles definition?
+ * [_] in-mod textures
+ * [_]   entity textures
+ * [_]   power icon
+ * [_]   in-mod UI
+ * [_]     actions atlas
+ * [_]   particles
+ *     
+ * [_] lang
+ *     
+ * [_] Geckolib format model
+ *     
+ * [_] sounds
+ * [_]   sounds.json
+ * [_]   sound files
+ *     
+ * [_] particles definition?
  * 
  */
 public class StandSkin {

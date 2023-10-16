@@ -48,8 +48,13 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
     }
     
     public static int getUiColor(StandInstance standInstance) {
-        return standInstance.getSelectedSkin().flatMap(skinId -> Optional.ofNullable(getInstance().getStandSkin(skinId))).map(skin -> skin.color)
-                .orElse(standInstance.getType().getColor());
+        Optional<StandSkin> resourceSkin = standInstance.getSelectedSkin()
+                .flatMap(skinId -> Optional.ofNullable(getInstance().getStandSkin(skinId)));
+        if (!resourceSkin.isPresent()) {
+            resourceSkin = Optional.ofNullable(getInstance().getStandSkin(standInstance.getType().getRegistryName()));
+        }
+        
+        return resourceSkin.map(skin -> skin.color).orElse(standInstance.getType().getColor());
     }
     
     
