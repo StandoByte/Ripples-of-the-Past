@@ -126,9 +126,9 @@ public abstract class StandAction extends Action<IStandPower> {
     }
     
     @Override
-    public void onPerform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
+    public void afterPerform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
+        super.afterPerform(world, user, power, target);
         consumeStamina(world, power);
-        super.onPerform(world, user, power, target);
     }
     
     protected void consumeStamina(World world, IStandPower power) {

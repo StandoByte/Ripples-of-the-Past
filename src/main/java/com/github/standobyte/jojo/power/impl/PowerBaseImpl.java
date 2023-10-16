@@ -369,8 +369,8 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         if (!action.holdOnly(getThis())) {
             World world = user.level;
             target = action.targetBeforePerform(world, user, getThis(), target);
-            action.onPerform(world, user, getThis(), target);
-            action.doPerform(world, user, getThis(), target, extraInput);
+            action.perform(world, user, getThis(), target, extraInput);
+            action.afterPerform(world, user, getThis(), target);
             if (!world.isClientSide()) {
                 int cooldown = action.getCooldown(getThis(), -1);
                 if (cooldown > 0) {

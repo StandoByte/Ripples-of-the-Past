@@ -252,13 +252,13 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return target;
     }
     
-    public void onPerform(World world, LivingEntity user, P power, ActionTarget target) {
+    public void afterPerform(World world, LivingEntity user, P power, ActionTarget target) {
         if (user instanceof ServerPlayerEntity) {
             ModCriteriaTriggers.ACTION_PERFORM.get().trigger((ServerPlayerEntity) user, this);
         }
     }
     
-    public void doPerform(World world, LivingEntity user, P power, ActionTarget target, @Nullable PacketBuffer extraInput) {
+    public void perform(World world, LivingEntity user, P power, ActionTarget target, @Nullable PacketBuffer extraInput) {
         perform(world, user, power, target);
     }
     
