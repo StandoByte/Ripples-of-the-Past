@@ -1,8 +1,5 @@
 package com.github.standobyte.jojo.client.render.entity.standskin;
 
-import com.github.standobyte.jojo.power.impl.stand.IStandPower;
-import com.github.standobyte.jojo.power.impl.stand.StandInstance;
-
 import net.minecraft.util.ResourceLocation;
 
 /*
@@ -32,19 +29,9 @@ public class StandSkin {
     private final ResourceLocation standTypeId;
     public final int color;
     
-    private StandSkin(ResourceLocation resLoc, ResourceLocation standTypeId, int color) {
+    public StandSkin(ResourceLocation resLoc, ResourceLocation standTypeId, int color) {
         this.resLoc = resLoc;
         this.standTypeId = standTypeId;
         this.color = color;
-    }
-    
-    
-    
-    public static int getUiColor(IStandPower standPower) {
-        return standPower.getStandInstance().map(StandSkin::getUiColor).orElse(-1);
-    }
-    
-    public static int getUiColor(StandInstance standInstance) {
-        return standInstance.getType() != null ? standInstance.getType().getColor() : -1;
     }
 }
