@@ -1,0 +1,32 @@
+{
+  "skins": {
+    "jojo:star_platinum": {      
+      "stand_type": "jojo:star_platinum",
+      "color" : "0x8E45FF"
+    },
+    "jojo:the_world": {      
+      "stand_type": "jojo:the_world",
+      "color" : "0xFFD800"
+    },
+    "jojo:hierophant_green": {      
+      "stand_type": "jojo:hierophant_green",
+      "color" : "0x00B319"
+    },
+    "jojo:silver_chariot": {      
+      "stand_type": "jojo:silver_chariot",
+      "color" : "0xBEC8D6"
+    },
+    "jojo:magicians_red": {      
+      "stand_type": "jojo:magicians_red",
+      "color" : "0xDE203A"
+    },
+    "jojo:crazy_diamond": {      
+      "stand_type": "jojo:crazy_diamond",
+      "color" : "0x4BEDE6"
+    },
+    "jojo:gold_experience": {      
+      "stand_type": "jojo:gold_experience",
+      "color" : "0xD88F1F"
+    }
+  }
+}
