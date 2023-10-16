@@ -253,9 +253,6 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     public void afterPerform(World world, LivingEntity user, P power, ActionTarget target) {
-        if (user instanceof ServerPlayerEntity) {
-            ModCriteriaTriggers.ACTION_PERFORM.get().trigger((ServerPlayerEntity) user, this);
-        }
     }
     
     public void perform(World world, LivingEntity user, P power, ActionTarget target, @Nullable PacketBuffer extraInput) {
