@@ -145,7 +145,7 @@ public class ModItems {
             () -> new StandRemoverItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1), StandRemoverItem.Mode.FULL_CLEAR, false));
 
     public static final RegistryObject<StandRemoverItem> STAND_FULL_CLEAR_ONE_TIME = ITEMS.register("stand_full_clear_one_time",
-            () -> new StandRemoverItem(new Item.Properties().stacksTo(1), StandRemoverItem.Mode.FULL_CLEAR, true));
+            () -> new StandRemoverItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1), StandRemoverItem.Mode.FULL_CLEAR, true));
 
 //    public static final RegistryObject<Item> COCOA_GUM = ITEMS.register("cocoa_gum", 
 //            () -> new GumItem(new Item.Properties()/*.tab(JojoMod.MAIN_TAB)*/.food(new Food.Builder().nutrition(2).saturationMod(0.1F).build())));
