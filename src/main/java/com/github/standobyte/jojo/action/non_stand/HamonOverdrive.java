@@ -57,11 +57,6 @@ public class HamonOverdrive extends HamonAction {
             }
         }
     }
-
-    // to not reset the player's attack strength ticker, it will get reset by the vanilla attack
-    @Override
-    public void afterPerform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
-    }
     
     protected float getDamage() {
         return 2.0F;

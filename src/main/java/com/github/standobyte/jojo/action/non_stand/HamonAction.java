@@ -100,7 +100,7 @@ public abstract class HamonAction extends NonStandAction {
     @Override
     public void afterPerform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         super.afterPerform(world, user, power, target);
-        if (swingHand() && user instanceof PlayerEntity) {
+        if (swingHand() && cancelsVanillaClick() && user instanceof PlayerEntity) {
             ((PlayerEntity) user).resetAttackStrengthTicker();
         }
     }
