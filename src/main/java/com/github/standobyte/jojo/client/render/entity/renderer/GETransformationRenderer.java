@@ -73,12 +73,13 @@ public class GETransformationRenderer<T extends GETransformationEntity> extends 
                 Entity target = entity.getTransformationTarget();
                 if (target != null) {
                     float progress = MathHelper.clamp((age - itemSourceAge) / (ageMax - itemSourceAge), 0, 1);
-                    if (target instanceof LivingEntity) {
-                        renderTransformationLiving((LivingEntity) target, entity, 
+                    EntityRenderer<?> renderer = entityRenderDispatcher.getRenderer(target);
+                    if (target instanceof LivingEntity && renderer instanceof LivingRenderer) {
+                        renderTransformationLiving((LivingEntity) target, entity, (LivingRenderer) renderer, 
                                 yRotation, partialTick, matrixStack, buffer, packedLight, progress);
                     }
                     else {
-                        renderTransformationNonLiving(target, entity, 
+                        renderTransformationNonLiving(target, entity, (EntityRenderer) renderer,
                                 yRotation, partialTick, matrixStack, buffer, packedLight, progress);
                     }
                 }
@@ -87,14 +88,12 @@ public class GETransformationRenderer<T extends GETransformationEntity> extends 
         }
     }
     
-    private <E extends Entity> void renderTransformationNonLiving(E target, T transformationEntity, 
+    private <E extends Entity> void renderTransformationNonLiving(E target, T transformationEntity, EntityRenderer<E> renderer, 
             float yRotation, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, float progress) {
-        
     }
     
-    private <E extends LivingEntity, M extends EntityModel<E>> void renderTransformationLiving(E living, T transformationEntity, 
+    private <E extends LivingEntity, M extends EntityModel<E>> void renderTransformationLiving(E living, T transformationEntity, LivingRenderer<E, M> renderer,
             float yRotation, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, float progress) {
-        LivingRenderer<E, M> renderer = (LivingRenderer<E, M>) entityRenderDispatcher.getRenderer(living);
         if (MinecraftForge.EVENT_BUS.post(new RenderLivingEvent.Pre<E, M>(living, renderer, partialTick, matrixStack, buffer, packedLight))) return;
         
         M targetModel = renderer.getModel();
@@ -338,4 +337,7 @@ public class GETransformationRenderer<T extends GETransformationEntity> extends 
         ObjectList<ModelRenderer> children = ClientReflection.getChildren(modelRenderer);
         children.forEach(child -> addSubPartsAndSelf(modelParts, child));
     }
+    
+
+    private static final Map<EntityRenderer<?>, EntityModel<?>> MODEL_CACHE = new HashMap<>();
 }
