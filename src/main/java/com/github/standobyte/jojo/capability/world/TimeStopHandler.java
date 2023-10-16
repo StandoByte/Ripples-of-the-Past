@@ -1,7 +1,9 @@
 package com.github.standobyte.jojo.capability.world;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -13,6 +15,7 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModSounds;
@@ -24,6 +27,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TimeStopInstancePac
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerJoinPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerJoinPacket.Phase;
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerStatePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrDirectEntityDataPacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -35,6 +39,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.server.SPlayEntityEffectPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -50,13 +55,6 @@ import net.minecraftforge.event.entity.player.PlayerEvent.PlayerChangedDimension
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedInEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerRespawnEvent;
-import net.minecraftforge.event.world.BlockEvent.CreateFluidSourceEvent;
-import net.minecraftforge.event.world.BlockEvent.CropGrowEvent;
-import net.minecraftforge.event.world.BlockEvent.FluidPlaceBlockEvent;
-import net.minecraftforge.event.world.BlockEvent.NeighborNotifyEvent;
-import net.minecraftforge.event.world.NoteBlockEvent;
-import net.minecraftforge.event.world.PistonEvent;
-import net.minecraftforge.eventbus.api.Event.Result;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -65,6 +63,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 public class TimeStopHandler {
     private final World world;
     private final Set<Entity> stoppedInTime = new HashSet<>();
+    private final Set<ServerPlayerEntity> playersVisionFrozen = new HashSet<>();
     private final Map<Integer, TimeStopInstance> timeStopInstances = HashBiMap.create();
     
     public TimeStopHandler(World world) {
@@ -73,6 +72,7 @@ public class TimeStopHandler {
     
     public void tick() {
         Iterator<Entity> entityIter = stoppedInTime.iterator();
+        
         while (entityIter.hasNext()) {
             Entity entity = entityIter.next();
             if (!entity.isAlive()) {
@@ -83,19 +83,56 @@ public class TimeStopHandler {
                 tickInStoppedTime(entity);
             }
         }
-        
-        Iterator<Map.Entry<Integer, TimeStopInstance>> instanceIter = timeStopInstances.entrySet().iterator();
-        while (instanceIter.hasNext()) {
-            Map.Entry<Integer, TimeStopInstance> entry = instanceIter.next();
-            if (entry.getValue().tick() && !world.isClientSide()) {
-                instanceIter.remove();
-                onRemovedTimeStop(entry.getValue());
+
+        if (!timeStopInstances.isEmpty()) {
+            Iterator<Map.Entry<Integer, TimeStopInstance>> instanceIter = timeStopInstances.entrySet().iterator();
+            while (instanceIter.hasNext()) {
+                Map.Entry<Integer, TimeStopInstance> entry = instanceIter.next();
+                if (entry.getValue().tick() && !world.isClientSide()) {
+                    instanceIter.remove();
+                    onRemovedTimeStop(entry.getValue());
+                }
+            }
+            
+            if (!playersVisionFrozen.isEmpty()) {
+                manualEntitiesDataSync();
             }
         }
-        
-        for (Entity entity : stoppedInTime) {
-            if (!entity.canUpdate()) {
-                entity.tickCount--;
+    }
+    
+    private void manualEntitiesDataSync() {
+        if (!world.isClientSide()) {
+            for (Entity entity : MCUtil.getAllEntities(world)) {
+                EntityDataManager entityData = entity.getEntityData();
+                if (entityData.isDirty()) {
+                    Set<ServerPlayerEntity> trackingPlayers = MCUtil.getTrackingPlayers(entity);
+                    List<ServerPlayerEntity> frozenPlayers = new ArrayList<>();
+                    
+                    List<EntityDataManager.DataEntry<?>> packedData = null;
+                    Iterator<ServerPlayerEntity> trackingIterator = trackingPlayers.iterator();
+                    while (trackingIterator.hasNext()) {
+                        ServerPlayerEntity player = trackingIterator.next();
+                        if (playersVisionFrozen.contains(player)) {
+                            frozenPlayers.add(player);
+                            packedData = entityData.packDirty();
+                        }
+                    }
+                    
+                    boolean manualSelectiveSync = packedData != null;
+                    if (manualSelectiveSync) {
+                        List<EntityDataManager.DataEntry<?>> dataToKeep = packedData;
+                        for (ServerPlayerEntity tracking : trackingPlayers) {
+                            if (frozenPlayers.contains(tracking)) {
+                                tracking.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                                    cap.addDataForTSUnfreeze(entity, dataToKeep);
+                                });
+                            }
+                            else {
+                                PacketManager.sendToClient(new TrDirectEntityDataPacket(entity.getId(), packedData), tracking);
+                            }
+                        }
+                    }
+                }
             }
         }
     }
@@ -109,6 +146,7 @@ public class TimeStopHandler {
                 entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.lastHurtByStandTick());
             }
         }
+        entity.tickCount--;
     }
     
     public boolean isTimeStopped(ChunkPos chunkPos) {
@@ -257,6 +295,14 @@ public class TimeStopHandler {
             canSee = canPlayerSeeInStoppedTime(canMove, hasTimeStopAbility(player));
         }
         PacketManager.sendToClient(new TimeStopPlayerStatePacket(canSee, canMove), player);
+        
+        if (canSee) {
+            playersVisionFrozen.remove(player);
+            player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.sendDataOnTSUnfreeze());
+        }
+        else {
+            playersVisionFrozen.add(player);
+        }
     }
     
     public Stream<TimeStopInstance> getAllTimeStopInstances() {
@@ -300,7 +346,7 @@ public class TimeStopHandler {
     
     public static boolean hasTimeStopAbility(LivingEntity entity) {
         return IStandPower.getStandPowerOptional(entity).map(stand -> 
-        JojoModUtil.hasAction(stand, action -> allowsToSeeInStoppedTime(action, stand, entity)))
+        stand.hasUnlockedMatching(action -> allowsToSeeInStoppedTime(action, stand, entity)))
                 .orElse(false);
     }
     

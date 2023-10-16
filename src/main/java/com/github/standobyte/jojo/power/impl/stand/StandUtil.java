@@ -1,12 +1,8 @@
 package com.github.standobyte.jojo.power.impl.stand;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
-import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -17,6 +13,7 @@ import com.github.standobyte.jojo.capability.entity.power.StandCapProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.StandController;
+import com.github.standobyte.jojo.command.configpack.standassign.PlayerStandAssignmentConfig;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
@@ -25,7 +22,8 @@ import com.github.standobyte.jojo.network.packets.fromserver.StandControlStatusP
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
-import com.github.standobyte.jojo.util.general.GeneralUtil;
+import com.github.standobyte.jojo.power.impl.stand.type.StandType.StandSurvivalGameplayPool;
+import com.github.standobyte.jojo.util.general.MathUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
@@ -39,81 +37,65 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.world.server.ServerWorld;
 
 public class StandUtil {
-    public static final int getMaxTier(boolean isClientSide) {
-        return Collections.max(getAvailableTiers(JojoModConfig.getCommonConfigInstance(isClientSide)));
-    }
     
-    public static StandType<?> randomStand(LivingEntity entity, Random random) {
-        return randomStandFromTiers(null, entity, random);
-    }
-    
-    public static StandType<?> randomStandFromTiers(@Nullable int[] tiers, LivingEntity entity, Random random) {
+    @Nullable
+    public static StandType<?> randomStand(PlayerEntity entity, Random random) {
         if (!entity.level.isClientSide()) {
-            List<StandType<?>> stands = availableStands(tiers, entity.level.isClientSide()).collect(Collectors.toList());
+            List<StandType<?>> stands = availableStands(entity.level.isClientSide()).collect(Collectors.toList());
 
             if (stands.isEmpty()) {
                 return null;
             }
             
-            if (JojoModConfig.getCommonConfigInstance(false).prioritizeLeastTakenStands.get()) {
-                stands = SaveFileUtilCapProvider.getSaveFileCap(((ServerWorld) entity.level).getServer()).leastTakenStands(stands);
-            }
+            stands = PlayerStandAssignmentConfig.getInstance().limitToAssignedStands(entity, stands);
+            
+            
+            stands = JojoModConfig.getCommonConfigInstance(false).standRandomPoolFilter.get().limitStandPool((ServerWorld) entity.level, stands);
             
             if (!stands.isEmpty()) {
-                return stands.get(random.nextInt(stands.size()));
+                stands = IStandPower.getStandPowerOptional(entity).resolve().get()
+                        .getPreviousStandsSet().rigForUnusedStands(stands);
+                return MathUtil.getRandomWeighted(stands, stand -> stand.getStats().getRandomWeight(), random).orElse(null);
             }
         }
         return null;
     }
     
-    public static Stream<StandType<?>> availableStands(@Nullable int[] tiers, boolean clientSide) {
+    
+    
+    public enum StandRandomPoolFilter {
+        NONE {
+            @Override
+            public List<StandType<?>> limitStandPool(ServerWorld world, List<StandType<?>> availableStands) {
+                return availableStands;
+            }
+        },
+        LEAST_TAKEN {
+            @Override
+            public List<StandType<?>> limitStandPool(ServerWorld world, List<StandType<?>> availableStands) {
+                return SaveFileUtilCapProvider.getSaveFileCap(world.getServer()).getNotTakenStands(availableStands);
+            }
+        },
+        NOT_TAKEN {
+            @Override
+            public List<StandType<?>> limitStandPool(ServerWorld world, List<StandType<?>> availableStands) {
+                return SaveFileUtilCapProvider.getSaveFileCap(world.getServer()).getNotTakenStands(availableStands);
+            }
+        };
+        
+        public abstract List<StandType<?>> limitStandPool(ServerWorld world /*TODO get stand pool limit data on client*/, List<StandType<?>> availableStands);
+    }
+    
+    public static Stream<StandType<?>> availableStands(boolean clientSide) {
         Collection<StandType<?>> stands = JojoCustomRegistries.STANDS.getRegistry().getValues();
         return stands.stream()
-                .filter(stand -> (
-                        tiers == null ||
-                        Arrays.stream(tiers).anyMatch(tier -> tier == stand.getTier()))
-                        && !JojoModConfig.getCommonConfigInstance(clientSide).isStandBanned(stand));
+                .filter(stand -> StandUtil.canPlayerGetFromArrow(stand, clientSide));
     }
     
-    public static int[] standTiersFromXp(int playerXpLvl, boolean withConfigBans, boolean isClientSide) {
-        List<Integer> tiers = new ArrayList<>();
-        int closestLvlBorder = -1;
-        for (int i = getMaxTier(isClientSide); i >= 0; i--) {
-            int tierLvlBorder = tierLowerBorder(i, isClientSide);
-            if (closestLvlBorder == -1 || closestLvlBorder == tierLvlBorder) {
-                if (playerXpLvl >= tierLvlBorder
-                        && (!withConfigBans || JojoModConfig.getCommonConfigInstance(isClientSide).tierHasUnbannedStands(i))) {
-                    closestLvlBorder = tierLvlBorder;
-                    tiers.add(i);
-                }
-            }
-            else {
-                break;
-            }
-        }
-        return tiers.stream().mapToInt(Integer::intValue).toArray();
-    }
-    
-    public static int arrowPoolNextTier(int startingFrom, boolean isClientSide) {
-        for (int i = startingFrom; i <= getMaxTier(isClientSide); i++) {
-            if (JojoModConfig.getCommonConfigInstance(isClientSide).tierHasUnbannedStands(i)) {
-                return i;
-            }
-        }
-        return -1;
-    }
-    
-    public static int tierLowerBorder(int tier, boolean isClientSide) {
-        List<? extends Integer> xpBorders = JojoModConfig.getCommonConfigInstance(isClientSide).standTierXpLevels.get();
-        return GeneralUtil.getOrLast(xpBorders, tier).intValue();
-    }
-    
-    public static Set<Integer> getAvailableTiers(JojoModConfig.Common config) {
-        return JojoCustomRegistries.STANDS.getRegistry().getValues()
-                .stream()
-                .filter(stand -> !config.isStandBanned(stand))
-                .map(StandType::getTier)
-                .collect(Collectors.toSet());
+    public static boolean canPlayerGetFromArrow(StandType<?> standType, boolean clientSide) {
+        return standType.getSurvivalGameplayPool() == StandSurvivalGameplayPool.PLAYER_ARROW && 
+                (!JojoModConfig.getCommonConfigInstance(clientSide).isConfigLoaded() || // to make it work when adding items to creative search tab on client initialization, when the config isn't loaded yet
+                !JojoModConfig.getCommonConfigInstance(clientSide).isStandBanned(standType));
     }
     
     public static boolean isEntityStandUser(LivingEntity entity) {
@@ -167,7 +149,7 @@ public class StandUtil {
     public static void addResolve(IStandPower stand, LivingEntity target, float points) {
         target = getStandUser(target);
         boolean hitSelf = target != null && stand.getUser() != null && getStandUser(target).is(stand.getUser());
-        if (!hitSelf && worthyTarget(target)) {
+        if (!hitSelf && attackingTargetGivesResolve(target)) {
             for (PowerClassification classification : PowerClassification.values()) {
                 points *= IPower.getPowerOptional(target, classification).map(power -> {
                     if (power.hasPower()) {
@@ -184,7 +166,7 @@ public class StandUtil {
         }
     }
     
-    public static boolean worthyTarget(Entity target) {
+    public static boolean attackingTargetGivesResolve(Entity target) {
         if (!target.isAlive()) {
             return false;
         }
@@ -206,8 +188,9 @@ public class StandUtil {
         }
         return false;
     }
-    
-    public static boolean isFinisherUnlocked(IStandPower power) {
-        return power.getResolveLevel() >= 1;
+
+    public static boolean isFinisherMechanicUnlocked(IStandPower stand) {
+        return stand.hasPower() && (stand.getResolveLevel() >= 1
+                || stand.getType().getStandFinisherPunch().map(action -> action.isUnlocked(stand)).orElse(false));
     }
 }

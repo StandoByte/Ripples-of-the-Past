@@ -90,7 +90,8 @@ public class HamonHealing extends HamonAction {
     }
     
     private boolean canBeHealed(LivingEntity targetEntity, LivingEntity user) {
-        return user.isShiftKeyDown() && !JojoModUtil.isUndead(targetEntity);
+        boolean shiftVariation = JojoModUtil.useShiftVar(user);
+        return shiftVariation && !JojoModUtil.isUndead(targetEntity);
     }
 
     public static boolean bonemealEffect(World world, PlayerEntity applyingPlayer, BlockPos pos, Direction face) {

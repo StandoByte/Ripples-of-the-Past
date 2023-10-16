@@ -77,6 +77,7 @@ import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.power.impl.stand.type.EntityStandType;
 import com.github.standobyte.jojo.power.impl.stand.type.NoManifestationStandType;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
+import com.github.standobyte.jojo.power.impl.stand.type.StandType.StandSurvivalGameplayPool;
 
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -134,6 +135,7 @@ public class ModStandsInit {
     
     public static final RegistryObject<StandEntityHeavyAttack> STAR_PLATINUM_UPPERCUT = ACTIONS.register("star_platinum_uppercut", 
             () -> new StarPlatinumUppercut(new StandEntityHeavyAttack.Builder()
+                    .resolveLevelToUnlock(1)
                     .punchSound(ModSounds.STAR_PLATINUM_PUNCH_HEAVY)
                     .standSound(Phase.WINDUP, ModSounds.STAR_PLATINUM_ORA_LONG)
                     .partsRequired(StandPart.ARMS)));
@@ -216,11 +218,13 @@ public class ModStandsInit {
                             .timeStopLearningPerTick(0.25F)
                             .timeStopDecayPerDay(0F)
                             .timeStopCooldownPerTick(3F)
+                            .randomWeight(1)
                             .build())
                     .addSummonShout(ModSounds.JOTARO_STAR_PLATINUM)
                     .addOst(ModSounds.STAR_PLATINUM_OST)
+                    .addAttackerResolveMultTier(1)
                     .build(), 
-                    
+
                     ENTITIES, 
                     () -> new StandEntityType<StarPlatinumEntity>(StarPlatinumEntity::new, 0.7F, 2.1F)
                     .summonSound(ModSounds.STAR_PLATINUM_SUMMON)
@@ -243,6 +247,7 @@ public class ModStandsInit {
 
     public static final RegistryObject<StandEntityHeavyAttack> THE_WORLD_KICK = ACTIONS.register("the_world_kick", 
             () -> new TheWorldKick(new StandEntityHeavyAttack.Builder()
+                    .resolveLevelToUnlock(1)
                     .punchSound(ModSounds.THE_WORLD_KICK_HEAVY)
                     .shout(ModSounds.DIO_DIE)
                     .partsRequired(StandPart.LEGS)));
@@ -310,9 +315,11 @@ public class ModStandsInit {
                             .timeStopLearningPerTick(0.1F)
                             .timeStopDecayPerDay(0F)
                             .timeStopCooldownPerTick(3F)
+                            .randomWeight(1)
                             .build())
                     .addSummonShout(ModSounds.DIO_THE_WORLD)
                     .addOst(ModSounds.THE_WORLD_OST)
+                    .addAttackerResolveMultTier(1)
 //                    .addItemOnResolveLevel(4, new ItemStack(ModItems.ROAD_ROLLER.get()))
                     .build(), 
 
@@ -394,6 +401,7 @@ public class ModStandsInit {
                             .range(50.0, 100.0)
                             .durability(10.0)
                             .precision(8.0)
+                            .randomWeight(2)
                             .build())
                     .addSummonShout(ModSounds.KAKYOIN_HIEROPHANT_GREEN)
                     .addOst(ModSounds.HIEROPHANT_GREEN_OST)
@@ -425,6 +433,7 @@ public class ModStandsInit {
     
     public static final RegistryObject<StandEntityHeavyAttack> SILVER_CHARIOT_SWEEPING_ATTACK = ACTIONS.register("silver_chariot_sweeping_attack", 
             () -> new SilverChariotSweepingAttack(new StandEntityHeavyAttack.Builder().standPerformDuration(3)
+                    .resolveLevelToUnlock(1)
                     .punchSound(() -> null).swingSound(ModSounds.SILVER_CHARIOT_SWEEP_HEAVY)
                     .partsRequired(StandPart.ARMS)));
     
@@ -475,6 +484,7 @@ public class ModStandsInit {
                             .durability(12.0)
                             .armor(15.0F)
                             .precision(16.0)
+                            .randomWeight(2)
                             .build())
                     .addSummonShout(ModSounds.POLNAREFF_SILVER_CHARIOT)
                     .addOst(ModSounds.SILVER_CHARIOT_OST)
@@ -496,6 +506,7 @@ public class ModStandsInit {
 
     public static final RegistryObject<StandEntityHeavyAttack> MAGICIANS_RED_KICK = ACTIONS.register("magicians_red_kick", 
             () -> new MagiciansRedKick(new StandEntityHeavyAttack.Builder()
+                    .resolveLevelToUnlock(1)
                     .punchSound(ModSounds.MAGICIANS_RED_KICK_HEAVY)
                     .partsRequired(StandPart.LEGS)));
 
@@ -571,6 +582,7 @@ public class ModStandsInit {
                             .range(5.0, 10.0)
                             .durability(12.0)
                             .precision(8.0)
+                            .randomWeight(2)
                             .build())
                     .addSummonShout(ModSounds.AVDOL_MAGICIANS_RED)
                     .addOst(ModSounds.MAGICIANS_RED_OST)
@@ -599,6 +611,7 @@ public class ModStandsInit {
     
     public static final RegistryObject<StandEntityHeavyAttack> CRAZY_DIAMOND_FINISHER_PUNCH = ACTIONS.register("crazy_diamond_misshaping_punch", 
             () -> new CrazyDiamondMisshapingPunch(new StandEntityHeavyAttack.Builder()
+                    .resolveLevelToUnlock(1)
                     .punchSound(ModSounds.CRAZY_DIAMOND_PUNCH_HEAVY)
                     .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_DORA_LONG)
                     .partsRequired(StandPart.ARMS)));
@@ -713,6 +726,7 @@ public class ModStandsInit {
                             .range(2.0, 4.0)
                             .durability(12.0)
                             .precision(12.0)
+                            .randomWeight(2)
                             .build())
                     .addSummonShout(ModSounds.JOSUKE_CRAZY_DIAMOND)
                     .addOst(ModSounds.CRAZY_DIAMOND_OST)
@@ -743,7 +757,7 @@ public class ModStandsInit {
                         .durability(0)
                         .precision(0)
                         .build())
-                .setPlayerAccess(false)
+                .setSurvivalGameplayPool(StandSurvivalGameplayPool.NPC_ENCOUNTER)
                 .build()
             );
     

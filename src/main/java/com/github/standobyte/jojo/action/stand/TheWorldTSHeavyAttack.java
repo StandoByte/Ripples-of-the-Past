@@ -107,7 +107,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
                         if (target.getType() == TargetType.ENTITY) {
                             offset += target.getEntity().getBoundingBox().getXsize() / 2;
                         }
-                        boolean shift = standPower.getUser().isShiftKeyDown();
+                        boolean shift = JojoModUtil.useShiftVar(standPower.getUser());
                         Vector3d offsetFromTarget = aimingEntity.getEyePosition(1.0F).subtract(pos).normalize().scale(offset);
                         if (shift) {
                             offsetFromTarget = offsetFromTarget.reverse();

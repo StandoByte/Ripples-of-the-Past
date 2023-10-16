@@ -121,6 +121,11 @@ public class ClientUtil {
         return Minecraft.getInstance().getLanguageManager().getSelected().getCode();
     }
     
+    public static boolean isInSinglePlayer() {
+        Minecraft mc = Minecraft.getInstance();
+        return mc.hasSingleplayerServer() && !mc.getSingleplayerServer().isPublished();
+    }
+    
     public static boolean useActionShiftVar(PlayerEntity player) {
         return player.isShiftKeyDown();
     }

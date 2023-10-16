@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.item;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,7 +14,6 @@ import com.github.standobyte.jojo.power.impl.stand.StandInstance;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
-import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.LegacyUtil;
 
@@ -51,7 +49,7 @@ public class StandDiscItem extends Item {
                     StandInstance stand = getStandFromStack(stack, false);
                     if (MCUtil.dispenseOnNearbyEntity(blockSource, stack, entity -> {
                         return IStandPower.getStandPowerOptional(entity).map(power -> {
-                            return standFitsTier(entity, power.getUserTier(), stand.getType()) && power.giveStand(stand, false);
+                            return canGetStandFromDisc(entity, power, stand.getType()) && power.giveStand(stand, false);
                         }).orElse(false);
                     }, true)) {
                         return stack;
@@ -72,10 +70,11 @@ public class StandDiscItem extends Item {
                 if (JojoModConfig.getCommonConfigInstance(false).isStandBanned(stand.getType())) {
                     return ActionResult.fail(stack);
                 }
-                if (!standFitsTier(player, power.getUserTier(), stand.getType())) {
-                    player.displayClientMessage(new TranslationTextComponent("jojo.chat.message.low_tier"), true);
+                if (!canGetStandFromDisc(player, power, stand.getType())) {
+                    player.displayClientMessage(new TranslationTextComponent("jojo.chat.message.cant_put_stand_disc"), true);
                     return ActionResult.fail(stack);
                 }
+                
                 if (!player.abilities.instabuild) {
                     Optional<StandInstance> previousDiscStand = power.putOutStand();
                     previousDiscStand.ifPresent(prevStand -> player.drop(withStand(new ItemStack(this), prevStand), false));
@@ -83,6 +82,7 @@ public class StandDiscItem extends Item {
                 else {
                     power.clear();
                 }
+                
                 if (power.giveStand(stand, !stack.getTag().getBoolean(WS_TAG))) {
                     if (!player.abilities.instabuild) {
                         stack.shrink(1);
@@ -90,7 +90,6 @@ public class StandDiscItem extends Item {
                     return ActionResult.success(stack);
                 }
                 else {
-                    player.displayClientMessage(new TranslationTextComponent("jojo.chat.message.already_have_stand"), true);
                     return ActionResult.fail(stack);
                 }
             } 
@@ -101,14 +100,10 @@ public class StandDiscItem extends Item {
         return ActionResult.fail(stack);
     }
 
-    private static boolean standFitsTier(LivingEntity entity, int playerTier, StandType<?> stand) {
+    private static boolean canGetStandFromDisc(LivingEntity entity, IStandPower entityStandPower, StandType<?> stand) {
         if (entity instanceof PlayerEntity) {
             PlayerEntity player = (PlayerEntity) entity;
-            return player.abilities.instabuild
-                    || !JojoModConfig.getCommonConfigInstance(entity.level.isClientSide()).standTiers.get()
-                    || playerTier >= stand.getTier()
-                    || Arrays.stream(StandUtil.standTiersFromXp(player.experienceLevel, false, entity.level.isClientSide()))
-                    .anyMatch(tier -> tier >= stand.getTier());
+            return player.abilities.instabuild || entityStandPower.hadAnyStand();
         }
         return false;
     }
@@ -118,8 +113,7 @@ public class StandDiscItem extends Item {
         if (this.allowdedIn(group)) {
             boolean isClientSide = Thread.currentThread().getThreadGroup() == SidedThreadGroups.CLIENT;
             for (StandType<?> standType : JojoCustomRegistries.STANDS.getRegistry()) {
-                if (!JojoModConfig.getCommonConfigInstance(isClientSide).isConfigLoaded()
-                        || !JojoModConfig.getCommonConfigInstance(isClientSide).isStandBanned(standType)) {
+                if (StandUtil.canPlayerGetFromArrow(standType, isClientSide)) {
                     items.add(withStand(new ItemStack(this), new StandInstance(standType)));
                 }
             }
@@ -139,14 +133,6 @@ public class StandDiscItem extends Item {
                 StandInstance stand = getStandFromStack(stack, true);
                 tooltip.add(stand.getName());
                 tooltip.add(stand.getType().getPartName());
-                if (JojoModConfig.getCommonConfigInstance(true).standTiers.get()) {
-                    int standTier = stand.getType().getTier();
-                    int playerXpLevel = ClientUtil.getClientPlayer().experienceLevel;
-                    int xpForTier = GeneralUtil.getOrLast(JojoModConfig.getCommonConfigInstance(true).standTierXpLevels.get(), standTier).intValue();
-                    tooltip.add(new TranslationTextComponent("jojo.disc.tier", standTier, 
-                            new TranslationTextComponent("jojo.disc.tier_level", xpForTier)
-                            .withStyle(playerXpLevel < xpForTier ? TextFormatting.RED : TextFormatting.GREEN)).withStyle(TextFormatting.GRAY));
-                }
                 for (StandPart standPart : StandPart.values()) {
                     if (!stand.hasPart(standPart)) {
                         tooltip.add(new TranslationTextComponent("jojo.disc.missing_part." + standPart.name().toLowerCase()).withStyle(TextFormatting.DARK_GRAY));

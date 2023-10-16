@@ -7,7 +7,6 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
-import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.TimeStopHandler;
@@ -18,6 +17,7 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
 
 import net.minecraft.entity.LivingEntity;
@@ -117,7 +117,7 @@ public class TimeStop extends StandAction {
     @Override
     public void onTrainingPoints(IStandPower power, float points) {
         if (getInstantTSVariation() != null) {
-            power.setLearningProgressPoints(getInstantTSVariation(), points, false, false);
+            power.setLearningProgressPoints(getInstantTSVariation(), points);
         }
     }
     
@@ -143,12 +143,12 @@ public class TimeStop extends StandAction {
     }
     
     @Nullable
-    public Action<IStandPower> getInstantTSVariation() {
+    public StandAction getInstantTSVariation() {
         return blink;
     }
     
-    private Action<IStandPower> blink;
-    void setInstantTSVariation(Action<IStandPower> blink) {
+    private StandAction blink;
+    void setInstantTSVariation(StandAction blink) {
         this.blink = blink;
     }
     
@@ -160,8 +160,12 @@ public class TimeStop extends StandAction {
     }
     
     public static int getMaxTimeStopTicks(IStandPower standPower) {
-        return ((TimeStopperStandStats) standPower.getType().getStats())
-                .getMaxTimeStopTicks(TimeStop.vampireTimeStopDuration(standPower.getUser()));
+        StandStats stats = standPower.getType().getStats();
+        if (stats instanceof TimeStopperStandStats) {
+            return ((TimeStopperStandStats) stats).getMaxTimeStopTicks(
+                    TimeStop.vampireTimeStopDuration(standPower.getUser()));
+        }
+        return 100;
     }
     
     public static boolean vampireTimeStopDuration(LivingEntity entity) {

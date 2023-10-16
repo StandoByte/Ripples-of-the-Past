@@ -1,12 +1,14 @@
 package com.github.standobyte.jojo.power.impl.stand.type;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -20,6 +22,7 @@ import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
+import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
 import com.github.standobyte.jojo.util.mc.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -49,10 +52,11 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     private final ITextComponent partName;
     private final T defaultStats;
     private final Class<T> statsClass;
-    private final boolean canPlayerGet;
+    private final StandSurvivalGameplayPool survivalGameplayPool;
     private final Supplier<SoundEvent> summonShoutSupplier;
     private final OstSoundList ostSupplier;
     private final Map<Integer, List<ItemStack>> resolveLevelItems;
+    private final int resolveMultiplierTier;
     
     @Deprecated
     public StandType(int color, ITextComponent partName, 
@@ -69,8 +73,9 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         if (additions == null) additions = new StandTypeOptionals();
         this.ostSupplier = additions.ostSupplier;
         this.summonShoutSupplier = additions.summonShoutSupplier;
-        this.canPlayerGet = additions.canPlayerGet;
+        this.survivalGameplayPool = additions.survivalGameplayPool;
         this.resolveLevelItems = additions.resolveLevelItems;
+        this.resolveMultiplierTier = additions.resolveMultiplierTier;
     }
     
     protected StandType(AbstractBuilder<?, T> builder) {
@@ -90,14 +95,14 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         private T defaultStats;
         private Class<T> statsClass;
         private StandTypeOptionals additions = null;
-
+        
         public B color(int color) {
             this.color = color;
             return getThis();
         }
         
-        public B storyPartName(ITextComponent storyPartName) {
-            this.storyPartName = storyPartName;
+        public B storyPartName(ITextComponent actions) {
+            this.storyPartName = actions;
             return getThis();
         }
         
@@ -114,8 +119,8 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
             return getThis();
         }
         
-        public B defaultQuickAccess(StandAction action) {
-            this.quickAccess = action;
+        public B defaultQuickAccess(StandAction quickAccess) {
+            this.quickAccess = quickAccess;
             return getThis();
         }
         
@@ -146,8 +151,13 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
             return getThis();
         }
         
-        public B setPlayerAccess(boolean canPlayerGet) {
-            getOptionals().canPlayerGet = canPlayerGet;
+        public B setSurvivalGameplayPool(StandSurvivalGameplayPool survivalGameplayPool) {
+            getOptionals().survivalGameplayPool = survivalGameplayPool;
+            return getThis();
+        }
+        
+        public B addAttackerResolveMultTier(int tierAdd) {
+            getOptionals().resolveMultiplierTier += tierAdd;
             return getThis();
         }
         
@@ -163,8 +173,29 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     
-    
-    public void onCommonSetup() {}
+
+    private Set<StandAction> allUnlockableActions;
+    public void onCommonSetup() {
+        Set<StandAction> unlockables = new HashSet<>();
+        Collections.addAll(unlockables, leftClickHotbar);
+        Collections.addAll(unlockables, rightClickHotbar);
+        
+        Set<StandAction> tmp = new HashSet<>();
+        for (StandAction action : unlockables) {
+            if (action.hasShiftVariation()) {
+                tmp.add((StandAction) action.getShiftVariationIfPresent());
+            }
+        }
+        unlockables.addAll(tmp);
+        
+        tmp.clear();
+        for (StandAction action : unlockables) {
+            Collections.addAll(tmp, action.getExtraUnlockable());
+        }
+        unlockables.addAll(tmp);
+        
+        this.allUnlockableActions = Collections.unmodifiableSet(unlockables);
+    }
     
     @Override
     public boolean keepOnDeath(IStandPower power) {
@@ -193,6 +224,10 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     public boolean isReplaceableWith(StandType<?> newType) {
         return false;
     }
+    
+    public StandSurvivalGameplayPool getSurvivalGameplayPool() {
+        return survivalGameplayPool;
+    }
 
     @Override
     public void tickUser(LivingEntity user, IStandPower power) {
@@ -207,18 +242,20 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     @Override
-    public StandAction[] getAttacks() {
-        return leftClickHotbar;
-    }
-
-    @Override
-    public StandAction[] getAbilities() {
-        return rightClickHotbar;
+    public ActionsLayout<IStandPower> createDefaultLayout() {
+        return new ActionsLayout<>(leftClickHotbar, rightClickHotbar, defaultQuickAccess);
     }
     
-    @Override
-    public StandAction getDefaultQuickAccess() {
-        return defaultQuickAccess;
+    public StandAction[] getDefaultHotbar(ActionsLayout.Hotbar hotbar) {
+        switch (hotbar) {
+        case LEFT_CLICK: return leftClickHotbar;
+        case RIGHT_CLICK: return rightClickHotbar;
+        default: throw new IllegalArgumentException();
+        }
+    }
+    
+    public Iterable<StandAction> getAllUnlockableActions() {
+        return allUnlockableActions;
     }
     
     public boolean usesStamina() {
@@ -257,12 +294,8 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     public void unlockNewActions(IStandPower power) {
-        Stream.concat(Arrays.stream(leftClickHotbar), Arrays.stream(rightClickHotbar))
-        .forEach(action -> {
+        getAllUnlockableActions().forEach(action -> {
             tryUnlock(action, power);
-            if (action.hasShiftVariation()) {
-                tryUnlock((StandAction) action.getShiftVariationIfPresent(), power);
-            }
         });
     }
     
@@ -272,15 +305,16 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         }
     }
     
-    public boolean usesStandFinisherMechanic() {
-        return false;
+    private static final Optional<StandAction> NOPE = Optional.empty();
+    public Optional<StandAction> getStandFinisherPunch() {
+        return NOPE;
     }
     
     @Override
     public float getTargetResolveMultiplier(IStandPower power, IStandPower attackingStand) {
-        float multiplier = getTier() + 1;
+        float multiplier = resolveMultiplierTier + 1;
         if (attackingStand.hasPower()) {
-            multiplier = Math.max(multiplier - attackingStand.getType().getTier(), 1);
+            multiplier = Math.max(multiplier - attackingStand.getType().resolveMultiplierTier, 1);
         }
         return multiplier;
     }
@@ -310,10 +344,6 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     
     public ITextComponent getPartName() {
         return partName;
-    }
-
-    public int getTier() {
-        return getStats().getTier();
     }
     
     public void toggleSummon(IStandPower standPower) {
@@ -375,10 +405,11 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     
     @Deprecated
     public static class StandTypeOptionals {
-        private boolean canPlayerGet = true;
+        private StandSurvivalGameplayPool survivalGameplayPool = StandSurvivalGameplayPool.PLAYER_ARROW; 
         private Supplier<SoundEvent> summonShoutSupplier = () -> null;
         private OstSoundList ostSupplier = null;
         private Map<Integer, List<ItemStack>> resolveLevelItems = new HashMap<>();
+        private int resolveMultiplierTier = 5;
         
         public StandTypeOptionals addSummonShout(Supplier<SoundEvent> summonShoutSupplier) {
             if (summonShoutSupplier != null) {
@@ -400,11 +431,11 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
             }
             return this;
         }
-        
-        public StandTypeOptionals setPlayerAccess(boolean canPlayerGet) {
-            this.canPlayerGet = canPlayerGet;
-            return this;
-        }
-        
+    }
+    
+    
+    public static enum StandSurvivalGameplayPool {
+        PLAYER_ARROW,
+        NPC_ENCOUNTER
     }
 }
