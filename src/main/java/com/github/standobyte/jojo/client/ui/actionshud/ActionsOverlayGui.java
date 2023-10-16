@@ -26,7 +26,7 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
-import com.github.standobyte.jojo.client.render.entity.standskin.StandSkin;
+import com.github.standobyte.jojo.client.render.entity.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsModeConfig.SelectedTargetIcon;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
@@ -367,7 +367,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 return -1;
             }
         case STAND:
-            return StandSkin.getUiColor((IStandPower) power);
+            return StandSkinsManager.getUiColor((IStandPower) power);
         }
         return -1;
     }
