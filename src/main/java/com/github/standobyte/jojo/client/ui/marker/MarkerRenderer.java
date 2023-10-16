@@ -6,7 +6,7 @@ import java.util.List;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.render.entity.standskin.StandSkin;
+import com.github.standobyte.jojo.client.render.entity.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -91,7 +91,7 @@ public abstract class MarkerRenderer {
     protected abstract void updatePositions(List<MarkerInstance> list, float partialTick);
     
     protected int getColor() {
-        return IStandPower.getStandPowerOptional(mc.player).map(stand -> StandSkin.getUiColor(stand)).orElse(0xFFFFFF);
+        return IStandPower.getStandPowerOptional(mc.player).map(stand -> StandSkinsManager.getUiColor(stand)).orElse(0xFFFFFF);
     }
     
     protected ResourceLocation getIcon() {

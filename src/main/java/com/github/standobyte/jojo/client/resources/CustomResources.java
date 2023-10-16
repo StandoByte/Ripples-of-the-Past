@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.client.resources;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.client.render.entity.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.client.resources.sprites.ActionSpriteUploader;
 import com.github.standobyte.jojo.client.resources.sprites.HamonSkillSpriteUploader;
 
@@ -13,6 +14,7 @@ public class CustomResources {
     private static HamonSkillSpriteUploader hamonSkillSprites;
     private static ResolveShadersListManager resolveShadersListManager;
     private static ModSplashes modSplashes;
+    private static StandSkinsManager standSkinsLoader;
 
     public static void initCustomResourceManagers(Minecraft mc) {
         IReloadableResourceManager resourceManager = (IReloadableResourceManager) mc.getResourceManager();
@@ -22,6 +24,7 @@ public class CustomResources {
         resourceManager.registerReloadListener(resolveShadersListManager = new ResolveShadersListManager());
         resourceManager.registerReloadListener(modSplashes = new ModSplashes(mc.getUser(), new ResourceLocation(JojoMod.MOD_ID, "texts/splashes.txt")));
         resourceManager.registerReloadListener(new ResourceReloadNotifier());
+        resourceManager.registerReloadListener(standSkinsLoader = new StandSkinsManager());
     }
     
     public static ActionSpriteUploader getActionSprites() {
@@ -38,6 +41,10 @@ public class CustomResources {
     
     public static ModSplashes getModSplashes() {
         return modSplashes;
+    }
+    
+    public static StandSkinsManager getStandSkinsLoader() {
+        return standSkinsLoader;
     }
 
 }

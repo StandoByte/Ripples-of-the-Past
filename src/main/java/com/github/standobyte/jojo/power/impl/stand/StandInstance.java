@@ -63,14 +63,18 @@ public class StandInstance {
         this.customName = Optional.ofNullable(customName);
     }
     
+    public ITextComponent getName() {
+        return customName.orElse(standType.getName());
+    }
+    
     public void setCustomSkin(Optional<ResourceLocation> skinLocation) {
         isDirty |= (this.standSkin.isPresent() ^ skinLocation.isPresent())
                 || this.standSkin.isPresent() && skinLocation.map(skinNew -> !skinNew.equals(this.standSkin.get())).orElse(false);
         this.standSkin = skinLocation;
     }
     
-    public ITextComponent getName() {
-        return customName.orElse(standType.getName());
+    public Optional<ResourceLocation> getSelectedSkin() {
+        return standSkin;
     }
     
     public void tick(IStandPower standPower, LivingEntity standUser, World world) {
