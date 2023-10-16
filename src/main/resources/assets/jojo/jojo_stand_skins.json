@@ -27,18 +27,6 @@
     "jojo:gold_experience": {      
       "stand_type": "jojo:gold_experience",
       "color" : "0xD88F1F"
-    },
-    "rotp_sf:stone_free": {
-      "stand_type": "rotp_sf:stone_free",
-      "color": "0x80DEF7"
-    },
-    "rotp_wr:weather_report": {
-      "stand_type": "rotp_wr:weather_report",
-      "color": "0xB8CEE5"
-    },
-    "rotp_th:the_hand": {
-      "stand_type": "rotp_th:the_hand",
-      "color": "0xEDEEF0"
     }
   }
 }
