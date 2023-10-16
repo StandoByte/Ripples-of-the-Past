@@ -111,8 +111,11 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
             return getThis();
         }
         
-        public B rightClickHotbar(StandAction... action) {
-            this.rightClickHotbar = action;
+        public B rightClickHotbar(StandAction... actions) {
+            this.rightClickHotbar = actions;
+            if (quickAccess == null) {
+                quickAccess = actions.length > 0 ? actions[0] : null;
+            }
             return getThis();
         }
         
