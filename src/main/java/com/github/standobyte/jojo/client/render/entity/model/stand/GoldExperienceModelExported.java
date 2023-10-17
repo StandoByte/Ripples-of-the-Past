@@ -225,7 +225,7 @@ public class GoldExperienceModelExported extends EntityModel<Entity> {
         leftLeg_r1.setPos(2.2F, 1.65F, 0.0F);
         leftLeg.addChild(leftLeg_r1);
         setRotationAngle(leftLeg_r1, 0.0F, -1.5708F, 0.0F);
-        leftLeg_r1.texOffs(111, 107).addBox(-1.5F, -2.0F, -1.0F, 3.0F, 4.0F, 2.0F, -0.5F, true);
+        leftLeg_r1.texOffs(112, 108).addBox(-1.5F, -2.0F, -1.0F, 3.0F, 4.0F, 2.0F, -0.5F, true);
 
         leftLegJoint = new ModelRenderer(this);
         leftLegJoint.setPos(0.0F, 6.0F, 0.0F);
