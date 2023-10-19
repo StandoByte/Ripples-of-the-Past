@@ -25,6 +25,7 @@ import net.minecraftforge.client.model.ModelLoader;
  * Was made with the help of TheGreyGhost's Minecraft by Example repository
  * https://github.com/TheGreyGhost/MinecraftByExample/tree/master/src/main/java/minecraftbyexample/mbe15_item_dynamic_item_model
  */
+// FIXME sometimes uses sprites of another item for some reason
 public class StandDiscItemOverrideList extends ItemOverrideList {
     private static final String MODEL_FILE_PREFIX = "stand_disc_";
     private static final Map<StandType<?>, IBakedModel> standTypeOverrides = new HashMap<>();
@@ -40,7 +41,7 @@ public class StandDiscItemOverrideList extends ItemOverrideList {
                     MODEL_FILE_PREFIX + standType.getRegistryName().getPath()), "inventory");
             ModelLoader.addSpecialModel(modelPath);
         }
-        StandDiscFinalisedModel.clearCache();
+        clearCache();
     }
     
     public static void bakeOverrides(ModelLoader modelBakery) {
@@ -76,6 +77,8 @@ public class StandDiscItemOverrideList extends ItemOverrideList {
      * @param entity
      * @return
      */
+    private static final Map<StandType<?>, StandDiscFinalisedModel> CACHED_MODELS = new HashMap<>(); // allows for a null key
+    
     @Override
     public IBakedModel resolve(IBakedModel originalModel, ItemStack stack, @Nullable ClientWorld world, @Nullable LivingEntity entity) {
         StandType<?> standType = null;
@@ -93,6 +96,22 @@ public class StandDiscItemOverrideList extends ItemOverrideList {
             }
         }
         
-        return StandDiscFinalisedModel.getModel(originalModel, standType);
+        return getCacheModel(originalModel, standType);
+    }
+    
+    private static StandDiscFinalisedModel getCacheModel(IBakedModel parentModel, @Nullable StandType<?> stand) {
+        if (CACHED_MODELS.containsKey(stand)) {
+            StandDiscFinalisedModel model = CACHED_MODELS.get(stand);
+            if (model != null) {
+                return model;
+            }
+        }
+        StandDiscFinalisedModel model = new StandDiscFinalisedModel(parentModel, stand);
+        CACHED_MODELS.put(stand, model);
+        return model;
+    }
+    
+    private static void clearCache() {
+        CACHED_MODELS.clear();
     }
 }
