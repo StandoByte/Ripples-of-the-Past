@@ -1196,6 +1196,13 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         return isArmsOnlyMode() ? offsetDefaultArmsOnly : offsetDefault;
     }
     
+    public void setDefaultOffsetFromUser(StandRelativeOffset offset) {
+        this.offsetDefault = offset;
+        if (unsummonTicks == 0) {
+            this.unsummonOffset = offset;
+        }
+    }
+    
 //    public void addBarrageOffset() {
 //        if (!isArmsOnlyMode()) {
 //            StandEntityTask currentTask = getCurrentTask();

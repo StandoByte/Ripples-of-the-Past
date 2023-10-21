@@ -32,6 +32,8 @@ import net.minecraft.util.text.ITextComponent;
 
 public class EntityStandType<T extends StandStats> extends StandType<T> {
     private Supplier<? extends StandEntityType<? extends StandEntity>> entityTypeSupplier = null;
+    private final boolean manualControlEnabled;
+    private final boolean standLeapEnabled;
     private boolean hasHeavyAttack;
     private boolean hasFastAttack;
 
@@ -40,15 +42,34 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
             StandAction[] attacks, StandAction[] abilities, 
             Class<T> statsClass, T defaultStats, @Nullable StandTypeOptionals additions) {
         super(color, partName, attacks, abilities, abilities.length > 0 ? abilities[0] : null, statsClass, defaultStats, additions);
+        manualControlEnabled = true;
+        standLeapEnabled = true;
     }
     
-    protected EntityStandType(Builder<T> builder) {
+    protected EntityStandType(EntityStandType.AbstractBuilder<?, T> builder) {
         super(builder);
+        this.manualControlEnabled = builder.manualControlEnabled;
+        this.standLeapEnabled = builder.standLeapEnabled;
     }
     
     
     
-    public static class Builder<T extends StandStats> extends StandType.AbstractBuilder<Builder<T>, T>{
+    public static abstract class AbstractBuilder<B extends AbstractBuilder<B, T>, T extends StandStats> extends StandType.AbstractBuilder<B, T> {
+        private boolean manualControlEnabled = true;
+        private boolean standLeapEnabled = true;
+        
+        public B disableManualControl() {
+            this.manualControlEnabled = false;
+            return getThis();
+        }
+        
+        public B disableStandLeap() {
+            this.standLeapEnabled = false;
+            return getThis();
+        }
+    }
+    
+    public static class Builder<T extends StandStats> extends EntityStandType.AbstractBuilder<Builder<T>, T> {
 
         @Override
         protected Builder<T> getThis() {
@@ -229,7 +250,12 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
     
     @Override
     public boolean canBeManuallyControlled() {
-        return true;
+        return manualControlEnabled;
+    }
+    
+    @Override
+    public boolean canLeap() {
+        return standLeapEnabled;
     }
 
     @Override

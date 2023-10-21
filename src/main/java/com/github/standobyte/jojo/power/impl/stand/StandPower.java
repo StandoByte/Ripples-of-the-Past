@@ -537,7 +537,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public boolean canLeap() {
         if (super.canLeap()) {
-            return !(standManifestation instanceof StandEntity && ((StandEntity) standManifestation).getCurrentTask().isPresent());
+            return !(standManifestation instanceof StandEntity && ((StandEntity) standManifestation).getCurrentTask().isPresent())
+                    && getType().canLeap();
         }
         return false;
     }

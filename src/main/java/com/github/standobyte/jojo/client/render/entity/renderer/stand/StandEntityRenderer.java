@@ -197,12 +197,8 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
                 walkAnimSpeed = 1.0F;
             }
         }
-
-        if (!entity.isVisibleForAll() && entity.getStandPose() == StandPose.IDLE && model.attackTime == 0 && 
-                entity.isFollowingUser() && !Minecraft.getInstance().player.isShiftKeyDown() || true) {
-            float idleY = MathHelper.sin((ticks - model.idleLoopTickStamp) * 0.04F) * 0.04F;
-            matrixStack.translate(0.0D, idleY, 0.0D);
-        }
+        
+        idlePoseSwaying(entity, ticks, matrixStack);
         
         model.prepareMobModel(entity, walkAnimPos, walkAnimSpeed, partialTick);
         model.setupAnim(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
@@ -262,6 +258,14 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
             return VisibilityMode.RIGHT_ARM_ONLY;
         default:
             return VisibilityMode.LEFT_ARM_ONLY;
+        }
+    }
+    
+    protected void idlePoseSwaying(T entity, float ticks, MatrixStack matrixStack) {
+        if (!entity.isVisibleForAll() && entity.getStandPose() == StandPose.IDLE && model.attackTime == 0 && 
+                entity.isFollowingUser() && !Minecraft.getInstance().player.isShiftKeyDown() || true) {
+            float idleY = MathHelper.sin((ticks - model.idleLoopTickStamp) * 0.04F) * 0.04F;
+            matrixStack.translate(0.0D, idleY, 0.0D);
         }
     }
     
