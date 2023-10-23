@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.item;
 
+import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.entity.itemprojectile.ClackersEntity;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
@@ -61,6 +62,9 @@ public class ClackersItem extends Item {
     }
     
     private void ding(World world, PlayerEntity player) {
+//        if (world.isClientSide()) {
+//            InputHandler.getInstance().setRandomStandSkin();
+//        }
     }
 
     private static final float CHARGE_TICK_COST = 5;

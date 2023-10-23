@@ -1,10 +1,13 @@
 package com.github.standobyte.jojo.client.render.entity.renderer.stand;
 
+import java.util.Optional;
+
 import com.github.standobyte.jojo.client.ClientEventHandler;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel.VisibilityMode;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.layer.StandGlowLayer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.layer.StandModelLayerRenderer;
+import com.github.standobyte.jojo.client.render.entity.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -46,6 +49,10 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
 
     @Override
     public ResourceLocation getTextureLocation(T entity) {
+        Optional<ResourceLocation> skin = entity.getStandSkin();
+        if (skin.isPresent()) {
+            return StandSkinsManager.getTextureRemapped(skin.get(), texture);
+        }
         return texture;
     }
 

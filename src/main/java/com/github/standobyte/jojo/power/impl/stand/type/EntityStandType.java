@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.power.impl.stand.type;
 
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
@@ -27,6 +28,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 
@@ -278,6 +280,13 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
                     user.addEffect(new EffectInstance(Effects.MOVEMENT_SLOWDOWN, 300, 1));
                 }
             });
+        }
+    }
+    
+    @Override
+    public void onStandSkinSet(IStandPower power, Optional<ResourceLocation> skin) {
+        if (power.getStandManifestation() instanceof StandEntity) {
+            ((StandEntity) power.getStandManifestation()).setStandSkin(skin);
         }
     }
     

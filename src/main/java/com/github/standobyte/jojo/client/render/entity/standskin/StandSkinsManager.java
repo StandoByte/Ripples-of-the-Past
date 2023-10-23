@@ -6,15 +6,20 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.resources.CustomResources;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
+import com.github.standobyte.jojo.power.impl.stand.type.StandType;
+import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -32,9 +37,30 @@ import net.minecraft.util.text.Color;
 public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, StandSkin>> {
     private Map<ResourceLocation, StandSkin> skins = new HashMap<>();
     
+    private Map<ResourceLocation, List<StandSkin>> skinsByStand = new HashMap<>();
+    private static final List<StandSkin> EMPTY = ImmutableList.of();
+    
     @Nullable
-    public StandSkin getStandSkin(ResourceLocation skinId) {
-        return skins.get(skinId);
+    public StandSkin getStandSkin(StandType<?> standType, @Nullable ResourceLocation skinId) {
+        StandSkin skin = null;
+        if (skinId != null) {
+            skin = skins.get(skinId);
+        }
+        if (skin == null) {
+            skin = skins.get(standType.getRegistryName());
+        }
+        return skin;
+    }
+    
+    public List<StandSkin> getStandSkinsView(ResourceLocation standId) {
+        return skinsByStand.getOrDefault(standId, EMPTY);
+    }
+    
+    public static ResourceLocation getTextureRemapped(ResourceLocation skinPath, ResourceLocation originalTexPath) {
+        return new ResourceLocation(
+                skinPath.getNamespace(), 
+                "stand_skins/" + skinPath.getPath() + "/assets/" + originalTexPath.getNamespace() + "/" + originalTexPath.getPath()
+                );
     }
     
     
@@ -49,10 +75,7 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
     
     public static int getUiColor(StandInstance standInstance) {
         Optional<StandSkin> resourceSkin = standInstance.getSelectedSkin()
-                .flatMap(skinId -> Optional.ofNullable(getInstance().getStandSkin(skinId)));
-        if (!resourceSkin.isPresent()) {
-            resourceSkin = Optional.ofNullable(getInstance().getStandSkin(standInstance.getType().getRegistryName()));
-        }
+                .flatMap(skinId -> Optional.ofNullable(getInstance().getStandSkin(standInstance.getType(), skinId)));
         
         return resourceSkin.map(skin -> skin.color).orElse(standInstance.getType().getColor());
     }
@@ -137,7 +160,7 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
                 int r = array.get(0).getAsInt() & 0xFF;
                 int g = array.get(1).getAsInt() & 0xFF;
                 int b = array.get(2).getAsInt() & 0xFF;
-                return (r << 4) | (g << 2) | b;
+                return (r << 16) | (g << 8) | b;
             }
         }
         
@@ -146,7 +169,16 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
 
     @Override
     protected void apply(Map<ResourceLocation, StandSkin> skinsMap, IResourceManager resourceManager, IProfiler profiler) {
+        JojoCustomRegistries.STANDS.getRegistry().getValues().forEach(standType -> {
+            ResourceLocation id = standType.getRegistryName();
+            skinsMap.computeIfAbsent(id, s -> new StandSkin(id, id, standType.getColor()));
+        });
         this.skins = skinsMap;
+        this.skinsByStand = skinsMap.entrySet().stream()
+                .map(Map.Entry::getValue)
+                .collect(Collectors.groupingBy(entry -> entry.standTypeId));
+        
+        
 //        pObject.apply(this.registry, this.soundEngine);
 //
 //        for(ResourceLocation resourcelocation : this.registry.keySet()) {

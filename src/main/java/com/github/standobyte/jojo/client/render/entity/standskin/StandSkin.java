@@ -26,13 +26,15 @@ import net.minecraft.util.ResourceLocation;
  * 
  */
 public class StandSkin {
-    private final ResourceLocation resLoc;
-    private final ResourceLocation standTypeId;
+    public final ResourceLocation resLoc;
+    public final ResourceLocation standTypeId;
     public final int color;
+    public final boolean defaultSkin;
     
     public StandSkin(ResourceLocation resLoc, ResourceLocation standTypeId, int color) {
         this.resLoc = resLoc;
         this.standTypeId = standTypeId;
         this.color = color;
+        this.defaultSkin = resLoc.equals(standTypeId);
     }
 }
