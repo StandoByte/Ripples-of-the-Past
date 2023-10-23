@@ -51,7 +51,8 @@ public class StandDiscItem extends Item {
                     StandInstance stand = getStandFromStack(stack, false);
                     if (MCUtil.dispenseOnNearbyEntity(blockSource, stack, entity -> {
                         return IStandPower.getStandPowerOptional(entity).map(power -> {
-                            return standFitsTier(entity, power.getUserTier(), stand.getType()) && power.giveStand(stand, false);
+                            return standFitsTier(entity, power.getUserTier(), stand.getType())
+                                    && giveStandFromDisc(power, stand, stack);
                         }).orElse(false);
                     }, true)) {
                         return stack;
@@ -83,7 +84,7 @@ public class StandDiscItem extends Item {
                 else {
                     power.clear();
                 }
-                if (power.giveStand(stand, !stack.getTag().getBoolean(WS_TAG))) {
+                if (giveStandFromDisc(power, stand, stack)) {
                     if (!player.abilities.instabuild) {
                         stack.shrink(1);
                     }
@@ -179,5 +180,11 @@ public class StandDiscItem extends Item {
         } else {
             return StandSkinsManager.getUiColor(getStandFromStack(itemStack, true));
         }
+    }
+    
+    
+    private static boolean giveStandFromDisc(IStandPower standCap, StandInstance stand, ItemStack discItem) {
+        boolean standExistedBefore = discItem.getTag().getBoolean(WS_TAG);
+        return standCap.giveStandFromInstance(stand, standExistedBefore);
     }
 }

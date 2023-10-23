@@ -42,7 +42,7 @@ public class BoyIIManStandPartTakenEffect extends StandEffectInstance {
             if (target != null) {
                 IStandPower.getStandPowerOptional(target).ifPresent(power -> {
                     if (!power.hasPower()) {
-                        power.giveStand(partsTaken, false);
+                        power.giveStandFromInstance(partsTaken, true);
                     }
                     else {
                         power.getStandInstance().ifPresent(stand -> {

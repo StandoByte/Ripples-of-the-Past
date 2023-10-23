@@ -72,8 +72,7 @@ public class TrTypeStandInstancePacket {
                         stand.clear();
                     }
                     else {
-                        // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! just update the instance's contents if the player already has power
-                        stand.giveStand(msg.standInstance, false);
+                        stand.setStandInstance(msg.standInstance);
                         if (msg.resolveLevel >= 0) {
                             stand.setResolveLevel(msg.resolveLevel, false);
                         }
