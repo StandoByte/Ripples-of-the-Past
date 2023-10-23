@@ -171,7 +171,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     private BarrageSwingsHolder<?, ?> barrageSwings;
     private final BarrageHitSoundHandler barrageSounds;
     
-    private static final DataParameter<Optional<ResourceLocation>> STAND_SKIN = EntityDataManager.defineId(StandEntity.class, 
+    public static final DataParameter<Optional<ResourceLocation>> DATA_PARAM_STAND_SKIN = EntityDataManager.defineId(StandEntity.class, 
             (IDataSerializer<Optional<ResourceLocation>>) ModDataSerializers.OPTIONAL_RES_LOC.get().getSerializer());
     
     public StandEntity(StandEntityType<? extends StandEntity> type, World world) {
@@ -217,7 +217,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         entityData.define(NO_BLOCKING_TICKS, 0);
         entityData.define(CURRENT_TASK, Optional.empty());
         entityData.define(MANUAL_MOVEMENT_LOCK, (byte) 0);
-        entityData.define(STAND_SKIN, Optional.empty());
+        entityData.define(DATA_PARAM_STAND_SKIN, Optional.empty());
     }
 
     @Override
@@ -2331,11 +2331,11 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     
     
     public void setStandSkin(Optional<ResourceLocation> skinLocation) {
-        entityData.set(STAND_SKIN, skinLocation);
+        entityData.set(DATA_PARAM_STAND_SKIN, skinLocation);
     }
     
     public Optional<ResourceLocation> getStandSkin() {
-        return entityData.get(STAND_SKIN);
+        return entityData.get(DATA_PARAM_STAND_SKIN);
     }
     
     

@@ -5,10 +5,14 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeSet;
+import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -19,7 +23,9 @@ import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
+import com.google.common.collect.Comparators;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Ordering;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -176,7 +182,8 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
         this.skins = skinsMap;
         this.skinsByStand = skinsMap.entrySet().stream()
                 .map(Map.Entry::getValue)
-                .collect(Collectors.groupingBy(entry -> entry.standTypeId));
+                .collect(Collectors.groupingBy(entry -> entry.standTypeId, 
+                        toSortedList(Comparator.comparing(skin -> skin.resLoc, SKINS_ID_ORDER))));
         
         
 //        pObject.apply(this.registry, this.soundEngine);
@@ -201,5 +208,18 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
 //
 //        this.soundEngine.reload();
     }
+    
+    private static <T> Collector<T, ?, List<T>> toSortedList(Comparator<? super T> c) {
+        return Collectors.collectingAndThen(
+                Collectors.toCollection(() -> new TreeSet<>(c)), 
+                ArrayList::new);
+    }
+    
+    private static final Comparator<ResourceLocation> SKINS_ID_ORDER = (rl1, rl2) -> {
+        boolean fromMainMod1 = JojoMod.MOD_ID.equals(rl1.getNamespace());
+        boolean fromMainMod2 = JojoMod.MOD_ID.equals(rl2.getNamespace());
+        if (fromMainMod1 ^ fromMainMod2) return fromMainMod1 ? -1 : 1;
+        return rl1.toString().compareTo(rl2.toString());
+    };
 
 }

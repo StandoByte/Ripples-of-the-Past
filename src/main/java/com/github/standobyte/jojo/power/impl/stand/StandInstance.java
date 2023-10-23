@@ -86,12 +86,14 @@ public class StandInstance {
     }
     
     public void tick(IStandPower standPower, LivingEntity standUser, World world) {
-        if (isDirty) {
-            if (!world.isClientSide()) {
-                PacketManager.sendToClientsTrackingAndSelf(new TrTypeStandInstancePacket(standUser.getId(), this, -1), standUser);
-            }
-            isDirty = false;
+        syncIfDirty(standUser);
+    }
+    
+    public void syncIfDirty(LivingEntity standUser) {
+        if (isDirty && !standUser.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(new TrTypeStandInstancePacket(standUser.getId(), this, -1), standUser);
         }
+        isDirty = false;
     }
     
     

@@ -67,6 +67,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.MovementInput;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
@@ -370,11 +371,11 @@ public class InputHandler {
     private static final Random RANDOM = new Random();
     public void setRandomStandSkin() {
         if (standPower.hasPower()) {
-            List<StandSkin> allSkins = StandSkinsManager.getInstance().getStandSkinsView(
-                    standPower.getType().getRegistryName());
+            ResourceLocation standId = standPower.getType().getRegistryName();
+            List<StandSkin> allSkins = StandSkinsManager.getInstance().getStandSkinsView(standId);
             int i = RANDOM.nextInt(allSkins.size());
             Optional<StandSkin> standSkin = Optional.of(allSkins.get(i));
-            PacketManager.sendToServer(new ClSetStandSkinPacket(standSkin.map(skin -> skin.resLoc)));
+            PacketManager.sendToServer(new ClSetStandSkinPacket(standSkin.map(skin -> skin.resLoc), standId));
         }
     }
     

@@ -136,6 +136,7 @@ public class HudLayoutEditingScreen extends Screen {
     @Override
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
         if (!works()) return;
+        renderBackground(matrixStack, 0);
         hoveredAction = getActionAt(mouseX, mouseY);
         isQuickActionSlotHovered = isQuickAccessActionSlotAt(mouseX, mouseY);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
