@@ -28,6 +28,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.StringTextComponent;
 
@@ -72,8 +73,8 @@ public class StandSkinsScreen extends Screen {
         this.skins = Streams.mapWithIndex(StandSkinsManager.getInstance()
                 .getStandSkinsView(standCap.getType().getRegistryName())
                 .stream(), (skin, index) -> {
-                    int x = 3 + (int) (index % 3) * (SkinView.width + 3);
-                    int y = 3 + (int) (index / 3) * (SkinView.height + 3);
+                    int x = 3 + (int) (index % 3) * (SkinView.boxWidth + 3);
+                    int y = 3 + (int) (index / 3) * (SkinView.boxHeight + 3);
                     return new SkinView(skin, x, y);
                 })
                 .collect(Collectors.toList());
@@ -97,11 +98,11 @@ public class StandSkinsScreen extends Screen {
         
         renderBackground(matrixStack, 0);
         renderBgPattern(matrixStack);
-        renderWindow(matrixStack);
         matrixStack.pushPose();
         matrixStack.translate(getWindowX() + WINDOW_INSIDE_X, getWindowY() + WINDOW_INSIDE_Y, 0);
         renderContents(matrixStack, mouseX, mouseY, partialTick);
         matrixStack.popPose();
+        renderWindow(matrixStack);
         
         for (Widget button : buttons) {
             button.render(matrixStack, mouseX, mouseY, partialTick);
@@ -126,7 +127,7 @@ public class StandSkinsScreen extends Screen {
         fill(matrixStack, WINDOW_WIDTH - 8, WINDOW_HEIGHT - 8, 0, 0, -0x1000000);
         RenderSystem.depthFunc(515);
         minecraft.getTextureManager().bind(TEXTURE_BG);
-        int l = scroll % 16;
+        int l = -scroll % 16;
         for (int i1 = -1; i1 <= 11; ++i1) {
             for (int j1 = -1; j1 <= 11; ++j1) {
                 blit(matrixStack, 5 + 16 * i1, l + 16 * j1, 0.0F, 0.0F, 16, 16, 16, 16);
@@ -143,18 +144,29 @@ public class StandSkinsScreen extends Screen {
     
     private void renderContents(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
         float ticks = tickCount + partialTick;
-        IRenderTypeBuffer.Impl buffer = Minecraft.getInstance().renderBuffers().bufferSource();
         if (skinFullView != null) {
+            IRenderTypeBuffer.Impl buffer = Minecraft.getInstance().renderBuffers().bufferSource();
             skinFullView.render(matrixStack, mouseX, mouseY, ticks, buffer);
+            buffer.endBatch();
         }
         else {
+            matrixStack.pushPose();
+            matrixStack.translate(0, -scroll, 0);
+            IRenderTypeBuffer.Impl buffer = Minecraft.getInstance().renderBuffers().bufferSource();
+            // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! filter to only visible
+            for (SkinView skin : skins) {
+                skin.renderStand(matrixStack, mouseX, mouseY, ticks, buffer);
+            }
+            buffer.endBatch();
+            
+            // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! renders outside of the window
             Optional<SkinView> hoveredSkin = getSkinAt(mouseX, mouseY);
             for (SkinView skin : skins) {
-                skin.render(matrixStack, mouseX, mouseY, ticks, buffer, 
+                skin.renderAdditional(matrixStack, mouseX, mouseY, ticks, 
                         hoveredSkin.map(hovered -> skin == hovered).orElse(false));
             }
+            matrixStack.popPose();
         }
-        buffer.endBatch();
     }
     
     private Optional<SkinView> getSkinAt(int mouseX, int mouseY) {
@@ -162,10 +174,18 @@ public class StandSkinsScreen extends Screen {
         
         int x = mouseX - (getWindowX() + WINDOW_INSIDE_X);
         int y = mouseY - (getWindowY() + WINDOW_INSIDE_Y);
-        return skins.stream().filter(skin -> 
-        x > skin.x && x <= skin.x + SkinView.width && 
-        y > skin.y && y <= skin.y + SkinView.height)
-                .findFirst();
+        if (
+                x >= 0 && x <= WINDOW_INSIDE_WIDTH && 
+                y >= 0 && y <= WINDOW_INSIDE_HEIGHT) {
+            int yWithScroll = y + scroll;
+            return skins.stream().filter(skin -> 
+            x >           skin.x && x           <= skin.x + SkinView.boxWidth && 
+            yWithScroll > skin.y && yWithScroll <= skin.y + SkinView.boxHeight)
+                    .findFirst();
+        }
+        else {
+            return Optional.empty();
+        }
     }
     
     private int getWindowX() { return (width - WINDOW_WIDTH) / 2; }
@@ -213,7 +233,7 @@ public class StandSkinsScreen extends Screen {
             return true;
         }
         else {
-            
+            addScroll((int) (-scrollDelta * 10));
         }
         
         return false;
@@ -243,6 +263,15 @@ public class StandSkinsScreen extends Screen {
         }
     }
     
+    private void addScroll(int scroll) {
+        this.scroll = MathHelper.clamp(this.scroll + scroll, 0, getMaxScroll());
+    }
+    
+    public int getMaxScroll() {
+        int rowsCount = (skins.size() - 1) / 3 + 1;
+        return Math.max((SkinView.boxHeight + 4) * rowsCount - WINDOW_INSIDE_HEIGHT, 0);
+    }
+    
     
     private void setFullViewSkin(@Nullable StandSkin skin) {
         if (skin != null) {
@@ -258,8 +287,8 @@ public class StandSkinsScreen extends Screen {
         public final StandSkin skin;
         public final int x;
         public final int y;
-        public static final int width = 51;
-        public static final int height = 72;
+        public static final int boxWidth = 51;
+        public static final int boxHeight = 72;
         
         public SkinView(StandSkin skin, int x, int y) {
             this.skin = skin;
@@ -268,15 +297,15 @@ public class StandSkinsScreen extends Screen {
         }
         
         @SuppressWarnings("deprecation")
-        public void render(MatrixStack matrixStack, int mouseX, int mouseY, 
-                float ticks, IRenderTypeBuffer buffer, boolean isHovered) {
+        public void renderStand(MatrixStack matrixStack, int mouseX, int mouseY, 
+                float ticks, IRenderTypeBuffer buffer) {
             minecraft.getTextureManager().bind(TEXTURE_MAIN_WINDOW);
 //            blit(matrixStack, x, y, 98, 182, width, height);
             
             StandType<?> standType = standCap.getType();
             if (standType instanceof EntityStandType) {
                 matrixStack.pushPose();
-                matrixStack.translate(x + width / 2, y + height / 2, 100);
+                matrixStack.translate(x + boxWidth / 2, y + boxHeight / 2, 100);
                 matrixStack.translate(0.5F, 0, 0);
                 
                 // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! lighting is weird
@@ -292,18 +321,24 @@ public class StandSkinsScreen extends Screen {
                 });
                 matrixStack.popPose();
             }
-
-            RenderSystem.enableBlend();
+        }
+        
+        @SuppressWarnings("deprecation")
+        public void renderAdditional(MatrixStack matrixStack, int mouseX, int mouseY, 
+                float ticks, boolean isHovered) {
             minecraft.getTextureManager().bind(TEXTURE_MAIN_WINDOW);
             if (isSkinSelected(skin)) {
-                blit(matrixStack, x + width - 18, y + 2, 0, 192, 16, 16);
+                blit(matrixStack, x + boxWidth - 18, y + 2, 0, 192, 16, 16);
             }
             if (isHovered) {
                 float[] color = ClientUtil.rgb(skin.color);
-                RenderSystem.color3f(color[0], color[1], color[2]);
-                blit(matrixStack, x - 2, y - 2, 32, 180, width + 4, height + 4);
-                RenderSystem.color3f(1, 1, 1);
-            }
+                RenderSystem.enableBlend();
+                RenderSystem.color4f(color[0], color[1], color[2], 1);
+                blit(matrixStack, x - 2, y - 2, 
+                        32, 180, boxWidth + 4, boxHeight + 4);
+                RenderSystem.color4f(1, 1, 1, 1);
+                RenderSystem.disableBlend();
+            };
         }
     }
     
