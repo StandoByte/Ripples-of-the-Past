@@ -19,8 +19,9 @@ import net.minecraftforge.common.util.LazyOptional;
 
 public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     Optional<StandInstance> getStandInstance();
-    boolean giveStand(StandInstance standInstance, boolean newInstance);
+    boolean giveStandFromInstance(StandInstance standInstance, boolean standExistedInWorld);
     Optional<StandInstance> putOutStand();
+    void setStandInstance(StandInstance standInstance);
     
     PreviousStandsSet getPreviousStandsSet();
     boolean hadAnyStand();

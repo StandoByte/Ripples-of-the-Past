@@ -497,9 +497,16 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         }
         
         public T holdToFire(int ticksToFire, boolean continueHolding) {
-            this.holdDurationToFire = ticksToFire;
-            this.holdDurationMax = Integer.MAX_VALUE;
-            this.continueHolding = continueHolding;
+            if (ticksToFire > 0) {
+                this.holdDurationToFire = ticksToFire;
+                this.holdDurationMax = Integer.MAX_VALUE;
+                this.continueHolding = continueHolding;
+            }
+            else {
+                this.holdDurationToFire = 0;
+                this.holdDurationMax = 0;
+                this.continueHolding = false;
+            }
             return getThis();
         }
         

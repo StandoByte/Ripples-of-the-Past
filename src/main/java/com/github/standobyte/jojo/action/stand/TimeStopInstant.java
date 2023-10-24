@@ -68,8 +68,10 @@ public class TimeStopInstant extends StandAction {
 
         Vector3d blinkPos = null;
         double speed = getDistancePerTick(user);
+        double distance = Math.min(speed * timeStopTicks, 192);
         if (target.getType() == TargetType.EMPTY) {
-            RayTraceResult rayTrace = JojoModUtil.rayTrace(user, Math.min(speed * timeStopTicks, 192), entity -> entity instanceof LivingEntity);
+            RayTraceResult rayTrace = JojoModUtil.rayTrace(user, distance, 
+                    entity -> entity instanceof LivingEntity && !(entity instanceof StandEntity && ((StandEntity) entity).getUser() == user));
             if (rayTrace.getType() == RayTraceResult.Type.MISS) {
                 blinkPos = rayTrace.getLocation();
             }
@@ -97,7 +99,8 @@ public class TimeStopInstant extends StandAction {
             break;
         }
         
-        int impliedTicks = MathHelper.clamp(MathHelper.ceil(user.position().subtract(blinkPos).length() / speed), 0, timeStopTicks);
+        distance = user.position().subtract(blinkPos).length();
+        int impliedTicks = MathHelper.clamp(MathHelper.ceil(distance / speed), 0, timeStopTicks);
         skipTicksForStandAndUser(power, impliedTicks);
         
         if (!world.isClientSide()) {

@@ -86,7 +86,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     
 
     
-    public static abstract class AbstractBuilder<B extends AbstractBuilder<B, T>, T extends StandStats> { // i freaking love chainables and builders
+    public static abstract class AbstractBuilder<B extends AbstractBuilder<B, T>, T extends StandStats> {
         private int color = 0x000000;
         private ITextComponent storyPartName = StringTextComponent.EMPTY;
         private StandAction[] leftClickHotbar = {};
@@ -379,6 +379,10 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         return false;
     }
     
+    public boolean canLeap() {
+        return false;
+    }
+    
     @Nullable
     public OstSoundList getOst() {
         return ostSupplier;
@@ -401,6 +405,8 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
             });
         }
     }
+    
+    public void onStandSkinSet(IStandPower power, Optional<ResourceLocation> skin) {}
     
     
     @Deprecated

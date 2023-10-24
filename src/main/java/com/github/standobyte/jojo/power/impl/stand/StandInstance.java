@@ -5,6 +5,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
@@ -67,10 +68,17 @@ public class StandInstance {
         return customName.orElse(standType.getName());
     }
     
-    public void setCustomSkin(Optional<ResourceLocation> skinLocation) {
+    public void setCustomSkin(Optional<ResourceLocation> skinLocation, @Nullable IStandPower power) {
+        if (skinLocation.isPresent() && skinLocation.get().equals(standType.getRegistryName())) {
+            skinLocation = Optional.empty();
+        }
+        
         isDirty |= (this.standSkin.isPresent() ^ skinLocation.isPresent())
                 || this.standSkin.isPresent() && skinLocation.map(skinNew -> !skinNew.equals(this.standSkin.get())).orElse(false);
         this.standSkin = skinLocation;
+        if (power != null) {
+            standType.onStandSkinSet(power, skinLocation);
+        }
     }
     
     public Optional<ResourceLocation> getSelectedSkin() {
@@ -78,12 +86,14 @@ public class StandInstance {
     }
     
     public void tick(IStandPower standPower, LivingEntity standUser, World world) {
-        if (isDirty) {
-            if (!world.isClientSide()) {
-                PacketManager.sendToClientsTrackingAndSelf(new TrTypeStandInstancePacket(standUser.getId(), this, -1), standUser);
-            }
-            isDirty = false;
+        syncIfDirty(standUser);
+    }
+    
+    public void syncIfDirty(LivingEntity standUser) {
+        if (isDirty && !standUser.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(new TrTypeStandInstancePacket(standUser.getId(), this, -1), standUser);
         }
+        isDirty = false;
     }
     
     
@@ -139,7 +149,8 @@ public class StandInstance {
         }
         
         instance.setCustomSkin(MCUtil.getNbtElement(nbt, "Skin", StringNBT.class)
-                .map(StringNBT::getAsString).map(ResourceLocation::new));
+                .map(StringNBT::getAsString).map(ResourceLocation::new), 
+                null);
         
         return instance;
     }

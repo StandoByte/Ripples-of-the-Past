@@ -1,20 +1,30 @@
-package com.github.standobyte.jojo.client.render.entity.standskin;
+package com.github.standobyte.jojo.client.standskin;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.TreeSet;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.client.ResourcePathChecker;
 import com.github.standobyte.jojo.client.resources.CustomResources;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
+import com.github.standobyte.jojo.power.impl.stand.type.StandType;
+import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -32,9 +42,23 @@ import net.minecraft.util.text.Color;
 public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, StandSkin>> {
     private Map<ResourceLocation, StandSkin> skins = new HashMap<>();
     
+    private Map<ResourceLocation, List<StandSkin>> skinsByStand = new HashMap<>();
+    private static final List<StandSkin> EMPTY = ImmutableList.of();
+    
     @Nullable
-    public StandSkin getStandSkin(ResourceLocation skinId) {
-        return skins.get(skinId);
+    public StandSkin getStandSkin(StandType<?> standType, @Nullable ResourceLocation skinId) {
+        StandSkin skin = null;
+        if (skinId != null) {
+            skin = skins.get(skinId);
+        }
+        if (skin == null) {
+            skin = skins.get(standType.getRegistryName());
+        }
+        return skin;
+    }
+    
+    public List<StandSkin> getStandSkinsView(ResourceLocation standId) {
+        return skinsByStand.getOrDefault(standId, EMPTY);
     }
     
     
@@ -49,10 +73,7 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
     
     public static int getUiColor(StandInstance standInstance) {
         Optional<StandSkin> resourceSkin = standInstance.getSelectedSkin()
-                .flatMap(skinId -> Optional.ofNullable(getInstance().getStandSkin(skinId)));
-        if (!resourceSkin.isPresent()) {
-            resourceSkin = Optional.ofNullable(getInstance().getStandSkin(standInstance.getType().getRegistryName()));
-        }
+                .flatMap(skinId -> Optional.ofNullable(getInstance().getStandSkin(standInstance.getType(), skinId)));
         
         return resourceSkin.map(skin -> skin.color).orElse(standInstance.getType().getColor());
     }
@@ -137,7 +158,7 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
                 int r = array.get(0).getAsInt() & 0xFF;
                 int g = array.get(1).getAsInt() & 0xFF;
                 int b = array.get(2).getAsInt() & 0xFF;
-                return (r << 4) | (g << 2) | b;
+                return (r << 16) | (g << 8) | b;
             }
         }
         
@@ -146,7 +167,17 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
 
     @Override
     protected void apply(Map<ResourceLocation, StandSkin> skinsMap, IResourceManager resourceManager, IProfiler profiler) {
+        JojoCustomRegistries.STANDS.getRegistry().getValues().forEach(standType -> {
+            ResourceLocation id = standType.getRegistryName();
+            skinsMap.computeIfAbsent(id, s -> new StandSkin(id, id, standType.getColor()));
+        });
         this.skins = skinsMap;
+        this.skinsByStand = skinsMap.entrySet().stream()
+                .map(Map.Entry::getValue)
+                .collect(Collectors.groupingBy(entry -> entry.standTypeId, 
+                        toSortedList(Comparator.comparing(skin -> skin.resLoc, SKINS_ID_ORDER))));
+        
+        
 //        pObject.apply(this.registry, this.soundEngine);
 //
 //        for(ResourceLocation resourcelocation : this.registry.keySet()) {
@@ -169,5 +200,66 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
 //
 //        this.soundEngine.reload();
     }
-
+    
+    private static <T> Collector<T, ?, List<T>> toSortedList(Comparator<? super T> c) {
+        return Collectors.collectingAndThen(
+                Collectors.toCollection(() -> new TreeSet<>(c)), 
+                ArrayList::new);
+    }
+    
+    private static final Comparator<ResourceLocation> SKINS_ID_ORDER = (rl1, rl2) -> {
+        boolean fromMainMod1 = JojoMod.MOD_ID.equals(rl1.getNamespace());
+        boolean fromMainMod2 = JojoMod.MOD_ID.equals(rl2.getNamespace());
+        if (fromMainMod1 ^ fromMainMod2) return fromMainMod1 ? -1 : 1;
+        return rl1.compareTo(rl2);
+    };
+    
+    
+    
+    private Map<ResLocPair, ResourcePathChecker> pathCheckCache = new HashMap<>();
+    
+    public ResourcePathChecker getPathChecker(ResourceLocation skinPath, ResourceLocation originalResPath) {
+        return pathCheckCache.computeIfAbsent(new ResLocPair(skinPath, originalResPath), pair -> {
+            ResourceLocation pathRemapped = new ResourceLocation(
+                    skinPath.getNamespace(), 
+                    "stand_skins/" + skinPath.getPath() + "/assets/" + originalResPath.getNamespace() + "/" + originalResPath.getPath()
+                    );
+            return ResourcePathChecker.create(pathRemapped);
+        });
+    }
+    
+    public static ResourceLocation getPathRemapped(StandSkin standSkin, ResourceLocation orDefault) {
+        return getPathRemapped(standSkin.getNonDefaultLocation(), orDefault);
+    }
+    
+    public static ResourceLocation getPathRemapped(Optional<ResourceLocation> standSkinPath, ResourceLocation orDefault) {
+        return standSkinPath.map(skin -> StandSkinsManager.getInstance().getPathChecker(skin, orDefault)
+                .or(orDefault))
+                .orElse(orDefault);
+    }
+    
+    private static class ResLocPair {
+        private final ResourceLocation left;
+        private final ResourceLocation right;
+        
+        public ResLocPair(ResourceLocation left, ResourceLocation right) {
+            this.left = left;
+            this.right = right;
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj instanceof ResLocPair) {
+                ResLocPair other = (ResLocPair) obj;
+                return this.left.equals(other.left) && this.right.equals(other.right);
+            }
+            return false;
+        }
+        
+        @Override
+        public int hashCode() {
+            return left.hashCode() ^ right.hashCode();
+        }
+    }
 }

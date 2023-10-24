@@ -13,8 +13,10 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_V;
 import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_MIDDLE;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Random;
 
 import javax.annotation.Nullable;
 
@@ -25,6 +27,8 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.client.standskin.StandSkin;
+import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.actionshud.QuickAccess.QuickAccessKeyConflictContext;
 import com.github.standobyte.jojo.client.ui.screen.hudlayout.HudLayoutEditingScreen;
@@ -41,6 +45,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClHasInputPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHeldActionTargetPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnLeapPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnStandDashPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClSetStandSkinPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClStopHeldActionPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandManualControlPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandSummonPacket;
@@ -62,6 +67,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.MovementInput;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
@@ -312,7 +318,7 @@ public class InputHandler {
             
 
             if (toggleStand.consumeClick()) {
-                if (!standPower.isActive()) {
+                if (standPower.hasPower() && !standPower.isActive()) {
                     actionsOverlay.onStandSummon();
                 }
 //                else {
@@ -359,6 +365,17 @@ public class InputHandler {
             
             checkHeldActionAndTarget(standPower);
             checkHeldActionAndTarget(nonStandPower);
+        }
+    }
+
+    private static final Random RANDOM = new Random();
+    public void setRandomStandSkin() {
+        if (standPower.hasPower()) {
+            ResourceLocation standId = standPower.getType().getRegistryName();
+            List<StandSkin> allSkins = StandSkinsManager.getInstance().getStandSkinsView(standId);
+            int i = RANDOM.nextInt(allSkins.size());
+            Optional<StandSkin> standSkin = Optional.of(allSkins.get(i));
+            PacketManager.sendToServer(new ClSetStandSkinPacket(standSkin.map(skin -> skin.resLoc), standId));
         }
     }
     
