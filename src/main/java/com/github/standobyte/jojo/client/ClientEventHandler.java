@@ -21,6 +21,7 @@ import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
+import com.github.standobyte.jojo.client.ui.screen.standskin.StandSkinsScreen;
 import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModStatusEffects;
@@ -45,6 +46,9 @@ import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.IngameMenuScreen;
 import net.minecraft.client.gui.screen.MainMenuScreen;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.widget.button.ImageButton;
 import net.minecraft.client.renderer.FirstPersonRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.OutlineLayerBuffer;
@@ -69,12 +73,14 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent;
+import net.minecraftforge.client.event.GuiScreenEvent.InitGuiEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
@@ -107,7 +113,7 @@ public class ClientEventHandler {
     public boolean isZooming;
 
     private int deathScreenTick;
-    private int pauseMenuScreenTick;
+    private int standStatsTick;
     
     private ClientEventHandler(Minecraft mc) {
         this.mc = mc;
@@ -285,7 +291,7 @@ public class ClientEventHandler {
         }
 
         deathScreenTick = mc.screen instanceof DeathScreen ? deathScreenTick + 1 : 0;
-        pauseMenuScreenTick = mc.screen instanceof IngameMenuScreen ? pauseMenuScreenTick + 1 : 0;
+        standStatsTick = mc.screen instanceof IngameMenuScreen && doStandStatsRender(mc.screen) ? standStatsTick + 1 : 0;
     }
     
     
@@ -474,26 +480,38 @@ public class ClientEventHandler {
     
     @SubscribeEvent
     public void afterScreenRender(DrawScreenEvent.Post event) {
-        if (event.getGui() instanceof DeathScreen) {
-            ITextComponent title = event.getGui().getTitle();
+        Screen screen = event.getGui();
+        if (screen instanceof DeathScreen) {
+            ITextComponent title = screen.getTitle();
             if (title instanceof TranslationTextComponent && ((TranslationTextComponent) title).getKey().endsWith(".hardcore")) {
                 return;
             }
-            renderToBeContinuedArrow(event.getMatrixStack(), event.getGui(), event.getGui().width, event.getGui().height, event.getRenderPartialTicks());
+            renderToBeContinuedArrow(event.getMatrixStack(), screen, screen.width, screen.height, event.getRenderPartialTicks());
         }
 
-        else if (event.getGui() instanceof IngameMenuScreen && ClientReflection.showsPauseMenu((IngameMenuScreen) event.getGui())) {
+        else if (screen instanceof IngameMenuScreen && ClientReflection.showsPauseMenu((IngameMenuScreen) screen)) {
             float alpha = JojoModConfig.CLIENT.standStatsTranslucency.get().floatValue();
             if (alpha <= 0) return;
-            int xButtonsRightEdge = event.getGui().width / 2 + 102;
-            int windowWidth = event.getGui().width;
-            int windowHeight = event.getGui().height;
-
-            if (windowWidth - xButtonsRightEdge >= 167 && windowHeight > 204) {
+            int xButtonsRightEdge = screen.width / 2 + 102;
+            int windowWidth = screen.width;
+            int windowHeight = screen.height;
+            
+            if (doStandStatsRender(screen)) {
                 StandStatsRenderer.renderStandStats(event.getMatrixStack(), mc, windowWidth - 160, windowHeight - 160, windowWidth, windowHeight,
-                        pauseMenuScreenTick, event.getRenderPartialTicks(), alpha, event.getMouseX(), event.getMouseY(), windowWidth - xButtonsRightEdge - 14);
+                        standStatsTick, event.getRenderPartialTicks(), alpha, event.getMouseX(), event.getMouseY(), windowWidth - xButtonsRightEdge - 14);
             }
         }
+    }
+    
+    private Boolean renderStandStats;
+    private boolean doStandStatsRender(Screen screen) {
+        if (renderStandStats != null) {
+            return renderStandStats;
+        }
+        int xButtonsRightEdge = screen.width / 2 + 102;
+        int windowWidth = screen.width;
+        int windowHeight = screen.height;
+        return windowWidth - xButtonsRightEdge >= 167 && windowHeight > 204;
     }
 
     private void renderToBeContinuedArrow(MatrixStack matrixStack, AbstractGui ui, int screenWidth, int screenHeight, float partialTick) {
@@ -503,14 +521,59 @@ public class ClientEventHandler {
         ui.blit(matrixStack, x, y, 0, 231, 130, 25);
         AbstractGui.drawCenteredString(matrixStack, mc.font, new TranslationTextComponent("jojo.to_be_continued"), x + 61, y + 8, 0x525544);
     }
+    
+    @SubscribeEvent
+    public void addToScreen(InitGuiEvent.Post event) {
+        Screen screen = event.getGui();
+        if (screen instanceof IngameMenuScreen && ClientReflection.showsPauseMenu((IngameMenuScreen) screen)) {
+            IStandPower.getStandPowerOptional(mc.player).ifPresent(power -> {
+                if (power.hasPower()) {
+//                    Button standStatsToggleButton = new ImageButton(screen.width - 28, screen.height - 28, 
+//                            20, 20, 236, 216, 20, StandStatsRenderer.STAND_STATS_UI, 256, 256, 
+//                            button -> {
+//                                renderStandStats = !doStandStatsRender(screen);
+//                            }, 
+//                            (button, matrixStack, x, y) -> {
+//                                ITextComponent message = doStandStatsRender(screen) ? 
+//                                        new TranslationTextComponent("jojo.stand_stat.button.hide")
+//                                        : new TranslationTextComponent("jojo.stand_stat.button.show");
+//                                screen.renderTooltip(matrixStack, message, x, y);
+//                            }, 
+//                            StringTextComponent.EMPTY);
+//                    event.addWidget(standStatsToggleButton);
+                    
+                    Button standSkinsButton = new ImageButton(screen.width - 28, screen.height - 159, 
+                            20, 20, 236, 216, 20, StandSkinsScreen.TEXTURE_MAIN_WINDOW, 256, 256, 
+                            button -> {
+                                StandSkinsScreen.openScreen(screen);
+                            }, 
+                            (button, matrixStack, x, y) -> {
+                                screen.renderTooltip(matrixStack, new TranslationTextComponent("jojo.stand_skins.button"), x, y);
+                            }, 
+                            StringTextComponent.EMPTY);
+                    event.addWidget(standSkinsButton);
+                }
+            });
+        }
+    }
 
     @SubscribeEvent
     public void onScreenOpened(GuiOpenEvent event) {
-        if (event.getGui() instanceof MainMenuScreen) {
+        Screen screen = event.getGui();
+        if (screen instanceof MainMenuScreen) {
             String splash = CustomResources.getModSplashes().overrideSplash();
             if (splash != null) {
-                ClientReflection.setSplash((MainMenuScreen) event.getGui(), splash);
+                ClientReflection.setSplash((MainMenuScreen) screen, splash);
             }
+        }
+        else if (screen == null) {
+            onScreenClosed();
+        }
+    }
+    
+    private void onScreenClosed() {
+        if (renderStandStats != null && renderStandStats) {
+            renderStandStats = null;
         }
     }
 

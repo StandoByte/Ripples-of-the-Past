@@ -81,19 +81,23 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
 
     @Override
     public boolean givePower(StandType<?> standType) {
-        return giveStand(new StandInstance(standType), true);
+        return giveStandFromInstance(new StandInstance(standType), false);
     }
     
     @Override
-    public boolean giveStand(StandInstance standInstance, boolean newInstance) {
-        if (standInstance == null || (user == null || !user.level.isClientSide()) && !canGetPower(standInstance.getType())) {
+    public boolean giveStandFromInstance(StandInstance standInstance, boolean standExistedInWorld) {
+        if (standInstance == null) {
             return false;
         }
-
-        setStandInstance(standInstance);
+        
         StandType<?> standType = standInstance.getType();
+        if ((user == null || !user.level.isClientSide()) && !canGetPower(standType)) {
+            return false;
+        }
+        
+        setStandInstance(standInstance);
         onNewPowerGiven(standType);
-        if (newInstance) {
+        if (!standExistedInWorld) {
             serverPlayerUser.ifPresent(player -> {
                 SaveFileUtilCapProvider.getSaveFileCap(player).addPlayerStand(standType);
             });
@@ -101,7 +105,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         return true;
     }
     
-    private void setStandInstance(StandInstance standInstance) {
+    
+    @Override
+    public void setStandInstance(StandInstance standInstance) {
         this.standInstance = Optional.ofNullable(standInstance);
         onPowerSet(this.standInstance.map(StandInstance::getType).orElse(null));
     }
@@ -109,23 +115,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     protected void onNewPowerGiven(StandType<?> standType) {
         super.onNewPowerGiven(standType);
-        serverPlayerUser.ifPresent(player -> {
-            PacketManager.sendToClientsTrackingAndSelf(new TrTypeStandInstancePacket(
-                    player.getId(), getStandInstance().get(), resolveCounter.getResolveLevel()), player);
-        });
-        setStamina(getMaxStamina() * 0.5F);
-        if (user != null && (JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).skipStandProgression.get()
-                || user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild)) {
-            skipProgression();
-        }
-        else {
-            standType.unlockNewActions(this);
-        }
-    }
-    
-    @Override
-    protected void onPowerSet(StandType<?> standType) {
-        super.onPowerSet(standType);
+
         if (usesStamina()) {
             stamina = isUserCreative() ? getMaxStamina() : 0;
         }
@@ -137,6 +127,19 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         }
         if (user != null && !user.level.isClientSide()) {
             continuousEffects.onStandChanged(user);
+        }
+        
+        serverPlayerUser.ifPresent(player -> {
+            PacketManager.sendToClientsTrackingAndSelf(new TrTypeStandInstancePacket(
+                    player.getId(), getStandInstance().get(), resolveCounter.getResolveLevel()), player);
+        });
+        setStamina(getMaxStamina() * 0.5F);
+        if (user != null && (JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).skipStandProgression.get()
+                || user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild)) {
+            skipProgression();
+        }
+        else {
+            standType.unlockNewActions(this);
         }
     }
 
@@ -537,7 +540,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public boolean canLeap() {
         if (super.canLeap()) {
-            return !(standManifestation instanceof StandEntity && ((StandEntity) standManifestation).getCurrentTask().isPresent());
+            return !(standManifestation instanceof StandEntity && ((StandEntity) standManifestation).getCurrentTask().isPresent())
+                    && getType().canLeap();
         }
         return false;
     }

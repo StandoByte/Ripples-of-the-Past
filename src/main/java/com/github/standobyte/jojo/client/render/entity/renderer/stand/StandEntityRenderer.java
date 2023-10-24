@@ -1,10 +1,15 @@
 package com.github.standobyte.jojo.client.render.entity.renderer.stand;
 
+import java.util.Optional;
+
 import com.github.standobyte.jojo.client.ClientEventHandler;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel.VisibilityMode;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.layer.StandGlowLayer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.layer.StandModelLayerRenderer;
+import com.github.standobyte.jojo.client.standskin.StandSkin;
+import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -18,6 +23,7 @@ import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.client.renderer.entity.layers.HeldItemLayer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Pose;
@@ -46,7 +52,11 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
 
     @Override
     public ResourceLocation getTextureLocation(T entity) {
-        return texture;
+        return getTextureLocation(entity.getStandSkin());
+    }
+    
+    private ResourceLocation getTextureLocation(Optional<ResourceLocation> standSkin) {
+        return StandSkinsManager.getPathRemapped(standSkin, texture);
     }
 
     @Override
@@ -149,6 +159,7 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
     @Override
     public void render(T entity, float yRotation, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
         if (MinecraftForge.EVENT_BUS.post(new RenderLivingEvent.Pre<T, M>(entity, this, partialTick, matrixStack, buffer, packedLight))) return;
+        M model = this.model;
         matrixStack.pushPose();
         model.attackTime = this.getAttackAnim(entity, partialTick);
         boolean shouldSit = entity.isPassenger() && (entity.getVehicle() != null && entity.getVehicle().shouldRiderSit());
@@ -197,12 +208,8 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
                 walkAnimSpeed = 1.0F;
             }
         }
-
-        if (!entity.isVisibleForAll() && entity.getStandPose() == StandPose.IDLE && model.attackTime == 0 && 
-                entity.isFollowingUser() && !Minecraft.getInstance().player.isShiftKeyDown() || true) {
-            float idleY = MathHelper.sin((ticks - model.idleLoopTickStamp) * 0.04F) * 0.04F;
-            matrixStack.translate(0.0D, idleY, 0.0D);
-        }
+        
+        idlePoseSwaying(entity, ticks, matrixStack);
         
         model.prepareMobModel(entity, walkAnimPos, walkAnimSpeed, partialTick);
         model.setupAnim(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
@@ -263,6 +270,18 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
         default:
             return VisibilityMode.LEFT_ARM_ONLY;
         }
+    }
+    
+    protected void idlePoseSwaying(T entity, float ticks, MatrixStack matrixStack) {
+        if (!entity.isVisibleForAll() && entity.getStandPose() == StandPose.IDLE && model.attackTime == 0 && 
+                entity.isFollowingUser() && !Minecraft.getInstance().player.isShiftKeyDown()) {
+            doIdlePoseSwaying(ticks, matrixStack);
+        }
+    }
+    
+    protected void doIdlePoseSwaying(float ticks, MatrixStack matrixStack) {
+        float idleY = MathHelper.sin((ticks - model.idleLoopTickStamp) * 0.04F) * 0.04F;
+        matrixStack.translate(0.0D, idleY, 0.0D);
     }
     
     
@@ -336,5 +355,40 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
         ModelRenderer armModelRenderer = model.getArm(handSide);
         armModelRenderer.render(matrixStack, vertexBuilder, packedLight, 
                 LivingRenderer.getOverlayCoords(entity, getWhiteOverlayProgress(entity, partialTick)), 1.0F, 1.0F, 1.0F, entity.getAlpha(partialTick));
+    }
+    
+    
+    public void renderIdleWithSkin(MatrixStack matrixStack, StandSkin standSkin, IRenderTypeBuffer buffer, float ticks) {
+        matrixStack.pushPose();
+        M model = this.model;
+        model.attackTime = 0;
+        model.riding = false;
+        model.young = false;
+        viewObstructionPrevention = ViewObstructionPrevention.NONE;
+        model.updatePartsVisibility(VisibilityMode.ALL);
+        
+        float yRotationOffset = 0;
+        float xRotation = 0;
+        
+        doIdlePoseSwaying(ticks, matrixStack);
+        // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! entity == null
+        model.poseIdleLoop(null, ticks, yRotationOffset, xRotation, HandSide.RIGHT);
+        
+        ResourceLocation texture = getTextureLocation(standSkin.getNonDefaultLocation());
+        RenderType renderType = model.renderType(texture);
+        int packedLight = ClientUtil.MAX_MODEL_LIGHT;
+        if (renderType != null) {
+            IVertexBuilder vertexBuilder = buffer.getBuffer(renderType);
+            int packedOverlay = OverlayTexture.NO_OVERLAY;
+            model.renderToBuffer(matrixStack, vertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, 1.0F);
+        }
+        
+        // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! render layers
+//        for (LayerRenderer<T, M> layerRenderer : this.layers) {
+//            layerRenderer.render(matrixStack, buffer, packedLight, entity, 
+//                    walkAnimPos, walkAnimSpeed, partialTick, ticks, yRotationOffset, xRotation);
+//        }
+
+        matrixStack.popPose();
     }
 }
