@@ -28,7 +28,7 @@ import net.minecraftforge.fml.client.gui.GuiUtils;
 
 public class StandStatsRenderer {
     private static final int HEXAGON_EXPAND_TICKS = 40;
-    private static final ResourceLocation STAND_STATS_UI = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/stand_stats.png");
+    public static final ResourceLocation STAND_STATS_UI = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/stand_stats.png");
     private static final ResourceLocation STAND_STATS_BG = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/stand_stats_bg.png");
     
     @SuppressWarnings("deprecation")
@@ -294,4 +294,8 @@ public class StandStatsRenderer {
         RenderSystem.enableTexture();
         RenderSystem.enableDepthTest();
     }
+    
+    
+    
+    
 }

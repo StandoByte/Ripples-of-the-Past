@@ -33,7 +33,7 @@ import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.StringTextComponent;
 
 public class StandSkinsScreen extends Screen {
-    private static final ResourceLocation TEXTURE_MAIN_WINDOW = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/stand_skins.png");
+    public static final ResourceLocation TEXTURE_MAIN_WINDOW = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/stand_skins.png");
     private static final ResourceLocation TEXTURE_BG = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/stand_skins_bg.png");
     
     private static final int WINDOW_WIDTH = 195;
@@ -46,6 +46,7 @@ public class StandSkinsScreen extends Screen {
     private static ResourceLocation latestStand = null;
     private static int latestScroll;
     
+    @Nullable private Screen prevScreen;
     private IStandPower standCap;
     private List<SkinView> skins;
     private int tickCount = 0;
@@ -58,11 +59,12 @@ public class StandSkinsScreen extends Screen {
         super(StringTextComponent.EMPTY);
     }
     
-    public static void openScreen() {
+    public static void openScreen(@Nullable Screen prevScreen) {
         IStandPower.getStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(playerStand -> {
             if (playerStand.hasPower()) {
                 StandSkinsScreen screen = new StandSkinsScreen();
                 screen.setStandCap(playerStand);
+                screen.prevScreen = prevScreen;
                 Minecraft.getInstance().setScreen(screen);
             }
         });
@@ -145,6 +147,9 @@ public class StandSkinsScreen extends Screen {
     private void renderContents(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
         float ticks = tickCount + partialTick;
         if (skinFullView != null) {
+            minecraft.getTextureManager().bind(standCap.getType().getIconTexture());
+            blit(matrixStack, 4, 4, 0, 0, 16, 16, 16, 16);
+            
             IRenderTypeBuffer.Impl buffer = Minecraft.getInstance().renderBuffers().bufferSource();
             skinFullView.render(matrixStack, mouseX, mouseY, ticks, buffer);
             buffer.endBatch();
@@ -257,6 +262,9 @@ public class StandSkinsScreen extends Screen {
     public void onClose() {
         if (skinFullView != null) {
             setFullViewSkin(null);
+        }
+        else if (prevScreen != null) {
+            minecraft.setScreen(prevScreen);
         }
         else {
             super.onClose();
