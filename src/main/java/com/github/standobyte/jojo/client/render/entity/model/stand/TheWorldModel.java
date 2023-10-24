@@ -507,7 +507,7 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
     }
     
     @Override
-    protected void poseIdleLoop(TheWorldEntity entity, float ticks, float yRotOffsetRad, float xRotRad, HandSide swingingHand) {
+    public void poseIdleLoop(TheWorldEntity entity, float ticks, float yRotOffsetRad, float xRotRad, HandSide swingingHand) {
         super.poseIdleLoop(entity, ticks, yRotOffsetRad, xRotRad, swingingHand);
         head.xRot -= 0.2618F;
     }

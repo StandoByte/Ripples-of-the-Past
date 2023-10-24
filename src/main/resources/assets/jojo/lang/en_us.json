@@ -932,6 +932,10 @@
   "jojo.stand_stat.dev_potential": "Development Potential",
   "jojo.stand_stat.stand_name": "Stand Name: %s",
   "jojo.stand_stat.stand_user": "Stand User: %s",
+  "jojo.stand_stat.button.show": "Show Stand Stats",
+  "jojo.stand_stat.button.hide": "Hide Stand Stats",
+  
+  "jojo.stand_skins.button": "Stand Skins",
   
   "jojo.disc.stand": "Stand: %s",
   "jojo.arrow.stand_arrow_xp": "Spend %s levels to have a higher chance at surviving",

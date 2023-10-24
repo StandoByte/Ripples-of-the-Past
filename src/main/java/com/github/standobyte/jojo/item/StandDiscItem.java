@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.render.entity.standskin.StandSkinsManager;
+import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
@@ -49,7 +49,7 @@ public class StandDiscItem extends Item {
                     StandInstance stand = getStandFromStack(stack, false);
                     if (MCUtil.dispenseOnNearbyEntity(blockSource, stack, entity -> {
                         return IStandPower.getStandPowerOptional(entity).map(power -> {
-                            return canGetStandFromDisc(entity, power, stand.getType()) && power.giveStand(stand, false);
+                            return canGetStandFromDisc(entity, power, stand.getType()) && giveStandFromDisc(power, stand, stack);
                         }).orElse(false);
                     }, true)) {
                         return stack;
@@ -83,7 +83,7 @@ public class StandDiscItem extends Item {
                     power.clear();
                 }
                 
-                if (power.giveStand(stand, !stack.getTag().getBoolean(WS_TAG))) {
+                if (giveStandFromDisc(power, stand, stack)) {
                     if (!player.abilities.instabuild) {
                         stack.shrink(1);
                     }
@@ -165,5 +165,11 @@ public class StandDiscItem extends Item {
         } else {
             return StandSkinsManager.getUiColor(getStandFromStack(itemStack, true));
         }
+    }
+    
+    
+    private static boolean giveStandFromDisc(IStandPower standCap, StandInstance stand, ItemStack discItem) {
+        boolean standExistedBefore = discItem.getTag().getBoolean(WS_TAG);
+        return standCap.giveStandFromInstance(stand, standExistedBefore);
     }
 }

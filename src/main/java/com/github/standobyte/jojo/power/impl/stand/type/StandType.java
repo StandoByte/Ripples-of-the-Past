@@ -5,6 +5,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -83,7 +84,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     
 
     
-    public static abstract class AbstractBuilder<B extends AbstractBuilder<B, T>, T extends StandStats> { // i freaking love chainables and builders
+    public static abstract class AbstractBuilder<B extends AbstractBuilder<B, T>, T extends StandStats> {
         private int color = 0x000000;
         private ITextComponent storyPartName = StringTextComponent.EMPTY;
         private StandAction[] leftClickHotbar = {};
@@ -356,6 +357,10 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         return false;
     }
     
+    public boolean canLeap() {
+        return false;
+    }
+    
     @Nullable
     public OstSoundList getOst() {
         return ostSupplier;
@@ -378,6 +383,8 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
             });
         }
     }
+    
+    public void onStandSkinSet(IStandPower power, Optional<ResourceLocation> skin) {}
     
     
     @Deprecated

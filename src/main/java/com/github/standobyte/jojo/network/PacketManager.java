@@ -26,6 +26,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClRPSPickThoughtsPa
 import com.github.standobyte.jojo.network.packets.fromclient.ClReadHamonBreathTabPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClRemovePlayerSoulEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClRunAwayPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClSetStandSkinPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClSoulRotationPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClStandManualMovementPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClStopHeldActionPacket;
@@ -160,6 +161,7 @@ public class PacketManager {
         registerMessage(clientChannel, new ClStandManualMovementPacket.Handler(),          Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClOnLeapPacket.Handler(),                       Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClOnStandDashPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        registerMessage(clientChannel, new ClSetStandSkinPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClSoulRotationPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClRemovePlayerSoulEntityPacket.Handler(),       Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClWalkmanControlsPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_SERVER));
