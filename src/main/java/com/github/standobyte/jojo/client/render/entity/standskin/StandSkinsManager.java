@@ -18,14 +18,13 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.client.ResourcePathChecker;
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
-import com.google.common.collect.Comparators;
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.Ordering;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -60,13 +59,6 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
     
     public List<StandSkin> getStandSkinsView(ResourceLocation standId) {
         return skinsByStand.getOrDefault(standId, EMPTY);
-    }
-    
-    public static ResourceLocation getTextureRemapped(ResourceLocation skinPath, ResourceLocation originalTexPath) {
-        return new ResourceLocation(
-                skinPath.getNamespace(), 
-                "stand_skins/" + skinPath.getPath() + "/assets/" + originalTexPath.getNamespace() + "/" + originalTexPath.getPath()
-                );
     }
     
     
@@ -219,7 +211,55 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
         boolean fromMainMod1 = JojoMod.MOD_ID.equals(rl1.getNamespace());
         boolean fromMainMod2 = JojoMod.MOD_ID.equals(rl2.getNamespace());
         if (fromMainMod1 ^ fromMainMod2) return fromMainMod1 ? -1 : 1;
-        return rl1.toString().compareTo(rl2.toString());
+        return rl1.compareTo(rl2);
     };
-
+    
+    
+    
+    private Map<ResLocPair, ResourcePathChecker> pathCheckCache = new HashMap<>();
+    
+    public ResourcePathChecker getPathChecker(ResourceLocation skinPath, ResourceLocation originalResPath) {
+        return pathCheckCache.computeIfAbsent(new ResLocPair(skinPath, originalResPath), pair -> {
+            ResourceLocation pathRemapped = new ResourceLocation(
+                    skinPath.getNamespace(), 
+                    "stand_skins/" + skinPath.getPath() + "/assets/" + originalResPath.getNamespace() + "/" + originalResPath.getPath()
+                    );
+            return ResourcePathChecker.create(pathRemapped);
+        });
+    }
+    
+    public static ResourceLocation getPathRemapped(StandSkin standSkin, ResourceLocation orDefault) {
+        return getPathRemapped(standSkin.getNonDefaultLocation(), orDefault);
+    }
+    
+    public static ResourceLocation getPathRemapped(Optional<ResourceLocation> standSkinPath, ResourceLocation orDefault) {
+        return standSkinPath.map(skin -> StandSkinsManager.getInstance().getPathChecker(skin, orDefault)
+                .or(orDefault))
+                .orElse(orDefault);
+    }
+    
+    private static class ResLocPair {
+        private final ResourceLocation left;
+        private final ResourceLocation right;
+        
+        public ResLocPair(ResourceLocation left, ResourceLocation right) {
+            this.left = left;
+            this.right = right;
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) return true;
+            if (obj instanceof ResLocPair) {
+                ResLocPair other = (ResLocPair) obj;
+                return this.left.equals(other.left) && this.right.equals(other.right);
+            }
+            return false;
+        }
+        
+        @Override
+        public int hashCode() {
+            return left.hashCode() ^ right.hashCode();
+        }
+    }
 }

@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.client.render.entity.renderer.stand.layer;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.render.ResourcePathChecker;
+import com.github.standobyte.jojo.client.ResourcePathChecker;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.StandEntityRenderer;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
