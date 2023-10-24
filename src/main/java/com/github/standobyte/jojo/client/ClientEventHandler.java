@@ -528,18 +528,20 @@ public class ClientEventHandler {
         if (screen instanceof IngameMenuScreen && ClientReflection.showsPauseMenu((IngameMenuScreen) screen)) {
             IStandPower.getStandPowerOptional(mc.player).ifPresent(power -> {
                 if (power.hasPower()) {
-                    Button standStatsToggleButton = new ImageButton(screen.width - 28, screen.height - 28, 
-                            20, 20, 236, 216, 20, StandStatsRenderer.STAND_STATS_UI, 256, 256, 
-                            button -> {
-                                renderStandStats = !doStandStatsRender(screen);
-                            }, 
-                            (button, matrixStack, x, y) -> {
-                                ITextComponent message = doStandStatsRender(screen) ? 
-                                        new TranslationTextComponent("jojo.stand_stat.button.hide")
-                                        : new TranslationTextComponent("jojo.stand_stat.button.show");
-                                screen.renderTooltip(matrixStack, message, x, y);
-                            }, 
-                            StringTextComponent.EMPTY);
+//                    Button standStatsToggleButton = new ImageButton(screen.width - 28, screen.height - 28, 
+//                            20, 20, 236, 216, 20, StandStatsRenderer.STAND_STATS_UI, 256, 256, 
+//                            button -> {
+//                                renderStandStats = !doStandStatsRender(screen);
+//                            }, 
+//                            (button, matrixStack, x, y) -> {
+//                                ITextComponent message = doStandStatsRender(screen) ? 
+//                                        new TranslationTextComponent("jojo.stand_stat.button.hide")
+//                                        : new TranslationTextComponent("jojo.stand_stat.button.show");
+//                                screen.renderTooltip(matrixStack, message, x, y);
+//                            }, 
+//                            StringTextComponent.EMPTY);
+//                    event.addWidget(standStatsToggleButton);
+                    
                     Button standSkinsButton = new ImageButton(screen.width - 28, screen.height - 159, 
                             20, 20, 236, 216, 20, StandSkinsScreen.TEXTURE_MAIN_WINDOW, 256, 256, 
                             button -> {
@@ -549,7 +551,6 @@ public class ClientEventHandler {
                                 screen.renderTooltip(matrixStack, new TranslationTextComponent("jojo.stand_skins.button"), x, y);
                             }, 
                             StringTextComponent.EMPTY);
-                    event.addWidget(standStatsToggleButton);
                     event.addWidget(standSkinsButton);
                 }
             });
