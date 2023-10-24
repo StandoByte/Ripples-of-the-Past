@@ -66,12 +66,9 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
             this.standLeapEnabled = false;
             return getThis();
         }
-    }
-    
-    public static class Builder<T extends StandStats> extends EntityStandType.AbstractBuilder<Builder<T>, T> {
         
         @Override
-        public Builder<T> rightClickHotbar(StandAction... rightClickHotbar) {
+        public B rightClickHotbar(StandAction... rightClickHotbar) {
             if (rightClickHotbar.length > 0) {
                 defaultQuickAccess(rightClickHotbar[0]);
             }
@@ -80,7 +77,10 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
             }
             return super.rightClickHotbar(rightClickHotbar);
         }
-
+    }
+    
+    public static class Builder<T extends StandStats> extends EntityStandType.AbstractBuilder<Builder<T>, T> {
+        
         @Override
         protected Builder<T> getThis() {
             return this;
