@@ -1,9 +1,9 @@
 package com.github.standobyte.jojo.client.resources;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.client.render.entity.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.client.resources.sprites.ActionSpriteUploader;
 import com.github.standobyte.jojo.client.resources.sprites.HamonSkillSpriteUploader;
+import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.IReloadableResourceManager;

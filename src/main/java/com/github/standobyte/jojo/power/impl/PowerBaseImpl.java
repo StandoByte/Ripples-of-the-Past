@@ -73,7 +73,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
 
     protected void onNewPowerGiven(T type) {
-        leapCooldown = getLeapCooldownPeriod();
+        setLeapCooldown(getLeapCooldownPeriod());
         serverPlayerUser.ifPresent(player -> {
             player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                 cap.sendNotification(OneTimeNotification.POWER_CONTROLS, 

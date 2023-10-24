@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.client.resources;
 
-import com.github.standobyte.jojo.client.render.entity.renderer.stand.layer.StandGlowLayer;
+import com.github.standobyte.jojo.client.ResourcePathChecker;
 
 import net.minecraft.client.resources.ReloadListener;
 import net.minecraft.profiler.IProfiler;
@@ -15,8 +15,6 @@ public class StandGlowTextureChecker extends ReloadListener<Void> {
 
     @Override
     protected void apply(Void __, IResourceManager resourceManager, IProfiler profiler) {
-        for (StandGlowLayer<?, ?> layer : StandGlowLayer.allGlowLayers()) {
-            layer.setNeedsTexRecheck();
-        }
+        ResourcePathChecker.onResourcesReload();
     }
 }

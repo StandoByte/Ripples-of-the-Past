@@ -2,10 +2,8 @@ package com.github.standobyte.jojo.client.render.item.standdisc;
 
 import java.awt.Color;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Random;
 
 import javax.annotation.Nullable;
@@ -39,30 +37,12 @@ import net.minecraftforge.client.model.ModelLoader;
  */
 @SuppressWarnings("deprecation")
 public class StandDiscFinalisedModel implements IBakedModel {
-    private static final Map<StandType<?>, StandDiscFinalisedModel> CACHED_MODELS = new HashMap<>(); // allows for a null key
-    
     private final IBakedModel parentModel;
     @Nullable private final StandType<?> stand;
-    
-    public static StandDiscFinalisedModel getModel(IBakedModel parentModel, @Nullable StandType<?> stand) {
-        if (CACHED_MODELS.containsKey(stand)) {
-            StandDiscFinalisedModel model = CACHED_MODELS.get(stand);
-            if (model != null) {
-                return model;
-            }
-        }
-        StandDiscFinalisedModel model = new StandDiscFinalisedModel(parentModel, stand);
-        CACHED_MODELS.put(stand, model);
-        return model;
-    }
 
-    private StandDiscFinalisedModel(IBakedModel parentModel, @Nullable StandType<?> stand) {
+    public StandDiscFinalisedModel(IBakedModel parentModel, @Nullable StandType<?> stand) {
         this.parentModel = parentModel;
         this.stand = stand;
-    }
-    
-    public static void clearCache() {
-        CACHED_MODELS.clear();
     }
     
     /**
