@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.render.entity.standskin;
+package com.github.standobyte.jojo.client.standskin;
 
 import java.util.Optional;
 

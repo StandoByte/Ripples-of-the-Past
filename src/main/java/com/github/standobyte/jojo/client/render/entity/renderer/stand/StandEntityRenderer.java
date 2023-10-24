@@ -8,8 +8,8 @@ import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityMo
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel.VisibilityMode;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.layer.StandGlowLayer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.layer.StandModelLayerRenderer;
-import com.github.standobyte.jojo.client.render.entity.standskin.StandSkin;
-import com.github.standobyte.jojo.client.render.entity.standskin.StandSkinsManager;
+import com.github.standobyte.jojo.client.standskin.StandSkin;
+import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.mojang.blaze3d.matrix.MatrixStack;
