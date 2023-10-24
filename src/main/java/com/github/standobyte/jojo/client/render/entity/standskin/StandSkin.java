@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.client.render.entity.standskin;
 
+import java.util.Optional;
+
 import net.minecraft.util.ResourceLocation;
 
 /*
@@ -36,5 +38,9 @@ public class StandSkin {
         this.standTypeId = standTypeId;
         this.color = color;
         this.defaultSkin = resLoc.equals(standTypeId);
+    }
+    
+    public Optional<ResourceLocation> getNonDefaultLocation() {
+        return defaultSkin ? Optional.empty() : Optional.of(resLoc);
     }
 }
