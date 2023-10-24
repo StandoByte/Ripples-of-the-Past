@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
 import com.github.standobyte.jojo.util.mc.damage.IStandDamageSource;
@@ -31,6 +32,7 @@ import net.minecraft.scoreboard.Team;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.IndirectEntityDamageSource;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.EntityRayTraceResult;
@@ -143,7 +145,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     
     @Override
     protected void onHitEntity(EntityRayTraceResult entityRayTraceResult) {
-        if (!level.isClientSide()) {
+        if (!level.isClientSide() && isAlive()) {
             Entity target = entityRayTraceResult.getEntity();
             LivingEntity owner = getOwner();
             boolean entityHurt = hurtTarget(target, owner);
@@ -234,7 +236,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     @Override
     protected void onHitBlock(BlockRayTraceResult blockRayTraceResult) {
         super.onHitBlock(blockRayTraceResult);
-        if (!level.isClientSide()) {
+        if (!level.isClientSide() && isAlive()) {
             BlockPos blockPos = blockRayTraceResult.getBlockPos();
             LivingEntity owner = getOwner();
             boolean brokenBlock = owner != null && !JojoModUtil.canEntityDestroy((ServerWorld) level, blockPos, level.getBlockState(blockPos), owner) ? 
@@ -329,6 +331,18 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     @Override
     public boolean isInvisibleTo(PlayerEntity player) {
         return !player.isSpectator() && (standVisibility() && !StandUtil.playerCanSeeStands(player) || super.isInvisible());
+    }
+    
+    @Override
+    public void playSound(SoundEvent sound, float volume, float pitch) {
+        if (!this.isSilent()) {
+            if (standVisibility()) {
+                MCUtil.playSound(level, null, getX(), getY(), getZ(), sound, getSoundSource(), volume, pitch, StandUtil::playerCanHearStands);
+            }
+            else {
+                level.playSound(null, getX(), getY(), getZ(), sound, getSoundSource(), volume, pitch);
+            }
+        }
     }
     
     @Override

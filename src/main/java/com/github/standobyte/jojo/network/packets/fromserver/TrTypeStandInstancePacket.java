@@ -72,7 +72,7 @@ public class TrTypeStandInstancePacket {
                         stand.clear();
                     }
                     else {
-                        stand.giveStand(msg.standInstance, false);
+                        stand.setStandInstance(msg.standInstance);
                         if (msg.resolveLevel >= 0) {
                             stand.setResolveLevel(msg.resolveLevel);
                         }

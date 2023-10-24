@@ -103,7 +103,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         }
     }
 
-    protected abstract void updatePartsVisibility(VisibilityMode mode);
+    public abstract void updatePartsVisibility(VisibilityMode mode);
     protected abstract void partMissing(StandPart standPart);
     
     @Override
@@ -195,7 +195,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
                 0F, 1F);
     }
     
-    protected void poseIdleLoop(T entity, float ticks, float yRotOffsetRad, float xRotRad, HandSide swingingHand) {
+    public void poseIdleLoop(T entity, float ticks, float yRotOffsetRad, float xRotRad, HandSide swingingHand) {
         idleLoop.poseModel(ticks - idleLoopTickStamp, entity, ticks, yRotOffsetRad, xRotRad, swingingHand);
     }
     

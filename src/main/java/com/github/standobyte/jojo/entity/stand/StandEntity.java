@@ -31,9 +31,9 @@ import com.github.standobyte.jojo.entity.damaging.DamagingEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
 import com.github.standobyte.jojo.entity.mob.IMobStandUser;
 import com.github.standobyte.jojo.init.ModDataSerializers;
-import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModEntityAttributes;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -41,6 +41,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPac
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandTaskTargetPacket;
 import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.StandInstance;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
@@ -93,6 +94,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -169,6 +171,9 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     private BarrageSwingsHolder<?, ?> barrageSwings;
     private final BarrageHitSoundHandler barrageSounds;
     
+    public static final DataParameter<Optional<ResourceLocation>> DATA_PARAM_STAND_SKIN = EntityDataManager.defineId(StandEntity.class, 
+            (IDataSerializer<Optional<ResourceLocation>>) ModDataSerializers.OPTIONAL_RES_LOC.get().getSerializer());
+    
     public StandEntity(StandEntityType<? extends StandEntity> type, World world) {
         super(type, world);
         this.type = type;
@@ -212,6 +217,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         entityData.define(NO_BLOCKING_TICKS, 0);
         entityData.define(CURRENT_TASK, Optional.empty());
         entityData.define(MANUAL_MOVEMENT_LOCK, (byte) 0);
+        entityData.define(DATA_PARAM_STAND_SKIN, Optional.empty());
     }
 
     @Override
@@ -535,6 +541,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         this.userPower = power;
         if (!level.isClientSide() && power != null) {
             modifiersFromResolveLevel(power.getStatsDevelopment());
+            setStandSkin(power.getStandInstance().flatMap(StandInstance::getSelectedSkin));
         }
     }
     
@@ -1194,6 +1201,13 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     
     public StandRelativeOffset getDefaultOffsetFromUser() {
         return isArmsOnlyMode() ? offsetDefaultArmsOnly : offsetDefault;
+    }
+    
+    public void setDefaultOffsetFromUser(StandRelativeOffset offset) {
+        this.offsetDefault = offset;
+        if (unsummonTicks == 0) {
+            this.unsummonOffset = offset;
+        }
     }
     
 //    public void addBarrageOffset() {
@@ -2312,6 +2326,16 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
 //        double attackSpeed = getAttackSpeed();
 //        return attackSpeed < 10D ? (int) (20D / attackSpeed) : 2;
         return 2;
+    }
+    
+    
+    
+    public void setStandSkin(Optional<ResourceLocation> skinLocation) {
+        entityData.set(DATA_PARAM_STAND_SKIN, skinLocation);
+    }
+    
+    public Optional<ResourceLocation> getStandSkin() {
+        return entityData.get(DATA_PARAM_STAND_SKIN);
     }
     
     

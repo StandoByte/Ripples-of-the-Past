@@ -174,7 +174,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
     private final Map<Supplier<ModelRenderer>, Consumer<ModelRenderer>> baseHumanoidBoxGenerators;
 
     @Override
-    protected void updatePartsVisibility(VisibilityMode mode) {
+    public void updatePartsVisibility(VisibilityMode mode) {
         if (mode == VisibilityMode.ALL) {
             head.visible = true;
             torso.visible = true;

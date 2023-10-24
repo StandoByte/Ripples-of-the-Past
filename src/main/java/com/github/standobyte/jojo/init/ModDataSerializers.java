@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.network.NetworkUtil;
 
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.IDataSerializer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DataSerializerEntry;
@@ -41,6 +42,25 @@ public class ModDataSerializers {
 
         @Override
         public Optional<Vector3d> copy(Optional<Vector3d> value) {
+            return value;
+        }
+    }));
+    
+    public static final RegistryObject<DataSerializerEntry> OPTIONAL_RES_LOC = DATA_SERIALIZERS.register("optional_res_loc", () -> new DataSerializerEntry(
+            new IDataSerializer<Optional<ResourceLocation>>() {
+
+        @Override
+        public void write(PacketBuffer buf, Optional<ResourceLocation> value) {
+            NetworkUtil.writeOptional(buf, value, resLoc -> buf.writeResourceLocation(resLoc));
+        }
+
+        @Override
+        public Optional<ResourceLocation> read(PacketBuffer buf) {
+            return NetworkUtil.readOptional(buf, () -> buf.readResourceLocation());
+        }
+
+        @Override
+        public Optional<ResourceLocation> copy(Optional<ResourceLocation> value) {
             return value;
         }
     }));
