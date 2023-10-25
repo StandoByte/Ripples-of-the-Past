@@ -218,16 +218,6 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
     
     private Map<ResLocPair, ResourcePathChecker> pathCheckCache = new HashMap<>();
     
-    public ResourcePathChecker getPathChecker(ResourceLocation skinPath, ResourceLocation originalResPath) {
-        return pathCheckCache.computeIfAbsent(new ResLocPair(skinPath, originalResPath), pair -> {
-            ResourceLocation pathRemapped = new ResourceLocation(
-                    skinPath.getNamespace(), 
-                    "stand_skins/" + skinPath.getPath() + "/assets/" + originalResPath.getNamespace() + "/" + originalResPath.getPath()
-                    );
-            return ResourcePathChecker.create(pathRemapped);
-        });
-    }
-    
     public static ResourceLocation getPathRemapped(StandSkin standSkin, ResourceLocation orDefault) {
         return getPathRemapped(standSkin.getNonDefaultLocation(), orDefault);
     }
@@ -236,6 +226,20 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
         return standSkinPath.map(skin -> StandSkinsManager.getInstance().getPathChecker(skin, orDefault)
                 .or(orDefault))
                 .orElse(orDefault);
+    }
+    
+    public ResourcePathChecker getPathChecker(ResourceLocation skinPath, ResourceLocation originalResPath) {
+        return pathCheckCache.computeIfAbsent(new ResLocPair(skinPath, originalResPath), pair -> {
+            ResourceLocation pathRemapped = pathRemapFunc(skinPath, originalResPath);
+            return ResourcePathChecker.create(pathRemapped);
+        });
+    }
+    
+    public static ResourceLocation pathRemapFunc(ResourceLocation skinPath, ResourceLocation originalResPath) {
+        return new ResourceLocation(
+                skinPath.getNamespace(), 
+                "stand_skins/" + skinPath.getPath() + "/assets/" + originalResPath.getNamespace() + "/" + originalResPath.getPath()
+                );
     }
     
     private static class ResLocPair {
