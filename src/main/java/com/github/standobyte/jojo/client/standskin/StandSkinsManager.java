@@ -12,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -59,6 +60,10 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
     
     public Optional<StandSkin> getStandSkin(StandInstance standInstance) {
         return getStandSkinOrDefault(standInstance.getType().getRegistryName(), standInstance.getSelectedSkin());
+    }
+    
+    public ResourceLocation getRemappedResPath(Function<StandSkinsManager, Optional<StandSkin>> getSkin, ResourceLocation originalPath) {
+        return getSkin.apply(this).map(skin -> skin.getRemappedResPath(originalPath).or(originalPath)).orElse(originalPath);
     }
     
     public List<StandSkin> getStandSkinsView(ResourceLocation standId) {

@@ -17,7 +17,7 @@ import net.minecraft.util.ResourceLocation;
  * [_]   entity textures
  * [V]     Stand entity
  * [_]     stuff like projectiles
- * [_]   power icon
+ * [V]   power icon
  * [_]   in-mod UI
  * [_]     actions atlas
  * [_]   particles

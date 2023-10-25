@@ -37,22 +37,6 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
     public void afterClear(INonStandPower power) {}
     
     @Override
-    public String getTranslationKey() {
-        if (translationKey == null) {
-            translationKey = Util.makeDescriptionId("non_stand", JojoCustomRegistries.NON_STAND_POWERS.getRegistry().getKey(this));
-        }
-        return this.translationKey;
-    }
-
-    @Override
-    public ResourceLocation getIconTexture() {
-        if (iconTexture == null) {
-            iconTexture = JojoModUtil.makeTextureLocation("power", getRegistryName().getNamespace(), getRegistryName().getPath());
-        }
-        return this.iconTexture;
-    }
-    
-    @Override
     public Action<INonStandPower>[] getAttacks() {
         return attacks;
     }
@@ -116,5 +100,21 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
 
     public TypeSpecificData newSpecificDataInstance() {
         return dataFactory.get();
+    }
+    
+    @Override
+    public String getTranslationKey() {
+        if (translationKey == null) {
+            translationKey = Util.makeDescriptionId("non_stand", JojoCustomRegistries.NON_STAND_POWERS.getRegistry().getKey(this));
+        }
+        return this.translationKey;
+    }
+
+    @Override
+    public ResourceLocation getIconTexture() {
+        if (iconTexture == null) {
+            iconTexture = JojoModUtil.makeTextureLocation("power", getRegistryName().getNamespace(), getRegistryName().getPath());
+        }
+        return this.iconTexture;
     }
 }

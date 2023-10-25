@@ -114,7 +114,7 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     void onClone(P oldPower, boolean wasDeath);
     void syncWithUserOnly();
     void syncWithTrackingOrUser(ServerPlayerEntity player);
-
+    
     default boolean onClickAction(ActionType type, int index, boolean shift, ActionTarget target, Optional<Action<?>> inputValidation) {
         return onClickAction(this.getAction(type, index, shift, target), shift, target, inputValidation);
     }

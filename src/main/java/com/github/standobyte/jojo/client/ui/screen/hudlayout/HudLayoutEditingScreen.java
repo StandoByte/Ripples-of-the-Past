@@ -11,6 +11,7 @@ import java.util.Set;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.InputHandler.MouseButton;
 import com.github.standobyte.jojo.client.resources.CustomResources;
@@ -174,7 +175,7 @@ public class HudLayoutEditingScreen extends Screen {
             blit(matrixStack, xy[0], xy[1], textureX, textureY, 28, 32);
 
             RenderSystem.enableBlend();
-            minecraft.getTextureManager().bind(powersPresent.get(i).getType().getIconTexture());
+            minecraft.getTextureManager().bind(ClientUtil.getIconPowerType(powersPresent.get(i)));
             blit(matrixStack, xy[0] + 6, xy[1] + 10, 0, 0, 16, 16, 16, 16);
             RenderSystem.disableBlend();
             if (renderSelectedTabButton) break;

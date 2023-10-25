@@ -19,6 +19,7 @@ import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
 import com.github.standobyte.jojo.power.impl.stand.type.EntityStandType;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.google.common.collect.Streams;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -147,7 +148,10 @@ public class StandSkinsScreen extends Screen {
     private void renderContents(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
         float ticks = tickCount + partialTick;
         if (skinFullView != null) {
-            minecraft.getTextureManager().bind(standCap.getType().getIconTexture());
+            ResourceLocation standIcon = JojoModUtil.makeTextureLocation("power", 
+                    skinFullView.skin.standTypeId.getNamespace(), skinFullView.skin.standTypeId.getPath());
+            standIcon = skinFullView.skin.getRemappedResPath(standIcon).or(standIcon);
+            minecraft.getTextureManager().bind(standIcon);
             blit(matrixStack, 4, 4, 0, 0, 16, 16, 16, 16);
             
             IRenderTypeBuffer.Impl buffer = Minecraft.getInstance().renderBuffers().bufferSource();

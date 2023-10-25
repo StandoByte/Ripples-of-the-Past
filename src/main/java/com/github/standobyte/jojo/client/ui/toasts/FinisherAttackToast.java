@@ -1,16 +1,18 @@
 package com.github.standobyte.jojo.client.ui.toasts;
 
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
-import com.github.standobyte.jojo.power.IPowerType;
+import com.github.standobyte.jojo.power.IPower;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.gui.toasts.ToastGui;
+import net.minecraft.util.ResourceLocation;
 
 public class FinisherAttackToast extends ActionToast {
     
-    protected FinisherAttackToast(Action<?> action, IPowerType<?, ?> powerType) {
-        super(SpecialToastType.FINISHER_HEAVY_ATTACK, action, powerType);
+    protected FinisherAttackToast(Action<?> action, ResourceLocation powerTypeIcon) {
+        super(SpecialToastType.FINISHER_HEAVY_ATTACK, action, powerTypeIcon);
     }
     
     private static final int FINISHER_BAR_TIME = 2000;
@@ -26,12 +28,13 @@ public class FinisherAttackToast extends ActionToast {
         }
     }
 
-    public static void addOrUpdate(ToastGui toastGui, Action<?> action, IPowerType<?, ?> powerType) {
+    public static void addOrUpdate(ToastGui toastGui, Action<?> action, IPower<?, ?> power) {
         ActionToast toast = toastGui.getToast(ActionToast.class, SpecialToastType.FINISHER_HEAVY_ATTACK);
+        ResourceLocation iconPath = ClientUtil.getIconPowerType(power);
         if (toast == null) {
-            toastGui.addToast(new FinisherAttackToast(action, powerType));
+            toastGui.addToast(new FinisherAttackToast(action, iconPath));
         } else {
-            toast.addAction(action, powerType);
+            toast.addAction(action, iconPath);
         }
     }
     

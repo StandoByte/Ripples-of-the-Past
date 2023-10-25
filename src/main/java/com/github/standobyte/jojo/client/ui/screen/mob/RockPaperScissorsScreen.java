@@ -12,7 +12,6 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClRPSGameInputPacke
 import com.github.standobyte.jojo.network.packets.fromclient.ClRPSPickThoughtsPacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
-import com.github.standobyte.jojo.power.IPowerType;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -181,12 +180,13 @@ public class RockPaperScissorsScreen extends ChatScreen {
         cheatButton.active = !cheatedThisRound && cheat != null;
         cheatButton.visible = cheat != null;
         if (cheat != null) {
-            IPowerType<?, ?> cheatType = IPower.getPowerOptional(minecraft.player, cheatPower).resolve().get().getType();
+            IPower<?, ?> cheatPowerCap = IPower.getPowerOptional(minecraft.player, cheatPower).resolve().get();
             cheatButton.y = (height - HEIGHT) / 2 + DEFAULT_CHEAT_BUTTON_Y + nonTieRound * 18;
-            minecraft.getTextureManager().bind(cheatType.getIconTexture());
+            minecraft.getTextureManager().bind(ClientUtil.getIconPowerType(cheatPowerCap));
             blit(matrixStack, cheatButton.x + 2, cheatButton.y + 2, 0, 0, 16, 16, 16, 16);
             if (cheatButton.isMouseOver(mouseX, mouseY)) {
-                renderTooltip(matrixStack, minecraft.font.split(new TranslationTextComponent("jojo.rps.cheat." + cheatType.getRegistryName().toString().replace(":", ".")), 150), mouseX, mouseY);
+                renderTooltip(matrixStack, minecraft.font.split(new TranslationTextComponent(
+                        "jojo.rps.cheat." + cheatPowerCap.getType().getRegistryName().toString().replace(":", ".")), 150), mouseX, mouseY);
             }
         }
     }

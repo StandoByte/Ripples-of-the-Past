@@ -5,10 +5,11 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.resources.CustomResources;
+import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
-import com.github.standobyte.jojo.power.IPowerType;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -17,6 +18,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.toasts.IToast;
 import net.minecraft.client.gui.toasts.ToastGui;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
@@ -26,14 +28,14 @@ public class ActionToast implements IToast {
     protected final ITextComponent description;
     protected final IActionToastType type;
     protected final List<Action<?>> actions = Lists.newArrayList();
-    private IPowerType<?, ?> powerType;
+    private ResourceLocation powerTypeIcon;
     private int lastChanged;
     private boolean changed;
     
-    protected ActionToast(IActionToastType type, Action<?> action, IPowerType<?, ?> powerType) {
+    protected ActionToast(IActionToastType type, Action<?> action, ResourceLocation powerTypeIcon) {
         this.type = type;
         this.description = new TranslationTextComponent("jojo.action.toast." + type.getName() + ".description");
-        this.powerType = powerType;
+        this.powerTypeIcon = powerTypeIcon;
         this.actions.add(action);
     }
     
@@ -58,7 +60,7 @@ public class ActionToast implements IToast {
 //            RenderSystem.scalef(0.6F, 0.6F, 1.0F);
             matrixStack.pushPose();
             matrixStack.scale(0.5F, 0.5F, 1.0F);
-            mc.getTextureManager().bind(powerType.getIconTexture());
+            mc.getTextureManager().bind(powerTypeIcon);
             ToastGui.blit(matrixStack, 3, 3, 0, 0, 16, 16, 16, 16);
             RenderSystem.popMatrix();
             matrixStack.popPose();
@@ -78,19 +80,20 @@ public class ActionToast implements IToast {
         ToastGui.blit(matrixStack, 8, 8, 0, 16, 16, textureAtlasSprite);
     }
     
-    protected void addAction(Action<?> action, IPowerType<?, ?> powerType) {
+    protected void addAction(Action<?> action, ResourceLocation powerTypeIcon) {
         if (actions.add(action)) {
-            this.powerType = powerType;
+            this.powerTypeIcon = powerTypeIcon;
             changed = true;
         }
     }
     
-    public static void addOrUpdate(ToastGui toastGui, Type type, Action<?> action, IPowerType<?, ?> powerType) {
+    public static void addOrUpdate(ToastGui toastGui, Type type, Action<?> action, IPower<?, ?> power) {
         ActionToast toast = toastGui.getToast(ActionToast.class, type);
+        ResourceLocation iconPath = ClientUtil.getIconPowerType(power);
         if (toast == null) {
-            toastGui.addToast(new ActionToast(type, action, powerType));
+            toastGui.addToast(new ActionToast(type, action, iconPath));
         } else {
-            toast.addAction(action, powerType);
+            toast.addAction(action, iconPath);
         }
     }
     

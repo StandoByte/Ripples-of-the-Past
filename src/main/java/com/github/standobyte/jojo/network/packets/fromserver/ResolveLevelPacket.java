@@ -59,7 +59,8 @@ public class ResolveLevelPacket {
                     })
                     .distinct()
                     .filter(attack -> attack.isUnlocked(power))
-                    .forEach(finisher -> FinisherAttackToast.addOrUpdate(Minecraft.getInstance().getToasts(), finisher, power.getType()));
+                    .forEach(finisher -> FinisherAttackToast.addOrUpdate(
+                            Minecraft.getInstance().getToasts(), finisher, power));
                 }
             });
         }

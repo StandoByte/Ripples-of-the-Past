@@ -28,7 +28,6 @@ import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.resources.CustomResources;
-import com.github.standobyte.jojo.client.standskin.StandSkin;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsModeConfig.SelectedTargetIcon;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
@@ -922,7 +921,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
             }
             
-            mc.getTextureManager().bind(mode.getPower().getType().getIconTexture());
+            mc.getTextureManager().bind(ClientUtil.getIconPowerType(mode.getPower()));
             blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
             
             if (alpha < 1.0F) {
@@ -1050,7 +1049,7 @@ public class ActionsOverlayGui extends AbstractGui {
             if (mode != null) {
                 IPower<?, ?> power = mode.getPower();
                 if (power.hasPower()) {
-                    mc.getTextureManager().bind(power.getType().getIconTexture());
+                    mc.getTextureManager().bind(ClientUtil.getIconPowerType(power));
                     blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
                 }
             }
@@ -1177,7 +1176,7 @@ public class ActionsOverlayGui extends AbstractGui {
     
     private boolean renderBowChargeIcon(MatrixStack matrixStack, BowChargeEffectInstance<?, ?> bowCharge, float partialTick, int x, int y) {
         if (bowCharge != null && bowCharge.isBeingCharged()) {
-            mc.getTextureManager().bind(bowCharge.getPowerType().getIconTexture());
+            mc.getTextureManager().bind(ClientUtil.getIconPowerType(bowCharge.getPower()));
             float fill = bowCharge.getProgress(partialTick);
             if (fill < 1) {
                 RenderSystem.color4f(0, 0, 0, 1);

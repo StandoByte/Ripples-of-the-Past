@@ -550,7 +550,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         if (hasPower() && BowChargeEffectInstance.itemFits(item)) {
             IBowChargeEffect<P, T> onBowCharge = getType().getBowChargeEffect();
             if (onBowCharge != null && onBowCharge.canStart(getThis())) {
-                bowCharge = new BowChargeEffectInstance<>(user, getThis(), getType());
+                bowCharge = new BowChargeEffectInstance<>(user, getThis());
                 bowCharge.onStart();
             }
         }

@@ -285,22 +285,6 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         return multiplier;
     }
     
-    @Override
-    public String getTranslationKey() {
-        if (translationKey == null) {
-            translationKey = Util.makeDescriptionId("stand", JojoCustomRegistries.STANDS.getRegistry().getKey(this));
-        }
-        return this.translationKey;
-    }
-
-    @Override
-    public ResourceLocation getIconTexture() {
-        if (iconTexture == null) {
-            iconTexture = JojoModUtil.makeTextureLocation("power", getRegistryName().getNamespace(), getRegistryName().getPath());
-        }
-        return this.iconTexture;
-    }
-    
     public ITextComponent getPartName() {
         return partName;
     }
@@ -367,6 +351,22 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
                 cap.setLastHurtByStand(attackerStand, dmgAmount, standDmgSource.getStandInvulTicks());
             });
         }
+    }
+    
+    @Override
+    public String getTranslationKey() {
+        if (translationKey == null) {
+            translationKey = Util.makeDescriptionId("stand", JojoCustomRegistries.STANDS.getRegistry().getKey(this));
+        }
+        return this.translationKey;
+    }
+
+    @Override
+    public ResourceLocation getIconTexture() {
+        if (iconTexture == null) {
+            iconTexture = JojoModUtil.makeTextureLocation("power", getRegistryName().getNamespace(), getRegistryName().getPath());
+        }
+        return this.iconTexture;
     }
     
     public void onStandSkinSet(IStandPower power, Optional<ResourceLocation> skin) {}
