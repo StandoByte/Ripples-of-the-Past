@@ -318,9 +318,14 @@ public class ClientSetup {
         ItemColors itemColors = event.getItemColors();
         
         itemColors.register((stack, layer) -> {
-            if (layer != 2) return -1;
-            
-            return ClientUtil.discColor(StandDiscItem.getColor(stack));
+            switch (layer) {
+            case 2:
+                return ClientUtil.discColor(StandDiscItem.getColor(stack));
+            case 3:
+                return StandDiscItem.getColor(stack);
+            default:
+                return -1;
+            }
         }, ModItems.STAND_DISC.get());
         
         itemColors.register((stack, layer) -> {
