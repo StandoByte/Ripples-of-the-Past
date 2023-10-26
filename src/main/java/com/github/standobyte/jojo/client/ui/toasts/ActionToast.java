@@ -6,7 +6,6 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
@@ -17,7 +16,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.toasts.IToast;
 import net.minecraft.client.gui.toasts.ToastGui;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -27,16 +25,16 @@ public class ActionToast implements IToast {
     protected static final int TIME_MS = 5000;
     protected final ITextComponent description;
     protected final IActionToastType type;
-    protected final List<Action<?>> actions = Lists.newArrayList();
+    protected final List<ResourceLocation> actionIcons = Lists.newArrayList();
     private ResourceLocation powerTypeIcon;
     private int lastChanged;
     private boolean changed;
     
-    protected ActionToast(IActionToastType type, Action<?> action, ResourceLocation powerTypeIcon) {
+    protected ActionToast(IActionToastType type, ResourceLocation actionIcon, ResourceLocation powerTypeIcon) {
         this.type = type;
         this.description = new TranslationTextComponent("jojo.action.toast." + type.getName() + ".description");
         this.powerTypeIcon = powerTypeIcon;
-        this.actions.add(action);
+        this.actionIcons.add(actionIcon);
     }
     
     @SuppressWarnings("deprecation")
@@ -47,7 +45,7 @@ public class ActionToast implements IToast {
             changed = false;
         }
         
-        if (actions.isEmpty()) {
+        if (actionIcons.isEmpty()) {
             return IToast.Visibility.HIDE;
         } else {
             Minecraft mc = toastGui.getMinecraft();
@@ -56,13 +54,12 @@ public class ActionToast implements IToast {
             toastGui.blit(matrixStack, 0, 0, 0, 32, 160, 32);
             mc.font.draw(matrixStack, NAME, 30.0F, 7.0F, -11534256);
             mc.font.draw(matrixStack, description, 30.0F, 18.0F, -16777216);
-            RenderSystem.pushMatrix();
-//            RenderSystem.scalef(0.6F, 0.6F, 1.0F);
             matrixStack.pushPose();
             matrixStack.scale(0.5F, 0.5F, 1.0F);
+            
             mc.getTextureManager().bind(powerTypeIcon);
             ToastGui.blit(matrixStack, 3, 3, 0, 0, 16, 16, 16, 16);
-            RenderSystem.popMatrix();
+            
             matrixStack.popPose();
             renderIcon(matrixStack, toastGui, (int) timeMs);
             return timeMs - lastChanged >= TIME_MS ? IToast.Visibility.HIDE : IToast.Visibility.SHOW;
@@ -70,30 +67,30 @@ public class ActionToast implements IToast {
     }
     
     protected void renderIcon(MatrixStack matrixStack, ToastGui toastGui, int timeMs) {
-        int actionsCount = actions.size();
+        int actionsCount = actionIcons.size();
         int actionShowUpTime = Math.max(1, TIME_MS / actionsCount);
         int actionIndex = timeMs / actionShowUpTime % actionsCount;
         
-        Action<?> action = actions.get(actionIndex);
-        TextureAtlasSprite textureAtlasSprite = CustomResources.getActionSprites().getSprite(action.getRegistryName());
-        toastGui.getMinecraft().getTextureManager().bind(textureAtlasSprite.atlas().location());
-        ToastGui.blit(matrixStack, 8, 8, 0, 16, 16, textureAtlasSprite);
+        ResourceLocation actionIcon = actionIcons.get(actionIndex);
+        toastGui.getMinecraft().getTextureManager().bind(actionIcon);
+        ToastGui.blit(matrixStack, 8, 8, 0, 0, 16, 16, 16, 16);
     }
     
-    protected void addAction(Action<?> action, ResourceLocation powerTypeIcon) {
-        if (actions.add(action)) {
+    protected void addAction(ResourceLocation actionIcon, ResourceLocation powerTypeIcon) {
+        if (actionIcons.add(actionIcon)) {
             this.powerTypeIcon = powerTypeIcon;
             changed = true;
         }
     }
     
-    public static void addOrUpdate(ToastGui toastGui, Type type, Action<?> action, IPower<?, ?> power) {
+    public static void addOrUpdate(ToastGui toastGui, IActionToastType type, Action<?> action, IPower<?, ?> power) {
         ActionToast toast = toastGui.getToast(ActionToast.class, type);
-        ResourceLocation iconPath = ClientUtil.getIconPowerType(power);
+        ResourceLocation actionIcon = ClientUtil.getActionIcon(action, power);
+        ResourceLocation powerTypeIcon = ClientUtil.getIconPowerType(power);
         if (toast == null) {
-            toastGui.addToast(new ActionToast(type, action, iconPath));
+            toastGui.addToast(type.createToast(actionIcon, powerTypeIcon));
         } else {
-            toast.addAction(action, iconPath);
+            toast.addAction(actionIcon, powerTypeIcon);
         }
     }
     
@@ -138,9 +135,15 @@ public class ActionToast implements IToast {
         public String getName() {
             return name;
         }
+        
+        @Override
+        public IToast createToast(ResourceLocation actionIcon, ResourceLocation powerTypeIcon) {
+            return new ActionToast(this, actionIcon, powerTypeIcon);
+        }
     }
     
     protected static interface IActionToastType {
         String getName();
+        IToast createToast(ResourceLocation actionIcon, ResourceLocation powerTypeIcon);
     }
 }

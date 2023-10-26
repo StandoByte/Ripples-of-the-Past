@@ -1,18 +1,16 @@
 package com.github.standobyte.jojo.client.ui.toasts;
 
-import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
-import com.github.standobyte.jojo.power.IPower;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
+import net.minecraft.client.gui.toasts.IToast;
 import net.minecraft.client.gui.toasts.ToastGui;
 import net.minecraft.util.ResourceLocation;
 
 public class FinisherAttackToast extends ActionToast {
     
-    protected FinisherAttackToast(Action<?> action, ResourceLocation powerTypeIcon) {
-        super(SpecialToastType.FINISHER_HEAVY_ATTACK, action, powerTypeIcon);
+    protected FinisherAttackToast(ResourceLocation actionIcon, ResourceLocation powerTypeIcon) {
+        super(SpecialToastType.FINISHER_HEAVY_ATTACK, actionIcon, powerTypeIcon);
     }
     
     private static final int FINISHER_BAR_TIME = 2000;
@@ -25,16 +23,6 @@ public class FinisherAttackToast extends ActionToast {
         else {
             int actionRotationTime = timeMs * TIME_MS / (TIME_MS - FINISHER_BAR_TIME);
             super.renderIcon(matrixStack, toastGui, actionRotationTime);
-        }
-    }
-
-    public static void addOrUpdate(ToastGui toastGui, Action<?> action, IPower<?, ?> power) {
-        ActionToast toast = toastGui.getToast(ActionToast.class, SpecialToastType.FINISHER_HEAVY_ATTACK);
-        ResourceLocation iconPath = ClientUtil.getIconPowerType(power);
-        if (toast == null) {
-            toastGui.addToast(new FinisherAttackToast(action, iconPath));
-        } else {
-            toast.addAction(action, iconPath);
         }
     }
     
@@ -50,6 +38,11 @@ public class FinisherAttackToast extends ActionToast {
         @Override
         public String getName() {
             return name;
+        }
+        
+        @Override
+        public IToast createToast(ResourceLocation actionIcon, ResourceLocation powerTypeIcon) {
+            return new FinisherAttackToast(actionIcon, powerTypeIcon);
         }
     }
 }

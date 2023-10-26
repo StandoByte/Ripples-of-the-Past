@@ -27,7 +27,6 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
-import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsModeConfig.SelectedTargetIcon;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
@@ -722,8 +721,8 @@ public class ActionsOverlayGui extends AbstractGui {
                 ClientUtil.fillSingleRect(x - 2, y - 2, 20, 20, 0, 255, 0, 127);
             }
             
-            TextureAtlasSprite textureAtlasSprite = CustomResources.getActionSprites().getSprite(action, power);
-            mc.getTextureManager().bind(textureAtlasSprite.atlas().location());
+            ResourceLocation icon = ClientUtil.getActionIcon(action, power);
+            mc.getTextureManager().bind(icon);
             
             ActionConditionResult result = actionAvailability(action, mode, actionKey, target, isSelected);
             if (!result.isPositive()) {
@@ -733,7 +732,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 else {
                     RenderSystem.color4f(0.75F, 0.75F, 0.75F, 0.75F * hotbarAlpha);
                 }
-                blit(matrixStack, x, y, 0, 16, 16, textureAtlasSprite);
+                blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
                 // cooldown
                 float ratio = power.getCooldownRatio(action, partialTick);
                 if (ratio > 0) {
@@ -741,7 +740,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 }
             } else {
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, hotbarAlpha);
-                blit(matrixStack, x, y, 0, 16, 16, textureAtlasSprite);
+                blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
             }
             // learning bar
             float learningProgress = power.getLearningProgressRatio(action);

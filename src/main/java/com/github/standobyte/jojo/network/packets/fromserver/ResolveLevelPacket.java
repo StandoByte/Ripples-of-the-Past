@@ -5,6 +5,7 @@ import java.util.stream.Stream;
 
 import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.ui.toasts.ActionToast;
 import com.github.standobyte.jojo.client.ui.toasts.FinisherAttackToast;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.IPower.ActionType;
@@ -59,8 +60,10 @@ public class ResolveLevelPacket {
                     })
                     .distinct()
                     .filter(attack -> attack.isUnlocked(power))
-                    .forEach(finisher -> FinisherAttackToast.addOrUpdate(
-                            Minecraft.getInstance().getToasts(), finisher, power));
+                    .forEach(finisher -> ActionToast.addOrUpdate(
+                            Minecraft.getInstance().getToasts(), 
+                            FinisherAttackToast.SpecialToastType.FINISHER_HEAVY_ATTACK,
+                            finisher, power));
                 }
             });
         }

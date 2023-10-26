@@ -11,7 +11,8 @@ import net.minecraft.util.ResourceLocation;
 /*
  * TODO Stand skins
  * 
- * [V]  UI color
+ * [V] UI color
+ * [_] appearance part
  * 
  * [_] in-mod textures
  * [_]   entity textures

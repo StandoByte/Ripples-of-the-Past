@@ -8,7 +8,6 @@ import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WIND
 import java.util.List;
 
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.widgets.HideScreenPartToggleBox;
 import com.github.standobyte.jojo.client.ui.screen.widgets.HideScreenPartToggleBox.Direction;
@@ -20,8 +19,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemRenderer;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.IReorderingProcessor;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -194,9 +193,9 @@ public class HamonIntroTabGui extends HamonTabGui {
         blit(matrixStack, x - 15, y - 1, 236, 128, 9, 16);
         minecraft.getTextureManager().bind(ActionsOverlayGui.HOTBAR_LOCATION);
         blit(matrixStack, x - 3, y - 3, 0, 0, 22, 22);
-        TextureAtlasSprite textureAtlasSprite = CustomResources.getActionSprites().getSprite(ModHamonActions.HAMON_BREATH.get().getRegistryName());
-        minecraft.getTextureManager().bind(textureAtlasSprite.atlas().location());
-        blit(matrixStack, x, y, 0, 16, 16, textureAtlasSprite);
+        ResourceLocation actionIcon = ModHamonActions.HAMON_BREATH.get().getIconTexture(null);
+        minecraft.getTextureManager().bind(actionIcon);
+        blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
         minecraft.getTextureManager().bind(ActionsOverlayGui.HOTBAR_LOCATION);
         blit(matrixStack, x - 4, y - 4, 0, 22, 24, 22);
     }

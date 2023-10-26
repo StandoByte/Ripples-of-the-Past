@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import org.lwjgl.opengl.GL11;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
@@ -196,6 +197,15 @@ public class ClientUtil {
         ResourceLocation path = stand.getType().getIconTexture();
         return StandSkinsManager.getInstance().getRemappedResPath(manager -> manager
                 .getStandSkin(stand), path);
+    }
+    
+    public static <P extends IPower<P, ?>> ResourceLocation getActionIcon(Action<P> action, IPower<?, ?> power) {
+        ResourceLocation path = action.getIconTexture((P) power);
+        if (power instanceof IStandPower) {
+            path = StandSkinsManager.getInstance().getRemappedResPath(manager -> manager
+                    .getStandSkin(((IStandPower) power).getStandInstance().get()), path);
+        }
+        return path;
     }
     
     public static void drawRightAlignedString(MatrixStack matrixStack, FontRenderer font, String line, float x, float y, int color) {
