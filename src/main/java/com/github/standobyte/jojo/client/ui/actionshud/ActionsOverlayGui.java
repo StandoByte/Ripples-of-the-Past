@@ -721,7 +721,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 ClientUtil.fillSingleRect(x - 2, y - 2, 20, 20, 0, 255, 0, 127);
             }
             
-            ResourceLocation icon = ClientUtil.getActionIcon(action, power);
+            ResourceLocation icon = action.getIconTexture(power);
             mc.getTextureManager().bind(icon);
             
             ActionConditionResult result = actionAvailability(action, mode, actionKey, target, isSelected);
@@ -920,7 +920,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
             }
             
-            mc.getTextureManager().bind(ClientUtil.getIconPowerType(mode.getPower()));
+            mc.getTextureManager().bind(mode.getPower().clGetPowerTypeIcon());
             blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
             
             if (alpha < 1.0F) {
@@ -1048,7 +1048,7 @@ public class ActionsOverlayGui extends AbstractGui {
             if (mode != null) {
                 IPower<?, ?> power = mode.getPower();
                 if (power.hasPower()) {
-                    mc.getTextureManager().bind(ClientUtil.getIconPowerType(power));
+                    mc.getTextureManager().bind(power.clGetPowerTypeIcon());
                     blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
                 }
             }
@@ -1175,7 +1175,7 @@ public class ActionsOverlayGui extends AbstractGui {
     
     private boolean renderBowChargeIcon(MatrixStack matrixStack, BowChargeEffectInstance<?, ?> bowCharge, float partialTick, int x, int y) {
         if (bowCharge != null && bowCharge.isBeingCharged()) {
-            mc.getTextureManager().bind(ClientUtil.getIconPowerType(bowCharge.getPower()));
+            mc.getTextureManager().bind(bowCharge.getPower().clGetPowerTypeIcon());
             float fill = bowCharge.getProgress(partialTick);
             if (fill < 1) {
                 RenderSystem.color4f(0, 0, 0, 1);

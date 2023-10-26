@@ -2,6 +2,8 @@ package com.github.standobyte.jojo.power.impl.nonstand.type;
 
 import java.util.function.Supplier;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.IPowerType;
@@ -111,7 +113,7 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
     }
 
     @Override
-    public ResourceLocation getIconTexture() {
+    public ResourceLocation getIconTexture(@Nullable INonStandPower power) {
         if (iconTexture == null) {
             iconTexture = JojoModUtil.makeTextureLocation("power", getRegistryName().getNamespace(), getRegistryName().getPath());
         }

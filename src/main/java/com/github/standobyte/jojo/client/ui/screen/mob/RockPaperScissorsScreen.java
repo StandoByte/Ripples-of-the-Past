@@ -182,7 +182,7 @@ public class RockPaperScissorsScreen extends ChatScreen {
         if (cheat != null) {
             IPower<?, ?> cheatPowerCap = IPower.getPowerOptional(minecraft.player, cheatPower).resolve().get();
             cheatButton.y = (height - HEIGHT) / 2 + DEFAULT_CHEAT_BUTTON_Y + nonTieRound * 18;
-            minecraft.getTextureManager().bind(ClientUtil.getIconPowerType(cheatPowerCap));
+            minecraft.getTextureManager().bind(cheatPowerCap.clGetPowerTypeIcon());
             blit(matrixStack, cheatButton.x + 2, cheatButton.y + 2, 0, 0, 16, 16, 16, 16);
             if (cheatButton.isMouseOver(mouseX, mouseY)) {
                 renderTooltip(matrixStack, minecraft.font.split(new TranslationTextComponent(

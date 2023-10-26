@@ -3,6 +3,8 @@ package com.github.standobyte.jojo.action.stand;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
@@ -153,9 +155,9 @@ public class CrazyDiamondBlockBullet extends StandEntityAction {
     
     private ResourceLocation homingTex;
     @Override
-    public ResourceLocation getIconTexture(IStandPower power) {
+    public ResourceLocation getIconTexturePath(@Nullable IStandPower power) {
         ResourceLocation iconPath = super.getIconTexture(power);
-        if (isHoming(power)) {
+        if (power != null && isHoming(power)) {
             if (homingTex == null) {
                 homingTex = JojoModUtil.makeTextureLocation("action", 
                         getRegistryName().getNamespace(), getRegistryName().getPath() + "_homing");

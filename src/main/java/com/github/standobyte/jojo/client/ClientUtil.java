@@ -8,16 +8,11 @@ import javax.annotation.Nullable;
 import org.lwjgl.opengl.GL11;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
-import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
 import com.github.standobyte.jojo.client.ui.screen.mob.RockPaperScissorsScreen;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
-import com.github.standobyte.jojo.power.IPower;
-import com.github.standobyte.jojo.power.impl.stand.IStandPower;
-import com.github.standobyte.jojo.power.impl.stand.StandInstance;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.general.MathUtil.Matrix4ZYX;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
@@ -179,33 +174,6 @@ public class ClientUtil {
         } catch (IOException e) {
             return false;
         }
-    }
-    
-    public static ResourceLocation getIconPowerType(IPower<?, ?> power) {
-        if (power.hasPower()) {
-            ResourceLocation path = power.getType().getIconTexture();
-            if (power instanceof IStandPower) {
-                path = StandSkinsManager.getInstance().getRemappedResPath(manager -> manager
-                        .getStandSkin(((IStandPower) power).getStandInstance().get()), path);
-            }
-            return path;
-        }
-        return new ResourceLocation("missingno");
-    }
-    
-    public static ResourceLocation getIconStand(StandInstance stand) {
-        ResourceLocation path = stand.getType().getIconTexture();
-        return StandSkinsManager.getInstance().getRemappedResPath(manager -> manager
-                .getStandSkin(stand), path);
-    }
-    
-    public static <P extends IPower<P, ?>> ResourceLocation getActionIcon(Action<P> action, IPower<?, ?> power) {
-        ResourceLocation path = action.getIconTexture((P) power);
-        if (power instanceof IStandPower) {
-            path = StandSkinsManager.getInstance().getRemappedResPath(manager -> manager
-                    .getStandSkin(((IStandPower) power).getStandInstance().get()), path);
-        }
-        return path;
     }
     
     public static void drawRightAlignedString(MatrixStack matrixStack, FontRenderer font, String line, float x, float y, int color) {

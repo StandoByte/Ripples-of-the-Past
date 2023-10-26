@@ -5,10 +5,10 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
+import com.github.standobyte.jojo.power.IPowerType;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -83,10 +83,11 @@ public class ActionToast implements IToast {
         }
     }
     
-    public static void addOrUpdate(ToastGui toastGui, IActionToastType type, Action<?> action, IPower<?, ?> power) {
+    public static <P extends IPower<P, T>, T extends IPowerType<P, T>> void addOrUpdate(
+            ToastGui toastGui, IActionToastType type, Action<P> action, IPower<P, T> power) {
         ActionToast toast = toastGui.getToast(ActionToast.class, type);
-        ResourceLocation actionIcon = ClientUtil.getActionIcon(action, power);
-        ResourceLocation powerTypeIcon = ClientUtil.getIconPowerType(power);
+        ResourceLocation actionIcon = action.getIconTexture((P) power);
+        ResourceLocation powerTypeIcon = power.clGetPowerTypeIcon();
         if (toast == null) {
             toastGui.addToast(type.createToast(actionIcon, powerTypeIcon));
         } else {

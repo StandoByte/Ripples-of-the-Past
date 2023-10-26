@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.command.configpack.StandStatsConfig;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.IPowerType;
@@ -362,10 +363,16 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
 
     @Override
-    public ResourceLocation getIconTexture() {
+    public ResourceLocation getIconTexture(@Nullable IStandPower power) {
         if (iconTexture == null) {
             iconTexture = JojoModUtil.makeTextureLocation("power", getRegistryName().getNamespace(), getRegistryName().getPath());
         }
+        
+        if (power != null && power.getType() == this) {
+            return StandSkinsManager.getInstance().getRemappedResPath(
+                    manager -> manager.getStandSkin(power.getStandInstance().get()), iconTexture);
+        }
+        
         return this.iconTexture;
     }
     

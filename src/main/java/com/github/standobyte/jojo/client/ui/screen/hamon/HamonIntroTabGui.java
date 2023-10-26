@@ -207,7 +207,7 @@ public class HamonIntroTabGui extends HamonTabGui {
 
     @Override
     void drawIcon(MatrixStack matrixStack, int windowX, int windowY, ItemRenderer itemRenderer) {
-        minecraft.getTextureManager().bind(ModPowers.HAMON.get().getIconTexture());
+        minecraft.getTextureManager().bind(ModPowers.HAMON.get().getIconTexture(null));
         int x = tabPositioning.getIconX(windowX, index, WINDOW_WIDTH);
         int y = tabPositioning.getIconY(windowY, index, WINDOW_HEIGHT);
         blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);

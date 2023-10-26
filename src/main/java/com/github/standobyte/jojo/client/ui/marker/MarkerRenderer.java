@@ -112,7 +112,7 @@ public abstract class MarkerRenderer {
     }
     
     private <P extends IPower<P, ?>> ResourceLocation getIconFromAction(Action<P> action, IPower<?, ?> power) {
-        return ClientUtil.getActionIcon(action, (P) power);
+        return action.getIconTexture((P) power);
     }
 
     @EventBusSubscriber(modid = JojoMod.MOD_ID, value = Dist.CLIENT)

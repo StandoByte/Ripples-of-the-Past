@@ -378,7 +378,11 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
 
     private ResourceLocation iconTexture;
-    public ResourceLocation getIconTexture(P power) {
+    public ResourceLocation getIconTexture(@Nullable P power) {
+        return getIconTexturePath(power);
+    }
+    
+    protected ResourceLocation getIconTexturePath(@Nullable P power) {
         if (iconTexture == null) {
             iconTexture = JojoModUtil.makeTextureLocation("action", getRegistryName().getNamespace(), getRegistryName().getPath());
         }

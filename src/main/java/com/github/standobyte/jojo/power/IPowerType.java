@@ -47,8 +47,6 @@ public interface IPowerType<P extends IPower<P, T>, T extends IPowerType<P, T>> 
     default IFormattableTextComponent getName() {
         return new TranslationTextComponent(getTranslationKey());
     }
-    /**
-     * For internal use. To get the Stand icon path, use ClientUtil.getPowerTypeIcon(IPower), as it accounts for things like Stand skins.
-     */
-    ResourceLocation getIconTexture();
+    
+    ResourceLocation getIconTexture(@Nullable P power);
 }

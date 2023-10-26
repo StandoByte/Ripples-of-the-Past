@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.client.render.item.standdisc;
 
-import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -49,7 +49,8 @@ public class StandDiscISTER extends ItemStackTileEntityRenderer {
     
     private void renderStandIcon(MatrixStack matrixStack, StandInstance stand, ItemStack discItem, 
             IRenderTypeBuffer buffer, int light, int overlay) {
-        ResourceLocation icon = ClientUtil.getIconStand(stand);
+        ResourceLocation icon = StandSkinsManager.getInstance().getRemappedResPath(
+                manager -> manager.getStandSkin(stand), stand.getType().getIconTexture(null));
         
         IVertexBuilder vertexBuilder = ItemRenderer.getFoilBufferDirect(
                 buffer, RenderType.entityCutoutNoCull(icon), 
