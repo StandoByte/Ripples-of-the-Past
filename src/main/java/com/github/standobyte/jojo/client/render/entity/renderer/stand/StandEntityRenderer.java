@@ -56,7 +56,8 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
     }
     
     private ResourceLocation getTextureLocation(Optional<ResourceLocation> standSkin) {
-        return StandSkinsManager.getPathRemapped(standSkin, texture);
+        return StandSkinsManager.getInstance()
+                .getRemappedResPath(manager -> manager.getStandSkin(standSkin), texture);
     }
 
     @Override

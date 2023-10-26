@@ -21,6 +21,7 @@ import java.util.Random;
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.tuple.Pair;
+import org.lwjgl.glfw.GLFW;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
@@ -58,7 +59,10 @@ import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mod.JojoModUtil.Direction2D;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.settings.KeyBinding;
@@ -981,5 +985,17 @@ public class InputHandler {
             }
             return null;
         }
+    }
+    
+    private static final Int2ObjectMap<Direction2D> ARROW_KEYS = Util.make(new Int2ObjectOpenHashMap<>(), map -> {
+        map.put(GLFW.GLFW_KEY_LEFT,  Direction2D.LEFT);
+        map.put(GLFW.GLFW_KEY_UP,    Direction2D.UP);
+        map.put(GLFW.GLFW_KEY_RIGHT, Direction2D.RIGHT);
+        map.put(GLFW.GLFW_KEY_DOWN,  Direction2D.DOWN);
+    });
+    
+    @Nullable
+    public static Direction2D getArrowKey(int keyCode) {
+        return ARROW_KEYS.get(keyCode);
     }
 }

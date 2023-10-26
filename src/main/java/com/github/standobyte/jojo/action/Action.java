@@ -12,7 +12,6 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
-import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.ActionType;
@@ -25,7 +24,6 @@ import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
@@ -369,12 +367,26 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return new TranslationTextComponent("jojo.layout_edit.locked");
     }
     
+    @Deprecated
     public ResourceLocation getTexture(P power) {
         return getRegistryName();
     }
-    
+
+    @Deprecated
     public Stream<ResourceLocation> getTexLocationstoLoad() {
         return Stream.of(getRegistryName());
+    }
+
+    private ResourceLocation iconTexture;
+    public ResourceLocation getIconTexture(@Nullable P power) {
+        return getIconTexturePath(power);
+    }
+    
+    protected ResourceLocation getIconTexturePath(@Nullable P power) {
+        if (iconTexture == null) {
+            iconTexture = JojoModUtil.makeTextureLocation("action", getRegistryName().getNamespace(), getRegistryName().getPath());
+        }
+        return this.iconTexture;
     }
     
     @Nullable

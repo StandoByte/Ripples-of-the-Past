@@ -12,18 +12,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
-
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.client.ResourcePathChecker;
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
-import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -45,16 +42,28 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
     private Map<ResourceLocation, List<StandSkin>> skinsByStand = new HashMap<>();
     private static final List<StandSkin> EMPTY = ImmutableList.of();
     
-    @Nullable
-    public StandSkin getStandSkin(StandType<?> standType, @Nullable ResourceLocation skinId) {
-        StandSkin skin = null;
-        if (skinId != null) {
-            skin = skins.get(skinId);
-        }
-        if (skin == null) {
-            skin = skins.get(standType.getRegistryName());
+    public static StandSkinsManager getInstance() {
+        return CustomResources.getStandSkinsLoader();
+    }
+    
+    public Optional<StandSkin> getStandSkinOrDefault(ResourceLocation standTypeId, Optional<ResourceLocation> skinId) {
+        Optional<StandSkin> skin = skinId.map(skins::get);
+        if (!skin.isPresent()) {
+            skin = Optional.ofNullable(skins.get(standTypeId));
         }
         return skin;
+    }
+    
+    public Optional<StandSkin> getStandSkin(Optional<ResourceLocation> skinId) {
+        return skinId.map(skins::get);
+    }
+    
+    public Optional<StandSkin> getStandSkin(StandInstance standInstance) {
+        return getStandSkinOrDefault(standInstance.getType().getRegistryName(), standInstance.getSelectedSkin());
+    }
+    
+    public ResourceLocation getRemappedResPath(Function<StandSkinsManager, Optional<StandSkin>> getSkin, ResourceLocation originalPath) {
+        return getSkin.apply(this).map(skin -> skin.getRemappedResPath(originalPath).or(originalPath)).orElse(originalPath);
     }
     
     public List<StandSkin> getStandSkinsView(ResourceLocation standId) {
@@ -63,19 +72,25 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
     
     
     
-    public static StandSkinsManager getInstance() {
-        return CustomResources.getStandSkinsLoader();
-    }
+    // static helper methods
     
     public static int getUiColor(IStandPower standPower) {
-        return standPower.getStandInstance().map(StandSkinsManager::getUiColor).orElse(-1);
+        return standPower.getStandInstance()
+                .map(StandSkinsManager::getUiColor)
+                .orElse(-1);
     }
     
-    public static int getUiColor(StandInstance standInstance) {
-        Optional<StandSkin> resourceSkin = standInstance.getSelectedSkin()
-                .flatMap(skinId -> Optional.ofNullable(getInstance().getStandSkin(standInstance.getType(), skinId)));
-        
-        return resourceSkin.map(skin -> skin.color).orElse(standInstance.getType().getColor());
+    public static int getUiColor(StandInstance stand) {
+        return StandSkinsManager.getInstance().getStandSkin(stand)
+                .map(skin -> skin.color)
+                .orElse(stand.getType().getColor());
+    }
+    
+    public static ResourceLocation pathRemapFunc(ResourceLocation skinPath, ResourceLocation originalResPath) {
+        return new ResourceLocation(
+                skinPath.getNamespace(), 
+                "stand_skins/" + skinPath.getPath() + "/assets/" + originalResPath.getNamespace() + "/" + originalResPath.getPath()
+                );
     }
     
     
@@ -213,53 +228,4 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
         if (fromMainMod1 ^ fromMainMod2) return fromMainMod1 ? -1 : 1;
         return rl1.compareTo(rl2);
     };
-    
-    
-    
-    private Map<ResLocPair, ResourcePathChecker> pathCheckCache = new HashMap<>();
-    
-    public ResourcePathChecker getPathChecker(ResourceLocation skinPath, ResourceLocation originalResPath) {
-        return pathCheckCache.computeIfAbsent(new ResLocPair(skinPath, originalResPath), pair -> {
-            ResourceLocation pathRemapped = new ResourceLocation(
-                    skinPath.getNamespace(), 
-                    "stand_skins/" + skinPath.getPath() + "/assets/" + originalResPath.getNamespace() + "/" + originalResPath.getPath()
-                    );
-            return ResourcePathChecker.create(pathRemapped);
-        });
-    }
-    
-    public static ResourceLocation getPathRemapped(StandSkin standSkin, ResourceLocation orDefault) {
-        return getPathRemapped(standSkin.getNonDefaultLocation(), orDefault);
-    }
-    
-    public static ResourceLocation getPathRemapped(Optional<ResourceLocation> standSkinPath, ResourceLocation orDefault) {
-        return standSkinPath.map(skin -> StandSkinsManager.getInstance().getPathChecker(skin, orDefault)
-                .or(orDefault))
-                .orElse(orDefault);
-    }
-    
-    private static class ResLocPair {
-        private final ResourceLocation left;
-        private final ResourceLocation right;
-        
-        public ResLocPair(ResourceLocation left, ResourceLocation right) {
-            this.left = left;
-            this.right = right;
-        }
-        
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) return true;
-            if (obj instanceof ResLocPair) {
-                ResLocPair other = (ResLocPair) obj;
-                return this.left.equals(other.left) && this.right.equals(other.right);
-            }
-            return false;
-        }
-        
-        @Override
-        public int hashCode() {
-            return left.hashCode() ^ right.hashCode();
-        }
-    }
 }

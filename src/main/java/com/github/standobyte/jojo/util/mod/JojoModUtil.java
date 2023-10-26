@@ -360,5 +360,14 @@ public class JojoModUtil {
                 power.getActions(ActionType.ATTACK).getAll().stream(), 
                 power.getActions(ActionType.ABILITY).getAll().stream())
                 .anyMatch(find);
+}
+    
+    
+    
+    public static enum Direction2D {
+        UP,
+        RIGHT,
+        DOWN,
+        LEFT
     }
 }
