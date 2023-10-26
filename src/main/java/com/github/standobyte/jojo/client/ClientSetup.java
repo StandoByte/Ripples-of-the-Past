@@ -319,9 +319,9 @@ public class ClientSetup {
         
         itemColors.register((stack, layer) -> {
             switch (layer) {
-            case 2:
+            case 1:
                 return ClientUtil.discColor(StandDiscItem.getColor(stack));
-            case 3:
+            case 2:
                 return StandDiscItem.getColor(stack);
             default:
                 return -1;

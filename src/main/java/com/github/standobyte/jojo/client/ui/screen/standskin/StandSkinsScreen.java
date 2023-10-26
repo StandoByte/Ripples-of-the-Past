@@ -10,6 +10,7 @@ import org.lwjgl.glfw.GLFW;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.StandEntityRenderer;
 import com.github.standobyte.jojo.client.standskin.StandSkin;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
@@ -20,6 +21,7 @@ import com.github.standobyte.jojo.power.impl.stand.StandInstance;
 import com.github.standobyte.jojo.power.impl.stand.type.EntityStandType;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
+import com.github.standobyte.jojo.util.mod.JojoModUtil.Direction2D;
 import com.google.common.collect.Streams;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -39,10 +41,12 @@ public class StandSkinsScreen extends Screen {
     
     private static final int WINDOW_WIDTH = 195;
     private static final int WINDOW_HEIGHT = 180;
-    public static final int WINDOW_INSIDE_X = 7;
-    public static final int WINDOW_INSIDE_WIDTH = 165;
-    public static final int WINDOW_INSIDE_Y = 20;
-    public static final int WINDOW_INSIDE_HEIGHT = 153;
+    private static final int WINDOW_INSIDE_X = 7;
+    private static final int WINDOW_INSIDE_WIDTH = 165;
+    private static final int WINDOW_INSIDE_Y = 20;
+    private static final int WINDOW_INSIDE_HEIGHT = 153;
+    
+    private static final int SKINS_IN_ROW = 3;
     
     private static ResourceLocation latestStand = null;
     private static int latestScroll;
@@ -76,8 +80,8 @@ public class StandSkinsScreen extends Screen {
         this.skins = Streams.mapWithIndex(StandSkinsManager.getInstance()
                 .getStandSkinsView(standCap.getType().getRegistryName())
                 .stream(), (skin, index) -> {
-                    int x = 3 + (int) (index % 3) * (SkinView.boxWidth + 3);
-                    int y = 3 + (int) (index / 3) * (SkinView.boxHeight + 3);
+                    int x = 3 + (int) (index % SKINS_IN_ROW) * (SkinView.boxWidth + 3);
+                    int y = 3 + (int) (index / SKINS_IN_ROW) * (SkinView.boxHeight + 3);
                     return new SkinView(skin, x, y);
                 })
                 .collect(Collectors.toList());
@@ -148,12 +152,6 @@ public class StandSkinsScreen extends Screen {
     private void renderContents(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
         float ticks = tickCount + partialTick;
         if (skinFullView != null) {
-            ResourceLocation standIcon = JojoModUtil.makeTextureLocation("power", 
-                    skinFullView.skin.standTypeId.getNamespace(), skinFullView.skin.standTypeId.getPath());
-            standIcon = skinFullView.skin.getRemappedResPath(standIcon).or(standIcon);
-            minecraft.getTextureManager().bind(standIcon);
-            blit(matrixStack, 4, 4, 0, 0, 16, 16, 16, 16);
-            
             IRenderTypeBuffer.Impl buffer = Minecraft.getInstance().renderBuffers().bufferSource();
             skinFullView.render(matrixStack, mouseX, mouseY, ticks, buffer);
             buffer.endBatch();
@@ -210,15 +208,14 @@ public class StandSkinsScreen extends Screen {
         switch (mouseButton) {
         case GLFW.GLFW_MOUSE_BUTTON_1:
             if (skinFullView == null && hoveredBox.isPresent()) {
-                StandSkin skin = hoveredBox.get().skin;
-                PacketManager.sendToServer(new ClSetStandSkinPacket(Optional.of(skin.resLoc), skin.standTypeId));
+                selectSkin(hoveredBox.get().skin);
                 return true;
             }
             break;
         case GLFW.GLFW_MOUSE_BUTTON_2:
             if (skinFullView == null) {
                 return hoveredBox.map(skinBox -> {
-                    setFullViewSkin(skinBox.skin);
+                    setFullViewSkin(skinBox);
                     return true;
                 }).orElse(false);
             }
@@ -263,6 +260,59 @@ public class StandSkinsScreen extends Screen {
     }
     
     @Override
+    public boolean keyPressed(int keyCode, int scanCode, int modifiers) {
+        if (keyCode == GLFW.GLFW_KEY_ENTER || keyCode == GLFW.GLFW_KEY_KP_ENTER) {
+            if (skinFullView != null) {
+                selectSkin(skinFullView.skin);
+                return true;
+            }
+            else {
+                
+            }
+        }
+        
+        else {
+            Direction2D arrowKey = InputHandler.getArrowKey(keyCode);
+            if (arrowKey != null) {
+                if (skinFullView != null) {
+                    float yRot = skinFullView.yRot;
+                    switch (arrowKey) {
+                    case RIGHT:
+                    case DOWN:
+                        setFullViewSkin(skins.get((skinFullView.skinIndex + 1) % skins.size()));
+                        break;
+                    case LEFT:
+                    case UP:
+                        setFullViewSkin(skins.get((skinFullView.skinIndex - 1 + skins.size()) % skins.size()));
+                        break;
+                    }
+                    skinFullView.yRot = yRot;
+                    return true;
+                }
+                else {
+                    switch (arrowKey) {
+                    case RIGHT:
+                        
+                        break;
+                    case DOWN:
+                        
+                        break;
+                    case LEFT:
+                        
+                        break;
+                    case UP:
+                        
+                        break;
+                    }
+                    return true;
+                }
+            }
+        }
+        
+        return super.keyPressed(keyCode, scanCode, modifiers);
+    }
+    
+    @Override
     public void onClose() {
         if (skinFullView != null) {
             setFullViewSkin(null);
@@ -275,19 +325,23 @@ public class StandSkinsScreen extends Screen {
         }
     }
     
+    private void selectSkin(StandSkin skin) {
+        PacketManager.sendToServer(new ClSetStandSkinPacket(Optional.of(skin.resLoc), skin.standTypeId));
+    }
+    
     private void addScroll(int scroll) {
         this.scroll = MathHelper.clamp(this.scroll + scroll, 0, getMaxScroll());
     }
     
     public int getMaxScroll() {
-        int rowsCount = (skins.size() - 1) / 3 + 1;
+        int rowsCount = (skins.size() - 1) / SKINS_IN_ROW + 1;
         return Math.max((SkinView.boxHeight + 4) * rowsCount - WINDOW_INSIDE_HEIGHT, 0);
     }
     
     
-    private void setFullViewSkin(@Nullable StandSkin skin) {
+    private void setFullViewSkin(@Nullable SkinView skin) {
         if (skin != null) {
-            skinFullView = new SkinFullView(skin);
+            skinFullView = new SkinFullView(skin.skin, skins.indexOf(skin));
         }
         else {
             skinFullView = null;
@@ -357,16 +411,22 @@ public class StandSkinsScreen extends Screen {
     
     private class SkinFullView {
         public final StandSkin skin;
+        public final int skinIndex;
         public float yRot = 0;
         
-        public SkinFullView(StandSkin skin) {
+        public SkinFullView(StandSkin skin, int skinIndex) {
             this.skin = skin;
+            this.skinIndex = skinIndex;
         }
         
         @SuppressWarnings("deprecation")
         public void render(MatrixStack matrixStack, int mouseX, int mouseY, 
                 float ticks, IRenderTypeBuffer buffer) {
-//            minecraft.getTextureManager().bind(TEXTURE_MAIN_WINDOW);
+            ResourceLocation standIcon = JojoModUtil.makeTextureLocation("power", 
+                    skinFullView.skin.standTypeId.getNamespace(), skinFullView.skin.standTypeId.getPath());
+            standIcon = skinFullView.skin.getRemappedResPath(standIcon).or(standIcon);
+            minecraft.getTextureManager().bind(standIcon);
+            blit(matrixStack, 4, 4, 0, 0, 16, 16, 16, 16);
             
             StandType<?> standType = standCap.getType();
             if (standType instanceof EntityStandType) {
@@ -383,6 +443,11 @@ public class StandSkinsScreen extends Screen {
                     renderer.renderIdleWithSkin(matrixStack, skin, buffer, ticks);
                 });
                 matrixStack.popPose();
+            }
+            
+            if (isSkinSelected(skin)) {
+                minecraft.getTextureManager().bind(TEXTURE_MAIN_WINDOW);
+                blit(matrixStack, WINDOW_INSIDE_WIDTH - 20, 4, 0, 192, 16, 16);
             }
 
             RenderSystem.enableBlend();
