@@ -23,6 +23,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -109,12 +110,14 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     void onItemUseStop(ItemStack item, int duration);
     @Nullable BowChargeEffectInstance<P, T> getBowChargeEffect();
     
+    ResourceLocation clGetPowerTypeIcon();
+    
     INBT writeNBT();
     void readNBT(CompoundNBT nbt);
     void onClone(P oldPower, boolean wasDeath);
     void syncWithUserOnly();
     void syncWithTrackingOrUser(ServerPlayerEntity player);
-
+    
     default boolean onClickAction(ActionType type, int index, boolean shift, ActionTarget target, Optional<Action<?>> inputValidation) {
         return onClickAction(this.getAction(type, index, shift, target), shift, target, inputValidation);
     }

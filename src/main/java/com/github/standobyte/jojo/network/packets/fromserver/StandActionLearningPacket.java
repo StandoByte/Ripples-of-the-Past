@@ -57,7 +57,7 @@ public class StandActionLearningPacket {
                         ActionToast.addOrUpdate(toastGui, 
                                 ActionToast.Type.getToastType(
                                         power.getPowerClassification(), actionType, standAction.isShiftVariation()), 
-                                standAction, power.getType());
+                                standAction, power);
                     }
                 });
             }

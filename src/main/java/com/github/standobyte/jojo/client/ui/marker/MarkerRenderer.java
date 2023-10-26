@@ -5,8 +5,10 @@ import java.util.Collection;
 import java.util.List;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
+import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -24,19 +26,25 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 public abstract class MarkerRenderer {
     private final ResourceLocation iconTexture;
+    private final Action<?> iconAction;
     private final List<MarkerInstance> positions = new ArrayList<>();
     protected final Minecraft mc;
     
     @Deprecated
     /**
-     * @deprecated use {@link MarkerRenderer#MarkerRenderer(ResourceLocation, Minecraft)}
+     * @deprecated use {@link MarkerRenderer#MarkerRenderer(ResourceLocation, Action, Minecraft)}
      */
     public MarkerRenderer(int color, ResourceLocation iconTexture, Minecraft mc) {
         this(iconTexture, mc);
     }
     
     public MarkerRenderer(ResourceLocation iconTexture, Minecraft mc) {
-        this.iconTexture = iconTexture;
+        this(iconTexture, null, mc);
+    }
+    
+    public MarkerRenderer(ResourceLocation defaultIconTexture, Action<?> iconAction, Minecraft mc) {
+        this.iconTexture = defaultIconTexture;
+        this.iconAction = iconAction;
         this.mc = mc;
     }
 
@@ -95,7 +103,16 @@ public abstract class MarkerRenderer {
     }
     
     protected ResourceLocation getIcon() {
+        if (iconAction != null) {
+            return IPower.getPowerOptional(mc.player, iconAction.getPowerClassification())
+                    .map(power -> getIconFromAction(iconAction, power))
+                    .orElse(iconTexture);
+        }
         return iconTexture;
+    }
+    
+    private <P extends IPower<P, ?>> ResourceLocation getIconFromAction(Action<P> action, IPower<?, ?> power) {
+        return action.getIconTexture((P) power);
     }
 
     @EventBusSubscriber(modid = JojoMod.MOD_ID, value = Dist.CLIENT)
