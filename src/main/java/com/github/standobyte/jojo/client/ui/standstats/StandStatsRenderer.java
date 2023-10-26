@@ -138,7 +138,7 @@ public class StandStatsRenderer {
                     standIconY -= 5;
                 }
 
-                mc.getTextureManager().bind(power.getType().getIconTexture());
+                mc.getTextureManager().bind(power.getType().getIconTexture(power));
                 AbstractGui.blit(matrixStack, x + 135 - width, standIconY, 0, 0, 16, 16, 16, 16);
                 ClientUtil.drawLines(matrixStack, mc.font, standName, 
                         x + 153 - width, standNameY, 0, color, false, true);

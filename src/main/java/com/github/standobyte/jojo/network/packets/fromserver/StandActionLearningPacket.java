@@ -67,7 +67,7 @@ public class StandActionLearningPacket {
                     
                     if (toastType != null) {
                         ToastGui toastGui = Minecraft.getInstance().getToasts();
-                        ActionToast.addOrUpdate(toastGui, toastType, action, standType);
+                        ActionToast.addOrUpdate(toastGui, toastType, action, power);
                     }
                 }
             });

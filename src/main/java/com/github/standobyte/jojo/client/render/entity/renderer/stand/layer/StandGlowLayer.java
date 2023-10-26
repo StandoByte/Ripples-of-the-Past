@@ -24,11 +24,11 @@ public class StandGlowLayer<T extends StandEntity, M extends StandEntityModel<T>
         ResourceLocation layerTexture = new ResourceLocation(
                 baseTex.getNamespace(), 
                 baseTex.getPath().replace("/entity/stand", "/entity/stand/glow"));
-        this.layerTexture = ResourcePathChecker.create(layerTexture);
+        this.layerTexture = ResourcePathChecker.getOrCreate(layerTexture);
     }
     
     public void setLegacyTexture(ResourceLocation legacyTex) {
-        this.legacyTexture = legacyTex != null ? ResourcePathChecker.create(legacyTex) : null;
+        this.legacyTexture = legacyTex != null ? ResourcePathChecker.getOrCreate(legacyTex) : null;
     }
     
     @Override

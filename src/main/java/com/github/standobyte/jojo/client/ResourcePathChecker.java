@@ -1,13 +1,13 @@
 package com.github.standobyte.jojo.client;
 
-import java.util.Collection;
-import java.util.HashSet;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.function.Supplier;
 
 import net.minecraft.util.ResourceLocation;
 
 public class ResourcePathChecker {
-    private static final Collection<ResourcePathChecker> ALL = new HashSet<>();
+    private static final Map<ResourceLocation, ResourcePathChecker> ALL = new HashMap<>();
     private final ResourceLocation path;
     private boolean resourceExists;
     private boolean checked = false;
@@ -16,10 +16,8 @@ public class ResourcePathChecker {
         this.path = path;
     }
     
-    public static ResourcePathChecker create(ResourceLocation path) {
-        ResourcePathChecker pathChecker = new ResourcePathChecker(path);
-        ALL.add(pathChecker);
-        return pathChecker;
+    public static ResourcePathChecker getOrCreate(ResourceLocation path) {
+        return ALL.computeIfAbsent(path, ResourcePathChecker::new);
     }
     
     public ResourceLocation or(ResourceLocation orDefault) {
@@ -43,7 +41,7 @@ public class ResourcePathChecker {
     }
     
     public static void onResourcesReload() {
-        ALL.forEach(path -> path.checked = false);
+        ALL.values().forEach(path -> path.checked = false);
     }
     
     

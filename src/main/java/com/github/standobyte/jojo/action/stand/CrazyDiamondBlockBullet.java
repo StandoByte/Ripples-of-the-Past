@@ -3,6 +3,8 @@ package com.github.standobyte.jojo.action.stand;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
@@ -153,25 +155,44 @@ public class CrazyDiamondBlockBullet extends StandEntityAction {
     
     private ResourceLocation homingTex;
     @Override
-    public ResourceLocation getTexture(IStandPower power) {
-        ResourceLocation resLoc = getRegistryName();
-        if (isHoming(power)) {
+    public ResourceLocation getIconTexturePath(@Nullable IStandPower power) {
+        ResourceLocation iconPath = super.getIconTexture(power);
+        if (power != null && isHoming(power)) {
             if (homingTex == null) {
-                homingTex = new ResourceLocation(resLoc.getNamespace(), resLoc.getPath() + "_homing");
+                homingTex = JojoModUtil.makeTextureLocation("action", 
+                        getRegistryName().getNamespace(), getRegistryName().getPath() + "_homing");
             }
-            resLoc = homingTex;
+            iconPath = homingTex;
         }
-        return resLoc;
-    }
-
-    @Override
-    public Stream<ResourceLocation> getTexLocationstoLoad() {
-        ResourceLocation resLoc = getRegistryName();
-        return Stream.of(resLoc, new ResourceLocation(resLoc.getNamespace(), resLoc.getPath() + "_homing"));
+        return iconPath;
     }
     
     private boolean isHoming(IStandPower power) {
         return power.getUser() != null && !JojoModUtil.useShiftVar(power.getUser())
                 && getTarget(targets(power), power.getUser()).isPresent();
+    }
+    
+    
+    
+    @Deprecated
+    private ResourceLocation homingTexPath;
+    @Deprecated
+    @Override
+    public ResourceLocation getTexture(IStandPower power) {
+        ResourceLocation resLoc = getRegistryName();
+        if (isHoming(power)) {
+            if (homingTexPath == null) {
+                homingTexPath = new ResourceLocation(resLoc.getNamespace(), resLoc.getPath() + "_homing");
+            }
+            resLoc = homingTexPath;
+        }
+        return resLoc;
+    }
+
+    @Deprecated
+    @Override
+    public Stream<ResourceLocation> getTexLocationstoLoad() {
+        ResourceLocation resLoc = getRegistryName();
+        return Stream.of(resLoc, new ResourceLocation(resLoc.getNamespace(), resLoc.getPath() + "_homing"));
     }
 }

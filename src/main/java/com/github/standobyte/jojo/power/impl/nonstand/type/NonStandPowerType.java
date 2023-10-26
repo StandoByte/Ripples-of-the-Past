@@ -2,6 +2,8 @@ package com.github.standobyte.jojo.power.impl.nonstand.type;
 
 import java.util.function.Supplier;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.IPowerType;
@@ -36,22 +38,6 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
     public void onClear(INonStandPower power) {}
     
     public void afterClear(INonStandPower power) {}
-    
-    @Override
-    public String getTranslationKey() {
-        if (translationKey == null) {
-            translationKey = Util.makeDescriptionId("non_stand", JojoCustomRegistries.NON_STAND_POWERS.getRegistry().getKey(this));
-        }
-        return this.translationKey;
-    }
-
-    @Override
-    public ResourceLocation getIconTexture() {
-        if (iconTexture == null) {
-            iconTexture = JojoModUtil.makeTextureLocation("power", getRegistryName().getNamespace(), getRegistryName().getPath());
-        }
-        return this.iconTexture;
-    }
     
     @Override
     public ActionsLayout<INonStandPower> createDefaultLayout() {
@@ -107,5 +93,21 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
 
     public TypeSpecificData newSpecificDataInstance() {
         return dataFactory.get();
+    }
+    
+    @Override
+    public String getTranslationKey() {
+        if (translationKey == null) {
+            translationKey = Util.makeDescriptionId("non_stand", JojoCustomRegistries.NON_STAND_POWERS.getRegistry().getKey(this));
+        }
+        return this.translationKey;
+    }
+
+    @Override
+    public ResourceLocation getIconTexture(@Nullable INonStandPower power) {
+        if (iconTexture == null) {
+            iconTexture = JojoModUtil.makeTextureLocation("power", getRegistryName().getNamespace(), getRegistryName().getPath());
+        }
+        return this.iconTexture;
     }
 }

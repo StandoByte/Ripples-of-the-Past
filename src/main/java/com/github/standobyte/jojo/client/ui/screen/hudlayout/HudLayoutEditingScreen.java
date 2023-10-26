@@ -10,7 +10,6 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.InputHandler.MouseButton;
-import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.widgets.CustomButton;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -26,7 +25,6 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.IFormattableTextComponent;
@@ -161,7 +159,7 @@ public class HudLayoutEditingScreen extends Screen {
             blit(matrixStack, xy[0], xy[1], textureX, textureY, 28, 32);
 
             RenderSystem.enableBlend();
-            minecraft.getTextureManager().bind(powersPresent.get(i).getType().getIconTexture());
+            minecraft.getTextureManager().bind(powersPresent.get(i).clGetPowerTypeIcon());
             blit(matrixStack, xy[0] + 6, xy[1] + 10, 0, 0, 16, 16, 16, 16);
             RenderSystem.disableBlend();
             if (renderSelectedTabButton) break;
@@ -259,15 +257,15 @@ public class HudLayoutEditingScreen extends Screen {
                 action = action.getShiftVariationIfPresent();
             }
             
-            TextureAtlasSprite textureAtlasSprite = CustomResources.getActionSprites().getSprite(action, power);
-            minecraft.getTextureManager().bind(textureAtlasSprite.atlas().location());
+            ResourceLocation icon = action.getIconTexture(power);
+            minecraft.getTextureManager().bind(icon);
             
             boolean isUnlocked = action.isUnlocked(power);
             float alpha = isEnabled ? isUnlocked ? 1.0F : 0.6F : 0.2F;
             float color = isEnabled && isUnlocked ? 1.0F : 0.0F;
             
             RenderSystem.color4f(color, color, color, alpha);
-            blit(matrixStack, x, y, 0, 16, 16, textureAtlasSprite);
+            blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         }
     }

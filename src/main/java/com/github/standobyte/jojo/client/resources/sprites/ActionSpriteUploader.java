@@ -11,6 +11,7 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.util.ResourceLocation;
 
+@Deprecated
 public class ActionSpriteUploader extends SpriteUploader {
     public ActionSpriteUploader(TextureManager textureManager) {
         super(textureManager, new ResourceLocation("textures/atlas/actions.png"), "action");

@@ -12,16 +12,14 @@ public class BowChargeEffectInstance<P extends IPower<P, T>, T extends IPowerTyp
     private static final int CHARGE_TICKS = 20;
     private final LivingEntity user;
     private final P power;
-    private final T powerType;
     private int tick = 0;
     
     private boolean wasFullyCharged;
     private int arrowWait = -1;
     
-    public BowChargeEffectInstance(LivingEntity user, P power, T powerType) {
+    public BowChargeEffectInstance(LivingEntity user, P power) {
         this.user = user;
         this.power = power;
-        this.powerType = powerType;
     }
     
     public float getProgress(float partialTick) {
@@ -80,8 +78,8 @@ public class BowChargeEffectInstance<P extends IPower<P, T>, T extends IPowerTyp
         return !isBeingCharged() && (!wasFullyCharged || arrowWait >= 5);
     }
     
-    public T getPowerType() {
-        return powerType;
+    public P getPower() {
+        return power;
     }
     
     public static boolean itemFits(ItemStack item) {

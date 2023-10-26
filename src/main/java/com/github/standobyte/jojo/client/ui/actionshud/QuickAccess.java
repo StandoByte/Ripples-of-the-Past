@@ -1,7 +1,6 @@
 package com.github.standobyte.jojo.client.ui.actionshud;
 
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.power.IPower;
 
 import net.minecraft.client.Minecraft;
