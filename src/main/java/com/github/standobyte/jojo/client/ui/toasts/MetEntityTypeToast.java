@@ -2,9 +2,11 @@ package com.github.standobyte.jojo.client.ui.toasts;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import com.github.standobyte.jojo.client.ui.screen.stand.ge.EntityTypeIcon;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -12,6 +14,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.toasts.IToast;
 import net.minecraft.client.gui.toasts.ToastGui;
 import net.minecraft.entity.EntityType;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
@@ -49,7 +52,12 @@ public class MetEntityTypeToast implements IToast {
 
             matrixStack.pushPose();
             matrixStack.scale(0.5F, 0.5F, 1.0F);
-            mc.getTextureManager().bind(ModStands.GOLD_EXPERIENCE.getStandType().getIconTexture());
+            ResourceLocation standIcon = IStandPower.getStandPowerOptional(mc.player).resolve().flatMap(
+                    power -> power.getType() == ModStands.GOLD_EXPERIENCE.getStandType() ? 
+                            Optional.of(power.clGetPowerTypeIcon())
+                            : Optional.empty())
+                    .orElse(ModStands.GOLD_EXPERIENCE.getStandType().getIconTexture(null));
+            mc.getTextureManager().bind(standIcon);
             ToastGui.blit(matrixStack, 3, 3, 0, 0, 16, 16, 16, 16);
             matrixStack.popPose();
             
