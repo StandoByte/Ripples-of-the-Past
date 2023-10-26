@@ -4,16 +4,20 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Set;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
@@ -135,6 +139,16 @@ public abstract class StandAction extends Action<IStandPower> {
                     (int) resolveLevelToUnlock);
         }
         return super.getNameLocked(power);
+    }
+    
+    @Override
+    public ResourceLocation getIconTexture(@Nullable IStandPower power) {
+        ResourceLocation path = getIconTexturePath(power);
+        if (power != null && power.hasPower()) {
+            path = StandSkinsManager.getInstance().getRemappedResPath(manager -> manager
+                    .getStandSkin(power.getStandInstance().get()), path);
+        }
+        return path;
     }
     
     

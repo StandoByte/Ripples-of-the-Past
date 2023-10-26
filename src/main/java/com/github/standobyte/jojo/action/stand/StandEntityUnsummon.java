@@ -103,7 +103,7 @@ public final class StandEntityUnsummon extends StandEntityAction {
     public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task, int ticks) {
         if (world.isClientSide()) {
             LivingEntity user = standPower.getUser();
-            if (user != null && user == ClientUtil.getClientPlayer()) {
+            if (user != null && user == ClientUtil.getClientPlayer() && !standEntity.isArmsOnlyMode()) {
                 ActionsOverlayGui.getInstance().onStandUnsummon();
             }
         }
