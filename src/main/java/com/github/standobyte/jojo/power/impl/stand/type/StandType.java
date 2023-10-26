@@ -16,6 +16,7 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.command.configpack.StandStatsConfig;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.IPowerType;
@@ -47,7 +48,6 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     private final StandAction defaultQuickAccess;
     private String translationKey;
     private ResourceLocation iconTexture;
-    private ResourceLocation iconTextureNoExt;
     
     private final ITextComponent partName;
     private final T defaultStats;
@@ -308,29 +308,6 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         return multiplier;
     }
     
-    @Override
-    public String getTranslationKey() {
-        if (translationKey == null) {
-            translationKey = Util.makeDescriptionId("stand", JojoCustomRegistries.STANDS.getRegistry().getKey(this));
-        }
-        return this.translationKey;
-    }
-
-    @Override
-    public ResourceLocation getIconTexture() {
-        if (iconTexture == null) {
-            iconTexture = JojoModUtil.makeTextureLocation("power", getRegistryName().getNamespace(), getRegistryName().getPath());
-        }
-        return this.iconTexture;
-    }
-    
-    public ResourceLocation getIconTextureBlocksAtlas() {
-        if (iconTextureNoExt == null) {
-            iconTextureNoExt = new ResourceLocation(getRegistryName().getNamespace(), "power/" + getRegistryName().getPath());
-        }
-        return this.iconTextureNoExt;
-    }
-    
     public ITextComponent getPartName() {
         return partName;
     }
@@ -397,6 +374,28 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
                 cap.setLastHurtByStand(attackerStand, dmgAmount, standDmgSource.getStandInvulTicks());
             });
         }
+    }
+    
+    @Override
+    public String getTranslationKey() {
+        if (translationKey == null) {
+            translationKey = Util.makeDescriptionId("stand", JojoCustomRegistries.STANDS.getRegistry().getKey(this));
+        }
+        return this.translationKey;
+    }
+
+    @Override
+    public ResourceLocation getIconTexture(@Nullable IStandPower power) {
+        if (iconTexture == null) {
+            iconTexture = JojoModUtil.makeTextureLocation("power", getRegistryName().getNamespace(), getRegistryName().getPath());
+        }
+        
+        if (power != null && power.getType() == this) {
+            return StandSkinsManager.getInstance().getRemappedResPath(
+                    manager -> manager.getStandSkin(power.getStandInstance().get()), iconTexture);
+        }
+        
+        return this.iconTexture;
     }
     
     public void onStandSkinSet(IStandPower power, Optional<ResourceLocation> skin) {}

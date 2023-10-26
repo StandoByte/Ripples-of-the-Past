@@ -26,7 +26,6 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
-import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsModeConfig.SelectedTargetIcon;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
@@ -367,7 +366,10 @@ public class ActionsOverlayGui extends AbstractGui {
                 return -1;
             }
         case STAND:
-            return StandSkinsManager.getUiColor((IStandPower) power);
+            return ((IStandPower) power).getStandInstance()
+                    .flatMap(StandSkinsManager.getInstance()::getStandSkin)
+                    .map(skin -> skin.color)
+                    .orElse(-1);
         }
         return -1;
     }
@@ -725,8 +727,8 @@ public class ActionsOverlayGui extends AbstractGui {
                 ClientUtil.fillSingleRect(x - 2, y - 2, 20, 20, 0, 255, 0, 127);
             }
             
-            TextureAtlasSprite textureAtlasSprite = CustomResources.getActionSprites().getSprite(action, power);
-            mc.getTextureManager().bind(textureAtlasSprite.atlas().location());
+            ResourceLocation icon = action.getIconTexture(power);
+            mc.getTextureManager().bind(icon);
             
             ActionConditionResult result = actionAvailability(action, mode, actionKey, target, isSelected);
             if (!result.isPositive()) {
@@ -736,7 +738,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 else {
                     RenderSystem.color4f(0.75F, 0.75F, 0.75F, 0.75F * hotbarAlpha);
                 }
-                blit(matrixStack, x, y, 0, 16, 16, textureAtlasSprite);
+                blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
                 // cooldown
                 float ratio = power.getCooldownRatio(action, partialTick);
                 if (ratio > 0) {
@@ -744,7 +746,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 }
             } else {
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, hotbarAlpha);
-                blit(matrixStack, x, y, 0, 16, 16, textureAtlasSprite);
+                blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
             }
             // learning bar
             float learningProgress = power.getLearningProgressRatio(action);
@@ -924,7 +926,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
             }
             
-            mc.getTextureManager().bind(mode.getPower().getType().getIconTexture());
+            mc.getTextureManager().bind(mode.getPower().clGetPowerTypeIcon());
             blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
             
             if (alpha < 1.0F) {
@@ -1052,7 +1054,7 @@ public class ActionsOverlayGui extends AbstractGui {
             if (mode != null) {
                 IPower<?, ?> power = mode.getPower();
                 if (power.hasPower()) {
-                    mc.getTextureManager().bind(power.getType().getIconTexture());
+                    mc.getTextureManager().bind(power.clGetPowerTypeIcon());
                     blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
                 }
             }
@@ -1185,7 +1187,7 @@ public class ActionsOverlayGui extends AbstractGui {
     
     private boolean renderBowChargeIcon(MatrixStack matrixStack, BowChargeEffectInstance<?, ?> bowCharge, float partialTick, int x, int y) {
         if (bowCharge != null && bowCharge.isBeingCharged()) {
-            mc.getTextureManager().bind(bowCharge.getPowerType().getIconTexture());
+            mc.getTextureManager().bind(bowCharge.getPower().clGetPowerTypeIcon());
             float fill = bowCharge.getProgress(partialTick);
             if (fill < 1) {
                 RenderSystem.color4f(0, 0, 0, 1);

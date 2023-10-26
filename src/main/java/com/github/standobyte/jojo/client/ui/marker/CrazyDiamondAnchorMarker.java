@@ -3,7 +3,6 @@ package com.github.standobyte.jojo.client.ui.marker;
 import java.util.List;
 
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
-import com.github.standobyte.jojo.client.resources.sprites.ActionSpriteUploader;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 
@@ -13,7 +12,8 @@ import net.minecraft.util.math.vector.Vector3d;
 public class CrazyDiamondAnchorMarker extends MarkerRenderer {
     
     public CrazyDiamondAnchorMarker(Minecraft mc) {
-        super(ActionSpriteUploader.getIcon(ModStandsInit.CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE.get()), mc);
+        super(ModStandsInit.CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE.get().getIconTexture(null),
+                ModStandsInit.CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE.get(), mc);
     }
     
     @Override

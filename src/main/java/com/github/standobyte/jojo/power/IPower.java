@@ -96,6 +96,8 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     void onItemUseStop(ItemStack item, int duration);
     @Nullable BowChargeEffectInstance<P, T> getBowChargeEffect();
     
+    ResourceLocation clGetPowerTypeIcon();
+    
     INBT writeNBT();
     void readNBT(CompoundNBT nbt);
     void onClone(P oldPower, boolean wasDeath);

@@ -354,4 +354,13 @@ public class JojoModUtil {
     public static boolean useShiftVar(LivingEntity user) {
         return user.isShiftKeyDown();
     }
+    
+    
+    
+    public static enum Direction2D {
+        UP,
+        RIGHT,
+        DOWN,
+        LEFT
+    }
 }

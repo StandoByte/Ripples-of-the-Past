@@ -1,9 +1,0 @@
-{
-  "_comment": "Discs can also have separate models for each Stand type",
-  "parent": "jojo:item/stand_disc",
-  "textures": {
-    "layer0": "jojo:item/stand_disc",
-    "layer1": "jojo:dynamic_stand_icon",
-    "layer2": "jojo:item/stand_disc"
-  }
-}

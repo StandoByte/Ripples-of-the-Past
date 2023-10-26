@@ -37,5 +37,6 @@ public interface IPowerType<P extends IPower<P, T>, T extends IPowerType<P, T>> 
     default IFormattableTextComponent getName() {
         return new TranslationTextComponent(getTranslationKey());
     }
-    ResourceLocation getIconTexture();
+    
+    ResourceLocation getIconTexture(@Nullable P power);
 }
