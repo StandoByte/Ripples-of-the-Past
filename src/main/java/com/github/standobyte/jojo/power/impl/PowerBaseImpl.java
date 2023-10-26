@@ -563,7 +563,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         if (hasPower() && BowChargeEffectInstance.itemFits(item)) {
             IBowChargeEffect<P, T> onBowCharge = getType().getBowChargeEffect();
             if (onBowCharge != null && onBowCharge.canStart(getThis())) {
-                bowCharge = new BowChargeEffectInstance<>(user, getThis(), getType());
+                bowCharge = new BowChargeEffectInstance<>(user, getThis());
                 bowCharge.onStart();
             }
         }
@@ -590,6 +590,14 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     @Override
     public BowChargeEffectInstance<P, T> getBowChargeEffect() {
         return bowCharge;
+    }
+    
+    @Override
+    public ResourceLocation clGetPowerTypeIcon() {
+        if (hasPower()) {
+            return getType().getIconTexture(getThis());
+        }
+        return new ResourceLocation("missingno");
     }
     
     @Override

@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.init;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.render.item.RoadRollerISTER;
+import com.github.standobyte.jojo.client.render.item.standdisc.StandDiscISTER;
 import com.github.standobyte.jojo.item.AjaStoneItem;
 import com.github.standobyte.jojo.item.BladeHatItem;
 import com.github.standobyte.jojo.item.BreathControlMaskItem;
@@ -127,7 +128,8 @@ public class ModItems {
             () -> new StandArrowItem(new Item.Properties().tab(JojoMod.MAIN_TAB).rarity(Rarity.RARE).durability(250), 25));
 
     public static final RegistryObject<StandDiscItem> STAND_DISC = ITEMS.register("stand_disc",
-            () -> new StandDiscItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1)));
+            () -> new StandDiscItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1)
+                    .setISTER(() -> StandDiscISTER::new)));
 
     public static final RegistryObject<StandRemoverItem> STAND_REMOVER = ITEMS.register("stand_remover",
             () -> new StandRemoverItem(new Item.Properties().tab(JojoMod.MAIN_TAB).stacksTo(1), StandRemoverItem.Mode.REMOVE, false));
