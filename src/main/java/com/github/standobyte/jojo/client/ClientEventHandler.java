@@ -542,16 +542,16 @@ public class ClientEventHandler {
                             StringTextComponent.EMPTY);
                     event.addWidget(standStatsToggleButton);
                     
-                    Button standSkinsButton = new ImageButton(screen.width - 28, screen.height - 159, 
-                            20, 20, 236, 216, 20, StandSkinsScreen.TEXTURE_MAIN_WINDOW, 256, 256, 
-                            button -> {
-                                StandSkinsScreen.openScreen(screen);
-                            }, 
-                            (button, matrixStack, x, y) -> {
-                                screen.renderTooltip(matrixStack, new TranslationTextComponent("jojo.stand_skins.button"), x, y);
-                            }, 
-                            StringTextComponent.EMPTY);
-                    event.addWidget(standSkinsButton);
+//                    Button standSkinsButton = new ImageButton(screen.width - 28, screen.height - 159, 
+//                            20, 20, 236, 216, 20, StandSkinsScreen.TEXTURE_MAIN_WINDOW, 256, 256, 
+//                            button -> {
+//                                StandSkinsScreen.openScreen(screen);
+//                            }, 
+//                            (button, matrixStack, x, y) -> {
+//                                screen.renderTooltip(matrixStack, new TranslationTextComponent("jojo.stand_skins.button"), x, y);
+//                            }, 
+//                            StringTextComponent.EMPTY);
+//                    event.addWidget(standSkinsButton);
                 }
             });
         }
