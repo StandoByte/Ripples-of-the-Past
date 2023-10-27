@@ -156,15 +156,16 @@ public class CrazyDiamondBlockBullet extends StandEntityAction {
     private ResourceLocation homingTex;
     @Override
     public ResourceLocation getIconTexturePath(@Nullable IStandPower power) {
-        ResourceLocation iconPath = super.getIconTexture(power);
         if (power != null && isHoming(power)) {
             if (homingTex == null) {
                 homingTex = JojoModUtil.makeTextureLocation("action", 
                         getRegistryName().getNamespace(), getRegistryName().getPath() + "_homing");
             }
-            iconPath = homingTex;
+            return homingTex;
         }
-        return iconPath;
+        else {
+            return super.getIconTexturePath(power);
+        }
     }
     
     private boolean isHoming(IStandPower power) {
