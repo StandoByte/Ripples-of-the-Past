@@ -216,7 +216,7 @@ public class ModStandsInit {
                             .timeStopLearningPerTick(0.25F)
                             .timeStopDecayPerDay(0F)
                             .timeStopCooldownPerTick(3F)
-                            .build())
+                            )
                     .addSummonShout(ModSounds.JOTARO_STAR_PLATINUM)
                     .addOst(ModSounds.STAR_PLATINUM_OST)
                     .build(), 
@@ -310,7 +310,7 @@ public class ModStandsInit {
                             .timeStopLearningPerTick(0.1F)
                             .timeStopDecayPerDay(0F)
                             .timeStopCooldownPerTick(3F)
-                            .build())
+                            )
                     .addSummonShout(ModSounds.DIO_THE_WORLD)
                     .addOst(ModSounds.THE_WORLD_OST)
 //                    .addItemOnResolveLevel(4, new ItemStack(ModItems.ROAD_ROLLER.get()))
@@ -394,7 +394,7 @@ public class ModStandsInit {
                             .range(50.0, 100.0)
                             .durability(10.0)
                             .precision(8.0)
-                            .build())
+                            )
                     .addSummonShout(ModSounds.KAKYOIN_HIEROPHANT_GREEN)
                     .addOst(ModSounds.HIEROPHANT_GREEN_OST)
                     .build(), 
@@ -475,7 +475,7 @@ public class ModStandsInit {
                             .durability(12.0)
                             .armor(15.0F)
                             .precision(16.0)
-                            .build())
+                            )
                     .addSummonShout(ModSounds.POLNAREFF_SILVER_CHARIOT)
                     .addOst(ModSounds.SILVER_CHARIOT_OST)
                     .build(),
@@ -571,7 +571,7 @@ public class ModStandsInit {
                             .range(5.0, 10.0)
                             .durability(12.0)
                             .precision(8.0)
-                            .build())
+                            )
                     .addSummonShout(ModSounds.AVDOL_MAGICIANS_RED)
                     .addOst(ModSounds.MAGICIANS_RED_OST)
                     .build(),
@@ -713,7 +713,7 @@ public class ModStandsInit {
                             .range(2.0, 4.0)
                             .durability(12.0)
                             .precision(12.0)
-                            .build())
+                            )
                     .addSummonShout(ModSounds.JOSUKE_CRAZY_DIAMOND)
                     .addOst(ModSounds.CRAZY_DIAMOND_OST)
                     .build(),
@@ -742,7 +742,7 @@ public class ModStandsInit {
                         .range(0)
                         .durability(0)
                         .precision(0)
-                        .build())
+                        )
                 .setPlayerAccess(false)
                 .build()
             );

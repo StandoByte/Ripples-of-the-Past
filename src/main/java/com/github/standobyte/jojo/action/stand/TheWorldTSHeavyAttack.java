@@ -176,6 +176,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
     public StandEntityPunch punchEntity(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
         double strength = stand.getAttackDamage();
         return new TheWorldTSHeavyPunch(stand, target, dmgSource)
+                .setVoiceLineOnKill(ModSounds.DIO_THIS_IS_THE_WORLD)
                 .damage(StandStatFormulas.getHeavyAttackDamage(strength))
                 .addKnockback(4)
                 .disableBlocking(1.0F)
@@ -227,17 +228,26 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
     
     
     public static class TheWorldTSHeavyPunch extends HeavyPunchInstance {
+        private Supplier<SoundEvent> voiceLineOnKill = () -> null;
 
         public TheWorldTSHeavyPunch(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
             super(stand, target, dmgSource);
+        }
+        
+        public TheWorldTSHeavyPunch setVoiceLineOnKill(Supplier<SoundEvent> sound) {
+            this.voiceLineOnKill = sound != null ? sound : () -> null;
+            return this;
         }
 
         @Override
         protected void afterAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, StandEntityTask task, boolean hurt, boolean killed) {
             if (killed) {
-                LivingEntity user = stand.getUser();
-                if (user != null && stand.distanceToSqr(user) > 16) {
-                    JojoModUtil.sayVoiceLine(user, ModSounds.DIO_THIS_IS_THE_WORLD.get());
+                SoundEvent voiceLine = voiceLineOnKill.get();
+                if (voiceLine != null) {
+                    LivingEntity user = stand.getUser();
+                    if (user != null && stand.distanceToSqr(user) > 16) {
+                        JojoModUtil.sayVoiceLine(user, voiceLine);
+                    }
                 }
             }
             super.afterAttack(stand, target, dmgSource, task, hurt, killed);
