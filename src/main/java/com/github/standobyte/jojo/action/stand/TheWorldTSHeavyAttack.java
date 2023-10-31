@@ -2,6 +2,8 @@ package com.github.standobyte.jojo.action.stand;
 
 import java.util.function.Supplier;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
@@ -22,6 +24,7 @@ import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
+import com.github.standobyte.jojo.util.general.LazySupplier;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -30,6 +33,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -107,9 +111,9 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
                         if (target.getType() == TargetType.ENTITY) {
                             offset += target.getEntity().getBoundingBox().getXsize() / 2;
                         }
-                        boolean shift = standPower.getUser().isShiftKeyDown();
+                        boolean backshot = doesBackshot(standPower);
                         Vector3d offsetFromTarget = aimingEntity.getEyePosition(1.0F).subtract(pos).normalize().scale(offset);
-                        if (shift) {
+                        if (backshot) {
                             offsetFromTarget = offsetFromTarget.reverse();
                         }
                         pos = pos.add(offsetFromTarget);
@@ -154,6 +158,10 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
                 }
             }
         }
+    }
+    
+    private boolean doesBackshot(IStandPower standPower) {
+        return standPower.getUser().isShiftKeyDown();
     }
     
     @Override
@@ -224,6 +232,20 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
     protected boolean standKeepsTarget(ActionTarget target) {
         return true;
     }
+    
+    
+    private final LazySupplier<ResourceLocation> backshotTex = 
+            new LazySupplier<>(() -> makeIconVariant(this, "_back"));
+    @Override
+    public ResourceLocation getIconTexturePath(@Nullable IStandPower power) {
+        if (power != null && doesBackshot(power)) {
+            return backshotTex.get();
+        }
+        else {
+            return super.getIconTexturePath(power);
+        }
+    }
+    
     
     
     

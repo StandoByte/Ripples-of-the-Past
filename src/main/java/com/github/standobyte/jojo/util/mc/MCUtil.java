@@ -18,6 +18,7 @@ import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.client.world.ClientWorld;
+import net.minecraft.command.CommandSource;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.crash.ReportedException;
@@ -355,7 +356,25 @@ public class MCUtil {
             }
         }
     }
+    
+    
 
+    /**
+     * Runs a command for the user entity, but with the permissions of the server.
+     * 
+     * @return The success value of the command, or 0 if an exception occured.
+     */
+    public static int runCommand(LivingEntity user, String command) {
+        if (user.level.isClientSide()) {
+            throw new IllegalLogicalSideException("Tried to run a command on client side!");
+        }
+        MinecraftServer server = ((ServerWorld) user.level).getServer();
+        CommandSource src = user.createCommandSourceStack()
+                .withMaximumPermission(4)
+                .withSuppressedOutput();
+        return server.getCommands().performCommand(src, command);
+    }
+    
     
     
     public static boolean isHandFree(LivingEntity entity, Hand hand) {
