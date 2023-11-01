@@ -19,23 +19,22 @@ import net.minecraft.util.math.MathHelper;
 
 public class FilterList {
     private static final int ENTRY_HEIGHT = 20;
-    private final int maxEntriesRendered;
     private int topEntry = 0;
     private final List<Entry> entries;
     public boolean visible = false;
     
-    private final int x;
-    private final int y;
-    private final int width;
-    private final int height;
-    private final int entriesRenderedCount;
+    private int x;
+    private int y;
+    private int width;
+    private int height;
+    private int maxHeight;
+    private int maxEntriesRendered;
+    private int entriesRenderedCount;
     
     public FilterList(List<EntityType<?>> entityTypes, 
             int xRight, int yBottom, int width, int maxHeight, ChooseLifeformScreen screen) {
-        this.maxEntriesRendered = Math.max(maxHeight / ENTRY_HEIGHT, 1);
-        this.entriesRenderedCount = Math.min(entityTypes.size(), maxEntriesRendered);
         this.width = width;
-        this.height = entriesRenderedCount * ENTRY_HEIGHT + 32;
+        setMaxHeight(maxHeight, entityTypes.size());
         this.x = xRight - width;
         this.y = yBottom - height;
         this.entries = Streams.mapWithIndex(
@@ -53,6 +52,21 @@ public class FilterList {
                                     }
                                 })))
                 .collect(Collectors.toCollection(ArrayList::new));
+    }
+    
+    public void setMaxHeight(int maxHeight) {
+        setMaxHeight(maxHeight, entries.size());
+    }
+    
+    private void setMaxHeight(int maxHeight, int entriesCount) {
+        this.maxHeight = maxHeight;
+        this.maxEntriesRendered = Math.max(maxHeight / ENTRY_HEIGHT, 1);
+        this.entriesRenderedCount = Math.min(entriesCount, maxEntriesRendered);
+        this.height = entriesRenderedCount * ENTRY_HEIGHT + 32;
+    }
+    
+    public int getMaxHeight() {
+        return maxHeight;
     }
     
     public void render(MatrixStack matrixStack, Minecraft mc, 
@@ -100,9 +114,9 @@ public class FilterList {
     }
     
     private static enum ScrollButtonState {
-        NORMAL(48),
-        DISABLED(64),
-        HOVERED(80);
+        NORMAL(80),
+        DISABLED(96),
+        HOVERED(112);
         
         private final int texY;
         private ScrollButtonState(int texY) {

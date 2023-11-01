@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 import org.lwjgl.glfw.GLFW;
 
 import com.github.standobyte.jojo.JojoMod;
@@ -36,6 +38,8 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.gui.widget.button.ImageButton;
@@ -68,6 +72,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     private static int savedColumn;
     
     private FilterList filterList;
+    private TextFieldWidget searchField;
     private Button unlockAllButton;
     
     public ChooseLifeformScreen(KeyBinding keyHeld) {
@@ -105,8 +110,10 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
                     });
                 }, ClientUtil.buttonMessageTooltip(this), new TranslationTextComponent("jojo.ge_lifeform.hide_all")));
         
-//        addButton(new ImageButton(width - 26, height - 48, 20, 20, 108, 88, 20, LIFEFORM_CHOOSE_LOCATION, 128, 128, 
-//                button -> {}, ClientUtil.buttonMessageTooltip(this), new TranslationTextComponent("jojo.ge_lifeform.search_field")));
+        addButton(new ImageButton(width - 26, height - 48, 20, 20, 108, 88, 20, LIFEFORM_CHOOSE_LOCATION, 128, 128, 
+                button -> {
+                    setSearchFieldVisible(!searchField.visible);
+                }, ClientUtil.buttonMessageTooltip(this), new TranslationTextComponent("jojo.ge_lifeform.search_field")));
         
         addButton(unlockAllButton = new Button(width - 101, height - 24, 95, 20, new TranslationTextComponent("jojo.ge_lifeform.unlock_all"), 
                 button -> {
@@ -115,6 +122,11 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
                     initEntityTypes();
                 }));
         unlockAllButton.visible = minecraft.player.abilities.instabuild;
+        
+        searchField = new TextFieldWidget(minecraft.font, width - 101, height - 76, 95, 20, 
+                searchField, new TranslationTextComponent("jojo.ge_lifeform.search_field"));
+        searchField.visible = false;
+        addWidget(searchField);
         
         if (firstInit) {
             if (GoldExperienceChooseLifeform.chosenTypeTmp != null) {
@@ -128,6 +140,18 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
             }
             
             firstInit = false;
+        }
+    }
+    
+    private void setSearchFieldVisible(boolean setVisible) {
+        if (searchField.visible ^ setVisible) {
+            int listHeightAdd = searchField.getHeight() + 16;
+            if (searchField.visible) {
+                listHeightAdd = -listHeightAdd;
+            }
+            
+            searchField.visible = setVisible;
+            filterList.setMaxHeight(filterList.getMaxHeight() - listHeightAdd);
         }
     }
     
@@ -226,6 +250,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         else {
             updateHoveredElement(mouseX, mouseY);
             entityIconsGrid.renderGrid(matrixStack, mouseX, mouseY, partialTicks);
+            searchField.render(matrixStack, mouseX, mouseY, partialTicks);
             super.render(matrixStack, mouseX, mouseY, partialTicks);
             renderHoveredTooltip(matrixStack, mouseX, mouseY, partialTicks);
             filterList.render(matrixStack, minecraft, mouseX, mouseY, partialTicks);
@@ -434,6 +459,19 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     @Override
     public boolean isPauseScreen() {
         return false;
+    }
+    
+    @Override
+    public boolean acceptsKeyInput() {
+        return !searchField.canConsumeInput();
+    }
+    
+    @Override
+    public void setFocused(@Nullable IGuiEventListener pListener) {
+        if (pListener != searchField) {
+            pListener = null;
+        }
+        doSetFocused(pListener);
     }
     
     private class SelectorWidget extends Widget implements GridList.IGridElement {

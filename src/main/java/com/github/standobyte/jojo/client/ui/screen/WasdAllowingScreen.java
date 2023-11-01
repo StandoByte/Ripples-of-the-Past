@@ -3,12 +3,15 @@ package com.github.standobyte.jojo.client.ui.screen;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 import org.lwjgl.glfw.GLFW;
 
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
@@ -43,6 +46,14 @@ public class WasdAllowingScreen extends Screen {
         return false;
     }
     
+    @Override
+    public void setFocused(@Nullable IGuiEventListener pListener) {
+    } // otherwise space will press focused buttons instead of jumping
+    
+    protected void doSetFocused(@Nullable IGuiEventListener pListener) {
+        super.setFocused(pListener);
+    }
+    
     
     private Collection<KeyBinding> heldKeyBinds;
     private void saveHeldKeyBinds() {
@@ -59,7 +70,7 @@ public class WasdAllowingScreen extends Screen {
     
     
     public void tickInput(Minecraft mc, ClientPlayerEntity player, MovementInput input) {
-        if (!KeyConflictContext.IN_GAME.isActive() && input instanceof MovementInputFromOptions) {
+        if (!KeyConflictContext.IN_GAME.isActive() && input instanceof MovementInputFromOptions && acceptsKeyInput()) {
             boolean isMovingSlowly = player.isMovingSlowly();
             
             input.up = isDownNoConflictContext(mc.options.keyUp);
@@ -79,7 +90,7 @@ public class WasdAllowingScreen extends Screen {
     }
     
     public void clickKey(Minecraft mc, int key, int scanCode, int action, int modifiers, KeyBindingMap keyBindingMap) {
-        if (action == GLFW.GLFW_RELEASE) return;
+        if (action == GLFW.GLFW_RELEASE || !acceptsKeyInput()) return;
         
         InputMappings.Input inputmappings$input = InputMappings.getKey(key, scanCode);
         
@@ -102,5 +113,9 @@ public class WasdAllowingScreen extends Screen {
      */
     private static boolean isDownNoConflictContext(KeyBinding keyBinding) {
         return keyBinding.getKeyModifier().isActive(null) && ClientReflection.isDownFieldOnly(keyBinding);
+    }
+    
+    public boolean acceptsKeyInput() {
+        return true;
     }
 }
