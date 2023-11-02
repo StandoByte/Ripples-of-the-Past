@@ -2,7 +2,10 @@ package com.github.standobyte.jojo.client.ui.screen.stand.ge;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.stand.GoldExperienceChooseLifeform;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -22,6 +25,8 @@ public class FilterList {
     private int topEntry = 0;
     private final List<Entry> entries;
     public boolean visible = false;
+    
+    @Nullable private Predicate<Entry> filter;
     
     private int x;
     private int y;
@@ -94,6 +99,11 @@ public class FilterList {
     
     private int getMaxTopEntryIndex() {
         return Math.max(entries.size() - maxEntriesRendered, 0);
+    }
+    
+    
+    public void setFilter(@Nullable Predicate<Entry> filter) {
+        this.filter = filter; // TODO fix filter
     }
     
     
@@ -177,8 +187,8 @@ public class FilterList {
     }
     
     
-    private static class Entry {
-        private final EntityType<?> entityType;
+    public static class Entry {
+        public final EntityType<?> entityType;
         private final CheckboxButton checkbox;
         
         private Entry(EntityType<?> entityType, CheckboxButton checkbox) {

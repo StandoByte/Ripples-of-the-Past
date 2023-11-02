@@ -9,6 +9,8 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableInt;
 
@@ -40,6 +42,8 @@ public class GridList<T extends Widget & GridList.IGridElement> {
     public int rowGap;
     private OptionalInt maxWidth = OptionalInt.empty();
     private int leftMostColumn = 0;
+    
+    @Nullable private Predicate<T> filter;
     
     public static <O, T extends Widget & GridList.IGridElement> GridList<T> create(Iterable<O> originalObjects, 
             Function<O, T> createElement, int maxColumnSize, 
@@ -76,7 +80,7 @@ public class GridList<T extends Widget & GridList.IGridElement> {
     }
     
     private int getMaxRenderedColumns() {
-        return maxWidth.isPresent() ? (maxWidth.getAsInt() - columnWidth) / (columnWidth + columnGap) : 999999;
+        return maxWidth.isPresent() ? maxWidth.getAsInt() / (columnWidth + columnGap) : 999999;
     }
     
 
@@ -90,7 +94,7 @@ public class GridList<T extends Widget & GridList.IGridElement> {
         
         for (T element : allElements) {
             element.setShouldRender(false);
-            if (element.visible) {
+            if (element.visible && (filter == null || filter.test(element))) { // TODO show all that pass the filter, but hidden are translucent
                 int index = visibleElements.getValue();
                 
                 int row = index % maxColumnSize;
@@ -170,8 +174,12 @@ public class GridList<T extends Widget & GridList.IGridElement> {
     }
     
     public boolean isMouseInsideGrid(double mouseX, double mouseY) {
-        return mouseX >= x - columnGap && mouseX <= x + Math.min(getMaxRenderedColumns() + 1, getColumnsCount()) * (columnWidth + columnGap) && 
-               mouseY >= y - rowGap &&    mouseY <= y + maxColumnSize * (rowHeight + rowGap);
+        int mouseColumn = MathHelper.floor((mouseX - x + columnGap * 0.5) / (columnWidth + columnGap));
+        int mouseRow    = MathHelper.floor((mouseY - y + rowGap * 0.5)    / (rowHeight   + rowGap));
+        int columnsCount = Math.min(getMaxRenderedColumns() + 1, getColumnsCount());
+        int rowsCount = getColumnSize(mouseColumn);
+        return mouseColumn >= 0 && mouseColumn < columnsCount
+                && mouseRow >= 0 && mouseRow < rowsCount;
     }
     
     public boolean onMouseScroll(double mouseX, double mouseY, double delta) {
@@ -197,6 +205,16 @@ public class GridList<T extends Widget & GridList.IGridElement> {
             return maxColumnSize;
         }
         return (visibleElementsCount - 1) % maxColumnSize + 1;
+    }
+    
+    public void setFilter(@Nullable Predicate<T> filter) {
+        this.filter = filter;
+        updateGridLayout();
+    }
+    
+    @Nullable
+    public Predicate<T> getFilter() {
+        return filter;
     }
     
     public void moveSelection(Direction2D direction, ElemMoveMode mode) {

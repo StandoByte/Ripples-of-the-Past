@@ -68,6 +68,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.entity.Entity;
@@ -580,7 +581,7 @@ public class InputHandler {
                 
                 if (action == ModStandsInit.GOLD_EXPERIENCE_CHOOSE_LIFEFORM.get()) {
                     if (mc.screen == null) {
-                        WasdAllowingScreen screen = new ChooseLifeformScreen(keyBinding);
+                        Screen screen = new ChooseLifeformScreen(keyBinding);
                         mc.setScreen(screen);
                     }
                 }

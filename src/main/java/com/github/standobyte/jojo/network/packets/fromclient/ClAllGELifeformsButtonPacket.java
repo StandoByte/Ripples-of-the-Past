@@ -30,7 +30,9 @@ public class ClAllGELifeformsButtonPacket {
         @Override
         public void handle(ClAllGELifeformsButtonPacket msg, Supplier<NetworkEvent.Context> ctx) {
             ServerPlayerEntity player = ctx.get().getSender();
-            GoldExperienceChooseLifeform.unlockAllEntityTypes(player);
+            if (player.abilities.instabuild) {
+                GoldExperienceChooseLifeform.unlockAllEntityTypes(player);
+            }
         }
 
         @Override

@@ -32,7 +32,6 @@ public class WasdAllowingScreen extends Screen {
 
     public WasdAllowingScreen(ITextComponent pTitle) {
         super(pTitle);
-        this.passEvents = true;
         saveHeldKeyBinds();
     }
     
@@ -55,7 +54,7 @@ public class WasdAllowingScreen extends Screen {
     }
     
     
-    private Collection<KeyBinding> heldKeyBinds;
+    protected Collection<KeyBinding> heldKeyBinds;
     private void saveHeldKeyBinds() {
         Collection<KeyBinding> allKeyBindings = ClientReflection.getKeyBindingsMap().values();
         heldKeyBinds = allKeyBindings.stream().filter(KeyBinding::isDown).collect(Collectors.toList());
@@ -68,6 +67,11 @@ public class WasdAllowingScreen extends Screen {
     }
     
     
+    
+    @Override
+    public void tick() {
+        passEvents = acceptsKeyInput();
+    }
     
     public void tickInput(Minecraft mc, ClientPlayerEntity player, MovementInput input) {
         if (!KeyConflictContext.IN_GAME.isActive() && input instanceof MovementInputFromOptions && acceptsKeyInput()) {

@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -70,9 +71,11 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     private static int savedMouseX;
     private static int savedMouseY;
     private static int savedColumn;
+    private static String savedSearchFilter = "";
     
     private FilterList filterList;
     private TextFieldWidget searchField;
+    private Button clearSearchFieldButton;
     private Button unlockAllButton;
     
     public ChooseLifeformScreen(KeyBinding keyHeld) {
@@ -98,15 +101,23 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         
         addButton(new ImageButton(width - 76, height - 48, 20, 20, 68, 88, 20, LIFEFORM_CHOOSE_LOCATION, 128, 128, 
                 button -> {
-                    entityIconsGrid.forEach(widget -> widget.visible = true);
-                    GoldExperienceChooseLifeform.hiddenEntriesTmp.clear();
+                    Predicate<SelectorWidget> filter = entityIconsGrid.getFilter();
+                    entityIconsGrid.forEach(widget -> {
+                        if (filter == null || filter.test(widget)) {
+                            widget.visible = true;
+                            GoldExperienceChooseLifeform.hiddenEntriesTmp.remove(widget.entityType);
+                        }
+                    });
                 }, ClientUtil.buttonMessageTooltip(this), new TranslationTextComponent("jojo.ge_lifeform.show_all")));
         
         addButton(new ImageButton(width - 51, height - 48, 20, 20, 88, 88, 20, LIFEFORM_CHOOSE_LOCATION, 128, 128, 
                 button -> {
+                    Predicate<SelectorWidget> filter = entityIconsGrid.getFilter();
                     entityIconsGrid.forEach(widget -> {
-                        widget.visible = false;
-                        GoldExperienceChooseLifeform.hiddenEntriesTmp.add(widget.entityType);
+                        if (filter == null || filter.test(widget)) {
+                            widget.visible = false;
+                            GoldExperienceChooseLifeform.hiddenEntriesTmp.add(widget.entityType);
+                        }
                     });
                 }, ClientUtil.buttonMessageTooltip(this), new TranslationTextComponent("jojo.ge_lifeform.hide_all")));
         
@@ -123,10 +134,18 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
                 }));
         unlockAllButton.visible = minecraft.player.abilities.instabuild;
         
-        searchField = new TextFieldWidget(minecraft.font, width - 101, height - 76, 95, 20, 
+        searchField = new TextFieldWidget(minecraft.font, width - 101, height - 76, 84, 20, 
                 searchField, new TranslationTextComponent("jojo.ge_lifeform.search_field"));
         searchField.visible = false;
+        searchField.setResponder(this::filterEntries);
         addWidget(searchField);
+        
+        addButton(clearSearchFieldButton = new ImageButton(width - 12, height - 70, 8, 7, 40, 112, 8, LIFEFORM_CHOOSE_LOCATION, 128, 128, 
+                button -> {
+                    searchField.setValue("");
+                }));
+        clearSearchFieldButton.visible = searchField.visible;
+        searchField.setValue(savedSearchFilter);
         
         if (firstInit) {
             if (GoldExperienceChooseLifeform.chosenTypeTmp != null) {
@@ -140,18 +159,6 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
             }
             
             firstInit = false;
-        }
-    }
-    
-    private void setSearchFieldVisible(boolean setVisible) {
-        if (searchField.visible ^ setVisible) {
-            int listHeightAdd = searchField.getHeight() + 16;
-            if (searchField.visible) {
-                listHeightAdd = -listHeightAdd;
-            }
-            
-            searchField.visible = setVisible;
-            filterList.setMaxHeight(filterList.getMaxHeight() - listHeightAdd);
         }
     }
     
@@ -213,6 +220,48 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     
     
     
+    private void setSearchFieldVisible(boolean setVisible) {
+        if (searchField.visible ^ setVisible) {
+            int listHeightAdd = searchField.getHeight() + 16;
+            if (searchField.visible) {
+                listHeightAdd = -listHeightAdd;
+            }
+            
+            searchField.visible = setVisible;
+            clearSearchFieldButton.visible = setVisible;
+            filterList.setMaxHeight(filterList.getMaxHeight() - listHeightAdd);
+            
+            setFocused(setVisible ? searchField : null);
+            searchField.setFocus(setVisible);
+        }
+    }
+    
+    @Override
+    public void setFocused(@Nullable IGuiEventListener pListener) {
+        if (pListener == null || pListener == searchField) {
+            doSetFocused(pListener);
+        }
+        else {
+            IGuiEventListener focused = getFocused();
+            if (focused == searchField) {
+                searchField.setFocus(true);
+            }
+        }
+    }
+    
+    private void filterEntries(String field) {
+        Predicate<EntityType<?>> filter = field == null || field.isEmpty() ? null : 
+            entityType -> {
+                String searchLC = field.toLowerCase();
+                return entityType.getDescription().getString().toLowerCase().contains(searchLC)
+                || ModInteractionUtil.getModName(entityType.getRegistryName()).toLowerCase().contains(searchLC);
+            };
+        entityIconsGrid.setFilter(GeneralUtil.mapPredicate(filter, widget -> widget.entityType));
+        filterList.setFilter(GeneralUtil.mapPredicate(filter, entry -> entry.entityType));
+    }
+    
+    
+    
     private int ticksKeyHeld = 0;
     private final KeyBinding keyHeld;
     private ScreenCloseMode mode = ScreenCloseMode.CLICK;
@@ -220,6 +269,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     
     @Override
     public void tick() {
+        super.tick();
         if (holdsButton) {
             if (!isKeyBeingHeld()) {
                 holdsButton = false;
@@ -302,11 +352,11 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
             
             
             
-            List<ITooltipLine> rightSideInfo = new ArrayList<>();
+            List<ITooltipLine> entityTypeInfo = new ArrayList<>();
             
-            rightSideInfo.add(new TextTooltipLine(widget.getMessage()));
+            entityTypeInfo.add(new TextTooltipLine(widget.getMessage()));
             
-            rightSideInfo.add(new TextTooltipLine(new StringTextComponent(ModInteractionUtil.getModName(widget.entityType.getRegistryName()))
+            entityTypeInfo.add(new TextTooltipLine(new StringTextComponent(ModInteractionUtil.getModName(widget.entityType.getRegistryName()))
                     .withStyle(TextFormatting.BLUE, TextFormatting.ITALIC)));
             
             Entity entity = EntityTypeToInstance.getEntityInstance(widget.entityType, minecraft.level);
@@ -316,20 +366,20 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
             int creationTicks = GoldExperienceCreateLifeform.getTicksToCreate(minecraft.player, ClientUtil.getStandPowerClCached(), entity);
             String creationSecs = String.format("%.2f", (float) creationTicks / 20F);
             
-            rightSideInfo.add(new MultiTooltipLine(
+            entityTypeInfo.add(new MultiTooltipLine(
                     new IconTooltipLine(IconTooltipLine.Icon.VOLUME),
                     new TextTooltipLine(new TranslationTextComponent("gold_experience.lifeform_size", width, height, width))));
             if (strength > 0) {
-                rightSideInfo.add(new MultiTooltipLine(
+                entityTypeInfo.add(new MultiTooltipLine(
                         new IconTooltipLine(IconTooltipLine.Icon.STRENGTH),
                         new TextTooltipLine(new StringTextComponent(String.format("%.1f", strength)))));
             }
-            rightSideInfo.add(new MultiTooltipLine(
+            entityTypeInfo.add(new MultiTooltipLine(
                     new IconTooltipLine(IconTooltipLine.Icon.TIME),
                     new TextTooltipLine(new TranslationTextComponent("gold_experience.lifeform_time", creationSecs))));
             
-            rightSideInfo.stream().map(line -> line.getWidth(font)).max(Comparator.naturalOrder()).ifPresent(tooltipWidth -> {
-                CustomTooltipRender.renderWrappedToolTip(matrixStack, rightSideInfo, x, y, font);
+            entityTypeInfo.stream().map(line -> line.getWidth(font)).max(Comparator.naturalOrder()).ifPresent(tooltipWidth -> {
+                CustomTooltipRender.renderWrappedToolTip(matrixStack, entityTypeInfo, x, y, font);
             });
         });
     }
@@ -415,13 +465,20 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         entityIconsGrid.getSelected().ifPresent(widget -> {
             GoldExperienceChooseLifeform.chosenTypeTmp = widget.entityType;
         });
+        setSearchFieldVisible(false);
         onClose();
     }
     
     @Override
     public void onClose() {
-        super.onClose();
-        savedColumn = entityIconsGrid.getLeftMostColumn();
+        if (searchField.visible) {
+            setSearchFieldVisible(false);
+        }
+        else {
+            super.onClose();
+            savedColumn = entityIconsGrid.getLeftMostColumn();
+            savedSearchFilter = searchField.getValue();
+        }
     }
     
     public void hideEntry(EntityType<?> entityType) {
@@ -464,14 +521,6 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     @Override
     public boolean acceptsKeyInput() {
         return !searchField.canConsumeInput();
-    }
-    
-    @Override
-    public void setFocused(@Nullable IGuiEventListener pListener) {
-        if (pListener != searchField) {
-            pListener = null;
-        }
-        doSetFocused(pListener);
     }
     
     private class SelectorWidget extends Widget implements GridList.IGridElement {
