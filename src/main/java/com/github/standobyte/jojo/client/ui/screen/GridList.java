@@ -25,6 +25,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.StringTextComponent;
 
 public class GridList<T extends Widget & GridList.IGridElement> {
+    @SuppressWarnings("unused")
     private final Screen screen;
     private final Button scrollLeftButton;
     private final Button scrollRightButton;
@@ -44,6 +45,7 @@ public class GridList<T extends Widget & GridList.IGridElement> {
     private int leftMostColumn = 0;
     
     @Nullable private Predicate<T> filter;
+    private boolean showHidden;
     
     public static <O, T extends Widget & GridList.IGridElement> GridList<T> create(Iterable<O> originalObjects, 
             Function<O, T> createElement, int maxColumnSize, 
@@ -93,8 +95,9 @@ public class GridList<T extends Widget & GridList.IGridElement> {
         MutableBoolean elementOutOfBounds = new MutableBoolean(false);
         
         for (T element : allElements) {
-            element.setShouldRender(false);
-            if (element.visible && (filter == null || filter.test(element))) { // TODO show all that pass the filter, but hidden are translucent
+            boolean passesFilter = filter == null || filter.test(element);
+            boolean hiddenCheck = showHidden || !element.isHidden();
+            if (passesFilter && hiddenCheck) {
                 int index = visibleElements.getValue();
                 
                 int row = index % maxColumnSize;
@@ -108,15 +111,17 @@ public class GridList<T extends Widget & GridList.IGridElement> {
                 }
                 boolean outOfBounds = elemOutOfBounds(element);
                 if (outOfBounds) {
+                    element.visible = false;
                     elementOutOfBounds.setTrue();
                 }
                 else {
-                    element.setShouldRender(true);
+                    element.visible = true;
                 }
                 
                 visibleElements.increment();
             }
             else {
+                element.visible = false;
                 element.setRow(-1);
                 element.setColumn(-1);
                 element.x = -999;
@@ -139,7 +144,7 @@ public class GridList<T extends Widget & GridList.IGridElement> {
         RenderSystem.enableBlend();
         
         for (T element : allElements) {
-            if (element.visible && element.shouldRender()) {
+            if (element.visible) {
                 element.render(matrixStack, mouseX, mouseY, partialTicks);
             }
         }
@@ -215,6 +220,10 @@ public class GridList<T extends Widget & GridList.IGridElement> {
     @Nullable
     public Predicate<T> getFilter() {
         return filter;
+    }
+    
+    public void setShowHidden(boolean showHidden) {
+        this.showHidden = showHidden;
     }
     
     public void moveSelection(Direction2D direction, ElemMoveMode mode) {
@@ -384,7 +393,10 @@ public class GridList<T extends Widget & GridList.IGridElement> {
         void setColumn(int column);
         void setRow(int row);
         
-        void setShouldRender(boolean shouldRender);
-        boolean shouldRender();
+//        void setShouldRender(boolean shouldRender);
+//        boolean shouldRender();
+        
+        void setHidden(boolean isHidden);
+        boolean isHidden();
     }
 }

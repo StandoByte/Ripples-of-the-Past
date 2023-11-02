@@ -35,6 +35,7 @@ import com.github.standobyte.jojo.util.mc.EntityTypeToInstance;
 import com.github.standobyte.jojo.util.mod.JojoModUtil.Direction2D;
 import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -104,7 +105,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
                     Predicate<SelectorWidget> filter = entityIconsGrid.getFilter();
                     entityIconsGrid.forEach(widget -> {
                         if (filter == null || filter.test(widget)) {
-                            widget.visible = true;
+                            widget.setHidden(false);
                             GoldExperienceChooseLifeform.hiddenEntriesTmp.remove(widget.entityType);
                         }
                     });
@@ -115,7 +116,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
                     Predicate<SelectorWidget> filter = entityIconsGrid.getFilter();
                     entityIconsGrid.forEach(widget -> {
                         if (filter == null || filter.test(widget)) {
-                            widget.visible = false;
+                            widget.setHidden(true);
                             GoldExperienceChooseLifeform.hiddenEntriesTmp.add(widget.entityType);
                         }
                     });
@@ -150,7 +151,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         if (firstInit) {
             if (GoldExperienceChooseLifeform.chosenTypeTmp != null) {
                 entityIconsGrid.setSelected(entityIconsGrid.findFirst(
-                        widget -> widget.visible && widget.entityType == GoldExperienceChooseLifeform.chosenTypeTmp));
+                        widget -> widget.entityType == GoldExperienceChooseLifeform.chosenTypeTmp));
                 entityIconsGrid.setLeftMostColumn(savedColumn);
                 if (restoreSavedMousePos) {
                     ClientUtil.setMousePos(savedMouseX, savedMouseY);
@@ -187,7 +188,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         int xMiddle = width / 2;
         
         entityIconsGrid = GridList.create(entityTypes, SelectorWidget::new, Math.max((height - 46) / 30, 1), this, this::addButton);
-        entityIconsGrid.forEach(widget -> widget.visible = !GoldExperienceChooseLifeform.hiddenEntriesTmp.contains(widget.entityType));
+        entityIconsGrid.forEach(widget -> widget.setHidden(GoldExperienceChooseLifeform.hiddenEntriesTmp.contains(widget.entityType)));
         
         int columnsCount = entityIconsGrid.getColumnsCount();
         int columnsCanFit = (xMax - xMin) / 30;
@@ -250,14 +251,17 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     }
     
     private void filterEntries(String field) {
-        Predicate<EntityType<?>> filter = field == null || field.isEmpty() ? null : 
+        boolean emptyQuery = field == null || field.isEmpty();
+        Predicate<EntityType<?>> filter = emptyQuery ? null : 
             entityType -> {
                 String searchLC = field.toLowerCase();
                 return entityType.getDescription().getString().toLowerCase().contains(searchLC)
-                || ModInteractionUtil.getModName(entityType.getRegistryName()).toLowerCase().contains(searchLC);
+                || ModInteractionUtil.getModName(entityType.getRegistryName()).toLowerCase().contains(searchLC)
+                || entityType.getRegistryName().toString().contains(searchLC);
             };
         entityIconsGrid.setFilter(GeneralUtil.mapPredicate(filter, widget -> widget.entityType));
         filterList.setFilter(GeneralUtil.mapPredicate(filter, entry -> entry.entityType));
+        entityIconsGrid.setShowHidden(!emptyQuery);
     }
     
     
@@ -310,7 +314,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     private void updateHoveredElement(int mouseX, int mouseY) {
         boolean mouseMoved = checkMouseMoved(mouseX, mouseY);
         entityIconsGrid.forEach(widget -> {
-            if (widget.visible && widget.shouldRender()) {
+            if (widget.visible) {
                 widget.updateIsHovered(mouseX, mouseY);
                 if (mouseMoved && widget.isHovered() && !widget.isSelected) {
                     entityIconsGrid.setSelected(widget);
@@ -406,7 +410,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
                 saveMousePos((int) mouseX, (int) mouseY);
                 return true;
             case RIGHT:
-                hideEntry(hovered.entityType);
+                switchEntryHide(hovered.entityType);
                 return true;
             default:
                 break;
@@ -485,7 +489,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         if (!GoldExperienceChooseLifeform.hiddenEntriesTmp.contains(entityType)) {
             GoldExperienceChooseLifeform.hiddenEntriesTmp.add(entityType);
             entityIconsGrid.findFirst(widget -> widget.entityType == entityType).ifPresent(
-                    widget -> widget.visible = false);
+                    widget -> widget.setHidden(true));
             
             if (entityIconsGrid.getSelected().isPresent()) {
                 SelectorWidget hovered = entityIconsGrid.getSelected().get();
@@ -500,9 +504,18 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         if (GoldExperienceChooseLifeform.hiddenEntriesTmp.contains(entityType)) {
             GoldExperienceChooseLifeform.hiddenEntriesTmp.remove(entityType);
             entityIconsGrid.findFirst(widget -> widget.entityType == entityType).ifPresent(
-                    widget -> widget.visible = true);
+                    widget -> widget.setHidden(false));
             
             entityIconsGrid.setSelected(entityIconsGrid.findFirst(widget -> widget.entityType == entityType));
+        }
+    }
+    
+    public void switchEntryHide(EntityType<?> entityType) {
+        if (GoldExperienceChooseLifeform.hiddenEntriesTmp.contains(entityType)) {
+            showEntry(entityType);
+        }
+        else {
+            hideEntry(entityType);
         }
     }
     
@@ -526,7 +539,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     private class SelectorWidget extends Widget implements GridList.IGridElement {
         private final EntityType<?> entityType;
         private boolean isSelected;
-        private boolean shouldRender;
+        private boolean isHidden;
         
         private SelectorWidget(EntityType<?> entityType) {
             super(0, 0, 24, 24, entityType.getDescription());
@@ -534,23 +547,32 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         }
         
         @Override
-        public void setShouldRender(boolean shouldRender) {
-            this.shouldRender = shouldRender;
+        public void setHidden(boolean isHidden) {
+            this.isHidden = isHidden;
         }
         
         @Override
-        public boolean shouldRender() {
-            return shouldRender;
+        public boolean isHidden() {
+            return isHidden;
         }
         
+        @SuppressWarnings("deprecation")
         @Override
         public void renderButton(MatrixStack matrixStack, int pMouseX, int pMouseY, float pPartialTicks) {
             Minecraft mc = Minecraft.getInstance();
             Minecraft.getInstance().getTextureManager().bind(LIFEFORM_CHOOSE_LOCATION);
             
+            if (isHidden) {
+                RenderSystem.color4f(1, 1, 1, 0.25F);
+            }
+            
             blit(matrixStack, x, y, 0, 0, 24, 24, 128, 128);
 
             EntityTypeIcon.renderIcon(entityType, matrixStack, x + 4, y + 4);
+            
+            if (isHidden) {
+                RenderSystem.color4f(1, 1, 1, 1);
+            }
             
             if (isSelected) {
                 mc.getTextureManager().bind(LIFEFORM_CHOOSE_LOCATION);
