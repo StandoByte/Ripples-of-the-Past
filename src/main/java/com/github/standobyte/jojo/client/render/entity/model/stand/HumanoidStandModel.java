@@ -90,7 +90,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
         torso.setPos(0.0F, -12.0F, 0.0F);
         upperPart.addChild(torso);
 
-        leftArm = new XRotationModelRenderer(this);
+        leftArm = convertLimb(new ModelRenderer(this));
         leftArm.setPos(6.0F, -10.0F, 0.0F);
         upperPart.addChild(leftArm);
 
@@ -102,7 +102,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
         leftForeArm.setPos(0.0F, 4.0F, 0.0F);
         leftArm.addChild(leftForeArm);
 
-        rightArm = new XRotationModelRenderer(this);
+        rightArm = convertLimb(new ModelRenderer(this));
         rightArm.setPos(-6.0F, -10.0F, 0.0F);
         upperPart.addChild(rightArm);
 
@@ -114,7 +114,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
         rightForeArm.setPos(0.0F, 4.0F, 0.0F);
         rightArm.addChild(rightForeArm);
 
-        leftLeg = new XRotationModelRenderer(this);
+        leftLeg = convertLimb(new ModelRenderer(this));
         leftLeg.setPos(1.9F, 12.0F, 0.0F);
         body.addChild(leftLeg);
 
@@ -126,7 +126,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
         leftLowerLeg.setPos(0.0F, 6.0F, 0.0F);
         leftLeg.addChild(leftLowerLeg);
 
-        rightLeg = new XRotationModelRenderer(this);
+        rightLeg = convertLimb(new ModelRenderer(this));
         rightLeg.setPos(-1.9F, 12.0F, 0.0F);
         body.addChild(rightLeg);
 
@@ -155,6 +155,10 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
                 .put(() -> rightLegJoint, part -> part.texOffs(64, 102) .addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.125F, false))
                 .put(() -> rightLowerLeg, part -> part.texOffs(64, 118) .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false))
                 .build();
+    }
+    
+    protected final XRotationModelRenderer convertLimb(ModelRenderer limbModelPart) {
+        return new XRotationModelRenderer(this);
     }
     
     @Override

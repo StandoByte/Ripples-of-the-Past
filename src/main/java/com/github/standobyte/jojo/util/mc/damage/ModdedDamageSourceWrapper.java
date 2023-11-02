@@ -15,6 +15,7 @@ public class ModdedDamageSourceWrapper extends DamageSource implements IModdedDa
     private boolean bypassInvulTicks = false;
     private boolean preventDamagingArmor = false;
     protected boolean showStandUserName;
+    protected boolean canHurtStands;
 
     public ModdedDamageSourceWrapper(DamageSource dmgSource) {
         super(dmgSource.msgId);
@@ -54,6 +55,16 @@ public class ModdedDamageSourceWrapper extends DamageSource implements IModdedDa
     @Override
     public boolean preventsDamagingArmor() {
         return preventDamagingArmor;
+    }
+    
+    public ModdedDamageSourceWrapper setCanHurtStands() {
+        this.canHurtStands = true;
+        return this;
+    }
+    
+    @Override
+    public boolean canHurtStands() {
+        return canHurtStands;
     }
     
     

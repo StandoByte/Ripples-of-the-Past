@@ -5,6 +5,7 @@ import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.Direction;
 
+@Deprecated
 public class SlopeModelBox extends ModelRenderer.ModelBox {
 
     public SlopeModelBox(int pTexCoordU, int pTexCoordV, 

@@ -24,6 +24,7 @@ public class AirStreamParticle extends SpriteTexturedParticle {
         this.xd = xSpeed;
         this.yd = ySpeed;
         this.zd = zSpeed;
+        quadSize *= 2;
         this.yRot = (float) MathHelper.atan2(xSpeed, zSpeed);
         this.xRot = (float) MathHelper.atan2(ySpeed, MathHelper.sqrt(xSpeed * xSpeed + zSpeed * zSpeed));
     }
@@ -103,7 +104,7 @@ public class AirStreamParticle extends SpriteTexturedParticle {
             AirStreamParticle particle = new AirStreamParticle(world, x, y, z, xSpeed, ySpeed, zSpeed);
             particle.pickSprite(spriteSet);
             particle.scale(1.5F);
-            particle.setLifetime(12);
+            particle.setLifetime(16);
             particle.hasPhysics = false;
             return particle;
         }

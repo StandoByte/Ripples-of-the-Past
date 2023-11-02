@@ -48,6 +48,7 @@ import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
+import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
 import com.github.standobyte.jojo.util.mc.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
 import com.github.standobyte.jojo.util.mc.damage.StandLinkDamageSource;
@@ -719,17 +720,25 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     @Override
     public boolean hurt(DamageSource dmgSource, float dmgAmount) {
         wasDamageBlocked = false;
-        if (!level.isClientSide() && barrageHandler.parryCount > 0
+        if (!level.isClientSide() && dmgSource instanceof StandEntityDamageSource) {
+            dmgAmount = barrageClashParryPunches((StandEntityDamageSource) dmgSource, dmgAmount);
+            if (dmgAmount <= 0) {
+                return false;
+            }
+        }
+        return super.hurt(dmgSource, dmgAmount);
+    }
+    
+    protected float barrageClashParryPunches(StandEntityDamageSource dmgSource, float dmgAmount) {
+        if (barrageHandler.parryCount > 0
                 && !isInvulnerableTo(dmgSource) && !isDeadOrDying() 
                 && !(dmgSource.isFire() && hasEffect(Effects.FIRE_RESISTANCE))
-                && canBlockDamage(dmgSource) && canBlockOrParryFromAngle(dmgSource.getSourcePosition())
-                && dmgSource instanceof StandEntityDamageSource) {
-            StandEntityDamageSource standDmgSource = (StandEntityDamageSource) dmgSource;
-            int punchesIncoming = standDmgSource.getBarrageHitsCount();
+                && canBlockDamage(dmgSource) && canBlockOrParryFromAngle(dmgSource.getSourcePosition())) {
+            int punchesIncoming = dmgSource.getBarrageHitsCount();
             if (punchesIncoming > 0) {
                 float parriableProportion = Math.min(StandStatFormulas.getMaxBarrageParryTickDamage(getDurability()) / dmgAmount, 1);
                 int punchesCanParry = MathHelper.floor(parriableProportion * barrageHandler.parryCount);
-                
+
                 if (punchesCanParry > 0) {
                     Vector3d attackPos = this.getEyePosition(1.0F);
                     Entity attacker = dmgSource.getDirectEntity();
@@ -744,26 +753,28 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
                     if (attacker instanceof StandEntity) {
                         ((StandEntity) attacker).playPunchSound = true;
                     }
-                    
+
                     punchesCanParry = Math.min(punchesCanParry, punchesIncoming);
-                    standDmgSource.setBarrageHitsCount(punchesIncoming - punchesCanParry);
+                    dmgSource.setBarrageHitsCount(punchesIncoming - punchesCanParry);
                     barrageHandler.parryCount -= punchesCanParry;
                     addFinisherMeter(0.0125F, FINISHER_NO_DECAY_TICKS);
                     setBarrageClashOpponent(attacker);
-                    
+
                     if (punchesCanParry == punchesIncoming) {
-                        StandUtil.addResolve(standDmgSource.getStandPower(), this, dmgAmount);
-                        return false;
+                        StandUtil.addResolve(dmgSource.getStandPower(), this, dmgAmount);
+                        return 0;
                     }
                     else {
                         float damageParried = dmgAmount * (float) punchesCanParry / (float) punchesIncoming;
                         dmgAmount -= damageParried;
-                        StandUtil.addResolve(standDmgSource.getStandPower(), this, damageParried);
+                        StandUtil.addResolve(dmgSource.getStandPower(), this, damageParried);
+                        return dmgAmount;
                     }
                 }
             }
         }
-        return super.hurt(dmgSource, dmgAmount);
+        
+        return dmgAmount;
     }
     
     public Optional<Entity> barrageClashOpponent() {
@@ -964,15 +975,31 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         }
         return true;
     }
-
+    
     @Override
     public boolean isInvulnerableTo(DamageSource damageSrc) {
-        return this.is(damageSrc.getEntity()) || damageSrc != DamageSource.OUT_OF_WORLD 
-                && !damageSrc.getMsgId().contains("stand")
-                && (isInvulnerable() 
-                || !(damageSrc instanceof IStandDamageSource) && damageSrc != DamageSource.ON_FIRE 
-                || damageSrc.isFire() && !level.getGameRules().getBoolean(GameRules.RULE_FIRE_DAMAGE))
-                || getUser() instanceof PlayerEntity && ((PlayerEntity) getUser()).abilities.invulnerable && !damageSrc.isBypassInvul();
+        if (damageSrc == DamageSource.OUT_OF_WORLD) {
+            return false;
+        }
+        if (this.is(damageSrc.getEntity())
+                || getUser() != null && getUser().is(damageSrc.getEntity())
+                || getUser() instanceof PlayerEntity && ((PlayerEntity) getUser()).abilities.invulnerable && !damageSrc.isBypassInvul()
+                || damageSrc.isFire() && !level.getGameRules().getBoolean(GameRules.RULE_FIRE_DAMAGE)) {
+            return true;
+        }
+        
+        if (canTakeDamageFrom(damageSrc)) {
+            return isInvulnerable();
+        }
+        
+        return true;
+    }
+    
+    public boolean canTakeDamageFrom(DamageSource damageSrc) {
+        return damageSrc instanceof IStandDamageSource
+                || damageSrc instanceof IModdedDamageSource && ((IModdedDamageSource) damageSrc).canHurtStands()
+                || damageSrc.getMsgId().contains("stand")
+                || damageSrc == DamageSource.ON_FIRE;
     }
     
     public boolean canBlockDamage(DamageSource dmgSource) {

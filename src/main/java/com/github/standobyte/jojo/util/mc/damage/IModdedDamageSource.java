@@ -9,4 +9,6 @@ public interface IModdedDamageSource {
 
     IModdedDamageSource setPreventDamagingArmor();
     boolean preventsDamagingArmor();
+    
+    boolean canHurtStands();
 }

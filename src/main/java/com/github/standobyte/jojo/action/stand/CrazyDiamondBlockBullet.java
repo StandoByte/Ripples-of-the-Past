@@ -19,6 +19,7 @@ import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.util.general.LazySupplier;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.Block;
@@ -153,18 +154,16 @@ public class CrazyDiamondBlockBullet extends StandEntityAction {
         return key;
     }
     
-    private ResourceLocation homingTex;
+    private final LazySupplier<ResourceLocation> homingTex = 
+            new LazySupplier<>(() -> makeIconVariant(this, "_homing"));
     @Override
     public ResourceLocation getIconTexturePath(@Nullable IStandPower power) {
-        ResourceLocation iconPath = super.getIconTexture(power);
         if (power != null && isHoming(power)) {
-            if (homingTex == null) {
-                homingTex = JojoModUtil.makeTextureLocation("action", 
-                        getRegistryName().getNamespace(), getRegistryName().getPath() + "_homing");
-            }
-            iconPath = homingTex;
+            return homingTex.get();
         }
-        return iconPath;
+        else {
+            return super.getIconTexturePath(power);
+        }
     }
     
     private boolean isHoming(IStandPower power) {

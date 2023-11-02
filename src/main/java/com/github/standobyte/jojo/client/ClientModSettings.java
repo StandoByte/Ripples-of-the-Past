@@ -40,6 +40,7 @@ public class ClientModSettings {
     }
     
     public boolean areControlsLockedForHotbar(ActionsLayout.Hotbar hotbar) {
+        if (hotbar == null) return false;
         switch (hotbar) {
         case LEFT_CLICK:
             return settings.lockedAttacksHotbar;
