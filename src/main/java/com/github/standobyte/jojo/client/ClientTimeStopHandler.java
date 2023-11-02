@@ -192,7 +192,7 @@ public class ClientTimeStopHandler implements ITicking {
     }
     
     public boolean shouldCancelSound(ISound sound) {
-        return !canSeeInStoppedTime && sound != null && sound.getAttenuation() == AttenuationType.LINEAR;
+        return isTimeStopped && !canSeeInStoppedTime && sound != null && sound.getAttenuation() == AttenuationType.LINEAR;
     }
     
     
