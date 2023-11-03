@@ -21,15 +21,19 @@ import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.MathHelper;
 
 public class FilterList {
-    private static final int ENTRY_HEIGHT = 20;
+    private static final int CHECKBOX_HEIGHT = 20;
+    private static final int CHECKBOX_WIDTH = 20;
     private int topEntry = 0;
-    private final List<Entry> entries;
+    private final List<Entry> allEntries;
+    private List<Entry> renderedEntries;
     public boolean visible = false;
     
     @Nullable private Predicate<Entry> filter;
     
     private int x;
     private int y;
+    private int yTop;
+    private int yBottom;
     private int width;
     private int height;
     private int maxHeight;
@@ -37,15 +41,15 @@ public class FilterList {
     private int entriesRenderedCount;
     
     public FilterList(List<EntityType<?>> entityTypes, 
-            int xRight, int yBottom, int width, int maxHeight, ChooseLifeformScreen screen) {
-        this.width = width;
-        setMaxHeight(maxHeight, entityTypes.size());
+            int xRight, int yTop, int width, int yBottom, ChooseLifeformScreen screen) {
         this.x = xRight - width;
-        this.y = yBottom - height;
-        this.entries = Streams.mapWithIndex(
+        this.yTop = yTop;
+        this.yBottom = yBottom;
+        this.width = width;
+        this.allEntries = Streams.mapWithIndex(
                 entityTypes.stream(), 
                 (entityType, i) -> new Entry(entityType, 
-                        new LifeformFilterListCheckbox(xRight - 20, y + 16 + (int) i * 20, 20, 20, 
+                        new LifeformFilterListCheckbox(xRight - CHECKBOX_WIDTH, -1, CHECKBOX_WIDTH, CHECKBOX_HEIGHT, 
                                 entityType.getDescription(), 
                                 () -> !GoldExperienceChooseLifeform.hiddenEntriesTmp.contains(entityType),
                                 stateBeingSet -> {
@@ -57,21 +61,35 @@ public class FilterList {
                                     }
                                 })))
                 .collect(Collectors.toCollection(ArrayList::new));
+        this.renderedEntries = new ArrayList<>(allEntries);
+        updateMaxHeight();
     }
     
-    public void setMaxHeight(int maxHeight) {
-        setMaxHeight(maxHeight, entries.size());
+    public void setYBottom(int yBottom) {
+        this.yBottom = yBottom;
+        updateMaxHeight();
     }
     
-    private void setMaxHeight(int maxHeight, int entriesCount) {
-        this.maxHeight = maxHeight;
-        this.maxEntriesRendered = Math.max(maxHeight / ENTRY_HEIGHT, 1);
-        this.entriesRenderedCount = Math.min(entriesCount, maxEntriesRendered);
-        this.height = entriesRenderedCount * ENTRY_HEIGHT + 32;
+    public int getYBottom() {
+        return yBottom;
     }
     
-    public int getMaxHeight() {
-        return maxHeight;
+    private void updateMaxHeight() {
+        this.maxHeight = yBottom - yTop;
+        this.maxEntriesRendered = Math.max(maxHeight / CHECKBOX_HEIGHT, 1);
+        this.entriesRenderedCount = Math.min(renderedEntries.size(), maxEntriesRendered);
+        this.height = entriesRenderedCount * CHECKBOX_HEIGHT + 32;
+        this.y = yBottom - height;
+        updatePositions();
+    }
+    
+    private void updatePositions() {
+        int i = 0;
+        for (Entry entry : renderedEntries) {
+            entry.checkbox.y = this.y + 16 + (int) i * CHECKBOX_HEIGHT;
+            i++;
+        }
+        setTopEntryIndex(topEntry);
     }
     
     public void render(MatrixStack matrixStack, Minecraft mc, 
@@ -79,17 +97,16 @@ public class FilterList {
         if (!visible) return;
         
         mc.textureManager.bind(ChooseLifeformScreen.LIFEFORM_CHOOSE_LOCATION);
-        int y = this.y;
         AbstractGui.blit(matrixStack, x + width / 2, y, 
                 16, getScrollUpState(mouseX, mouseY).texY, 16, 16, 128, 128);
         
-        y += 16 + (20 - mc.font.lineHeight) / 2;
-        for (int i = 0; i < entriesRenderedCount; i++) {
-            Entry entry = entries.get(i + topEntry);
+        for (int i = 0; i < entriesRenderedCount && i + topEntry < renderedEntries.size(); i++) {
+            Entry entry = renderedEntries.get(i + topEntry);
             ClientUtil.drawRightAlignedString(matrixStack, mc.font, 
-                    entry.checkbox.getMessage(), x + width - 25, y, 0xFFFFFF);
+                    entry.checkbox.getMessage(), 
+                    x + width - 25, entry.checkbox.y + (CHECKBOX_HEIGHT - mc.font.lineHeight) / 2, 
+                    0xFFFFFF);
             entry.checkbox.render(matrixStack, mouseX, mouseY, partialTick);
-            y += 20;
         }
 
         mc.textureManager.bind(ChooseLifeformScreen.LIFEFORM_CHOOSE_LOCATION);
@@ -98,12 +115,22 @@ public class FilterList {
     }
     
     private int getMaxTopEntryIndex() {
-        return Math.max(entries.size() - maxEntriesRendered, 0);
+        return Math.max(renderedEntries.size() - maxEntriesRendered, 0);
     }
     
     
     public void setFilter(@Nullable Predicate<Entry> filter) {
         this.filter = filter; // TODO fix filter
+        this.renderedEntries = new ArrayList<>();
+        for (Entry entry : allEntries) {
+            boolean visible = filter == null || filter.test(entry);
+            if (visible) {
+                renderedEntries.add(entry);
+            }
+            entry.checkbox.visible = visible;
+        }
+        
+        updateMaxHeight();
     }
     
     
@@ -148,7 +175,7 @@ public class FilterList {
         }
         
         for (int i = 0; i < entriesRenderedCount; i++) {
-            CheckboxButton checkbox = entries.get(i + topEntry).checkbox;
+            CheckboxButton checkbox = renderedEntries.get(i + topEntry).checkbox;
             if (checkbox.mouseClicked(mouseX, mouseY, buttonId)) {
                 return true;
             }
@@ -182,7 +209,7 @@ public class FilterList {
         if (this.topEntry != index) {
             int diff = index - this.topEntry;
             this.topEntry = index;
-            entries.forEach(entry -> entry.checkbox.y -= diff * ENTRY_HEIGHT);
+            renderedEntries.forEach(entry -> entry.checkbox.y -= diff * CHECKBOX_HEIGHT);
         }
     }
     
