@@ -14,7 +14,7 @@ public class StandStats {
     private final UpgradeableStats statsDevPotential;
     private final double rangeEffective;
     private final double rangeMax;
-    private final int randomWeight;
+    private final double randomWeight;
 
     protected StandStats(AbstractBuilder<?, ?> builder) {
         this.statsBase = new UpgradeableStats(builder.powerBase, builder.speedBase, builder.durabilityBase, builder.precisionBase);
@@ -29,7 +29,7 @@ public class StandStats {
         this.statsDevPotential = new UpgradeableStats(buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble());
         this.rangeEffective = buf.readDouble();
         this.rangeMax = buf.readDouble();
-        this.randomWeight = buf.readVarInt();
+        this.randomWeight = buf.readDouble();
     }
     
     public void write(PacketBuffer buf) {
@@ -46,7 +46,7 @@ public class StandStats {
         buf.writeDouble(rangeEffective);
         buf.writeDouble(rangeMax);
         
-        buf.writeVarInt(randomWeight);
+        buf.writeDouble(randomWeight);
     }
     
     public void onNewDay(LivingEntity user, IStandPower power) {}
@@ -130,7 +130,7 @@ public class StandStats {
         return 0;
     }
     
-    public int getRandomWeight() {
+    public double getRandomWeight() {
         return randomWeight;
     }
     
@@ -165,7 +165,7 @@ public class StandStats {
         private double precisionBase = 8.0;
         private double precisionMax = 8.0;
         
-        private int randomWeight = 2;
+        private double randomWeight = 2;
         
         public B power(double power) {
             return power(power, power);
@@ -227,7 +227,7 @@ public class StandStats {
             return getThis();
         }
         
-        public B randomWeight(int randomWeight) {
+        public B randomWeight(double randomWeight) {
             this.randomWeight = randomWeight;
             return getThis();
         }
