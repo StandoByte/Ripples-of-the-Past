@@ -375,7 +375,7 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
 
         head.texOffs(24, 0).addBox(-4.5F, -4.0F, -3.0F, 1.0F, 2.0F, 2.0F, 0.0F, false);
         head.texOffs(24, 4).addBox(3.5F, -4.0F, -3.0F, 1.0F, 2.0F, 2.0F, 0.0F, true);
-        head.texOffs(4, 6).addBox(-0.5F, -0.5F, -4.5F, 1.0F, 1.0F, 1.0F, 0.0F, false);
+        head.texOffs(5, 7).addBox(-0.5F, -0.9F, -4.0F, 1.0F, 1.0F, 0.0F, 0.1F, false);
 
         leftShoulder = new ModelRenderer(this);
         leftShoulder.setPos(3.5F, 1.05F, 0.0F);
