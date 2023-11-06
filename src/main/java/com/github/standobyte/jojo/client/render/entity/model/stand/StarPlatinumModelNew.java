@@ -19,15 +19,14 @@ import net.minecraft.util.math.MathHelper;
 
 // Made with Blockbench 3.9.2
 
+public class StarPlatinumModelNew extends HumanoidStandModel<StarPlatinumEntity> {
+    protected ModelRenderer leftShoulder;
+    protected ModelRenderer rightShoulder;
+    protected ModelRenderer frontFabric;
+    protected ModelRenderer backFabric;
 
-public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
-
-    public StarPlatinumModel() {
+    public StarPlatinumModelNew() {
         super();
-        
-        addHumanoidBaseBoxes(null);
-        ModelRenderer leftShoulder;
-        ModelRenderer rightShoulder;
         
         // hair goes brrrrr
         ModelRenderer hair;
@@ -80,6 +79,13 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
         ModelRenderer hair47;
         ModelRenderer hair48;
 
+        head.setPos(0.0F, 0.0F, 0.0F);
+        head.texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
+        head.texOffs(45, 14).addBox(-4.0F, -6.0F, -4.0F, 8.0F, 1.0F, 8.0F, 0.075F, false);
+        head.texOffs(24, 0).addBox(-4.5F, -4.0F, -3.0F, 1.0F, 2.0F, 2.0F, 0.0F, false);
+        head.texOffs(24, 4).addBox(3.5F, -4.0F, -3.0F, 1.0F, 2.0F, 2.0F, 0.0F, true);
+        head.texOffs(5, 7).addBox(-0.5F, -0.9F, -4.0F, 1.0F, 1.0F, 0.0F, 0.1F, false);
+
         hair = new ModelRenderer(this);
         hair.setPos(0.0F, -8.0F, 0.0F);
         head.addChild(hair);
@@ -89,49 +95,49 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
         hair1.setPos(-3.6F, 1.2F, -4.0F);
         hair.addChild(hair1);
         setRotationAngle(hair1, -0.1309F, -0.1571F, 0.0F);
-        hair1.texOffs(76, 0).addBox(-1.0F, -3.0F, -0.5F, 2.0F, 4.0F, 2.0F, 0.0F, false);
+        hair1.texOffs(44, 0).addBox(-1.0F, -3.0F, -0.5F, 2.0F, 4.0F, 2.0F, 0.0F, false);
 
         hair2 = new ModelRenderer(this);
         hair2.setPos(0.0F, -3.0F, -0.5F);
         hair1.addChild(hair2);
         setRotationAngle(hair2, -0.9163F, 0.0F, 0.0F);
-        hair2.texOffs(53, 0).addBox(-0.9F, -9.0F, 0.0F, 2.0F, 9.0F, 2.0F, 0.0F, false);
+        hair2.texOffs(36, 0).addBox(-0.9F, -9.0F, 0.0F, 2.0F, 9.0F, 2.0F, 0.0F, false);
 
         hair3 = new ModelRenderer(this);
         hair3.setPos(-1.8F, 1.1F, -4.0F);
         hair.addChild(hair3);
         setRotationAngle(hair3, -0.1309F, -0.096F, 0.0F);
-        hair3.texOffs(67, 0).addBox(-1.0F, -3.0F, -0.5F, 2.0F, 4.0F, 2.0F, 0.0F, false);
+        hair3.texOffs(44, 6).addBox(-1.0F, -3.0F, -0.5F, 2.0F, 4.0F, 2.0F, 0.0F, false);
 
         hair4 = new ModelRenderer(this);
         hair4.setPos(0.0F, -3.0F, -0.5F);
         hair3.addChild(hair4);
         setRotationAngle(hair4, -0.829F, 0.0F, 0.0F);
-        hair4.texOffs(49, 0).addBox(-0.9F, -9.0F, 0.0F, 2.0F, 9.0F, 2.0F, 0.0F, true);
+        hair4.texOffs(52, 0).addBox(-0.9F, -9.0F, 0.0F, 2.0F, 9.0F, 2.0F, 0.0F, true);
 
         hair5 = new ModelRenderer(this);
         hair5.setPos(0.0F, 1.0F, -4.0F);
         hair.addChild(hair5);
         setRotationAngle(hair5, -0.1309F, 0.0087F, 0.0F);
-        hair5.texOffs(62, 0).addBox(-1.0F, -3.0F, -0.5F, 2.0F, 4.0F, 2.0F, 0.0F, false);
+        hair5.texOffs(60, 0).addBox(-1.0F, -3.0F, -0.5F, 2.0F, 4.0F, 2.0F, 0.0F, false);
 
         hair6 = new ModelRenderer(this);
         hair6.setPos(0.0F, -3.0F, -0.5F);
         hair5.addChild(hair6);
         setRotationAngle(hair6, -0.7854F, 0.0F, 0.0F);
-        hair6.texOffs(71, 0).addBox(-1.0F, -9.0F, 0.0F, 2.0F, 9.0F, 2.0F, 0.0F, false);
+        hair6.texOffs(68, 0).addBox(-1.0F, -9.0F, 0.0F, 2.0F, 9.0F, 2.0F, 0.0F, false);
 
         hair7 = new ModelRenderer(this);
         hair7.setPos(1.8F, 1.2F, -4.0F);
         hair.addChild(hair7);
         setRotationAngle(hair7, -0.1309F, 0.1047F, 0.0F);
-        hair7.texOffs(54, 0).addBox(-1.0F, -3.0F, -0.5F, 2.0F, 4.0F, 2.0F, 0.0F, true);
+        hair7.texOffs(60, 6).addBox(-1.0F, -3.0F, -0.5F, 2.0F, 4.0F, 2.0F, 0.0F, true);
 
         hair8 = new ModelRenderer(this);
         hair8.setPos(0.0F, -3.0F, -0.5F);
         hair7.addChild(hair8);
         setRotationAngle(hair8, -0.8727F, 0.0F, 0.0F);
-        hair8.texOffs(58, 0).addBox(-1.1F, -9.0F, 0.0F, 2.0F, 9.0F, 2.0F, 0.0F, true);
+        hair8.texOffs(92, 0).addBox(-1.1F, -9.0F, 0.0F, 2.0F, 9.0F, 2.0F, 0.0F, true);
 
         hair9 = new ModelRenderer(this);
         hair9.setPos(3.6F, 1.3F, -4.0F);
@@ -143,73 +149,73 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
         hair10.setPos(0.0F, -3.0F, -0.5F);
         hair9.addChild(hair10);
         setRotationAngle(hair10, -0.9163F, 0.0F, 0.0F);
-        hair10.texOffs(67, 0).addBox(-1.1F, -9.0F, 0.0F, 2.0F, 9.0F, 2.0F, 0.0F, false);
+        hair10.texOffs(84, 0).addBox(-1.1F, -9.0F, 0.0F, 2.0F, 9.0F, 2.0F, 0.0F, false);
 
         hair11 = new ModelRenderer(this);
         hair11.setPos(-4.0F, -0.5F, -1.5F);
         hair.addChild(hair11);
         setRotationAngle(hair11, -1.2654F, -0.2531F, 0.0F);
-        hair11.texOffs(52, 0).addBox(-1.0F, -7.0F, -1.0F, 2.0F, 8.0F, 2.0F, 0.0F, false);
+        hair11.texOffs(36, 0).addBox(-1.0F, -7.0F, -1.0F, 2.0F, 8.0F, 2.0F, 0.0F, false);
 
         hair12 = new ModelRenderer(this);
         hair12.setPos(4.0F, -0.5F, -1.5F);
         hair.addChild(hair12);
         setRotationAngle(hair12, -1.2654F, 0.2531F, 0.0F);
-        hair12.texOffs(61, 0).addBox(-1.0F, -7.0F, -1.0F, 2.0F, 8.0F, 2.0F, 0.0F, false);
+        hair12.texOffs(36, 0).addBox(-1.0F, -7.0F, -1.0F, 2.0F, 8.0F, 2.0F, 0.0F, false);
 
         hair13 = new ModelRenderer(this);
         hair13.setPos(-4.0F, 1.0F, -1.5F);
         hair.addChild(hair13);
         setRotationAngle(hair13, -1.4399F, -0.2705F, 0.0F);
-        hair13.texOffs(44, 0).addBox(-1.0F, -7.0F, -1.0F, 2.0F, 8.0F, 2.0F, 0.0F, false);
+        hair13.texOffs(36, 0).addBox(-1.0F, -7.0F, -1.0F, 2.0F, 8.0F, 2.0F, 0.0F, false);
 
         hair14 = new ModelRenderer(this);
         hair14.setPos(4.0F, 1.0F, -1.5F);
         hair.addChild(hair14);
         setRotationAngle(hair14, -1.4399F, 0.2356F, 0.0F);
-        hair14.texOffs(62, 0).addBox(-1.0F, -8.0F, -1.0F, 2.0F, 9.0F, 2.0F, 0.0F, true);
+        hair14.texOffs(36, 0).addBox(-1.0F, -8.0F, -1.0F, 2.0F, 9.0F, 2.0F, 0.0F, true);
 
         hair15 = new ModelRenderer(this);
         hair15.setPos(-4.0F, 3.0F, -2.0F);
         hair.addChild(hair15);
         setRotationAngle(hair15, -1.5272F, -0.2095F, 0.0F);
-        hair15.texOffs(65, 0).addBox(-1.0F, -8.0F, -1.0F, 2.0F, 9.0F, 2.0F, 0.0F, true);
+        hair15.texOffs(68, 0).addBox(-1.0F, -8.0F, -1.0F, 2.0F, 9.0F, 2.0F, 0.0F, true);
 
         hair16 = new ModelRenderer(this);
         hair16.setPos(4.0F, 3.0F, -2.0F);
         hair.addChild(hair16);
         setRotationAngle(hair16, -1.5272F, 0.2095F, 0.0F);
-        hair16.texOffs(60, 0).addBox(-1.0F, -8.0F, -1.0F, 2.0F, 9.0F, 2.0F, 0.0F, false);
+        hair16.texOffs(68, 0).addBox(-1.0F, -8.0F, -1.0F, 2.0F, 9.0F, 2.0F, 0.0F, false);
 
         hair17 = new ModelRenderer(this);
         hair17.setPos(-4.0F, 5.0F, 0.0F);
         hair.addChild(hair17);
         setRotationAngle(hair17, -1.6144F, -0.1309F, 0.0F);
-        hair17.texOffs(49, 0).addBox(-1.0F, -6.0F, -1.0F, 2.0F, 7.0F, 2.0F, -0.1F, false);
+        hair17.texOffs(52, 2).addBox(-1.0F, -6.0F, -1.0F, 2.0F, 7.0F, 2.0F, -0.1F, false);
 
         hair18 = new ModelRenderer(this);
         hair18.setPos(4.0F, 5.0F, 0.0F);
         hair.addChild(hair18);
         setRotationAngle(hair18, -1.6144F, 0.1222F, 0.0F);
-        hair18.texOffs(55, 0).addBox(-1.0F, -6.0F, -1.0F, 2.0F, 7.0F, 2.0F, -0.1F, false);
+        hair18.texOffs(52, 2).addBox(-1.0F, -6.0F, -1.0F, 2.0F, 7.0F, 2.0F, -0.1F, false);
 
         hair19 = new ModelRenderer(this);
         hair19.setPos(-4.0F, 7.0F, 2.0F);
         hair.addChild(hair19);
         setRotationAngle(hair19, -1.7453F, -0.0611F, 0.0F);
-        hair19.texOffs(36, 0).addBox(-1.0F, -4.0F, -1.0F, 2.0F, 5.0F, 2.0F, -0.1F, false);
+        hair19.texOffs(44, 0).addBox(-1.0F, -4.0F, -1.0F, 2.0F, 5.0F, 2.0F, -0.1F, false);
 
         hair20 = new ModelRenderer(this);
         hair20.setPos(4.0F, 7.0F, 2.0F);
         hair.addChild(hair20);
         setRotationAngle(hair20, -1.7453F, 0.1048F, 0.0F);
-        hair20.texOffs(36, 0).addBox(-1.0F, -4.0F, -1.0F, 2.0F, 5.0F, 2.0F, -0.1F, false);
+        hair20.texOffs(44, 0).addBox(-1.0F, -4.0F, -1.0F, 2.0F, 5.0F, 2.0F, -0.1F, false);
 
         hair21 = new ModelRenderer(this);
         hair21.setPos(-3.25F, -1.5F, -1.5F);
         hair.addChild(hair21);
         setRotationAngle(hair21, -1.2131F, -0.1833F, 0.0F);
-        hair21.texOffs(67, 0).addBox(-1.0F, -7.0F, -1.0F, 2.0F, 8.0F, 2.0F, 0.0F, false);
+        hair21.texOffs(52, 0).addBox(-1.0F, -7.0F, -1.0F, 2.0F, 8.0F, 2.0F, 0.0F, false);
 
         hair22 = new ModelRenderer(this);
         hair22.setPos(-1.75F, -1.5F, -1.5F);
@@ -221,85 +227,85 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
         hair23.setPos(0.95F, -1.5F, -1.5F);
         hair.addChild(hair23);
         setRotationAngle(hair23, -1.0472F, 0.0873F, 0.0F);
-        hair23.texOffs(50, 0).addBox(-1.0F, -7.0F, -1.0F, 2.0F, 8.0F, 2.0F, 0.1F, false);
+        hair23.texOffs(52, 0).addBox(-1.0F, -7.0F, -1.0F, 2.0F, 8.0F, 2.0F, 0.1F, false);
 
         hair24 = new ModelRenderer(this);
         hair24.setPos(3.25F, -1.5F, -1.5F);
         hair.addChild(hair24);
         setRotationAngle(hair24, -1.1781F, 0.1571F, 0.0F);
-        hair24.texOffs(58, 0).addBox(-1.0F, -7.0F, -1.0F, 2.0F, 8.0F, 2.0F, 0.1F, false);
+        hair24.texOffs(52, 0).addBox(-1.0F, -7.0F, -1.0F, 2.0F, 8.0F, 2.0F, 0.1F, false);
 
         hair25 = new ModelRenderer(this);
         hair25.setPos(-1.7F, -1.0F, -1.1F);
         hair.addChild(hair25);
         setRotationAngle(hair25, -1.1781F, -0.1047F, 0.0F);
-        hair25.texOffs(64, 0).addBox(-1.0F, -7.0F, -1.0F, 2.0F, 8.0F, 2.0F, 0.2F, false);
+        hair25.texOffs(52, 0).addBox(-1.0F, -7.0F, -1.0F, 2.0F, 8.0F, 2.0F, 0.2F, false);
 
         hair26 = new ModelRenderer(this);
         hair26.setPos(-0.3F, -1.0F, -2.1F);
         hair.addChild(hair26);
         setRotationAngle(hair26, -1.117F, 0.0175F, 0.0F);
-        hair26.texOffs(63, 0).addBox(-1.0F, -8.0F, -1.0F, 2.0F, 9.0F, 2.0F, 0.2F, true);
+        hair26.texOffs(52, 0).addBox(-1.0F, -8.0F, -1.0F, 2.0F, 9.0F, 2.0F, 0.2F, true);
 
         hair27 = new ModelRenderer(this);
         hair27.setPos(1.7F, -1.0F, -2.4F);
         hair.addChild(hair27);
         setRotationAngle(hair27, -1.213F, 0.0785F, 0.0F);
-        hair27.texOffs(48, 0).addBox(-1.0F, -8.0F, -1.0F, 2.0F, 9.0F, 2.0F, 0.2F, true);
+        hair27.texOffs(52, 0).addBox(-1.0F, -8.0F, -1.0F, 2.0F, 9.0F, 2.0F, 0.2F, true);
 
         hair28 = new ModelRenderer(this);
         hair28.setPos(-3.5F, 0.0F, -1.3F);
         hair.addChild(hair28);
         setRotationAngle(hair28, -1.3788F, -0.1483F, 0.0F);
-        hair28.texOffs(61, 0).addBox(-1.0F, -7.0F, -1.0F, 2.0F, 8.0F, 2.0F, 0.1F, false);
+        hair28.texOffs(52, 0).addBox(-1.0F, -7.0F, -1.0F, 2.0F, 8.0F, 2.0F, 0.1F, false);
 
         hair29 = new ModelRenderer(this);
         hair29.setPos(-1.6F, -1.0F, 1.8F);
         hair.addChild(hair29);
         setRotationAngle(hair29, -1.4487F, -0.1222F, 0.0F);
-        hair29.texOffs(50, 0).addBox(-1.0F, -4.0F, -1.0F, 2.0F, 5.0F, 2.0F, 0.2F, true);
+        hair29.texOffs(52, 0).addBox(-1.0F, -4.0F, -1.0F, 2.0F, 5.0F, 2.0F, 0.2F, true);
 
         hair30 = new ModelRenderer(this);
         hair30.setPos(-0.2F, -1.0F, -1.0F);
         hair.addChild(hair30);
         setRotationAngle(hair30, -1.309F, 0.0873F, 0.0F);
-        hair30.texOffs(49, 0).addBox(-1.0F, -7.0F, -1.0F, 2.0F, 8.0F, 2.0F, 0.3F, false);
+        hair30.texOffs(52, 0).addBox(-1.0F, -7.0F, -1.0F, 2.0F, 8.0F, 2.0F, 0.3F, false);
 
         hair31 = new ModelRenderer(this);
         hair31.setPos(1.7F, -1.0F, 0.9F);
         hair.addChild(hair31);
         setRotationAngle(hair31, -1.405F, 0.1134F, 0.0F);
-        hair31.texOffs(51, 0).addBox(-1.0F, -5.0F, -1.0F, 2.0F, 6.0F, 2.0F, 0.2F, false);
+        hair31.texOffs(52, 0).addBox(-1.0F, -5.0F, -1.0F, 2.0F, 6.0F, 2.0F, 0.2F, false);
 
         hair32 = new ModelRenderer(this);
         hair32.setPos(3.25F, 0.0F, -1.9F);
         hair.addChild(hair32);
         setRotationAngle(hair32, -1.3614F, 0.1309F, 0.0F);
-        hair32.texOffs(57, 0).addBox(-1.0F, -8.0F, -1.0F, 2.0F, 9.0F, 2.0F, 0.1F, false);
+        hair32.texOffs(52, 0).addBox(-1.0F, -8.0F, -1.0F, 2.0F, 9.0F, 2.0F, 0.1F, false);
 
         hair33 = new ModelRenderer(this);
         hair33.setPos(-3.0F, 2.0F, -2.0F);
         hair.addChild(hair33);
         setRotationAngle(hair33, -1.4399F, -0.1746F, 0.0F);
-        hair33.texOffs(46, 0).addBox(-1.0F, -8.0F, -1.0F, 2.0F, 9.0F, 2.0F, 0.1F, false);
+        hair33.texOffs(52, 0).addBox(-1.0F, -8.0F, -1.0F, 2.0F, 9.0F, 2.0F, 0.1F, false);
 
         hair34 = new ModelRenderer(this);
         hair34.setPos(-2.1F, 0.4F, 4.0F);
         hair.addChild(hair34);
         setRotationAngle(hair34, -1.5185F, -0.0873F, 0.0F);
-        hair34.texOffs(53, 0).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 3.0F, 2.0F, 0.2F, false);
+        hair34.texOffs(52, 0).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 3.0F, 2.0F, 0.2F, false);
 
         hair35 = new ModelRenderer(this);
         hair35.setPos(0.0F, -1.0F, 3.0F);
         hair.addChild(hair35);
         setRotationAngle(hair35, -1.6406F, 0.0873F, 0.0F);
-        hair35.texOffs(67, 0).addBox(-1.0F, -3.0F, -1.0F, 2.0F, 4.0F, 2.0F, 0.3F, false);
+        hair35.texOffs(68, 0).addBox(-1.0F, -3.0F, -1.0F, 2.0F, 4.0F, 2.0F, 0.3F, false);
 
         hair36 = new ModelRenderer(this);
         hair36.setPos(1.9F, 0.0F, 4.0F);
         hair.addChild(hair36);
         setRotationAngle(hair36, -1.693F, 0.1745F, 0.0F);
-        hair36.texOffs(48, 0).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 3.0F, 2.0F, 0.2F, true);
+        hair36.texOffs(52, 0).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 3.0F, 2.0F, 0.2F, true);
 
         hair37 = new ModelRenderer(this);
         hair37.setPos(3.25F, 2.0F, -2.0F);
@@ -311,71 +317,85 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
         hair38.setPos(-3.5F, 4.0F, 0.0F);
         hair.addChild(hair38);
         setRotationAngle(hair38, -1.5271F, -0.0785F, 0.0F);
-        hair38.texOffs(63, 0).addBox(-1.0F, -6.0F, -1.0F, 2.0F, 7.0F, 2.0F, 0.1F, false);
+        hair38.texOffs(68, 0).addBox(-1.0F, -6.0F, -1.0F, 2.0F, 7.0F, 2.0F, 0.1F, false);
 
         hair39 = new ModelRenderer(this);
         hair39.setPos(-2.7F, 2.4F, 4.0F);
         hair.addChild(hair39);
         setRotationAngle(hair39, -1.693F, 0.0F, 0.0F);
-        hair39.texOffs(49, 0).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 3.0F, 2.0F, 0.2F, true);
+        hair39.texOffs(52, 0).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 3.0F, 2.0F, 0.2F, true);
 
         hair40 = new ModelRenderer(this);
         hair40.setPos(-0.2F, 1.1F, 4.0F);
         hair.addChild(hair40);
         setRotationAngle(hair40, -1.7715F, 0.1309F, 0.0F);
-        hair40.texOffs(50, 0).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 3.0F, 2.0F, 0.3F, true);
+        hair40.texOffs(52, 0).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 3.0F, 2.0F, 0.3F, true);
 
         hair41 = new ModelRenderer(this);
         hair41.setPos(2.1F, 2.0F, 4.0F);
         hair.addChild(hair41);
         setRotationAngle(hair41, -1.8588F, 0.1047F, 0.0F);
-        hair41.texOffs(47, 0).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 3.0F, 2.0F, 0.2F, false);
+        hair41.texOffs(52, 0).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 3.0F, 2.0F, 0.2F, false);
 
         hair42 = new ModelRenderer(this);
         hair42.setPos(3.5F, 4.0F, 0.0F);
         hair.addChild(hair42);
         setRotationAngle(hair42, -1.5271F, 0.0873F, 0.0F);
-        hair42.texOffs(48, 0).addBox(-1.0F, -6.0F, -1.0F, 2.0F, 7.0F, 2.0F, 0.1F, false);
+        hair42.texOffs(52, 0).addBox(-1.0F, -6.0F, -1.0F, 2.0F, 7.0F, 2.0F, 0.1F, false);
 
         hair43 = new ModelRenderer(this);
         hair43.setPos(-0.9F, 3.3F, 4.0F);
         hair.addChild(hair43);
         setRotationAngle(hair43, -1.8065F, -0.0873F, 0.0F);
-        hair43.texOffs(61, 0).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 3.0F, 2.0F, 0.2F, false);
+        hair43.texOffs(52, 0).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 3.0F, 2.0F, 0.2F, false);
 
         hair44 = new ModelRenderer(this);
         hair44.setPos(1.1F, 4.2F, 4.0F);
         hair.addChild(hair44);
         setRotationAngle(hair44, -1.8065F, 0.1484F, 0.0F);
-        hair44.texOffs(49, 0).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 3.0F, 2.0F, 0.2F, false);
+        hair44.texOffs(52, 0).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 3.0F, 2.0F, 0.2F, false);
 
         hair45 = new ModelRenderer(this);
         hair45.setPos(-3.5F, 6.0F, 2.0F);
         hair.addChild(hair45);
         setRotationAngle(hair45, -1.658F, 0.0436F, 0.0F);
-        hair45.texOffs(49, 0).addBox(-1.0F, -4.0F, -1.0F, 2.0F, 5.0F, 2.0F, 0.1F, false);
+        hair45.texOffs(52, 0).addBox(-1.0F, -4.0F, -1.0F, 2.0F, 5.0F, 2.0F, 0.1F, false);
 
         hair46 = new ModelRenderer(this);
         hair46.setPos(-1.0F, 5.3F, 4.0F);
         hair.addChild(hair46);
         setRotationAngle(hair46, -1.981F, 0.0175F, 0.0F);
-        hair46.texOffs(51, 0).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 3.0F, 2.0F, 0.1F, false);
+        hair46.texOffs(52, 0).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 3.0F, 2.0F, 0.1F, false);
 
         hair47 = new ModelRenderer(this);
         hair47.setPos(1.0F, 6.2F, 4.0F);
         hair.addChild(hair47);
         setRotationAngle(hair47, -1.8588F, 0.0611F, 0.0F);
-        hair47.texOffs(76, 0).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 3.0F, 2.0F, 0.1F, false);
+        hair47.texOffs(68, 0).addBox(-1.0F, -2.0F, -1.0F, 2.0F, 3.0F, 2.0F, 0.1F, false);
 
         hair48 = new ModelRenderer(this);
         hair48.setPos(3.5F, 6.0F, 2.0F);
         hair.addChild(hair48);
         setRotationAngle(hair48, -1.658F, -0.0349F, 0.0F);
-        hair48.texOffs(67, 0).addBox(-1.0F, -4.0F, -1.0F, 2.0F, 5.0F, 2.0F, 0.1F, false);
+        hair48.texOffs(68, 0).addBox(-1.0F, -4.0F, -1.0F, 2.0F, 5.0F, 2.0F, 0.1F, false);
 
-        head.texOffs(24, 0).addBox(-4.5F, -4.0F, -3.0F, 1.0F, 2.0F, 2.0F, 0.0F, false);
-        head.texOffs(24, 4).addBox(3.5F, -4.0F, -3.0F, 1.0F, 2.0F, 2.0F, 0.0F, true);
-        head.texOffs(5, 7).addBox(-0.5F, -0.9F, -4.0F, 1.0F, 1.0F, 0.0F, 0.1F, false);
+        body.setPos(0.0F, 0.0F, 0.0F);
+        
+
+        upperPart.setPos(0.0F, 12.0F, 0.0F);
+        
+
+        torso.setPos(0.0F, -12.0F, 0.0F);
+        torso.texOffs(0, 64).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, 0.0F, false);
+        torso.texOffs(0, 48).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, 0.1F, false);
+        torso.texOffs(20, 48).addBox(-3.5F, 1.1F, -2.0F, 7.0F, 3.0F, 1.0F, 0.475F, false);
+        torso.texOffs(20, 64).addBox(-3.5F, 1.1F, -2.0F, 7.0F, 3.0F, 1.0F, 0.4F, false);
+        torso.texOffs(24, 73).addBox(-2.5F, 4.0F, -2.3F, 5.0F, 6.0F, 1.0F, 0.0F, false);
+        torso.texOffs(0, 16).addBox(-4.0F, -1.0F, -2.75F, 8.0F, 2.0F, 5.0F, 0.1F, false);
+        torso.texOffs(13, 80).addBox(1.0F, 10.0F, -2.5F, 1.0F, 1.0F, 5.0F, -0.2F, false);
+        torso.texOffs(0, 80).addBox(-2.0F, 10.0F, -2.5F, 1.0F, 1.0F, 5.0F, -0.2F, false);
+        torso.texOffs(108, 108).addBox(3.75F, 10.0F, -1.5F, 1.0F, 1.0F, 3.0F, 0.0F, true);
+        torso.texOffs(76, 108).addBox(-4.75F, 10.0F, -1.5F, 1.0F, 1.0F, 3.0F, 0.0F, true);
 
         leftShoulder = new ModelRenderer(this);
         leftShoulder.setPos(3.5F, 1.05F, 0.0F);
@@ -390,36 +410,78 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
         torso.addChild(rightShoulder);
         setRotationAngle(rightShoulder, 0.0F, 0.0F, 0.0873F);
         rightShoulder.texOffs(0, 23).addBox(-5.35F, -1.8F, -2.75F, 6.0F, 1.0F, 5.0F, 0.15F, false);
-        rightShoulder.texOffs(17, 25).addBox(-0.5F, -1.66F, -2.6F, 1.0F, 2.0F, 1.0F, 0.3F, false);
+        rightShoulder.texOffs(24, 25).addBox(-0.5F, -1.66F, -2.6F, 1.0F, 2.0F, 1.0F, 0.3F, false);
         rightShoulder.texOffs(17, 25).addBox(-0.5F, -1.66F, 1.1F, 1.0F, 2.0F, 1.0F, 0.3F, false);
 
-        torso.texOffs(20, 64).addBox(-3.5F, 1.1F, -2.0F, 7.0F, 3.0F, 1.0F, 0.4F, false);
-        torso.texOffs(24, 73).addBox(-2.5F, 4.0F, -2.3F, 5.0F, 6.0F, 1.0F, 0.0F, false);
-        torso.texOffs(0, 16).addBox(-4.0F, -1.0F, -2.75F, 8.0F, 2.0F, 5.0F, 0.1F, false);
-        torso.texOffs(0, 86).addBox(-2.0F, 10.0F, -2.15F, 4.0F, 5.0F, 0.0F, 0.0F, false);
-        torso.texOffs(0, 92).addBox(-2.0F, 10.0F, 2.15F, 4.0F, 5.0F, 0.0F, 0.0F, false);
-        torso.texOffs(13, 80).addBox(1.0F, 10.0F, -2.5F, 1.0F, 1.0F, 5.0F, -0.2F, false);
-        torso.texOffs(0, 80).addBox(-2.0F, 10.0F, -2.5F, 1.0F, 1.0F, 5.0F, -0.2F, false);
-        torso.texOffs(108, 109).addBox(3.5F, 10.5F, -1.0F, 1.0F, 1.0F, 2.0F, 0.0F, true);
-        torso.texOffs(76, 109).addBox(-4.5F, 10.5F, -1.0F, 1.0F, 1.0F, 2.0F, 0.0F, false);
+        frontFabric = new ModelRenderer(this);
+        frontFabric.setPos(0.0F, 10.5F, -2.15F);
+        torso.addChild(frontFabric);
+        frontFabric.texOffs(0, 86).addBox(-2.0F, -0.5F, 0.0F, 4.0F, 5.0F, 0.0F, 0.0F, false);
 
-        leftArm.texOffs(44, 109).addBox(-0.5F, 3.0F, 1.5F, 1.0F, 2.0F, 1.0F, 0.0F, false);
+        backFabric = new ModelRenderer(this);
+        backFabric.setPos(0.0F, 10.5F, 2.15F);
+        torso.addChild(backFabric);
+        backFabric.texOffs(0, 92).addBox(-2.0F, -0.5F, 0.0F, 4.0F, 5.0F, 0.0F, 0.0F, false);
 
-        leftForeArm.texOffs(48, 114).addBox(1.5F, 3.2F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, true);
-        leftForeArm.texOffs(48, 116).addBox(1.5F, 3.8F, -1.0F, 1.0F, 1.0F, 2.0F, -0.2F, true);
-        leftForeArm.texOffs(48, 119).addBox(1.5F, 4.4F, -1.5F, 1.0F, 1.0F, 3.0F, -0.2F, true);
-        leftForeArm.texOffs(48, 123).addBox(1.5F, 5.0F, -2.0F, 1.0F, 1.0F, 4.0F, -0.2F, true);
+        leftArm.setPos(6.0F, -10.0F, 0.0F);
+        leftArm.texOffs(32, 108).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
+        leftArm.texOffs(50, 105).addBox(-1.0F, -2.0F, -2.0F, 3.0F, 6.0F, 4.0F, 0.1F, true);
+        leftArm.texOffs(44, 109).addBox(-1.0F, 3.0F, 1.5F, 2.0F, 2.0F, 1.0F, 0.0F, false);
 
-        rightArm.texOffs(12, 109).addBox(-0.5F, 3.0F, 1.5F, 1.0F, 2.0F, 1.0F, 0.0F, false);
+        leftArmJoint.setPos(0.0F, 4.0F, 0.0F);
+        leftArmJoint.texOffs(32, 102).addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.1F, true);
 
-        rightForeArm.texOffs(16, 114).addBox(-2.5F, 3.2F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
-        rightForeArm.texOffs(16, 116).addBox(-2.5F, 3.8F, -1.0F, 1.0F, 1.0F, 2.0F, -0.2F, false);
-        rightForeArm.texOffs(16, 119).addBox(-2.5F, 4.4F, -1.5F, 1.0F, 1.0F, 3.0F, -0.2F, false);
-        rightForeArm.texOffs(16, 123).addBox(-2.5F, 5.0F, -2.0F, 1.0F, 1.0F, 4.0F, -0.2F, false);
+        leftForeArm.setPos(0.0F, 4.0F, 0.0F);
+        leftForeArm.texOffs(32, 118).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false);
+        leftForeArm.texOffs(48, 95).addBox(-2.0F, -0.1F, -2.0F, 4.0F, 2.0F, 4.0F, 0.185F, false);
+        leftForeArm.texOffs(48, 95).addBox(-2.0F, 3.0F, -2.0F, 4.0F, 3.0F, 4.0F, 0.15F, false);
+        leftForeArm.texOffs(48, 114).addBox(1.6F, 3.2F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, true);
+        leftForeArm.texOffs(48, 116).addBox(1.6F, 3.8F, -1.0F, 1.0F, 1.0F, 2.0F, -0.2F, true);
+        leftForeArm.texOffs(48, 119).addBox(1.6F, 4.4F, -1.5F, 1.0F, 1.0F, 3.0F, -0.2F, true);
+        leftForeArm.texOffs(48, 123).addBox(1.6F, 5.0F, -2.0F, 1.0F, 1.0F, 4.0F, -0.2F, true);
 
-        leftLeg.texOffs(108, 119).addBox(-0.4F, 4.5F, -2.5F, 1.0F, 2.0F, 1.0F, 0.0F, true);
+        rightArm.setPos(-6.0F, -10.0F, 0.0F);
+        rightArm.texOffs(0, 108).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
+        rightArm.texOffs(18, 105).addBox(-2.0F, -2.0F, -2.0F, 3.0F, 6.0F, 4.0F, 0.1F, false);
+        rightArm.texOffs(12, 109).addBox(-1.0F, 3.0F, 1.5F, 2.0F, 2.0F, 1.0F, 0.0F, false);
 
-        rightLeg.texOffs(76, 119).addBox(-0.6F, 4.5F, -2.5F, 1.0F, 2.0F, 1.0F, 0.0F, false);
+        rightArmJoint.setPos(0.0F, 4.0F, 0.0F);
+        rightArmJoint.texOffs(0, 102).addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.1F, false);
+
+        rightForeArm.setPos(0.0F, 4.0F, 0.0F);
+        rightForeArm.texOffs(0, 118).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false);
+        rightForeArm.texOffs(16, 95).addBox(-2.0F, -0.1F, -2.0F, 4.0F, 2.0F, 4.0F, 0.185F, false);
+        rightForeArm.texOffs(16, 95).addBox(-2.0F, 3.0F, -2.0F, 4.0F, 3.0F, 4.0F, 0.15F, false);
+        rightForeArm.texOffs(16, 114).addBox(-2.6F, 3.2F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
+        rightForeArm.texOffs(16, 116).addBox(-2.6F, 3.8F, -1.0F, 1.0F, 1.0F, 2.0F, -0.2F, false);
+        rightForeArm.texOffs(16, 119).addBox(-2.6F, 4.4F, -1.5F, 1.0F, 1.0F, 3.0F, -0.2F, false);
+        rightForeArm.texOffs(16, 123).addBox(-2.6F, 5.0F, -2.0F, 1.0F, 1.0F, 4.0F, -0.2F, false);
+
+        leftLeg.setPos(2.0F, 12.0F, 0.0F);
+        leftLeg.texOffs(96, 108).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
+        leftLeg.texOffs(112, 108).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.1F, false);
+        leftLeg.texOffs(108, 119).addBox(-1.15F, 4.5F, -2.5F, 2.0F, 2.0F, 1.0F, 0.0F, true);
+
+        leftLegJoint.setPos(0.0F, 6.0F, 0.0F);
+        leftLegJoint.texOffs(96, 102).addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.1F, true);
+
+        leftLowerLeg.setPos(0.0F, 6.0F, 0.0F);
+        leftLowerLeg.texOffs(96, 118).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false);
+        leftLowerLeg.texOffs(112, 118).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.15F, false);
+        leftLowerLeg.texOffs(108, 103).addBox(-2.0F, 0.8F, -2.0F, 4.0F, 1.0F, 4.0F, 0.1F, true);
+
+        rightLeg.setPos(-2.0F, 12.0F, 0.0F);
+        rightLeg.texOffs(64, 108).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
+        rightLeg.texOffs(80, 108).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.1F, false);
+        rightLeg.texOffs(76, 119).addBox(-0.85F, 4.5F, -2.5F, 2.0F, 2.0F, 1.0F, 0.0F, false);
+
+        rightLegJoint.setPos(0.0F, 6.0F, 0.0F);
+        rightLegJoint.texOffs(64, 102).addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.1F, false);
+
+        rightLowerLeg.setPos(0.0F, 6.0F, 0.0F);
+        rightLowerLeg.texOffs(64, 118).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false);
+        rightLowerLeg.texOffs(80, 118).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.15F, false);
+        rightLowerLeg.texOffs(76, 103).addBox(-2.0F, 0.8F, -2.0F, 4.0F, 1.0F, 4.0F, 0.1F, false);
 
         hairToAnimateManually = new ArrayList<>();
         Collections.addAll(hairToAnimateManually, hair2, hair4, hair6, hair8, hair10, 

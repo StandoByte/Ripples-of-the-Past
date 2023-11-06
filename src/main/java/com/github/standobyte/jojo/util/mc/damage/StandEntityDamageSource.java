@@ -92,6 +92,11 @@ public class StandEntityDamageSource extends EntityDamageSource implements IStan
     public boolean preventsDamagingArmor() {
         return preventDamagingArmor;
     }
+    
+    @Override
+    public boolean canHurtStands() {
+        return true;
+    }
 
     public StandEntityDamageSource setStandInvulTicks(int ticks) {
         this.standInvulTicks = ticks;

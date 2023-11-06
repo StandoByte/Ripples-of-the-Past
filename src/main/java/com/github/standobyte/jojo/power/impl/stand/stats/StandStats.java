@@ -149,7 +149,7 @@ public class StandStats {
         }
     }
     
-    protected abstract static class AbstractBuilder<B extends AbstractBuilder<B, S>, S extends StandStats> {
+    public abstract static class AbstractBuilder<B extends AbstractBuilder<B, S>, S extends StandStats> {
         private double powerBase = 8.0;
         private double powerMax = 8.0;
         

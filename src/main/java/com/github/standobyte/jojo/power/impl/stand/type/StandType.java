@@ -128,6 +128,10 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
             return getThis();
         }
         
+        public B defaultStats(Class<T> statsClass, StandStats.AbstractBuilder<?, T> statsBuilder) {
+            return defaultStats(statsClass, statsBuilder.build());
+        }
+        
         public B addSummonShout(Supplier<SoundEvent> summonShoutSupplier) {
             if (summonShoutSupplier != null) {
                 getOptionals().summonShoutSupplier = summonShoutSupplier;

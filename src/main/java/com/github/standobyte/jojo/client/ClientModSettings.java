@@ -40,6 +40,7 @@ public class ClientModSettings {
     }
     
     public boolean areControlsLockedForHotbar(ActionType hotbar) {
+        if (hotbar == null) return false;
         switch (hotbar) {
         case ATTACK:
             return settings.lockedAttacksHotbar;
