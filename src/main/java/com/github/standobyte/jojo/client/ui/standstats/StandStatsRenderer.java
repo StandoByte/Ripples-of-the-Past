@@ -142,7 +142,7 @@ public class StandStatsRenderer {
                 mc.getTextureManager().bind(power.getType().getIconTexture(power));
                 AbstractGui.blit(matrixStack, x + 135 - width, standIconY, 0, 0, 16, 16, 16, 16);
                 ClientUtil.drawLines(matrixStack, mc.font, standName, 
-                        x + 153 - width, standNameY, 0, color, false, true);
+                        x + 153 - width, standNameY, 0, color, true, true);
 
                 ResourceLocation playerFace = mc.player.getSkinTextureLocation();
                 mc.getTextureManager().bind(playerFace);
@@ -157,7 +157,7 @@ public class StandStatsRenderer {
                     matrixStack.popPose();
                 }
                 ClientUtil.drawLines(matrixStack, mc.font, standUser, 
-                        x + 153 - width, standUserY, 0, color, false, true);
+                        x + 153 - width, standUserY, 0, color, true, true);
 
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 
