@@ -53,7 +53,6 @@ import com.github.standobyte.jojo.action.stand.TheWorldHeavyPunch;
 import com.github.standobyte.jojo.action.stand.TheWorldKick;
 import com.github.standobyte.jojo.action.stand.TheWorldTSHeavyAttack;
 import com.github.standobyte.jojo.action.stand.TheWorldTimeStop;
-import com.github.standobyte.jojo.action.stand.TheWorldTimeStopInstant;
 import com.github.standobyte.jojo.action.stand.TimeResume;
 import com.github.standobyte.jojo.action.stand.TimeStop;
 import com.github.standobyte.jojo.action.stand.TimeStopInstant;
@@ -186,7 +185,8 @@ public class ModStandsInit {
                     .resolveLevelToUnlock(4).isTrained()
                     .ignoresPerformerStun()
                     .partsRequired(StandPart.MAIN_BODY), 
-                    STAR_PLATINUM_TIME_STOP, ModSounds.STAR_PLATINUM_TIME_STOP_BLINK));
+                    STAR_PLATINUM_TIME_STOP, ModSounds.STAR_PLATINUM_TIME_STOP_BLINK,
+                    false));
     
     public static final RegistryObject<TimeResume> STAR_PLATINUM_TIME_RESUME = ACTIONS.register("star_platinum_time_resume", 
             () -> new TimeResume(new StandAction.Builder().shiftVariationOf(STAR_PLATINUM_TIME_STOP)));
@@ -275,11 +275,12 @@ public class ModStandsInit {
             .shaderEffect(new ResourceLocation(JojoMod.MOD_ID, "shaders/post/time_stop_tw_old.json"), false)));
     
     public static final RegistryObject<TimeStopInstant> THE_WORLD_TIME_STOP_BLINK = ACTIONS.register("the_world_ts_blink", 
-            () -> new TheWorldTimeStopInstant(new StandAction.Builder()
+            () -> new TimeStopInstant(new StandAction.Builder()
                     .resolveLevelToUnlock(2).isTrained()
                     .ignoresPerformerStun()
                     .partsRequired(StandPart.MAIN_BODY), 
-                    THE_WORLD_TIME_STOP, ModSounds.THE_WORLD_TIME_STOP_BLINK));
+                    THE_WORLD_TIME_STOP, ModSounds.THE_WORLD_TIME_STOP_BLINK,
+                    true));
     
     public static final RegistryObject<TimeResume> THE_WORLD_TIME_RESUME = ACTIONS.register("the_world_time_resume", 
             () -> new TimeResume(new StandAction.Builder().shiftVariationOf(THE_WORLD_TIME_STOP)));

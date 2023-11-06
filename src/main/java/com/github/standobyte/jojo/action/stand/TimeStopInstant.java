@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.action.stand;
 import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
@@ -36,12 +37,20 @@ import net.minecraft.world.World;
 public class TimeStopInstant extends StandAction {
     final Supplier<SoundEvent> blinkSound;
     private final Supplier<TimeStop> baseTimeStop;
+    private final boolean teleportBehindEntity;
     
     public TimeStopInstant(StandAction.Builder builder, 
-            @Nonnull Supplier<TimeStop> baseTimeStopAction, @Nonnull Supplier<SoundEvent> blinkSound) {
+            @Nonnull Supplier<TimeStop> baseTimeStopAction, @Nullable Supplier<SoundEvent> blinkSound) {
+        this(builder, baseTimeStopAction, blinkSound, false);
+    }
+    
+    public TimeStopInstant(StandAction.Builder builder, 
+            @Nonnull Supplier<TimeStop> baseTimeStopAction, @Nullable Supplier<SoundEvent> blinkSound,
+            boolean teleportBehindEntity) {
         super(builder);
         this.baseTimeStop = baseTimeStopAction;
         this.blinkSound = blinkSound;
+        this.teleportBehindEntity = teleportBehindEntity;
     }
     
     @Override
@@ -131,16 +140,23 @@ public class TimeStopInstant extends StandAction {
     }
     
     void playSound(World world, Entity entity) {
-        SoundEvent sound = blinkSound.get();
-        if (sound != null) {
-            MCUtil.playSound(world, entity instanceof PlayerEntity ? (PlayerEntity) entity : null, entity.getX(), entity.getY(), entity.getZ(), 
-                    sound, SoundCategory.AMBIENT, 5.0F, 1.0F, TimeStopHandler::canPlayerSeeInStoppedTime);
+        if (blinkSound != null) {
+            SoundEvent sound = blinkSound.get();
+            if (sound != null) {
+                MCUtil.playSound(world, entity instanceof PlayerEntity ? (PlayerEntity) entity : null, entity.getX(), entity.getY(), entity.getZ(), 
+                        sound, SoundCategory.AMBIENT, 5.0F, 1.0F, TimeStopHandler::canPlayerSeeInStoppedTime);
+            }
         }
     }
     
     protected Vector3d getEntityTargetTeleportPos(Entity user, Entity target) {
-        double distance = target.getBbWidth() + user.getBbWidth();
-        return user.distanceToSqr(target) > distance * distance ? target.position().subtract(user.getLookAngle().scale(distance)) : user.position();
+        if (teleportBehindEntity) {
+            return target.position().subtract(target.getLookAngle().scale(target.getBbWidth() + user.getBbWidth()));
+        }
+        else {
+            double distance = target.getBbWidth() + user.getBbWidth();
+            return user.distanceToSqr(target) > distance * distance ? target.position().subtract(user.getLookAngle().scale(distance)) : user.position();
+        }
     }
     
     @Override
