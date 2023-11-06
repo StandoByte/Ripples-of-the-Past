@@ -2220,6 +2220,8 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         }
     }
     
+    public void onKnivesThrow(World world, PlayerEntity playerUser, ItemStack knivesStack, int knivesThrown) {}
+    
     @Override
     public void onRemovedFromWorld() {
         super.onRemovedFromWorld();
