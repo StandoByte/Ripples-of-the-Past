@@ -68,7 +68,8 @@ public class DamageUtil {
             return 0;
         }
         if (source instanceof IModdedDamageSource) {
-            return ((IModdedDamageSource) source).getKnockbackFactor();
+            IModdedDamageSource moddedSrc = (IModdedDamageSource) source;
+            return moddedSrc.getKnockbackFactor();
         }
         if (source instanceof EntityDamageSource) {
             if (source.getDirectEntity() instanceof LivingEntity && 
@@ -295,10 +296,10 @@ public class DamageUtil {
         }
     }
     
-    public static void knockback(LivingEntity target, float strength, float yRot) {
+    public static void knockback(LivingEntity target, float strength, float yRotDeg) {
         target.knockback(strength, 
-                (double) MathHelper.sin(yRot * MathUtil.DEG_TO_RAD), 
-                (double) (-MathHelper.cos(yRot * MathUtil.DEG_TO_RAD)));
+                (double) MathHelper.sin(yRotDeg * MathUtil.DEG_TO_RAD), 
+                (double) (-MathHelper.cos(yRotDeg * MathUtil.DEG_TO_RAD)));
     }
     
     public static void upwardsKnockback(LivingEntity target, float strength) {
@@ -318,7 +319,14 @@ public class DamageUtil {
     public static void knockback3d(LivingEntity target, float strength, float xRot, float yRot) {
         Vector3d knockbackVec = Vector3d.directionFromRotation(xRot, yRot);
         LivingKnockBackEvent event = ForgeHooks.onLivingKnockBack(target, strength, knockbackVec.x, knockbackVec.z);
-        if (event.isCanceled()) return;
+        boolean addVertical = true;
+        if (event.isCanceled()) {
+            addVertical = target.getCapability(LivingUtilCapProvider.CAPABILITY).map(cap -> cap.didStackKnockbackInstead).orElse(false);
+        }
+        if (!addVertical) {
+            return;
+        }
+        
         strength = event.getStrength();
         knockbackVec = new Vector3d(event.getRatioX(), knockbackVec.y, event.getRatioZ()).normalize();
         strength *= (1.0F - (float) target.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE));
@@ -332,6 +340,19 @@ public class DamageUtil {
             if (standUser != null && !standUser.is(target)) {
                 upwardsKnockback(standUser, (float) knockbackVec.y * strength);
             }
+        }
+    }
+    
+    public static void applyKnockbackStack(LivingEntity target, float pStrength, double pRatioX, double pRatioZ) { // TODO knockback3d
+        pStrength *= 1 - target.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
+        if (pStrength > 0) {
+            target.hasImpulse = true;
+            Vector3d speedCur = target.getDeltaMovement();
+            Vector3d knockback = (new Vector3d(pRatioX, 0.0D, pRatioZ)).normalize().scale(pStrength);
+            target.setDeltaMovement(
+                    speedCur.x - knockback.x, 
+                    Math.min(0.4D, speedCur.y + (double)pStrength), 
+                    speedCur.z - knockback.z);
         }
     }
     

@@ -79,6 +79,8 @@ import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 public class MCUtil {
     public static final IFormattableTextComponent EMPTY_TEXT = new StringTextComponent("");
     public static final IFormattableTextComponent NEW_LINE = new StringTextComponent("\n");
+    
+    // NBT helper functions
     private static final ImmutableMap<Class<? extends INBT>, Integer> NBT_ID = new ImmutableMap.Builder<Class<? extends INBT>, Integer>()
             .put(EndNBT.class, 0)           .put(ByteNBT.class, 1)      .put(ShortNBT.class, 2)         .put(IntNBT.class, 3)
             .put(LongNBT.class, 4)          .put(FloatNBT.class, 5)     .put(DoubleNBT.class, 6)        .put(ByteArrayNBT.class, 7)
@@ -145,6 +147,37 @@ public class MCUtil {
         return null;
     }
     
+    public static void nbtPutVec3d(CompoundNBT nbt, String key, Vector3d vec) {
+        ListNBT list = new ListNBT();
+        list.add(DoubleNBT.valueOf(vec.x));
+        list.add(DoubleNBT.valueOf(vec.y));
+        list.add(DoubleNBT.valueOf(vec.z));
+        nbt.put(key, list);
+    }
+    
+    @Nullable
+    public static Vector3d nbtGetVec3d(CompoundNBT nbt, String key) {
+        return getNbtElement(nbt, key, ListNBT.class).map(list -> {
+            if (list.size() == 3) {
+                double[] nums = new double[3];
+                for (int i = 0; i < 3; i++) {
+                    INBT nbtElem = list.get(i);
+                    if (nbtElem.getId() == 6) {
+                        nums[i] = ((DoubleNBT) nbtElem).getAsDouble();
+                    }
+                    else {
+                        return null;
+                    }
+                }
+                return new Vector3d(nums[0], nums[1], nums[2]);
+            }
+            
+            return null;
+        }).orElse(null);
+    }
+    
+    //
+    
     
     
     @Nonnull
@@ -200,31 +233,28 @@ public class MCUtil {
     
     
     public static Vector3d collide(Entity entity, Vector3d offsetVec) {
-        AxisAlignedBB axisalignedbb = entity.getBoundingBox();
-        ISelectionContext iselectioncontext = ISelectionContext.of(entity);
-        VoxelShape voxelshape = entity.level.getWorldBorder().getCollisionShape();
-        Stream<VoxelShape> stream = VoxelShapes.joinIsNotEmpty(voxelshape, VoxelShapes.create(axisalignedbb.deflate(1.0E-7D)), IBooleanFunction.AND) ? Stream.empty() : Stream.of(voxelshape);
-        Stream<VoxelShape> stream1 = entity.level.getEntityCollisions(entity, axisalignedbb.expandTowards(offsetVec), (p_233561_0_) -> {
-            return true;
-        });
-        ReuseableStream<VoxelShape> reuseablestream = new ReuseableStream<>(Stream.concat(stream1, stream));
-        Vector3d vector3d = offsetVec.lengthSqr() == 0.0D ? offsetVec : Entity.collideBoundingBoxHeuristically(entity, offsetVec, axisalignedbb, entity.level, iselectioncontext, reuseablestream);
+        AxisAlignedBB entityBB = entity.getBoundingBox();
+        ISelectionContext selectionContext = ISelectionContext.of(entity);
+        VoxelShape worldBorder = entity.level.getWorldBorder().getCollisionShape();
+        Stream<VoxelShape> worldBorderCollision = VoxelShapes.joinIsNotEmpty(worldBorder, VoxelShapes.create(entityBB.deflate(1.0E-7D)), IBooleanFunction.AND) ? Stream.empty() : Stream.of(worldBorder);
+        Stream<VoxelShape> entityCollisions = entity.level.getEntityCollisions(entity, entityBB.expandTowards(offsetVec), e -> true);
+        ReuseableStream<VoxelShape> collisions = new ReuseableStream<>(Stream.concat(entityCollisions, worldBorderCollision));
+        Vector3d vector3d = offsetVec.lengthSqr() == 0 ? offsetVec : Entity.collideBoundingBoxHeuristically(entity, offsetVec, entityBB, entity.level, selectionContext, collisions);
         boolean flag = offsetVec.x != vector3d.x;
-        boolean flag1 = offsetVec.y != vector3d.y;
         boolean flag2 = offsetVec.z != vector3d.z;
-        boolean flag3 = entity.isOnGround() || flag1 && offsetVec.y < 0.0D;
+        boolean flag3 = entity.isOnGround() || offsetVec.y != vector3d.y && offsetVec.y < 0.0D;
         if (entity.maxUpStep > 0.0F && flag3 && (flag || flag2)) {
-            Vector3d vector3d1 = Entity.collideBoundingBoxHeuristically(entity, new Vector3d(offsetVec.x, (double)entity.maxUpStep, offsetVec.z), axisalignedbb, entity.level, iselectioncontext, reuseablestream);
-            Vector3d vector3d2 = Entity.collideBoundingBoxHeuristically(entity, new Vector3d(0.0D, (double)entity.maxUpStep, 0.0D), axisalignedbb.expandTowards(offsetVec.x, 0.0D, offsetVec.z), entity.level, iselectioncontext, reuseablestream);
-            if (vector3d2.y < (double)entity.maxUpStep) {
-                Vector3d vector3d3 = Entity.collideBoundingBoxHeuristically(entity, new Vector3d(offsetVec.x, 0.0D, offsetVec.z), axisalignedbb.move(vector3d2), entity.level, iselectioncontext, reuseablestream).add(vector3d2);
+            Vector3d vector3d1 = Entity.collideBoundingBoxHeuristically(entity, new Vector3d(offsetVec.x, entity.maxUpStep, offsetVec.z), entityBB, entity.level, selectionContext, collisions);
+            Vector3d vector3d2 = Entity.collideBoundingBoxHeuristically(entity, new Vector3d(0, entity.maxUpStep, 0), entityBB.expandTowards(offsetVec.x, 0.0D, offsetVec.z), entity.level, selectionContext, collisions);
+            if (vector3d2.y < entity.maxUpStep) {
+                Vector3d vector3d3 = Entity.collideBoundingBoxHeuristically(entity, new Vector3d(offsetVec.x, 0.0D, offsetVec.z), entityBB.move(vector3d2), entity.level, selectionContext, collisions).add(vector3d2);
                 if (Entity.getHorizontalDistanceSqr(vector3d3) > Entity.getHorizontalDistanceSqr(vector3d1)) {
                     vector3d1 = vector3d3;
                 }
             }
             
             if (Entity.getHorizontalDistanceSqr(vector3d1) > Entity.getHorizontalDistanceSqr(vector3d)) {
-                return vector3d1.add(Entity.collideBoundingBoxHeuristically(entity, new Vector3d(0.0D, -vector3d1.y + offsetVec.y, 0.0D), axisalignedbb.move(vector3d1), entity.level, iselectioncontext, reuseablestream));
+                return vector3d1.add(Entity.collideBoundingBoxHeuristically(entity, new Vector3d(0.0D, -vector3d1.y + offsetVec.y, 0.0D), entityBB.move(vector3d1), entity.level, selectionContext, collisions));
             }
         }
         

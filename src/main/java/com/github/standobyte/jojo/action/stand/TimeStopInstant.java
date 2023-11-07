@@ -189,7 +189,9 @@ public class TimeStopInstant extends StandAction {
     protected Vector3d getEntityTargetTeleportPos(Entity user, Entity target) {
         Vector3d pos;
         if (teleportBehindEntity) {
-            pos = target.position().subtract(target.getLookAngle().scale(target.getBbWidth() + user.getBbWidth()));
+            pos = target.position()
+                    .subtract(Vector3d.directionFromRotation(0, target.yRot)
+                            .scale(target.getBbWidth() + user.getBbWidth()));
         }
         else {
             double distance = target.getBbWidth() + user.getBbWidth();

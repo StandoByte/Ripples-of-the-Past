@@ -97,6 +97,10 @@ public class StandStatFormulas {
         return (float) resistance;
     }
     
+    public static float getBlockingKnockbackMult(double durability) {
+        return MathHelper.clamp((float) Math.pow(2, 1 - durability / 4), 0, 1);
+    }
+    
     public static float getStaminaMultiplier(double durability) {
         return 0.5F + (float) durability * 3 / 32;
     }
