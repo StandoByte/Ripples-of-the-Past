@@ -108,7 +108,7 @@ public class StandStatsRenderer {
                 fillHexagon(xCenter, yCenter, 
                         statVal[0], statVal[1], statVal[2], 
                         statVal[3], statVal[4], statVal[5], 
-                        rgb[0], rgb[1], rgb[2], (int) (192 * alpha));
+                        rgb[0], rgb[1], rgb[2], 192);
                 RenderSystem.disableBlend();
                 
 

@@ -6,7 +6,6 @@ import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType
 import java.util.Set;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
@@ -21,6 +20,7 @@ import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
+import com.github.standobyte.jojo.client.ui.screen.widgets.HeightScaledSlider;
 import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModStatusEffects;
@@ -46,6 +46,7 @@ import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.IngameMenuScreen;
 import net.minecraft.client.gui.screen.MainMenuScreen;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.AbstractSlider;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.gui.widget.button.ImageButton;
 import net.minecraft.client.renderer.FirstPersonRenderer;
@@ -489,8 +490,7 @@ public class ClientEventHandler {
         }
 
         else if (screen instanceof IngameMenuScreen && ClientReflection.showsPauseMenu((IngameMenuScreen) screen)) {
-            float alpha = JojoModConfig.CLIENT.standStatsTranslucency.get().floatValue();
-            if (alpha <= 0) return;
+            float alpha = ClientModSettings.getInstance().getSettingsReadOnly().standStatsTranslucency;
             int xButtonsRightEdge = screen.width / 2 + 102;
             int windowWidth = screen.width;
             int windowHeight = screen.height;
@@ -527,10 +527,34 @@ public class ClientEventHandler {
         if (screen instanceof IngameMenuScreen && ClientReflection.showsPauseMenu((IngameMenuScreen) screen)) {
             IStandPower.getStandPowerOptional(mc.player).ifPresent(power -> {
                 if (power.hasPower()) {
+                    AbstractSlider statsBgAlphaSlider = new HeightScaledSlider(
+                            screen.width - 160, screen.height - 6, 153, 6, StringTextComponent.EMPTY, 0.0D) {
+                        {
+                            this.value = MathHelper.inverseLerp(
+                                    ClientModSettings.getInstance().getSettingsReadOnly().standStatsTranslucency, 
+                                    0.1, 1.0);
+                            updateMessage();
+                        }
+                        
+                        @Override
+                        protected void updateMessage() {
+                            setMessage(StringTextComponent.EMPTY);
+                        }
+                        
+                        @Override
+                        protected void applyValue() {
+                            ClientModSettings.getInstance().editSettings(settings -> 
+                            settings.standStatsTranslucency = (float) MathHelper.clampedLerp(0.1, 1.0, this.value));
+                        }
+                    };
+                    statsBgAlphaSlider.visible = doStandStatsRender(screen);
+                    event.addWidget(statsBgAlphaSlider);
+                    
                     Button standStatsToggleButton = new ImageButton(screen.width - 28, screen.height - 28, 
                             20, 20, 236, 216, 20, StandStatsRenderer.STAND_STATS_UI, 256, 256, 
                             button -> {
                                 renderStandStats = !doStandStatsRender(screen);
+                                statsBgAlphaSlider.visible = doStandStatsRender(screen);
                             }, 
                             (button, matrixStack, x, y) -> {
                                 ITextComponent message = doStandStatsRender(screen) ? 

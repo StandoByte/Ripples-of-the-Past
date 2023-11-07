@@ -544,8 +544,6 @@
   "jojo.config.client.timeStopFreezesVisuals.tooltip": "Enable particles, block texture animations and rain/snow being frozen during time stop. Crashes with Dynamic Surroundings mod.",
   "jojo.config.client.timeStopAnimation": "Time stop animation",
   "jojo.config.client.timeStopAnimation.tooltip": "Enables the visual effect at the beginning of time stop when its duration is 5 seconds or longer.",
-  "jojo.config.client.standStatsTranslucency": "Stand Stats translucency",
-  "jojo.config.client.standStatsTranslucency.tooltip": "Translucency of Stand stats hexagon in the pause menu. If set to 0, it will not show up.",
   
 
   "stand.unknown": "Unknown Stand: %s",
