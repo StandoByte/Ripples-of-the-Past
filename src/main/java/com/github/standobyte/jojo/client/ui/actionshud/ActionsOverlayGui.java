@@ -1459,13 +1459,17 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     public boolean isActionSelectedAndEnabled(Predicate<Action<?>> action) {
-        if (!areHotbarsEnabled() || currentMode == null) {
-            return false;
-        }
-        boolean shift = mc.player.isShiftKeyDown();
-        return Stream.of(ActionType.values()).map(hotbar -> currentMode.getSelectedAction(hotbar, shift, getTargetLazy())).anyMatch(action);
+        return getSelectedEnabledActions().anyMatch(action);
         // FIXME (hud) generics moment
 //                || action.test(getQuickAccessAction(currentMode.getPower(), shift));
+    }
+    
+    public Stream<Action<?>> getSelectedEnabledActions() {
+        if (!areHotbarsEnabled() || currentMode == null) {
+            return Stream.empty();
+        }
+        boolean shift = mc.player.isShiftKeyDown();
+        return Stream.of(ActionType.values()).map(hotbar -> currentMode.getSelectedAction(hotbar, shift, getTargetLazy()));
     }
     
     

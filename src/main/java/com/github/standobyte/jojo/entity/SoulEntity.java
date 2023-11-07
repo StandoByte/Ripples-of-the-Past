@@ -44,6 +44,8 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
     private UUID originUuid;
     private int lifeSpan;
     private boolean resolveCanLvlUp;
+    private Entity noResolveEntity;
+    private UUID noResolveEntityUUID;
     
     public SoulEntity(World world, LivingEntity originEntity, int lifeSpan, boolean resolveCanLvlUp) {
         this(ModEntityTypes.SOUL.get(), world);
@@ -67,6 +69,10 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
             }
             entity.setRemainingFireTicks(-20);
         }
+    }
+    
+    public void setNoResolveToEntity(LivingEntity entity) {
+        this.noResolveEntity = entity;
     }
     
     public LivingEntity getOriginEntity() {
@@ -102,17 +108,27 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
             }
         }
         else {
+            if (noResolveEntity == null && noResolveEntityUUID != null) {
+                noResolveEntity = ((ServerWorld) level).getEntity(noResolveEntityUUID);
+                noResolveEntityUUID = null;
+            }
+            
             level.getEntitiesOfClass(LivingEntity.class, 
                     new AxisAlignedBB(getBoundingBox().getCenter(), getBoundingBox().getCenter()).inflate(24), 
-                    entity -> !entity.is(originEntity) && originEntity.isAlliedTo(entity) && !(entity instanceof StandEntity)).forEach(entity -> {
-                        IStandPower.getStandPowerOptional(entity).ifPresent(stand -> {
-                            if (giveResolve(entity, stand)) {
-                                stand.getResolveCounter().soulAddResolveTeammate();
-                            }
-                        });
-                    });
+                    entity -> !entity.is(originEntity) && entity != noResolveEntity
+                            && originEntity.isAlliedTo(entity) && !(entity instanceof StandEntity))
+            .forEach(entity -> {
+                IStandPower.getStandPowerOptional(entity).ifPresent(stand -> {
+                    if (giveResolve(entity, stand)) {
+                        stand.getResolveCounter().soulAddResolveTeammate();
+                    }
+                });
+            });
             RayTraceResult rayTrace = JojoModUtil.rayTrace(this, 32, 
-                    entity -> entity instanceof LivingEntity && !StandUtil.getStandUser((LivingEntity) entity).is(originEntity), 1.0);
+                    entity -> entity instanceof LivingEntity
+                            && !StandUtil.getStandUser((LivingEntity) entity).is(originEntity)
+                            && entity != noResolveEntity
+                    , 1.0);
             if (rayTrace.getType() == RayTraceResult.Type.ENTITY) {
                 Entity lookEntity = ((EntityRayTraceResult) rayTrace).getEntity();
                 if (lookEntity instanceof LivingEntity) {
@@ -197,6 +213,11 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
     public boolean isInvisibleTo(PlayerEntity player) {
         return !player.isSpectator() && !player.is(originEntity) && (!StandUtil.playerCanSeeStands(player) || invisibleFlag());
     }
+    
+    @Override
+    public boolean displayFireAnimation() {
+        return false;
+    }
 
     @Override
     public EntitySize getDimensions(Pose pose) {
@@ -214,6 +235,9 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
         if (nbt.hasUUID("Origin")) {
             this.originUuid = nbt.getUUID("Origin");
         }
+        if (nbt.hasUUID("NoResolve")) {
+            this.noResolveEntityUUID = nbt.getUUID("NoResolve");
+        }
     }
 
     @Override
@@ -223,6 +247,9 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
         nbt.putBoolean("Resolve", resolveCanLvlUp);
         if (originUuid != null) {
             nbt.putUUID("Origin", originEntity.getUUID());
+        }
+        if (noResolveEntity != null) {
+            nbt.putUUID("NoResolve", noResolveEntity.getUUID());
         }
     }
 

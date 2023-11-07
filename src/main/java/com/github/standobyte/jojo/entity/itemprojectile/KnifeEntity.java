@@ -1,9 +1,11 @@
 package com.github.standobyte.jojo.entity.itemprojectile;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.block.Block;
@@ -16,6 +18,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -29,6 +32,7 @@ public class KnifeEntity extends ItemProjectileEntity {
     private boolean timeStop = false;
     private Vector3d timeStopHitMotion;
     private int tsFlightTicks = 0;
+    private TexVariant knifeTexVariant = TexVariant.KNIFE;
 
     public KnifeEntity(World world, LivingEntity shooter) {
        super(ModEntityTypes.KNIFE.get(), shooter, world);
@@ -144,11 +148,31 @@ public class KnifeEntity extends ItemProjectileEntity {
         return false;
     }
     
+    public void setKnifeType(TexVariant type) {
+        this.knifeTexVariant = type;
+    }
+    
+    public ResourceLocation getKnifeTexture() {
+        return knifeTexVariant.texPath;
+    }
+    
+    public static enum TexVariant {
+        KNIFE(new ResourceLocation(JojoMod.MOD_ID, "textures/entity/projectiles/knife.png")),
+        SCALPEL(new ResourceLocation(JojoMod.MOD_ID, "textures/entity/projectiles/knife_scalpel.png")),
+        FISH(new ResourceLocation(JojoMod.MOD_ID, "textures/entity/projectiles/knife_fish.png"));
+        
+        private final ResourceLocation texPath;
+        private TexVariant(ResourceLocation texPath) {
+            this.texPath = texPath;
+        }
+    }
+    
     @Override
     public void readAdditionalSaveData(CompoundNBT nbt) {
         super.readAdditionalSaveData(nbt);
         timeStop = nbt.getBoolean("TimeStop");
         tsFlightTicks = nbt.getInt("TimeStopTicks");
+        knifeTexVariant = MCUtil.nbtGetEnum(nbt, "KnifeType", TexVariant.class);
     }
 
     @Override
@@ -156,6 +180,7 @@ public class KnifeEntity extends ItemProjectileEntity {
         super.addAdditionalSaveData(nbt);
         nbt.putBoolean("TimeStop", timeStop);
         nbt.putInt("TimeStopTicks", tsFlightTicks);
+        MCUtil.nbtPutEnum(nbt, "KnifeType", knifeTexVariant);
     }
     
     @Override
@@ -163,6 +188,7 @@ public class KnifeEntity extends ItemProjectileEntity {
         super.writeSpawnData(buffer);
         buffer.writeBoolean(timeStop);
         buffer.writeVarInt(tsFlightTicks);
+        buffer.writeEnum(knifeTexVariant);
     }
 
     @Override
@@ -170,5 +196,6 @@ public class KnifeEntity extends ItemProjectileEntity {
         super.readSpawnData(additionalData);
         timeStop = additionalData.readBoolean();
         tsFlightTicks = additionalData.readVarInt();
+        knifeTexVariant = additionalData.readEnum(TexVariant.class);
     }
 }
