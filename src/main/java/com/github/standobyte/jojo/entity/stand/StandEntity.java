@@ -2244,6 +2244,23 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         return null;
     }
     // FIXME save the items in nbt
+    
+    
+    
+    private boolean noFireAnimFrame = false;
+    @Override
+    public boolean displayFireAnimation() {
+        if (noFireAnimFrame) {
+            noFireAnimFrame = false;
+            return false;
+        }
+        
+        return super.displayFireAnimation();
+    }
+    
+    public void setNoFireAnimFrame() {
+        this.noFireAnimFrame = true;
+    }
 
 
 

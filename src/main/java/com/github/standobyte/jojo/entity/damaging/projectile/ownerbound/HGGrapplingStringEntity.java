@@ -13,6 +13,7 @@ import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -168,21 +169,21 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
     @Override
     protected void afterBlockHit(BlockRayTraceResult blockRayTraceResult, boolean brokenBlock) {
         if (!brokenBlock && !bindEntities) {
+            BlockPos blockHitPos = blockRayTraceResult.getBlockPos();
             if (!getBlockPosAttachedTo().isPresent()) {
                 playSound(ModSounds.HIEROPHANT_GREEN_GRAPPLE_CATCH.get(), 1.0F, 1.0F);
-                attachToBlockPos(blockRayTraceResult.getBlockPos());
+                attachToBlockPos(blockHitPos);
             }
             
-            placeBarrier();
+            placeBarrier(blockHitPos);
         }
     }
     
-    private void placeBarrier() {
-
+    private void placeBarrier(BlockPos blockPos) {
         if (!level.isClientSide() && !placedBarrier && getOwner() instanceof HierophantGreenEntity) {
             HierophantGreenEntity hierophant = (HierophantGreenEntity) getOwner();
             if (hierophant.hasBarrierAttached()) {
-                hierophant.attachBarrier(blockPosition());
+                hierophant.attachBarrier(blockPos);
             }
             placedBarrier = true;
         }

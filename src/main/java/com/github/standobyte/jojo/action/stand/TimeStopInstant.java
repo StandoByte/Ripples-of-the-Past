@@ -18,12 +18,14 @@ import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
+import com.github.standobyte.jojo.util.general.Container;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.SoundCategory;
@@ -69,52 +71,35 @@ public class TimeStopInstant extends StandAction {
     @Override
     protected void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
         playSound(world, user);
-        
-        int timeStopTicks = TimeStop.getTimeStopTicks(power, this);
-        if (!StandUtil.standIgnoresStaminaDebuff(power)) {
-            timeStopTicks = MathHelper.clamp(MathHelper.floor((power.getStamina() - getStaminaCost(power)) / getStaminaCostTicking(power)), 5, timeStopTicks);
-        }
 
-        Vector3d blinkPos = null;
+        int timeStopTicks = getMaxImpliedTicks(power);
         double speed = getDistancePerTick(user);
-        double distance = Math.min(speed * timeStopTicks, 192);
-        if (target.getType() == TargetType.EMPTY) {
-            RayTraceResult rayTrace = JojoModUtil.rayTrace(user, distance, 
-                    entity -> entity instanceof LivingEntity && !(entity instanceof StandEntity && ((StandEntity) entity).getUser() == user));
-            if (rayTrace.getType() == RayTraceResult.Type.MISS) {
-                blinkPos = rayTrace.getLocation();
-            }
-            target = ActionTarget.fromRayTraceResult(rayTrace);
-        }
+        double distance = getMaxDistance(user, power, speed, timeStopTicks);
+        Container<ActionTarget> targetMutable = new Container<>(target);
+        Vector3d blinkPos = calcBlinkPos(user, targetMutable, distance);
+        target = targetMutable.get();
+        distance = user.position().subtract(blinkPos).length();
         
-        switch (target.getType()) {
-        case ENTITY:
-            blinkPos = getEntityTargetTeleportPos(user, target.getEntity());
-            Vector3d toTarget = target.getEntity().position().subtract(blinkPos);
+        if (target.getType() == ActionTarget.TargetType.ENTITY) {
+            Entity targetEntity = target.getEntity();
+            Vector3d toTarget = targetEntity.position().subtract(blinkPos);
             user.yRot = MathUtil.yRotDegFromVec(toTarget);
             user.yRotO = user.yRot;
-            break;
-        case BLOCK:
-            BlockPos blockPosTargeted = target.getBlockPos();
-            blinkPos = Vector3d.atBottomCenterOf(world.isEmptyBlock(blockPosTargeted.above()) ? blockPosTargeted.above() : blockPosTargeted.relative(target.getFace()));
-            break;
-        default:
-            Vector3d pos = blinkPos;
-            BlockPos blockPos = new BlockPos(pos);
-            while (world.isEmptyBlock(blockPos.below()) && blockPos.getY() > 0) {
-                blockPos = blockPos.below();
-            }
-            blinkPos = new Vector3d(pos.x, blockPos.getY() > 0 ? blockPos.getY() : user.position().y, pos.z);
-            break;
         }
+
+        user.level.getEntitiesOfClass(MobEntity.class, user.getBoundingBox().inflate(8), 
+                mob -> mob.getTarget() == user
+                && mob.getLookAngle().dot(mob.getEyePosition(1).subtract(blinkPos)) >= 0)
+        .forEach(mob -> {
+            MCUtil.loseTarget(mob, user);
+        });
         
-        distance = user.position().subtract(blinkPos).length();
         int impliedTicks = MathHelper.clamp(MathHelper.ceil(distance / speed), 0, timeStopTicks);
         skipTicksForStandAndUser(power, impliedTicks);
         
         if (!world.isClientSide()) {
             power.consumeStamina(impliedTicks * getStaminaCostTicking(power));
-
+            
             user.teleportTo(blinkPos.x, blinkPos.y, blinkPos.z);
             StandStats stats = power.getType().getStats();
             if (power.hasPower() && stats instanceof TimeStopperStandStats) {
@@ -133,11 +118,63 @@ public class TimeStopInstant extends StandAction {
         user.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.hasUsedTimeStopToday = true);
     }
     
-    public static final float COOLDOWN_RATIO = 1F / 6F;
+    public int getMaxImpliedTicks(IStandPower power) {
+        int timeStopTicks = TimeStop.getTimeStopTicks(power, this);
+        if (!StandUtil.standIgnoresStaminaDebuff(power)) {
+            timeStopTicks = MathHelper.clamp(MathHelper.floor((power.getStamina() - getStaminaCost(power)) / getStaminaCostTicking(power)), 5, timeStopTicks);
+        }
+        
+        return timeStopTicks;
+    }
+    
+    public double getMaxDistance(LivingEntity user, IStandPower power, double playerSpeed, int timeStopTicks) {
+        double distance = Math.min(playerSpeed * timeStopTicks, 192);
+        return distance;
+    }
     
     public static double getDistancePerTick(LivingEntity entity) {
         return entity.getAttributeValue(Attributes.MOVEMENT_SPEED) * 2.1585;
     }
+    
+    public Vector3d calcBlinkPos(LivingEntity user, IStandPower power, ActionTarget initialTarget) {
+        return calcBlinkPos(user, new Container<>(initialTarget), getMaxDistance(user, power, getDistancePerTick(user), getMaxImpliedTicks(power)));
+    }
+    
+    public Vector3d calcBlinkPos(LivingEntity user, Container<ActionTarget> initialTarget, double maxDistance) {
+        Vector3d blinkPos = null;
+        ActionTarget target = initialTarget.get();
+        if (target.getType() == TargetType.EMPTY) {
+            RayTraceResult rayTrace = JojoModUtil.rayTrace(user, maxDistance, 
+                    entity -> entity instanceof LivingEntity && !(entity instanceof StandEntity && ((StandEntity) entity).getUser() == user));
+            if (rayTrace.getType() == RayTraceResult.Type.MISS) {
+                blinkPos = rayTrace.getLocation();
+            }
+            target = ActionTarget.fromRayTraceResult(rayTrace);
+        }
+        initialTarget.set(target);
+        
+        switch (target.getType()) {
+        case ENTITY:
+            blinkPos = getEntityTargetTeleportPos(user, target.getEntity());
+            break;
+        case BLOCK:
+            BlockPos blockPosTargeted = target.getBlockPos();
+            blinkPos = Vector3d.atBottomCenterOf(user.level.isEmptyBlock(blockPosTargeted.above()) ? blockPosTargeted.above() : blockPosTargeted.relative(target.getFace()));
+            break;
+        default:
+            Vector3d pos = blinkPos;
+            BlockPos blockPos = new BlockPos(pos);
+            while (user.level.isEmptyBlock(blockPos.below()) && blockPos.getY() > 0) {
+                blockPos = blockPos.below();
+            }
+            blinkPos = new Vector3d(pos.x, blockPos.getY() > 0 ? blockPos.getY() : user.position().y, pos.z);
+            break;
+        }
+        
+        return blinkPos;
+    }
+    
+    public static final float COOLDOWN_RATIO = 1F / 6F;
     
     void playSound(World world, Entity entity) {
         if (blinkSound != null) {
@@ -150,13 +187,16 @@ public class TimeStopInstant extends StandAction {
     }
     
     protected Vector3d getEntityTargetTeleportPos(Entity user, Entity target) {
+        Vector3d pos;
         if (teleportBehindEntity) {
-            return target.position().subtract(target.getLookAngle().scale(target.getBbWidth() + user.getBbWidth()));
+            pos = target.position().subtract(target.getLookAngle().scale(target.getBbWidth() + user.getBbWidth()));
         }
         else {
             double distance = target.getBbWidth() + user.getBbWidth();
-            return user.distanceToSqr(target) > distance * distance ? target.position().subtract(user.getLookAngle().scale(distance)) : user.position();
+            pos = user.distanceToSqr(target) > distance * distance ? target.position().subtract(user.getLookAngle().scale(distance)) : user.position();
         }
+        
+        return pos;
     }
     
     @Override

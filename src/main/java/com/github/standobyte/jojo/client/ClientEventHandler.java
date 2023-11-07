@@ -21,7 +21,6 @@ import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
-import com.github.standobyte.jojo.client.ui.screen.standskin.StandSkinsScreen;
 import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModStatusEffects;
@@ -593,6 +592,19 @@ public class ClientEventHandler {
                     block -> CrazyDiamondRestoreTerrain.blockPosSelectedForRestoration(block, entity, lookVec, eyePosD, pos, 
                             mc.player.hasEffect(ModStatusEffects.RESOLVE.get()), mc.player.isShiftKeyDown()));
         }
+//        else {
+//            hud.getSelectedEnabledActions()
+//            .filter(action -> action instanceof TimeStopInstant)
+//            .findFirst()
+//            .ifPresent(action -> {
+//                TimeStopInstant tpAction = (TimeStopInstant) action;
+//                IStandPower stand = ActionsOverlayGui.getInstance().standUiMode.getPower();
+//                Vector3d pos = tpAction.calcBlinkPos(mc.player, stand, ActionTarget.fromRayTraceResult(mc.hitResult));
+//                if (pos != null) {
+//                    // TODO render translucent player model at the position
+//                }
+//            });
+//        }
         
         boolean paused = mc.isPaused();
         if (prevPause && !paused) {

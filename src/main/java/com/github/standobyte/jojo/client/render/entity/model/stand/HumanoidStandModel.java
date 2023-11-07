@@ -1,6 +1,11 @@
 package com.github.standobyte.jojo.client.render.entity.model.stand;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -9,6 +14,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
+import com.github.standobyte.jojo.client.particle.custom.StandCrumbleParticle;
 import com.github.standobyte.jojo.client.render.entity.pose.IModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose.ModelAnim;
@@ -23,15 +29,19 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.util.general.MathUtil;
+import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
+import it.unimi.dsi.fastutil.objects.ObjectList;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
 
 // Made with Blockbench 3.9.2
 
@@ -567,5 +577,73 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
                 (double)(-foreArm.x / 16.0F), 
                 (double)(-foreArm.y / 16.0F), 
                 (double)(-foreArm.z / 16.0F));
+    }
+    
+    
+    
+    public void addCrumbleParticleAt(HumanoidPart humanoidPart, ResourceLocation texture, Vector3d pos) {
+        Minecraft mc = Minecraft.getInstance();
+        StandCrumbleParticle particle = new StandCrumbleParticle(mc.level, pos.x, pos.y, pos.z, 0, 0, 0);
+        
+        ModelRenderer mainPart;
+        switch (humanoidPart) {
+        case HEAD: 
+            mainPart = head;
+            break;
+        case TORSO: 
+            mainPart = torso;
+            break;
+        case LEFT_ARM: 
+            mainPart = leftArm;
+            break;
+        case RIGHT_ARM: 
+            mainPart = rightArm;
+            break;
+        case LEFT_LEG: 
+            mainPart = leftLeg;
+            break;
+        case RIGHT_LEG: 
+            mainPart = rightLeg;
+            break;
+        default:
+            throw new IllegalArgumentException();
+        }
+        Random random = new Random();
+        List<ModelRenderer> allModelParts = new ArrayList<>();
+        addChildren(mainPart, allModelParts);
+        ModelRenderer randomPart = allModelParts.get(random.nextInt(allModelParts.size()));
+        ObjectList<ModelRenderer.ModelBox> cubes = ClientReflection.getCubes(randomPart); // TODO don't use reflection here
+        if (!cubes.isEmpty()) {
+            ModelRenderer.ModelBox cube = cubes.get(random.nextInt(cubes.size()));
+            ModelRenderer.TexturedQuad[] polygons = ClientReflection.getPolygons(cube); // TODO don't use reflection here
+            ModelRenderer.TexturedQuad polygon = polygons[random.nextInt(polygons.length)];
+            if (polygon != null) {
+                ModelRenderer.PositionTextureVertex[] vertices = polygon.vertices;
+                if (vertices.length > 0) {
+                    float u0 = (float) Arrays.stream(vertices).mapToDouble(vertex -> vertex.u).min().getAsDouble();
+                    float v0 = (float) Arrays.stream(vertices).mapToDouble(vertex -> vertex.v).min().getAsDouble();
+                    float u1 = (float) Arrays.stream(vertices).mapToDouble(vertex -> vertex.u).max().getAsDouble();
+                    float v1 = (float) Arrays.stream(vertices).mapToDouble(vertex -> vertex.v).max().getAsDouble();
+                    particle.setTextureAndUv(texture, u0, v0, u1, v1);
+                    mc.particleEngine.add(particle);
+                }
+            }
+        }
+    }
+    
+    private void addChildren(ModelRenderer parent, Collection<ModelRenderer> collection) {
+        collection.add(parent);
+        for (ModelRenderer child : ClientReflection.getChildren(parent)) { // TODO don't use reflection here
+            addChildren(child, collection);
+        }
+    }
+    
+    private enum HumanoidPart {
+        HEAD,
+        TORSO,
+        LEFT_ARM,
+        RIGHT_ARM,
+        LEFT_LEG,
+        RIGHT_LEG;
     }
 }

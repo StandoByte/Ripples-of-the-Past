@@ -115,8 +115,12 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
                 }
                 if (entity.isFollowingUser() && !entity.isArmsOnlyMode()) {
                     Vector3d diffVec = entity.getPosition(partialTick).subtract(user.getPosition(partialTick));
+                    Vector3d lookVec = Vector3d.directionFromRotation(0, user.getViewYRot(partialTick));
+                    
+                    diffVec = new Vector3d(diffVec.x, 0, diffVec.z);
+                    lookVec = new Vector3d(lookVec.x, 0, lookVec.z);
                     double distanceSqr = diffVec.lengthSqr();
-                    if (distanceSqr < 0.25 || distanceSqr < 1 && user.getViewVector(partialTick).dot(diffVec) > distanceSqr / 2) {
+                    if (distanceSqr < 0.25 || distanceSqr < 1 && lookVec.dot(diffVec) > distanceSqr / 2) {
                         return ViewObstructionPrevention.ARMS_ONLY;
                     }
                 }
@@ -167,6 +171,9 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
         model.riding = shouldSit;
         model.young = entity.isBaby();
         viewObstructionPrevention = obstructsView(entity, partialTick);
+        if (viewObstructionPrevention != ViewObstructionPrevention.NONE) {
+            entity.setNoFireAnimFrame();
+        }
         model.setVisibility(entity, visibilityMode(entity), viewObstructionPrevention.armsOnly);
         float yBodyRotation = MathHelper.rotLerp(partialTick, entity.yBodyRotO, entity.yBodyRot);
         float yHeadRotation = MathHelper.rotLerp(partialTick, entity.yHeadRotO, entity.yHeadRot);

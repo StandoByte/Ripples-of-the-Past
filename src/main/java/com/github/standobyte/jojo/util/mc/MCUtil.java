@@ -25,6 +25,7 @@ import net.minecraft.crash.ReportedException;
 import net.minecraft.dispenser.IBlockSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -398,6 +399,16 @@ public class MCUtil {
     
     public static HandSide getOppositeSide(HandSide side) {
         return side == HandSide.LEFT ? HandSide.RIGHT : HandSide.LEFT;
+    }
+    
+    
+    
+    public static void loseTarget(MobEntity attackingMob, LivingEntity target) {
+        if (attackingMob.getTarget() == target) {
+            attackingMob.setTarget(null);
+            attackingMob.targetSelector.getRunningGoals()
+            .forEach(goal -> goal.stop());
+        }
     }
     
     
