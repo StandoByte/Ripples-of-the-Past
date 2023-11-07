@@ -53,7 +53,7 @@ import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 
 public class DamageUtil {
-    public static final DamageSource ULTRAVIOLET = new DamageSource("ultraviolet").bypassArmor();
+    public static final DamageSource ULTRAVIOLET = new DamageSource("ultraviolet").bypassArmor().bypassMagic();
     public static final String BLOOD_DRAIN_MSG = "bloodDrain";
     public static final DamageSource COLD = new DamageSource("cold").bypassArmor();
     public static final DamageSource HAMON = new DamageSource("hamon").bypassArmor();
