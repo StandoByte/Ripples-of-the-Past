@@ -148,11 +148,13 @@ public class MCUtil {
     }
     
     public static void nbtPutVec3d(CompoundNBT nbt, String key, Vector3d vec) {
-        ListNBT list = new ListNBT();
-        list.add(DoubleNBT.valueOf(vec.x));
-        list.add(DoubleNBT.valueOf(vec.y));
-        list.add(DoubleNBT.valueOf(vec.z));
-        nbt.put(key, list);
+        if (vec != null) {
+            ListNBT list = new ListNBT();
+            list.add(DoubleNBT.valueOf(vec.x));
+            list.add(DoubleNBT.valueOf(vec.y));
+            list.add(DoubleNBT.valueOf(vec.z));
+            nbt.put(key, list);
+        }
     }
     
     @Nullable
