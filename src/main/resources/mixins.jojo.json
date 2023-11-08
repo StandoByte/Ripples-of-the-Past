@@ -1,0 +1,7 @@
+{
+  "package": "com.github.standobyte.jojo.mixin",
+  "refmap": "mixins.jojo.refmap.json",
+  "client": [
+    "client.ParticleManagerMixin"
+  ]
+}

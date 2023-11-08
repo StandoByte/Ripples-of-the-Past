@@ -3,16 +3,19 @@ buildscript {
         maven { url = 'https://maven.minecraftforge.net' }
         maven { url = 'https://maven.parchmentmc.org' }
         mavenCentral()
+        maven { url = 'https://repo.spongepowered.org/repository/maven-public/' }
     }
     dependencies {
         classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
         classpath 'org.parchmentmc:librarian:1.+'
+        classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
     }
 }
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.parchmentmc.librarian.forgegradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
+apply plugin: 'org.spongepowered.mixin'
 
 version = release_snapshot.toBoolean() ? "${mc_version}-${mod_version}-snapshot-${snapshot_version}" : "${mc_version}-${mod_version}"
 group = 'standobyte.jojo'
@@ -68,6 +71,15 @@ minecraft {
 
 sourceSets.main.resources { srcDir 'src/generated/resources' }
 
+mixin {
+    add sourceSets.main, 'mixins.jojo.refmap.json'
+    config 'mixins.jojo.json'
+    
+    debug.verbose = true
+    debug.export = true
+    dumpTargetOnFailure = true
+}
+
 repositories {
     maven {
         name "KosmX's maven"
@@ -77,6 +89,7 @@ repositories {
 
 dependencies {
     minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
+    annotationProcessor 'org.spongepowered:mixin:0.8.4:processor'
     implementation fg.deobf("dev.kosmx.player-anim:player-animation-lib-forge:${playeranim_version}")
     implementation fg.deobf("io.github.kosmx.bendy-lib:bendy-lib-forge:${bendylib_version}")
 }
