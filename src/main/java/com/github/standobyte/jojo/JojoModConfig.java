@@ -630,6 +630,7 @@ public class JojoModConfig {
         
         public final ForgeConfigSpec.BooleanValue resolveShaders;
         public final ForgeConfigSpec.BooleanValue menacingParticles;
+        @Deprecated
         public final ForgeConfigSpec.BooleanValue timeStopFreezesVisuals;
         public final ForgeConfigSpec.BooleanValue timeStopAnimation;
         
