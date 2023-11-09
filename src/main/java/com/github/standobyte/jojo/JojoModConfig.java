@@ -630,8 +630,6 @@ public class JojoModConfig {
         
         public final ForgeConfigSpec.BooleanValue resolveShaders;
         public final ForgeConfigSpec.BooleanValue menacingParticles;
-        @Deprecated
-        public final ForgeConfigSpec.BooleanValue timeStopFreezesVisuals;
         public final ForgeConfigSpec.BooleanValue timeStopAnimation;
         
         public final ForgeConfigSpec.BooleanValue characterVoiceLines;
@@ -667,12 +665,6 @@ public class JojoModConfig {
                     .comment(" Enable particles spawning from the player when AFK.")
                     .translation("jojo.config.client.menacingParticles")
                     .define("menacingParticles", true);
-            
-            timeStopFreezesVisuals = builder
-                    .comment(" Freeze particles, block texture animations and rain/snow during time stop.",
-                            "  Experimental feature - it may cause errors or crashes with other mods (one known crash is with Dynamic Surroundings), so the option is disabled by default.")
-                    .translation("jojo.config.client.timeStopFreezesParticles")
-                    .define("timeStopFreezesParticles", false);
             
             timeStopAnimation = builder
                     .comment(" Enables the visual effect at the beginning of time stop when its duration is 5 seconds or longer.")

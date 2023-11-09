@@ -516,8 +516,6 @@
   "jojo.config.client.resolveShaders.tooltip": "Habilite los shaders durante el efecto Determinacion.",
   "jojo.config.client.menacingParticles": "\"Amenazador\" partículas",
   "jojo.config.client.menacingParticles.tooltip": "Habilitar partículas ゴゴゴゴゴ cuando estas AFK.",
-  "jojo.config.client.timeStopFreezesVisuals": "La parada del tiempo congela las imágenes.",
-  "jojo.config.client.timeStopFreezesVisuals.tooltip": "Habilite las partículas, bloquee las animaciones de textura y la lluvia/nieve que se congela durante la parada del tiempo. Característica experimental.",
   "jojo.config.client.timeStopAnimation": "Animación de Parada de tiempo",
   "jojo.config.client.timeStopAnimation.tooltip": "Habilita el efecto visual al inicio de la parada del tiempo cuando su duración es de 5 segundos o más.",
   

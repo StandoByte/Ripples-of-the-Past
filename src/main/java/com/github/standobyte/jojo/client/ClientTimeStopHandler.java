@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.TimeStopHandler;
 import com.github.standobyte.jojo.client.ClientTicking.ITicking;
@@ -111,25 +110,24 @@ public class ClientTimeStopHandler implements ITicking {
                 timeStopLength = 0;
             }
             
-            if (JojoModConfig.CLIENT.timeStopFreezesVisuals.get()) {
-                if (isTimeStopped) {
-                    if (mc.level != null) {
-                        DimensionRenderInfo effects = mc.level.effects();
-                        prevWeatherRender.put(mc.level, Pair.of(effects.getWeatherRenderHandler(), effects.getWeatherParticleRenderHandler()));
-                        effects.setWeatherRenderHandler(timeStopWeatherHandler);
-                        effects.setWeatherParticleRenderHandler(timeStopWeatherHandler);
-                    }
-                }
-                else {
-                    if (mc.level != null && prevWeatherRender.containsKey(mc.level)) {
-                        timeStopWeatherHandler.onTimeStopEnd();
-                        Pair<IWeatherRenderHandler, IWeatherParticleRenderHandler> prevEffects = prevWeatherRender.get(mc.level);
-                        DimensionRenderInfo effects = mc.level.effects();
-                        effects.setWeatherRenderHandler(prevEffects.getLeft());
-                        effects.setWeatherParticleRenderHandler(prevEffects.getRight());
-                    }
+            if (isTimeStopped) {
+                if (mc.level != null) {
+                    DimensionRenderInfo effects = mc.level.effects();
+                    prevWeatherRender.put(mc.level, Pair.of(effects.getWeatherRenderHandler(), effects.getWeatherParticleRenderHandler()));
+                    effects.setWeatherRenderHandler(timeStopWeatherHandler);
+                    effects.setWeatherParticleRenderHandler(timeStopWeatherHandler);
                 }
             }
+            else {
+                if (mc.level != null && prevWeatherRender.containsKey(mc.level)) {
+                    timeStopWeatherHandler.onTimeStopEnd();
+                    Pair<IWeatherRenderHandler, IWeatherParticleRenderHandler> prevEffects = prevWeatherRender.get(mc.level);
+                    DimensionRenderInfo effects = mc.level.effects();
+                    effects.setWeatherRenderHandler(prevEffects.getLeft());
+                    effects.setWeatherParticleRenderHandler(prevEffects.getRight());
+                }
+            }
+            
             timeStopTicks = 0;
         }
     }
