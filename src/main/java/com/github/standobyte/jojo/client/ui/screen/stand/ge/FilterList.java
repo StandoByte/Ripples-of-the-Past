@@ -84,7 +84,7 @@ public class FilterList {
     }
     
     private void updatePositions() {
-        int i = 0;
+        int i = -topEntry;
         for (Entry entry : renderedEntries) {
             entry.checkbox.y = this.y + 16 + (int) i * CHECKBOX_HEIGHT;
             i++;

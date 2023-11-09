@@ -179,7 +179,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         initSelectionGrid(entityTypes);
         ignoreMouseUntilMoved = true;
         
-        filterList = new FilterList(entityTypes, width - 8, 36, 100, height - 52, this);
+        filterList = new FilterList(entityTypes, width - 8, 36, 100, height - 58, this);
     }
     
     private void initSelectionGrid(List<EntityType<?>> entityTypes) {
@@ -223,14 +223,9 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     
     private void setSearchFieldVisible(boolean setVisible) {
         if (searchField.visible ^ setVisible) {
-            int listHeightAdd = searchField.getHeight() + 16;
-            if (!searchField.visible) {
-                listHeightAdd = -listHeightAdd;
-            }
-            
             searchField.visible = setVisible;
             clearSearchFieldButton.visible = setVisible;
-            filterList.setYBottom(filterList.getYBottom() + listHeightAdd);
+            filterList.setYBottom(setVisible ? height - ((40 + searchField.getHeight()) / 20 * 20 + 18) : height - 58);
             
             setFocused(setVisible ? searchField : null);
             searchField.setFocus(setVisible);
