@@ -1,28 +1,18 @@
 package com.github.standobyte.jojo.client;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.apache.commons.lang3.tuple.Pair;
-
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.TimeStopHandler;
 import com.github.standobyte.jojo.client.ClientTicking.ITicking;
-import com.github.standobyte.jojo.client.render.world.TimeStopWeatherHandler;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.ISound.AttenuationType;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.client.world.DimensionRenderInfo;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.Timer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
-import net.minecraftforge.client.IWeatherParticleRenderHandler;
-import net.minecraftforge.client.IWeatherRenderHandler;
 
 public class ClientTimeStopHandler implements ITicking {
     private static ClientTimeStopHandler instance;
@@ -108,34 +98,32 @@ public class ClientTimeStopHandler implements ITicking {
                 timeStopLength = 0;
             }
             
-            setWeatherStopped(isTimeStopped);
-            
             timeStopTicks = 0;
         }
     }
     
     
-    private boolean wasWeatherStopped = false;
-    private final Map<ClientWorld, Pair<IWeatherRenderHandler, IWeatherParticleRenderHandler>> prevWeatherRender = new HashMap<>();
-    private final TimeStopWeatherHandler timeStopWeatherHandler = new TimeStopWeatherHandler();
-    public void setWeatherStopped(boolean isStopped) {
-        if (wasWeatherStopped ^ isStopped && mc.level != null) {
-            wasWeatherStopped = isStopped;
-            if (isStopped) {
-                DimensionRenderInfo effects = mc.level.effects();
-                prevWeatherRender.put(mc.level, Pair.of(effects.getWeatherRenderHandler(), effects.getWeatherParticleRenderHandler()));
-                effects.setWeatherRenderHandler(timeStopWeatherHandler);
-                effects.setWeatherParticleRenderHandler(timeStopWeatherHandler);
-            }
-            else if (prevWeatherRender.containsKey(mc.level)) {
-                timeStopWeatherHandler.unfreeze();
-                Pair<IWeatherRenderHandler, IWeatherParticleRenderHandler> prevEffects = prevWeatherRender.get(mc.level);
-                DimensionRenderInfo effects = mc.level.effects();
-                effects.setWeatherRenderHandler(prevEffects.getLeft());
-                effects.setWeatherParticleRenderHandler(prevEffects.getRight());
-            }
-        }
-    }
+//    private boolean wasWeatherStopped = false;
+//    private final Map<ClientWorld, Pair<IWeatherRenderHandler, IWeatherParticleRenderHandler>> prevWeatherRender = new HashMap<>();
+//    private final TimeStopWeatherHandler timeStopWeatherHandler = new TimeStopWeatherHandler();
+//    public void setWeatherStopped(boolean isStopped) {
+//        if (wasWeatherStopped != isStopped && mc.level != null) {
+//            wasWeatherStopped = isStopped;
+//            if (isStopped) {
+//                DimensionRenderInfo effects = mc.level.effects();
+//                prevWeatherRender.put(mc.level, Pair.of(effects.getWeatherRenderHandler(), effects.getWeatherParticleRenderHandler()));
+//                effects.setWeatherRenderHandler(timeStopWeatherHandler);
+//                effects.setWeatherParticleRenderHandler(timeStopWeatherHandler);
+//            }
+//            else if (prevWeatherRender.containsKey(mc.level)) {
+//                timeStopWeatherHandler.unfreeze();
+//                Pair<IWeatherRenderHandler, IWeatherParticleRenderHandler> prevEffects = prevWeatherRender.get(mc.level);
+//                DimensionRenderInfo effects = mc.level.effects();
+//                effects.setWeatherRenderHandler(prevEffects.getLeft());
+//                effects.setWeatherParticleRenderHandler(prevEffects.getRight());
+//            }
+//        }
+//    }
     
     
     @Override
