@@ -113,7 +113,7 @@ public class MathUtil {
     }
     
     private static float getM(Matrix4f matrix, int i, int j) {
-        return ReflectionUtil.getFieldValue(M_FIELDS[i][j], matrix);
+        return ReflectionUtil.getFloatFieldValue(M_FIELDS[i][j], matrix);
     }
     
     private static final Field M00 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226575_a_");
