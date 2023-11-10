@@ -79,7 +79,6 @@ public class TimeStopWeatherHandler implements IWeatherRenderHandler, IWeatherPa
 
             RenderSystem.depthMask(Minecraft.useShaderTransparency());
             int i1 = -1;
-            float f1 = (float)this.frozenTicks + this.frozenPartialTick;
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
             BlockPos.Mutable blockpos$mutable = new BlockPos.Mutable();
 
@@ -161,6 +160,7 @@ public class TimeStopWeatherHandler implements IWeatherRenderHandler, IWeatherPa
                                     bufferbuilder.begin(7, DefaultVertexFormats.PARTICLE);
                                 }
 
+                                float f1 = renderTicks + renderPartialTick;
                                 float f6 = -((float)(renderTicks & 511) + renderPartialTick) / 512.0F;
                                 float f7 = (float)(random.nextDouble() + (double)f1 * 0.01D * (double)((float)random.nextGaussian()));
                                 float f8 = (float)(random.nextDouble() + (double)(f1 * (float)random.nextGaussian()) * 0.001D);
@@ -196,8 +196,51 @@ public class TimeStopWeatherHandler implements IWeatherRenderHandler, IWeatherPa
         }
     }
 
+//    private int rainSoundTime;
     @Override
     public void render(int ticks, ClientWorld world, Minecraft mc, ActiveRenderInfo activeRenderInfoIn) {
+//        float f = world.getRainLevel(1.0F) / (Minecraft.useFancyGraphics() ? 1.0F : 2.0F);
+//        if (!(f <= 0.0F)) {
+//            Random random = new Random(ticks * 312987231L);
+//            IWorldReader iworldreader = world;
+//            BlockPos blockpos = new BlockPos(activeRenderInfoIn.getPosition());
+//            BlockPos blockpos1 = null;
+//            int i = (int)(100.0F * f * f) / (mc.options.particles == ParticleStatus.DECREASED ? 2 : 1);
+//
+//            for(int j = 0; j < i; ++j) {
+//                int k = random.nextInt(21) - 10;
+//                int l = random.nextInt(21) - 10;
+//                BlockPos blockpos2 = iworldreader.getHeightmapPos(Heightmap.Type.MOTION_BLOCKING, blockpos.offset(k, 0, l)).below();
+//                Biome biome = iworldreader.getBiome(blockpos2);
+//                if (blockpos2.getY() > 0 && blockpos2.getY() <= blockpos.getY() + 10 && blockpos2.getY() >= blockpos.getY() - 10 && biome.getPrecipitation() == Biome.RainType.RAIN && biome.getTemperature(blockpos2) >= 0.15F) {
+//                    blockpos1 = blockpos2;
+//                    if (mc.options.particles == ParticleStatus.MINIMAL) {
+//                        break;
+//                    }
+//
+//                    double d0 = random.nextDouble();
+//                    double d1 = random.nextDouble();
+//                    BlockState blockstate = iworldreader.getBlockState(blockpos2);
+//                    FluidState fluidstate = iworldreader.getFluidState(blockpos2);
+//                    VoxelShape voxelshape = blockstate.getCollisionShape(iworldreader, blockpos2);
+//                    double d2 = voxelshape.max(Direction.Axis.Y, d0, d1);
+//                    double d3 = (double)fluidstate.getHeight(iworldreader, blockpos2);
+//                    double d4 = Math.max(d2, d3);
+//                    IParticleData iparticledata = !fluidstate.is(FluidTags.LAVA) && !blockstate.is(Blocks.MAGMA_BLOCK) && !CampfireBlock.isLitCampfire(blockstate) ? ParticleTypes.RAIN : ParticleTypes.SMOKE;
+//                    world.addParticle(iparticledata, (double)blockpos2.getX() + d0, (double)blockpos2.getY() + d4, (double)blockpos2.getZ() + d1, 0.0D, 0.0D, 0.0D);
+//                }
+//            }
+//
+//            if (blockpos1 != null && random.nextInt(3) < this.rainSoundTime++) {
+//                this.rainSoundTime = 0;
+//                if (blockpos1.getY() > blockpos.getY() + 1 && iworldreader.getHeightmapPos(Heightmap.Type.MOTION_BLOCKING, blockpos).getY() > MathHelper.floor((float)blockpos.getY())) {
+//                    world.playLocalSound(blockpos1, SoundEvents.WEATHER_RAIN_ABOVE, SoundCategory.WEATHER, 0.1F, 0.5F, false);
+//                } else {
+//                    world.playLocalSound(blockpos1, SoundEvents.WEATHER_RAIN, SoundCategory.WEATHER, 0.2F, 1.0F, false);
+//                }
+//            }
+//
+//        }
     }
 
 }
