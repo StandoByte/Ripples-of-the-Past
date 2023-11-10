@@ -1498,7 +1498,7 @@ public class ActionsOverlayGui extends AbstractGui {
         
         return false;
     }
-        
+    
     public boolean isActionSelectedAndEnabled(Action<?> action) {
         return isActionSelectedAndEnabled(a -> a == action);
     }

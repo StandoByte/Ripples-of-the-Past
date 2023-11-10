@@ -161,7 +161,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
     }
     
     private boolean doesBackshot(IStandPower standPower) {
-        return standPower.getUser().isShiftKeyDown();
+        return JojoModUtil.useShiftVar(standPower.getUser());
     }
     
     @Override
