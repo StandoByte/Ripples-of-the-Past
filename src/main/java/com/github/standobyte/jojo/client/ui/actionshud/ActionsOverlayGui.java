@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.IntBinaryOperator;
 import java.util.function.IntUnaryOperator;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -1496,6 +1497,28 @@ public class ActionsOverlayGui extends AbstractGui {
 //        }
         
         return false;
+    }
+        
+    public boolean isActionSelectedAndEnabled(Action<?> action) {
+        return isActionSelectedAndEnabled(a -> a == action);
+    }
+    
+    public boolean isActionSelectedAndEnabled(Action<?>... anyOf) {
+        return isActionSelectedAndEnabled(a -> Stream.of(anyOf).anyMatch(action -> a == action));
+    }
+    
+    public boolean isActionSelectedAndEnabled(Predicate<Action<?>> action) {
+        return getSelectedEnabledActions().anyMatch(action);
+        // FIXME (hud) generics moment
+//                || action.test(getQuickAccessAction(currentMode.getPower(), shift));
+    }
+    
+    public Stream<Action<?>> getSelectedEnabledActions() {
+        if (!areHotbarsEnabled() || currentMode == null) {
+            return Stream.empty();
+        }
+        boolean shift = mc.player.isShiftKeyDown();
+        return Stream.of(ActionsLayout.Hotbar.values()).map(hotbar -> currentMode.getSelectedAction(hotbar, shift, getTargetLazy()));
     }
     
     

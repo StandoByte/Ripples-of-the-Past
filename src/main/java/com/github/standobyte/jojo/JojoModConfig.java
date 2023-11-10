@@ -632,7 +632,6 @@ public class JojoModConfig {
         public final ForgeConfigSpec.BooleanValue menacingParticles;
         public final ForgeConfigSpec.BooleanValue timeStopFreezesVisuals;
         public final ForgeConfigSpec.BooleanValue timeStopAnimation;
-        public final ForgeConfigSpec.DoubleValue standStatsTranslucency;
         
         public final ForgeConfigSpec.BooleanValue characterVoiceLines;
         
@@ -678,12 +677,6 @@ public class JojoModConfig {
                     .comment(" Enables the visual effect at the beginning of time stop when its duration is 5 seconds or longer.")
                     .translation("jojo.config.client.timeStopAnimation")
                     .define("timeStopAnimation", true);
-            
-            standStatsTranslucency = builder
-                    .comment(" Translucency of Stand stats hexagon in the pause menu.", 
-                            "  If set to 0, it will not show up.")
-                    .translation("jojo.config.standStatsTranslucency")
-                    .defineInRange("standStatsTranslucency", 1.0, 0.0, 1.0);
             
             characterVoiceLines = builder
                     .comment(" Whether or not voice lines of the JoJo characters whose powers the players use are played.")

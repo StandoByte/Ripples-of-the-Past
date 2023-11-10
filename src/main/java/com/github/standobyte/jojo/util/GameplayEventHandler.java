@@ -78,7 +78,6 @@ import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
 import com.github.standobyte.jojo.util.mc.damage.IStandDamageSource;
-import com.github.standobyte.jojo.util.mc.damage.ModdedDamageSourceWrapper;
 import com.github.standobyte.jojo.util.mc.damage.StandLinkDamageSource;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -664,6 +663,7 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void prepareToReduceKnockback(LivingDamageEvent event) {
         float knockbackReduction = DamageUtil.knockbackReduction(event.getSource());
+        
         if (knockbackReduction >= 0 && knockbackReduction < 1) {
             event.getEntityLiving().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(util -> {
                 util.setFutureKnockbackFactor(knockbackReduction);
@@ -679,6 +679,16 @@ public class GameplayEventHandler {
                 event.setStrength(event.getStrength() * factor);
             }
         });
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void stackKnockbackInstead(LivingKnockBackEvent event) {
+        LivingEntity target = event.getEntityLiving();
+        
+        if (!target.canUpdate()) {
+            event.setCanceled(true);
+            DamageUtil.applyKnockbackStack(target, event.getStrength(), event.getRatioX(), event.getRatioZ());
+        }
     }
 
     private static void bleed(DamageSource dmgSource, float dmgAmount, LivingEntity target) {
@@ -1068,7 +1078,7 @@ public class GameplayEventHandler {
             dead.addEffect(new EffectInstance(Effects.INVISIBILITY, 200, 0, false, false, true));
             chorusFruitTeleport(dead);
             dead.level.getEntitiesOfClass(MobEntity.class, dead.getBoundingBox().inflate(8), 
-                    mob -> mob.getTarget() == dead).forEach(mob -> mob.setTarget(null));
+                    mob -> mob.getTarget() == dead).forEach(mob -> MCUtil.loseTarget(mob, dead));
             INonStandPower.getNonStandPowerOptional(dead).ifPresent(power -> {
                 power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                     if (hamon.characterIs(ModHamonSkills.CHARACTER_JOSEPH.get())) {
