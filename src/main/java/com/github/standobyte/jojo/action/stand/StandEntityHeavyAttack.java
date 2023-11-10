@@ -32,8 +32,8 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class StandEntityHeavyAttack extends StandEntityAction implements IHasStandPunch {
-    private final Supplier<StandEntityHeavyAttack> finisherVariation;
-    private final Supplier<StandEntityActionModifier> recoveryAction;
+    private final Supplier<? extends StandEntityHeavyAttack> finisherVariation;
+    private final Supplier<? extends StandEntityActionModifier> recoveryAction;
     boolean isFinisher = false;
     private final Supplier<SoundEvent> punchSound;
     private final Supplier<SoundEvent> swingSound;
@@ -227,18 +227,19 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     
     
     
+    public static final float DEFAULT_STAMINA_COST = 50;
     public static class Builder extends StandEntityAction.AbstractBuilder<StandEntityHeavyAttack.Builder> {
-        private Supplier<StandEntityHeavyAttack> finisherVariation = () -> null;
-        private Supplier<StandEntityActionModifier> recoveryAction = () -> null;
+        private Supplier<? extends StandEntityHeavyAttack> finisherVariation = () -> null;
+        private Supplier<? extends StandEntityActionModifier> recoveryAction = () -> null;
         private Supplier<SoundEvent> punchSound = ModSounds.STAND_PUNCH_HEAVY;
         private Supplier<SoundEvent> swingSound = ModSounds.STAND_PUNCH_HEAVY_SWING;
         
         public Builder() {
-            standPose(StandPose.HEAVY_ATTACK).staminaCost(50F)
+            standPose(StandPose.HEAVY_ATTACK).staminaCost(DEFAULT_STAMINA_COST)
             .standOffsetFromUser(-0.75, 0.75);
         }
         
-        public Builder setFinisherVariation(Supplier<StandEntityHeavyAttack> variation) {
+        public Builder setFinisherVariation(Supplier<? extends StandEntityHeavyAttack> variation) {
             if (this.finisherVariation.get() == null && variation != null && variation.get() != null) {
                 this.finisherVariation = variation;
                 variation.get().isFinisher = true;
@@ -246,7 +247,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
             return getThis();
         }
         
-        public Builder setRecoveryFollowUpAction(Supplier<StandEntityActionModifier> recoveryAction) {
+        public Builder setRecoveryFollowUpAction(Supplier<? extends StandEntityActionModifier> recoveryAction) {
             this.recoveryAction = recoveryAction != null ? recoveryAction : () -> null;
             return getThis();
         }
