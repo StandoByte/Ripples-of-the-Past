@@ -100,8 +100,6 @@ public class ClientTimeStopHandler implements ITicking {
         }
     }
     
-    private final Map<ClientWorld, Pair<IWeatherRenderHandler, IWeatherParticleRenderHandler>> prevWeatherRender = new HashMap<>();
-    private final TimeStopWeatherHandler timeStopWeatherHandler = new TimeStopWeatherHandler();
     private void setTimeStoppedState(boolean isTimeStopped) {
         if (this.isTimeStopped != isTimeStopped) {
             this.isTimeStopped = isTimeStopped;
@@ -110,25 +108,32 @@ public class ClientTimeStopHandler implements ITicking {
                 timeStopLength = 0;
             }
             
-            if (isTimeStopped) {
-                if (mc.level != null) {
-                    DimensionRenderInfo effects = mc.level.effects();
-                    prevWeatherRender.put(mc.level, Pair.of(effects.getWeatherRenderHandler(), effects.getWeatherParticleRenderHandler()));
-                    effects.setWeatherRenderHandler(timeStopWeatherHandler);
-                    effects.setWeatherParticleRenderHandler(timeStopWeatherHandler);
-                }
-            }
-            else {
-                if (mc.level != null && prevWeatherRender.containsKey(mc.level)) {
-                    timeStopWeatherHandler.onTimeStopEnd();
-                    Pair<IWeatherRenderHandler, IWeatherParticleRenderHandler> prevEffects = prevWeatherRender.get(mc.level);
-                    DimensionRenderInfo effects = mc.level.effects();
-                    effects.setWeatherRenderHandler(prevEffects.getLeft());
-                    effects.setWeatherParticleRenderHandler(prevEffects.getRight());
-                }
-            }
+            setWeatherStopped(isTimeStopped);
             
             timeStopTicks = 0;
+        }
+    }
+    
+    
+    private boolean wasWeatherStopped = false;
+    private final Map<ClientWorld, Pair<IWeatherRenderHandler, IWeatherParticleRenderHandler>> prevWeatherRender = new HashMap<>();
+    private final TimeStopWeatherHandler timeStopWeatherHandler = new TimeStopWeatherHandler();
+    public void setWeatherStopped(boolean isStopped) {
+        if (wasWeatherStopped ^ isStopped && mc.level != null) {
+            wasWeatherStopped = isStopped;
+            if (isStopped) {
+                DimensionRenderInfo effects = mc.level.effects();
+                prevWeatherRender.put(mc.level, Pair.of(effects.getWeatherRenderHandler(), effects.getWeatherParticleRenderHandler()));
+                effects.setWeatherRenderHandler(timeStopWeatherHandler);
+                effects.setWeatherParticleRenderHandler(timeStopWeatherHandler);
+            }
+            else if (prevWeatherRender.containsKey(mc.level)) {
+                timeStopWeatherHandler.unfreeze();
+                Pair<IWeatherRenderHandler, IWeatherParticleRenderHandler> prevEffects = prevWeatherRender.get(mc.level);
+                DimensionRenderInfo effects = mc.level.effects();
+                effects.setWeatherRenderHandler(prevEffects.getLeft());
+                effects.setWeatherParticleRenderHandler(prevEffects.getRight());
+            }
         }
     }
     

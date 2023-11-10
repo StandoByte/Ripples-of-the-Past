@@ -20,7 +20,7 @@ public class ParticleManagerMixin {
         }
     }
     
-    @ModifyVariable(method = "renderParticles", at = @At("HEAD"), argsOnly = true, ordinal = 0)
+    @ModifyVariable(method = "renderParticles", remap = false, at = @At("HEAD"), argsOnly = true, ordinal = 0)
     private float jojoTsParticleChangePartialTick(float partialTick) {
         if (ClientTimeStopHandler.getInstance().isTimeStopped()) {
             return 1.0F;
