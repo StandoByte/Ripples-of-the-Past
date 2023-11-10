@@ -160,12 +160,7 @@ public class MCUtil {
     public static <T extends IForgeRegistryEntry<T>> Optional<T> nbtGetRegistryEntry(CompoundNBT nbt, String key, IForgeRegistry<T> registry) {
         if (nbt.contains(key, getNbtId(StringNBT.class))) {
             String idString = nbt.getString(key);
-            if (!idString.isEmpty()) {
-                ResourceLocation id = new ResourceLocation(idString);
-                if (registry.containsKey(id)) {
-                    return Optional.of(registry.getValue(id));
-                }
-            }
+            return registryEntryFromId(idString, registry);
         }
         
         return Optional.empty();
@@ -175,6 +170,26 @@ public class MCUtil {
         if (nbt.contains(key, getNbtId(CompoundNBT.class))) {
             return Optional.of(nbt.getCompound(key));
         }
+        return Optional.empty();
+    }
+    
+    public static Optional<ListNBT> nbtGetList(CompoundNBT nbt, String key, Class<? extends INBT> nbtClass) {
+        if (nbt.contains(key, getNbtId(ListNBT.class))) {
+            return Optional.of(nbt.getList(key, getNbtId(nbtClass)));
+        }
+        return Optional.empty();
+    }
+    
+    
+    
+    public static <T extends IForgeRegistryEntry<T>> Optional<T> registryEntryFromId(String idString, IForgeRegistry<T> registry) {
+        if (!idString.isEmpty()) {
+            ResourceLocation id = new ResourceLocation(idString);
+            if (registry.containsKey(id)) {
+                return Optional.of(registry.getValue(id));
+            }
+        }
+        
         return Optional.empty();
     }
     

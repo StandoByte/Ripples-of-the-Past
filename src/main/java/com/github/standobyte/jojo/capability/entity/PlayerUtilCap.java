@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.capability.entity;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -11,6 +12,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -21,6 +23,7 @@ import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
 import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromclient.ClGEUiDataPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.NotificationSyncPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDirectEntityDataPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDoubleShiftPacket;
@@ -28,6 +31,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrHamonLiquidWalkin
 import com.github.standobyte.jojo.network.packets.fromserver.TrKnivesCountPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerContinuousActionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrWalkmanEarbudsPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.GEUiDataPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.MetEntityTypesPacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
@@ -54,6 +58,7 @@ import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class PlayerUtilCap {
     private final PlayerEntity player;
@@ -104,6 +109,16 @@ public class PlayerUtilCap {
         nbt.put("RotpVersion", JojoModVersion.getCurrentVersion().toNBT());
         
         nbt.put("TradeCD", tradeCooldownToNbt());
+        
+        if (GEChosenType != null) {
+            MCUtil.nbtPutRegistryEntry(nbt, "GEChosenType", GEChosenType);
+        }
+        if (!GEHiddenEntries.isEmpty()) {
+            ListNBT list = GEHiddenEntries.stream()
+                    .map(EntityType::getRegistryName).map(Object::toString).map(StringNBT::valueOf)
+                    .collect(ListNBT::new, ListNBT::add, ListNBT::addAll);
+            nbt.put("GEHidden", list);
+        }
         return nbt;
     }
 
@@ -126,6 +141,15 @@ public class PlayerUtilCap {
             });
         }
         
+        GEChosenType = MCUtil.nbtGetRegistryEntry(nbt, "GEChosenType", ForgeRegistries.ENTITIES).orElse(null);
+        MCUtil.nbtGetList(nbt, "GEHidden", StringNBT.class)
+                .map(listNbt -> listNbt
+                        .stream()
+                        .map(stringNbt -> MCUtil.registryEntryFromId(stringNbt.getAsString(), ForgeRegistries.ENTITIES))
+                        .filter(Optional::isPresent).map(Optional::get)
+                        .collect(Collectors.toSet()))
+                .ifPresent(hidden -> GEHiddenEntries.addAll(hidden));
+        
         MCUtil.getNbtElement(nbt, "TradeCD", CompoundNBT.class).ifPresent(this::tradeCooldownFromNbt);
     }
     
@@ -140,6 +164,7 @@ public class PlayerUtilCap {
         if (!metEntityTypesId.isEmpty()) {
             PacketManager.sendToClient(new MetEntityTypesPacket(metEntityTypesId), player);
         }
+        PacketManager.sendToClient(new GEUiDataPacket(this.GEHiddenEntries, Optional.ofNullable(GEChosenType)), player);
     }
     
     
@@ -469,6 +494,52 @@ public class PlayerUtilCap {
     public void addMetEntityTypeId(ResourceLocation id) {
         metEntityTypesId.add(id);
     }
+    
+    
+    
+    private EntityType<?> GEChosenType = null;
+    private Set<EntityType<?>> GEHiddenEntries = new HashSet<>();
+    
+    @Nullable
+    public EntityType<?> getGEChosenLifeformType() {
+        return GEChosenType;
+    }
+
+    public void setGEChosenLifeformType(EntityType<?> type, boolean syncToServer) {
+        this.GEChosenType = type;
+        if (syncToServer && player.level.isClientSide()) {
+            PacketManager.sendToServer(ClGEUiDataPacket.chosenEntityType(Optional.ofNullable(type)));
+        }
+    }
+
+    public boolean isGELifeformHidden(EntityType<?> type) {
+        return GEHiddenEntries.contains(type);
+    }
+
+    public boolean hideGELifeform(EntityType<?> type) {
+        if (GEHiddenEntries.add(type) && player.level.isClientSide()) {
+            PacketManager.sendToServer(ClGEUiDataPacket.hiddenEntry(type));
+            return true;
+        }
+        
+        return false;
+    }
+
+    public boolean showGELifeform(EntityType<?> type) {
+        if (GEHiddenEntries.remove(type) && player.level.isClientSide()) {
+            PacketManager.sendToServer(ClGEUiDataPacket.shownEntry(type));
+            return true;
+        }
+        
+        return false;
+    }
+    
+    public void setGEHiddenLifeforms(Collection<EntityType<?>> allHidden) {
+        GEHiddenEntries.clear();
+        GEHiddenEntries.addAll(allHidden);
+    }
+    
+    
     
     
     

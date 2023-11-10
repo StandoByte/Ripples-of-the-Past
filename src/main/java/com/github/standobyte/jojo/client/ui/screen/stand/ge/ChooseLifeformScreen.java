@@ -48,6 +48,7 @@ import net.minecraft.client.gui.widget.button.ImageButton;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
@@ -62,6 +63,8 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     public static final ResourceLocation LIFEFORM_CHOOSE_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/lifeform_choose.png");
 
     private GridList<SelectorWidget> entityIconsGrid;
+    
+    @Nullable private EntityType<?> chosenLifeformCache;
     
     private int firstMouseX;
     private int firstMouseY;
@@ -105,8 +108,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
                     Predicate<SelectorWidget> filter = entityIconsGrid.getFilter();
                     entityIconsGrid.forEach(widget -> {
                         if (filter == null || filter.test(widget)) {
-                            widget.setHidden(false);
-                            GoldExperienceChooseLifeform.hiddenEntriesTmp.remove(widget.entityType);
+                            hideEntry(widget);
                         }
                     });
                 }, ClientUtil.buttonMessageTooltip(this), new TranslationTextComponent("jojo.ge_lifeform.show_all")));
@@ -116,8 +118,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
                     Predicate<SelectorWidget> filter = entityIconsGrid.getFilter();
                     entityIconsGrid.forEach(widget -> {
                         if (filter == null || filter.test(widget)) {
-                            widget.setHidden(true);
-                            GoldExperienceChooseLifeform.hiddenEntriesTmp.add(widget.entityType);
+                            showEntry(widget);
                         }
                     });
                 }, ClientUtil.buttonMessageTooltip(this), new TranslationTextComponent("jojo.ge_lifeform.hide_all")));
@@ -149,15 +150,18 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         searchField.setValue(savedSearchFilter);
         
         if (firstInit) {
-            if (GoldExperienceChooseLifeform.chosenTypeTmp != null) {
-                entityIconsGrid.setSelected(entityIconsGrid.findFirst(
-                        widget -> widget.entityType == GoldExperienceChooseLifeform.chosenTypeTmp));
-                entityIconsGrid.setLeftMostColumn(savedColumn);
-                if (restoreSavedMousePos) {
-                    ClientUtil.setMousePos(savedMouseX, savedMouseY);
-                    restoreSavedMousePos = false;
+            getEntriesUiData(minecraft.player).ifPresent(playerData -> {
+                EntityType<?> chosenLifeform = playerData.getGEChosenLifeformType();
+                if (chosenLifeform != null) {
+                    entityIconsGrid.setSelected(entityIconsGrid.findFirst(
+                            widget -> widget.entityType == chosenLifeform));
+                    entityIconsGrid.setLeftMostColumn(savedColumn);
+                    if (restoreSavedMousePos) {
+                        ClientUtil.setMousePos(savedMouseX, savedMouseY);
+                        restoreSavedMousePos = false;
+                    }
                 }
-            }
+            });
             
             firstInit = false;
         }
@@ -188,7 +192,8 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         int xMiddle = width / 2;
         
         entityIconsGrid = GridList.create(entityTypes, SelectorWidget::new, Math.max((height - 46) / 30, 1), this, this::addButton);
-        entityIconsGrid.forEach(widget -> widget.setHidden(GoldExperienceChooseLifeform.hiddenEntriesTmp.contains(widget.entityType)));
+        entityIconsGrid.forEach(widget -> widget.setHidden(getEntriesUiData(minecraft.player).map(
+                playerData -> playerData.isGELifeformHidden(widget.entityType)).orElse(true)));
         
         int columnsCount = entityIconsGrid.getColumnsCount();
         int columnsCanFit = (xMax - xMin) / 30;
@@ -297,6 +302,8 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
             saveMousePos(mouseX, mouseY);
         }
         else {
+            chosenLifeformCache = getEntriesUiData(minecraft.player).map(
+                    entityData -> entityData.getGEChosenLifeformType()).orElse(null);
             updateHoveredElement(mouseX, mouseY);
             entityIconsGrid.renderGrid(matrixStack, mouseX, mouseY, partialTicks);
             searchField.render(matrixStack, mouseX, mouseY, partialTicks);
@@ -462,7 +469,8 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     
     private void chooseHoveredAndClose() {
         entityIconsGrid.getSelected().ifPresent(widget -> {
-            GoldExperienceChooseLifeform.chosenTypeTmp = widget.entityType;
+            minecraft.player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(
+                    cap -> cap.setGEChosenLifeformType(widget.entityType, true));
         });
         setSearchFieldVisible(false);
         onClose();
@@ -481,37 +489,68 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     }
     
     public void hideEntry(EntityType<?> entityType) {
-        if (!GoldExperienceChooseLifeform.hiddenEntriesTmp.contains(entityType)) {
-            GoldExperienceChooseLifeform.hiddenEntriesTmp.add(entityType);
-            entityIconsGrid.findFirst(widget -> widget.entityType == entityType).ifPresent(
-                    widget -> widget.setHidden(true));
-            
-            if (entityIconsGrid.getSelected().isPresent()) {
-                SelectorWidget hovered = entityIconsGrid.getSelected().get();
-                if (hovered.entityType == entityType) {
-                    entityIconsGrid.setSelected(Optional.empty());
+        getEntriesUiData(minecraft.player).ifPresent(playerData -> {
+            if (playerData.hideGELifeform(entityType)) {
+                entityIconsGrid.findFirst(widget -> widget.entityType == entityType).ifPresent(
+                        widget -> widget.setHidden(true));
+                
+                if (entityIconsGrid.getSelected().isPresent()) {
+                    SelectorWidget hovered = entityIconsGrid.getSelected().get();
+                    if (hovered.entityType == entityType) {
+                        entityIconsGrid.setSelected(Optional.empty());
+                    }
                 }
             }
-        }
+        });
+    }
+    
+    public void hideEntry(SelectorWidget entityTypeWidget) {
+        getEntriesUiData(minecraft.player).ifPresent(playerData -> {
+            if (playerData.hideGELifeform(entityTypeWidget.entityType)) {
+                entityTypeWidget.setHidden(true);
+                
+                if (entityIconsGrid.getSelected().isPresent()) {
+                    SelectorWidget hovered = entityIconsGrid.getSelected().get();
+                    if (hovered == entityTypeWidget) {
+                        entityIconsGrid.setSelected(Optional.empty());
+                    }
+                }
+            }
+        });
     }
     
     public void showEntry(EntityType<?> entityType) {
-        if (GoldExperienceChooseLifeform.hiddenEntriesTmp.contains(entityType)) {
-            GoldExperienceChooseLifeform.hiddenEntriesTmp.remove(entityType);
-            entityIconsGrid.findFirst(widget -> widget.entityType == entityType).ifPresent(
-                    widget -> widget.setHidden(false));
-            
-            entityIconsGrid.setSelected(entityIconsGrid.findFirst(widget -> widget.entityType == entityType));
-        }
+        getEntriesUiData(minecraft.player).ifPresent(playerData -> {
+            if (playerData.showGELifeform(entityType)) {
+                entityIconsGrid.findFirst(widget -> widget.entityType == entityType).ifPresent(
+                        widget -> widget.setHidden(false));
+                
+                entityIconsGrid.setSelected(entityIconsGrid.findFirst(widget -> widget.entityType == entityType));
+            }
+        });
+    }
+    
+    public void showEntry(SelectorWidget entityTypeWidget) {
+        getEntriesUiData(minecraft.player).ifPresent(playerData -> {
+            if (playerData.showGELifeform(entityTypeWidget.entityType)) {
+                entityTypeWidget.setHidden(false);
+            }
+        });
     }
     
     public void switchEntryHide(EntityType<?> entityType) {
-        if (GoldExperienceChooseLifeform.hiddenEntriesTmp.contains(entityType)) {
-            showEntry(entityType);
-        }
-        else {
-            hideEntry(entityType);
-        }
+        getEntriesUiData(minecraft.player).ifPresent(playerData -> {
+            if (playerData.isGELifeformHidden(entityType)) {
+                showEntry(entityType);
+            }
+            else {
+                hideEntry(entityType);
+            }
+        });
+    }
+    
+    static Optional<PlayerUtilCap> getEntriesUiData(PlayerEntity clientPlayer) {
+        return clientPlayer.getCapability(PlayerUtilCapProvider.CAPABILITY).resolve();
     }
     
     @Override
@@ -573,7 +612,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
                 mc.getTextureManager().bind(LIFEFORM_CHOOSE_LOCATION);
                 blit(matrixStack, x, y, 24, 0, 24, 24, 128, 128);
             }
-            else if (this.entityType == GoldExperienceChooseLifeform.chosenTypeTmp) {
+            else if (this.entityType == chosenLifeformCache) {
                 mc.getTextureManager().bind(LIFEFORM_CHOOSE_LOCATION);
                 blit(matrixStack, x, y, 0, 24, 24, 24, 128, 128);
             }

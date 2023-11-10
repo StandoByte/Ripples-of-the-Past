@@ -1,8 +1,5 @@
 package com.github.standobyte.jojo.action.stand;
 
-import java.util.HashSet;
-import java.util.Set;
-
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.util.mc.EntityTypeToInstance;
 
@@ -30,8 +27,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistries;
 
 public class GoldExperienceChooseLifeform extends StandAction {
-    public static EntityType<?> chosenTypeTmp = null;
-    public static Set<EntityType<?>> hiddenEntriesTmp = new HashSet<>();
     
     public GoldExperienceChooseLifeform(StandAction.Builder builder) {
         super(builder);

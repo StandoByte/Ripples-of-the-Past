@@ -4,6 +4,8 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.GETransformationEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.network.NetworkUtil;
@@ -17,6 +19,7 @@ import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.monster.SlimeEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
@@ -35,7 +38,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
     
     @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
-        if (user.level.isClientSide() && GoldExperienceChooseLifeform.chosenTypeTmp == null) {
+        if (user.level.isClientSide() && getChosenEntityType(ClientUtil.getClientPlayer()) == null) {
             return ActionConditionResult.NEGATIVE;
         }
         
@@ -44,8 +47,15 @@ public class GoldExperienceCreateLifeform extends StandAction {
     
     @Override
     public void clWriteExtraData(PacketBuffer buf) {
-        NetworkUtil.writeOptionally(buf, GoldExperienceChooseLifeform.chosenTypeTmp, 
+        NetworkUtil.writeOptionally(buf, 
+                getChosenEntityType(ClientUtil.getClientPlayer()), 
                 type -> buf.writeRegistryId(type));
+    }
+    
+    @Nullable
+    private static EntityType<?> getChosenEntityType(PlayerEntity player) {
+        return player.getCapability(PlayerUtilCapProvider.CAPABILITY).resolve()
+                .map(playerData -> playerData.getGEChosenLifeformType()).orElse(null);
     }
     
     @SuppressWarnings("unchecked")
@@ -143,8 +153,9 @@ public class GoldExperienceCreateLifeform extends StandAction {
     
     @Override
     public IFormattableTextComponent getTranslatedName(IStandPower power, String key) {
-        if (GoldExperienceChooseLifeform.chosenTypeTmp != null) {
-            return new TranslationTextComponent(key + ".param", GoldExperienceChooseLifeform.chosenTypeTmp.getDescription());
+        EntityType<?> chosenEntityType = getChosenEntityType(ClientUtil.getClientPlayer());
+        if (chosenEntityType != null) {
+            return new TranslationTextComponent(key + ".param", chosenEntityType.getDescription());
         }
         else {
             return super.getTranslatedName(power, key);

@@ -7,7 +7,6 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.action.stand.GoldExperienceChooseLifeform;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.google.common.collect.Streams;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -51,7 +50,8 @@ public class FilterList {
                 (entityType, i) -> new Entry(entityType, 
                         new LifeformFilterListCheckbox(xRight - CHECKBOX_WIDTH, -1, CHECKBOX_WIDTH, CHECKBOX_HEIGHT, 
                                 entityType.getDescription(), 
-                                () -> !GoldExperienceChooseLifeform.hiddenEntriesTmp.contains(entityType),
+                                () -> ChooseLifeformScreen.getEntriesUiData(ClientUtil.getClientPlayer()).map(
+                                        cap -> !cap.isGELifeformHidden(entityType)).orElse(false),
                                 stateBeingSet -> {
                                     if (stateBeingSet) {
                                         screen.showEntry(entityType);
