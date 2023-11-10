@@ -10,6 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.ISound.AttenuationType;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.Timer;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -160,7 +161,10 @@ public class ClientTimeStopHandler implements ITicking {
     }
     
     public boolean shouldCancelSound(ISound sound) {
-        return isTimeStopped && !canSeeInStoppedTime && sound != null && sound.getAttenuation() == AttenuationType.LINEAR;
+        return isTimeStopped && sound != null && sound.getAttenuation() == AttenuationType.LINEAR && (
+                !canSeeInStoppedTime
+                || sound.getSource() == SoundCategory.WEATHER
+                || sound.getSource() == SoundCategory.BLOCKS);
     }
     
     
