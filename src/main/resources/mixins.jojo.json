@@ -1,0 +1,11 @@
+{
+  "package": "com.github.standobyte.jojo.mixin",
+  "refmap": "mixins.jojo.refmap.json",
+  "mixins": [
+    "ServerChunkProviderMixin"
+  ],
+  "client": [
+    "client.ParticleManagerMixin",
+    "client.TextureManagerMixin"
+  ]
+}

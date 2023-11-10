@@ -33,8 +33,6 @@ import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.model.ModelBakery;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.model.RenderMaterial;
-import net.minecraft.client.renderer.texture.ITickable;
-import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.shader.Shader;
 import net.minecraft.client.shader.ShaderGroup;
@@ -185,27 +183,6 @@ public class ClientReflection {
     private static final Field MODEL_BAKERY_UNREFERENCED_TEXTURES = ObfuscationReflectionHelper.findField(ModelBakery.class, "field_177602_b");
     public static Set<RenderMaterial> getModelBakeryUnreferencedTextures() {
         return ReflectionUtil.getFieldValue(MODEL_BAKERY_UNREFERENCED_TEXTURES, null);
-    }
-
-    
-    private static final Field TEXTURE_MANAGER_TICKABLE_TEXTURES = ObfuscationReflectionHelper.findField(TextureManager.class, "field_110583_b");
-    public static Set<ITickable> getTickableTextures(TextureManager textureManager) {
-        return ReflectionUtil.getFieldValue(TEXTURE_MANAGER_TICKABLE_TEXTURES, textureManager);
-    }
-    
-    public static void setTickableTextures(TextureManager textureManager, Set<ITickable> textures) {
-        ReflectionUtil.setFieldValue(TEXTURE_MANAGER_TICKABLE_TEXTURES, textureManager, textures);
-    }
-    
-    
-    private static final Field MINECRAFT_PARTICLE_ENGINE = ObfuscationReflectionHelper.findField(Minecraft.class, "field_71452_i");
-    public static void setParticleEngine(Minecraft mc, ParticleManager particleEngine) {
-        ReflectionUtil.setFieldValue(MINECRAFT_PARTICLE_ENGINE, mc, particleEngine);
-    }
-    
-    private static final Field PARTICLE_MANAGER_TEXTURE_MANAGER = ObfuscationReflectionHelper.findField(ParticleManager.class, "field_78877_c");
-    public static void setTextureManager(ParticleManager particleManager, TextureManager textureManager) {
-        ReflectionUtil.setFieldValue(PARTICLE_MANAGER_TEXTURE_MANAGER, particleManager, textureManager);
     }
     
     private static final Field MINECRAFT_MOUSE_HANDLER = ObfuscationReflectionHelper.findField(Minecraft.class, "field_71417_B");
