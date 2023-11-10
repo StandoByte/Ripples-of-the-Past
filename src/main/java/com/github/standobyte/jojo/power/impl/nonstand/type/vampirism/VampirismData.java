@@ -80,10 +80,10 @@ public class VampirismData extends TypeSpecificData {
 
     public void setVampireHamonUser(boolean vampireHamonUser, Optional<HamonData> prevHamon) {
         if (!this.vampireHamonUser == vampireHamonUser) {
-            serverPlayer.ifPresent(player -> {
-                PacketManager.sendToClientsTrackingAndSelf(TrVampirismDataPacket.wasHamonUser(
-                        player.getId(), vampireHamonUser), player);
-            });
+            LivingEntity user = power.getUser();
+            if (!user.level.isClientSide()) {
+                PacketManager.sendToClientsTrackingAndSelf(TrVampirismDataPacket.wasHamonUser(user.getId(), vampireHamonUser), user);
+            }
         }
         this.vampireHamonUser = vampireHamonUser;
         if (vampireHamonUser && prevHamon.isPresent()) {
@@ -122,10 +122,10 @@ public class VampirismData extends TypeSpecificData {
     
     public void setVampireFullPower(boolean vampireFullPower) {
         if (this.vampireFullPower != vampireFullPower) {
-            serverPlayer.ifPresent(player -> {
-                PacketManager.sendToClientsTrackingAndSelf(TrVampirismDataPacket.atFullPower(
-                        player.getId(), vampireFullPower), player);
-            });
+            LivingEntity user = power.getUser();
+            if (!user.level.isClientSide()) {
+                PacketManager.sendToClientsTrackingAndSelf(TrVampirismDataPacket.atFullPower(user.getId(), vampireFullPower), user);
+            }
         }
         this.vampireFullPower = vampireFullPower;
     }
@@ -180,10 +180,10 @@ public class VampirismData extends TypeSpecificData {
     
     public void setCuringTicks(int ticks) {
         if (this.curingTicks != ticks) {
-            serverPlayer.ifPresent(player -> {
-                PacketManager.sendToClientsTrackingAndSelf(TrVampirismDataPacket.curingTicks(
-                        player.getId(), ticks), player);
-            });
+            LivingEntity user = power.getUser();
+            if (!user.level.isClientSide()) {
+                PacketManager.sendToClientsTrackingAndSelf(TrVampirismDataPacket.curingTicks(user.getId(), ticks), user);
+            }
             this.curingTicks = ticks;
         }
     }

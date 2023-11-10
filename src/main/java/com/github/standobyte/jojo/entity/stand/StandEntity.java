@@ -869,7 +869,8 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         zRatio = event.getRatioZ();
         strength *= 1.0F - (float) getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
         if (isStandBlocking() && canBlockOrParryFromAngle(position().add(new Vector3d(xRatio, 0, zRatio)))) {
-            strength *= 0.2F;
+            double durabilityStat = getDurability();
+            strength *= StandStatFormulas.getBlockingKnockbackMult(durabilityStat);
         }
         
         if (strength > 0) {
@@ -2220,6 +2221,8 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         }
     }
     
+    public void onKnivesThrow(World world, PlayerEntity playerUser, ItemStack knivesStack, int knivesThrown) {}
+    
     @Override
     public void onRemovedFromWorld() {
         super.onRemovedFromWorld();
@@ -2242,6 +2245,23 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         return null;
     }
     // FIXME save the items in nbt
+    
+    
+    
+    private boolean noFireAnimFrame = false;
+    @Override
+    public boolean displayFireAnimation() {
+        if (noFireAnimFrame) {
+            noFireAnimFrame = false;
+            return false;
+        }
+        
+        return super.displayFireAnimation();
+    }
+    
+    public void setNoFireAnimFrame() {
+        this.noFireAnimFrame = true;
+    }
 
 
 

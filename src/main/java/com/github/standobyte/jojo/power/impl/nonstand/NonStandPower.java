@@ -83,17 +83,17 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
         if (isUserCreative()) {
             energy = getMaxEnergy();
         }
-        serverPlayerUser.ifPresent(player -> {
-            PacketManager.sendToClientsTrackingAndSelf(new TrTypeNonStandPowerPacket(player.getId(), getType()), player);
-        });
+        if (user != null && !user.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(new TrTypeNonStandPowerPacket(user.getId(), getType()), user);
+        }
     }
     
     @Override
     public boolean clear() {
         if (super.clear()) {
-            serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClientsTrackingAndSelf(TrTypeNonStandPowerPacket.noPowerType(player.getId()), player);
-            });
+            if (user != null && !user.level.isClientSide()) {
+                PacketManager.sendToClientsTrackingAndSelf(TrTypeNonStandPowerPacket.noPowerType(user.getId()), user);
+            }
             type.onClear(this);
             NonStandPowerType<?> clearedType = this.type;
             setType(null);
@@ -171,12 +171,11 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     @Override
     public void setEnergy(float amount) {
         amount = MathHelper.clamp(amount, 0, getMaxEnergy());
-        boolean send = this.energy != amount;
-        this.energy = amount;
-        if (send) {
-            serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClientsTrackingAndSelf(new TrEnergyPacket(player.getId(), getEnergy()), player);
-            });
+        if (this.energy != amount) {
+            this.energy = amount;
+            if (user != null && !user.level.isClientSide()) {
+                PacketManager.sendToClientsTrackingAndSelf(new TrEnergyPacket(user.getId(), getEnergy()), user);
+            }
         }
     }
     

@@ -149,7 +149,7 @@ public class StandStatsConfig extends JsonDataConfig {
                 i++;
             }
             catch (JsonWriteException e) {
-                LOGGER.error("Couldn't save default stand stats to {}", e.jsonFilePath, e.getCause());
+                IDataConfig.LOGGER.error("Couldn't save default stand stats to {}", e.jsonFilePath, e.getCause());
                 throw e.getCause();
             }
         }
@@ -166,13 +166,13 @@ public class StandStatsConfig extends JsonDataConfig {
     private void addReadmeFile(MinecraftServer server, Path destPath) {
         try (InputStream inputStream = getReadmeSourcePath(MCUtil.getLanguageCode(server))) {
             if (inputStream == null) {
-                LOGGER.error("Couldn't find readme file for Stand stats");
+                IDataConfig.LOGGER.error("Couldn't find readme file for Stand stats");
             }
             File dataPackFile = destPath.toFile();
             Files.asByteSink(dataPackFile).writeFrom(inputStream);
             inputStream.close();
         } catch (IOException e) {
-            LOGGER.error("Couldn't write readme file for Stand stats", e);
+            IDataConfig.LOGGER.error("Couldn't write readme file for Stand stats", e);
         }
     }
     
@@ -206,7 +206,7 @@ public class StandStatsConfig extends JsonDataConfig {
                         // FIXME can i also update all summoned stand entities' data parameters?
                     }
                     catch (IllegalArgumentException | JsonParseException jsonparseexception) {
-                        LOGGER.error("Parsing error loading custom stand stats {}: {}", location, jsonparseexception.getMessage());
+                        IDataConfig.LOGGER.error("Parsing error loading custom stand stats {}: {}", location, jsonparseexception.getMessage());
                     }
                 }
             }

@@ -4,19 +4,16 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.vector.Vector3d;
 
+@Deprecated
+/**
+ * @deprecated use the TimeStopInstant(StandAction.Builder, Supplier<TimeStop>, Supplier<SoundEvent>, true) constructor
+ */
 public class TheWorldTimeStopInstant extends TimeStopInstant {
 
     public TheWorldTimeStopInstant(StandAction.Builder builder, 
             @Nonnull Supplier<TimeStop> baseTimeStopAction, @Nonnull Supplier<SoundEvent> blinkSound) {
-        super(builder, baseTimeStopAction, blinkSound);
-    }
-    
-    @Override
-    protected Vector3d getEntityTargetTeleportPos(Entity user, Entity target) {
-        return target.position().subtract(target.getLookAngle().scale(target.getBbWidth() + user.getBbWidth()));
+        super(builder, baseTimeStopAction, blinkSound, true);
     }
 }

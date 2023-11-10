@@ -475,8 +475,6 @@
  "jojo.config.client.menacingParticles.tooltip": "使玩家在静止的情况下时漂浮ゴゴゴゴゴ粒子",
  "jojo.config.client.timeStopFreezesVisuals": "时停视觉效果",
  "jojo.config.client.timeStopFreezesVisuals.tooltip": "在时间停止期间粒子、方块动画和雨/雪会被暂停，这是实验特性",
- "jojo.config.client.standStatsTranslucency": "替身面板",
- "jojo.config.client.standStatsTranslucency.tooltip": "菜单中的替身数据面板，如果设置为 0，则不会显示",
  "stand.unknown": "未知的替身: %s",
  "commands.stand.give.success.single": "已将 %s 给于 %s ",
  "commands.stand.give.success.multiple": "已将 %s 给与玩家 %s",
