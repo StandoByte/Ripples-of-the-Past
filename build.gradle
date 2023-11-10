@@ -92,6 +92,7 @@ dependencies {
     annotationProcessor 'org.spongepowered:mixin:0.8.4:processor'
     implementation fg.deobf("dev.kosmx.player-anim:player-animation-lib-forge:${playeranim_version}")
     implementation fg.deobf("io.github.kosmx.bendy-lib:bendy-lib-forge:${bendylib_version}")
+    compileOnly 'org.jetbrains:annotations:23.0.0'
 }
 
 jar {
