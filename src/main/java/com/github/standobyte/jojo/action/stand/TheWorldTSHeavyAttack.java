@@ -43,13 +43,16 @@ import net.minecraft.world.World;
 
 public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStandPunch {
     public static final StandPose TS_PUNCH_POSE = new StandPose("TS_PUNCH");
-    private final Supplier<StandEntityHeavyAttack> theWorldHeavyAttack;
     private final Supplier<TimeStopInstant> theWorldTimeStopBlink;
-
+    
+    @Deprecated
     public TheWorldTSHeavyAttack(StandEntityAction.Builder builder, 
             Supplier<StandEntityHeavyAttack> theWorldHeavyAttack, Supplier<TimeStopInstant> theWorldTimeStopBlink) {
+        this(builder, theWorldTimeStopBlink);
+    }
+
+    public TheWorldTSHeavyAttack(StandEntityAction.Builder builder, Supplier<TimeStopInstant> theWorldTimeStopBlink) {
         super(builder);
-        this.theWorldHeavyAttack = theWorldHeavyAttack;
         this.theWorldTimeStopBlink = theWorldTimeStopBlink;
     }
     
@@ -162,11 +165,6 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
     
     private boolean doesBackshot(IStandPower standPower) {
         return standPower.getUser().isShiftKeyDown();
-    }
-    
-    @Override
-    public float getStaminaCost(IStandPower stand) {
-        return theWorldHeavyAttack.get().getStaminaCost(stand);
     }
     
     @Override
