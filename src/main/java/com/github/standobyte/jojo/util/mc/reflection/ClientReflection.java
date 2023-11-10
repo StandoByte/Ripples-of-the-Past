@@ -195,17 +195,17 @@ public class ClientReflection {
     
     private static final Field GAME_RENDERER_EFFECT_ACTIVE = ObfuscationReflectionHelper.findField(GameRenderer.class, "field_175083_ad");
     public static void setEffectActive(GameRenderer gameRenderer, boolean effectActive) {
-        ReflectionUtil.setFieldValue(GAME_RENDERER_EFFECT_ACTIVE, gameRenderer, effectActive);
+        ReflectionUtil.setBooleanFieldValue(GAME_RENDERER_EFFECT_ACTIVE, gameRenderer, effectActive);
     }
     
     private static final Field GAME_RENDERER_EFFECT_INDEX = ObfuscationReflectionHelper.findField(GameRenderer.class, "field_147713_ae");
     public static void setEffectIndex(GameRenderer gameRenderer, int effectIndex) {
-        ReflectionUtil.setFieldValue(GAME_RENDERER_EFFECT_INDEX, gameRenderer, effectIndex);
+        ReflectionUtil.setIntFieldValue(GAME_RENDERER_EFFECT_INDEX, gameRenderer, effectIndex);
     }
     
     
     private static final Field CLIENT_PLAYER_ENTITY_HANDS_BUSY = ObfuscationReflectionHelper.findField(ClientPlayerEntity.class, "field_184844_co");
     public static void setHandsBusy(ClientPlayerEntity player, boolean handsBusy) {
-        ReflectionUtil.setFieldValue(CLIENT_PLAYER_ENTITY_HANDS_BUSY, player, handsBusy);
+        ReflectionUtil.setBooleanFieldValue(CLIENT_PLAYER_ENTITY_HANDS_BUSY, player, handsBusy);
     }
 }
