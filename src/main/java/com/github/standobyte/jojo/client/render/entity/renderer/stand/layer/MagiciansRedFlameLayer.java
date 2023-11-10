@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.client.render.entity.renderer.stand.layer;
 
 import com.github.standobyte.jojo.client.render.entity.model.stand.MagiciansRedFlameLayerModel;
-import com.github.standobyte.jojo.client.render.entity.model.stand.MagiciansRedModel;
+import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.MagiciansRedRenderer;
 import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
 
@@ -9,7 +9,7 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.ResourceLocation;
 
-public class MagiciansRedFlameLayer extends StandModelLayerRenderer<MagiciansRedEntity, MagiciansRedModel> {
+public class MagiciansRedFlameLayer extends StandModelLayerRenderer<MagiciansRedEntity, StandEntityModel<MagiciansRedEntity>> {
 
     public MagiciansRedFlameLayer(MagiciansRedRenderer entityRenderer) {
         super(entityRenderer, new MagiciansRedFlameLayerModel());

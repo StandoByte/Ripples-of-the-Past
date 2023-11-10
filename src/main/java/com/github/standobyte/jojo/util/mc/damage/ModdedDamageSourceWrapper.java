@@ -12,9 +12,11 @@ import net.minecraft.util.text.ITextComponent;
 public class ModdedDamageSourceWrapper extends DamageSource implements IModdedDamageSource {
     private final DamageSource dmgSource;
     private float knockbackFactor = 1;
+    private boolean stackKnockback = false;
     private boolean bypassInvulTicks = false;
     private boolean preventDamagingArmor = false;
     protected boolean showStandUserName;
+    protected boolean canHurtStands;
 
     public ModdedDamageSourceWrapper(DamageSource dmgSource) {
         super(dmgSource.msgId);
@@ -34,6 +36,19 @@ public class ModdedDamageSourceWrapper extends DamageSource implements IModdedDa
         return knockbackFactor;
     }
     
+    
+    @Override
+    public ModdedDamageSourceWrapper setStackKnockback() {
+        this.stackKnockback = true;
+        return this;
+    }
+    
+    @Override
+    public boolean doesStackKnockback() {
+        return stackKnockback;
+    }
+    
+    
     @Override
     public ModdedDamageSourceWrapper setBypassInvulTicksInEvent() {
         this.bypassInvulTicks = true;
@@ -45,6 +60,7 @@ public class ModdedDamageSourceWrapper extends DamageSource implements IModdedDa
         return bypassInvulTicks;
     }
     
+    
     @Override
     public ModdedDamageSourceWrapper setPreventDamagingArmor() {
         this.preventDamagingArmor = true;
@@ -54,6 +70,17 @@ public class ModdedDamageSourceWrapper extends DamageSource implements IModdedDa
     @Override
     public boolean preventsDamagingArmor() {
         return preventDamagingArmor;
+    }
+    
+    
+    public ModdedDamageSourceWrapper setCanHurtStands() {
+        this.canHurtStands = true;
+        return this;
+    }
+    
+    @Override
+    public boolean canHurtStands() {
+        return canHurtStands;
     }
     
     

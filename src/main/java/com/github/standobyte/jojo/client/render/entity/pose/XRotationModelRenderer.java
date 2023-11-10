@@ -9,7 +9,7 @@ import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
 
 @Deprecated
-// This type needs to exist to not break previously made Stand addonss
+// This type needs to exist to not break previously made Stand addons
 // TODO: delete in v0.3
 public class XRotationModelRenderer extends ModelRenderer {
     /** @deprecated use {@link StandEntityModel#setSecondXRot(ModelRenderer, float)} */

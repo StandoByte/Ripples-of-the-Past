@@ -518,8 +518,6 @@
   "jojo.config.client.timeStopFreezesVisuals.tooltip": "Habilite partículas, bloqueie animações de textura e chuva/neve sendo congelada durante a parada do tempo. Recurso experimental.",
   "jojo.config.client.timeStopAnimation": "Animação de parada de tempo",
   "jojo.config.client.timeStopAnimation.tooltip": "Ativa o efeito visual no início da parada de tempo quando sua duração é de 5 segundos ou mais.",
-  "jojo.config.client.standStatsTranslucency": "Translucidez das estatísticas do Stand",
-  "jojo.config.client.standStatsTranslucency.tooltip": "Translucidez do hexágono de estatísticas do Stand no menu de pausa. Se definido como 0, não aparecerá.",
   
 
   "stand.unknown": "Unknown Stand: %s",
