@@ -54,7 +54,7 @@ public class FilterList {
                                         cap -> !cap.isGELifeformHidden(entityType)).orElse(false),
                                 stateBeingSet -> {
                                     if (stateBeingSet) {
-                                        screen.showEntry(entityType);
+                                        screen.showEntry(entityType, true);
                                     }
                                     else {
                                         screen.hideEntry(entityType);

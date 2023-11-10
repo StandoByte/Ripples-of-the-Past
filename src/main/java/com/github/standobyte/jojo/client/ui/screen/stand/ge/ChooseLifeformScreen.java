@@ -108,7 +108,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
                     Predicate<SelectorWidget> filter = entityIconsGrid.getFilter();
                     entityIconsGrid.forEach(widget -> {
                         if (filter == null || filter.test(widget)) {
-                            hideEntry(widget);
+                            showEntry(widget, false);
                         }
                     });
                 }, ClientUtil.buttonMessageTooltip(this), new TranslationTextComponent("jojo.ge_lifeform.show_all")));
@@ -118,7 +118,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
                     Predicate<SelectorWidget> filter = entityIconsGrid.getFilter();
                     entityIconsGrid.forEach(widget -> {
                         if (filter == null || filter.test(widget)) {
-                            showEntry(widget);
+                            hideEntry(widget);
                         }
                     });
                 }, ClientUtil.buttonMessageTooltip(this), new TranslationTextComponent("jojo.ge_lifeform.hide_all")));
@@ -412,7 +412,14 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
                 saveMousePos((int) mouseX, (int) mouseY);
                 return true;
             case RIGHT:
-                switchEntryHide(hovered.entityType);
+                getEntriesUiData(minecraft.player).ifPresent(playerData -> {
+                    if (playerData.isGELifeformHidden(hovered.entityType)) {
+                        showEntry(hovered, false);
+                    }
+                    else {
+                        hideEntry(hovered);
+                    }
+                });
                 return true;
             default:
                 break;
@@ -489,19 +496,8 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     }
     
     public void hideEntry(EntityType<?> entityType) {
-        getEntriesUiData(minecraft.player).ifPresent(playerData -> {
-            if (playerData.hideGELifeform(entityType)) {
-                entityIconsGrid.findFirst(widget -> widget.entityType == entityType).ifPresent(
-                        widget -> widget.setHidden(true));
-                
-                if (entityIconsGrid.getSelected().isPresent()) {
-                    SelectorWidget hovered = entityIconsGrid.getSelected().get();
-                    if (hovered.entityType == entityType) {
-                        entityIconsGrid.setSelected(Optional.empty());
-                    }
-                }
-            }
-        });
+        entityIconsGrid.findFirst(widget -> widget.entityType == entityType).ifPresent(
+                widget -> hideEntry(widget));
     }
     
     public void hideEntry(SelectorWidget entityTypeWidget) {
@@ -519,32 +515,18 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         });
     }
     
-    public void showEntry(EntityType<?> entityType) {
-        getEntriesUiData(minecraft.player).ifPresent(playerData -> {
-            if (playerData.showGELifeform(entityType)) {
-                entityIconsGrid.findFirst(widget -> widget.entityType == entityType).ifPresent(
-                        widget -> widget.setHidden(false));
-                
-                entityIconsGrid.setSelected(entityIconsGrid.findFirst(widget -> widget.entityType == entityType));
-            }
-        });
+    public void showEntry(EntityType<?> entityType, boolean select) {
+        entityIconsGrid.findFirst(widget -> widget.entityType == entityType).ifPresent(
+                widget -> showEntry(widget, select));
     }
     
-    public void showEntry(SelectorWidget entityTypeWidget) {
+    public void showEntry(SelectorWidget entityTypeWidget, boolean select) {
         getEntriesUiData(minecraft.player).ifPresent(playerData -> {
             if (playerData.showGELifeform(entityTypeWidget.entityType)) {
                 entityTypeWidget.setHidden(false);
-            }
-        });
-    }
-    
-    public void switchEntryHide(EntityType<?> entityType) {
-        getEntriesUiData(minecraft.player).ifPresent(playerData -> {
-            if (playerData.isGELifeformHidden(entityType)) {
-                showEntry(entityType);
-            }
-            else {
-                hideEntry(entityType);
+                if (select) {
+                    entityIconsGrid.setSelected(entityTypeWidget);
+                }
             }
         });
     }
