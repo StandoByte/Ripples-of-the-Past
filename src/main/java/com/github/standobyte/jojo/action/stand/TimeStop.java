@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
@@ -190,8 +191,8 @@ public class TimeStop extends StandAction {
         private Supplier<SoundEvent> timeResumeVoiceLine = () -> null;
         private Supplier<SoundEvent> timeManualResumeVoiceLine = () -> null;
         private Supplier<SoundEvent> timeResumeSound = () -> null;
-        private ResourceLocation shaderWithAnim = null;
-        private ResourceLocation shaderOld = null;
+        private ResourceLocation shaderWithAnim = new ResourceLocation(JojoMod.MOD_ID, "shaders/post/time_stop_tw.json");
+        private ResourceLocation shaderOld = new ResourceLocation(JojoMod.MOD_ID, "shaders/post/time_stop_tw_old.json");
         
         public Builder voiceLineWithStandSummoned(Supplier<SoundEvent> voiceLine) {
             this.voiceLineWithStandSummoned = voiceLine;
