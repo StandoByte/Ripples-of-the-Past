@@ -234,7 +234,7 @@ public class ClientReflection {
      * Doesn't check the conflict context and Shift/Ctrl/... modifiers
      */
     public static boolean isDownFieldOnly(KeyBinding key) {
-        return ReflectionUtil.getFieldValue(KEY_BINDING_IS_DOWN, key);
+        return ReflectionUtil.getBooleanFieldValue(KEY_BINDING_IS_DOWN, key);
     }
 
     private static final Field KEY_BINDING_ALL_MAP = ObfuscationReflectionHelper.findField(KeyBinding.class, "field_74516_a");
@@ -246,10 +246,10 @@ public class ClientReflection {
 
     private static final Field KEY_BINDING_CLICK_COUNT = ObfuscationReflectionHelper.findField(KeyBinding.class, "field_151474_i");
     public static int getClickCount(KeyBinding key) {
-        return ReflectionUtil.getFieldValue(KEY_BINDING_CLICK_COUNT, key);
+        return ReflectionUtil.getIntFieldValue(KEY_BINDING_CLICK_COUNT, key);
     }
     
     public static void setClickCount(KeyBinding key, int clickCount) {
-        ReflectionUtil.setFieldValue(KEY_BINDING_CLICK_COUNT, key, clickCount);
+        ReflectionUtil.setIntFieldValue(KEY_BINDING_CLICK_COUNT, key, clickCount);
     }
 }
