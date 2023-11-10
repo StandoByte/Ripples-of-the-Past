@@ -107,8 +107,6 @@ public class ClientTimeStopHandler implements ITicking {
         }
     }
     
-    private final Map<ClientWorld, Pair<IWeatherRenderHandler, IWeatherParticleRenderHandler>> prevWeatherRender = new HashMap<>();
-    private final TimeStopWeatherHandler timeStopWeatherHandler = new TimeStopWeatherHandler();
     private Set<ITickable> prevTickableTextures = new HashSet<>();
     private void setTimeStoppedState(boolean isTimeStopped) {
         if (this.isTimeStopped != isTimeStopped) {
@@ -120,28 +118,13 @@ public class ClientTimeStopHandler implements ITicking {
             
             if (JojoModConfig.CLIENT.timeStopFreezesVisuals.get()) {
                 if (isTimeStopped) {
-                    if (mc.level != null) {
-                        DimensionRenderInfo effects = mc.level.effects();
-                        prevWeatherRender.put(mc.level, Pair.of(effects.getWeatherRenderHandler(), effects.getWeatherParticleRenderHandler()));
-                        effects.setWeatherRenderHandler(timeStopWeatherHandler);
-                        effects.setWeatherParticleRenderHandler(timeStopWeatherHandler);
-    
-                        TextureManager textureManager = mc.getTextureManager();
-                        prevTickableTextures = ClientReflection.getTickableTextures(textureManager);
-                        ClientReflection.setTickableTextures(textureManager, new HashSet<>());
-                        
-                        ParticleManagerWrapperTS.onTimeStopStart(mc);
-                    }
+                    TextureManager textureManager = mc.getTextureManager();
+                    prevTickableTextures = ClientReflection.getTickableTextures(textureManager);
+                    ClientReflection.setTickableTextures(textureManager, new HashSet<>());
+                    
+                    ParticleManagerWrapperTS.onTimeStopStart(mc);
                 }
                 else {
-                    if (mc.level != null && prevWeatherRender.containsKey(mc.level)) {
-                        timeStopWeatherHandler.onTimeStopEnd();
-                        Pair<IWeatherRenderHandler, IWeatherParticleRenderHandler> prevEffects = prevWeatherRender.get(mc.level);
-                        DimensionRenderInfo effects = mc.level.effects();
-                        effects.setWeatherRenderHandler(prevEffects.getLeft());
-                        effects.setWeatherParticleRenderHandler(prevEffects.getRight());
-                    }
-    
                     TextureManager textureManager = mc.getTextureManager();
                     Set<ITickable> allTickableTextures = Util.make(new HashSet<>(), set -> {
                         set.addAll(prevTickableTextures);
@@ -152,8 +135,33 @@ public class ClientTimeStopHandler implements ITicking {
     
                     ParticleManagerWrapperTS.onTimeStopEnd(mc);
                 }
+                
+                setWeatherStopped(isTimeStopped);
             }
             timeStopTicks = 0;
+        }
+    }
+    
+    
+    private boolean wasWeatherStopped = false;
+    private final Map<ClientWorld, Pair<IWeatherRenderHandler, IWeatherParticleRenderHandler>> prevWeatherRender = new HashMap<>();
+    private final TimeStopWeatherHandler timeStopWeatherHandler = new TimeStopWeatherHandler();
+    public void setWeatherStopped(boolean isStopped) {
+        if (wasWeatherStopped ^ isStopped && mc.level != null) {
+            wasWeatherStopped = isStopped;
+            if (isStopped) {
+                DimensionRenderInfo effects = mc.level.effects();
+                prevWeatherRender.put(mc.level, Pair.of(effects.getWeatherRenderHandler(), effects.getWeatherParticleRenderHandler()));
+                effects.setWeatherRenderHandler(timeStopWeatherHandler);
+                effects.setWeatherParticleRenderHandler(timeStopWeatherHandler);
+            }
+            else if (prevWeatherRender.containsKey(mc.level)) {
+                timeStopWeatherHandler.unfreeze();
+                Pair<IWeatherRenderHandler, IWeatherParticleRenderHandler> prevEffects = prevWeatherRender.get(mc.level);
+                DimensionRenderInfo effects = mc.level.effects();
+                effects.setWeatherRenderHandler(prevEffects.getLeft());
+                effects.setWeatherParticleRenderHandler(prevEffects.getRight());
+            }
         }
     }
     
