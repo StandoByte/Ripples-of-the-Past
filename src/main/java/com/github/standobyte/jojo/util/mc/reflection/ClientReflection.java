@@ -44,22 +44,22 @@ import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 public class ClientReflection {
     private static final Field FIRST_PERSON_RENDERER_MAIN_HAND_HEIGHT = ObfuscationReflectionHelper.findField(FirstPersonRenderer.class, "field_187469_f");
     public static float getMainHandHeight(FirstPersonRenderer renderer) {
-        return ReflectionUtil.getFieldValue(FIRST_PERSON_RENDERER_MAIN_HAND_HEIGHT, renderer);
+        return ReflectionUtil.getFloatFieldValue(FIRST_PERSON_RENDERER_MAIN_HAND_HEIGHT, renderer);
     }
 
     private static final Field FIRST_PERSON_RENDERER_O_MAIN_HAND_HEIGHT = ObfuscationReflectionHelper.findField(FirstPersonRenderer.class, "field_187470_g");
     public static float getMainHandHeightPrev(FirstPersonRenderer renderer) {
-        return ReflectionUtil.getFieldValue(FIRST_PERSON_RENDERER_O_MAIN_HAND_HEIGHT, renderer);
+        return ReflectionUtil.getFloatFieldValue(FIRST_PERSON_RENDERER_O_MAIN_HAND_HEIGHT, renderer);
     }
     
     private static final Field FIRST_PERSON_RENDERER_OFF_HAND_HEIGHT = ObfuscationReflectionHelper.findField(FirstPersonRenderer.class, "field_187471_h");
     public static float getOffHandHeight(FirstPersonRenderer renderer) {
-        return ReflectionUtil.getFieldValue(FIRST_PERSON_RENDERER_OFF_HAND_HEIGHT, renderer);
+        return ReflectionUtil.getFloatFieldValue(FIRST_PERSON_RENDERER_OFF_HAND_HEIGHT, renderer);
     }
 
     private static final Field FIRST_PERSON_RENDERER_O_OFF_HAND_HEIGHT = ObfuscationReflectionHelper.findField(FirstPersonRenderer.class, "field_187472_i");
     public static float getOffHandHeightPrev(FirstPersonRenderer renderer) {
-        return ReflectionUtil.getFieldValue(FIRST_PERSON_RENDERER_O_OFF_HAND_HEIGHT, renderer);
+        return ReflectionUtil.getFloatFieldValue(FIRST_PERSON_RENDERER_O_OFF_HAND_HEIGHT, renderer);
     }
 
     private static final Method FIRST_PERSON_RENDERER_RENDER_PLAYER_ARM = ObfuscationReflectionHelper.findMethod(FirstPersonRenderer.class, "func_228401_a_", 
@@ -141,7 +141,7 @@ public class ClientReflection {
 
     private static final Field ENTITY_RENDERER_SHADOW_RADIUS = ObfuscationReflectionHelper.findField(EntityRenderer.class, "field_76989_e");
     public static float getShadowRadius(EntityRenderer<?> renderer) {
-        return ReflectionUtil.getFieldValue(ENTITY_RENDERER_SHADOW_RADIUS, renderer);
+        return ReflectionUtil.getFloatFieldValue(ENTITY_RENDERER_SHADOW_RADIUS, renderer);
     }
 
     private static final Field LIVING_RENDERER_LAYERS = ObfuscationReflectionHelper.findField(LivingRenderer.class, "field_177097_h");
@@ -169,7 +169,7 @@ public class ClientReflection {
     
     private static final Field INGAME_MENU_SCREEN_SHOW_PAUSE_MENU = ObfuscationReflectionHelper.findField(IngameMenuScreen.class, "field_222813_a");
     public static boolean showsPauseMenu(IngameMenuScreen screen) {
-        return ReflectionUtil.getFieldValue(INGAME_MENU_SCREEN_SHOW_PAUSE_MENU, screen);
+        return ReflectionUtil.getBooleanFieldValue(INGAME_MENU_SCREEN_SHOW_PAUSE_MENU, screen);
     }
     
     
@@ -218,17 +218,17 @@ public class ClientReflection {
     
     private static final Field GAME_RENDERER_EFFECT_ACTIVE = ObfuscationReflectionHelper.findField(GameRenderer.class, "field_175083_ad");
     public static void setEffectActive(GameRenderer gameRenderer, boolean effectActive) {
-        ReflectionUtil.setFieldValue(GAME_RENDERER_EFFECT_ACTIVE, gameRenderer, effectActive);
+        ReflectionUtil.setBooleanFieldValue(GAME_RENDERER_EFFECT_ACTIVE, gameRenderer, effectActive);
     }
     
     private static final Field GAME_RENDERER_EFFECT_INDEX = ObfuscationReflectionHelper.findField(GameRenderer.class, "field_147713_ae");
     public static void setEffectIndex(GameRenderer gameRenderer, int effectIndex) {
-        ReflectionUtil.setFieldValue(GAME_RENDERER_EFFECT_INDEX, gameRenderer, effectIndex);
+        ReflectionUtil.setIntFieldValue(GAME_RENDERER_EFFECT_INDEX, gameRenderer, effectIndex);
     }
     
     
     private static final Field CLIENT_PLAYER_ENTITY_HANDS_BUSY = ObfuscationReflectionHelper.findField(ClientPlayerEntity.class, "field_184844_co");
     public static void setHandsBusy(ClientPlayerEntity player, boolean handsBusy) {
-        ReflectionUtil.setFieldValue(CLIENT_PLAYER_ENTITY_HANDS_BUSY, player, handsBusy);
+        ReflectionUtil.setBooleanFieldValue(CLIENT_PLAYER_ENTITY_HANDS_BUSY, player, handsBusy);
     }
 }
