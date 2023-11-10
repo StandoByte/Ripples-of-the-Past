@@ -2,6 +2,8 @@ package com.github.standobyte.jojo.action.stand;
 
 import java.util.function.Supplier;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
@@ -22,6 +24,7 @@ import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
+import com.github.standobyte.jojo.util.general.LazySupplier;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -30,6 +33,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -107,9 +111,9 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
                         if (target.getType() == TargetType.ENTITY) {
                             offset += target.getEntity().getBoundingBox().getXsize() / 2;
                         }
-                        boolean shift = JojoModUtil.useShiftVar(standPower.getUser());
+                        boolean backshot = doesBackshot(standPower);
                         Vector3d offsetFromTarget = aimingEntity.getEyePosition(1.0F).subtract(pos).normalize().scale(offset);
-                        if (shift) {
+                        if (backshot) {
                             offsetFromTarget = offsetFromTarget.reverse();
                         }
                         pos = pos.add(offsetFromTarget);
@@ -156,6 +160,10 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
         }
     }
     
+    private boolean doesBackshot(IStandPower standPower) {
+        return JojoModUtil.useShiftVar(standPower.getUser());
+    }
+    
     @Override
     public float getStaminaCost(IStandPower stand) {
         return theWorldHeavyAttack.get().getStaminaCost(stand);
@@ -176,6 +184,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
     public StandEntityPunch punchEntity(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
         double strength = stand.getAttackDamage();
         return new TheWorldTSHeavyPunch(stand, target, dmgSource)
+                .setVoiceLineOnKill(ModSounds.DIO_THIS_IS_THE_WORLD)
                 .damage(StandStatFormulas.getHeavyAttackDamage(strength))
                 .addKnockback(4)
                 .disableBlocking(1.0F)
@@ -225,19 +234,42 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
     }
     
     
+    private final LazySupplier<ResourceLocation> backshotTex = 
+            new LazySupplier<>(() -> makeIconVariant(this, "_back"));
+    @Override
+    public ResourceLocation getIconTexturePath(@Nullable IStandPower power) {
+        if (power != null && doesBackshot(power)) {
+            return backshotTex.get();
+        }
+        else {
+            return super.getIconTexturePath(power);
+        }
+    }
+    
+    
+    
     
     public static class TheWorldTSHeavyPunch extends HeavyPunchInstance {
+        private Supplier<SoundEvent> voiceLineOnKill = () -> null;
 
         public TheWorldTSHeavyPunch(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
             super(stand, target, dmgSource);
+        }
+        
+        public TheWorldTSHeavyPunch setVoiceLineOnKill(Supplier<SoundEvent> sound) {
+            this.voiceLineOnKill = sound != null ? sound : () -> null;
+            return this;
         }
 
         @Override
         protected void afterAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, StandEntityTask task, boolean hurt, boolean killed) {
             if (killed) {
-                LivingEntity user = stand.getUser();
-                if (user != null && stand.distanceToSqr(user) > 16) {
-                    JojoModUtil.sayVoiceLine(user, ModSounds.DIO_THIS_IS_THE_WORLD.get());
+                SoundEvent voiceLine = voiceLineOnKill.get();
+                if (voiceLine != null) {
+                    LivingEntity user = stand.getUser();
+                    if (user != null && stand.distanceToSqr(user) > 16) {
+                        JojoModUtil.sayVoiceLine(user, voiceLine);
+                    }
                 }
             }
             super.afterAttack(stand, target, dmgSource, task, hurt, killed);

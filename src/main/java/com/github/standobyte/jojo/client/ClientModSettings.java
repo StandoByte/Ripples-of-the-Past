@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.client;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.util.function.Consumer;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.power.layout.ActionsLayout;
@@ -15,9 +16,20 @@ import net.minecraft.client.Minecraft;
 
 public class ClientModSettings {
     
-    private static class Settings {
+    public static class Settings {
         private boolean lockedAttacksHotbar;
         private boolean lockedAbilitiesHotbar;
+        public float standStatsTranslucency = 0.75F;
+    }
+    
+    
+    public void editSettings(Consumer<Settings> edit) {
+        edit.accept(settings);
+        save();
+    }
+    
+    public Settings getSettingsReadOnly() {
+        return settings;
     }
     
     
@@ -26,20 +38,22 @@ public class ClientModSettings {
     }
     
     private void setLockedHotbarControls(ActionsLayout.Hotbar hotbar, boolean value) {
-        switch (hotbar) {
-        case LEFT_CLICK:
-            settings.lockedAttacksHotbar = value;
-            if (value) settings.lockedAbilitiesHotbar = false;
-            break;
-        case RIGHT_CLICK:
-            if (value) settings.lockedAttacksHotbar = false;
-            settings.lockedAbilitiesHotbar = value;
-            break;
-        }
-        save();
+        editSettings(settings -> {
+            switch (hotbar) {
+            case LEFT_CLICK:
+                settings.lockedAttacksHotbar = value;
+                if (value) settings.lockedAbilitiesHotbar = false;
+                break;
+            case RIGHT_CLICK:
+                if (value) settings.lockedAttacksHotbar = false;
+                settings.lockedAbilitiesHotbar = value;
+                break;
+            }
+        });
     }
     
     public boolean areControlsLockedForHotbar(ActionsLayout.Hotbar hotbar) {
+        if (hotbar == null) return false;
         switch (hotbar) {
         case LEFT_CLICK:
             return settings.lockedAttacksHotbar;

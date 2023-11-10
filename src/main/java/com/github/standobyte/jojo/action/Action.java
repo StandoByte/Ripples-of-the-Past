@@ -16,6 +16,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.util.general.Container;
+import com.github.standobyte.jojo.util.general.LazySupplier;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
@@ -376,16 +377,20 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return Stream.of(getRegistryName());
     }
 
-    private ResourceLocation iconTexture;
+    private final LazySupplier<ResourceLocation> iconTexture = 
+            new LazySupplier<>(() -> makeIconVariant(this, ""));
     public ResourceLocation getIconTexture(@Nullable P power) {
         return getIconTexturePath(power);
     }
     
     protected ResourceLocation getIconTexturePath(@Nullable P power) {
-        if (iconTexture == null) {
-            iconTexture = JojoModUtil.makeTextureLocation("action", getRegistryName().getNamespace(), getRegistryName().getPath());
-        }
-        return this.iconTexture;
+        return iconTexture.get();
+    }
+    
+    protected static final ResourceLocation makeIconVariant(Action<?> action, @Nullable String postfix) {
+        return JojoModUtil.makeTextureLocation("action", 
+                action.getRegistryName().getNamespace(), 
+                action.getRegistryName().getPath() + postfix);
     }
     
     public boolean canUserSeeInStoppedTime(LivingEntity user, P power) {

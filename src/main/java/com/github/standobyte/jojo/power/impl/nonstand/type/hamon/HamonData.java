@@ -224,10 +224,11 @@ public class HamonData extends TypeSpecificData {
         this.prevBreathStability = value;
         this.ticksNoBreathStabilityInc = Math.max(noIncTicks, this.ticksNoBreathStabilityInc);
         if (send) {
-            serverPlayer.ifPresent(player -> {
+            LivingEntity user = power.getUser();
+            if (!user.level.isClientSide()) {
                 PacketManager.sendToClientsTrackingAndSelf(new TrHamonBreathStabilityPacket(
-                        player.getId(), getBreathStability(), ticksNoBreathStabilityInc), player);
-            });
+                        user.getId(), getBreathStability(), ticksNoBreathStabilityInc), user);
+            }
         }
     }
     
@@ -526,10 +527,13 @@ public class HamonData extends TypeSpecificData {
             break;
         }
         if (oldPoints != newPoints) {
-            serverPlayer.ifPresent(player -> {
-                PacketManager.sendToClientsTrackingAndSelf(new TrHamonStatsPacket(player.getId(), true, stat, newPoints), player);
-                ModCriteriaTriggers.HAMON_STATS.get().trigger(player, hamonStrengthLevel, hamonControlLevel, breathingTrainingLevel);
-            });
+            LivingEntity user = power.getUser();
+            if (!user.level.isClientSide()) {
+                PacketManager.sendToClientsTrackingAndSelf(new TrHamonStatsPacket(user.getId(), true, stat, newPoints), user);
+                serverPlayer.ifPresent(player -> {
+                    ModCriteriaTriggers.HAMON_STATS.get().trigger(player, hamonStrengthLevel, hamonControlLevel, breathingTrainingLevel);
+                });
+            }
             if (oldLevel != getStatLevel(stat)) {
                 switch (stat) {
                 case STRENGTH:
@@ -639,15 +643,18 @@ public class HamonData extends TypeSpecificData {
     public void setBreathingLevel(float level) {
         float oldLevel = breathingTrainingLevel;
         breathingTrainingLevel = MathHelper.clamp(level, 0, MAX_BREATHING_LEVEL);
+        LivingEntity user = power.getUser();
         if (oldLevel != breathingTrainingLevel) {
             recalcHamonDamage();
-            serverPlayer.ifPresent(player -> {
-                PacketManager.sendToClientsTrackingAndSelf(new TrHamonStatsPacket(player.getId(), true, getBreathingLevel()), player);
-                ModCriteriaTriggers.HAMON_STATS.get().trigger(player, hamonStrengthLevel, hamonControlLevel, breathingTrainingLevel);
-            });
+            if (!user.level.isClientSide()) {
+                PacketManager.sendToClientsTrackingAndSelf(new TrHamonStatsPacket(user.getId(), true, getBreathingLevel()), user);
+                serverPlayer.ifPresent(player -> {
+                    ModCriteriaTriggers.HAMON_STATS.get().trigger(player, hamonStrengthLevel, hamonControlLevel, breathingTrainingLevel);
+                });
+            }
         }
-        if (!power.getUser().level.isClientSide()) {
-            giveBreathingTrainingBuffs(power.getUser());
+        if (!user.level.isClientSide()) {
+            giveBreathingTrainingBuffs(user);
         }
     }
     

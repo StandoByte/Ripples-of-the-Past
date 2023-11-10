@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.client.render.entity.model.stand;
 
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.action.stand.TheWorldTSHeavyAttack;
-import com.github.standobyte.jojo.client.render.SlopeModelBox;
+import com.github.standobyte.jojo.client.render.CustomVerticesModelBox;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPoseTransition;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPoseTransitionMultiple;
@@ -12,6 +12,7 @@ import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.stands.TheWorldEntity;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.util.Direction;
 import net.minecraft.util.HandSide;
 
 // Made with Blockbench 3.9.2
@@ -118,24 +119,71 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         slopeNew = new ModelRenderer(this);
         slopeNew.setPos(0.0F, -6.4F, 1.3F);
         headpiece.addChild(slopeNew);
-        SlopeModelBox.addSlopeBox(slopeNew, 
-                30, 14, 
-                -4.0F, 0.2F, -2.8F, 0.2F, 
-                8.0F, 6.0F, 7.0F, 8.0F, 
-                0.2F, false, texWidth, texHeight);
+//        SlopeModelBox.addSlopeBox(slopeNew, 
+//                30, 14, 
+//                -4.0F, 0.2F, -2.8F, 0.2F, 
+//                8.0F, 6.0F, 7.0F, 8.0F, 
+//                0.2F, false, texWidth, texHeight);
+        new CustomVerticesModelBox.Builder(true)
+        .withVertex(true,  true,  false,  4.2F,     0,     0)
+        .withVertex(false, true,  false, -4.2F,     0,     0)
+        .withVertex(true,  false, false,  4.2F, -6.4F,     0)
+        .withVertex(false, false, false, -4.2F, -6.4F,     0)
+        .withVertex(true,  true,   true,  4.2F,     3,  8.4F)
+        .withVertex(false, true,   true, -4.2F,     3,  8.4F)
+        .withVertex(true,  false,  true,  4.2F, -4.4F,  8.4F)
+        .withVertex(false, false,  true, -4.2F, -4.4F,  8.4F)
+        .withUvFace(Direction.UP,    38, 14,  8,  8)
+        .withUvFace(Direction.DOWN,  46, 14,  8,  8)
+        .withUvFace(Direction.EAST,  30, 22,  8,  6)
+        .withUvFace(Direction.NORTH, 38, 22,  8,  6)
+        .withUvFace(Direction.WEST,  46, 22,  8,  6)
+        .withUvFace(Direction.SOUTH, 54, 22,  8,  6)
+        .addCube(slopeNew, texWidth, texHeight, false);
 
         faceRight = new ModelRenderer(this);
         faceRight.setPos(-4.2F, -6.4F, 1.3F);
         headpiece.addChild(faceRight);
         setRotationAngle(faceRight, 0.0F, 0.3023F, 0.0F);
-        faceRight.texOffs(69, 21).addBox(0.2F, 0.2F, 0.2F, 4.0F, 6.0F, 1.0F, 0.2F, false);
-        // TODO same slope angle for faceRight and faceLeft cubes (more vertices control)
+//        faceRight.texOffs(69, 21).addBox(0.2F, 0.2F, 0.2F, 4.0F, 6.0F, 1.0F, 0.2F, false);
+        new CustomVerticesModelBox.Builder(true)
+        .withVertex(true,  true,  false,     0,      0,     0)
+        .withVertex(false, true,  false, -4.4F,  -0.5F,     0)
+        .withVertex(true,  false, false,     0,  -6.4F,     0)
+        .withVertex(false, false, false, -4.4F, -6.75F,     0)
+        .withVertex(true,  true,   true,     0,      0,     0.0001F)
+        .withVertex(false, true,   true, -4.4F,      0,  1.4F)
+        .withVertex(true,  false,  true,     0, -6.15F,  1.1F)
+        .withVertex(false, false,  true, -4.4F,  -6.4F,  1.4F)
+        .withUvFace(Direction.UP,    70, 21,  4,  1)
+        .withUvFace(Direction.DOWN,  74, 21,  4,  1)
+        .withUvFace(Direction.EAST,  69, 22,  1,  6)
+        .withUvFace(Direction.NORTH, 70, 22,  4,  6)
+        .withUvFace(Direction.WEST,  74, 22,  1,  6)
+        .withUvFace(Direction.SOUTH, 75, 22,  4,  6)
+        .addCube(faceRight, texWidth, texHeight, false);
 
         faceLeft = new ModelRenderer(this);
         faceLeft.setPos(4.2F, -6.4F, 1.3F);
         headpiece.addChild(faceLeft);
         setRotationAngle(faceLeft, 0.0F, -0.3023F, 0.0F);
-        faceLeft.texOffs(80, 21).addBox(-4.2F, 0.2F, 0.2F, 4.0F, 6.0F, 1.0F, 0.2F, true);
+//        faceLeft.texOffs(80, 21).addBox(-4.2F, 0.2F, 0.2F, 4.0F, 6.0F, 1.0F, 0.2F, true);
+        new CustomVerticesModelBox.Builder(true)
+        .withVertex(true,  true,  false,  4.4F,  -0.5F,     0)
+        .withVertex(false, true,  false,     0,      0,     0)
+        .withVertex(true,  false, false,  4.4F, -6.75F,     0)
+        .withVertex(false, false, false,     0,  -6.4F,     0)
+        .withVertex(true,  true,   true,  4.4F,      0,  1.4F)
+        .withVertex(false, true,   true,     0,      0,     0.0001F)
+        .withVertex(true,  false,  true,  4.4F,  -6.4F,  1.4F)
+        .withVertex(false, false,  true,     0, -6.15F,  1.1F)
+        .withUvFace(Direction.UP,    81, 21,  4,  1)
+        .withUvFace(Direction.DOWN,  85, 21,  4,  1)
+        .withUvFace(Direction.EAST,  80, 22,  1,  6)
+        .withUvFace(Direction.NORTH, 81, 22,  4,  6)
+        .withUvFace(Direction.WEST,  74, 22,  1,  6)
+        .withUvFace(Direction.SOUTH, 86, 22,  4,  6)
+        .addCube(faceLeft, texWidth, texHeight, true);
 
         leftCable = new ModelRenderer(this);
         leftCable.setPos(1.25F, -3.3F, 0.25F);
