@@ -343,7 +343,7 @@ public class DamageUtil {
         }
     }
     
-    public static void applyKnockbackStack(LivingEntity target, float pStrength, double pRatioX, double pRatioZ) { // TODO knockback3d
+    public static void applyKnockbackStack(LivingEntity target, float pStrength, double pRatioX, double pRatioZ) {
         pStrength *= 1 - target.getAttributeValue(Attributes.KNOCKBACK_RESISTANCE);
         if (pStrength > 0) {
             target.hasImpulse = true;
@@ -354,6 +354,10 @@ public class DamageUtil {
                     Math.min(0.4D, speedCur.y + (double)pStrength), 
                     speedCur.z - knockback.z);
         }
+        
+        target.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(util -> {
+            util.didStackKnockbackInstead = true;
+        });
     }
     
     public static void suffocateTick(LivingEntity entity, float speed) {

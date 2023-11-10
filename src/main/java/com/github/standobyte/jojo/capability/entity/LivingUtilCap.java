@@ -1,18 +1,21 @@
 package com.github.standobyte.jojo.capability.entity;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.entity.AfterimageEntity;
 import com.github.standobyte.jojo.entity.HamonSendoOverdriveEntity;
 import com.github.standobyte.jojo.entity.ai.LookAtEntityWithoutMovingGoal;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.potion.HamonSpreadEffect;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.util.mc.CollideBlocks;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
@@ -28,9 +31,11 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.Explosion;
+import net.minecraftforge.common.ForgeMod;
 
 public class LivingUtilCap {
     private final LivingEntity entity;
@@ -47,7 +52,8 @@ public class LivingUtilCap {
     @Nullable private Explosion latestExplosion;
     
     public boolean didStackKnockbackInstead;
-    @Nullable private Vector3d knockbackWithBlockImpact;
+    @Nullable private Vector3d blockImpactKbVec;
+    private double blockImpactMultiplier;
     
     public boolean hasUsedTimeStopToday = false;
     private int noLerpTicks = 0;
@@ -150,13 +156,41 @@ public class LivingUtilCap {
     }
     
     
-    public void setKnockbackBlockImpact() {
-        knockbackWithBlockImpact = entity.getDeltaMovement().normalize();
+    public void setKnockbackBlockImpact(Vector3d knockbackVec) {
+        blockImpactKbVec = knockbackVec;
+        blockImpactMultiplier = 1;
     }
     
     private void tickKnockbackBlockImpact() {
-        if (knockbackWithBlockImpact != null) {
+        if (blockImpactKbVec != null) {
+            Vector3d speedVec = entity.getDeltaMovement()
+//                    .subtract(0, entity.getAttributeValue(ForgeMod.ENTITY_GRAVITY.get()), 0)
+                    .multiply(1, 0, 1);
             
+            if (Math.abs(speedVec.x) < 1.0E-7 && Math.abs(speedVec.z) < 1.0E-7) {
+                blockImpactKbVec = null;
+                return;
+            }
+            
+            blockImpactMultiplier = Math.min(blockImpactMultiplier, speedVec.normalize().dot(blockImpactKbVec.normalize() /*we can cache this*/));
+            if (blockImpactMultiplier < 0) {
+                blockImpactKbVec = null;
+                return;
+            }
+            
+            Collection<BlockPos> blocksCollision = CollideBlocks.getBlocksOutlineTowards(
+                    entity.getBoundingBox(), speedVec, entity.level, true);
+            if (!blocksCollision.isEmpty()) {
+                blocksCollision.forEach(blockPos -> {
+//                  BlockState blockState = entity.level.getBlockState(blockPos);
+                  entity.level.destroyBlock(blockPos, true);
+                });
+                // and ig we reduce blockImpactMultiplier?
+                
+//                if (entity.isOnGround()) {
+//                    blockImpactKbVec = null;
+//                }
+            }
         }
     }
     
@@ -366,7 +400,7 @@ public class LivingUtilCap {
     public CompoundNBT toNBT() {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putFloat("HamonSpread", receivedHamonDamage);
-        MCUtil.nbtPutVec3d(nbt, "KbBlockImpact", knockbackWithBlockImpact);
+        MCUtil.nbtPutVec3d(nbt, "BlockImpactVec", blockImpactKbVec);
         nbt.putBoolean("UsedTimeStop", hasUsedTimeStopToday);
         if (preHypnosisOwner != null) {
             nbt.putUUID("PreHypnosisOwner", preHypnosisOwner);
@@ -377,7 +411,7 @@ public class LivingUtilCap {
     
     public void fromNBT(CompoundNBT nbt) {
         receivedHamonDamage = nbt.getFloat("HamonSpread");
-        knockbackWithBlockImpact = MCUtil.nbtGetVec3d(nbt, "KbBlockImpact");
+        blockImpactKbVec = MCUtil.nbtGetVec3d(nbt, "BlockImpactVec");
         hasUsedTimeStopToday = nbt.getBoolean("UsedTimeStop");
         if (nbt.hasUUID("PreHypnosisOwner")) {
             preHypnosisOwner = nbt.getUUID("PreHypnosisOwner");

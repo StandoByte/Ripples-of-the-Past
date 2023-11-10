@@ -688,9 +688,6 @@ public class GameplayEventHandler {
         if (!target.canUpdate()) {
             event.setCanceled(true);
             DamageUtil.applyKnockbackStack(target, event.getStrength(), event.getRatioX(), event.getRatioZ());
-            target.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(util -> {
-                util.didStackKnockbackInstead = true;
-            });
         }
     }
 
