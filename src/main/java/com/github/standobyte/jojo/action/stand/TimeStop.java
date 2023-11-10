@@ -22,6 +22,7 @@ import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -37,6 +38,8 @@ public class TimeStop extends StandAction {
     private final Supplier<SoundEvent> timeResumeVoiceLine;
     private final Supplier<SoundEvent> timeManualResumeVoiceLine;
     private final Supplier<SoundEvent> timeResumeSound;
+    private final ResourceLocation shaderWithAnim;
+    private final ResourceLocation shaderOld;
 
     public TimeStop(TimeStop.Builder builder) {
         super(builder);
@@ -45,6 +48,8 @@ public class TimeStop extends StandAction {
         this.timeResumeVoiceLine = builder.timeResumeVoiceLine;
         this.timeManualResumeVoiceLine = builder.timeManualResumeVoiceLine;
         this.timeResumeSound = builder.timeResumeSound;
+        this.shaderWithAnim = builder.shaderWithAnim;
+        this.shaderOld = builder.shaderOld;
     }
 
     @Override
@@ -152,6 +157,11 @@ public class TimeStop extends StandAction {
         this.blink = blink;
     }
     
+    @Nullable
+    public ResourceLocation getTimeStopShader(boolean withAnimEffect) {
+        return withAnimEffect ? shaderWithAnim : shaderOld;
+    }
+    
     
     
     public static final int MIN_TIME_STOP_TICKS = 5;
@@ -176,6 +186,8 @@ public class TimeStop extends StandAction {
         private Supplier<SoundEvent> timeResumeVoiceLine = () -> null;
         private Supplier<SoundEvent> timeManualResumeVoiceLine = () -> null;
         private Supplier<SoundEvent> timeResumeSound = () -> null;
+        private ResourceLocation shaderWithAnim = null;
+        private ResourceLocation shaderOld = null;
         
         public Builder voiceLineWithStandSummoned(Supplier<SoundEvent> voiceLine) {
             this.voiceLineWithStandSummoned = voiceLine;
@@ -205,6 +217,16 @@ public class TimeStop extends StandAction {
         
         public Builder timeResumeSound(Supplier<SoundEvent> sound) {
             this.timeResumeSound = sound;
+            return getThis();
+        }
+        
+        public Builder shaderEffect(ResourceLocation path, boolean withAnimEffect) {
+            if (withAnimEffect) {
+                this.shaderWithAnim = path;
+            }
+            else {
+                this.shaderOld = path;
+            }
             return getThis();
         }
         

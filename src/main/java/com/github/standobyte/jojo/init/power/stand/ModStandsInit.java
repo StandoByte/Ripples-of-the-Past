@@ -53,7 +53,6 @@ import com.github.standobyte.jojo.action.stand.TheWorldHeavyPunch;
 import com.github.standobyte.jojo.action.stand.TheWorldKick;
 import com.github.standobyte.jojo.action.stand.TheWorldTSHeavyAttack;
 import com.github.standobyte.jojo.action.stand.TheWorldTimeStop;
-import com.github.standobyte.jojo.action.stand.TheWorldTimeStopInstant;
 import com.github.standobyte.jojo.action.stand.TimeResume;
 import com.github.standobyte.jojo.action.stand.TimeStop;
 import com.github.standobyte.jojo.action.stand.TimeStopInstant;
@@ -79,6 +78,7 @@ import com.github.standobyte.jojo.power.impl.stand.type.NoManifestationStandType
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType.StandSurvivalGameplayPool;
 
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -164,7 +164,7 @@ public class ModStandsInit {
                     .partsRequired(StandPart.MAIN_BODY)));
     
     public static final RegistryObject<StandEntityAction> STAR_PLATINUM_INHALE = ACTIONS.register("star_platinum_inhale", 
-            () -> new StarPlatinumInhale(new StandEntityAction.Builder().holdType(80).staminaCostTick(2F).cooldown(120)
+            () -> new StarPlatinumInhale(new StandEntityAction.Builder().holdType(80).staminaCostTick(2F).cooldown(80)
                     .ignoresPerformerStun().resolveLevelToUnlock(2)
                     .standOffsetFromUser(0, -0.25).standSound(ModSounds.STAR_PLATINUM_INHALE)
                     .partsRequired(StandPart.MAIN_BODY)));
@@ -176,14 +176,18 @@ public class ModStandsInit {
                     .shout(ModSounds.JOTARO_STAR_PLATINUM_THE_WORLD)
                     .partsRequired(StandPart.MAIN_BODY)
             .timeStopSound(ModSounds.STAR_PLATINUM_TIME_STOP)
-            .addTimeResumeVoiceLine(ModSounds.JOTARO_TIME_RESUMES).timeResumeSound(ModSounds.STAR_PLATINUM_TIME_RESUME)));
+            .addTimeResumeVoiceLine(ModSounds.JOTARO_TIME_RESUMES).timeResumeSound(ModSounds.STAR_PLATINUM_TIME_RESUME)
+            .shaderEffect(new ResourceLocation(JojoMod.MOD_ID, "shaders/post/time_stop_sp.json"), true)
+            .shaderEffect(new ResourceLocation(JojoMod.MOD_ID, "shaders/post/time_stop_sp_old.json"), false)));
+    
     
     public static final RegistryObject<StandAction> STAR_PLATINUM_TIME_STOP_BLINK = ACTIONS.register("star_platinum_ts_blink", 
             () -> new TimeStopInstant(new StandAction.Builder()
                     .resolveLevelToUnlock(4).isTrained()
                     .ignoresPerformerStun()
                     .partsRequired(StandPart.MAIN_BODY), 
-                    STAR_PLATINUM_TIME_STOP, ModSounds.STAR_PLATINUM_TIME_STOP_BLINK));
+                    STAR_PLATINUM_TIME_STOP, ModSounds.STAR_PLATINUM_TIME_STOP_BLINK,
+                    false));
     
     public static final RegistryObject<TimeResume> STAR_PLATINUM_TIME_RESUME = ACTIONS.register("star_platinum_time_resume", 
             () -> new TimeResume(new StandAction.Builder().shiftVariationOf(STAR_PLATINUM_TIME_STOP)));
@@ -269,14 +273,17 @@ public class ModStandsInit {
                     .partsRequired(StandPart.MAIN_BODY)
             .voiceLineWithStandSummoned(ModSounds.DIO_TIME_STOP).timeStopSound(ModSounds.THE_WORLD_TIME_STOP)
             .addTimeResumeVoiceLine(ModSounds.DIO_TIME_RESUMES, true).addTimeResumeVoiceLine(ModSounds.DIO_TIMES_UP, false)
-            .timeResumeSound(ModSounds.THE_WORLD_TIME_RESUME)));
+            .timeResumeSound(ModSounds.THE_WORLD_TIME_RESUME)
+            .shaderEffect(new ResourceLocation(JojoMod.MOD_ID, "shaders/post/time_stop_tw.json"), true)
+            .shaderEffect(new ResourceLocation(JojoMod.MOD_ID, "shaders/post/time_stop_tw_old.json"), false)));
     
     public static final RegistryObject<TimeStopInstant> THE_WORLD_TIME_STOP_BLINK = ACTIONS.register("the_world_ts_blink", 
-            () -> new TheWorldTimeStopInstant(new StandAction.Builder()
+            () -> new TimeStopInstant(new StandAction.Builder()
                     .resolveLevelToUnlock(2).isTrained()
                     .ignoresPerformerStun()
                     .partsRequired(StandPart.MAIN_BODY), 
-                    THE_WORLD_TIME_STOP, ModSounds.THE_WORLD_TIME_STOP_BLINK));
+                    THE_WORLD_TIME_STOP, ModSounds.THE_WORLD_TIME_STOP_BLINK,
+                    true));
     
     public static final RegistryObject<TimeResume> THE_WORLD_TIME_RESUME = ACTIONS.register("the_world_time_resume", 
             () -> new TimeResume(new StandAction.Builder().shiftVariationOf(THE_WORLD_TIME_STOP)));
@@ -361,7 +368,7 @@ public class ModStandsInit {
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_GRAPPLE = ACTIONS.register("hierophant_green_grapple", 
             () -> new HierophantGreenGrapple(new StandEntityAction.Builder().staminaCostTick(1).holdType().standUserWalkSpeed(0.0F)
                     .resolveLevelToUnlock(2)
-                    .standPose(HierophantGreenGrapple.GRAPPLE_POSE).standOffsetFromUser(-0.5, 0.25)
+                    .standPose(HierophantGreenGrapple.GRAPPLE_POSE)
                     .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_GRAPPLE_ENTITY = ACTIONS.register("hierophant_green_grapple_entity", 

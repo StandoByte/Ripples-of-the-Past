@@ -131,12 +131,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         }
         if (user != null && !user.level.isClientSide()) {
             continuousEffects.onStandChanged(user);
-        }
-        
-        serverPlayerUser.ifPresent(player -> {
             PacketManager.sendToClientsTrackingAndSelf(new TrTypeStandInstancePacket(
-                    player.getId(), getStandInstance().get(), resolveCounter.getResolveLevel()), player);
-        });
+                    user.getId(), getStandInstance().get(), resolveCounter.getResolveLevel()), user);
+        }
         
         setStamina(getMaxStamina() * 0.5F);
         
@@ -165,9 +162,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     private boolean clear(boolean countTaken) {
         StandType<?> standType = getType();
         if (super.clear()) {
-            serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClientsTrackingAndSelf(TrTypeStandInstancePacket.noStand(player.getId()), player);
-            });
+            if (user != null && !user.level.isClientSide()) {
+                PacketManager.sendToClientsTrackingAndSelf(TrTypeStandInstancePacket.noStand(user.getId()), user);
+            }
             if (isActive()) {
                 standType.forceUnsummon(user, this);
             }
@@ -287,12 +284,11 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     private void setStamina(float amount, boolean sendToClient) {
         amount = MathHelper.clamp(amount, 0, getMaxStamina());
-        boolean send = sendToClient && this.stamina != amount;
-        this.stamina = amount;
-        if (send) {
-            serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClientsTrackingAndSelf(new TrStaminaPacket(user.getId(), getStamina()), player);
-            });
+        if (this.stamina != amount) {
+            this.stamina = amount;
+            if (sendToClient && user != null && !user.level.isClientSide()) {
+                PacketManager.sendToClientsTrackingAndSelf(new TrStaminaPacket(user.getId(), getStamina()), user);
+            }
         }
     }
     
