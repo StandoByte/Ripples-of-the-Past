@@ -93,16 +93,18 @@ public abstract class StandEffectInstance {
     }
     
     public void onTick() {
-        tickCount++;
-
-        updateTarget(world);
-        
-        if (!world.isClientSide() && targetUUID == null && needsTarget()) {
-            remove();
-            return;
+        if (!toBeRemoved) {
+            tickCount++;
+    
+            updateTarget(world);
+            
+            if (!world.isClientSide() && targetUUID == null && needsTarget()) {
+                remove();
+                return;
+            }
+            
+            tick();
         }
-        
-        tick();
     }
 
     public void updateTarget(World world) {

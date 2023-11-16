@@ -3,10 +3,15 @@ package com.github.standobyte.jojo.entity;
 import java.io.IOException;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.GoldExperienceCreateLifeform;
+import com.github.standobyte.jojo.action.stand.effect.GECreatedLifeformEffect;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.network.NetworkUtil;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.util.mc.EntityOwnerResolver;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.Entity;
@@ -36,7 +41,9 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
     private static final DataParameter<Boolean> LIFE_FORM_SPAWNED = EntityDataManager.defineId(GETransformationEntity.class, DataSerializers.BOOLEAN);
     private Entity source;
     private Entity target;
+    private EntityOwnerResolver owner = new EntityOwnerResolver();
     private int duration;
+    private boolean isTurningBack = false;
 
     public GETransformationEntity(EntityType<?> type, World level) {
         super(type, level);
@@ -57,13 +64,27 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         return this;
     }
     
+    public GETransformationEntity withOwner(LivingEntity user) {
+        this.owner.setOwner(user);
+        return this;
+    }
+    
     public GETransformationEntity withDuration(int duration) {
         this.duration = duration;
         return this;
     }
     
+    public GETransformationEntity setTurningBack() {
+        this.isTurningBack = true;
+        return this;
+    }
+    
     public int getDuration() {
         return duration;
+    }
+    
+    public boolean isTurningBack() {
+        return isTurningBack;
     }
     
     public Entity getTransformationSource() {
@@ -80,13 +101,27 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             if (!level.isClientSide()) {
                 entityData.set(LIFE_FORM_SPAWNED, true);
                 remove();
-                if (target != null) {
-                    target.copyPosition(this);
-                    level.addFreshEntity(target);
-                    GoldExperienceCreateLifeform.onTransformationFinish(target);
+                Entity entityToSummon = isTurningBack ? source : target;
+                if (entityToSummon != null) {
+                    entityToSummon.copyPosition(this);
+                    level.addFreshEntity(entityToSummon);
+                    GoldExperienceCreateLifeform.onTransformationFinish(entityToSummon);
+                    
+                    if (!isTurningBack && entityToSummon instanceof LivingEntity) {
+                        IStandPower.getStandPowerOptional(owner.getEntity(level)).ifPresent(power -> {
+                            power.getContinuousEffects().addEffect(new GECreatedLifeformEffect(source)
+                                    .withStand(power)
+                                    .withTarget((LivingEntity) entityToSummon)); 
+                        });
+                    }
                 }
             }
             return;
+        }
+        else {
+            if (!level.isClientSide()) {
+                
+            }
         }
         
         
@@ -147,9 +182,10 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         float scale = 0;
         
         float renderAsItemTime = getRenderAsItemTime(duration);
-        if (tickCount < renderAsItemTime) {
+        float tfProgressTime = getTfProgressTime(0);
+        if (tfProgressTime < renderAsItemTime) {
             if (source != null) {
-                scale = 1 - tickCount / renderAsItemTime;
+                scale = 1 - tfProgressTime / renderAsItemTime;
                 if (scale > 0) {
                     size = source.getDimensions(pPose).scale(scale);
                 }
@@ -157,13 +193,18 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         }
         
         else if (target != null) {
-            scale = 1 - (duration - tickCount) / (duration - renderAsItemTime);
+            scale = 1 - (duration - tfProgressTime) / (duration - renderAsItemTime);
             if (scale > 0) {
                 size = target.getDimensions(pPose).scale(scale);
             }
         }
         
         return size;
+    }
+    
+    public float getTfProgressTime(float partialTick) {
+        float time = tickCount + partialTick;
+        return isTurningBack ? duration - time : time;
     }
     
     public static float getRenderAsItemTime(float fullDuration) {
@@ -175,14 +216,33 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         entityData.define(LIFE_FORM_SPAWNED, false);
     }
     
+    @Override
     public boolean isInvisible() {
         return super.isInvisible() || entityData.get(LIFE_FORM_SPAWNED);
     }
+    
+    
+    public static void turnEntityBack(Entity lifeform, Entity originalEntity, @Nullable LivingEntity owner) {
+        Entity tf = new GETransformationEntity(lifeform.level)
+                .withTransformationTarget(lifeform)
+                .withTransformationSource(originalEntity)
+                .withDuration(10)
+                .withOwner(owner)
+                .setTurningBack();
+        
+        Vector3d pos = lifeform.position();
+        tf.moveTo(pos.x, pos.y, pos.z, lifeform.yRot, lifeform.xRot);
+        lifeform.level.addFreshEntity(tf);
+        
+        lifeform.remove();
+    }
+    
     
     @Override
     protected void readAdditionalSaveData(CompoundNBT nbt) {
         this.tickCount = nbt.getInt("Age");
         this.duration = nbt.getInt("Duration");
+        this.isTurningBack = nbt.getBoolean("TurnBack");
         
         if (nbt.contains("SourceEntity", MCUtil.getNbtId(CompoundNBT.class))) {
             CompoundNBT entityNbt = nbt.getCompound("SourceEntity");
@@ -192,12 +252,14 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             CompoundNBT entityNbt = nbt.getCompound("TargetEntity");
             target = EntityType.create(entityNbt, level).orElse(null);
         }
+        owner.loadNbt(nbt, "Owner");
     }
 
     @Override
     protected void addAdditionalSaveData(CompoundNBT nbt) {
         nbt.putInt("Age", tickCount);
         nbt.putInt("Duration", duration);
+        nbt.putBoolean("TurnBack", isTurningBack);
         
         if (source != null) {
             CompoundNBT entityNbt = source.serializeNBT();
@@ -207,6 +269,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             CompoundNBT entityNbt = target.serializeNBT();
             nbt.put("TargetEntity", entityNbt);
         }
+        owner.saveNbt(nbt, "Owner");
     }
 
     @Override
@@ -218,6 +281,8 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
     public void writeSpawnData(PacketBuffer buffer) {
         buffer.writeVarInt(tickCount);
         buffer.writeVarInt(duration);
+        buffer.writeBoolean(isTurningBack);
+        owner.writeNetwork(buffer);
         
         writeEntityData(buffer, target);
         writeEntityData(buffer, source);
@@ -227,6 +292,8 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
     public void readSpawnData(PacketBuffer additionalData) {
         tickCount = additionalData.readVarInt();
         duration = additionalData.readVarInt();
+        isTurningBack = additionalData.readBoolean();
+        owner.readNetwork(additionalData);
         
         target = readEntityData(additionalData);
         source = readEntityData(additionalData);

@@ -754,7 +754,7 @@ public class ModStandsInit {
     
 // ======================================== Gold Experience ========================================
     
-    public static final RegistryObject<StandEntityAction> GOLD_EXPERIENCE_PUNCH = ACTIONS.register("gold_experience_punch", 
+    public static final RegistryObject<StandEntityLightAttack> GOLD_EXPERIENCE_PUNCH = ACTIONS.register("gold_experience_punch", 
             () -> new StandEntityLightAttack(new StandEntityLightAttack.Builder()
 //                    .punchSound(ModSounds.GOLD_EXPERIENCE_PUNCH_LIGHT)
 //                    .standSound(Phase.WINDUP, ModSounds.GOLD_EXPERIENCE_MUDA)
@@ -766,21 +766,22 @@ public class ModStandsInit {
 //                    .standSound(ModSounds.GOLD_EXPERIENCE_MUDA_MUDA_MUDA)
                     ));
     
-    public static final RegistryObject<StandEntityAction> GOLD_EXPERIENCE_HEAVY_PUNCH = ACTIONS.register("gold_experience_heavy_punch", 
+    public static final RegistryObject<CrazyDiamondHeavyPunch> GOLD_EXPERIENCE_HEAVY_PUNCH = ACTIONS.register("gold_experience_heavy_punch", 
             () -> new CrazyDiamondHeavyPunch(new StandEntityHeavyAttack.Builder()
 //                    .punchSound(ModSounds.GOLD_EXPERIENCE_PUNCH_HEAVY)
 //                    .standSound(Phase.WINDUP, ModSounds.GOLD_EXPERIENCE_MUDA_LONG)
                     .partsRequired(StandPart.ARMS)
                     .shiftVariationOf(GOLD_EXPERIENCE_PUNCH).shiftVariationOf(GOLD_EXPERIENCE_BARRAGE)));
     
-    public static final RegistryObject<StandEntityAction> GOLD_EXPERIENCE_BLOCK = ACTIONS.register("gold_experience_block", 
+    public static final RegistryObject<StandEntityBlock> GOLD_EXPERIENCE_BLOCK = ACTIONS.register("gold_experience_block", 
             () -> new StandEntityBlock());
     
-    public static final RegistryObject<StandAction> GOLD_EXPERIENCE_CHOOSE_LIFEFORM = ACTIONS.register("gold_experience_choose_lifeform", 
+    public static final RegistryObject<GoldExperienceChooseLifeform> GOLD_EXPERIENCE_CHOOSE_LIFEFORM = ACTIONS.register("gold_experience_choose_lifeform", 
             () -> new GoldExperienceChooseLifeform(new StandAction.Builder()));
     
-    public static final RegistryObject<StandAction> GOLD_EXPERIENCE_CREATE_LIFEFORM = ACTIONS.register("gold_experience_create_lifeform", 
+    public static final RegistryObject<GoldExperienceCreateLifeform> GOLD_EXPERIENCE_CREATE_LIFEFORM = ACTIONS.register("gold_experience_create_lifeform", 
             () -> new GoldExperienceCreateLifeform(new StandAction.Builder()
+                    .staminaCostTick(1)
                     .partsRequired(StandPart.ARMS)));
     
     

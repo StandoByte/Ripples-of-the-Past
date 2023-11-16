@@ -37,7 +37,7 @@ public class BoyIIManStandPartTakenEffect extends StandEffectInstance {
 
     @Override
     protected void stop() {
-        if (!userPower.getUser().level.isClientSide() && partsTaken != null) {
+        if (!world.isClientSide() && partsTaken != null) {
             LivingEntity target = getTarget();
             if (target != null) {
                 IStandPower.getStandPowerOptional(target).ifPresent(power -> {
@@ -62,7 +62,7 @@ public class BoyIIManStandPartTakenEffect extends StandEffectInstance {
     
     @Override
     protected boolean keepTarget(LivingEntity target) {
-        return !target.isDeadOrDying() || JojoModConfig.getCommonConfigInstance(target.level.isClientSide()).keepStandOnDeath.get();
+        return !target.isDeadOrDying() || JojoModConfig.getCommonConfigInstance(world.isClientSide()).keepStandOnDeath.get();
     }
     
     @Override

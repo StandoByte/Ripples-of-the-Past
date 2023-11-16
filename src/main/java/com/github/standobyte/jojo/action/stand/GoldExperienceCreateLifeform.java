@@ -92,7 +92,8 @@ public class GoldExperienceCreateLifeform extends StandAction {
                 
                 Entity tf = new GETransformationEntity(world)
                         .withTransformationTarget(lifeFormCreated)
-                        .withDuration(ticks);
+                        .withDuration(ticks)
+                        .withOwner(user);
                 
                 Vector3d pos = performer.position();
                 Vector3d lookVec = performer.getLookAngle();
@@ -125,6 +126,12 @@ public class GoldExperienceCreateLifeform extends StandAction {
         
         return (int) (240 / Math.max(standSpeed, 1)
                 + MathHelper.ceil(volume * (1 + entityStrength * 0.125) * MathHelper.clamp(100 - standSpeed * 2, 0, 100)));
+    }
+    
+    public float getStaminaCostTicking(IStandPower stand, LivingEntity lifeform) {
+        float costMultiplier = getStaminaCostTicking(stand);
+        
+        return costMultiplier;
     }
     
     public static float getVolume(Entity entity) {

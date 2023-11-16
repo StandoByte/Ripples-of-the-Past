@@ -55,7 +55,7 @@ public class GETransformationRenderer<T extends GETransformationEntity> extends 
     @Override
     public void render(T entity, float yRotation, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
         if (!entity.isInvisibleTo(Minecraft.getInstance().player)) {
-            float age = entity.tickCount + partialTick;
+            float age = entity.getTfProgressTime(partialTick);
             float ageMax = entity.getDuration();
             float itemSourceAge = GETransformationEntity.getRenderAsItemTime(ageMax);
             if (age < itemSourceAge) {
