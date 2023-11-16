@@ -273,11 +273,11 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
         if (!user.level.isClientSide()) {
             power.getStandInstance().ifPresent(standInstance -> {
                 if (!standInstance.hasPart(StandPart.ARMS)) {
-                    user.addEffect(new EffectInstance(Effects.WEAKNESS, 300, 1));
-                    user.addEffect(new EffectInstance(Effects.DIG_SLOWDOWN, 300, 1));
+                    user.addEffect(new EffectInstance(Effects.WEAKNESS, 319, 1));
+                    user.addEffect(new EffectInstance(Effects.DIG_SLOWDOWN, 319, 1));
                 }
                 if (!standInstance.hasPart(StandPart.LEGS)) {
-                    user.addEffect(new EffectInstance(Effects.MOVEMENT_SLOWDOWN, 300, 1));
+                    user.addEffect(new EffectInstance(Effects.MOVEMENT_SLOWDOWN, 319, 1));
                 }
             });
         }

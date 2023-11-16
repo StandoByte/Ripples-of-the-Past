@@ -638,6 +638,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         this.skippedProgression = oldPower.wasProgressionSkipped();
         this.actionLearningProgressMap = ((StandPower) oldPower).actionLearningProgressMap; // FIXME can i remove this cast?
         this.continuousEffects = oldPower.getContinuousEffects();
+        this.continuousEffects.setPowerData(this);
         this.stamina = getMaxStamina();
     }
     
