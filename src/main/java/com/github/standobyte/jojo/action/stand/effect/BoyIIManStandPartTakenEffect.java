@@ -62,7 +62,7 @@ public class BoyIIManStandPartTakenEffect extends StandEffectInstance {
     
     @Override
     protected boolean keepTarget(LivingEntity target) {
-        return JojoModConfig.getCommonConfigInstance(target.level.isClientSide()).keepStandOnDeath.get();
+        return !target.isDeadOrDying() || JojoModConfig.getCommonConfigInstance(target.level.isClientSide()).keepStandOnDeath.get();
     }
     
     @Override

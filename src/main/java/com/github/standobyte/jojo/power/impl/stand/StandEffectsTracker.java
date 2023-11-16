@@ -24,12 +24,17 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 
 public class StandEffectsTracker {
-    private static final AtomicInteger EFFECTS_COUNTER = new AtomicInteger();
-    private final IStandPower standPower;
+    public static final AtomicInteger EFFECTS_COUNTER = new AtomicInteger();
+    private IStandPower standPower;
     private final Int2ObjectMap<StandEffectInstance> effects = new Int2ObjectLinkedOpenHashMap<>();
     
     public StandEffectsTracker(IStandPower standPower) {
         this.standPower = standPower;
+    }
+    
+    public void setPowerData(IStandPower standPower) {
+        this.standPower = standPower;
+        effects.values().forEach(effect -> effect.withStand(standPower));
     }
     
     public void addEffect(StandEffectInstance instance) {
@@ -39,7 +44,7 @@ public class StandEffectsTracker {
         }
         putEffectInstance(instance);
         if (!user.level.isClientSide()) {
-            instance.syncWithTrackingAndUser();
+            PacketManager.sendToClientsTrackingAndSelf(TrStandEffectPacket.add(instance), user);
         }
     }
     

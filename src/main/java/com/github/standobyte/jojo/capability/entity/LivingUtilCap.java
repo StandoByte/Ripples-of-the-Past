@@ -3,12 +3,13 @@ package com.github.standobyte.jojo.capability.entity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
 import com.github.standobyte.jojo.entity.AfterimageEntity;
 import com.github.standobyte.jojo.entity.HamonSendoOverdriveEntity;
 import com.github.standobyte.jojo.entity.ai.LookAtEntityWithoutMovingGoal;
@@ -35,7 +36,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.Explosion;
-import net.minecraftforge.common.ForgeMod;
 
 public class LivingUtilCap {
     private final LivingEntity entity;
@@ -54,6 +54,8 @@ public class LivingUtilCap {
     public boolean didStackKnockbackInstead;
     @Nullable private Vector3d blockImpactKbVec;
     private double blockImpactMultiplier;
+    
+    private Collection<StandEffectInstance> standEffectsTargetedBy = new LinkedList<>();
     
     public boolean hasUsedTimeStopToday = false;
     private int noLerpTicks = 0;
@@ -192,6 +194,16 @@ public class LivingUtilCap {
 //                }
             }
         }
+    }
+    
+    
+    
+    public void addEffectTargetedBy(StandEffectInstance instance) {
+        this.standEffectsTargetedBy.add(instance);
+    }
+    
+    public void removeEffectTargetedBy(StandEffectInstance instance) {
+        this.standEffectsTargetedBy.remove(instance);
     }
     
     

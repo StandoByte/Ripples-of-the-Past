@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.entity.mob.rps.RPSPvpGamesMap;
+import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 
 import net.minecraft.nbt.CompoundNBT;
@@ -164,6 +165,7 @@ public class SaveFileUtilCap {
         nbt.putBoolean("UsedTimeStop", usedTimeStop);
         nbt.putInt("WalkmanId", walkmanId);
         nbt.putInt("CassetteId", cassetteId);
+        nbt.putInt("StandEffId", StandEffectsTracker.EFFECTS_COUNTER.get());
         return nbt;
     }
     
@@ -174,5 +176,9 @@ public class SaveFileUtilCap {
         gameruleWeatherCycle = nbt.getBoolean("GameruleWeatherCycle");
         walkmanId = nbt.getInt("WalkmanId");
         cassetteId = nbt.getInt("CassetteId");
+        int latestId = nbt.getInt("StandEffId");
+        if (latestId < (1 << 30)) {
+            StandEffectsTracker.EFFECTS_COUNTER.set(latestId);
+        }
     }
 }
