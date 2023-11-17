@@ -73,7 +73,7 @@ public class BoyIIManStandPartTakenEffect extends StandEffectInstance {
     
 
     @Override
-    public void writeAdditionalPacketData(PacketBuffer buf) {
+    public void writeAdditionalPacketData(PacketBuffer buf, boolean sendingToUser) {
         buf.writeBoolean(partsTaken != null);
         if (partsTaken != null) {
             partsTaken.toBuf(buf);
@@ -81,7 +81,7 @@ public class BoyIIManStandPartTakenEffect extends StandEffectInstance {
     }
     
     @Override
-    public void readAdditionalPacketData(PacketBuffer buf) {
+    public void readAdditionalPacketData(PacketBuffer buf, boolean clientIsUser) {
         partsTaken = buf.readBoolean() ? StandInstance.fromBuf(buf) : null;
     }
 

@@ -203,7 +203,7 @@ public abstract class StandEffectInstance {
     }
     
     public void syncWithTrackingOrUser(ServerPlayerEntity player) {
-        PacketManager.sendToClient(TrStandEffectPacket.add(this), player);
+        PacketManager.sendToClient(TrStandEffectPacket.add(this, player == user), player);
     }
 
     public CompoundNBT toNBT() {
@@ -231,9 +231,9 @@ public abstract class StandEffectInstance {
         return effect;
     }
     
-    public void writeAdditionalPacketData(PacketBuffer buf) {}
+    public void writeAdditionalPacketData(PacketBuffer buf, boolean sendingToUser) {}
     
-    public void readAdditionalPacketData(PacketBuffer buf) {}
+    public void readAdditionalPacketData(PacketBuffer buf, boolean clientIsUser) {}
 
     protected void writeAdditionalSaveData(CompoundNBT nbt) {}
 

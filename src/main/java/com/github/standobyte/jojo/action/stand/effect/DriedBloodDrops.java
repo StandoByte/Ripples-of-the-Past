@@ -52,6 +52,7 @@ public class DriedBloodDrops extends StandEffectInstance {
         nbt.putInt("BloodTicks", disappearTicks);
     }
 
+    @Override
     protected void readAdditionalSaveData(CompoundNBT nbt) {
         disappearTicks = nbt.getInt("BloodTicks");
     }

@@ -18,11 +18,14 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.monster.SlimeEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.IFormattableTextComponent;
@@ -90,10 +93,13 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     }
                 }
                 
-                Entity tf = new GETransformationEntity(world)
+                GETransformationEntity tf = new GETransformationEntity(world)
                         .withTransformationTarget(lifeFormCreated)
                         .withDuration(ticks)
                         .withOwner(user);
+                if (!user.getItemInHand(Hand.OFF_HAND).isEmpty()) {
+                    tf.withTransformationSource(new ItemEntity(world, 0, 0, 0, new ItemStack(user.getItemInHand(Hand.OFF_HAND).getItem())));
+                }
                 
                 Vector3d pos = performer.position();
                 Vector3d lookVec = performer.getLookAngle();

@@ -3,13 +3,18 @@ package com.github.standobyte.jojo.client.ui.marker;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
+import com.github.standobyte.jojo.action.stand.effect.StandEffectType;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -17,6 +22,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.renderer.ActiveRenderInfo;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.api.distmarker.Dist;
@@ -58,7 +64,7 @@ public abstract class MarkerRenderer {
                 
                 float[] rgb = ClientUtil.rgb(getColor());
                 positions.forEach(marker -> {
-                    renderAt(marker.getPos(), matrixStack, camera, partialTick, rgb, marker.isOutlined());
+                    renderAt(matrixStack, marker, camera, partialTick, rgb);
                 });
                 
                 matrixStack.popPose();
@@ -67,9 +73,9 @@ public abstract class MarkerRenderer {
     }
 
     @SuppressWarnings("deprecation")
-    protected void renderAt(Vector3d worldPos, MatrixStack matrixStack, ActiveRenderInfo camera, float partialTick, float[] rgb, boolean outline) {
+    protected void renderAt(MatrixStack matrixStack, MarkerInstance marker, ActiveRenderInfo camera, float partialTick, float[] rgb) {
         matrixStack.pushPose();
-        Vector3d diff = worldPos.subtract(camera.getPosition())
+        Vector3d diff = marker.pos.subtract(camera.getPosition())
                 .yRot(camera.getYRot() * MathUtil.DEG_TO_RAD)
                 .xRot(camera.getXRot() * MathUtil.DEG_TO_RAD);
         
@@ -81,22 +87,45 @@ public abstract class MarkerRenderer {
         matrixStack.translate(diff.x, diff.y, diff.z);
         matrixStack.scale(-scale, -scale, 1);
         
-        mc.getTextureManager().bind(getIcon());
-        AbstractGui.blit(matrixStack, -8, -28, 0, 0, 16, 16, 16, 16);
-
+        matrixStack.pushPose();
+        matrixStack.translate(-8, -28, 0);
+        renderIcon(matrixStack, marker);
+        matrixStack.popPose();
+        
         mc.getTextureManager().bind(ClientUtil.ADDITIONAL_UI);
         RenderSystem.color4f(rgb[0], rgb[1], rgb[2], 1.0F);
         AbstractGui.blit(matrixStack, -16, -32, 0, 0, 32, 32, 256, 256);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        if (outline) {
+        if (marker.outlined) {
             AbstractGui.blit(matrixStack, -16, -32, 32, 0, 64, 32, 256, 256);
         }
 
         matrixStack.popPose();
     }
     
+    protected void renderIcon(MatrixStack matrixStack, MarkerInstance marker) {
+        mc.getTextureManager().bind(getIcon());
+        AbstractGui.blit(matrixStack, 0, 0, 0, 0, 16, 16, 16, 16);
+    }
+    
     protected abstract boolean shouldRender();
     protected abstract void updatePositions(List<MarkerInstance> list, float partialTick);
+    
+    protected static void fillWithStandEffectTargets(List<MarkerInstance> list, float partialTick, 
+            StandEffectType<?> standEffect, double range, Minecraft mc, boolean highlightLookedAt) {
+        IStandPower.getStandPowerOptional(mc.player).ifPresent(stand -> {
+            List<StandEffectInstance> targets = StandEffectsTracker.getEffectsOfType(stand, 
+                    standEffect, range).collect(Collectors.toList());
+            Optional<StandEffectInstance> outlined = highlightLookedAt ? StandEffectsTracker.getTargetLookedAt(targets.stream(), mc.player) : Optional.empty();
+            targets.forEach(effect -> {
+                LivingEntity target = effect.getTarget();
+                list.add(new MarkerInstance(
+                        target.getPosition(partialTick).add(0, target.getBbHeight() * 1.1, 0), 
+                        highlightLookedAt && outlined.map(outlinedEffect -> effect == outlinedEffect).orElse(false),
+                        Optional.of(effect)));
+            });
+        });
+    }
     
     protected int getColor() {
         return IStandPower.getStandPowerOptional(mc.player).map(stand -> StandSkinsManager.getUiColor(stand)).orElse(0xFFFFFF);
@@ -140,20 +169,18 @@ public abstract class MarkerRenderer {
     
     
     protected static class MarkerInstance {
-        private final Vector3d pos;
-        private final boolean outlined;
+        protected final Vector3d pos;
+        protected final boolean outlined;
+        protected final Optional<StandEffectInstance> standEffect;
         
         protected MarkerInstance(Vector3d pos, boolean outlined) {
+            this(pos, outlined, Optional.empty());
+        }
+        
+        protected MarkerInstance(Vector3d pos, boolean outlined, Optional<StandEffectInstance> standEffect) {
             this.pos = pos;
             this.outlined = outlined;
-        }
-        
-        protected Vector3d getPos() {
-            return pos;
-        }
-        
-        protected boolean isOutlined() {
-            return outlined;
+            this.standEffect = standEffect;
         }
     }
 }

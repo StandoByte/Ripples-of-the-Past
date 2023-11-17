@@ -20,9 +20,6 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.Pose;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
@@ -47,7 +44,6 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
 
     public GETransformationEntity(EntityType<?> type, World level) {
         super(type, level);
-        source = new ItemEntity(level, 0, 0, 0, new ItemStack(Items.DIRT));
     }
 
     public GETransformationEntity(World pLevel) {
@@ -109,7 +105,8 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                     
                     if (!isTurningBack && entityToSummon instanceof LivingEntity) {
                         IStandPower.getStandPowerOptional(owner.getEntity(level)).ifPresent(power -> {
-                            power.getContinuousEffects().addEffect(new GECreatedLifeformEffect(source)
+                            power.getContinuousEffects().addEffect(new GECreatedLifeformEffect()
+                                    .withOriginalEntity(source)
                                     .withStand(power)
                                     .withTarget((LivingEntity) entityToSummon)); 
                         });
