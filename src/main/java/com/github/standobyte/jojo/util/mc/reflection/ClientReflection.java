@@ -161,6 +161,12 @@ public class ClientReflection {
     }
     
     
+    private static final Field TEXTURED_QUAD_VERTICES = ObfuscationReflectionHelper.findField(ModelRenderer.TexturedQuad.class, "field_78239_a");
+    public static void setVertices(ModelRenderer.TexturedQuad quad, ModelRenderer.PositionTextureVertex[] vertices) {
+        ReflectionUtil.setFieldValue(TEXTURED_QUAD_VERTICES, quad, vertices);
+    }
+    
+    
     private static final Field SOUND_EVENT_ACCESSOR_LIST = ObfuscationReflectionHelper.findField(SoundEventAccessor.class, "field_188716_a");
     public static List<ISoundEventAccessor<Sound>> getSubAccessorsList(SoundEventAccessor accessor) {
         return ReflectionUtil.getFieldValue(SOUND_EVENT_ACCESSOR_LIST, accessor);

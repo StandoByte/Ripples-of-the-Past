@@ -117,7 +117,7 @@ public class StandDiscISTER extends ItemStackTileEntityRenderer {
         float y = normal.y();
         float z = normal.z();
 
-        for (int i = 0; i < 4; ++i) {
+        for (int i = 0; i < quad.vertices.length; ++i) {
             ModelRenderer.PositionTextureVertex vertex = quad.vertices[i];
             float vertexX = vertex.pos.x() / 16.0F;
             float vertexY = vertex.pos.y() / 16.0F;
