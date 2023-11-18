@@ -14,6 +14,7 @@ import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.EntityOwnerResolver;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.EntityType;
@@ -21,6 +22,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.Pose;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
@@ -36,7 +38,11 @@ import net.minecraftforge.fml.network.NetworkHooks;
 
 public class GETransformationEntity extends Entity implements IEntityAdditionalSpawnData {
     private static final DataParameter<Boolean> LIFE_FORM_SPAWNED = EntityDataManager.defineId(GETransformationEntity.class, DataSerializers.BOOLEAN);
-    private Entity source;
+    
+    private Entity sourceEntity;
+    private BlockState sourceBlockState;
+    private BlockPos sourceBlockPos;
+    
     private Entity target;
     private EntityOwnerResolver owner = new EntityOwnerResolver();
     private int duration;
@@ -51,7 +57,13 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
     }
     
     public GETransformationEntity withTransformationSource(Entity entity) {
-        this.source = entity;
+        this.sourceEntity = entity;
+        return this;
+    }
+    
+    public GETransformationEntity withTransformationSource(BlockState blockState, BlockPos blockPos) {
+        this.sourceBlockState = blockState;
+        this.sourceBlockPos = blockPos;
         return this;
     }
     
@@ -84,7 +96,15 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
     }
     
     public Entity getTransformationSource() {
-        return source;
+        return sourceEntity;
+    }
+    
+    public BlockState getTransformationSourceBlock() {
+        return sourceBlockState;
+    }
+    
+    public BlockPos getStartingBlockPos() {
+        return sourceBlockPos;
     }
     
     public Entity getTransformationTarget() {
@@ -97,7 +117,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             if (!level.isClientSide()) {
                 entityData.set(LIFE_FORM_SPAWNED, true);
                 remove();
-                Entity entityToSummon = isTurningBack ? source : target;
+                Entity entityToSummon = isTurningBack ? sourceEntity : target;
                 if (entityToSummon != null) {
                     entityToSummon.copyPosition(this);
                     level.addFreshEntity(entityToSummon);
@@ -106,7 +126,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                     if (!isTurningBack && entityToSummon instanceof LivingEntity) {
                         IStandPower.getStandPowerOptional(owner.getEntity(level)).ifPresent(power -> {
                             power.getContinuousEffects().addEffect(new GECreatedLifeformEffect()
-                                    .withOriginalEntity(source)
+                                    .withOriginalEntity(sourceEntity)
                                     .withStand(power)
                                     .withTarget((LivingEntity) entityToSummon)); 
                         });
@@ -181,10 +201,15 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         float renderAsItemTime = getRenderAsItemTime(duration);
         float tfProgressTime = getTfProgressTime(0);
         if (tfProgressTime < renderAsItemTime) {
-            if (source != null) {
+            if (sourceEntity != null || sourceBlockState != null) {
                 scale = 1 - tfProgressTime / renderAsItemTime;
                 if (scale > 0) {
-                    size = source.getDimensions(pPose).scale(scale);
+                    if (sourceEntity != null) {
+                        size = sourceEntity.getDimensions(pPose).scale(scale);
+                    }
+                    else {
+                        size = EntitySize.scalable(1, 1).scale(scale);
+                    }
                 }
             }
         }
@@ -243,7 +268,13 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         
         if (nbt.contains("SourceEntity", MCUtil.getNbtId(CompoundNBT.class))) {
             CompoundNBT entityNbt = nbt.getCompound("SourceEntity");
-            source = EntityType.create(entityNbt, level).orElse(null);
+            sourceEntity = EntityType.create(entityNbt, level).orElse(null);
+        }
+        if (nbt.contains("SourceBlock", MCUtil.getNbtId(CompoundNBT.class))) {
+            sourceBlockState = NBTUtil.readBlockState(nbt.getCompound("SourceBlock"));
+        }
+        if (nbt.contains("SourcePos", MCUtil.getNbtId(CompoundNBT.class))) {
+            sourceBlockPos = NBTUtil.readBlockPos(nbt.getCompound("SourcePos"));
         }
         if (nbt.contains("TargetEntity", MCUtil.getNbtId(CompoundNBT.class))) {
             CompoundNBT entityNbt = nbt.getCompound("TargetEntity");
@@ -258,9 +289,15 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         nbt.putInt("Duration", duration);
         nbt.putBoolean("TurnBack", isTurningBack);
         
-        if (source != null) {
-            CompoundNBT entityNbt = source.serializeNBT();
+        if (sourceEntity != null) {
+            CompoundNBT entityNbt = sourceEntity.serializeNBT();
             nbt.put("SourceEntity", entityNbt);
+        }
+        if (sourceBlockState != null) {
+            nbt.put("SourceBlock", NBTUtil.writeBlockState(sourceBlockState));
+        }
+        if (sourceBlockPos != null) {
+            nbt.put("SourcePos", NBTUtil.writeBlockPos(sourceBlockPos));
         }
         if (target != null) {
             CompoundNBT entityNbt = target.serializeNBT();
@@ -282,7 +319,9 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         owner.writeNetwork(buffer);
         
         writeEntityData(buffer, target);
-        writeEntityData(buffer, source);
+        writeEntityData(buffer, sourceEntity);
+        NetworkUtil.writeOptionally(buffer, sourceBlockState, blockState -> NetworkUtil.writeBlockState(buffer, blockState));
+        NetworkUtil.writeOptionally(buffer, sourceBlockPos, blockPos -> buffer.writeBlockPos(blockPos));
     }
 
     @Override
@@ -293,7 +332,9 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         owner.readNetwork(additionalData);
         
         target = readEntityData(additionalData);
-        source = readEntityData(additionalData);
+        sourceEntity = readEntityData(additionalData);
+        sourceBlockState = NetworkUtil.readOptional(additionalData, () -> NetworkUtil.readBlockState(additionalData)).orElse(null);
+        sourceBlockPos = NetworkUtil.readOptional(additionalData, () -> additionalData.readBlockPos()).orElse(null);
     }
     
     private void writeEntityData(PacketBuffer buffer, Entity entityToWrite) {

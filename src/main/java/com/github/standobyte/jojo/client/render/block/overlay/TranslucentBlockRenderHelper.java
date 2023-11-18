@@ -47,7 +47,7 @@ public class TranslucentBlockRenderHelper {
                 -projectedView.y(), 
                 -projectedView.z());
 
-        BlockRendererDispatcher renderer = Minecraft.getInstance().getBlockRenderer();
+        BlockRendererDispatcher renderer = mc.getBlockRenderer();
         int overlayTexture = OverlayTexture.pack(Math.abs((int) (Util.getMillis() % 2000) / 100 - 10), 10);
         blocks.forEach(block -> {
             BlockPos pos = block.pos;

@@ -4,6 +4,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.GETransformationEntity;
@@ -12,6 +13,7 @@ import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -26,6 +28,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.IFormattableTextComponent;
@@ -97,15 +100,23 @@ public class GoldExperienceCreateLifeform extends StandAction {
                         .withTransformationTarget(lifeFormCreated)
                         .withDuration(ticks)
                         .withOwner(user);
-                if (!user.getItemInHand(Hand.OFF_HAND).isEmpty()) {
-                    tf.withTransformationSource(new ItemEntity(world, 0, 0, 0, new ItemStack(user.getItemInHand(Hand.OFF_HAND).getItem())));
-                }
                 
                 Vector3d pos = performer.position();
                 Vector3d lookVec = performer.getLookAngle();
                 double distScale = lifeFormCreated.getBbWidth() + 1;
                 pos = pos.add(lookVec.x * distScale, 0, lookVec.z * distScale);
                 tf.moveTo(pos.x, pos.y, pos.z, performer.yRot, 0);
+                
+                if (!user.getItemInHand(Hand.OFF_HAND).isEmpty()) {
+                    tf.withTransformationSource(new ItemEntity(world, 0, 0, 0, new ItemStack(user.getItemInHand(Hand.OFF_HAND).getItem())));
+                }
+                else if (target.getType() == TargetType.BLOCK) {
+                    BlockPos blockPos = target.getBlockPos();
+                    BlockState blockState = world.getBlockState(blockPos);
+                    tf.withTransformationSource(blockState, blockPos);
+                    world.removeBlock(blockPos, false);
+                    tf.moveTo(blockPos, performer.yRot, 0);
+                }
                 
                 lifeFormCreated.copyPosition(tf);
                 lifeFormCreated.setYHeadRot(performer.yRot);

@@ -32,7 +32,7 @@ public class GoldExperienceLifeformRevertMarker extends MarkerRenderer {
 //        ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
 //        return hud.showExtraActionHud(ModStandsInit.CRAZY_DIAMOND_BLOCK_BULLET.get())
 //               && !mc.player.isShiftKeyDown();
-        return true;
+        return false;
     }
     
     @SuppressWarnings("deprecation")
