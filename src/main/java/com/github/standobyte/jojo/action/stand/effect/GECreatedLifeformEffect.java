@@ -3,23 +3,21 @@ package com.github.standobyte.jojo.action.stand.effect;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.entity.GETransformationEntity;
+import com.github.standobyte.jojo.entity.GETransformationEntity.GETransformationData;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.network.NetworkUtil;
-import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.world.World;
 
 public class GECreatedLifeformEffect extends StandEffectInstance {
-    private CompoundNBT originalEntityNbt = null;
-    private Entity originalEntity;
-    private ItemStack originalAsItem;
+    private GETransformationData source = new GETransformationData();
+    private ItemStack originalAsItem = ItemStack.EMPTY; // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this resets on savefile reload
     
     public GECreatedLifeformEffect() {
         this(ModStandEffects.GE_CREATED_LIFEFORM.get());
@@ -29,15 +27,12 @@ public class GECreatedLifeformEffect extends StandEffectInstance {
         super(effectType);
     }
     
-    public GECreatedLifeformEffect withOriginalEntity(Entity originalEntity) {
-        this.originalEntity = originalEntity;
-        if (originalEntity instanceof ItemEntity) {
-            originalAsItem = ((ItemEntity) originalEntity).getItem().copy();
-        }
-        else {
-            originalAsItem = null;
-        }
-        return this;
+    public GETransformationData getSource() {
+        return source;
+    }
+    
+    public void setSource(GETransformationData source) {
+        this.source.copyFrom(source, world);
     }
     
     @Nullable
@@ -46,20 +41,37 @@ public class GECreatedLifeformEffect extends StandEffectInstance {
     }
     
     @Override
-    protected void start() {}
-
+    protected void start() {
+        if (!world.isClientSide()) {
+            originalAsItem = source.makeSourceItemView();
+        }
+    }
+    
     @Override
-    protected void tickTarget(LivingEntity target) {}
+    protected void updateTarget(World world) {
+        if (!world.isClientSide()) {
+            Entity target = getTarget();
+            if (target != null && !target.isAlive() && target instanceof GETransformationEntity) {
+                GETransformationEntity tfEntity = (GETransformationEntity) target;
+                Entity tfTarget = tfEntity.getTransformationTarget();
+                if (tfTarget != null) {
+                    setTargetEntity(tfTarget);
+                }
+                else {
+                    clearTarget();
+                    return;
+                }
+            }
+        }
+        
+        super.updateTarget(world);
+    }
     
     @Override
     protected void tick() {
         if (!world.isClientSide()) {
-            LivingEntity target = getTarget();
-            if (target == null) {
-                remove();
-                return;
-            }
-            else {
+            LivingEntity target = getTargetLiving();
+            if (target != null) {
                 float staminaCost = ModStandsInit.GOLD_EXPERIENCE_CREATE_LIFEFORM.get().getStaminaCostTicking(userPower, target);
                 if (!userPower.consumeStamina(staminaCost)) {
                     remove();
@@ -73,12 +85,7 @@ public class GECreatedLifeformEffect extends StandEffectInstance {
         if (!world.isClientSide()) {
             Entity target = getTarget();
             if (target != null) {
-                if (originalEntity != null) {
-                    GETransformationEntity.turnEntityBack(target, originalEntity, user);
-                }
-                else {
-                    target.remove();
-                }
+                GETransformationEntity.turnEntityBack(target, source, user);
             }
         }
     }
@@ -90,26 +97,20 @@ public class GECreatedLifeformEffect extends StandEffectInstance {
     
     @Override
     public void onTick() {
-        if (originalEntityNbt != null) {
-            withOriginalEntity(EntityType.create(originalEntityNbt, world).orElse(null));
-            originalEntityNbt = null;
+        if (!world.isClientSide()) {
+            source.resolveNbtRead(world);
         }
         super.onTick();
     }
 
     @Override
     protected void writeAdditionalSaveData(CompoundNBT nbt) {
-        if (originalEntity != null) {
-            CompoundNBT entityNbt = originalEntity.serializeNBT();
-            nbt.put("OrigEntity", entityNbt);
-        }
+        source.writeNbt(nbt);
     }
 
     @Override
     protected void readAdditionalSaveData(CompoundNBT nbt) {
-        if (nbt.contains("OrigEntity", MCUtil.getNbtId(CompoundNBT.class))) {
-            originalEntityNbt = nbt.getCompound("OrigEntity");
-        }
+        source.readNbt(nbt);
     }
 
     @Override

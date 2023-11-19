@@ -1017,11 +1017,16 @@ public class ActionsOverlayGui extends AbstractGui {
             if (alpha < 1) {
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
             }
-            mc.getTextureManager().bind(RADIAL_INDICATOR);
-            int deg = (int) (ratio * 360F);
-            blit(matrixStack, x, y, deg % 19 * 13, deg / 19 * 13, 13, 13);
+            renderRadialIndicator(matrixStack, x - 1, y - 1, ratio);
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         }
+    }
+    
+    public static void renderRadialIndicator(MatrixStack matrixStack, int x, int y, float ratio) {
+        Minecraft.getInstance().getTextureManager().bind(RADIAL_INDICATOR);
+        int deg = (int) (ratio * 360F);
+        blitFloat(matrixStack, x + 1.5F, y + 1.5F, deg % 19 * 13, deg / 19 * 13, 13, 13, 256, 256);
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
     }
     
     

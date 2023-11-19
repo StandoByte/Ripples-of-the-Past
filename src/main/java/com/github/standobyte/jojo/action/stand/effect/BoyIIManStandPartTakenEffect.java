@@ -1,11 +1,14 @@
 package com.github.standobyte.jojo.action.stand.effect;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
@@ -28,9 +31,6 @@ public class BoyIIManStandPartTakenEffect extends StandEffectInstance {
     
     @Override
     protected void start() {}
-
-    @Override
-    protected void tickTarget(LivingEntity target) {}
     
     @Override
     protected void tick() {}
@@ -38,7 +38,7 @@ public class BoyIIManStandPartTakenEffect extends StandEffectInstance {
     @Override
     protected void stop() {
         if (!world.isClientSide() && partsTaken != null) {
-            LivingEntity target = getTarget();
+            LivingEntity target = getTargetLiving();
             if (target != null) {
                 IStandPower.getStandPowerOptional(target).ifPresent(power -> {
                     if (!power.hasPower()) {
@@ -61,8 +61,9 @@ public class BoyIIManStandPartTakenEffect extends StandEffectInstance {
     }
     
     @Override
-    protected boolean keepTarget(LivingEntity target) {
-        return !target.isDeadOrDying() || JojoModConfig.getCommonConfigInstance(world.isClientSide()).keepStandOnDeath.get();
+    protected boolean shouldClearTarget(Entity target, @Nullable LivingEntity targetLiving) {
+        return targetLiving != null && targetLiving.isDeadOrDying()
+                && !JojoModConfig.getCommonConfigInstance(world.isClientSide()).keepStandOnDeath.get();
     }
     
     @Override

@@ -169,7 +169,6 @@ public class StandEffectsTracker {
     
     public void syncWithTrackingOrUser(ServerPlayerEntity player) {
         effects.values().forEach(effect -> {
-            effect.updateTarget(player.getLevel());
             effect.syncWithTrackingOrUser(player);
         });
     }

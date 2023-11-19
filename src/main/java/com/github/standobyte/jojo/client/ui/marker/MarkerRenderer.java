@@ -22,7 +22,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.renderer.ActiveRenderInfo;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.api.distmarker.Dist;
@@ -89,7 +89,7 @@ public abstract class MarkerRenderer {
         
         matrixStack.pushPose();
         matrixStack.translate(-8, -28, 0);
-        renderIcon(matrixStack, marker);
+        renderIcon(matrixStack, marker, partialTick);
         matrixStack.popPose();
         
         mc.getTextureManager().bind(ClientUtil.ADDITIONAL_UI);
@@ -100,13 +100,23 @@ public abstract class MarkerRenderer {
             AbstractGui.blit(matrixStack, -16, -32, 32, 0, 64, 32, 256, 256);
         }
 
+        matrixStack.pushPose();
+        matrixStack.translate(-8, -28, 0);
+        renderIconOnBorder(matrixStack, marker, partialTick);
+        matrixStack.popPose();
+
         matrixStack.popPose();
     }
     
-    protected void renderIcon(MatrixStack matrixStack, MarkerInstance marker) {
-        mc.getTextureManager().bind(getIcon());
-        AbstractGui.blit(matrixStack, 0, 0, 0, 0, 16, 16, 16, 16);
+    protected void renderIcon(MatrixStack matrixStack, MarkerInstance marker, float partialTick) {
+        ResourceLocation icon = getIcon();
+        if (icon != null) {
+            mc.getTextureManager().bind(icon);
+            AbstractGui.blit(matrixStack, 0, 0, 0, 0, 16, 16, 16, 16);
+        }
     }
+    
+    protected void renderIconOnBorder(MatrixStack matrixStack, MarkerInstance marker, float partialTick) {}
     
     protected abstract boolean shouldRender();
     protected abstract void updatePositions(List<MarkerInstance> list, float partialTick);
@@ -118,11 +128,13 @@ public abstract class MarkerRenderer {
                     standEffect, range).collect(Collectors.toList());
             Optional<StandEffectInstance> outlined = highlightLookedAt ? StandEffectsTracker.getTargetLookedAt(targets.stream(), mc.player) : Optional.empty();
             targets.forEach(effect -> {
-                LivingEntity target = effect.getTarget();
-                list.add(new MarkerInstance(
-                        target.getPosition(partialTick).add(0, target.getBbHeight() * 1.1, 0), 
-                        highlightLookedAt && outlined.map(outlinedEffect -> effect == outlinedEffect).orElse(false),
-                        Optional.of(effect)));
+                Entity target = effect.getTarget();
+                if (target != null) {
+                    list.add(new MarkerInstance(
+                            target.getPosition(partialTick).add(0, target.getBbHeight() * 1.1, 0), 
+                            highlightLookedAt && outlined.map(outlinedEffect -> effect == outlinedEffect).orElse(false),
+                            Optional.of(effect)));
+                }
             });
         });
     }
@@ -169,8 +181,8 @@ public abstract class MarkerRenderer {
     
     
     protected static class MarkerInstance {
-        protected final Vector3d pos;
-        protected final boolean outlined;
+        protected Vector3d pos;
+        protected boolean outlined;
         protected final Optional<StandEffectInstance> standEffect;
         
         protected MarkerInstance(Vector3d pos, boolean outlined) {

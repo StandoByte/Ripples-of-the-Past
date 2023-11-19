@@ -4,13 +4,13 @@ import java.util.List;
 
 import com.github.standobyte.jojo.action.stand.effect.GECreatedLifeformEffect;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
+import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
+import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.model.IBakedModel;
@@ -19,7 +19,6 @@ import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.vector.Matrix4f;
 
 public class GoldExperienceLifeformRevertMarker extends MarkerRenderer {
     
@@ -29,15 +28,13 @@ public class GoldExperienceLifeformRevertMarker extends MarkerRenderer {
     
     @Override
     protected boolean shouldRender() {
-//        ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
-//        return hud.showExtraActionHud(ModStandsInit.CRAZY_DIAMOND_BLOCK_BULLET.get())
-//               && !mc.player.isShiftKeyDown();
-        return false;
+        ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
+        return hud.showExtraActionHud(ModStandsInit.GOLD_EXPERIENCE_REVERT_LIFEFORM.get());
     }
     
     @SuppressWarnings("deprecation")
     @Override
-    protected void renderIcon(MatrixStack matrixStack, MarkerInstance marker) {
+    protected void renderIcon(MatrixStack matrixStack, MarkerInstance marker, float partialTick) {
         marker.standEffect.ifPresent(effect -> {
             if (effect instanceof GECreatedLifeformEffect) {
                 ItemStack item = ((GECreatedLifeformEffect) effect).getItemView();
@@ -63,8 +60,8 @@ public class GoldExperienceLifeformRevertMarker extends MarkerRenderer {
                     matrixStack.translate(8, 8, 0);
                     matrixStack.scale(16, 16, 1);
                     matrixStack.scale(1, -1, -1);
-                    
-                    // FIXME the item is distorted the further it is from the cursor
+
+                    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! the item model is distorted by FoV effect
                     itemRenderer.render(item, ItemCameraTransforms.TransformType.GUI, false, 
                             matrixStack, buffer, ClientUtil.MAX_MODEL_LIGHT, OverlayTexture.NO_OVERLAY, itemModel);
                     matrixStack.popPose();
@@ -80,6 +77,6 @@ public class GoldExperienceLifeformRevertMarker extends MarkerRenderer {
     
     @Override
     protected void updatePositions(List<MarkerInstance> list, float partialTick) {
-        fillWithStandEffectTargets(list, partialTick, ModStandEffects.GE_CREATED_LIFEFORM.get(), 32, mc, true);
+        GoldExperienceLifeformMarker.updateGELifeformMarkers(list, partialTick, mc, true);
     }
 }

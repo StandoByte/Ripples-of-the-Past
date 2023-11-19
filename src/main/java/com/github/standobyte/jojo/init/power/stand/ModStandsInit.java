@@ -20,6 +20,7 @@ import com.github.standobyte.jojo.action.stand.CrazyDiamondRepairItem;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.action.stand.GoldExperienceChooseLifeform;
 import com.github.standobyte.jojo.action.stand.GoldExperienceCreateLifeform;
+import com.github.standobyte.jojo.action.stand.GoldExperienceRevertLifeform;
 import com.github.standobyte.jojo.action.stand.HierophantGreenBarrier;
 import com.github.standobyte.jojo.action.stand.HierophantGreenEmeraldSplash;
 import com.github.standobyte.jojo.action.stand.HierophantGreenGrapple;
@@ -783,6 +784,10 @@ public class ModStandsInit {
             () -> new GoldExperienceCreateLifeform(new StandAction.Builder()
                     .staminaCostTick(1)
                     .partsRequired(StandPart.ARMS)));
+    
+    public static final RegistryObject<GoldExperienceRevertLifeform> GOLD_EXPERIENCE_REVERT_LIFEFORM = ACTIONS.register("gold_experience_revert_lifeform", 
+            () -> new GoldExperienceRevertLifeform(new StandAction.Builder()
+                    .shiftVariationOf(GOLD_EXPERIENCE_CREATE_LIFEFORM)));
     
     
     public static final EntityStandRegistryObject<EntityStandType<StandStats>, StandEntityType<GoldExperienceEntity>> STAND_GOLD_EXPERIENCE = 

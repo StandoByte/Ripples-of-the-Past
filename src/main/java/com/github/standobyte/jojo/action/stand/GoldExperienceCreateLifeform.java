@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.action.stand.effect.GECreatedLifeformEffect;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.GETransformationEntity;
@@ -21,6 +22,7 @@ import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.item.TNTEntity;
 import net.minecraft.entity.monster.SlimeEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -96,34 +98,60 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     }
                 }
                 
-                GETransformationEntity tf = new GETransformationEntity(world)
-                        .withTransformationTarget(lifeFormCreated)
-                        .withDuration(ticks)
-                        .withOwner(user);
+                GETransformationEntity tf = new GETransformationEntity(world);
                 
-                Vector3d pos = performer.position();
-                Vector3d lookVec = performer.getLookAngle();
-                double distScale = lifeFormCreated.getBbWidth() + 1;
-                pos = pos.add(lookVec.x * distScale, 0, lookVec.z * distScale);
-                tf.moveTo(pos.x, pos.y, pos.z, performer.yRot, 0);
-                
-                if (!user.getItemInHand(Hand.OFF_HAND).isEmpty()) {
-                    tf.withTransformationSource(new ItemEntity(world, 0, 0, 0, new ItemStack(user.getItemInHand(Hand.OFF_HAND).getItem())));
+                boolean tfTargetFound = false;
+                // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! use more types of inanimate entities as targets
+                if (target.getType() == TargetType.ENTITY) {
+                    Entity targetEntity = target.getEntity();
+                    if (targetEntity instanceof TNTEntity) {
+                        tf.getTfSourceData().withEntitySource(targetEntity);
+                        targetEntity.remove();
+                        tfTargetFound = true;
+                        
+                        Vector3d pos = targetEntity.position();
+                        tf.moveTo(pos.x, pos.y, pos.z, performer.yRot, 0);
+                    }
                 }
-                else if (target.getType() == TargetType.BLOCK) {
+                if (!tfTargetFound && !user.getItemInHand(Hand.OFF_HAND).isEmpty()) {
+                    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! consoom the item
+                    tf.getTfSourceData().withEntitySource(new ItemEntity(world, 0, 0, 0, new ItemStack(user.getItemInHand(Hand.OFF_HAND).getItem())));
+                    tfTargetFound = true;
+                    
+                    Vector3d pos = performer.position();
+                    Vector3d lookVec = performer.getLookAngle();
+                    double distScale = lifeFormCreated.getBbWidth() + 1;
+                    pos = pos.add(lookVec.x * distScale, 0, lookVec.z * distScale);
+                    tf.moveTo(pos.x, pos.y, pos.z, performer.yRot, 0);
+                }
+                if (!tfTargetFound && target.getType() == TargetType.BLOCK) {
                     BlockPos blockPos = target.getBlockPos();
                     BlockState blockState = world.getBlockState(blockPos);
-                    tf.withTransformationSource(blockState, blockPos);
+                    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! filter the block
+                    tf.getTfSourceData().withBlockSource(blockState, blockPos);
                     world.removeBlock(blockPos, false);
+                    tfTargetFound = true;
+                    
                     tf.moveTo(blockPos, performer.yRot, 0);
                 }
                 
-                lifeFormCreated.copyPosition(tf);
-                lifeFormCreated.setYHeadRot(performer.yRot);
-                world.addFreshEntity(tf);
-                
-                if (!power.isUserCreative()) {
-                    power.setCooldownTimer(this, ticks);
+                if (tfTargetFound) {
+                    tf.withTransformationTarget(lifeFormCreated)
+                    .withDuration(ticks)
+                    .withOwner(user);
+                    
+                    GECreatedLifeformEffect effect = new GECreatedLifeformEffect();
+                    effect.withStand(power).withTarget(tf);
+                    effect.setSource(tf.getTfSourceData());
+                    power.getContinuousEffects().addEffect(effect);
+                    
+                    lifeFormCreated.copyPosition(tf);
+                    lifeFormCreated.setYHeadRot(performer.yRot);
+                    world.addFreshEntity(tf);
+                    
+                    if (!power.isUserCreative()) {
+                        power.setCooldownTimer(this, ticks);
+                    }
                 }
             }
             else if (user instanceof ServerPlayerEntity) {
@@ -146,9 +174,9 @@ public class GoldExperienceCreateLifeform extends StandAction {
     }
     
     public float getStaminaCostTicking(IStandPower stand, LivingEntity lifeform) {
-        float costMultiplier = getStaminaCostTicking(stand);
+//        float costMultiplier = getStaminaCostTicking(stand);
         
-        return costMultiplier;
+        return 0;
     }
     
     public static float getVolume(Entity entity) {

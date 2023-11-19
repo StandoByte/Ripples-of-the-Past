@@ -66,10 +66,10 @@ public class GETransformationRenderer<T extends GETransformationEntity> extends 
         if (!entity.isInvisibleTo(Minecraft.getInstance().player)) {
             float age = entity.getTfProgressTime(partialTick);
             float ageMax = entity.getDuration();
-            float itemSourceAge = GETransformationEntity.getRenderAsItemTime(ageMax);
+            float itemSourceAge = entity.getRenderAsItemTime();
             if (age < itemSourceAge) {
-                Entity sourceEntity = entity.getTransformationSource();
-                BlockState sourceBlock = entity.getTransformationSourceBlock();
+                Entity sourceEntity = entity.getTfSourceData().getSourceEntity();
+                BlockState sourceBlock = entity.getTfSourceData().getSourceBlockState();
                 if (sourceEntity != null || sourceBlock != null) {
                     float scale = 1 - age / itemSourceAge;
                     matrixStack.pushPose();
@@ -93,7 +93,7 @@ public class GETransformationRenderer<T extends GETransformationEntity> extends 
                               for (RenderType type : RenderType.chunkBufferLayers()) {
                                  if (RenderTypeLookup.canRenderInLayer(sourceBlock, type)) {
                                     ForgeHooksClient.setRenderLayer(type);
-                                    BlockPos startingPos = entity.getStartingBlockPos();
+                                    BlockPos startingPos = entity.getTfSourceData().getSourceBlockPos();
                                     if (startingPos == null) startingPos = entity.blockPosition();
                                     blockRenderer.getModelRenderer().renderModel(world, 
                                             blockRenderer.getBlockModel(sourceBlock), sourceBlock, blockPos, 
@@ -199,7 +199,7 @@ public class GETransformationRenderer<T extends GETransformationEntity> extends 
     
     
     private ResourceLocation getBlockOverlaySprite(GETransformationEntity tfEntity) {
-        Entity sourceEntity = tfEntity.getTransformationSource();
+        Entity sourceEntity = tfEntity.getTfSourceData().getSourceEntity();
         if (sourceEntity instanceof ItemEntity) {
             ItemStack item = ((ItemEntity) sourceEntity).getItem();
             if (!item.isEmpty() && item.getItem() instanceof BlockItem) {
@@ -209,7 +209,7 @@ public class GETransformationRenderer<T extends GETransformationEntity> extends 
             }
         }
         else {
-            BlockState blockState = tfEntity.getTransformationSourceBlock();
+            BlockState blockState = tfEntity.getTfSourceData().getSourceBlockState();
             if (blockState != null) {
                 ResourceLocation tex = CDBlockBulletRenderer.getBlockTexture(blockState);
                 return tex;
