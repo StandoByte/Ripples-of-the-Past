@@ -115,7 +115,7 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
             
             level.getEntitiesOfClass(LivingEntity.class, 
                     new AxisAlignedBB(getBoundingBox().getCenter(), getBoundingBox().getCenter()).inflate(24), 
-                    entity -> !entity.is(originEntity) && entity != noResolveEntity
+                    entity -> !entity.is(originEntity)
                             && originEntity.isAlliedTo(entity) && !(entity instanceof StandEntity))
             .forEach(entity -> {
                 IStandPower.getStandPowerOptional(entity).ifPresent(stand -> {
@@ -127,7 +127,6 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
             RayTraceResult rayTrace = JojoModUtil.rayTrace(this, 32, 
                     entity -> entity instanceof LivingEntity
                             && !StandUtil.getStandUser((LivingEntity) entity).is(originEntity)
-                            && entity != noResolveEntity
                     , 1.0);
             if (rayTrace.getType() == RayTraceResult.Type.ENTITY) {
                 Entity lookEntity = ((EntityRayTraceResult) rayTrace).getEntity();
@@ -153,7 +152,7 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
     }
     
     private boolean giveResolve(LivingEntity target, IStandPower targetStandPower) {
-        return resolveCanLvlUp || targetStandPower.getResolveLevel() >= targetStandPower.getMaxResolveLevel();
+        return target != noResolveEntity && (resolveCanLvlUp || targetStandPower.getResolveLevel() >= targetStandPower.getMaxResolveLevel());
     }
     
     
