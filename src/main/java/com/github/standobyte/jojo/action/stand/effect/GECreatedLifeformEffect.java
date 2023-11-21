@@ -46,14 +46,20 @@ public class GECreatedLifeformEffect extends StandEffectInstance {
     protected void updateTarget(World world) {
         if (!world.isClientSide()) {
             Entity target = getTarget();
-            if (target != null && !target.isAlive() && target instanceof GETransformationEntity) {
-                GETransformationEntity tfEntity = (GETransformationEntity) target;
-                Entity tfTarget = tfEntity.getTransformationTarget();
-                if (tfTarget != null) {
-                    setTargetEntity(tfTarget);
+            if (target != null && !target.isAlive()) {
+                if (target instanceof GETransformationEntity) {
+                    GETransformationEntity tfEntity = (GETransformationEntity) target;
+                    Entity tfTarget = tfEntity.getTransformationTarget();
+                    if (tfTarget != null) {
+                        setTargetEntity(tfTarget);
+                    }
+                    else {
+                        clearTarget();
+                        return;
+                    }
                 }
-                else {
-                    clearTarget();
+                else if (target instanceof LivingEntity && ((LivingEntity) target).isDeadOrDying()) {
+                    remove();
                     return;
                 }
             }
