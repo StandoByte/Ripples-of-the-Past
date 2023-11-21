@@ -12,6 +12,7 @@ import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.util.mc.EntityOwnerResolver;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntitySize;
@@ -21,6 +22,8 @@ import net.minecraft.entity.MoverType;
 import net.minecraft.entity.Pose;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.item.TNTEntity;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
@@ -31,10 +34,13 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.BlockSnapshot;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
 
@@ -95,25 +101,54 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         return target;
     }
     
+    @SuppressWarnings("deprecation")
     private void turnInto() {
         Entity entityToSummon = null;
-        BlockState blockToSummon = null;
+        BlockState blockToPlace = null;
         if (isTurningBack()) {
             if (source.sourceEntity != null) {
                 entityToSummon = source.sourceEntity;
             }
             else if (source.sourceBlockState != null) {
-                blockToSummon = source.sourceBlockState;
+                blockToPlace = source.sourceBlockState;
             }
         }
         else {
             entityToSummon = target;
         }
+        BlockPos blockPos = blockPosition();
+        
+        if (blockToPlace != null) {
+            blockToPlace = Block.updateFromNeighbourShapes(blockToPlace, level, blockPos);
+            BlockState existingBlock = level.getBlockState(blockPos);
+            if (!(existingBlock.isAir(level, blockPos) && blockToPlace.canSurvive(level, blockPos))) {
+                Item item = blockToPlace.getBlock().asItem();
+                if (item != null && item != Items.AIR) {
+                    entityToSummon = new ItemEntity(level, getX(), getY(), getZ(), new ItemStack(item));
+                }
+                
+                blockToPlace = null;
+            }
+        }
         
         if (entityToSummon != null) {
             entityToSummon.copyPosition(this);
             level.addFreshEntity(entityToSummon);
+            if (this.isOnFire()) {
+                entityToSummon.setSecondsOnFire((getRemainingFireTicks() + 19) / 20);
+            }
             GoldExperienceCreateLifeform.onTransformationFinish(entityToSummon);
+        }
+        else if (blockToPlace != null) {
+            Entity ownerEntity = owner.getEntity(level);
+            if (!ForgeEventFactory.onBlockPlace(ownerEntity, BlockSnapshot.create(level.dimension(), level, blockPos.below()), Direction.UP)) {
+                if (this.isOnFire()) {
+                    blockToPlace.catchFire(level, blockPos, Direction.UP, null);
+                }
+                else {
+                    level.setBlock(blockPos, blockToPlace, 3);
+                }
+            }
         }
     }
     
@@ -282,7 +317,21 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                     .withDuration(TURN_BACK_TICKS)
                     .withOwner(owner)
                     .setTurningBack();
-            tf.source.copyFrom(source, world);
+            
+            if (source.sourceEntity instanceof ItemEntity) {
+                ItemStack item = ((ItemEntity) source.sourceEntity).getItem();
+                if (!item.isEmpty() && item.getItem() instanceof BlockItem && item.getCount() == 1) {
+//                    BlockState blockToPlace = null;
+//                    if (blockToPlace != null) {
+//                        source.withEntitySource(null).withBlockSource(blockToPlace, null);
+//                    }
+                }
+            }
+            tf.source.copyFrom(source, world); // set on fire
+
+            if (entity.isOnFire()) {
+                tf.setSecondsOnFire((entity.getRemainingFireTicks() + 19) / 20);
+            }
             
             Vector3d pos = entity.position();
             tf.moveTo(pos.x, pos.y, pos.z, entity.yRot, entity.xRot);
@@ -385,6 +434,13 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                 }
                 else if (sourceEntity instanceof TNTEntity) {
                     return new ItemStack(Items.TNT);
+                }
+            }
+            else if (sourceBlockState != null) {
+                Block block = sourceBlockState.getBlock();
+                Item blockItem = block.asItem();
+                if (blockItem != null && blockItem != Items.AIR) {
+                    return new ItemStack(blockItem);
                 }
             }
             

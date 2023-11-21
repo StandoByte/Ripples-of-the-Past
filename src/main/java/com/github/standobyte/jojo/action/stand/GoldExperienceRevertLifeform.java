@@ -13,6 +13,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.world.World;
 
 public class GoldExperienceRevertLifeform extends StandAction {
+    public static final double MARKER_DISTANCE = 64;
 
     public GoldExperienceRevertLifeform(StandAction.Builder builder) {
         super(builder);
@@ -22,7 +23,7 @@ public class GoldExperienceRevertLifeform extends StandAction {
     public Action<IStandPower> getVisibleAction(IStandPower power, ActionTarget target) {
         Action<IStandPower> action = super.getVisibleAction(power, target);
         if (action == this && 
-                !StandEffectsTracker.getEffectsOfType(power, ModStandEffects.GE_CREATED_LIFEFORM.get(), 64)
+                !StandEffectsTracker.getEffectsOfType(power, ModStandEffects.GE_CREATED_LIFEFORM.get(), MARKER_DISTANCE)
                 .findAny().isPresent()) {
             action = null;
         }
@@ -54,7 +55,8 @@ public class GoldExperienceRevertLifeform extends StandAction {
     @Override
     public void perform(World world, LivingEntity user, IStandPower power, ActionTarget target, @Nullable PacketBuffer extraInput) {
         if (!world.isClientSide()) {
-            StandEffectsTracker.getTargetLookedAt(power, ModStandEffects.GE_CREATED_LIFEFORM.get(), 64, power.getUser()).ifPresent(effect -> effect.remove());
+            StandEffectsTracker.getTargetLookedAt(power, ModStandEffects.GE_CREATED_LIFEFORM.get(), 
+                    MARKER_DISTANCE, power.getUser()).ifPresent(effect -> effect.remove());
         }
     }
 //    

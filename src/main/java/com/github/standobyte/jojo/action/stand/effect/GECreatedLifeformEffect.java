@@ -17,7 +17,7 @@ import net.minecraft.world.World;
 
 public class GECreatedLifeformEffect extends StandEffectInstance {
     private GETransformationData source = new GETransformationData();
-    private ItemStack originalAsItem = ItemStack.EMPTY; // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this resets on savefile reload
+    private ItemStack originalAsItem = ItemStack.EMPTY; // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this resets on savefile reload
     
     public GECreatedLifeformEffect() {
         this(ModStandEffects.GE_CREATED_LIFEFORM.get());
@@ -32,7 +32,7 @@ public class GECreatedLifeformEffect extends StandEffectInstance {
     }
     
     public void setSource(GETransformationData source) {
-        this.source.copyFrom(source, world);
+        this.source = source;
     }
     
     @Nullable

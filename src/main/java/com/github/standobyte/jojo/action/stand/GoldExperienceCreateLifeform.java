@@ -101,7 +101,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                 GETransformationEntity tf = new GETransformationEntity(world);
                 
                 boolean tfTargetFound = false;
-                // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! use more types of inanimate entities as targets
+                // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! use more types of inanimate entities as targets
                 if (target.getType() == TargetType.ENTITY) {
                     Entity targetEntity = target.getEntity();
                     if (targetEntity instanceof TNTEntity) {
@@ -111,6 +111,10 @@ public class GoldExperienceCreateLifeform extends StandAction {
                         
                         Vector3d pos = targetEntity.position();
                         tf.moveTo(pos.x, pos.y, pos.z, performer.yRot, 0);
+                        
+                        if (targetEntity.isOnFire()) {
+                            tf.setSecondsOnFire((targetEntity.getRemainingFireTicks() + 19) / 20);
+                        }
                     }
                 }
                 if (!tfTargetFound && !user.getItemInHand(Hand.OFF_HAND).isEmpty()) {
