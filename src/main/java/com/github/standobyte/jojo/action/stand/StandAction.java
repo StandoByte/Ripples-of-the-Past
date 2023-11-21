@@ -59,8 +59,9 @@ public abstract class StandAction extends Action<IStandPower> {
         return isTrained;
     }
     
+    private static final StandAction[] NO_EXTRA_ACTIONS = new StandAction[0];
     public StandAction[] getExtraUnlockable() {
-        return new StandAction[0];
+        return NO_EXTRA_ACTIONS;
     }
     
     public float getMaxTrainingPoints(IStandPower power) {
