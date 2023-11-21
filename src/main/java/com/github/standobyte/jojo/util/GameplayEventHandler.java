@@ -1036,6 +1036,10 @@ public class GameplayEventHandler {
                     ModCriteriaTriggers.SOUL_ASCENSION.get().trigger((ServerPlayerEntity) user, stand, ticks);
                 }
                 SoulEntity soulEntity = new SoulEntity(user.level, user, ticks, resolveCanLvlUp);
+                LivingEntity killer = user.getKillCredit();
+                if (killer != null) {
+                    soulEntity.setNoResolveToEntity(StandUtil.getStandUser(killer));
+                }
                 user.level.addFreshEntity(soulEntity);
             });
         }
