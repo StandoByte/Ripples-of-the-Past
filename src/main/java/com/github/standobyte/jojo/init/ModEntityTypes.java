@@ -249,7 +249,7 @@ public class ModEntityTypes {
             .build(new ResourceLocation(JojoMod.MOD_ID, "firework_inside").toString()));
     
     public static final RegistryObject<EntityType<GETransformationEntity>> GE_LIFEFORM_TRANSFORMATION = ENTITIES.register("ge_lifeform", 
-            () -> EntityType.Builder.<GETransformationEntity>of(GETransformationEntity::new, EntityClassification.MISC).sized(1.0F, 1.0F)
+            () -> EntityType.Builder.<GETransformationEntity>of(GETransformationEntity::new, EntityClassification.MISC).sized(1.0F, 1.0F).noSummon()
             .build(new ResourceLocation(JojoMod.MOD_ID, "ge_lifeform").toString()));
 
     

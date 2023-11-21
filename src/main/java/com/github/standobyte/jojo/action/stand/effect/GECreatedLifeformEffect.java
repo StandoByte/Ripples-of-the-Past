@@ -6,7 +6,6 @@ import com.github.standobyte.jojo.entity.GETransformationEntity;
 import com.github.standobyte.jojo.entity.GETransformationEntity.GETransformationData;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
-import com.github.standobyte.jojo.network.NetworkUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -41,11 +40,7 @@ public class GECreatedLifeformEffect extends StandEffectInstance {
     }
     
     @Override
-    protected void start() {
-        if (!world.isClientSide()) {
-            originalAsItem = source.makeSourceItemView();
-        }
-    }
+    protected void start() {}
     
     @Override
     protected void updateTarget(World world) {
@@ -116,14 +111,15 @@ public class GECreatedLifeformEffect extends StandEffectInstance {
     @Override
     public void writeAdditionalPacketData(PacketBuffer buf, boolean sendingToUser) {
         if (sendingToUser) {
-            NetworkUtil.writeOptionally(buf, originalAsItem, item -> buf.writeItemStack(originalAsItem, true));
+            source.toBuf(buf);
         }
     }
 
     @Override
     public void readAdditionalPacketData(PacketBuffer buf, boolean clientIsUser) {
         if (clientIsUser) {
-            originalAsItem = NetworkUtil.readOptional(buf, () -> buf.readItem()).orElse(null);
+            source.fromBuf(buf, world);
+            originalAsItem = source.clMakeSourceItemView();
         }
     }
 }

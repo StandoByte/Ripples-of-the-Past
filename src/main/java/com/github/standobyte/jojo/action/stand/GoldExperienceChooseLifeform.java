@@ -46,6 +46,11 @@ public class GoldExperienceChooseLifeform extends StandAction {
             if (entityType == EntityType.TRADER_LLAMA) {
                 return false;
             }
+
+            // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! tmp, will be reserved for specific items/blocks
+            if (entityType == EntityType.SLIME || entityType == EntityType.MAGMA_CUBE) {
+                return false;
+            }
             
             if (!(mob instanceof AmbientEntity || mob instanceof CreatureEntity
                     || mob instanceof FlyingEntity || mob instanceof SlimeEntity)) {

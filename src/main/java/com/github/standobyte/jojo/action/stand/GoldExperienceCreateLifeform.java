@@ -65,6 +65,29 @@ public class GoldExperienceCreateLifeform extends StandAction {
     
     @Nullable
     private static EntityType<?> getChosenEntityType(PlayerEntity player) {
+//        ItemStack heldItem = player.getItemInHand(Hand.OFF_HAND);
+//        if (!heldItem.isEmpty()) {
+//            Item item = heldItem.getItem();
+//            if (item == Items.SLIME_BALL || item == Items.SLIME_BLOCK) {
+//                return EntityType.SLIME;
+//            }
+//            if (item == Items.MAGMA_CREAM || item == Items.MAGMA_BLOCK) {
+//                return EntityType.MAGMA_CUBE;
+//            }
+//        }
+//
+//        if (target.getType() == TargetType.BLOCK) {
+//            BlockPos blockPos = target.getBlockPos();
+//            BlockState blockState = world.getBlockState(blockPos);
+//            Block block = blockState.getBlock();
+//            if (block == Blocks.SLIME_BLOCK) {
+//                return EntityType.SLIME;
+//            }
+//            if (block == Blocks.MAGMA_BLOCK) {
+//                return EntityType.MAGMA_CUBE;
+//            }
+//        }
+        
         return player.getCapability(PlayerUtilCapProvider.CAPABILITY).resolve()
                 .map(playerData -> playerData.getGEChosenLifeformType()).orElse(null);
     }
@@ -123,17 +146,20 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     }
                 }
                 if (!tfTargetFound && !user.getItemInHand(Hand.OFF_HAND).isEmpty()) {
-                    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! consoom the item
-                    ItemStack item = user.getItemInHand(Hand.OFF_HAND);
+                    ItemStack heldItem = user.getItemInHand(Hand.OFF_HAND);
                     Entity itemEntity;
-                    if (item.getItem() instanceof ThrowablePotionItem) {
+                    ItemStack transformedItem = heldItem.copy();
+                    transformedItem.setCount(1);
+                    if (heldItem.getItem() instanceof ThrowablePotionItem) {
                         PotionEntity potionEntity = new PotionEntity(world, user);
-                        potionEntity.setItem(item);
+                        potionEntity.setItem(transformedItem);
                         itemEntity = potionEntity;
                     }
                     else {
-                        itemEntity = new ItemEntity(world, 0, 0, 0, new ItemStack(item.getItem()));
+                        itemEntity = new ItemEntity(world, 0, 0, 0, transformedItem);
                     }
+                    if (!power.isUserCreative()) heldItem.shrink(1);
+                    
                     tf.getTfSourceData().withEntitySource(itemEntity);
                     tfTargetFound = true;
                     
@@ -146,7 +172,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                 if (!tfTargetFound && target.getType() == TargetType.BLOCK) {
                     BlockPos blockPos = target.getBlockPos();
                     BlockState blockState = world.getBlockState(blockPos);
-                    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! filter the block
+                    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! filter the block/item (use hamon filters)
                     tf.getTfSourceData().withBlockSource(blockState, blockPos);
                     world.removeBlock(blockPos, false);
                     tfTargetFound = true;

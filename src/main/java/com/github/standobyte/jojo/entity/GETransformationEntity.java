@@ -429,7 +429,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             this.sourceBlockPos = other.sourceBlockPos;
         }
         
-        public ItemStack makeSourceItemView() {
+        public ItemStack clMakeSourceItemView() {
             if (sourceEntity != null) {
                 if (sourceEntity instanceof ItemEntity) {
                     return ((ItemEntity) sourceEntity).getItem().copy();
@@ -438,7 +438,6 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                     return new ItemStack(Items.TNT);
                 }
                 else if (sourceEntity instanceof PotionEntity) {
-                    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! shit only exists in client code
                     return ((PotionEntity) sourceEntity).getItem().copy();
                 }
                 else if (sourceEntity.getType() == ModEntityTypes.ROAD_ROLLER.get()) {
