@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.action.stand.effect.GECreatedLifeformEffect;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.GETransformationEntity;
+import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -26,7 +27,9 @@ import net.minecraft.entity.item.TNTEntity;
 import net.minecraft.entity.monster.SlimeEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.entity.projectile.PotionEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ThrowablePotionItem;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Hand;
@@ -104,7 +107,9 @@ public class GoldExperienceCreateLifeform extends StandAction {
                 // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! use more types of inanimate entities as targets
                 if (target.getType() == TargetType.ENTITY) {
                     Entity targetEntity = target.getEntity();
-                    if (targetEntity instanceof TNTEntity) {
+                    if (
+                            targetEntity instanceof TNTEntity || 
+                            targetEntity instanceof RoadRollerEntity) {
                         tf.getTfSourceData().withEntitySource(targetEntity);
                         targetEntity.remove();
                         tfTargetFound = true;
@@ -119,7 +124,17 @@ public class GoldExperienceCreateLifeform extends StandAction {
                 }
                 if (!tfTargetFound && !user.getItemInHand(Hand.OFF_HAND).isEmpty()) {
                     // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! consoom the item
-                    tf.getTfSourceData().withEntitySource(new ItemEntity(world, 0, 0, 0, new ItemStack(user.getItemInHand(Hand.OFF_HAND).getItem())));
+                    ItemStack item = user.getItemInHand(Hand.OFF_HAND);
+                    Entity itemEntity;
+                    if (item.getItem() instanceof ThrowablePotionItem) {
+                        PotionEntity potionEntity = new PotionEntity(world, user);
+                        potionEntity.setItem(item);
+                        itemEntity = potionEntity;
+                    }
+                    else {
+                        itemEntity = new ItemEntity(world, 0, 0, 0, new ItemStack(item.getItem()));
+                    }
+                    tf.getTfSourceData().withEntitySource(itemEntity);
                     tfTargetFound = true;
                     
                     Vector3d pos = performer.position();

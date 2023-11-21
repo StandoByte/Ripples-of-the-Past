@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.GoldExperienceCreateLifeform;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.util.mc.EntityOwnerResolver;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -22,6 +23,7 @@ import net.minecraft.entity.MoverType;
 import net.minecraft.entity.Pose;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.item.TNTEntity;
+import net.minecraft.entity.projectile.PotionEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -434,6 +436,13 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                 }
                 else if (sourceEntity instanceof TNTEntity) {
                     return new ItemStack(Items.TNT);
+                }
+                else if (sourceEntity instanceof PotionEntity) {
+                    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! shit only exists in client code
+                    return ((PotionEntity) sourceEntity).getItem().copy();
+                }
+                else if (sourceEntity.getType() == ModEntityTypes.ROAD_ROLLER.get()) {
+                    return new ItemStack(ModItems.ROAD_ROLLER.get());
                 }
             }
             else if (sourceBlockState != null) {
