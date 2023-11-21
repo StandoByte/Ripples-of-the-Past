@@ -20,7 +20,7 @@ public class SilverChariotLightAttack extends StandEntityLightAttack {
 
     public SilverChariotLightAttack(StandEntityLightAttack.Builder builder, Supplier<StandEntityLightAttack> noRapierAttack) {
         super(builder);
-        this.noRapierAttack = noRapierAttack;
+        this.noRapierAttack = noRapierAttack != null ? noRapierAttack : () -> null;
     }
 
     @Override
@@ -36,6 +36,15 @@ public class SilverChariotLightAttack extends StandEntityLightAttack {
         return power.isActive() && power.getStandManifestation() instanceof SilverChariotEntity
                 && !((SilverChariotEntity) power.getStandManifestation()).hasRapier() && noRapierAttack.get() != null
                 ? noRapierAttack.get() : this;
+    }
+    
+    @Override
+    public StandAction[] getExtraUnlockable() {
+        if (noRapierAttack.get() != null) {
+            return new StandAction[] { noRapierAttack.get() };
+        }
+        
+        return super.getExtraUnlockable();
     }
     
     @Nullable

@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Direction.Axis;
 
+@Deprecated
 public class CustomVerticesModelBox extends ModelRenderer.ModelBox {
     
     private CustomVerticesModelBox(Builder builder, float texWidth, float texHeight, boolean mirror) {
@@ -83,6 +84,7 @@ public class CustomVerticesModelBox extends ModelRenderer.ModelBox {
     
     
     
+    @Deprecated
     public static class Builder {
         private final boolean livingEntityRenderHacks;
         private final ModelRenderer.PositionTextureVertex[] vertices = new ModelRenderer.PositionTextureVertex[8];

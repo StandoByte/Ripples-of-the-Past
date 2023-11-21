@@ -686,6 +686,13 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         }
         super.readNBT(nbt);
     }
+
+    @Override
+    public void onClone(IStandPower oldPower, boolean wasDeath) {
+        super.onClone(oldPower, wasDeath);
+        this.standArrowHandler.keepOnDeath(oldPower.getStandArrowHandler());
+        this.actionLearningProgressMap = ((StandPower) oldPower).actionLearningProgressMap; // FIXME can i remove this cast?
+    }
     
     @Override
     protected void keepPower(IStandPower oldPower, boolean wasDeath) {
@@ -696,11 +703,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             this.resolveCounter.alwaysResetOnDeath();
         }
         this.skippedProgression = oldPower.wasProgressionSkipped();
-        this.actionLearningProgressMap = ((StandPower) oldPower).actionLearningProgressMap; // FIXME can i remove this cast?
         this.continuousEffects = oldPower.getContinuousEffects();
         this.continuousEffects.setPowerData(this);
         this.stamina = getMaxStamina();
-        this.standArrowHandler.keepOnDeath(oldPower.getStandArrowHandler());
     }
     
     @Override

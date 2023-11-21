@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.client.render.entity.model.stand;
 
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.action.stand.TheWorldTSHeavyAttack;
-import com.github.standobyte.jojo.client.render.CustomVerticesModelBox;
+import com.github.standobyte.jojo.client.render.MeshModelBox;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPoseTransition;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPoseTransitionMultiple;
@@ -25,8 +25,8 @@ public class TheWorldModelNew extends HumanoidStandModel<TheWorldEntity> {
 
         ModelRenderer headpiece;
         ModelRenderer slopeNew;
-        ModelRenderer faceRight;
-        ModelRenderer faceLeft;
+        ModelRenderer faceRightNew;
+        ModelRenderer faceLeftNew;
         ModelRenderer leftCable;
         ModelRenderer rightCable;
         ModelRenderer heartSmallHead;
@@ -72,65 +72,100 @@ public class TheWorldModelNew extends HumanoidStandModel<TheWorldEntity> {
         slopeNew = new ModelRenderer(this);
         slopeNew.setPos(0.0F, -6.4F, 1.3F);
         headpiece.addChild(slopeNew);
-        new CustomVerticesModelBox.Builder(true)
-        .withVertex(true,  true,  false,  4.2F,     0,     0)
-        .withVertex(false, true,  false, -4.2F,     0,     0)
-        .withVertex(true,  false, false,  4.2F, -6.4F,     0)
-        .withVertex(false, false, false, -4.2F, -6.4F,     0)
-        .withVertex(true,  true,   true,  4.2F,     3,  8.4F)
-        .withVertex(false, true,   true, -4.2F,     3,  8.4F)
-        .withVertex(true,  false,  true,  4.2F, -4.4F,  8.4F)
-        .withVertex(false, false,  true, -4.2F, -4.4F,  8.4F)
-        .withUvFace(Direction.UP,    38, 14,  8,  8)
-        .withUvFace(Direction.DOWN,  46, 14,  8,  8)
-        .withUvFace(Direction.EAST,  30, 22,  8,  6)
-        .withUvFace(Direction.NORTH, 38, 22,  8,  6)
-        .withUvFace(Direction.WEST,  46, 22,  8,  6)
-        .withUvFace(Direction.SOUTH, 54, 22,  8,  6)
-        .addCube(slopeNew, texWidth, texHeight, false);
+        
+        new MeshModelBox.Builder(true, this)
+            .startFace(Direction.UP)
+                .withVertex( 4.2,    3,  8.4,      38, 14)
+                .withVertex(-4.2,    3,  8.4,      46, 14)
+                .withVertex(-4.2,    0,    0,      46, 22)
+                .withVertex( 4.2,    0,    0,      38, 22)
+            .createFace()
+            .startFace(Direction.DOWN)
+                .withVertex( 4.2, -6.4,    0,      46, 14)
+                .withVertex(-4.2, -6.4,    0,      54, 14)
+                .withVertex(-4.2, -4.4,  8.4,      54, 22)
+                .withVertex( 4.2, -4.4,  8.4,      46, 22)
+            .createFace()
+            .startFace(Direction.EAST)
+                .withVertex( 4.2,    0,    0,      38, 22)
+                .withVertex( 4.2,    3,  8.4,      30, 22)
+                .withVertex( 4.2, -4.4,  8.4,      30, 28)
+                .withVertex( 4.2, -6.4,    0,      38, 28)
+            .createFace()
+            .startFace(Direction.WEST)
+                .withVertex(-4.2,    0,    0,      46, 22)
+                .withVertex(-4.2,    3,  8.4,      54, 22)
+                .withVertex(-4.2, -4.4,  8.4,      54, 28)
+                .withVertex(-4.2, -6.4,    0,      46, 28)
+            .createFace()
+            .startFace(Direction.SOUTH)
+                .withVertex(-4.2,    3,  8.4,      54, 22)
+                .withVertex( 4.2,    3,  8.4,      62, 22)
+                .withVertex( 4.2, -4.4,  8.4,      62, 28)
+                .withVertex(-4.2, -4.4,  8.4,      54, 28)
+            .createFace()
+        .addCube(slopeNew);
+        
+        
+        faceRightNew = new ModelRenderer(this);
+        faceRightNew.setPos(-4.2F, -6.4F, 1.3F);
+        headpiece.addChild(faceRightNew);
+        new MeshModelBox.Builder(true, this);
+        
+        new MeshModelBox.Builder(true, this)
+            .startFace(Direction.NORTH)
+                .withVertex(      0,     0,     0,    70, 22)
+                .withVertex(-4.2005,  -0.5, -1.31,    74, 22)
+                .withVertex(-4.2005, -6.75, -1.31,    74, 28)
+                .withVertex(      0,  -6.4,     0,    70, 28)
+            .createFace()
+            .startFace(Direction.UP)
+                .withVertex(      0,     0,      0,    70, 21)
+                .withVertex(-4.2005,     0, 0.0266,    74, 22)
+                .withVertex(-4.2005,  -0.5,  -1.31,    74, 21)
+            .createFace()
+            .startFace(Direction.DOWN)
+                .withVertex(      0,  -6.4,      0,    74, 22)
+                .withVertex(-4.2005, -6.75,  -1.31,    78, 22)
+                .withVertex(-4.2005,  -6.4, 0.0266,    78, 21)
+            .createFace()
+            .startFace(Direction.WEST)
+                .withVertex(-4.2005,  -0.5,  -1.31,    74, 22)
+                .withVertex(-4.6173,     0, 0.0266,    75, 22)
+                .withVertex(-4.6173,  -6.4, 0.0266,    75, 28)
+                .withVertex(-4.2005, -6.75,  -1.31,    74, 28)
+            .createFace()
+        .addCube(faceRightNew);
         
 
-        faceRight = new ModelRenderer(this);
-        faceRight.setPos(-4.2F, -6.4F, 1.3F);
-        headpiece.addChild(faceRight);
-        setRotationAngle(faceRight, 0.0F, 0.3023F, 0.0F);
-        new CustomVerticesModelBox.Builder(true)
-        .withVertex(true,  true,  false,     0,      0,     0)
-        .withVertex(false, true,  false, -4.4F,  -0.5F,     0)
-        .withVertex(true,  false, false,     0,  -6.4F,     0)
-        .withVertex(false, false, false, -4.4F, -6.75F,     0)
-        .withVertex(true,  true,   true,     0,      0,     0.0001F)
-        .withVertex(false, true,   true, -4.4F,      0,  1.4F)
-        .withVertex(true,  false,  true,     0, -6.15F,  1.1F)
-        .withVertex(false, false,  true, -4.4F,  -6.4F,  1.4F)
-        .withUvFace(Direction.UP,    70, 21,  4,  1)
-        .withUvFace(Direction.DOWN,  74, 21,  4,  1)
-        .withUvFace(Direction.EAST,  69, 22,  1,  6)
-        .withUvFace(Direction.NORTH, 70, 22,  4,  6)
-        .withUvFace(Direction.WEST,  74, 22,  1,  6)
-        .withUvFace(Direction.SOUTH, 75, 22,  4,  6)
-        .addCube(faceRight, texWidth, texHeight, false);
-
-        faceLeft = new ModelRenderer(this);
-        faceLeft.setPos(4.2F, -6.4F, 1.3F);
-        headpiece.addChild(faceLeft);
-        setRotationAngle(faceLeft, 0.0F, -0.3023F, 0.0F);
-        new CustomVerticesModelBox.Builder(true)
-        .withVertex(true,  true,  false,  4.4F,  -0.5F,     0)
-        .withVertex(false, true,  false,     0,      0,     0)
-        .withVertex(true,  false, false,  4.4F, -6.75F,     0)
-        .withVertex(false, false, false,     0,  -6.4F,     0)
-        .withVertex(true,  true,   true,  4.4F,      0,  1.4F)
-        .withVertex(false, true,   true,     0,      0,     0.0001F)
-        .withVertex(true,  false,  true,  4.4F,  -6.4F,  1.4F)
-        .withVertex(false, false,  true,     0, -6.15F,  1.1F)
-        .withUvFace(Direction.UP,    81, 21,  4,  1)
-        .withUvFace(Direction.DOWN,  85, 21,  4,  1)
-        .withUvFace(Direction.EAST,  80, 22,  1,  6)
-        .withUvFace(Direction.NORTH, 81, 22,  4,  6)
-        .withUvFace(Direction.WEST,  74, 22,  1,  6)
-        .withUvFace(Direction.SOUTH, 86, 22,  4,  6)
-        .addCube(faceLeft, texWidth, texHeight, true);
+        faceLeftNew = new ModelRenderer(this);
+        faceLeftNew.setPos(4.2F, -6.4F, 1.3F);
+        headpiece.addChild(faceLeftNew);
+        
+        new MeshModelBox.Builder(true, this)
+        .startFace(Direction.NORTH)
+            .withVertex(      0,     0,     0,    81, 22)
+            .withVertex( 4.2005,  -0.5, -1.31,    85, 22)
+            .withVertex( 4.2005, -6.75, -1.31,    85, 28)
+            .withVertex(      0,  -6.4,     0,    81, 28)
+        .createFace()
+        .startFace(Direction.UP)
+            .withVertex(      0,     0,      0,    81, 21)
+            .withVertex( 4.2005,     0, 0.0266,    85, 22)
+            .withVertex( 4.2005,  -0.5,  -1.31,    85, 21)
+        .createFace()
+        .startFace(Direction.DOWN)
+            .withVertex(      0,  -6.4,      0,    85, 22)
+            .withVertex( 4.2005, -6.75,  -1.31,    89, 22)
+            .withVertex( 4.2005,  -6.4, 0.0266,    89, 21)
+        .createFace()
+        .startFace(Direction.WEST)
+            .withVertex( 4.2005,  -0.5,  -1.31,    86, 22)
+            .withVertex( 4.6173,     0, 0.0266,    85, 22)
+            .withVertex( 4.6173,  -6.4, 0.0266,    85, 28)
+            .withVertex( 4.2005, -6.75,  -1.31,    86, 28)
+        .createFace()
+        .addCube(faceLeftNew);
 
         leftCable = new ModelRenderer(this);
         leftCable.setPos(1.25F, -3.3F, 0.25F);
