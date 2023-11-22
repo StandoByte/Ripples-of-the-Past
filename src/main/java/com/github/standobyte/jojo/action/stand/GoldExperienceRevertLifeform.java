@@ -52,15 +52,23 @@ public class GoldExperienceRevertLifeform extends StandAction {
 //                .map(playerData -> playerData.getGEChosenLifeformType()).orElse(null);
 //    }
 //    
+    
+    @Override
+    public void clWriteExtraData(PacketBuffer buf) {
+        clWriteTargetedStandEffect(buf, ModStandEffects.GE_CREATED_LIFEFORM.get(), MARKER_DISTANCE);
+    }
+    
     @Override
     public void perform(World world, LivingEntity user, IStandPower power, ActionTarget target, @Nullable PacketBuffer extraInput) {
-        if (!world.isClientSide()) {
-            StandEffectsTracker.getTargetLookedAt(power, ModStandEffects.GE_CREATED_LIFEFORM.get(), 
-                    MARKER_DISTANCE, power.getUser()).ifPresent(effect -> effect.remove());
+        if (!world.isClientSide() && extraInput != null) {
+            readTargetedStandEffect(extraInput, power, ModStandEffects.GE_CREATED_LIFEFORM.get())
+            .ifPresent(effect -> {
+                effect.remove();
+            });
         }
     }
-//    
-//    
+    
+    
 //    @Override
 //    public IFormattableTextComponent getTranslatedName(IStandPower power, String key) {
 //        EntityType<?> chosenEntityType = getChosenEntityType(ClientUtil.getClientPlayer());
