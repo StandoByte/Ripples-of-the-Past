@@ -21,6 +21,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.Pose;
+import net.minecraft.entity.item.BoatEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.item.TNTEntity;
 import net.minecraft.entity.projectile.PotionEntity;
@@ -40,6 +41,9 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.event.ForgeEventFactory;
@@ -135,10 +139,13 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         
         if (entityToSummon != null) {
             entityToSummon.copyPosition(this);
-            level.addFreshEntity(entityToSummon);
             if (this.isOnFire()) {
                 entityToSummon.setSecondsOnFire((getRemainingFireTicks() + 19) / 20);
             }
+            if (entityToSummon instanceof ItemEntity) {
+                ((ItemEntity) entityToSummon).setNoPickUpDelay();
+            }
+            level.addFreshEntity(entityToSummon);
             GoldExperienceCreateLifeform.onTransformationFinish(entityToSummon);
         }
         else if (blockToPlace != null) {
@@ -152,6 +159,8 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                 }
             }
         }
+        
+        remove();
     }
     
     @Override
@@ -163,7 +172,6 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         if (tickCount >= duration) {
             if (!level.isClientSide()) {
                 entityData.set(LIFE_FORM_SPAWNED, true);
-                remove();
                 turnInto();
             }
             return;
@@ -441,6 +449,19 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             this.sourceBlockPos = other.sourceBlockPos;
         }
         
+        
+        /**
+         * Call this during tick.
+         */
+        public void resolveNbtRead(World world) {
+            if (sourceEntityNbt != null) {
+                withEntitySource(EntityType.create(sourceEntityNbt, world).orElse(null));
+                sourceEntityNbt = null;
+            }
+        }
+        
+        
+        
         public ItemStack clMakeSourceItemView() {
             if (sourceEntity != null) {
                 if (sourceEntity instanceof ItemEntity) {
@@ -455,6 +476,12 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                 else if (sourceEntity.getType() == ModEntityTypes.ROAD_ROLLER.get()) {
                     return new ItemStack(ModItems.ROAD_ROLLER.get());
                 }
+                else if (sourceEntity.getType() == EntityType.END_CRYSTAL) {
+                    return new ItemStack(Items.END_CRYSTAL);
+                }
+                else if (sourceEntity instanceof BoatEntity) {
+                    return new ItemStack(((BoatEntity) sourceEntity).getDropItem());
+                }
             }
             else if (sourceBlockState != null) {
                 Block block = sourceBlockState.getBlock();
@@ -465,6 +492,22 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             }
             
             return ItemStack.EMPTY;
+        }
+        
+        public IFormattableTextComponent clMakeSourceName() {
+            if (sourceEntity != null) {
+                ITextComponent name = sourceEntity.getDisplayName();
+                if (name instanceof IFormattableTextComponent) {
+                    return (IFormattableTextComponent) name;
+                }
+                throw new ClassCastException("Why do ITextComponent and IFormattableTextComponent interfaces both exist? Why not just make ITextComponent formattable? Separating them doesn't even do shit, ffs OOP was a mistake");
+            }
+            
+            else if (sourceBlockState != null) {
+                return sourceBlockState.getBlock().getName(); // oh, look, this returns IFormattableTextComponent!
+            }
+            
+            return (StringTextComponent) StringTextComponent.EMPTY;
         }
         
         
@@ -481,17 +524,6 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         @Nullable
         public BlockPos getSourceBlockPos() {
             return sourceBlockPos;
-        }
-        
-        
-        /**
-         * Call this during tick.
-         */
-        public void resolveNbtRead(World world) {
-            if (sourceEntityNbt != null) {
-                withEntitySource(EntityType.create(sourceEntityNbt, world).orElse(null));
-                sourceEntityNbt = null;
-            }
         }
         
         

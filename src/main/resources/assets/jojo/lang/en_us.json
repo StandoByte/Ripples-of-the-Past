@@ -1119,6 +1119,8 @@
   "action.jojo.gold_experience_choose_lifeform": "Choose lifeform",
   "action.jojo.gold_experience_create_lifeform": "Create lifeform",
   "action.jojo.gold_experience_create_lifeform.param": "Create %s",
+  "action.jojo.gold_experience_revert_lifeform": "Revert",
+  "action.jojo.gold_experience_revert_lifeform.param": "Revert to %s",
   "entity.jojo.ge_lifeform": "Gold Experience's Lifeform",
   "gold_experience.lifeform_size": "%sx%sx%sm",
   "gold_experience.lifeform_time": "%ss",

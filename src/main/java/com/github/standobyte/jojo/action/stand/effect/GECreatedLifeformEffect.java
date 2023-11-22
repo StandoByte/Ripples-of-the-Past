@@ -1,7 +1,5 @@
 package com.github.standobyte.jojo.action.stand.effect;
 
-import javax.annotation.Nullable;
-
 import com.github.standobyte.jojo.entity.GETransformationEntity;
 import com.github.standobyte.jojo.entity.GETransformationEntity.GETransformationData;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
@@ -12,11 +10,14 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
 
 public class GECreatedLifeformEffect extends StandEffectInstance {
     private GETransformationData source = new GETransformationData();
-    private ItemStack originalAsItem = ItemStack.EMPTY; // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this resets on savefile reload
+    private ItemStack originalAsItem = ItemStack.EMPTY;
+    private IFormattableTextComponent originalName = (StringTextComponent) StringTextComponent.EMPTY;
     
     public GECreatedLifeformEffect() {
         this(ModStandEffects.GE_CREATED_LIFEFORM.get());
@@ -34,9 +35,12 @@ public class GECreatedLifeformEffect extends StandEffectInstance {
         this.source = source;
     }
     
-    @Nullable
     public ItemStack getItemView() {
         return originalAsItem;
+    }
+    
+    public IFormattableTextComponent getName() {
+        return originalName;
     }
     
     @Override
@@ -126,6 +130,7 @@ public class GECreatedLifeformEffect extends StandEffectInstance {
         if (clientIsUser) {
             source.fromBuf(buf, world);
             originalAsItem = source.clMakeSourceItemView();
+            originalName = source.clMakeSourceName();
         }
     }
 }

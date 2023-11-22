@@ -183,10 +183,13 @@ public abstract class StandAction extends Action<IStandPower> {
     
     // TODO use this for CrazyDiamondBlockBullet (save the reference to the blood drops effect in StandEntityTask)
     protected static void clWriteTargetedStandEffect(PacketBuffer buf, StandEffectType<?> type, double maxRange) {
+        buf.writeVarInt(clGetTargetedStandEffect(type, maxRange).map(effect -> effect.getId()).orElse(-1));
+    }
+    
+    protected static Optional<StandEffectInstance> clGetTargetedStandEffect(StandEffectType<?> type, double maxRange) {
         PlayerEntity user = ClientUtil.getClientPlayer();
-        Optional<StandEffectInstance> mouseTarget = IStandPower.getStandPowerOptional(user).resolve().flatMap(
+        return IStandPower.getStandPowerOptional(user).resolve().flatMap(
                 power -> StandEffectsTracker.getTargetLookedAt(power, type, maxRange, user));
-        buf.writeVarInt(mouseTarget.map(effect -> effect.getId()).orElse(-1));
     }
     
     protected static Optional<StandEffectInstance> readTargetedStandEffect(PacketBuffer buf, IStandPower power, StandEffectType<?> type) {

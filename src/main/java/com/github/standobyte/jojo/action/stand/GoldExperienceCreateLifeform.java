@@ -22,6 +22,8 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.item.BoatEntity;
+import net.minecraft.entity.item.EnderCrystalEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.item.TNTEntity;
 import net.minecraft.entity.monster.SlimeEntity;
@@ -132,7 +134,9 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     Entity targetEntity = target.getEntity();
                     if (
                             targetEntity instanceof TNTEntity || 
-                            targetEntity instanceof RoadRollerEntity) {
+                            targetEntity instanceof RoadRollerEntity || 
+                            targetEntity instanceof EnderCrystalEntity || 
+                            targetEntity instanceof BoatEntity) {
                         tf.getTfSourceData().withEntitySource(targetEntity);
                         targetEntity.remove();
                         tfTargetFound = true;
