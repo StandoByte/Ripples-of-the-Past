@@ -169,8 +169,20 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             return;
         }
         else {
-            if (!level.isClientSide()) {
-                
+            if (isTurningBack() && source.sourceEntity == null && source.sourceBlockState != null) {
+                int timeLeft = duration - tickCount;
+                float timeAsBlock = getRenderAsItemTime();
+                if (timeLeft - 1 <= timeAsBlock && timeLeft > timeAsBlock) {
+                    BlockPos blockPos = blockPosition();
+                    Vector3d pos = Vector3d.atBottomCenterOf(blockPos);
+//                    BlockPos blockPosNew = new BlockPos(pos);
+//                    if (!blockPosNew.equals(blockPos)) {
+//                        BlockPos diff = blockPosNew.subtract(blockPos);
+//                        pos = pos.subtract(diff.getX(), diff.getY(), diff.getZ());
+//                        JojoMod.LOGGER.debug(diff);
+//                    }
+                    moveTo(pos);
+                }
             }
         }
         

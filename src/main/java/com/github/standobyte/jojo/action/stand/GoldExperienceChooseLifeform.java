@@ -47,7 +47,7 @@ public class GoldExperienceChooseLifeform extends StandAction {
                 return false;
             }
 
-            // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! tmp, will be reserved for specific items/blocks
+            // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! tmp, will be reserved for specific items/blocks
             if (entityType == EntityType.SLIME || entityType == EntityType.MAGMA_CUBE) {
                 return false;
             }
