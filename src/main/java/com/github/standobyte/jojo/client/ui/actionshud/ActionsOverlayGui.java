@@ -24,6 +24,9 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.stand.GoldExperienceCreateLifeform;
+import com.github.standobyte.jojo.action.stand.GoldExperienceRevertLifeform;
+import com.github.standobyte.jojo.action.stand.effect.GECreatedLifeformEffect;
 import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
@@ -32,8 +35,11 @@ import com.github.standobyte.jojo.client.ui.actionshud.ActionsModeConfig.Selecte
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonStatsTabGui;
 import com.github.standobyte.jojo.client.ui.screen.stand.ge.ChooseLifeformScreen;
+import com.github.standobyte.jojo.client.ui.screen.stand.ge.EntityTypeIcon;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
+import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClClickActionPacket;
 import com.github.standobyte.jojo.power.IPower;
@@ -46,6 +52,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.github.standobyte.jojo.util.general.Container;
@@ -69,6 +76,8 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.settings.AttackIndicatorStatus;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.EntityType;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
@@ -731,26 +740,26 @@ public class ActionsOverlayGui extends AbstractGui {
                 ClientUtil.fillSingleRect(x - 2, y - 2, 20, 20, 0, 255, 0, 127);
             }
             
-            ResourceLocation icon = action.getIconTexture(power);
-            mc.getTextureManager().bind(icon);
-            
             ActionConditionResult result = actionAvailability(action, mode, actionKey, target, isSelected);
             if (!result.isPositive()) {
+                float brightness;
+                float alpha;
                 if (!result.isQueued()) {
-                    RenderSystem.color4f(0.2F, 0.2F, 0.2F, 0.5F * hotbarAlpha);
+                    brightness = 0.2F;
+                    alpha = 0.5F * hotbarAlpha;
                 }
                 else {
-                    RenderSystem.color4f(0.75F, 0.75F, 0.75F, 0.75F * hotbarAlpha);
+                    brightness = 0.75F;
+                    alpha = 0.75F * hotbarAlpha;
                 }
-                blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
+                renderActionIcon(matrixStack, action, power, x, y, brightness, alpha);
                 // cooldown
                 float ratio = power.getCooldownRatio(action, partialTick);
                 if (ratio > 0) {
                     ClientUtil.fillSingleRect(x, y + 16.0F * (1.0F - ratio), 16, 16.0F * ratio, 255, 255, 255, 127);
                 }
             } else {
-                RenderSystem.color4f(1.0F, 1.0F, 1.0F, hotbarAlpha);
-                blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
+                renderActionIcon(matrixStack, action, power, x, y, 1, hotbarAlpha);
             }
             // learning bar
             float learningProgress = power.getLearningProgressRatio(action);
@@ -780,6 +789,45 @@ public class ActionsOverlayGui extends AbstractGui {
                 }
                 blit(matrixStack, x - 4, y - 4, 0, 22, 24, 22);
             }
+        }
+    }
+    
+    public static <P extends IPower<P, ?>> void renderActionIcon(MatrixStack matrixStack, Action<P> action, P power, 
+            int x, int y, float brightness, float alpha) {
+        boolean changeColor = brightness < 1 || alpha < 1;
+        if (changeColor) {
+            RenderSystem.color4f(brightness, brightness, brightness, alpha);
+        }
+
+        Minecraft mc = Minecraft.getInstance();
+        boolean specialRender = false;
+        
+        if (action == ModStandsInit.GOLD_EXPERIENCE_CREATE_LIFEFORM.get()) {
+            EntityType<?> selectedMob = GoldExperienceCreateLifeform.getChosenEntityType(mc.player);
+            if (selectedMob != null) {
+                EntityTypeIcon.renderIcon(selectedMob, matrixStack, x, y);
+                specialRender = true;
+            }
+        }
+        else if (action == ModStandsInit.GOLD_EXPERIENCE_REVERT_LIFEFORM.get()) {
+            ItemStack sourceItem = StandEffectsTracker.getTargetLookedAt((IStandPower) power, 
+                    ModStandEffects.GE_CREATED_LIFEFORM.get(), GoldExperienceRevertLifeform.MARKER_DISTANCE, mc.player)
+                    .map(effect -> ((GECreatedLifeformEffect) effect).getItemView())
+                    .orElse(ItemStack.EMPTY);
+            if (!sourceItem.isEmpty()) {
+                mc.getItemRenderer().renderAndDecorateFakeItem(sourceItem, x, y);
+                specialRender = true;
+            }
+        }
+        
+        if (!specialRender) {
+            ResourceLocation icon = action.getIconTexture(power);
+            mc.getTextureManager().bind(icon);
+            blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
+        }
+        
+        if (changeColor) {
+            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
     

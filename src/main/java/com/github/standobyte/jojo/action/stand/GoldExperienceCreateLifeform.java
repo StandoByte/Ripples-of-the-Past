@@ -66,7 +66,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
     }
     
     @Nullable
-    private static EntityType<?> getChosenEntityType(PlayerEntity player) {
+    public static EntityType<?> getChosenEntityType(PlayerEntity player) {
 //        ItemStack heldItem = player.getItemInHand(Hand.OFF_HAND);
 //        if (!heldItem.isEmpty()) {
 //            Item item = heldItem.getItem();
