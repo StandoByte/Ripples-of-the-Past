@@ -676,7 +676,7 @@ public class HamonUtil {
         }
     }
     
-    private static boolean isItemLivingMatter(ItemStack itemStack) {
+    public static boolean isItemLivingMatter(ItemStack itemStack) {
         if (itemStack.isEmpty()) {
             return false;
         }

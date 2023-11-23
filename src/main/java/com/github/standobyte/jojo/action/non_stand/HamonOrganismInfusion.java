@@ -29,6 +29,7 @@ import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.entity.passive.AmbientEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.GolemEntity;
+import net.minecraft.tags.BlockTags;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -156,7 +157,12 @@ public class HamonOrganismInfusion extends HamonAction {
         }
         
         Block block = blockState.getBlock();
-        return block instanceof SnowyDirtBlock || block.getRegistryName().getPath().contains("mossy");
+        if (BlockTags.LOGS.contains(block) || block instanceof SnowyDirtBlock) {
+            return true;
+        }
+        
+        String blockName = block.getRegistryName().getPath();
+        return blockName.contains("mossy");
     }
 
 }

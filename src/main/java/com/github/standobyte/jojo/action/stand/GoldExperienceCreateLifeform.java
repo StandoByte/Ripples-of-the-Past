@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.action.non_stand.HamonOrganismInfusion;
 import com.github.standobyte.jojo.action.stand.effect.GECreatedLifeformEffect;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -12,6 +13,7 @@ import com.github.standobyte.jojo.entity.GETransformationEntity;
 import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.network.NetworkUtil;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 
@@ -50,9 +52,68 @@ public class GoldExperienceCreateLifeform extends StandAction {
     }
     
     @Override
+    protected ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, IStandPower power) {
+        switch (target.getType()) {
+        case ENTITY:
+            // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! use more types of inanimate entities as targets
+            Entity entity = target.getEntity();
+            return ActionConditionResult.noMessage(
+                    entity instanceof TNTEntity || 
+                    entity instanceof RoadRollerEntity || 
+                    entity instanceof EnderCrystalEntity || 
+                    entity instanceof BoatEntity);
+        case BLOCK:
+            if (!power.isUserCreative()) {
+                World world = user.level;
+                BlockPos blockPos = target.getBlockPos();
+                BlockState blockState = world.getBlockState(blockPos);
+                
+                float blockHardness = blockState.getDestroySpeed(world, blockPos);
+                if (blockHardness < 0) {
+                    return ActionConditionResult.NEGATIVE;
+                }
+            }
+        default:
+            break;
+        }
+        
+        return super.checkTarget(target, user, power);
+    }
+    
+    @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
         if (user.level.isClientSide() && getChosenEntityType(ClientUtil.getClientPlayer()) == null) {
             return ActionConditionResult.NEGATIVE;
+        }
+        
+        boolean hasAnItem = false;
+        boolean itemFits = false;
+        boolean hasABlock = false;
+        boolean blockFits = false;
+        
+        ItemStack item = user.getItemInHand(Hand.OFF_HAND);
+        if (!item.isEmpty()) {
+            hasAnItem = true;
+            itemFits = !HamonUtil.isItemLivingMatter(item);
+        }
+        
+        if (target.getType() == TargetType.BLOCK) {
+            hasABlock = true;
+            BlockPos blockPos = target.getBlockPos();
+            BlockState blockState = user.level.getBlockState(blockPos);
+            blockFits = !HamonOrganismInfusion.isBlockLiving(blockState);
+        }
+        
+        if (!hasAnItem && !hasABlock) {
+            return conditionMessage("ge_lifeform_material");
+        }
+        if (!itemFits && !blockFits) {
+            if (hasAnItem) {
+                return conditionMessage("ge_lifeform_material_item");
+            }
+            else {
+                return conditionMessage("ge_lifeform_material_block");
+            }
         }
         
         return ActionConditionResult.POSITIVE;
@@ -129,24 +190,17 @@ public class GoldExperienceCreateLifeform extends StandAction {
                 GETransformationEntity tf = new GETransformationEntity(world);
                 
                 boolean tfTargetFound = false;
-                // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! use more types of inanimate entities as targets
                 if (target.getType() == TargetType.ENTITY) {
                     Entity targetEntity = target.getEntity();
-                    if (
-                            targetEntity instanceof TNTEntity || 
-                            targetEntity instanceof RoadRollerEntity || 
-                            targetEntity instanceof EnderCrystalEntity || 
-                            targetEntity instanceof BoatEntity) {
-                        tf.getTfSourceData().withEntitySource(targetEntity);
-                        targetEntity.remove();
-                        tfTargetFound = true;
-                        
-                        Vector3d pos = targetEntity.position();
-                        tf.moveTo(pos.x, pos.y, pos.z, performer.yRot, 0);
-                        
-                        if (targetEntity.isOnFire()) {
-                            tf.setSecondsOnFire((targetEntity.getRemainingFireTicks() + 19) / 20);
-                        }
+                    tf.getTfSourceData().withEntitySource(targetEntity);
+                    targetEntity.remove();
+                    tfTargetFound = true;
+                    
+                    Vector3d pos = targetEntity.position();
+                    tf.moveTo(pos.x, pos.y, pos.z, targetEntity.yRot, targetEntity.xRot);
+                    
+                    if (targetEntity.isOnFire()) {
+                        tf.setSecondsOnFire((targetEntity.getRemainingFireTicks() + 19) / 20);
                     }
                 }
                 if (!tfTargetFound && !user.getItemInHand(Hand.OFF_HAND).isEmpty()) {
@@ -176,7 +230,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                 if (!tfTargetFound && target.getType() == TargetType.BLOCK) {
                     BlockPos blockPos = target.getBlockPos();
                     BlockState blockState = world.getBlockState(blockPos);
-                    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! filter the block/item (use hamon filters)
+                    
                     tf.getTfSourceData().withBlockSource(blockState, blockPos);
                     world.removeBlock(blockPos, false);
                     tfTargetFound = true;
@@ -195,7 +249,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     power.getContinuousEffects().addEffect(effect);
                     
                     lifeFormCreated.copyPosition(tf);
-                    lifeFormCreated.setYHeadRot(performer.yRot);
+                    lifeFormCreated.setYHeadRot(lifeFormCreated.yRot);
                     world.addFreshEntity(tf);
                     
                     if (!power.isUserCreative()) {

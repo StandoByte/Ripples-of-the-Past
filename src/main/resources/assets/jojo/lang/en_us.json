@@ -1132,6 +1132,9 @@
   "jojo.ge_lifeform.unlock_all": "Unlock all",
   "ge_new_lifeform.toast.title": "New lifeform unlocked!",
   "jojo.message.action_condition.choose_lifeform": "You have to choose a lifeform first",
+  "jojo.message.action_condition.ge_lifeform_material": "You need a non-living item or block",
+  "jojo.message.action_condition.ge_lifeform_material_item": "You can't turn an organic item into a lifeform",
+  "jojo.message.action_condition.ge_lifeform_material_block": "You can't turn an organic block into a lifeform",
   
   "stand.jojo.boy_ii_man": "Boy II Man",
   "entity.jojo.rps_kid": "Rock-Paper-Scissors Kid",
