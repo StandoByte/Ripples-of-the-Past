@@ -19,6 +19,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.Pose;
 import net.minecraft.entity.item.BoatEntity;
@@ -142,7 +143,10 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             if (this.isOnFire()) {
                 entityToSummon.setSecondsOnFire((getRemainingFireTicks() + 19) / 20);
             }
-            if (entityToSummon instanceof ItemEntity) {
+            if (entityToSummon instanceof MobEntity) {
+                ((MobEntity) entityToSummon).setPersistenceRequired();
+            }
+            else if (entityToSummon instanceof ItemEntity) {
                 ((ItemEntity) entityToSummon).setNoPickUpDelay();
             }
             level.addFreshEntity(entityToSummon);
@@ -440,7 +444,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         
         public void copyFrom(GETransformationData other, World world) {
             if (other.sourceEntity != null) {
-                // FIXME the entity can be marked as removed and fail to be added again 
+                // the entity can be marked as removed and fail to be added again 
                 // (in case it's a TNT/minecart/etc. that was transformed into a mob while in its entity form)
                 CompoundNBT entityNbt = other.sourceEntity.serializeNBT();
                 this.sourceEntity = EntityType.create(entityNbt, world).orElse(null);
