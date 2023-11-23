@@ -102,7 +102,9 @@ public abstract class MarkerRenderer {
 
         matrixStack.pushPose();
         matrixStack.translate(-8, -28, 0);
+        RenderSystem.disableDepthTest();
         renderIconOnBorder(matrixStack, marker, partialTick);
+        RenderSystem.enableDepthTest();
         matrixStack.popPose();
 
         matrixStack.popPose();

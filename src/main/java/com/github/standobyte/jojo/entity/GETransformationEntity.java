@@ -128,7 +128,8 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         if (blockToPlace != null) {
             blockToPlace = Block.updateFromNeighbourShapes(blockToPlace, level, blockPos);
             BlockState existingBlock = level.getBlockState(blockPos);
-            if (!(existingBlock.isAir(level, blockPos) && blockToPlace.canSurvive(level, blockPos))) {
+            if (!((existingBlock.isAir(level, blockPos) || existingBlock.getMaterial().isReplaceable())
+                    && blockToPlace.canSurvive(level, blockPos))) {
                 Item item = blockToPlace.getBlock().asItem();
                 if (item != null && item != Items.AIR) {
                     entityToSummon = new ItemEntity(level, getX(), getY(), getZ(), new ItemStack(item));
