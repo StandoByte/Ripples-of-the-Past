@@ -21,6 +21,8 @@ import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.google.common.base.Preconditions;
 
 import io.netty.handler.codec.DecoderException;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.network.play.IClientPlayNetHandler;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -31,6 +33,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.extensions.IForgePacketBuffer;
 import net.minecraftforge.registries.ForgeRegistry;
+import net.minecraftforge.registries.GameData;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryManager;
@@ -102,6 +105,15 @@ public class NetworkUtil {
                 throw new IllegalArgumentException("Attempted to read an registryValue of the wrong type from the Buffer!");
         }
         return values;
+    }
+    
+    
+    public static void writeBlockState(PacketBuffer buf, BlockState blockState) {
+        buf.writeVarInt(Block.getId(blockState));
+    }
+    
+    public static BlockState readBlockState(PacketBuffer buf) {
+        return GameData.getBlockStateIDMap().byId(buf.readVarInt());
     }
     
     

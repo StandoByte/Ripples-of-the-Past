@@ -90,6 +90,8 @@ import com.github.standobyte.jojo.client.sound.loopplayer.LoopPlayerHandler;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.marker.CrazyDiamondAnchorMarker;
 import com.github.standobyte.jojo.client.ui.marker.CrazyDiamondBloodHomingMarker;
+import com.github.standobyte.jojo.client.ui.marker.GoldExperienceLifeformMarker;
+import com.github.standobyte.jojo.client.ui.marker.GoldExperienceLifeformRevertMarker;
 import com.github.standobyte.jojo.client.ui.marker.HierophantGreenBarrierDetectionMarker;
 import com.github.standobyte.jojo.client.ui.marker.MarkerRenderer;
 import com.github.standobyte.jojo.client.ui.screen.walkman.WalkmanScreen;
@@ -274,6 +276,8 @@ public class ClientSetup {
             MarkerRenderer.Handler.addRenderer(new HierophantGreenBarrierDetectionMarker(mc));
             MarkerRenderer.Handler.addRenderer(new CrazyDiamondAnchorMarker(mc));
             MarkerRenderer.Handler.addRenderer(new CrazyDiamondBloodHomingMarker(mc));
+            MarkerRenderer.Handler.addRenderer(new GoldExperienceLifeformMarker(mc));
+            MarkerRenderer.Handler.addRenderer(new GoldExperienceLifeformRevertMarker(mc));
             
             PlayerAnimationHandler.initAnimator();
         });

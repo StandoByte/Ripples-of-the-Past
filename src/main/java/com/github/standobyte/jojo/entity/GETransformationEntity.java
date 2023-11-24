@@ -3,53 +3,73 @@ package com.github.standobyte.jojo.entity;
 import java.io.IOException;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.GoldExperienceCreateLifeform;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.network.NetworkUtil;
+import com.github.standobyte.jojo.util.mc.EntityOwnerResolver;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.Pose;
+import net.minecraft.entity.item.BoatEntity;
 import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.item.TNTEntity;
+import net.minecraft.entity.projectile.PotionEntity;
+import net.minecraft.item.BlockItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.BlockSnapshot;
+import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 public class GETransformationEntity extends Entity implements IEntityAdditionalSpawnData {
     private static final DataParameter<Boolean> LIFE_FORM_SPAWNED = EntityDataManager.defineId(GETransformationEntity.class, DataSerializers.BOOLEAN);
-    private Entity source;
+    private static final DataParameter<Boolean> IS_TURNING_BACK = EntityDataManager.defineId(GETransformationEntity.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> REVERSE_SIGNAL = EntityDataManager.defineId(GETransformationEntity.class, DataSerializers.BOOLEAN);
+    
+    private GETransformationData source = new GETransformationData();
+    private EntityOwnerResolver owner = new EntityOwnerResolver();
+    
     private Entity target;
+    
     private int duration;
+    private float renderAsItemTime;
 
     public GETransformationEntity(EntityType<?> type, World level) {
         super(type, level);
-        source = new ItemEntity(level, 0, 0, 0, new ItemStack(Items.DIRT));
     }
 
     public GETransformationEntity(World pLevel) {
         this(ModEntityTypes.GE_LIFEFORM_TRANSFORMATION.get(), pLevel);
-    }
-    
-    public GETransformationEntity withTransformationSource(Entity entity) {
-        this.source = entity;
-        return this;
     }
     
     public GETransformationEntity withTransformationTarget(Entity entity) {
@@ -57,36 +77,120 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         return this;
     }
     
+    public GETransformationEntity withOwner(LivingEntity user) {
+        this.owner.setOwner(user);
+        return this;
+    }
+    
     public GETransformationEntity withDuration(int duration) {
         this.duration = duration;
+        this.renderAsItemTime = Math.min((float) duration / 3, 20);
         return this;
+    }
+    
+    public GETransformationData getTfSourceData() {
+        return source;
     }
     
     public int getDuration() {
         return duration;
     }
     
-    public Entity getTransformationSource() {
-        return source;
+    public boolean isTurningBack() {
+        return entityData.get(IS_TURNING_BACK);
     }
     
     public Entity getTransformationTarget() {
         return target;
     }
     
+    @SuppressWarnings("deprecation")
+    private void turnInto() {
+        Entity entityToSummon = null;
+        BlockState blockToPlace = null;
+        if (isTurningBack()) {
+            if (source.sourceEntity != null) {
+                entityToSummon = source.sourceEntity;
+            }
+            else if (source.sourceBlockState != null) {
+                blockToPlace = source.sourceBlockState;
+            }
+        }
+        else {
+            entityToSummon = target;
+        }
+        BlockPos blockPos = blockPosition();
+        
+        if (blockToPlace != null) {
+            blockToPlace = Block.updateFromNeighbourShapes(blockToPlace, level, blockPos);
+            BlockState existingBlock = level.getBlockState(blockPos);
+            if (!((existingBlock.isAir(level, blockPos) || existingBlock.getMaterial().isReplaceable())
+                    && blockToPlace.canSurvive(level, blockPos))) {
+                Item item = blockToPlace.getBlock().asItem();
+                if (item != null && item != Items.AIR) {
+                    entityToSummon = new ItemEntity(level, getX(), getY(), getZ(), new ItemStack(item));
+                }
+                
+                blockToPlace = null;
+            }
+        }
+        
+        if (entityToSummon != null) {
+            entityToSummon.copyPosition(this);
+            if (entityToSummon instanceof MobEntity) {
+                ((MobEntity) entityToSummon).setPersistenceRequired();
+            }
+            else if (entityToSummon instanceof ItemEntity) {
+                ((ItemEntity) entityToSummon).setNoPickUpDelay();
+            }
+            copyStatus(this, entityToSummon);
+            level.addFreshEntity(entityToSummon);
+            GoldExperienceCreateLifeform.onTransformationFinish(entityToSummon);
+        }
+        else if (blockToPlace != null) {
+            Entity ownerEntity = owner.getEntity(level);
+            if (!ForgeEventFactory.onBlockPlace(ownerEntity, BlockSnapshot.create(level.dimension(), level, blockPos.below()), Direction.UP)) {
+                if (this.isOnFire()) {
+                    blockToPlace.catchFire(level, blockPos, Direction.UP, null);
+                }
+                else {
+                    level.setBlock(blockPos, blockToPlace, 3);
+                }
+            }
+        }
+        
+        remove();
+    }
+    
     @Override
     public void tick() {
+        if (!level.isClientSide()) {
+            source.resolveNbtRead(level);
+        }
+        
         if (tickCount >= duration) {
             if (!level.isClientSide()) {
                 entityData.set(LIFE_FORM_SPAWNED, true);
-                remove();
-                if (target != null) {
-                    target.copyPosition(this);
-                    level.addFreshEntity(target);
-                    GoldExperienceCreateLifeform.onTransformationFinish(target);
-                }
+                turnInto();
             }
             return;
+        }
+        else {
+            if (isTurningBack() && source.sourceEntity == null && source.sourceBlockState != null) {
+                int timeLeft = duration - tickCount;
+                float timeAsBlock = getRenderAsItemTime();
+                if (timeLeft - 1 <= timeAsBlock && timeLeft > timeAsBlock) {
+                    BlockPos blockPos = blockPosition();
+                    Vector3d pos = Vector3d.atBottomCenterOf(blockPos);
+//                    BlockPos blockPosNew = new BlockPos(pos);
+//                    if (!blockPosNew.equals(blockPos)) {
+//                        BlockPos diff = blockPosNew.subtract(blockPos);
+//                        pos = pos.subtract(diff.getX(), diff.getY(), diff.getZ());
+//                        JojoMod.LOGGER.debug(diff);
+//                    }
+                    moveTo(pos);
+                }
+            }
         }
         
         
@@ -146,18 +250,25 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         EntitySize size = new EntitySize(getBbWidth(), getBbHeight(), false);
         float scale = 0;
         
-        float renderAsItemTime = getRenderAsItemTime(duration);
-        if (tickCount < renderAsItemTime) {
-            if (source != null) {
-                scale = 1 - tickCount / renderAsItemTime;
+        float tfProgressTime = getTfProgressTime(0);
+        if (tfProgressTime < renderAsItemTime) {
+            Entity sourceEntity = source.getSourceEntity();
+            BlockState sourceBlockState = source.getSourceBlockState();
+            if (sourceEntity != null || sourceBlockState != null) {
+                scale = 1 - tfProgressTime / renderAsItemTime;
                 if (scale > 0) {
-                    size = source.getDimensions(pPose).scale(scale);
+                    if (sourceEntity != null) {
+                        size = sourceEntity.getDimensions(pPose).scale(scale);
+                    }
+                    else {
+                        size = EntitySize.scalable(1, 1).scale(scale);
+                    }
                 }
             }
         }
         
         else if (target != null) {
-            scale = 1 - (duration - tickCount) / (duration - renderAsItemTime);
+            scale = 1 - (duration - tfProgressTime) / (duration - renderAsItemTime);
             if (scale > 0) {
                 size = target.getDimensions(pPose).scale(scale);
             }
@@ -166,47 +277,133 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         return size;
     }
     
-    public static float getRenderAsItemTime(float fullDuration) {
-        return Math.min(fullDuration / 3, 20);
+    public float getTfProgressTime(float partialTick) {
+        float time = Math.min(tickCount + partialTick, duration);
+        return isTurningBack() ? duration - time : time;
+    }
+    
+    public float getRenderAsItemTime() {
+        return renderAsItemTime;
     }
 
     @Override
     protected void defineSynchedData() {
         entityData.define(LIFE_FORM_SPAWNED, false);
+        entityData.define(IS_TURNING_BACK, false);
+        entityData.define(REVERSE_SIGNAL, false);
     }
     
+    @Override
     public boolean isInvisible() {
         return super.isInvisible() || entityData.get(LIFE_FORM_SPAWNED);
     }
     
     @Override
+    public void onSyncedDataUpdated(DataParameter<?> key) {
+        super.onSyncedDataUpdated(key);
+        if (key == REVERSE_SIGNAL && entityData.get(REVERSE_SIGNAL)) {
+            reverseTransformation();
+        }
+    }
+    
+    private void reverseTransformation() {
+        int ticks = TURN_BACK_TICKS;
+        if (tickCount < ticks) {
+            tickCount = duration - tickCount;
+        }
+        else {
+            float prevItemTime = getRenderAsItemTime();
+            
+            if (tickCount > prevItemTime) {
+                renderAsItemTime = (ticks / 3F);
+                duration = (int) ((duration - prevItemTime) * (ticks - renderAsItemTime)
+                                    / (tickCount - prevItemTime) + renderAsItemTime);
+            }
+            else {
+                renderAsItemTime = ticks * prevItemTime / tickCount;
+                duration = MathHelper.ceil(renderAsItemTime);
+            }
+            
+            tickCount = duration - ticks;
+        }
+    }
+    
+    
+    private static final int TURN_BACK_TICKS = 10;
+    public static void turnEntityBack(Entity entity, GETransformationData source, @Nullable LivingEntity owner) {
+        if (entity instanceof GETransformationEntity) {
+            GETransformationEntity tfEntity = (GETransformationEntity) entity;
+            tfEntity.entityData.set(IS_TURNING_BACK, true);
+            tfEntity.entityData.set(REVERSE_SIGNAL, true);
+        }
+        else {
+            World world = entity.level;
+            GETransformationEntity tf = new GETransformationEntity(world)
+                    .withTransformationTarget(entity)
+                    .withDuration(TURN_BACK_TICKS)
+                    .withOwner(owner);
+            tf.entityData.set(IS_TURNING_BACK, true);
+            
+            if (source.sourceEntity instanceof ItemEntity) {
+                ItemStack item = ((ItemEntity) source.sourceEntity).getItem();
+                if (!item.isEmpty() && item.getItem() instanceof BlockItem && item.getCount() == 1) {
+//                    BlockState blockToPlace = null;
+//                    if (blockToPlace != null) {
+//                        source.withEntitySource(null).withBlockSource(blockToPlace, null);
+//                    }
+                }
+            }
+            tf.source.copyFrom(source, world);
+            
+            copyStatus(entity, tf);
+            
+            Vector3d pos = entity.position();
+            tf.moveTo(pos.x, pos.y, pos.z, entity.yRot, entity.xRot);
+            entity.level.addFreshEntity(tf);
+            
+            entity.remove();
+        }
+    }
+    
+    private static void copyStatus(Entity from, Entity to) {
+        if (from.isOnFire()) {
+            to.setSecondsOnFire((from.getRemainingFireTicks() + 19) / 20);
+        }
+        if (from.isPassenger()) {
+            to.startRiding(from.getVehicle());
+        }
+        if (from.isVehicle()) {
+            from.getPassengers().forEach(passenger -> passenger.startRiding(to));
+        }
+    }
+    
+    
+    @Override
     protected void readAdditionalSaveData(CompoundNBT nbt) {
         this.tickCount = nbt.getInt("Age");
-        this.duration = nbt.getInt("Duration");
+        withDuration(nbt.getInt("Duration"));
+        entityData.set(IS_TURNING_BACK, nbt.getBoolean("TurnBack"));
         
-        if (nbt.contains("SourceEntity", MCUtil.getNbtId(CompoundNBT.class))) {
-            CompoundNBT entityNbt = nbt.getCompound("SourceEntity");
-            source = EntityType.create(entityNbt, level).orElse(null);
-        }
+        source.readNbt(nbt);
         if (nbt.contains("TargetEntity", MCUtil.getNbtId(CompoundNBT.class))) {
             CompoundNBT entityNbt = nbt.getCompound("TargetEntity");
             target = EntityType.create(entityNbt, level).orElse(null);
         }
+        owner.loadNbt(nbt, "Owner");
     }
 
     @Override
     protected void addAdditionalSaveData(CompoundNBT nbt) {
         nbt.putInt("Age", tickCount);
         nbt.putInt("Duration", duration);
+        nbt.putBoolean("TurnBack", entityData.get(IS_TURNING_BACK));
         
-        if (source != null) {
-            CompoundNBT entityNbt = source.serializeNBT();
-            nbt.put("SourceEntity", entityNbt);
-        }
+        source.writeNbt(nbt);
         if (target != null) {
             CompoundNBT entityNbt = target.serializeNBT();
             nbt.put("TargetEntity", entityNbt);
         }
+        owner.saveNbt(nbt, "Owner");
     }
 
     @Override
@@ -218,21 +415,170 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
     public void writeSpawnData(PacketBuffer buffer) {
         buffer.writeVarInt(tickCount);
         buffer.writeVarInt(duration);
+        owner.writeNetwork(buffer);
         
         writeEntityData(buffer, target);
-        writeEntityData(buffer, source);
+        source.resolveNbtRead(level);
+        source.toBuf(buffer);
     }
 
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
         tickCount = additionalData.readVarInt();
-        duration = additionalData.readVarInt();
+        withDuration(additionalData.readVarInt());
+        owner.readNetwork(additionalData);
         
-        target = readEntityData(additionalData);
-        source = readEntityData(additionalData);
+        target = readEntityData(additionalData, level);
+        source.fromBuf(additionalData, level);
     }
     
-    private void writeEntityData(PacketBuffer buffer, Entity entityToWrite) {
+    
+    
+    public static class GETransformationData {
+        private Entity sourceEntity;
+        private CompoundNBT sourceEntityNbt = null;
+        private BlockState sourceBlockState;
+        private BlockPos sourceBlockPos;
+        
+        
+        
+        public GETransformationData withEntitySource(Entity entity) {
+            this.sourceEntity = entity;
+            return this;
+        }
+        
+        public GETransformationData withBlockSource(BlockState blockState, BlockPos blockPos) {
+            this.sourceBlockState = blockState;
+            this.sourceBlockPos = blockPos;
+            return this;
+        }
+        
+        public void copyFrom(GETransformationData other, World world) {
+            this.sourceEntity = other.sourceEntity;
+            this.sourceBlockState = other.sourceBlockState;
+            this.sourceBlockPos = other.sourceBlockPos;
+        }
+        
+        
+        /**
+         * Call this during tick or before sending the data from server.
+         */
+        public void resolveNbtRead(World world) {
+            if (sourceEntityNbt != null) {
+                withEntitySource(EntityType.create(sourceEntityNbt, world).orElse(null));
+                sourceEntityNbt = null;
+            }
+        }
+        
+        
+        
+        public ItemStack clMakeSourceItemView() {
+            if (sourceEntity != null) {
+                if (sourceEntity instanceof ItemEntity) {
+                    return ((ItemEntity) sourceEntity).getItem().copy();
+                }
+                else if (sourceEntity instanceof TNTEntity) {
+                    return new ItemStack(Items.TNT);
+                }
+                else if (sourceEntity instanceof PotionEntity) {
+                    return ((PotionEntity) sourceEntity).getItem().copy();
+                }
+                else if (sourceEntity.getType() == ModEntityTypes.ROAD_ROLLER.get()) {
+                    return new ItemStack(ModItems.ROAD_ROLLER.get());
+                }
+                else if (sourceEntity.getType() == EntityType.END_CRYSTAL) {
+                    return new ItemStack(Items.END_CRYSTAL);
+                }
+                else if (sourceEntity instanceof BoatEntity) {
+                    return new ItemStack(((BoatEntity) sourceEntity).getDropItem());
+                }
+            }
+            else if (sourceBlockState != null) {
+                Block block = sourceBlockState.getBlock();
+                Item blockItem = block.asItem();
+                if (blockItem != null && blockItem != Items.AIR) {
+                    return new ItemStack(blockItem);
+                }
+            }
+            
+            return ItemStack.EMPTY;
+        }
+        
+        public IFormattableTextComponent clMakeSourceName() {
+            if (sourceEntity != null) {
+                ITextComponent name = sourceEntity.getDisplayName();
+                if (name instanceof IFormattableTextComponent) {
+                    return (IFormattableTextComponent) name;
+                }
+                throw new ClassCastException("Why do ITextComponent and IFormattableTextComponent interfaces both exist? Why not just make ITextComponent formattable? Separating them doesn't even do shit, ffs OOP was a mistake");
+            }
+            
+            else if (sourceBlockState != null) {
+                return sourceBlockState.getBlock().getName(); // oh, look, this returns IFormattableTextComponent!
+            }
+            
+            return (StringTextComponent) StringTextComponent.EMPTY;
+        }
+        
+        
+        @Nullable
+        public Entity getSourceEntity() {
+            return sourceEntity;
+        }
+        
+        @Nullable
+        public BlockState getSourceBlockState() {
+            return sourceBlockState;
+        }
+        
+        @Nullable
+        public BlockPos getSourceBlockPos() {
+            return sourceBlockPos;
+        }
+        
+        
+        
+        public void writeNbt(CompoundNBT nbt) {
+            if (sourceEntity != null) {
+                CompoundNBT entityNbt = sourceEntity.serializeNBT();
+                nbt.put("GESourceEntity", entityNbt);
+            }
+            if (sourceBlockState != null) {
+                nbt.put("GESourceBlock", NBTUtil.writeBlockState(sourceBlockState));
+            }
+            if (sourceBlockPos != null) {
+                nbt.put("GESourcePos", NBTUtil.writeBlockPos(sourceBlockPos));
+            }
+        }
+        
+        public void readNbt(CompoundNBT nbt) {
+            if (nbt.contains("GESourceEntity", MCUtil.getNbtId(CompoundNBT.class))) {
+                sourceEntityNbt = nbt.getCompound("GESourceEntity");
+            }
+            if (nbt.contains("GESourceBlock", MCUtil.getNbtId(CompoundNBT.class))) {
+                sourceBlockState = NBTUtil.readBlockState(nbt.getCompound("GESourceBlock"));
+            }
+            if (nbt.contains("GESourcePos", MCUtil.getNbtId(CompoundNBT.class))) {
+                sourceBlockPos = NBTUtil.readBlockPos(nbt.getCompound("GESourcePos"));
+            }
+        }
+        
+        public void toBuf(PacketBuffer buffer) {
+            writeEntityData(buffer, sourceEntity);
+            NetworkUtil.writeOptionally(buffer, sourceBlockState, blockState -> NetworkUtil.writeBlockState(buffer, blockState));
+            NetworkUtil.writeOptionally(buffer, sourceBlockPos, blockPos -> buffer.writeBlockPos(blockPos));
+        }
+        
+        public void fromBuf(PacketBuffer buffer, World world) {
+            sourceEntity = readEntityData(buffer, world);
+            sourceBlockState = NetworkUtil.readOptional(buffer, () -> NetworkUtil.readBlockState(buffer)).orElse(null);
+            sourceBlockPos = NetworkUtil.readOptional(buffer, () -> buffer.readBlockPos()).orElse(null);
+        }
+    }
+    
+    
+    
+    private static void writeEntityData(PacketBuffer buffer, Entity entityToWrite) {
         NetworkUtil.writeOptionally(buffer, entityToWrite, entity -> {
             byte pitch = (byte) MathHelper.floor(entity.xRot * 256.0F / 360.0F);
             byte yaw = (byte) MathHelper.floor(entity.yRot * 256.0F / 360.0F);
@@ -257,10 +603,10 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         });
     }
     
-    private Entity readEntityData(PacketBuffer buffer) {
+    private static Entity readEntityData(PacketBuffer buffer, World world) {
         return NetworkUtil.readOptional(buffer, () -> {
             EntityType<?> type = buffer.readRegistryIdSafe(EntityType.class);
-            Entity entity = type.create(level);
+            Entity entity = type.create(world);
             
             float pitch = (buffer.readByte() * 360) / 256.0F;
             float yaw = (buffer.readByte() * 360) / 256.0F;

@@ -36,22 +36,21 @@ public class EntityTypeIcon {
                 FontRenderer font = Minecraft.getInstance().font;
                 
                 ITextComponent firstLetter = StringTextComponent.EMPTY;
-                int width = 0;
                 int widthNext = 0;
                 for (int i = 1; i <= name.length() && widthNext < 12; i++) {
                     firstLetter = new StringTextComponent(name.substring(0, i));
-                    width = widthNext;
                     widthNext = font.width(firstLetter);
                 }
 
                 RenderSystem.disableDepthTest();
                 font.draw(matrixStack, firstLetter, x + (16 - widthNext) / 2, y + (16 - font.lineHeight + 1) / 2, 0xFFFFFF);
                 RenderSystem.enableDepthTest();
+                RenderSystem.enableBlend();
             }
         }
     }
 
-    private static ResourceLocation getIcon(EntityType<?> entityType) {
+    public static ResourceLocation getIcon(EntityType<?> entityType) {
         return ICONS_CACHE.computeIfAbsent(entityType, EntityTypeIcon::createIconPath);
     }
 

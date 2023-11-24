@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.stand;
 
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.Nullable;
@@ -9,15 +10,20 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
+import com.github.standobyte.jojo.action.stand.effect.StandEffectType;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.IFormattableTextComponent;
@@ -60,8 +66,9 @@ public abstract class StandAction extends Action<IStandPower> {
         return isTrained;
     }
     
+    private static final StandAction[] NO_EXTRA_ACTIONS = new StandAction[0];
     public StandAction[] getExtraUnlockable() {
-        return new StandAction[0];
+        return NO_EXTRA_ACTIONS;
     }
     
     public float getMaxTrainingPoints(IStandPower power) {
@@ -171,6 +178,31 @@ public abstract class StandAction extends Action<IStandPower> {
                     .getStandSkin(power.getStandInstance().get()), path);
         }
         return path;
+    }
+    
+    
+    // TODO use this for CrazyDiamondBlockBullet (save the reference to the blood drops effect in StandEntityTask)
+    protected static void clWriteTargetedStandEffect(PacketBuffer buf, StandEffectType<?> type, double maxRange) {
+        buf.writeVarInt(clGetTargetedStandEffect(type, maxRange).map(effect -> effect.getId()).orElse(-1));
+    }
+    
+    protected static Optional<StandEffectInstance> clGetTargetedStandEffect(StandEffectType<?> type, double maxRange) {
+        PlayerEntity user = ClientUtil.getClientPlayer();
+        return IStandPower.getStandPowerOptional(user).resolve().flatMap(
+                power -> StandEffectsTracker.getTargetLookedAt(power, type, maxRange, user));
+    }
+    
+    protected static Optional<StandEffectInstance> readTargetedStandEffect(PacketBuffer buf, IStandPower power, StandEffectType<?> type) {
+        int effectId = buf.readVarInt();
+        if (effectId > 0) {
+            StandEffectInstance effect = power.getContinuousEffects().getById(effectId);
+            if (effect != null && effect.effectType == type
+                    && power.getUser() == effect.getStandUser()) {
+                return Optional.of(effect);
+            }
+        }
+        
+        return Optional.empty();
     }
     
     

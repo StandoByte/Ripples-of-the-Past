@@ -3,7 +3,9 @@ package com.github.standobyte.jojo.action.stand.effect;
 import java.util.UUID;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandEffectPacket;
@@ -29,7 +31,8 @@ public abstract class StandEffectInstance {
     protected World world;
     protected IStandPower userPower;
     
-    private LivingEntity target;
+    private Entity target;
+    private LivingEntity targetLiving;
     private UUID targetUUID;
     private int targetNetworkId = -1;
     
@@ -57,8 +60,9 @@ public abstract class StandEffectInstance {
         return this;
     }
     
-    public StandEffectInstance withTarget(LivingEntity target) {
+    public StandEffectInstance withTarget(Entity target) {
         this.target = target;
+        this.targetLiving = target instanceof LivingEntity ? (LivingEntity) target : null;
         this.targetUUID = target != null ? target.getUUID() : null;
         this.targetNetworkId = target.getId();
         return this;
@@ -67,7 +71,8 @@ public abstract class StandEffectInstance {
     public StandEffectInstance withTargetEntityId(int entityId) {
         this.targetNetworkId = entityId;
         if (target != null && target.getId() != entityId) {
-            target = null;
+            this.target = null;
+            this.targetLiving = null;
         }
         return this;
     }
@@ -76,8 +81,12 @@ public abstract class StandEffectInstance {
         return user;
     }
     
-    public LivingEntity getTarget() {
+    public Entity getTarget() {
         return target;
+    }
+    
+    public LivingEntity getTargetLiving() {
+        return targetLiving;
     }
     
     public UUID getTargetUUID() {
@@ -85,65 +94,87 @@ public abstract class StandEffectInstance {
     }
     
     public void onStart() {
+        if (targetLiving != null) {
+            targetLiving.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.addEffectTargetedBy(this));
+        }
         start();
     }
     
     public void onTick() {
-        tickCount++;
-
-        updateTarget(world);
-        
-        if (!world.isClientSide() && targetUUID == null && needsTarget()) {
-            remove();
-            return;
+        if (!toBeRemoved) {
+            tickCount++;
+    
+            updateTarget(world);
+            
+            if (!world.isClientSide() && targetUUID == null && needsTarget()) {
+                remove();
+                return;
+            }
+            
+            tick();
         }
-        
-        tick();
     }
 
-    public void updateTarget(World world) {
+    protected void updateTarget(World world) {
         if (target == null) {
             if (!world.isClientSide()) {
                 if (targetUUID != null) {
                     Entity entity = ((ServerWorld) world).getEntity(targetUUID);
-                    if (entity instanceof LivingEntity) {
-                        target = (LivingEntity) entity;
-                        PacketManager.sendToClientsTrackingAndSelf(TrStandEffectPacket.updateTarget(this), user);
-                    }
+                    setTargetEntity(entity);
                 }
             }
             else if (targetNetworkId > -1) {
                 Entity entity = world.getEntity(targetNetworkId);
-                if (entity instanceof LivingEntity) {
-                    target = (LivingEntity) entity;
-                }
+                setTargetEntity(entity);
             }
         }
         
-        if (!world.isClientSide() && targetUUID != null && target != null) {
-            if (!keepTarget(target)) {
-                targetUUID = null;
-                target = null;
-                PacketManager.sendToClientsTrackingAndSelf(TrStandEffectPacket.updateTarget(this), user);
-            }
+        if (!world.isClientSide() && targetUUID != null && 
+                target != null && shouldClearTarget(target, targetLiving)) {
+            clearTarget();
         }
         
-        if (target != null) {
-            if (!target.isAlive()) {
-                target = null;
+        if (target != null && !target.isAlive()) {
+            setTargetEntity(null);
+        }
+    }
+    
+    protected final void clearTarget() {
+        targetUUID = null;
+        setTargetEntity(null);
+    }
+    
+    protected void setTargetEntity(Entity target) {
+        if (this.target != target) {
+            if (this.targetLiving != null) {
+                this.targetLiving.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.removeEffectTargetedBy(this));
+            }
+            this.target = target;
+            if (target != null) {
+                this.targetUUID = target.getUUID();
+            }
+            if (target instanceof LivingEntity) {
+                target.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.addEffectTargetedBy(this));
+                this.targetLiving = (LivingEntity) target;
             }
             else {
-                tickTarget(target);
+                this.targetLiving = null;
+            }
+            
+            if (!world.isClientSide()) {
+                PacketManager.sendToClientsTrackingAndSelf(TrStandEffectPacket.updateTarget(this), user);
             }
         }
     }
     
     public void onStop() {
+        if (targetLiving != null) {
+            targetLiving.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.removeEffectTargetedBy(this));
+        }
         stop();
     }
     
     protected abstract void start();
-    protected abstract void tickTarget(LivingEntity target);
     protected abstract void tick();
     protected abstract void stop();
     
@@ -159,8 +190,8 @@ public abstract class StandEffectInstance {
         return true;
     }
     
-    protected boolean keepTarget(LivingEntity target) {
-        return !target.isDeadOrDying();
+    protected boolean shouldClearTarget(Entity target, @Nullable LivingEntity targetLiving) {
+        return targetLiving != null && targetLiving.isDeadOrDying();
     }
     
     protected abstract boolean needsTarget();
@@ -181,12 +212,9 @@ public abstract class StandEffectInstance {
         updateTarget(user.level);
     }
     
-    public void syncWithTrackingAndUser() {
-        PacketManager.sendToClientsTrackingAndSelf(TrStandEffectPacket.add(this), user);
-    }
-    
     public void syncWithTrackingOrUser(ServerPlayerEntity player) {
-        PacketManager.sendToClient(TrStandEffectPacket.add(this), player);
+        updateTarget(player.level);
+        PacketManager.sendToClient(TrStandEffectPacket.add(this, player == user), player);
     }
 
     public CompoundNBT toNBT() {
@@ -214,9 +242,9 @@ public abstract class StandEffectInstance {
         return effect;
     }
     
-    public void writeAdditionalPacketData(PacketBuffer buf) {}
+    public void writeAdditionalPacketData(PacketBuffer buf, boolean sendingToUser) {}
     
-    public void readAdditionalPacketData(PacketBuffer buf) {}
+    public void readAdditionalPacketData(PacketBuffer buf, boolean clientIsUser) {}
 
     protected void writeAdditionalSaveData(CompoundNBT nbt) {}
 

@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
+import java.util.Random;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -18,9 +19,13 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.block.Block;
+import net.minecraft.block.BlockRenderType;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.BlockRendererDispatcher;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.LivingRenderer;
@@ -35,9 +40,13 @@ import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.world.World;
+import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.RenderLivingEvent;
+import net.minecraftforge.client.model.data.EmptyModelData;
 import net.minecraftforge.common.MinecraftForge;
 
 public class GETransformationRenderer<T extends GETransformationEntity> extends EntityRenderer<T> {
@@ -55,17 +64,49 @@ public class GETransformationRenderer<T extends GETransformationEntity> extends 
     @Override
     public void render(T entity, float yRotation, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
         if (!entity.isInvisibleTo(Minecraft.getInstance().player)) {
-            float age = entity.tickCount + partialTick;
+            float age = entity.getTfProgressTime(partialTick);
             float ageMax = entity.getDuration();
-            float itemSourceAge = GETransformationEntity.getRenderAsItemTime(ageMax);
+            float itemSourceAge = entity.getRenderAsItemTime();
             if (age < itemSourceAge) {
-                Entity source = entity.getTransformationSource();
-                if (source != null) {
+                Entity sourceEntity = entity.getTfSourceData().getSourceEntity();
+                BlockState sourceBlock = entity.getTfSourceData().getSourceBlockState();
+                if (sourceEntity != null || sourceBlock != null) {
                     float scale = 1 - age / itemSourceAge;
                     matrixStack.pushPose();
                     matrixStack.scale(scale, scale, scale);
-                    this.shadowRadius = 0.15F * scale;
-                    entityRenderDispatcher.getRenderer(source).render(source, yRotation, partialTick, matrixStack, buffer, packedLight);
+                    if (sourceEntity != null) {
+                        this.shadowRadius = 0.15F * scale;
+                        
+                        entityRenderDispatcher.getRenderer(sourceEntity).render(
+                                sourceEntity, yRotation, partialTick, matrixStack, buffer, packedLight);
+                    }
+                    else {
+                        this.shadowRadius = 0;
+                        
+                        if (sourceBlock.getRenderShape() == BlockRenderType.MODEL) {
+                           World world = entity.level;
+                           if (sourceBlock != world.getBlockState(entity.blockPosition()) && sourceBlock.getRenderShape() != BlockRenderType.INVISIBLE) {
+                              matrixStack.pushPose();
+                              BlockPos blockPos = new BlockPos(entity.getX(), entity.getBoundingBox().maxY, entity.getZ());
+                              matrixStack.translate(-0.5, 0, -0.5);
+                              BlockRendererDispatcher blockRenderer = Minecraft.getInstance().getBlockRenderer();
+                              for (RenderType type : RenderType.chunkBufferLayers()) {
+                                 if (RenderTypeLookup.canRenderInLayer(sourceBlock, type)) {
+                                    ForgeHooksClient.setRenderLayer(type);
+                                    BlockPos startingPos = entity.getTfSourceData().getSourceBlockPos();
+                                    if (startingPos == null) startingPos = entity.blockPosition();
+                                    blockRenderer.getModelRenderer().renderModel(world, 
+                                            blockRenderer.getBlockModel(sourceBlock), sourceBlock, blockPos, 
+                                            matrixStack, buffer.getBuffer(type), false, new Random(), 
+                                            sourceBlock.getSeed(startingPos), OverlayTexture.NO_OVERLAY, 
+                                            EmptyModelData.INSTANCE);
+                                 }
+                              }
+                              ForgeHooksClient.setRenderLayer(null);
+                              matrixStack.popPose();
+                           }
+                        }
+                    }
                     matrixStack.popPose();
                 }
             }
@@ -137,7 +178,7 @@ public class GETransformationRenderer<T extends GETransformationEntity> extends 
             
             float blockOverlayAlpha = 1.0F - progress;
             if (blockOverlayAlpha > 0) {
-                ResourceLocation blockSprite = getBlockOverlaySprite(transformationEntity.getTransformationSource());
+                ResourceLocation blockSprite = getBlockOverlaySprite(transformationEntity);
                 if (blockSprite != null) {
                     RenderType renderTypeItem = CustomRenderType.goldExperienceLifeformOverlay(
                             blockSprite, targetModel.texWidth / 16F, targetModel.texHeight / 16F);
@@ -157,12 +198,20 @@ public class GETransformationRenderer<T extends GETransformationEntity> extends 
     
     
     
-    private <S extends Entity> ResourceLocation getBlockOverlaySprite(S entity) {
-        if (entity instanceof ItemEntity) {
-            ItemStack item = ((ItemEntity) entity).getItem();
+    private ResourceLocation getBlockOverlaySprite(GETransformationEntity tfEntity) {
+        Entity sourceEntity = tfEntity.getTfSourceData().getSourceEntity();
+        if (sourceEntity instanceof ItemEntity) {
+            ItemStack item = ((ItemEntity) sourceEntity).getItem();
             if (!item.isEmpty() && item.getItem() instanceof BlockItem) {
                 Block block = ((BlockItem) item.getItem()).getBlock();
                 ResourceLocation tex = CDBlockBulletRenderer.getBlockTexture(block.defaultBlockState());
+                return tex;
+            }
+        }
+        else {
+            BlockState blockState = tfEntity.getTfSourceData().getSourceBlockState();
+            if (blockState != null) {
+                ResourceLocation tex = CDBlockBulletRenderer.getBlockTexture(blockState);
                 return tex;
             }
         }

@@ -1,6 +1,11 @@
 package com.github.standobyte.jojo.util.mod;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismUtil;
@@ -13,10 +18,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.IndirectEntityDamageSource;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.ModList;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 @EventBusSubscriber(modid = JojoMod.MOD_ID)
@@ -87,6 +92,32 @@ public class ModInteractionUtil {
                     }
                 }
             }
+        }
+    }
+    
+    
+    public static class ResLocSet {
+        private final Map<String, Collection<String>> resLocsByNamespace = new HashMap<>();
+        
+        public ResLocSet add(String namespace, String path) {
+            Collection<String> pathsSet = resLocsByNamespace.computeIfAbsent(namespace, key -> new HashSet<>());
+            pathsSet.add(path);
+            return this;
+        }
+        
+        public ResLocSet add(String namespace, String... paths) {
+            Collection<String> pathsSet = resLocsByNamespace.computeIfAbsent(namespace, key -> new HashSet<>());
+            Collections.addAll(pathsSet, paths);
+            return this;
+        }
+        
+        public ResLocSet add(ResourceLocation resLoc) {
+            return add(resLoc.getNamespace(), resLoc.getPath());
+        }
+        
+        public boolean contains(ResourceLocation resLoc) {
+            Collection<String> paths = resLocsByNamespace.get(resLoc.getNamespace());
+            return paths != null ? paths.contains(resLoc.getPath()) : false;
         }
     }
 }

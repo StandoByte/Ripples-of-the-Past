@@ -1,10 +1,13 @@
 package com.github.standobyte.jojo.power.impl.stand;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -22,14 +25,20 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.util.math.vector.Vector3d;
 
 public class StandEffectsTracker {
-    private static final AtomicInteger EFFECTS_COUNTER = new AtomicInteger();
-    private final IStandPower standPower;
+    public static final AtomicInteger EFFECTS_COUNTER = new AtomicInteger();
+    private IStandPower standPower;
     private final Int2ObjectMap<StandEffectInstance> effects = new Int2ObjectLinkedOpenHashMap<>();
     
     public StandEffectsTracker(IStandPower standPower) {
         this.standPower = standPower;
+    }
+    
+    public void setPowerData(IStandPower standPower) {
+        this.standPower = standPower;
+        effects.values().forEach(effect -> effect.withStand(standPower));
     }
     
     public void addEffect(StandEffectInstance instance) {
@@ -39,7 +48,10 @@ public class StandEffectsTracker {
         }
         putEffectInstance(instance);
         if (!user.level.isClientSide()) {
-            instance.syncWithTrackingAndUser();
+            PacketManager.sendToClientsTracking(TrStandEffectPacket.add(instance, false), user);
+            if (user instanceof ServerPlayerEntity) {
+                PacketManager.sendToClient(TrStandEffectPacket.add(instance, true), (ServerPlayerEntity) user);
+            }
         }
     }
     
@@ -86,6 +98,8 @@ public class StandEffectsTracker {
     }
     
     public void onStandUserLogout(ServerPlayerEntity user) {
+        if (!user.server.isPublished()) return;
+        
         ObjectIterator<Entry<StandEffectInstance>> it = effects.int2ObjectEntrySet().iterator();
         while (it.hasNext()) {
             StandEffectInstance effect = it.next().getValue();
@@ -157,7 +171,6 @@ public class StandEffectsTracker {
     
     public void syncWithTrackingOrUser(ServerPlayerEntity player) {
         effects.values().forEach(effect -> {
-            effect.updateTarget(player.getLevel());
             effect.syncWithTrackingOrUser(player);
         });
     }
@@ -183,5 +196,24 @@ public class StandEffectsTracker {
                 }
             });
         }
+    }
+    
+    
+    
+    public static Stream<StandEffectInstance> getEffectsOfType(IStandPower power, StandEffectType<?> type, double range) {
+        double rangeSq = range * range;
+        return power.getContinuousEffects().getEffects(effect -> effect.effectType == type)
+        .stream().filter(effect -> effect.getTarget() != null && effect.getTarget().distanceToSqr(power.getUser()) < rangeSq);
+    }
+    
+    public static Optional<StandEffectInstance> getTargetLookedAt(Stream<StandEffectInstance> targets, LivingEntity user) {
+        Vector3d lookAngle = user.getLookAngle();
+        Vector3d eyePos = user.getEyePosition(1.0F);
+        return targets.max(Comparator.comparingDouble(
+                e -> lookAngle.dot(e.getTarget().getBoundingBox().getCenter().subtract(eyePos).normalize())));
+    }
+    
+    public static Optional<StandEffectInstance> getTargetLookedAt(IStandPower power, StandEffectType<?> type, double range, LivingEntity user) {
+        return getTargetLookedAt(getEffectsOfType(power, type, range), user);
     }
 }

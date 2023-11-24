@@ -26,6 +26,7 @@ import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.crash.ReportedException;
 import net.minecraft.dispenser.IBlockSource;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.item.ItemEntity;
@@ -293,6 +294,13 @@ public class MCUtil {
             itemEntity.setOwner(entity.getUUID());
             return itemEntity;
         }
+    }
+    
+    
+    
+    public static Optional<Entity> cloneEntity(Entity entity) {
+        CompoundNBT entityNbt = entity.serializeNBT();
+        return EntityType.create(entityNbt, entity.level);
     }
     
     
