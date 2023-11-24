@@ -920,7 +920,7 @@ public class GameplayEventHandler {
     public static void tripwireInteract(PlayerInteractEvent.RightClickBlock event) {
         if (event.getHand() == Hand.MAIN_HAND && event.getUseBlock() != Event.Result.DENY) {
             PlayerEntity player = event.getPlayer();
-            if (!player.isSpectator() && player.getMainHandItem().isEmpty()) {
+            if (!player.isSpectator() && MCUtil.isHandFree(player, Hand.MAIN_HAND)) {
                 World world = player.level;
                 BlockPos pos = event.getHitVec().getBlockPos();
                 BlockState blockState = world.getBlockState(pos);
