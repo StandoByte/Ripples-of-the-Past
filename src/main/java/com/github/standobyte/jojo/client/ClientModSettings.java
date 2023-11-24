@@ -6,7 +6,7 @@ import java.io.File;
 import java.util.function.Consumer;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.power.IPower.ActionType;
+import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.google.gson.Gson;
@@ -33,18 +33,18 @@ public class ClientModSettings {
     }
     
     
-    public void switchLockedHotbarControls(ActionType hotbar) {
+    public void switchLockedHotbarControls(ActionsLayout.Hotbar hotbar) {
         setLockedHotbarControls(hotbar, !areControlsLockedForHotbar(hotbar));
     }
     
-    private void setLockedHotbarControls(ActionType hotbar, boolean value) {
+    private void setLockedHotbarControls(ActionsLayout.Hotbar hotbar, boolean value) {
         editSettings(settings -> {
             switch (hotbar) {
-            case ATTACK:
+            case LEFT_CLICK:
                 settings.lockedAttacksHotbar = value;
                 if (value) settings.lockedAbilitiesHotbar = false;
                 break;
-            case ABILITY:
+            case RIGHT_CLICK:
                 if (value) settings.lockedAttacksHotbar = false;
                 settings.lockedAbilitiesHotbar = value;
                 break;
@@ -52,12 +52,12 @@ public class ClientModSettings {
         });
     }
     
-    public boolean areControlsLockedForHotbar(ActionType hotbar) {
+    public boolean areControlsLockedForHotbar(ActionsLayout.Hotbar hotbar) {
         if (hotbar == null) return false;
         switch (hotbar) {
-        case ATTACK:
+        case LEFT_CLICK:
             return settings.lockedAttacksHotbar;
-        case ABILITY:
+        case RIGHT_CLICK:
             return settings.lockedAbilitiesHotbar;
         }
         return false;

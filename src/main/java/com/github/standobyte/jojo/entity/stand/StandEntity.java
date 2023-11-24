@@ -1043,7 +1043,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     
     public void defaultRotation() {
         LivingEntity user = getUser();
-        if (user != null && !isRemotePositionFixed()) {
+        if (user != null && !isManuallyControlled() && !isRemotePositionFixed()) {
             setRot(user.yRot, user.xRot);
         }
         setYHeadRot(this.yRot);
@@ -1650,7 +1650,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
     
     public float getFinisherMeter() {
-        if (userPower != null && !StandUtil.isFinisherUnlocked(userPower)) {
+        if (userPower != null && !StandUtil.isFinisherMechanicUnlocked(userPower)) {
             return 0;
         }
         return entityData.get(FINISHER_VALUE);

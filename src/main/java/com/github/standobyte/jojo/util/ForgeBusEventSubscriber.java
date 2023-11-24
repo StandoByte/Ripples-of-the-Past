@@ -236,7 +236,7 @@ public class ForgeBusEventSubscriber {
         
         original.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(oldCap -> {
             player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(newCap -> {
-                newCap.moveNotificationsSet(oldCap);
+                newCap.saveOnDeath(oldCap);
             });
         });
     }
@@ -254,6 +254,11 @@ public class ForgeBusEventSubscriber {
     public static void onPlayerLoggedIn(PlayerLoggedInEvent event) {
         JojoModConfig.Common.SyncedValues.syncWithClient((ServerPlayerEntity) event.getPlayer());
         syncPowerData(event.getPlayer());
+        IStandPower.getStandPowerOptional(event.getPlayer()).ifPresent(power -> {
+            if (power.hasPower()) {
+                power.getType().unlockNewActions(power);
+            }
+        });
     }
     
     @SubscribeEvent

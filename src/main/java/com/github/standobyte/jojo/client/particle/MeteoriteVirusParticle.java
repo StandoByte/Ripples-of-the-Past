@@ -14,7 +14,7 @@ public class MeteoriteVirusParticle extends SpriteTexturedParticle {
     protected MeteoriteVirusParticle(ClientWorld world, double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
         super(world, x, y, z, xSpeed, ySpeed, zSpeed);
         lifetime = 100;
-        quadSize = 0.05F;
+        quadSize = 0.075F;
         hasPhysics = false;
     }
 

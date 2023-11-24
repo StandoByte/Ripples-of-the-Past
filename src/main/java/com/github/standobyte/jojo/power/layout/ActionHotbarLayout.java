@@ -25,11 +25,10 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 
 public class ActionHotbarLayout<P extends IPower<P, ?>> {
-    private Map<Action<P>, ActionSwitch<P>> _actions = new LinkedHashMap<>();
+    private final Map<Action<P>, ActionSwitch<P>> _actions = new LinkedHashMap<>();
     private List<ActionSwitch<P>> actionsOrder = new ArrayList<>();
     private List<Action<P>> allActionsCache = new ArrayList<>();
     private List<Action<P>> enabledActionsCache = new ArrayList<>();
-    private boolean wasEdited = false;
     
     
     
@@ -47,7 +46,6 @@ public class ActionHotbarLayout<P extends IPower<P, ?>> {
     }
     
     private void updateCache() {
-        wasEdited = true;
         this.allActionsCache = actionsOrder.stream()
                 .map(ActionSwitch::getAction)
                 .collect(Collectors.collectingAndThen(Collectors.toList(), ImmutableList::copyOf));
@@ -55,6 +53,7 @@ public class ActionHotbarLayout<P extends IPower<P, ?>> {
                 .filter(entry -> entry.isEnabled())
                 .map(ActionSwitch::getAction)
                 .collect(Collectors.collectingAndThen(Collectors.toList(), ImmutableList::copyOf));
+        int dummy = 0;
     }
     
     public List<ActionSwitch<P>> getLayoutView() {
@@ -74,7 +73,16 @@ public class ActionHotbarLayout<P extends IPower<P, ?>> {
     void resetLayout() {
         actionsOrder = new ArrayList<>(_actions.values());
         editLayout(() -> actionsOrder.forEach(actionSwitch -> actionSwitch.reset()));
-        wasEdited = false;
+    }
+    
+    void copySwitches(ActionHotbarLayout<P> source) {
+        editLayout(() -> {
+            _actions.forEach((action, actionSwitch) -> {
+                if (source._actions.containsKey(action)) {
+                    actionSwitch.copyFrom(source._actions.get(action));
+                }
+            });
+        });
     }
     
     public void addExtraAction(Action<P> action) {
@@ -146,7 +154,7 @@ public class ActionHotbarLayout<P extends IPower<P, ?>> {
         buf.writeShort(enabled);
     }
     
-    public static <P extends IPower<P, ?>> List<ActionSwitch<?>> fromBuf(PacketBuffer buf) {
+    public void setFromBuf(PacketBuffer buf) {
         int count = Math.min(buf.readVarInt(), ARBITRARY_ACTIONS_LIMIT);
         List<ActionSwitch<?>> switches = new ArrayList<>(count);
         
@@ -160,25 +168,37 @@ public class ActionHotbarLayout<P extends IPower<P, ?>> {
             enableFlags >>= 1;
         }
         
-        return switches;
+        editLayout(() -> {
+            actionsOrder.clear();
+            
+            for (ActionSwitch<?> switchFromNetwork : switches) {
+                Action<?> action = switchFromNetwork.getAction();
+                
+                if (action != null) {
+                    ActionSwitch<P> switchLocal = _actions.computeIfAbsent((Action<P>) action, ActionSwitch::new);
+                    switchLocal.copyFrom(switchFromNetwork);
+                    actionsOrder.add(switchLocal);
+                }
+            }
+            
+            // shouldn't happen, but just in case
+            if (fillInMissingActions()) {
+                JojoMod.getLogger().warn("Action layout wasn't full!");
+            }
+        });
     }
     
     
     
     Optional<ListNBT> toNBT() {
-        if (wasEdited) {
-            ListNBT nbt = new ListNBT();
-            actionsOrder.forEach(actionSwitch -> {
-                CompoundNBT actionNBT = new CompoundNBT();
-                actionNBT.put("Action", StringNBT.valueOf(actionSwitch.action.getRegistryName().toString()));
-                actionNBT.putBoolean("Enabled", actionSwitch.isEnabled);
-                nbt.add(actionNBT);
-            });
-            return Optional.of(nbt);
-        }
-        else {
-            return Optional.empty();
-        }
+        ListNBT nbt = new ListNBT();
+        actionsOrder.forEach(actionSwitch -> {
+            CompoundNBT actionNBT = new CompoundNBT();
+            actionNBT.put("Action", StringNBT.valueOf(actionSwitch.action.getRegistryName().toString()));
+            actionNBT.putBoolean("Enabled", actionSwitch.isEnabled);
+            nbt.add(actionNBT);
+        });
+        return Optional.of(nbt);
     }
     
     void fromNBT(ListNBT nbt) {
@@ -189,13 +209,13 @@ public class ActionHotbarLayout<P extends IPower<P, ?>> {
                 if (actionNBT instanceof CompoundNBT) {
                     CompoundNBT actionCNBT = (CompoundNBT) actionNBT;
                     String actionName = actionCNBT.getString("Action");
-                    if (!"".equals(actionName)) {
+                    if (!actionName.isEmpty()) {
                         ResourceLocation actionId = new ResourceLocation(actionName);
                         if (JojoCustomRegistries.ACTIONS.getRegistry().containsKey(actionId)) {
                             Action<?> action = JojoCustomRegistries.ACTIONS.getRegistry().getValue(actionId);
                             
-                            if (action != null && _actions.containsKey(action)) {
-                                ActionSwitch<P> switchLocal = _actions.get(action);
+                            if (action != null) {
+                                ActionSwitch<P> switchLocal = _actions.computeIfAbsent((Action<P>) action, ActionSwitch::new);
                                 switchLocal.fromNBT(actionCNBT);
                                 actionsOrder.add(switchLocal);
                             }
@@ -205,27 +225,6 @@ public class ActionHotbarLayout<P extends IPower<P, ?>> {
             }
             
             fillInMissingActions();
-        });
-    }
-    
-    public void setFromPacket(List<ActionSwitch<?>> switches, boolean clientSide) {
-        editLayout(() -> {
-            actionsOrder.clear();
-            
-            for (ActionSwitch<?> switchFromNetwork : switches) {
-                Action<?> action = switchFromNetwork.getAction();
-                
-                if (action != null && _actions.containsKey(action)) {
-                    ActionSwitch<P> switchLocal = _actions.get(action);
-                    switchLocal.copyFrom(switchFromNetwork);
-                    actionsOrder.add(switchLocal);
-                }
-            }
-            
-            // shouldn't happen, but just in case
-            if (fillInMissingActions()) {
-                JojoMod.getLogger().warn("Action layout sent to {} wasn't full!", clientSide ? "client" : "server");
-            }
         });
     }
     
@@ -242,20 +241,6 @@ public class ActionHotbarLayout<P extends IPower<P, ?>> {
     
     public boolean containsAction(Action<P> action) {
         return _actions.containsKey(action);
-    }
-    
-    
-    
-    void keepLayoutOnClone(ActionHotbarLayout<P> oldLayout) {
-        this._actions = oldLayout._actions;
-        this.actionsOrder = oldLayout.actionsOrder;
-        this.allActionsCache = oldLayout.allActionsCache;
-        this.enabledActionsCache = oldLayout.enabledActionsCache;
-        this.wasEdited = oldLayout.wasEdited;
-    }
-    
-    boolean wasEdited() {
-        return wasEdited;
     }
     
     

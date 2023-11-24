@@ -1,16 +1,14 @@
 package com.github.standobyte.jojo.power.impl.stand.type;
 
-import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.StreamSupport;
 
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack;
-import com.github.standobyte.jojo.action.stand.StandEntityLightAttack;
-import com.github.standobyte.jojo.action.stand.StandEntityMeleeBarrage;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
@@ -36,9 +34,8 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
     private Supplier<? extends StandEntityType<? extends StandEntity>> entityTypeSupplier = null;
     private final boolean manualControlEnabled;
     private final boolean standLeapEnabled;
-    private boolean hasHeavyAttack;
-    private boolean hasFastAttack;
-
+    private Optional<StandAction> finisherPunch = Optional.empty();
+    
     @Deprecated
     public EntityStandType(int color, ITextComponent partName, 
             StandAction[] attacks, StandAction[] abilities, 
@@ -69,10 +66,21 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
             this.standLeapEnabled = false;
             return getThis();
         }
+        
+        @Override
+        public B rightClickHotbar(StandAction... rightClickHotbar) {
+            if (rightClickHotbar.length > 0) {
+                defaultQuickAccess(rightClickHotbar[0]);
+            }
+            else {
+                defaultQuickAccess(null);
+            }
+            return super.rightClickHotbar(rightClickHotbar);
+        }
     }
     
     public static class Builder<T extends StandStats> extends EntityStandType.AbstractBuilder<Builder<T>, T> {
-
+        
         @Override
         protected Builder<T> getThis() {
             return this;
@@ -89,10 +97,10 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
     
     @Override
     public void onCommonSetup() {
-        hasHeavyAttack = Arrays.stream(getAttacks()).anyMatch(
-                attack -> attack instanceof StandEntityHeavyAttack || attack.getShiftVariationIfPresent() instanceof StandEntityHeavyAttack);
-        hasFastAttack = Arrays.stream(getAttacks()).anyMatch(
-                attack -> attack instanceof StandEntityLightAttack || attack instanceof StandEntityMeleeBarrage);
+        super.onCommonSetup();
+        finisherPunch = StreamSupport.stream(getAllUnlockableActions().spliterator(), false)
+                .filter(attack -> attack instanceof StandEntityHeavyAttack && ((StandEntityHeavyAttack) attack).isFinisher())
+                .findFirst();
     }
     
     public void setEntityType(Supplier<? extends StandEntityType<? extends StandEntity>> entityTypeSupplier) {
@@ -154,8 +162,8 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
     }
     
     @Override
-    public boolean usesStandFinisherMechanic() {
-        return hasHeavyAttack && hasFastAttack;
+    public Optional<StandAction> getStandFinisherPunch() {
+        return finisherPunch;
     }
     
     @Override
@@ -273,11 +281,11 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
         if (!user.level.isClientSide()) {
             power.getStandInstance().ifPresent(standInstance -> {
                 if (!standInstance.hasPart(StandPart.ARMS)) {
-                    user.addEffect(new EffectInstance(Effects.WEAKNESS, 300, 1));
-                    user.addEffect(new EffectInstance(Effects.DIG_SLOWDOWN, 300, 1));
+                    user.addEffect(new EffectInstance(Effects.WEAKNESS, 319, 1));
+                    user.addEffect(new EffectInstance(Effects.DIG_SLOWDOWN, 319, 1));
                 }
                 if (!standInstance.hasPart(StandPart.LEGS)) {
-                    user.addEffect(new EffectInstance(Effects.MOVEMENT_SLOWDOWN, 300, 1));
+                    user.addEffect(new EffectInstance(Effects.MOVEMENT_SLOWDOWN, 319, 1));
                 }
             });
         }

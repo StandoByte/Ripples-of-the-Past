@@ -20,6 +20,7 @@ import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.LazySupplier;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -101,7 +102,7 @@ public class CrazyDiamondBlockBullet extends StandEntityAction {
             if (!(user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild)) {
                 user.getOffhandItem().shrink(1);
             }
-            if (!user.isShiftKeyDown()) {
+            if (!JojoModUtil.useShiftVar(user)) {
                 getTarget(targets(userPower), user).ifPresent(effect -> {
                     bullet.setTarget(effect.getTarget());
                 });
@@ -166,7 +167,8 @@ public class CrazyDiamondBlockBullet extends StandEntityAction {
     }
     
     private boolean isHoming(IStandPower power) {
-        return power.getUser() != null && !power.getUser().isShiftKeyDown() && getTarget(targets(power), power.getUser()).isPresent();
+        return power.getUser() != null && !JojoModUtil.useShiftVar(power.getUser())
+                && getTarget(targets(power), power.getUser()).isPresent();
     }
     
     

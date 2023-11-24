@@ -8,16 +8,14 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
-import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
-import com.github.standobyte.jojo.power.impl.stand.IStandPower;
-import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.power.IPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
+import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
 
-import net.minecraft.advancements.criterion.MinMaxBounds;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
@@ -25,56 +23,48 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.registries.ForgeRegistry;
 
 public class PowerPredicate {
-    public static final PowerPredicate ANY = new PowerPredicate(null, null, null, null);
+    public static final PowerPredicate ANY = new PowerPredicate(null, null, null);
     private final PowerClassification classification;
     @Nullable
     private final IPowerType<?, ?> type;
     @Nullable
     private final SpecialTypeCheck typeCheck;
-    @Nullable
-    private final MinMaxBounds.IntBound standTier;
     
     private PowerPredicate(PowerClassification classification, @Nullable IPowerType<?, ?> type, 
-            @Nullable SpecialTypeCheck powerCheck, @Nullable MinMaxBounds.IntBound standTier) {
+            @Nullable SpecialTypeCheck powerCheck) {
         this.classification = classification;
         this.type = type;
         this.typeCheck = powerCheck;
-        this.standTier = standTier;
     }
     
     public boolean matches(LivingEntity powerUser) {
         for (PowerClassification classification : PowerClassification.values()) {
-            if (matches(classification, IPower.getPowerOptional(powerUser, classification))) {
+            if (matchesOptional(classification, IPower.getPowerOptional(powerUser, classification))) {
                 return true;
             }
         }
         return false;
     }
     
-    public boolean matches(PowerClassification classification, LazyOptional<? extends IPower<?, ?>> powerOptional) {
-        return matches(classification, powerOptional.orElse(null));
+    public boolean matchesOptional(PowerClassification classification, LazyOptional<? extends IPower<?, ?>> powerOptional) {
+        return matchesPower(classification, powerOptional.orElse(null));
     }
 
-    public boolean matches(PowerClassification classification, @Nullable IPower<?, ?> power) {
+    public boolean matchesPower(PowerClassification classification, @Nullable IPower<?, ?> power) {
         if (power == null) {
-            return matches(classification, null, -1);
+            return matchesType(classification, null);
         }
-        int standTier = -1;
-        if (power.getPowerClassification() == PowerClassification.STAND && power.hasPower()) {
-            standTier = ((IStandPower) power).getType().getTier();
-        }
-        return matches(power.getPowerClassification(), power.getType(), standTier);
+        return matchesType(power.getPowerClassification(), power.getType());
     }
 
-    public boolean matches(PowerClassification classification, @Nullable IPowerType<?, ?> type, int standTier) {
+    public boolean matchesType(PowerClassification classification, @Nullable IPowerType<?, ?> type) {
         if (this == ANY) {
             return true;
         }
         
         return (this.classification == null || this.classification == classification)
                 && (this.type == null || this.type == type)
-                && (this.typeCheck == null || this.typeCheck.matches(type))
-                && (this.standTier == null || this.standTier.matches(standTier));
+                && (this.typeCheck == null || this.typeCheck.matches(type));
     }
 
     
@@ -125,9 +115,7 @@ public class PowerPredicate {
                 }
             }
             
-            MinMaxBounds.IntBound standTier = MinMaxBounds.IntBound.fromJson(jsonObject.get("stand_tier"));
-            
-            return new PowerPredicate(classification, type, typeCheck, standTier);
+            return new PowerPredicate(classification, type, typeCheck);
         }
     }
 
@@ -143,9 +131,6 @@ public class PowerPredicate {
             }
             else if (typeCheck != null) {
                 jsonObject.addProperty("type", typeCheck.name().toLowerCase());
-            }
-            if (classification == PowerClassification.STAND && standTier != null) {
-                jsonObject.add("stand_tier", standTier.serializeToJson());
             }
             return jsonObject;
         }

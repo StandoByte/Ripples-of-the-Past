@@ -1,17 +1,16 @@
 package com.github.standobyte.jojo.power;
 
-import java.util.List;
-import java.util.Optional;
-
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.bowcharge.BowChargeEffectInstance;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
-import com.github.standobyte.jojo.power.layout.ActionHotbarLayout;
+import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.github.standobyte.jojo.util.general.Container;
 
@@ -22,12 +21,14 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.registries.IForgeRegistry;
 
 public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     PowerClassification getPowerClassification();
@@ -44,11 +45,10 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     default ITextComponent getName() {
         return hasPower() ? getType().getName() : StringTextComponent.EMPTY;
     }
-    
-    ActionsLayout<P> getActionsLayout();
-    default ActionHotbarLayout<P> getActions(ActionType hotbar) {
-        return getActionsLayout().getHotbar(hotbar);
-    }
+
+    ActionsLayout<P> getActionsHudLayout();
+    void setActionsHudLayout(ActionsLayout<P> layout);
+    void saveActionsHudLayout(T powerType, ActionsLayout<P> clReceivedLayout);
     
     boolean isActionOnCooldown(Action<?> action);
     float getCooldownRatio(Action<?> action, float partialTick);
@@ -56,21 +56,8 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     void updateCooldownTimer(Action<?> action, int value, int totalCooldown);
     void resetCooldowns();
     ActionCooldownTracker getCooldowns();
-
-    @Nullable default Action<P> getAction(ActionType type, int index, boolean shift, ActionTarget target) {
-        List<Action<P>> actions = getActions(type).getEnabled();
-        if (index < 0 || index >= actions.size()) {
-            return null;
-        }
-        return getActionOnClick(actions.get(index), shift, target);
-    }
     
-    @Nullable default Action<P> getQuickAccessAction(boolean shift, ActionTarget target) {
-        return getActionOnClick(getActionsLayout().getQuickAccessAction(), shift, target);
-    }
-    
-    @Nullable Action<P> getActionOnClick(Action<P> actionInSlot, boolean shift, ActionTarget target);
-    boolean clickAction(Action<P> action, boolean shift, ActionTarget target);
+    boolean clickAction(Action<P> action, boolean sneak, ActionTarget target);
     ActionConditionResult checkRequirements(Action<P> action, Container<ActionTarget> targetContainer, boolean checkTargetType);
     ActionConditionResult checkTarget(Action<P> action, Container<ActionTarget> targetContainer);
     boolean canUsePower();
@@ -79,7 +66,6 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
         return getType() != null ? getType().clientHitResult((P) this, cameraEntity, mcHitResult) : mcHitResult;
     }
     
-    float getLearningProgressPoints(Action<P> action);
     float getLearningProgressRatio(Action<P> action);
 
     void setHeldAction(Action<P> action);
@@ -117,21 +103,6 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     void onClone(P oldPower, boolean wasDeath);
     void syncWithUserOnly();
     void syncWithTrackingOrUser(ServerPlayerEntity player);
-    
-    default boolean onClickAction(ActionType type, int index, boolean shift, ActionTarget target, Optional<Action<?>> inputValidation) {
-        return onClickAction(this.getAction(type, index, shift, target), shift, target, inputValidation);
-    }
-    
-    default boolean onClickQuickAccess(boolean shift, ActionTarget target, Optional<Action<?>> inputValidation) {
-        return onClickAction(this.getQuickAccessAction(shift, target), shift, target, inputValidation);
-    }
-    
-    default boolean onClickAction(Action<P> action, boolean shift, ActionTarget target, Optional<Action<?>> inputValidation) {
-        if (action != null && inputValidation.map(clientAction -> clientAction == action).orElse(true)) {
-            return clickAction(action, shift, target);
-        }
-        return false;
-    }
 
     public static LazyOptional<? extends IPower<?, ?>> getPowerOptional(LivingEntity entity, PowerClassification classification) {
         return classification == PowerClassification.STAND ? IStandPower.getStandPowerOptional(entity) : INonStandPower.getNonStandPowerOptional(entity);
@@ -142,8 +113,48 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     }
     
     public static enum PowerClassification {
-        STAND(IStandPower.class),
-        NON_STAND(INonStandPower.class);
+        STAND(IStandPower.class) {
+            @Override
+            public void writePowerType(IPowerType<?, ?> powerType, PacketBuffer buf) {
+                buf.writeRegistryId((StandType<?>) powerType);
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public IPowerType<?, ?> readPowerType(PacketBuffer buf) {
+                return buf.readRegistryIdSafe(StandType.class);
+            }
+
+            @Override
+            public StandType<?> getFromRegistryId(ResourceLocation id) {
+                IForgeRegistry<StandType<?>> registry = JojoCustomRegistries.STANDS.getRegistry();
+                if (registry.containsKey(id)) {
+                    return registry.getValue(id);
+                }
+                return null;
+            }
+        },
+        NON_STAND(INonStandPower.class) {
+            @Override
+            public void writePowerType(IPowerType<?, ?> powerType, PacketBuffer buf) {
+                buf.writeRegistryId((NonStandPowerType<?>) powerType);
+            }
+
+            @SuppressWarnings("unchecked")
+            @Override
+            public IPowerType<?, ?> readPowerType(PacketBuffer buf) {
+                return buf.readRegistryIdSafe(NonStandPowerType.class);
+            }
+
+            @Override
+            public NonStandPowerType<?> getFromRegistryId(ResourceLocation id) {
+                IForgeRegistry<NonStandPowerType<?>> registry = JojoCustomRegistries.NON_STAND_POWERS.getRegistry();
+                if (registry.containsKey(id)) {
+                    return registry.getValue(id);
+                }
+                return null;
+            }
+        };
         
         private final Class<? extends IPower<?, ?>> powerClass;
         
@@ -154,6 +165,10 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
         public Class<? extends IPower<?, ?>> getPowerClass() {
             return powerClass;
         }
+        
+        public abstract void writePowerType(IPowerType<?, ?> powerType, PacketBuffer buf);
+        public abstract IPowerType<?, ?> readPowerType(PacketBuffer buf);
+        @Nullable public abstract IPowerType<?, ?> getFromRegistryId(ResourceLocation id);
     }
     
     // TODO change PowerClassification from Enum to the custom one
@@ -197,9 +212,4 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
 //            return VALUES;
 //        }
 //    }
-    
-    public static enum ActionType {
-        ATTACK,
-        ABILITY
-    }
 }

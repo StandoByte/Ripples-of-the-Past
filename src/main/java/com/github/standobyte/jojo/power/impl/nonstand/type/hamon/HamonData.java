@@ -49,7 +49,6 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrHamonCharacterTec
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonEnergyTicksPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonMeditationPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonStatsPacket;
-import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.TypeSpecificData;
@@ -59,6 +58,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamon
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterHamonTechnique;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.HamonTechniqueManager;
+import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -1081,9 +1081,9 @@ public class HamonData extends TypeSpecificData {
 
     private void addSkillAction(AbstractHamonSkill skill) {
         if (skill.getRewardAction() != null && skill.addsActionToHUD()) {
-            ActionType hotbar = skill.getRewardType().getActionType();
+            ActionsLayout.Hotbar hotbar = skill.getRewardType().getDefaultHotbar();
             if (hotbar != null) {
-                power.getActions(hotbar).addExtraAction(skill.getRewardAction());
+                power.getActionsHudLayout().addExtraAction(skill.getRewardAction(), hotbar);
             }
         }
     }
@@ -1103,10 +1103,7 @@ public class HamonData extends TypeSpecificData {
 
     private void removeSkillAction(AbstractHamonSkill skill) {
         if (skill.getRewardAction() != null && skill.addsActionToHUD()) {
-            ActionType hotbar = skill.getRewardType().getActionType();
-            if (hotbar != null) {
-                power.getActions(hotbar).removeAction(skill.getRewardAction());
-            }
+            power.getActionsHudLayout().removeExtraAction(skill.getRewardAction());
         }
     }
     

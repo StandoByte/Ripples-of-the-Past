@@ -14,6 +14,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public class StandCommand {
@@ -133,7 +134,7 @@ public class StandCommand {
             if (power != null) {
                 removedStand = power.getType();
                 power.clear();
-                power.clearActionLearning();
+                power.fullStandClear();
                 i++;
             }
         }
@@ -145,9 +146,16 @@ public class StandCommand {
             }
         } else {
             if (targets.size() == 1) {
-                source.sendSuccess(new TranslationTextComponent("commands.stand.remove.success.single", 
-                        removedStand != null ? removedStand.getName() : "", 
-                                targets.iterator().next().getDisplayName()), true);
+                ITextComponent message;
+                if (removedStand != null) {
+                    message = new TranslationTextComponent("commands.stand.remove.success.single", 
+                            removedStand.getName(), targets.iterator().next().getDisplayName());
+                }
+                else {
+                    message = new TranslationTextComponent("commands.stand.remove.success.single.no_stand", 
+                            targets.iterator().next().getDisplayName());
+                }
+                source.sendSuccess(message, true);
             } else {
                 source.sendSuccess(new TranslationTextComponent("commands.stand.remove.success.multiple", i), true);
             }

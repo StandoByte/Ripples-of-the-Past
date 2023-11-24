@@ -14,7 +14,6 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.power.IPower;
-import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.util.general.Container;
 import com.github.standobyte.jojo.util.general.LazySupplier;
@@ -195,6 +194,10 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     public abstract boolean isUnlocked(P power);
     
+    public boolean isTrained() {
+        return false;
+    }
+    
     @Nullable
     public Action<P> getVisibleAction(P power, ActionTarget target) {
         if (isUnlocked(power)) {
@@ -211,10 +214,6 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     public boolean enabledInHudDefault() {
         return true;
-    }
-    
-    public boolean validateInput() {
-        return false;
     }
     
     public static ActionConditionResult conditionMessage(String postfix) {
@@ -306,8 +305,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return shoutSupplier.get();
     }
     
-    public void playVoiceLine(LivingEntity user, P power, ActionTarget target, boolean wasActive, boolean shift) {
-        if (!shift || playsVoiceLineOnShift()) {
+    public void playVoiceLine(LivingEntity user, P power, ActionTarget target, boolean wasActive, boolean sneak) {
+        if (!sneak || playsVoiceLineOnSneak()) {
             SoundEvent shout = getShout(user, power, target, wasActive);
             if (shout != null) {
                 JojoModUtil.sayVoiceLine(user, shout);
@@ -315,7 +314,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         }
     }
     
-    protected boolean playsVoiceLineOnShift() {
+    protected boolean playsVoiceLineOnSneak() {
         return isShiftVariation();
     }
     
@@ -393,30 +392,6 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
                 action.getRegistryName().getNamespace(), 
                 action.getRegistryName().getPath() + postfix);
     }
-    
-    @Nullable
-    public ActionType getActionType(P power) {
-        for (ActionType actionType : ActionType.values()) {
-            for (Action<P> action : power.getActions(actionType).getAll()) {
-                if (action == this || action.getShiftVariationIfPresent() == this) {
-                    return actionType;
-                }
-            }
-        }
-        return null;
-    }
-    
-    public boolean isTrained() {
-        return false;
-    }
-    
-    public float getMaxTrainingPoints(P power) {
-        return 1F;
-    }
-    
-    public void onTrainingPoints(P power, float points) {}
-    
-    public void onMaxTraining(P power) {}
     
     public boolean canUserSeeInStoppedTime(LivingEntity user, P power) {
         return false;

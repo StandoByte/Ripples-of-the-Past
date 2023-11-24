@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.power.impl;
 
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
@@ -51,7 +53,9 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     protected final LivingEntity user;
     protected final Optional<ServerPlayerEntity> serverPlayerUser;
     
-    private ActionsLayout<P> actionsLayout = new ActionsLayout<>();
+    private ActionsLayout<P> clHudLayout = ActionsLayout.emptyLayout();
+    private Map<ResourceLocation, ActionsLayout<P>> srvSavedLayouts = new HashMap<>();
+    
     private ActionCooldownTracker cooldowns = new ActionCooldownTracker();
     private int leapCooldown;
     protected HeldActionData<P> heldActionData;
@@ -82,12 +86,29 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             });
             ModCriteriaTriggers.GET_POWER.get().trigger(player, getPowerClassification(), this);
         });
-    }
-    
-    protected void onPowerSet(T type) {
-        actionsLayout.onPowerSet(type);
+
+        if (!user.level.isClientSide()) {
+            serverPlayerUser.ifPresent(player -> {
+                clHudLayout.syncWithUser(player, getPowerClassification(), type);
+            });
+        }
     }
 
+    protected void onPowerSet(T type) {
+        if (!user.level.isClientSide()) {
+            if (type != null) {
+                ResourceLocation key = type.getRegistryName();
+                clHudLayout = type.createDefaultLayout();
+                if (srvSavedLayouts.containsKey(key)) {
+                    clHudLayout.copySwitchesState(srvSavedLayouts.get(key));
+                }
+            }
+            else {
+                clHudLayout = ActionsLayout.emptyLayout();
+            }
+        }
+    }
+    
     @Override
     public boolean clear() {
         if (!hasPower()) {
@@ -141,8 +162,21 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
     
     @Override
-    public ActionsLayout<P> getActionsLayout() {
-        return actionsLayout;
+    public ActionsLayout<P> getActionsHudLayout() {
+        return clHudLayout;
+    }
+    
+    @Override
+    public void setActionsHudLayout(ActionsLayout<P> layout) {
+        this.clHudLayout = layout;
+    }
+    
+    @Override
+    public void saveActionsHudLayout(T powerType, ActionsLayout<P> clReceivedLayout) {
+        srvSavedLayouts.put(powerType.getRegistryName(), clReceivedLayout);
+        if (powerType == this.getType()) {
+            this.clHudLayout = clReceivedLayout;
+        }
     }
     
     @Override
@@ -187,33 +221,16 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     
     
     
-    @Nullable
-    @Override
-    public Action<P> getActionOnClick(Action<P> actionInSlot, boolean shift, ActionTarget target) {
-        if (actionInSlot == null) return null;
-        actionInSlot = actionInSlot.getVisibleAction(getThis(), target);
-        Action<P> held = getHeldAction();
-        if (actionInSlot == held) {
-            return actionInSlot;
-        }
-        if (actionInSlot != null && actionInSlot.hasShiftVariation()) {
-            Action<P> shiftVar = actionInSlot.getShiftVariationIfPresent().getVisibleAction(getThis(), target);
-            if (shiftVar != null && (shift || shiftVar == held)) {
-                actionInSlot = shiftVar;
-            }
-        }
-        return actionInSlot;
-    }
     
     @Override
-    public final boolean clickAction(Action<P> action, boolean shift, ActionTarget target) {
+    public final boolean clickAction(Action<P> action, boolean sneak, ActionTarget target) {
         if (action == null) return false;
-        boolean res = onClickAction(action, shift, target);
+        boolean res = onClickAction(action, sneak, target);
         action.afterClick(user.level, user, getThis(), res);
         return res;
     }
     
-    private boolean onClickAction(Action<P> action, boolean shift, ActionTarget target) {
+    private boolean onClickAction(Action<P> action, boolean sneak, ActionTarget target) {
         if (action == null || getHeldAction() == action) return false;
         boolean wasActive = isActive();
         action.onClick(user.level, user, getThis());
@@ -230,7 +247,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             }
             if (result.isPositive()) {
                 if (!user.level.isClientSide()) {
-                    action.playVoiceLine(user, getThis(), target, wasActive, shift);
+                    action.playVoiceLine(user, getThis(), target, wasActive, sneak);
                 }
                 setHeldAction(action);
                 setMouseTarget(target);
@@ -243,7 +260,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         else {
             if (result.isPositive()) {
                 if (!user.level.isClientSide()) {
-                    action.playVoiceLine(user, getThis(), target, wasActive, shift);
+                    action.playVoiceLine(user, getThis(), target, wasActive, sneak);
                 }
                 performAction(action, target);
                 stopHeldAction(false);
@@ -340,13 +357,8 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
 
     @Override
-    public float getLearningProgressPoints(Action<P> action) {
-        return action.isUnlocked(getThis()) ? 1 : -1;
-    }
-    
-    @Override
     public float getLearningProgressRatio(Action<P> action) {
-        return getLearningProgressPoints(action) / action.getMaxTrainingPoints(getThis());
+        return action.isUnlocked(getThis()) ? 1 : -1;
     }
     
     protected void performAction(Action<P> action, ActionTarget target) {
@@ -594,7 +606,15 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         cnbt.putLong("LastDay", lastTickedDay);
         cnbt.put("Cooldowns", cooldowns.writeNBT());
         cnbt.putInt("LeapCd", leapCooldown);
-        cnbt.put("Layout", actionsLayout.toNBT());
+        
+        CompoundNBT layoutsMapNbt = new CompoundNBT();
+        srvSavedLayouts.entrySet().forEach(entry -> {
+            if (entry.getKey() != null && entry.getValue() != null) {
+                CompoundNBT layoutNbt = entry.getValue().toNBT();
+                layoutsMapNbt.put(entry.getKey().toString(), layoutNbt);
+            }
+        });
+        cnbt.put("LayoutsSaved", layoutsMapNbt);
         return cnbt;
     }
 
@@ -603,8 +623,22 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         lastTickedDay = nbt.getLong("LastDay");
         cooldowns = new ActionCooldownTracker(nbt.getCompound("Cooldowns"));
         leapCooldown = nbt.getInt("LeapCd");
-        if (nbt.contains("Layout", MCUtil.getNbtId(CompoundNBT.class))) {
-            actionsLayout.fromNBT(nbt.getCompound("Layout"));
+        
+        if (nbt.contains("LayoutsSaved", MCUtil.getNbtId(CompoundNBT.class))) {
+            CompoundNBT layoutsMapNbt = nbt.getCompound("LayoutsSaved");
+            layoutsMapNbt.getAllKeys().forEach(key -> {
+                if (!key.isEmpty() && layoutsMapNbt.contains(key, MCUtil.getNbtId(CompoundNBT.class))) {
+                    ResourceLocation powerTypeId = new ResourceLocation(key);
+                    IPowerType<?, ?> type = getPowerClassification().getFromRegistryId(powerTypeId);
+                    ActionsLayout<P> layout = type != null ? (ActionsLayout<P>) type.createDefaultLayout() : ActionsLayout.emptyLayout();
+                    CompoundNBT layoutNbt = layoutsMapNbt.getCompound(key);
+                    layout.fromNBT(layoutNbt);
+                    srvSavedLayouts.put(powerTypeId, layout);
+                    if (type == getType()) {
+                        clHudLayout = layout;
+                    }
+                }
+            });
         }
     }
 
@@ -622,7 +656,9 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
     
     protected void keepActionsLayout(P oldPower) {
-        actionsLayout.keepLayoutOnClone(oldPower.getActionsLayout());
+        PowerBaseImpl<P, T> myCodeIsJankAf = (PowerBaseImpl<P, T>) oldPower;
+        clHudLayout = myCodeIsJankAf.clHudLayout;
+        srvSavedLayouts = myCodeIsJankAf.srvSavedLayouts;
     }
     
     @Override
@@ -640,7 +676,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     protected final void syncLayoutWithUser() {
         serverPlayerUser.ifPresent(player -> {
             if (hasPower()) {
-                actionsLayout.syncWithUser(player, getPowerClassification());
+                clHudLayout.syncWithUser(player, getPowerClassification(), getType());
             }
         });
     }

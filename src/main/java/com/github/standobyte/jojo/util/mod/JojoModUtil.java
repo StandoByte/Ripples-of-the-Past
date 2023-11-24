@@ -9,7 +9,6 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
-import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.InputHandler;
@@ -19,13 +18,10 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.item.ClothesSet;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlayVoiceLinePacket;
-import com.github.standobyte.jojo.power.IPower;
-import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
-import com.google.common.collect.Streams;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.AgeableEntity;
@@ -354,13 +350,10 @@ public class JojoModUtil {
     }
     
     
-    
-    public static <T extends IPower<T, ?>> boolean hasAction(T power, Predicate<Action<T>> find) {
-        return Streams.concat(
-                power.getActions(ActionType.ATTACK).getAll().stream(), 
-                power.getActions(ActionType.ABILITY).getAll().stream())
-                .anyMatch(find);
-}
+    @Deprecated
+    public static boolean useShiftVar(LivingEntity user) {
+        return user.isShiftKeyDown();
+    }
     
     
     

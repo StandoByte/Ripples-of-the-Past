@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.capability.world;
 
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -12,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.entity.mob.rps.RPSPvpGamesMap;
+import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 
 import net.minecraft.nbt.CompoundNBT;
@@ -68,9 +68,19 @@ public class SaveFileUtilCap {
         }
     }
     
-    public List<StandType<?>> leastTakenStands(Collection<StandType<?>> fromStands) {
+    public List<StandType<?>> getNotTakenStands(List<StandType<?>> fromStands) {
         if (fromStands.isEmpty()) {
-            return Collections.emptyList();
+            return fromStands;
+        }
+        return fromStands
+                .stream()
+                .filter(stand -> !timesStandsTaken.containsKey(stand) || timesStandsTaken.get(stand) <= 0)
+                .collect(Collectors.toList());
+    }
+    
+    public List<StandType<?>> getLeastTakenStands(List<StandType<?>> fromStands) {
+        if (fromStands.isEmpty()) {
+            return fromStands;
         }
         Set<Map.Entry<StandType<?>, Integer>> entriesRequested = timesStandsTaken
                 .entrySet()
@@ -85,7 +95,7 @@ public class SaveFileUtilCap {
                     .map(entry -> entry.getKey())
                     .collect(Collectors.toList());
         }
-        else {
+        else { // means there are stands with no record of being given to someone
             List<StandType<?>> st = entriesRequested.stream().map(Map.Entry::getKey).collect(Collectors.toList());
             return fromStands
                     .stream()
@@ -155,6 +165,7 @@ public class SaveFileUtilCap {
         nbt.putBoolean("UsedTimeStop", usedTimeStop);
         nbt.putInt("WalkmanId", walkmanId);
         nbt.putInt("CassetteId", cassetteId);
+        nbt.putInt("StandEffId", StandEffectsTracker.EFFECTS_COUNTER.get());
         return nbt;
     }
     
@@ -165,5 +176,9 @@ public class SaveFileUtilCap {
         gameruleWeatherCycle = nbt.getBoolean("GameruleWeatherCycle");
         walkmanId = nbt.getInt("WalkmanId");
         cassetteId = nbt.getInt("CassetteId");
+        int latestId = nbt.getInt("StandEffId");
+        if (latestId < (1 << 30)) {
+            StandEffectsTracker.EFFECTS_COUNTER.set(latestId);
+        }
     }
 }
