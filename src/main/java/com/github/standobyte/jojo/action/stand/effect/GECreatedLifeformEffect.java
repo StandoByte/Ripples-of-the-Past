@@ -121,6 +121,7 @@ public class GECreatedLifeformEffect extends StandEffectInstance {
     @Override
     public void writeAdditionalPacketData(PacketBuffer buf, boolean sendingToUser) {
         if (sendingToUser) {
+            source.resolveNbtRead(world);
             source.toBuf(buf);
         }
     }

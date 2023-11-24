@@ -98,6 +98,8 @@ public class StandEffectsTracker {
     }
     
     public void onStandUserLogout(ServerPlayerEntity user) {
+        if (!user.server.isPublished()) return;
+        
         ObjectIterator<Entry<StandEffectInstance>> it = effects.int2ObjectEntrySet().iterator();
         while (it.hasNext()) {
             StandEffectInstance effect = it.next().getValue();

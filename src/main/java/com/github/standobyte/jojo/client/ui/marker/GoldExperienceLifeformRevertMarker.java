@@ -61,7 +61,7 @@ public class GoldExperienceLifeformRevertMarker extends MarkerRenderer {
                     matrixStack.scale(16, 16, 1);
                     matrixStack.scale(1, -1, -1);
 
-                    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! the item model is distorted by FoV effect
+                    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! the item model is distorted by FoV effect
                     itemRenderer.render(item, ItemCameraTransforms.TransformType.GUI, false, 
                             matrixStack, buffer, ClientUtil.MAX_MODEL_LIGHT, OverlayTexture.NO_OVERLAY, itemModel);
                     matrixStack.popPose();

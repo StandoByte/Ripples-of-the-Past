@@ -354,7 +354,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
 //                    }
                 }
             }
-            tf.source.copyFrom(source, world); // set on fire
+            tf.source.copyFrom(source, world);
 
             if (entity.isOnFire()) {
                 tf.setSecondsOnFire((entity.getRemainingFireTicks() + 19) / 20);
@@ -409,6 +409,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         owner.writeNetwork(buffer);
         
         writeEntityData(buffer, target);
+        source.resolveNbtRead(level);
         source.toBuf(buffer);
     }
 
@@ -444,19 +445,14 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         }
         
         public void copyFrom(GETransformationData other, World world) {
-            if (other.sourceEntity != null) {
-                // the entity can be marked as removed and fail to be added again 
-                // (in case it's a TNT/minecart/etc. that was transformed into a mob while in its entity form)
-                CompoundNBT entityNbt = other.sourceEntity.serializeNBT();
-                this.sourceEntity = EntityType.create(entityNbt, world).orElse(null);
-            }
+            this.sourceEntity = other.sourceEntity;
             this.sourceBlockState = other.sourceBlockState;
             this.sourceBlockPos = other.sourceBlockPos;
         }
         
         
         /**
-         * Call this during tick.
+         * Call this during tick or before sending the data from server.
          */
         public void resolveNbtRead(World world) {
             if (sourceEntityNbt != null) {

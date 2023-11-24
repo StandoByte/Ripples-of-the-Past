@@ -150,6 +150,9 @@ public abstract class StandEffectInstance {
                 this.targetLiving.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.removeEffectTargetedBy(this));
             }
             this.target = target;
+            if (target != null) {
+                this.targetUUID = target.getUUID();
+            }
             if (target instanceof LivingEntity) {
                 target.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.addEffectTargetedBy(this));
                 this.targetLiving = (LivingEntity) target;

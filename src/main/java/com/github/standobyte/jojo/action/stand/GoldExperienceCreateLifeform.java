@@ -16,6 +16,7 @@ import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -55,7 +56,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
     protected ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, IStandPower power) {
         switch (target.getType()) {
         case ENTITY:
-            // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! use more types of inanimate entities as targets
+            // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! use more types of inanimate entities as targets?
             Entity entity = target.getEntity();
             return ActionConditionResult.noMessage(
                     entity instanceof TNTEntity || 
@@ -84,6 +85,9 @@ public class GoldExperienceCreateLifeform extends StandAction {
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
         if (user.level.isClientSide() && getChosenEntityType(ClientUtil.getClientPlayer()) == null) {
             return ActionConditionResult.NEGATIVE;
+        }
+        if (target.getType() == TargetType.ENTITY) {
+            return ActionConditionResult.POSITIVE;
         }
         
         boolean hasAnItem = false;
@@ -192,7 +196,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                 boolean tfTargetFound = false;
                 if (target.getType() == TargetType.ENTITY) {
                     Entity targetEntity = target.getEntity();
-                    tf.getTfSourceData().withEntitySource(targetEntity);
+                    MCUtil.cloneEntity(targetEntity).ifPresent(entity -> tf.getTfSourceData().withEntitySource(entity));
                     targetEntity.remove();
                     tfTargetFound = true;
                     

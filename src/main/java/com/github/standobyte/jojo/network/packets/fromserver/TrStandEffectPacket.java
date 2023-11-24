@@ -70,6 +70,8 @@ public class TrStandEffectPacket {
                 buf.writeInt(msg.targetId);
                 buf.writeRegistryId(msg.effectFactory);
                 buf.writeBoolean(msg.isUser);
+                
+                buf.writeVarInt(msg.effect.tickCount);
                 msg.effect.writeAdditionalPacketData(buf, msg.isUser);
                 break;
             case REMOVE:
@@ -113,6 +115,8 @@ public class TrStandEffectPacket {
                         if (msg.targetId != -1) {
                             newEffect.withTargetEntityId(msg.targetId);
                         }
+                        
+                        newEffect.tickCount = msg.buf.readVarInt();
                         newEffect.readAdditionalPacketData(msg.buf, msg.isUser);
                         stand.getContinuousEffects().addEffect(newEffect);
                         break;
