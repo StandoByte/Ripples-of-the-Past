@@ -54,6 +54,7 @@ import net.minecraftforge.fml.network.NetworkHooks;
 public class GETransformationEntity extends Entity implements IEntityAdditionalSpawnData {
     private static final DataParameter<Boolean> LIFE_FORM_SPAWNED = EntityDataManager.defineId(GETransformationEntity.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> IS_TURNING_BACK = EntityDataManager.defineId(GETransformationEntity.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<Boolean> REVERSE_SIGNAL = EntityDataManager.defineId(GETransformationEntity.class, DataSerializers.BOOLEAN);
     
     private GETransformationData source = new GETransformationData();
     private EntityOwnerResolver owner = new EntityOwnerResolver();
@@ -89,11 +90,6 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
     
     public GETransformationData getTfSourceData() {
         return source;
-    }
-    
-    public GETransformationEntity setTurningBack() {
-        entityData.set(IS_TURNING_BACK, true);
-        return this;
     }
     
     public int getDuration() {
@@ -141,15 +137,13 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         
         if (entityToSummon != null) {
             entityToSummon.copyPosition(this);
-            if (this.isOnFire()) {
-                entityToSummon.setSecondsOnFire((getRemainingFireTicks() + 19) / 20);
-            }
             if (entityToSummon instanceof MobEntity) {
                 ((MobEntity) entityToSummon).setPersistenceRequired();
             }
             else if (entityToSummon instanceof ItemEntity) {
                 ((ItemEntity) entityToSummon).setNoPickUpDelay();
             }
+            copyStatus(this, entityToSummon);
             level.addFreshEntity(entityToSummon);
             GoldExperienceCreateLifeform.onTransformationFinish(entityToSummon);
         }
@@ -296,6 +290,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
     protected void defineSynchedData() {
         entityData.define(LIFE_FORM_SPAWNED, false);
         entityData.define(IS_TURNING_BACK, false);
+        entityData.define(REVERSE_SIGNAL, false);
     }
     
     @Override
@@ -306,27 +301,30 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
     @Override
     public void onSyncedDataUpdated(DataParameter<?> key) {
         super.onSyncedDataUpdated(key);
-        // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! this should ONLY trigger exactly in turnEntityBack()
-        if (key == IS_TURNING_BACK && tickCount > 0 && entityData.get(IS_TURNING_BACK)) {
-            int ticks = TURN_BACK_TICKS;
-            if (tickCount < ticks) {
-                tickCount = duration - tickCount;
+        if (key == REVERSE_SIGNAL && entityData.get(REVERSE_SIGNAL)) {
+            reverseTransformation();
+        }
+    }
+    
+    private void reverseTransformation() {
+        int ticks = TURN_BACK_TICKS;
+        if (tickCount < ticks) {
+            tickCount = duration - tickCount;
+        }
+        else {
+            float prevItemTime = getRenderAsItemTime();
+            
+            if (tickCount > prevItemTime) {
+                renderAsItemTime = (ticks / 3F);
+                duration = (int) ((duration - prevItemTime) * (ticks - renderAsItemTime)
+                                    / (tickCount - prevItemTime) + renderAsItemTime);
             }
             else {
-                float prevItemTime = getRenderAsItemTime();
-                
-                if (tickCount > prevItemTime) {
-                    renderAsItemTime = (ticks / 3F);
-                    duration = (int) ((duration - prevItemTime) * (ticks - renderAsItemTime)
-                                        / (tickCount - prevItemTime) + renderAsItemTime);
-                }
-                else {
-                    renderAsItemTime = ticks * prevItemTime / tickCount;
-                    duration = MathHelper.ceil(renderAsItemTime);
-                }
-                
-                tickCount = duration - ticks;
+                renderAsItemTime = ticks * prevItemTime / tickCount;
+                duration = MathHelper.ceil(renderAsItemTime);
             }
+            
+            tickCount = duration - ticks;
         }
     }
     
@@ -335,15 +333,16 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
     public static void turnEntityBack(Entity entity, GETransformationData source, @Nullable LivingEntity owner) {
         if (entity instanceof GETransformationEntity) {
             GETransformationEntity tfEntity = (GETransformationEntity) entity;
-            tfEntity.setTurningBack();
+            tfEntity.entityData.set(IS_TURNING_BACK, true);
+            tfEntity.entityData.set(REVERSE_SIGNAL, true);
         }
         else {
             World world = entity.level;
             GETransformationEntity tf = new GETransformationEntity(world)
                     .withTransformationTarget(entity)
                     .withDuration(TURN_BACK_TICKS)
-                    .withOwner(owner)
-                    .setTurningBack();
+                    .withOwner(owner);
+            tf.entityData.set(IS_TURNING_BACK, true);
             
             if (source.sourceEntity instanceof ItemEntity) {
                 ItemStack item = ((ItemEntity) source.sourceEntity).getItem();
@@ -355,16 +354,26 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                 }
             }
             tf.source.copyFrom(source, world);
-
-            if (entity.isOnFire()) {
-                tf.setSecondsOnFire((entity.getRemainingFireTicks() + 19) / 20);
-            }
+            
+            copyStatus(entity, tf);
             
             Vector3d pos = entity.position();
             tf.moveTo(pos.x, pos.y, pos.z, entity.yRot, entity.xRot);
             entity.level.addFreshEntity(tf);
             
             entity.remove();
+        }
+    }
+    
+    private static void copyStatus(Entity from, Entity to) {
+        if (from.isOnFire()) {
+            to.setSecondsOnFire((from.getRemainingFireTicks() + 19) / 20);
+        }
+        if (from.isPassenger()) {
+            to.startRiding(from.getVehicle());
+        }
+        if (from.isVehicle()) {
+            from.getPassengers().forEach(passenger -> passenger.startRiding(to));
         }
     }
     
