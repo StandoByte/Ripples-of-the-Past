@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.SpawnParticlePacket;
 import com.github.standobyte.jojo.util.general.MathUtil;
+import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.google.common.collect.ImmutableMap;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -33,6 +34,7 @@ import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.PotionEntity;
+import net.minecraft.entity.projectile.ProjectileItemEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.ByteArrayNBT;
@@ -541,6 +543,11 @@ public class MCUtil {
     public static boolean isPotionWaterBottle(PotionEntity entity) {
         ItemStack potionItem = entity.getItem();
         return PotionUtils.getPotion(potionItem) == Potions.WATER && PotionUtils.getMobEffects(potionItem).isEmpty();
+    }
+    
+    public static ItemStack getItemOnServer(ProjectileItemEntity entity) {
+        ItemStack item = CommonReflection.getItemRaw(entity);
+        return item.isEmpty() ? new ItemStack(CommonReflection.getDefaultItem(entity)) : item;
     }
     
     
