@@ -1,6 +1,10 @@
 package com.github.standobyte.jojo.block;
 
+import java.util.Collections;
+import java.util.Optional;
 import java.util.Random;
+
+import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -33,7 +37,12 @@ public class MagiciansRedFireBlock extends FireBlock {
 //    }
     
     
-    
+
+
+    // all the copy-paste below is to change this single method that is private in FireBlock
+    private BlockState getStateWithAge(IWorld pLevel, BlockPos pPos, int pAge) {
+        return getStateForPlacement(pLevel, pPos).setValue(AGE, Integer.valueOf(pAge));
+    }
 
     @Override
     public BlockState updateShape(BlockState pState, Direction pFacing, BlockState pFacingState, IWorld pLevel, BlockPos pCurrentPos, BlockPos pFacingPos) {
@@ -123,8 +132,12 @@ public class MagiciansRedFireBlock extends FireBlock {
             BlockState blockstate = pLevel.getBlockState(pPos);
             if (pRandom.nextInt(pAge + 10) < 5 && !pLevel.isRainingAt(pPos)) {
                 int j = Math.min(pAge + pRandom.nextInt(5) / 4, 15);
+                CrazyDiamondRestoreTerrain.rememberBrokenBlock(pLevel, pPos, blockstate, 
+                        Optional.ofNullable(pLevel.getBlockEntity(pPos)), Collections.emptyList());
                 pLevel.setBlock(pPos, this.getStateWithAge(pLevel, pPos, j), 3);
             } else {
+                CrazyDiamondRestoreTerrain.rememberBrokenBlock(pLevel, pPos, blockstate, 
+                        Optional.ofNullable(pLevel.getBlockEntity(pPos)), Collections.emptyList());
                 pLevel.removeBlock(pPos, false);
             }
 
@@ -163,10 +176,5 @@ public class MagiciansRedFireBlock extends FireBlock {
 
             return i;
         }
-    }
-
-    // and all the copypaste is to change this single method
-    private BlockState getStateWithAge(IWorld pLevel, BlockPos pPos, int pAge) {
-        return getStateForPlacement(pLevel, pPos).setValue(AGE, Integer.valueOf(pAge));
     }
 }

@@ -2,7 +2,8 @@
   "package": "com.github.standobyte.jojo.mixin",
   "refmap": "mixins.jojo.refmap.json",
   "mixins": [
-    "ServerChunkProviderMixin"
+    "ServerChunkProviderMixin",
+    "FireBlockMixin"
   ],
   "client": [
     "client.ParticleManagerMixin",

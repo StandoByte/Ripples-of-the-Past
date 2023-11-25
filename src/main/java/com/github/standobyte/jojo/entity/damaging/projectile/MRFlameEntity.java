@@ -1,6 +1,10 @@
 package com.github.standobyte.jojo.entity.damaging.projectile;
 
+import java.util.Collections;
+import java.util.Optional;
+
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
@@ -89,6 +93,8 @@ public class MRFlameEntity extends ModdedProjectileEntity {
         if (blockState.getMaterial() == Material.SNOW || blockState.getMaterial() == Material.TOP_SNOW 
                 || blockState.getMaterial() == Material.ICE || blockState.getMaterial() == Material.ICE_SOLID) {
             if (world.dimensionType().ultraWarm() || !blockState.isCollisionShapeFullBlock(world, blockPos)) {
+                CrazyDiamondRestoreTerrain.rememberBrokenBlock(world, blockPos, blockState, 
+                        Optional.ofNullable(world.getBlockEntity(blockPos)), Collections.emptyList());
                 world.removeBlock(blockPos, false);
             }
             else {
