@@ -55,7 +55,7 @@ public class LivingUtilCap {
     @Nullable private Vector3d blockImpactKbVec;
     private double blockImpactMultiplier;
     
-    private Collection<StandEffectInstance> standEffectsTargetedBy = new LinkedList<>();
+    private List<StandEffectInstance> standEffectsTargetedBy = new LinkedList<>();
     
     public boolean hasUsedTimeStopToday = false;
     private int noLerpTicks = 0;
@@ -204,6 +204,10 @@ public class LivingUtilCap {
     
     public void removeEffectTargetedBy(StandEffectInstance instance) {
         this.standEffectsTargetedBy.remove(instance);
+    }
+    
+    public List<StandEffectInstance> getEffectsTargetedBy() {
+        return standEffectsTargetedBy;
     }
     
     

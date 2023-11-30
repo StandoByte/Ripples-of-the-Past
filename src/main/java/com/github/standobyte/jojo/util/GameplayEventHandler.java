@@ -19,6 +19,7 @@ import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.action.stand.effect.BoyIIManStandPartTakenEffect;
 import com.github.standobyte.jojo.action.stand.effect.DriedBloodDrops;
+import com.github.standobyte.jojo.action.stand.effect.GECreatedLifeformEffect;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.block.StoneMaskBlock;
 import com.github.standobyte.jojo.block.WoodenCoffinBlock;
@@ -96,6 +97,8 @@ import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.item.PaintingEntity;
 import net.minecraft.entity.item.PaintingType;
 import net.minecraft.entity.monster.StrayEntity;
+import net.minecraft.entity.passive.CowEntity;
+import net.minecraft.entity.passive.MooshroomEntity;
 import net.minecraft.entity.player.ChatVisibility;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -104,6 +107,7 @@ import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.item.SuspiciousStewItem;
 import net.minecraft.network.play.server.SChatPacket;
 import net.minecraft.network.play.server.SPlayEntityEffectPacket;
 import net.minecraft.network.play.server.SPlaySoundEffectPacket;
@@ -112,6 +116,7 @@ import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
+import net.minecraft.potion.PotionUtils;
 import net.minecraft.scoreboard.ScorePlayerTeam;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
@@ -120,10 +125,12 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.CombatRules;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.DrinkHelper;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -1260,6 +1267,79 @@ public class GameplayEventHandler {
             }
             return false;
         });
+    }
+    
+    @SubscribeEvent
+    public static void onMobInteract(PlayerInteractEvent.EntityInteract event) {
+        PlayerEntity player = event.getPlayer();
+        Entity target = event.getTarget();
+        Hand hand = event.getHand();
+        ItemStack item = player.getItemInHand(hand);
+        
+        if (target.isAlive() && target instanceof CowEntity && (
+                item.getItem() == Items.BUCKET
+                || item.getItem() == Items.BOWL && target instanceof MooshroomEntity)) {
+            CowEntity cow = (CowEntity) target;
+            if (cow.getLeashHolder() != player && !cow.isBaby()) {
+                Optional<List<EffectInstance>> potion = cow.getCapability(LivingUtilCapProvider.CAPABILITY).resolve().flatMap(cap -> {
+                    Optional<List<EffectInstance>> potionEffects = cap.getEffectsTargetedBy()
+                            .stream()
+                            .filter(effect -> effect instanceof GECreatedLifeformEffect)
+                            .findAny()
+                            .map(effect -> (GECreatedLifeformEffect) effect)
+                            .map(effect -> effect.getSource().makeSourceItemView())
+                            .map(sourceItem -> PotionUtils.getMobEffects(sourceItem))
+                            .filter(effects -> !effects.isEmpty());
+                    return potionEffects;
+                });
+                
+                if (potion.isPresent()) {
+                    if (item.getItem() == Items.BUCKET) {
+                        player.playSound(SoundEvents.COW_MILK, 1.0F, 1.0F);
+                        ItemStack milkBucketItem = DrinkHelper.createFilledResult(item, player, 
+                                PotionUtils.setCustomEffects(Items.MILK_BUCKET.getDefaultInstance(), potion.get()));
+                        player.setItemInHand(hand, milkBucketItem);
+                    }
+                    else {
+                        ItemStack stewItem;
+                        MooshroomEntity mooshroomEntity = (MooshroomEntity) target;
+                        Effect susEffect = CommonReflection.getEffect(mooshroomEntity);
+                        if (susEffect != null) {
+                            stewItem = new ItemStack(Items.SUSPICIOUS_STEW);
+                            int duration = CommonReflection.getEffectDuration(mooshroomEntity);
+                            SuspiciousStewItem.saveMobEffect(stewItem, susEffect, duration);
+                            CommonReflection.clearEffect(mooshroomEntity);
+                        } else {
+                            stewItem = new ItemStack(Items.MUSHROOM_STEW);
+                        }
+                        
+                        PotionUtils.setCustomEffects(stewItem, potion.get());
+                        ItemStack stewBowlItem = DrinkHelper.createFilledResult(item, player, stewItem, false);
+                        player.setItemInHand(hand, stewBowlItem);
+                        
+                        target.playSound(susEffect != null ? SoundEvents.MOOSHROOM_MILK_SUSPICIOUSLY : SoundEvents.MOOSHROOM_MILK, 1.0F, 1.0F);
+                    }
+                    
+                    event.setCanceled(true);
+                    event.setCancellationResult(ActionResultType.sidedSuccess(player.level.isClientSide()));
+                }
+            }
+        }
+    }
+    
+    @SubscribeEvent
+    public static void usePotionCowProduct(LivingEntityUseItemEvent.Finish event) {
+        ItemStack item = event.getItem();
+        LivingEntity entity = event.getEntityLiving();
+        if (!item.isEmpty() && (
+                item.getItem() == Items.MILK_BUCKET
+                || item.getItem() == Items.MUSHROOM_STEW
+                || item.getItem() == Items.SUSPICIOUS_STEW)) {
+            List<EffectInstance> effects = PotionUtils.getMobEffects(item);
+            if (!effects.isEmpty()) {
+                effects.forEach(effect -> entity.addEffect(effect));
+            }
+        }
     }
     
     @SubscribeEvent

@@ -472,7 +472,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         
         
         
-        public ItemStack clMakeSourceItemView() {
+        public ItemStack makeSourceItemView() {
             if (sourceEntity != null) {
                 if (sourceEntity instanceof ItemEntity) {
                     return ((ItemEntity) sourceEntity).getItem().copy();
@@ -481,7 +481,14 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                     return new ItemStack(Items.TNT);
                 }
                 else if (sourceEntity instanceof PotionEntity) {
-                    return ((PotionEntity) sourceEntity).getItem().copy();
+                    ItemStack potionItem;
+                    if (sourceEntity.level.isClientSide()) {
+                        potionItem = ((PotionEntity) sourceEntity).getItem();
+                    }
+                    else {
+                        potionItem = MCUtil.getItemOnServer((PotionEntity) sourceEntity);
+                    }
+                    return potionItem.copy();
                 }
                 else if (sourceEntity.getType() == ModEntityTypes.ROAD_ROLLER.get()) {
                     return new ItemStack(ModItems.ROAD_ROLLER.get());
@@ -597,7 +604,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             try {
                 EntityDataManager.pack(entityData, buffer);
             } catch (IOException e) {
-                JojoMod.LOGGER.error("Failed to write entity data for Gold Experience's transformation render for entity of type {}", entity.getType().getRegistryName());
+                JojoMod.getLogger().error("Failed to write entity data for Gold Experience's transformation render for entity of type {}", entity.getType().getRegistryName());
                 e.printStackTrace();
             }
         });
@@ -632,7 +639,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                 List<EntityDataManager.DataEntry<?>> entityData = EntityDataManager.unpack(buffer);
                 entity.getEntityData().assignValues(entityData);
             } catch (IOException e) {
-                JojoMod.LOGGER.error("Failed to read entity data for Gold Experience's transformation render for entity of type {}", entity.getType().getRegistryName());
+                JojoMod.getLogger().error("Failed to read entity data for Gold Experience's transformation render for entity of type {}", entity.getType().getRegistryName());
                 e.printStackTrace();
             } catch (Exception e) {
                 JojoMod.LOGGER.error("Failed to assign entity data for Gold Experience's transformation render for entity of type {}", entity.getType().getRegistryName());

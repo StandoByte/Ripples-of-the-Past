@@ -130,7 +130,7 @@ public class GECreatedLifeformEffect extends StandEffectInstance {
     public void readAdditionalPacketData(PacketBuffer buf, boolean clientIsUser) {
         if (clientIsUser) {
             source.fromBuf(buf, world);
-            originalAsItem = source.clMakeSourceItemView();
+            originalAsItem = source.makeSourceItemView();
             originalName = source.clMakeSourceName();
         }
     }

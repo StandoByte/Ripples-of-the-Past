@@ -17,16 +17,20 @@ import net.minecraft.entity.ai.goal.PrioritizedGoal;
 import net.minecraft.entity.ai.goal.TargetGoal;
 import net.minecraft.entity.merchant.IMerchant;
 import net.minecraft.entity.monster.CreeperEntity;
+import net.minecraft.entity.passive.MooshroomEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.entity.projectile.ProjectileItemEntity;
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.MerchantContainer;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.inventory.container.WorkbenchContainer;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.potion.Effect;
 import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.gen.ChunkGenerator;
@@ -193,5 +197,34 @@ public class CommonReflection {
     private static final Field MERCHANT_CONTAINER_TRADER = ObfuscationReflectionHelper.findField(MerchantContainer.class, "field_75178_e");
     public static IMerchant getTrader(MerchantContainer merchantContainer) {
         return ReflectionUtil.getFieldValue(MERCHANT_CONTAINER_TRADER, merchantContainer);
+    }
+    
+    
+    
+    private static final Method PROJECTILE_ITEM_ENTITY_GET_ITEM_RAW = ObfuscationReflectionHelper.findMethod(ProjectileItemEntity.class, "func_213882_k");
+    public static ItemStack getItemRaw(ProjectileItemEntity entity) {
+        return ReflectionUtil.invokeMethod(PROJECTILE_ITEM_ENTITY_GET_ITEM_RAW, entity);
+    }
+    
+    private static final Method PROJECTILE_ITEM_ENTITY_GET_DEFAULT_ITEM = ObfuscationReflectionHelper.findMethod(ProjectileItemEntity.class, "func_213885_i");
+    public static Item getDefaultItem(ProjectileItemEntity entity) {
+        return ReflectionUtil.invokeMethod(PROJECTILE_ITEM_ENTITY_GET_DEFAULT_ITEM, entity);
+    }
+    
+    
+    
+    private static final Field MOOSHROOM_ENTITY_EFFECT = ObfuscationReflectionHelper.findField(MooshroomEntity.class, "field_213450_bA");
+    public static Effect getEffect(MooshroomEntity entity) {
+        return ReflectionUtil.getFieldValue(MOOSHROOM_ENTITY_EFFECT, entity);
+    }
+    
+    private static final Field MOOSHROOM_ENTITY_EFFECT_DURATION = ObfuscationReflectionHelper.findField(MooshroomEntity.class, "field_213447_bB");
+    public static int getEffectDuration(MooshroomEntity entity) {
+        return ReflectionUtil.getIntFieldValue(MOOSHROOM_ENTITY_EFFECT_DURATION, entity);
+    }
+    
+    public static void clearEffect(MooshroomEntity entity) {
+        ReflectionUtil.setFieldValue(MOOSHROOM_ENTITY_EFFECT, entity, null);
+        ReflectionUtil.setIntFieldValue(MOOSHROOM_ENTITY_EFFECT_DURATION, entity, 0);
     }
 }
