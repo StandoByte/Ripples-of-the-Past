@@ -12,7 +12,7 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.power.StandCapProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.StandController;
+import com.github.standobyte.jojo.client.ControllerStand;
 import com.github.standobyte.jojo.command.configpack.standassign.PlayerStandAssignmentConfig;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModStatusEffects;
@@ -126,7 +126,7 @@ public class StandUtil {
                             mc.player.xxa = 0;
                             mc.player.zza = 0;
                             mc.player.setJumping(false);
-                            StandController.setStartedControllingStand();
+                            ControllerStand.setStartedControllingStand();
                         }
                     }
                 }

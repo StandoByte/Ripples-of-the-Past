@@ -4,7 +4,7 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
-import com.github.standobyte.jojo.client.SoulController;
+import com.github.standobyte.jojo.client.ControllerSoul;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 
@@ -29,7 +29,7 @@ public class UpdateClientCapCachePacket {
         public void handle(UpdateClientCapCachePacket msg, Supplier<NetworkEvent.Context> ctx) {
             ActionsOverlayGui.getInstance().updatePowersCache();
             InputHandler.getInstance().updatePowersCache();
-            SoulController.getInstance().updateStandCache();
+            ControllerSoul.getInstance().updateStandCache();
             ClientUtil.updatePowersCapCache();
         }
 

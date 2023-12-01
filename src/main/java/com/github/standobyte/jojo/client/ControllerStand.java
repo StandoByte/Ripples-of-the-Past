@@ -48,8 +48,8 @@ import net.minecraftforge.event.TickEvent.PlayerTickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-public class StandController {
-    private static StandController instance = null;
+public class ControllerStand {
+    private static ControllerStand instance = null;
     
     private final Minecraft mc;
     private Random rand;
@@ -61,19 +61,19 @@ public class StandController {
     private long lastSystemTime;
     private long healthUpdateCounter;
 
-    private StandController(Minecraft mc) {
+    private ControllerStand(Minecraft mc) {
         this.mc = mc;
         this.rand = new Random();
     }
 
     public static void init(Minecraft mc) {
         if (instance == null) {
-            instance = new StandController(mc);
+            instance = new ControllerStand(mc);
             MinecraftForge.EVENT_BUS.register(instance);
         }
     }
 
-    public static StandController getInstance() {
+    public static ControllerStand getInstance() {
         return instance;
     }
     
