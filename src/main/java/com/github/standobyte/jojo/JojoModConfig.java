@@ -13,7 +13,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import com.electronwill.nightconfig.core.CommentedConfig;
 import com.electronwill.nightconfig.core.InMemoryCommentedFormat;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -622,66 +621,14 @@ public class JojoModConfig {
     
     public static class Client {
         
-        public final ForgeConfigSpec.EnumValue<ActionsOverlayGui.PositionConfig> barsPosition;
-        public final ForgeConfigSpec.EnumValue<ActionsOverlayGui.PositionConfig> hotbarsPosition;
-        public final ForgeConfigSpec.EnumValue<ActionsOverlayGui.HudNamesRender> hudNamesRender;
-        
         public final ForgeConfigSpec.BooleanValue actionSlotHotkeys;
         
-        public final ForgeConfigSpec.BooleanValue resolveShaders;
-        public final ForgeConfigSpec.BooleanValue menacingParticles;
-        public final ForgeConfigSpec.BooleanValue timeStopFreezesVisuals;
-        public final ForgeConfigSpec.BooleanValue timeStopAnimation;
-        
-        public final ForgeConfigSpec.BooleanValue characterVoiceLines;
-        
         private Client(ForgeConfigSpec.Builder builder) {
-            barsPosition = builder
-                    .comment(" Position of Energy, Stamina and Resolve bars in the HUD.")
-                    .translation("jojo.config.client.barsPosition") 
-                    .defineEnum("barsPosition", ActionsOverlayGui.PositionConfig.TOP_LEFT);
-            
-            hotbarsPosition = builder
-                    .comment(" Position of Power name, Attack and Ability hotbars in the HUD.")
-                    .translation("jojo.config.client.hotbarsPosition")
-                    .defineEnum("hotbarsPosition", ActionsOverlayGui.PositionConfig.TOP_LEFT);
-            
-            hudNamesRender = builder
-                    .comment(" How Power, Attack and Ability names should render in the HUD.")
-                    .translation("jojo.config.client.hudNamesRender")
-                    .defineEnum("hudNamesRender", ActionsOverlayGui.HudNamesRender.ALWAYS);
-            
             actionSlotHotkeys = builder
                     .comment(" Enable hotkey settings for each individual attack and ability from 1 to 9.", 
                             "  If your client is launched, changing the setting requires restarting the game.")
                     .translation("jojo.config.client.slotHotkeys")
                     .define("actionSlotHotkeys", false);
-            
-            resolveShaders = builder
-                    .comment(" Enable shaders during Resolve effect.")
-                    .translation("jojo.config.client.resolveShaders")
-                    .define("resolveShaders", true);
-            
-            menacingParticles = builder
-                    .comment(" Enable particles spawning from the player when AFK.")
-                    .translation("jojo.config.client.menacingParticles")
-                    .define("menacingParticles", true);
-            
-            timeStopFreezesVisuals = builder
-                    .comment(" Freeze particles, block texture animations and rain/snow during time stop.",
-                            "  Experimental feature - it may cause errors or crashes with other mods (one known crash is with Dynamic Surroundings), so the option is disabled by default.")
-                    .translation("jojo.config.client.timeStopFreezesParticles")
-                    .define("timeStopFreezesParticles", false);
-            
-            timeStopAnimation = builder
-                    .comment(" Enables the visual effect at the beginning of time stop when its duration is 5 seconds or longer.")
-                    .translation("jojo.config.client.timeStopAnimation")
-                    .define("timeStopAnimation", true);
-            
-            characterVoiceLines = builder
-                    .comment(" Whether or not voice lines of the JoJo characters whose powers the players use are played.")
-                    .translation("jojo.config.client.characterVoiceLines")
-                    .define("characterVoiceLines", true);
         }
     }
 

@@ -6,6 +6,8 @@ import java.io.File;
 import java.util.function.Consumer;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.HudNamesRender;
+import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.PositionConfig;
 import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -20,6 +22,17 @@ public class ClientModSettings {
         private boolean lockedAttacksHotbar;
         private boolean lockedAbilitiesHotbar;
         public float standStatsTranslucency = 0.75F;
+        
+        public PositionConfig barsPosition = PositionConfig.TOP_LEFT;
+        public PositionConfig hotbarsPosition = PositionConfig.TOP_LEFT;
+        public HudNamesRender hudNamesRender = HudNamesRender.ALWAYS;
+        
+        public boolean resolveShaders = true;
+        public boolean menacingParticles = true;
+        public boolean timeStopFreezesVisuals = false;
+        public boolean timeStopAnimation = true;
+        
+        public boolean characterVoiceLines = true;
     }
     
     
@@ -28,8 +41,8 @@ public class ClientModSettings {
         save();
     }
     
-    public Settings getSettingsReadOnly() {
-        return settings;
+    public static Settings getSettingsReadOnly() {
+        return getInstance().settings;
     }
     
     
