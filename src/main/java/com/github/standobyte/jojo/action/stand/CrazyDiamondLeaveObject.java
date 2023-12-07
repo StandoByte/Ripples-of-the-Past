@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.action.stand;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.Random;
 import java.util.function.Predicate;
 
@@ -18,9 +19,10 @@ import com.github.standobyte.jojo.entity.EyeOfEnderInsideEntity;
 import com.github.standobyte.jojo.entity.FireworkInsideEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
-import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
+import com.github.standobyte.jojo.item.StandArrowItem;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
@@ -57,6 +59,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.util.TriPredicate;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.living.EntityTeleportEvent;
 
@@ -84,6 +87,9 @@ public class CrazyDiamondLeaveObject extends StandEntityActionModifier {
         map.put(item -> !PotionUtils.getMobEffects(item).isEmpty(), (target, item, user) ->     PotionUtils.getMobEffects(item).forEach(effect -> target.addEffect(effect)));
         map.put(item -> item.isEdible(), (target, item, user) ->                                target.eat(target.level, item.copy()));
         map.put(item -> item.getItem() == Items.ENCHANTED_GOLDEN_APPLE, (target, item, user) -> VampirismUtil.onEnchantedGoldenAppleEaten(target));
+    });
+    static final Map<Predicate<ItemStack>, TriPredicate<LivingEntity, ItemStack, LivingEntity>> ITEM_ACTION_CONDITIONAL = Util.make(new HashMap<>(), map -> {
+        map.put(item -> item.getItem() instanceof StandArrowItem, (target, item, user) ->       StandArrowItem.onPiercedByArrow(target, item, target.level, Optional.of(user)));
     });
 
     public CrazyDiamondLeaveObject(Builder builder) {
@@ -124,18 +130,40 @@ public class CrazyDiamondLeaveObject extends StandEntityActionModifier {
                     LivingEntity targetEntity = (LivingEntity) entity;
                     
                     ItemStack item = standEntity.getMainHandItem();
+                    boolean itemUsed = false;
                     if (!item.isEmpty()) {
-                        ITEM_ACTION.forEach((itemCheck, itemEffect) -> {
+                        boolean itemAction1 = ITEM_ACTION.entrySet().stream().filter(entry -> {
+                            boolean triggered = false;
+                            Predicate<ItemStack> itemCheck = entry.getKey();
+                            TriConsumer<LivingEntity, ItemStack, LivingEntity> itemEffect = entry.getValue();
                             if (!world.isClientSide() && itemCheck.test(item)) {
                                 itemEffect.accept(targetEntity, item, userPower.getUser());
+                                triggered = true;
                             }
-                        });
-                        item.shrink(1);
+                            return triggered;
+                        }).findAny().isPresent();
+                        
+                        boolean itemAction2 = ITEM_ACTION_CONDITIONAL.entrySet().stream().filter(entry -> {
+                            boolean triggered = false;
+                            Predicate<ItemStack> itemCheck = entry.getKey();
+                            TriPredicate<LivingEntity, ItemStack, LivingEntity> itemEffect = entry.getValue();
+                            if (!world.isClientSide() && itemCheck.test(item) && itemEffect.test(targetEntity, item, userPower.getUser())) {
+                                triggered = true;
+                            }
+                            return triggered;
+                        }).findAny().isPresent();
+                        
+                        itemUsed = itemAction1 || itemAction2;
+                        if (itemUsed) {
+                            item.shrink(1);
+                        }
                     }
-    
-                    IPunch punch = standEntity.getLastPunch();
-                    float damageDealt = punch.getType() == TargetType.ENTITY ? ((StandEntityPunch) punch).getDamageDealtToLiving() : 0;
-                    targetEntity.setHealth(targetEntity.getHealth() + damageDealt * 0.5F);
+                    
+                    if (itemUsed) {
+                        IPunch punch = standEntity.getLastPunch();
+                        float damageDealt = punch.getType() == TargetType.ENTITY ? ((StandEntityPunch) punch).getDamageDealtToLiving() : 0;
+                        targetEntity.setHealth(targetEntity.getHealth() + damageDealt * 0.5F);
+                    }
                 }
             }
             if (triggerEffect) {
@@ -145,7 +173,8 @@ public class CrazyDiamondLeaveObject extends StandEntityActionModifier {
     }
     
     static boolean canUseItem(ItemStack itemStack) {
-        return ITEM_ACTION.keySet().stream().anyMatch(predicate -> predicate.test(itemStack));
+        return ITEM_ACTION.keySet().stream().anyMatch(predicate -> predicate.test(itemStack))
+                || ITEM_ACTION_CONDITIONAL.keySet().stream().anyMatch(predicate -> predicate.test(itemStack));
     }
     
     @Override

@@ -22,6 +22,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.renderer.ActiveRenderInfo;
+import net.minecraft.client.settings.GraphicsFanciness;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3d;
@@ -171,6 +172,9 @@ public abstract class MarkerRenderer {
             Minecraft mc = Minecraft.getInstance();
             if (!mc.options.hideGui) {
                 RenderSystem.disableDepthTest();
+                if (mc.options.graphicsMode == GraphicsFanciness.FABULOUS) { // it just works
+                    RenderSystem.enableTexture();
+                }
 
                 MatrixStack matrixStack = event.getMatrixStack();
                 RENDERERS.forEach(marker -> marker.render(matrixStack, mc.gameRenderer.getMainCamera(), event.getPartialTicks()));

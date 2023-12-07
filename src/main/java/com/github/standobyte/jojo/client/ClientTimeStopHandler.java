@@ -7,7 +7,6 @@ import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.TimeStopHandler;
 import com.github.standobyte.jojo.client.ClientTicking.ITicking;
@@ -116,7 +115,7 @@ public class ClientTimeStopHandler implements ITicking {
                 timeStopLength = 0;
             }
             
-            if (JojoModConfig.CLIENT.timeStopFreezesVisuals.get()) {
+            if (ClientModSettings.getSettingsReadOnly().timeStopFreezesVisuals) {
                 if (isTimeStopped) {
                     TextureManager textureManager = mc.getTextureManager();
                     prevTickableTextures = ClientReflection.getTickableTextures(textureManager);
