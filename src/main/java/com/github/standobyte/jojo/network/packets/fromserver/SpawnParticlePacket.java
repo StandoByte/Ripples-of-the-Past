@@ -6,7 +6,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
@@ -101,7 +101,7 @@ public class SpawnParticlePacket {
         
         @Override
         public void handle(SpawnParticlePacket msg, Supplier<NetworkEvent.Context> ctx) {
-            if (msg.context == SpecialContext.AFK && !JojoModConfig.CLIENT.menacingParticles.get()) {
+            if (msg.context == SpecialContext.AFK && !ClientModSettings.getSettingsReadOnly().menacingParticles) {
                 return;
             }
             

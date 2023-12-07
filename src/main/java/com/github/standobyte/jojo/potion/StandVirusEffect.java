@@ -84,7 +84,7 @@ public class StandVirusEffect extends UncurableEffect implements IApplicableEffe
     public static int getEffectDurationToApply(PlayerEntity player) {
         return IStandPower.getStandPowerOptional(player).map(power -> {
             StandArrowHandler handler = power.getStandArrowHandler();
-            return (handler.getStandXpLevelsRequirement(player.level.isClientSide(), ItemStack.EMPTY) + 1) * 10;
-        }).orElse(0) * 2;
+            return (handler.getStandXpLevelsRequirement(player.level.isClientSide(), ItemStack.EMPTY) + 1) * 20;
+        }).orElse(0);
     }
 }

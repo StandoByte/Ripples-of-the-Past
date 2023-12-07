@@ -8,7 +8,10 @@ issueTrackerURL="https://github.com/StandoByte/Ripples-of-the-Past/issues"
     version="${file.jarVersion}"
     displayName="Ripples of the Past"
     updateJSONURL="https://raw.githubusercontent.com/StandoByte/Ripples-of-the-Past/1.16.5/update.json"
-    displayURL="https://curseforge.com/minecraft/mc-mods/ripples-of-the-past/"
+    displayURL=''' 
+https://curseforge.com/minecraft/mc-mods/ripples-of-the-past/
+https://modrinth.com/mod/ripples-of-the-past
+    '''
     logoFile="logo.png"
     credits='''
     

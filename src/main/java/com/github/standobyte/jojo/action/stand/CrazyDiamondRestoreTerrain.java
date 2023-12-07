@@ -73,6 +73,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         return super.checkSpecificConditions(user, power, target);
     }
     
+    // TODO try to mitigate the fps drops when lots of blocks are restored simultaneously
     @Override
     public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
@@ -169,6 +170,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
             if (!isCreative && playerWithXp != null && xpCost > 0) {
                 playerWithXp.giveExperiencePoints(-xpCost);
             }
+            blockState = Block.updateFromNeighbourShapes(blockState, world, blockPos);
             world.setBlockAndUpdate(blockPos, blockState);
             placedBlocks.add(blockPos);
             return true;
@@ -179,8 +181,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
     }
     
     public static boolean blockCanBePlaced(World world, BlockPos pos, BlockState placedBlockState) {
-        BlockState currentBlockState = world.getBlockState(pos);
-        return currentBlockState.isAir(world, pos) || currentBlockState.getMaterial().isReplaceable();
+        return world.getBlockState(pos).getMaterial().isReplaceable();
     }
     
     private static boolean consumeNeededItems(List<ItemStack> restorationCost, @Nullable IInventory userInventory, List<ItemEntity> itemEntities) {
