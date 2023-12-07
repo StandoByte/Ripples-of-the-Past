@@ -29,7 +29,6 @@ public class ClientModSettings {
         
         public boolean resolveShaders = true;
         public boolean menacingParticles = true;
-        public boolean timeStopFreezesVisuals = false;
         public boolean timeStopAnimation = true;
         
         public boolean characterVoiceLines = true;

@@ -104,15 +104,6 @@ public class ClientModSettingsScreen extends SettingsScreen {
         };
         addButton(timeStopAnimation.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
         
-        BooleanSetting timeStopFreezesVisuals = new BooleanSetting(settings, 
-                new TranslationTextComponent("jojo.config.client.timeStopFreezesVisuals"), 
-                new TranslationTextComponent("jojo.config.client.timeStopFreezesVisuals.tooltip")
-                ) {
-            @Override public boolean get() { return settingsValues.timeStopFreezesVisuals; }
-            @Override public void set(boolean value) { settingsValues.timeStopFreezesVisuals = value; }
-        };
-        addButton(timeStopFreezesVisuals.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
-        
         
         ++i;
         if (i % 2 == 1) {
