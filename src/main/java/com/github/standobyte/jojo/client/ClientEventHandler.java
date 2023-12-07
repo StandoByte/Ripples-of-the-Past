@@ -19,6 +19,7 @@ import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
+import com.github.standobyte.jojo.client.ui.screen.ClientModSettingsScreen;
 import com.github.standobyte.jojo.client.ui.screen.widgets.HeightScaledSlider;
 import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
 import com.github.standobyte.jojo.init.ModEntityTypes;
@@ -47,6 +48,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.IngameMenuScreen;
 import net.minecraft.client.gui.screen.MainMenuScreen;
+import net.minecraft.client.gui.screen.OptionsScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractSlider;
 import net.minecraft.client.gui.widget.button.Button;
@@ -290,10 +292,10 @@ public class ClientEventHandler {
         
         if (event.phase == TickEvent.Phase.START) {
             ClientTimeStopHandler.getInstance().tickPauseIrrelevant();
+            
+            deathScreenTick = mc.screen instanceof DeathScreen ? deathScreenTick + 1 : 0;
+            standStatsTick = mc.screen instanceof IngameMenuScreen && doStandStatsRender(mc.screen) ? standStatsTick + 1 : 0;
         }
-
-        deathScreenTick = mc.screen instanceof DeathScreen ? deathScreenTick + 1 : 0;
-        standStatsTick = mc.screen instanceof IngameMenuScreen && doStandStatsRender(mc.screen) ? standStatsTick + 1 : 0;
     }
     
     
@@ -549,23 +551,24 @@ public class ClientEventHandler {
     @SubscribeEvent
     public void afterScreenRender(DrawScreenEvent.Post event) {
         Screen screen = event.getGui();
+        float partialTick = screen.getMinecraft().getFrameTime();
         if (screen instanceof DeathScreen) {
             ITextComponent title = screen.getTitle();
             if (title instanceof TranslationTextComponent && ((TranslationTextComponent) title).getKey().endsWith(".hardcore")) {
                 return;
             }
-            renderToBeContinuedArrow(event.getMatrixStack(), screen, screen.width, screen.height, event.getRenderPartialTicks());
+            renderToBeContinuedArrow(event.getMatrixStack(), screen, screen.width, screen.height, partialTick);
         }
 
         else if (screen instanceof IngameMenuScreen && ClientReflection.showsPauseMenu((IngameMenuScreen) screen)) {
-            float alpha = ClientModSettings.getInstance().getSettingsReadOnly().standStatsTranslucency;
+            float alpha = ClientModSettings.getSettingsReadOnly().standStatsTranslucency;
             int xButtonsRightEdge = screen.width / 2 + 102;
             int windowWidth = screen.width;
             int windowHeight = screen.height;
             
             if (doStandStatsRender(screen)) {
                 StandStatsRenderer.renderStandStats(event.getMatrixStack(), mc, windowWidth - 160, windowHeight - 160, windowWidth, windowHeight,
-                        standStatsTick, event.getRenderPartialTicks(), alpha, event.getMouseX(), event.getMouseY(), windowWidth - xButtonsRightEdge - 14);
+                        standStatsTick, partialTick, alpha, event.getMouseX(), event.getMouseY(), windowWidth - xButtonsRightEdge - 14);
             }
         }
     }
@@ -589,7 +592,7 @@ public class ClientEventHandler {
         AbstractGui.drawCenteredString(matrixStack, mc.font, new TranslationTextComponent("jojo.to_be_continued"), x + 61, y + 8, 0x525544);
     }
     
-    @SubscribeEvent
+    @SubscribeEvent(priority = EventPriority.LOW)
     public void addToScreen(InitGuiEvent.Post event) {
         Screen screen = event.getGui();
         if (screen instanceof IngameMenuScreen && ClientReflection.showsPauseMenu((IngameMenuScreen) screen)) {
@@ -599,7 +602,7 @@ public class ClientEventHandler {
                             screen.width - 160, screen.height - 6, 153, 6, StringTextComponent.EMPTY, 0.0D) {
                         {
                             this.value = MathHelper.inverseLerp(
-                                    ClientModSettings.getInstance().getSettingsReadOnly().standStatsTranslucency, 
+                                    ClientModSettings.getSettingsReadOnly().standStatsTranslucency, 
                                     0.1, 1.0);
                             updateMessage();
                         }
@@ -645,6 +648,10 @@ public class ClientEventHandler {
 //                    event.addWidget(standSkinsButton);
                 }
             });
+        }
+        
+        else if (screen instanceof OptionsScreen) {
+            event.addWidget(ClientModSettingsScreen.addSettingsButton(screen, event.getWidgetList()));
         }
     }
 

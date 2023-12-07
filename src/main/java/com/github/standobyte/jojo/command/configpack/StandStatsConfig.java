@@ -8,6 +8,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
@@ -18,6 +19,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.StandStatsDataPacke
 import com.github.standobyte.jojo.network.packets.fromserver.StandStatsDataPacket.StandStatsDataEntry;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
+import com.github.standobyte.jojo.power.impl.stand.type.StandType.StandSurvivalGameplayPool;
 import com.github.standobyte.jojo.util.general.JsonModUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.google.common.io.Files;
@@ -91,7 +93,10 @@ public class StandStatsConfig extends JsonDataConfig {
             // generate base datapack
             genDataPackBase(source);
             // generate the .json files
-            int count = writeDefaultStandStats(source.getServer(), JojoCustomRegistries.STANDS.getRegistry().getValues());
+            int count = writeDefaultStandStats(source.getServer(), 
+                    JojoCustomRegistries.STANDS.getRegistry().getValues().stream()
+                    .filter(stand -> stand.getSurvivalGameplayPool() == StandSurvivalGameplayPool.PLAYER_ARROW)
+                    .collect(Collectors.toList()));
             source.sendSuccess(new TranslationTextComponent("commands.jojoconfigpack.standstats.all", 
                     // clickable link to the files (in "jojo" namespace)
                     new TranslationTextComponent("commands.jojoconfigpack.standstats.all.link_name").withStyle(TextFormatting.UNDERLINE).withStyle((style) -> {

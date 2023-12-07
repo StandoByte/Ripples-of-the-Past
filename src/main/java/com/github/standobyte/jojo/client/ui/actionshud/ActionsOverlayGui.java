@@ -20,7 +20,6 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
@@ -233,8 +232,8 @@ public class ActionsOverlayGui extends AbstractGui {
         int screenWidth = mc.getWindow().getGuiScaledWidth();
         int screenHeight = mc.getWindow().getGuiScaledHeight();
         
-        PositionConfig hotbarsPosConfig = JojoModConfig.CLIENT.hotbarsPosition.get();
-        PositionConfig barsPosConfig = JojoModConfig.CLIENT.barsPosition.get();
+        PositionConfig hotbarsPosConfig = ClientModSettings.getSettingsReadOnly().hotbarsPosition;
+        PositionConfig barsPosConfig = ClientModSettings.getSettingsReadOnly().barsPosition;
         boolean showModeSelector = false;
         boolean renderQuickAccessSlot = currentMode != null && currentMode.getPower().getActionsHudLayout().isMmbActionHudVisible();
         updateWarnings(currentMode);
@@ -888,7 +887,7 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     private float getNameAlpha(ElementTransparency transparency, float partialTick) {
-        HudNamesRender renderMode = JojoModConfig.CLIENT.hudNamesRender.get();
+        HudNamesRender renderMode = ClientModSettings.getSettingsReadOnly().hudNamesRender;
         switch (renderMode) {
         case NEVER:
             return 0;

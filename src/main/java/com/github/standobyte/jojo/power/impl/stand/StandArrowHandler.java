@@ -2,7 +2,6 @@ package com.github.standobyte.jojo.power.impl.stand;
 
 import java.util.UUID;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.JojoModConfig.Common;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
@@ -122,7 +121,6 @@ public class StandArrowHandler {
     
     public void setStandArrowItem(ItemStack item) {
         if (item != null) {
-            JojoMod.LOGGER.debug(EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.STAND_ARROW_XP_REDUCTION.get(), item));
             this.standArrowItem = item.copy();
         }
     }
