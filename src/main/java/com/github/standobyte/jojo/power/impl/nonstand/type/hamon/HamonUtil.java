@@ -444,7 +444,7 @@ public class HamonUtil {
     // TODO fix not being able to walk on liquid on shift (PlayerEntity#maybeBackOffFromEdge (989))
     public static boolean liquidWalking(PlayerEntity player) {
         World world = player.level;
-        if (player.abilities.flying || player.isInWater()) {
+        if (player.abilities.flying || player.isInWater() || player.isPassenger()) {
             return false;
         }
         boolean doubleShift = player.isShiftKeyDown() && player.getCapability(PlayerUtilCapProvider.CAPABILITY).map(

@@ -126,24 +126,24 @@ public class ModStandsInit {
     public static final RegistryObject<StandEntityLightAttack> STAR_PLATINUM_PUNCH = ACTIONS.register("star_platinum_punch", 
             () -> new StandEntityLightAttack(new StandEntityLightAttack.Builder()
                     .punchSound(ModSounds.STAR_PLATINUM_PUNCH_LIGHT)
-                    .standSound(Phase.WINDUP, ModSounds.STAR_PLATINUM_ORA)));
+                    .standSound(Phase.WINDUP, false, ModSounds.STAR_PLATINUM_ORA)));
     
     public static final RegistryObject<StandEntityMeleeBarrage> STAR_PLATINUM_BARRAGE = ACTIONS.register("star_platinum_barrage", 
             () -> new StandEntityMeleeBarrage(new StandEntityMeleeBarrage.Builder()
                     .barrageHitSound(ModSounds.STAR_PLATINUM_PUNCH_BARRAGE)
-                    .standSound(ModSounds.STAR_PLATINUM_ORA_ORA_ORA)));
+                    .standSound(Phase.PERFORM, false, ModSounds.STAR_PLATINUM_ORA_ORA_ORA)));
     
     public static final RegistryObject<StandEntityHeavyAttack> STAR_PLATINUM_UPPERCUT = ACTIONS.register("star_platinum_uppercut", 
             () -> new StarPlatinumUppercut(new StandEntityHeavyAttack.Builder()
                     .resolveLevelToUnlock(1)
                     .punchSound(ModSounds.STAR_PLATINUM_PUNCH_HEAVY)
-                    .standSound(Phase.WINDUP, ModSounds.STAR_PLATINUM_ORA_LONG)
+                    .standSound(Phase.WINDUP, false, ModSounds.STAR_PLATINUM_ORA_LONG)
                     .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<StandEntityHeavyAttack> STAR_PLATINUM_HEAVY_PUNCH = ACTIONS.register("star_platinum_heavy_punch", 
             () -> new StandEntityHeavyAttack(new StandEntityHeavyAttack.Builder()
                     .punchSound(ModSounds.STAR_PLATINUM_PUNCH_HEAVY)
-                    .standSound(Phase.WINDUP, ModSounds.STAR_PLATINUM_ORA_LONG)
+                    .standSound(Phase.WINDUP, false, ModSounds.STAR_PLATINUM_ORA_LONG)
                     .partsRequired(StandPart.ARMS)
                     .setFinisherVariation(STAR_PLATINUM_UPPERCUT)
                     .shiftVariationOf(STAR_PLATINUM_PUNCH).shiftVariationOf(STAR_PLATINUM_BARRAGE)));
@@ -242,12 +242,12 @@ public class ModStandsInit {
     public static final RegistryObject<StandEntityLightAttack> THE_WORLD_PUNCH = ACTIONS.register("the_world_punch", 
             () -> new StandEntityLightAttack(new StandEntityLightAttack.Builder()
                     .punchSound(ModSounds.THE_WORLD_PUNCH_LIGHT)
-                    .standSound(Phase.WINDUP, ModSounds.DIO_MUDA)));
+                    .standSound(Phase.WINDUP, false, ModSounds.DIO_MUDA)));
     
     public static final RegistryObject<StandEntityMeleeBarrage> THE_WORLD_BARRAGE = ACTIONS.register("the_world_barrage", 
             () -> new TheWorldBarrage(new StandEntityMeleeBarrage.Builder()
                     .barrageHitSound(ModSounds.THE_WORLD_PUNCH_BARRAGE)
-                    .standSound(ModSounds.THE_WORLD_MUDA_MUDA_MUDA).shout(ModSounds.DIO_MUDA_MUDA), ModSounds.DIO_WRY));
+                    .standSound(Phase.PERFORM, false, ModSounds.THE_WORLD_MUDA_MUDA_MUDA).shout(ModSounds.DIO_MUDA_MUDA), ModSounds.DIO_WRY));
 
     public static final RegistryObject<StandEntityHeavyAttack> THE_WORLD_KICK = ACTIONS.register("the_world_kick", 
             () -> new TheWorldKick(new StandEntityHeavyAttack.Builder()
@@ -609,19 +609,19 @@ public class ModStandsInit {
     public static final RegistryObject<StandEntityLightAttack> CRAZY_DIAMOND_PUNCH = ACTIONS.register("crazy_diamond_punch", 
             () -> new StandEntityLightAttack(new StandEntityLightAttack.Builder()
                     .punchSound(ModSounds.CRAZY_DIAMOND_PUNCH_LIGHT)
-                    .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_DORA)
+                    .standSound(Phase.WINDUP, false, ModSounds.CRAZY_DIAMOND_DORA)
                     ));
     
     public static final RegistryObject<StandEntityMeleeBarrage> CRAZY_DIAMOND_BARRAGE = ACTIONS.register("crazy_diamond_barrage", 
             () -> new StandEntityMeleeBarrage(new StandEntityMeleeBarrage.Builder()
                     .barrageHitSound(ModSounds.CRAZY_DIAMOND_PUNCH_BARRAGE)
-                    .standSound(ModSounds.CRAZY_DIAMOND_DORARARA)));
+                    .standSound(Phase.PERFORM, false, ModSounds.CRAZY_DIAMOND_DORARARA)));
     
     public static final RegistryObject<StandEntityHeavyAttack> CRAZY_DIAMOND_FINISHER_PUNCH = ACTIONS.register("crazy_diamond_misshaping_punch", 
             () -> new CrazyDiamondMisshapingPunch(new StandEntityHeavyAttack.Builder()
                     .resolveLevelToUnlock(1)
                     .punchSound(ModSounds.CRAZY_DIAMOND_PUNCH_HEAVY)
-                    .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_DORA_LONG)
+                    .standSound(Phase.WINDUP, false, ModSounds.CRAZY_DIAMOND_DORA_LONG)
                     .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<StandEntityActionModifier> CRAZY_DIAMOND_MISSHAPE_FACE = ACTIONS.register("crazy_diamond_misshape_face", 

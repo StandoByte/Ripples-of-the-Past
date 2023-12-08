@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.action.stand;
 
-import java.util.List;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -113,7 +113,7 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
     }
     
     @Override
-    public List<Supplier<SoundEvent>> getSounds(StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task) {
+    public Stream<SoundEvent> getSounds(StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task) {
         return task.getTarget().getType() != TargetType.ENTITY || standEntity.isArmsOnlyMode() || standEntity.getFinisherMeter() > 0
                 ? null : super.getSounds(standEntity, standPower, phase, task);
     }
