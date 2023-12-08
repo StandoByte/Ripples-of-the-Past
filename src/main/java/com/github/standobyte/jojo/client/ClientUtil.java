@@ -361,6 +361,14 @@ public class ClientUtil {
         return new int[] {red, green, blue};
     }
     
+    public static int fromRgb(float r, float g, float b) {
+        return ((int) (r * 255) << 16) + ((int) (g * 255) << 8) + (int) (b * 255);
+    }
+    
+    public static int fromRgbInt(int r, int g, int b) {
+        return (r << 16) + (g << 8) + b;
+    }
+    
     public static int discColor(int color) {
         return (((0xFFFFFF - color) & 0xFEFEFE) >> 1) + color;
     }
