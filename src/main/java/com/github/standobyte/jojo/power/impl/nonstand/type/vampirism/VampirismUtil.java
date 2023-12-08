@@ -73,7 +73,16 @@ public class VampirismUtil {
             return 0;
         }
         World world = entity.level;
-        if (world.isDay()) {
+        if (
+                world.dimensionType().hasSkyLight()
+                && !world.dimensionType().hasCeiling()
+                && world.isDay()
+//                && !world.isRainingAt(new BlockPos(
+//                        entity.blockPosition().getX(), 
+//                        entity.getBoundingBox().maxY,
+//                        entity.blockPosition().getZ()))
+                && !world.isRaining()
+                && !world.isThundering()) {
             float brightness = entity.getBrightness();
             BlockPos blockPos = entity.getVehicle() instanceof BoatEntity ? 
                     (new BlockPos(entity.getX(), (double)Math.round(entity.getY(1.0)), entity.getZ())).above()
