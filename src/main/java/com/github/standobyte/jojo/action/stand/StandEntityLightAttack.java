@@ -63,7 +63,6 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
                 .damage(StandStatFormulas.getLightAttackDamage(stand.getAttackDamage()))
                 .addKnockback(stand.guardCounter())
                 .addFinisher(0.15F)
-                .parryTiming(stand.getFinisherMeter() == 0 ? StandStatFormulas.getParryTiming(stand.getPrecision()) : 0)
                 .impactSound(punchSound);
     }
     
