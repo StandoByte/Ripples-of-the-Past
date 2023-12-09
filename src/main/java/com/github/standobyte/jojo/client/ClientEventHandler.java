@@ -319,19 +319,15 @@ public class ClientEventHandler {
                 if (cap.addMetEntityType(type)) {
                     PacketManager.sendToServer(new ClMetEntityTypePacket(entity.getId()));
                     
-                    // TODO highlight/particle/sound as indication (if CreateLifeform is unlocked)
                     if (GoldExperienceChooseLifeform.isValidLifeform(type, mc.level)) {
                         IStandPower.getStandPowerOptional(mc.player).ifPresent(power -> {
                             if (ModStandsInit.GOLD_EXPERIENCE_CHOOSE_LIFEFORM.get().isUnlocked(power)) {
                                 mc.getSoundManager().play(new SimpleSound(SoundEvents.UI_BUTTON_CLICK, 
                                         SoundCategory.MASTER, 0.5F, 2.0F, 
                                         entity.getX(), entity.getY(0.5), entity.getZ()));
+                                MetEntityTypeToast.addOrUpdate(mc.getToasts(), type);
                             }
                         });
-                        
-                        MetEntityTypeToast.addOrUpdate(mc.getToasts(), type);
-                        
-                        // TODO particle
                     }
                 }
             });

@@ -145,7 +145,9 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             }
             copyStatus(this, entityToSummon);
             level.addFreshEntity(entityToSummon);
-            GoldExperienceCreateLifeform.onTransformationFinish(entityToSummon);
+            if (!isTurningBack()) {
+                GoldExperienceCreateLifeform.onTransformationFinish(entityToSummon);
+            }
         }
         else if (blockToPlace != null) {
             Entity ownerEntity = owner.getEntity(level);
