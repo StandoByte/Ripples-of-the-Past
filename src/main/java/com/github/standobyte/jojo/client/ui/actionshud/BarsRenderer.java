@@ -330,7 +330,7 @@ public abstract class BarsRenderer {
         }
         
         public void resetRedHighlight() {
-            this.redHighlightTick = redHighlightTick % 10;
+            this.redHighlightTick = redHighlightTick % 20;
         }
         
         private float lerpValue(float value, float partialTick) {
