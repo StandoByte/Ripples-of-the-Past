@@ -100,7 +100,7 @@ public class CrazyDiamondBlockBullet extends StandEntityAction {
             bullet.setBlock(((BlockItem) item.getItem()).getBlock());
             standEntity.shootProjectile(bullet, 2.0F, 0.25F);
             if (!(user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild)) {
-                user.getOffhandItem().shrink(1);
+                item.shrink(1);
             }
             if (!JojoModUtil.useShiftVar(user)) {
                 getTarget(targets(userPower), user).ifPresent(effect -> {

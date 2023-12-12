@@ -752,10 +752,13 @@ public class InputHandler {
                     if (power.canLeap() && !slowedDown) {
                         Entity playerVehicle = mc.player.getVehicle();
                         // FIXME let passengers other than the controlling player leap
-                        boolean onGround = mc.player.isOnGround() || playerVehicle != null && 
-                                (playerVehicle.isOnGround()
-                                || playerVehicle.getType() == ModEntityTypes.LEAVES_GLIDER.get()
-                                && MCUtil.collide(playerVehicle, new Vector3d(0, -1, 0)).y > -1);
+                        boolean onGround = false;
+                        if (playerVehicle != null && playerVehicle.getType() != ModEntityTypes.ROAD_ROLLER.get()) {
+                            onGround = playerVehicle.isOnGround()
+                                    || playerVehicle.getType() == ModEntityTypes.LEAVES_GLIDER.get()
+                                    && MCUtil.collide(playerVehicle, new Vector3d(0, -1, 0)).y > -1;
+                        }
+                        onGround |= mc.player.isOnGround();
                         // TODO wall leap
                         boolean atWall = false && mc.player.horizontalCollision;
                         
