@@ -3,7 +3,6 @@ package com.github.standobyte.jojo.client.render.entity.renderer.stand;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.render.entity.model.stand.TheWorldModel;
-import com.github.standobyte.jojo.client.render.entity.model.stand.TheWorldModelNew;
 import com.github.standobyte.jojo.entity.stand.stands.TheWorldEntity;
 
 import net.minecraft.client.renderer.entity.EntityRendererManager;
@@ -18,5 +17,6 @@ public class TheWorldRenderer extends StandEntityRenderer<TheWorldEntity, StandE
 //        super(renderManager, 
 //                new TheWorldModelNew(), 
 //                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/stand/the_world_new.png"), 0);
+        getModel().registerStandModel(new ResourceLocation(JojoMod.MOD_ID, "the_world"), TheWorldModel::new);
     }
 }

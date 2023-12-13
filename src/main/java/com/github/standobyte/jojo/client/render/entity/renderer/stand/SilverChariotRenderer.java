@@ -19,5 +19,6 @@ public class SilverChariotRenderer extends StandEntityRenderer<SilverChariotEnti
         addLayer(armorLayer);
         addLayer(new SilverChariotArmorGlowLayer(this, armorLayer));
         addLayer(new SilverChariotRapierFlameLayer(this));
+        getModel().registerStandModel(new ResourceLocation(JojoMod.MOD_ID, "silver_chariot"), SilverChariotModel::new);
     }
 }

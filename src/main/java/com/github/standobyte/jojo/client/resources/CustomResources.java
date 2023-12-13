@@ -1,8 +1,10 @@
 package com.github.standobyte.jojo.client.resources;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.client.resources.models.StandModelOverrides;
 import com.github.standobyte.jojo.client.resources.sprites.HamonSkillSpriteUploader;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
+import com.google.gson.Gson;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.IReloadableResourceManager;
@@ -14,6 +16,7 @@ public class CustomResources {
     private static ModSplashes modSplashes;
     private static StandGlowTextureChecker standGlowTextureChecker;
     private static StandSkinsManager standSkinsLoader;
+    private static StandModelOverrides standModelOverrides;
 
     public static void initCustomResourceManagers(Minecraft mc) {
         IReloadableResourceManager resourceManager = (IReloadableResourceManager) mc.getResourceManager();
@@ -23,6 +26,7 @@ public class CustomResources {
         resourceManager.registerReloadListener(modSplashes = new ModSplashes(mc.getUser(), new ResourceLocation(JojoMod.MOD_ID, "texts/splashes.txt")));
         resourceManager.registerReloadListener(standGlowTextureChecker = new StandGlowTextureChecker());
         resourceManager.registerReloadListener(standSkinsLoader = new StandSkinsManager());
+        resourceManager.registerReloadListener(standModelOverrides = new StandModelOverrides(new Gson()));
     }
     
     public static HamonSkillSpriteUploader getHamonSkillSprites() {
@@ -43,6 +47,10 @@ public class CustomResources {
     
     public static StandSkinsManager getStandSkinsLoader() {
         return standSkinsLoader;
+    }
+    
+    public static StandModelOverrides getStandModelOverrides() {
+        return standModelOverrides;
     }
 
 }

@@ -14,6 +14,7 @@ public class HierophantGreenRenderer extends StandEntityRenderer<HierophantGreen
     public HierophantGreenRenderer(EntityRendererManager renderManager) {
         super(renderManager, new HierophantGreenModel(), new ResourceLocation(JojoMod.MOD_ID, "textures/entity/stand/hierophant_green.png"), 0);
         addLegacyGlowTexture();
+        getModel().registerStandModel(new ResourceLocation(JojoMod.MOD_ID, "hierophant_green"), HierophantGreenModel::new);
     }
     
     @Deprecated
