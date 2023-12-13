@@ -4,16 +4,22 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Collections;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.util.general.MathUtil;
+
+import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import net.minecraft.client.resources.ReloadListener;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IResource;
@@ -23,7 +29,7 @@ import net.minecraft.util.Session;
 
 public class ModSplashes extends ReloadListener<List<String>> {
     private static final Random RANDOM = new Random();
-    private final List<String> splashes = new ArrayList<>();
+    private final Object2IntMap<String> splashes = new Object2IntArrayMap<>();
     private final Session user;
     private final ResourceLocation location;
 
@@ -47,10 +53,23 @@ public class ModSplashes extends ReloadListener<List<String>> {
         }
     }
 
+    private static final Pattern WEIGHT_PATTERN = Pattern.compile("^\\(\\d+\\) ");
     @Override
     protected void apply(List<String> splashes, IResourceManager resourceManager, IProfiler profiler) {
         this.splashes.clear();
-        this.splashes.addAll(splashes);
+        for (String line : splashes) {
+            int weight = 1;
+            Matcher matcher = WEIGHT_PATTERN.matcher(line);
+            if (matcher.find()) {
+                String weightStr = matcher.group();
+                try {
+                    weight = Integer.parseInt(weightStr.replaceAll("[\\D]", ""));
+                    line = line.replace(weightStr, "");
+                }
+                catch (NumberFormatException e) {}
+            }
+            this.splashes.put(line, weight);
+        }
     }
     
     @Nullable
@@ -66,10 +85,10 @@ public class ModSplashes extends ReloadListener<List<String>> {
             return "ゴ ゴ ゴ ゴ ゴ ゴ ゴ ゴ ゴ ゴ";
         }
         if (!splashes.isEmpty() && RANDOM.nextInt(420 + splashes.size()) < splashes.size()) {
-            String splash = splashes.get(RANDOM.nextInt(splashes.size()));
-            if (splash.contains("@p")) {
-                return user != null ? splash.replace("@p", user.getName()) : null;
-            }
+            Optional<String> splashOpt = MathUtil.getRandomWeightedInt(splashes.keySet(), splashes::applyAsInt, RANDOM);
+            return splashOpt.map(splash -> {
+                return user != null ? splash.replace("@p", user.getName()) : splash;
+            }).orElse(null);
         }
         return null;
     }
