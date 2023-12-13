@@ -1688,14 +1688,6 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         return noFinisherDecayTicks;
     }
     
-    public void parryHeavyAttack() {
-        if (!level.isClientSide()) {
-            stopTask(true);
-            addEffect(new EffectInstance(ModStatusEffects.STUN.get(), 20));
-            playSound(ModSounds.STAND_PARRY.get(), 1.0F, 1.0F);
-        }
-    }
-    
     public void breakStandBlocking(int lockTicks) {
         if (!level.isClientSide() && isStandBlocking()) {
             entityData.set(NO_BLOCKING_TICKS, lockTicks);

@@ -168,7 +168,7 @@ public class StandDiscItem extends Item {
     }
     
     
-    private static boolean giveStandFromDisc(IStandPower standCap, StandInstance stand, ItemStack discItem) {
+    public static boolean giveStandFromDisc(IStandPower standCap, StandInstance stand, ItemStack discItem) {
         boolean standExistedBefore = discItem.getTag().getBoolean(WS_TAG);
         return standCap.giveStandFromInstance(stand, standExistedBefore);
     }
