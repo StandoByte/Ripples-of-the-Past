@@ -3,7 +3,8 @@
   "refmap": "mixins.jojo.refmap.json",
   "mixins": [
     "ServerChunkProviderMixin",
-    "FireBlockMixin"
+    "FireBlockMixin",
+    "TheMostUnnecessaryMixin"
   ],
   "client": [
     "client.ParticleManagerMixin",
