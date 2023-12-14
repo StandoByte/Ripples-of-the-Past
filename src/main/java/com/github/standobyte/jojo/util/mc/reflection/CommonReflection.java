@@ -5,7 +5,10 @@ import java.lang.reflect.Method;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Predicate;
+
+import javax.annotation.Nullable;
 
 import com.mojang.serialization.Codec;
 
@@ -19,6 +22,7 @@ import net.minecraft.entity.ai.goal.PrioritizedGoal;
 import net.minecraft.entity.ai.goal.TargetGoal;
 import net.minecraft.entity.merchant.IMerchant;
 import net.minecraft.entity.monster.CreeperEntity;
+import net.minecraft.entity.monster.ZombieVillagerEntity;
 import net.minecraft.entity.passive.MooshroomEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.FireworkRocketEntity;
@@ -229,6 +233,14 @@ public class CommonReflection {
     public static void clearEffect(MooshroomEntity entity) {
         ReflectionUtil.setFieldValue(MOOSHROOM_ENTITY_EFFECT, entity, null);
         ReflectionUtil.setIntFieldValue(MOOSHROOM_ENTITY_EFFECT_DURATION, entity, 0);
+    }
+    
+    
+    
+    private static final Method ZOMBIE_VILLAGER_ENTITY_START_CONVERTING = ObfuscationReflectionHelper.findMethod(ZombieVillagerEntity.class, "func_191991_a", UUID.class, int.class);
+    public static void startConverting(ZombieVillagerEntity entity, @Nullable UUID conversionStarter, int villagerConversionTime) {
+        ReflectionUtil.invokeMethod(ZOMBIE_VILLAGER_ENTITY_START_CONVERTING, entity, 
+                conversionStarter, villagerConversionTime);
     }
     
     

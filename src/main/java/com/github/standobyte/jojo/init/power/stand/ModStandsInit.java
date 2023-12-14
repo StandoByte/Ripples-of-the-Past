@@ -20,6 +20,8 @@ import com.github.standobyte.jojo.action.stand.CrazyDiamondRepairItem;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.action.stand.GoldExperienceChooseLifeform;
 import com.github.standobyte.jojo.action.stand.GoldExperienceCreateLifeform;
+import com.github.standobyte.jojo.action.stand.GoldExperienceEntityLifeshot;
+import com.github.standobyte.jojo.action.stand.GoldExperienceLifeshotPunch;
 import com.github.standobyte.jojo.action.stand.GoldExperienceRevertLifeform;
 import com.github.standobyte.jojo.action.stand.HierophantGreenBarrier;
 import com.github.standobyte.jojo.action.stand.HierophantGreenEmeraldSplash;
@@ -767,10 +769,22 @@ public class ModStandsInit {
 //                    .standSound(ModSounds.GOLD_EXPERIENCE_MUDA_MUDA_MUDA)
                     ));
     
+    public static final RegistryObject<StandEntityActionModifier> GOLD_EXPERIENCE_ENTITY_LIFESHOT = ACTIONS.register("gold_experience_lifeshot", 
+            () -> new GoldExperienceEntityLifeshot(new StandAction.Builder().staminaCost(50)));
+    
+    public static final RegistryObject<StandEntityHeavyAttack> GOLD_EXPERIENCE_LIFESHOT_PUNCH = ACTIONS.register("gold_experience_lifeshot_punch", 
+            () -> new GoldExperienceLifeshotPunch(new StandEntityHeavyAttack.Builder()
+                    .resolveLevelToUnlock(1)
+                    .setRecoveryFollowUpAction(GOLD_EXPERIENCE_ENTITY_LIFESHOT)
+//                    .punchSound(ModSounds.GOLD_EXPERIENCE_PUNCH_HEAVY)
+//                    .standSound(Phase.WINDUP, ModSounds.GOLD_EXPERIENCE_MUDA_LONG)
+                    .partsRequired(StandPart.ARMS)));
+    
     public static final RegistryObject<CrazyDiamondHeavyPunch> GOLD_EXPERIENCE_HEAVY_PUNCH = ACTIONS.register("gold_experience_heavy_punch", 
             () -> new CrazyDiamondHeavyPunch(new StandEntityHeavyAttack.Builder()
 //                    .punchSound(ModSounds.GOLD_EXPERIENCE_PUNCH_HEAVY)
 //                    .standSound(Phase.WINDUP, ModSounds.GOLD_EXPERIENCE_MUDA_LONG)
+                    .setFinisherVariation(GOLD_EXPERIENCE_LIFESHOT_PUNCH)
                     .partsRequired(StandPart.ARMS)
                     .shiftVariationOf(GOLD_EXPERIENCE_PUNCH).shiftVariationOf(GOLD_EXPERIENCE_BARRAGE)));
     

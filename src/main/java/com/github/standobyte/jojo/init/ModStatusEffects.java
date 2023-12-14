@@ -9,9 +9,9 @@ import com.github.standobyte.jojo.potion.HamonShockEffect;
 import com.github.standobyte.jojo.potion.HamonSpreadEffect;
 import com.github.standobyte.jojo.potion.HypnosisEffect;
 import com.github.standobyte.jojo.potion.ImmobilizeEffect;
-import com.github.standobyte.jojo.potion.StandVirusEffect;
 import com.github.standobyte.jojo.potion.ResolveEffect;
 import com.github.standobyte.jojo.potion.StaminaRegenEffect;
+import com.github.standobyte.jojo.potion.StandVirusEffect;
 import com.github.standobyte.jojo.potion.StatusEffect;
 import com.github.standobyte.jojo.potion.StunEffect;
 import com.github.standobyte.jojo.potion.UncurableEffect;
@@ -93,6 +93,9 @@ public class ModStatusEffects {
     
     public static final RegistryObject<Effect> MISSHAPEN_LEGS = EFFECTS.register("misshapen_legs", 
             () -> new StatusEffect(EffectType.HARMFUL, 0x808080));
+    
+    public static final RegistryObject<Effect> SENSORY_OVERLOAD = EFFECTS.register("sensory_overload", 
+            () -> new UncurableEffect(EffectType.HARMFUL, 0xD88F1F));
     
 //    public static final RegistryObject<Effect> STAND_SEALING = EFFECTS.register("stand_sealing", 
 //            () -> new StatusEffect(EffectType.HARMFUL, 0xCACAD8)); // TODO Stand Sealing effect

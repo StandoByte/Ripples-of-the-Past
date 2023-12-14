@@ -9,6 +9,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.action.stand.GoldExperienceEntityLifeshot;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
 import com.github.standobyte.jojo.entity.AfterimageEntity;
 import com.github.standobyte.jojo.entity.HamonSendoOverdriveEntity;
@@ -71,6 +72,9 @@ public class LivingUtilCap {
     private boolean usedZoomPunch = false;
     private boolean gotScarf = false;
     
+    private float lifeShotResist;
+    private int lifeShotResistTicks;
+    
     public LivingUtilCap(LivingEntity entity) {
         this.entity = entity;
     }
@@ -85,6 +89,7 @@ public class LivingUtilCap {
             tickSendoOverdriveHurtTimer();
             tickHypnosisProcess();
             tickKnockbackBlockImpact();
+            tickLifeShotResist();
         }
         
         Iterator<AfterimageEntity> it = afterimages.iterator();
@@ -193,6 +198,32 @@ public class LivingUtilCap {
 //                    blockImpactKbVec = null;
 //                }
             }
+        }
+    }
+    
+    
+    
+    /**
+     * @return The effect duration that should be applied.
+     */
+    public int onLifeShot(int maxDuration) {
+        if (lifeShotResistTicks > 0) {
+            lifeShotResist = Math.min(lifeShotResist + GoldExperienceEntityLifeshot.REDUCTION_SHORT_DELAY, maxDuration);
+        }
+        else if (lifeShotResist > 0) {
+            lifeShotResist = Math.min(lifeShotResist + GoldExperienceEntityLifeshot.REDUCTION_LONG_DELAY, maxDuration);
+        }
+        lifeShotResistTicks = GoldExperienceEntityLifeshot.RESIST_TICKS;
+        int ticks = maxDuration - (int) lifeShotResist;
+        return ticks;
+    }
+    
+    private void tickLifeShotResist() {
+        if (lifeShotResistTicks > 0) {
+            --lifeShotResistTicks;
+        }
+        if (lifeShotResistTicks == 0) {
+            lifeShotResist = Math.max(lifeShotResist - GoldExperienceEntityLifeshot.RESIST_TICK_DOWN, 0);
         }
     }
     
@@ -422,6 +453,9 @@ public class LivingUtilCap {
             nbt.putUUID("PreHypnosisOwner", preHypnosisOwner);
         }
         nbt.putBoolean("GotScarf", gotScarf);
+        
+        nbt.putInt("LifeShotTicks", lifeShotResistTicks);
+        nbt.putFloat("LifeShotResist", lifeShotResist);
         return nbt;
     }
     
@@ -433,5 +467,8 @@ public class LivingUtilCap {
             preHypnosisOwner = nbt.getUUID("PreHypnosisOwner");
         }
         gotScarf = nbt.getBoolean("GotScarf");
+        
+        lifeShotResistTicks = nbt.getInt("LifeShotTicks");
+        lifeShotResist = nbt.getInt("LifeShotResist");
     }
 }

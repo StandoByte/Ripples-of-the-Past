@@ -4,11 +4,13 @@
   "mixins": [
     "ServerChunkProviderMixin",
     "FireBlockMixin",
+    "ForgeSimpleChannelMixin",
     "TheMostUnnecessaryMixin"
   ],
   "client": [
     "client.ParticleManagerMixin",
     "client.TextureManagerMixin",
-    "client.WorldRendererMixin"
+    "client.WorldRendererMixin",
+    "client.ClientPlayNetHandlerMixin"
   ]
 }
