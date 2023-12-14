@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.client.render.entity.renderer.stand;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientEventHandler;
 import com.github.standobyte.jojo.client.ClientUtil;

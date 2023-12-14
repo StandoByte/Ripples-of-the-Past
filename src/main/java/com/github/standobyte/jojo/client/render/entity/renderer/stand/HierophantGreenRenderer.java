@@ -12,9 +12,11 @@ import net.minecraft.util.ResourceLocation;
 public class HierophantGreenRenderer extends StandEntityRenderer<HierophantGreenEntity, StandEntityModel<HierophantGreenEntity>> {
 
     public HierophantGreenRenderer(EntityRendererManager renderManager) {
-        super(renderManager, new HierophantGreenModel(), new ResourceLocation(JojoMod.MOD_ID, "textures/entity/stand/hierophant_green.png"), 0);
+        super(renderManager, 
+                StandEntityModel.registerModel(new HierophantGreenModel(), 
+                        new ResourceLocation(JojoMod.MOD_ID, "hierophant_green"), HierophantGreenModel::new), 
+                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/stand/hierophant_green.png"), 0);
         addLegacyGlowTexture();
-        getModel().registerStandModel(new ResourceLocation(JojoMod.MOD_ID, "hierophant_green"), HierophantGreenModel::new);
     }
     
     @Deprecated

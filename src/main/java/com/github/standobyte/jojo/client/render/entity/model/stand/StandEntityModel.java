@@ -52,6 +52,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     protected float xRotRad;
     protected float ticks;
 
+    private boolean initialized = false;
     public float idleLoopTickStamp = 0;
     private ModelPose<T> poseReset;
     protected IModelPose<T> idlePose;
@@ -77,7 +78,13 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         super(renderType, scaleHead, yHeadOffset, zHeadOffset, babyHeadScale, babyBodyScale, bodyYOffset);
     }
     
-    public final void registerStandModel(ResourceLocation modelId, Supplier<? extends StandEntityModel<?>> constructor) {
+    public static <T extends StandEntity, M extends StandEntityModel<T>> M registerModel(
+            M model, ResourceLocation modelId, Supplier<? extends M> constructor) {
+        model.registerStandModel(modelId, constructor);
+        return model;
+    }
+    
+    final void registerStandModel(ResourceLocation modelId, Supplier<? extends StandEntityModel<?>> constructor) {
         synchronized (STAND_MODELS) {
             if (this.modelId != null) {
                 JojoMod.getLogger().error("Tried to register {} Stand model object twice!", modelId);
@@ -102,9 +109,12 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     }
 
     public void afterInit() {
-        initOpposites();
-        initPoses();
-        initActionPoses();
+        if (!initialized) { 
+            initOpposites();
+            initPoses();
+            initActionPoses();
+            initialized = true;
+        }
     }
 
     public static final void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
