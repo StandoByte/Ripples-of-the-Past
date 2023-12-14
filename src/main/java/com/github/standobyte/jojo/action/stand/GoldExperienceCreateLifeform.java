@@ -33,6 +33,7 @@ import net.minecraft.entity.monster.SlimeEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.PotionEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ThrowablePotionItem;
 import net.minecraft.nbt.CompoundNBT;
@@ -175,6 +176,9 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     ((MobEntity) lifeFormCreated).finalizeSpawn((ServerWorld) world, 
                             world.getCurrentDifficultyAt(user.blockPosition()), 
                             SpawnReason.COMMAND, null, null);
+                    for (EquipmentSlotType slot : EquipmentSlotType.values()) {
+                        lifeFormCreated.setItemSlot(slot, ItemStack.EMPTY);
+                    }
                     if (lifeFormCreated instanceof SlimeEntity) {
                         CompoundNBT additionalNbt = lifeFormCreated.serializeNBT();
                         additionalNbt.putInt("Size", 0);
@@ -207,39 +211,43 @@ public class GoldExperienceCreateLifeform extends StandAction {
                         tf.setSecondsOnFire((targetEntity.getRemainingFireTicks() + 19) / 20);
                     }
                 }
-                if (!tfTargetFound && !user.getItemInHand(Hand.OFF_HAND).isEmpty()) {
+                if (!tfTargetFound) {
                     ItemStack heldItem = user.getItemInHand(Hand.OFF_HAND);
-                    Entity itemEntity;
-                    ItemStack transformedItem = heldItem.copy();
-                    transformedItem.setCount(1);
-                    if (heldItem.getItem() instanceof ThrowablePotionItem) {
-                        PotionEntity potionEntity = new PotionEntity(world, user);
-                        potionEntity.setItem(transformedItem);
-                        itemEntity = potionEntity;
+                    if (!heldItem.isEmpty() && !HamonUtil.isItemLivingMatter(heldItem)) {
+                        Entity itemEntity;
+                        ItemStack transformedItem = heldItem.copy();
+                        transformedItem.setCount(1);
+                        if (heldItem.getItem() instanceof ThrowablePotionItem) {
+                            PotionEntity potionEntity = new PotionEntity(world, user);
+                            potionEntity.setItem(transformedItem);
+                            itemEntity = potionEntity;
+                        }
+                        else {
+                            itemEntity = new ItemEntity(world, 0, 0, 0, transformedItem);
+                        }
+                        if (!power.isUserCreative()) heldItem.shrink(1);
+                        
+                        tf.getTfSourceData().withEntitySource(itemEntity);
+                        tfTargetFound = true;
+                        
+                        Vector3d pos = performer.position();
+                        Vector3d lookVec = performer.getLookAngle();
+                        double distScale = lifeFormCreated.getBbWidth() + 1;
+                        pos = pos.add(lookVec.x * distScale, 0, lookVec.z * distScale);
+                        tf.moveTo(pos.x, pos.y, pos.z, performer.yRot, 0);
                     }
-                    else {
-                        itemEntity = new ItemEntity(world, 0, 0, 0, transformedItem);
-                    }
-                    if (!power.isUserCreative()) heldItem.shrink(1);
-                    
-                    tf.getTfSourceData().withEntitySource(itemEntity);
-                    tfTargetFound = true;
-                    
-                    Vector3d pos = performer.position();
-                    Vector3d lookVec = performer.getLookAngle();
-                    double distScale = lifeFormCreated.getBbWidth() + 1;
-                    pos = pos.add(lookVec.x * distScale, 0, lookVec.z * distScale);
-                    tf.moveTo(pos.x, pos.y, pos.z, performer.yRot, 0);
                 }
                 if (!tfTargetFound && target.getType() == TargetType.BLOCK) {
                     BlockPos blockPos = target.getBlockPos();
                     BlockState blockState = world.getBlockState(blockPos);
                     
-                    tf.getTfSourceData().withBlockSource(blockState, blockPos);
-                    world.removeBlock(blockPos, false);
-                    tfTargetFound = true;
-                    
-                    tf.moveTo(blockPos, performer.yRot, 0);
+                    if (!HamonOrganismInfusion.isBlockLiving(blockState)) {
+                        tf.getTfSourceData().withBlockSource(blockState, blockPos);
+                        world.removeBlock(blockPos, false);
+                        tfTargetFound = true;
+                        
+                        tf.moveTo(blockPos, performer.yRot, 0);
+                    }
                 }
                 
                 if (tfTargetFound) {

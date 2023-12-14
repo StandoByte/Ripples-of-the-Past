@@ -1,16 +1,7 @@
 ジョジョの奇妙な冒険
 Ode to humanity!
 WRYYYYYYYYYYYYY
-§2Emerald splash!
-§2Emerald splash!
-§2Emerald splash!
-§2Emerald splash!
-§2Emerald splash!
-§2Emerald splash!
-§2Emerald splash!
-§2Emerald splash!
-§2Emerald splash!
-§2Emerald splash!
+(2) §2Emerald splash!
 ORAORAORAORAORA
 MUDAMUDAMUDAMUDA
 
@@ -22,8 +13,9 @@ If I heal you first, it's not cowardly at all!
 
 Sunlight Yellow Overdrive!
 
+I, @p, have a dream!
+Buon Giorno!
+
 //I will have my happy life!
 //Sheer Heart Attack has no weaknesses!
-//I, @p, have a dream!
-
 //Janken Boy Is Coming!

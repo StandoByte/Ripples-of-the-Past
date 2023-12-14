@@ -3,8 +3,6 @@ package com.github.standobyte.jojo.action.stand.punch;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
-import com.github.standobyte.jojo.action.stand.StandEntityAction;
-import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
@@ -39,7 +37,6 @@ public class StandEntityPunch implements IPunch {
     protected float knockbackXRot = 0;
     protected float armorPiercing = 0;
     protected float disableBlockingChance = 0;
-    protected float parryTiming = 0;
     protected Vector3d sweepingAabb;
     protected float sweepingDamage;
     protected int standInvulTime = 0;
@@ -65,7 +62,6 @@ public class StandEntityPunch implements IPunch {
         .knockbackXRot(original.knockbackXRot)
         .armorPiercing(original.armorPiercing)
         .disableBlocking(original.disableBlockingChance)
-        .parryTiming(original.parryTiming)
         .sweepingAttack(original.sweepingAabb, original.sweepingDamage)
         .setStandInvulTime(original.standInvulTime)
         .impactSound(original.punchSound);
@@ -116,11 +112,6 @@ public class StandEntityPunch implements IPunch {
         return this;
     }
     
-    public StandEntityPunch parryTiming(float parryTiming) {
-        this.parryTiming = MathHelper.clamp(parryTiming, 0, 1);
-        return this;
-    }
-    
     public StandEntityPunch sweepingAttack(double x, double y, double z, float damage) {
         if ((x > 0 || y > 0 || z > 0) && damage > 0) {
             return sweepingAttack(new Vector3d(Math.max(x, 0), Math.max(y, 0), Math.max(z, 0)), damage);
@@ -166,10 +157,6 @@ public class StandEntityPunch implements IPunch {
     
     private boolean disablesBlocking() {
         return disableBlockingChance > 0;
-    }
-    
-    private boolean canParryHeavyAttack() {
-        return parryTiming > 0;
     }
     
     private boolean isSweepingAttack() {
@@ -261,22 +248,8 @@ public class StandEntityPunch implements IPunch {
             if (target instanceof StandEntity) {
                 StandEntity targetStand = (StandEntity) target;
                 
-                if ((canParryHeavyAttack() || disablesBlocking())) {
-                    if (canParryHeavyAttack()) {
-                        StandEntityAction heavyAttack = targetStand.getCurrentTaskAction();
-                        if (heavyAttack instanceof StandEntityHeavyAttack
-                                && ((StandEntityHeavyAttack) heavyAttack).canBeParried()
-                                && targetStand.getCurrentTaskPhase().get() == StandEntityAction.Phase.WINDUP
-                                && targetStand.canBlockOrParryFromAngle(dmgSource.getSourcePosition())
-                                && 1F - targetStand.getCurrentTaskPhaseCompletion(0) < parryTiming) {
-                            targetStand.parryHeavyAttack();
-                            return false;
-                        }
-                    }
-                    
-                    if (disablesBlocking() && stand.getRandom().nextFloat() < disableBlockingChance) {
-                        targetStand.breakStandBlocking(StandStatFormulas.getBlockingBreakTicks(targetStand.getDurability()));
-                    }
+                if (disablesBlocking() && stand.getRandom().nextFloat() < disableBlockingChance) {
+                    targetStand.breakStandBlocking(StandStatFormulas.getBlockingBreakTicks(targetStand.getDurability()));
                 }
             }
             

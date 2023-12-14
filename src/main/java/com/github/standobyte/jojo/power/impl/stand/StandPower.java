@@ -9,6 +9,8 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
+import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer;
+import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer.BarType;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModSounds;
@@ -218,6 +220,14 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         }
         if (!user.level.isClientSide()) {
             standArrowHandler.tick(user);
+        }
+        else {
+            if (getStamina() < getMaxStamina() * 0.5F) {
+                BarsRenderer.getBarEffects(BarType.STAMINA).triggerRedHighlight(user.tickCount);
+            }
+            else {
+                BarsRenderer.getBarEffects(BarType.STAMINA).resetRedHighlight();
+            }
         }
     }
     

@@ -3,11 +3,13 @@ package com.github.standobyte.jojo.util.mc.reflection;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
 
 import com.mojang.serialization.Codec;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityPredicate;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.goal.GoalSelector;
@@ -32,6 +34,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.potion.Effect;
 import net.minecraft.tileentity.AbstractFurnaceTileEntity;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.gen.FlatGenerationSettings;
@@ -226,5 +229,16 @@ public class CommonReflection {
     public static void clearEffect(MooshroomEntity entity) {
         ReflectionUtil.setFieldValue(MOOSHROOM_ENTITY_EFFECT, entity, null);
         ReflectionUtil.setIntFieldValue(MOOSHROOM_ENTITY_EFFECT_DURATION, entity, 0);
+    }
+    
+    
+    
+    private static final Field ENTITY_DATA_CUSTOM_NAME_FIELD = ObfuscationReflectionHelper.findField(Entity.class, "field_184242_az");
+    private static DataParameter<Optional<ITextComponent>> ENTITY_DATA_CUSTOM_NAME = null;
+    public static DataParameter<Optional<ITextComponent>> getEntityCustomNameParameter() {
+        if (ENTITY_DATA_CUSTOM_NAME == null) {
+            ENTITY_DATA_CUSTOM_NAME = ReflectionUtil.getFieldValue(ENTITY_DATA_CUSTOM_NAME_FIELD, null);
+        }
+        return ENTITY_DATA_CUSTOM_NAME;
     }
 }

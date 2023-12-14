@@ -88,9 +88,9 @@ public class StandStatFormulas {
         double resistance = MathHelper.clamp(durability * 0.01875 + strength * 0.0125, 0, 1);
         if (blocked > 0) {
             double dmgBlockingCoeff = 0.8;
-            double furtherReductionCap = durability / 8;
+            double furtherReductionCap = durability / 2;
             if (damageDealt < furtherReductionCap) {
-                dmgBlockingCoeff += (1 - dmgBlockingCoeff) * (1 - damageDealt / furtherReductionCap);
+                dmgBlockingCoeff += Math.max((1 - dmgBlockingCoeff) * (1 - damageDealt / furtherReductionCap), 0);
             }
             resistance += (1 - resistance) * blocked * dmgBlockingCoeff;
         }
