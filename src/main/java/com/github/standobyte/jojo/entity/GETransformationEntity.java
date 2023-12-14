@@ -644,7 +644,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                 JojoMod.getLogger().error("Failed to read entity data for Gold Experience's transformation render for entity of type {}", entity.getType().getRegistryName());
                 e.printStackTrace();
             } catch (Exception e) {
-                JojoMod.LOGGER.error("Failed to assign entity data for Gold Experience's transformation render for entity of type {}", entity.getType().getRegistryName());
+                JojoMod.getLogger().error("Failed to assign entity data for Gold Experience's transformation render for entity of type {}", entity.getType().getRegistryName());
                 e.printStackTrace();
             }
             
