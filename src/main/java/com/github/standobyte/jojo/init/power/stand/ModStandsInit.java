@@ -775,7 +775,7 @@ public class ModStandsInit {
     public static final RegistryObject<StandEntityHeavyAttack> GOLD_EXPERIENCE_LIFESHOT_PUNCH = ACTIONS.register("gold_experience_lifeshot_punch", 
             () -> new GoldExperienceLifeshotPunch(new StandEntityHeavyAttack.Builder()
                     .resolveLevelToUnlock(1)
-                    .setRecoveryFollowUpAction(GOLD_EXPERIENCE_ENTITY_LIFESHOT)
+//                    .setRecoveryFollowUpAction(GOLD_EXPERIENCE_ENTITY_LIFESHOT)
 //                    .punchSound(ModSounds.GOLD_EXPERIENCE_PUNCH_HEAVY)
 //                    .standSound(Phase.WINDUP, ModSounds.GOLD_EXPERIENCE_MUDA_LONG)
                     .partsRequired(StandPart.ARMS)));
