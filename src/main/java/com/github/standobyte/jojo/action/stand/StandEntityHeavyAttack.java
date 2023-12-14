@@ -6,6 +6,8 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
@@ -222,7 +224,11 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         if (recoveryAction.get() != null) {
             actions[i++] = recoveryAction.get();
         }
-        return Arrays.copyOfRange(actions, 0, i);
+        actions = Arrays.copyOfRange(actions, 0, i);
+        for (int j = 0; j < i; j++) {
+            actions = ArrayUtils.addAll(actions, actions[j].getExtraUnlockable());
+        }
+        return actions;
     }
     
     

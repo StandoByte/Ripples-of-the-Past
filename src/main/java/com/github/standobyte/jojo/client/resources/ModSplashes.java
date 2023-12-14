@@ -84,12 +84,12 @@ public class ModSplashes extends ReloadListener<List<String>> {
         if (month == Calendar.OCTOBER && day == 31 && RANDOM.nextInt(50) == 0) {
             return "ゴ ゴ ゴ ゴ ゴ ゴ ゴ ゴ ゴ ゴ";
         }
-//        if (!splashes.isEmpty() && RANDOM.nextInt(420 + splashes.size()) < splashes.size()) {
+        if (!splashes.isEmpty() && RANDOM.nextInt(420 + splashes.size()) < splashes.size()) {
             Optional<String> splashOpt = MathUtil.getRandomWeightedInt(splashes.keySet(), splashes::applyAsInt, RANDOM);
             return splashOpt.map(splash -> {
                 return user != null ? splash.replace("@p", user.getName()) : splash;
             }).orElse(null);
-//        }
-//        return null;
+        }
+        return null;
     }
 }

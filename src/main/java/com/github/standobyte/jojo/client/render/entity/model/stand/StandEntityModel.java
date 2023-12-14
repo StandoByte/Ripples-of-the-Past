@@ -7,12 +7,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.mutable.MutableFloat;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.StandEntityAction.Phase;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.render.entity.pose.IModelPose;
@@ -42,11 +44,15 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 
 public abstract class StandEntityModel<T extends StandEntity> extends AgeableModel<T> implements IHasArm {
+    private static final HashMap<ResourceLocation, StandModelRegistryObj> STAND_MODELS = new HashMap<>();
+    private ResourceLocation modelId;
+    
     protected VisibilityMode visibilityMode = VisibilityMode.ALL;
     protected float yRotRad;
     protected float xRotRad;
     protected float ticks;
 
+    private boolean initialized = false;
     public float idleLoopTickStamp = 0;
     private ModelPose<T> poseReset;
     protected IModelPose<T> idlePose;
@@ -71,11 +77,44 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
             float babyHeadScale, float babyBodyScale, float bodyYOffset) {
         super(renderType, scaleHead, yHeadOffset, zHeadOffset, babyHeadScale, babyBodyScale, bodyYOffset);
     }
+    
+    public static <T extends StandEntity, M extends StandEntityModel<T>> M registerModel(
+            M model, ResourceLocation modelId, Supplier<? extends M> constructor) {
+        model.registerStandModel(modelId, constructor);
+        return model;
+    }
+    
+    final void registerStandModel(ResourceLocation modelId, Supplier<? extends StandEntityModel<?>> constructor) {
+        synchronized (STAND_MODELS) {
+            if (this.modelId != null) {
+                JojoMod.getLogger().error("Tried to register {} Stand model object twice!", modelId);
+            }
+            else if (STAND_MODELS.values().stream().anyMatch(modelEntry -> modelEntry.id.equals(modelId))) {
+                JojoMod.getLogger().error("Using duplicate id {} for a Stand model!", modelId);
+            }
+            else {
+                STAND_MODELS.put(modelId, new StandModelRegistryObj(modelId, this, constructor));
+                this.modelId = modelId;
+            }
+        }
+    }
+    
+    @Nullable
+    public static StandModelRegistryObj getRegisteredModel(ResourceLocation id) {
+        return STAND_MODELS.get(id);
+    }
+    
+    public final ResourceLocation getModelId() {
+        return modelId;
+    }
 
     public void afterInit() {
-        initOpposites();
-        initPoses();
-        initActionPoses();
+        if (!initialized) { 
+            initOpposites();
+            initPoses();
+            initActionPoses();
+            initialized = true;
+        }
     }
 
     public static final void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
@@ -313,5 +352,23 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         LEFT_ARM_ONLY,
         RIGHT_ARM_ONLY,
         NONE
+    }
+    
+    
+    
+    public static final class StandModelRegistryObj {
+        public final ResourceLocation id;
+        public final StandEntityModel<?> baseModel;
+        private final Supplier<? extends StandEntityModel<?>> modelConstructor;
+        
+        StandModelRegistryObj(ResourceLocation id, StandEntityModel<?> baseModel, Supplier<? extends StandEntityModel<?>> modelConstructor) {
+            this.id = id;
+            this.baseModel = baseModel;
+            this.modelConstructor = modelConstructor;
+        }
+        
+        public StandEntityModel<?> createNewModelCopy() {
+            return modelConstructor.get();
+        }
     }
 }
