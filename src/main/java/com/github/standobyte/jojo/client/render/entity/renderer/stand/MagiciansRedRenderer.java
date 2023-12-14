@@ -21,7 +21,10 @@ public class MagiciansRedRenderer extends StandEntityRenderer<MagiciansRedEntity
     public static final Supplier<TextureAtlasSprite> FIRE_1_SPRITE = () -> MR_FIRE_1.sprite();
 
     public MagiciansRedRenderer(EntityRendererManager renderManager) {
-        super(renderManager, new MagiciansRedModel(), new ResourceLocation(JojoMod.MOD_ID, "textures/entity/stand/magicians_red.png"), 0);
+        super(renderManager, 
+                StandEntityModel.registerModel(new MagiciansRedModel(), 
+                        new ResourceLocation(JojoMod.MOD_ID, "magicians_red"), MagiciansRedModel::new), 
+                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/stand/magicians_red.png"), 0);
         addLayer(new MagiciansRedFlameLayer(this));
     }
 }

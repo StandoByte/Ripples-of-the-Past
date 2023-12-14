@@ -1,9 +1,7 @@
 package com.github.standobyte.jojo.action.stand;
 
-import java.util.List;
 import java.util.function.Supplier;
-
-import javax.annotation.Nullable;
+import java.util.stream.Stream;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
@@ -47,8 +45,8 @@ public class SilverChariotLightAttack extends StandEntityLightAttack {
         return super.getExtraUnlockable();
     }
     
-    @Nullable
-    public List<Supplier<SoundEvent>> getSounds(StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task) {
-        return standSounds.get(phase);
+    @Override
+    public Stream<SoundEvent> getSounds(StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task) {
+        return getPhaseStandSounds(phase, standEntity);
     }
 }

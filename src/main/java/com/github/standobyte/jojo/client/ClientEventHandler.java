@@ -389,8 +389,6 @@ public class ClientEventHandler {
                     MatrixStack matrixStack = event.getMatrixStack();
                     renderExperienceBar(matrixStack, standArrowLevels, event.getWindow());
                     event.setCanceled(true);
-                    MinecraftForge.EVENT_BUS.post(new RenderGameOverlayEvent.Post(matrixStack, 
-                            new RenderGameOverlayEvent(matrixStack, event.getPartialTicks(), event.getWindow()), EXPERIENCE));
                 }
             });
         }

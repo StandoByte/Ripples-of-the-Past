@@ -74,6 +74,7 @@ import com.github.standobyte.jojo.client.render.entity.renderer.itemprojectile.S
 import com.github.standobyte.jojo.client.render.entity.renderer.mob.HamonMasterRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.mob.HungryZombieRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.mob.RockPaperScissorsKidRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.mob.StandUserDummyRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.CrazyDiamondRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.HierophantGreenRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.MagiciansRedRenderer;
@@ -199,6 +200,7 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HUNGRY_ZOMBIE.get(), HungryZombieRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HAMON_MASTER.get(), HamonMasterRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.ROCK_PAPER_SCISSORS_KID.get(), RockPaperScissorsKidRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.STAND_USER_DUMMY.get(), StandUserDummyRenderer::new);
         
         RenderingRegistry.registerEntityRenderingHandler(ModStands.STAR_PLATINUM.getEntityType(), StarPlatinumRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModStands.THE_WORLD.getEntityType(), TheWorldRenderer::new);
