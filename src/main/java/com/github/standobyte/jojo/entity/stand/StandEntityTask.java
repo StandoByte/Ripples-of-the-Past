@@ -76,7 +76,8 @@ public class StandEntityTask {
         if (target.getType() == TargetType.ENTITY) {
             Entity targetEntity = target.getEntity();
             if (targetEntity == null || targetEntity.is(standEntity)
-                    || !targetEntity.isAlive() && targetEntity.removed || !(targetEntity instanceof LivingEntity && ((LivingEntity) targetEntity).deathTime < 20)) {
+                    || !targetEntity.isAlive() && targetEntity.removed
+                    || targetEntity instanceof LivingEntity && ((LivingEntity) targetEntity).deathTime >= 20) {
                 return false;
             }
         }
