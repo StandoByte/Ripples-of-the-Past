@@ -205,9 +205,8 @@ public class InputHandler {
         }
 
         if (actionsOverlay.isActive() && !mc.player.isSpectator()) {
-            ClientModSettings clientSettings = ClientModSettings.getInstance();
-            boolean scrollAttack = attackHotbar.isDown() || clientSettings.areControlsLockedForHotbar(ActionsLayout.Hotbar.LEFT_CLICK);
-            boolean scrollAbility = abilityHotbar.isDown() || clientSettings.areControlsLockedForHotbar(ActionsLayout.Hotbar.RIGHT_CLICK);
+            boolean scrollAttack = attackHotbar.isDown() || areControlsLockedForHotbar(ActionsLayout.Hotbar.LEFT_CLICK);
+            boolean scrollAbility = abilityHotbar.isDown() || areControlsLockedForHotbar(ActionsLayout.Hotbar.RIGHT_CLICK);
             if (scrollAttack || scrollAbility) {
                 if (scrollAttack) {
                     actionsOverlay.scrollAction(ActionsLayout.Hotbar.LEFT_CLICK, event.getScrollDelta() > 0.0D);
@@ -227,11 +226,9 @@ public class InputHandler {
         }
         
         if (event.phase == TickEvent.Phase.START) {
-            ClientModSettings clientSettings = ClientModSettings.getInstance();
-            
             if (actionsOverlay.isActive()) {
-                boolean chooseAttack = attackHotbar.isDown() || clientSettings.areControlsLockedForHotbar(ActionsLayout.Hotbar.LEFT_CLICK);
-                boolean chooseAbility = abilityHotbar.isDown() || clientSettings.areControlsLockedForHotbar(ActionsLayout.Hotbar.RIGHT_CLICK);
+                boolean chooseAttack = attackHotbar.isDown() || areControlsLockedForHotbar(ActionsLayout.Hotbar.LEFT_CLICK);
+                boolean chooseAbility = abilityHotbar.isDown() || areControlsLockedForHotbar(ActionsLayout.Hotbar.RIGHT_CLICK);
                 actionsOverlay.setHotbarButtonsDows(chooseAttack, chooseAbility);
                 actionsOverlay.setHotbarsEnabled(!disableHotbars.isDown());
                 if (chooseAttack || chooseAbility) {
@@ -272,11 +269,11 @@ public class InputHandler {
                 }
                 
                 if (lockAttackHotbar.consumeClick()) {
-                    clientSettings.switchLockedHotbarControls(ActionsLayout.Hotbar.LEFT_CLICK);
+                    switchLockedHotbarControls(ActionsLayout.Hotbar.LEFT_CLICK);
                 }
                 
                 if (lockAbilityHotbar.consumeClick()) {
-                    clientSettings.switchLockedHotbarControls(ActionsLayout.Hotbar.RIGHT_CLICK);
+                    switchLockedHotbarControls(ActionsLayout.Hotbar.RIGHT_CLICK);
                 }
                 
                 if (actionQuickAccess.isDown() && quickAccessMmbDelay <= 0
@@ -371,7 +368,39 @@ public class InputHandler {
             checkHeldActionAndTarget(nonStandPower);
         }
     }
-
+    
+    
+    public void switchLockedHotbarControls(ActionsLayout.Hotbar hotbar) {
+        setLockedHotbarControls(hotbar, !areControlsLockedForHotbar(hotbar));
+    }
+    
+    private void setLockedHotbarControls(ActionsLayout.Hotbar hotbar, boolean value) {
+        switch (hotbar) {
+        case LEFT_CLICK:
+            lockedAttacksHotbar = value;
+            if (value) lockedAbilitiesHotbar = false;
+            break;
+        case RIGHT_CLICK:
+            if (value) lockedAttacksHotbar = false;
+            lockedAbilitiesHotbar = value;
+            break;
+        }
+    }
+    
+    private boolean lockedAttacksHotbar;
+    private boolean lockedAbilitiesHotbar;
+    public boolean areControlsLockedForHotbar(ActionsLayout.Hotbar hotbar) {
+        if (hotbar == null) return false;
+        switch (hotbar) {
+        case LEFT_CLICK:
+            return lockedAttacksHotbar;
+        case RIGHT_CLICK:
+            return lockedAbilitiesHotbar;
+        }
+        return false;
+    }
+    
+    
     private static final Random RANDOM = new Random();
     public void setRandomStandSkin() {
         if (standPower.hasPower()) {
