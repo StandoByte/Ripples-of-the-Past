@@ -13,6 +13,7 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.util.general.Container;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.google.common.collect.ImmutableSet;
@@ -29,6 +30,7 @@ import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.entity.passive.AmbientEntity;
 import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.GolemEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -65,7 +67,19 @@ public class HamonOrganismInfusion extends HamonAction {
             BlockPos blockPos = target.getBlockPos();
             BlockState blockState = user.level.getBlockState(blockPos);
             Block block = blockState.getBlock();
-            if (!(isBlockLiving(blockState) || block instanceof FlowerPotBlock && blockState.getBlock() != Blocks.FLOWER_POT)) {
+            boolean isLivingBlock;
+            if (isBlockLiving(blockState)) {
+                isLivingBlock = true;
+            }
+            else if (block instanceof FlowerPotBlock && blockState.getBlock() != Blocks.FLOWER_POT) {
+                FlowerPotBlock flowerPot = (FlowerPotBlock) block;
+                ItemStack flowerPotContents = flowerPot.getCloneItemStack(user.level, blockPos, blockState);
+                isLivingBlock = HamonUtil.isItemLivingMatter(flowerPotContents);
+            }
+            else {
+                isLivingBlock = false;
+            }
+            if (!isLivingBlock) {
                 return conditionMessage("living_plant");
             }
             break;
@@ -138,7 +152,7 @@ public class HamonOrganismInfusion extends HamonAction {
     private static final Set<Material> LIVING_MATERIALS = ImmutableSet.<Material>builder().add(
             Material.PLANT,
             Material.WATER_PLANT,
-            Material.REPLACEABLE_PLANT,
+//            Material.REPLACEABLE_PLANT,
             Material.REPLACEABLE_FIREPROOF_PLANT,
             Material.REPLACEABLE_WATER_PLANT,
             Material.GRASS,
@@ -151,12 +165,19 @@ public class HamonOrganismInfusion extends HamonAction {
             Material.EGG
             ).build();
     public static boolean isBlockLiving(BlockState blockState) {
-        if (LIVING_MATERIALS.contains(blockState.getMaterial())) {
+        Material material = blockState.getMaterial();
+        Block block = blockState.getBlock();
+        String blockName = block.getRegistryName().getPath();
+        
+        if (material == Material.REPLACEABLE_PLANT) {
+            return !blockName.contains("dead");
+        }
+        
+        if (LIVING_MATERIALS.contains(material)) {
             return true;
         }
         
-        Block block = blockState.getBlock();
-        return block instanceof SnowyDirtBlock || block.getRegistryName().getPath().contains("mossy");
+        return block instanceof SnowyDirtBlock || blockName.contains("mossy");
     }
 
 }
