@@ -82,12 +82,10 @@ public class CDBlockBulletEntity extends ModdedProjectileEntity {
                 Vector3d targetPos = target.getBoundingBox().getCenter();
                 Vector3d vecToTarget = targetPos.subtract(this.position());
                 setDeltaMovement(vecToTarget.normalize().scale(this.getDeltaMovement().length()));
-                if (!level.isClientSide()) {
-                    getUserStandPower().ifPresent(stand -> {
-                        stand.consumeStamina(stand.getStaminaTickGain() + ModStandsInit.CRAZY_DIAMOND_BLOCK_BULLET.get().getStaminaCostTicking(stand));
-                    });
-                }
-                else {
+                getUserStandPower().ifPresent(stand -> {
+                    stand.consumeStamina(stand.getStaminaTickGain() + ModStandsInit.CRAZY_DIAMOND_BLOCK_BULLET.get().getStaminaCostTicking(stand), true);
+                });
+                if (level.isClientSide()) {
                     if (ClientUtil.canSeeStands()) {
                         CrazyDiamondHeal.addParticlesAround(this);
                         

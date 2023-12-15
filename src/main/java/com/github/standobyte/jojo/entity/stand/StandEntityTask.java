@@ -137,9 +137,7 @@ public class StandEntityTask {
 
             if (action.standCanTickPerform(standEntity.level, standEntity, standPower, this)) {
                 action.standTickPerform(standEntity.level, standEntity, standPower, this);
-                if (!standEntity.level.isClientSide()) {
-                    standPower.consumeStamina(action.getStaminaCostTicking(standPower));
-                }
+                standPower.consumeStamina(action.getStaminaCostTicking(standPower), true);
             }
             break;
         case RECOVERY:

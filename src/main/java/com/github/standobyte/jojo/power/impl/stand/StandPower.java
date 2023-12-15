@@ -267,13 +267,19 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         setStamina(MathHelper.clamp(this.stamina + amount, 0, getMaxStamina()), sendToClient);
     }
 
+    private float staminaAddNextTick = 0;
     @Override
-    public boolean consumeStamina(float amount) {
+    public boolean consumeStamina(float amount, boolean ticking) {
         if (isStaminaInfinite()) {
             return true;
         }
         if (getStamina() >= amount) {
-            setStamina(this.stamina - amount);
+            if (ticking) {
+                staminaAddNextTick -= amount;
+            }
+            else if (!user.level.isClientSide()) {
+                setStamina(this.stamina - amount);
+            }
             return true;
         }
         setStamina(0);
@@ -303,7 +309,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     private void tickStamina() {
         if (usesStamina()) {
-            addStamina(getStaminaTickGain(), false);
+            addStamina(getStaminaTickGain() + staminaAddNextTick, false);
+            staminaAddNextTick = 0;
         }
     }
     
