@@ -8,7 +8,7 @@
       "intarget": "minecraft:main",
       "outtarget": "swap",
       "uniforms": [
-        { "name": "TSEffectLength", "values": [ 35.0 ] },
+        { "name": "TSEffectLength", "values": [ 20.0 ] },
         {
             "name": "RedMatrix",
             "values": [ 0.3333, 0.3333, 0.3333 ]

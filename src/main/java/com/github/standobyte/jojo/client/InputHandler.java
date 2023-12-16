@@ -41,6 +41,8 @@ import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClDoubleShiftPressPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClHamonInteractAskTeacherPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClHamonInteractTeachPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonMeditationPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHasInputPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHeldActionTargetPacket;
@@ -53,6 +55,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandSummon
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.layout.ActionsLayout;
@@ -68,6 +71,7 @@ import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.MovementInput;
@@ -334,21 +338,46 @@ public class InputHandler {
             
             if (hamonSkillsWindow.consumeClick()) {
                 if (nonStandPower.hasPower() && nonStandPower.getType() == ModPowers.HAMON.get()) {
-                    ClientUtil.openHamonTeacherUi();
+                    boolean taughtHamon = false;
+                    if (mouseTarget instanceof EntityRayTraceResult) {
+                        Entity mouseTargetEntity = ((EntityRayTraceResult) mouseTarget).getEntity();
+                        taughtHamon = nonStandPower.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
+                            if (mouseTargetEntity instanceof PlayerEntity) {
+                                return hamon.interactWithNewLearner((PlayerEntity) mouseTargetEntity);
+                            }
+                            return false;
+                        }).orElse(false);
+                        if (taughtHamon) {
+                            PacketManager.sendToServer(new ClHamonInteractTeachPacket(mouseTargetEntity.getId()));
+                        }
+                    }
+                    if (!taughtHamon) {
+                        ClientUtil.openHamonTeacherUi();
+                    }
                 }
                 else {
-                    ITextComponent message;
-                    if (nonStandPower.getTypeSpecificData(ModPowers.VAMPIRISM.get())
-                            .map(vampirism -> vampirism.isVampireHamonUser()).orElse(false)) {
-                        message = new TranslationTextComponent("jojo.chat.message.no_hamon_vampire");
+                    boolean askedForHamonTraining = false;
+                    if (mouseTarget instanceof EntityRayTraceResult) {
+                        Entity mouseTargetEntity = ((EntityRayTraceResult) mouseTarget).getEntity();
+                        askedForHamonTraining = HamonUtil.interactWithHamonTeacher(mc.level, mc.player, (LivingEntity) mouseTargetEntity);
+                        if (askedForHamonTraining) {
+                            PacketManager.sendToServer(new ClHamonInteractAskTeacherPacket(mouseTargetEntity.getId()));
+                        }
                     }
-                    else if (nonStandPower.hadPowerBefore(ModPowers.HAMON.get())) {
-                        message = new TranslationTextComponent("jojo.chat.message.no_hamon_abandoned");
+                    if (!askedForHamonTraining) {
+                        ITextComponent message;
+                        if (nonStandPower.getTypeSpecificData(ModPowers.VAMPIRISM.get())
+                                .map(vampirism -> vampirism.isVampireHamonUser()).orElse(false)) {
+                            message = new TranslationTextComponent("jojo.chat.message.no_hamon_vampire");
+                        }
+                        else if (nonStandPower.hadPowerBefore(ModPowers.HAMON.get())) {
+                            message = new TranslationTextComponent("jojo.chat.message.no_hamon_abandoned");
+                        }
+                        else {
+                            message = new TranslationTextComponent("jojo.chat.message.no_hamon");
+                        }
+                        mc.gui.handleChat(ChatType.GAME_INFO, message, Util.NIL_UUID);
                     }
-                    else {
-                        message = new TranslationTextComponent("jojo.chat.message.no_hamon");
-                    }
-                    mc.gui.handleChat(ChatType.GAME_INFO, message, Util.NIL_UUID);
                 }
             }
             
