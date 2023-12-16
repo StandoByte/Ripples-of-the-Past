@@ -278,7 +278,7 @@ public class InputHandler {
                 
                 if (actionQuickAccess.isDown() && quickAccessMmbDelay <= 0
                         && !mc.player.isSpectator() && !disableHotbars.isDown()) {
-                    HudClickResult result = handleMouseClickPowerHud(ActionKey.QUICK_ACCESS);
+                    HudClickResult result = handleMouseClickPowerHud(ActionKey.QUICK_ACCESS, actionQuickAccess);
                     if (result.vanillaInput == HudClickResult.Behavior.CANCEL) {
                         KeyBinding keybinding = keyBindingMap.lookupActive(actionQuickAccess.getKey());
                         if (keybinding != null) {
@@ -296,7 +296,7 @@ public class InputHandler {
             clickWithBusyHands();
         }
         else {
-            pickMouseTarget();
+            boolean targetChanged = pickMouseTarget();
             
             if (leftClickBlockDelay > 0) {
                 leftClickBlockDelay--;
@@ -364,8 +364,12 @@ public class InputHandler {
                 quickAccessMmbDelay = 0;
             }
             
-            checkHeldActionAndTarget(standPower);
-            checkHeldActionAndTarget(nonStandPower);
+            checkHeldActionAndTarget(standPower, targetChanged);
+            checkHeldActionAndTarget(nonStandPower, targetChanged);
+            
+            if (targetChanged) {
+                ClientEventHandler.onMouseTargetChanged(mouseTarget);
+            }
         }
     }
     
@@ -412,14 +416,21 @@ public class InputHandler {
         }
     }
     
-    private void pickMouseTarget() {
-        mouseTarget = mc.hitResult;
+    private boolean pickMouseTarget() {
+        RayTraceResult target = mc.hitResult;
         if (actionsOverlay != null && actionsOverlay.getCurrentPower() != null) {
             IPower<?, ?> power = actionsOverlay.getCurrentPower();
             if (power.hasPower()) {
-                mouseTarget = power.clientHitResult(mc.getCameraEntity() != null ? mc.getCameraEntity() : mc.player, mouseTarget);
+                target = power.clientHitResult(mc.getCameraEntity() != null ? mc.getCameraEntity() : mc.player, target);
             }
         }
+        
+        if (target != null && !MCUtil.rayTraceTargetEquals(target, mouseTarget)) {
+            this.mouseTarget = target;
+            return true;
+        }
+        
+        return false;
     }
     
     private final Map<IPower<?, ?>, ActionKey> heldKeys = new HashMap<>();
@@ -452,7 +463,7 @@ public class InputHandler {
         }
     }
     
-    private void checkHeldActionAndTarget(IPower<?, ?> power) {
+    private void checkHeldActionAndTarget(IPower<?, ?> power, boolean targetChanged) {
         boolean keyHeld;
         if (heldKeys.containsKey(power)) {
             keyHeld = heldKeys.get(power).getKey(mc, this).isDown();
@@ -468,7 +479,7 @@ public class InputHandler {
             stopHeldAction(power, power.getPowerClassification() == actionsOverlay.getCurrentMode());
         }
         
-        if (power.isTargetUpdateTick()) {
+        if (power.isTargetUpdateTick() && targetChanged) {
             PacketManager.sendToServer(ClHeldActionTargetPacket.withRayTraceResult(power.getPowerClassification(), mouseTarget));
         }
     }
@@ -501,17 +512,20 @@ public class InputHandler {
         }
 
         ActionKey key;
+        KeyBinding keyBinding;
         if (event.isAttack()) {
             key = ActionKey.ATTACK;
+            keyBinding = mc.options.keyAttack;
         }
         else if (event.isUseItem()) {
             key = ActionKey.ABILITY;
+            keyBinding = mc.options.keyUse;
         }
         else {
             return;
         }
         
-        HudClickResult clickResult = handleMouseClickPowerHud(key);
+        HudClickResult clickResult = handleMouseClickPowerHud(key, keyBinding);
         if (clickResult.vanillaInput == HudClickResult.Behavior.CANCEL) {
             event.setCanceled(true);
         }
@@ -523,15 +537,15 @@ public class InputHandler {
     private void clickWithBusyHands() {
         if (ClientUtil.arePlayerHandsBusy()) {
             while (mc.options.keyAttack.consumeClick()) {
-                handleMouseClickPowerHud(ActionKey.ATTACK);
+                handleMouseClickPowerHud(ActionKey.ATTACK, mc.options.keyAttack);
             }
             while (mc.options.keyUse.consumeClick()) {
-                handleMouseClickPowerHud(ActionKey.ABILITY);
+                handleMouseClickPowerHud(ActionKey.ABILITY, mc.options.keyUse);
             }
         }
     }
     
-    private <P extends IPower<P, ?>> HudClickResult handleMouseClickPowerHud(ActionKey key) {
+    private <P extends IPower<P, ?>> HudClickResult handleMouseClickPowerHud(ActionKey key, KeyBinding keyBinding) {
         HudClickResult result = new HudClickResult();
         if (!actionsOverlay.areHotbarsEnabled() || mc.player.isSpectator()) {
             return result;

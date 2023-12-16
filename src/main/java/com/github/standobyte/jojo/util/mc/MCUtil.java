@@ -66,7 +66,10 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.shapes.IBooleanFunction;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
@@ -334,6 +337,28 @@ public class MCUtil {
     
     public static Vector3d getEntityPosition(Entity entity, float partialTick) {
         return partialTick == 1.0F ? entity.position() : entity.getPosition(partialTick);
+    }
+    
+    
+    
+    public static boolean rayTraceTargetEquals(RayTraceResult r1, RayTraceResult r2) {
+        if (r1 == null || r2 == null) return r1 == null && r2 == null;
+        if (r1.getType() != r2.getType()) return false;
+        
+        switch (r1.getType()) {
+        case MISS:
+            return true;
+        case BLOCK:
+            BlockRayTraceResult br1 = (BlockRayTraceResult) r1;
+            BlockRayTraceResult br2 = (BlockRayTraceResult) r2;
+            return br1.getBlockPos().equals(br2.getBlockPos()) && br1.getDirection() == br2.getDirection();
+        case ENTITY:
+            EntityRayTraceResult er1 = (EntityRayTraceResult) r1;
+            EntityRayTraceResult er2 = (EntityRayTraceResult) r2;
+            return er1.getEntity() == er2.getEntity();
+        default:
+            throw new IllegalArgumentException("Unknown RayTraceResult type (it's an enum wtf)");
+        }
     }
     
     
