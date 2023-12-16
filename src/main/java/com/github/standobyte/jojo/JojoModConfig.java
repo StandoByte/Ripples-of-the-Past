@@ -78,6 +78,7 @@ public class JojoModConfig {
 
         public final ForgeConfigSpec.BooleanValue abilitiesBreakBlocks;
         public final ForgeConfigSpec.DoubleValue standDamageMultiplier;
+        public final ForgeConfigSpec.DoubleValue standResistanceMultiplier;
         public final ForgeConfigSpec.BooleanValue skipStandProgression;
         public final ForgeConfigSpec.BooleanValue standStamina;
         public final ForgeConfigSpec.ConfigValue<List<? extends Double>> resolveLvlPoints;
@@ -286,6 +287,11 @@ public class JojoModConfig {
                         .comment("    Damage multiplier applied to all Stands.")
                         .translation("jojo.config.standPowerMultiplier")
                         .defineInRange("standPowerMultiplier", 1.0, 0.0, 128.0);
+            
+                standResistanceMultiplier = builder
+                        .comment("    Damage resistance applied to all Stands.")
+                        .translation("jojo.config.standResistanceMultiplier")
+                        .defineInRange("standResistanceMultiplier", 1.0, 1.0, 128.0);
             
                 standStamina = builder
                         .comment("    Whether or not Stand stamina mechanic is enabled.")
