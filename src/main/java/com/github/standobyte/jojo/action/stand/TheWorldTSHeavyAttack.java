@@ -88,6 +88,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
     
     @Override
     protected void preTaskInit(World world, IStandPower standPower, StandEntity standEntity, ActionTarget target) {
+        standEntity.summonLockTicks = 0;
         if (!world.isClientSide() || standEntity.isManuallyControlled()) {
             LivingEntity aimingEntity = standEntity.isManuallyControlled() ? standEntity : standPower.getUser();
             if (aimingEntity != null) {
