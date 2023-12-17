@@ -32,8 +32,6 @@ import com.github.standobyte.jojo.capability.entity.power.NonStandCapProvider;
 import com.github.standobyte.jojo.capability.entity.power.NonStandCapStorage;
 import com.github.standobyte.jojo.capability.entity.power.StandCapProvider;
 import com.github.standobyte.jojo.capability.entity.power.StandCapStorage;
-import com.github.standobyte.jojo.capability.item.walkman.WalkmanDataCap;
-import com.github.standobyte.jojo.capability.item.walkman.WalkmanDataCapStorage;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCap;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapStorage;
@@ -186,8 +184,6 @@ public class ForgeBusEventSubscriber {
         CapabilityManager.INSTANCE.register(SaveFileUtilCap.class, new SaveFileUtilCapStorage(), () -> new SaveFileUtilCap(null));
 
         CapabilityManager.INSTANCE.register(ChunkCap.class, new ChunkCapStorage(), () -> new ChunkCap(null));
-        
-        CapabilityManager.INSTANCE.register(WalkmanDataCap.class, new WalkmanDataCapStorage(), () -> new WalkmanDataCap(null));
     }
     
     

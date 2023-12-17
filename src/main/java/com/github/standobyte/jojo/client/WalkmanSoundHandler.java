@@ -15,12 +15,12 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.capability.item.walkman.WalkmanDataCap.PlaybackMode;
 import com.github.standobyte.jojo.client.sound.WalkmanRewindSound;
 import com.github.standobyte.jojo.client.sound.WalkmanTrackSound;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.item.CassetteRecordedItem;
 import com.github.standobyte.jojo.item.WalkmanItem;
+import com.github.standobyte.jojo.item.WalkmanDataCap.PlaybackMode;
 import com.github.standobyte.jojo.item.cassette.CassetteCap;
 import com.github.standobyte.jojo.item.cassette.TrackSource;
 import com.github.standobyte.jojo.item.cassette.CassetteCap.TrackSourceList;

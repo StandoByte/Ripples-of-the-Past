@@ -79,6 +79,7 @@ public class CassetteRecordedItem extends Item {
     
     
     public static Optional<CassetteCap> getCassetteData(ItemStack recordedCassetteItem) {
+        if (recordedCassetteItem.isEmpty()) return Optional.empty();
         return MCUtil.nbtGetCompoundOptional(recordedCassetteItem.getOrCreateTag(), "Cassette")
                 .map(nbt -> {
                     CassetteCap data = new CassetteCap(recordedCassetteItem);

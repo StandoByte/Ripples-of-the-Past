@@ -4,8 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.capability.item.walkman.WalkmanDataCap;
-import com.github.standobyte.jojo.capability.item.walkman.WalkmanDataCap.PlaybackMode;
 import com.github.standobyte.jojo.client.WalkmanSoundHandler;
 import com.github.standobyte.jojo.client.WalkmanSoundHandler.CassetteSide;
 import com.github.standobyte.jojo.client.WalkmanSoundHandler.CassetteTracksSided;
@@ -15,6 +13,8 @@ import com.github.standobyte.jojo.client.WalkmanSoundHandler.Track;
 import com.github.standobyte.jojo.client.WalkmanSoundHandler.TrackInfo;
 import com.github.standobyte.jojo.container.WalkmanItemContainer;
 import com.github.standobyte.jojo.item.CassetteRecordedItem;
+import com.github.standobyte.jojo.item.WalkmanDataCap;
+import com.github.standobyte.jojo.item.WalkmanDataCap.PlaybackMode;
 import com.github.standobyte.jojo.item.WalkmanItem;
 import com.github.standobyte.jojo.item.cassette.CassetteCap.TrackSourceList;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -77,7 +77,7 @@ public class WalkmanScreen extends ContainerScreen<WalkmanItemContainer> {
         ItemStack walkman = menu.getWalkmanItem();
         WalkmanDataCap walkmanData = WalkmanItem.getWalkmanData(walkman).orElse(null);
         mode = walkmanData.getPlaybackMode();
-        walkmanId = WalkmanItem.getWalkmanData(walkman).resolve().get().getId();
+        walkmanId = walkmanData.getId();
         
         Playlist playlist = WalkmanSoundHandler.getPlaylist(walkmanId);
         if (playlist != null) {

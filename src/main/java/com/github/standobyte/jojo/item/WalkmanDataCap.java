@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.capability.item.walkman;
+package com.github.standobyte.jojo.item;
 
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.util.mc.MCUtil;
