@@ -148,6 +148,10 @@ public class MCUtil {
     
     @Nullable
     public static <T extends Enum<T>> T nbtGetEnum(CompoundNBT nbt, String key, Class<T> enumClass) {
+        if (!nbt.contains(key, getNbtId(IntNBT.class))) {
+            return null;
+        }
+        
         int ordinal = nbt.getInt(key);
         T[] values = enumClass.getEnumConstants();
         if (ordinal >= 0 && ordinal < values.length) {
