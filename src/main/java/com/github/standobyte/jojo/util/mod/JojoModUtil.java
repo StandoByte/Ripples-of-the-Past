@@ -135,14 +135,26 @@ public class JojoModUtil {
     }
     
     private static AxisAlignedBB standPrecisionTargetHitbox(AxisAlignedBB aabb, double precision) {
-        if (precision > 0) {
-            double smallAabbAddFraction = Math.min(precision, 16) / 16;
+        if (precision > 4) {
+            double smallAabbAddFraction = Math.min(Math.pow(2, precision - 16), 1);
             aabb.inflate(
                     Math.max(1.0 - aabb.getXsize(), 0) * smallAabbAddFraction, 
-                    Math.max(2.5 - aabb.getYsize(), 0) * smallAabbAddFraction, 
+                    Math.max(1.0 - aabb.getYsize(), 0) * smallAabbAddFraction, 
                     Math.max(1.0 - aabb.getZsize(), 0) * smallAabbAddFraction);
-            aabb = aabb.inflate(precision / 20);
         }
+        
+        
+        double scale;
+        if (precision < 4) {        scale = Math.max(precision, 2) / 4; }
+        else {                      scale = precision / 5 + 0.2; }
+        
+        double xSize = aabb.getXsize();
+        double ySize = aabb.getYsize();
+        double zSize = aabb.getZsize();
+        aabb = MCUtil.scale(aabb, 
+                Math.min(scale, 1 + 4 / xSize), 
+                Math.min(scale, 1 + 4 / ySize), 
+                Math.min(scale, 1 + 4 / zSize));
         return aabb;
     }
 

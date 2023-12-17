@@ -87,6 +87,10 @@ public class StandEntityPunch implements IPunch {
         return this;
     }
     
+    public StandEntityPunch multiplyAddKnockback(float multiplier) {
+        return addKnockback((this.knockback - 1) * multiplier);
+    }
+    
     private StandEntityPunch knockbackVal(float knockback) {
         this.knockback = knockback;
         return this;

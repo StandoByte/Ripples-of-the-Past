@@ -135,7 +135,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         double strength = stand.getAttackDamage();
         return new HeavyPunchInstance(stand, target, dmgSource)
                 .damage(StandStatFormulas.getHeavyAttackDamage(strength))
-                .addKnockback(0.5F + (float) strength / 8)
+                .addKnockback(0.5F + (float) strength / (8 - stand.getLastHeavyFinisherValue() * 4))
                 .setStandInvulTime(10)
                 .impactSound(punchSound);
     }

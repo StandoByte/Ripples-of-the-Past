@@ -8,7 +8,6 @@ import java.util.function.Consumer;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.HudNamesRender;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.PositionConfig;
-import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.google.gson.Gson;
@@ -19,8 +18,6 @@ import net.minecraft.client.Minecraft;
 public class ClientModSettings {
     
     public static class Settings {
-        private boolean lockedAttacksHotbar;
-        private boolean lockedAbilitiesHotbar;
         public float standStatsTranslucency = 0.75F;
         
         public PositionConfig barsPosition = PositionConfig.TOP_LEFT;
@@ -43,37 +40,6 @@ public class ClientModSettings {
     
     public static Settings getSettingsReadOnly() {
         return getInstance().settings;
-    }
-    
-    
-    public void switchLockedHotbarControls(ActionsLayout.Hotbar hotbar) {
-        setLockedHotbarControls(hotbar, !areControlsLockedForHotbar(hotbar));
-    }
-    
-    private void setLockedHotbarControls(ActionsLayout.Hotbar hotbar, boolean value) {
-        editSettings(settings -> {
-            switch (hotbar) {
-            case LEFT_CLICK:
-                settings.lockedAttacksHotbar = value;
-                if (value) settings.lockedAbilitiesHotbar = false;
-                break;
-            case RIGHT_CLICK:
-                if (value) settings.lockedAttacksHotbar = false;
-                settings.lockedAbilitiesHotbar = value;
-                break;
-            }
-        });
-    }
-    
-    public boolean areControlsLockedForHotbar(ActionsLayout.Hotbar hotbar) {
-        if (hotbar == null) return false;
-        switch (hotbar) {
-        case LEFT_CLICK:
-            return settings.lockedAttacksHotbar;
-        case RIGHT_CLICK:
-            return settings.lockedAbilitiesHotbar;
-        }
-        return false;
     }
     
     

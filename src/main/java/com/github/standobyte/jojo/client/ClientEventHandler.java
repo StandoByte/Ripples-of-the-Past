@@ -4,6 +4,8 @@ import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.EXPERIENCE;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.FOOD;
 
+import java.util.Optional;
+
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
@@ -35,6 +37,7 @@ import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClMetEntityTypePacket;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandArrowHandler;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
@@ -88,6 +91,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -314,6 +318,43 @@ public class ClientEventHandler {
         Minecraft mc = Minecraft.getInstance();
         if (newTarget.getType() == RayTraceResult.Type.ENTITY) {
             Entity entity = ((EntityRayTraceResult) newTarget).getEntity();
+            
+            // Hamon learning player interaction hints
+            if (entity instanceof PlayerEntity) {
+                @SuppressWarnings("resource")
+                PlayerEntity clientPlayer = Minecraft.getInstance().player;
+                PlayerEntity targetPlayer = (PlayerEntity) entity;
+                Optional<HamonData> playerHamon = INonStandPower.getNonStandPowerOptional(clientPlayer)
+                        .resolve().flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get()));
+                if (playerHamon.isPresent()) {
+                    if (playerHamon.get().playerWantsToLearn(targetPlayer)) {
+                        ClientUtil.setOverlayMessage(new TranslationTextComponent(
+                                "jojo.chat.message.new_hamon_learner", 
+                                targetPlayer.getDisplayName(), 
+                                new KeybindTextComponent(InputHandler.getInstance().hamonSkillsWindow.getName())));
+                    }
+                }
+                else {
+                    Optional<HamonData> targetHamon = INonStandPower.getNonStandPowerOptional(targetPlayer)
+                            .resolve().flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get()));
+                    if (targetHamon.isPresent()) {
+                        boolean hasAskedAlready = targetHamon.get().playerWantsToLearn(clientPlayer);
+                        if (hasAskedAlready) {
+                            ClientUtil.setOverlayMessage(new TranslationTextComponent(
+                                    "jojo.chat.message.asked_hamon_teacher", 
+                                    targetPlayer.getDisplayName()));
+                        }
+                        else {
+                            ClientUtil.setOverlayMessage(new TranslationTextComponent(
+                                    "jojo.chat.message.ask_hamon_teacher", 
+                                    new KeybindTextComponent(InputHandler.getInstance().hamonSkillsWindow.getName()), 
+                                    targetPlayer.getDisplayName()));
+                        }
+                    }
+                }
+            }
+            
+            // learning new lifeforms for Gold Experience
             mc.player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                 EntityType<?> type = entity.getType();
                 if (cap.addMetEntityType(type)) {
