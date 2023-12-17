@@ -363,6 +363,22 @@ public class MCUtil {
     
     
     
+    public static AxisAlignedBB scale(AxisAlignedBB aabb, double scale) {
+        return scale(aabb, scale, scale, scale);
+    }
+    
+    public static AxisAlignedBB scale(AxisAlignedBB aabb, double scaleX, double scaleY, double scaleZ) {
+        Vector3d center = aabb.getCenter();
+        double inflX = aabb.getXsize() * scaleX / 2;
+        double inflY = aabb.getYsize() * scaleY / 2;
+        double inflZ = aabb.getZsize() * scaleZ / 2;
+        return new AxisAlignedBB(
+                center.x - inflX, center.y - inflY, center.z - inflZ,
+                center.x + inflX, center.y + inflY, center.z + inflZ);
+    }
+    
+    
+    
     public static boolean isControlledThisSide(Entity entity) {
         if (entity instanceof PlayerEntity) {
             return ((PlayerEntity) entity).isLocalPlayer();

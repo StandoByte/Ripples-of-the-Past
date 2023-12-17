@@ -80,8 +80,8 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
         if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
             StandEntity stand = (StandEntity) power.getStandManifestation();
             return ActionTarget.fromRayTraceResult(
-                    JojoModUtil.rayTrace(stand.isManuallyControlled() ? stand : user, 
-                            stand.getMaxRange(), stand.canTarget(), stand.getPrecision() / 16F, stand.getPrecision()));
+                    stand.precisionRayTrace(stand.isManuallyControlled() ? stand : user, stand.getMaxRange(),
+                            stand.getPrecision() / 16F));
         }
         return super.targetBeforePerform(world, user, power, target);
     }
