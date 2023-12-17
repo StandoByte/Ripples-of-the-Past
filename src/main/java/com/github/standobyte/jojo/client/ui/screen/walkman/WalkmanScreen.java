@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Optional;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.capability.item.cassette.CassetteCap.TrackSourceList;
 import com.github.standobyte.jojo.capability.item.walkman.WalkmanDataCap;
 import com.github.standobyte.jojo.capability.item.walkman.WalkmanDataCap.PlaybackMode;
 import com.github.standobyte.jojo.client.WalkmanSoundHandler;
@@ -17,6 +16,7 @@ import com.github.standobyte.jojo.client.WalkmanSoundHandler.TrackInfo;
 import com.github.standobyte.jojo.container.WalkmanItemContainer;
 import com.github.standobyte.jojo.item.CassetteRecordedItem;
 import com.github.standobyte.jojo.item.WalkmanItem;
+import com.github.standobyte.jojo.item.cassette.CassetteCap.TrackSourceList;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClWalkmanControlsPacket;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -112,7 +112,7 @@ public class WalkmanScreen extends ContainerScreen<WalkmanItemContainer> {
                 setCassetteChanged(CassetteTracksSided.EMPTY_TRACK_LIST);
             }
             else {
-                CassetteRecordedItem.getCapability(cassetteItem).ifPresent(cap -> {
+                CassetteRecordedItem.getCassetteData(cassetteItem).ifPresent(cap -> {
                     TrackSourceList cassetteSources = cap.getTracks();
                     if (cassetteSources.isBroken()) {
                         setCassetteChanged(CassetteTracksSided.EMPTY_TRACK_LIST);
@@ -274,7 +274,7 @@ public class WalkmanScreen extends ContainerScreen<WalkmanItemContainer> {
         this.currentTrack = track;
         
         if (track != null) {
-            CassetteRecordedItem.getCapability(getCassetteItem()).ifPresent(cap -> {
+            CassetteRecordedItem.getCassetteData(getCassetteItem()).ifPresent(cap -> {
                 if (cap.getTracks().isBroken()) return;
                 
                 int trackNumber = track.number;
@@ -364,7 +364,7 @@ public class WalkmanScreen extends ContainerScreen<WalkmanItemContainer> {
             minecraft.getTextureManager().bind(WALKMAN_CASSETTE_TEXTURE);
             blit(matrixStack, windowX + 35, windowY + 7, 0, 0, 150, 95);
             
-            Optional<DyeColor> color = CassetteRecordedItem.getCapability(cassetteItem).map(cap -> cap.getDye()).orElse(Optional.empty());
+            Optional<DyeColor> color = CassetteRecordedItem.getCassetteData(cassetteItem).map(cap -> cap.getDye()).orElse(Optional.empty());
             if (color.isPresent()) {
                 blit(matrixStack, windowX + 40, windowY + 41, 5, 128 + color.get().ordinal() * 8, 140, 7);
             }

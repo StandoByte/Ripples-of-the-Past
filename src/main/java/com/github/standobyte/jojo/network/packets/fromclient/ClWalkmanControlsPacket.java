@@ -97,7 +97,7 @@ public class ClWalkmanControlsPacket {
                         ItemStack cassette = walkman.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).map(
                                 walkmanSlot -> walkmanSlot.getStackInSlot(0)).orElse(ItemStack.EMPTY);
                         if (!cassette.isEmpty() && cassette.getItem() == ModItems.CASSETTE_RECORDED.get()) {
-                            CassetteRecordedItem.getCapability(cassette).ifPresent(cap -> {
+                            CassetteRecordedItem.editCassetteData(cassette, cap -> {
                                 cap.setSide(msg.side);
                                 cap.setTrackOn(msg.track);
                             });

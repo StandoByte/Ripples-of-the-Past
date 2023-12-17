@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.capability.item.cassette;
+package com.github.standobyte.jojo.item.cassette;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -9,8 +9,8 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.capability.item.cassette.TrackSource.TrackSourceType;
 import com.github.standobyte.jojo.client.WalkmanSoundHandler.CassetteSide;
+import com.github.standobyte.jojo.item.cassette.TrackSource.TrackSourceType;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.item.DyeColor;
