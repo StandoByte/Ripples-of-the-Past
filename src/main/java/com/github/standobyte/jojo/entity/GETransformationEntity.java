@@ -63,6 +63,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
     
     private int duration;
     private float renderAsItemTime;
+    public int actionCooldown;
 
     public GETransformationEntity(EntityType<?> type, World level) {
         super(type, level);
@@ -385,6 +386,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         this.tickCount = nbt.getInt("Age");
         withDuration(nbt.getInt("Duration"));
         entityData.set(IS_TURNING_BACK, nbt.getBoolean("TurnBack"));
+        actionCooldown = nbt.getInt("ActionCD");
         
         source.readNbt(nbt);
         if (nbt.contains("TargetEntity", MCUtil.getNbtId(CompoundNBT.class))) {
@@ -399,6 +401,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         nbt.putInt("Age", tickCount);
         nbt.putInt("Duration", duration);
         nbt.putBoolean("TurnBack", entityData.get(IS_TURNING_BACK));
+        nbt.putInt("ActionCD", actionCooldown);
         
         source.writeNbt(nbt);
         if (target != null) {

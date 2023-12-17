@@ -265,7 +265,9 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     world.addFreshEntity(tf);
                     
                     if (!power.isUserCreative()) {
-                        power.setCooldownTimer(this, ticks);
+                        int cooldown = Math.max(ticks / 2, 1);
+                        tf.actionCooldown = cooldown;
+                        power.setCooldownTimer(this, cooldown);
                     }
                 }
             }

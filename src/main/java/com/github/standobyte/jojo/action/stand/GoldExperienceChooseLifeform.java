@@ -40,14 +40,14 @@ public class GoldExperienceChooseLifeform extends StandAction {
             MobEntity mob = (MobEntity) entity;
             
             CreatureAttribute mobType = mob.getMobType();
-            if (mobType == CreatureAttribute.UNDEAD || mobType == CreatureAttribute.ILLAGER) {
+            if (
+                    mobType == CreatureAttribute.UNDEAD || 
+                    mobType == CreatureAttribute.ILLAGER ||
+                    entityType == EntityType.TRADER_LLAMA ||
+                    !entityType.canSummon()) {
                 return false;
             }
             
-            if (entityType == EntityType.TRADER_LLAMA) {
-                return false;
-            }
-
             // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! tmp, will be reserved for specific items/blocks
             if (entityType == EntityType.SLIME || entityType == EntityType.MAGMA_CUBE) {
                 return false;
@@ -66,11 +66,7 @@ public class GoldExperienceChooseLifeform extends StandAction {
                 return false;
             }
             
-            if (GoldExperienceCreateLifeform.getVolume(entity) >= 7.5) { // no too large mobs
-                return false;
-            }
-            
-            if (mob.getMaxHealth() > 60) {
+            if (GoldExperienceCreateLifeform.getVolume(entity) >= 7.5 || mob.getMaxHealth() > 60) {
                 return false;
             }
             
