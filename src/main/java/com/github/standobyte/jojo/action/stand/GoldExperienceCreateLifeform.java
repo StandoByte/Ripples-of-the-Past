@@ -290,10 +290,22 @@ public class GoldExperienceCreateLifeform extends StandAction {
                 + MathHelper.ceil(volume * (1 + entityStrength * 0.125) * MathHelper.clamp(100 - standSpeed * 2, 0, 100)));
     }
     
-    public float getStaminaCostTicking(IStandPower stand, LivingEntity lifeform) {
-//        float costMultiplier = getStaminaCostTicking(stand);
+    public float getStaminaCostTicking(IStandPower stand, Entity lifeform) {
+        float baseCost = getStaminaCostTicking(stand);
         
-        return 0;
+        if (lifeform != null) {
+            double entityStrength = getAttackStrength(lifeform);
+            float volume = getVolume(lifeform);
+            
+            float entityMultiplier = MathHelper.clamp(volume, 1, 3);
+            if (entityStrength > 0) {
+                entityMultiplier *= MathHelper.clamp(entityStrength, 2, 6) * 0.45 + 0.3;
+            }
+            
+            return baseCost * entityMultiplier;
+        }
+        
+        return baseCost;
     }
     
     public static float getVolume(Entity entity) {

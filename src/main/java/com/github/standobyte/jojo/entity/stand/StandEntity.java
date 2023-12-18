@@ -984,8 +984,11 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             return false;
         }
         if (this.is(damageSrc.getEntity())
-                || getUser() != null && getUser().is(damageSrc.getEntity())
-                || getUser() instanceof PlayerEntity && ((PlayerEntity) getUser()).abilities.invulnerable && !damageSrc.isBypassInvul()
+                || getUser() != null && getUser().is(damageSrc.getEntity())) {
+            return !(damageSrc instanceof IStandDamageSource && ((IStandDamageSource) damageSrc).standCanHitSelf());
+        }
+        if (
+                getUser() instanceof PlayerEntity && ((PlayerEntity) getUser()).abilities.invulnerable && !damageSrc.isBypassInvul()
                 || damageSrc.isFire() && !level.getGameRules().getBoolean(GameRules.RULE_FIRE_DAMAGE)) {
             return true;
         }

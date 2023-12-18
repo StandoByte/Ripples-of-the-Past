@@ -384,6 +384,8 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
                     new IconTooltipLine(IconTooltipLine.Icon.TIME),
                     new TextTooltipLine(new TranslationTextComponent("gold_experience.lifeform_time", creationSecs))));
             
+            entityTypeInfo.add(new TextTooltipLine(new StringTextComponent(String.valueOf(GoldExperienceCreateLifeform.getVolume(entity)))));
+            
             entityTypeInfo.stream().map(line -> line.getWidth(font)).max(Comparator.naturalOrder()).ifPresent(tooltipWidth -> {
                 CustomTooltipRender.renderWrappedToolTip(matrixStack, entityTypeInfo, x, y, font);
             });
