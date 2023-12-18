@@ -159,6 +159,6 @@ public class ModItems {
             () -> new CassetteBlankItem(new Item.Properties().tab(JojoMod.MAIN_TAB)));
 
     public static final RegistryObject<CassetteRecordedItem> CASSETTE_RECORDED = ITEMS.register("cassette_recorded", 
-            () -> new CassetteRecordedItem(new Item.Properties().stacksTo(1)));
+            () -> new CassetteRecordedItem(new Item.Properties().stacksTo(1).tab(JojoMod.MAIN_TAB)));
 
 }

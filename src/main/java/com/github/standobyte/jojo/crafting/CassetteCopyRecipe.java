@@ -1,13 +1,15 @@
 package com.github.standobyte.jojo.crafting;
 
+import java.util.Optional;
+
 import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import com.github.standobyte.jojo.capability.item.cassette.CassetteCap;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModRecipeSerializers;
 import com.github.standobyte.jojo.item.CassetteRecordedItem;
+import com.github.standobyte.jojo.item.cassette.CassetteCap;
 
 import net.minecraft.inventory.CraftingInventory;
 import net.minecraft.item.ItemStack;
@@ -16,7 +18,6 @@ import net.minecraft.item.crafting.SpecialRecipe;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.LazyOptional;
 
 public class CassetteCopyRecipe extends SpecialRecipe {
     
@@ -39,12 +40,12 @@ public class CassetteCopyRecipe extends SpecialRecipe {
     public ItemStack assemble(CraftingInventory inventory) {
         Pair<ItemStack, Integer> result = originalRecordingAndCopyCount(inventory);
         if (result != null && !result.getLeft().isEmpty() && result.getRight() > 0) {
-            LazyOptional<CassetteCap> cassetteCap = CassetteRecordedItem.getCapability(result.getLeft());
+            Optional<CassetteCap> cassetteCap = CassetteRecordedItem.getCassetteData(result.getLeft());
             if (cassetteCap.isPresent()) {
-                CassetteCap originalRecording = cassetteCap.resolve().get();
+                CassetteCap originalRecording = cassetteCap.get();
                 if (originalRecording.getGeneration() < CassetteCap.MAX_GENERATION) {
                     ItemStack copies = new ItemStack(ModItems.CASSETTE_RECORDED.get(), result.getRight());
-                    CassetteRecordedItem.getCapability(copies).ifPresent(cap -> {
+                    CassetteRecordedItem.editCassetteData(copies, cap -> {
                         cap.copyFrom(originalRecording);
                         cap.incGeneration();
                     });

@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.capability.item.cassette;
+package com.github.standobyte.jojo.item.cassette;
 
 import java.util.Map;
 import java.util.function.Supplier;

@@ -15,14 +15,15 @@ import java.util.stream.Stream;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.capability.item.cassette.CassetteCap;
-import com.github.standobyte.jojo.capability.item.cassette.CassetteCap.TrackSourceList;
-import com.github.standobyte.jojo.capability.item.walkman.WalkmanDataCap.PlaybackMode;
 import com.github.standobyte.jojo.client.sound.WalkmanRewindSound;
 import com.github.standobyte.jojo.client.sound.WalkmanTrackSound;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.item.CassetteRecordedItem;
 import com.github.standobyte.jojo.item.WalkmanItem;
+import com.github.standobyte.jojo.item.WalkmanDataCap.PlaybackMode;
+import com.github.standobyte.jojo.item.cassette.CassetteCap;
+import com.github.standobyte.jojo.item.cassette.TrackSource;
+import com.github.standobyte.jojo.item.cassette.CassetteCap.TrackSourceList;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClWalkmanControlsPacket;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -65,7 +66,7 @@ public class WalkmanSoundHandler {
     
     public static Playlist initPlaylist(CassetteTracksSided cassetteTracks, ItemStack cassetteItem, int walkmanId) {
         clearPlaylist();
-        CassetteRecordedItem.getCapability(cassetteItem).ifPresent(cap -> {
+        CassetteRecordedItem.getCassetteData(cassetteItem).ifPresent(cap -> {
             if (!cap.getTracks().isBroken()) {
                 playlist = new Playlist(cassetteTracks, cap, walkmanId);
             }
@@ -437,17 +438,19 @@ public class WalkmanSoundHandler {
             if (trackSourcesList.isBroken()) {
                 return Stream.empty();
             }
-            return trackSourcesList.getTracks().flatMap(trackSource -> {
-                SoundEvent soundEvent = trackSource.getSoundEvent();
-                if (soundEvent == null) return Stream.empty();
-                SoundHandler soundManager = Minecraft.getInstance().getSoundManager();
-                SoundEventAccessor soundEventAccessor = soundManager.getSoundEvent(soundEvent.getLocation());
-                if (soundEventAccessor == null) return Stream.empty();
-                Stream<Sound> loadedSounds = unpackSounds(soundManager, soundEventAccessor);
-                Stream<Track> tracks = loadedSounds
-                        .map(sound -> new Track(sound, shortened -> trackSource.trackName(sound.getLocation(), shortened)));
-                return tracks;
-            });
+            return trackSourcesList.getTracks().flatMap(trackSource -> getTracks(trackSource));
+        }
+        
+        public static Stream<Track> getTracks(TrackSource singleTrackSource) {
+            SoundEvent soundEvent = singleTrackSource.getSoundEvent();
+            if (soundEvent == null) return Stream.empty();
+            SoundHandler soundManager = Minecraft.getInstance().getSoundManager();
+            SoundEventAccessor soundEventAccessor = soundManager.getSoundEvent(soundEvent.getLocation());
+            if (soundEventAccessor == null) return Stream.empty();
+            Stream<Sound> loadedSounds = unpackSounds(soundManager, soundEventAccessor);
+            Stream<Track> tracks = loadedSounds
+                    .map(sound -> new Track(sound, shortened -> singleTrackSource.trackName(sound.getLocation(), shortened)));
+            return tracks;
         }
         
         private static Stream<Sound> unpackSounds(SoundHandler soundManager, ISoundEventAccessor<Sound> accessor) {
