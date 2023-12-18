@@ -17,6 +17,7 @@ import net.minecraft.potion.Effects;
 import net.minecraft.world.World;
 
 public class GoldExperienceEntityLifeshot extends StandEntityActionModifier {
+    public static final int ENTITY_ID = 0x3a4a9b10; // random large int number
     
     public GoldExperienceEntityLifeshot(Builder builder) {
         super(builder);
@@ -52,13 +53,13 @@ public class GoldExperienceEntityLifeshot extends StandEntityActionModifier {
         int duration = targetEntity.getCapability(LivingUtilCapProvider.CAPABILITY)
                 .map(cap -> cap.onLifeShot(MAX_DURATION)).orElse(MAX_DURATION);
         if (duration > 0) {
-            targetEntity.addEffect(new EffectInstance(ModStatusEffects.SENSORY_OVERLOAD.get(), duration, 0));
+            targetEntity.addEffect(new EffectInstance(ModStatusEffects.SENSORY_OVERLOAD.get(), duration, 0, false, false, false));
         }
         else {
-            targetEntity.addEffect(new EffectInstance(Effects.MOVEMENT_SPEED, 40, 1, false, false, true));
-            targetEntity.addEffect(new EffectInstance(Effects.DIG_SPEED, 40, 0, false, false, true));
-            targetEntity.addEffect(new EffectInstance(Effects.DAMAGE_BOOST, 40, 0, false, false, true));
-            targetEntity.addEffect(new EffectInstance(Effects.REGENERATION, 40, 0, false, false, true));
+            targetEntity.addEffect(new EffectInstance(Effects.MOVEMENT_SPEED, 40, 1, false, false, false));
+            targetEntity.addEffect(new EffectInstance(Effects.DIG_SPEED, 40, 0, false, false, false));
+            targetEntity.addEffect(new EffectInstance(Effects.DAMAGE_BOOST, 40, 0, false, false, false));
+            targetEntity.addEffect(new EffectInstance(Effects.REGENERATION, 40, 0, false, false, false));
         }
     }
 }

@@ -845,8 +845,14 @@ public class GameplayEventHandler {
                 ((ServerChunkProvider) entity.getCommandSenderWorld().getChunkSource()).broadcast(entity, 
                         new SPlayEntityEffectPacket(entity.getId(), effectInstance));
             }
-            if (effectInstance.getEffect() == ModStatusEffects.RESOLVE.get() && entity instanceof ServerPlayerEntity) {
-                PacketManager.sendToClient(new ResolveEffectStartPacket(effectInstance.getAmplifier()), (ServerPlayerEntity) entity);
+            if (entity instanceof ServerPlayerEntity) {
+                Effect effect = effectInstance.getEffect();
+                if (effect == ModStatusEffects.RESOLVE.get()) {
+                    PacketManager.sendToClient(new ResolveEffectStartPacket(effectInstance.getAmplifier()), (ServerPlayerEntity) entity);
+                }
+                else if (effect == ModStatusEffects.SENSORY_OVERLOAD.get()) {
+                    entity.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(PlayerUtilCap::setSendLifeshotNextTick);
+                }
             }
         }
     }

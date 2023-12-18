@@ -16,6 +16,6 @@ public class GoldExperienceLifeshotPunch extends StandEntityHeavyAttack {
     public StandEntityPunch punchEntity(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
         StandEntityPunch punchProperties = super.punchEntity(stand, target, dmgSource);
         return punchProperties
-                .addKnockback(1.0F + (float) stand.getAttackDamage() / 8);
+                .multiplyAddKnockback(1.25F);
     }
 }

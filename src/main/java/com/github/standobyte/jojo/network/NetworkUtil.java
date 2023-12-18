@@ -39,6 +39,7 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryManager;
 
 public class NetworkUtil {
+    public static boolean blockPacketsToServer = false;
 
     public static void broadcastWithCondition(List<ServerPlayerEntity> players, @Nullable PlayerEntity clientHandled, 
             double x, double y, double z, double radius, World world, 

@@ -81,6 +81,11 @@ public class ClientReflection {
     public static Timer getTimer(Minecraft minecraft) {
         return ReflectionUtil.getFieldValue(MINECRAFT_TIMER, minecraft);
     }
+
+    private static final Field TIMER_MS_PER_TICK = ObfuscationReflectionHelper.findField(Timer.class, "field_194149_e");
+    public static void setMsPerTick(Timer timer, float msPerTick) {
+        ReflectionUtil.setFloatFieldValue(TIMER_MS_PER_TICK, timer, msPerTick);
+    }
     
     
     private static final Field MAIN_MENU_SCREEN_SPLASH = ObfuscationReflectionHelper.findField(MainMenuScreen.class, "field_73975_c");

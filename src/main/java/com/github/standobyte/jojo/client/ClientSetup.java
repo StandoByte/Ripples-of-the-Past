@@ -31,6 +31,7 @@ import com.github.standobyte.jojo.client.render.entity.layerrenderer.SpecialHeld
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.TornadoOverdriveEffectLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.barrage.BarrageFistAfterimagesLayer;
 import com.github.standobyte.jojo.client.render.entity.renderer.AfterimageRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.ConsciousnessRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.CrimsonBubbleRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.GETransformationRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.HamonBlockChargeRenderer;
@@ -155,6 +156,8 @@ public class ClientSetup {
         return !ClientUtil.canSeeStands() ? 1 : 0;
     };
     
+    public static ConsciousnessRenderer xxd;
+    
     @SubscribeEvent
     public static void onFMLClientSetup(FMLClientSetupEvent event) {
         Minecraft mc = event.getMinecraftSupplier().get();
@@ -206,6 +209,8 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HAMON_MASTER.get(), HamonMasterRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.ROCK_PAPER_SCISSORS_KID.get(), RockPaperScissorsKidRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.STAND_USER_DUMMY.get(), StandUserDummyRenderer::new);
+        
+        xxd = new ConsciousnessRenderer(mc.getEntityRenderDispatcher());
         
         RenderingRegistry.registerEntityRenderingHandler(ModStands.STAR_PLATINUM.getEntityType(), StarPlatinumRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModStands.THE_WORLD.getEntityType(), TheWorldRenderer::new);
@@ -264,6 +269,7 @@ public class ClientSetup {
             ActionsOverlayGui.init(mc);
             ControllerStand.init(mc);
             ControllerSoul.init(mc);
+            ControllerConsciousness.init(mc);
             InputHandler.init(mc);
             InputHandler.getInstance().setActionsOverlay(ActionsOverlayGui.getInstance());
             LoopPlayerHandler.init();

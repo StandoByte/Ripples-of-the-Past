@@ -22,6 +22,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClGEUiDataPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.NotificationSyncPacket;
@@ -31,6 +32,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrHamonLiquidWalkin
 import com.github.standobyte.jojo.network.packets.fromserver.TrKnivesCountPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerContinuousActionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrWalkmanEarbudsPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.GESplitConsciousnessPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.GEUiDataPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.MetEntityTypesPacket;
 import com.github.standobyte.jojo.power.IPower;
@@ -82,6 +84,7 @@ public class PlayerUtilCap {
             tickNoSleepTimer();
             tickStatUpdates();
             tickQueuedOnScreenClose();
+            tickLifeshotKnockback();
             
             if (knivesThrewTicks > 0) knivesThrewTicks--;
             if (chatSpamTickCount > 0) chatSpamTickCount--;
@@ -645,6 +648,19 @@ public class PlayerUtilCap {
                 return true;
             }
             return false;
+        }
+    }
+    
+    
+    
+    public void setSendLifeshotNextTick() {
+        sendLifeshotKBTicks = 2;
+    }
+    
+    private int sendLifeshotKBTicks = 0;
+    private void tickLifeshotKnockback() {
+        if (sendLifeshotKBTicks > 0 && --sendLifeshotKBTicks == 0 && player.hasEffect(ModStatusEffects.SENSORY_OVERLOAD.get())) {
+            PacketManager.sendToClient(new GESplitConsciousnessPacket(player.getDeltaMovement()), (ServerPlayerEntity) player);
         }
     }
 
