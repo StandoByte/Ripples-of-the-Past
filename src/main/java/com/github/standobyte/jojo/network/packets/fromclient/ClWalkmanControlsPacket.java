@@ -3,12 +3,12 @@ package com.github.standobyte.jojo.network.packets.fromclient;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import com.github.standobyte.jojo.capability.item.walkman.WalkmanDataCap.PlaybackMode;
 import com.github.standobyte.jojo.client.WalkmanSoundHandler.CassetteSide;
 import com.github.standobyte.jojo.container.WalkmanItemContainer;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.item.CassetteRecordedItem;
 import com.github.standobyte.jojo.item.WalkmanItem;
+import com.github.standobyte.jojo.item.WalkmanDataCap.PlaybackMode;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -86,7 +86,7 @@ public class ClWalkmanControlsPacket {
         public void handle(ClWalkmanControlsPacket msg, Supplier<NetworkEvent.Context> ctx) {
             ServerPlayerEntity player = ctx.get().getSender();
             findWalkman(player, msg.walkmanId).ifPresent(walkman -> {
-                WalkmanItem.getWalkmanData(walkman).ifPresent(walkmanData -> {
+                WalkmanItem.editWalkmanData(walkman, walkmanData -> {
                     switch (msg.packetType) {
                     case VOLUME:
                         if (!walkman.isEmpty() && walkman.getItem() == ModItems.WALKMAN.get()) {
@@ -97,7 +97,7 @@ public class ClWalkmanControlsPacket {
                         ItemStack cassette = walkman.getCapability(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY).map(
                                 walkmanSlot -> walkmanSlot.getStackInSlot(0)).orElse(ItemStack.EMPTY);
                         if (!cassette.isEmpty() && cassette.getItem() == ModItems.CASSETTE_RECORDED.get()) {
-                            CassetteRecordedItem.getCapability(cassette).ifPresent(cap -> {
+                            CassetteRecordedItem.editCassetteData(cassette, cap -> {
                                 cap.setSide(msg.side);
                                 cap.setTrackOn(msg.track);
                             });

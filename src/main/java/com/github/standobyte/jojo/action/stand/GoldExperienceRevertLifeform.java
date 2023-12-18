@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.stand.effect.GECreatedLifeformEffect;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
+import com.github.standobyte.jojo.entity.GETransformationEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
@@ -52,7 +53,8 @@ public class GoldExperienceRevertLifeform extends StandAction {
                 effect.remove();
                 Entity entity = effect.getTarget();
                 if (entity != null && entity.getType() == ModEntityTypes.GE_LIFEFORM_TRANSFORMATION.get()) {
-                    power.setCooldownTimer(ModStandsInit.GOLD_EXPERIENCE_CREATE_LIFEFORM.get(), 0);
+                    power.setCooldownTimer(ModStandsInit.GOLD_EXPERIENCE_CREATE_LIFEFORM.get(), 
+                            power.getCooldownTimer(ModStandsInit.GOLD_EXPERIENCE_CREATE_LIFEFORM.get()) - ((GETransformationEntity) entity).actionCooldown);
                 }
             });
         }

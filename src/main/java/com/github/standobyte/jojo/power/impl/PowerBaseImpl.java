@@ -194,6 +194,11 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
 
     @Override
+    public int getCooldownTimer(Action<?> action) {
+        return cooldowns.getCooldownTimer(action);
+    }
+
+    @Override
     public void setCooldownTimer(Action<?> action, int value) {
         updateCooldownTimer(action, value, value);
         serverPlayerUser.ifPresent(player -> {

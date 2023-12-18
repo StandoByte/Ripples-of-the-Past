@@ -14,8 +14,10 @@ public class StarPlatinumUppercut extends StandEntityHeavyAttack {
 
     @Override
     public StandEntityPunch punchEntity(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
-        return super.punchEntity(stand, target, dmgSource)
-                .addKnockback(0.5F + stand.getLastHeavyFinisherValue())
+        StandEntityPunch punch = super.punchEntity(stand, target, dmgSource);
+        double strength = stand.getAttackDamage();
+        return punch
+                .addKnockback(0.5F + (float) strength / 16 * stand.getLastHeavyFinisherValue())
                 .knockbackXRot(-60F)
                 .disableBlocking((float) stand.getProximityRatio(target) - 0.25F);
     }

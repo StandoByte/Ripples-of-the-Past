@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.stand.TimeStop;
 import com.github.standobyte.jojo.action.stand.TimeStopInstant;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
@@ -86,7 +87,12 @@ public class TimeStopInstance {
     
     public boolean tick() {
         ticksPassed++;
-        if (user != null && !user.level.isClientSide()) {
+        ticksLeft--;
+        if (world.isClientSide() && user != ClientUtil.getClientPlayer()) {
+            return false;
+        }
+        
+        if (user != null) {
             if (!user.isAlive()) {
                 return true;
             }
@@ -100,7 +106,7 @@ public class TimeStopInstance {
                     if (action != null) {
                         staminaCost += action.getStaminaCostTicking(power);
                     }
-                    if (!power.consumeStamina(staminaCost)) {
+                    if (!power.consumeStamina(staminaCost, true)) {
                         power.setStamina(0);
                         return true;
                     }
@@ -115,7 +121,7 @@ public class TimeStopInstance {
             
             tickSounds();
         }
-        return --ticksLeft <= 0;
+        return ticksLeft <= 0;
     }
     
     public void setTicksLeft(int ticks) {

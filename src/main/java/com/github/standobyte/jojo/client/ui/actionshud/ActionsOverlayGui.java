@@ -95,7 +95,6 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-@SuppressWarnings("deprecation")
 public class ActionsOverlayGui extends AbstractGui {
     public static final ResourceLocation HOTBAR_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/overlay_hotbar.png");
     public static final ResourceLocation OVERLAY_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/overlay.png");
@@ -607,8 +606,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 
                 // hotbar controls lock icon
                 if (actionHotbar != null) {
-                    ClientModSettings settings = ClientModSettings.getInstance();
-                    if (settings.areControlsLockedForHotbar(actionHotbar)) {
+                    if (InputHandler.getInstance().areControlsLockedForHotbar(actionHotbar)) {
                         mc.getTextureManager().bind(OVERLAY_LOCATION);
                         if (position.alignment == Alignment.LEFT) {
                             blit(matrixStack, x + hotbarLength - 2, y, 240, 240, 16, 16);

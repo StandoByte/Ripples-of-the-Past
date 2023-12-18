@@ -10,6 +10,8 @@ import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -170,6 +172,11 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
     protected void afterBlockHit(BlockRayTraceResult blockRayTraceResult, boolean brokenBlock) {
         if (!brokenBlock && !bindEntities) {
             BlockPos blockHitPos = blockRayTraceResult.getBlockPos();
+            BlockState hitBlock = level.getBlockState(blockHitPos);
+            if (hitBlock.getBlock() == Blocks.BARRIER) {
+                return;
+            }
+            
             if (!getBlockPosAttachedTo().isPresent()) {
                 playSound(ModSounds.HIEROPHANT_GREEN_GRAPPLE_CATCH.get(), 1.0F, 1.0F);
                 attachToBlockPos(blockHitPos);

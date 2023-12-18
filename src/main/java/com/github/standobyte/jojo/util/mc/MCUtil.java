@@ -151,6 +151,10 @@ public class MCUtil {
     
     @Nullable
     public static <T extends Enum<T>> T nbtGetEnum(CompoundNBT nbt, String key, Class<T> enumClass) {
+        if (!nbt.contains(key, getNbtId(IntNBT.class))) {
+            return null;
+        }
+        
         int ordinal = nbt.getInt(key);
         T[] values = enumClass.getEnumConstants();
         if (ordinal >= 0 && ordinal < values.length) {
@@ -384,6 +388,22 @@ public class MCUtil {
         default:
             throw new IllegalArgumentException("Unknown RayTraceResult type (it's an enum wtf)");
         }
+    }
+    
+    
+    
+    public static AxisAlignedBB scale(AxisAlignedBB aabb, double scale) {
+        return scale(aabb, scale, scale, scale);
+    }
+    
+    public static AxisAlignedBB scale(AxisAlignedBB aabb, double scaleX, double scaleY, double scaleZ) {
+        Vector3d center = aabb.getCenter();
+        double inflX = aabb.getXsize() * scaleX / 2;
+        double inflY = aabb.getYsize() * scaleY / 2;
+        double inflZ = aabb.getZsize() * scaleZ / 2;
+        return new AxisAlignedBB(
+                center.x - inflX, center.y - inflY, center.z - inflZ,
+                center.x + inflX, center.y + inflY, center.z + inflZ);
     }
     
     
