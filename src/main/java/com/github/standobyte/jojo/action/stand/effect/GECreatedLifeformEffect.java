@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.action.stand.effect;
 
+import com.github.standobyte.jojo.action.stand.GoldExperienceRevertLifeform;
 import com.github.standobyte.jojo.entity.GETransformationEntity;
 import com.github.standobyte.jojo.entity.GETransformationEntity.GETransformationData;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
@@ -74,13 +75,24 @@ public class GECreatedLifeformEffect extends StandEffectInstance {
     
     @Override
     protected void tick() {
-        if (!world.isClientSide()) {
-            LivingEntity target = getTargetLiving();
-            if (target != null) {
-                float staminaCost = ModStandsInit.GOLD_EXPERIENCE_CREATE_LIFEFORM.get().getStaminaCostTicking(userPower, target);
-                if (!userPower.consumeStamina(staminaCost)) {
-                    remove();
-                }
+        Entity entity = getTarget();
+        double maxDistSqr = GoldExperienceRevertLifeform.MARKER_DISTANCE * GoldExperienceRevertLifeform.MARKER_DISTANCE;
+        if (entity.distanceToSqr(user) > maxDistSqr) {
+            if (!world.isClientSide()) {
+                remove();
+            }
+            return;
+        }
+        
+        Entity lifeform = getTargetLiving();
+        if (lifeform == null && entity instanceof GETransformationEntity) {
+            lifeform = ((GETransformationEntity) entity).getTransformationTarget();
+        }
+        
+        float staminaCost = ModStandsInit.GOLD_EXPERIENCE_CREATE_LIFEFORM.get().getStaminaCostTicking(userPower, lifeform);
+        if (!userPower.consumeStamina(staminaCost, true)) {
+            if (!world.isClientSide()) {
+                remove();
             }
         }
     }

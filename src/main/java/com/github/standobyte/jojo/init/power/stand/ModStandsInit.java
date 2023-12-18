@@ -783,7 +783,7 @@ public class ModStandsInit {
     
     public static final RegistryObject<GoldExperienceCreateLifeform> GOLD_EXPERIENCE_CREATE_LIFEFORM = ACTIONS.register("gold_experience_create_lifeform", 
             () -> new GoldExperienceCreateLifeform(new StandAction.Builder()
-                    .staminaCostTick(1)
+                    .staminaCostTick(0.2F)
                     .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<GoldExperienceRevertLifeform> GOLD_EXPERIENCE_REVERT_LIFEFORM = ACTIONS.register("gold_experience_revert_lifeform", 
