@@ -20,6 +20,7 @@ import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.action.stand.effect.BoyIIManStandPartTakenEffect;
 import com.github.standobyte.jojo.action.stand.effect.DriedBloodDrops;
 import com.github.standobyte.jojo.action.stand.effect.GECreatedLifeformEffect;
+import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.block.StoneMaskBlock;
 import com.github.standobyte.jojo.block.WoodenCoffinBlock;
@@ -66,7 +67,6 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismDa
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
-import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
@@ -439,23 +439,37 @@ public class GameplayEventHandler {
         LivingEntity target = event.getEntityLiving();
         Entity attacker = dmgSource.getEntity();
         
-        if (attacker != null && attacker.is(dmgSource.getDirectEntity()) && attacker instanceof LivingEntity) {
-            IStandPower.getStandPowerOptional((LivingEntity) attacker).ifPresent(attackerStand -> {
-                IStandPower.getStandPowerOptional(target).ifPresent(boyIIManStand -> {
-                    StandEffectsTracker standEffects = boyIIManStand.getContinuousEffects();
-                    if (!standEffects.getEffects(effect -> {
-                        if (effect.effectType == ModStandEffects.BOY_II_MAN_PART_TAKE.get() && attacker.is(effect.getTarget())) {
-                            StandInstance partsTaken = ((BoyIIManStandPartTakenEffect) effect).getPartsTaken();
-                            return partsTaken.getType() == attackerStand.getType() && partsTaken.hasPart(StandPart.ARMS);
-                        }
-                        return false;
-                    }).isEmpty()) {
-                        attacker.hurt(dmgSource, event.getAmount());
-                        event.setCanceled(true);
-                        return;
-                    }
-                });
-            });
+        if (attacker != null && attacker instanceof LivingEntity) {
+            if (attacker.is(dmgSource.getDirectEntity())) {
+                // redirect melee attacks on Boy II Man user who has taken the attacker's arms
+                if (IStandPower.getStandPowerOptional((LivingEntity) attacker).resolve().flatMap(attackerStand -> {
+                    return IStandPower.getStandPowerOptional(target).map(boyIIManStand -> {
+                        List<StandEffectInstance> takenArmsEffects = boyIIManStand.getContinuousEffects().getEffects(effect -> {
+                            if (effect.effectType == ModStandEffects.BOY_II_MAN_PART_TAKE.get() && attacker.is(effect.getTarget())) {
+                                StandInstance partsTaken = ((BoyIIManStandPartTakenEffect) effect).getPartsTaken();
+                                return partsTaken.getType() == attackerStand.getType() && partsTaken.hasPart(StandPart.ARMS);
+                            }
+                            return false;
+                        });
+                        return !takenArmsEffects.isEmpty();
+                    });
+                }).orElse(false)) {
+                    attacker.hurt(dmgSource, event.getAmount());
+                    event.setCanceled(true);
+                    return;
+                }
+            }
+            
+            // redirect attacks on mobs created by Gold Experience
+            if (target.getCapability(LivingUtilCapProvider.CAPABILITY).map(cap -> cap.getEffectsTargetedBy().stream()
+                    .anyMatch(effect -> effect instanceof GECreatedLifeformEffect)).orElse(false)) {
+                if (dmgSource instanceof IStandDamageSource) {
+                    ((IStandDamageSource) dmgSource).setStandCanHitSelf();
+                }
+                attacker.hurt(dmgSource, event.getAmount());
+                event.setCanceled(true);
+                return;
+            }
         }
         
         if (target.invulnerableTime > 0 && dmgSource instanceof IModdedDamageSource && 
