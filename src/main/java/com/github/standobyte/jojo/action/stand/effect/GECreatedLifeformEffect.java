@@ -77,7 +77,7 @@ public class GECreatedLifeformEffect extends StandEffectInstance {
     protected void tick() {
         Entity entity = getTarget();
         double maxDistSqr = GoldExperienceRevertLifeform.MARKER_DISTANCE * GoldExperienceRevertLifeform.MARKER_DISTANCE;
-        if (entity.distanceToSqr(user) > maxDistSqr) {
+        if (entity != null && entity.distanceToSqr(user) > maxDistSqr) {
             if (!world.isClientSide()) {
                 remove();
             }
