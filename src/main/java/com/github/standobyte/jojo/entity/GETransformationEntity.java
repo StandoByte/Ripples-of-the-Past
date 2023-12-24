@@ -441,7 +441,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
     
     
     public static class GETransformationData {
-        private UUID owner;
+        private UUID aggroTarget;
         private Entity sourceEntity;
         private CompoundNBT sourceEntityNbt = null;
         private BlockState sourceBlockState;
@@ -460,13 +460,13 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             return this;
         }
         
-        public GETransformationData withOwner(UUID owner) {
-            this.owner = owner;
+        public GETransformationData withAggroTarget(UUID entity) {
+            this.aggroTarget = entity;
             return this;
         }
         
         public void copyFrom(GETransformationData other, World world) {
-            this.owner = other.owner;
+            this.aggroTarget = other.aggroTarget;
             this.sourceEntity = other.sourceEntity;
             this.sourceBlockState = other.sourceBlockState;
             this.sourceBlockPos = other.sourceBlockPos;
@@ -557,8 +557,8 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         }
         
         @Nullable
-        public UUID getSourceOwner() {
-            return owner;
+        public UUID getAggroTarget() {
+            return aggroTarget;
         }
         
         
@@ -574,8 +574,8 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             if (sourceBlockPos != null) {
                 nbt.put("GESourcePos", NBTUtil.writeBlockPos(sourceBlockPos));
             }
-            if (owner != null) {
-                nbt.putUUID("Owner", owner);
+            if (aggroTarget != null) {
+                nbt.putUUID("Owner", aggroTarget);
             }
         }
         
@@ -590,7 +590,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                 sourceBlockPos = NBTUtil.readBlockPos(nbt.getCompound("GESourcePos"));
             }
             if (nbt.hasUUID("Owner")) {
-                owner = nbt.getUUID("Owner");
+                aggroTarget = nbt.getUUID("Owner");
             }
         }
         

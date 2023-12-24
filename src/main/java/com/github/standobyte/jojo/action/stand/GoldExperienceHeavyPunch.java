@@ -7,7 +7,6 @@ import com.github.standobyte.jojo.entity.ObjectEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
-import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
 
@@ -58,15 +57,15 @@ public class GoldExperienceHeavyPunch extends StandEntityHeavyAttack {
                 tooth.setPos(targetLiving.getX(), targetLiving.getEyeY(), targetLiving.getZ());
                 tooth.setOwner(targetLiving.getUUID());
                 
-                Vector3d targetLookVec = target.getLookAngle();
-                float xRot = 45 + 15 * stand.getRandom().nextFloat();
-                float yRot = 75 + 30 * stand.getRandom().nextFloat();
-                tooth.setDeltaMovement(
-                        targetLookVec
-                        .xRot(xRot * MathUtil.DEG_TO_RAD)
-                        .yRot(-yRot * MathUtil.DEG_TO_RAD)
-                        .scale(Math.max(strength, 2) * 0.05));
+                float xRot = -37.5F - 15 * stand.getRandom().nextFloat();
+                float yRot = 90 + 30 * stand.getRandom().nextFloat();
+                Vector3d toothVec = Vector3d.directionFromRotation(
+                        target.xRot + xRot, 
+                        target.yRot + yRot);
+                tooth.setDeltaMovement(toothVec.scale(Math.max(strength, 2) * 0.05));
                 world.addFreshEntity(tooth);
+
+                task.getAdditionalData().push(Integer.class, tooth.getId());
             }
         }
     }

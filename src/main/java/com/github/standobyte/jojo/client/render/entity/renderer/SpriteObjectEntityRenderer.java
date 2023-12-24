@@ -39,7 +39,7 @@ public class SpriteObjectEntityRenderer extends EntityRenderer<ObjectEntity> {
 
         float height = entity.getBbHeight();
         float width = entity.getBbWidth();
-        matrixStack.translate(0, height / 2, 0);
+//        matrixStack.translate(0, height / 2, 0);
         matrixStack.mulPose(entityRenderDispatcher.cameraOrientation());
         float scale = width * 0.4F;
         matrixStack.scale(scale, scale, scale);

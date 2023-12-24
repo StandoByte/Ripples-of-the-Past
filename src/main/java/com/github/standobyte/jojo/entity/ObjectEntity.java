@@ -19,12 +19,14 @@ import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 public class ObjectEntity extends Entity implements IEntityAdditionalSpawnData {
-    private Type type;
+    private Type objectType;
     private UUID owner;
 
     public ObjectEntity(EntityType<?> pType, World pLevel) {
@@ -33,11 +35,11 @@ public class ObjectEntity extends Entity implements IEntityAdditionalSpawnData {
 
     public ObjectEntity(World world, Type objectType) {
         this(ModEntityTypes.OBJECT.get(), world);
-        this.type = objectType;
+        this.objectType = objectType;
     }
 
     public Type getObjectType() {
-        return type;
+        return objectType;
     }
 
     @Nullable
@@ -47,6 +49,14 @@ public class ObjectEntity extends Entity implements IEntityAdditionalSpawnData {
 
     public void setOwner(@Nullable UUID pOwner) {
         this.owner = pOwner;
+    }
+
+    @Override
+    protected ITextComponent getTypeName() {
+        if (objectType != null) {
+            return new TranslationTextComponent(getType().getDescriptionId() + '.' + objectType.name().toLowerCase());
+        }
+        return super.getTypeName();
     }
 
 
@@ -60,14 +70,14 @@ public class ObjectEntity extends Entity implements IEntityAdditionalSpawnData {
     public void tick() {
         super.tick();
         
-        if (type == null) {
+        if (objectType == null) {
             if (!level.isClientSide()) {
                 remove();
             }
             return;
         }
         
-        if (isOnGround() && tickCount > 100) {
+        if ((isOnGround() || fluidHeight.values().stream().anyMatch(height -> height > 0)) && tickCount > 100) {
             if (!level.isClientSide()) {
                 remove();
             }
@@ -151,8 +161,8 @@ public class ObjectEntity extends Entity implements IEntityAdditionalSpawnData {
 
     @Override
     protected void addAdditionalSaveData(CompoundNBT pCompound) {
-        if (type != null) {
-            MCUtil.nbtPutEnum(pCompound, "ObjType", type);
+        if (objectType != null) {
+            MCUtil.nbtPutEnum(pCompound, "ObjType", objectType);
         }
         pCompound.putInt("Age", tickCount);
         if (getOwner() != null) {
@@ -162,7 +172,7 @@ public class ObjectEntity extends Entity implements IEntityAdditionalSpawnData {
 
     @Override
     protected void readAdditionalSaveData(CompoundNBT pCompound) {
-        type = MCUtil.nbtGetEnum(pCompound, "ObjType", Type.class);
+        objectType = MCUtil.nbtGetEnum(pCompound, "ObjType", Type.class);
         tickCount = pCompound.getInt("Age");
         if (pCompound.hasUUID("Owner")) {
             owner = pCompound.getUUID("Owner");
@@ -172,12 +182,12 @@ public class ObjectEntity extends Entity implements IEntityAdditionalSpawnData {
 
     @Override
     public void writeSpawnData(PacketBuffer buffer) {
-        NetworkUtil.writeOptionally(buffer, type, t -> buffer.writeEnum(t));
+        NetworkUtil.writeOptionally(buffer, objectType, t -> buffer.writeEnum(t));
     }
 
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
-        type = NetworkUtil.readOptional(additionalData, () -> additionalData.readEnum(Type.class)).orElse(null);
+        objectType = NetworkUtil.readOptional(additionalData, () -> additionalData.readEnum(Type.class)).orElse(null);
     }
 
     @Override

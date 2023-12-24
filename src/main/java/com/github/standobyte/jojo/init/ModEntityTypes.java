@@ -178,7 +178,7 @@ public class ModEntityTypes {
             .build(new ResourceLocation(JojoMod.MOD_ID, "dummy").toString()));
 
     public static final RegistryObject<EntityType<ObjectEntity>> OBJECT = ENTITIES.register("util_object", 
-            () -> EntityType.Builder.<ObjectEntity>of(ObjectEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F)//.noSummon()
+            () -> EntityType.Builder.<ObjectEntity>of(ObjectEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon()
             .build(new ResourceLocation(JojoMod.MOD_ID, "util_object").toString()));
     
     

@@ -221,6 +221,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     if (targetEntity.isOnFire()) {
                         tf.setSecondsOnFire((targetEntity.getRemainingFireTicks() + 19) / 20);
                     }
+                    tf.setDeltaMovement(targetEntity.getDeltaMovement());
                 }
                 if (!tfTargetFound) {
                     ItemStack heldItem = user.getItemInHand(Hand.OFF_HAND);
