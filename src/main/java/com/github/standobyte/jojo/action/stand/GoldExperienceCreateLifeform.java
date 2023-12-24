@@ -172,6 +172,8 @@ public class GoldExperienceCreateLifeform extends StandAction {
             EntityType<?> type = (EntityType<?>) NetworkUtil.readOptional(extraInput, 
                     () -> extraInput.readRegistryIdSafe(EntityType.class)).orElse(null);
             if (type != null) {
+                
+                
                 Entity lifeFormCreated = type.create(world);
                 CompoundNBT nbt = new CompoundNBT();
                 nbt.putString("DeathLootTable", "empty");
@@ -190,7 +192,9 @@ public class GoldExperienceCreateLifeform extends StandAction {
                         lifeFormCreated.load(additionalNbt);
                     }
                 }
+                
                 int ticks = getTicksToCreate(user, power, lifeFormCreated);
+                
                 
                 Entity performer = user;
                 if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
@@ -200,7 +204,9 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     }
                 }
                 
+                
                 GETransformationEntity tf = new GETransformationEntity(world);
+                
                 
                 boolean tfTargetFound = false;
                 if (target.getType() == TargetType.ENTITY) {
@@ -256,6 +262,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     }
                 }
                 
+                
                 if (tfTargetFound) {
                     tf.withTransformationTarget(lifeFormCreated)
                     .withDuration(ticks)
@@ -282,6 +289,13 @@ public class GoldExperienceCreateLifeform extends StandAction {
             }
         }
     }
+    
+    
+    public static void createLifeformFrom() {
+        
+    }
+    
+    
     
     public static int getTicksToCreate(LivingEntity user, IStandPower power, Entity targetEntity) {
         double entityStrength = getAttackStrength(targetEntity);

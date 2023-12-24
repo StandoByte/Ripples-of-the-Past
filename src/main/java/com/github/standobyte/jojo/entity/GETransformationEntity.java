@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.entity;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -440,6 +441,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
     
     
     public static class GETransformationData {
+        private UUID owner;
         private Entity sourceEntity;
         private CompoundNBT sourceEntityNbt = null;
         private BlockState sourceBlockState;
@@ -458,7 +460,13 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             return this;
         }
         
+        public GETransformationData withOwner(UUID owner) {
+            this.owner = owner;
+            return this;
+        }
+        
         public void copyFrom(GETransformationData other, World world) {
+            this.owner = other.owner;
             this.sourceEntity = other.sourceEntity;
             this.sourceBlockState = other.sourceBlockState;
             this.sourceBlockPos = other.sourceBlockPos;
@@ -548,6 +556,11 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             return sourceBlockPos;
         }
         
+        @Nullable
+        public UUID getSourceOwner() {
+            return owner;
+        }
+        
         
         
         public void writeNbt(CompoundNBT nbt) {
@@ -561,6 +574,9 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             if (sourceBlockPos != null) {
                 nbt.put("GESourcePos", NBTUtil.writeBlockPos(sourceBlockPos));
             }
+            if (owner != null) {
+                nbt.putUUID("Owner", owner);
+            }
         }
         
         public void readNbt(CompoundNBT nbt) {
@@ -572,6 +588,9 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             }
             if (nbt.contains("GESourcePos", MCUtil.getNbtId(CompoundNBT.class))) {
                 sourceBlockPos = NBTUtil.readBlockPos(nbt.getCompound("GESourcePos"));
+            }
+            if (nbt.hasUUID("Owner")) {
+                owner = nbt.getUUID("Owner");
             }
         }
         

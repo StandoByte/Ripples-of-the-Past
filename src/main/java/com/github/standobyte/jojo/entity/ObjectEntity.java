@@ -63,11 +63,16 @@ public class ObjectEntity extends Entity implements IEntityAdditionalSpawnData {
         if (type == null) {
             if (!level.isClientSide()) {
                 remove();
-                return;
             }
+            return;
         }
-
-        if (tickCount > -1) return;
+        
+        if (isOnGround() && tickCount > 100) {
+            if (!level.isClientSide()) {
+                remove();
+            }
+            return;
+        }
         
         this.xo = this.getX();
         this.yo = this.getY();
