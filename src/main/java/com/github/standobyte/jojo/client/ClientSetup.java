@@ -37,6 +37,7 @@ import com.github.standobyte.jojo.client.render.entity.renderer.HamonBlockCharge
 import com.github.standobyte.jojo.client.render.entity.renderer.HamonProjectileShieldRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.LeavesGliderRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.MRDetectorRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.SpriteObjectEntityRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.PillarmanTempleEngravingRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.RoadRollerRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.SendoHamonOverdriveRenderer;
@@ -206,6 +207,7 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HAMON_MASTER.get(), HamonMasterRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.ROCK_PAPER_SCISSORS_KID.get(), RockPaperScissorsKidRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.STAND_USER_DUMMY.get(), StandUserDummyRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.OBJECT.get(), SpriteObjectEntityRenderer::new);
         
         RenderingRegistry.registerEntityRenderingHandler(ModStands.STAR_PLATINUM.getEntityType(), StarPlatinumRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModStands.THE_WORLD.getEntityType(), TheWorldRenderer::new);
