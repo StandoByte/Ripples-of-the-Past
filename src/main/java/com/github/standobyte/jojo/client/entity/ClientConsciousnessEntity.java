@@ -287,11 +287,8 @@ public class ClientConsciousnessEntity extends AbstractClientPlayerEntity {
 
     }
 
-    /**
-     * returns true if this is an EntityPlayerSP, or the logged in player.
-     */
     @Override
-    public boolean isLocalPlayer() {
+    public boolean isControlledByLocalInstance() {
         return true;
     }
 
