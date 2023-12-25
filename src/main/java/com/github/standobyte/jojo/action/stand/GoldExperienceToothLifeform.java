@@ -24,7 +24,6 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.IFormattableTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
@@ -59,7 +58,7 @@ public class GoldExperienceToothLifeform extends StandEntityActionModifier {
                     
 //                    EntityType<?> type = (EntityType<?>) NetworkUtil.readOptional(extraInput, 
 //                            () -> extraInput.readRegistryIdSafe(EntityType.class)).orElse(null);
-                    EntityType<?> type = EntityType.BEE;
+                    EntityType<?> type = EntityType.PARROT;
                     if (type != null) {
                         LivingEntity user = userPower.getUser();
                         

@@ -7,7 +7,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.action.stand.GoldExperienceCreateLifeform;
+import com.github.standobyte.jojo.entity.ai.GELifeformFollowOwnerGoal;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.network.NetworkUtil;
@@ -148,7 +148,13 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             copyStatus(this, entityToSummon);
             level.addFreshEntity(entityToSummon);
             if (!isTurningBack()) {
-                GoldExperienceCreateLifeform.onTransformationFinish(entityToSummon);
+                if (entityToSummon instanceof MobEntity) {
+                    MobEntity mob = (MobEntity) entityToSummon;
+                    mob.playAmbientSound();
+                    if (source.aggroTarget != null) {
+                        mob.goalSelector.addGoal(-1, new GELifeformFollowOwnerGoal(mob, source.aggroTarget, 1.25));
+                    }
+                }
             }
         }
         else if (blockToPlace != null) {

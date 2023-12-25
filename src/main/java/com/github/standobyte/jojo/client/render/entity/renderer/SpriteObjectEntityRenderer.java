@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.client.render.entity.renderer;
 
+import java.util.function.Consumer;
+
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.entity.ObjectEntity;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -31,21 +33,32 @@ public class SpriteObjectEntityRenderer extends EntityRenderer<ObjectEntity> {
     
     @Override
     public void render(ObjectEntity entity, float entityYaw, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
-        IVertexBuilder vertexBuilder = buffer.getBuffer(RenderType.entityCutoutNoCull(getTextureLocation(entity)));
-        int packedOverlay = OverlayTexture.NO_OVERLAY;
-        
-        
         matrixStack.pushPose();
 
-        float height = entity.getBbHeight();
-        float width = entity.getBbWidth();
-//        matrixStack.translate(0, height / 2, 0);
+        renderSprite(matrixStack, 
+                stack -> {
+//                    float height = entity.getBbHeight();
+//                    matrixStack.translate(0, height / 2, 0);
+                }, 
+                stack -> {
+                    float height = entity.getBbHeight();
+                    float width = entity.getBbWidth();
+                    float scale = width * 0.4F;
+                    matrixStack.scale(scale, scale, scale);
+                    matrixStack.translate(width * -2, height * -2, 0);
+                }, 
+                buffer.getBuffer(RenderType.entityCutoutNoCull(getTextureLocation(entity))), 
+                packedLight, OverlayTexture.NO_OVERLAY);
+
+        matrixStack.popPose();
+        super.render(entity, entityYaw, partialTick, matrixStack, buffer, packedLight);
+    }
+    
+    public void renderSprite(MatrixStack matrixStack, Consumer<MatrixStack> beforeRotate, Consumer<MatrixStack> afterRotate, 
+            IVertexBuilder vertexBuilder, int packedLight, int packedOverlay) {
+        beforeRotate.accept(matrixStack);
         matrixStack.mulPose(entityRenderDispatcher.cameraOrientation());
-        float scale = width * 0.4F;
-        matrixStack.scale(scale, scale, scale);
-        matrixStack.translate(width * -2, height * -2, 0);
-        
-        
+        afterRotate.accept(matrixStack);
         
         MatrixStack.Entry pose = matrixStack.last();
         Matrix4f matrix4f = pose.pose();
@@ -69,11 +82,6 @@ public class SpriteObjectEntityRenderer extends EntityRenderer<ObjectEntity> {
                     packedLight, 
                     normalVec.x(), normalVec.y(), normalVec.z());
         }
-        
-        
-        
-        matrixStack.popPose();
-        super.render(entity, entityYaw, partialTick, matrixStack, buffer, packedLight);
     }
     
     private static final ModelRenderer.PositionTextureVertex[] VERTICES = new ModelRenderer.PositionTextureVertex[] {

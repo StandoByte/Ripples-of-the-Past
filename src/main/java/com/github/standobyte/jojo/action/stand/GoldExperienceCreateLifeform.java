@@ -292,11 +292,6 @@ public class GoldExperienceCreateLifeform extends StandAction {
     }
     
     
-    public static void createLifeformFrom() {
-        
-    }
-    
-    
     
     public static int getTicksToCreate(LivingEntity user, IStandPower power, Entity targetEntity) {
         double entityStrength = getAttackStrength(targetEntity);
@@ -346,12 +341,6 @@ public class GoldExperienceCreateLifeform extends StandAction {
     }
     
     
-    
-    public static void onTransformationFinish(Entity entity) {
-        if (entity instanceof MobEntity) {
-            ((MobEntity) entity).playAmbientSound();
-        }
-    }
     
     @Override
     public IFormattableTextComponent getTranslatedName(IStandPower power, String key) {
