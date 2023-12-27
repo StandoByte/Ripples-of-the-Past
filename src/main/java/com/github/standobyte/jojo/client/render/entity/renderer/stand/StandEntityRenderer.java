@@ -55,7 +55,7 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
         return getTextureLocation(entity.getStandSkin());
     }
     
-    private ResourceLocation getTextureLocation(Optional<ResourceLocation> standSkin) {
+    public ResourceLocation getTextureLocation(Optional<ResourceLocation> standSkin) {
         return StandSkinsManager.getInstance()
                 .getRemappedResPath(manager -> manager.getStandSkin(standSkin), texture);
     }
@@ -308,7 +308,7 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
             for (LayerRenderer<T, M> layer : layers) {
                 if (layer instanceof StandModelLayerRenderer) {
                     StandModelLayerRenderer<T, M> standLayer = (StandModelLayerRenderer<T, M>) layer;
-                    if (standLayer.shouldRender(entity)) {
+                    if (standLayer.shouldRender(entity, entity.getStandSkin())) {
                         RenderType layerRenderType = standLayer.getRenderType(entity);
                         if (layerRenderType != null) {
                             renderSeparateLayerArm(standLayer.getLayerModel(), handSide, matrixStack, 
@@ -377,25 +377,35 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
         
         float yRotationOffset = 0;
         float xRotation = 0;
+        float partialTick = MathHelper.frac(ticks);
         
         doIdlePoseSwaying(ticks, matrixStack);
-        // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! entity == null
+        model.prepareMobModel(null, 0, 0, partialTick);
         model.poseIdleLoop(null, ticks, yRotationOffset, xRotation, HandSide.RIGHT);
         
-        ResourceLocation texture = getTextureLocation(standSkin.getNonDefaultLocation());
+        Optional<ResourceLocation> nonDefaultSkin = standSkin.getNonDefaultLocation();
+        ResourceLocation texture = getTextureLocation(nonDefaultSkin);
         RenderType renderType = model.renderType(texture);
         int packedLight = ClientUtil.MAX_MODEL_LIGHT;
         if (renderType != null) {
             IVertexBuilder vertexBuilder = buffer.getBuffer(renderType);
             int packedOverlay = OverlayTexture.NO_OVERLAY;
             model.renderToBuffer(matrixStack, vertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, 1.0F);
+            
+            for (LayerRenderer<T, M> layerRenderer : this.layers) {
+                if (layerRenderer instanceof StandModelLayerRenderer) {
+                    StandModelLayerRenderer<T, M> standLayer = (StandModelLayerRenderer<T, M>) layerRenderer;
+                    if (standLayer.shouldRender(null, nonDefaultSkin)) {
+                        M layerModel = standLayer.getLayerModel();
+                        RenderType layerRenderType = layerModel.renderType(standLayer.getLayerTexture(nonDefaultSkin));
+                        IVertexBuilder layerVertexBuilder = buffer.getBuffer(layerRenderType);
+                        layerModel.prepareMobModel(null, 0, 0, partialTick);
+                        layerModel.poseIdleLoop(null, ticks, yRotationOffset, xRotation, HandSide.RIGHT);
+                        layerModel.renderToBuffer(matrixStack, layerVertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, 1.0F);
+                    }
+                }
+            }
         }
-        
-        // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! render layers
-//        for (LayerRenderer<T, M> layerRenderer : this.layers) {
-//            layerRenderer.render(matrixStack, buffer, packedLight, entity, 
-//                    walkAnimPos, walkAnimSpeed, partialTick, ticks, yRotationOffset, xRotation);
-//        }
 
         matrixStack.popPose();
     }

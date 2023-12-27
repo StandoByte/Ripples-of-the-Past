@@ -166,7 +166,7 @@ public class MagiciansRedFireBlock extends FireBlock {
     }
 
     // and all the copypaste is to change this single method
-    private BlockState getStateWithAge(IWorld pLevel, BlockPos pPos, int pAge) {
+    public BlockState getStateWithAge(IWorld pLevel, BlockPos pPos, int pAge) {
         return getStateForPlacement(pLevel, pPos).setValue(AGE, Integer.valueOf(pAge));
     }
 }

@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.client.render.entity.renderer.stand.layer;
 
+import java.util.Optional;
+
 import com.github.standobyte.jojo.client.render.entity.model.stand.SilverChariotRapierFlameLayerModel;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.SilverChariotRenderer;
@@ -12,7 +14,7 @@ import net.minecraft.util.ResourceLocation;
 public class SilverChariotRapierFlameLayer extends StandModelLayerRenderer<SilverChariotEntity, StandEntityModel<SilverChariotEntity>> {
 
     public SilverChariotRapierFlameLayer(SilverChariotRenderer entityRenderer) {
-        super(entityRenderer, new SilverChariotRapierFlameLayerModel());
+        super(entityRenderer, new SilverChariotRapierFlameLayerModel(), null);
     }
     
     @Override
@@ -22,12 +24,12 @@ public class SilverChariotRapierFlameLayer extends StandModelLayerRenderer<Silve
 
     @Deprecated
     @Override
-    protected ResourceLocation getLayerTexture() {
+    public ResourceLocation getLayerTexture(Optional<ResourceLocation> standSkin) {
         return PlayerContainer.BLOCK_ATLAS;
     }
 
     @Override
-    public boolean shouldRender(SilverChariotEntity entity) {
-        return entity.isRapierOnFire();
+    public boolean shouldRender(SilverChariotEntity entity, Optional<ResourceLocation> standSkin) {
+        return entity != null && entity.isRapierOnFire();
     }
 }
