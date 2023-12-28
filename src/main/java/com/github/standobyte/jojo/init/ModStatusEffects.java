@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.init;
 
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Set;
 
 import com.github.standobyte.jojo.JojoMod;
@@ -9,6 +11,7 @@ import com.github.standobyte.jojo.potion.HamonShockEffect;
 import com.github.standobyte.jojo.potion.HamonSpreadEffect;
 import com.github.standobyte.jojo.potion.HypnosisEffect;
 import com.github.standobyte.jojo.potion.ImmobilizeEffect;
+import com.github.standobyte.jojo.potion.StandVirusEffect;
 import com.github.standobyte.jojo.potion.ResolveEffect;
 import com.github.standobyte.jojo.potion.StaminaRegenEffect;
 import com.github.standobyte.jojo.potion.StatusEffect;
@@ -17,7 +20,6 @@ import com.github.standobyte.jojo.potion.UncurableEffect;
 import com.github.standobyte.jojo.potion.UndeadRegenerationEffect;
 import com.github.standobyte.jojo.potion.VampireSunBurnEffect;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismPowerType;
-import com.google.common.collect.ImmutableSet;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.Effect;
@@ -72,6 +74,9 @@ public class ModStatusEffects {
     public static final RegistryObject<UncurableEffect> TIME_STOP = EFFECTS.register("time_stop", 
             () -> new UncurableEffect(EffectType.BENEFICIAL, 0x707070));
     
+    public static final RegistryObject<StandVirusEffect> STAND_VIRUS = EFFECTS.register("stand_virus", 
+            () -> new StandVirusEffect(0xC10019));
+    
     public static final RegistryObject<UncurableEffect> RESOLVE = EFFECTS.register("resolve", 
             () -> new ResolveEffect(EffectType.BENEFICIAL, 0xC6151F));
     
@@ -93,13 +98,13 @@ public class ModStatusEffects {
 //    public static final RegistryObject<Effect> STAND_SEALING = EFFECTS.register("stand_sealing", 
 //            () -> new StatusEffect(EffectType.HARMFUL, 0xCACAD8)); // TODO Stand Sealing effect
     
-    private static Set<Effect> TRACKED_EFFECTS;
+    private static final Set<Effect> TRACKED_EFFECTS = new HashSet<>();
     @SubscribeEvent(priority = EventPriority.LOW)
-    public static final void afterEffectsRegister(RegistryEvent.Register<Effect> event) {
+    public static void afterEffectsRegister(RegistryEvent.Register<Effect> event) {
         VampirismPowerType.initVampiricEffects();
         StandEntity.addSharedEffectsFromUser(TIME_STOP.get(), Effects.BLINDNESS);
         StandEntity.addSharedEffectsFromStand(STUN.get(), IMMOBILIZE.get());
-        TRACKED_EFFECTS = ImmutableSet.of(
+        setEffectAsTracked(
                 RESOLVE.get(), 
                 TIME_STOP.get(), 
                 IMMOBILIZE.get(), 
@@ -109,6 +114,11 @@ public class ModStatusEffects {
                 HAMON_SPREAD.get(), 
                 FULL_INVISIBILITY.get(), 
                 VAMPIRE_SUN_BURN.get());
+    }
+    
+    // Makes it so that the effect is also sent to the surrounding players, in case it is needed for visuals
+    public static void setEffectAsTracked(Effect... effects) {
+        Collections.addAll(TRACKED_EFFECTS, effects);
     }
     
     public static boolean isEffectTracked(Effect effect) {

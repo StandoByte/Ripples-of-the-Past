@@ -67,9 +67,8 @@ public class ModSplashes extends ReloadListener<List<String>> {
         }
         if (!splashes.isEmpty() && RANDOM.nextInt(420 + splashes.size()) < splashes.size()) {
             String splash = splashes.get(RANDOM.nextInt(splashes.size()));
-            if (splash.contains("@p")) {
-                return user != null ? splash.replace("@p", user.getName()) : null;
-            }
+            splash = splash.replace("@p", user.getName());
+            return splash;
         }
         return null;
     }

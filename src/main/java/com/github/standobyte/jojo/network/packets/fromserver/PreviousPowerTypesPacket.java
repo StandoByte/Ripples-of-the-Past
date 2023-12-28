@@ -12,28 +12,28 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-public class HadPowerTypesPacket {
+public class PreviousPowerTypesPacket {
     private final Collection<NonStandPowerType<?>> types;
     
-    public HadPowerTypesPacket(Collection<NonStandPowerType<?>> types) {
+    public PreviousPowerTypesPacket(Collection<NonStandPowerType<?>> types) {
         this.types = types;
     }
     
     
-    public static class Handler implements IModPacketHandler<HadPowerTypesPacket> {
+    public static class Handler implements IModPacketHandler<PreviousPowerTypesPacket> {
 
         @Override
-        public void encode(HadPowerTypesPacket msg, PacketBuffer buf) {
+        public void encode(PreviousPowerTypesPacket msg, PacketBuffer buf) {
             NetworkUtil.writeCollection(buf, msg.types, type -> buf.writeRegistryId(type), false);
         }
 
         @Override
-        public HadPowerTypesPacket decode(PacketBuffer buf) {
-            return new HadPowerTypesPacket(NetworkUtil.readCollection(buf, () -> buf.readRegistryIdSafe(NonStandPowerType.class)));
+        public PreviousPowerTypesPacket decode(PacketBuffer buf) {
+            return new PreviousPowerTypesPacket(NetworkUtil.readCollection(buf, () -> buf.readRegistryIdSafe(NonStandPowerType.class)));
         }
 
         @Override
-        public void handle(HadPowerTypesPacket msg, Supplier<NetworkEvent.Context> ctx) {
+        public void handle(PreviousPowerTypesPacket msg, Supplier<NetworkEvent.Context> ctx) {
             INonStandPower.getNonStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
                 msg.types.forEach(type -> {
                     power.addHadPowerBefore(type);
@@ -42,8 +42,8 @@ public class HadPowerTypesPacket {
         }
 
         @Override
-        public Class<HadPowerTypesPacket> getPacketClass() {
-            return HadPowerTypesPacket.class;
+        public Class<PreviousPowerTypesPacket> getPacketClass() {
+            return PreviousPowerTypesPacket.class;
         }
     }
 }

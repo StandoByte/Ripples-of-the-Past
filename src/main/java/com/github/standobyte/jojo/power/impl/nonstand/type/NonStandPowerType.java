@@ -11,6 +11,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.TypeSpecificData;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.util.ResourceLocation;
@@ -39,18 +40,8 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
     public void afterClear(INonStandPower power) {}
     
     @Override
-    public Action<INonStandPower>[] getAttacks() {
-        return attacks;
-    }
-
-    @Override
-    public Action<INonStandPower>[] getAbilities() {
-        return abilities;
-    }
-
-    @Override
-    public Action<INonStandPower> getDefaultQuickAccess() {
-        return defaultQuickAccess;
+    public ActionsLayout<INonStandPower> createDefaultLayout() {
+        return new ActionsLayout<>(attacks, abilities, defaultQuickAccess);
     }
 
     public float getMaxEnergy(INonStandPower power) {

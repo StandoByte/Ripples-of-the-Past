@@ -26,8 +26,8 @@ public class CrazyDiamondAnchorMarker extends MarkerRenderer {
         CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(mc.level, mc.player.getMainHandItem()).ifPresent(pos -> 
             list.add(new MarkerInstance(Vector3d.atCenterOf(pos), false)));
         CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(mc.level, mc.player.getOffhandItem()).ifPresent(pos -> {
-            boolean abilitySelected = ActionsOverlayGui.getInstance().isActionSelectedAndEnabled(ModStandsInit.CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE.get());
-            list.add(new MarkerInstance(Vector3d.atCenterOf(pos), abilitySelected));
+            boolean showMarker = ActionsOverlayGui.getInstance().showExtraActionHud(ModStandsInit.CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE.get());
+            list.add(new MarkerInstance(Vector3d.atCenterOf(pos), showMarker));
         });
     }
 }

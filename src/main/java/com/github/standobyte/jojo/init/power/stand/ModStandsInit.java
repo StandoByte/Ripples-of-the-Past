@@ -76,6 +76,7 @@ import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.power.impl.stand.type.EntityStandType;
 import com.github.standobyte.jojo.power.impl.stand.type.NoManifestationStandType;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
+import com.github.standobyte.jojo.power.impl.stand.type.StandType.StandSurvivalGameplayPool;
 
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
@@ -125,23 +126,24 @@ public class ModStandsInit {
     public static final RegistryObject<StandEntityLightAttack> STAR_PLATINUM_PUNCH = ACTIONS.register("star_platinum_punch", 
             () -> new StandEntityLightAttack(new StandEntityLightAttack.Builder()
                     .punchSound(ModSounds.STAR_PLATINUM_PUNCH_LIGHT)
-                    .standSound(Phase.WINDUP, ModSounds.STAR_PLATINUM_ORA)));
+                    .standSound(Phase.WINDUP, false, ModSounds.STAR_PLATINUM_ORA)));
     
     public static final RegistryObject<StandEntityMeleeBarrage> STAR_PLATINUM_BARRAGE = ACTIONS.register("star_platinum_barrage", 
             () -> new StandEntityMeleeBarrage(new StandEntityMeleeBarrage.Builder()
                     .barrageHitSound(ModSounds.STAR_PLATINUM_PUNCH_BARRAGE)
-                    .standSound(ModSounds.STAR_PLATINUM_ORA_ORA_ORA)));
+                    .standSound(Phase.PERFORM, false, ModSounds.STAR_PLATINUM_ORA_ORA_ORA)));
     
     public static final RegistryObject<StandEntityHeavyAttack> STAR_PLATINUM_UPPERCUT = ACTIONS.register("star_platinum_uppercut", 
             () -> new StarPlatinumUppercut(new StandEntityHeavyAttack.Builder()
+                    .resolveLevelToUnlock(1)
                     .punchSound(ModSounds.STAR_PLATINUM_PUNCH_HEAVY)
-                    .standSound(Phase.WINDUP, ModSounds.STAR_PLATINUM_ORA_LONG)
+                    .standSound(Phase.WINDUP, false, ModSounds.STAR_PLATINUM_ORA_LONG)
                     .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<StandEntityHeavyAttack> STAR_PLATINUM_HEAVY_PUNCH = ACTIONS.register("star_platinum_heavy_punch", 
             () -> new StandEntityHeavyAttack(new StandEntityHeavyAttack.Builder()
                     .punchSound(ModSounds.STAR_PLATINUM_PUNCH_HEAVY)
-                    .standSound(Phase.WINDUP, ModSounds.STAR_PLATINUM_ORA_LONG)
+                    .standSound(Phase.WINDUP, false, ModSounds.STAR_PLATINUM_ORA_LONG)
                     .partsRequired(StandPart.ARMS)
                     .setFinisherVariation(STAR_PLATINUM_UPPERCUT)
                     .shiftVariationOf(STAR_PLATINUM_PUNCH).shiftVariationOf(STAR_PLATINUM_BARRAGE)));
@@ -220,11 +222,13 @@ public class ModStandsInit {
                             .timeStopLearningPerTick(0.25F)
                             .timeStopDecayPerDay(0F)
                             .timeStopCooldownPerTick(3F)
+                            .randomWeight(1)
                             )
                     .addSummonShout(ModSounds.JOTARO_STAR_PLATINUM)
                     .addOst(ModSounds.STAR_PLATINUM_OST)
+                    .addAttackerResolveMultTier(1)
                     .build(), 
-                    
+
                     ENTITIES, 
                     () -> new StandEntityType<StarPlatinumEntity>(StarPlatinumEntity::new, 0.7F, 2.1F)
                     .summonSound(ModSounds.STAR_PLATINUM_SUMMON)
@@ -238,15 +242,16 @@ public class ModStandsInit {
     public static final RegistryObject<StandEntityLightAttack> THE_WORLD_PUNCH = ACTIONS.register("the_world_punch", 
             () -> new StandEntityLightAttack(new StandEntityLightAttack.Builder()
                     .punchSound(ModSounds.THE_WORLD_PUNCH_LIGHT)
-                    .standSound(Phase.WINDUP, ModSounds.DIO_MUDA)));
+                    .standSound(Phase.WINDUP, false, ModSounds.DIO_MUDA)));
     
     public static final RegistryObject<StandEntityMeleeBarrage> THE_WORLD_BARRAGE = ACTIONS.register("the_world_barrage", 
             () -> new TheWorldBarrage(new StandEntityMeleeBarrage.Builder()
                     .barrageHitSound(ModSounds.THE_WORLD_PUNCH_BARRAGE)
-                    .standSound(ModSounds.THE_WORLD_MUDA_MUDA_MUDA).shout(ModSounds.DIO_MUDA_MUDA), ModSounds.DIO_WRY));
+                    .standSound(Phase.PERFORM, false, ModSounds.THE_WORLD_MUDA_MUDA_MUDA).shout(ModSounds.DIO_MUDA_MUDA), ModSounds.DIO_WRY));
 
     public static final RegistryObject<StandEntityHeavyAttack> THE_WORLD_KICK = ACTIONS.register("the_world_kick", 
             () -> new TheWorldKick(new StandEntityHeavyAttack.Builder()
+                    .resolveLevelToUnlock(1)
                     .punchSound(ModSounds.THE_WORLD_KICK_HEAVY)
                     .shout(ModSounds.DIO_DIE)
                     .partsRequired(StandPart.LEGS)));
@@ -318,9 +323,11 @@ public class ModStandsInit {
                             .timeStopLearningPerTick(0.1F)
                             .timeStopDecayPerDay(0F)
                             .timeStopCooldownPerTick(3F)
+                            .randomWeight(1)
                             )
                     .addSummonShout(ModSounds.DIO_THE_WORLD)
                     .addOst(ModSounds.THE_WORLD_OST)
+                    .addAttackerResolveMultTier(1)
 //                    .addItemOnResolveLevel(4, new ItemStack(ModItems.ROAD_ROLLER.get()))
                     .build(), 
 
@@ -402,6 +409,7 @@ public class ModStandsInit {
                             .range(50.0, 100.0)
                             .durability(10.0)
                             .precision(8.0)
+                            .randomWeight(2)
                             )
                     .addSummonShout(ModSounds.KAKYOIN_HIEROPHANT_GREEN)
                     .addOst(ModSounds.HIEROPHANT_GREEN_OST)
@@ -433,6 +441,7 @@ public class ModStandsInit {
     
     public static final RegistryObject<StandEntityHeavyAttack> SILVER_CHARIOT_SWEEPING_ATTACK = ACTIONS.register("silver_chariot_sweeping_attack", 
             () -> new SilverChariotSweepingAttack(new StandEntityHeavyAttack.Builder().standPerformDuration(3)
+                    .resolveLevelToUnlock(1)
                     .punchSound(() -> null).swingSound(ModSounds.SILVER_CHARIOT_SWEEP_HEAVY)
                     .partsRequired(StandPart.ARMS)));
     
@@ -481,8 +490,10 @@ public class ModStandsInit {
                             .speed(14.0)
                             .range(10.0)
                             .durability(12.0)
-                            .armor(15.0F)
+                            .armor(20.0F)
+                            .armorToughness(8.0F)
                             .precision(16.0)
+                            .randomWeight(2)
                             )
                     .addSummonShout(ModSounds.POLNAREFF_SILVER_CHARIOT)
                     .addOst(ModSounds.SILVER_CHARIOT_OST)
@@ -504,6 +515,7 @@ public class ModStandsInit {
 
     public static final RegistryObject<StandEntityHeavyAttack> MAGICIANS_RED_KICK = ACTIONS.register("magicians_red_kick", 
             () -> new MagiciansRedKick(new StandEntityHeavyAttack.Builder()
+                    .resolveLevelToUnlock(1)
                     .punchSound(ModSounds.MAGICIANS_RED_KICK_HEAVY)
                     .partsRequired(StandPart.LEGS)));
 
@@ -579,6 +591,7 @@ public class ModStandsInit {
                             .range(5.0, 10.0)
                             .durability(12.0)
                             .precision(8.0)
+                            .randomWeight(2)
                             )
                     .addSummonShout(ModSounds.AVDOL_MAGICIANS_RED)
                     .addOst(ModSounds.MAGICIANS_RED_OST)
@@ -597,18 +610,19 @@ public class ModStandsInit {
     public static final RegistryObject<StandEntityLightAttack> CRAZY_DIAMOND_PUNCH = ACTIONS.register("crazy_diamond_punch", 
             () -> new StandEntityLightAttack(new StandEntityLightAttack.Builder()
                     .punchSound(ModSounds.CRAZY_DIAMOND_PUNCH_LIGHT)
-                    .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_DORA)
+                    .standSound(Phase.WINDUP, false, ModSounds.CRAZY_DIAMOND_DORA)
                     ));
     
     public static final RegistryObject<StandEntityMeleeBarrage> CRAZY_DIAMOND_BARRAGE = ACTIONS.register("crazy_diamond_barrage", 
             () -> new StandEntityMeleeBarrage(new StandEntityMeleeBarrage.Builder()
                     .barrageHitSound(ModSounds.CRAZY_DIAMOND_PUNCH_BARRAGE)
-                    .standSound(ModSounds.CRAZY_DIAMOND_DORARARA)));
+                    .standSound(Phase.PERFORM, false, ModSounds.CRAZY_DIAMOND_DORARARA)));
     
     public static final RegistryObject<StandEntityHeavyAttack> CRAZY_DIAMOND_FINISHER_PUNCH = ACTIONS.register("crazy_diamond_misshaping_punch", 
             () -> new CrazyDiamondMisshapingPunch(new StandEntityHeavyAttack.Builder()
+                    .resolveLevelToUnlock(1)
                     .punchSound(ModSounds.CRAZY_DIAMOND_PUNCH_HEAVY)
-                    .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_DORA_LONG)
+                    .standSound(Phase.WINDUP, false, ModSounds.CRAZY_DIAMOND_DORA_LONG)
                     .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<StandEntityActionModifier> CRAZY_DIAMOND_MISSHAPE_FACE = ACTIONS.register("crazy_diamond_misshape_face", 
@@ -721,6 +735,7 @@ public class ModStandsInit {
                             .range(2.0, 4.0)
                             .durability(12.0)
                             .precision(12.0)
+                            .randomWeight(2)
                             )
                     .addSummonShout(ModSounds.JOSUKE_CRAZY_DIAMOND)
                     .addOst(ModSounds.CRAZY_DIAMOND_OST)
@@ -751,7 +766,7 @@ public class ModStandsInit {
                         .durability(0)
                         .precision(0)
                         )
-                .setPlayerAccess(false)
+                .setSurvivalGameplayPool(StandSurvivalGameplayPool.NPC_ENCOUNTER)
                 .build()
             );
     

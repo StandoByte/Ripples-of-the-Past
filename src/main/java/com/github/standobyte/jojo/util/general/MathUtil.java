@@ -1,6 +1,11 @@
 package com.github.standobyte.jojo.util.general;
 
 import java.lang.reflect.Field;
+import java.util.Optional;
+import java.util.Random;
+import java.util.function.ToDoubleFunction;
+import java.util.function.ToIntFunction;
+import java.util.stream.StreamSupport;
 
 import com.github.standobyte.jojo.util.mc.reflection.ReflectionUtil;
 
@@ -89,6 +94,42 @@ public class MathUtil {
             numInt++;
         }
         return numInt;
+    }
+    
+    public static <T> Optional<T> getRandomWeightedInt(Iterable<T> items, ToIntFunction<T> getWeight, Random random) {
+        ToIntFunction<T> getWeightSafe = element -> Math.max(getWeight.applyAsInt(element), 0);
+        int weightSum = StreamSupport.stream(items.spliterator(), false)
+                .mapToInt(getWeightSafe).sum();
+        if (weightSum <= 0) return Optional.empty();
+        
+        int randomNum = random.nextInt(weightSum);
+
+        for (T element: items) {
+            randomNum -= getWeightSafe.applyAsInt(element);
+            if (randomNum < 0) {
+                return Optional.of(element);
+            }
+        }
+        
+        return Optional.empty();
+    }
+    
+    public static <T> Optional<T> getRandomWeightedDouble(Iterable<T> items, ToDoubleFunction<T> getWeight, Random random) {
+        ToDoubleFunction<T> getWeightSafe = element -> Math.max(getWeight.applyAsDouble(element), 0);
+        double weightSum = StreamSupport.stream(items.spliterator(), false)
+                .mapToDouble(getWeightSafe).sum();
+        if (weightSum <= 0) return Optional.empty();
+        
+        double randomNum = random.nextDouble() * weightSum;
+
+        for (T element: items) {
+            randomNum -= getWeightSafe.applyAsDouble(element);
+            if (randomNum < 0) {
+                return Optional.of(element);
+            }
+        }
+        
+        return Optional.empty();
     }
     
     public static float fadeOut(float time, float maxTime, float fractionUntilFadeOut) {

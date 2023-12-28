@@ -1,8 +1,8 @@
 package com.github.standobyte.jojo.action.stand;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
@@ -27,7 +27,7 @@ public class TheWorldBarrage extends StandEntityMeleeBarrage {
     }
     
     @Override
-    public List<Supplier<SoundEvent>> getSounds(StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task) {
+    public Stream<SoundEvent> getSounds(StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task) {
         if (Optional.ofNullable(standPower.getUser()).map(
                 user -> user.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).map(
                         cap -> cap.lastVoiceLineTriggered).orElse(false))

@@ -1,7 +1,8 @@
 {
   "display": {
     "icon": {
-      "item": "jojo:stone_mask"
+      "item": "jojo:meteoric_scrap",
+      "nbt": "{Icon:1}"
     },
     "title": {
       "translate": "advancements.jojo.root.title"
@@ -10,21 +11,21 @@
       "translate": "advancements.jojo.root.description"
     },
     "frame": "task",
-    "show_toast": false,
-    "announce_to_chat": false,
+    "show_toast": true,
+    "announce_to_chat": true,
     "hidden": false,
     "background": "jojo:textures/gui/advancements/jojo.png"
   },
   "criteria": {
-    "do_nothing": {
-      "trigger": "minecraft:tick",
+    "stand_afk": {
+      "trigger": "jojo:afk",
       "conditions": {
       }
     }
   },
   "requirements": [
     [
-      "do_nothing"
+      "stand_afk"
     ]
   ]
 }

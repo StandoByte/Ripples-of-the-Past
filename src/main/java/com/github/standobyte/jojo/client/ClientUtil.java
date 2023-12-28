@@ -121,6 +121,11 @@ public class ClientUtil {
         return Minecraft.getInstance().getLanguageManager().getSelected().getCode();
     }
     
+    public static boolean isInSinglePlayer() {
+        Minecraft mc = Minecraft.getInstance();
+        return mc.hasSingleplayerServer() && !mc.getSingleplayerServer().isPublished();
+    }
+    
     public static boolean useActionShiftVar(PlayerEntity player) {
         return player.isShiftKeyDown();
     }
@@ -354,6 +359,14 @@ public class ClientUtil {
         int green = (color >> 8) & 0xFF;
         int blue = color & 0xFF;
         return new int[] {red, green, blue};
+    }
+    
+    public static int fromRgb(float r, float g, float b) {
+        return ((int) (r * 255) << 16) + ((int) (g * 255) << 8) + (int) (b * 255);
+    }
+    
+    public static int fromRgbInt(int r, int g, int b) {
+        return (r << 16) + (g << 8) + b;
     }
     
     public static int discColor(int color) {

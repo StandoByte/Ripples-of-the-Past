@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.entity.stand;
 
 import java.util.Random;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
 import net.minecraft.util.math.MathHelper;
@@ -85,15 +86,25 @@ public class StandStatFormulas {
     
     
     public static float getPhysicalResistance(double durability, double strength, float blocked, float damageDealt) {
-        double resistance = MathHelper.clamp(durability * 0.01875 + strength * 0.0125, 0, 1);
+        double resistance = MathHelper.clamp(durability * 0.03 + strength * 0.02, 0, 1);
+        double dmgCoeff = 1;
+        
         if (blocked > 0) {
-            double dmgBlockingCoeff = 0.8;
-            double furtherReductionCap = durability / 8;
+            dmgCoeff -= 0.8 * blocked;
+            double furtherReductionCap = durability / 2;
+            
             if (damageDealt < furtherReductionCap) {
-                dmgBlockingCoeff += (1 - dmgBlockingCoeff) * (1 - damageDealt / furtherReductionCap);
+                dmgCoeff *= damageDealt / furtherReductionCap;
             }
-            resistance += (1 - resistance) * blocked * dmgBlockingCoeff;
         }
+        
+        double config = JojoModConfig.getCommonConfigInstance(false).standResistanceMultiplier.get();
+        config = 3;
+        if (config > 1) {
+            dmgCoeff /= config;
+        }
+        
+        resistance += (1 - resistance) * MathHelper.clamp(1 - dmgCoeff, 0, 1);
         return (float) resistance;
     }
     
@@ -106,7 +117,7 @@ public class StandStatFormulas {
     }
     
     public static float getBlockStaminaCost(float incomingDamage) {
-        return 0.5F + (float) Math.pow(incomingDamage, 2);
+        return (float) Math.pow(incomingDamage, 2) / 2;
     }
     
     public static int getSummonLockTicks(double speed) {

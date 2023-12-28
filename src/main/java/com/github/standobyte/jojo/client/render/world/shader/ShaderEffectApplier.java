@@ -8,8 +8,8 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.stand.TimeStop;
+import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.ClientTimeStopHandler;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.resources.CustomResources;
@@ -83,7 +83,7 @@ public class ShaderEffectApplier {
         
         ClientTimeStopHandler tsFields = ClientTimeStopHandler.getInstance();
         if (tsFields.isTimeStopped() && tsFields.canSeeInStoppedTime() && timeStopAction != null) {
-            boolean animationConfig = JojoModConfig.CLIENT.timeStopAnimation.get();
+            boolean animationConfig = ClientModSettings.getSettingsReadOnly().timeStopAnimation;
             ResourceLocation timeStopShader = timeStopAction.getTimeStopShader(animationConfig);
             if (timeStopShader != null) {
                 return ShaderResLocation.fromResLoc(timeStopShader, animationConfig);
@@ -91,7 +91,7 @@ public class ShaderEffectApplier {
         }
         tsShaderStarted = false;
         
-        if (JojoModConfig.CLIENT.resolveShaders.get() && resolveShader != null) {
+        if (ClientModSettings.getSettingsReadOnly().resolveShaders && resolveShader != null) {
             return resolveShader;
         }
         return null;
@@ -166,7 +166,7 @@ public class ShaderEffectApplier {
             float tsTick = tsFields.getTimeStopTicks() + partialTick;
             tsShader.safeGetUniform("TSTicks") .set(tsTick);
             tsShader.safeGetUniform("TSLength").set(tsFields.getTimeStopLength());
-            if (!JojoModConfig.CLIENT.timeStopAnimation.get() || tsPosOnScreen == null) {
+            if (!ClientModSettings.getSettingsReadOnly().timeStopAnimation || tsPosOnScreen == null) {
                 tsShader.safeGetUniform("TSEffectLength").set(0);
             }
             if (tsPosOnScreen != null) {

@@ -99,6 +99,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
@@ -1043,7 +1044,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     
     public void defaultRotation() {
         LivingEntity user = getUser();
-        if (user != null && !isRemotePositionFixed()) {
+        if (user != null && !isManuallyControlled() && !isRemotePositionFixed()) {
             setRot(user.yRot, user.xRot);
         }
         setYHeadRot(this.yRot);
@@ -1409,23 +1410,34 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
 
 
     
-    public RayTraceResult aimWithStandOrUser(double reachDistance, ActionTarget currentTarget) {
-        RayTraceResult aim;
-        if (!isManuallyControlled()) {
-            LivingEntity user = getUser();
-            if (user != null && currentTarget.getType() != TargetType.ENTITY) {
-                aim = precisionRayTrace(user, reachDistance);
-                if (JojoModUtil.isAnotherEntityTargeted(aim, this)
-                        || currentTarget.getType() == TargetType.EMPTY && aim.getType() != RayTraceResult.Type.MISS) {
-                    Vector3d targetPos = ActionTarget.fromRayTraceResult(aim).getTargetPos(true);
-                    if (targetPos != null) {
-                        MCUtil.rotateTowards(this, targetPos, (float) getAttackSpeed() / 16F * 18F);
-                    }
+    public ActionTarget aimWithStandOrUser(double reachDistance, ActionTarget currentTarget) {
+        ActionTarget target;
+        if (currentTarget.getType() == TargetType.ENTITY && isTargetInReach(currentTarget)) {
+            target = currentTarget;
+        }
+        else {
+            RayTraceResult aim = null;
+            if (!isManuallyControlled()) {
+                LivingEntity user = getUser();
+                if (user != null) {
+                    aim = precisionRayTrace(user, reachDistance);
                 }
             }
+            if (aim == null) {
+                aim = precisionRayTrace(this, reachDistance);
+            }
+            
+            target = ActionTarget.fromRayTraceResult(aim);
         }
-        aim = precisionRayTrace(this, reachDistance);
-        return aim;
+        
+        if (target.getEntity() != this) {
+            Vector3d targetPos = target.getTargetPos(true);
+            if (targetPos != null) {
+                MCUtil.rotateTowards(this, targetPos, (float) getAttackSpeed() / 16F * 18F);
+            }
+        }
+        
+        return target;
     }
     
     public RayTraceResult precisionRayTrace(Entity aimingEntity) {
@@ -1443,14 +1455,57 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         return reachDistance;
     }
 
-    public Predicate<Entity> canTarget() {
+    public Predicate<Entity> canTargetEntity() {
         return entity -> !entity.is(this) && !entity.is(getUser()) && entity.isAlive()
                 && !(entity instanceof ProjectileEntity && this.is(((ProjectileEntity) entity).getOwner()));
     }
     
     public RayTraceResult precisionRayTrace(Entity aimingEntity, double reachDistance) {
-        return JojoModUtil.rayTrace(aimingEntity, 
-                reachDistance, canTarget(), 0.25, getPrecision());
+        return precisionRayTrace(aimingEntity, reachDistance, 0);
+    }
+    
+    public RayTraceResult precisionRayTrace(Entity aimingEntity, double reachDistance, double rayTraceInflate) {
+        RayTraceResult[] targets = JojoModUtil.rayTraceMultipleEntities(aimingEntity, 
+                reachDistance, canTargetEntity(), rayTraceInflate, getPrecision());
+        if (targets.length == 1) {
+            return targets[0];
+        }
+
+        /* get the closest targets in each category, with categories given different priorities
+         *   0 - players
+         *   1 - living entities
+         *   2 - other entities
+         *   3 - blocks
+         */
+        RayTraceResult[] closestWithPriority = new RayTraceResult[4];
+        for (RayTraceResult target : targets) {
+            if (target instanceof EntityRayTraceResult) {
+                Entity targetEntity = ((EntityRayTraceResult) target).getEntity();
+                if (targetEntity instanceof LivingEntity) {
+                    if (targetEntity instanceof PlayerEntity) {
+                        setIfNull(closestWithPriority, 0, target);
+                    }
+                    else {
+                        setIfNull(closestWithPriority, 1, target);
+                    }
+                }
+                else {
+                    setIfNull(closestWithPriority, 2, target);
+                }
+            }
+            else {
+                setIfNull(closestWithPriority, 3, target);
+            }
+        }
+        for (RayTraceResult target : closestWithPriority) {
+            if (target != null) return target;
+        }
+        
+        return targets[0];
+    }
+    
+    private static <T> void setIfNull(T[] array, int index, T value) {
+        if (array[index] == null) array[index] = value;
     }
     
     public boolean canAttackMelee() {
@@ -1459,7 +1514,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
 
     public boolean punch(StandEntityTask task, IHasStandPunch punch, ActionTarget target) {
         if (!level.isClientSide()) {
-            ActionTarget finalTarget = ActionTarget.fromRayTraceResult(aimWithStandOrUser(getAimDistance(getUser()), target));
+            ActionTarget finalTarget = aimWithStandOrUser(getAimDistance(getUser()), target);
             target = finalTarget.getType() != TargetType.EMPTY && isTargetInReach(finalTarget) ? finalTarget : ActionTarget.EMPTY;
             setTaskTarget(target);
         }
@@ -1650,7 +1705,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
     
     public float getFinisherMeter() {
-        if (userPower != null && !StandUtil.isFinisherUnlocked(userPower)) {
+        if (userPower != null && !StandUtil.isFinisherMechanicUnlocked(userPower)) {
             return 0;
         }
         return entityData.get(FINISHER_VALUE);
@@ -1686,14 +1741,6 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     
     public int getNoFinisherDecayTicks() {
         return noFinisherDecayTicks;
-    }
-    
-    public void parryHeavyAttack() {
-        if (!level.isClientSide()) {
-            stopTask(true);
-            addEffect(new EffectInstance(ModStatusEffects.STUN.get(), 20));
-            playSound(ModSounds.STAND_PARRY.get(), 1.0F, 1.0F);
-        }
     }
     
     public void breakStandBlocking(int lockTicks) {

@@ -889,38 +889,38 @@ public class GameplayEventHandler {
 //        overdrive was there
 //    }
     
-    @SubscribeEvent(priority = EventPriority.LOW, receiveCanceled = true)
-    public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
-        if (event.getCancellationResult() == ActionResultType.PASS && event.getHand() == Hand.MAIN_HAND && !event.getPlayer().isShiftKeyDown()) {
-            Entity target = event.getTarget();
-            if (target instanceof PlayerEntity) {
-                PlayerEntity targetPlayer = (PlayerEntity) target;
-                INonStandPower targetPower = INonStandPower.getNonStandPowerOptional(targetPlayer).orElse(null);
-                INonStandPower playerPower = INonStandPower.getNonStandPowerOptional(event.getPlayer()).orElse(null);
-                if (targetPower != null && playerPower != null && 
-                        targetPower.getType() == ModPowers.HAMON.get()
-                        && (!playerPower.hasPower() || playerPower.getType().isReplaceableWith(ModPowers.HAMON.get()))) {
-                    HamonUtil.interactWithHamonTeacher(target.level, event.getPlayer(), targetPlayer, 
-                            targetPower.getTypeSpecificData(ModPowers.HAMON.get()).get());
-                    event.setCanceled(true);
-                    event.setCancellationResult(ActionResultType.sidedSuccess(target.level.isClientSide));
-                }
-                else {
-                    playerPower.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                        hamon.interactWithNewLearner(targetPlayer);
-                        event.setCanceled(true);
-                        event.setCancellationResult(ActionResultType.sidedSuccess(target.level.isClientSide));
-                    });
-                }
-            }
-        }
-    }
+//    @SubscribeEvent(priority = EventPriority.LOW, receiveCanceled = true)
+//    public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
+//        if (event.getCancellationResult() == ActionResultType.PASS && event.getHand() == Hand.MAIN_HAND && !event.getPlayer().isShiftKeyDown()) {
+//            Entity target = event.getTarget();
+//            if (target instanceof PlayerEntity) {
+//                PlayerEntity targetPlayer = (PlayerEntity) target;
+//                INonStandPower targetPower = INonStandPower.getNonStandPowerOptional(targetPlayer).orElse(null);
+//                INonStandPower playerPower = INonStandPower.getNonStandPowerOptional(event.getPlayer()).orElse(null);
+//                if (targetPower != null && playerPower != null && 
+//                        targetPower.getType() == ModPowers.HAMON.get()
+//                        && (!playerPower.hasPower() || playerPower.getType().isReplaceableWith(ModPowers.HAMON.get()))) {
+//                    HamonUtil.interactWithHamonTeacher(target.level, event.getPlayer(), targetPlayer, 
+//                            targetPower.getTypeSpecificData(ModPowers.HAMON.get()).get());
+//                    event.setCanceled(true);
+//                    event.setCancellationResult(ActionResultType.sidedSuccess(target.level.isClientSide));
+//                }
+//                else {
+//                    playerPower.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
+//                        hamon.interactWithNewLearner(targetPlayer);
+//                        event.setCanceled(true);
+//                        event.setCancellationResult(ActionResultType.sidedSuccess(target.level.isClientSide));
+//                    });
+//                }
+//            }
+//        }
+//    }
     
     @SubscribeEvent(priority = EventPriority.LOW, receiveCanceled = true)
     public static void tripwireInteract(PlayerInteractEvent.RightClickBlock event) {
         if (event.getHand() == Hand.MAIN_HAND && event.getUseBlock() != Event.Result.DENY) {
             PlayerEntity player = event.getPlayer();
-            if (!player.isSpectator() && player.getMainHandItem().isEmpty()) {
+            if (!player.isSpectator() && MCUtil.isHandFree(player, Hand.MAIN_HAND)) {
                 World world = player.level;
                 BlockPos pos = event.getHitVec().getBlockPos();
                 BlockState blockState = world.getBlockState(pos);
@@ -1036,6 +1036,10 @@ public class GameplayEventHandler {
                     ModCriteriaTriggers.SOUL_ASCENSION.get().trigger((ServerPlayerEntity) user, stand, ticks);
                 }
                 SoulEntity soulEntity = new SoulEntity(user.level, user, ticks, resolveCanLvlUp);
+                LivingEntity killer = user.getKillCredit();
+                if (killer != null) {
+                    soulEntity.setNoResolveToEntity(StandUtil.getStandUser(killer));
+                }
                 user.level.addFreshEntity(soulEntity);
             });
         }

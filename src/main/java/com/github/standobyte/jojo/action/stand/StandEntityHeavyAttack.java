@@ -1,9 +1,12 @@
 package com.github.standobyte.jojo.action.stand;
 
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.ArrayUtils;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
@@ -20,8 +23,7 @@ import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
-import com.github.standobyte.jojo.power.impl.stand.StandUtil;
-import com.github.standobyte.jojo.util.general.Container;
+import com.github.standobyte.jojo.util.general.ObjectWrapper;
 import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
 
 import net.minecraft.block.BlockState;
@@ -59,7 +61,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         if (followUp != null && standEntity != null && standEntity.getCurrentTask().map(task -> {
             return task.getAction() == this && 
                     !task.getModifierActions().filter(action -> action == followUp).findAny().isPresent() &&
-                    power.checkRequirements(followUp, new Container<>(task.getTarget()), true).isPositive();
+                    power.checkRequirements(followUp, new ObjectWrapper<>(task.getTarget()), true).isPositive();
         }).orElse(false)) {
             return followUp;
         };
@@ -133,7 +135,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         double strength = stand.getAttackDamage();
         return new HeavyPunchInstance(stand, target, dmgSource)
                 .damage(StandStatFormulas.getHeavyAttackDamage(strength))
-                .addKnockback(0.5F + (float) strength / 8)
+                .addKnockback(0.5F + (float) strength / (8 - stand.getLastHeavyFinisherValue() * 4))
                 .setStandInvulTime(10)
                 .impactSound(punchSound);
     }
@@ -190,13 +192,8 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     }
     
     @Override
-    public boolean isUnlocked(IStandPower power) {
-        return isFinisher ? StandUtil.isFinisherUnlocked(power) : super.isUnlocked(power);
-    }
-    
-    @Override
-    protected boolean playsVoiceLineOnShift() {
-        return isFinisher || super.playsVoiceLineOnShift();
+    protected boolean playsVoiceLineOnSneak() {
+        return isFinisher || super.playsVoiceLineOnSneak();
     }
     
     @Override
@@ -215,6 +212,23 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     
     public boolean canBeParried() {
         return !isFinisher;
+    }
+    
+    @Override
+    public StandAction[] getExtraUnlockable() {
+        StandAction[] actions = new StandAction[2];
+        int i = 0;
+        if (finisherVariation.get() != null) {
+            actions[i++] = finisherVariation.get();
+        }
+        if (recoveryAction.get() != null) {
+            actions[i++] = recoveryAction.get();
+        }
+        actions = Arrays.copyOfRange(actions, 0, i);
+        for (int j = 0; j < i; j++) {
+            actions = ArrayUtils.addAll(actions, actions[j].getExtraUnlockable());
+        }
+        return actions;
     }
     
     

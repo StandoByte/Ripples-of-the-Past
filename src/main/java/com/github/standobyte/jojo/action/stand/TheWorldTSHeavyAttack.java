@@ -80,14 +80,15 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
         if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
             StandEntity stand = (StandEntity) power.getStandManifestation();
             return ActionTarget.fromRayTraceResult(
-                    JojoModUtil.rayTrace(stand.isManuallyControlled() ? stand : user, 
-                            stand.getMaxRange(), stand.canTarget(), stand.getPrecision() / 16F, stand.getPrecision()));
+                    stand.precisionRayTrace(stand.isManuallyControlled() ? stand : user, stand.getMaxRange(),
+                            stand.getPrecision() / 16F));
         }
         return super.targetBeforePerform(world, user, power, target);
     }
     
     @Override
     protected void preTaskInit(World world, IStandPower standPower, StandEntity standEntity, ActionTarget target) {
+        standEntity.summonLockTicks = 0;
         if (!world.isClientSide() || standEntity.isManuallyControlled()) {
             LivingEntity aimingEntity = standEntity.isManuallyControlled() ? standEntity : standPower.getUser();
             if (aimingEntity != null) {
@@ -164,7 +165,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
     }
     
     private boolean doesBackshot(IStandPower standPower) {
-        return standPower.getUser().isShiftKeyDown();
+        return JojoModUtil.useShiftVar(standPower.getUser());
     }
     
     @Override

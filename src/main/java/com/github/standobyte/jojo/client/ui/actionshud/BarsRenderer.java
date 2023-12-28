@@ -15,11 +15,11 @@ import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.Alignme
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.BarsOrientation;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.IPower;
-import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
+import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -136,7 +136,8 @@ public abstract class BarsRenderer {
         }
     }
     
-    protected <P extends IPower<P, ?>> float getActionCost(ActionsModeConfig<P> mode, ActionType hotbar, LivingEntity user, boolean shift, ActionTarget target) {
+    protected <P extends IPower<P, ?>> float getActionCost(ActionsModeConfig<P> mode, 
+            ActionsLayout.Hotbar hotbar, LivingEntity user, boolean shift, ActionTarget target) {
         Action<P> action = mode.getSelectedAction(hotbar, shift, target);
         
         if (action != null) {
@@ -329,7 +330,7 @@ public abstract class BarsRenderer {
         }
         
         public void resetRedHighlight() {
-            this.redHighlightTick = redHighlightTick % 10;
+            this.redHighlightTick = redHighlightTick % 20;
         }
         
         private float lerpValue(float value, float partialTick) {

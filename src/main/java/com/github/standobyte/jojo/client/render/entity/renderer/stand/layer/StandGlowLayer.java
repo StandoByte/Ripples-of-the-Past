@@ -2,8 +2,6 @@ package com.github.standobyte.jojo.client.render.entity.renderer.stand.layer;
 
 import java.util.Optional;
 
-import javax.annotation.Nullable;
-
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ResourcePathChecker;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
@@ -14,10 +12,10 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import net.minecraft.util.ResourceLocation;
 
 public class StandGlowLayer<T extends StandEntity, M extends StandEntityModel<T>> extends StandModelLayerRenderer<T, M> {
-    private final ResourcePathChecker texturePathCheck;
+    private ResourcePathChecker texturePathCheck;
 
     public StandGlowLayer(StandEntityRenderer<T, M> entityRenderer, ResourceLocation baseTex) {
-        this(entityRenderer, entityRenderer.getModel(), baseTex);
+        this(entityRenderer, null, baseTex);
     }
 
     protected StandGlowLayer(StandEntityRenderer<T, M> entityRenderer, M model, ResourceLocation baseTex) {
@@ -28,13 +26,13 @@ public class StandGlowLayer<T extends StandEntity, M extends StandEntityModel<T>
     }
     
     @Override
-    public int getPackedLight(int packedLight) {
-        return ClientUtil.MAX_MODEL_LIGHT;
+    public ResourceLocation getLayerTexture(Optional<ResourceLocation> standSkin) {
+        return skinContainsGlow(standSkin).orElse(super.getLayerTexture(standSkin));
     }
     
     @Override
-    public ResourceLocation getLayerTexture(Optional<ResourceLocation> standSkin) {
-        return skinContainsGlow(standSkin).orElse(super.getLayerTexture(standSkin));
+    public int getPackedLight(int packedLight) {
+        return ClientUtil.MAX_MODEL_LIGHT;
     }
     
     private Optional<ResourceLocation> skinContainsGlow(Optional<ResourceLocation> standSkin) {

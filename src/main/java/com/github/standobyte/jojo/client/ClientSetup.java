@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.function.UnaryOperator;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.capability.item.cassette.CassetteCap;
 import com.github.standobyte.jojo.client.particle.AirStreamParticle;
 import com.github.standobyte.jojo.client.particle.BloodParticle;
 import com.github.standobyte.jojo.client.particle.CDRestorationParticle;
@@ -74,6 +73,7 @@ import com.github.standobyte.jojo.client.render.entity.renderer.itemprojectile.S
 import com.github.standobyte.jojo.client.render.entity.renderer.mob.HamonMasterRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.mob.HungryZombieRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.mob.RockPaperScissorsKidRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.mob.StandUserDummyRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.CrazyDiamondRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.HierophantGreenRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.MagiciansRedRenderer;
@@ -102,6 +102,7 @@ import com.github.standobyte.jojo.item.CassetteRecordedItem;
 import com.github.standobyte.jojo.item.StandArrowItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
+import com.github.standobyte.jojo.item.cassette.CassetteCap;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 
 import net.minecraft.client.Minecraft;
@@ -199,6 +200,7 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HUNGRY_ZOMBIE.get(), HungryZombieRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HAMON_MASTER.get(), HamonMasterRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.ROCK_PAPER_SCISSORS_KID.get(), RockPaperScissorsKidRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.STAND_USER_DUMMY.get(), StandUserDummyRenderer::new);
         
         RenderingRegistry.registerEntityRenderingHandler(ModStands.STAR_PLATINUM.getEntityType(), StarPlatinumRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModStands.THE_WORLD.getEntityType(), TheWorldRenderer::new);
@@ -240,7 +242,7 @@ public class ClientSetup {
                 return StandDiscItem.validStandDisc(itemStack, true) ? JojoCustomRegistries.STANDS.getNumericId(StandDiscItem.getStandFromStack(itemStack, true).getType().getRegistryName()) : -1;
             });
             ItemModelsProperties.register(ModItems.CASSETTE_RECORDED.get(), new ResourceLocation(JojoMod.MOD_ID, "cassette_distortion"), (itemStack, clientWorld, livingEntity) -> {
-                return CassetteRecordedItem.getCapability(itemStack)
+                return CassetteRecordedItem.getCassetteData(itemStack)
                         .map(cap -> MathHelper.clamp(cap.getGeneration(), 0, CassetteCap.MAX_GENERATION))
                         .orElse(0).floatValue();
             });
@@ -331,7 +333,7 @@ public class ClientSetup {
         itemColors.register((stack, layer) -> {
             if (layer != 1) return -1;
 
-            Optional<DyeColor> dye = CassetteRecordedItem.getCapability(stack).map(cap -> cap.getDye()).orElse(Optional.empty());
+            Optional<DyeColor> dye = CassetteRecordedItem.getCassetteData(stack).map(cap -> cap.getDye()).orElse(Optional.empty());
             return dye.isPresent() ? dye.get().getColorValue() : 0xeff0e0;
         }, ModItems.CASSETTE_RECORDED.get());
     }
@@ -398,6 +400,7 @@ public class ClientSetup {
         CustomParticlesHelper.saveSprites(mc);
         // yep...
         CustomResources.initCustomResourceManagers(mc);
+        StandControlMouseHelper.overrideVanillaMouseHelper(mc);
     }
 
     private static class SoulCloudParticleFactory extends CloudParticle.Factory {

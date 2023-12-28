@@ -25,7 +25,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
 public abstract class StandAction extends Action<IStandPower> {
-    private final int resolveLevelToUnlock;
+    protected final int resolveLevelToUnlock;
     private final float resolveCooldownMultiplier;
     private final boolean isTrained;
     private final boolean autoSummonStand;
@@ -51,8 +51,26 @@ public abstract class StandAction extends Action<IStandPower> {
     
     @Override
     public boolean isUnlocked(IStandPower power) {
-        return resolveLevelToUnlock == 0 || power.getLearningProgressPoints(this) >= 0;
+        return power.getLearningProgressPoints(this) >= 0;
     }
+    
+    @Override
+    public boolean isTrained() {
+        return isTrained;
+    }
+    
+    private static final StandAction[] NO_EXTRA_ACTIONS = new StandAction[0];
+    public StandAction[] getExtraUnlockable() {
+        return NO_EXTRA_ACTIONS;
+    }
+    
+    public float getMaxTrainingPoints(IStandPower power) {
+        return 1F;
+    }
+    
+    public void onTrainingPoints(IStandPower power, float points) {}
+    
+    public void onMaxTraining(IStandPower power) {}
     
     @Override
     protected int getCooldownAdditional(IStandPower power, int ticksHeld) {
@@ -79,16 +97,14 @@ public abstract class StandAction extends Action<IStandPower> {
     }
     
     public boolean canBeUnlocked(IStandPower power) {
-        return power.isUserCreative() || 
-                resolveLevelToUnlock > -1 && power.getResolveLevel() >= resolveLevelToUnlock || isUnlockedByDefault();
+        return !isUnlocked(power) && (
+                power.isUserCreative() || 
+                resolveLevelToUnlock > -1 && power.getResolveLevel() >= resolveLevelToUnlock || 
+                isUnlockedByDefault());
     }
     
-    protected boolean isUnlockedByDefault() {
+    public boolean isUnlockedByDefault() {
         return resolveLevelToUnlock == 0;
-    }
-    
-    public boolean isTrained() {
-        return isTrained;
     }
     
     public float getStaminaCost(IStandPower stand) {

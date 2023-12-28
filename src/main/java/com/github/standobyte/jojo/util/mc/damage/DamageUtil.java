@@ -58,7 +58,8 @@ public class DamageUtil {
     public static final DamageSource COLD = new DamageSource("cold").bypassArmor();
     public static final DamageSource HAMON = new DamageSource("hamon").bypassArmor();
     public static final DamageSource PILLAR_MAN_ABSORPTION = new DamageSource("pillarManAbsorption").setScalesWithDifficulty();
-    public static final DamageSource STAND_VIRUS = new DamageSource("standVirus").bypassArmor();
+    public static final DamageSource STAND_VIRUS = new DamageSource("standVirus").bypassArmor().bypassMagic();
+    public static final DamageSource STAND_VIRUS_METEORITE = new DamageSource("standVirusMeteorite").bypassArmor().bypassMagic();
     public static final DamageSource SUFFOCATION = new DamageSource("suffocation").bypassArmor();
     public static final DamageSource EYE_OF_ENDER_SHARDS = new DamageSource("eyeOfEnderShards").bypassArmor();
     public static final String ROAD_ROLLER_MSG = "roadRoller";

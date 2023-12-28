@@ -10,6 +10,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.MouseHelper;
 import net.minecraft.client.audio.ISoundEventAccessor;
 import net.minecraft.client.audio.Sound;
 import net.minecraft.client.audio.SoundEventAccessor;
@@ -161,6 +162,12 @@ public class ClientReflection {
     }
     
     
+    private static final Field TEXTURED_QUAD_VERTICES = ObfuscationReflectionHelper.findField(ModelRenderer.TexturedQuad.class, "field_78239_a");
+    public static void setVertices(ModelRenderer.TexturedQuad quad, ModelRenderer.PositionTextureVertex[] vertices) {
+        ReflectionUtil.setFieldValue(TEXTURED_QUAD_VERTICES, quad, vertices);
+    }
+    
+    
     private static final Field SOUND_EVENT_ACCESSOR_LIST = ObfuscationReflectionHelper.findField(SoundEventAccessor.class, "field_188716_a");
     public static List<ISoundEventAccessor<Sound>> getSubAccessorsList(SoundEventAccessor accessor) {
         return ReflectionUtil.getFieldValue(SOUND_EVENT_ACCESSOR_LIST, accessor);
@@ -203,6 +210,11 @@ public class ClientReflection {
     private static final Field PARTICLE_MANAGER_TEXTURE_MANAGER = ObfuscationReflectionHelper.findField(ParticleManager.class, "field_78877_c");
     public static void setTextureManager(ParticleManager particleManager, TextureManager textureManager) {
         ReflectionUtil.setFieldValue(PARTICLE_MANAGER_TEXTURE_MANAGER, particleManager, textureManager);
+    }
+    
+    private static final Field MINECRAFT_MOUSE_HANDLER = ObfuscationReflectionHelper.findField(Minecraft.class, "field_71417_B");
+    public static void setMouseHandler(Minecraft mc, MouseHelper mouseHandler) {
+        ReflectionUtil.setFieldValue(MINECRAFT_MOUSE_HANDLER, mc, mouseHandler);
     }
     
     

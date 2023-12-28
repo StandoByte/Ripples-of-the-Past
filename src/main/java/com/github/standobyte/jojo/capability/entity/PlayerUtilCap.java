@@ -21,6 +21,7 @@ import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.NotificationSyncPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrDirectEntityDataPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDoubleShiftPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonLiquidWalkingPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrKnivesCountPacket;
@@ -35,9 +36,12 @@ import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.PlayerStatListener;
 import com.github.standobyte.jojo.util.mod.JojoModVersion;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
@@ -48,32 +52,7 @@ import net.minecraft.world.World;
 public class PlayerUtilCap {
     private final PlayerEntity player;
     
-    private Set<OneTimeNotification> notificationsSent = EnumSet.noneOf(OneTimeNotification.class);
-    
-    private int knives;
-    private int removeKnifeTime;
-    
     public int knivesThrewTicks = 0;
-    
-    private boolean hasClientInput;
-    private int noClientInputTimer;
-    
-    private Optional<RockPaperScissorsGame> currentGame = Optional.empty();
-    
-    private boolean walkmanEarbuds = false;
-    
-    private Optional<ContinuousActionInstance<?, ?>> continuousAction = Optional.empty();
-    
-    private boolean doubleShiftPress = false;
-    private boolean shiftSynced = false;
-    private boolean isWalkingOnLiquid = false;
-    private boolean clTickSpark;
-    
-    private int chatSpamTickCount = 0;
-    
-    private BedType lastBedType;
-    private int ticksNoSleep;
-    private long nextSleepTime;
     
     public PlayerUtilCap(PlayerEntity player) {
         this.player = player;
@@ -99,6 +78,10 @@ public class PlayerUtilCap {
         
         tickContinuousAction();
         tickDoubleShift();
+    }
+    
+    public void saveOnDeath(PlayerUtilCap cap) {
+        this.notificationsSent = cap.notificationsSent;
     }
     
     public CompoundNBT toNBT() {
@@ -132,6 +115,34 @@ public class PlayerUtilCap {
     
     
     
+    private final Map<Entity, Map<DataParameter<?>, EntityDataManager.DataEntry<?>>> tsDelayedData = new HashMap<>();
+    public void addDataForTSUnfreeze(Entity entity, Iterable<EntityDataManager.DataEntry<?>> newData) {
+        Map<DataParameter<?>, EntityDataManager.DataEntry<?>> data = tsDelayedData.computeIfAbsent(entity, e -> new HashMap<>());
+        for (EntityDataManager.DataEntry<?> dataEntry : newData) {
+            data.put(dataEntry.getAccessor(), dataEntry);
+        }
+    }
+    
+    public void sendDataOnTSUnfreeze() {
+        if (player.level.isClientSide()) {
+            return;
+        }
+        
+        ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
+        if (!tsDelayedData.isEmpty()) {
+            tsDelayedData.forEach((entity, data) -> {
+                if (!data.isEmpty()) {
+                    PacketManager.sendToClient(new TrDirectEntityDataPacket(entity.getId(), new ArrayList<>(data.values())), serverPlayer);
+                }
+            });
+        }
+        
+        tsDelayedData.clear();
+    }
+    
+    
+    
+    private Optional<ContinuousActionInstance<?, ?>> continuousAction = Optional.empty();
     public void setContinuousAction(@Nullable ContinuousActionInstance<?, ?> action) {
         continuousAction = Optional.ofNullable(action);
         if (!player.level.isClientSide()) {
@@ -168,6 +179,11 @@ public class PlayerUtilCap {
     }
     
     
+    
+    private boolean doubleShiftPress = false;
+    private boolean shiftSynced = false;
+    private boolean isWalkingOnLiquid = false;
+    private boolean clTickSpark;
     
     public void setDoubleShiftPress() {
         doubleShiftPress = true;
@@ -224,6 +240,8 @@ public class PlayerUtilCap {
     
     
     
+    private Set<OneTimeNotification> notificationsSent = EnumSet.noneOf(OneTimeNotification.class);
+    
     public void sendNotification(OneTimeNotification notification, ITextComponent message) {
         if (!sentNotification(notification)) {
             player.sendMessage(message, Util.NIL_UUID);
@@ -245,10 +263,6 @@ public class PlayerUtilCap {
         if (!player.level.isClientSide()) {
             PacketManager.sendToClient(new NotificationSyncPacket(notificationsSent), (ServerPlayerEntity) player);
         }
-    }
-    
-    public void moveNotificationsSet(PlayerUtilCap cap) {
-        this.notificationsSent = cap.notificationsSent;
     }
     
     public static enum OneTimeNotification {
@@ -276,6 +290,9 @@ public class PlayerUtilCap {
     }
     
     
+    
+    private int knives;
+    private int removeKnifeTime;
     
     public void setKnives(int knives) {
         knives = Math.max(knives, 0);
@@ -309,6 +326,9 @@ public class PlayerUtilCap {
     
     
     
+    private boolean hasClientInput;
+    private int noClientInputTimer;
+    
     public void setHasClientInput(boolean hasInput) {
         this.hasClientInput = hasInput;
         if (hasClientInput) {
@@ -331,6 +351,10 @@ public class PlayerUtilCap {
     }
     
     
+    
+    private BedType lastBedType;
+    private int ticksNoSleep;
+    private long nextSleepTime;
     
     private void tickNoSleepTimer() {
         if (ticksNoSleep > 0) ticksNoSleep--;
@@ -363,6 +387,8 @@ public class PlayerUtilCap {
     
     
     
+    private Optional<RockPaperScissorsGame> currentGame = Optional.empty();
+    
     public Optional<RockPaperScissorsGame> getCurrentRockPaperScissorsGame() {
         return currentGame;
     }
@@ -372,6 +398,8 @@ public class PlayerUtilCap {
     }
     
     
+    
+    private boolean walkmanEarbuds = false;
     
     public void setEarbuds(boolean earbuds) {
         if (this.walkmanEarbuds != earbuds) {
@@ -387,6 +415,8 @@ public class PlayerUtilCap {
     }
     
     
+    
+    private int chatSpamTickCount = 0;
     
     public void onChatMsgBypassingSpamCheck(MinecraftServer server, ServerPlayerEntity serverPlayer) {
         chatSpamTickCount += 20;

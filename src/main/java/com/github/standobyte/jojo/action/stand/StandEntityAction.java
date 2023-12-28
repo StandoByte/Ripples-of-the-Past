@@ -1,13 +1,15 @@
 package com.github.standobyte.jojo.action.stand;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -49,7 +51,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     @Nullable
     protected final StandRelativeOffset userOffsetArmsOnly;
     public final boolean enablePhysics;
-    protected final Map<Phase, List<Supplier<SoundEvent>>> standSounds;
+    private final Map<Phase, List<StandSound>> standSounds;
     protected final Supplier<StandEntityMeleeBarrage> barrageVisuals;
     
     public StandEntityAction(StandEntityAction.AbstractBuilder<?> builder) {
@@ -322,26 +324,32 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     public void taskCopyAdditional(StandEntityTask task, StandEntityTask sourceTask) {}
     
     public void playSound(StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task) {
-        List<Supplier<SoundEvent>> sounds = getSounds(standEntity, standPower, phase, task);
+        Stream<SoundEvent> sounds = getSounds(standEntity, standPower, phase, task);
         if (sounds != null) {
-            sounds.forEach(soundSupplier -> {
-                if (soundSupplier != null) {
-                    SoundEvent sound = soundSupplier.get();
-                    if (sound != null) {
-                        playSoundAtStand(standEntity.level, standEntity, sound, standPower, phase);
-                    }
+            sounds.forEach(sound -> {
+                if (sound != null) {
+                    playSoundAtStand(standEntity.level, standEntity, sound, standPower, phase);
                 }
             });
         }
     }
     
     @Nullable
-    public List<Supplier<SoundEvent>> getSounds(StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task) {
+    public Stream<SoundEvent> getSounds(StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task) {
         if (barrageVisuals(standEntity, standPower, task)) {
             return barrageVisuals.get().getSounds(standEntity, standPower, phase, task);
         }
         
-        return standSounds.get(phase);
+        return getPhaseStandSounds(phase, standEntity);
+    }
+    
+    protected final Stream<SoundEvent> getPhaseStandSounds(Phase phase, StandEntity standEntity) {
+        boolean armsOnly = standEntity.isArmsOnlyMode();
+        return Optional.ofNullable(standSounds.get(phase))
+                .map(list -> list.stream()
+                        .filter(sound -> sound.playInArmsOnly || !armsOnly)
+                        .map(sound -> sound.sound.get()))
+                .orElse(null);
     }
     
     protected void playSoundAtStand(World world, StandEntity standEntity, SoundEvent sound, IStandPower standPower, Phase phase) {
@@ -543,7 +551,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         @Nullable
         protected StandRelativeOffset userOffsetArmsOnly = null;
         protected boolean enablePhysics = true;
-        protected final Map<Phase, List<Supplier<SoundEvent>>> standSounds = new EnumMap<>(Phase.class);
+        protected final Map<Phase, List<StandSound>> standSounds = new EnumMap<>(Phase.class);
         protected Supplier<StandEntityMeleeBarrage> barrageVisuals = () -> null;
 
         @Override
@@ -630,8 +638,15 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
 
         @SafeVarargs
         public final T standSound(Phase phase, Supplier<SoundEvent>... soundSuppliers) {
+            return standSound(phase, true, soundSuppliers);
+        }
+
+        @SafeVarargs
+        public final T standSound(Phase phase, boolean playInArmsOnly, Supplier<SoundEvent>... soundSuppliers) {
             if (phase != null) {
-                Collections.addAll(standSounds.computeIfAbsent(phase, p -> new ArrayList<>()), soundSuppliers);
+                Arrays.stream(soundSuppliers)
+                .map(sound -> new StandSound(sound, playInArmsOnly))
+                .collect(Collectors.toCollection(() -> standSounds.computeIfAbsent(phase, p -> new ArrayList<>())));
             }
             return getThis();
         }
@@ -639,6 +654,16 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         public T barrageVisuals(Supplier<StandEntityMeleeBarrage> barrageAttack) {
             this.barrageVisuals = barrageAttack != null ? barrageAttack : () -> null;
             return getThis();
+        }
+    }
+    
+    protected static class StandSound {
+        private final Supplier<SoundEvent> sound;
+        private final boolean playInArmsOnly;
+        
+        public StandSound(Supplier<SoundEvent> sound, boolean playInArmsOnly) {
+            this.sound = sound;
+            this.playInArmsOnly = playInArmsOnly;
         }
     }
     

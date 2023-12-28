@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.util.mc;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -16,6 +17,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.SpawnParticlePacket
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.google.common.collect.ImmutableMap;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.command.CommandSource;
@@ -58,12 +60,16 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.ReuseableStream;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
+import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.shapes.IBooleanFunction;
 import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
@@ -72,9 +78,12 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ChunkManager;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
+import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 
 public class MCUtil {
     public static final IFormattableTextComponent EMPTY_TEXT = new StringTextComponent("");
@@ -139,12 +148,41 @@ public class MCUtil {
     
     @Nullable
     public static <T extends Enum<T>> T nbtGetEnum(CompoundNBT nbt, String key, Class<T> enumClass) {
+        if (!nbt.contains(key, getNbtId(IntNBT.class))) {
+            return null;
+        }
+        
         int ordinal = nbt.getInt(key);
         T[] values = enumClass.getEnumConstants();
         if (ordinal >= 0 && ordinal < values.length) {
             return values[ordinal];
         }
         return null;
+    }
+    
+    public static <T extends IForgeRegistryEntry<T>> void nbtPutRegistryEntry(CompoundNBT nbt, String key, T entry) {
+        nbt.put(key, StringNBT.valueOf(entry.getRegistryName().toString()));
+    }
+    
+    public static <T extends IForgeRegistryEntry<T>> Optional<T> nbtGetRegistryEntry(CompoundNBT nbt, String key, IForgeRegistry<T> registry) {
+        if (nbt.contains(key, getNbtId(StringNBT.class))) {
+            String idString = nbt.getString(key);
+            if (!idString.isEmpty()) {
+                ResourceLocation id = new ResourceLocation(idString);
+                if (registry.containsKey(id)) {
+                    return Optional.of(registry.getValue(id));
+                }
+            }
+        }
+        
+        return Optional.empty();
+    }
+    
+    public static Optional<CompoundNBT> nbtGetCompoundOptional(CompoundNBT nbt, String key) {
+        if (nbt.contains(key, getNbtId(CompoundNBT.class))) {
+            return Optional.of(nbt.getCompound(key));
+        }
+        return Optional.empty();
     }
     
     public static void nbtPutVec3d(CompoundNBT nbt, String key, Vector3d vec) {
@@ -179,6 +217,20 @@ public class MCUtil {
     }
     
     //
+    
+    
+    
+    public static Set<ServerPlayerEntity> getTrackingPlayers(Entity entity) {
+        if (entity.level.isClientSide()) {
+            throw new IllegalStateException();
+        }
+        
+        @SuppressWarnings("resource")
+        ChunkManager chunkMap = ((ServerWorld) entity.level).getChunkSource().chunkMap;
+        Int2ObjectMap<ChunkManager.EntityTracker> entityMap = chunkMap.entityMap;
+        ChunkManager.EntityTracker tracker = entityMap.get(entity.getId());
+        return tracker.seenBy;
+    }
     
     
     
@@ -289,6 +341,44 @@ public class MCUtil {
     
     public static Vector3d getEntityPosition(Entity entity, float partialTick) {
         return partialTick == 1.0F ? entity.position() : entity.getPosition(partialTick);
+    }
+    
+    
+    
+    public static boolean rayTraceTargetEquals(RayTraceResult r1, RayTraceResult r2) {
+        if (r1 == null || r2 == null) return r1 == null && r2 == null;
+        if (r1.getType() != r2.getType()) return false;
+        
+        switch (r1.getType()) {
+        case MISS:
+            return true;
+        case BLOCK:
+            BlockRayTraceResult br1 = (BlockRayTraceResult) r1;
+            BlockRayTraceResult br2 = (BlockRayTraceResult) r2;
+            return br1.getBlockPos().equals(br2.getBlockPos()) && br1.getDirection() == br2.getDirection();
+        case ENTITY:
+            EntityRayTraceResult er1 = (EntityRayTraceResult) r1;
+            EntityRayTraceResult er2 = (EntityRayTraceResult) r2;
+            return er1.getEntity() == er2.getEntity();
+        default:
+            throw new IllegalArgumentException("Unknown RayTraceResult type (it's an enum wtf)");
+        }
+    }
+    
+    
+    
+    public static AxisAlignedBB scale(AxisAlignedBB aabb, double scale) {
+        return scale(aabb, scale, scale, scale);
+    }
+    
+    public static AxisAlignedBB scale(AxisAlignedBB aabb, double scaleX, double scaleY, double scaleZ) {
+        Vector3d center = aabb.getCenter();
+        double inflX = aabb.getXsize() * scaleX / 2;
+        double inflY = aabb.getYsize() * scaleY / 2;
+        double inflZ = aabb.getZsize() * scaleZ / 2;
+        return new AxisAlignedBB(
+                center.x - inflX, center.y - inflY, center.z - inflZ,
+                center.x + inflX, center.y + inflY, center.z + inflZ);
     }
     
     

@@ -14,14 +14,14 @@ public class StandStats {
     private final UpgradeableStats statsDevPotential;
     private final double rangeEffective;
     private final double rangeMax;
-    private final int tier;
+    private final double randomWeight;
 
     protected StandStats(AbstractBuilder<?, ?> builder) {
         this.statsBase = new UpgradeableStats(builder.powerBase, builder.speedBase, builder.durabilityBase, builder.precisionBase);
         this.statsDevPotential = new UpgradeableStats(builder.powerMax, builder.speedMax, builder.durabilityMax, builder.precisionMax);
         this.rangeEffective = builder.rangeEffective;
         this.rangeMax = builder.rangeMax;
-        this.tier = builder.tier;
+        this.randomWeight = builder.randomWeight;
     }
     
     protected StandStats(PacketBuffer buf) {
@@ -29,7 +29,7 @@ public class StandStats {
         this.statsDevPotential = new UpgradeableStats(buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readDouble());
         this.rangeEffective = buf.readDouble();
         this.rangeMax = buf.readDouble();
-        this.tier = buf.readVarInt();
+        this.randomWeight = buf.readDouble();
     }
     
     public void write(PacketBuffer buf) {
@@ -46,7 +46,7 @@ public class StandStats {
         buf.writeDouble(rangeEffective);
         buf.writeDouble(rangeMax);
         
-        buf.writeVarInt(tier);
+        buf.writeDouble(randomWeight);
     }
     
     public void onNewDay(LivingEntity user, IStandPower power) {}
@@ -122,16 +122,16 @@ public class StandStats {
         return rangeMax;
     }
     
-    public int getTier() {
-        return tier;
-    }
-    
     public double getArmor() {
         return 0;
     }
     
     public double getArmorToughness() {
         return 0;
+    }
+    
+    public double getRandomWeight() {
+        return randomWeight;
     }
     
     
@@ -152,20 +152,20 @@ public class StandStats {
     public abstract static class AbstractBuilder<B extends AbstractBuilder<B, S>, S extends StandStats> {
         private double powerBase = 8.0;
         private double powerMax = 8.0;
+        
         private double speedBase = 8.0;
         private double speedMax = 8.0;
+        
         private double rangeEffective = 2.0;
         private double rangeMax = 5.0;
+        
         private double durabilityBase = 8.0;
         private double durabilityMax = 8.0;
+        
         private double precisionBase = 8.0;
         private double precisionMax = 8.0;
-        private int tier = -1;
         
-        public B tier(int tier) {
-            this.tier = tier;
-            return getThis();
-        }
+        private double randomWeight = 2;
         
         public B power(double power) {
             return power(power, power);
@@ -222,17 +222,24 @@ public class StandStats {
             return getThis();
         }
         
-        protected abstract B getThis();
-        
-        public S build() {
-            return build("A stand");
+        @Deprecated
+        public B tier(int tier) {
+            return getThis();
         }
         
+        public B randomWeight(double randomWeight) {
+            this.randomWeight = randomWeight;
+            return getThis();
+        }
+        
+        protected abstract B getThis();
+        
         @Deprecated
-        public S build(String standName) {
-            if (tier < 0) {
-                throw new IllegalStateException(standName + "'s tier has not beed initialized!");
-            }
+        public S build(String logName) {
+            return build();
+        }
+        
+        public S build() {
             return createStats();
         }
         

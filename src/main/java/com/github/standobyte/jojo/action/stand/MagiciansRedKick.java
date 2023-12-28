@@ -76,7 +76,7 @@ public class MagiciansRedKick extends StandEntityHeavyAttack {
     @Override
     public StandEntityPunch punchEntity(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
         return super.punchEntity(stand, target, dmgSource)
-                .addKnockback(3);
+                .multiplyAddKnockback(1.2F);
     }
     
     @Override

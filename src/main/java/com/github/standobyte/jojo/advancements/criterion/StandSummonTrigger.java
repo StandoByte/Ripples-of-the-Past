@@ -52,7 +52,7 @@ public class StandSummonTrigger extends AbstractCriterionTrigger<StandSummonTrig
         }
 
         private boolean matches(PowerClassification classification, IPower<?, ?> power) {
-            return this.powerPredicate.matches(classification, power);
+            return this.powerPredicate.matchesPower(classification, power);
         }
     }
 
