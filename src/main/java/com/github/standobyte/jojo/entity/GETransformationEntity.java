@@ -2,11 +2,12 @@ package com.github.standobyte.jojo.entity;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.action.stand.GoldExperienceCreateLifeform;
+import com.github.standobyte.jojo.entity.ai.GELifeformFollowOwnerGoal;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.network.NetworkUtil;
@@ -147,7 +148,13 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             copyStatus(this, entityToSummon);
             level.addFreshEntity(entityToSummon);
             if (!isTurningBack()) {
-                GoldExperienceCreateLifeform.onTransformationFinish(entityToSummon);
+                if (entityToSummon instanceof MobEntity) {
+                    MobEntity mob = (MobEntity) entityToSummon;
+                    mob.playAmbientSound();
+                    if (source.aggroTarget != null) {
+                        mob.goalSelector.addGoal(-1, new GELifeformFollowOwnerGoal(mob, source.aggroTarget, 1.25));
+                    }
+                }
             }
         }
         else if (blockToPlace != null) {
@@ -440,6 +447,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
     
     
     public static class GETransformationData {
+        private UUID aggroTarget;
         private Entity sourceEntity;
         private CompoundNBT sourceEntityNbt = null;
         private BlockState sourceBlockState;
@@ -458,7 +466,13 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             return this;
         }
         
+        public GETransformationData withAggroTarget(UUID entity) {
+            this.aggroTarget = entity;
+            return this;
+        }
+        
         public void copyFrom(GETransformationData other, World world) {
+            this.aggroTarget = other.aggroTarget;
             this.sourceEntity = other.sourceEntity;
             this.sourceBlockState = other.sourceBlockState;
             this.sourceBlockPos = other.sourceBlockPos;
@@ -548,6 +562,11 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             return sourceBlockPos;
         }
         
+        @Nullable
+        public UUID getAggroTarget() {
+            return aggroTarget;
+        }
+        
         
         
         public void writeNbt(CompoundNBT nbt) {
@@ -561,6 +580,9 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             if (sourceBlockPos != null) {
                 nbt.put("GESourcePos", NBTUtil.writeBlockPos(sourceBlockPos));
             }
+            if (aggroTarget != null) {
+                nbt.putUUID("Owner", aggroTarget);
+            }
         }
         
         public void readNbt(CompoundNBT nbt) {
@@ -572,6 +594,9 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             }
             if (nbt.contains("GESourcePos", MCUtil.getNbtId(CompoundNBT.class))) {
                 sourceBlockPos = NBTUtil.readBlockPos(nbt.getCompound("GESourcePos"));
+            }
+            if (nbt.hasUUID("Owner")) {
+                aggroTarget = nbt.getUUID("Owner");
             }
         }
         

@@ -11,6 +11,7 @@ import com.github.standobyte.jojo.entity.HamonProjectileShieldEntity;
 import com.github.standobyte.jojo.entity.HamonSendoOverdriveEntity;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.entity.MRDetectorEntity;
+import com.github.standobyte.jojo.entity.ObjectEntity;
 import com.github.standobyte.jojo.entity.PillarmanTempleEngravingEntity;
 import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.entity.SoulEntity;
@@ -175,6 +176,10 @@ public class ModEntityTypes {
     public static final RegistryObject<EntityType<StandUserDummyEntity>> STAND_USER_DUMMY = ENTITIES.register("dummy", 
             () -> EntityType.Builder.<StandUserDummyEntity>of(StandUserDummyEntity::new, EntityClassification.MISC).sized(0.6F, 1.95F)
             .build(new ResourceLocation(JojoMod.MOD_ID, "dummy").toString()));
+
+    public static final RegistryObject<EntityType<ObjectEntity>> OBJECT = ENTITIES.register("util_object", 
+            () -> EntityType.Builder.<ObjectEntity>of(ObjectEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon()
+            .build(new ResourceLocation(JojoMod.MOD_ID, "util_object").toString()));
     
     
     

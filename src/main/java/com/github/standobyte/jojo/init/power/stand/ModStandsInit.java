@@ -21,8 +21,10 @@ import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.action.stand.GoldExperienceChooseLifeform;
 import com.github.standobyte.jojo.action.stand.GoldExperienceCreateLifeform;
 import com.github.standobyte.jojo.action.stand.GoldExperienceEntityLifeshot;
+import com.github.standobyte.jojo.action.stand.GoldExperienceHeavyPunch;
 import com.github.standobyte.jojo.action.stand.GoldExperienceLifeshotPunch;
 import com.github.standobyte.jojo.action.stand.GoldExperienceRevertLifeform;
+import com.github.standobyte.jojo.action.stand.GoldExperienceToothLifeform;
 import com.github.standobyte.jojo.action.stand.HierophantGreenBarrier;
 import com.github.standobyte.jojo.action.stand.HierophantGreenEmeraldSplash;
 import com.github.standobyte.jojo.action.stand.HierophantGreenGrapple;
@@ -780,9 +782,13 @@ public class ModStandsInit {
 //                    .punchSound(ModSounds.GOLD_EXPERIENCE_PUNCH_HEAVY)
 //                    .standSound(Phase.WINDUP, ModSounds.GOLD_EXPERIENCE_MUDA_LONG)
                     .partsRequired(StandPart.ARMS)));
+
+    public static final RegistryObject<StandEntityActionModifier> GOLD_EXPERIENCE_TOOTH_LIFEFORM = ACTIONS.register("gold_experience_tooth_lifeform", 
+            () -> new GoldExperienceToothLifeform(new StandAction.Builder()));
     
-    public static final RegistryObject<CrazyDiamondHeavyPunch> GOLD_EXPERIENCE_HEAVY_PUNCH = ACTIONS.register("gold_experience_heavy_punch", 
-            () -> new CrazyDiamondHeavyPunch(new StandEntityHeavyAttack.Builder()
+    public static final RegistryObject<GoldExperienceHeavyPunch> GOLD_EXPERIENCE_HEAVY_PUNCH = ACTIONS.register("gold_experience_heavy_punch", 
+            () -> new GoldExperienceHeavyPunch(new StandEntityHeavyAttack.Builder()
+                    .setRecoveryFollowUpAction(GOLD_EXPERIENCE_TOOTH_LIFEFORM)
 //                    .punchSound(ModSounds.GOLD_EXPERIENCE_PUNCH_HEAVY)
 //                    .standSound(Phase.WINDUP, ModSounds.GOLD_EXPERIENCE_MUDA_LONG)
                     .setFinisherVariation(GOLD_EXPERIENCE_LIFESHOT_PUNCH)

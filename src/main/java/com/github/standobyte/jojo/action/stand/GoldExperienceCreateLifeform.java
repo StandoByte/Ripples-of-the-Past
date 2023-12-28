@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.stand;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
@@ -65,6 +66,9 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     entity instanceof EnderCrystalEntity || 
                     entity instanceof BoatEntity);
         case BLOCK:
+            if (!JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).abilitiesBreakBlocks.get()) {
+                return ActionConditionResult.NEGATIVE;
+            }
             if (!power.isUserCreative()) {
                 World world = user.level;
                 BlockPos blockPos = target.getBlockPos();
@@ -95,6 +99,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
         boolean itemFits = false;
         boolean hasABlock = false;
         boolean blockFits = false;
+        boolean canUseBlock = JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).abilitiesBreakBlocks.get();
         
         ItemStack item = user.getItemInHand(Hand.OFF_HAND);
         if (!item.isEmpty()) {
@@ -102,7 +107,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
             itemFits = !HamonUtil.isItemLivingMatter(item);
         }
         
-        if (target.getType() == TargetType.BLOCK) {
+        if (canUseBlock && target.getType() == TargetType.BLOCK) {
             hasABlock = true;
             BlockPos blockPos = target.getBlockPos();
             BlockState blockState = user.level.getBlockState(blockPos);
@@ -110,7 +115,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
         }
         
         if (!hasAnItem && !hasABlock) {
-            return conditionMessage("ge_lifeform_material");
+            return canUseBlock ? conditionMessage("ge_lifeform_material") : conditionMessage("ge_lifeform_material_only_item");
         }
         if (!itemFits && !blockFits) {
             if (hasAnItem) {
@@ -167,6 +172,8 @@ public class GoldExperienceCreateLifeform extends StandAction {
             EntityType<?> type = (EntityType<?>) NetworkUtil.readOptional(extraInput, 
                     () -> extraInput.readRegistryIdSafe(EntityType.class)).orElse(null);
             if (type != null) {
+                
+                
                 Entity lifeFormCreated = type.create(world);
                 CompoundNBT nbt = new CompoundNBT();
                 nbt.putString("DeathLootTable", "empty");
@@ -185,7 +192,9 @@ public class GoldExperienceCreateLifeform extends StandAction {
                         lifeFormCreated.load(additionalNbt);
                     }
                 }
+                
                 int ticks = getTicksToCreate(user, power, lifeFormCreated);
+                
                 
                 Entity performer = user;
                 if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
@@ -195,7 +204,9 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     }
                 }
                 
+                
                 GETransformationEntity tf = new GETransformationEntity(world);
+                
                 
                 boolean tfTargetFound = false;
                 if (target.getType() == TargetType.ENTITY) {
@@ -210,6 +221,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     if (targetEntity.isOnFire()) {
                         tf.setSecondsOnFire((targetEntity.getRemainingFireTicks() + 19) / 20);
                     }
+                    tf.setDeltaMovement(targetEntity.getDeltaMovement());
                 }
                 if (!tfTargetFound) {
                     ItemStack heldItem = user.getItemInHand(Hand.OFF_HAND);
@@ -237,7 +249,8 @@ public class GoldExperienceCreateLifeform extends StandAction {
                         tf.moveTo(pos.x, pos.y, pos.z, performer.yRot, 0);
                     }
                 }
-                if (!tfTargetFound && target.getType() == TargetType.BLOCK) {
+                if (!tfTargetFound && target.getType() == TargetType.BLOCK
+                        && JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).abilitiesBreakBlocks.get()) {
                     BlockPos blockPos = target.getBlockPos();
                     BlockState blockState = world.getBlockState(blockPos);
                     
@@ -249,6 +262,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                         tf.moveTo(blockPos, performer.yRot, 0);
                     }
                 }
+                
                 
                 if (tfTargetFound) {
                     tf.withTransformationTarget(lifeFormCreated)
@@ -276,6 +290,8 @@ public class GoldExperienceCreateLifeform extends StandAction {
             }
         }
     }
+    
+    
     
     public static int getTicksToCreate(LivingEntity user, IStandPower power, Entity targetEntity) {
         double entityStrength = getAttackStrength(targetEntity);
@@ -325,12 +341,6 @@ public class GoldExperienceCreateLifeform extends StandAction {
     }
     
     
-    
-    public static void onTransformationFinish(Entity entity) {
-        if (entity instanceof MobEntity) {
-            ((MobEntity) entity).playAmbientSound();
-        }
-    }
     
     @Override
     public IFormattableTextComponent getTranslatedName(IStandPower power, String key) {

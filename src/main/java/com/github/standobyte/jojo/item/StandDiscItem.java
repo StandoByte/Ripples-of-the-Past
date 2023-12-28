@@ -21,7 +21,6 @@ import net.minecraft.block.DispenserBlock;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.dispenser.IBlockSource;
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -49,7 +48,7 @@ public class StandDiscItem extends Item {
                     StandInstance stand = getStandFromStack(stack, false);
                     if (MCUtil.dispenseOnNearbyEntity(blockSource, stack, entity -> {
                         return IStandPower.getStandPowerOptional(entity).map(power -> {
-                            return canGetStandFromDisc(entity, power, stand.getType()) && giveStandFromDisc(power, stand, stack);
+                            return giveStandFromDisc(power, stand, stack);
                         }).orElse(false);
                     }, true)) {
                         return stack;
@@ -68,10 +67,6 @@ public class StandDiscItem extends Item {
             if (validStandDisc(stack, false)) {
                 StandInstance stand = getStandFromStack(stack, false);
                 if (JojoModConfig.getCommonConfigInstance(false).isStandBanned(stand.getType())) {
-                    return ActionResult.fail(stack);
-                }
-                if (!canGetStandFromDisc(player, power, stand.getType())) {
-                    player.displayClientMessage(new TranslationTextComponent("jojo.chat.message.cant_put_stand_disc"), true);
                     return ActionResult.fail(stack);
                 }
                 
@@ -100,13 +95,13 @@ public class StandDiscItem extends Item {
         return ActionResult.fail(stack);
     }
 
-    private static boolean canGetStandFromDisc(LivingEntity entity, IStandPower entityStandPower, StandType<?> stand) {
-        if (entity instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity) entity;
-            return player.abilities.instabuild || entityStandPower.hadAnyStand();
-        }
-        return false;
-    }
+//    private static boolean canGetStandFromDisc(LivingEntity entity, IStandPower entityStandPower, StandType<?> stand) {
+//        if (entity instanceof PlayerEntity) {
+//            PlayerEntity player = (PlayerEntity) entity;
+//            return player.abilities.instabuild || entityStandPower.hadAnyStand();
+//        }
+//        return false;
+//    }
     
     @Override
     public void fillItemCategory(ItemGroup group, NonNullList<ItemStack> items) {

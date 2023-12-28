@@ -12,7 +12,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.power.layout.ActionsLayout;
-import com.github.standobyte.jojo.util.general.Container;
+import com.github.standobyte.jojo.util.general.ObjectWrapper;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -59,8 +59,8 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     ActionCooldownTracker getCooldowns();
     
     boolean clickAction(Action<P> action, boolean sneak, ActionTarget target, @Nullable PacketBuffer extraInput);
-    ActionConditionResult checkRequirements(Action<P> action, Container<ActionTarget> targetContainer, boolean checkTargetType);
-    ActionConditionResult checkTarget(Action<P> action, Container<ActionTarget> targetContainer);
+    ActionConditionResult checkRequirements(Action<P> action, ObjectWrapper<ActionTarget> targetContainer, boolean checkTargetType);
+    ActionConditionResult checkTarget(Action<P> action, ObjectWrapper<ActionTarget> targetContainer);
     boolean canUsePower();
     
     default RayTraceResult clientHitResult(Entity cameraEntity, RayTraceResult mcHitResult) {

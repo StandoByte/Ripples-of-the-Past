@@ -103,6 +103,8 @@ public class PlayerUtilCap {
         CompoundNBT nbt = new CompoundNBT();
         nbt.put("NotificationsSent", notificationsToNBT());
         
+        nbt.putInt("Knives", knives);
+        
         if (!metEntityTypesId.isEmpty()) {
             ListNBT metEntities = new ListNBT();
             metEntityTypesId.forEach(entityTypeId -> metEntities.add(StringNBT.valueOf(entityTypeId.toString())));
@@ -132,6 +134,8 @@ public class PlayerUtilCap {
             CompoundNBT notificationsMap = nbt.getCompound("NotificationsSent");
             notificationsFromNBT(notificationsMap);
         }
+        
+        knives = nbt.getInt("Knives");
         
         if (nbt.contains("MetEntityTypes", MCUtil.getNbtId(ListNBT.class))) {
             ListNBT metEntitiesId = nbt.getList("MetEntityTypes", MCUtil.getNbtId(StringNBT.class));
