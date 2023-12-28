@@ -6,7 +6,6 @@ import java.util.Map;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel.StandModelRegistryObj;
 import com.github.standobyte.jojo.client.render.entity.model.stand.bb.BlockbenchStandModelHelper;
-import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;

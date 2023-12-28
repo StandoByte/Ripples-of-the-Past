@@ -1,7 +1,6 @@
 package com.github.standobyte.jojo.client.render.entity.renderer.stand;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientEventHandler;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -407,6 +406,10 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
                         M layerModel = standLayer.getLayerModel();
                         RenderType layerRenderType = layerModel.renderType(standLayer.getLayerTexture(nonDefaultSkin));
                         IVertexBuilder layerVertexBuilder = buffer.getBuffer(layerRenderType);
+                        layerModel.attackTime = 0;
+                        layerModel.riding = false;
+                        layerModel.young = false;
+                        layerModel.updatePartsVisibility(VisibilityMode.ALL);
                         layerModel.prepareMobModel(null, 0, 0, partialTick);
                         layerModel.poseIdleLoop(null, ticks, yRotationOffset, xRotation, HandSide.RIGHT);
                         layerModel.renderToBuffer(matrixStack, layerVertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, 1.0F);
