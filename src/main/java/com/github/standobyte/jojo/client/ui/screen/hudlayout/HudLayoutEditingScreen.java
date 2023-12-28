@@ -45,7 +45,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 public class HudLayoutEditingScreen extends Screen {
     private static final ResourceLocation WINDOW = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/layout_editing.png");
     private static final int WINDOW_WIDTH = 200;
-    private static final int WINDOW_HEIGHT = 180;
+    private static final int WINDOW_HEIGHT = 124;
     
     private static PowerClassification selectedTab = null;
     private IPower<?, ?> selectedPower;
@@ -69,7 +69,7 @@ public class HudLayoutEditingScreen extends Screen {
     
     @Override
     protected void init() {
-        quickAccessHudVisibilityButton = new VisibilityButton(getWindowX() + 30, getWindowY() + 96,
+        quickAccessHudVisibilityButton = new VisibilityButton(getWindowX() + 30, getWindowY() + WINDOW_HEIGHT - 28,
                 button -> {
                     ActionsLayout<?> layout = selectedPower.getActionsLayout();
                     boolean newValue = !layout.isMmbActionHudVisible();

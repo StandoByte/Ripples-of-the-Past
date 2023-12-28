@@ -39,7 +39,7 @@ public class StandSkinsScreen extends Screen {
     public static final ResourceLocation TEXTURE_MAIN_WINDOW = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/stand_skins.png");
     private static final ResourceLocation TEXTURE_BG = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/stand_skins_bg.png");
     
-    private static final int WINDOW_WIDTH = 200;
+    private static final int WINDOW_WIDTH = 195;
     private static final int WINDOW_HEIGHT = 180;
     private static final int WINDOW_INSIDE_X = 7;
     private static final int WINDOW_INSIDE_WIDTH = 165;
@@ -80,7 +80,7 @@ public class StandSkinsScreen extends Screen {
         this.skins = Streams.mapWithIndex(StandSkinsManager.getInstance()
                 .getStandSkinsView(standCap.getType().getRegistryName())
                 .stream(), (skin, index) -> {
-                    int x = 6 + (int) (index % SKINS_IN_ROW) * (SkinView.boxWidth + 3);
+                    int x = 3 + (int) (index % SKINS_IN_ROW) * (SkinView.boxWidth + 3);
                     int y = 3 + (int) (index / SKINS_IN_ROW) * (SkinView.boxHeight + 3);
                     return new SkinView(skin, x, y);
                 })
