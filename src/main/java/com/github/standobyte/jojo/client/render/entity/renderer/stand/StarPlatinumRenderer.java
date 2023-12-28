@@ -17,7 +17,7 @@ public class StarPlatinumRenderer extends StandEntityRenderer<StarPlatinumEntity
                         new ResourceLocation(JojoMod.MOD_ID, "star_platinum"), StarPlatinumModel::new), 
                 new ResourceLocation(JojoMod.MOD_ID, "textures/entity/stand/star_platinum.png"), 0);
 //        super(renderManager, 
-//                registerModel(new StarPlatinumModelNew(), new ResourceLocation(JojoMod.MOD_ID, "star_platinum"), StarPlatinumModelNew::new), 
-//                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/stand/star_platinum.png"), 0);
+//                new StarPlatinumModelNew(),
+//                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/stand/star_platinum_new.png"), 0);
     }
 }

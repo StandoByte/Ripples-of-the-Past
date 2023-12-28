@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.client.render.entity.renderer.stand.layer;
 
+import java.util.Optional;
+
 import com.github.standobyte.jojo.client.render.entity.model.stand.MagiciansRedFlameLayerModel;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.MagiciansRedRenderer;
@@ -12,7 +14,7 @@ import net.minecraft.util.ResourceLocation;
 public class MagiciansRedFlameLayer extends StandModelLayerRenderer<MagiciansRedEntity, StandEntityModel<MagiciansRedEntity>> {
 
     public MagiciansRedFlameLayer(MagiciansRedRenderer entityRenderer) {
-        super(entityRenderer, new MagiciansRedFlameLayerModel());
+        super(entityRenderer, new MagiciansRedFlameLayerModel(), null);
     }
     
     @Override
@@ -22,12 +24,12 @@ public class MagiciansRedFlameLayer extends StandModelLayerRenderer<MagiciansRed
 
     @Deprecated
     @Override
-    protected ResourceLocation getLayerTexture() {
+    public ResourceLocation getLayerTexture(Optional<ResourceLocation> standSkin) {
         return PlayerContainer.BLOCK_ATLAS;
     }
 
     @Override
-    public boolean shouldRender(MagiciansRedEntity entity) {
-        return !entity.isInWaterOrRain();
+    public boolean shouldRender(MagiciansRedEntity entity, Optional<ResourceLocation> standSkin) {
+        return entity == null || !entity.isInWaterOrRain();
     }
 }
