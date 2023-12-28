@@ -14,7 +14,7 @@ import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
-import com.github.standobyte.jojo.util.general.Container;
+import com.github.standobyte.jojo.util.general.ObjectWrapper;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.google.common.collect.ImmutableSet;
 
@@ -103,7 +103,7 @@ public class HamonOrganismInfusion extends HamonAction {
     }
     
     @Override
-    public void overrideVanillaMouseTarget(Container<ActionTarget> targetContainer, World world, LivingEntity user, INonStandPower power) {
+    public void overrideVanillaMouseTarget(ObjectWrapper<ActionTarget> targetContainer, World world, LivingEntity user, INonStandPower power) {
         if (getTargetRequirement().checkTargetType(TargetType.ENTITY) && targetContainer.get().getType() == TargetType.BLOCK) {
             BlockPos blockPos = targetContainer.get().getBlockPos();
             VoxelShape shape = world.getBlockState(blockPos).getShape(world, blockPos);

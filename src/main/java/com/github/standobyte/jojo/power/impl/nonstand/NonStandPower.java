@@ -18,7 +18,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrTypeNonStandPower
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.impl.PowerBaseImpl;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
-import com.github.standobyte.jojo.util.general.Container;
+import com.github.standobyte.jojo.util.general.ObjectWrapper;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.LivingEntity;
@@ -124,7 +124,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     }
     
     @Override
-    public ActionConditionResult checkRequirements(Action<INonStandPower> action, Container<ActionTarget> targetContainer, boolean checkTargetType) {
+    public ActionConditionResult checkRequirements(Action<INonStandPower> action, ObjectWrapper<ActionTarget> targetContainer, boolean checkTargetType) {
         ActionConditionResult result = super.checkRequirements(action, targetContainer, checkTargetType);
         if (!result.isPositive()) {
             serverPlayerUser.ifPresent(player -> {

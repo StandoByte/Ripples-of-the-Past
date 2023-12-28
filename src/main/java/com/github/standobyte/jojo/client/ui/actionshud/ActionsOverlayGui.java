@@ -46,7 +46,7 @@ import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.layout.ActionsLayout;
-import com.github.standobyte.jojo.util.general.Container;
+import com.github.standobyte.jojo.util.general.ObjectWrapper;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.google.common.collect.ImmutableMap;
@@ -780,7 +780,7 @@ public class ActionsOverlayGui extends AbstractGui {
     private <P extends IPower<P, ?>> ActionConditionResult actionAvailability(Action<P> action, ActionsModeConfig<P> mode, 
             InputHandler.ActionKey actionKey, ActionTarget mouseTarget, boolean isSelected) {
         P power = mode.getPower();
-        Container<ActionTarget> targetContainer = new Container<>(mouseTarget);
+        ObjectWrapper<ActionTarget> targetContainer = new ObjectWrapper<>(mouseTarget);
         if (isSelected) {
             ActionConditionResult targetCheck = power.checkTarget(action, targetContainer);
             mode.getTargetIcon(actionKey).update(action.getTargetRequirement(), targetCheck.isPositive());

@@ -2,10 +2,10 @@ package com.github.standobyte.jojo.util.general;
 
 import java.util.function.Supplier;
 
-public class Container<T> implements Supplier<T> {
+public class ObjectWrapper<T> implements Supplier<T> {
     private T object;
     
-    public Container(T object) {
+    public ObjectWrapper(T object) {
         this.object = object;
     }
     

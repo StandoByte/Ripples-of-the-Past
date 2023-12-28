@@ -18,7 +18,7 @@ import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
-import com.github.standobyte.jojo.util.general.Container;
+import com.github.standobyte.jojo.util.general.ObjectWrapper;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -75,7 +75,7 @@ public class TimeStopInstant extends StandAction {
         int timeStopTicks = getMaxImpliedTicks(power);
         double speed = getDistancePerTick(user);
         double distance = getMaxDistance(user, power, speed, timeStopTicks);
-        Container<ActionTarget> targetMutable = new Container<>(target);
+        ObjectWrapper<ActionTarget> targetMutable = new ObjectWrapper<>(target);
         Vector3d blinkPos = calcBlinkPos(user, targetMutable, distance);
         target = targetMutable.get();
         distance = user.position().subtract(blinkPos).length();
@@ -137,10 +137,10 @@ public class TimeStopInstant extends StandAction {
     }
     
     public Vector3d calcBlinkPos(LivingEntity user, IStandPower power, ActionTarget initialTarget) {
-        return calcBlinkPos(user, new Container<>(initialTarget), getMaxDistance(user, power, getDistancePerTick(user), getMaxImpliedTicks(power)));
+        return calcBlinkPos(user, new ObjectWrapper<>(initialTarget), getMaxDistance(user, power, getDistancePerTick(user), getMaxImpliedTicks(power)));
     }
     
-    public Vector3d calcBlinkPos(LivingEntity user, Container<ActionTarget> initialTarget, double maxDistance) {
+    public Vector3d calcBlinkPos(LivingEntity user, ObjectWrapper<ActionTarget> initialTarget, double maxDistance) {
         Vector3d blinkPos = null;
         ActionTarget target = initialTarget.get();
         if (target.getType() == TargetType.EMPTY) {

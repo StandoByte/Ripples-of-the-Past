@@ -23,7 +23,7 @@ import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
-import com.github.standobyte.jojo.util.general.Container;
+import com.github.standobyte.jojo.util.general.ObjectWrapper;
 import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
 
 import net.minecraft.block.BlockState;
@@ -61,7 +61,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         if (followUp != null && standEntity != null && standEntity.getCurrentTask().map(task -> {
             return task.getAction() == this && 
                     !task.getModifierActions().filter(action -> action == followUp).findAny().isPresent() &&
-                    power.checkRequirements(followUp, new Container<>(task.getTarget()), true).isPositive();
+                    power.checkRequirements(followUp, new ObjectWrapper<>(task.getTarget()), true).isPositive();
         }).orElse(false)) {
             return followUp;
         };

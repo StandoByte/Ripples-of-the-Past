@@ -12,7 +12,7 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
-import com.github.standobyte.jojo.util.general.Container;
+import com.github.standobyte.jojo.util.general.ObjectWrapper;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Direction;
@@ -30,7 +30,7 @@ public class HamonSendoOverdrive extends HamonAction {
     }
     
     @Override
-    public void overrideVanillaMouseTarget(Container<ActionTarget> targetContainer, World world, LivingEntity user, INonStandPower power) {
+    public void overrideVanillaMouseTarget(ObjectWrapper<ActionTarget> targetContainer, World world, LivingEntity user, INonStandPower power) {
         if (targetContainer.get().getType() == TargetType.BLOCK) {
             Vector3d pos1 = user.getEyePosition(1.0F);
             Vector3d pos2 = pos1.add(user.getViewVector(1.0F).scale(Math.sqrt(getMaxRangeSqBlockTarget())));
