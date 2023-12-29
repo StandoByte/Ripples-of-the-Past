@@ -167,14 +167,14 @@ public class TimeStopInstance {
     public static final int TIME_RESUME_SOUND_TICKS = 10;
     public static final int TIME_RESUME_VOICELINE_TICKS = 30;
     public void tickSounds() {
-        if (!world.isClientSide() && (ticksLeft == TIME_RESUME_SOUND_TICKS || ticksLeft == TIME_RESUME_VOICELINE_TICKS || alwaysSayVoiceLine)) {
+        if (!world.isClientSide()) {
             if (ticksLeft == TIME_RESUME_SOUND_TICKS) {
                 if (timeResumeSound != null) {
                     PacketManager.sendGloballyWithCondition(new PlaySoundAtClientPacket(timeResumeSound, SoundCategory.AMBIENT, user.blockPosition(), 5.0F, 1.0F), 
                             world.dimension(), player -> inRange(TimeStopHandler.getChunkPos(player)) && TimeStopHandler.canPlayerSeeInStoppedTime(player));
                 }
             }
-            else {
+            else if (ticksLeft == TIME_RESUME_VOICELINE_TICKS || alwaysSayVoiceLine) {
                 if (startingTicks >= 100) {
                     SoundEvent voiceLine = ticksManuallySet ? timeManualResumeVoiceLine : timeResumeVoiceLine;
                     if (voiceLine != null) {
