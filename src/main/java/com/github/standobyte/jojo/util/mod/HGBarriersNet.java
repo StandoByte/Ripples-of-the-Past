@@ -8,6 +8,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -23,6 +24,7 @@ import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.GraphAdjacencyList;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 
@@ -135,6 +137,7 @@ public class HGBarriersNet {
             Vector3d shootVec = targetPos.subtract(shootingPos);
             emeraldEntity.shoot(shootVec.x, shootVec.y, shootVec.z, 1.5F, stand.getProjectileInaccuracy(2.0F));
             emeraldEntity.setDamageFactor(0.75F);
+            emeraldEntity.withStandSkin(stand.getStandSkin());
             stand.addProjectile(emeraldEntity);
             if (playSound) {
                 MCUtil.playSound(stand.level, null, shootingPos.x, shootingPos.y, shootingPos.z, 
@@ -142,6 +145,10 @@ public class HGBarriersNet {
                         stand.getSoundSource(), 1.0F, 1.0F, StandUtil::playerCanHearStands);
             }
         }
+    }
+    
+    public void setStandSkin(Optional<ResourceLocation> standSkin) {
+        placedBarriers.keySet().forEach(barrier -> barrier.withStandSkin(standSkin));
     }
     
     private class ShootingPoints {

@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.entity.stand.stands;
 
+import java.util.Optional;
 import java.util.UUID;
 
 import com.github.standobyte.jojo.action.stand.HierophantGreenBarrier;
@@ -15,6 +16,7 @@ import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
@@ -73,6 +75,7 @@ public class HierophantGreenEntity extends StandEntity {
                     stringFromStand.remove();
                 }
                 stringFromStand = stringToUser;
+                stringFromStand.withStandSkin(getStandSkin());
                 level.addFreshEntity(stringFromStand);
             }
         }
@@ -102,6 +105,7 @@ public class HierophantGreenEntity extends StandEntity {
             }
             stringFromStand = new HGBarrierEntity(level, this);
             stringFromStand.setOriginBlockPos(blockPos);
+            stringFromStand.withStandSkin(getStandSkin());
             level.addFreshEntity(stringFromStand);
             playSound(ModSounds.HIEROPHANT_GREEN_BARRIER_PLACED.get(), 1.0F, 1.0F);
         }
@@ -133,5 +137,13 @@ public class HierophantGreenEntity extends StandEntity {
                 stringToUser.remove();
             }
         }
+    }
+    
+    @Override
+    public void setStandSkin(Optional<ResourceLocation> skinLocation) {
+        super.setStandSkin(skinLocation);
+        getBarriersNet().setStandSkin(skinLocation);
+        if (stringToUser != null) stringToUser.withStandSkin(skinLocation);
+        if (stringFromStand != null) stringFromStand.withStandSkin(skinLocation);
     }
 }
