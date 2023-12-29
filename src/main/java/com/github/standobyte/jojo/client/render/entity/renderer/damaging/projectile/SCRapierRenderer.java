@@ -5,6 +5,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.render.entity.model.projectile.SCRapierFlameModel;
 import com.github.standobyte.jojo.client.render.entity.model.projectile.SCRapierModel;
 import com.github.standobyte.jojo.client.render.entity.renderer.SimpleEntityRenderer;
+import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
@@ -20,6 +21,13 @@ public class SCRapierRenderer extends SimpleEntityRenderer<SCRapierEntity, SCRap
         super(renderManager, new SCRapierModel(), new ResourceLocation(JojoMod.MOD_ID, "textures/entity/stand/silver_chariot.png"));
         this.flameModel = new SCRapierFlameModel();
     }
+    
+    @Override
+    public ResourceLocation getTextureLocation(SCRapierEntity entity) {
+        return StandSkinsManager.getInstance()
+                .getRemappedResPath(manager -> manager.getStandSkin(entity.getStandSkin()), texPath);
+    }
+
     
     protected void rotateModel(SCRapierModel model, SCRapierEntity entity, float partialTick, float yRotation, float xRotation, MatrixStack matrixStack) {
         super.rotateModel(model, entity, partialTick, yRotation, xRotation, matrixStack);
