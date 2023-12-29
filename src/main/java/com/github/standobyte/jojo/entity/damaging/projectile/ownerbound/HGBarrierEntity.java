@@ -25,6 +25,7 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.datasync.IDataSerializer;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.EntityRayTraceResult;
@@ -37,6 +38,8 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
     protected static final DataParameter<Boolean> WAS_RIPPED = EntityDataManager.defineId(HGBarrierEntity.class, DataSerializers.BOOLEAN);
     protected static final DataParameter<Optional<Vector3d>> RIPPED_POINT = EntityDataManager.defineId(HGBarrierEntity.class, 
             (IDataSerializer<Optional<Vector3d>>) ModDataSerializers.OPTIONAL_VECTOR3D.get().getSerializer());
+    public static final DataParameter<Optional<ResourceLocation>> DATA_PARAM_STAND_SKIN = EntityDataManager.defineId(HGBarrierEntity.class, 
+            (IDataSerializer<Optional<ResourceLocation>>) ModDataSerializers.OPTIONAL_RES_LOC.get().getSerializer());
     private boolean rippedHurtOwner = false;
     private LivingEntity standUser;
     private BlockPos originBlockPos;
@@ -134,6 +137,7 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
         super.defineSynchedData();
         entityData.define(WAS_RIPPED, false);
         entityData.define(RIPPED_POINT, Optional.empty());
+        entityData.define(DATA_PARAM_STAND_SKIN, Optional.empty());
     }
     
     private static final Vector3d OFFSET = new Vector3d(0.15D, -1.4D, 0);
@@ -232,6 +236,16 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
     @Override
     public boolean canUpdate() {
         return true;
+    }
+    
+    @Override
+    public void withStandSkin(Optional<ResourceLocation> skinLocation) {
+        entityData.set(DATA_PARAM_STAND_SKIN, skinLocation);
+    }
+
+    @Override
+    public Optional<ResourceLocation> getStandSkin() {
+        return entityData.get(DATA_PARAM_STAND_SKIN);
     }
 
     @Override

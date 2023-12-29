@@ -24,6 +24,7 @@ public class HierophantGreenGrapple extends StandEntityAction {
             if (isShiftVariation()) {
                 string.setBindEntities(true);
             }
+            string.withStandSkin(standEntity.getStandSkin());
             world.addFreshEntity(string);
         }
     }

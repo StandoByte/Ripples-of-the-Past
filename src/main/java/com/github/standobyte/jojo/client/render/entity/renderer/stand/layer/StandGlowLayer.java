@@ -12,14 +12,14 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import net.minecraft.util.ResourceLocation;
 
 public class StandGlowLayer<T extends StandEntity, M extends StandEntityModel<T>> extends StandModelLayerRenderer<T, M> {
-    private ResourcePathChecker texturePathCheck;
+    private final ResourcePathChecker texturePathCheck;
 
     public StandGlowLayer(StandEntityRenderer<T, M> entityRenderer, ResourceLocation baseTex) {
         this(entityRenderer, null, baseTex);
     }
 
     protected StandGlowLayer(StandEntityRenderer<T, M> entityRenderer, M model, ResourceLocation baseTex) {
-        super(entityRenderer, model, new ResourceLocation(
+        super(entityRenderer, model == null, model, new ResourceLocation(
                 baseTex.getNamespace(), 
                 baseTex.getPath().replace("/entity/stand", "/entity/stand/glow")));
         this.texturePathCheck = ResourcePathChecker.getOrCreate(texture);

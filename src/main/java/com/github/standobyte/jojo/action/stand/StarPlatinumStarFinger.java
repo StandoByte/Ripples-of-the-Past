@@ -18,6 +18,7 @@ public class StarPlatinumStarFinger extends StandEntityAction {
         if (!world.isClientSide()) {
             SPStarFingerEntity starFinger = new SPStarFingerEntity(world, standEntity);
             starFinger.setLifeSpan(getStandActionTicks(userPower, standEntity));
+            starFinger.withStandSkin(standEntity.getStandSkin());
             standEntity.addProjectile(starFinger);
         }
     }

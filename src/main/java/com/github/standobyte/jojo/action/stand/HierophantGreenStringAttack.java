@@ -39,6 +39,7 @@ public class HierophantGreenStringAttack extends StandEntityAction {
             string.addKnockback(standEntity.guardCounter());
         }
         string.setLifeSpan(getStandActionTicks(userPower, standEntity));
+        string.withStandSkin(standEntity.getStandSkin());
         standEntity.addProjectile(string);
     }
     
