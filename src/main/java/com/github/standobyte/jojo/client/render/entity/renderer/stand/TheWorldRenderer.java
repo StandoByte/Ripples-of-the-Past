@@ -17,7 +17,8 @@ public class TheWorldRenderer extends StandEntityRenderer<TheWorldEntity, StandE
                         new ResourceLocation(JojoMod.MOD_ID, "the_world"), TheWorldModel::new), 
                 new ResourceLocation(JojoMod.MOD_ID, "textures/entity/stand/the_world.png"), 0);
 //        super(renderManager, 
-//                registerModel(new TheWorldModelNew(), new ResourceLocation(JojoMod.MOD_ID, "the_world"), TheWorldModelNew::new), 
+//                StandEntityModel.registerModel(new TheWorldModelNew(), 
+//                        new ResourceLocation(JojoMod.MOD_ID, "the_world"), TheWorldModelNew::new), 
 //                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/stand/the_world_new.png"), 0);
     }
 }
