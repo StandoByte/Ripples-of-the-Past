@@ -39,8 +39,8 @@ import net.minecraft.util.text.TranslationTextComponent;
 @SuppressWarnings("deprecation")
 public class HudLayoutEditingScreen extends Screen {
     private static final ResourceLocation WINDOW = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/layout_editing.png");
-    private static final int WINDOW_WIDTH = 200;
-    private static final int WINDOW_HEIGHT = 124;
+    private static final int WINDOW_WIDTH = 230;
+    private static final int WINDOW_HEIGHT = 180;
     
     private static PowerClassification selectedTab = null;
     private IPower<?, ?> selectedPower;
@@ -59,7 +59,7 @@ public class HudLayoutEditingScreen extends Screen {
     
     @Override
     protected void init() {
-        addButton(new CustomButton(getWindowX() + WINDOW_WIDTH - 30, getWindowY() + WINDOW_HEIGHT - 30, 24, 24, 
+        addButton(new CustomButton(getWindowX() + WINDOW_WIDTH - 30, getWindowY() + 6, 24, 24, 
                 button -> {
                     selectedPower.getActionsHudLayout().resetLayout();
                     markLayoutEdited(selectedPower);
@@ -80,7 +80,7 @@ public class HudLayoutEditingScreen extends Screen {
             }
         });
         
-        addButton(quickAccessHudVisibilityButton = new VisibilityButton(getWindowX() + 30, getWindowY() + WINDOW_HEIGHT - 28,
+        addButton(quickAccessHudVisibilityButton = new VisibilityButton(getWindowX() + 42, getWindowY() + 66,
                 button -> {
                     ActionsLayout<?> layout = selectedPower.getActionsHudLayout();
                     boolean newValue = !layout.isMmbActionHudVisible();
@@ -133,7 +133,6 @@ public class HudLayoutEditingScreen extends Screen {
         renderDragged(matrixStack, mouseX, mouseY);
         renderToolTips(matrixStack, mouseX, mouseY);
         buttons.forEach(button -> button.render(matrixStack, mouseX, mouseY, partialTick));
-        drawText(matrixStack);
     }
     
 
@@ -141,9 +140,9 @@ public class HudLayoutEditingScreen extends Screen {
         RenderSystem.enableBlend();
         minecraft.getTextureManager().bind(WINDOW);
         blit(matrixStack, getWindowX(), getWindowY(), 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-        blit(matrixStack, getWindowX() + 9, getWindowY() + 3, 232, 3, 9, 16);
-        blit(matrixStack, getWindowX() + 9, getWindowY() + 39, 232, 39, 9, 16);
-        blit(matrixStack, getWindowX() + 9, getWindowY() + 75, 232, 75, 9, 16);
+        blit(matrixStack, getWindowX() + 7, getWindowY() + 10, 232, 3, 9, 16);
+        blit(matrixStack, getWindowX() + 7, getWindowY() + 36, 232, 39, 9, 16);
+        blit(matrixStack, getWindowX() + 7, getWindowY() + 62, 232, 75, 9, 16);
         RenderSystem.disableBlend();
     }
     
@@ -176,10 +175,10 @@ public class HudLayoutEditingScreen extends Screen {
         return power == selectedPower;
     }
 
-    private static final int HOTBARS_X = 8;
-    private static final int ATTACKS_HOTBAR_Y = 20;
-    private static final int ABILITIES_HOTBAR_Y = 56;
-    private static final int QUICK_ACCESS_Y = 92;
+    private static final int HOTBARS_X = 20;
+    private static final int ATTACKS_HOTBAR_Y = 10;
+    private static final int ABILITIES_HOTBAR_Y = 36;
+    private static final int QUICK_ACCESS_Y = 62;
     private <P extends IPower<P, ?>> void renderSlots(MatrixStack matrixStack, int mouseX, int mouseY) {
         RenderSystem.enableBlend();
         P iSuckAtThis = (P) selectedPower;
@@ -298,9 +297,9 @@ public class HudLayoutEditingScreen extends Screen {
     
     private void renderHint(MatrixStack matrixStack) {
         minecraft.getTextureManager().bind(WINDOW);
-        int x = getWindowX() + WINDOW_WIDTH - 48;
-        int y = getWindowY() + WINDOW_HEIGHT - 17;
-        blit(matrixStack, x, y, 32, 245, 11, 11);
+        int hintX = getWindowX() + WINDOW_WIDTH - 48;
+        int hintY = getWindowY() + 6;
+        blit(matrixStack, hintX, hintY, 32, 245, 11, 11);
     }
     
     private final List<ITextComponent> hintTooltip = ImmutableList.of(
@@ -318,7 +317,7 @@ public class HudLayoutEditingScreen extends Screen {
         }
         
         int hintX = getWindowX() + WINDOW_WIDTH - 48;
-        int hintY = getWindowY() + WINDOW_HEIGHT - 17;
+        int hintY = getWindowY() + 6;
         if (mouseX >= hintX && mouseX < hintX + 11 && mouseY >= hintY && mouseY < hintY + 11) {
             renderComponentTooltip(matrixStack, hintTooltip, mouseX, mouseY);
         }

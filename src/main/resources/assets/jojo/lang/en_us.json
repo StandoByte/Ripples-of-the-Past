@@ -369,9 +369,6 @@
   "jojo.key.deselect_ability": "Deselect Ability",
   
   "jojo.screen.edit_hud_layout": "Edit Hotbars Layout",
-  "jojo.screen.edit_hud_layout.attacks": "Attacks",
-  "jojo.screen.edit_hud_layout.abilities": "Abilities",
-  "jojo.screen.edit_hud_layout.mmb": "Quick Access",
   "jojo.screen.edit_hud_layout.reset": "Reset Layout",
   "jojo.screen.edit_hud_layout.hint.lmb": "Left mouse button - move",
   "jojo.screen.edit_hud_layout.hint.rmb": "Right mouse button - enable/disable",
