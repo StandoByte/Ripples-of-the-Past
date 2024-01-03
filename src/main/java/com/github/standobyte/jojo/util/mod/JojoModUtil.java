@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.util.mod;
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -99,14 +100,13 @@ public class JojoModUtil {
         aabb.inflate(rayTraceInflate);
         double minDistanceSqr = minDistance * minDistance;
         Map<EntityRayTraceResult, Double> rayTracedWithDistance = new HashMap<>();
-        for (Entity potentialTarget : world.getEntities(entity, aabb, e -> !e.isSpectator() && e.isPickable() && (entityFilter == null || entityFilter.test(e)))) {
+        List<Entity> entities = world.getEntities(entity, aabb, e -> !e.isSpectator() && e.isPickable() && (entityFilter == null || entityFilter.test(e)));
+        for (Entity potentialTarget : entities) {
             AxisAlignedBB targetCollisionAABB = potentialTarget.getBoundingBox().inflate((double) potentialTarget.getPickRadius() + rayTraceInflate);
             targetCollisionAABB = standPrecisionTargetHitbox(targetCollisionAABB, standPrecision);
             Optional<Vector3d> clipOptional = targetCollisionAABB.clip(startPos, endPos);
             if (targetCollisionAABB.contains(startPos)) {
-                if (minDistanceSqr >= 0.0D) {
-                    rayTracedWithDistance.put(new EntityRayTraceResult(potentialTarget, clipOptional.orElse(startPos)), 0.0);
-                }
+                rayTracedWithDistance.put(new EntityRayTraceResult(potentialTarget, clipOptional.orElse(startPos)), 0.0);
             } else if (clipOptional.isPresent()) {
                 Vector3d clipVec = clipOptional.get();
                 double clipDistanceSqr = startPos.distanceToSqr(clipVec);
@@ -141,20 +141,16 @@ public class JojoModUtil {
                     Math.max(1.0 - aabb.getXsize(), 0) * smallAabbAddFraction, 
                     Math.max(1.0 - aabb.getYsize(), 0) * smallAabbAddFraction, 
                     Math.max(1.0 - aabb.getZsize(), 0) * smallAabbAddFraction);
+            
+            double scale = precision / 5 + 0.2;
+            double xSize = aabb.getXsize();
+            double ySize = aabb.getYsize();
+            double zSize = aabb.getZsize();
+            aabb = MCUtil.scale(aabb, 
+                    Math.min(scale, 1 + 4 / xSize), 
+                    Math.min(scale, 1 + 4 / ySize), 
+                    Math.min(scale, 1 + 4 / zSize));
         }
-        
-        
-        double scale;
-        if (precision < 4) {        scale = Math.max(precision, 2) / 4; }
-        else {                      scale = precision / 5 + 0.2; }
-        
-        double xSize = aabb.getXsize();
-        double ySize = aabb.getYsize();
-        double zSize = aabb.getZsize();
-        aabb = MCUtil.scale(aabb, 
-                Math.min(scale, 1 + 4 / xSize), 
-                Math.min(scale, 1 + 4 / ySize), 
-                Math.min(scale, 1 + 4 / zSize));
         return aabb;
     }
 
