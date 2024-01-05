@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.input.ActionsControlScheme;
 import com.github.standobyte.jojo.command.JojoControlsCommand;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -53,7 +54,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     protected final LivingEntity user;
     protected final Optional<ServerPlayerEntity> serverPlayerUser;
     
-    private ActionsLayout<P> clHudLayout = ActionsLayout.emptyLayout();
+    @Deprecated
     private Map<ResourceLocation, ActionsLayout<P>> srvSavedLayouts = new HashMap<>();
     
     private ActionCooldownTracker cooldowns = new ActionCooldownTracker();
@@ -86,26 +87,11 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             });
             ModCriteriaTriggers.GET_POWER.get().trigger(player, getPowerClassification(), this);
         });
-
-        if (!user.level.isClientSide()) {
-            serverPlayerUser.ifPresent(player -> {
-                clHudLayout.syncWithUser(player, getPowerClassification(), type);
-            });
-        }
     }
 
     protected void onPowerSet(T type) {
-        if (!user.level.isClientSide()) {
-            if (type != null) {
-                ResourceLocation key = type.getRegistryName();
-                clHudLayout = type.createDefaultLayout();
-                if (srvSavedLayouts.containsKey(key)) {
-                    clHudLayout.copySwitchesState(srvSavedLayouts.get(key));
-                }
-            }
-            else {
-                clHudLayout = ActionsLayout.emptyLayout();
-            }
+        if (user.level.isClientSide()) {
+            ActionsControlScheme.cacheCtrlScheme(getPowerClassification(), type);
         }
     }
     
@@ -160,24 +146,14 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             getType().onNewDay(user, getThis(), prevDay, day);
         }
     }
-    
-    @Override
-    public ActionsLayout<P> getActionsHudLayout() {
-        return clHudLayout;
-    }
-    
-    @Override
-    public void setActionsHudLayout(ActionsLayout<P> layout) {
-        this.clHudLayout = layout;
-    }
-    
-    @Override
-    public void saveActionsHudLayout(T powerType, ActionsLayout<P> clReceivedLayout) {
-        srvSavedLayouts.put(powerType.getRegistryName(), clReceivedLayout);
-        if (powerType == this.getType()) {
-            this.clHudLayout = clReceivedLayout;
-        }
-    }
+//    
+//    @Override
+//    public void saveActionsHudLayout(T powerType, ActionsLayout<P> clReceivedLayout) {
+//        srvSavedLayouts.put(powerType.getRegistryName(), clReceivedLayout);
+//        if (powerType == this.getType()) {
+//            this.clHudLayout = clReceivedLayout;
+//        }
+//    }
     
     @Override
     public final boolean isActionOnCooldown(Action<?> action) {
@@ -634,9 +610,6 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                     CompoundNBT layoutNbt = layoutsMapNbt.getCompound(key);
                     layout.fromNBT(layoutNbt);
                     srvSavedLayouts.put(powerTypeId, layout);
-                    if (type == getType()) {
-                        clHudLayout = layout;
-                    }
                 }
             });
         }
@@ -657,7 +630,6 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     
     protected void keepActionsLayout(P oldPower) {
         PowerBaseImpl<P, T> myCodeIsJankAf = (PowerBaseImpl<P, T>) oldPower;
-        clHudLayout = myCodeIsJankAf.clHudLayout;
         srvSavedLayouts = myCodeIsJankAf.srvSavedLayouts;
     }
     
@@ -672,15 +644,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             }
         });
     }
-
-    protected final void syncLayoutWithUser() {
-        serverPlayerUser.ifPresent(player -> {
-            if (hasPower()) {
-                clHudLayout.syncWithUser(player, getPowerClassification(), getType());
-            }
-        });
-    }
-
+    
     @Override
     public void syncWithTrackingOrUser(ServerPlayerEntity player) {
         if (hasPower() && user != null) {

@@ -111,9 +111,9 @@ public class VampirismData extends TypeSpecificData {
     }
     
     private void addHamonSuicideAbility() {
-        if (vampireHamonUser) {
-            power.getActionsHudLayout().addExtraAction(ModVampirismActions.VAMPIRISM_HAMON_SUICIDE.get(), ActionsLayout.Hotbar.RIGHT_CLICK);
-        }
+//        if (vampireHamonUser) {
+//            power.clGetActionsHudLayout().addExtraAction(ModVampirismActions.VAMPIRISM_HAMON_SUICIDE.get(), ActionsLayout.Hotbar.RIGHT_CLICK);
+//        }
     }
 
     public boolean isVampireAtFullPower() {

@@ -1081,12 +1081,12 @@ public class HamonData extends TypeSpecificData {
     }
 
     private void addSkillAction(AbstractHamonSkill skill) {
-        if (skill.getRewardAction() != null && skill.addsActionToHUD()) {
-            ActionsLayout.Hotbar hotbar = skill.getRewardType().getDefaultHotbar();
-            if (hotbar != null) {
-                power.getActionsHudLayout().addExtraAction(skill.getRewardAction(), hotbar);
-            }
-        }
+//        if (skill.getRewardAction() != null && skill.addsActionToHUD()) {
+//            ActionsLayout.Hotbar hotbar = skill.getRewardType().getDefaultHotbar();
+//            if (hotbar != null) {
+//                power.clGetActionsHudLayout().addExtraAction(skill.getRewardAction(), hotbar);
+//            }
+//        }
     }
     
     public void removeHamonSkill(AbstractHamonSkill skill) {
@@ -1103,9 +1103,9 @@ public class HamonData extends TypeSpecificData {
     }
 
     private void removeSkillAction(AbstractHamonSkill skill) {
-        if (skill.getRewardAction() != null && skill.addsActionToHUD()) {
-            power.getActionsHudLayout().removeExtraAction(skill.getRewardAction());
-        }
+//        if (skill.getRewardAction() != null && skill.addsActionToHUD()) {
+//            power.clGetActionsHudLayout().removeExtraAction(skill.getRewardAction());
+//        }
     }
     
     public static boolean canResetTab(PlayerEntity user, HamonSkillsTab type) {

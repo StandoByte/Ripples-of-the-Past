@@ -324,7 +324,6 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
             }
             PacketManager.sendToClient(new PreviousPowerTypesPacket(hadPowers), player);
         });
-        syncLayoutWithUser();
     }
     
     @Override
