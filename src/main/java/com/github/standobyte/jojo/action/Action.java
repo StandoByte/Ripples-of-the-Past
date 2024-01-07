@@ -384,7 +384,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     public Stream<ResourceLocation> getTexLocationstoLoad() {
         return Stream.of(getRegistryName());
     }
-
+    
     private final LazySupplier<ResourceLocation> iconTexture = 
             new LazySupplier<>(() -> makeIconVariant(this, ""));
     public ResourceLocation getIconTexture(@Nullable P power) {

@@ -95,6 +95,7 @@ import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
+@SuppressWarnings("deprecation")
 public class ActionsOverlayGui extends AbstractGui {
     public static final ResourceLocation HOTBAR_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/overlay_hotbar.png");
     public static final ResourceLocation OVERLAY_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/overlay.png");
@@ -736,7 +737,8 @@ public class ActionsOverlayGui extends AbstractGui {
             if (heldReadyToFire) {
                 ClientUtil.fillSingleRect(x - 2, y - 2, 20, 20, 0, 255, 0, 127);
             }
-            
+
+            RenderSystem.color4f(1.0F, 1.0F, 1.0F, hotbarAlpha);
             ActionConditionResult result = actionAvailability(action, mode, actionKey, target, isSelected);
             if (!result.isPositive()) {
                 float brightness;
@@ -799,7 +801,8 @@ public class ActionsOverlayGui extends AbstractGui {
         Minecraft mc = Minecraft.getInstance();
         boolean specialRender = false;
         
-        if (action == ModStandsInit.GOLD_EXPERIENCE_CREATE_LIFEFORM.get()) {
+        if (action == ModStandsInit.GOLD_EXPERIENCE_CREATE_LIFEFORM.get()
+                || action == ModStandsInit.GOLD_EXPERIENCE_TOOTH_LIFEFORM.get()) {
             EntityType<?> selectedMob = GoldExperienceCreateLifeform.getChosenEntityType(mc.player);
             if (selectedMob != null) {
                 EntityTypeIcon.renderIcon(selectedMob, matrixStack, x, y);

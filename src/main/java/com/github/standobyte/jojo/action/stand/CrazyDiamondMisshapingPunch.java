@@ -26,6 +26,8 @@ public class CrazyDiamondMisshapingPunch extends StandEntityHeavyAttack {
     
     @Override
     protected StandEntityActionModifier getRecoveryFollowup(IStandPower standPower, StandEntity standEntity) {
+        if (standEntity == null) return null;
+        
         TargetHitPart hitPart = standEntity.getCurrentTask().map(task -> task.getAdditionalData().peekOrNull(TargetHitPart.class)).orElse(null);
         if (hitPart != null) {
             switch (hitPart) {

@@ -6,6 +6,7 @@ import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.entity.ObjectEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
@@ -19,6 +20,17 @@ public class GoldExperienceHeavyPunch extends StandEntityHeavyAttack {
 
     public GoldExperienceHeavyPunch(Builder builder) {
         super(builder);
+    }
+    
+    @Override
+    protected StandEntityActionModifier getRecoveryFollowup(IStandPower standPower, StandEntity standEntity) {
+        if (standEntity == null) return null;
+        
+        if (standEntity.getCurrentTask().map(task -> task.getTarget().getType() == TargetType.ENTITY).orElse(false)) {
+            return super.getRecoveryFollowup(standPower, standEntity);
+        }
+        
+        return null;
     }
     
     @Override

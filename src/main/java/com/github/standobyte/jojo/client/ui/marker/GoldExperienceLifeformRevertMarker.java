@@ -2,15 +2,18 @@ package com.github.standobyte.jojo.client.ui.marker;
 
 import java.util.List;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.effect.GECreatedLifeformEffect;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
+import com.github.standobyte.jojo.entity.ObjectEntity;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.model.IBakedModel;
@@ -18,7 +21,9 @@ import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.client.renderer.texture.AtlasTexture;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.entity.Entity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.ResourceLocation;
 
 public class GoldExperienceLifeformRevertMarker extends MarkerRenderer {
     
@@ -37,7 +42,8 @@ public class GoldExperienceLifeformRevertMarker extends MarkerRenderer {
     protected void renderIcon(MatrixStack matrixStack, MarkerInstance marker, float partialTick) {
         marker.standEffect.ifPresent(effect -> {
             if (effect instanceof GECreatedLifeformEffect) {
-                ItemStack item = ((GECreatedLifeformEffect) effect).getItemView();
+                GECreatedLifeformEffect lifeformData = (GECreatedLifeformEffect) effect;
+                ItemStack item = lifeformData.getItemView();
                 if (item != null && !item.isEmpty()) {
                     ItemRenderer itemRenderer = mc.getItemRenderer();
                     
@@ -71,9 +77,23 @@ public class GoldExperienceLifeformRevertMarker extends MarkerRenderer {
                     RenderSystem.disableAlphaTest();
                     RenderSystem.disableRescaleNormal();
                 }
+                else {
+                    Entity sourceEntity = lifeformData.getSource().getSourceEntity();
+                    if (sourceEntity instanceof ObjectEntity) {
+                        ObjectEntity.Type objectType = ((ObjectEntity) sourceEntity).getObjectType();
+                        switch (objectType) {
+                        case TOOTH:
+                            mc.getTextureManager().bind(ICON_TOOTH);
+                            AbstractGui.blit(matrixStack, 0, 0, 0, 0, 16, 16, 16, 16);
+                            break;
+                        }
+                    }
+                }
             }
         });
     }
+    
+    private static final ResourceLocation ICON_TOOTH = new ResourceLocation(JojoMod.MOD_ID, "textures/icons/tooth.png");
     
     @Override
     protected void updatePositions(List<MarkerInstance> list, float partialTick) {

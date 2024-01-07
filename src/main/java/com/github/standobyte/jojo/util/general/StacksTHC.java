@@ -31,6 +31,14 @@ public class StacksTHC {
         return stack.isEmpty() ? null : peek(stackType);
     }
     
+    @Nullable
+    @SuppressWarnings("unchecked")
+    public <T> T popOrNull(Class<T> stackType) {
+        if (!store.containsKey(stackType)) return null;
+        Stack<T> stack = ((Stack<T>) store.get(stackType));
+        return stack.isEmpty() ? null : pop(stackType);
+    }
+    
     public <T> boolean isEmpty(Class<T> stackType) {
         return store.containsKey(stackType) ? store.get(stackType).isEmpty() : true;
     }

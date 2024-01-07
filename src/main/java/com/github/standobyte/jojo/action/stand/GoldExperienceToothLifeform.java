@@ -1,6 +1,9 @@
 package com.github.standobyte.jojo.action.stand;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.stand.effect.GECreatedLifeformEffect;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.GETransformationEntity;
@@ -24,6 +27,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
@@ -46,6 +50,19 @@ public class GoldExperienceToothLifeform extends StandEntityActionModifier {
     }
     
     @Override
+    public void perform(World world, LivingEntity user, IStandPower power, ActionTarget target, @Nullable PacketBuffer extraInput) {
+        super.perform(world, user, power, target, extraInput);
+        if (!world.isClientSide() && extraInput != null && power.isActive()) {
+            EntityType<?> type = (EntityType<?>) NetworkUtil.readOptional(extraInput, 
+                    () -> extraInput.readRegistryIdSafe(EntityType.class)).orElse(null);
+            if (type != null) {
+                StandEntity stand = (StandEntity) power.getStandManifestation();
+                stand.getCurrentTask().ifPresent(task -> task.getAdditionalData().push(EntityType.class, type));
+            }
+        }
+    }
+    
+    @Override
     public void standTickRecovery(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         boolean triggerEffect = task.getTicksLeft() <= 1;
         if (task.getAdditionalData().isEmpty(TriggeredFlag.class)) {
@@ -54,16 +71,12 @@ public class GoldExperienceToothLifeform extends StandEntityActionModifier {
                 Entity objEntity = world.getEntity(toothEntityId);
                 if (objEntity instanceof ObjectEntity) {
                     ObjectEntity toothEntity = (ObjectEntity) objEntity;
-                    
-                    
-//                    EntityType<?> type = (EntityType<?>) NetworkUtil.readOptional(extraInput, 
-//                            () -> extraInput.readRegistryIdSafe(EntityType.class)).orElse(null);
-                    EntityType<?> type = EntityType.PARROT;
-                    if (type != null) {
+                    EntityType<?> targetType = task.getAdditionalData().popOrNull(EntityType.class);
+                    if (targetType != null) {
                         LivingEntity user = userPower.getUser();
                         
                         
-                        Entity lifeFormCreated = type.create(world);
+                        Entity lifeFormCreated = targetType.create(world);
                         CompoundNBT nbt = new CompoundNBT();
                         nbt.putString("DeathLootTable", "empty");
                         lifeFormCreated.load(nbt);
@@ -138,12 +151,17 @@ public class GoldExperienceToothLifeform extends StandEntityActionModifier {
     }
     
     @Override
-    public String getTranslationKey(IStandPower power, ActionTarget target) {
-        return ModStandsInit.GOLD_EXPERIENCE_CREATE_LIFEFORM.get().getTranslationKey(power, target);
-    }
-    
-    @Override
     public IFormattableTextComponent getTranslatedName(IStandPower power, String key) {
-        return ModStandsInit.GOLD_EXPERIENCE_CREATE_LIFEFORM.get().getTranslatedName(power, key);
+        if (power.isActive()) {
+            StandEntity stand = (StandEntity) power.getStandManifestation();
+            if (stand.getCurrentTask().map(task -> task.getTarget().getType() == TargetType.ENTITY).orElse(false)) {
+                EntityType<?> chosenEntityType = GoldExperienceCreateLifeform.getChosenEntityType(ClientUtil.getClientPlayer());
+                if (chosenEntityType != null) {
+                    return new TranslationTextComponent(key + ".param", chosenEntityType.getDescription());
+                }
+            }
+        }
+        
+        return super.getTranslatedName(power, key);
     }
 }

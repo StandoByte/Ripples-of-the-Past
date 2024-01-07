@@ -18,7 +18,7 @@ public abstract class StandEntityActionModifier extends StandAction implements I
     }
     
     @Override
-    public final void perform(World world, LivingEntity user, IStandPower power, ActionTarget target, @Nullable PacketBuffer buf) {
+    public void perform(World world, LivingEntity user, IStandPower power, ActionTarget target, @Nullable PacketBuffer extraInput) {
         if (!world.isClientSide() && power.isActive()) {
             StandEntity stand = (StandEntity) power.getStandManifestation();
             stand.getCurrentTask().ifPresent(task -> task.addModifierAction(this, stand));

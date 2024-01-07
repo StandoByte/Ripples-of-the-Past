@@ -1124,6 +1124,8 @@
   "action.jojo.gold_experience_choose_lifeform": "Choose lifeform",
   "action.jojo.gold_experience_create_lifeform": "Create lifeform",
   "action.jojo.gold_experience_create_lifeform.param": "Create %s",
+  "action.jojo.gold_experience_tooth_lifeform": "Turn tooth into lifeform",
+  "action.jojo.gold_experience_tooth_lifeform.param": "Turn tooth into %s",
   "action.jojo.gold_experience_revert_lifeform": "Revert",
   "action.jojo.gold_experience_revert_lifeform.param": "Revert to %s",
   "entity.jojo.util_object.tooth": "Tooth",
