@@ -222,7 +222,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
         if (standPower.getStandManifestation() instanceof StandEntity) {
             return StandStatFormulas.getBarrageMaxDuration(((StandEntity) standPower.getStandManifestation()).getDurability());
         }
-        return 0;
+        return 20;
     }
     
     @Override

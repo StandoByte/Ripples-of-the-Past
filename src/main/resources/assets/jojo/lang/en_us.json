@@ -61,6 +61,8 @@
   "item.jojo.walkman.reference_quote": "\"My own grandson doesn't even know my face! I'll never forgive the Japanese! But... I do like my Walkman.\"",
   "item.jojo.cassette_blank": "Blank Cassette Tape",
   "item.jojo.cassette_blank.hint": "Combine it with a music disc to record it",
+  "item.jojo.cassette_blank.hint.has_dyes": "Combine it with a music disc or a dye to record it",
+  "item.jojo.cassette.dye_hint": "%s + %s",
   "item.jojo.cassette_recorded": "Cassette Tape",
   "jojo.cassette.side_a": "  Side A:",
   "jojo.cassette.side_b": "  Side B:",
@@ -369,9 +371,6 @@
   "jojo.key.deselect_ability": "Deselect Ability",
   
   "jojo.screen.edit_hud_layout": "Edit Hotbars Layout",
-  "jojo.screen.edit_hud_layout.attacks": "Attacks",
-  "jojo.screen.edit_hud_layout.abilities": "Abilities",
-  "jojo.screen.edit_hud_layout.mmb": "Quick Access",
   "jojo.screen.edit_hud_layout.reset": "Reset Layout",
   "jojo.screen.edit_hud_layout.hint.lmb": "Left mouse button - move",
   "jojo.screen.edit_hud_layout.hint.rmb": "Right mouse button - enable/disable",
