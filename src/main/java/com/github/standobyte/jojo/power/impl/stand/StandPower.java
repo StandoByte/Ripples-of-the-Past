@@ -4,6 +4,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.stand.StandAction;
@@ -29,6 +30,7 @@ import com.github.standobyte.jojo.power.impl.stand.StandActionLearningProgress.S
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.LegacyUtil;
 
@@ -37,12 +39,17 @@ import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.StringNBT;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 
 public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> implements IStandPower {
     private Optional<StandInstance> standInstance = Optional.empty();
+    private Optional<ResourceLocation> invalidReadStandId = Optional.empty();;
+    private Optional<CompoundNBT> invalidReadStandNbt = Optional.empty();;
     
     private boolean hadStand = false;
     private PreviousStandsSet previousStands = new PreviousStandsSet();
@@ -222,7 +229,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             standArrowHandler.tick(user);
         }
         else {
-            if (getStamina() < getMaxStamina() * 0.5F) {
+            if (getStamina() < getMaxStamina() * 0.5F && !StandUtil.standIgnoresStaminaDebuff(this)) {
                 BarsRenderer.getBarEffects(BarType.STAMINA).triggerRedHighlight(user.tickCount);
             }
             else {
@@ -577,6 +584,20 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         if (hasPower()) {
             getType().toggleSummon(this);
         }
+        else {
+            serverPlayerUser.ifPresent(player -> {
+                ITextComponent message;
+                if (invalidReadStandId.isPresent()) {
+                    message = invalidReadStandId.map(id -> id.getNamespace().equals(JojoMod.MOD_ID) ? 
+                            new TranslationTextComponent("jojo.chat.message.no_stand.mod_version", id)
+                            : new TranslationTextComponent("jojo.chat.message.no_stand.addon", id)).get();
+                }
+                else {
+                    message = new TranslationTextComponent("jojo.chat.message.no_stand");
+                }
+                player.displayClientMessage(message, true);
+            });
+        }
     }
     
 //    @Override // TODO Stand Sealing effect
@@ -657,7 +678,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public CompoundNBT writeNBT() {
         CompoundNBT cnbt = super.writeNBT();
-        standInstance.ifPresent(stand -> cnbt.put("StandInstance", stand.writeNBT()));
+        GeneralUtil.ifPresentOrElse(standInstance, 
+                stand -> cnbt.put("StandInstance", stand.writeNBT()), 
+                ()    -> invalidReadStandNbt.ifPresent(standNbt -> cnbt.put("StandInstance", standNbt)));
         
         cnbt.putBoolean("HadStand", hadStand);
         if (usesStamina()) {
@@ -676,9 +699,21 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
 
     @Override
     public void readNBT(CompoundNBT nbt) {
-        StandInstance standInstance = nbt.contains("StandInstance", MCUtil.getNbtId(CompoundNBT.class))
-                ? StandInstance.fromNBT(nbt.getCompound("StandInstance"))
-                        : LegacyUtil.readOldStandCapType(nbt).orElse(null);
+        StandInstance standInstance;
+        if (nbt.contains("StandInstance", MCUtil.getNbtId(CompoundNBT.class))) {
+            CompoundNBT standInstanceNbt = nbt.getCompound("StandInstance");
+            standInstance = StandInstance.fromNBT(standInstanceNbt);
+            
+            if (standInstance == null) {
+                invalidReadStandNbt = Optional.of(standInstanceNbt.copy());
+                if (standInstanceNbt.contains("StandType", MCUtil.getNbtId(StringNBT.class))) {
+                    invalidReadStandId = Optional.of(new ResourceLocation(standInstanceNbt.getString("StandType")));
+                }
+            }
+        }
+        else {
+            standInstance = LegacyUtil.readOldStandCapType(nbt).orElse(null);
+        }
         setStandInstance(standInstance);
             
         hadStand = nbt.getBoolean("HadStand");
@@ -707,8 +742,11 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public void onClone(IStandPower oldPower, boolean wasDeath) {
         super.onClone(oldPower, wasDeath);
+        StandPower oldImpl = (StandPower) oldPower;
         this.standArrowHandler.keepOnDeath(oldPower.getStandArrowHandler());
-        this.actionLearningProgressMap = ((StandPower) oldPower).actionLearningProgressMap; // FIXME can i remove this cast?
+        this.actionLearningProgressMap = oldImpl.actionLearningProgressMap;
+        this.invalidReadStandId = oldImpl.invalidReadStandId;
+        this.invalidReadStandNbt = oldImpl.invalidReadStandNbt;
     }
     
     @Override
