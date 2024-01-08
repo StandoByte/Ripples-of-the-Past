@@ -586,9 +586,16 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         }
         else {
             serverPlayerUser.ifPresent(player -> {
-                String key = "jojo.chat.message.no_stand"
-                        + invalidReadStandId.map(id -> id.getNamespace().equals(JojoMod.MOD_ID) ? ".mod_version" : ".addon").orElse("");
-                player.displayClientMessage(new TranslationTextComponent(key), true);
+                ITextComponent message;
+                if (invalidReadStandId.isPresent()) {
+                    message = invalidReadStandId.map(id -> id.getNamespace().equals(JojoMod.MOD_ID) ? 
+                            new TranslationTextComponent("jojo.chat.message.no_stand.mod_version", id)
+                            : new TranslationTextComponent("jojo.chat.message.no_stand.addon", id)).get();
+                }
+                else {
+                    message = new TranslationTextComponent("jojo.chat.message.no_stand");
+                }
+                player.displayClientMessage(message, true);
             });
         }
     }
@@ -699,8 +706,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             
             if (standInstance == null) {
                 invalidReadStandNbt = Optional.of(standInstanceNbt.copy());
-                if (nbt.contains("StandType", MCUtil.getNbtId(StringNBT.class))) {
-                    invalidReadStandId = Optional.of(new ResourceLocation(nbt.getString("StandType")));
+                if (standInstanceNbt.contains("StandType", MCUtil.getNbtId(StringNBT.class))) {
+                    invalidReadStandId = Optional.of(new ResourceLocation(standInstanceNbt.getString("StandType")));
                 }
             }
         }
