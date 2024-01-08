@@ -147,7 +147,7 @@ public class StandActionLearningProgress {
                 });
                 nbt.put(standType.toString(), standTypeNbt);
             });
-            nbt.merge(invalidEntriedSrc);
+            if (invalidEntriedSrc != null) nbt.merge(invalidEntriedSrc);
             return nbt;
         }
         
