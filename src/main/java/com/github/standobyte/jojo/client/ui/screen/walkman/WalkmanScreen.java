@@ -364,7 +364,7 @@ public class WalkmanScreen extends ContainerScreen<WalkmanItemContainer> {
             minecraft.getTextureManager().bind(WALKMAN_CASSETTE_TEXTURE);
             blit(matrixStack, windowX + 35, windowY + 7, 0, 0, 150, 95);
             
-            Optional<DyeColor> color = CassetteRecordedItem.getCassetteData(cassetteItem).map(cap -> cap.getDye()).orElse(Optional.empty());
+            Optional<DyeColor> color = CassetteRecordedItem.getCassetteData(cassetteItem).map(cap -> cap.getDye());
             if (color.isPresent()) {
                 blit(matrixStack, windowX + 40, windowY + 41, 5, 128 + color.get().ordinal() * 8, 140, 7);
             }

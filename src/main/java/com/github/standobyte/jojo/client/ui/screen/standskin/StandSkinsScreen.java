@@ -39,10 +39,10 @@ public class StandSkinsScreen extends Screen {
     public static final ResourceLocation TEXTURE_MAIN_WINDOW = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/stand_skins.png");
     private static final ResourceLocation TEXTURE_BG = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/stand_skins_bg.png");
     
-    private static final int WINDOW_WIDTH = 195;
+    private static final int WINDOW_WIDTH = 230;
     private static final int WINDOW_HEIGHT = 180;
     private static final int WINDOW_INSIDE_X = 7;
-    private static final int WINDOW_INSIDE_WIDTH = 165;
+    private static final int WINDOW_INSIDE_WIDTH = 201;
     private static final int WINDOW_INSIDE_Y = 20;
     private static final int WINDOW_INSIDE_HEIGHT = 153;
     
@@ -80,7 +80,7 @@ public class StandSkinsScreen extends Screen {
         this.skins = Streams.mapWithIndex(StandSkinsManager.getInstance()
                 .getStandSkinsView(standCap.getType().getRegistryName())
                 .stream(), (skin, index) -> {
-                    int x = 3 + (int) (index % SKINS_IN_ROW) * (SkinView.boxWidth + 3);
+                    int x = 12 + (int) (index % SKINS_IN_ROW) * (SkinView.boxWidth + 12);
                     int y = 3 + (int) (index / SKINS_IN_ROW) * (SkinView.boxHeight + 3);
                     return new SkinView(skin, x, y);
                 })
@@ -135,7 +135,7 @@ public class StandSkinsScreen extends Screen {
         RenderSystem.depthFunc(515);
         minecraft.getTextureManager().bind(TEXTURE_BG);
         int l = -scroll % 16;
-        for (int i1 = -1; i1 <= 11; ++i1) {
+        for (int i1 = -1; i1 <= 12; ++i1) {
             for (int j1 = -1; j1 <= 11; ++j1) {
                 blit(matrixStack, 5 + 16 * i1, l + 16 * j1, 0.0F, 0.0F, 16, 16, 16, 16);
             }
@@ -185,6 +185,7 @@ public class StandSkinsScreen extends Screen {
                 x >= 0 && x <= WINDOW_INSIDE_WIDTH && 
                 y >= 0 && y <= WINDOW_INSIDE_HEIGHT) {
             int yWithScroll = y + scroll;
+            
             return skins.stream().filter(skin -> 
             x >           skin.x && x           <= skin.x + SkinView.boxWidth && 
             yWithScroll > skin.y && yWithScroll <= skin.y + SkinView.boxHeight)
@@ -431,7 +432,7 @@ public class StandSkinsScreen extends Screen {
             StandType<?> standType = standCap.getType();
             if (standType instanceof EntityStandType) {
                 matrixStack.pushPose();
-                matrixStack.translate(82.5F, 0, 100);
+                matrixStack.translate(WINDOW_WIDTH / 2 - 15, 0, 100);
 
                 matrixStack.scale(-55, 55, 55);
                 matrixStack.translate(0, 1.02F, 0);

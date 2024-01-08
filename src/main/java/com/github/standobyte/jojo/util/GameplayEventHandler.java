@@ -681,8 +681,8 @@ public class GameplayEventHandler {
     }
 
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void prepareToReduceKnockback(LivingDamageEvent event) {
+    @SubscribeEvent(receiveCanceled = true)
+    public static void prepareToReduceKnockback(LivingHurtEvent event) {
         float knockbackReduction = DamageUtil.knockbackReduction(event.getSource());
         
         if (knockbackReduction >= 0 && knockbackReduction < 1) {

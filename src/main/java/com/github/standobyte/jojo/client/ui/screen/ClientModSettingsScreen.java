@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.HudNamesRender;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.PositionConfig;
+import com.github.standobyte.jojo.client.ui.screen.widgets.ImageVanillaButton;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.gui.DialogTexts;
@@ -16,7 +17,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.SettingsScreen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.client.gui.widget.button.ImageButton;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -266,8 +266,8 @@ public class ClientModSettingsScreen extends SettingsScreen {
         }
         
         ITextComponent tooltip = new TranslationTextComponent("jojo.options.client.title");
-        return new ImageButton(buttonPos[0], buttonPos[1], 20, 20, 
-                80, 128, 20, 
+        return new ImageVanillaButton(buttonPos[0], buttonPos[1], 20, 20, 
+                80, 128, 
                 ClientUtil.ADDITIONAL_UI, 256, 256,
                 button -> {
                     optionsScreen.getMinecraft().setScreen(new ClientModSettingsScreen(optionsScreen, ClientModSettings.getInstance()));

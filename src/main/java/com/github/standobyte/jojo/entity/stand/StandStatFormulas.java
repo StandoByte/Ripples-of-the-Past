@@ -99,7 +99,6 @@ public class StandStatFormulas {
         }
         
         double config = JojoModConfig.getCommonConfigInstance(false).standResistanceMultiplier.get();
-        config = 3;
         if (config > 1) {
             dmgCoeff /= config;
         }
