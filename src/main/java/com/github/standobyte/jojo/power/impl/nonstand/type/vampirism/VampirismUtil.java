@@ -126,6 +126,7 @@ public class VampirismUtil {
     
     private static void makeMobNeutralToVampirePlayers(MobEntity mob) {
         if (JojoModConfig.getCommonConfigInstance(false).vampiresAggroMobs.get()) return;
+        
         Set<PrioritizedGoal> goals = CommonReflection.getGoalsSet(mob.targetSelector);
         for (PrioritizedGoal prGoal : goals) {
             Goal goal = prGoal.getGoal();
