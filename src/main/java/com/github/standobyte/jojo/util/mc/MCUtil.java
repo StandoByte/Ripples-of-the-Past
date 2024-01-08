@@ -216,6 +216,14 @@ public class MCUtil {
         }).orElse(null);
     }
     
+    public static CompoundNBT getOrCreateCompound(CompoundNBT mainNbt, String key) {
+        return nbtGetCompoundOptional(mainNbt, key).orElseGet(() -> {
+            CompoundNBT nbt = new CompoundNBT();
+            mainNbt.put(key, nbt);
+            return nbt;
+        });
+    }
+    
     //
     
     
