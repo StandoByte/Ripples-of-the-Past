@@ -22,8 +22,8 @@ import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.ClientModSettingsScreen;
-import com.github.standobyte.jojo.client.ui.screen.standskin.StandSkinsScreen;
 import com.github.standobyte.jojo.client.ui.screen.widgets.HeightScaledSlider;
+import com.github.standobyte.jojo.client.ui.screen.widgets.ImageVanillaButton;
 import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModStatusEffects;
@@ -56,7 +56,6 @@ import net.minecraft.client.gui.screen.OptionsScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractSlider;
 import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.client.gui.widget.button.ImageButton;
 import net.minecraft.client.renderer.FirstPersonRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.OutlineLayerBuffer;
@@ -665,8 +664,8 @@ public class ClientEventHandler {
                     statsBgAlphaSlider.visible = doStandStatsRender(screen);
                     event.addWidget(statsBgAlphaSlider);
                     
-                    Button standStatsToggleButton = new ImageButton(screen.width - 28, screen.height - 28, 
-                            20, 20, 236, 216, 20, StandStatsRenderer.STAND_STATS_UI, 256, 256, 
+                    Button standStatsToggleButton = new ImageVanillaButton(screen.width - 28, screen.height - 28, 
+                            20, 20, 236, 236, StandStatsRenderer.STAND_STATS_UI, 256, 256, 
                             button -> {
                                 renderStandStats = !doStandStatsRender(screen);
                                 statsBgAlphaSlider.visible = doStandStatsRender(screen);
@@ -680,8 +679,8 @@ public class ClientEventHandler {
                             StringTextComponent.EMPTY);
                     event.addWidget(standStatsToggleButton);
                     
-//                    Button standSkinsButton = new ImageButton(screen.width - 28, screen.height - 159, 
-//                            20, 20, 236, 216, 20, StandSkinsScreen.TEXTURE_MAIN_WINDOW, 256, 256, 
+//                    Button standSkinsButton = new ImageVanillaButton(screen.width - 28, screen.height - 159, 
+//                            20, 20, 236, 236, StandSkinsScreen.TEXTURE_MAIN_WINDOW, 256, 256, 
 //                            button -> {
 //                                StandSkinsScreen.openScreen(screen);
 //                            }, 
