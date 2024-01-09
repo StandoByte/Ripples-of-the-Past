@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.stand.effect.GECreatedLifeformEffect;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.GETransformationEntity;
 import com.github.standobyte.jojo.entity.ObjectEntity;
@@ -13,6 +14,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.Entity;
@@ -55,7 +57,11 @@ public class GoldExperienceToothLifeform extends StandEntityActionModifier {
         if (!world.isClientSide() && extraInput != null && power.isActive()) {
             EntityType<?> type = (EntityType<?>) NetworkUtil.readOptional(extraInput, 
                     () -> extraInput.readRegistryIdSafe(EntityType.class)).orElse(null);
-            if (type != null) {
+            if (type != null
+                    && GeneralUtil.orElseFalse(user.getCapability(PlayerUtilCapProvider.CAPABILITY), 
+                            cap -> cap.didPlayerMeetEntityType(type))
+                    && GoldExperienceChooseLifeform.isValidLifeform(type, world)) {
+                
                 StandEntity stand = (StandEntity) power.getStandManifestation();
                 stand.getCurrentTask().ifPresent(task -> task.getAdditionalData().push(EntityType.class, type));
             }

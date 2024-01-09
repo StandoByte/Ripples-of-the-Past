@@ -17,6 +17,7 @@ import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.block.BlockState;
@@ -171,8 +172,10 @@ public class GoldExperienceCreateLifeform extends StandAction {
         if (!world.isClientSide() && extraInput != null) {
             EntityType<?> type = (EntityType<?>) NetworkUtil.readOptional(extraInput, 
                     () -> extraInput.readRegistryIdSafe(EntityType.class)).orElse(null);
-            if (type != null) {
-                
+            if (type != null
+                    && GeneralUtil.orElseFalse(user.getCapability(PlayerUtilCapProvider.CAPABILITY), 
+                            cap -> cap.didPlayerMeetEntityType(type))
+                    && GoldExperienceChooseLifeform.isValidLifeform(type, world)) {
                 
                 Entity lifeFormCreated = type.create(world);
                 CompoundNBT nbt = new CompoundNBT();
