@@ -40,6 +40,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Timer;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 public class ClientReflection {
@@ -165,6 +166,11 @@ public class ClientReflection {
     private static final Field TEXTURED_QUAD_VERTICES = ObfuscationReflectionHelper.findField(ModelRenderer.TexturedQuad.class, "field_78239_a");
     public static void setVertices(ModelRenderer.TexturedQuad quad, ModelRenderer.PositionTextureVertex[] vertices) {
         ReflectionUtil.setFieldValue(TEXTURED_QUAD_VERTICES, quad, vertices);
+    }
+    
+    private static final Field TEXTURED_QUAD_NORMAL = ObfuscationReflectionHelper.findField(ModelRenderer.TexturedQuad.class, "field_228312_b_");
+    public static void setNormal(ModelRenderer.TexturedQuad quad, Vector3f normal) {
+        ReflectionUtil.setFieldValue(TEXTURED_QUAD_NORMAL, quad, normal);
     }
     
     

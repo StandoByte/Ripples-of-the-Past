@@ -106,13 +106,12 @@ public class TheWorldModelNew extends HumanoidStandModel<TheWorldEntity> {
                 .withVertex( 4.2, -4.4,  8.4,      62, 28)
                 .withVertex(-4.2, -4.4,  8.4,      54, 28)
             .createFace()
-        .addCube(slopeNew);
+        .buildCube().addCube(slopeNew);
         
         
         faceRightNew = new ModelRenderer(this);
         faceRightNew.setPos(-4.2F, -6.4F, 1.3F);
         headpiece.addChild(faceRightNew);
-        new MeshModelBox.Builder(true, this);
         
         new MeshModelBox.Builder(true, this)
             .startFace(Direction.NORTH)
@@ -137,7 +136,7 @@ public class TheWorldModelNew extends HumanoidStandModel<TheWorldEntity> {
                 .withVertex(-4.6173,  -6.4, 0.0266,    75, 28)
                 .withVertex(-4.2005, -6.75,  -1.31,    74, 28)
             .createFace()
-        .addCube(faceRightNew);
+        .buildCube().addCube(faceRightNew);
         
 
         faceLeftNew = new ModelRenderer(this);
@@ -145,29 +144,29 @@ public class TheWorldModelNew extends HumanoidStandModel<TheWorldEntity> {
         headpiece.addChild(faceLeftNew);
         
         new MeshModelBox.Builder(true, this)
-        .startFace(Direction.NORTH)
-            .withVertex(      0,     0,     0,    81, 22)
-            .withVertex( 4.2005,  -0.5, -1.31,    85, 22)
-            .withVertex( 4.2005, -6.75, -1.31,    85, 28)
-            .withVertex(      0,  -6.4,     0,    81, 28)
-        .createFace()
-        .startFace(Direction.UP)
-            .withVertex(      0,     0,      0,    81, 21)
-            .withVertex( 4.2005,     0, 0.0266,    85, 22)
-            .withVertex( 4.2005,  -0.5,  -1.31,    85, 21)
-        .createFace()
-        .startFace(Direction.DOWN)
-            .withVertex(      0,  -6.4,      0,    85, 22)
-            .withVertex( 4.2005, -6.75,  -1.31,    89, 22)
-            .withVertex( 4.2005,  -6.4, 0.0266,    89, 21)
-        .createFace()
-        .startFace(Direction.WEST)
-            .withVertex( 4.2005,  -0.5,  -1.31,    86, 22)
-            .withVertex( 4.6173,     0, 0.0266,    85, 22)
-            .withVertex( 4.6173,  -6.4, 0.0266,    85, 28)
-            .withVertex( 4.2005, -6.75,  -1.31,    86, 28)
-        .createFace()
-        .addCube(faceLeftNew);
+            .startFace(Direction.NORTH)
+                .withVertex(      0,     0,     0,    81, 22)
+                .withVertex( 4.2005,  -0.5, -1.31,    85, 22)
+                .withVertex( 4.2005, -6.75, -1.31,    85, 28)
+                .withVertex(      0,  -6.4,     0,    81, 28)
+            .createFace()
+            .startFace(Direction.UP)
+                .withVertex(      0,     0,      0,    81, 21)
+                .withVertex( 4.2005,     0, 0.0266,    85, 22)
+                .withVertex( 4.2005,  -0.5,  -1.31,    85, 21)
+            .createFace()
+            .startFace(Direction.DOWN)
+                .withVertex(      0,  -6.4,      0,    85, 22)
+                .withVertex( 4.2005, -6.75,  -1.31,    89, 22)
+                .withVertex( 4.2005,  -6.4, 0.0266,    89, 21)
+            .createFace()
+            .startFace(Direction.WEST)
+                .withVertex( 4.2005,  -0.5,  -1.31,    86, 22)
+                .withVertex( 4.6173,     0, 0.0266,    85, 22)
+                .withVertex( 4.6173,  -6.4, 0.0266,    85, 28)
+                .withVertex( 4.2005, -6.75,  -1.31,    86, 28)
+            .createFace()
+        .buildCube().addCube(faceLeftNew);
 
         leftCable = new ModelRenderer(this);
         leftCable.setPos(1.25F, -3.3F, 0.25F);
