@@ -128,11 +128,9 @@ public class ParseGenericModel {
                     if (face.vertices.length > 2) {
                         // FIXME mesh face normal (cross product)
                         MeshFaceBuilder faceBuilder = meshBuilder.startFaceCalcNormal();
-                        int[] order4 = { 0, 1, 3, 2 };
                         for (int i = 0; i < face.vertices.length; ++i) {
                             // FIXME mesh vertices order
-                            int index = face.vertices.length == 4 ? order4[i] : i;
-                            String vertexId = face.vertices[index];
+                            String vertexId = face.vertices[i];
                             
                             float[] vertexPos = vertices.get(vertexId);
                             float[] vertexUv = face.uv.get(vertexId);
