@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.render.entity.model.stand.bb;
+package com.github.standobyte.jojo.client.render.entity.bb;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
