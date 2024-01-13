@@ -75,15 +75,19 @@ public class MeshModelBox extends ModelRenderer.ModelBox {
             if (livingEntityRenderHacks) {
                 lightingDir = lightingDir.getAxis() == Axis.Z ? lightingDir : lightingDir.getOpposite();
             }
-            return faceBuilder.withState(lightingDir, null, false);
+            return faceBuilder.withState(lightingDir, null, false, false);
         }
         
         public MeshFaceBuilder startFace(Vector3f faceNormal) {
-            return faceBuilder.withState(null, faceNormal, false);
+            return faceBuilder.withState(null, faceNormal, false, false);
         }
         
         public MeshFaceBuilder startFaceCalcNormal() {
-            return faceBuilder.withState(null, null, true);
+            return faceBuilder.withState(null, null, true, false);
+        }
+        
+        public MeshFaceBuilder startFaceCalcNormal(boolean invertVec) {
+            return faceBuilder.withState(null, null, true, invertVec);
         }
         
         
@@ -101,6 +105,7 @@ public class MeshModelBox extends ModelRenderer.ModelBox {
             private Direction direction;
             private Vector3f faceNormal;
             private boolean calcNormalFromVertices;
+            private boolean invertCalcNormal;
             
             private List<ModelRenderer.PositionTextureVertex> vertices = new ArrayList<>();
             
@@ -131,15 +136,22 @@ public class MeshModelBox extends ModelRenderer.ModelBox {
                 return this;
             }
             
-            private MeshFaceBuilder withState(Direction direction, Vector3f faceNormal, boolean calcNormalFromVertices) {
+            private MeshFaceBuilder withState(Direction direction, Vector3f faceNormal, 
+                    boolean calcNormalFromVertices, boolean invertCalcNormal) {
                 this.direction = direction;
                 this.faceNormal = faceNormal;
                 this.calcNormalFromVertices = calcNormalFromVertices;
+                this.invertCalcNormal = invertCalcNormal;
                 return this;
             }
             
             public MeshModelBox.Builder createFace() {
-                if (this.vertices.size() > 2) {
+                if (vertices.size() > 2) {
+                    if (vertices.size() > 3) {
+                        ModelRenderer.PositionTextureVertex swap = vertices.get(3);
+                        vertices.set(3, vertices.get(2));
+                        vertices.set(2, swap);
+                    }
                     ModelRenderer.PositionTextureVertex[] verticesDummy = new ModelRenderer.PositionTextureVertex[] {
                             new ModelRenderer.PositionTextureVertex(0, 0, 0, 0, 0),
                             new ModelRenderer.PositionTextureVertex(0, 0, 0, 0, 0),
@@ -166,6 +178,9 @@ public class MeshModelBox extends ModelRenderer.ModelBox {
                         vec2.sub(pos0);
                         vec1.cross(vec2);
                         vec1.normalize();
+                        if (invertCalcNormal) {
+                            vec1.mul(-1);
+                        }
                         ClientReflection.setNormal(quad, vec1);
                     }
                     else if (faceNormal != null) {

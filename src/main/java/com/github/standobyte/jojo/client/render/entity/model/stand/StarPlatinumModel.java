@@ -19,7 +19,7 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.MathHelper;
 
-// Made with Blockbench 3.9.2
+//Made with Blockbench 4.8.3
 
 public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
     protected ModelRenderer leftShoulder;

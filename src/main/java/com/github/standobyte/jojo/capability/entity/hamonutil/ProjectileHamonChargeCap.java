@@ -103,7 +103,7 @@ public class ProjectileHamonChargeCap {
     
     private float chargeWearOffMultiplier() {
         if (chargeWearsOff()) {
-            return MathHelper.clamp((float) (maxChargeTicks - tickCount) / (float) maxChargeTicks, 0F, 1F);
+            return MathHelper.clamp((float) (maxChargeTicks - tickCount) / (float) maxChargeTicks, 0.25F, 1F);
         }
         else {
             return 1;

@@ -4,9 +4,11 @@ import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -56,19 +58,21 @@ public class BlockbenchStandModelHelper {
     }
     
     public static void replaceModelParts(EntityModel<?> inModModel, Map<String, ModelRenderer> source) throws IllegalArgumentException, IllegalAccessException {
-        List<Field> inModModelParts = FieldUtils.getAllFieldsList(inModModel.getClass()).stream()
+        Set<Field> declaredModelParts = FieldUtils.getAllFieldsList(inModModel.getClass()).stream()
                 .filter(field -> ModelRenderer.class.isAssignableFrom(field.getType()))
-                .collect(Collectors.toList());
-        List<ModelRenderer> modelParts = new ArrayList<>();
-        Map<ModelRenderer, ModelRenderer> remapChildren = new HashMap<>();
+                .collect(Collectors.toCollection(HashSet::new));
+        List<ModelRenderer> editedParts = new ArrayList<>();
+        Map<ModelRenderer, ModelRenderer> remapParents = new HashMap<>();
         
         for (Map.Entry<String, ModelRenderer> entry : source.entrySet()) {
             String name = entry.getKey();
             ModelRenderer blockbenchPart = entry.getValue();
             
-            Iterator<Field> it = inModModelParts.iterator();
-            while (it.hasNext()) {
+            Iterator<Field> it = declaredModelParts.iterator();
+            boolean foundModelPart = false;
+            while (it.hasNext() && !foundModelPart) {
                 Field inModPartField = it.next();
+                
                 if (inModPartField.getName().equals(name)) {
                     boolean xRotJank = false;
                     if (!inModPartField.getType().isAssignableFrom(blockbenchPart.getClass())) {
@@ -82,26 +86,35 @@ public class BlockbenchStandModelHelper {
                         }
                     }
                     
-                    inModPartField.setAccessible(true);
-                    
                     if (xRotJank) {
                         ModelRenderer jank = jankToKeepAddonsWorkingForNow(blockbenchPart);
-                        remapChildren.put(blockbenchPart, jank);
+                        remapParents.put(blockbenchPart, jank);
                         blockbenchPart = jank;
                     }
-                    modelParts.add(blockbenchPart);
+                    inModPartField.setAccessible(true);
+                    editedParts.add(blockbenchPart);
                     inModPartField.set(inModModel, blockbenchPart);
                     
                     it.remove();
+                    foundModelPart = true;
                 }
             }
         }
         
-        for (ModelRenderer modelPart : modelParts) {
+        for (Field field : declaredModelParts) {
+            field.setAccessible(true);
+            ModelRenderer declaredPartNotInGecko = (ModelRenderer) field.get(inModModel);
+            if (declaredPartNotInGecko != null) {
+                ClientReflection.getCubes(declaredPartNotInGecko).clear();
+                ClientReflection.getChildren(declaredPartNotInGecko).clear();
+            }
+        }
+        
+        for (ModelRenderer modelPart : editedParts) {
             ObjectList<ModelRenderer> children = ClientReflection.getChildren(modelPart);
             if (!children.isEmpty()) {
-                remapChildren.forEach((oldPart, newPart) -> {
-                    Collections.replaceAll(children, oldPart, newPart);
+                remapParents.forEach((oldChild, newChild) -> {
+                    Collections.replaceAll(children, oldChild, newChild);
                 });
             }
         }
