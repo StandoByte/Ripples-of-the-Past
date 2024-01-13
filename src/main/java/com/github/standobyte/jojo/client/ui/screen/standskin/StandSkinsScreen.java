@@ -150,8 +150,10 @@ public class StandSkinsScreen extends Screen {
     
     @SuppressWarnings("deprecation")
     private void renderContents(int mouseX, int mouseY, float partialTick) {
+        int x = getWindowX() + WINDOW_INSIDE_X;
+        int y = getWindowY() + WINDOW_INSIDE_Y;
         RenderSystem.pushMatrix();
-        RenderSystem.translatef(getWindowX() + WINDOW_INSIDE_X, getWindowY() + WINDOW_INSIDE_Y, 0);
+        RenderSystem.translatef(x, y, 0);
         MatrixStack matrixStack = new MatrixStack();
         float ticks = tickCount + partialTick;
         if (skinFullView != null) {
@@ -163,13 +165,14 @@ public class StandSkinsScreen extends Screen {
             for (SkinView skin : skins) {
                 skin.renderStand(matrixStack, mouseX, mouseY, ticks);
             }
-            
-            // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! renders outside of the window
+
+            ClientUtil.enableGlScissor(x, y, WINDOW_INSIDE_WIDTH, WINDOW_INSIDE_HEIGHT);
             Optional<SkinView> hoveredSkin = getSkinAt(mouseX, mouseY);
             for (SkinView skin : skins) {
                 skin.renderAdditional(matrixStack, mouseX, mouseY, ticks, 
                         hoveredSkin.map(hovered -> skin == hovered).orElse(false));
             }
+            ClientUtil.disableGlScissor();
         }
         RenderSystem.popMatrix();
     }

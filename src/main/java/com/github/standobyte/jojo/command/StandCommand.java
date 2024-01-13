@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 
@@ -34,9 +35,13 @@ public class StandCommand {
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
         dispatcher.register(Commands.literal("stand").requires(ctx -> ctx.hasPermission(2))
                 .then(Commands.literal("give").then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("stand", new StandArgument())
-                        .executes(ctx -> giveStands(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), StandArgument.getStandType(ctx, "stand"), false)))))
+                        .executes(ctx -> giveStands(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), StandArgument.getStandType(ctx, "stand"), false))
+                        .then(Commands.argument("replace", BoolArgumentType.bool())
+                                .executes(ctx -> giveStands(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), StandArgument.getStandType(ctx, "stand"), BoolArgumentType.getBool(ctx, "replace")))))))
                 .then(Commands.literal("random").then(Commands.argument("targets", EntityArgument.players()) // /stand random <player(s)>
-                        .executes(ctx -> giveRandomStands(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), false))))
+                        .executes(ctx -> giveRandomStands(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), false))
+                        .then(Commands.argument("replace", BoolArgumentType.bool())
+                                .executes(ctx -> giveRandomStands(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), BoolArgumentType.getBool(ctx, "replace"))))))
                 .then(Commands.literal("clear").then(Commands.argument("targets", EntityArgument.players())
                         .executes(ctx -> removeStands(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets")))))
                 .then(Commands.literal("type").then(Commands.argument("targets", EntityArgument.player())
@@ -50,6 +55,9 @@ public class StandCommand {
         for (ServerPlayerEntity player : targets) {
             IStandPower power = IStandPower.getStandPowerOptional(player).orElse(null);
             if (power != null) {
+                if (replace) {
+                    power.clear();
+                }
                 if (power.givePower(standType)) {
                     i++;
                 }
@@ -95,6 +103,9 @@ public class StandCommand {
                         else {
                             throw GIVE_MULTIPLE_EXCEPTION_RANDOM.create(targets.size() - i);
                         }
+                    }
+                    if (replace) {
+                        power.clear();
                     }
                     if (power.givePower(stand)) {
                         i++;

@@ -55,6 +55,7 @@
   "item.jojo.stand_eject_one_time": "Eject Stand (one-time)",
   "item.jojo.stand_full_clear": "Full Stand Clear",
   "item.jojo.stand_full_clear_one_time": "Full Stand Clear (one-time)",
+  "item.jojo.stand_full_clear.hint": "Also clears all the Stand abilities learned, and the Arrow xp cost penalty",
   "item.jojo.creative_only_tooltip" : "Creative-only item",
   "item.jojo.cocoa_gum": "Cocoa Gum",
   "item.jojo.walkman": "Walkman",
