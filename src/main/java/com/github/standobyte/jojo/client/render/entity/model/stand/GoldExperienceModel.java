@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.client.render.entity.model.stand;
 
-import com.github.standobyte.jojo.client.render.entity.model.stand.bb.BlockbenchStandModelHelper;
+import com.github.standobyte.jojo.client.render.entity.bb.BlockbenchStandModelHelper;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.RotationAngle;
 import com.github.standobyte.jojo.entity.stand.stands.GoldExperienceEntity;

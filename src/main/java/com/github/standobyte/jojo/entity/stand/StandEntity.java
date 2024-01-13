@@ -1458,7 +1458,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         return reachDistance;
     }
 
-    public Predicate<Entity> canTargetEntity() {
+    public Predicate<Entity> canTarget() {
         return entity -> !entity.is(this) && !entity.is(getUser()) && entity.isAlive()
                 && !(entity instanceof ProjectileEntity && this.is(((ProjectileEntity) entity).getOwner()));
     }
@@ -1469,7 +1469,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     
     public RayTraceResult precisionRayTrace(Entity aimingEntity, double reachDistance, double rayTraceInflate) {
         RayTraceResult[] targets = JojoModUtil.rayTraceMultipleEntities(aimingEntity, 
-                reachDistance, canTargetEntity(), rayTraceInflate, getPrecision());
+                reachDistance, canTarget(), rayTraceInflate, getPrecision());
         if (targets.length == 1) {
             return targets[0];
         }

@@ -245,7 +245,8 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         if (idlePose == null)
             idlePose = initBaseIdlePose();
         if (idleLoop == null)
-            idleLoop = new ModelPoseTransition<T>(idlePose, initIdlePose2Loop()).setEasing(ticks -> MathHelper.sin(ticks / 20));
+            idleLoop = new ModelPoseTransition<T>(idlePose, initIdlePose2Loop())
+                .setEasing(ticks -> (MathHelper.sin((float) Math.PI * (ticks / 40 - 0.5f)) - 1) / 2);
 
         if (summonPoses == null)
             summonPoses = initSummonPoses();
