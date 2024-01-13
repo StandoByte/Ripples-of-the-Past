@@ -21,6 +21,7 @@ import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -189,7 +190,14 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     for (EquipmentSlotType slot : EquipmentSlotType.values()) {
                         lifeFormCreated.setItemSlot(slot, ItemStack.EMPTY);
                     }
-                    if (lifeFormCreated instanceof SlimeEntity) {
+                    
+                    if (lifeFormCreated instanceof AgeableEntity) {
+                        user.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(playerData -> {
+                            playerData.animalAgeCd += 3000;
+                            ((AgeableEntity) lifeFormCreated).setAge(Math.max(playerData.animalAgeCd - 3000, 0));
+                        });
+                    }
+                    else if (lifeFormCreated instanceof SlimeEntity) {
                         CompoundNBT additionalNbt = lifeFormCreated.serializeNBT();
                         additionalNbt.putInt("Size", 0);
                         lifeFormCreated.load(additionalNbt);

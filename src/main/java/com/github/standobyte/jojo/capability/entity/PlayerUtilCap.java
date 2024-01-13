@@ -101,6 +101,7 @@ public class PlayerUtilCap {
     private Set<ResourceLocation> metEntityTypesId = new HashSet<>();
     private EntityType<?> GEChosenType = null;
     private Set<EntityType<?>> GEHiddenEntries = new HashSet<>();
+    public int animalAgeCd;
     
     
     
@@ -124,6 +125,7 @@ public class PlayerUtilCap {
             
             if (knivesThrewTicks > 0) knivesThrewTicks--;
             if (chatSpamTickCount > 0) chatSpamTickCount--;
+            if (animalAgeCd > 0) animalAgeCd--;
         }
         
         tickContinuousAction();
@@ -160,6 +162,7 @@ public class PlayerUtilCap {
                     .collect(ListNBT::new, ListNBT::add, ListNBT::addAll);
             nbt.put("GEHidden", list);
         }
+        nbt.putInt("AnimalAgeCd", animalAgeCd);
         return nbt;
     }
 
@@ -192,6 +195,7 @@ public class PlayerUtilCap {
                         .filter(Optional::isPresent).map(Optional::get)
                         .collect(Collectors.toSet()))
                 .ifPresent(hidden -> GEHiddenEntries.addAll(hidden));
+        animalAgeCd = nbt.getInt("AnimalAgeCd");
         
         MCUtil.getNbtElement(nbt, "TradeCD", CompoundNBT.class).ifPresent(this::tradeCooldownFromNbt);
     }
