@@ -268,8 +268,8 @@ public class ParseGeckoModel {
                 public UV deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
                         throws JsonParseException {
                     if (json.isJsonArray()) {
-                        BoxUV uv = context.deserialize(json, int[].class);
-                        return uv;
+                        int[] uv = context.deserialize(json, int[].class);
+                        return new BoxUV(uv);
                     }
                     else {
                         JsonObject wrappingJson = new JsonObject();
@@ -283,6 +283,10 @@ public class ParseGeckoModel {
         
         static class BoxUV implements UV {
             int[] uv;
+            
+            BoxUV(int[] uv) {
+                this.uv = uv;
+            }
         }
         
         static class PerFaceUV implements UV {
