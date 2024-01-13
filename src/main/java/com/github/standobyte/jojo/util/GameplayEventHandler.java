@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -67,6 +68,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismDa
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
@@ -440,18 +442,20 @@ public class GameplayEventHandler {
         Entity attacker = dmgSource.getEntity();
         
         if (attacker != null && attacker instanceof LivingEntity) {
+            LivingEntity attackerLiving = (LivingEntity) attacker;
             if (attacker.is(dmgSource.getDirectEntity())) {
                 // redirect melee attacks on Boy II Man user who has taken the attacker's arms
-                if (IStandPower.getStandPowerOptional((LivingEntity) attacker).resolve().flatMap(attackerStand -> {
+                if (IStandPower.getStandPowerOptional(attackerLiving).resolve().flatMap(attackerStand -> {
                     return IStandPower.getStandPowerOptional(target).map(boyIIManStand -> {
-                        List<StandEffectInstance> takenArmsEffects = boyIIManStand.getContinuousEffects().getEffects(effect -> {
-                            if (effect.effectType == ModStandEffects.BOY_II_MAN_PART_TAKE.get() && attacker.is(effect.getTarget())) {
-                                StandInstance partsTaken = ((BoyIIManStandPartTakenEffect) effect).getPartsTaken();
-                                return partsTaken.getType() == attackerStand.getType() && partsTaken.hasPart(StandPart.ARMS);
-                            }
-                            return false;
-                        });
-                        return !takenArmsEffects.isEmpty();
+                        Stream<StandEffectInstance> takenArmsEffects = boyIIManStand.getContinuousEffects().getEffects()
+                                .filter(effect -> {
+                                    if (effect.effectType == ModStandEffects.BOY_II_MAN_PART_TAKE.get() && attacker.is(effect.getTarget())) {
+                                        StandInstance partsTaken = ((BoyIIManStandPartTakenEffect) effect).getPartsTaken();
+                                        return partsTaken.getType() == attackerStand.getType() && partsTaken.hasPart(StandPart.ARMS);
+                                    }
+                                    return false;
+                                });
+                        return takenArmsEffects.findAny().isPresent();
                     });
                 }).orElse(false)) {
                     attacker.hurt(dmgSource, event.getAmount());
@@ -461,12 +465,12 @@ public class GameplayEventHandler {
             }
             
             // redirect attacks on mobs created by Gold Experience
-            if (target.getCapability(LivingUtilCapProvider.CAPABILITY).map(cap -> cap.getEffectsTargetedBy().stream()
-                    .anyMatch(effect -> effect instanceof GECreatedLifeformEffect)).orElse(false)) {
+            if (StandEffectsTracker.isTargetedBy(target, ModStandEffects.GE_CREATED_LIFEFORM.get())
+                    && !StandEffectsTracker.isTargetedBy(attackerLiving, ModStandEffects.GE_CREATED_LIFEFORM.get())) {
                 if (dmgSource instanceof IStandDamageSource) {
                     ((IStandDamageSource) dmgSource).setStandCanHitSelf();
                 }
-                attacker.hurt(dmgSource, event.getAmount());
+                attackerLiving.hurt(dmgSource, event.getAmount());
                 event.setCanceled(true);
                 return;
             }
