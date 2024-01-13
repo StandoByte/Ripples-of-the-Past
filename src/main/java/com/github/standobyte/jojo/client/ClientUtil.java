@@ -307,6 +307,18 @@ public class ClientUtil {
         }
     }
     
+    public static void enableGlScissor(int x, int y, int width, int height) {
+        GL11.glEnable(GL11.GL_SCISSOR_TEST);
+        Minecraft mc = Minecraft.getInstance();
+        int guiScale = mc.getWindow().calculateScale(mc.options.guiScale, mc.isEnforceUnicode());
+        y = mc.getWindow().getGuiScaledHeight() - y - height;
+        GL11.glScissor(x * guiScale, y * guiScale, width * guiScale, height * guiScale);
+    }
+    
+    public static void disableGlScissor() {
+        GL11.glDisable(GL11.GL_SCISSOR_TEST);
+    }
+    
     public static String getShortenedTranslationKey(String originalKey) {
         String shortenedKey = originalKey + ".shortened";
         return I18n.exists(shortenedKey) ? shortenedKey : originalKey;
