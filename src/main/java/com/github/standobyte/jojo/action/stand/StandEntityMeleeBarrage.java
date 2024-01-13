@@ -230,11 +230,11 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
         return standEntity.isArmsOnlyMode() ? 0 : StandStatFormulas.getBarrageRecovery(standEntity.getSpeed());
     }
     
-    @Override
-    public boolean isFreeRecovery(IStandPower standPower, StandEntity standEntity) {
-        LivingEntity user = standPower.getUser();
-        return user != null && user.hasEffect(ModStatusEffects.RESOLVE.get());
-    }
+//    @Override
+//    public boolean isFreeRecovery(IStandPower standPower, StandEntity standEntity) {
+//        LivingEntity user = standPower.getUser();
+//        return user != null && user.hasEffect(ModStatusEffects.RESOLVE.get());
+//    }
     
     
     

@@ -455,7 +455,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     }
     
     protected boolean isFreeRecovery(IStandPower standPower, StandEntity standEntity) {
-        return false;
+        return true;
     }
     
     public final boolean canBeCanceled(IStandPower standPower, StandEntity standEntity, Phase phase, @Nullable StandEntityAction newAction) {
