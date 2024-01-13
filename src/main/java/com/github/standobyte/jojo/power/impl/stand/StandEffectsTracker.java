@@ -199,7 +199,8 @@ public class StandEffectsTracker {
         return power.getContinuousEffects()
                 .getEffects()
                 .filter(effect -> effect.effectType == type)
-                .filter(effect -> effect.getTarget() != null && effect.getTarget().distanceToSqr(power.getUser()) < rangeSq)
+                .filter(effect -> effect.getTarget() != null
+                        && (range <= 0 || effect.getTarget().distanceToSqr(power.getUser()) < rangeSq))
                 .map(effect -> (T) effect);
     }
     

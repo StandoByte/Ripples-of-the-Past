@@ -1145,6 +1145,7 @@
   "jojo.message.action_condition.ge_lifeform_material_only_item": "You need a non-living item",
   "jojo.message.action_condition.ge_lifeform_material_item": "You can't turn an organic item into a lifeform",
   "jojo.message.action_condition.ge_lifeform_material_block": "You can't turn an organic block into a lifeform",
+  "jojo.message.action_condition.ge_too_many_mobs": "You have too many mobs summoned",
   
   "stand.jojo.boy_ii_man": "Boy II Man",
   "entity.jojo.rps_kid": "Rock-Paper-Scissors Kid",

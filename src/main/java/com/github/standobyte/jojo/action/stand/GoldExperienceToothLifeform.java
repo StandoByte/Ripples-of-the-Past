@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.stand;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.stand.effect.GECreatedLifeformEffect;
@@ -11,27 +12,22 @@ import com.github.standobyte.jojo.entity.GETransformationEntity;
 import com.github.standobyte.jojo.entity.ObjectEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.SpawnReason;
-import net.minecraft.entity.monster.SlimeEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
 
 public class GoldExperienceToothLifeform extends StandEntityActionModifier {
     
@@ -42,6 +38,16 @@ public class GoldExperienceToothLifeform extends StandEntityActionModifier {
     @Override
     public boolean isUnlocked(IStandPower power) {
         return ModStandsInit.GOLD_EXPERIENCE_CREATE_LIFEFORM.get().isUnlocked(power);
+    }
+    
+    @Override
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
+        int mobsCreated = (int) StandEffectsTracker.getEffectsOfType(power, ModStandEffects.GE_CREATED_LIFEFORM.get(), -1).count();
+        if (mobsCreated >= 16) {
+            return conditionMessage("ge_too_many_mobs");
+        }
+        
+        return super.checkSpecificConditions(user, power, target);
     }
     
     @Override
@@ -81,28 +87,8 @@ public class GoldExperienceToothLifeform extends StandEntityActionModifier {
                     if (targetType != null) {
                         LivingEntity user = userPower.getUser();
                         
-                        
-                        Entity lifeFormCreated = targetType.create(world);
-                        CompoundNBT nbt = new CompoundNBT();
-                        nbt.putString("DeathLootTable", "empty");
-                        lifeFormCreated.load(nbt);
-                        
-                        if (lifeFormCreated instanceof MobEntity) {
-                            ((MobEntity) lifeFormCreated).finalizeSpawn((ServerWorld) world, 
-                                    world.getCurrentDifficultyAt(user.blockPosition()), 
-                                    SpawnReason.COMMAND, null, null);
-                            for (EquipmentSlotType slot : EquipmentSlotType.values()) {
-                                lifeFormCreated.setItemSlot(slot, ItemStack.EMPTY);
-                            }
-                            if (lifeFormCreated instanceof SlimeEntity) {
-                                CompoundNBT additionalNbt = lifeFormCreated.serializeNBT();
-                                additionalNbt.putInt("Size", 0);
-                                lifeFormCreated.load(additionalNbt);
-                            }
-                        }
-                        
+                        Entity lifeFormCreated = GoldExperienceCreateLifeform.createEntity(targetType, world, user);
                         int ticks = GoldExperienceCreateLifeform.getTicksToCreate(user, userPower, lifeFormCreated);
-                        
                         
                         GETransformationEntity tf = new GETransformationEntity(world);
                         
