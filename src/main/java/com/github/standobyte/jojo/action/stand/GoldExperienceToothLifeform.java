@@ -23,6 +23,24 @@ import com.github.standobyte.jojo.util.mc.MCUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.merchant.villager.AbstractVillagerEntity;
+import net.minecraft.entity.monster.AbstractSkeletonEntity;
+import net.minecraft.entity.monster.HoglinEntity;
+import net.minecraft.entity.monster.PatrollerEntity;
+import net.minecraft.entity.monster.ZombieEntity;
+import net.minecraft.entity.monster.piglin.AbstractPiglinEntity;
+import net.minecraft.entity.passive.CatEntity;
+import net.minecraft.entity.passive.CowEntity;
+import net.minecraft.entity.passive.FoxEntity;
+import net.minecraft.entity.passive.OcelotEntity;
+import net.minecraft.entity.passive.PandaEntity;
+import net.minecraft.entity.passive.PigEntity;
+import net.minecraft.entity.passive.PolarBearEntity;
+import net.minecraft.entity.passive.RabbitEntity;
+import net.minecraft.entity.passive.SheepEntity;
+import net.minecraft.entity.passive.WaterMobEntity;
+import net.minecraft.entity.passive.WolfEntity;
+import net.minecraft.entity.passive.horse.AbstractHorseEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.IFormattableTextComponent;
@@ -48,6 +66,34 @@ public class GoldExperienceToothLifeform extends StandEntityActionModifier {
         }
         
         return super.checkSpecificConditions(user, power, target);
+    }
+    
+    public static ObjectEntity.Type getToothObject(LivingEntity punchTarget) {
+        EntityType<?> type = punchTarget.getType();
+        if (type == EntityType.PLAYER
+                || punchTarget instanceof AbstractSkeletonEntity
+                || punchTarget instanceof ZombieEntity
+                || punchTarget instanceof AbstractVillagerEntity
+                || punchTarget instanceof AbstractPiglinEntity
+                || punchTarget instanceof PatrollerEntity
+                || type == EntityType.BAT
+                || punchTarget instanceof AbstractHorseEntity
+                || punchTarget instanceof CowEntity
+                || punchTarget instanceof FoxEntity
+                || punchTarget instanceof HoglinEntity
+                || punchTarget instanceof OcelotEntity
+                || punchTarget instanceof PandaEntity
+                || punchTarget instanceof PigEntity
+                || punchTarget instanceof PolarBearEntity
+                || punchTarget instanceof RabbitEntity
+                || punchTarget instanceof SheepEntity
+                || punchTarget instanceof CatEntity
+                || punchTarget instanceof WolfEntity
+                || punchTarget instanceof WaterMobEntity) {
+            return ObjectEntity.Type.TOOTH;
+        }
+        
+        return null;
     }
     
     @Override
