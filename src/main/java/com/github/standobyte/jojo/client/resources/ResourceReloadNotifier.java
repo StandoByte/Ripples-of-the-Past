@@ -6,7 +6,7 @@ import net.minecraft.client.resources.ReloadListener;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IResourceManager;
 
-public class StandGlowTextureChecker extends ReloadListener<Void> {
+public class ResourceReloadNotifier extends ReloadListener<Void> {
 
     @Override
     protected Void prepare(IResourceManager resourceManager, IProfiler profiler) {
