@@ -654,7 +654,7 @@ public class ModStandsInit {
                     .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<CrazyDiamondBloodCutter> CRAZY_DIAMOND_BLOOD_CUTTER = ACTIONS.register("crazy_diamond_blood_cutter", 
-            () -> new CrazyDiamondBloodCutter(new StandEntityAction.Builder().standWindupDuration(5).standRecoveryTicks(5).staminaCost(25).cooldown(300)
+            () -> new CrazyDiamondBloodCutter(new StandEntityAction.Builder().standWindupDuration(5).staminaCost(25).cooldown(300)
                     .resolveLevelToUnlock(4)
                     .standPose(CrazyDiamondBloodCutter.BLOOD_CUTTER_SHOT_POSE)
                     .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_FIX_STARTED, ModSounds.CRAZY_DIAMOND_DORA).standSound(Phase.PERFORM, ModSounds.CRAZY_DIAMOND_BLOOD_CUTTER_SHOT)
