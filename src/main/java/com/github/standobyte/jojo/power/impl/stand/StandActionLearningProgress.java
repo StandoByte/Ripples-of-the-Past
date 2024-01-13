@@ -26,6 +26,7 @@ import net.minecraft.util.ResourceLocation;
 
 public class StandActionLearningProgress {
     private final EntriesMap map = new EntriesMap();
+    private CompoundNBT savedInvalidEntries;
     
     public float getLearningProgressPoints(StandAction action, @Nullable StandType<?> currentlyUsedStand) {
         StandActionLearningEntry entry = map.getEntry(currentlyUsedStand, action);
@@ -82,11 +83,12 @@ public class StandActionLearningProgress {
     
 
     public void fromNBT(CompoundNBT nbt) {
-        map.fromNBT(nbt);
+        savedInvalidEntries = new CompoundNBT();
+        map.fromNBT(nbt, savedInvalidEntries);
     }
     
     public CompoundNBT toNBT() {
-        return map.toNBT();
+        return map.toNBT(savedInvalidEntries);
     }
     
     
@@ -136,7 +138,7 @@ public class StandActionLearningProgress {
             .forEach(action);
         }
         
-        public CompoundNBT toNBT() {
+        public CompoundNBT toNBT(CompoundNBT invalidEntriedSrc) {
             CompoundNBT nbt = new CompoundNBT();
             _mapOfMaps.forEach((standType, map) -> {
                 CompoundNBT standTypeNbt = new CompoundNBT();
@@ -145,14 +147,16 @@ public class StandActionLearningProgress {
                 });
                 nbt.put(standType.toString(), standTypeNbt);
             });
+            if (invalidEntriedSrc != null) nbt.merge(invalidEntriedSrc);
             return nbt;
         }
         
-        public void fromNBT(CompoundNBT nbt) {
+        public void fromNBT(CompoundNBT nbt, CompoundNBT invalidEntriedDest) {
             _mapOfMaps.clear();
-
+            
             nbt.getAllKeys().forEach(standTypeName -> {
                 if (standTypeName.isEmpty()) return;
+                CompoundNBT standTypeNbt = nbt.getCompound(standTypeName);
                 StandType<?> standType = JojoCustomRegistries.STANDS.getRegistry().getValue(new ResourceLocation(standTypeName));
                 if (standType == null) {
                     
@@ -160,11 +164,16 @@ public class StandActionLearningProgress {
                     if (entryLegacy.isPresent()) {
                         putEntry(entryLegacy.get());
                     }
+                    else {
+                        CompoundNBT invalidStandTypeNbt = MCUtil.getOrCreateCompound(invalidEntriedDest, standTypeName);
+                        standTypeNbt.getAllKeys().forEach(actionName -> {
+                            invalidStandTypeNbt.put(actionName, standTypeNbt.get(actionName));
+                        });
+                    }
                     
                     return;
                 }
 
-                CompoundNBT standTypeNbt = nbt.getCompound(standTypeName);
                 standTypeNbt.getAllKeys().forEach(actionName -> {
                     if (actionName.isEmpty()) return;
                     Action<?> action = JojoCustomRegistries.ACTIONS.getRegistry().getValue(new ResourceLocation(actionName));
@@ -172,6 +181,10 @@ public class StandActionLearningProgress {
                     if (action instanceof StandAction) {
                         StandActionLearningEntry entry = new StandActionLearningEntry((StandAction) action, standType, standTypeNbt.getFloat(actionName));
                         putEntry(entry);
+                    }
+                    else {
+                        MCUtil.getOrCreateCompound(invalidEntriedDest, standTypeName)
+                        .put(actionName, standTypeNbt.get(actionName));
                     }
                 });
             });

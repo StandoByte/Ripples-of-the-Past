@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.util.mc;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -27,9 +28,13 @@ import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.crash.ReportedException;
 import net.minecraft.dispenser.IBlockSource;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityPredicate;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
+import net.minecraft.entity.ai.goal.PrioritizedGoal;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -232,6 +237,14 @@ public class MCUtil {
             
             return null;
         }).orElse(null);
+    }
+    
+    public static CompoundNBT getOrCreateCompound(CompoundNBT mainNbt, String key) {
+        return nbtGetCompoundOptional(mainNbt, key).orElseGet(() -> {
+            CompoundNBT nbt = new CompoundNBT();
+            mainNbt.put(key, nbt);
+            return nbt;
+        });
     }
     
     //
@@ -555,6 +568,29 @@ public class MCUtil {
             attackingMob.setTarget(null);
             attackingMob.targetSelector.getRunningGoals()
             .forEach(goal -> goal.stop());
+        }
+    }
+    
+    public static void makeMobNeutralTo(MobEntity mob, LivingEntity neutralTo) {
+        Class<? extends LivingEntity> clazz = neutralTo.getClass();
+        UUID userUuid = neutralTo.getUUID();
+        Set<PrioritizedGoal> goals = CommonReflection.getGoalsSet(mob.targetSelector);
+        for (PrioritizedGoal prGoal : goals) {
+            Goal goal = prGoal.getGoal();
+            if (goal instanceof NearestAttackableTargetGoal) {
+                NearestAttackableTargetGoal<?> targetGoal = (NearestAttackableTargetGoal<?>) goal;
+                Class<? extends LivingEntity> targetClass = CommonReflection.getTargetClass(targetGoal);
+                
+                if (targetClass == null || targetClass.isAssignableFrom(clazz)) {
+                    EntityPredicate selector = CommonReflection.getTargetConditions(targetGoal);
+                    if (selector != null) {
+                        Predicate<LivingEntity> oldPredicate = CommonReflection.getTargetSelector(selector);
+                        Predicate<LivingEntity> geUserPredicate = target -> !userUuid.equals(target.getUUID());
+                        CommonReflection.setTargetConditions(targetGoal, new EntityPredicate().range(CommonReflection.getTargetDistance(targetGoal)).selector(
+                                oldPredicate != null ? oldPredicate.and(geUserPredicate) : geUserPredicate));
+                    }
+                }
+            }
         }
     }
     

@@ -33,6 +33,7 @@ public class WasdAllowingScreen extends Screen {
     public WasdAllowingScreen(ITextComponent pTitle) {
         super(pTitle);
         saveHeldKeyBinds();
+        heldKeyBinds.forEach(keybind -> keybind.setDown(true));
     }
     
     @Override
@@ -63,7 +64,6 @@ public class WasdAllowingScreen extends Screen {
     @Override
     protected void init() {
         super.init();
-        heldKeyBinds.forEach(keybind -> keybind.setDown(true));
     }
     
     

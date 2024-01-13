@@ -13,13 +13,17 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.GETransformationEntity;
 import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -31,6 +35,7 @@ import net.minecraft.entity.item.EnderCrystalEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.item.TNTEntity;
 import net.minecraft.entity.monster.SlimeEntity;
+import net.minecraft.entity.passive.horse.AbstractHorseEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.PotionEntity;
@@ -93,6 +98,11 @@ public class GoldExperienceCreateLifeform extends StandAction {
         }
         if (target.getType() == TargetType.ENTITY) {
             return ActionConditionResult.POSITIVE;
+        }
+        
+        int mobsCreated = (int) StandEffectsTracker.getEffectsOfType(power, ModStandEffects.GE_CREATED_LIFEFORM.get(), -1).count();
+        if (mobsCreated >= 16) {
+            return conditionMessage("ge_too_many_mobs");
         }
         
         boolean hasAnItem = false;
@@ -165,36 +175,52 @@ public class GoldExperienceCreateLifeform extends StandAction {
                 .map(playerData -> playerData.getGEChosenLifeformType()).orElse(null);
     }
     
+    public static Entity createEntity(EntityType<?> type, World world, LivingEntity standUser) {
+        Entity lifeFormCreated = type.create(world);
+        CompoundNBT nbt = new CompoundNBT();
+        nbt.putString("DeathLootTable", "empty");
+        lifeFormCreated.load(nbt);
+        
+        if (lifeFormCreated instanceof MobEntity) {
+            ((MobEntity) lifeFormCreated).finalizeSpawn((ServerWorld) world, 
+                    world.getCurrentDifficultyAt(standUser.blockPosition()), 
+                    SpawnReason.COMMAND, null, null);
+            for (EquipmentSlotType slot : EquipmentSlotType.values()) {
+                lifeFormCreated.setItemSlot(slot, ItemStack.EMPTY);
+            }
+            
+            if (lifeFormCreated instanceof AgeableEntity) {
+                standUser.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(playerData -> {
+                    playerData.animalAgeCd += 3000;
+                    ((AgeableEntity) lifeFormCreated).setAge(Math.max(playerData.animalAgeCd - 3000, 0));
+                });
+                if (lifeFormCreated instanceof AbstractHorseEntity) {
+                    ((AbstractHorseEntity) lifeFormCreated).setTemper(0);
+                }
+            }
+            else if (lifeFormCreated instanceof SlimeEntity) {
+                CompoundNBT additionalNbt = lifeFormCreated.serializeNBT();
+                additionalNbt.putInt("Size", 0);
+                lifeFormCreated.load(additionalNbt);
+            }
+        }
+        
+        return lifeFormCreated;
+    }
+    
     @SuppressWarnings("unchecked")
     @Override
     public void perform(World world, LivingEntity user, IStandPower power, ActionTarget target, @Nullable PacketBuffer extraInput) {
         if (!world.isClientSide() && extraInput != null) {
             EntityType<?> type = (EntityType<?>) NetworkUtil.readOptional(extraInput, 
                     () -> extraInput.readRegistryIdSafe(EntityType.class)).orElse(null);
-            if (type != null) {
+            if (type != null
+                    && GeneralUtil.orElseFalse(user.getCapability(PlayerUtilCapProvider.CAPABILITY), 
+                            cap -> cap.didPlayerMeetEntityType(type))
+                    && GoldExperienceChooseLifeform.isValidLifeform(type, world)) {
                 
-                
-                Entity lifeFormCreated = type.create(world);
-                CompoundNBT nbt = new CompoundNBT();
-                nbt.putString("DeathLootTable", "empty");
-                lifeFormCreated.load(nbt);
-                
-                if (lifeFormCreated instanceof MobEntity) {
-                    ((MobEntity) lifeFormCreated).finalizeSpawn((ServerWorld) world, 
-                            world.getCurrentDifficultyAt(user.blockPosition()), 
-                            SpawnReason.COMMAND, null, null);
-                    for (EquipmentSlotType slot : EquipmentSlotType.values()) {
-                        lifeFormCreated.setItemSlot(slot, ItemStack.EMPTY);
-                    }
-                    if (lifeFormCreated instanceof SlimeEntity) {
-                        CompoundNBT additionalNbt = lifeFormCreated.serializeNBT();
-                        additionalNbt.putInt("Size", 0);
-                        lifeFormCreated.load(additionalNbt);
-                    }
-                }
-                
+                Entity lifeFormCreated = createEntity(type, world, user);
                 int ticks = getTicksToCreate(user, power, lifeFormCreated);
-                
                 
                 Entity performer = user;
                 if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {

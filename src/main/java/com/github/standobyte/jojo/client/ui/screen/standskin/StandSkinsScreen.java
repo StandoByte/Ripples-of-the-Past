@@ -30,8 +30,10 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.StringTextComponent;
 
@@ -39,10 +41,10 @@ public class StandSkinsScreen extends Screen {
     public static final ResourceLocation TEXTURE_MAIN_WINDOW = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/stand_skins.png");
     private static final ResourceLocation TEXTURE_BG = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/stand_skins_bg.png");
     
-    private static final int WINDOW_WIDTH = 195;
+    private static final int WINDOW_WIDTH = 230;
     private static final int WINDOW_HEIGHT = 180;
     private static final int WINDOW_INSIDE_X = 7;
-    private static final int WINDOW_INSIDE_WIDTH = 165;
+    private static final int WINDOW_INSIDE_WIDTH = 201;
     private static final int WINDOW_INSIDE_Y = 20;
     private static final int WINDOW_INSIDE_HEIGHT = 153;
     
@@ -80,7 +82,7 @@ public class StandSkinsScreen extends Screen {
         this.skins = Streams.mapWithIndex(StandSkinsManager.getInstance()
                 .getStandSkinsView(standCap.getType().getRegistryName())
                 .stream(), (skin, index) -> {
-                    int x = 3 + (int) (index % SKINS_IN_ROW) * (SkinView.boxWidth + 3);
+                    int x = 12 + (int) (index % SKINS_IN_ROW) * (SkinView.boxWidth + 12);
                     int y = 3 + (int) (index / SKINS_IN_ROW) * (SkinView.boxHeight + 3);
                     return new SkinView(skin, x, y);
                 })
@@ -105,10 +107,7 @@ public class StandSkinsScreen extends Screen {
         
         renderBackground(matrixStack, 0);
         renderBgPattern(matrixStack);
-        matrixStack.pushPose();
-        matrixStack.translate(getWindowX() + WINDOW_INSIDE_X, getWindowY() + WINDOW_INSIDE_Y, 0);
-        renderContents(matrixStack, mouseX, mouseY, partialTick);
-        matrixStack.popPose();
+        renderContents(mouseX, mouseY, partialTick);
         renderWindow(matrixStack);
         
         for (Widget button : buttons) {
@@ -135,7 +134,7 @@ public class StandSkinsScreen extends Screen {
         RenderSystem.depthFunc(515);
         minecraft.getTextureManager().bind(TEXTURE_BG);
         int l = -scroll % 16;
-        for (int i1 = -1; i1 <= 11; ++i1) {
+        for (int i1 = -1; i1 <= 12; ++i1) {
             for (int j1 = -1; j1 <= 11; ++j1) {
                 blit(matrixStack, 5 + 16 * i1, l + 16 * j1, 0.0F, 0.0F, 16, 16, 16, 16);
             }
@@ -149,31 +148,33 @@ public class StandSkinsScreen extends Screen {
         blit(matrixStack, getWindowX(), getWindowY(), 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
     }
     
-    private void renderContents(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
+    @SuppressWarnings("deprecation")
+    private void renderContents(int mouseX, int mouseY, float partialTick) {
+        int x = getWindowX() + WINDOW_INSIDE_X;
+        int y = getWindowY() + WINDOW_INSIDE_Y;
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(x, y, 0);
+        MatrixStack matrixStack = new MatrixStack();
         float ticks = tickCount + partialTick;
         if (skinFullView != null) {
-            IRenderTypeBuffer.Impl buffer = Minecraft.getInstance().renderBuffers().bufferSource();
-            skinFullView.render(matrixStack, mouseX, mouseY, ticks, buffer);
-            buffer.endBatch();
+            skinFullView.render(matrixStack, mouseX, mouseY, ticks);
         }
         else {
-            matrixStack.pushPose();
-            matrixStack.translate(0, -scroll, 0);
-            IRenderTypeBuffer.Impl buffer = Minecraft.getInstance().renderBuffers().bufferSource();
+            RenderSystem.translatef(0, -scroll, 0);
             // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! filter to only visible
             for (SkinView skin : skins) {
-                skin.renderStand(matrixStack, mouseX, mouseY, ticks, buffer);
+                skin.renderStand(matrixStack, mouseX, mouseY, ticks);
             }
-            buffer.endBatch();
-            
-            // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! renders outside of the window
+
+            ClientUtil.enableGlScissor(x, y, WINDOW_INSIDE_WIDTH, WINDOW_INSIDE_HEIGHT);
             Optional<SkinView> hoveredSkin = getSkinAt(mouseX, mouseY);
             for (SkinView skin : skins) {
                 skin.renderAdditional(matrixStack, mouseX, mouseY, ticks, 
                         hoveredSkin.map(hovered -> skin == hovered).orElse(false));
             }
-            matrixStack.popPose();
+            ClientUtil.disableGlScissor();
         }
+        RenderSystem.popMatrix();
     }
     
     private Optional<SkinView> getSkinAt(int mouseX, int mouseY) {
@@ -185,6 +186,7 @@ public class StandSkinsScreen extends Screen {
                 x >= 0 && x <= WINDOW_INSIDE_WIDTH && 
                 y >= 0 && y <= WINDOW_INSIDE_HEIGHT) {
             int yWithScroll = y + scroll;
+            
             return skins.stream().filter(skin -> 
             x >           skin.x && x           <= skin.x + SkinView.boxWidth && 
             yWithScroll > skin.y && yWithScroll <= skin.y + SkinView.boxHeight)
@@ -348,7 +350,6 @@ public class StandSkinsScreen extends Screen {
         }
     }
     
-    
     private class SkinView {
         public final StandSkin skin;
         public final int x;
@@ -362,30 +363,15 @@ public class StandSkinsScreen extends Screen {
             this.y = y;
         }
         
-        @SuppressWarnings("deprecation")
-        public void renderStand(MatrixStack matrixStack, int mouseX, int mouseY, 
-                float ticks, IRenderTypeBuffer buffer) {
+        public void renderStand(MatrixStack matrixStack, int mouseX, int mouseY, float ticks) {
             minecraft.getTextureManager().bind(TEXTURE_MAIN_WINDOW);
 //            blit(matrixStack, x, y, 98, 182, width, height);
             
             StandType<?> standType = standCap.getType();
             if (standType instanceof EntityStandType) {
-                matrixStack.pushPose();
-                matrixStack.translate(x + boxWidth / 2, y + boxHeight / 2, 100);
-                matrixStack.translate(0.5F, 0, 0);
-                
-                // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! lighting is weird
-                matrixStack.scale(-25, 25, 25);
-                matrixStack.translate(0, -0.35F, 0);
-                matrixStack.mulPose(Vector3f.YP.rotationDegrees(180F));
-
                 // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! SP hair isn't animated (decouple model methods from entity instance as much as possible)
-                StandEntityRenderer<?, ?> renderer = (StandEntityRenderer<?, ?>) Minecraft.getInstance()
-                        .getEntityRenderDispatcher().renderers.get(((EntityStandType<?>) standType).getEntityType());
-                RenderSystem.runAsFancy(() -> {
-                    renderer.renderIdleWithSkin(matrixStack, skin, buffer, ticks);
-                });
-                matrixStack.popPose();
+                renderStandModel(x + boxWidth / 2, y + boxHeight / 2 + 26.6667F, 25, 0, 
+                        (EntityStandType<?>) standType, skin, ticks);
             }
         }
         
@@ -419,9 +405,7 @@ public class StandSkinsScreen extends Screen {
             this.skinIndex = skinIndex;
         }
         
-        @SuppressWarnings("deprecation")
-        public void render(MatrixStack matrixStack, int mouseX, int mouseY, 
-                float ticks, IRenderTypeBuffer buffer) {
+        public void render(MatrixStack matrixStack, int mouseX, int mouseY, float ticks) {
             ResourceLocation standIcon = JojoModUtil.makeTextureLocation("power", 
                     skinFullView.skin.standTypeId.getNamespace(), skinFullView.skin.standTypeId.getPath());
             standIcon = skinFullView.skin.getRemappedResPath(standIcon).or(standIcon);
@@ -430,19 +414,8 @@ public class StandSkinsScreen extends Screen {
             
             StandType<?> standType = standCap.getType();
             if (standType instanceof EntityStandType) {
-                matrixStack.pushPose();
-                matrixStack.translate(82.5F, 0, 100);
-
-                matrixStack.scale(-55, 55, 55);
-                matrixStack.translate(0, 1.02F, 0);
-                matrixStack.mulPose(Vector3f.YP.rotationDegrees(180F + yRot * 180F));
-
-                StandEntityRenderer<?, ?> renderer = (StandEntityRenderer<?, ?>) Minecraft.getInstance()
-                        .getEntityRenderDispatcher().renderers.get(((EntityStandType<?>) standType).getEntityType());
-                RenderSystem.runAsFancy(() -> {
-                    renderer.renderIdleWithSkin(matrixStack, skin, buffer, ticks);
-                });
-                matrixStack.popPose();
+                renderStandModel(WINDOW_WIDTH / 2 - 15, 133.33F, 55, yRot * 180F, 
+                        (EntityStandType<?>) standType, skin, ticks);    
             }
             
             if (isSkinSelected(skin)) {
@@ -452,5 +425,39 @@ public class StandSkinsScreen extends Screen {
 
             RenderSystem.enableBlend();
         }
+    }
+
+    @SuppressWarnings("deprecation")
+    public static void renderStandModel(float posX, float posY, float scale, float yRot, 
+            EntityStandType<?> standType, StandSkin standSkin, float ticks) {
+        RenderSystem.pushMatrix();
+        RenderSystem.translatef(posX, posY, 1050.0F);
+        RenderSystem.scalef(1.0F, 1.0F, -1.0F);
+        
+        MatrixStack matrixStack = new MatrixStack();
+        matrixStack.translate(0.0D, 0.0D, 1000.0D);
+        matrixStack.scale(scale, scale, scale);
+        matrixStack.translate(0.0D, -1.4D, 0.0D);
+        Quaternion quaternion = Vector3f.ZP.rotationDegrees(0.0F);
+        Quaternion quaternion1 = Vector3f.YP.rotationDegrees(yRot);
+        quaternion.mul(quaternion1);
+        matrixStack.mulPose(quaternion);
+        EntityRendererManager entityrenderermanager = Minecraft.getInstance().getEntityRenderDispatcher();
+        quaternion1.conj();
+        entityrenderermanager.overrideCameraOrientation(quaternion1);
+        
+        // rotate lighting
+        matrixStack.last().normal().mul(Vector3f.YP.rotationDegrees(60));
+        
+        entityrenderermanager.setRenderShadow(false);
+        IRenderTypeBuffer.Impl buffer = Minecraft.getInstance().renderBuffers().bufferSource();
+        EntityRendererManager entityRendererManager = Minecraft.getInstance().getEntityRenderDispatcher();
+        StandEntityRenderer<?, ?> renderer = (StandEntityRenderer<?, ?>) entityRendererManager.renderers.get(standType.getEntityType());
+        RenderSystem.runAsFancy(() -> {
+            renderer.renderIdleWithSkin(matrixStack, standSkin, buffer, ticks);
+        });
+        buffer.endBatch();
+        entityrenderermanager.setRenderShadow(true);
+        RenderSystem.popMatrix();
     }
 }

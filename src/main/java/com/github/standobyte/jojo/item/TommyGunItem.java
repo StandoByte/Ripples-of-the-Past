@@ -14,6 +14,7 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
+import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.google.common.collect.ImmutableMultimap;
@@ -36,6 +37,7 @@ import net.minecraft.item.UseAction;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -131,7 +133,7 @@ public class TommyGunItem extends Item {
         return false;
     }
 
-    private static final int GUNPOWDER_TO_BULLET = 1;
+    private static final int BULLETS_PER_GUNPOWDER = 8;
     private int consumeAmmo(PlayerEntity player, int ammoToLoad) {
         if (!player.abilities.instabuild) {
             List<ItemStack> ironNuggets = new ArrayList<>();
@@ -151,9 +153,9 @@ public class TommyGunItem extends Item {
                 }
             }
             
-            ammoToLoad = Math.min(Math.min(ironNuggetsCount, gunpowderCount / GUNPOWDER_TO_BULLET), ammoToLoad);
+            ammoToLoad = MathUtil.min(ironNuggetsCount, gunpowderCount * BULLETS_PER_GUNPOWDER, ammoToLoad);
             ironNuggetsCount = ammoToLoad;
-            gunpowderCount = ammoToLoad * GUNPOWDER_TO_BULLET;
+            gunpowderCount = MathHelper.ceil((float) ammoToLoad / BULLETS_PER_GUNPOWDER);
 
             for (ItemStack ironNuggetsStack : ironNuggets) {
                 int consumed = Math.min(ironNuggetsStack.getCount(), ironNuggetsCount);

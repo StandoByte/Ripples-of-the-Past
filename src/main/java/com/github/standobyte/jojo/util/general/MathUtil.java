@@ -270,4 +270,66 @@ public class MathUtil {
             return new Vector3f((float) xRot, (float) yRot, (float) zRot);
         }
     }
+    
+    
+    
+    public static int min(int num1, int num2, int... nums) {
+        int min = (num1 <= num2) ? num1 : num2;
+        for (int num : nums) {
+            if (num < min) {
+                min = num;
+            }
+        }
+        return min;
+    }
+    
+    public static float min(float num1, float num2, float... nums) {
+        float min = (num1 <= num2) ? num1 : num2;
+        for (float num : nums) {
+            if (num < min) {
+                min = num;
+            }
+        }
+        return min;
+    }
+    
+    public static double min(double num1, double num2, double... nums) {
+        double min = (num1 <= num2) ? num1 : num2;
+        for (double num : nums) {
+            if (num < min) {
+                min = num;
+            }
+        }
+        return min;
+    }
+    
+    public static int max(int num1, int num2, int... nums) {
+        int max = (num1 >= num2) ? num1 : num2;
+        for (int num : nums) {
+            if (num > max) {
+                max = num;
+            }
+        }
+        return max;
+    }
+    
+    public static float max(float num1, float num2, float... nums) {
+        float max = (num1 >= num2) ? num1 : num2;
+        for (float num : nums) {
+            if (num > max) {
+                max = num;
+            }
+        }
+        return max;
+    }
+    
+    public static double max(double num1, double num2, double... nums) {
+        double max = (num1 >= num2) ? num1 : num2;
+        for (double num : nums) {
+            if (num > max) {
+                max = num;
+            }
+        }
+        return max;
+    }
 }

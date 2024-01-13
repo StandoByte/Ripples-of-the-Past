@@ -218,7 +218,7 @@ public class RockPaperScissorsGame {
         }
         else if (loserStand.getType() == ModStandsInit.BOY_II_MAN.get() && round == ROUNDS_TO_WIN) {
             StandEffectsTracker boyIIManEffects = loserStand.getContinuousEffects();
-            boyIIManEffects.getEffects(effect -> effect.effectType == ModStandEffects.BOY_II_MAN_PART_TAKE.get()
+            boyIIManEffects.getEffects().filter(effect -> effect.effectType == ModStandEffects.BOY_II_MAN_PART_TAKE.get()
                     && roundWinner.is(effect.getTarget())).forEach(effect -> {
                         if (winnerStand.hasPower()) {
                             // FIXME (BIIM)

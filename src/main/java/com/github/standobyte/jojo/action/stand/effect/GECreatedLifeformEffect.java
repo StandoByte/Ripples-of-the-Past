@@ -5,9 +5,11 @@ import com.github.standobyte.jojo.entity.GETransformationEntity;
 import com.github.standobyte.jojo.entity.GETransformationEntity.GETransformationData;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
@@ -71,6 +73,15 @@ public class GECreatedLifeformEffect extends StandEffectInstance {
         }
         
         super.updateTarget(world);
+    }
+    
+    @Override
+    protected void setTargetEntity(Entity target) {
+        super.setTargetEntity(target);
+        if (target instanceof MobEntity && user != null) {
+            MobEntity lifeformMob = (MobEntity) target;
+            MCUtil.makeMobNeutralTo(lifeformMob, user);
+        }
     }
     
     @Override

@@ -152,7 +152,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                     MobEntity mob = (MobEntity) entityToSummon;
                     mob.playAmbientSound();
                     if (source.aggroTarget != null) {
-                        mob.goalSelector.addGoal(-1, new GELifeformFollowOwnerGoal(mob, source.aggroTarget, 1.25));
+                        mob.goalSelector.addGoal(-1, new GELifeformFollowOwnerGoal(mob, source.aggroTarget, 1.0));
                     }
                 }
             }

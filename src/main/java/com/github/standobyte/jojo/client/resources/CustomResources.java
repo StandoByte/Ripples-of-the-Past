@@ -23,6 +23,7 @@ public class CustomResources {
         resourceManager.registerReloadListener(hamonSkillSprites = new HamonSkillSpriteUploader(mc.textureManager));
         resourceManager.registerReloadListener(resolveShadersListManager = new ResolveShadersListManager());
         resourceManager.registerReloadListener(modSplashes = new ModSplashes(mc.getUser(), new ResourceLocation(JojoMod.MOD_ID, "texts/splashes.txt")));
+        resourceManager.registerReloadListener(new ResourceReloadNotifier());
         resourceManager.registerReloadListener(standSkinsLoader = new StandSkinsManager());
         resourceManager.registerReloadListener(standModelOverrides = new StandModelOverrides(new Gson()));
     }

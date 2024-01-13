@@ -21,6 +21,7 @@ import net.minecraft.block.DispenserBlock;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.dispenser.IBlockSource;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -72,7 +73,11 @@ public class StandDiscItem extends Item {
                 
                 if (!player.abilities.instabuild) {
                     Optional<StandInstance> previousDiscStand = power.putOutStand();
-                    previousDiscStand.ifPresent(prevStand -> player.drop(withStand(new ItemStack(this), prevStand), false));
+                    previousDiscStand.ifPresent(prevStand -> {
+                        ItemEntity discItemEntity = player.drop(withStand(new ItemStack(this), prevStand), false);
+                        discItemEntity.setPickUpDelay(5);
+                        discItemEntity.setOwner(player.getUUID());
+                    });
                 }
                 else {
                     power.clear();
