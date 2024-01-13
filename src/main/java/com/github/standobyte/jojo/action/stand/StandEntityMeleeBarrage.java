@@ -226,15 +226,11 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
     }
     
     @Override
-    public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
-        return standEntity.isArmsOnlyMode() ? 0 : StandStatFormulas.getBarrageRecovery(standEntity.getSpeed());
-    }
-    
-//    @Override
-//    public boolean isFreeRecovery(IStandPower standPower, StandEntity standEntity) {
+    public boolean isFreeRecovery(IStandPower standPower, StandEntity standEntity) {
 //        LivingEntity user = standPower.getUser();
 //        return user != null && user.hasEffect(ModStatusEffects.RESOLVE.get());
-//    }
+        return true;
+    }
     
     
     
@@ -246,6 +242,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
             super();
             standPose(StandPose.BARRAGE)
             .standAutoSummonMode(AutoSummonMode.ARMS).holdType().staminaCostTick(4F)
+            .standRecoveryTicks(5)
             .standUserWalkSpeed(0.15F).standOffsetFront()
             .partsRequired(StandPart.ARMS);
         }
