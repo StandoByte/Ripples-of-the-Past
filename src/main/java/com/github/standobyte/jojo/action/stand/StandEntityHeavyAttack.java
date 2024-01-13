@@ -192,6 +192,11 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     }
     
     @Override
+    public boolean isFreeRecovery(IStandPower standPower, StandEntity standEntity) {
+        return isFinisher();
+    }
+    
+    @Override
     protected boolean playsVoiceLineOnSneak() {
         return isFinisher || super.playsVoiceLineOnSneak();
     }

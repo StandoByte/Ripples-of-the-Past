@@ -64,20 +64,24 @@ public class GoldExperienceHeavyPunch extends StandEntityHeavyAttack {
             double strength = stand.getAttackDamage();
             World world = stand.level;
             if (!world.isClientSide() && hurt && target instanceof LivingEntity) {
-                LivingEntity targetLiving = StandUtil.getStandUser((LivingEntity) target);
-                ObjectEntity tooth = new ObjectEntity(world, ObjectEntity.Type.TOOTH);
-                tooth.setPos(targetLiving.getX(), targetLiving.getEyeY(), targetLiving.getZ());
-                tooth.setOwner(targetLiving.getUUID());
-                
-                float xRot = -37.5F - 15 * stand.getRandom().nextFloat();
-                float yRot = 90 + 30 * stand.getRandom().nextFloat();
-                Vector3d toothVec = Vector3d.directionFromRotation(
-                        target.xRot + xRot, 
-                        target.yRot + yRot);
-                tooth.setDeltaMovement(toothVec.scale(Math.max(strength, 2) * 0.05));
-                world.addFreshEntity(tooth);
-
-                task.getAdditionalData().push(Integer.class, tooth.getId());
+                LivingEntity targetLiving = (LivingEntity) target;
+                targetLiving = StandUtil.getStandUser(targetLiving);
+                ObjectEntity.Type toothType = GoldExperienceToothLifeform.getToothObject(targetLiving);
+                if (toothType != null) {
+                    ObjectEntity tooth = new ObjectEntity(world, toothType);
+                    tooth.setPos(targetLiving.getX(), targetLiving.getEyeY(), targetLiving.getZ());
+                    tooth.setOwner(targetLiving.getUUID());
+                    
+                    float xRot = -37.5F - 15 * stand.getRandom().nextFloat();
+                    float yRot = 90 + 30 * stand.getRandom().nextFloat();
+                    Vector3d toothVec = Vector3d.directionFromRotation(
+                            target.xRot + xRot, 
+                            target.yRot + yRot);
+                    tooth.setDeltaMovement(toothVec.scale(Math.max(strength, 2) * 0.05));
+                    world.addFreshEntity(tooth);
+    
+                    task.getAdditionalData().push(Integer.class, tooth.getId());
+                }
             }
         }
     }
