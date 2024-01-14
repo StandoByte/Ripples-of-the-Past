@@ -29,6 +29,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -168,6 +169,20 @@ public class StandDiscItem extends Item {
             return StandSkinsManager.getUiColor(getStandFromStack(itemStack, true));
         }
     }
+    
+    @Override
+    public String getCreatorModId(ItemStack itemStack) {
+        ResourceLocation id;
+        StandInstance stand = getStandFromStack(itemStack);
+        if (stand != null) {
+            id = stand.getType().getRegistryName();
+        }
+        else {
+            id = this.getRegistryName();
+        }
+        return id.getNamespace();
+    }
+    
     
     
     public static boolean giveStandFromDisc(IStandPower standCap, StandInstance stand, ItemStack discItem) {
