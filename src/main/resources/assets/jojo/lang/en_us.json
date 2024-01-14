@@ -78,6 +78,10 @@
   "filled_map.jojo:hamon_temple": "Mountain Explorer Map",
   "filled_map.jojo:pillarman_temple": "Jungle Explorer Map",
   
+  "jojo.stand_user_crafting.jei_hint.single": "This can only be crafted if your Stand is %s",
+  "jojo.stand_user_crafting.jei_hint.multiple": "This can only be crafted if your Stand is either one of these:",
+  "jojo.stand_user_crafting.jei_hint.error": "Missing Stand id(s):",
+  
   "walkman.button.play": "Play %s",
   "walkman.button.flip": "Flip (play %s)",
   "walkman.button.rewind": "Rewind (play %s)",

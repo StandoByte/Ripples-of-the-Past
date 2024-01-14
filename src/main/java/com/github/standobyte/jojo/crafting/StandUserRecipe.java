@@ -1,6 +1,12 @@
 package com.github.standobyte.jojo.crafting;
 
+import java.util.Collection;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 
@@ -11,19 +17,40 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.ForgeRegistryEntry;
+import net.minecraftforge.registries.IForgeRegistry;
 
 public abstract class StandUserRecipe<R extends ICraftingRecipe> extends PlayerPredicateRecipeWrapper<R> {
-    private final NonNullList<ResourceLocation> stands;
+    private final NonNullList<ResourceLocation> standIds;
+    private final List<StandType<?>> standTypes;
+    private final List<ResourceLocation> missingIds;
 
     public StandUserRecipe(R recipe, NonNullList<ResourceLocation> stands) {
         super(recipe);
-        this.stands = stands;
+        this.standIds = stands;
+        
+        IForgeRegistry<StandType<?>> standsRegistry = JojoCustomRegistries.STANDS.getRegistry();
+        this.standTypes = standIds.stream()
+                .filter(standsRegistry::containsKey)
+                .map(standsRegistry::getValue)
+                .collect(Collectors.toList());
+        
+        this.missingIds = standIds.stream()
+                .filter(id -> !standsRegistry.containsKey(id))
+                .collect(Collectors.toList());
     }
     
     @Override
     protected boolean playerMatches(PlayerEntity player) {
         IStandPower standPower = IStandPower.getPlayerStandPower(player);
-        return standPower.hasPower() && (stands.isEmpty() || stands.contains(standPower.getType().getRegistryName()));
+        return standPower.hasPower() && (standIds.isEmpty() || standIds.contains(standPower.getType().getRegistryName()));
+    }
+    
+    public List<StandType<?>> getStandTypesView() {
+        return standTypes;
+    }
+    
+    public Collection<ResourceLocation> getMissingIdsView() {
+        return missingIds;
     }
 
     public static class Serializer<R extends ICraftingRecipe> extends ForgeRegistryEntry<IRecipeSerializer<?>> implements IRecipeSerializer<StandUserRecipe<R>> {
@@ -61,8 +88,8 @@ public abstract class StandUserRecipe<R extends ICraftingRecipe> extends PlayerP
         public void toNetwork(PacketBuffer buf, StandUserRecipe<R> recipe) {
             wrappedRecipeSerializer.toNetwork(buf, recipe.recipe);
             
-            buf.writeVarInt(recipe.stands.size());
-            for (ResourceLocation resLoc : recipe.stands) {
+            buf.writeVarInt(recipe.standIds.size());
+            for (ResourceLocation resLoc : recipe.standIds) {
                 buf.writeResourceLocation(resLoc);
             }
         }
