@@ -12,7 +12,7 @@ import mezz.jei.gui.ingredients.CycleTimer;
 
 public class JeiStandIconDrawable implements IDrawable {
     private final CycleTimer iconsCycle = new CycleTimer(0);
-    private final List<DrawableResource> standIcons;
+    private final List<IDrawable> standIcons;
     
     public JeiStandIconDrawable(List<StandType<?>> standIcons) {
         this.standIcons = standIcons.stream()
@@ -34,7 +34,7 @@ public class JeiStandIconDrawable implements IDrawable {
     @Override
     public void draw(MatrixStack matrixStack, int xOffset, int yOffset) {
         if (!standIcons.isEmpty()) {
-            DrawableResource standIcon = iconsCycle.getCycledItem(standIcons);
+            IDrawable standIcon = iconsCycle.getCycledItem(standIcons);
             standIcon.draw(matrixStack, xOffset, yOffset);
             iconsCycle.onDraw();
         }

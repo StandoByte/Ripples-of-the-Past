@@ -92,8 +92,7 @@ dependencies {
     implementation fg.deobf("io.github.kosmx.bendy-lib:bendy-lib-forge:${bendylib_version}")
     compileOnly 'org.jetbrains:annotations:23.0.0'
     
-    compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}:api")
-    runtimeOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
+    implementation fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
 }
 
 jar {
