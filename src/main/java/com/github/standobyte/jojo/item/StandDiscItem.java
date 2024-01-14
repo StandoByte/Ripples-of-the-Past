@@ -15,7 +15,6 @@ import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.mc.MCUtil;
-import com.github.standobyte.jojo.util.mod.LegacyUtil;
 
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.client.util.ITooltipFlag;
@@ -143,15 +142,18 @@ public class StandDiscItem extends Item {
         tooltip.add(new TranslationTextComponent("item.jojo.creative_only_tooltip").withStyle(TextFormatting.DARK_GRAY));
     }
     
-    @Nullable
+    @Deprecated
     public static StandInstance getStandFromStack(ItemStack stack, boolean clientSide) {
-        return LegacyUtil.oldStandDiscInstance(stack, clientSide).orElseGet(() -> {
-            CompoundNBT nbt = stack.getTag();
-            if (nbt == null || !nbt.contains(STAND_TAG, MCUtil.getNbtId(CompoundNBT.class))) {
-                return null;
-            }
-            return StandInstance.fromNBT((CompoundNBT) nbt.get(STAND_TAG));
-        });
+        return getStandFromStack(stack);
+    }
+    
+    @Nullable
+    public static StandInstance getStandFromStack(ItemStack stack) {
+        CompoundNBT nbt = stack.getTag();
+        if (nbt == null || !nbt.contains(STAND_TAG, MCUtil.getNbtId(CompoundNBT.class))) {
+            return null;
+        }
+        return StandInstance.fromNBT((CompoundNBT) nbt.get(STAND_TAG));
     }
     
     public static boolean validStandDisc(ItemStack stack, boolean clientSide) {
