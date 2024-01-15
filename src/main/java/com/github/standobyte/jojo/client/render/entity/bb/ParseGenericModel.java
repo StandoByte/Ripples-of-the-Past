@@ -12,6 +12,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.render.MeshModelBox;
 import com.github.standobyte.jojo.client.render.MeshModelBox.Builder.MeshFaceBuilder;
 import com.github.standobyte.jojo.util.general.MathUtil;
@@ -104,6 +105,28 @@ public class ParseGenericModel {
                     throw new JsonParseException("No model element type present!");
                 }
             };
+            
+            Optional<GroupParsed> convertRotated(GroupParsed parentBone) {
+                if (rotation != null && (rotation[0] != 0 || rotation[1] != 0 || rotation[2] != 0 )) {
+                    String name = parentBone.name + "_r" + parentBone.convertedCount++;
+                    
+                    GroupParsed bone = new GroupParsed();
+                    bone.name = name;
+                    bone.origin = this.origin != null ? this.origin : new float[] { 0, 0, 0 };
+                    bone.rotation = this.rotation;
+                    this.rotation = null;
+                    
+                    ElementUUID cube = new ElementUUID(this.uuid);
+                    bone.children = new ArrayList<>();
+                    bone.children.add(cube);
+                    
+                    bone.export = true;
+                    
+                    return Optional.of(bone);
+                }
+                
+                return Optional.empty();
+            }
         }
         
         static class ElementMesh extends Element {
@@ -290,39 +313,11 @@ public class ParseGenericModel {
                 }
                 return facesPerDirection;
             }
-            
-            Optional<GroupParsed> convertRotated(GroupParsed parentBone) {
-                if (rotation != null && (rotation[0] != 0 || rotation[1] != 0 || rotation[2] != 0 )) {
-                    String name = parentBone.name + "_r" + parentBone.convertedCount++;
-                    
-                    GroupParsed bone = new GroupParsed();
-                    bone.name = name;
-                    if (parentBone.children == null) parentBone.children = new ArrayList<>();
-                    parentBone.children.add(bone);
-                    bone.origin = this.origin != null ? this.origin : new float[] { 0, 0, 0 };
-                    bone.rotation = this.rotation;
-                    if (bone.children == null) bone.children = new ArrayList<>();
-                    bone.children.add(new ElementUUID(this.uuid));
-                    
-                    this.rotation = null;
-                    
-                    return Optional.of(bone);
-                }
-                
-                return Optional.empty();
-            }
 
             @Override
             void addElement(ModelRenderer parent, GroupParsed parentParsed, 
                     List<ModelRenderer.ModelBox> modelCubesCollection, int texWidth, int texHeight) {
-                Optional<GroupParsed> cubeRotated = convertRotated(parentParsed);
-                if (cubeRotated.isPresent()) {
-                    ModelRenderer autoGenRotatedCube = cubeRotated.get().makeModelPart(texWidth, texHeight, parentParsed);
-                    parent.addChild(autoGenRotatedCube);
-                }
-                else {
-                    modelCubesCollection.add(makeModelBox(texWidth, texHeight, parentParsed));
-                }
+                modelCubesCollection.add(makeModelBox(texWidth, texHeight, parentParsed));
             }
         }
         
@@ -427,7 +422,7 @@ public class ParseGenericModel {
             return model;
         }
         
-        private void addBlockbenchObjectRecursive(EntityModelUnbaked model, ModelParsed.BlockbenchObj bbObj, 
+        void addBlockbenchObjectRecursive(EntityModelUnbaked model, ModelParsed.BlockbenchObj bbObj, 
                 @Nullable List<ModelRenderer.ModelBox> parentCubesCollection, 
                 @Nullable ModelRenderer parent, @Nullable ModelParsed.GroupParsed parentParsed) {
             if (bbObj instanceof ModelParsed.GroupParsed) {
@@ -447,7 +442,15 @@ public class ParseGenericModel {
             }
             else if (bbObj instanceof ModelParsed.ElementUUID && parent != null) {
                 ModelParsed.Element element = initElements.get(((ModelParsed.ElementUUID) bbObj).uuid);
-                element.addElement(parent, parentParsed, parentCubesCollection, model.texWidth, model.texHeight);
+
+                Optional<GroupParsed> cubeRotated = element.convertRotated(parentParsed);
+                if (cubeRotated.isPresent()) {
+                    GroupParsed autoGenRotatedCube = cubeRotated.get();
+                    addBlockbenchObjectRecursive(model, autoGenRotatedCube, null, parent, parentParsed);
+                }
+                else {
+                    element.addElement(parent, parentParsed, parentCubesCollection, model.texWidth, model.texHeight);
+                }
             }
         }
     }
