@@ -651,8 +651,8 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
         return new ModelPose<>(new RotationAngle[] {
                 new RotationAngle(upperPart, 0, 0, 0),
                 RotationAngle.fromDegrees(body,             -10.3453,   14.7669,    -2.664),
-                RotationAngle.fromDegrees(leftArm,          11.3684,    10.8486,    -30.036),
-                RotationAngle.fromDegrees(leftForeArm,      -11.8046,   3.8358,     23.4714),
+                RotationAngle.fromDegrees(leftArm,          12.2616,    9.8242,     -25.0612),
+                RotationAngle.fromDegrees(leftForeArm,      -12.0884,   2.8002,     18.5715),
                 RotationAngle.fromDegrees(rightArm,         3.0667,     -8.1272,    29.6295),
                 RotationAngle.fromDegrees(rightForeArm,     -34.6,      -4.5795,    -21.7089),
                 RotationAngle.fromDegrees(leftLeg,          20.2151,    -12.1546,   -12.2229),
@@ -666,7 +666,15 @@ public class TheWorldModel extends HumanoidStandModel<TheWorldEntity> {
     @Override
     protected ModelPose<TheWorldEntity> initIdlePose2Loop() {
         return new ModelPose<>(new RotationAngle[] {
-                
+                RotationAngle.fromDegrees(leftArm,          18.8684,    10.8486,    -30.036),
+                RotationAngle.fromDegrees(leftForeArm,      -19.3046,   3.8358,     23.4714),
+                RotationAngle.fromDegrees(rightArm,         8.0667,     -8.1272,    29.6295),
+                RotationAngle.fromDegrees(rightForeArm,     -44.4869,   -2.7976,    -23.4661),
+                RotationAngle.fromDegrees(leftLeg,          22.7151,    -12.1546,   -12.2229),
+                RotationAngle.fromDegrees(leftLowerLeg,     12.5,        0,         0),
+                RotationAngle.fromDegrees(rightLeg,         9.2581,     -8.8099,    10.9413),
+                RotationAngle.fromDegrees(rightLowerLeg,    25,         0,          0),
+                RotationAngle.fromDegrees(heartLargeAbdomen,-8.2352,    2.4217,     0.178)
         });
     }
     

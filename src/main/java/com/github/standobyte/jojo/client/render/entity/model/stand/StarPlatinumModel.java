@@ -631,8 +631,8 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
                 new RotationAngle(upperPart, 0, 0, 0),
                 RotationAngle.fromDegrees(body,             -4.7383,    -22.5834,   -0.01776),
                 RotationAngle.fromDegrees(leftArm,          -14.7822,   2.5759,     -35.3342),
-                RotationAngle.fromDegrees(leftForeArm,      -94.0676,   -29.9470,   53.0899),
-                RotationAngle.fromDegrees(rightArm,         -21.8883,   27.3085,    21.8550),
+                RotationAngle.fromDegrees(leftForeArm,      -96.9094,   -29.4684,   58.8207),
+                RotationAngle.fromDegrees(rightArm,         -24.1671,   25.3512,    16.7207),
                 RotationAngle.fromDegrees(rightForeArm,     -90,        60,         -90),
                 RotationAngle.fromDegrees(leftLeg,          0.7499,     -16.8861,   -12.3022),
                 RotationAngle.fromDegrees(leftLowerLeg,     17,         0,          0),
@@ -646,7 +646,16 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
     @Override
     protected ModelPose<StarPlatinumEntity> initIdlePose2Loop() {
         return new ModelPose<>(new RotationAngle[] {
-                
+                RotationAngle.fromDegrees(leftArm,          -4.7822,    2.5759,     -35.3342),
+                RotationAngle.fromDegrees(leftForeArm,      -101.2948,  -20.4915,   61.558),
+                RotationAngle.fromDegrees(rightArm,         -14.1671,   25.3512,    16.7207),
+                RotationAngle.fromDegrees(rightForeArm,     -90,        47.5,       -90),
+                RotationAngle.fromDegrees(leftLeg,          5.7499,     -16.8861,   -12.3022),
+                RotationAngle.fromDegrees(leftLowerLeg,     19.5,       0,          0),
+                RotationAngle.fromDegrees(rightLeg,         15.8417,    24.2139,    17.8699),
+                RotationAngle.fromDegrees(rightLowerLeg,    21.3261,    0,          0),
+                RotationAngle.fromDegrees(frontFabric,      -10.5,      0,          0),
+                RotationAngle.fromDegrees(backFabric,       11,         0,          0)
         });
     }
     
