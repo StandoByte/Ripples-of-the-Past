@@ -23,7 +23,6 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.glfw.GLFW;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
@@ -31,7 +30,7 @@ import com.github.standobyte.jojo.client.input.ActionsControlScheme;
 import com.github.standobyte.jojo.client.standskin.StandSkin;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
-import com.github.standobyte.jojo.client.ui.screen.hudlayout.HudLayoutEditingScreen;
+import com.github.standobyte.jojo.client.ui.screen.controls.HudLayoutEditingScreen;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.ItemProjectileEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -107,33 +106,25 @@ public class InputHandler {
     public RayTraceResult mouseTarget;
 
     private static final String MAIN_CATEGORY = new String("key.categories." + JojoMod.MOD_ID);
-    private KeyBinding toggleStand;
-    private KeyBinding standRemoteControl;
+    public KeyBinding toggleStand;
+    public KeyBinding standRemoteControl;
     public KeyBinding hamonSkillsWindow;
 
     private static final String HUD_CATEGORY = new String("key.categories." + JojoMod.MOD_ID + ".hud");
     public KeyBinding nonStandMode;
     public KeyBinding standMode;
-    private KeyBinding scrollMode;
+    public KeyBinding scrollMode;
     public KeyBinding editHotbars;
     public KeyBinding disableHotbars;
     
-    private KeyBinding attackHotbar;
-    private KeyBinding abilityHotbar;
-    private KeyBinding scrollAttack;
-    private KeyBinding scrollAbility;
-    private KeyBinding lockAttackHotbar;
-    private KeyBinding lockAbilityHotbar;
+    public KeyBinding attackHotbar;
+    public KeyBinding abilityHotbar;
+    public KeyBinding scrollAttack;
+    public KeyBinding scrollAbility;
+    public KeyBinding lockAttackHotbar;
+    public KeyBinding lockAbilityHotbar;
 
     private static final String HUD_ALTERNATIVE_CATEGORY = new String("key.categories." + JojoMod.MOD_ID + ".hud.alternative");
-    @Nullable
-    private KeyBinding[] attackSlots;
-    @Nullable
-    private KeyBinding deselectAttack;
-    @Nullable
-    private KeyBinding[] abilitySlots;
-    @Nullable
-    private KeyBinding deselectAbility;
     
     // it works because the actual map is static, not sure if that's intended or just an implementation detail
     // but hey, i'll take it
@@ -185,17 +176,6 @@ public class InputHandler {
         ClientRegistry.registerKeyBinding(scrollAbility = new KeyBinding(JojoMod.MOD_ID + ".key.scroll_ability", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
         ClientRegistry.registerKeyBinding(lockAttackHotbar = new KeyBinding(JojoMod.MOD_ID + ".key.lock_attack", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
         ClientRegistry.registerKeyBinding(lockAbilityHotbar = new KeyBinding(JojoMod.MOD_ID + ".key.lock_ability", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
-        
-        if (JojoModConfig.CLIENT.actionSlotHotkeys.get()) {
-            attackSlots = new KeyBinding[9];
-            abilitySlots = new KeyBinding[9];
-            for (int i = 0; i < 9; i++) {
-                ClientRegistry.registerKeyBinding(attackSlots[i] = new KeyBinding(JojoMod.MOD_ID + ".key.attack_" + (i + 1), GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
-                ClientRegistry.registerKeyBinding(abilitySlots[i] = new KeyBinding(JojoMod.MOD_ID + ".key.ability_" + (i + 1), GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
-            }
-            ClientRegistry.registerKeyBinding(deselectAttack = new KeyBinding(JojoMod.MOD_ID + ".key.deselect_attack", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
-            ClientRegistry.registerKeyBinding(deselectAbility = new KeyBinding(JojoMod.MOD_ID + ".key.deselect_ability", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
-        }
     }
     
     @SubscribeEvent(priority = EventPriority.HIGH)
@@ -245,22 +225,22 @@ public class InputHandler {
                         }
                     }
                 }
-                else {
-                    if (attackSlots != null) {
-                        for (int i = 0; i < 9; i++) {
-                            if (attackSlots[i].consumeClick()) {
-                                actionsOverlay.selectAction(ActionsLayout.Hotbar.LEFT_CLICK, i);
-                            }
-                        }
-                    }
-                    if (abilitySlots != null) {
-                        for (int i = 0; i < 9; i++) {
-                            if (abilitySlots[i].consumeClick()) {
-                                actionsOverlay.selectAction(ActionsLayout.Hotbar.RIGHT_CLICK, i);
-                            }
-                        }
-                    }
-                }
+//                else {
+//                    if (attackSlots != null) {
+//                        for (int i = 0; i < 9; i++) {
+//                            if (attackSlots[i].consumeClick()) {
+//                                actionsOverlay.selectAction(ActionsLayout.Hotbar.LEFT_CLICK, i);
+//                            }
+//                        }
+//                    }
+//                    if (abilitySlots != null) {
+//                        for (int i = 0; i < 9; i++) {
+//                            if (abilitySlots[i].consumeClick()) {
+//                                actionsOverlay.selectAction(ActionsLayout.Hotbar.RIGHT_CLICK, i);
+//                            }
+//                        }
+//                    }
+//                }
                 
                 if (scrollAttack.consumeClick()) {
                     actionsOverlay.scrollAction(ActionsLayout.Hotbar.LEFT_CLICK, mc.player.isShiftKeyDown());

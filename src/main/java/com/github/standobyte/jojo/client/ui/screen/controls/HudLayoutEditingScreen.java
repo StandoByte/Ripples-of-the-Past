@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.ui.screen.hudlayout;
+package com.github.standobyte.jojo.client.ui.screen.controls;
 
 import java.util.ArrayList;
 import java.util.Collection;
