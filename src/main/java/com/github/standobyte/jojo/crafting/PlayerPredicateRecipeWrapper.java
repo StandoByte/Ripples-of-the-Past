@@ -11,6 +11,8 @@ import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.inventory.container.WorkbenchContainer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.crafting.ICraftingRecipe;
+import net.minecraft.item.crafting.Ingredient;
+import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 
@@ -41,6 +43,11 @@ public abstract class PlayerPredicateRecipeWrapper<R extends ICraftingRecipe> im
     @Override
     public ItemStack getResultItem() {
         return recipe.getResultItem();
+    }
+
+    @Override
+    public NonNullList<Ingredient> getIngredients() {
+        return recipe.getIngredients();
     }
 
     @Override

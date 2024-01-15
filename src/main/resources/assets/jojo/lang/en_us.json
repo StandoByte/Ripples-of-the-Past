@@ -61,8 +61,8 @@
   "item.jojo.walkman": "Walkman",
   "item.jojo.walkman.reference_quote": "\"My own grandson doesn't even know my face! I'll never forgive the Japanese! But... I do like my Walkman.\"",
   "item.jojo.cassette_blank": "Blank Cassette Tape",
-  "item.jojo.cassette_blank.hint": "Combine it with a music disc to record it",
-  "item.jojo.cassette_blank.hint.has_dyes": "Combine it with a music disc or a dye to record it",
+  "item.jojo.cassette_blank.hint": "Combine it with one or multiple music discs (in any combination) to record it",
+  "item.jojo.cassette_blank.hint.has_dyes": "Combine it with one or multiple music discs/dyes (in any combination) to record it",
   "item.jojo.cassette.dye_hint": "%s + %s",
   "item.jojo.cassette_recorded": "Cassette Tape",
   "jojo.cassette.side_a": "  Side A:",
@@ -77,6 +77,10 @@
   "filled_map.jojo:meteorite": "Tundra Explorer Map",
   "filled_map.jojo:hamon_temple": "Mountain Explorer Map",
   "filled_map.jojo:pillarman_temple": "Jungle Explorer Map",
+  
+  "jojo.stand_user_crafting.jei_hint.single": "This can only be crafted if your Stand is %s",
+  "jojo.stand_user_crafting.jei_hint.multiple": "This can only be crafted if your Stand is either one of these:",
+  "jojo.stand_user_crafting.jei_hint.error": "Missing Stand id(s):",
   
   "walkman.button.play": "Play %s",
   "walkman.button.flip": "Flip (play %s)",

@@ -154,15 +154,87 @@ public class ParseGeckoModel {
                           origin[2] - parentBone.pivot[2]
                         );
                 
-                int[] boxUV0 = uv instanceof BoxUV ? ((BoxUV) uv).uv : new int[] { 0, 0 };
                 ModelRenderer.ModelBox box = new ModelRenderer.ModelBox(
-                        boxUV0[0], boxUV0[1], 
+                        0, 0, 
                         originJ.x(), originJ.y(), originJ.z(), 
                         size[0], size[1], size[2], 
                         inflate, inflate, inflate, 
                         mirror, texWidth, texHeight);
                 
-                if (uv instanceof PerFaceUV) {
+                if (uv instanceof BoxUV) { // UV needs to be remapped anyway, as if the sizes are integer
+                    float x0 = originJ.x() - inflate;
+                    float y0 = originJ.y() - inflate;
+                    float z0 = originJ.z() - inflate;
+                    float x1 = originJ.x() + inflate + size[0];
+                    float y1 = originJ.y() + inflate + size[1];
+                    float z1 = originJ.z() + inflate + size[2];
+                    
+                    if (mirror) {
+                        float swap = x1;
+                        x1 = x0;
+                        x0 = swap;
+                    }
+                    
+                    ModelRenderer.PositionTextureVertex x0y0z0 = new ModelRenderer.PositionTextureVertex(x0, y0, z0, 0.0F, 0.0F);
+                    ModelRenderer.PositionTextureVertex x1y0z0 = new ModelRenderer.PositionTextureVertex(x1, y0, z0, 0.0F, 8.0F);
+                    ModelRenderer.PositionTextureVertex x1y1z0 = new ModelRenderer.PositionTextureVertex(x1, y1, z0, 8.0F, 8.0F);
+                    ModelRenderer.PositionTextureVertex x0y1z0 = new ModelRenderer.PositionTextureVertex(x0, y1, z0, 8.0F, 0.0F);
+                    ModelRenderer.PositionTextureVertex x0y0z1 = new ModelRenderer.PositionTextureVertex(x0, y0, z1, 0.0F, 0.0F);
+                    ModelRenderer.PositionTextureVertex x1y0z1 = new ModelRenderer.PositionTextureVertex(x1, y0, z1, 0.0F, 8.0F);
+                    ModelRenderer.PositionTextureVertex x1y1z1 = new ModelRenderer.PositionTextureVertex(x1, y1, z1, 8.0F, 8.0F);
+                    ModelRenderer.PositionTextureVertex x0y1z1 = new ModelRenderer.PositionTextureVertex(x0, y1, z1, 8.0F, 0.0F);
+
+                    ModelRenderer.TexturedQuad[] polygons = new ModelRenderer.TexturedQuad[6];
+                    int[] boxUV0 = ((BoxUV) uv).uv;
+                    int texCoordU = boxUV0[0];
+                    int texCoordV = boxUV0[1];
+                    int sizeX = (int) size[0];
+                    int sizeY = (int) size[1];
+                    int sizeZ = (int) size[2];
+                    float f4 = texCoordU;
+                    float f5 = texCoordU + sizeZ;
+                    float f6 = texCoordU + sizeZ + sizeX;
+                    float f7 = texCoordU + sizeZ + sizeX + sizeX;
+                    float f8 = texCoordU + sizeZ + sizeX + sizeZ;
+                    float f9 = texCoordU + sizeZ + sizeX + sizeZ + sizeX;
+                    float f10 = texCoordV;
+                    float f11 = texCoordV + sizeZ;
+                    float f12 = texCoordV + sizeZ + sizeY;
+                    
+                    polygons[2] = new ModelRenderer.TexturedQuad(new ModelRenderer.PositionTextureVertex[]{
+                            x1y0z1, 
+                            x0y0z1, 
+                            x0y0z0, 
+                            x1y0z0}, f5, f10, f6, f11, texWidth, texHeight, mirror, Direction.DOWN);
+                    polygons[3] = new ModelRenderer.TexturedQuad(new ModelRenderer.PositionTextureVertex[]{
+                            x1y1z0, 
+                            x0y1z0, 
+                            x0y1z1, 
+                            x1y1z1}, f6, f11, f7, f10, texWidth, texHeight, mirror, Direction.UP);
+                    polygons[1] = new ModelRenderer.TexturedQuad(new ModelRenderer.PositionTextureVertex[]{
+                            x0y0z0, 
+                            x0y0z1, 
+                            x0y1z1, 
+                            x0y1z0}, f4, f11, f5, f12, texWidth, texHeight, mirror, Direction.WEST);
+                    polygons[4] = new ModelRenderer.TexturedQuad(new ModelRenderer.PositionTextureVertex[]{
+                            x1y0z0, 
+                            x0y0z0, 
+                            x0y1z0, 
+                            x1y1z0}, f5, f11, f6, f12, texWidth, texHeight, mirror, Direction.NORTH);
+                    polygons[0] = new ModelRenderer.TexturedQuad(new ModelRenderer.PositionTextureVertex[]{
+                            x1y0z1, 
+                            x1y0z0, 
+                            x1y1z0, 
+                            x1y1z1}, f6, f11, f8, f12, texWidth, texHeight, mirror, Direction.EAST);
+                    polygons[5] = new ModelRenderer.TexturedQuad(new ModelRenderer.PositionTextureVertex[]{
+                            x0y0z1, 
+                            x1y0z1, 
+                            x1y1z1, 
+                            x0y1z1}, f8, f11, f9, f12, texWidth, texHeight, mirror, Direction.SOUTH);
+                    ClientReflection.setPolygons(box, polygons);
+                }
+                
+                else if (uv instanceof PerFaceUV) {
                     ModelRenderer.TexturedQuad[] polygons = new ModelRenderer.TexturedQuad[6];
                     float x0 = originJ.x() - inflate;
                     float y0 = originJ.y() - inflate;
