@@ -15,12 +15,12 @@ import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.mc.MCUtil;
-import com.github.standobyte.jojo.util.mod.LegacyUtil;
 
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.dispenser.IBlockSource;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
@@ -29,6 +29,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.NonNullList;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -72,7 +73,11 @@ public class StandDiscItem extends Item {
                 
                 if (!player.abilities.instabuild) {
                     Optional<StandInstance> previousDiscStand = power.putOutStand();
-                    previousDiscStand.ifPresent(prevStand -> player.drop(withStand(new ItemStack(this), prevStand), false));
+                    previousDiscStand.ifPresent(prevStand -> {
+                        ItemEntity discItemEntity = player.drop(withStand(new ItemStack(this), prevStand), false);
+                        discItemEntity.setPickUpDelay(5);
+                        discItemEntity.setOwner(player.getUUID());
+                    });
                 }
                 else {
                     power.clear();
@@ -138,15 +143,18 @@ public class StandDiscItem extends Item {
         tooltip.add(new TranslationTextComponent("item.jojo.creative_only_tooltip").withStyle(TextFormatting.DARK_GRAY));
     }
     
-    @Nullable
+    @Deprecated
     public static StandInstance getStandFromStack(ItemStack stack, boolean clientSide) {
-        return LegacyUtil.oldStandDiscInstance(stack, clientSide).orElseGet(() -> {
-            CompoundNBT nbt = stack.getTag();
-            if (nbt == null || !nbt.contains(STAND_TAG, MCUtil.getNbtId(CompoundNBT.class))) {
-                return null;
-            }
-            return StandInstance.fromNBT((CompoundNBT) nbt.get(STAND_TAG));
-        });
+        return getStandFromStack(stack);
+    }
+    
+    @Nullable
+    public static StandInstance getStandFromStack(ItemStack stack) {
+        CompoundNBT nbt = stack.getTag();
+        if (nbt == null || !nbt.contains(STAND_TAG, MCUtil.getNbtId(CompoundNBT.class))) {
+            return null;
+        }
+        return StandInstance.fromNBT((CompoundNBT) nbt.get(STAND_TAG));
     }
     
     public static boolean validStandDisc(ItemStack stack, boolean clientSide) {
@@ -161,6 +169,20 @@ public class StandDiscItem extends Item {
             return StandSkinsManager.getUiColor(getStandFromStack(itemStack, true));
         }
     }
+    
+    @Override
+    public String getCreatorModId(ItemStack itemStack) {
+        ResourceLocation id;
+        StandInstance stand = getStandFromStack(itemStack);
+        if (stand != null) {
+            id = stand.getType().getRegistryName();
+        }
+        else {
+            id = this.getRegistryName();
+        }
+        return id.getNamespace();
+    }
+    
     
     
     public static boolean giveStandFromDisc(IStandPower standCap, StandInstance stand, ItemStack discItem) {

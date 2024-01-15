@@ -1455,7 +1455,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         return reachDistance;
     }
 
-    public Predicate<Entity> canTargetEntity() {
+    public Predicate<Entity> canTarget() {
         return entity -> !entity.is(this) && !entity.is(getUser()) && entity.isAlive()
                 && !(entity instanceof ProjectileEntity && this.is(((ProjectileEntity) entity).getOwner()));
     }
@@ -1466,36 +1466,36 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     
     public RayTraceResult precisionRayTrace(Entity aimingEntity, double reachDistance, double rayTraceInflate) {
         RayTraceResult[] targets = JojoModUtil.rayTraceMultipleEntities(aimingEntity, 
-                reachDistance, canTargetEntity(), rayTraceInflate, getPrecision());
+                reachDistance, canTarget(), rayTraceInflate, getPrecision());
         if (targets.length == 1) {
             return targets[0];
         }
 
         /* get the closest targets in each category, with categories given different priorities
          *   0 - players
-         *   1 - living entities
+         *   1 - hostile mobs
          *   2 - other entities
          *   3 - blocks
          */
         RayTraceResult[] closestWithPriority = new RayTraceResult[4];
+        int priority = 3;
         for (RayTraceResult target : targets) {
             if (target instanceof EntityRayTraceResult) {
                 Entity targetEntity = ((EntityRayTraceResult) target).getEntity();
                 if (targetEntity instanceof LivingEntity) {
-                    if (targetEntity instanceof PlayerEntity) {
-                        setIfNull(closestWithPriority, 0, target);
+                    if (targetEntity instanceof PlayerEntity || targetEntity instanceof StandEntity) {
+                        priority = 0;
                     }
-                    else {
-                        setIfNull(closestWithPriority, 1, target);
+                    else if (StandUtil.attackingTargetGivesResolve(targetEntity)) {
+                        priority = 1;
                     }
                 }
                 else {
-                    setIfNull(closestWithPriority, 2, target);
+                    priority = 2;
                 }
             }
-            else {
-                setIfNull(closestWithPriority, 3, target);
-            }
+            
+            setIfNull(closestWithPriority, priority, target);
         }
         for (RayTraceResult target : closestWithPriority) {
             if (target != null) return target;

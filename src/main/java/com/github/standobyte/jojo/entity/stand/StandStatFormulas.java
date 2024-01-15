@@ -75,6 +75,7 @@ public class StandStatFormulas {
         return Math.max((int) (speed * 8.0 - 20.0), 0);
     }
     
+    @Deprecated
     public static int getBarrageRecovery(double speed) {
         return MathHelper.floor((40.0 - speed * 1.25) * 0.25);
     }
@@ -99,7 +100,6 @@ public class StandStatFormulas {
         }
         
         double config = JojoModConfig.getCommonConfigInstance(false).standResistanceMultiplier.get();
-        config = 3;
         if (config > 1) {
             dmgCoeff /= config;
         }

@@ -33,6 +33,8 @@ public class WalkmanTrackSound extends ResolvedLocationTickingSound {
             // , but...
             pitch = 0.8F + (MathHelper.sin((float) ticks * 0.05F) + 1) * 0.05F;
         }
+        
+//         /*Nightcore remixes be like:*/ pitch = 1.35F;
     }
     
     public void setVolume(float volume) {

@@ -333,7 +333,7 @@ public class ClientSetup {
         itemColors.register((stack, layer) -> {
             if (layer != 1) return -1;
 
-            Optional<DyeColor> dye = CassetteRecordedItem.getCassetteData(stack).map(cap -> cap.getDye()).orElse(Optional.empty());
+            Optional<DyeColor> dye = CassetteRecordedItem.getCassetteData(stack).map(cap -> cap.getDye());
             return dye.isPresent() ? dye.get().getColorValue() : 0xeff0e0;
         }, ModItems.CASSETTE_RECORDED.get());
     }

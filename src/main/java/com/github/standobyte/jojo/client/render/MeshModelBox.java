@@ -10,6 +10,7 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.model.ModelRenderer.PositionTextureVertex;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Direction.Axis;
+import net.minecraft.util.math.vector.Vector3f;
 
 public class MeshModelBox extends ModelRenderer.ModelBox {
     
@@ -26,6 +27,11 @@ public class MeshModelBox extends ModelRenderer.ModelBox {
         
         ModelRenderer.TexturedQuad[] quads = builder.quads.toArray(new ModelRenderer.TexturedQuad[0]);
         ClientReflection.setPolygons(this, quads);
+    }
+    
+    // a convenience method for chainable calls
+    public void addCube(ModelRenderer modelRenderer) {
+        ClientReflection.addCube(modelRenderer, this);
     }
     
     
@@ -56,23 +62,38 @@ public class MeshModelBox extends ModelRenderer.ModelBox {
         private float maxZ;
         private final List<ModelRenderer.TexturedQuad> quads = new ArrayList<>();
         
-        public Builder(boolean livingEntityRenderHacks, Model model) {
+        public Builder(boolean livingEntityRenderHacks, float texWidth, float texHeight) {
             this.livingEntityRenderHacks = livingEntityRenderHacks;
-            faceBuilder = new MeshFaceBuilder(this, model.texWidth, model.texHeight);
+            faceBuilder = new MeshFaceBuilder(this, texWidth, texHeight);
+        }
+        
+        public Builder(boolean livingEntityRenderHacks, Model model) {
+            this(livingEntityRenderHacks, model.texWidth, model.texHeight);
         }
         
         public MeshFaceBuilder startFace(Direction lightingDir) {
             if (livingEntityRenderHacks) {
                 lightingDir = lightingDir.getAxis() == Axis.Z ? lightingDir : lightingDir.getOpposite();
             }
-            faceBuilder.direction = lightingDir;
-            return faceBuilder;
+            return faceBuilder.withState(lightingDir, null, false, false);
+        }
+        
+        public MeshFaceBuilder startFace(Vector3f faceNormal) {
+            return faceBuilder.withState(null, faceNormal, false, false);
+        }
+        
+        public MeshFaceBuilder startFaceCalcNormal() {
+            return faceBuilder.withState(null, null, true, false);
+        }
+        
+        public MeshFaceBuilder startFaceCalcNormal(boolean invertVec) {
+            return faceBuilder.withState(null, null, true, invertVec);
         }
         
         
-        public void addCube(ModelRenderer modelRenderer) {
+        public MeshModelBox buildCube() {
             MeshModelBox cube = new MeshModelBox(this);
-            ClientReflection.addCube(modelRenderer, cube);
+            return cube;
         }
         
         
@@ -82,6 +103,9 @@ public class MeshModelBox extends ModelRenderer.ModelBox {
             private final float texHeight;
             
             private Direction direction;
+            private Vector3f faceNormal;
+            private boolean calcNormalFromVertices;
+            private boolean invertCalcNormal;
             
             private List<ModelRenderer.PositionTextureVertex> vertices = new ArrayList<>();
             
@@ -112,15 +136,30 @@ public class MeshModelBox extends ModelRenderer.ModelBox {
                 return this;
             }
             
+            private MeshFaceBuilder withState(Direction direction, Vector3f faceNormal, 
+                    boolean calcNormalFromVertices, boolean invertCalcNormal) {
+                this.direction = direction;
+                this.faceNormal = faceNormal;
+                this.calcNormalFromVertices = calcNormalFromVertices;
+                this.invertCalcNormal = invertCalcNormal;
+                return this;
+            }
+            
             public MeshModelBox.Builder createFace() {
-                if (this.vertices.size() > 2) {
+                if (vertices.size() > 2) {
+                    if (vertices.size() > 3) {
+                        ModelRenderer.PositionTextureVertex swap = vertices.get(3);
+                        vertices.set(3, vertices.get(2));
+                        vertices.set(2, swap);
+                    }
                     ModelRenderer.PositionTextureVertex[] verticesDummy = new ModelRenderer.PositionTextureVertex[] {
                             new ModelRenderer.PositionTextureVertex(0, 0, 0, 0, 0),
                             new ModelRenderer.PositionTextureVertex(0, 0, 0, 0, 0),
                             new ModelRenderer.PositionTextureVertex(0, 0, 0, 0, 0),
                             new ModelRenderer.PositionTextureVertex(0, 0, 0, 0, 0)
                     };
-                    ModelRenderer.TexturedQuad quad = new ModelRenderer.TexturedQuad(verticesDummy, 0, 0, 0, 0, 1, 1, false, direction);
+                    ModelRenderer.TexturedQuad quad = new ModelRenderer.TexturedQuad(verticesDummy, 
+                            0, 0, 0, 0, 1, 1, false, direction != null ? direction : Direction.UP);
                     
                     ModelRenderer.PositionTextureVertex[] verticesArr = vertices.toArray(new ModelRenderer.PositionTextureVertex[4]);
                     if (this.vertices.size() < verticesArr.length) {
@@ -130,6 +169,23 @@ public class MeshModelBox extends ModelRenderer.ModelBox {
                         }
                     }
                     ClientReflection.setVertices(quad, verticesArr);
+                    
+                    if (calcNormalFromVertices) {
+                        Vector3f pos0 = vertices.get(0).pos.copy();
+                        Vector3f vec1 = vertices.get(1).pos.copy();
+                        Vector3f vec2 = vertices.get(2).pos.copy();
+                        vec1.sub(pos0);
+                        vec2.sub(pos0);
+                        vec1.cross(vec2);
+                        vec1.normalize();
+                        if (invertCalcNormal) {
+                            vec1.mul(-1);
+                        }
+                        ClientReflection.setNormal(quad, vec1);
+                    }
+                    else if (faceNormal != null) {
+                        ClientReflection.setNormal(quad, faceNormal);
+                    }
                     
                     boxBuilder.quads.add(quad);
                 }
