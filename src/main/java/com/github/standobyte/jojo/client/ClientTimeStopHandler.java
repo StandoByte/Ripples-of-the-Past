@@ -7,14 +7,13 @@ import java.util.Set;
 
 import org.apache.commons.lang3.tuple.Pair;
 
-import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
+import com.github.standobyte.jojo.capability.world.TimeStopHandler;
 import com.github.standobyte.jojo.client.ClientTicking.ITicking;
 import com.github.standobyte.jojo.client.render.world.ParticleManagerWrapperTS;
 import com.github.standobyte.jojo.client.render.world.TimeStopWeatherHandler;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
-import com.github.standobyte.jojo.util.mod.TimeUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
@@ -65,7 +64,7 @@ public class ClientTimeStopHandler implements ITicking {
     }
 
     private boolean isTimeStopped(ChunkPos chunkPos) {
-        return mc.level != null && TimeUtil.isTimeStopped(mc.level, chunkPos);
+        return mc.level != null && TimeStopHandler.isTimeStopped(mc.level, chunkPos);
     }
 
     public void setTimeStopClientState(boolean canSee, boolean canMove) {
@@ -99,7 +98,7 @@ public class ClientTimeStopHandler implements ITicking {
     
     public void updateTimeStopTicksLeft() {
         if (mc.level != null && mc.player != null) {
-            int ticks = TimeUtil.getTimeStopTicksLeft(mc.level, new ChunkPos(mc.player.blockPosition()));
+            int ticks = TimeStopHandler.getTimeStopTicksLeft(mc.level, new ChunkPos(mc.player.blockPosition()));
             this.timeStopLength = timeStopTicks + ticks;
         }
         else {
@@ -107,8 +106,6 @@ public class ClientTimeStopHandler implements ITicking {
         }
     }
     
-    private final Map<ClientWorld, Pair<IWeatherRenderHandler, IWeatherParticleRenderHandler>> prevWeatherRender = new HashMap<>();
-    private final TimeStopWeatherHandler timeStopWeatherHandler = new TimeStopWeatherHandler();
     private Set<ITickable> prevTickableTextures = new HashSet<>();
     private void setTimeStoppedState(boolean isTimeStopped) {
         if (this.isTimeStopped != isTimeStopped) {
@@ -118,30 +115,15 @@ public class ClientTimeStopHandler implements ITicking {
                 timeStopLength = 0;
             }
             
-            if (JojoModConfig.CLIENT.timeStopFreezesVisuals.get()) {
+            if (ClientModSettings.getSettingsReadOnly().timeStopFreezesVisuals) {
                 if (isTimeStopped) {
-                    if (mc.level != null) {
-                        DimensionRenderInfo effects = mc.level.effects();
-                        prevWeatherRender.put(mc.level, Pair.of(effects.getWeatherRenderHandler(), effects.getWeatherParticleRenderHandler()));
-                        effects.setWeatherRenderHandler(timeStopWeatherHandler);
-                        effects.setWeatherParticleRenderHandler(timeStopWeatherHandler);
-    
-                        TextureManager textureManager = mc.getTextureManager();
-                        prevTickableTextures = ClientReflection.getTickableTextures(textureManager);
-                        ClientReflection.setTickableTextures(textureManager, new HashSet<>());
-                        
-                        ParticleManagerWrapperTS.onTimeStopStart(mc);
-                    }
+                    TextureManager textureManager = mc.getTextureManager();
+                    prevTickableTextures = ClientReflection.getTickableTextures(textureManager);
+                    ClientReflection.setTickableTextures(textureManager, new HashSet<>());
+                    
+                    ParticleManagerWrapperTS.onTimeStopStart(mc);
                 }
                 else {
-                    if (mc.level != null && prevWeatherRender.containsKey(mc.level)) {
-                        timeStopWeatherHandler.onTimeStopEnd();
-                        Pair<IWeatherRenderHandler, IWeatherParticleRenderHandler> prevEffects = prevWeatherRender.get(mc.level);
-                        DimensionRenderInfo effects = mc.level.effects();
-                        effects.setWeatherRenderHandler(prevEffects.getLeft());
-                        effects.setWeatherParticleRenderHandler(prevEffects.getRight());
-                    }
-    
                     TextureManager textureManager = mc.getTextureManager();
                     Set<ITickable> allTickableTextures = Util.make(new HashSet<>(), set -> {
                         set.addAll(prevTickableTextures);
@@ -152,8 +134,33 @@ public class ClientTimeStopHandler implements ITicking {
     
                     ParticleManagerWrapperTS.onTimeStopEnd(mc);
                 }
+                
+                setWeatherStopped(isTimeStopped);
             }
             timeStopTicks = 0;
+        }
+    }
+    
+    
+    private boolean wasWeatherStopped = false;
+    private final Map<ClientWorld, Pair<IWeatherRenderHandler, IWeatherParticleRenderHandler>> prevWeatherRender = new HashMap<>();
+    private final TimeStopWeatherHandler timeStopWeatherHandler = new TimeStopWeatherHandler();
+    public void setWeatherStopped(boolean isStopped) {
+        if (wasWeatherStopped ^ isStopped && mc.level != null) {
+            wasWeatherStopped = isStopped;
+            if (isStopped) {
+                DimensionRenderInfo effects = mc.level.effects();
+                prevWeatherRender.put(mc.level, Pair.of(effects.getWeatherRenderHandler(), effects.getWeatherParticleRenderHandler()));
+                effects.setWeatherRenderHandler(timeStopWeatherHandler);
+                effects.setWeatherParticleRenderHandler(timeStopWeatherHandler);
+            }
+            else if (prevWeatherRender.containsKey(mc.level)) {
+                timeStopWeatherHandler.unfreeze();
+                Pair<IWeatherRenderHandler, IWeatherParticleRenderHandler> prevEffects = prevWeatherRender.get(mc.level);
+                DimensionRenderInfo effects = mc.level.effects();
+                effects.setWeatherRenderHandler(prevEffects.getLeft());
+                effects.setWeatherParticleRenderHandler(prevEffects.getRight());
+            }
         }
     }
     
@@ -192,7 +199,7 @@ public class ClientTimeStopHandler implements ITicking {
     }
     
     public boolean shouldCancelSound(ISound sound) {
-        return !canSeeInStoppedTime && sound != null && sound.getAttenuation() == AttenuationType.LINEAR;
+        return isTimeStopped && !canSeeInStoppedTime && sound != null && sound.getAttenuation() == AttenuationType.LINEAR;
     }
     
     

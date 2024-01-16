@@ -1,7 +1,5 @@
 package com.github.standobyte.jojo.capability.entity;
 
-import com.github.standobyte.jojo.util.mod.JojoModVersion;
-
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.util.Direction;
@@ -12,22 +10,11 @@ public class PlayerUtilCapStorage implements IStorage<PlayerUtilCap> {
 
     @Override
     public INBT writeNBT(Capability<PlayerUtilCap> capability, PlayerUtilCap instance, Direction side) {
-        CompoundNBT cnbt = new CompoundNBT();
-        
-        cnbt.put("NotificationsSent", instance.notificationsToNBT());
-        
-        cnbt.put("RotpVersion", JojoModVersion.getCurrentVersion().toNBT());
-        
-        return cnbt;
+        return instance.toNBT();
     }
 
     @Override
     public void readNBT(Capability<PlayerUtilCap> capability, PlayerUtilCap instance, Direction side, INBT nbt) {
-        CompoundNBT cnbt = (CompoundNBT) nbt;
-        
-        if (cnbt.contains("NotificationsSent", 10)) {
-            CompoundNBT notificationsMap = cnbt.getCompound("NotificationsSent");
-            instance.notificationsFromNBT(notificationsMap);
-        }
+        instance.fromNBT((CompoundNBT) nbt);
     }
 }

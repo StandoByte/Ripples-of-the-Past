@@ -5,6 +5,7 @@ import java.util.Queue;
 import java.util.UUID;
 
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -83,7 +84,7 @@ public class AfterimageEntity extends Entity implements IEntityAdditionalSpawnDa
             level.getEntitiesOfClass(MobEntity.class, this.getBoundingBox().inflate(8), mob -> 
             mob.getTarget() == originEntity && mob.canSee(this)).forEach(mob -> {
                 if (mob.getRandom().nextDouble() < 0.01) {
-                    mob.setTarget(null);
+                    MCUtil.loseTarget(mob, originEntity);
                 }
             });
         }

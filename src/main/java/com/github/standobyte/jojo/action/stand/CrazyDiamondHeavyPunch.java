@@ -51,7 +51,6 @@ public class CrazyDiamondHeavyPunch extends StandEntityHeavyAttack {
     @Override
     public StandEntityPunch punchEntity(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
         return super.punchEntity(stand, target, dmgSource)
-                .armorPiercing((float) stand.getAttackDamage() * 0.01F)
-                .addKnockback(0);
+                .armorPiercing((float) stand.getAttackDamage() * 0.01F);
     }
 }

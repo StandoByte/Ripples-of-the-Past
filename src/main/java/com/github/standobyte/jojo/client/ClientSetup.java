@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.function.UnaryOperator;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.capability.item.cassette.CassetteCap;
 import com.github.standobyte.jojo.client.particle.AirStreamParticle;
 import com.github.standobyte.jojo.client.particle.BloodParticle;
 import com.github.standobyte.jojo.client.particle.CDRestorationParticle;
@@ -74,6 +73,7 @@ import com.github.standobyte.jojo.client.render.entity.renderer.itemprojectile.S
 import com.github.standobyte.jojo.client.render.entity.renderer.mob.HamonMasterRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.mob.HungryZombieRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.mob.RockPaperScissorsKidRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.mob.StandUserDummyRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.CrazyDiamondRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.HierophantGreenRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.MagiciansRedRenderer;
@@ -81,6 +81,7 @@ import com.github.standobyte.jojo.client.render.entity.renderer.stand.SilverChar
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.StarPlatinumRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.TheWorldRenderer;
 import com.github.standobyte.jojo.client.render.item.RoadRollerBakedModel;
+import com.github.standobyte.jojo.client.render.item.standdisc.StandDiscISTERModel;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.loopplayer.LoopPlayerHandler;
@@ -101,6 +102,7 @@ import com.github.standobyte.jojo.item.CassetteRecordedItem;
 import com.github.standobyte.jojo.item.StandArrowItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
+import com.github.standobyte.jojo.item.cassette.CassetteCap;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 
 import net.minecraft.client.Minecraft;
@@ -198,6 +200,7 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HUNGRY_ZOMBIE.get(), HungryZombieRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HAMON_MASTER.get(), HamonMasterRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.ROCK_PAPER_SCISSORS_KID.get(), RockPaperScissorsKidRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.STAND_USER_DUMMY.get(), StandUserDummyRenderer::new);
         
         RenderingRegistry.registerEntityRenderingHandler(ModStands.STAR_PLATINUM.getEntityType(), StarPlatinumRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModStands.THE_WORLD.getEntityType(), TheWorldRenderer::new);
@@ -239,7 +242,7 @@ public class ClientSetup {
                 return StandDiscItem.validStandDisc(itemStack, true) ? JojoCustomRegistries.STANDS.getNumericId(StandDiscItem.getStandFromStack(itemStack, true).getType().getRegistryName()) : -1;
             });
             ItemModelsProperties.register(ModItems.CASSETTE_RECORDED.get(), new ResourceLocation(JojoMod.MOD_ID, "cassette_distortion"), (itemStack, clientWorld, livingEntity) -> {
-                return CassetteRecordedItem.getCapability(itemStack)
+                return CassetteRecordedItem.getCassetteData(itemStack)
                         .map(cap -> MathHelper.clamp(cap.getGeneration(), 0, CassetteCap.MAX_GENERATION))
                         .orElse(0).floatValue();
             });
@@ -317,15 +320,20 @@ public class ClientSetup {
         ItemColors itemColors = event.getItemColors();
         
         itemColors.register((stack, layer) -> {
-            if (layer != 1) return -1;
-            
-            return ClientUtil.discColor(StandDiscItem.getColor(stack));
+            switch (layer) {
+            case 1:
+                return ClientUtil.discColor(StandDiscItem.getColor(stack));
+            case 2:
+                return StandDiscItem.getColor(stack);
+            default:
+                return -1;
+            }
         }, ModItems.STAND_DISC.get());
         
         itemColors.register((stack, layer) -> {
             if (layer != 1) return -1;
 
-            Optional<DyeColor> dye = CassetteRecordedItem.getCapability(stack).map(cap -> cap.getDye()).orElse(Optional.empty());
+            Optional<DyeColor> dye = CassetteRecordedItem.getCassetteData(stack).map(cap -> cap.getDye());
             return dye.isPresent() ? dye.get().getColorValue() : 0xeff0e0;
         }, ModItems.CASSETTE_RECORDED.get());
     }
@@ -334,6 +342,8 @@ public class ClientSetup {
     public static void onModelBake(ModelBakeEvent event) {
         registerCustomBakedModel(ModItems.ROAD_ROLLER.get().getRegistryName(), event.getModelRegistry(), 
                 model -> new RoadRollerBakedModel(model));
+        registerCustomBakedModel(ModItems.STAND_DISC.get().getRegistryName(), event.getModelRegistry(), 
+                model -> new StandDiscISTERModel(model));
     }
     
     private static void registerCustomBakedModel(ResourceLocation resLoc, 
@@ -341,10 +351,10 @@ public class ClientSetup {
         ModelResourceLocation modelResLoc = new ModelResourceLocation(resLoc, "inventory");
         IBakedModel existingModel = modelRegistry.get(modelResLoc);
         if (existingModel == null) {
-            throw new RuntimeException("Did not find original model in registry");
+            JojoMod.getLogger().error("Did not find original {} model in registry", modelResLoc);
         }
         else if (existingModel.isCustomRenderer()) {
-            throw new RuntimeException("Tried to replace model twice");
+            JojoMod.getLogger().error("Tried to replace {} model twice", modelResLoc);
         }
         else {
             modelRegistry.put(modelResLoc, newModel.apply(existingModel));
@@ -390,6 +400,7 @@ public class ClientSetup {
         CustomParticlesHelper.saveSprites(mc);
         // yep...
         CustomResources.initCustomResourceManagers(mc);
+        StandControlMouseHelper.overrideVanillaMouseHelper(mc);
     }
 
     private static class SoulCloudParticleFactory extends CloudParticle.Factory {

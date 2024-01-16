@@ -1,7 +1,10 @@
 package com.github.standobyte.jojo.client;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
+import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
@@ -36,6 +39,7 @@ import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
+import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
@@ -45,6 +49,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.util.ColorHelper;
+import net.minecraft.util.Direction;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
@@ -119,6 +124,11 @@ public class ClientUtil {
     
     public static String getCurrentLanguageCode() {
         return Minecraft.getInstance().getLanguageManager().getSelected().getCode();
+    }
+    
+    public static boolean isInSinglePlayer() {
+        Minecraft mc = Minecraft.getInstance();
+        return mc.hasSingleplayerServer() && !mc.getSingleplayerServer().isPublished();
     }
     
     public static boolean useActionShiftVar(PlayerEntity player) {
@@ -356,6 +366,14 @@ public class ClientUtil {
         return new int[] {red, green, blue};
     }
     
+    public static int fromRgb(float r, float g, float b) {
+        return ((int) (r * 255) << 16) + ((int) (g * 255) << 8) + (int) (b * 255);
+    }
+    
+    public static int fromRgbInt(int r, int g, int b) {
+        return (r << 16) + (g << 8) + b;
+    }
+    
     public static int discColor(int color) {
         return (((0xFFFFFF - color) & 0xFEFEFE) >> 1) + color;
     }
@@ -445,6 +463,43 @@ public class ClientUtil {
     
     public static void clearCubes(ModelRenderer modelRenderer) {
         ClientReflection.setCubes(modelRenderer, new ObjectArrayList<>());
+    }
+    
+    public static void editLatestCube(ModelRenderer modelRenderer, Consumer<ModelRenderer.ModelBox> edit) {
+        List<ModelRenderer.ModelBox> cubes = ClientReflection.getCubes(modelRenderer);
+        if (cubes.isEmpty()) return;
+        ModelRenderer.ModelBox box = cubes.get(cubes.size() - 1);
+        edit.accept(box);
+    }
+    
+    public static void setFaceUv(ModelRenderer.ModelBox cube, Direction faceDir, float u0, float v0, float u1, float v1, Model model) {
+        if (faceDir.getAxis() == Direction.Axis.Y) {
+            faceDir = faceDir.getOpposite();
+        }
+        Vector3f faceNormal = faceDir.step();
+        Optional<ModelRenderer.TexturedQuad> faceOptional = Arrays.stream(ClientReflection.getPolygons(cube))
+                .filter(quad -> quad.normal.equals(faceNormal)).findFirst();
+        if (faceOptional.isPresent()) {
+            u0 /= model.texWidth;
+            v0 /= model.texHeight;
+            u1 /= model.texWidth;
+            v1 /= model.texHeight;
+            ModelRenderer.TexturedQuad face = faceOptional.get();
+            if (face.vertices[0].u < face.vertices[1].u) {
+                float swap = u0;
+                u0 = u1;
+                u1 = swap;
+            }
+            if (face.vertices[0].v > face.vertices[2].v) {
+                float swap = v0;
+                v0 = v1;
+                v1 = swap;
+            }
+            face.vertices[0] = face.vertices[0].remap(u1, v0);
+            face.vertices[1] = face.vertices[1].remap(u0, v0);
+            face.vertices[2] = face.vertices[2].remap(u0, v1);
+            face.vertices[3] = face.vertices[3].remap(u1, v1);
+        }
     }
     
     public static ModelRenderer getArm(BipedModel<?> model, HandSide side) {

@@ -187,11 +187,12 @@ public class SilverChariotEntity extends StandEntity {
 
     private boolean attackOrDeflect(Supplier<Boolean> doAttack, StandEntityPunch punch, StandEntityTask task) {
         if (canDeflectProjectiles() && hasRapier() && punch.target instanceof ProjectileEntity) {
-            return deflectProjectile(punch.target);
+            ProjectileEntity projectile = (ProjectileEntity) punch.target;
+            if (projectile.getOwner() == null || !projectile.getOwner().is(getUser())) {
+                return deflectProjectile(punch.target);
+            }
         }
-        else {
-            return super.attackEntity(doAttack, punch, task);
-        }
+        return super.attackEntity(doAttack, punch, task);
     }
     
     @Override

@@ -8,20 +8,20 @@ import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WIND
 import java.util.List;
 
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.actionshud.hotbar.HotbarRenderer;
 import com.github.standobyte.jojo.client.ui.screen.widgets.HideScreenPartToggleBox;
 import com.github.standobyte.jojo.client.ui.screen.widgets.HideScreenPartToggleBox.Direction;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemRenderer;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.IReorderingProcessor;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -177,7 +177,7 @@ public class HamonIntroTabGui extends HamonTabGui {
     
     @SuppressWarnings("deprecation")
     private void renderEnergyBar(MatrixStack matrixStack, int x, int y, float fillStab, float fillEnergy) {
-        float[] hamonRGB = ClientUtil.rgb(ModPowers.HAMON.get().getColor());
+        float[] hamonRGB = ClientUtil.rgb(HamonPowerType.COLOR);
         blit(matrixStack, x, y, 0, 128, 202, 8);
         RenderSystem.color4f(hamonRGB[0], hamonRGB[1], hamonRGB[2], 0.4F);
         blit(matrixStack, x + 1, y + 1, 1, 161, (int) (200 * fillStab), 6);
@@ -194,9 +194,9 @@ public class HamonIntroTabGui extends HamonTabGui {
         blit(matrixStack, x - 15, y - 1, 236, 128, 9, 16);
         HotbarRenderer.renderHotbar(matrixStack, minecraft, x - 3, y - 3, 1, 1);
         blit(matrixStack, x - 17, y - 17, 390, 50, 50, 50, 512, 512);
-        TextureAtlasSprite textureAtlasSprite = CustomResources.getActionSprites().getSprite(ModHamonActions.HAMON_BREATH.get().getRegistryName());
-        minecraft.getTextureManager().bind(textureAtlasSprite.atlas().location());
-        blit(matrixStack, x, y, 0, 16, 16, textureAtlasSprite);
+        ResourceLocation actionIcon = ModHamonActions.HAMON_BREATH.get().getIconTexture(null);
+        minecraft.getTextureManager().bind(actionIcon);
+        blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
         HotbarRenderer.renderSlotSelection(matrixStack, minecraft, x, y, 1, false);
     }
     
@@ -207,7 +207,7 @@ public class HamonIntroTabGui extends HamonTabGui {
 
     @Override
     void drawIcon(MatrixStack matrixStack, int windowX, int windowY, ItemRenderer itemRenderer) {
-        minecraft.getTextureManager().bind(ModPowers.HAMON.get().getIconTexture());
+        minecraft.getTextureManager().bind(ModPowers.HAMON.get().getIconTexture(null));
         int x = tabPositioning.getIconX(windowX, index, WINDOW_WIDTH);
         int y = tabPositioning.getIconY(windowY, index, WINDOW_HEIGHT);
         blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);

@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.power.impl.stand;
 
 import java.util.Optional;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModStatusEffects;
@@ -74,11 +75,14 @@ public class ResolveCounter {
     private float boostChat = 1;
     private float hpOnGettingAttacked = -1;
     
+    private final boolean clientSide;
+    
     
     protected ResolveCounter(IStandPower stand) {
         this.stand = stand;
         LivingEntity standUser = stand.getUser();
         this.serverPlayerUser = standUser instanceof ServerPlayerEntity ? Optional.of((ServerPlayerEntity) standUser) : Optional.empty();
+        this.clientSide = standUser.level.isClientSide();
     }
 
 
@@ -111,7 +115,7 @@ public class ResolveCounter {
                         noResolveDecayTicks--;
                     }
                 }
-                else {
+                else if (!clientSide) {
                     if (saveNextRecord) {
                         saveNextRecord = false;
                     }
@@ -122,6 +126,7 @@ public class ResolveCounter {
                         resolveRecords.add(resolve);
                     }
                     setMaxAchievedValue(Optional.ofNullable(resolveRecords.getMax()).orElse(0F));
+                    JojoMod.LOGGER.debug("{}", maxAchievedValue);
                 }
             }
             else {
@@ -168,9 +173,8 @@ public class ResolveCounter {
     }
     
     public void setMaxAchievedValue(float value) {
-        boolean send = this.maxAchievedValue != value;
-        this.maxAchievedValue = value;
-        if (send) {
+        if (this.maxAchievedValue != value) {
+            this.maxAchievedValue = value;
             serverPlayerUser.ifPresent(player -> {
                 PacketManager.sendToClient(new MaxAchievedResolvePacket(value), player);
             });
@@ -265,11 +269,11 @@ public class ResolveCounter {
         return boost;
     }
 
-    void setResolveLevel(int level, boolean showUnlockToast) {
+    void setResolveLevel(int level) {
         boolean send = levels.setResolveLevel(stand, level);
         if (send) {
             serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new ResolveLevelPacket(getResolveLevel(), showUnlockToast), player);
+                PacketManager.sendToClient(new ResolveLevelPacket(getResolveLevel()), player);
             });
         }
     }
@@ -337,7 +341,7 @@ public class ResolveCounter {
 
     public void onResolveEffectStarted(int amplifier) {
         int newLevel = amplifier + 1;
-        stand.setResolveLevel(Math.min(newLevel, stand.getMaxResolveLevel()), true);
+        stand.setResolveLevel(Math.min(newLevel, stand.getMaxResolveLevel()));
         if (newLevel > stand.getMaxResolveLevel()) {
             levels.incExtraLevel(stand);
         }
@@ -453,6 +457,7 @@ public class ResolveCounter {
                 this.resolveRecords.add(listNBT.getFloat(i));
             }
         }
+        maxAchievedValue = nbt.getFloat("MaxAchieved");
     }
 
     CompoundNBT writeNBT() {
@@ -472,6 +477,7 @@ public class ResolveCounter {
             recordNbt.add(FloatNBT.valueOf(record));
         }
         resolveNbt.put("ResolveRecord", recordNbt);
+        resolveNbt.putFloat("MaxAchieved", maxAchievedValue);
         
         return resolveNbt;
     }

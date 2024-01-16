@@ -2,6 +2,8 @@ package com.github.standobyte.jojo.power.impl.nonstand.type;
 
 import java.util.function.Supplier;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.IPowerType;
@@ -9,6 +11,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.TypeSpecificData;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.util.ResourceLocation;
@@ -16,7 +19,6 @@ import net.minecraft.util.Util;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
 public abstract class NonStandPowerType<T extends TypeSpecificData> extends ForgeRegistryEntry<NonStandPowerType<?>> implements IPowerType<INonStandPower, NonStandPowerType<?>> {
-    private final int color;
     protected final Action<INonStandPower>[] attacks;
     protected final Action<INonStandPower>[] abilities;
     protected final Action<INonStandPower> defaultQuickAccess;
@@ -25,18 +27,12 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
     
     private final Supplier<T> dataFactory;
 
-    public NonStandPowerType(int color, Action<INonStandPower>[] startingAttacks, Action<INonStandPower>[] startingAbilities, 
+    public NonStandPowerType(Action<INonStandPower>[] startingAttacks, Action<INonStandPower>[] startingAbilities, 
             Action<INonStandPower> defaultQuickAccess, Supplier<T> dataFactory) {
-        this.color = color;
         this.attacks = startingAttacks;
         this.abilities = startingAbilities;
         this.defaultQuickAccess = defaultQuickAccess;
         this.dataFactory = dataFactory;
-    }
-    
-    @Override
-    public int getColor() {
-        return color;
     }
     
     public void onClear(INonStandPower power) {}
@@ -44,34 +40,8 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
     public void afterClear(INonStandPower power) {}
     
     @Override
-    public String getTranslationKey() {
-        if (translationKey == null) {
-            translationKey = Util.makeDescriptionId("non_stand", JojoCustomRegistries.NON_STAND_POWERS.getRegistry().getKey(this));
-        }
-        return this.translationKey;
-    }
-    
-    @Override
-    public ResourceLocation getIconTexture() {
-        if (iconTexture == null) {
-            iconTexture = JojoModUtil.makeTextureLocation("power", getRegistryName().getNamespace(), getRegistryName().getPath());
-        }
-        return this.iconTexture;
-    }
-    
-    @Override
-    public Action<INonStandPower>[] getAttacks() {
-        return attacks;
-    }
-
-    @Override
-    public Action<INonStandPower>[] getAbilities() {
-        return abilities;
-    }
-
-    @Override
-    public Action<INonStandPower> getDefaultQuickAccess() {
-        return defaultQuickAccess;
+    public ActionsLayout<INonStandPower> createDefaultLayout() {
+        return new ActionsLayout<>(attacks, abilities, defaultQuickAccess);
     }
 
     public float getMaxEnergy(INonStandPower power) {
@@ -123,5 +93,21 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
 
     public TypeSpecificData newSpecificDataInstance() {
         return dataFactory.get();
+    }
+    
+    @Override
+    public String getTranslationKey() {
+        if (translationKey == null) {
+            translationKey = Util.makeDescriptionId("non_stand", JojoCustomRegistries.NON_STAND_POWERS.getRegistry().getKey(this));
+        }
+        return this.translationKey;
+    }
+
+    @Override
+    public ResourceLocation getIconTexture(@Nullable INonStandPower power) {
+        if (iconTexture == null) {
+            iconTexture = JojoModUtil.makeTextureLocation("power", getRegistryName().getNamespace(), getRegistryName().getPath());
+        }
+        return this.iconTexture;
     }
 }

@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.util.mod;
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -9,7 +10,6 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
-import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.InputHandler;
@@ -19,13 +19,10 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.item.ClothesSet;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlayVoiceLinePacket;
-import com.github.standobyte.jojo.power.IPower;
-import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
-import com.google.common.collect.Streams;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.AgeableEntity;
@@ -103,14 +100,13 @@ public class JojoModUtil {
         aabb.inflate(rayTraceInflate);
         double minDistanceSqr = minDistance * minDistance;
         Map<EntityRayTraceResult, Double> rayTracedWithDistance = new HashMap<>();
-        for (Entity potentialTarget : world.getEntities(entity, aabb, e -> !e.isSpectator() && e.isPickable() && (entityFilter == null || entityFilter.test(e)))) {
+        List<Entity> entities = world.getEntities(entity, aabb, e -> !e.isSpectator() && e.isPickable() && (entityFilter == null || entityFilter.test(e)));
+        for (Entity potentialTarget : entities) {
             AxisAlignedBB targetCollisionAABB = potentialTarget.getBoundingBox().inflate((double) potentialTarget.getPickRadius() + rayTraceInflate);
             targetCollisionAABB = standPrecisionTargetHitbox(targetCollisionAABB, standPrecision);
             Optional<Vector3d> clipOptional = targetCollisionAABB.clip(startPos, endPos);
             if (targetCollisionAABB.contains(startPos)) {
-                if (minDistanceSqr >= 0.0D) {
-                    rayTracedWithDistance.put(new EntityRayTraceResult(potentialTarget, clipOptional.orElse(startPos)), 0.0);
-                }
+                rayTracedWithDistance.put(new EntityRayTraceResult(potentialTarget, clipOptional.orElse(startPos)), 0.0);
             } else if (clipOptional.isPresent()) {
                 Vector3d clipVec = clipOptional.get();
                 double clipDistanceSqr = startPos.distanceToSqr(clipVec);
@@ -139,13 +135,21 @@ public class JojoModUtil {
     }
     
     private static AxisAlignedBB standPrecisionTargetHitbox(AxisAlignedBB aabb, double precision) {
-        if (precision > 0) {
-            double smallAabbAddFraction = Math.min(precision, 16) / 16;
+        if (precision > 4) {
+            double smallAabbAddFraction = Math.min(Math.pow(2, precision - 16), 1);
             aabb.inflate(
                     Math.max(1.0 - aabb.getXsize(), 0) * smallAabbAddFraction, 
-                    Math.max(2.5 - aabb.getYsize(), 0) * smallAabbAddFraction, 
+                    Math.max(1.0 - aabb.getYsize(), 0) * smallAabbAddFraction, 
                     Math.max(1.0 - aabb.getZsize(), 0) * smallAabbAddFraction);
-            aabb = aabb.inflate(precision / 20);
+            
+            double scale = precision / 5 + 0.2;
+            double xSize = aabb.getXsize();
+            double ySize = aabb.getYsize();
+            double zSize = aabb.getZsize();
+            aabb = MCUtil.scale(aabb, 
+                    Math.min(scale, 1 + 4 / xSize), 
+                    Math.min(scale, 1 + 4 / ySize), 
+                    Math.min(scale, 1 + 4 / zSize));
         }
         return aabb;
     }
@@ -225,7 +229,11 @@ public class JojoModUtil {
 
 
     public static ResourceLocation makeTextureLocation(String folderName, String namespace, String path) {
-        return new ResourceLocation(namespace, "textures/"+ folderName + "/" + path + ".png");
+        return makeTextureLocation(folderName, namespace, path, true);
+    }
+
+    public static ResourceLocation makeTextureLocation(String folderName, String namespace, String path, boolean addPngExtension) {
+        return new ResourceLocation(namespace, "textures/"+ folderName + "/" + path + (addPngExtension ? ".png" : ""));
     }
     
     
@@ -350,11 +358,17 @@ public class JojoModUtil {
     }
     
     
+    @Deprecated
+    public static boolean useShiftVar(LivingEntity user) {
+        return user.isShiftKeyDown();
+    }
     
-    public static <T extends IPower<T, ?>> boolean hasAction(T power, Predicate<Action<T>> find) {
-        return Streams.concat(
-                power.getActions(ActionType.ATTACK).getAll().stream(), 
-                power.getActions(ActionType.ABILITY).getAll().stream())
-                .anyMatch(find);
+    
+    
+    public static enum Direction2D {
+        UP,
+        RIGHT,
+        DOWN,
+        LEFT
     }
 }

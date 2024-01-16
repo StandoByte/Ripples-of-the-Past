@@ -71,6 +71,15 @@
   "walkman_rewind": {
     "sounds": [ "jojo:walkman_rewind" ]
   },
+  "map_bought_snowy": {
+    "sounds": [ "jojo:map_bought_snowy" ]
+  },
+  "map_bought_mountain": {
+    "sounds": [ "jojo:map_bought_mountain" ]
+  },
+  "map_bought_jungle": {
+    "sounds": [ "jojo:map_bought_jungle" ]
+  },
   "vampire_blood_drain": {
     "subtitle": "jojo.subtitle.blood_drain",
     "sounds": [ "jojo:vampire_blood_drain" ]

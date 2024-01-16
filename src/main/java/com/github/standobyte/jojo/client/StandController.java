@@ -8,6 +8,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Random;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.StandEntityRenderer;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -92,6 +94,14 @@ public class StandController {
         return isProbablyControllingStand;
     }
     
+    @Nullable
+    public StandEntity getManuallyControlledStand() {
+        if (isControllingStand()) {
+            return stand;
+        }
+        return null;
+    }
+    
     
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -100,7 +110,8 @@ public class StandController {
             MovementInput input = event.getMovementInput();
             stand.moveStandManually(input.leftImpulse, input.forwardImpulse, input.jumping, input.shiftKeyDown);
             // FIXME do not reset deltaMovement in manual control
-            PacketManager.sendToServer(new ClStandManualMovementPacket(stand.getX(), stand.getY(), stand.getZ(), stand.hadInput()));
+            PacketManager.sendToServer(new ClStandManualMovementPacket(
+                    stand.getX(), stand.getY(), stand.getZ(), stand.xRot, stand.yRot, stand.hadInput()));
         }
         else {
             if ((mc.getCameraEntity() == mc.player || mc.getCameraEntity() == null) && ModStatusEffects.isStunned(mc.player)) {

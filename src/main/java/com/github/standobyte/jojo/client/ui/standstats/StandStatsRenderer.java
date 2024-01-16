@@ -5,9 +5,9 @@ import java.util.List;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
-import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -26,8 +26,8 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fml.client.gui.GuiUtils;
 
 public class StandStatsRenderer {
-    private static final int HEXAGON_EXPAND_TICKS = 40;
-    private static final ResourceLocation STAND_STATS_UI = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/stand_stats.png");
+    private static final int HEXAGON_EXPAND_TICKS = 20;
+    public static final ResourceLocation STAND_STATS_UI = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/stand_stats.png");
     private static final ResourceLocation STAND_STATS_BG = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/stand_stats_bg.png");
     
     @SuppressWarnings("deprecation")
@@ -41,8 +41,8 @@ public class StandStatsRenderer {
 
                 StandStats stats = power.getType().getStats();
                 float statLeveling = power.getStatsDevelopment();
-
-                int color = power.getColor();
+                
+                int color = StandSkinsManager.getUiColor(power);
                 int[] rgb = ClientUtil.rgbInt(color);
 
                 double[] statVal = new double[6];
@@ -64,7 +64,7 @@ public class StandStatsRenderer {
                 if (statLeveling < 1) {
                     statVal[5] = 1 + (1 - statLeveling) * power.getMaxResolveLevel();
                 }
-                else if (JojoModUtil.hasAction(power, action -> action.isTrained() && power.getLearningProgressRatio(action) < 1)) {
+                else if (power.hasUnlockedMatching(action -> action.isTrained() && power.getLearningProgressRatio(action) < 1)) {
                     statVal[5] = 1;
                 }
 
@@ -107,7 +107,7 @@ public class StandStatsRenderer {
                 fillHexagon(xCenter, yCenter, 
                         statVal[0], statVal[1], statVal[2], 
                         statVal[3], statVal[4], statVal[5], 
-                        rgb[0], rgb[1], rgb[2], (int) (192 * alpha));
+                        rgb[0], rgb[1], rgb[2], 192);
                 RenderSystem.disableBlend();
                 
 
@@ -138,10 +138,10 @@ public class StandStatsRenderer {
                     standIconY -= 5;
                 }
 
-                mc.getTextureManager().bind(power.getType().getIconTexture());
+                mc.getTextureManager().bind(power.getType().getIconTexture(power));
                 AbstractGui.blit(matrixStack, x + 135 - width, standIconY, 0, 0, 16, 16, 16, 16);
                 ClientUtil.drawLines(matrixStack, mc.font, standName, 
-                        x + 153 - width, standNameY, 0, color, false, true);
+                        x + 153 - width, standNameY, 0, color, true, true);
 
                 ResourceLocation playerFace = mc.player.getSkinTextureLocation();
                 mc.getTextureManager().bind(playerFace);
@@ -156,7 +156,7 @@ public class StandStatsRenderer {
                     matrixStack.popPose();
                 }
                 ClientUtil.drawLines(matrixStack, mc.font, standUser, 
-                        x + 153 - width, standUserY, 0, color, false, true);
+                        x + 153 - width, standUserY, 0, color, true, true);
 
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
 
@@ -293,4 +293,8 @@ public class StandStatsRenderer {
         RenderSystem.enableTexture();
         RenderSystem.enableDepthTest();
     }
+    
+    
+    
+    
 }

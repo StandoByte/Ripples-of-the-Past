@@ -4,6 +4,7 @@ import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.playeranim.IPlayerBarrageAnimation;
 import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.barrage.BarrageSwingsHolder;
+import com.github.standobyte.jojo.util.general.MathUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
@@ -68,7 +69,8 @@ public class BarrageFistAfterimagesLayer extends LayerRenderer<AbstractClientPla
                 
                 IVertexBuilder vertexBuilder = buffer.getBuffer(renderType);
                 swings.renderBarrageSwings(model, entity, matrixStack, vertexBuilder, 
-                        packedLight, OverlayTexture.NO_OVERLAY, headYRotation, headXRotation, 
+                        packedLight, OverlayTexture.NO_OVERLAY, 
+                        headYRotation * MathUtil.DEG_TO_RAD, headXRotation * MathUtil.DEG_TO_RAD, 
                         1.0F, 1.0F, 1.0F, spectatorVisibility ? 0.15F : 1.0F);
                 
                 matrixStack.popPose();

@@ -1,15 +1,14 @@
 package com.github.standobyte.jojo.power.impl.stand.type;
 
-import java.util.Arrays;
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
+import java.util.stream.StreamSupport;
 
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack;
-import com.github.standobyte.jojo.action.stand.StandEntityLightAttack;
-import com.github.standobyte.jojo.action.stand.StandEntityMeleeBarrage;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
@@ -27,26 +26,81 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.text.ITextComponent;
 
 public class EntityStandType<T extends StandStats> extends StandType<T> {
     private Supplier<? extends StandEntityType<? extends StandEntity>> entityTypeSupplier = null;
-    private boolean hasHeavyAttack;
-    private boolean hasFastAttack;
-
+    private final boolean manualControlEnabled;
+    private final boolean standLeapEnabled;
+    private Optional<StandAction> finisherPunch = Optional.empty();
+    
+    @Deprecated
     public EntityStandType(int color, ITextComponent partName, 
             StandAction[] attacks, StandAction[] abilities, 
             Class<T> statsClass, T defaultStats, @Nullable StandTypeOptionals additions) {
         super(color, partName, attacks, abilities, abilities.length > 0 ? abilities[0] : null, statsClass, defaultStats, additions);
+        manualControlEnabled = true;
+        standLeapEnabled = true;
     }
+    
+    protected EntityStandType(EntityStandType.AbstractBuilder<?, T> builder) {
+        super(builder);
+        this.manualControlEnabled = builder.manualControlEnabled;
+        this.standLeapEnabled = builder.standLeapEnabled;
+    }
+    
+    
+    
+    public static abstract class AbstractBuilder<B extends AbstractBuilder<B, T>, T extends StandStats> extends StandType.AbstractBuilder<B, T> {
+        private boolean manualControlEnabled = true;
+        private boolean standLeapEnabled = true;
+        
+        public B disableManualControl() {
+            this.manualControlEnabled = false;
+            return getThis();
+        }
+        
+        public B disableStandLeap() {
+            this.standLeapEnabled = false;
+            return getThis();
+        }
+        
+        @Override
+        public B rightClickHotbar(StandAction... rightClickHotbar) {
+            if (rightClickHotbar.length > 0) {
+                defaultQuickAccess(rightClickHotbar[0]);
+            }
+            else {
+                defaultQuickAccess(null);
+            }
+            return super.rightClickHotbar(rightClickHotbar);
+        }
+    }
+    
+    public static class Builder<T extends StandStats> extends EntityStandType.AbstractBuilder<Builder<T>, T> {
+        
+        @Override
+        protected Builder<T> getThis() {
+            return this;
+        }
+        
+        @Override
+        public EntityStandType<T> build() {
+            return new EntityStandType<>(this);
+        }
+        
+    }
+    
+    
     
     @Override
     public void onCommonSetup() {
-        hasHeavyAttack = Arrays.stream(getAttacks()).anyMatch(
-                attack -> attack instanceof StandEntityHeavyAttack || attack.getShiftVariationIfPresent() instanceof StandEntityHeavyAttack);
-        hasFastAttack = Arrays.stream(getAttacks()).anyMatch(
-                attack -> attack instanceof StandEntityLightAttack || attack instanceof StandEntityMeleeBarrage);
+        super.onCommonSetup();
+        finisherPunch = StreamSupport.stream(getAllUnlockableActions().spliterator(), false)
+                .filter(attack -> attack instanceof StandEntityHeavyAttack && ((StandEntityHeavyAttack) attack).isFinisher())
+                .findFirst();
     }
     
     public void setEntityType(Supplier<? extends StandEntityType<? extends StandEntity>> entityTypeSupplier) {
@@ -108,8 +162,8 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
     }
     
     @Override
-    public boolean usesStandFinisherMechanic() {
-        return hasHeavyAttack && hasFastAttack;
+    public Optional<StandAction> getStandFinisherPunch() {
+        return finisherPunch;
     }
     
     @Override
@@ -206,7 +260,12 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
     
     @Override
     public boolean canBeManuallyControlled() {
-        return true;
+        return manualControlEnabled;
+    }
+    
+    @Override
+    public boolean canLeap() {
+        return standLeapEnabled;
     }
 
     @Override
@@ -222,13 +281,20 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
         if (!user.level.isClientSide()) {
             power.getStandInstance().ifPresent(standInstance -> {
                 if (!standInstance.hasPart(StandPart.ARMS)) {
-                    user.addEffect(new EffectInstance(Effects.WEAKNESS, 300, 1));
-                    user.addEffect(new EffectInstance(Effects.DIG_SLOWDOWN, 300, 1));
+                    user.addEffect(new EffectInstance(Effects.WEAKNESS, 319, 1));
+                    user.addEffect(new EffectInstance(Effects.DIG_SLOWDOWN, 319, 1));
                 }
                 if (!standInstance.hasPart(StandPart.LEGS)) {
-                    user.addEffect(new EffectInstance(Effects.MOVEMENT_SLOWDOWN, 300, 1));
+                    user.addEffect(new EffectInstance(Effects.MOVEMENT_SLOWDOWN, 319, 1));
                 }
             });
+        }
+    }
+    
+    @Override
+    public void onStandSkinSet(IStandPower power, Optional<ResourceLocation> skin) {
+        if (power.getStandManifestation() instanceof StandEntity) {
+            ((StandEntity) power.getStandManifestation()).setStandSkin(skin);
         }
     }
     

@@ -7,7 +7,7 @@ import java.util.List;
 import com.github.standobyte.jojo.client.ClientTicking;
 import com.github.standobyte.jojo.client.ClientTicking.ITicking;
 
-@Deprecated
+@Deprecated // forgot why i made this, though there's no reason to throw it away i guess
 public class LoopPlayerHandler implements ITicking {
     private static LoopPlayerHandler instance;
     private final List<SoundLoopPlayer> loopPlayers = new ArrayList<>();

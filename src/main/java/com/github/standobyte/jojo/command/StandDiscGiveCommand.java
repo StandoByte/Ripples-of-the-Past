@@ -43,8 +43,14 @@ public class StandDiscGiveCommand {
     }
     
     private static int giveStandDiscItem(CommandSource source, Function<ServerPlayerEntity, StandType<?>> standType, Collection<ServerPlayerEntity> targets) throws CommandSyntaxException {
+        int i = 0;
         for (ServerPlayerEntity player : targets) {
-            ItemStack discItem = createItemStack(standType.apply(player));
+            StandType<?> stand = standType.apply(player);
+            if (stand == null) {
+                continue;
+            }
+            
+            ItemStack discItem = createItemStack(stand);
             boolean added = player.inventory.add(discItem);
             if (added && discItem.isEmpty()) {
                 discItem.setCount(1);
@@ -65,15 +71,21 @@ public class StandDiscGiveCommand {
                     itemEntity.setOwner(player.getUUID());
                 }
             }
+            
+            i++;
         }
         
-        if (targets.size() == 1) {
-            source.sendSuccess(new TranslationTextComponent("commands.give.success.single", 1, new TranslationTextComponent(ModItems.STAND_DISC.get().getDescriptionId()), targets.iterator().next().getDisplayName()), true);
-        } else {
-            source.sendSuccess(new TranslationTextComponent("commands.give.success.single", 1, new TranslationTextComponent(ModItems.STAND_DISC.get().getDescriptionId()), targets.size()), true);
+        if (i > 0) {
+            if (targets.size() == 1) {
+                source.sendSuccess(new TranslationTextComponent("commands.give.success.single", 1, 
+                        new TranslationTextComponent(ModItems.STAND_DISC.get().getDescriptionId()), targets.iterator().next().getDisplayName()), true);
+            } else {
+                source.sendSuccess(new TranslationTextComponent("commands.give.success.single", 1, 
+                        new TranslationTextComponent(ModItems.STAND_DISC.get().getDescriptionId()), i), true);
+            }
         }
         
-        return targets.size();
+        return i;
     }
     
     private static ItemStack createItemStack(StandType<?> standType) {

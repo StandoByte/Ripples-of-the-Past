@@ -53,7 +53,6 @@ import com.github.standobyte.jojo.action.stand.TheWorldHeavyPunch;
 import com.github.standobyte.jojo.action.stand.TheWorldKick;
 import com.github.standobyte.jojo.action.stand.TheWorldTSHeavyAttack;
 import com.github.standobyte.jojo.action.stand.TheWorldTimeStop;
-import com.github.standobyte.jojo.action.stand.TheWorldTimeStopInstant;
 import com.github.standobyte.jojo.action.stand.TimeResume;
 import com.github.standobyte.jojo.action.stand.TimeStop;
 import com.github.standobyte.jojo.action.stand.TimeStopInstant;
@@ -74,10 +73,12 @@ import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.power.impl.stand.stats.ArmoredStandStats;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
-import com.github.standobyte.jojo.power.impl.stand.type.BoyIIManStandType;
 import com.github.standobyte.jojo.power.impl.stand.type.EntityStandType;
+import com.github.standobyte.jojo.power.impl.stand.type.NoManifestationStandType;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
+import com.github.standobyte.jojo.power.impl.stand.type.StandType.StandSurvivalGameplayPool;
 
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -122,48 +123,49 @@ public class ModStandsInit {
     
 // ======================================== Star Platinum ========================================
     
-    public static final RegistryObject<StandEntityAction> STAR_PLATINUM_PUNCH = ACTIONS.register("star_platinum_punch", 
+    public static final RegistryObject<StandEntityLightAttack> STAR_PLATINUM_PUNCH = ACTIONS.register("star_platinum_punch", 
             () -> new StandEntityLightAttack(new StandEntityLightAttack.Builder()
                     .punchSound(ModSounds.STAR_PLATINUM_PUNCH_LIGHT)
-                    .standSound(Phase.WINDUP, ModSounds.STAR_PLATINUM_ORA)));
+                    .standSound(Phase.WINDUP, false, ModSounds.STAR_PLATINUM_ORA)));
     
-    public static final RegistryObject<StandEntityAction> STAR_PLATINUM_BARRAGE = ACTIONS.register("star_platinum_barrage", 
+    public static final RegistryObject<StandEntityMeleeBarrage> STAR_PLATINUM_BARRAGE = ACTIONS.register("star_platinum_barrage", 
             () -> new StandEntityMeleeBarrage(new StandEntityMeleeBarrage.Builder()
                     .barrageHitSound(ModSounds.STAR_PLATINUM_PUNCH_BARRAGE)
-                    .standSound(ModSounds.STAR_PLATINUM_ORA_ORA_ORA)));
+                    .standSound(Phase.PERFORM, false, ModSounds.STAR_PLATINUM_ORA_ORA_ORA)));
     
     public static final RegistryObject<StandEntityHeavyAttack> STAR_PLATINUM_UPPERCUT = ACTIONS.register("star_platinum_uppercut", 
             () -> new StarPlatinumUppercut(new StandEntityHeavyAttack.Builder()
+                    .resolveLevelToUnlock(1)
                     .punchSound(ModSounds.STAR_PLATINUM_PUNCH_HEAVY)
-                    .standSound(Phase.WINDUP, ModSounds.STAR_PLATINUM_ORA_LONG)
+                    .standSound(Phase.WINDUP, false, ModSounds.STAR_PLATINUM_ORA_LONG)
                     .partsRequired(StandPart.ARMS)));
     
-    public static final RegistryObject<StandEntityAction> STAR_PLATINUM_HEAVY_PUNCH = ACTIONS.register("star_platinum_heavy_punch", 
+    public static final RegistryObject<StandEntityHeavyAttack> STAR_PLATINUM_HEAVY_PUNCH = ACTIONS.register("star_platinum_heavy_punch", 
             () -> new StandEntityHeavyAttack(new StandEntityHeavyAttack.Builder()
                     .punchSound(ModSounds.STAR_PLATINUM_PUNCH_HEAVY)
-                    .standSound(Phase.WINDUP, ModSounds.STAR_PLATINUM_ORA_LONG)
+                    .standSound(Phase.WINDUP, false, ModSounds.STAR_PLATINUM_ORA_LONG)
                     .partsRequired(StandPart.ARMS)
                     .setFinisherVariation(STAR_PLATINUM_UPPERCUT)
                     .shiftVariationOf(STAR_PLATINUM_PUNCH).shiftVariationOf(STAR_PLATINUM_BARRAGE)));
     
-    public static final RegistryObject<StandEntityAction> STAR_PLATINUM_STAR_FINGER = ACTIONS.register("star_platinum_star_finger", 
+    public static final RegistryObject<StarPlatinumStarFinger> STAR_PLATINUM_STAR_FINGER = ACTIONS.register("star_platinum_star_finger", 
             () -> new StarPlatinumStarFinger(new StandEntityAction.Builder().staminaCost(375).standPerformDuration(20).cooldown(20, 60)
                     .ignoresPerformerStun().resolveLevelToUnlock(3)
                     .standOffsetFront().standPose(StandPose.RANGED_ATTACK)
                     .shout(ModSounds.JOTARO_STAR_FINGER).standSound(Phase.PERFORM, ModSounds.STAR_PLATINUM_STAR_FINGER)
                     .partsRequired(StandPart.ARMS)));
     
-    public static final RegistryObject<StandEntityAction> STAR_PLATINUM_BLOCK = ACTIONS.register("star_platinum_block", 
+    public static final RegistryObject<StandEntityBlock> STAR_PLATINUM_BLOCK = ACTIONS.register("star_platinum_block", 
             () -> new StandEntityBlock());
     
-    public static final RegistryObject<StandEntityAction> STAR_PLATINUM_ZOOM = ACTIONS.register("star_platinum_zoom", 
+    public static final RegistryObject<StarPlatinumZoom> STAR_PLATINUM_ZOOM = ACTIONS.register("star_platinum_zoom", 
             () -> new StarPlatinumZoom(new StandEntityAction.Builder()
                     .ignoresPerformerStun()
                     .standOffsetFromUser(-0.25, -0.25, -0.3)
                     .partsRequired(StandPart.MAIN_BODY)));
     
-    public static final RegistryObject<StandEntityAction> STAR_PLATINUM_INHALE = ACTIONS.register("star_platinum_inhale", 
-            () -> new StarPlatinumInhale(new StandEntityAction.Builder().holdType(80).staminaCostTick(2F).cooldown(120)
+    public static final RegistryObject<StarPlatinumInhale> STAR_PLATINUM_INHALE = ACTIONS.register("star_platinum_inhale", 
+            () -> new StarPlatinumInhale(new StandEntityAction.Builder().holdType(80).staminaCostTick(2F).cooldown(80)
                     .ignoresPerformerStun().resolveLevelToUnlock(2)
                     .standOffsetFromUser(0, -0.25).standSound(ModSounds.STAR_PLATINUM_INHALE)
                     .partsRequired(StandPart.MAIN_BODY)));
@@ -175,14 +177,18 @@ public class ModStandsInit {
                     .shout(ModSounds.JOTARO_STAR_PLATINUM_THE_WORLD)
                     .partsRequired(StandPart.MAIN_BODY)
             .timeStopSound(ModSounds.STAR_PLATINUM_TIME_STOP)
-            .addTimeResumeVoiceLine(ModSounds.JOTARO_TIME_RESUMES).timeResumeSound(ModSounds.STAR_PLATINUM_TIME_RESUME)));
+            .addTimeResumeVoiceLine(ModSounds.JOTARO_TIME_RESUMES).timeResumeSound(ModSounds.STAR_PLATINUM_TIME_RESUME)
+            .shaderEffect(new ResourceLocation(JojoMod.MOD_ID, "shaders/post/time_stop_sp.json"), true)
+            .shaderEffect(new ResourceLocation(JojoMod.MOD_ID, "shaders/post/time_stop_sp_old.json"), false)));
     
-    public static final RegistryObject<StandAction> STAR_PLATINUM_TIME_STOP_BLINK = ACTIONS.register("star_platinum_ts_blink", 
+    
+    public static final RegistryObject<TimeStopInstant> STAR_PLATINUM_TIME_STOP_BLINK = ACTIONS.register("star_platinum_ts_blink", 
             () -> new TimeStopInstant(new StandAction.Builder()
                     .resolveLevelToUnlock(4).isTrained()
                     .ignoresPerformerStun()
                     .partsRequired(StandPart.MAIN_BODY), 
-                    STAR_PLATINUM_TIME_STOP, ModSounds.STAR_PLATINUM_TIME_STOP_BLINK));
+                    STAR_PLATINUM_TIME_STOP, ModSounds.STAR_PLATINUM_TIME_STOP_BLINK,
+                    false));
     
     public static final RegistryObject<TimeResume> STAR_PLATINUM_TIME_RESUME = ACTIONS.register("star_platinum_time_resume", 
             () -> new TimeResume(new StandAction.Builder().shiftVariationOf(STAR_PLATINUM_TIME_STOP)));
@@ -191,20 +197,21 @@ public class ModStandsInit {
     public static final EntityStandRegistryObject<EntityStandType<TimeStopperStandStats>, StandEntityType<StarPlatinumEntity>> STAND_STAR_PLATINUM = 
             new EntityStandRegistryObject<>("star_platinum", 
                     STAND_TYPES, 
-                    () -> new EntityStandType<>(
-                            0x8E45FF, PART_3_NAME,
-
-                            new StandAction[] {
-                                    STAR_PLATINUM_PUNCH.get(), 
-                                    STAR_PLATINUM_BARRAGE.get(), 
-                                    STAR_PLATINUM_STAR_FINGER.get()},
-                            new StandAction[] {
-                                    STAR_PLATINUM_BLOCK.get(), 
-                                    STAR_PLATINUM_ZOOM.get(), 
-                                    STAR_PLATINUM_INHALE.get(), 
-                                    STAR_PLATINUM_TIME_STOP.get()},
-
-                            TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
+                    () -> new EntityStandType.Builder<TimeStopperStandStats>()
+                    .color(0x8E45FF)
+                    .storyPartName(PART_3_NAME)
+                    .leftClickHotbar(
+                            STAR_PLATINUM_PUNCH.get(), 
+                            STAR_PLATINUM_BARRAGE.get(), 
+                            STAR_PLATINUM_STAR_FINGER.get()
+                            )
+                    .rightClickHotbar(
+                            STAR_PLATINUM_BLOCK.get(), 
+                            STAR_PLATINUM_ZOOM.get(), 
+                            STAR_PLATINUM_INHALE.get(), 
+                            STAR_PLATINUM_TIME_STOP.get()
+                            )
+                    .defaultStats(TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
                             .tier(6)
                             .power(16.0)
                             .speed(16.0)
@@ -215,11 +222,12 @@ public class ModStandsInit {
                             .timeStopLearningPerTick(0.25F)
                             .timeStopDecayPerDay(0F)
                             .timeStopCooldownPerTick(3F)
-                            .build("Star Platinum"), 
-
-                            new StandType.StandTypeOptionals()
-                            .addSummonShout(ModSounds.JOTARO_STAR_PLATINUM)
-                            .addOst(ModSounds.STAR_PLATINUM_OST)), 
+                            .randomWeight(1)
+                            )
+                    .addSummonShout(ModSounds.JOTARO_STAR_PLATINUM)
+                    .addOst(ModSounds.STAR_PLATINUM_OST)
+                    .addAttackerResolveMultTier(1)
+                    .build(), 
 
                     ENTITIES, 
                     () -> new StandEntityType<StarPlatinumEntity>(StarPlatinumEntity::new, 0.7F, 2.1F)
@@ -231,18 +239,19 @@ public class ModStandsInit {
     
 // ======================================== The World ========================================
     
-    public static final RegistryObject<StandEntityAction> THE_WORLD_PUNCH = ACTIONS.register("the_world_punch", 
+    public static final RegistryObject<StandEntityLightAttack> THE_WORLD_PUNCH = ACTIONS.register("the_world_punch", 
             () -> new StandEntityLightAttack(new StandEntityLightAttack.Builder()
                     .punchSound(ModSounds.THE_WORLD_PUNCH_LIGHT)
-                    .standSound(Phase.WINDUP, ModSounds.DIO_MUDA)));
+                    .standSound(Phase.WINDUP, false, ModSounds.DIO_MUDA)));
     
-    public static final RegistryObject<StandEntityAction> THE_WORLD_BARRAGE = ACTIONS.register("the_world_barrage", 
+    public static final RegistryObject<StandEntityMeleeBarrage> THE_WORLD_BARRAGE = ACTIONS.register("the_world_barrage", 
             () -> new TheWorldBarrage(new StandEntityMeleeBarrage.Builder()
                     .barrageHitSound(ModSounds.THE_WORLD_PUNCH_BARRAGE)
-                    .standSound(ModSounds.THE_WORLD_MUDA_MUDA_MUDA).shout(ModSounds.DIO_MUDA_MUDA), ModSounds.DIO_WRY));
+                    .standSound(Phase.PERFORM, false, ModSounds.THE_WORLD_MUDA_MUDA_MUDA).shout(ModSounds.DIO_MUDA_MUDA), ModSounds.DIO_WRY));
 
     public static final RegistryObject<StandEntityHeavyAttack> THE_WORLD_KICK = ACTIONS.register("the_world_kick", 
             () -> new TheWorldKick(new StandEntityHeavyAttack.Builder()
+                    .resolveLevelToUnlock(1)
                     .punchSound(ModSounds.THE_WORLD_KICK_HEAVY)
                     .shout(ModSounds.DIO_DIE)
                     .partsRequired(StandPart.LEGS)));
@@ -255,7 +264,7 @@ public class ModStandsInit {
                     .setFinisherVariation(THE_WORLD_KICK)
                     .shiftVariationOf(THE_WORLD_PUNCH).shiftVariationOf(THE_WORLD_BARRAGE)));
 
-    public static final RegistryObject<StandEntityAction> THE_WORLD_BLOCK = ACTIONS.register("the_world_block", 
+    public static final RegistryObject<StandEntityBlock> THE_WORLD_BLOCK = ACTIONS.register("the_world_block", 
             () -> new StandEntityBlock());
     
     public static final RegistryObject<TimeStop> THE_WORLD_TIME_STOP = ACTIONS.register("the_world_time_stop", 
@@ -266,39 +275,44 @@ public class ModStandsInit {
                     .partsRequired(StandPart.MAIN_BODY)
             .voiceLineWithStandSummoned(ModSounds.DIO_TIME_STOP).timeStopSound(ModSounds.THE_WORLD_TIME_STOP)
             .addTimeResumeVoiceLine(ModSounds.DIO_TIME_RESUMES, true).addTimeResumeVoiceLine(ModSounds.DIO_TIMES_UP, false)
-            .timeResumeSound(ModSounds.THE_WORLD_TIME_RESUME)));
+            .timeResumeSound(ModSounds.THE_WORLD_TIME_RESUME)
+            .shaderEffect(new ResourceLocation(JojoMod.MOD_ID, "shaders/post/time_stop_tw.json"), true)
+            .shaderEffect(new ResourceLocation(JojoMod.MOD_ID, "shaders/post/time_stop_tw_old.json"), false)));
     
     public static final RegistryObject<TimeStopInstant> THE_WORLD_TIME_STOP_BLINK = ACTIONS.register("the_world_ts_blink", 
-            () -> new TheWorldTimeStopInstant(new StandAction.Builder()
+            () -> new TimeStopInstant(new StandAction.Builder()
                     .resolveLevelToUnlock(2).isTrained()
                     .ignoresPerformerStun()
                     .partsRequired(StandPart.MAIN_BODY), 
-                    THE_WORLD_TIME_STOP, ModSounds.THE_WORLD_TIME_STOP_BLINK));
+                    THE_WORLD_TIME_STOP, ModSounds.THE_WORLD_TIME_STOP_BLINK,
+                    true));
     
     public static final RegistryObject<TimeResume> THE_WORLD_TIME_RESUME = ACTIONS.register("the_world_time_resume", 
             () -> new TimeResume(new StandAction.Builder().shiftVariationOf(THE_WORLD_TIME_STOP)));
     
     public static final RegistryObject<StandEntityAction> THE_WORLD_TS_PUNCH = ACTIONS.register("the_world_ts_punch", 
-            () -> new TheWorldTSHeavyAttack(new StandEntityAction.Builder().resolveLevelToUnlock(3).standUserWalkSpeed(1.0F)
+            () -> new TheWorldTSHeavyAttack(new StandEntityAction.Builder().staminaCost(StandEntityHeavyAttack.DEFAULT_STAMINA_COST)
+                    .resolveLevelToUnlock(3).standUserWalkSpeed(1.0F)
                     .standPose(TheWorldTSHeavyAttack.TS_PUNCH_POSE).standWindupDuration(5).cooldown(50)
-                    .partsRequired(StandPart.MAIN_BODY, StandPart.ARMS), THE_WORLD_HEAVY_PUNCH, THE_WORLD_TIME_STOP_BLINK));
+                    .partsRequired(StandPart.MAIN_BODY, StandPart.ARMS), THE_WORLD_TIME_STOP_BLINK));
     
     
     public static final EntityStandRegistryObject<EntityStandType<TimeStopperStandStats>, StandEntityType<TheWorldEntity>> STAND_THE_WORLD = 
             new EntityStandRegistryObject<>("the_world", 
                     STAND_TYPES,
-                    () -> new EntityStandType<>(
-                            0xFFD800, PART_3_NAME,
-
-                            new StandAction[] {
-                                    THE_WORLD_PUNCH.get(), 
-                                    THE_WORLD_BARRAGE.get(), 
-                                    THE_WORLD_TS_PUNCH.get()},
-                            new StandAction[] {
-                                    THE_WORLD_BLOCK.get(), 
-                                    THE_WORLD_TIME_STOP.get()},
-
-                            TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
+                    () -> new EntityStandType.Builder<TimeStopperStandStats>()
+                    .color(0xFFD800)
+                    .storyPartName(PART_3_NAME)
+                    .leftClickHotbar(
+                            THE_WORLD_PUNCH.get(), 
+                            THE_WORLD_BARRAGE.get(), 
+                            THE_WORLD_TS_PUNCH.get()
+                            )
+                    .rightClickHotbar(
+                            THE_WORLD_BLOCK.get(), 
+                            THE_WORLD_TIME_STOP.get()
+                            )
+                    .defaultStats(TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
                             .tier(6)
                             .power(16.0)
                             .speed(16.0)
@@ -309,12 +323,13 @@ public class ModStandsInit {
                             .timeStopLearningPerTick(0.1F)
                             .timeStopDecayPerDay(0F)
                             .timeStopCooldownPerTick(3F)
-                            .build("The World"), 
-
-                            new StandType.StandTypeOptionals()
-                            .addSummonShout(ModSounds.DIO_THE_WORLD)
-                            .addOst(ModSounds.THE_WORLD_OST)
-                            /*.addItemOnResolveLevel(4, new ItemStack(ModItems.ROAD_ROLLER.get()))*/), 
+                            .randomWeight(1)
+                            )
+                    .addSummonShout(ModSounds.DIO_THE_WORLD)
+                    .addOst(ModSounds.THE_WORLD_OST)
+                    .addAttackerResolveMultTier(1)
+//                    .addItemOnResolveLevel(4, new ItemStack(ModItems.ROAD_ROLLER.get()))
+                    .build(), 
 
                     ENTITIES, 
                     () -> new StandEntityType<TheWorldEntity>(TheWorldEntity::new, 0.7F, 2.1F)
@@ -326,47 +341,47 @@ public class ModStandsInit {
     
 // ======================================== Hierophant Green ========================================
     
-    public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_STRING_ATTACK = ACTIONS.register("hierophant_green_attack", 
+    public static final RegistryObject<HierophantGreenStringAttack> HIEROPHANT_GREEN_STRING_ATTACK = ACTIONS.register("hierophant_green_attack", 
             () -> new HierophantGreenStringAttack(new StandEntityAction.Builder().staminaCost(75).standPerformDuration(16)
                     .standSound(ModSounds.HIEROPHANT_GREEN_TENTACLES)
                     .partsRequired(StandPart.MAIN_BODY)));
     
-    public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_STRING_BIND = ACTIONS.register("hierophant_green_attack_binding", 
+    public static final RegistryObject<HierophantGreenStringAttack> HIEROPHANT_GREEN_STRING_BIND = ACTIONS.register("hierophant_green_attack_binding", 
             () -> new HierophantGreenStringAttack(new StandEntityAction.Builder().staminaCost(75).standPerformDuration(24).cooldown(25, 100, 0.5F)
                     .standSound(ModSounds.HIEROPHANT_GREEN_TENTACLES)
                     .partsRequired(StandPart.MAIN_BODY)
                     .shiftVariationOf(HIEROPHANT_GREEN_STRING_ATTACK)));
     
-    public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_EMERALD_SPLASH = ACTIONS.register("hierophant_green_emerald_splash", 
+    public static final RegistryObject<HierophantGreenEmeraldSplash> HIEROPHANT_GREEN_EMERALD_SPLASH = ACTIONS.register("hierophant_green_emerald_splash", 
             () -> new HierophantGreenEmeraldSplash(new StandEntityAction.Builder().standPerformDuration(30).standRecoveryTicks(20).staminaCostTick(3)
                     .resolveLevelToUnlock(1).isTrained()
                     .standOffsetFront().standPose(StandPose.RANGED_ATTACK).shout(ModSounds.KAKYOIN_EMERALD_SPLASH).standSound(ModSounds.HIEROPHANT_GREEN_EMERALD_SPLASH)
                     .partsRequired(StandPart.ARMS)));
     
-    public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED = ACTIONS.register("hierophant_green_es_concentrated", 
+    public static final RegistryObject<HierophantGreenEmeraldSplash> HIEROPHANT_GREEN_EMERALD_SPLASH_CONCENTRATED = ACTIONS.register("hierophant_green_es_concentrated", 
             () -> new HierophantGreenEmeraldSplash(new StandEntityAction.Builder().staminaCostTick(6).standPerformDuration(5).standRecoveryTicks(20).cooldown(5, 60)
                     .noResolveUnlock()
                     .standOffsetFront().standPose(StandPose.RANGED_ATTACK).shout(ModSounds.KAKYOIN_EMERALD_SPLASH).standSound(ModSounds.HIEROPHANT_GREEN_EMERALD_SPLASH)
                     .partsRequired(StandPart.ARMS)
                     .shiftVariationOf(HIEROPHANT_GREEN_EMERALD_SPLASH)));
     
-    public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_BLOCK = ACTIONS.register("hierophant_green_block", 
+    public static final RegistryObject<StandEntityBlock> HIEROPHANT_GREEN_BLOCK = ACTIONS.register("hierophant_green_block", 
             () -> new StandEntityBlock());
     
-    public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_GRAPPLE = ACTIONS.register("hierophant_green_grapple", 
+    public static final RegistryObject<HierophantGreenGrapple> HIEROPHANT_GREEN_GRAPPLE = ACTIONS.register("hierophant_green_grapple", 
             () -> new HierophantGreenGrapple(new StandEntityAction.Builder().staminaCostTick(1).holdType().standUserWalkSpeed(0.0F)
                     .resolveLevelToUnlock(2)
-                    .standPose(HierophantGreenGrapple.GRAPPLE_POSE).standOffsetFromUser(-0.5, 0.25)
+                    .standPose(HierophantGreenGrapple.GRAPPLE_POSE)
                     .partsRequired(StandPart.ARMS)));
     
-    public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_GRAPPLE_ENTITY = ACTIONS.register("hierophant_green_grapple_entity", 
+    public static final RegistryObject<HierophantGreenGrapple> HIEROPHANT_GREEN_GRAPPLE_ENTITY = ACTIONS.register("hierophant_green_grapple_entity", 
             () -> new HierophantGreenGrapple(new StandEntityAction.Builder().staminaCostTick(1).holdType().standUserWalkSpeed(0.0F)
                     .resolveLevelToUnlock(2)
                     .standPose(HierophantGreenGrapple.GRAPPLE_POSE)
                     .partsRequired(StandPart.ARMS)
                     .shiftVariationOf(HIEROPHANT_GREEN_GRAPPLE)));
     
-    public static final RegistryObject<StandEntityAction> HIEROPHANT_GREEN_BARRIER = ACTIONS.register("hierophant_green_barrier", 
+    public static final RegistryObject<HierophantGreenBarrier> HIEROPHANT_GREEN_BARRIER = ACTIONS.register("hierophant_green_barrier", 
             () -> new HierophantGreenBarrier(new StandEntityAction.Builder()
                     .resolveLevelToUnlock(3)
                     .partsRequired(StandPart.MAIN_BODY)));
@@ -375,29 +390,30 @@ public class ModStandsInit {
     public static final EntityStandRegistryObject<EntityStandType<StandStats>, StandEntityType<HierophantGreenEntity>> STAND_HIEROPHANT_GREEN = 
             new EntityStandRegistryObject<>("hierophant_green", 
                     STAND_TYPES, 
-                    () -> new EntityStandType<>(
-                            0x00B319, PART_3_NAME,
-
-                            new StandAction[] {
-                                    HIEROPHANT_GREEN_STRING_ATTACK.get(), 
-                                    HIEROPHANT_GREEN_EMERALD_SPLASH.get()},
-                            new StandAction[] {
-                                    HIEROPHANT_GREEN_BLOCK.get(), 
-                                    HIEROPHANT_GREEN_GRAPPLE.get(), 
-                                    HIEROPHANT_GREEN_BARRIER.get()},
-
-                            StandStats.class, new StandStats.Builder()
+                    () -> new EntityStandType.Builder<>()
+                    .color(0x00B319)
+                    .storyPartName(PART_3_NAME)
+                    .leftClickHotbar(
+                            HIEROPHANT_GREEN_STRING_ATTACK.get(), 
+                            HIEROPHANT_GREEN_EMERALD_SPLASH.get()
+                            )
+                    .rightClickHotbar(
+                            HIEROPHANT_GREEN_BLOCK.get(), 
+                            HIEROPHANT_GREEN_GRAPPLE.get(), 
+                            HIEROPHANT_GREEN_BARRIER.get()
+                            )
+                    .defaultStats(StandStats.class, new StandStats.Builder()
                             .tier(5)
                             .power(8.0)
                             .speed(12.0)
                             .range(50.0, 100.0)
                             .durability(10.0)
                             .precision(8.0)
-                            .build("Hierophant Green"), 
-
-                            new StandType.StandTypeOptionals()
-                            .addSummonShout(ModSounds.KAKYOIN_HIEROPHANT_GREEN)
-                            .addOst(ModSounds.HIEROPHANT_GREEN_OST)), 
+                            .randomWeight(2)
+                            )
+                    .addSummonShout(ModSounds.KAKYOIN_HIEROPHANT_GREEN)
+                    .addOst(ModSounds.HIEROPHANT_GREEN_OST)
+                    .build(), 
 
                     ENTITIES, 
                     () -> new StandEntityType<HierophantGreenEntity>(HierophantGreenEntity::new, 0.6F, 1.9F)
@@ -412,12 +428,12 @@ public class ModStandsInit {
     public static final RegistryObject<StandEntityLightAttack> SILVER_CHARIOT_NO_RAPIER_ATTACK = ACTIONS.register("silver_chariot_no_rapier_attack", 
             () -> new StandEntityLightAttack(new StandEntityLightAttack.Builder()));
     
-    public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_ATTACK = ACTIONS.register("silver_chariot_attack", 
+    public static final RegistryObject<StandEntityLightAttack> SILVER_CHARIOT_ATTACK = ACTIONS.register("silver_chariot_attack", 
             () -> new SilverChariotLightAttack(new StandEntityLightAttack.Builder()
                     .punchSound(() -> null).swingSound(ModSounds.SILVER_CHARIOT_SWEEP_LIGHT), 
                     SILVER_CHARIOT_NO_RAPIER_ATTACK));
     
-    public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_RAPIER_BARRAGE = ACTIONS.register("silver_chariot_barrage", 
+    public static final RegistryObject<SilverChariotMeleeBarrage> SILVER_CHARIOT_RAPIER_BARRAGE = ACTIONS.register("silver_chariot_barrage", 
             () -> new SilverChariotMeleeBarrage(new StandEntityMeleeBarrage.Builder()
                     .shout(ModSounds.POLNAREFF_HORA_HORA_HORA)
                     .barrageSwingSound(ModSounds.SILVER_CHARIOT_BARRAGE_SWIPE).barrageHitSound(null)
@@ -425,27 +441,28 @@ public class ModStandsInit {
     
     public static final RegistryObject<StandEntityHeavyAttack> SILVER_CHARIOT_SWEEPING_ATTACK = ACTIONS.register("silver_chariot_sweeping_attack", 
             () -> new SilverChariotSweepingAttack(new StandEntityHeavyAttack.Builder().standPerformDuration(3)
+                    .resolveLevelToUnlock(1)
                     .punchSound(() -> null).swingSound(ModSounds.SILVER_CHARIOT_SWEEP_HEAVY)
                     .partsRequired(StandPart.ARMS)));
     
-    public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_DASH_ATTACK = ACTIONS.register("silver_chariot_dash_attack", 
+    public static final RegistryObject<StandEntityHeavyAttack> SILVER_CHARIOT_DASH_ATTACK = ACTIONS.register("silver_chariot_dash_attack", 
             () -> new SilverChariotDashAttack(new StandEntityHeavyAttack.Builder()
                     .punchSound(null).swingSound(null).standSound(ModSounds.SILVER_CHARIOT_DASH)
                     .partsRequired(StandPart.MAIN_BODY, StandPart.ARMS)
                     .setFinisherVariation(SILVER_CHARIOT_SWEEPING_ATTACK)
                     .shiftVariationOf(SILVER_CHARIOT_ATTACK).shiftVariationOf(SILVER_CHARIOT_RAPIER_BARRAGE)));
     
-    public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_RAPIER_LAUNCH = ACTIONS.register("silver_chariot_rapier_launch", 
+    public static final RegistryObject<SilverChariotRapierLaunch> SILVER_CHARIOT_RAPIER_LAUNCH = ACTIONS.register("silver_chariot_rapier_launch", 
             () -> new SilverChariotRapierLaunch(new StandEntityAction.Builder().cooldown(100)
                     .ignoresPerformerStun()
                     .resolveLevelToUnlock(2)
                     .standOffsetFromUser(0, 0.25).standPose(StandPose.RANGED_ATTACK).standSound(ModSounds.SILVER_CHARIOT_RAPIER_SHOT)
                     .partsRequired(StandPart.ARMS)));
     
-    public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_BLOCK = ACTIONS.register("silver_chariot_block", 
+    public static final RegistryObject<StandEntityBlock> SILVER_CHARIOT_BLOCK = ACTIONS.register("silver_chariot_block", 
             () -> new StandEntityBlock());
     
-    public static final RegistryObject<StandEntityAction> SILVER_CHARIOT_TAKE_OFF_ARMOR = ACTIONS.register("silver_chariot_take_off_armor", 
+    public static final RegistryObject<SilverChariotTakeOffArmor> SILVER_CHARIOT_TAKE_OFF_ARMOR = ACTIONS.register("silver_chariot_take_off_armor", 
             () -> new SilverChariotTakeOffArmor(new StandEntityAction.Builder()
                     .resolveLevelToUnlock(3)
                     .standSound(ModSounds.SILVER_CHARIOT_ARMOR_OFF)
@@ -455,30 +472,32 @@ public class ModStandsInit {
     public static final EntityStandRegistryObject<EntityStandType<ArmoredStandStats>, StandEntityType<SilverChariotEntity>> STAND_SILVER_CHARIOT = 
             new EntityStandRegistryObject<>("silver_chariot", 
                     STAND_TYPES, 
-                    () -> new EntityStandType<>(
-                            0xBEC8D6, PART_3_NAME,
-                            
-                            new StandAction[] {
-                                    SILVER_CHARIOT_ATTACK.get(), 
-                                    SILVER_CHARIOT_RAPIER_BARRAGE.get(), 
-                                    SILVER_CHARIOT_RAPIER_LAUNCH.get()},
-                            new StandAction[] {
-                                    SILVER_CHARIOT_BLOCK.get(), 
-                                    SILVER_CHARIOT_TAKE_OFF_ARMOR.get()},
-                            
-                            ArmoredStandStats.class, new ArmoredStandStats.Builder()
+                    () -> new EntityStandType.Builder<ArmoredStandStats>()
+                    .color(0xBEC8D6)
+                    .storyPartName(PART_3_NAME)
+                    .leftClickHotbar(
+                            SILVER_CHARIOT_ATTACK.get(), 
+                            SILVER_CHARIOT_RAPIER_BARRAGE.get(), 
+                            SILVER_CHARIOT_RAPIER_LAUNCH.get()
+                            )
+                    .rightClickHotbar(
+                            SILVER_CHARIOT_BLOCK.get(), 
+                            SILVER_CHARIOT_TAKE_OFF_ARMOR.get()
+                            )
+                    .defaultStats(ArmoredStandStats.class, new ArmoredStandStats.Builder()
                             .tier(5)
                             .power(9.0)
                             .speed(14.0)
                             .range(10.0)
                             .durability(12.0)
-                            .armor(15.0F)
+                            .armor(20.0F)
+                            .armorToughness(8.0F)
                             .precision(16.0)
-                            .build("Silver Chariot"), 
-
-                            new StandType.StandTypeOptionals()
-                            .addSummonShout(ModSounds.POLNAREFF_SILVER_CHARIOT)
-                            .addOst(ModSounds.SILVER_CHARIOT_OST)), 
+                            .randomWeight(2)
+                            )
+                    .addSummonShout(ModSounds.POLNAREFF_SILVER_CHARIOT)
+                    .addOst(ModSounds.SILVER_CHARIOT_OST)
+                    .build(),
 
                     ENTITIES, 
                     () -> new StandEntityType<SilverChariotEntity>(SilverChariotEntity::new, 0.6F, 1.95F)
@@ -490,58 +509,59 @@ public class ModStandsInit {
     
 // ======================================== Magician's Red ========================================
     
-    public static final RegistryObject<StandEntityAction> MAGICIANS_RED_PUNCH = ACTIONS.register("magicians_red_punch", 
+    public static final RegistryObject<StandEntityLightAttack> MAGICIANS_RED_PUNCH = ACTIONS.register("magicians_red_punch", 
             () -> new StandEntityLightAttack(new StandEntityLightAttack.Builder()
                     .punchSound(ModSounds.MAGICIANS_RED_PUNCH_LIGHT)));
 
     public static final RegistryObject<StandEntityHeavyAttack> MAGICIANS_RED_KICK = ACTIONS.register("magicians_red_kick", 
             () -> new MagiciansRedKick(new StandEntityHeavyAttack.Builder()
+                    .resolveLevelToUnlock(1)
                     .punchSound(ModSounds.MAGICIANS_RED_KICK_HEAVY)
                     .partsRequired(StandPart.LEGS)));
 
-    public static final RegistryObject<StandEntityAction> MAGICIANS_RED_HEAVY_PUNCH = ACTIONS.register("magicians_red_heavy_punch", 
+    public static final RegistryObject<StandEntityHeavyAttack> MAGICIANS_RED_HEAVY_PUNCH = ACTIONS.register("magicians_red_heavy_punch", 
             () -> new StandEntityHeavyAttack(new StandEntityHeavyAttack.Builder()
                     .punchSound(ModSounds.MAGICIANS_RED_PUNCH_HEAVY)
                     .partsRequired(StandPart.ARMS)
                     .setFinisherVariation(MAGICIANS_RED_KICK)
                     .shiftVariationOf(MAGICIANS_RED_PUNCH)));
     
-    public static final RegistryObject<StandEntityAction> MAGICIANS_RED_FLAME_BURST = ACTIONS.register("magicians_red_flame_burst", 
+    public static final RegistryObject<MagiciansRedFlameBurst> MAGICIANS_RED_FLAME_BURST = ACTIONS.register("magicians_red_flame_burst", 
             () -> new MagiciansRedFlameBurst(new StandEntityAction.Builder().holdType()
                     .staminaCostTick(3)
                     .standOffsetFront().standPose(MagiciansRedFlameBurst.FLAME_BURST_POSE)
                     .partsRequired(StandPart.MAIN_BODY)));
     
-    public static final RegistryObject<StandEntityAction> MAGICIANS_RED_FIREBALL = ACTIONS.register("magicians_red_fireball", 
+    public static final RegistryObject<MagiciansRedFireball> MAGICIANS_RED_FIREBALL = ACTIONS.register("magicians_red_fireball", 
             () -> new MagiciansRedFireball(new StandEntityAction.Builder().staminaCost(75).standPerformDuration(3)
                     .resolveLevelToUnlock(2)
                     .standPose(MagiciansRedFlameBurst.FLAME_BURST_POSE).standSound(ModSounds.MAGICIANS_RED_FIREBALL)
                     .partsRequired(StandPart.MAIN_BODY)));
     
-    public static final RegistryObject<StandEntityAction> MAGICIANS_RED_CROSSFIRE_HURRICANE = ACTIONS.register("magicians_red_crossfire_hurricane", 
+    public static final RegistryObject<MagiciansRedCrossfireHurricane> MAGICIANS_RED_CROSSFIRE_HURRICANE = ACTIONS.register("magicians_red_crossfire_hurricane", 
             () -> new MagiciansRedCrossfireHurricane(new StandEntityAction.Builder().holdToFire(20, false).staminaCost(500)
                     .resolveLevelToUnlock(4).isTrained()
                     .standPose(MagiciansRedFlameBurst.FLAME_BURST_POSE).shout(ModSounds.AVDOL_CROSSFIRE_HURRICANE).standSound(ModSounds.MAGICIANS_RED_FIRE_BLAST)
                     .partsRequired(StandPart.MAIN_BODY)));
     
-    public static final RegistryObject<StandEntityAction> MAGICIANS_RED_CROSSFIRE_HURRICANE_SPECIAL = ACTIONS.register("magicians_red_ch_special", 
+    public static final RegistryObject<MagiciansRedCrossfireHurricane> MAGICIANS_RED_CROSSFIRE_HURRICANE_SPECIAL = ACTIONS.register("magicians_red_ch_special", 
             () -> new MagiciansRedCrossfireHurricane(new StandEntityAction.Builder().holdToFire(20, false).staminaCost(500)
                     .noResolveUnlock()
                     .standPose(MagiciansRedFlameBurst.FLAME_BURST_POSE).shout(ModSounds.AVDOL_CROSSFIRE_HURRICANE_SPECIAL).standSound(ModSounds.MAGICIANS_RED_FIRE_BLAST)
                     .partsRequired(StandPart.MAIN_BODY)
                     .shiftVariationOf(MAGICIANS_RED_CROSSFIRE_HURRICANE)));
     
-    public static final RegistryObject<StandEntityAction> MAGICIANS_RED_BLOCK = ACTIONS.register("magicians_red_block", 
+    public static final RegistryObject<StandEntityBlock> MAGICIANS_RED_BLOCK = ACTIONS.register("magicians_red_block", 
             () -> new StandEntityBlock());
     
-    public static final RegistryObject<StandEntityAction> MAGICIANS_RED_RED_BIND = ACTIONS.register("magicians_red_red_bind", 
+    public static final RegistryObject<MagiciansRedRedBind> MAGICIANS_RED_RED_BIND = ACTIONS.register("magicians_red_red_bind", 
             () -> new MagiciansRedRedBind(new StandEntityAction.Builder().staminaCostTick(1).holdType().heldWalkSpeed(0.3F)
                     .resolveLevelToUnlock(1)
                     .standOffsetFront().standPose(MagiciansRedRedBind.RED_BIND_POSE)
                     .shout(ModSounds.AVDOL_RED_BIND).standSound(ModSounds.MAGICIANS_RED_FIRE_BLAST)
                     .partsRequired(StandPart.ARMS)));
     
-    public static final RegistryObject<StandAction> MAGICIANS_RED_DETECTOR = ACTIONS.register("magicians_red_detector", 
+    public static final RegistryObject<MagiciansRedDetector> MAGICIANS_RED_DETECTOR = ACTIONS.register("magicians_red_detector", 
             () -> new MagiciansRedDetector(new StandAction.Builder().autoSummonStand()
                     .resolveLevelToUnlock(3)
                     .partsRequired(StandPart.MAIN_BODY)));
@@ -550,31 +570,32 @@ public class ModStandsInit {
     public static final EntityStandRegistryObject<EntityStandType<StandStats>, StandEntityType<MagiciansRedEntity>> STAND_MAGICIANS_RED = 
             new EntityStandRegistryObject<>("magicians_red", 
                     STAND_TYPES, 
-                    () -> new EntityStandType<>(
-                            0xDE203A, PART_3_NAME,
-                            
-                            new StandAction[] {
-                                    MAGICIANS_RED_PUNCH.get(), 
-                                    MAGICIANS_RED_FLAME_BURST.get(), 
-                                    MAGICIANS_RED_FIREBALL.get(), 
-                                    MAGICIANS_RED_CROSSFIRE_HURRICANE.get()},
-                            new StandAction[] {
-                                    MAGICIANS_RED_BLOCK.get(), 
-                                    MAGICIANS_RED_RED_BIND.get(), 
-                                    MAGICIANS_RED_DETECTOR.get()},
-                            
-                            StandStats.class, new StandStats.Builder()
+                    () -> new EntityStandType.Builder<>()
+                    .color(0xDE203A)
+                    .storyPartName(PART_3_NAME)
+                    .leftClickHotbar(
+                            MAGICIANS_RED_PUNCH.get(), 
+                            MAGICIANS_RED_FLAME_BURST.get(), 
+                            MAGICIANS_RED_FIREBALL.get(), 
+                            MAGICIANS_RED_CROSSFIRE_HURRICANE.get()
+                            )
+                    .rightClickHotbar(
+                            MAGICIANS_RED_BLOCK.get(), 
+                            MAGICIANS_RED_RED_BIND.get(), 
+                            MAGICIANS_RED_DETECTOR.get()
+                            )
+                    .defaultStats(StandStats.class, new StandStats.Builder()
                             .tier(5)
                             .power(12.0)
                             .speed(12.0)
                             .range(5.0, 10.0)
                             .durability(12.0)
                             .precision(8.0)
-                            .build("Magician's Red"), 
-                            
-                            new StandType.StandTypeOptionals()
-                            .addSummonShout(ModSounds.AVDOL_MAGICIANS_RED)
-                            .addOst(ModSounds.MAGICIANS_RED_OST)), 
+                            .randomWeight(2)
+                            )
+                    .addSummonShout(ModSounds.AVDOL_MAGICIANS_RED)
+                    .addOst(ModSounds.MAGICIANS_RED_OST)
+                    .build(),
                     
                     ENTITIES, 
                     () -> new StandEntityType<MagiciansRedEntity>(MagiciansRedEntity::new, 0.65F, 1.95F)
@@ -586,21 +607,22 @@ public class ModStandsInit {
     
 // ======================================== Crazy Diamond ========================================
     
-    public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_PUNCH = ACTIONS.register("crazy_diamond_punch", 
+    public static final RegistryObject<StandEntityLightAttack> CRAZY_DIAMOND_PUNCH = ACTIONS.register("crazy_diamond_punch", 
             () -> new StandEntityLightAttack(new StandEntityLightAttack.Builder()
                     .punchSound(ModSounds.CRAZY_DIAMOND_PUNCH_LIGHT)
-                    .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_DORA)
+                    .standSound(Phase.WINDUP, false, ModSounds.CRAZY_DIAMOND_DORA)
                     ));
     
     public static final RegistryObject<StandEntityMeleeBarrage> CRAZY_DIAMOND_BARRAGE = ACTIONS.register("crazy_diamond_barrage", 
             () -> new StandEntityMeleeBarrage(new StandEntityMeleeBarrage.Builder()
                     .barrageHitSound(ModSounds.CRAZY_DIAMOND_PUNCH_BARRAGE)
-                    .standSound(ModSounds.CRAZY_DIAMOND_DORARARA)));
+                    .standSound(Phase.PERFORM, false, ModSounds.CRAZY_DIAMOND_DORARARA)));
     
     public static final RegistryObject<StandEntityHeavyAttack> CRAZY_DIAMOND_FINISHER_PUNCH = ACTIONS.register("crazy_diamond_misshaping_punch", 
             () -> new CrazyDiamondMisshapingPunch(new StandEntityHeavyAttack.Builder()
+                    .resolveLevelToUnlock(1)
                     .punchSound(ModSounds.CRAZY_DIAMOND_PUNCH_HEAVY)
-                    .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_DORA_LONG)
+                    .standSound(Phase.WINDUP, false, ModSounds.CRAZY_DIAMOND_DORA_LONG)
                     .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<StandEntityActionModifier> CRAZY_DIAMOND_MISSHAPE_FACE = ACTIONS.register("crazy_diamond_misshape_face", 
@@ -612,7 +634,7 @@ public class ModStandsInit {
     public static final RegistryObject<StandEntityActionModifier> CRAZY_DIAMOND_MISSHAPE_LEGS = ACTIONS.register("crazy_diamond_misshape_legs", 
             () -> new CrazyDiamondMisshapeBodyPart(new StandAction.Builder().staminaCost(50)));
     
-    public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_HEAVY_PUNCH = ACTIONS.register("crazy_diamond_heavy_punch", 
+    public static final RegistryObject<CrazyDiamondHeavyPunch> CRAZY_DIAMOND_HEAVY_PUNCH = ACTIONS.register("crazy_diamond_heavy_punch", 
             () -> new CrazyDiamondHeavyPunch(new StandEntityHeavyAttack.Builder()
                     .punchSound(ModSounds.CRAZY_DIAMOND_PUNCH_HEAVY)
                     .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_DORA_LONG)
@@ -623,7 +645,7 @@ public class ModStandsInit {
     public static final RegistryObject<StandEntityActionModifier> CRAZY_DIAMOND_LEAVE_OBJECT = ACTIONS.register("crazy_diamond_leave_object", 
             () -> new CrazyDiamondLeaveObject(new StandAction.Builder().staminaCost(50)));
     
-    public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_BLOCK_BULLET = ACTIONS.register("crazy_diamond_block_bullet", 
+    public static final RegistryObject<CrazyDiamondBlockBullet> CRAZY_DIAMOND_BLOCK_BULLET = ACTIONS.register("crazy_diamond_block_bullet", 
             () -> new CrazyDiamondBlockBullet(new StandEntityAction.Builder().standWindupDuration(15).staminaCost(40).staminaCostTick(2F)
                     .resolveLevelToUnlock(4)
                     .standPose(CrazyDiamondBlockBullet.BLOCK_BULLET_SHOT_POSE)
@@ -631,15 +653,15 @@ public class ModStandsInit {
                     .standOffsetFromUser(0.25, -0.5, 0)
                     .partsRequired(StandPart.ARMS)));
     
-    public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_BLOOD_CUTTER = ACTIONS.register("crazy_diamond_blood_cutter", 
-            () -> new CrazyDiamondBloodCutter(new StandEntityAction.Builder().standWindupDuration(5).standRecoveryTicks(5).staminaCost(25).cooldown(300)
+    public static final RegistryObject<CrazyDiamondBloodCutter> CRAZY_DIAMOND_BLOOD_CUTTER = ACTIONS.register("crazy_diamond_blood_cutter", 
+            () -> new CrazyDiamondBloodCutter(new StandEntityAction.Builder().standWindupDuration(5).staminaCost(25).cooldown(300)
                     .resolveLevelToUnlock(4)
                     .standPose(CrazyDiamondBloodCutter.BLOOD_CUTTER_SHOT_POSE)
                     .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_FIX_STARTED, ModSounds.CRAZY_DIAMOND_DORA).standSound(Phase.PERFORM, ModSounds.CRAZY_DIAMOND_BLOOD_CUTTER_SHOT)
                     .standOffsetFromUser(-0.1, -0.5)
                     .partsRequired(StandPart.ARMS)));
     
-    public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_BLOCK = ACTIONS.register("crazy_diamond_block", 
+    public static final RegistryObject<StandEntityBlock> CRAZY_DIAMOND_BLOCK = ACTIONS.register("crazy_diamond_block", 
             () -> new StandEntityBlock());
     
     public static final RegistryObject<CrazyDiamondRepairItem> CRAZY_DIAMOND_REPAIR = ACTIONS.register("crazy_diamond_repair", 
@@ -650,7 +672,7 @@ public class ModStandsInit {
                     .standAutoSummonMode(AutoSummonMode.OFF_ARM)
                     .partsRequired(StandPart.ARMS)));
     
-    public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_PREVIOUS_STATE = ACTIONS.register("crazy_diamond_previous_state", 
+    public static final RegistryObject<CrazyDiamondPreviousState> CRAZY_DIAMOND_PREVIOUS_STATE = ACTIONS.register("crazy_diamond_previous_state", 
             () -> new CrazyDiamondPreviousState(new StandEntityAction.Builder().holdType().staminaCostTick(0.2F)
                     .noResolveUnlock()
                     .standOffsetFromUser(0.667, 0.2, 0).standPose(CrazyDiamondRepairItem.ITEM_FIX_POSE)
@@ -666,20 +688,20 @@ public class ModStandsInit {
                     .standAutoSummonMode(AutoSummonMode.MAIN_ARM)
                     .partsRequired(StandPart.ARMS)));
     
-    public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_RESTORE_TERRAIN = ACTIONS.register("crazy_diamond_restore_terrain", 
+    public static final RegistryObject<CrazyDiamondRestoreTerrain> CRAZY_DIAMOND_RESTORE_TERRAIN = ACTIONS.register("crazy_diamond_restore_terrain", 
             () -> new CrazyDiamondRestoreTerrain(new StandEntityAction.Builder().holdType().staminaCostTick(2) // cost per block rather than per tick
                     .resolveLevelToUnlock(2)
                     .shout(ModSounds.JOSUKE_FIX).standSound(Phase.PERFORM, ModSounds.CRAZY_DIAMOND_FIX_STARTED)
                     .partsRequired(StandPart.ARMS)));
     
-    public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE = ACTIONS.register("crazy_diamond_anchor_move", 
+    public static final RegistryObject<CrazyDiamondBlockCheckpointMove> CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE = ACTIONS.register("crazy_diamond_anchor_move", 
             () -> new CrazyDiamondBlockCheckpointMove(new StandEntityAction.Builder().holdType().staminaCostTick(1)
                     .resolveLevelToUnlock(3)
                     .standSound(Phase.PERFORM, ModSounds.CRAZY_DIAMOND_FIX_STARTED)
                     .standAutoSummonMode(AutoSummonMode.OFF_ARM)
                     .partsRequired(StandPart.ARMS)));
     
-    public static final RegistryObject<StandEntityAction> CRAZY_DIAMOND_BLOCK_ANCHOR_MAKE = ACTIONS.register("crazy_diamond_anchor_make", 
+    public static final RegistryObject<CrazyDiamondBlockCheckpointMake> CRAZY_DIAMOND_BLOCK_ANCHOR_MAKE = ACTIONS.register("crazy_diamond_anchor_make", 
             () -> new CrazyDiamondBlockCheckpointMake(new StandEntityAction.Builder().standWindupDuration(10).standRecoveryTicks(5).staminaCost(25)
                     .resolveLevelToUnlock(3)
                     .standPose(StandPose.HEAVY_ATTACK_FINISHER)
@@ -690,33 +712,34 @@ public class ModStandsInit {
     public static final EntityStandRegistryObject<EntityStandType<StandStats>, StandEntityType<CrazyDiamondEntity>> STAND_CRAZY_DIAMOND = 
             new EntityStandRegistryObject<>("crazy_diamond", 
                     STAND_TYPES, 
-                    () -> new EntityStandType<>(
-                            0x4BEDE6, PART_4_NAME,
-                            
-                            new StandAction[] {
-                                    CRAZY_DIAMOND_PUNCH.get(), 
-                                    CRAZY_DIAMOND_BARRAGE.get(), 
-                                    CRAZY_DIAMOND_BLOCK_BULLET.get(), 
-                                    CRAZY_DIAMOND_BLOOD_CUTTER.get()},
-                            new StandAction[] {
-                                    CRAZY_DIAMOND_BLOCK.get(), 
-                                    CRAZY_DIAMOND_REPAIR.get(), 
-                                    CRAZY_DIAMOND_HEAL.get(), 
-                                    CRAZY_DIAMOND_RESTORE_TERRAIN.get(), 
-                                    CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE.get()},
-                            
-                            StandStats.class, new StandStats.Builder()
+                    () -> new EntityStandType.Builder<>()
+                    .color(0x4BEDE6)
+                    .storyPartName(PART_4_NAME)
+                    .leftClickHotbar(
+                            CRAZY_DIAMOND_PUNCH.get(), 
+                            CRAZY_DIAMOND_BARRAGE.get(), 
+                            CRAZY_DIAMOND_BLOCK_BULLET.get(), 
+                            CRAZY_DIAMOND_BLOOD_CUTTER.get()
+                            )
+                    .rightClickHotbar(
+                            CRAZY_DIAMOND_BLOCK.get(), 
+                            CRAZY_DIAMOND_REPAIR.get(), 
+                            CRAZY_DIAMOND_HEAL.get(), 
+                            CRAZY_DIAMOND_RESTORE_TERRAIN.get(), 
+                            CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE.get()
+                            )
+                    .defaultStats(StandStats.class, new StandStats.Builder()
                             .tier(5)
                             .power(14.0)
                             .speed(14.0)
                             .range(2.0, 4.0)
                             .durability(12.0)
                             .precision(12.0)
-                            .build("Crazy Diamond"), 
-                            
-                            new StandType.StandTypeOptionals()
-                            .addSummonShout(ModSounds.JOSUKE_CRAZY_DIAMOND)
-                            .addOst(ModSounds.CRAZY_DIAMOND_OST)),
+                            .randomWeight(2)
+                            )
+                    .addSummonShout(ModSounds.JOSUKE_CRAZY_DIAMOND)
+                    .addOst(ModSounds.CRAZY_DIAMOND_OST)
+                    .build(),
                     
                     ENTITIES,
                     () -> new StandEntityType<CrazyDiamondEntity>(CrazyDiamondEntity::new, 0.65F, 1.95F)
@@ -727,27 +750,25 @@ public class ModStandsInit {
     
     
     public static final RegistryObject<StandType<StandStats>> BOY_II_MAN = STAND_TYPES.register("boy_ii_man", 
-            () -> {
+            () -> 
 //                StandArrowEntity.EntityPierce.addBehavior(
 //                        () -> RockPaperScissorsKidEntity::canTurnFromArrow, 
 //                        () -> RockPaperScissorsKidEntity::turnFromArrow);
-                return new BoyIIManStandType<>(
-                        0x749FA5, PART_4_NAME,
-                        
-                        new StandAction[] {},
-                        new StandAction[] {},
-                        StandStats.class, new StandStats.Builder()
+                
+                new NoManifestationStandType.Builder<>()
+                .color(0x749FA5)
+                .storyPartName(PART_4_NAME)
+                .defaultStats(StandStats.class, new StandStats.Builder()
                         .tier(0)
                         .power(0)
                         .speed(0)
                         .range(0)
                         .durability(0)
                         .precision(0)
-                        .build("Boy II Man"), 
-                        
-                        new StandType.StandTypeOptionals()
-                        .setPlayerAccess(false));
-            });
+                        )
+                .setSurvivalGameplayPool(StandSurvivalGameplayPool.NPC_ENCOUNTER)
+                .build()
+            );
     
     
     

@@ -71,14 +71,17 @@ public class StandRemoverItem extends Item {
     private boolean useOn(LivingEntity entity, IStandPower power) {
         if (power.hasPower()) {
             switch (mode) {
-            case CLEAR:
+            case REMOVE:
                 power.clear();
-                power.clearActionLearning();
                 break;
             case EJECT:
                 Optional<StandInstance> previousDiscStand = power.putOutStand();
                 previousDiscStand.ifPresent(prevStand -> MCUtil.giveItemTo(entity, 
                         StandDiscItem.withStand(new ItemStack(ModItems.STAND_DISC.get()), prevStand), true));
+                break;
+            case FULL_CLEAR:
+                power.clear();
+                power.fullStandClear();
                 break;
             }
             return true;
@@ -88,11 +91,15 @@ public class StandRemoverItem extends Item {
     
     @Override
     public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
+        if (((StandRemoverItem) stack.getItem()).mode == Mode.FULL_CLEAR) {
+            tooltip.add(new TranslationTextComponent("item.jojo.stand_full_clear.hint").withStyle(TextFormatting.GRAY));
+        }
         tooltip.add(new TranslationTextComponent("item.jojo.creative_only_tooltip").withStyle(TextFormatting.DARK_GRAY));
     }
     
     public static enum Mode {
-        CLEAR,
-        EJECT
+        REMOVE,
+        EJECT,
+        FULL_CLEAR
     }
 }

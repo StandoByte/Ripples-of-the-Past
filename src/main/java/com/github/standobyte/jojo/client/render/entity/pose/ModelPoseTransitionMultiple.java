@@ -33,14 +33,14 @@ public class ModelPoseTransitionMultiple<T extends Entity> implements IModelPose
     }
 
     @Override
-    public void poseModel(float rotationAmount, T entity, float ticks, float yRotationOffset, float xRotation, HandSide side) {
+    public void poseModel(float rotationAmount, T entity, float ticks, float yRotOffsetRad, float xRotRad, HandSide side) {
         rotationAmount = animPointFunc.apply(rotationAmount);
         Map.Entry<Float, ModelPoseTransition<T>> part = transitions.floorEntry(rotationAmount);
         if (part != null) {
             Map.Entry<Float, ModelPoseTransition<T>> nextPart = transitions.ceilingEntry(rotationAmount);
             float nextPartPoint = nextPart != null ? nextPart.getKey() : 1.0F;
             float rotation = part.getKey() == nextPartPoint ? nextPartPoint : MathUtil.inverseLerp(rotationAmount, part.getKey(), nextPartPoint);
-            part.getValue().poseModel(rotation, entity, ticks, yRotationOffset, xRotation, side);
+            part.getValue().poseModel(rotation, entity, ticks, yRotOffsetRad, xRotRad, side);
         }
     }
 

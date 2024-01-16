@@ -1,25 +1,20 @@
 package com.github.standobyte.jojo.client.ui.screen.hudlayout;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.EnumSet;
+import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.InputHandler.MouseButton;
-import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.widgets.CustomButton;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClActionsLayoutPacket;
 import com.github.standobyte.jojo.power.IPower;
-import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.layout.ActionHotbarLayout;
 import com.github.standobyte.jojo.power.layout.ActionHotbarLayout.ActionSwitch;
@@ -30,10 +25,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Util;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -46,8 +39,8 @@ import net.minecraft.util.text.TranslationTextComponent;
 @SuppressWarnings("deprecation")
 public class HudLayoutEditingScreen extends Screen {
     private static final ResourceLocation WINDOW = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/layout_editing.png");
-    private static final int WINDOW_WIDTH = 200;
-    private static final int WINDOW_HEIGHT = 124;
+    private static final int WINDOW_WIDTH = 230;
+    private static final int WINDOW_HEIGHT = 180;
     
     private static PowerClassification selectedTab = null;
     private IPower<?, ?> selectedPower;
@@ -58,12 +51,7 @@ public class HudLayoutEditingScreen extends Screen {
     private boolean isQuickActionSlotHovered;
     private VisibilityButton quickAccessHudVisibilityButton;
     
-    private Map<PowerClassification, Set<ActionType>> editedLayouts = Util.make(new EnumMap<>(PowerClassification.class), map -> {
-        for (PowerClassification power : PowerClassification.values()) {
-            map.put(power, EnumSet.noneOf(ActionType.class));
-        }
-    });
-    private Map<PowerClassification, Action<?>> changedQuickAccessSlots = new EnumMap<>(PowerClassification.class);
+    private Collection<IPower<?, ?>> editedLayouts = new ArrayList<>();
 
     public HudLayoutEditingScreen() {
         super(new TranslationTextComponent("jojo.screen.edit_hud_layout"));
@@ -71,14 +59,35 @@ public class HudLayoutEditingScreen extends Screen {
     
     @Override
     protected void init() {
-        quickAccessHudVisibilityButton = new VisibilityButton(getWindowX() + 30, getWindowY() + WINDOW_HEIGHT - 28,
+        addButton(new CustomButton(getWindowX() + WINDOW_WIDTH - 30, getWindowY() + 6, 24, 24, 
                 button -> {
-                    ActionsLayout<?> layout = selectedPower.getActionsLayout();
+                    selectedPower.getActionsHudLayout().resetLayout();
+                    markLayoutEdited(selectedPower);
+                }, 
+                (button, matrixStack, x, y) -> {
+                    renderTooltip(matrixStack, new TranslationTextComponent("jojo.screen.edit_hud_layout.reset"), x, y);
+                }) {
+
+            @Override
+            protected void renderCustomButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
+                Minecraft minecraft = Minecraft.getInstance();
+                minecraft.getTextureManager().bind(WINDOW);
+                RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+                RenderSystem.enableDepthTest();
+                blit(matrixStack, x, y, 0, 184 + getYImage(isHovered()) * 24, width, height);
+            }
+        });
+        
+        addButton(quickAccessHudVisibilityButton = new VisibilityButton(getWindowX() + 42, getWindowY() + 66,
+                button -> {
+                    ActionsLayout<?> layout = selectedPower.getActionsHudLayout();
                     boolean newValue = !layout.isMmbActionHudVisible();
                     layout.setMmbActionHudVisibility(newValue);
                     quickAccessHudVisibilityButton.setVisibilityState(newValue);
-                    PacketManager.sendToServer(ClActionsLayoutPacket.saveQuickAccessVisibility(selectedPower.getPowerClassification(), newValue));
-                });
+                    markLayoutEdited(selectedPower);
+                }));
         
         if (selectedTab != null) {
             IPower.getPowerOptional(minecraft.player, selectedTab).ifPresent(power -> {
@@ -103,30 +112,6 @@ public class HudLayoutEditingScreen extends Screen {
         if (selectedTab != null && selectedPower == null) {
             selectTab(IPower.getPlayerPower(minecraft.player, selectedTab));
         }
-        
-        addButton(new CustomButton(getWindowX() + WINDOW_WIDTH - 30, getWindowY() + WINDOW_HEIGHT - 30, 24, 24, 
-                button -> {
-                    PacketManager.sendToServer(ClActionsLayoutPacket.resetLayout(selectedPower.getPowerClassification()));
-                    selectedPower.getActionsLayout().resetLayout();
-                    editedLayouts.put(selectedPower.getPowerClassification(), EnumSet.noneOf(ActionType.class));
-                }, 
-                (button, matrixStack, x, y) -> {
-                    renderTooltip(matrixStack, new TranslationTextComponent("jojo.screen.edit_hud_layout.reset"), x, y);
-                }) {
-
-            @Override
-            protected void renderCustomButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
-                Minecraft minecraft = Minecraft.getInstance();
-                minecraft.getTextureManager().bind(WINDOW);
-                RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
-                RenderSystem.enableBlend();
-                RenderSystem.defaultBlendFunc();
-                RenderSystem.enableDepthTest();
-                blit(matrixStack, x, y, 0, 184 + getYImage(isHovered()) * 24, width, height);
-            }
-        });
-        
-        addButton(quickAccessHudVisibilityButton);
     }
     
     public boolean works() {
@@ -136,6 +121,7 @@ public class HudLayoutEditingScreen extends Screen {
     @Override
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
         if (!works()) return;
+        renderBackground(matrixStack, 0);
         hoveredAction = getActionAt(mouseX, mouseY);
         isQuickActionSlotHovered = isQuickAccessActionSlotAt(mouseX, mouseY);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
@@ -147,7 +133,6 @@ public class HudLayoutEditingScreen extends Screen {
         renderDragged(matrixStack, mouseX, mouseY);
         renderToolTips(matrixStack, mouseX, mouseY);
         buttons.forEach(button -> button.render(matrixStack, mouseX, mouseY, partialTick));
-        drawText(matrixStack);
     }
     
 
@@ -155,9 +140,9 @@ public class HudLayoutEditingScreen extends Screen {
         RenderSystem.enableBlend();
         minecraft.getTextureManager().bind(WINDOW);
         blit(matrixStack, getWindowX(), getWindowY(), 0, 0, WINDOW_WIDTH, WINDOW_HEIGHT);
-        blit(matrixStack, getWindowX() + 9, getWindowY() + 3, 232, 3, 9, 16);
-        blit(matrixStack, getWindowX() + 9, getWindowY() + 39, 232, 39, 9, 16);
-        blit(matrixStack, getWindowX() + 9, getWindowY() + 75, 232, 75, 9, 16);
+        blit(matrixStack, getWindowX() + 7, getWindowY() + 10, 232, 3, 9, 16);
+        blit(matrixStack, getWindowX() + 7, getWindowY() + 36, 232, 39, 9, 16);
+        blit(matrixStack, getWindowX() + 7, getWindowY() + 62, 232, 75, 9, 16);
         RenderSystem.disableBlend();
     }
     
@@ -173,7 +158,7 @@ public class HudLayoutEditingScreen extends Screen {
             blit(matrixStack, xy[0], xy[1], textureX, textureY, 28, 32);
 
             RenderSystem.enableBlend();
-            minecraft.getTextureManager().bind(powersPresent.get(i).getType().getIconTexture());
+            minecraft.getTextureManager().bind(powersPresent.get(i).clGetPowerTypeIcon());
             blit(matrixStack, xy[0] + 6, xy[1] + 10, 0, 0, 16, 16, 16, 16);
             RenderSystem.disableBlend();
             if (renderSelectedTabButton) break;
@@ -190,33 +175,31 @@ public class HudLayoutEditingScreen extends Screen {
         return power == selectedPower;
     }
 
-    private static final int HOTBARS_X = 8;
-    private static final int ATTACKS_HOTBAR_Y = 20;
-    private static final int ABILITIES_HOTBAR_Y = 56;
-    private static final int QUICK_ACCESS_Y = 92;
+    private static final int HOTBARS_X = 20;
+    private static final int ATTACKS_HOTBAR_Y = 10;
+    private static final int ABILITIES_HOTBAR_Y = 36;
+    private static final int QUICK_ACCESS_Y = 62;
     private <P extends IPower<P, ?>> void renderSlots(MatrixStack matrixStack, int mouseX, int mouseY) {
         RenderSystem.enableBlend();
         P iSuckAtThis = (P) selectedPower;
         int x = HOTBARS_X + getWindowX();
-        renderHotbar(iSuckAtThis, ActionType.ATTACK, matrixStack, x, ATTACKS_HOTBAR_Y + getWindowY(), mouseX, mouseY);
-        renderHotbar(iSuckAtThis, ActionType.ABILITY, matrixStack, x, ABILITIES_HOTBAR_Y + getWindowY(), mouseX, mouseY);
+        renderHotbar(iSuckAtThis, ActionsLayout.Hotbar.LEFT_CLICK, matrixStack, x, ATTACKS_HOTBAR_Y + getWindowY(), mouseX, mouseY);
+        renderHotbar(iSuckAtThis, ActionsLayout.Hotbar.RIGHT_CLICK, matrixStack, x, ABILITIES_HOTBAR_Y + getWindowY(), mouseX, mouseY);
         renderActionSlot(matrixStack, x, QUICK_ACCESS_Y + getWindowY(), mouseX, mouseY, 
-                iSuckAtThis, iSuckAtThis.getActionsLayout().getQuickAccessAction(), 
-                true, 
+                iSuckAtThis, iSuckAtThis.getActionsHudLayout().getVisibleQuickAccessAction(shift, iSuckAtThis, ActionTarget.EMPTY), true, 
                 draggedAction.isPresent(), 
                 isQuickActionSlotHovered && draggedAction.isPresent(), 
                 true);
         RenderSystem.disableBlend();
     }
     
-    private <P extends IPower<P, ?>> void renderHotbar(P power, ActionType hotbar,
+    private <P extends IPower<P, ?>> void renderHotbar(P power, ActionsLayout.Hotbar hotbar,
             MatrixStack matrixStack, int hotbarX, int hotbarY,
             int mouseX, int mouseY) {
         int i = 0;
-        for (ActionSwitch<P> actionSwitch : power.getActions(hotbar).getLayoutView()) {
+        for (ActionSwitch<P> actionSwitch : power.getActionsHudLayout().getHotbar(hotbar).getLayoutView()) {
             renderActionSlot(matrixStack, hotbarX + i * 18, hotbarY, mouseX, mouseY, 
-                    power, actionSwitch.getAction(), 
-                    actionSwitch.isEnabled(), 
+                    power, actionSwitch, 
                     draggedAction.map(dragged -> dragged.hotbar == hotbar).orElse(false), 
                     hoveredAction.map(slot -> slot.actionSwitch == actionSwitch).orElse(false), 
                     draggedAction.map(dragged -> dragged.actionSwitch != actionSwitch).orElse(true));
@@ -224,13 +207,35 @@ public class HudLayoutEditingScreen extends Screen {
         }
     }
     
+    private <P extends IPower<P, ?>> void renderDragged(MatrixStack matrixStack, int mouseX, int mouseY) {
+        draggedAction.ifPresent(dragged -> {
+            RenderSystem.translatef(0.0F, 0.0F, 32.0F);
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            this.setBlitOffset(200);
+            ActionSwitch<P> actionSwitch = (ActionSwitch<P>) dragged.actionSwitch;
+            renderActionIcon(matrixStack, mouseX - 8, mouseY - 8, 
+                    actionSwitch.getAction(), actionSwitch.isEnabled(), (P) selectedPower);
+            this.setBlitOffset(0);
+            RenderSystem.disableBlend();
+            RenderSystem.translatef(0.0F, 0.0F, -32.0F);
+        });
+    }
+    
     private <P extends IPower<P, ?>> void renderActionSlot(MatrixStack matrixStack, 
             int x, int y, int mouseX, int mouseY, 
-            P power, Action<P> action, 
-            boolean isEnabled, boolean fitsForDragged, boolean isHoveredOver, boolean renderActionIcon) {
-        Action<P> actionResolved = power.getActionOnClick(action, shift, ActionTarget.EMPTY);
-        if (actionResolved != null) action = actionResolved;
-        
+            P power, ActionSwitch<P> actionSwitch, 
+            boolean fitsForDragged, boolean isHoveredOver, boolean renderActionIcon) {
+        renderActionSlot(matrixStack, 
+                x, y, mouseX, mouseY, 
+                power, actionSwitch.getAction(), actionSwitch.isEnabled(), 
+                fitsForDragged, isHoveredOver, renderActionIcon);
+    }
+    
+    private <P extends IPower<P, ?>> void renderActionSlot(MatrixStack matrixStack, 
+            int x, int y, int mouseX, int mouseY, 
+            P power, Action<P> action, boolean isEnabled, 
+            boolean fitsForDragged, boolean isHoveredOver, boolean renderActionIcon) {
         minecraft.getTextureManager().bind(WINDOW);
         int texX = isHoveredOver ? 82 : 64;
         if (fitsForDragged) {
@@ -238,37 +243,30 @@ public class HudLayoutEditingScreen extends Screen {
         }
         blit(matrixStack, x, y, texX, 238, 18, 18);
 
-        if (renderActionIcon && action != null) {
+        if (renderActionIcon) {
+            renderActionIcon(matrixStack, x + 1, y + 1, action, isEnabled, power);
+        }
+    }
+    
+    private <P extends IPower<P, ?>> void renderActionIcon(MatrixStack matrixStack, int x, int y, Action<P> action, boolean isEnabled, P power) {
+        if (action != null) {
+            Action<P> actionResolved = power.getActionsHudLayout().resolveVisibleActionInSlot(action, shift, power, ActionTarget.EMPTY);
+            if (actionResolved != null) action = actionResolved;
             if (shift) {
                 action = action.getShiftVariationIfPresent();
             }
-            TextureAtlasSprite textureAtlasSprite = CustomResources.getActionSprites().getSprite(action, power);
-            minecraft.getTextureManager().bind(textureAtlasSprite.atlas().location());
+            
+            ResourceLocation icon = action.getIconTexture(power);
+            minecraft.getTextureManager().bind(icon);
             
             boolean isUnlocked = action.isUnlocked(power);
             float alpha = isEnabled ? isUnlocked ? 1.0F : 0.6F : 0.2F;
             float color = isEnabled && isUnlocked ? 1.0F : 0.0F;
             
             RenderSystem.color4f(color, color, color, alpha);
-            blit(matrixStack, x + 1, y + 1, 0, 16, 16, textureAtlasSprite);
+            blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         }
-    }
-    
-    private <P extends IPower<P, ?>> void renderDragged(MatrixStack matrixStack, int mouseX, int mouseY) {
-        draggedAction.ifPresent(dragged -> {
-            RenderSystem.translatef(0.0F, 0.0F, 32.0F);
-            this.setBlitOffset(200);
-            Action<P> action = (Action<P>) dragged.actionSwitch.getAction();
-            if (shift) {
-                action = action.getShiftVariationIfPresent();
-            }
-            TextureAtlasSprite textureAtlasSprite = CustomResources.getActionSprites()
-                    .getSprite(action, (P) selectedPower);
-            blit(matrixStack, mouseX - 8, mouseY - 8, 0, 16, 16, textureAtlasSprite);
-            this.setBlitOffset(0);
-            RenderSystem.translatef(0.0F, 0.0F, -32.0F);
-        });
     }
     
     private Optional<ActionData<?>> getActionAt(int mouseX, int mouseY) {
@@ -277,16 +275,16 @@ public class HudLayoutEditingScreen extends Screen {
                 .flatMap(action -> Optional.of(new ActionData<>(action, hotbar))));
     }
     
-    private Optional<ActionType> getHotbarAt(int mouseY) {
-        if (mouseY >= ATTACKS_HOTBAR_Y && mouseY < ATTACKS_HOTBAR_Y + 18) return Optional.of(ActionType.ATTACK);
-        if (mouseY >= ABILITIES_HOTBAR_Y && mouseY < ABILITIES_HOTBAR_Y + 18) return Optional.of(ActionType.ABILITY);
+    private Optional<ActionsLayout.Hotbar> getHotbarAt(int mouseY) {
+        if (mouseY >= ATTACKS_HOTBAR_Y && mouseY < ATTACKS_HOTBAR_Y + 18) return Optional.of(ActionsLayout.Hotbar.LEFT_CLICK);
+        if (mouseY >= ABILITIES_HOTBAR_Y && mouseY < ABILITIES_HOTBAR_Y + 18) return Optional.of(ActionsLayout.Hotbar.RIGHT_CLICK);
         return Optional.empty();
     }
     
-    private Optional<ActionSwitch<?>> getSlotInHotbar(ActionType hotbar, int mouseX) {
+    private Optional<ActionSwitch<?>> getSlotInHotbar(ActionsLayout.Hotbar hotbar, int mouseX) {
         mouseX -= HOTBARS_X;
         if (mouseX < 0) return Optional.empty();
-        List<? extends ActionSwitch<?>> layout = selectedPower.getActions(hotbar).getLayoutView();
+        List<? extends ActionSwitch<?>> layout = selectedPower.getActionsHudLayout().getHotbar(hotbar).getLayoutView();
         int slot = mouseX / 18;
         return slot < layout.size() ? Optional.of(layout.get(slot)) : Optional.empty();
     }
@@ -299,9 +297,9 @@ public class HudLayoutEditingScreen extends Screen {
     
     private void renderHint(MatrixStack matrixStack) {
         minecraft.getTextureManager().bind(WINDOW);
-        int x = getWindowX() + WINDOW_WIDTH - 48;
-        int y = getWindowY() + WINDOW_HEIGHT - 17;
-        blit(matrixStack, x, y, 32, 245, 11, 11);
+        int hintX = getWindowX() + WINDOW_WIDTH - 48;
+        int hintY = getWindowY() + 6;
+        blit(matrixStack, hintX, hintY, 32, 245, 11, 11);
     }
     
     private final List<ITextComponent> hintTooltip = ImmutableList.of(
@@ -319,7 +317,7 @@ public class HudLayoutEditingScreen extends Screen {
         }
         
         int hintX = getWindowX() + WINDOW_WIDTH - 48;
-        int hintY = getWindowY() + WINDOW_HEIGHT - 17;
+        int hintY = getWindowY() + 6;
         if (mouseX >= hintX && mouseX < hintX + 11 && mouseY >= hintY && mouseY < hintY + 11) {
             renderComponentTooltip(matrixStack, hintTooltip, mouseX, mouseY);
         }
@@ -331,13 +329,13 @@ public class HudLayoutEditingScreen extends Screen {
             renderActionName(matrixStack, power, (Action<P>) slot.actionSwitch.getAction(), mouseX, mouseY, slot.actionSwitch.isEnabled());
         });
         if (isQuickActionSlotHovered) {
-            renderActionName(matrixStack, power, power.getActionsLayout().getQuickAccessAction(), mouseX, mouseY, true);
+            renderActionName(matrixStack, power, power.getActionsHudLayout().getVisibleQuickAccessAction(shift, power, ActionTarget.EMPTY), mouseX, mouseY, true);
         }
     }
     
     private <P extends IPower<P, ?>> void renderActionName(MatrixStack matrixStack, P power, Action<P> action, int mouseX, int mouseY, boolean isEnabled) {
         if (action == null) return;
-        Action<P> actionReplacing = power.getActionOnClick(action, shift, ActionTarget.EMPTY);
+        Action<P> actionReplacing = power.getActionsHudLayout().resolveVisibleActionInSlot(action, shift, power, ActionTarget.EMPTY);
         if (actionReplacing != null) {
             action = actionReplacing;
         }
@@ -392,10 +390,10 @@ public class HudLayoutEditingScreen extends Screen {
         if (draggedAction.isPresent()) {
             clickedSlot.ifPresent(clicked -> {
                 if (draggedAction.get().hotbar == clicked.hotbar) {
-                    selectedPower.getActions(clicked.hotbar).swapActionsOrder(
+                    selectedPower.getActionsHudLayout().getHotbar(clicked.hotbar).swapActionsOrder(
                             draggedAction.get().actionSwitch.getAction(), 
                             clicked.actionSwitch.getAction());
-                    markLayoutEdited(clicked.hotbar);
+                    markLayoutEdited(selectedPower);
                 }
             });
             if (isQuickActionSlotHovered) {
@@ -412,19 +410,19 @@ public class HudLayoutEditingScreen extends Screen {
                 return true;
             }
             if (clickedSlot.isPresent()) {
-                ActionType hotbar = clickedSlot.get().hotbar;
+                ActionsLayout.Hotbar hotbar = clickedSlot.get().hotbar;
                 switch (button) {
                 case LEFT:
                     draggedAction = clickedSlot;
                     return true;
                 case RIGHT:
                     ActionSwitch<?> slot = clickedSlot.get().actionSwitch;
-                    selectedPower.getActions(hotbar).setIsEnabled(slot.getAction(), !slot.isEnabled());
-                    markLayoutEdited(hotbar);
+                    selectedPower.getActionsHudLayout().getHotbar(hotbar).setIsEnabled(slot.getAction(), !slot.isEnabled());
+                    markLayoutEdited(selectedPower);
                     
                     if (slot.isEnabled() && selectedPower == ActionsOverlayGui.getInstance().getCurrentPower()
                             && isActionVisible(slot.getAction(), selectedPower)) {
-                        int slotIndex = selectedPower.getActions(hotbar).getEnabled().indexOf(slot.getAction());
+                        int slotIndex = selectedPower.getActionsHudLayout().getHotbar(hotbar).getEnabled().indexOf(slot.getAction());
                         if (slotIndex >= 0) {
                             ActionsOverlayGui.getInstance().selectAction(hotbar, slotIndex);
                         }
@@ -446,7 +444,7 @@ public class HudLayoutEditingScreen extends Screen {
         if (power != null && power.hasPower()) {
             selectedPower = power;
             selectedTab = power.getPowerClassification();
-            quickAccessHudVisibilityButton.setVisibilityState(power.getActionsLayout().isMmbActionHudVisible());
+            quickAccessHudVisibilityButton.setVisibilityState(power.getActionsHudLayout().isMmbActionHudVisible());
         }
     }
     
@@ -457,7 +455,7 @@ public class HudLayoutEditingScreen extends Screen {
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double scroll) {
         if (hoveredAction.isPresent()) {
-            ActionType hotbar = hoveredAction.get().hotbar;
+            ActionsLayout.Hotbar hotbar = hoveredAction.get().hotbar;
             if (hotbar != null) {
                 ActionsOverlayGui.getInstance().scrollAction(hotbar, scroll > 0);
                 return true;
@@ -469,7 +467,7 @@ public class HudLayoutEditingScreen extends Screen {
     private boolean shift = false;
     @Override
     public boolean keyPressed(int key, int scanCode, int modifiers) {
-        if (minecraft.options.keyShift.matches(key, scanCode)) {
+        if (InputHandler.renderShiftVarInScreenUI(minecraft, key, scanCode)) {
             shift = true;
         }
         if (InputHandler.getInstance().editHotbars.matches(key, scanCode)) {
@@ -482,12 +480,12 @@ public class HudLayoutEditingScreen extends Screen {
                 Optional<ActionData<?>> toMove = draggedAction;
                 if (!toMove.isPresent()) toMove = hoveredAction;
                 if (toMove.map(action -> {
-                    ActionHotbarLayout<?> actionsHotbar = selectedPower.getActions(action.hotbar);
+                    ActionHotbarLayout<?> actionsHotbar = selectedPower.getActionsHudLayout().getHotbar(action.hotbar);
                     if (numKey < actionsHotbar.getLayoutView().size()) {
                         actionsHotbar.swapActionsOrder(
                                 action.actionSwitch.getAction(), 
                                 actionsHotbar.getLayoutView().get(numKey).getAction());
-                        markLayoutEdited(action.hotbar);
+                        markLayoutEdited(selectedPower);
                         return true;
                     }
                     return false;
@@ -511,18 +509,18 @@ public class HudLayoutEditingScreen extends Screen {
         return -1;
     }
     
-    private void markLayoutEdited(ActionType hotbar) {
-        editedLayouts.get(selectedPower.getPowerClassification()).add(hotbar);
+    private void markLayoutEdited(IPower<?, ?> power) {
+        editedLayouts.add(power);
     }
 
     private <P extends IPower<P, ?>> void setQuickAccess(IPower<?, ?> power, Action<P> action) {
-        ((P) power).getActionsLayout().setQuickAccessAction(action);
-        changedQuickAccessSlots.put(power.getPowerClassification(), action);
+        ((P) power).getActionsHudLayout().setQuickAccessAction(action);
+        markLayoutEdited(power);
     }
     
     @Override
     public boolean keyReleased(int key, int scanCode, int modifiers) {
-        if (minecraft.options.keyShift.matches(key, scanCode)) {
+        if (InputHandler.renderShiftVarInScreenUI(minecraft, key, scanCode)) {
             shift = false;
         }
         return super.keyReleased(key, scanCode, modifiers);
@@ -531,23 +529,18 @@ public class HudLayoutEditingScreen extends Screen {
     @Override
     public void onClose() {
         super.onClose();
-        editedLayouts.forEach((power, hotbars) -> {
-            hotbars.forEach(hotbar -> {
-                PacketManager.sendToServer(ClActionsLayoutPacket.withLayout(power, hotbar, 
-                        IPower.getPlayerPower(minecraft.player, power).getActions(hotbar)));
-            });
-        });
-        changedQuickAccessSlots.forEach((power, action) -> {
-            PacketManager.sendToServer(ClActionsLayoutPacket.quickAccessAction(power, action));
+        editedLayouts.forEach(power -> {
+            PacketManager.sendToServer(new ClActionsLayoutPacket(
+                    power.getPowerClassification(), power.getType(), power.getActionsHudLayout()));
         });
         ActionsOverlayGui.getInstance().revealActionNames();
     }
     
     private static class ActionData<P extends IPower<P, ?>> {
         private final ActionSwitch<P> actionSwitch;
-        private final ActionType hotbar;
+        private final ActionsLayout.Hotbar hotbar;
         
-        private ActionData(ActionSwitch<P> actionSwitch, ActionType hotbar) {
+        private ActionData(ActionSwitch<P> actionSwitch, ActionsLayout.Hotbar hotbar) {
             this.actionSwitch = actionSwitch;
             this.hotbar = hotbar;
         }

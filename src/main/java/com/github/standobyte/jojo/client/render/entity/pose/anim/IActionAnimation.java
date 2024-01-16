@@ -12,7 +12,7 @@ public interface IActionAnimation<T extends Entity> {
     default void onAnimStart(T entity, float yRotationOffset, float xRotation) {}
     
     void animate(StandEntityAction.Phase phase, float phaseCompletion, 
-            T entity, float ticks, float yRotationOffset, float xRotation, HandSide side);
+            T entity, float ticks, float yRotOffsetRad, float xRotRad, HandSide side);
     
     default void renderAdditional(T entity, MatrixStack matrixStack, IVertexBuilder buffer, 
             int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {}

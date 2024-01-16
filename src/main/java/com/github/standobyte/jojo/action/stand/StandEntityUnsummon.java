@@ -8,10 +8,12 @@ import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
@@ -26,7 +28,7 @@ public final class StandEntityUnsummon extends StandEntityAction {
         LivingEntity user = standEntity.getUser();
         if (user != null && (standEntity.isCloseToUser() || standEntity.isFollowingUser() || standEntity.unsummonTicks > 0)) {
             int maxTicks = getUnsummonDuration(standEntity);
-            if (standEntity.unsummonTicks == maxTicks) {
+            if (standEntity.unsummonTicks >= maxTicks) {
                 if (!world.isClientSide()) {
                     userPower.getType().forceUnsummon(user, userPower);
                 }
@@ -67,7 +69,18 @@ public final class StandEntityUnsummon extends StandEntityAction {
     }
     
     public int getUnsummonDuration(StandEntity standEntity) {
-        return standEntity.isArmsOnlyMode() ? 10 : 15;
+        LivingEntity user = standEntity.getUser();
+        boolean resolve = user != null && user.hasEffect(ModStatusEffects.RESOLVE.get());
+        if (resolve) {
+            return standEntity.isArmsOnlyMode() ? 3 : 5;
+        }
+        else {
+            int ticks = standEntity.isArmsOnlyMode() ? 7 : 10;
+            double staminaDebuff = standEntity.getStaminaCondition(); // 0.25 ~ 1
+            staminaDebuff = (staminaDebuff * 2 + 1) / 3.0;            // 0.5  ~ 1
+            if (staminaDebuff < 1) ticks = MathHelper.ceil((double) ticks / staminaDebuff);
+            return ticks;
+        }
     }
     
     @Override
@@ -103,7 +116,7 @@ public final class StandEntityUnsummon extends StandEntityAction {
     public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task, int ticks) {
         if (world.isClientSide()) {
             LivingEntity user = standPower.getUser();
-            if (user != null && user == ClientUtil.getClientPlayer()) {
+            if (user != null && user == ClientUtil.getClientPlayer() && !standEntity.isArmsOnlyMode()) {
                 ActionsOverlayGui.getInstance().onStandUnsummon();
             }
         }

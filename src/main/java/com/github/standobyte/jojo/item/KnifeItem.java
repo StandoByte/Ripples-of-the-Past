@@ -1,17 +1,10 @@
 package com.github.standobyte.jojo.item;
 
-import java.util.Optional;
-
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
-import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.entity.itemprojectile.KnifeEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.GameplayEventHandler;
-import com.github.standobyte.jojo.util.mod.JojoModUtil;
-import com.github.standobyte.jojo.util.mod.TimeUtil;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableMultimap.Builder;
 import com.google.common.collect.Multimap;
@@ -59,7 +52,7 @@ public class KnifeItem extends Item {
         });
     }
 
-    private static final int MAX_KNIVES_THROW = 8;
+    public static final int MAX_KNIVES_THROW = 8;
     @Override
     public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         ItemStack handStack = player.getItemInHand(hand);
@@ -70,62 +63,29 @@ public class KnifeItem extends Item {
                 player.hurt(DamageSource.playerAttack(player), 1.0F);
                 return ActionResult.consume(handStack);
             }
-
-            IStandPower standPower = IStandPower.getPlayerStandPower(player);
-            boolean hasTheWorld = standPower.getType() == ModStands.THE_WORLD.getStandType();
-            Optional<StandEntity> theWorld = hasTheWorld && standPower.isActive()
-                    ? Optional.of((StandEntity) standPower.getStandManifestation()) : Optional.empty();
             
             for (int i = 0; i < knivesToThrow; i++) {
                 KnifeEntity knifeEntity = new KnifeEntity(world, player);
-                if (knivesToThrow == 1 && hasTheWorld) {
-                    player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                        if (cap.knivesThrewTicks > 0) {
-                            JojoModUtil.sayVoiceLine(player, ModSounds.DIO_ONE_MORE.get());
-                            cap.knivesThrewTicks = 0;
-                        }
-                    });
-                }
                 knifeEntity.setTimeStopFlightTicks(5);
                 knifeEntity.shootFromRotation(player, 1.5F, i == 0 ? 1.0F : 16.0F);
                 world.addFreshEntity(knifeEntity);
             }
             
-            int cooldown = knivesToThrow * 3;
-            if (hasTheWorld && knivesToThrow > 1 && TimeUtil.isTimeStopped(player.level, player.blockPosition())) {
-                player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                    cap.knivesThrewTicks = 80;
-                });
-            }
-            
-            if (!player.isShiftKeyDown() && handStack.getCount() > MAX_KNIVES_THROW && theWorld.isPresent()) {
-                StandEntity stand = theWorld.get();
-                int standKnives = handStack.getCount() - MAX_KNIVES_THROW;
-                knivesToThrow = handStack.getCount();
-                
-                for (int i = 0; i < standKnives; i++) {
-                    KnifeEntity knifeEntity = new KnifeEntity(world, player);
-                    knifeEntity.setPos(stand.getX(), stand.getEyeY() - 0.1, stand.getZ());
-                    knifeEntity.shootFromRotation(player, 1.5F, i == 0 ? 1.0F : 16.0F);
-                    world.addFreshEntity(knifeEntity);
-                }
-                
-                world.getCapability(WorldUtilCapProvider.CAPABILITY).map(cap -> 
-                cap.getTimeStopHandler().userStoppedTime(player)).get().ifPresent(timeStop -> {
-                    if (timeStop.getStartingTicks() == 100 && timeStop.getTicksLeft() > 50 && timeStop.getTicksLeft() <= 80) {
-                        JojoModUtil.sayVoiceLine(player, ModSounds.DIO_5_SECONDS.get());
-                    }
-                });
-            }
-            
             world.playSound(null, player.getX(), player.getY(), player.getZ(), 
                     knivesToThrow == 1 ? ModSounds.KNIFE_THROW.get() : ModSounds.KNIVES_THROW.get(), 
-                            SoundCategory.PLAYERS, 0.5F, 0.4F / (random.nextFloat() * 0.4F + 0.8F));
+                            SoundCategory.PLAYERS, 0 * 0.5F, 0.4F / (random.nextFloat() * 0.4F + 0.8F));
             
+            int cooldown = knivesToThrow * 3;
             player.getCooldowns().addCooldown(this, cooldown);
             if (!player.abilities.instabuild) {
                 handStack.shrink(knivesToThrow);
             }
+            
+            IStandPower.getStandPowerOptional(player).ifPresent(power -> {
+                if (power.getStandManifestation() instanceof StandEntity) {
+                    ((StandEntity) power.getStandManifestation()).onKnivesThrow(world, player, handStack, knivesToThrow);
+                }
+            });
         }
         return ActionResult.success(handStack);
     }

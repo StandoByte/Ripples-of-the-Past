@@ -2,6 +2,8 @@ package com.github.standobyte.jojo.action.stand;
 
 import java.util.function.Supplier;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
@@ -9,6 +11,7 @@ import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack.HeavyPunch
 import com.github.standobyte.jojo.action.stand.punch.StandBlockPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.capability.world.TimeStopHandler;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
@@ -21,15 +24,16 @@ import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
+import com.github.standobyte.jojo.util.general.LazySupplier;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
-import com.github.standobyte.jojo.util.mod.TimeUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -39,19 +43,22 @@ import net.minecraft.world.World;
 
 public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStandPunch {
     public static final StandPose TS_PUNCH_POSE = new StandPose("TS_PUNCH");
-    private final Supplier<StandEntityHeavyAttack> theWorldHeavyAttack;
     private final Supplier<TimeStopInstant> theWorldTimeStopBlink;
-
+    
+    @Deprecated
     public TheWorldTSHeavyAttack(StandEntityAction.Builder builder, 
             Supplier<StandEntityHeavyAttack> theWorldHeavyAttack, Supplier<TimeStopInstant> theWorldTimeStopBlink) {
+        this(builder, theWorldTimeStopBlink);
+    }
+
+    public TheWorldTSHeavyAttack(StandEntityAction.Builder builder, Supplier<TimeStopInstant> theWorldTimeStopBlink) {
         super(builder);
-        this.theWorldHeavyAttack = theWorldHeavyAttack;
         this.theWorldTimeStopBlink = theWorldTimeStopBlink;
     }
     
     @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
-        if (TimeUtil.isTimeStopped(user.level, user.blockPosition())) {
+        if (TimeStopHandler.isTimeStopped(user.level, user.blockPosition())) {
             return ActionConditionResult.NEGATIVE;
         }
         return super.checkSpecificConditions(user, power, target);
@@ -73,14 +80,15 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
         if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
             StandEntity stand = (StandEntity) power.getStandManifestation();
             return ActionTarget.fromRayTraceResult(
-                    JojoModUtil.rayTrace(stand.isManuallyControlled() ? stand : user, 
-                            stand.getMaxRange(), stand.canTarget(), stand.getPrecision() / 16F, stand.getPrecision()));
+                    stand.precisionRayTrace(stand.isManuallyControlled() ? stand : user, stand.getMaxRange(),
+                            stand.getPrecision() / 16F));
         }
         return super.targetBeforePerform(world, user, power, target);
     }
     
     @Override
     protected void preTaskInit(World world, IStandPower standPower, StandEntity standEntity, ActionTarget target) {
+        standEntity.summonLockTicks = 0;
         if (!world.isClientSide() || standEntity.isManuallyControlled()) {
             LivingEntity aimingEntity = standEntity.isManuallyControlled() ? standEntity : standPower.getUser();
             if (aimingEntity != null) {
@@ -107,9 +115,9 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
                         if (target.getType() == TargetType.ENTITY) {
                             offset += target.getEntity().getBoundingBox().getXsize() / 2;
                         }
-                        boolean shift = standPower.getUser().isShiftKeyDown();
+                        boolean backshot = doesBackshot(standPower);
                         Vector3d offsetFromTarget = aimingEntity.getEyePosition(1.0F).subtract(pos).normalize().scale(offset);
-                        if (shift) {
+                        if (backshot) {
                             offsetFromTarget = offsetFromTarget.reverse();
                         }
                         pos = pos.add(offsetFromTarget);
@@ -141,7 +149,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
                 TimeStopInstant.skipTicksForStandAndUser(standPower, timeStopTicks);
                 if (!world.isClientSide()) {
                     MCUtil.playEitherSound(world, null, standEntity.getX(), standEntity.getY(), standEntity.getZ(), 
-                            TimeUtil::canPlayerSeeInStoppedTime, blink.blinkSound.get(), ModSounds.THE_WORLD_TIME_STOP_UNREVEALED.get(), 
+                            TimeStopHandler::canPlayerSeeInStoppedTime, blink.blinkSound.get(), ModSounds.THE_WORLD_TIME_STOP_UNREVEALED.get(), 
                             SoundCategory.AMBIENT, 1.0F, 1.0F);
                     standPower.consumeStamina(staminaCostTS + timeStopTicks * staminaCostTicking);
                     if (standPower.hasPower()) {
@@ -156,9 +164,8 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
         }
     }
     
-    @Override
-    public float getStaminaCost(IStandPower stand) {
-        return theWorldHeavyAttack.get().getStaminaCost(stand);
+    private boolean doesBackshot(IStandPower standPower) {
+        return JojoModUtil.useShiftVar(standPower.getUser());
     }
     
     @Override
@@ -176,6 +183,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
     public StandEntityPunch punchEntity(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
         double strength = stand.getAttackDamage();
         return new TheWorldTSHeavyPunch(stand, target, dmgSource)
+                .setVoiceLineOnKill(ModSounds.DIO_THIS_IS_THE_WORLD)
                 .damage(StandStatFormulas.getHeavyAttackDamage(strength))
                 .addKnockback(4)
                 .disableBlocking(1.0F)
@@ -225,19 +233,42 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
     }
     
     
+    private final LazySupplier<ResourceLocation> backshotTex = 
+            new LazySupplier<>(() -> makeIconVariant(this, "_back"));
+    @Override
+    public ResourceLocation getIconTexturePath(@Nullable IStandPower power) {
+        if (power != null && doesBackshot(power)) {
+            return backshotTex.get();
+        }
+        else {
+            return super.getIconTexturePath(power);
+        }
+    }
+    
+    
+    
     
     public static class TheWorldTSHeavyPunch extends HeavyPunchInstance {
+        private Supplier<SoundEvent> voiceLineOnKill = () -> null;
 
         public TheWorldTSHeavyPunch(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
             super(stand, target, dmgSource);
+        }
+        
+        public TheWorldTSHeavyPunch setVoiceLineOnKill(Supplier<SoundEvent> sound) {
+            this.voiceLineOnKill = sound != null ? sound : () -> null;
+            return this;
         }
 
         @Override
         protected void afterAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, StandEntityTask task, boolean hurt, boolean killed) {
             if (killed) {
-                LivingEntity user = stand.getUser();
-                if (user != null && stand.distanceToSqr(user) > 16) {
-                    JojoModUtil.sayVoiceLine(user, ModSounds.DIO_THIS_IS_THE_WORLD.get());
+                SoundEvent voiceLine = voiceLineOnKill.get();
+                if (voiceLine != null) {
+                    LivingEntity user = stand.getUser();
+                    if (user != null && stand.distanceToSqr(user) > 16) {
+                        JojoModUtil.sayVoiceLine(user, voiceLine);
+                    }
                 }
             }
             super.afterAttack(stand, target, dmgSource, task, hurt, killed);

@@ -1,12 +1,14 @@
 package com.github.standobyte.jojo.power.impl.stand.type;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -14,12 +16,14 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.command.configpack.StandStatsConfig;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
+import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
 import com.github.standobyte.jojo.util.mc.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -33,12 +37,14 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
 public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry<StandType<?>> implements IPowerType<IStandPower, StandType<?>> {
+    @Deprecated
     private final int color;
-    private final StandAction[] attacks;
-    private final StandAction[] abilities;
+    private final StandAction[] leftClickHotbar;
+    private final StandAction[] rightClickHotbar;
     private final StandAction defaultQuickAccess;
     private String translationKey;
     private ResourceLocation iconTexture;
@@ -46,18 +52,20 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     private final ITextComponent partName;
     private final T defaultStats;
     private final Class<T> statsClass;
-    private final boolean canPlayerGet;
+    private final StandSurvivalGameplayPool survivalGameplayPool;
     private final Supplier<SoundEvent> summonShoutSupplier;
     private final OstSoundList ostSupplier;
     private final Map<Integer, List<ItemStack>> resolveLevelItems;
+    private final int resolveMultiplierTier;
     
+    @Deprecated
     public StandType(int color, ITextComponent partName, 
-            StandAction[] attacks, StandAction[] abilities, StandAction defaultQuickAccess, 
+            StandAction[] leftClickHotbar, StandAction[] rightClickHotbar, StandAction defaultQuickAccess, 
             Class<T> statsClass, T defaultStats, @Nullable StandTypeOptionals additions) {
         this.color = color;
         this.partName = partName;
-        this.attacks = attacks;
-        this.abilities = abilities;;
+        this.leftClickHotbar = leftClickHotbar;
+        this.rightClickHotbar = rightClickHotbar;
         this.defaultQuickAccess = defaultQuickAccess;
         this.statsClass = statsClass;
         this.defaultStats = defaultStats;
@@ -65,11 +73,133 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         if (additions == null) additions = new StandTypeOptionals();
         this.ostSupplier = additions.ostSupplier;
         this.summonShoutSupplier = additions.summonShoutSupplier;
-        this.canPlayerGet = additions.canPlayerGet;
+        this.survivalGameplayPool = additions.survivalGameplayPool;
         this.resolveLevelItems = additions.resolveLevelItems;
+        this.resolveMultiplierTier = additions.resolveMultiplierTier;
     }
     
-    public void onCommonSetup() {}
+    protected StandType(AbstractBuilder<?, T> builder) {
+        this(builder.color, builder.storyPartName, builder.leftClickHotbar, builder.rightClickHotbar, 
+                builder.quickAccess, builder.statsClass, builder.defaultStats, 
+                builder.additions);
+    }
+    
+
+    
+    public static abstract class AbstractBuilder<B extends AbstractBuilder<B, T>, T extends StandStats> {
+        private int color = 0x000000;
+        private ITextComponent storyPartName = StringTextComponent.EMPTY;
+        private StandAction[] leftClickHotbar = {};
+        private StandAction[] rightClickHotbar = {};
+        private StandAction quickAccess = null;
+        private T defaultStats;
+        private Class<T> statsClass;
+        private StandTypeOptionals additions = null;
+        
+        public B color(int color) {
+            this.color = color;
+            return getThis();
+        }
+        
+        public B storyPartName(ITextComponent actions) {
+            this.storyPartName = actions;
+            return getThis();
+        }
+        
+        public B leftClickHotbar(StandAction... actions) {
+            this.leftClickHotbar = actions;
+            return getThis();
+        }
+        
+        public B rightClickHotbar(StandAction... actions) {
+            this.rightClickHotbar = actions;
+            if (quickAccess == null) {
+                quickAccess = actions.length > 0 ? actions[0] : null;
+            }
+            return getThis();
+        }
+        
+        public B defaultQuickAccess(StandAction quickAccess) {
+            this.quickAccess = quickAccess;
+            return getThis();
+        }
+        
+        public B defaultStats(Class<T> statsClass, T stats) {
+            this.statsClass = statsClass;
+            this.defaultStats = stats;
+            return getThis();
+        }
+        
+        public B defaultStats(Class<T> statsClass, StandStats.AbstractBuilder<?, T> statsBuilder) {
+            return defaultStats(statsClass, statsBuilder.build());
+        }
+        
+        public B addSummonShout(Supplier<SoundEvent> summonShoutSupplier) {
+            if (summonShoutSupplier != null) {
+                getOptionals().summonShoutSupplier = summonShoutSupplier;
+            }
+            return getThis();
+        }
+        
+        public B addOst(OstSoundList ostSupplier) {
+            if (ostSupplier != null) {
+                getOptionals().ostSupplier = ostSupplier;
+            }
+            return getThis();
+        }
+        
+        public B addItemOnResolveLevel(int resolveLevel, ItemStack item) {
+            if (item != null && !item.isEmpty()) {
+                getOptionals().resolveLevelItems.computeIfAbsent(resolveLevel, lvl -> new ArrayList<>()).add(item);
+            }
+            return getThis();
+        }
+        
+        public B setSurvivalGameplayPool(StandSurvivalGameplayPool survivalGameplayPool) {
+            getOptionals().survivalGameplayPool = survivalGameplayPool;
+            return getThis();
+        }
+        
+        public B addAttackerResolveMultTier(int tierAdd) {
+            getOptionals().resolveMultiplierTier += tierAdd;
+            return getThis();
+        }
+        
+        private StandTypeOptionals getOptionals() {
+            if (additions == null) {
+                additions = new StandTypeOptionals();
+            }
+            return additions;
+        }
+        
+        protected abstract B getThis();
+        public abstract StandType<T> build();
+    }
+    
+    
+
+    private Set<StandAction> allUnlockableActions;
+    public void onCommonSetup() {
+        Set<StandAction> unlockables = new HashSet<>();
+        Collections.addAll(unlockables, leftClickHotbar);
+        Collections.addAll(unlockables, rightClickHotbar);
+        
+        Set<StandAction> tmp = new HashSet<>();
+        for (StandAction action : unlockables) {
+            if (action.hasShiftVariation()) {
+                tmp.add((StandAction) action.getShiftVariationIfPresent());
+            }
+        }
+        unlockables.addAll(tmp);
+        
+        tmp.clear();
+        for (StandAction action : unlockables) {
+            Collections.addAll(tmp, action.getExtraUnlockable());
+        }
+        unlockables.addAll(tmp);
+        
+        this.allUnlockableActions = Collections.unmodifiableSet(unlockables);
+    }
     
     @Override
     public boolean keepOnDeath(IStandPower power) {
@@ -89,7 +219,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         return statsClass;
     }
     
-    @Override
+    @Deprecated
     public int getColor() {
         return color;
     }
@@ -97,6 +227,10 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     @Override
     public boolean isReplaceableWith(StandType<?> newType) {
         return false;
+    }
+    
+    public StandSurvivalGameplayPool getSurvivalGameplayPool() {
+        return survivalGameplayPool;
     }
 
     @Override
@@ -112,18 +246,20 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     @Override
-    public StandAction[] getAttacks() {
-        return attacks;
-    }
-
-    @Override
-    public StandAction[] getAbilities() {
-        return abilities;
+    public ActionsLayout<IStandPower> createDefaultLayout() {
+        return new ActionsLayout<>(leftClickHotbar, rightClickHotbar, defaultQuickAccess);
     }
     
-    @Override
-    public StandAction getDefaultQuickAccess() {
-        return defaultQuickAccess;
+    public StandAction[] getDefaultHotbar(ActionsLayout.Hotbar hotbar) {
+        switch (hotbar) {
+        case LEFT_CLICK: return leftClickHotbar;
+        case RIGHT_CLICK: return rightClickHotbar;
+        default: throw new IllegalArgumentException();
+        }
+    }
+    
+    public Iterable<StandAction> getAllUnlockableActions() {
+        return allUnlockableActions;
     }
     
     public boolean usesStamina() {
@@ -162,12 +298,8 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     public void unlockNewActions(IStandPower power) {
-        Stream.concat(Arrays.stream(attacks), Arrays.stream(abilities))
-        .forEach(action -> {
+        getAllUnlockableActions().forEach(action -> {
             tryUnlock(action, power);
-            if (action.hasShiftVariation()) {
-                tryUnlock((StandAction) action.getShiftVariationIfPresent(), power);
-            }
         });
     }
     
@@ -177,41 +309,22 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         }
     }
     
-    public boolean usesStandFinisherMechanic() {
-        return false;
+    private static final Optional<StandAction> NOPE = Optional.empty();
+    public Optional<StandAction> getStandFinisherPunch() {
+        return NOPE;
     }
     
     @Override
     public float getTargetResolveMultiplier(IStandPower power, IStandPower attackingStand) {
-        float multiplier = getTier() + 1;
+        float multiplier = resolveMultiplierTier + 1;
         if (attackingStand.hasPower()) {
-            multiplier = Math.max(multiplier - attackingStand.getType().getTier(), 1);
+            multiplier = Math.max(multiplier - attackingStand.getType().resolveMultiplierTier, 1);
         }
         return multiplier;
     }
     
-    @Override
-    public String getTranslationKey() {
-        if (translationKey == null) {
-            translationKey = Util.makeDescriptionId("stand", JojoCustomRegistries.STANDS.getRegistry().getKey(this));
-        }
-        return this.translationKey;
-    }
-    
-    @Override
-    public ResourceLocation getIconTexture() {
-        if (iconTexture == null) {
-            iconTexture = JojoModUtil.makeTextureLocation("power", getRegistryName().getNamespace(), getRegistryName().getPath());
-        }
-        return this.iconTexture;
-    }
-    
     public ITextComponent getPartName() {
         return partName;
-    }
-
-    public int getTier() {
-        return getStats().getTier();
     }
     
     public void toggleSummon(IStandPower standPower) {
@@ -247,6 +360,10 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         return false;
     }
     
+    public boolean canLeap() {
+        return false;
+    }
+    
     @Nullable
     public OstSoundList getOst() {
         return ostSupplier;
@@ -270,13 +387,38 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         }
     }
     
+    @Override
+    public String getTranslationKey() {
+        if (translationKey == null) {
+            translationKey = Util.makeDescriptionId("stand", JojoCustomRegistries.STANDS.getRegistry().getKey(this));
+        }
+        return this.translationKey;
+    }
+
+    @Override
+    public ResourceLocation getIconTexture(@Nullable IStandPower power) {
+        if (iconTexture == null) {
+            iconTexture = JojoModUtil.makeTextureLocation("power", getRegistryName().getNamespace(), getRegistryName().getPath());
+        }
+        
+        if (power != null && power.getType() == this) {
+            return StandSkinsManager.getInstance().getRemappedResPath(
+                    manager -> manager.getStandSkin(power.getStandInstance().get()), iconTexture);
+        }
+        
+        return this.iconTexture;
+    }
+    
+    public void onStandSkinSet(IStandPower power, Optional<ResourceLocation> skin) {}
     
     
+    @Deprecated
     public static class StandTypeOptionals {
-        private boolean canPlayerGet = true;
+        private StandSurvivalGameplayPool survivalGameplayPool = StandSurvivalGameplayPool.PLAYER_ARROW; 
         private Supplier<SoundEvent> summonShoutSupplier = () -> null;
         private OstSoundList ostSupplier = null;
         private Map<Integer, List<ItemStack>> resolveLevelItems = new HashMap<>();
+        private int resolveMultiplierTier = 5;
         
         public StandTypeOptionals addSummonShout(Supplier<SoundEvent> summonShoutSupplier) {
             if (summonShoutSupplier != null) {
@@ -298,11 +440,11 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
             }
             return this;
         }
-        
-        public StandTypeOptionals setPlayerAccess(boolean canPlayerGet) {
-            this.canPlayerGet = canPlayerGet;
-            return this;
-        }
-        
+    }
+    
+    
+    public static enum StandSurvivalGameplayPool {
+        PLAYER_ARROW,
+        NPC_ENCOUNTER
     }
 }

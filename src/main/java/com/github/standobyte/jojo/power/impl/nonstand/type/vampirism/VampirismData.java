@@ -13,13 +13,13 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.vampirism.ModVampirismActions;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrVampirismDataPacket;
-import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.TypeSpecificData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterHamonTechnique;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.block.BedBlock;
@@ -80,10 +80,10 @@ public class VampirismData extends TypeSpecificData {
 
     public void setVampireHamonUser(boolean vampireHamonUser, Optional<HamonData> prevHamon) {
         if (!this.vampireHamonUser == vampireHamonUser) {
-            serverPlayer.ifPresent(player -> {
-                PacketManager.sendToClientsTrackingAndSelf(TrVampirismDataPacket.wasHamonUser(
-                        player.getId(), vampireHamonUser), player);
-            });
+            LivingEntity user = power.getUser();
+            if (!user.level.isClientSide()) {
+                PacketManager.sendToClientsTrackingAndSelf(TrVampirismDataPacket.wasHamonUser(user.getId(), vampireHamonUser), user);
+            }
         }
         this.vampireHamonUser = vampireHamonUser;
         if (vampireHamonUser && prevHamon.isPresent()) {
@@ -112,7 +112,7 @@ public class VampirismData extends TypeSpecificData {
     
     private void addHamonSuicideAbility() {
         if (vampireHamonUser) {
-            power.getActions(ActionType.ABILITY).addExtraAction(ModVampirismActions.VAMPIRISM_HAMON_SUICIDE.get());
+            power.getActionsHudLayout().addExtraAction(ModVampirismActions.VAMPIRISM_HAMON_SUICIDE.get(), ActionsLayout.Hotbar.RIGHT_CLICK);
         }
     }
 
@@ -122,10 +122,10 @@ public class VampirismData extends TypeSpecificData {
     
     public void setVampireFullPower(boolean vampireFullPower) {
         if (this.vampireFullPower != vampireFullPower) {
-            serverPlayer.ifPresent(player -> {
-                PacketManager.sendToClientsTrackingAndSelf(TrVampirismDataPacket.atFullPower(
-                        player.getId(), vampireFullPower), player);
-            });
+            LivingEntity user = power.getUser();
+            if (!user.level.isClientSide()) {
+                PacketManager.sendToClientsTrackingAndSelf(TrVampirismDataPacket.atFullPower(user.getId(), vampireFullPower), user);
+            }
         }
         this.vampireFullPower = vampireFullPower;
     }
@@ -180,10 +180,10 @@ public class VampirismData extends TypeSpecificData {
     
     public void setCuringTicks(int ticks) {
         if (this.curingTicks != ticks) {
-            serverPlayer.ifPresent(player -> {
-                PacketManager.sendToClientsTrackingAndSelf(TrVampirismDataPacket.curingTicks(
-                        player.getId(), ticks), player);
-            });
+            LivingEntity user = power.getUser();
+            if (!user.level.isClientSide()) {
+                PacketManager.sendToClientsTrackingAndSelf(TrVampirismDataPacket.curingTicks(user.getId(), ticks), user);
+            }
             this.curingTicks = ticks;
         }
     }

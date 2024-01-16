@@ -1,6 +1,11 @@
 package com.github.standobyte.jojo.util.general;
 
 import java.lang.reflect.Field;
+import java.util.Optional;
+import java.util.Random;
+import java.util.function.ToDoubleFunction;
+import java.util.function.ToIntFunction;
+import java.util.stream.StreamSupport;
 
 import com.github.standobyte.jojo.util.mc.reflection.ReflectionUtil;
 
@@ -91,6 +96,42 @@ public class MathUtil {
         return numInt;
     }
     
+    public static <T> Optional<T> getRandomWeightedInt(Iterable<T> items, ToIntFunction<T> getWeight, Random random) {
+        ToIntFunction<T> getWeightSafe = element -> Math.max(getWeight.applyAsInt(element), 0);
+        int weightSum = StreamSupport.stream(items.spliterator(), false)
+                .mapToInt(getWeightSafe).sum();
+        if (weightSum <= 0) return Optional.empty();
+        
+        int randomNum = random.nextInt(weightSum);
+
+        for (T element: items) {
+            randomNum -= getWeightSafe.applyAsInt(element);
+            if (randomNum < 0) {
+                return Optional.of(element);
+            }
+        }
+        
+        return Optional.empty();
+    }
+    
+    public static <T> Optional<T> getRandomWeightedDouble(Iterable<T> items, ToDoubleFunction<T> getWeight, Random random) {
+        ToDoubleFunction<T> getWeightSafe = element -> Math.max(getWeight.applyAsDouble(element), 0);
+        double weightSum = StreamSupport.stream(items.spliterator(), false)
+                .mapToDouble(getWeightSafe).sum();
+        if (weightSum <= 0) return Optional.empty();
+        
+        double randomNum = random.nextDouble() * weightSum;
+
+        for (T element: items) {
+            randomNum -= getWeightSafe.applyAsDouble(element);
+            if (randomNum < 0) {
+                return Optional.of(element);
+            }
+        }
+        
+        return Optional.empty();
+    }
+    
     public static float fadeOut(float time, float maxTime, float fractionUntilFadeOut) {
         if (fractionUntilFadeOut >= 1) return 1;
         float f = 1 / (1 - fractionUntilFadeOut);
@@ -113,7 +154,7 @@ public class MathUtil {
     }
     
     private static float getM(Matrix4f matrix, int i, int j) {
-        return ReflectionUtil.getFieldValue(M_FIELDS[i][j], matrix);
+        return ReflectionUtil.getFloatFieldValue(M_FIELDS[i][j], matrix);
     }
     
     private static final Field M00 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226575_a_");
@@ -228,5 +269,67 @@ public class MathUtil {
             
             return new Vector3f((float) xRot, (float) yRot, (float) zRot);
         }
+    }
+    
+    
+    
+    public static int min(int num1, int num2, int... nums) {
+        int min = (num1 <= num2) ? num1 : num2;
+        for (int num : nums) {
+            if (num < min) {
+                min = num;
+            }
+        }
+        return min;
+    }
+    
+    public static float min(float num1, float num2, float... nums) {
+        float min = (num1 <= num2) ? num1 : num2;
+        for (float num : nums) {
+            if (num < min) {
+                min = num;
+            }
+        }
+        return min;
+    }
+    
+    public static double min(double num1, double num2, double... nums) {
+        double min = (num1 <= num2) ? num1 : num2;
+        for (double num : nums) {
+            if (num < min) {
+                min = num;
+            }
+        }
+        return min;
+    }
+    
+    public static int max(int num1, int num2, int... nums) {
+        int max = (num1 >= num2) ? num1 : num2;
+        for (int num : nums) {
+            if (num > max) {
+                max = num;
+            }
+        }
+        return max;
+    }
+    
+    public static float max(float num1, float num2, float... nums) {
+        float max = (num1 >= num2) ? num1 : num2;
+        for (float num : nums) {
+            if (num > max) {
+                max = num;
+            }
+        }
+        return max;
+    }
+    
+    public static double max(double num1, double num2, double... nums) {
+        double max = (num1 >= num2) ? num1 : num2;
+        for (double num : nums) {
+            if (num > max) {
+                max = num;
+            }
+        }
+        return max;
     }
 }

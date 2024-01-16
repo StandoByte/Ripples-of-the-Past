@@ -41,6 +41,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacke
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillAddPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillRemovePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSyncOnLoadPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHamonSyncPlayerLearnerPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonUiEffectPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonAuraColorPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonAuraColorPacket.HamonAuraColor;
@@ -49,7 +50,6 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrHamonCharacterTec
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonEnergyTicksPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonMeditationPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonStatsPacket;
-import com.github.standobyte.jojo.power.IPower.ActionType;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.TypeSpecificData;
@@ -59,6 +59,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamon
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterHamonTechnique;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.HamonTechniqueManager;
+import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -151,8 +152,8 @@ public class HamonData extends TypeSpecificData {
         updateHeight = false;
         LivingEntity user = power.getUser();
         if (user.isAlive()) {
+            tickNewPlayerLearners(user);
             if (!user.level.isClientSide()) {
-                tickNewPlayerLearners(user);
                 tickAirSupply(user);
                 if (tcsa && (power.isUserCreative() || getCharacterTechnique() != null)) {
                     tcsa = false;
@@ -224,10 +225,11 @@ public class HamonData extends TypeSpecificData {
         this.prevBreathStability = value;
         this.ticksNoBreathStabilityInc = Math.max(noIncTicks, this.ticksNoBreathStabilityInc);
         if (send) {
-            serverPlayer.ifPresent(player -> {
+            LivingEntity user = power.getUser();
+            if (!user.level.isClientSide()) {
                 PacketManager.sendToClientsTrackingAndSelf(new TrHamonBreathStabilityPacket(
-                        player.getId(), getBreathStability(), ticksNoBreathStabilityInc), player);
-            });
+                        user.getId(), getBreathStability(), ticksNoBreathStabilityInc), user);
+            }
         }
     }
     
@@ -526,10 +528,13 @@ public class HamonData extends TypeSpecificData {
             break;
         }
         if (oldPoints != newPoints) {
-            serverPlayer.ifPresent(player -> {
-                PacketManager.sendToClientsTrackingAndSelf(new TrHamonStatsPacket(player.getId(), true, stat, newPoints), player);
-                ModCriteriaTriggers.HAMON_STATS.get().trigger(player, hamonStrengthLevel, hamonControlLevel, breathingTrainingLevel);
-            });
+            LivingEntity user = power.getUser();
+            if (!user.level.isClientSide()) {
+                PacketManager.sendToClientsTrackingAndSelf(new TrHamonStatsPacket(user.getId(), true, stat, newPoints), user);
+                serverPlayer.ifPresent(player -> {
+                    ModCriteriaTriggers.HAMON_STATS.get().trigger(player, hamonStrengthLevel, hamonControlLevel, breathingTrainingLevel);
+                });
+            }
             if (oldLevel != getStatLevel(stat)) {
                 switch (stat) {
                 case STRENGTH:
@@ -639,15 +644,18 @@ public class HamonData extends TypeSpecificData {
     public void setBreathingLevel(float level) {
         float oldLevel = breathingTrainingLevel;
         breathingTrainingLevel = MathHelper.clamp(level, 0, MAX_BREATHING_LEVEL);
+        LivingEntity user = power.getUser();
         if (oldLevel != breathingTrainingLevel) {
             recalcHamonDamage();
-            serverPlayer.ifPresent(player -> {
-                PacketManager.sendToClientsTrackingAndSelf(new TrHamonStatsPacket(player.getId(), true, getBreathingLevel()), player);
-                ModCriteriaTriggers.HAMON_STATS.get().trigger(player, hamonStrengthLevel, hamonControlLevel, breathingTrainingLevel);
-            });
+            if (!user.level.isClientSide()) {
+                PacketManager.sendToClientsTrackingAndSelf(new TrHamonStatsPacket(user.getId(), true, getBreathingLevel()), user);
+                serverPlayer.ifPresent(player -> {
+                    ModCriteriaTriggers.HAMON_STATS.get().trigger(player, hamonStrengthLevel, hamonControlLevel, breathingTrainingLevel);
+                });
+            }
         }
-        if (!power.getUser().level.isClientSide()) {
-            giveBreathingTrainingBuffs(power.getUser());
+        if (!user.level.isClientSide()) {
+            giveBreathingTrainingBuffs(user);
         }
     }
     
@@ -1074,9 +1082,9 @@ public class HamonData extends TypeSpecificData {
 
     private void addSkillAction(AbstractHamonSkill skill) {
         if (skill.getRewardAction() != null && skill.addsActionToHUD()) {
-            ActionType hotbar = skill.getRewardType().getActionType();
+            ActionsLayout.Hotbar hotbar = skill.getRewardType().getDefaultHotbar();
             if (hotbar != null) {
-                power.getActions(hotbar).addExtraAction(skill.getRewardAction());
+                power.getActionsHudLayout().addExtraAction(skill.getRewardAction(), hotbar);
             }
         }
     }
@@ -1096,10 +1104,7 @@ public class HamonData extends TypeSpecificData {
 
     private void removeSkillAction(AbstractHamonSkill skill) {
         if (skill.getRewardAction() != null && skill.addsActionToHUD()) {
-            ActionType hotbar = skill.getRewardType().getActionType();
-            if (hotbar != null) {
-                power.getActions(hotbar).removeAction(skill.getRewardAction());
-            }
+            power.getActionsHudLayout().removeExtraAction(skill.getRewardAction());
         }
     }
     
@@ -1186,28 +1191,45 @@ public class HamonData extends TypeSpecificData {
     
     
     
-    public void addNewPlayerLearner(PlayerEntity player) {
-        newLearners.add(player);
+    public boolean playerWantsToLearn(PlayerEntity playerEntity) {
+        return newLearners.contains(playerEntity);
+    }
+    
+    public void addNewPlayerLearner(PlayerEntity learnerPlayer) {
+        newLearners.add(learnerPlayer);
         LivingEntity user = power.getUser();
-        if (user instanceof PlayerEntity) {
-            ((PlayerEntity) user).displayClientMessage(new TranslationTextComponent("jojo.chat.message.new_hamon_learner", player.getDisplayName()), true);
+        if (!user.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(
+                    new TrHamonSyncPlayerLearnerPacket(user.getId(), learnerPlayer.getId(), true), user);
         }
     }
     
     private void tickNewPlayerLearners(LivingEntity user) {
         for (Iterator<PlayerEntity> it = newLearners.iterator(); it.hasNext(); ) {
             PlayerEntity player = it.next();
-            if (user.distanceToSqr(player) > 64) {
+            if (!player.isAlive() || user.distanceToSqr(player) > 64) {
                 it.remove();
             }
         }
     }
     
-    public void interactWithNewLearner(PlayerEntity player) {
-        if (newLearners.contains(player)) {
-            HamonUtil.startLearningHamon(player.level, player, INonStandPower.getPlayerNonStandPower(player), power.getUser(), this);
-            newLearners.remove(player);
+    public boolean interactWithNewLearner(PlayerEntity learnerPlayer) {
+        if (newLearners.contains(learnerPlayer)) {
+            if (!learnerPlayer.level.isClientSide()) {
+                HamonUtil.startLearningHamon(learnerPlayer.level, learnerPlayer, 
+                        INonStandPower.getPlayerNonStandPower(learnerPlayer), power.getUser(), this);
+                LivingEntity user = power.getUser();
+                PacketManager.sendToClientsTracking(
+                        new TrHamonSyncPlayerLearnerPacket(user.getId(), learnerPlayer.getId(), false), user);
+            }
+            newLearners.remove(learnerPlayer);
+            return true;
         }
+        return false;
+    }
+    
+    public void removeNewLearner(PlayerEntity player) {
+        newLearners.remove(player);
     }
     
     

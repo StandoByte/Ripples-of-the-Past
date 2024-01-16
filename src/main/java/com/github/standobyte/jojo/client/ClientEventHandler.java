@@ -1,12 +1,12 @@
 package com.github.standobyte.jojo.client;
 
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.AIR;
+import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.EXPERIENCE;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.FOOD;
 
-import java.util.Set;
+import java.util.Optional;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
@@ -21,6 +21,9 @@ import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
+import com.github.standobyte.jojo.client.ui.screen.ClientModSettingsScreen;
+import com.github.standobyte.jojo.client.ui.screen.widgets.HeightScaledSlider;
+import com.github.standobyte.jojo.client.ui.screen.widgets.ImageVanillaButton;
 import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModStatusEffects;
@@ -29,22 +32,30 @@ import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.StandArrowHandler;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 import com.google.common.base.MoreObjects;
-import com.google.common.collect.ImmutableSet;
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.systems.RenderSystem;
 
+import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
+import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.IngameMenuScreen;
 import net.minecraft.client.gui.screen.MainMenuScreen;
+import net.minecraft.client.gui.screen.OptionsScreen;
+import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.AbstractSlider;
+import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.FirstPersonRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.OutlineLayerBuffer;
@@ -64,17 +75,22 @@ import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Timer;
+import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.KeybindTextComponent;
+import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent;
+import net.minecraftforge.client.event.GuiScreenEvent.InitGuiEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
@@ -107,7 +123,7 @@ public class ClientEventHandler {
     public boolean isZooming;
 
     private int deathScreenTick;
-    private int pauseMenuScreenTick;
+    private int standStatsTick;
     
     private ClientEventHandler(Minecraft mc) {
         this.mc = mc;
@@ -131,7 +147,7 @@ public class ClientEventHandler {
     public void onPlaySound(PlaySoundEvent event) {
         ISound sound = event.getResultSound();
         if (ClientTimeStopHandler.getInstance().shouldCancelSound(sound)) {
-            event.setCanceled(true);
+            event.setResultSound(null);
         }
     }
     
@@ -234,8 +250,10 @@ public class ClientEventHandler {
         if (mc.level != null && event.phase == TickEvent.Phase.START) {
             ClientUtil.canSeeStands = StandUtil.playerCanSeeStands(mc.player);
             ClientUtil.canHearStands = /*StandUtil.playerCanHearStands(mc.player)*/ ClientUtil.canSeeStands;
+            
+            ClientTimeStopHandler timeStopHandler = ClientTimeStopHandler.getInstance();
             if (mc.player.isAlive()) {
-                ClientTimeStopHandler.getInstance().setConstantPartialTick(clientTimer);
+                timeStopHandler.setConstantPartialTick(clientTimer);
                 
                 mc.player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                     cap.applyLockedRotation();
@@ -280,10 +298,49 @@ public class ClientEventHandler {
         
         if (event.phase == TickEvent.Phase.START) {
             ClientTimeStopHandler.getInstance().tickPauseIrrelevant();
+            
+            deathScreenTick = mc.screen instanceof DeathScreen ? deathScreenTick + 1 : 0;
+            standStatsTick = mc.screen instanceof IngameMenuScreen && doStandStatsRender(mc.screen) ? standStatsTick + 1 : 0;
         }
-
-        deathScreenTick = mc.screen instanceof DeathScreen ? deathScreenTick + 1 : 0;
-        pauseMenuScreenTick = mc.screen instanceof IngameMenuScreen ? pauseMenuScreenTick + 1 : 0;
+    }
+    
+    public static void onMouseTargetChanged(RayTraceResult newTarget) {
+        if (newTarget instanceof EntityRayTraceResult) {
+            Entity entity = ((EntityRayTraceResult) newTarget).getEntity();
+            if (entity instanceof PlayerEntity) {
+                @SuppressWarnings("resource")
+                PlayerEntity clientPlayer = Minecraft.getInstance().player;
+                PlayerEntity targetPlayer = (PlayerEntity) entity;
+                Optional<HamonData> playerHamon = INonStandPower.getNonStandPowerOptional(clientPlayer)
+                        .resolve().flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get()));
+                if (playerHamon.isPresent()) {
+                    if (playerHamon.get().playerWantsToLearn(targetPlayer)) {
+                        ClientUtil.setOverlayMessage(new TranslationTextComponent(
+                                "jojo.chat.message.new_hamon_learner", 
+                                targetPlayer.getDisplayName(), 
+                                new KeybindTextComponent(InputHandler.getInstance().hamonSkillsWindow.getName())));
+                    }
+                }
+                else {
+                    Optional<HamonData> targetHamon = INonStandPower.getNonStandPowerOptional(targetPlayer)
+                            .resolve().flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get()));
+                    if (targetHamon.isPresent()) {
+                        boolean hasAskedAlready = targetHamon.get().playerWantsToLearn(clientPlayer);
+                        if (hasAskedAlready) {
+                            ClientUtil.setOverlayMessage(new TranslationTextComponent(
+                                    "jojo.chat.message.asked_hamon_teacher", 
+                                    targetPlayer.getDisplayName()));
+                        }
+                        else {
+                            ClientUtil.setOverlayMessage(new TranslationTextComponent(
+                                    "jojo.chat.message.ask_hamon_teacher", 
+                                    new KeybindTextComponent(InputHandler.getInstance().hamonSkillsWindow.getName()), 
+                                    targetPlayer.getDisplayName()));
+                        }
+                    }
+                }
+            }
+        }
     }
     
     
@@ -367,6 +424,70 @@ public class ClientEventHandler {
                 }
             });
         }
+        
+        if (event.getType() == EXPERIENCE && mc.gameMode.hasExperience()
+                && mc.player.hasEffect(ModStatusEffects.STAND_VIRUS.get())) {
+            IStandPower.getStandPowerOptional(mc.player).ifPresent(power -> {
+                StandArrowHandler handler = power.getStandArrowHandler();
+                int standArrowLevels = handler.getXpLevelsTakenByArrow();
+                if (standArrowLevels > 0) {
+                    MatrixStack matrixStack = event.getMatrixStack();
+                    renderExperienceBar(matrixStack, standArrowLevels, event.getWindow());
+                    event.setCanceled(true);
+                }
+            });
+        }
+    }
+    
+    @SuppressWarnings("deprecation")
+    private void renderExperienceBar(MatrixStack matrixStack, int standArrowLevels, MainWindow window) {
+        int screenWidth = window.getGuiScaledWidth();
+        int screenHeight = window.getGuiScaledHeight();
+        FontRenderer font = mc.font;
+        int xPos = screenWidth / 2 - 91;
+        
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.disableBlend();
+        
+        mc.getProfiler().push("expBar");
+        mc.getTextureManager().bind(AbstractGui.GUI_ICONS_LOCATION);
+        int i = mc.player.getXpNeededForNextLevel();
+        if (i > 0) {
+            int k = (int)(mc.player.experienceProgress * 183.0F);
+            int yPos = screenHeight - 32 + 3;
+            mc.gui.blit(matrixStack, xPos, yPos, 0, 64, 182, 5);
+            if (k > 0) {
+                mc.gui.blit(matrixStack, xPos, yPos, 0, 69, k, 5);
+            }
+        }
+        
+        mc.getProfiler().pop();
+        
+        mc.getProfiler().push("expLevel");
+        
+        String xpLevels = mc.player.experienceLevel > 0 ? "" + mc.player.experienceLevel + " " : "";
+        String arrowLevels = "(" + standArrowLevels + ")";
+        
+        float xpNumX = (screenWidth - font.width(xpLevels + arrowLevels)) / 2F;
+        float arrowXpNumX = xpNumX + font.width(xpLevels);
+        float numberY = screenHeight - 31 - 4;
+        
+        font.draw(matrixStack, xpLevels, xpNumX + 1, numberY, 0);
+        font.draw(matrixStack, xpLevels, xpNumX - 1, numberY, 0);
+        font.draw(matrixStack, xpLevels, xpNumX, numberY + 1, 0);
+        font.draw(matrixStack, xpLevels, xpNumX, numberY - 1, 0);
+        font.draw(matrixStack, xpLevels, xpNumX, numberY, 0x80FF20);
+        
+        font.draw(matrixStack, arrowLevels, arrowXpNumX + 1, numberY, 0);
+        font.draw(matrixStack, arrowLevels, arrowXpNumX - 1, numberY, 0);
+        font.draw(matrixStack, arrowLevels, arrowXpNumX, numberY + 1, 0);
+        font.draw(matrixStack, arrowLevels, arrowXpNumX, numberY - 1, 0);
+        font.draw(matrixStack, arrowLevels, arrowXpNumX, numberY, 0xFFD820);
+        
+        mc.getProfiler().pop();
+        
+        RenderSystem.enableBlend();
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -403,7 +524,7 @@ public class ClientEventHandler {
         if (!event.isCanceled() && !modPostedEvent && event.getHand() == Hand.MAIN_HAND && !player.isInvisible()) {
             INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
                 ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
-                if ((hud.isActionSelectedAndEnabled(ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get()))
+                if ((hud.showExtraActionHud(ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get()))
                         && MCUtil.isHandFree(player, Hand.MAIN_HAND) && MCUtil.isHandFree(player, Hand.OFF_HAND)) {
                     renderHand(Hand.OFF_HAND, event.getMatrixStack(), event.getBuffers(), event.getLight(), 
                             event.getPartialTicks(), event.getInterpolatedPitch(), player);
@@ -472,26 +593,38 @@ public class ClientEventHandler {
     
     @SubscribeEvent
     public void afterScreenRender(DrawScreenEvent.Post event) {
-        if (event.getGui() instanceof DeathScreen) {
-            ITextComponent title = event.getGui().getTitle();
+        Screen screen = event.getGui();
+        float partialTick = screen.getMinecraft().getFrameTime();
+        if (screen instanceof DeathScreen) {
+            ITextComponent title = screen.getTitle();
             if (title instanceof TranslationTextComponent && ((TranslationTextComponent) title).getKey().endsWith(".hardcore")) {
                 return;
             }
-            renderToBeContinuedArrow(event.getMatrixStack(), event.getGui(), event.getGui().width, event.getGui().height, event.getRenderPartialTicks());
+            renderToBeContinuedArrow(event.getMatrixStack(), screen, screen.width, screen.height, partialTick);
         }
 
-        else if (event.getGui() instanceof IngameMenuScreen && ClientReflection.showsPauseMenu((IngameMenuScreen) event.getGui())) {
-            float alpha = JojoModConfig.CLIENT.standStatsTranslucency.get().floatValue();
-            if (alpha <= 0) return;
-            int xButtonsRightEdge = event.getGui().width / 2 + 102;
-            int windowWidth = event.getGui().width;
-            int windowHeight = event.getGui().height;
-
-            if (windowWidth - xButtonsRightEdge >= 167 && windowHeight > 204) {
+        else if (screen instanceof IngameMenuScreen && ClientReflection.showsPauseMenu((IngameMenuScreen) screen)) {
+            float alpha = ClientModSettings.getSettingsReadOnly().standStatsTranslucency;
+            int xButtonsRightEdge = screen.width / 2 + 102;
+            int windowWidth = screen.width;
+            int windowHeight = screen.height;
+            
+            if (doStandStatsRender(screen)) {
                 StandStatsRenderer.renderStandStats(event.getMatrixStack(), mc, windowWidth - 160, windowHeight - 160, windowWidth, windowHeight,
-                        pauseMenuScreenTick, event.getRenderPartialTicks(), alpha, event.getMouseX(), event.getMouseY(), windowWidth - xButtonsRightEdge - 14);
+                        standStatsTick, partialTick, alpha, event.getMouseX(), event.getMouseY(), windowWidth - xButtonsRightEdge - 14);
             }
         }
+    }
+    
+    private Boolean renderStandStats;
+    private boolean doStandStatsRender(Screen screen) {
+        if (renderStandStats != null) {
+            return renderStandStats;
+        }
+        int xButtonsRightEdge = screen.width / 2 + 102;
+        int windowWidth = screen.width;
+        int windowHeight = screen.height;
+        return windowWidth - xButtonsRightEdge >= 167 && windowHeight > 204;
     }
 
     private void renderToBeContinuedArrow(MatrixStack matrixStack, AbstractGui ui, int screenWidth, int screenHeight, float partialTick) {
@@ -501,21 +634,94 @@ public class ClientEventHandler {
         ui.blit(matrixStack, x, y, 0, 231, 130, 25);
         AbstractGui.drawCenteredString(matrixStack, mc.font, new TranslationTextComponent("jojo.to_be_continued"), x + 61, y + 8, 0x525544);
     }
+    
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public void addToScreen(InitGuiEvent.Post event) {
+        Screen screen = event.getGui();
+        if (screen instanceof IngameMenuScreen && ClientReflection.showsPauseMenu((IngameMenuScreen) screen)) {
+            IStandPower.getStandPowerOptional(mc.player).ifPresent(power -> {
+                if (power.hasPower()) {
+                    AbstractSlider statsBgAlphaSlider = new HeightScaledSlider(
+                            screen.width - 160, screen.height - 6, 153, 6, StringTextComponent.EMPTY, 0.0D) {
+                        {
+                            this.value = MathHelper.inverseLerp(
+                                    ClientModSettings.getSettingsReadOnly().standStatsTranslucency, 
+                                    0.1, 1.0);
+                            updateMessage();
+                        }
+                        
+                        @Override
+                        protected void updateMessage() {
+                            setMessage(StringTextComponent.EMPTY);
+                        }
+                        
+                        @Override
+                        protected void applyValue() {
+                            ClientModSettings.getInstance().editSettings(settings -> 
+                            settings.standStatsTranslucency = (float) MathHelper.clampedLerp(0.1, 1.0, this.value));
+                        }
+                    };
+                    statsBgAlphaSlider.visible = doStandStatsRender(screen);
+                    event.addWidget(statsBgAlphaSlider);
+                    
+                    Button standStatsToggleButton = new ImageVanillaButton(screen.width - 28, screen.height - 28, 
+                            20, 20, 236, 236, StandStatsRenderer.STAND_STATS_UI, 256, 256, 
+                            button -> {
+                                renderStandStats = !doStandStatsRender(screen);
+                                statsBgAlphaSlider.visible = doStandStatsRender(screen);
+                            }, 
+                            (button, matrixStack, x, y) -> {
+                                ITextComponent message = doStandStatsRender(screen) ? 
+                                        new TranslationTextComponent("jojo.stand_stat.button.hide")
+                                        : new TranslationTextComponent("jojo.stand_stat.button.show");
+                                screen.renderTooltip(matrixStack, message, x, y);
+                            }, 
+                            StringTextComponent.EMPTY);
+                    event.addWidget(standStatsToggleButton);
+                    
+//                    Button standSkinsButton = new ImageVanillaButton(screen.width - 28, screen.height - 159, 
+//                            20, 20, 236, 236, StandSkinsScreen.TEXTURE_MAIN_WINDOW, 256, 256, 
+//                            button -> {
+//                                StandSkinsScreen.openScreen(screen);
+//                            }, 
+//                            (button, matrixStack, x, y) -> {
+//                                screen.renderTooltip(matrixStack, new TranslationTextComponent("jojo.stand_skins.button"), x, y);
+//                            }, 
+//                            StringTextComponent.EMPTY);
+//                    event.addWidget(standSkinsButton);
+                }
+            });
+        }
+        
+        else if (screen instanceof OptionsScreen) {
+            event.addWidget(ClientModSettingsScreen.addSettingsButton(screen, event.getWidgetList()));
+        }
+    }
 
     @SubscribeEvent
     public void onScreenOpened(GuiOpenEvent event) {
-        if (event.getGui() instanceof MainMenuScreen) {
+        Screen screen = event.getGui();
+        if (screen instanceof MainMenuScreen) {
             String splash = CustomResources.getModSplashes().overrideSplash();
             if (splash != null) {
-                ClientReflection.setSplash((MainMenuScreen) event.getGui(), splash);
+                ClientReflection.setSplash((MainMenuScreen) screen, splash);
             }
+        }
+        else if (screen == null) {
+            onScreenClosed();
+        }
+    }
+    
+    private void onScreenClosed() {
+        if (renderStandStats != null && renderStandStats) {
+            renderStandStats = null;
         }
     }
 
     @SubscribeEvent
     public void renderBlocksOverlay(RenderWorldLastEvent event) {
         ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
-        if (hud.isActionSelectedAndEnabled(ModStandsInit.CRAZY_DIAMOND_RESTORE_TERRAIN.get())) {
+        if (hud.showExtraActionHud(ModStandsInit.CRAZY_DIAMOND_RESTORE_TERRAIN.get())) {
             MatrixStack matrixStack = event.getMatrixStack();
             IStandPower stand = ActionsOverlayGui.getInstance().standUiMode.getPower();
             Entity entity = CrazyDiamondRestoreTerrain.restorationCenterEntity(mc.player, stand);
@@ -528,6 +734,19 @@ public class ClientEventHandler {
                     block -> CrazyDiamondRestoreTerrain.blockPosSelectedForRestoration(block, entity, lookVec, eyePosD, pos, 
                             mc.player.hasEffect(ModStatusEffects.RESOLVE.get()), mc.player.isShiftKeyDown()));
         }
+//        else {
+//            hud.getSelectedEnabledActions()
+//            .filter(action -> action instanceof TimeStopInstant)
+//            .findFirst()
+//            .ifPresent(action -> {
+//                TimeStopInstant tpAction = (TimeStopInstant) action;
+//                IStandPower stand = ActionsOverlayGui.getInstance().standUiMode.getPower();
+//                Vector3d pos = tpAction.calcBlinkPos(mc.player, stand, ActionTarget.fromRayTraceResult(mc.hitResult));
+//                if (pos != null) {
+//                    // TODO render translucent player model at the position
+//                }
+//            });
+//        }
         
         boolean paused = mc.isPaused();
         if (prevPause && !paused) {
@@ -542,9 +761,7 @@ public class ClientEventHandler {
     public float getPartialTick() {
         return mc.isPaused() ? pausePartialTick : mc.getFrameTime();
     }
-
-    private static final Set<ResourceLocation> ENCHANTMENTS_DESC = ImmutableSet.of(
-            new ResourceLocation(JojoMod.MOD_ID, "virus_inhibition"));
+    
     @SubscribeEvent
     public void addTooltipLines(ItemTooltipEvent event) {
         PlayerEntity player = event.getPlayer();
@@ -562,7 +779,7 @@ public class ClientEventHandler {
                 if (nbt.getId() == MCUtil.getNbtId(CompoundNBT.class)) {
                     CompoundNBT enchNbt = (CompoundNBT) nbt;
                     ResourceLocation enchId = ResourceLocation.tryParse(enchNbt.getString("id"));
-                    if (enchId != null && ENCHANTMENTS_DESC.contains(enchId)) {
+                    if (enchId != null && enchId.getNamespace().equals(JojoMod.MOD_ID)) {
                         event.getToolTip().add(new TranslationTextComponent(
                                 String.format("enchantment.%s.%s.desc", enchId.getNamespace(), enchId.getPath()))
                                 .withStyle(TextFormatting.GRAY));

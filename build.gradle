@@ -14,7 +14,7 @@ apply plugin: 'org.parchmentmc.librarian.forgegradle'
 apply plugin: 'eclipse'
 apply plugin: 'maven-publish'
 
-version = "${mc_version}-${mod_version}"
+version = release_snapshot.toBoolean() ? "${mc_version}-${mod_version}-snapshot-${snapshot_version}" : "${mc_version}-${mod_version}"
 group = 'standobyte.jojo'
 archivesBaseName = 'JJBA-RipplesOfThePast'
 
@@ -73,12 +73,26 @@ repositories {
         name "KosmX's maven"
         url 'https://maven.kosmx.dev/'
     }
+    maven {
+        // location of the maven that hosts JEI files since January 2023
+        name = "Jared's maven"
+        url = "https://maven.blamejared.com/"
+    }
+    maven {
+        // location of a maven mirror for JEI files, as a fallback
+        name = "ModMaven"
+        url = "https://modmaven.dev"
+    }
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
+
     implementation fg.deobf("dev.kosmx.player-anim:player-animation-lib-forge:${playeranim_version}")
     implementation fg.deobf("io.github.kosmx.bendy-lib:bendy-lib-forge:${bendylib_version}")
+    compileOnly 'org.jetbrains:annotations:23.0.0'
+    
+    implementation fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
 }
 
 jar {
@@ -94,13 +108,40 @@ jar {
     }
 }
 
+// Example configuration to allow publishing using the maven-publish task
+// This is the preferred method to reobfuscate your jar file
 jar.finalizedBy('reobfJar') 
+// However if you are in a multi-project build, dev time needs unobfed jar files, so you can delay the obfuscation until publishing by doing
 //publish.dependsOn('reobfJar')
+
+task srcJar (type: Jar) {
+    from sourceSets.main.java
+    classifier = 'sources'
+}
+
+artifacts {
+    archives srcJar
+}
+
+tasks.withType(GenerateModuleMetadata) {
+	// Gradle metadata generates with dependencies which causes an error, 
+	// and I CBA to figure out how to fix it when this works
+    enabled = false
+}
 
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifact jar
+            groupId project.group
+            artifactId project.archivesBaseName
+            version "${mc_version}-${mod_version}-snapshot-${snapshot_version}"
+            from components.java
+            artifact srcJar
+            pom.withXml {
+                def node = asNode()
+                if (node.dependencies.size() > 0)
+                    node.remove(node.dependencies) // Remove dependencies from .pom
+            }
         }
     }
     repositories {

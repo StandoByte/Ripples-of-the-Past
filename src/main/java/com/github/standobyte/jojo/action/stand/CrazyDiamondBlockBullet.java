@@ -3,6 +3,8 @@ package com.github.standobyte.jojo.action.stand;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
@@ -17,6 +19,8 @@ import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.util.general.LazySupplier;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -96,9 +100,9 @@ public class CrazyDiamondBlockBullet extends StandEntityAction {
             bullet.setBlock(((BlockItem) item.getItem()).getBlock());
             standEntity.shootProjectile(bullet, 2.0F, 0.25F);
             if (!(user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild)) {
-                user.getOffhandItem().shrink(1);
+                item.shrink(1);
             }
-            if (!user.isShiftKeyDown()) {
+            if (!JojoModUtil.useShiftVar(user)) {
                 getTarget(targets(userPower), user).ifPresent(effect -> {
                     bullet.setTarget(effect.getTarget());
                 });
@@ -150,26 +154,44 @@ public class CrazyDiamondBlockBullet extends StandEntityAction {
         return key;
     }
     
-    private ResourceLocation homingTex;
+    private final LazySupplier<ResourceLocation> homingTex = 
+            new LazySupplier<>(() -> makeIconVariant(this, "_homing"));
+    @Override
+    public ResourceLocation getIconTexturePath(@Nullable IStandPower power) {
+        if (power != null && isHoming(power)) {
+            return homingTex.get();
+        }
+        else {
+            return super.getIconTexturePath(power);
+        }
+    }
+    
+    private boolean isHoming(IStandPower power) {
+        return power.getUser() != null && !JojoModUtil.useShiftVar(power.getUser())
+                && getTarget(targets(power), power.getUser()).isPresent();
+    }
+    
+    
+    
+    @Deprecated
+    private ResourceLocation homingTexPath;
+    @Deprecated
     @Override
     public ResourceLocation getTexture(IStandPower power) {
         ResourceLocation resLoc = getRegistryName();
         if (isHoming(power)) {
-            if (homingTex == null) {
-                homingTex = new ResourceLocation(resLoc.getNamespace(), resLoc.getPath() + "_homing");
+            if (homingTexPath == null) {
+                homingTexPath = new ResourceLocation(resLoc.getNamespace(), resLoc.getPath() + "_homing");
             }
-            resLoc = homingTex;
+            resLoc = homingTexPath;
         }
         return resLoc;
     }
 
+    @Deprecated
     @Override
     public Stream<ResourceLocation> getTexLocationstoLoad() {
         ResourceLocation resLoc = getRegistryName();
         return Stream.of(resLoc, new ResourceLocation(resLoc.getNamespace(), resLoc.getPath() + "_homing"));
-    }
-    
-    private boolean isHoming(IStandPower power) {
-        return power.getUser() != null && !power.getUser().isShiftKeyDown() && getTarget(targets(power), power.getUser()).isPresent();
     }
 }

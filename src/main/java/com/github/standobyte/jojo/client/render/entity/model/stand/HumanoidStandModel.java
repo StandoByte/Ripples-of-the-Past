@@ -1,36 +1,47 @@
 package com.github.standobyte.jojo.client.render.entity.model.stand;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
+import com.github.standobyte.jojo.client.particle.custom.StandCrumbleParticle;
 import com.github.standobyte.jojo.client.render.entity.pose.IModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose;
+import com.github.standobyte.jojo.client.render.entity.pose.ModelPose.ModelAnim;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPoseSided;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPoseTransition;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPoseTransitionMultiple;
 import com.github.standobyte.jojo.client.render.entity.pose.RotationAngle;
 import com.github.standobyte.jojo.client.render.entity.pose.XRotationModelRenderer;
-import com.github.standobyte.jojo.client.render.entity.pose.ModelPose.ModelAnim;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.PosedActionAnimation;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.barrage.StandTwoHandedBarrageAnimation;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.util.general.MathUtil;
+import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
+import it.unimi.dsi.fastutil.objects.ObjectList;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
 
 // Made with Blockbench 3.9.2
 
@@ -89,7 +100,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
         torso.setPos(0.0F, -12.0F, 0.0F);
         upperPart.addChild(torso);
 
-        leftArm = new XRotationModelRenderer(this);
+        leftArm = convertLimb(new ModelRenderer(this));
         leftArm.setPos(6.0F, -10.0F, 0.0F);
         upperPart.addChild(leftArm);
 
@@ -101,7 +112,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
         leftForeArm.setPos(0.0F, 4.0F, 0.0F);
         leftArm.addChild(leftForeArm);
 
-        rightArm = new XRotationModelRenderer(this);
+        rightArm = convertLimb(new ModelRenderer(this));
         rightArm.setPos(-6.0F, -10.0F, 0.0F);
         upperPart.addChild(rightArm);
 
@@ -113,7 +124,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
         rightForeArm.setPos(0.0F, 4.0F, 0.0F);
         rightArm.addChild(rightForeArm);
 
-        leftLeg = new XRotationModelRenderer(this);
+        leftLeg = convertLimb(new ModelRenderer(this));
         leftLeg.setPos(1.9F, 12.0F, 0.0F);
         body.addChild(leftLeg);
 
@@ -125,7 +136,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
         leftLowerLeg.setPos(0.0F, 6.0F, 0.0F);
         leftLeg.addChild(leftLowerLeg);
 
-        rightLeg = new XRotationModelRenderer(this);
+        rightLeg = convertLimb(new ModelRenderer(this));
         rightLeg.setPos(-1.9F, 12.0F, 0.0F);
         body.addChild(rightLeg);
 
@@ -138,22 +149,26 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
         rightLeg.addChild(rightLowerLeg);
         
         
-        baseHumanoidBoxGenerators = ImmutableMap.<ModelRenderer, Consumer<ModelRenderer>>builder()
-                .put(head, part ->          part.texOffs(0, 0)    .addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, 0.0F, false))
-                .put(torso, part ->         part.texOffs(0, 64)   .addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, 0.0F, false))
-                .put(leftArm, part ->       part.texOffs(32, 108) .addBox(-2.0F, -2.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false))
-                .put(leftArmJoint, part ->  part.texOffs(32, 102) .addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.125F, true))
-                .put(leftForeArm, part ->   part.texOffs(32, 118) .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false))
-                .put(rightArm, part ->      part.texOffs(0, 108)  .addBox(-2.0F, -2.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false))
-                .put(rightArmJoint, part -> part.texOffs(0, 102)  .addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.125F, false))
-                .put(rightForeArm, part ->  part.texOffs(0, 118)  .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false))
-                .put(leftLeg, part ->       part.texOffs(96, 108) .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false))
-                .put(leftLegJoint, part ->  part.texOffs(96, 102) .addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.125F, true))
-                .put(leftLowerLeg, part ->  part.texOffs(96, 118) .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false))
-                .put(rightLeg, part ->      part.texOffs(64, 108) .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false))
-                .put(rightLegJoint, part -> part.texOffs(64, 102) .addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.125F, false))
-                .put(rightLowerLeg, part -> part.texOffs(64, 118) .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false))
+        baseHumanoidBoxGenerators = ImmutableMap.<Supplier<ModelRenderer>, Consumer<ModelRenderer>>builder()
+                .put(() -> head, part ->          part.texOffs(0, 0)    .addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, 0.0F, false))
+                .put(() -> torso, part ->         part.texOffs(0, 64)   .addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, 0.0F, false))
+                .put(() -> leftArm, part ->       part.texOffs(32, 108) .addBox(-2.0F, -2.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false))
+                .put(() -> leftArmJoint, part ->  part.texOffs(32, 102) .addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.125F, true))
+                .put(() -> leftForeArm, part ->   part.texOffs(32, 118) .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false))
+                .put(() -> rightArm, part ->      part.texOffs(0, 108)  .addBox(-2.0F, -2.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false))
+                .put(() -> rightArmJoint, part -> part.texOffs(0, 102)  .addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.125F, false))
+                .put(() -> rightForeArm, part ->  part.texOffs(0, 118)  .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false))
+                .put(() -> leftLeg, part ->       part.texOffs(96, 108) .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false))
+                .put(() -> leftLegJoint, part ->  part.texOffs(96, 102) .addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.125F, true))
+                .put(() -> leftLowerLeg, part ->  part.texOffs(96, 118) .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false))
+                .put(() -> rightLeg, part ->      part.texOffs(64, 108) .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false))
+                .put(() -> rightLegJoint, part -> part.texOffs(64, 102) .addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.125F, false))
+                .put(() -> rightLowerLeg, part -> part.texOffs(64, 118) .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false))
                 .build();
+    }
+    
+    protected final XRotationModelRenderer convertLimb(ModelRenderer limbModelPart) {
+        return new XRotationModelRenderer(this);
     }
     
     @Override
@@ -162,17 +177,18 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
     }
 
     protected final void addHumanoidBaseBoxes(@Nullable Predicate<ModelRenderer> partPredicate) {
-        for (Map.Entry<ModelRenderer, Consumer<ModelRenderer>> entry : baseHumanoidBoxGenerators.entrySet()) {
-            if (partPredicate == null || partPredicate.test(entry.getKey())) {
-                entry.getValue().accept(entry.getKey());
+        for (Map.Entry<Supplier<ModelRenderer>, Consumer<ModelRenderer>> entry : baseHumanoidBoxGenerators.entrySet()) {
+            ModelRenderer modelRenderer = entry.getKey().get();
+            if (partPredicate == null || partPredicate.test(modelRenderer)) {
+                entry.getValue().accept(modelRenderer);
             }
         }
     }
     
-    private final Map<ModelRenderer, Consumer<ModelRenderer>> baseHumanoidBoxGenerators;
+    private final Map<Supplier<ModelRenderer>, Consumer<ModelRenderer>> baseHumanoidBoxGenerators;
 
     @Override
-    protected void updatePartsVisibility(VisibilityMode mode) {
+    public void updatePartsVisibility(VisibilityMode mode) {
         if (mode == VisibilityMode.ALL) {
             head.visible = true;
             torso.visible = true;
@@ -264,22 +280,21 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
                 RotationAngle.fromDegrees(rightForeArm, -75, 0, 0)
         };
         
-        ModelAnim<T> armsRotation = (rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
-            float xRot = xRotation * MathUtil.DEG_TO_RAD * rotationAmount;
-            leftArm.xRotSecond = xRot;
-            rightArm.xRotSecond = xRot;
+        ModelAnim<T> armsRotation = (rotationAmount, entity, ticks, yRotOffsetRad, xRotRad) -> {
+            float xRot = xRotRad * rotationAmount;
+            setSecondXRot(leftArm, xRot);
+            setSecondXRot(rightArm, xRot);
         };
         
-        ModelAnim<T> armsRotationFull = (rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
-            float xRot = xRotation * MathUtil.DEG_TO_RAD;
-            leftArm.xRotSecond = xRot;
-            rightArm.xRotSecond = xRot;
+        ModelAnim<T> armsRotationFull = (rotationAmount, entity, ticks, yRotOffsetRad, xRotRad) -> {
+            setSecondXRot(leftArm, xRotRad);
+            setSecondXRot(rightArm, xRotRad);
         };
         
-        ModelAnim<T> armsRotationBack = (rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
-            float xRot = xRotation * MathUtil.DEG_TO_RAD * (1 - rotationAmount);
-            leftArm.xRotSecond = xRot;
-            rightArm.xRotSecond = xRot;
+        ModelAnim<T> armsRotationBack = (rotationAmount, entity, ticks, yRotOffsetRad, xRotRad) -> {
+            float xRot = xRotRad * (1 - rotationAmount);
+            setSecondXRot(leftArm, xRot);
+            setSecondXRot(rightArm, xRot);
         };
         
         IModelPose<T> jabStart = new ModelPoseSided<>(
@@ -379,8 +394,8 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
                         new RotationAngle(upperPart, 0.0F, 0.0F, 0.0F),
                         RotationAngle.fromDegrees(rightForeArm, -90, 30, -90),
                         RotationAngle.fromDegrees(leftForeArm, -90, -30, 90)
-                }).setAdditionalAnim((rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
-                    float blockXRot = MathHelper.clamp(xRotation, -60, 60) * MathUtil.DEG_TO_RAD / 2;
+                }).setAdditionalAnim((rotationAmount, entity, ticks, yRotOffsetRad, xRotRad) -> {
+                    float blockXRot = MathHelper.clamp(xRotRad, -60 * MathUtil.DEG_TO_RAD, 60 * MathUtil.DEG_TO_RAD) / 2;
                     rightArm.xRot = -1.5708F + blockXRot;
                     leftArm.xRot = rightArm.xRot;
 
@@ -455,7 +470,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
     }
     
     @Override
-    public XRotationModelRenderer getArm(HandSide side) {
+    public ModelRenderer getArm(HandSide side) {
         switch (side) {
         case LEFT:
             return leftArm;
@@ -513,10 +528,6 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
 
     @Override
     public void setupAnim(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
-        this.leftArm.xRotSecond = 0;
-        this.rightArm.xRotSecond = 0;
-        this.leftLeg.xRotSecond = 0;
-        this.rightLeg.xRotSecond = 0;
         super.setupAnim(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
         rotateJoint(leftArmJoint, leftForeArm);
         rotateJoint(rightArmJoint, rightForeArm);
@@ -566,5 +577,73 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
                 (double)(-foreArm.x / 16.0F), 
                 (double)(-foreArm.y / 16.0F), 
                 (double)(-foreArm.z / 16.0F));
+    }
+    
+    
+    
+    public void addCrumbleParticleAt(HumanoidPart humanoidPart, ResourceLocation texture, Vector3d pos) {
+        Minecraft mc = Minecraft.getInstance();
+        StandCrumbleParticle particle = new StandCrumbleParticle(mc.level, pos.x, pos.y, pos.z, 0, 0, 0);
+        
+        ModelRenderer mainPart;
+        switch (humanoidPart) {
+        case HEAD: 
+            mainPart = head;
+            break;
+        case TORSO: 
+            mainPart = torso;
+            break;
+        case LEFT_ARM: 
+            mainPart = leftArm;
+            break;
+        case RIGHT_ARM: 
+            mainPart = rightArm;
+            break;
+        case LEFT_LEG: 
+            mainPart = leftLeg;
+            break;
+        case RIGHT_LEG: 
+            mainPart = rightLeg;
+            break;
+        default:
+            throw new IllegalArgumentException();
+        }
+        Random random = new Random();
+        List<ModelRenderer> allModelParts = new ArrayList<>();
+        addChildren(mainPart, allModelParts);
+        ModelRenderer randomPart = allModelParts.get(random.nextInt(allModelParts.size()));
+        ObjectList<ModelRenderer.ModelBox> cubes = ClientReflection.getCubes(randomPart); // TODO don't use reflection here
+        if (!cubes.isEmpty()) {
+            ModelRenderer.ModelBox cube = cubes.get(random.nextInt(cubes.size()));
+            ModelRenderer.TexturedQuad[] polygons = ClientReflection.getPolygons(cube); // TODO don't use reflection here
+            ModelRenderer.TexturedQuad polygon = polygons[random.nextInt(polygons.length)];
+            if (polygon != null) {
+                ModelRenderer.PositionTextureVertex[] vertices = polygon.vertices;
+                if (vertices.length > 0) {
+                    float u0 = (float) Arrays.stream(vertices).mapToDouble(vertex -> vertex.u).min().getAsDouble();
+                    float v0 = (float) Arrays.stream(vertices).mapToDouble(vertex -> vertex.v).min().getAsDouble();
+                    float u1 = (float) Arrays.stream(vertices).mapToDouble(vertex -> vertex.u).max().getAsDouble();
+                    float v1 = (float) Arrays.stream(vertices).mapToDouble(vertex -> vertex.v).max().getAsDouble();
+                    particle.setTextureAndUv(texture, u0, v0, u1, v1);
+                    mc.particleEngine.add(particle);
+                }
+            }
+        }
+    }
+    
+    private void addChildren(ModelRenderer parent, Collection<ModelRenderer> collection) {
+        collection.add(parent);
+        for (ModelRenderer child : ClientReflection.getChildren(parent)) { // TODO don't use reflection here
+            addChildren(child, collection);
+        }
+    }
+    
+    private enum HumanoidPart {
+        HEAD,
+        TORSO,
+        LEFT_ARM,
+        RIGHT_ARM,
+        LEFT_LEG,
+        RIGHT_LEG;
     }
 }

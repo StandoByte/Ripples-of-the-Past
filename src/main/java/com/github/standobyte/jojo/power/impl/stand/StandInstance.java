@@ -5,9 +5,11 @@ import java.util.Optional;
 import java.util.Set;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
+import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrTypeStandInstancePacket;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
@@ -26,6 +28,7 @@ public class StandInstance {
     private final StandType<?> standType;
     private final EnumSet<StandPart> parts = EnumSet.allOf(StandPart.class);
     private Optional<ITextComponent> customName = Optional.empty();
+    private Optional<ResourceLocation> standSkin = Optional.empty();
     private boolean isDirty;
     
     public StandInstance(@Nonnull StandType<?> standType) {
@@ -65,13 +68,32 @@ public class StandInstance {
         return customName.orElse(standType.getName());
     }
     
-    public void tick(IStandPower standPower, LivingEntity standUser, World world) {
-        if (isDirty) {
-            if (!world.isClientSide()) {
-                PacketManager.sendToClientsTrackingAndSelf(new TrTypeStandInstancePacket(standUser.getId(), this, -1), standUser);
-            }
-            isDirty = false;
+    public void setCustomSkin(Optional<ResourceLocation> skinLocation, @Nullable IStandPower power) {
+        if (skinLocation.isPresent() && skinLocation.get().equals(standType.getRegistryName())) {
+            skinLocation = Optional.empty();
         }
+        
+        isDirty |= (this.standSkin.isPresent() ^ skinLocation.isPresent())
+                || this.standSkin.isPresent() && skinLocation.map(skinNew -> !skinNew.equals(this.standSkin.get())).orElse(false);
+        this.standSkin = skinLocation;
+        if (power != null) {
+            standType.onStandSkinSet(power, skinLocation);
+        }
+    }
+    
+    public Optional<ResourceLocation> getSelectedSkin() {
+        return standSkin;
+    }
+    
+    public void tick(IStandPower standPower, LivingEntity standUser, World world) {
+        syncIfDirty(standUser);
+    }
+    
+    public void syncIfDirty(LivingEntity standUser) {
+        if (isDirty && !standUser.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(new TrTypeStandInstancePacket(standUser.getId(), this, -1), standUser);
+        }
+        isDirty = false;
     }
     
     
@@ -94,6 +116,7 @@ public class StandInstance {
         }
         
         customName.ifPresent(name -> nbt.putString("CustomName", ITextComponent.Serializer.toJson(name)));
+        standSkin.ifPresent(skinId -> nbt.putString("Skin", skinId.toString()));
         
         return nbt;
     }
@@ -125,6 +148,10 @@ public class StandInstance {
             }
         }
         
+        instance.setCustomSkin(MCUtil.getNbtElement(nbt, "Skin", StringNBT.class)
+                .map(StringNBT::getAsString).map(ResourceLocation::new), 
+                null);
+        
         return instance;
     }
     
@@ -136,6 +163,7 @@ public class StandInstance {
         missingParts.forEach(part -> buf.writeEnum(part));
         
         DataSerializers.OPTIONAL_COMPONENT.write(buf, customName);
+        NetworkUtil.writeOptional(buf, standSkin, skinResLoc -> buf.writeResourceLocation(skinResLoc));
     }
     
     public static StandInstance fromBuf(PacketBuffer buf) {
@@ -148,6 +176,7 @@ public class StandInstance {
         }
         
         standInstance.customName = DataSerializers.OPTIONAL_COMPONENT.read(buf);
+        standInstance.standSkin = NetworkUtil.readOptional(buf, () -> buf.readResourceLocation());
         
         return standInstance;
     }

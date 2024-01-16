@@ -3,8 +3,8 @@ package com.github.standobyte.jojo.util;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
+import com.github.standobyte.jojo.command.ConfigPackCommand;
 import com.github.standobyte.jojo.command.StandArgument;
-import com.github.standobyte.jojo.command.configpack.StandStatsConfig;
 import com.github.standobyte.jojo.init.ModPotions;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -32,7 +32,7 @@ public class CommonSetup {
             
             PacketManager.init();
             
-            StandStatsConfig.init(MinecraftForge.EVENT_BUS);
+            ConfigPackCommand.initConfigs(MinecraftForge.EVENT_BUS);
             
             // things to do after registry events
             ModPotions.registerRecipes();

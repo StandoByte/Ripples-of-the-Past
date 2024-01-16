@@ -201,6 +201,19 @@ public class HamonUtil {
         return skills;
     }
     
+    public static boolean interactWithHamonTeacher(World world, PlayerEntity player, Entity targetEntity) {
+        if (targetEntity instanceof LivingEntity) {
+            LivingEntity targetLiving = (LivingEntity) targetEntity;
+            Optional<HamonData> targetHamon = INonStandPower.getNonStandPowerOptional(targetLiving).resolve()
+                    .flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get()));
+            if (targetHamon.isPresent()) {
+                HamonUtil.interactWithHamonTeacher(targetLiving.level, player, targetLiving, targetHamon.get());
+                return true;
+            }
+        }
+        return false;
+    }
+    
     public static void interactWithHamonTeacher(World world, PlayerEntity player, LivingEntity teacher, HamonData teacherHamon) {
         INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
             Optional<HamonData> hamonOptional = power.getTypeSpecificData(ModPowers.HAMON.get());
@@ -444,7 +457,7 @@ public class HamonUtil {
     // TODO fix not being able to walk on liquid on shift (PlayerEntity#maybeBackOffFromEdge (989))
     public static boolean liquidWalking(PlayerEntity player) {
         World world = player.level;
-        if (player.abilities.flying || player.isInWater()) {
+        if (player.abilities.flying || player.isInWater() || player.isPassenger()) {
             return false;
         }
         boolean doubleShift = player.isShiftKeyDown() && player.getCapability(PlayerUtilCapProvider.CAPABILITY).map(
@@ -676,7 +689,7 @@ public class HamonUtil {
         }
     }
     
-    private static boolean isItemLivingMatter(ItemStack itemStack) {
+    public static boolean isItemLivingMatter(ItemStack itemStack) {
         if (itemStack.isEmpty()) {
             return false;
         }

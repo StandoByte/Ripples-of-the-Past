@@ -3,9 +3,11 @@ package com.github.standobyte.jojo.client;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.util.function.Consumer;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.power.IPower.ActionType;
+import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.HudNamesRender;
+import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.PositionConfig;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.google.gson.Gson;
@@ -15,38 +17,29 @@ import net.minecraft.client.Minecraft;
 
 public class ClientModSettings {
     
-    private static class Settings {
-        private boolean lockedAttacksHotbar;
-        private boolean lockedAbilitiesHotbar;
+    public static class Settings {
+        public float standStatsTranslucency = 0.75F;
+        
+        public PositionConfig barsPosition = PositionConfig.TOP_LEFT;
+        public PositionConfig hotbarsPosition = PositionConfig.TOP_LEFT;
+        public HudNamesRender hudNamesRender = HudNamesRender.ALWAYS;
+        
+        public boolean resolveShaders = true;
+        public boolean menacingParticles = true;
+        public boolean timeStopFreezesVisuals = false;
+        public boolean timeStopAnimation = true;
+        
+        public boolean characterVoiceLines = true;
     }
     
     
-    public void switchLockedHotbarControls(ActionType hotbar) {
-        setLockedHotbarControls(hotbar, !areControlsLockedForHotbar(hotbar));
-    }
-    
-    private void setLockedHotbarControls(ActionType hotbar, boolean value) {
-        switch (hotbar) {
-        case ATTACK:
-            settings.lockedAttacksHotbar = value;
-            if (value) settings.lockedAbilitiesHotbar = false;
-            break;
-        case ABILITY:
-            if (value) settings.lockedAttacksHotbar = false;
-            settings.lockedAbilitiesHotbar = value;
-            break;
-        }
+    public void editSettings(Consumer<Settings> edit) {
+        edit.accept(settings);
         save();
     }
     
-    public boolean areControlsLockedForHotbar(ActionType hotbar) {
-        switch (hotbar) {
-        case ATTACK:
-            return settings.lockedAttacksHotbar;
-        case ABILITY:
-            return settings.lockedAbilitiesHotbar;
-        }
-        return false;
+    public static Settings getSettingsReadOnly() {
+        return getInstance().settings;
     }
     
     

@@ -28,6 +28,6 @@ public abstract class AdditionalBarrageSwing<T extends Entity, M extends EntityM
     
     
     public abstract void poseAndRender(T entity, M model, MatrixStack matrixStack, IVertexBuilder buffer, 
-            float yRotationOffset, float xRotation, 
+            float yRotOffsetRad, float xRotRad, 
             int packedLight, int packedOverlay, float red, float green, float blue, float alpha);
 }

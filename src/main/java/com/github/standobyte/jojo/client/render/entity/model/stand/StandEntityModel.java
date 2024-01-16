@@ -7,16 +7,21 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.mutable.MutableFloat;
+
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.StandEntityAction.Phase;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.render.entity.pose.IModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose;
+import com.github.standobyte.jojo.client.render.entity.pose.ModelPose.ModelAnim;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPoseTransition;
 import com.github.standobyte.jojo.client.render.entity.pose.RotationAngle;
-import com.github.standobyte.jojo.client.render.entity.pose.ModelPose.ModelAnim;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.IActionAnimation;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.barrage.BarrageSwingsHolder;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.barrage.IBarrageAnimation;
@@ -39,11 +44,15 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 
 public abstract class StandEntityModel<T extends StandEntity> extends AgeableModel<T> implements IHasArm {
+    private static final HashMap<ResourceLocation, StandModelRegistryObj> STAND_MODELS = new HashMap<>();
+    private ResourceLocation modelId;
+    
     protected VisibilityMode visibilityMode = VisibilityMode.ALL;
-    protected float yRotation;
-    protected float xRotation;
+    protected float yRotRad;
+    protected float xRotRad;
     protected float ticks;
 
+    private boolean initialized = false;
     public float idleLoopTickStamp = 0;
     private ModelPose<T> poseReset;
     protected IModelPose<T> idlePose;
@@ -52,6 +61,8 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     protected final Map<StandPose, IActionAnimation<T>> actionAnim = new HashMap<>();
     @Nullable
     private IActionAnimation<T> currentActionAnim = null;
+    
+    private Map<ModelRenderer, MutableFloat> secondXRotMap = new HashMap<>();
 
     protected StandEntityModel(boolean scaleHead, float yHeadOffset, float zHeadOffset) {
         this(scaleHead, yHeadOffset, zHeadOffset, 2.0F, 2.0F, 24.0F);
@@ -66,11 +77,44 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
             float babyHeadScale, float babyBodyScale, float bodyYOffset) {
         super(renderType, scaleHead, yHeadOffset, zHeadOffset, babyHeadScale, babyBodyScale, bodyYOffset);
     }
+    
+    public static <T extends StandEntity, M extends StandEntityModel<T>> M registerModel(
+            M model, ResourceLocation modelId, Supplier<? extends M> constructor) {
+        model.registerStandModel(modelId, constructor);
+        return model;
+    }
+    
+    final void registerStandModel(ResourceLocation modelId, Supplier<? extends StandEntityModel<?>> constructor) {
+        synchronized (STAND_MODELS) {
+            if (this.modelId != null) {
+                JojoMod.getLogger().error("Tried to register {} Stand model object twice!", modelId);
+            }
+            else if (STAND_MODELS.values().stream().anyMatch(modelEntry -> modelEntry.id.equals(modelId))) {
+                JojoMod.getLogger().error("Using duplicate id {} for a Stand model!", modelId);
+            }
+            else {
+                STAND_MODELS.put(modelId, new StandModelRegistryObj(modelId, this, constructor));
+                this.modelId = modelId;
+            }
+        }
+    }
+    
+    @Nullable
+    public static StandModelRegistryObj getRegisteredModel(ResourceLocation id) {
+        return STAND_MODELS.get(id);
+    }
+    
+    public final ResourceLocation getModelId() {
+        return modelId;
+    }
 
     public void afterInit() {
-        initOpposites();
-        initPoses();
-        initActionPoses();
+        if (!initialized) { 
+            initOpposites();
+            initPoses();
+            initActionPoses();
+            initialized = true;
+        }
     }
 
     public static final void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
@@ -98,11 +142,13 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         }
     }
 
-    protected abstract void updatePartsVisibility(VisibilityMode mode);
+    public abstract void updatePartsVisibility(VisibilityMode mode);
     protected abstract void partMissing(StandPart standPart);
     
     @Override
     public void setupAnim(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
+        resetXRotation();
+        
         HandSide swingingHand = entity.getPunchingHand();
         headParts().forEach(part -> {
             setRotationAngle(part, 0, 0, 0);
@@ -116,36 +162,43 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
             entity.setStandPose(StandPose.IDLE);
             pose = StandPose.IDLE;
         }
-
-        poseStand(entity, ticks, yRotationOffset, xRotation, 
+        
+        this.yRotRad = yRotationOffset * MathUtil.DEG_TO_RAD;
+        this.xRotRad = xRotation * MathUtil.DEG_TO_RAD;
+        poseStand(entity, ticks, yRotRad, xRotRad, 
                 pose, entity.getCurrentTaskPhase(), 
                 entity.getCurrentTaskPhaseCompletion(ticks - entity.tickCount), swingingHand);
-        this.yRotation = yRotationOffset;
-        this.xRotation = xRotation;
         this.ticks = ticks;
     }
-
-    protected void poseStand(T entity, float ticks, float yRotationOffset, float xRotation, 
+    
+    @Override
+    public void renderToBuffer(MatrixStack matrixStack, IVertexBuilder buffer, 
+            int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+        applyXRotation();
+        super.renderToBuffer(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+    }
+    
+    protected void poseStand(T entity, float ticks, float yRotOffsetRad, float xRotRad, 
             StandPose standPose, Optional<Phase> actionPhase, float phaseCompletion, HandSide swingingHand) {
         if (actionAnim.containsKey(standPose)) {
-            idlePose.poseModel(1.0F, entity, ticks, yRotationOffset, xRotation, swingingHand);
+            idlePose.poseModel(1.0F, entity, ticks, yRotOffsetRad, xRotRad, swingingHand);
             onPose(entity, ticks);
             
             IActionAnimation<T> prevAnim = currentActionAnim;
             currentActionAnim = getActionAnim(entity, standPose);
             if (currentActionAnim != null) {
                 if (prevAnim != currentActionAnim) {
-                    currentActionAnim.onAnimStart(entity, yRotationOffset, xRotation);
+                    currentActionAnim.onAnimStart(entity, yRotOffsetRad, xRotRad);
                 }
                 currentActionAnim.animate(actionPhase.get(), phaseCompletion, 
-                        entity, ticks, yRotationOffset, xRotation, swingingHand);
+                        entity, ticks, yRotOffsetRad, xRotRad, swingingHand);
             }
         }
         else if (standPose == StandPose.SUMMON && summonPoses.size() > 0) {
-            poseSummon(entity, ticks, yRotationOffset, xRotation, swingingHand);
+            poseSummon(entity, ticks, yRotOffsetRad, xRotRad, swingingHand);
         }
         else {
-            poseIdleLoop(entity, ticks, yRotationOffset, xRotation, swingingHand);
+            poseIdleLoop(entity, ticks, yRotOffsetRad, xRotRad, swingingHand);
         }
     }
 
@@ -157,22 +210,22 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         idleLoopTickStamp = ticks;
     }
 
-    protected final ModelAnim<T> HEAD_ROTATION = (rotationAmount, entity, ticks, yRotationOffset, xRotation) -> {
+    protected final ModelAnim<T> HEAD_ROTATION = (rotationAmount, entity, ticks, yRotOffsetRad, xRotRad) -> {
         headParts().forEach(part -> {
-            part.yRot = MathUtil.rotLerpRad(rotationAmount, part.yRot, yRotationOffset * MathUtil.DEG_TO_RAD);
-            part.xRot = MathUtil.rotLerpRad(rotationAmount, part.xRot, xRotation * MathUtil.DEG_TO_RAD);
+            part.yRot = MathUtil.rotLerpRad(rotationAmount, part.yRot, yRotOffsetRad);
+            part.xRot = MathUtil.rotLerpRad(rotationAmount, part.xRot, xRotRad);
             part.zRot = 0;
         });
     };
     
-    protected void poseSummon(T entity, float ticks, float yRotationOffset, float xRotation, HandSide swingingHand) {
+    protected void poseSummon(T entity, float ticks, float yRotOffsetRad, float xRotRad, HandSide swingingHand) {
         resetPose(entity);
         onPose(entity, ticks);
         
         summonPoses.get(entity.getSummonPoseRandomByte() % summonPoses.size())
-        .poseModel(1.0F, entity, ticks, yRotationOffset, xRotation, swingingHand);
+        .poseModel(1.0F, entity, ticks, yRotOffsetRad, xRotRad, swingingHand);
 
-        idlePose.poseModel(summonPoseRotation(ticks), entity, ticks, yRotationOffset, xRotation, swingingHand);
+        idlePose.poseModel(summonPoseRotation(ticks), entity, ticks, yRotOffsetRad, xRotRad, swingingHand);
     }
     
     private static float summonPoseRotation(float ticks) {
@@ -181,8 +234,8 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
                 0F, 1F);
     }
     
-    protected void poseIdleLoop(T entity, float ticks, float yRotationOffset, float xRotation, HandSide swingingHand) {
-        idleLoop.poseModel(ticks - idleLoopTickStamp, entity, ticks, yRotationOffset, xRotation, swingingHand);
+    public void poseIdleLoop(T entity, float ticks, float yRotOffsetRad, float xRotRad, HandSide swingingHand) {
+        idleLoop.poseModel(ticks - idleLoopTickStamp, entity, ticks, yRotOffsetRad, xRotRad, swingingHand);
     }
     
     protected void initPoses() {
@@ -192,7 +245,8 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         if (idlePose == null)
             idlePose = initBaseIdlePose();
         if (idleLoop == null)
-            idleLoop = new ModelPoseTransition<T>(idlePose, initIdlePose2Loop()).setEasing(ticks -> MathHelper.sin(ticks / 20));
+            idleLoop = new ModelPoseTransition<T>(idlePose, initIdlePose2Loop())
+                .setEasing(ticks -> (MathHelper.sin((float) Math.PI * (ticks / 40 - 0.5f)) - 1) / 2);
 
         if (summonPoses == null)
             summonPoses = initSummonPoses();
@@ -237,9 +291,26 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
             int packedOverlay, float red, float green, float blue, float alpha) {}
 
     public abstract ModelRenderer getArm(HandSide side);
-
-
-
+    
+    
+    
+    
+    protected final void setSecondXRot(ModelRenderer modelPart, float xRot) {
+        secondXRotMap.computeIfAbsent(modelPart, part -> new MutableFloat()).setValue(xRot);
+    }
+    
+    private void resetXRotation() {
+        secondXRotMap.forEach((modelPart, xRotMutable) -> xRotMutable.setValue(0));
+    }
+    
+    private void applyXRotation() {
+        secondXRotMap.forEach((modelPart, xRotMutable) -> {
+            float xRot = xRotMutable.getValue();
+            if (xRot != 0) {
+                ClientUtil.rotateAngles(modelPart, xRot);
+            }
+        });
+    }
     
     public void addBarrageSwings(T entity) {
         if (entity.getStandPose() == StandPose.BARRAGE && entity.getCurrentTaskPhase().map(phase -> phase == Phase.PERFORM).orElse(false)
@@ -262,7 +333,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
             int packedOverlay, float red, float green, float blue, float alpha) {
         BarrageSwingsHolder<T, M> barrageSwings = (BarrageSwingsHolder<T, M>) entity.getBarrageSwingsHolder();
         barrageSwings.renderBarrageSwings(thisModel, entity, matrixStack, buffer, 
-                packedLight, packedOverlay, yRotation, xRotation, red, green, blue, alpha);
+                packedLight, packedOverlay, yRotRad, xRotRad, red, green, blue, alpha);
     }
 
     public void resetPose(T entity) {
@@ -282,5 +353,23 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         LEFT_ARM_ONLY,
         RIGHT_ARM_ONLY,
         NONE
+    }
+    
+    
+    
+    public static final class StandModelRegistryObj {
+        public final ResourceLocation id;
+        public final StandEntityModel<?> baseModel;
+        private final Supplier<? extends StandEntityModel<?>> modelConstructor;
+        
+        StandModelRegistryObj(ResourceLocation id, StandEntityModel<?> baseModel, Supplier<? extends StandEntityModel<?>> modelConstructor) {
+            this.id = id;
+            this.baseModel = baseModel;
+            this.modelConstructor = modelConstructor;
+        }
+        
+        public StandEntityModel<?> createNewModelCopy() {
+            return modelConstructor.get();
+        }
     }
 }

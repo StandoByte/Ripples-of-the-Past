@@ -84,14 +84,23 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
         case ENTITY:
             Entity targetEntity = target.getEntity();
             
-            return standPower.getResolveLevel() >= 3 && (
-                    targetEntity instanceof TNTEntity
-                    || targetEntity.getType() == EntityType.SNOW_GOLEM
-                    || (targetEntity instanceof CreeperEntity && ((CreeperEntity) targetEntity).isPowered()) ||
-                    standPower.getResolveLevel() >= 4 && (
-                            targetEntity.getType() == EntityType.IRON_GOLEM
-                            || targetEntity.getType() == EntityType.WITHER && ((WitherEntity) targetEntity).getInvulnerableTicks() > 0))
-                    ? ActionConditionResult.POSITIVE : conditionMessage("entity_revert");
+            int resolveLevel = standPower.getResolveLevel();
+            if (resolveLevel >= 3) {
+                if (
+                        targetEntity instanceof TNTEntity ||
+                        targetEntity.getType() == EntityType.SNOW_GOLEM ||
+                        targetEntity instanceof CreeperEntity && ((CreeperEntity) targetEntity).isPowered()) {
+                    return ActionConditionResult.POSITIVE;
+                }
+                if (resolveLevel >= 4) {
+                    if (
+                            targetEntity.getType() == EntityType.IRON_GOLEM ||
+                            targetEntity.getType() == EntityType.WITHER && ((WitherEntity) targetEntity).getInvulnerableTicks() > 0) {
+                        return ActionConditionResult.POSITIVE;
+                    }
+                }
+            }
+            return conditionMessage("entity_revert");
         default:
             return ActionConditionResult.POSITIVE;
         }

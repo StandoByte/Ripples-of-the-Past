@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.stand.TimeStop;
 import com.github.standobyte.jojo.action.stand.TimeStopInstant;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
@@ -15,7 +16,6 @@ import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
-import com.github.standobyte.jojo.util.mod.TimeUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -87,7 +87,12 @@ public class TimeStopInstance {
     
     public boolean tick() {
         ticksPassed++;
-        if (user != null && !user.level.isClientSide()) {
+        ticksLeft--;
+        if (world.isClientSide() && user != ClientUtil.getClientPlayer()) {
+            return false;
+        }
+        
+        if (user != null) {
             if (!user.isAlive()) {
                 return true;
             }
@@ -101,7 +106,7 @@ public class TimeStopInstance {
                     if (action != null) {
                         staminaCost += action.getStaminaCostTicking(power);
                     }
-                    if (!power.consumeStamina(staminaCost)) {
+                    if (!power.consumeStamina(staminaCost, true)) {
                         power.setStamina(0);
                         return true;
                     }
@@ -116,7 +121,7 @@ public class TimeStopInstance {
             
             tickSounds();
         }
-        return --ticksLeft <= 0;
+        return ticksLeft <= 0;
     }
     
     public void setTicksLeft(int ticks) {
@@ -162,14 +167,14 @@ public class TimeStopInstance {
     public static final int TIME_RESUME_SOUND_TICKS = 10;
     public static final int TIME_RESUME_VOICELINE_TICKS = 30;
     public void tickSounds() {
-        if (!world.isClientSide() && (ticksLeft == TIME_RESUME_SOUND_TICKS || ticksLeft == TIME_RESUME_VOICELINE_TICKS || alwaysSayVoiceLine)) {
+        if (!world.isClientSide()) {
             if (ticksLeft == TIME_RESUME_SOUND_TICKS) {
                 if (timeResumeSound != null) {
                     PacketManager.sendGloballyWithCondition(new PlaySoundAtClientPacket(timeResumeSound, SoundCategory.AMBIENT, user.blockPosition(), 5.0F, 1.0F), 
-                            world.dimension(), player -> inRange(TimeStopHandler.getChunkPos(player)) && TimeUtil.canPlayerSeeInStoppedTime(player));
+                            world.dimension(), player -> inRange(TimeStopHandler.getChunkPos(player)) && TimeStopHandler.canPlayerSeeInStoppedTime(player));
                 }
             }
-            else {
+            else if (ticksLeft == TIME_RESUME_VOICELINE_TICKS || alwaysSayVoiceLine) {
                 if (startingTicks >= 100) {
                     SoundEvent voiceLine = ticksManuallySet ? timeManualResumeVoiceLine : timeResumeVoiceLine;
                     if (voiceLine != null) {

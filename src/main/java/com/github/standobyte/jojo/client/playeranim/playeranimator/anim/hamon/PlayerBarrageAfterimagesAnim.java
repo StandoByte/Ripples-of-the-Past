@@ -30,9 +30,9 @@ public class PlayerBarrageAfterimagesAnim extends TwoHandedBarrageAnimation<Abst
 
     @Override
     public void animate(Phase phase, float phaseCompletion, AbstractClientPlayerEntity entity, float ticks, 
-            float yRotationOffset, float xRotation, HandSide side) {
+            float yRotOffsetRad, float xRotRad, HandSide side) {
         if (phase != Phase.PERFORM) {
-            super.animate(phase, phaseCompletion, entity, ticks, yRotationOffset, xRotation, side);
+            super.animate(phase, phaseCompletion, entity, ticks, yRotOffsetRad, xRotRad, side);
         }
     }
 

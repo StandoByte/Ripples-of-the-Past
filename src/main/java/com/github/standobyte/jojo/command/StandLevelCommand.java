@@ -47,7 +47,7 @@ public class StandLevelCommand {
     private static int addStandLevel(CommandSource source, Collection<? extends ServerPlayerEntity> targets, int levels) throws CommandSyntaxException {
         Collection<IStandPower> stands = getStands(targets);
         for (IStandPower stand : stands) {
-            stand.setResolveLevel(stand.getResolveLevel() + levels, true);
+            stand.setResolveLevel(stand.getResolveLevel() + levels);
         }
         
         if (stands.size() == 1) {
@@ -62,7 +62,7 @@ public class StandLevelCommand {
     private static int setStandLevel(CommandSource source, Collection<? extends ServerPlayerEntity> targets, int level) throws CommandSyntaxException {
         Collection<IStandPower> stands = getStands(targets);
         for (IStandPower stand : stands) {
-            stand.setResolveLevel(level, true);
+            stand.setResolveLevel(level);
         }
         
         if (stands.size() == 1) {

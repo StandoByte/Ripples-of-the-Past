@@ -6,8 +6,8 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
-import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.TimeStopHandler;
@@ -18,11 +18,12 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
-import com.github.standobyte.jojo.util.mod.TimeUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -38,6 +39,8 @@ public class TimeStop extends StandAction {
     private final Supplier<SoundEvent> timeResumeVoiceLine;
     private final Supplier<SoundEvent> timeManualResumeVoiceLine;
     private final Supplier<SoundEvent> timeResumeSound;
+    private final ResourceLocation shaderWithAnim;
+    private final ResourceLocation shaderOld;
 
     public TimeStop(TimeStop.Builder builder) {
         super(builder);
@@ -46,11 +49,13 @@ public class TimeStop extends StandAction {
         this.timeResumeVoiceLine = builder.timeResumeVoiceLine;
         this.timeManualResumeVoiceLine = builder.timeManualResumeVoiceLine;
         this.timeResumeSound = builder.timeResumeSound;
+        this.shaderWithAnim = builder.shaderWithAnim;
+        this.shaderOld = builder.shaderOld;
     }
 
     @Override
     protected SoundEvent getShout(LivingEntity user, IStandPower power, ActionTarget target, boolean wasActive) {
-        if (TimeUtil.isTimeStopped(user.level, user.blockPosition())) {
+        if (TimeStopHandler.isTimeStopped(user.level, user.blockPosition())) {
             return null;
         }
         if (wasActive && voiceLineWithStandSummoned != null && voiceLineWithStandSummoned.get() != null) {
@@ -65,7 +70,7 @@ public class TimeStop extends StandAction {
             int timeStopTicks = getTimeStopTicks(power, this);
             BlockPos blockPos = user.blockPosition();
             ChunkPos chunkPos = new ChunkPos(blockPos);
-            boolean invadingStoppedTime = TimeUtil.isTimeStopped(world, user.blockPosition());
+            boolean invadingStoppedTime = TimeStopHandler.isTimeStopped(world, user.blockPosition());
             TimeStopInstance instance = new TimeStopInstance(world, timeStopTicks, chunkPos, 
                     JojoModConfig.getCommonConfigInstance(world.isClientSide()).timeStopChunkRange.get(), user, this);
             Optional<TimeStopInstance> currentMaxInstance = world.getCapability(WorldUtilCapProvider.CAPABILITY)
@@ -89,11 +94,11 @@ public class TimeStop extends StandAction {
             user.addEffect(immunityEffect);
             instance.setStatusEffectInstance(immunityEffect);
             
-            TimeUtil.stopTime(world, instance);
+            TimeStopHandler.stopTime(world, instance);
             if (timeStopTicks >= 40 && timeStopSound != null && timeStopSound.get() != null
                     && !invadingStoppedTime) {
                 PacketManager.sendGloballyWithCondition(new PlaySoundAtClientPacket(timeStopSound.get(), SoundCategory.AMBIENT, blockPos, 5.0F, 1.0F), 
-                        world.dimension(), player -> instance.inRange(TimeStopHandler.getChunkPos(player)) && TimeUtil.canPlayerSeeInStoppedTime(player));
+                        world.dimension(), player -> instance.inRange(TimeStopHandler.getChunkPos(player)) && TimeStopHandler.canPlayerSeeInStoppedTime(player));
             }
             
             user.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.hasUsedTimeStopToday = true);
@@ -102,7 +107,7 @@ public class TimeStop extends StandAction {
 
     @Override
     public int getHoldDurationToFire(IStandPower power) { 
-        return TimeUtil.isTimeStopped(power.getUser().level, power.getUser().blockPosition()) ? 0 : super.getHoldDurationToFire(power);
+        return TimeStopHandler.isTimeStopped(power.getUser().level, power.getUser().blockPosition()) ? 0 : super.getHoldDurationToFire(power);
     }
 
     @Override
@@ -118,7 +123,7 @@ public class TimeStop extends StandAction {
     @Override
     public void onTrainingPoints(IStandPower power, float points) {
         if (getInstantTSVariation() != null) {
-            power.setLearningProgressPoints(getInstantTSVariation(), points, false, false);
+            power.setLearningProgressPoints(getInstantTSVariation(), points);
         }
     }
     
@@ -144,13 +149,18 @@ public class TimeStop extends StandAction {
     }
     
     @Nullable
-    public Action<IStandPower> getInstantTSVariation() {
+    public StandAction getInstantTSVariation() {
         return blink;
     }
     
-    private Action<IStandPower> blink;
-    void setInstantTSVariation(Action<IStandPower> blink) {
+    private StandAction blink;
+    void setInstantTSVariation(StandAction blink) {
         this.blink = blink;
+    }
+    
+    @Nullable
+    public ResourceLocation getTimeStopShader(boolean withAnimEffect) {
+        return withAnimEffect ? shaderWithAnim : shaderOld;
     }
     
     
@@ -161,8 +171,12 @@ public class TimeStop extends StandAction {
     }
     
     public static int getMaxTimeStopTicks(IStandPower standPower) {
-        return ((TimeStopperStandStats) standPower.getType().getStats())
-                .getMaxTimeStopTicks(TimeStop.vampireTimeStopDuration(standPower.getUser()));
+        StandStats stats = standPower.getType().getStats();
+        if (stats instanceof TimeStopperStandStats) {
+            return ((TimeStopperStandStats) stats).getMaxTimeStopTicks(
+                    TimeStop.vampireTimeStopDuration(standPower.getUser()));
+        }
+        return 100;
     }
     
     public static boolean vampireTimeStopDuration(LivingEntity entity) {
@@ -177,6 +191,8 @@ public class TimeStop extends StandAction {
         private Supplier<SoundEvent> timeResumeVoiceLine = () -> null;
         private Supplier<SoundEvent> timeManualResumeVoiceLine = () -> null;
         private Supplier<SoundEvent> timeResumeSound = () -> null;
+        private ResourceLocation shaderWithAnim = new ResourceLocation(JojoMod.MOD_ID, "shaders/post/time_stop_tw.json");
+        private ResourceLocation shaderOld = new ResourceLocation(JojoMod.MOD_ID, "shaders/post/time_stop_tw_old.json");
         
         public Builder voiceLineWithStandSummoned(Supplier<SoundEvent> voiceLine) {
             this.voiceLineWithStandSummoned = voiceLine;
@@ -206,6 +222,16 @@ public class TimeStop extends StandAction {
         
         public Builder timeResumeSound(Supplier<SoundEvent> sound) {
             this.timeResumeSound = sound;
+            return getThis();
+        }
+        
+        public Builder shaderEffect(ResourceLocation path, boolean withAnimEffect) {
+            if (withAnimEffect) {
+                this.shaderWithAnim = path;
+            }
+            else {
+                this.shaderOld = path;
+            }
             return getThis();
         }
         

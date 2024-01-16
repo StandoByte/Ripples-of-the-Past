@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
 
@@ -14,6 +15,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
 import net.minecraft.command.arguments.EntityArgument;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public class StandCommand {
@@ -33,9 +35,13 @@ public class StandCommand {
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
         dispatcher.register(Commands.literal("stand").requires(ctx -> ctx.hasPermission(2))
                 .then(Commands.literal("give").then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("stand", new StandArgument())
-                        .executes(ctx -> giveStands(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), StandArgument.getStandType(ctx, "stand"), false)))))
+                        .executes(ctx -> giveStands(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), StandArgument.getStandType(ctx, "stand"), false))
+                        .then(Commands.argument("replace", BoolArgumentType.bool())
+                                .executes(ctx -> giveStands(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), StandArgument.getStandType(ctx, "stand"), BoolArgumentType.getBool(ctx, "replace")))))))
                 .then(Commands.literal("random").then(Commands.argument("targets", EntityArgument.players()) // /stand random <player(s)>
-                        .executes(ctx -> giveRandomStands(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), false))))
+                        .executes(ctx -> giveRandomStands(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), false))
+                        .then(Commands.argument("replace", BoolArgumentType.bool())
+                                .executes(ctx -> giveRandomStands(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), BoolArgumentType.getBool(ctx, "replace"))))))
                 .then(Commands.literal("clear").then(Commands.argument("targets", EntityArgument.players())
                         .executes(ctx -> removeStands(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets")))))
                 .then(Commands.literal("type").then(Commands.argument("targets", EntityArgument.player())
@@ -49,6 +55,9 @@ public class StandCommand {
         for (ServerPlayerEntity player : targets) {
             IStandPower power = IStandPower.getStandPowerOptional(player).orElse(null);
             if (power != null) {
+                if (replace) {
+                    power.clear();
+                }
                 if (power.givePower(standType)) {
                     i++;
                 }
@@ -95,6 +104,9 @@ public class StandCommand {
                             throw GIVE_MULTIPLE_EXCEPTION_RANDOM.create(targets.size() - i);
                         }
                     }
+                    if (replace) {
+                        power.clear();
+                    }
                     if (power.givePower(stand)) {
                         i++;
                     }
@@ -133,7 +145,7 @@ public class StandCommand {
             if (power != null) {
                 removedStand = power.getType();
                 power.clear();
-                power.clearActionLearning();
+                power.fullStandClear();
                 i++;
             }
         }
@@ -145,9 +157,16 @@ public class StandCommand {
             }
         } else {
             if (targets.size() == 1) {
-                source.sendSuccess(new TranslationTextComponent("commands.stand.remove.success.single", 
-                        removedStand != null ? removedStand.getName() : "", 
-                                targets.iterator().next().getDisplayName()), true);
+                ITextComponent message;
+                if (removedStand != null) {
+                    message = new TranslationTextComponent("commands.stand.remove.success.single", 
+                            removedStand.getName(), targets.iterator().next().getDisplayName());
+                }
+                else {
+                    message = new TranslationTextComponent("commands.stand.remove.success.single.no_stand", 
+                            targets.iterator().next().getDisplayName());
+                }
+                source.sendSuccess(message, true);
             } else {
                 source.sendSuccess(new TranslationTextComponent("commands.stand.remove.success.multiple", i), true);
             }

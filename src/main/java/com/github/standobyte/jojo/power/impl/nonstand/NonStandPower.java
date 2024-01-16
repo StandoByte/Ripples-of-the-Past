@@ -12,13 +12,13 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.HadPowerTypesPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.PreviousPowerTypesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrEnergyPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrTypeNonStandPowerPacket;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.impl.PowerBaseImpl;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
-import com.github.standobyte.jojo.util.general.Container;
+import com.github.standobyte.jojo.util.general.ObjectWrapper;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.LivingEntity;
@@ -83,17 +83,17 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
         if (isUserCreative()) {
             energy = getMaxEnergy();
         }
-        serverPlayerUser.ifPresent(player -> {
-            PacketManager.sendToClientsTrackingAndSelf(new TrTypeNonStandPowerPacket(player.getId(), getType()), player);
-        });
+        if (user != null && !user.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(new TrTypeNonStandPowerPacket(user.getId(), getType()), user);
+        }
     }
     
     @Override
     public boolean clear() {
         if (super.clear()) {
-            serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClientsTrackingAndSelf(TrTypeNonStandPowerPacket.noPowerType(player.getId()), player);
-            });
+            if (user != null && !user.level.isClientSide()) {
+                PacketManager.sendToClientsTrackingAndSelf(TrTypeNonStandPowerPacket.noPowerType(user.getId()), user);
+            }
             type.onClear(this);
             NonStandPowerType<?> clearedType = this.type;
             setType(null);
@@ -124,7 +124,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     }
     
     @Override
-    public ActionConditionResult checkRequirements(Action<INonStandPower> action, Container<ActionTarget> targetContainer, boolean checkTargetType) {
+    public ActionConditionResult checkRequirements(Action<INonStandPower> action, ObjectWrapper<ActionTarget> targetContainer, boolean checkTargetType) {
         ActionConditionResult result = super.checkRequirements(action, targetContainer, checkTargetType);
         if (!result.isPositive()) {
             serverPlayerUser.ifPresent(player -> {
@@ -171,12 +171,11 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     @Override
     public void setEnergy(float amount) {
         amount = MathHelper.clamp(amount, 0, getMaxEnergy());
-        boolean send = this.energy != amount;
-        this.energy = amount;
-        if (send) {
-            serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClientsTrackingAndSelf(new TrEnergyPacket(player.getId(), getEnergy()), player);
-            });
+        if (this.energy != amount) {
+            this.energy = amount;
+            if (user != null && !user.level.isClientSide()) {
+                PacketManager.sendToClientsTrackingAndSelf(new TrEnergyPacket(user.getId(), getEnergy()), user);
+            }
         }
     }
     
@@ -241,7 +240,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     public void addHadPowerBefore(NonStandPowerType<?> type) {
         hadPowers.add(type);
         serverPlayerUser.ifPresent(player -> {
-            PacketManager.sendToClient(new HadPowerTypesPacket(hadPowers), player);
+            PacketManager.sendToClient(new PreviousPowerTypesPacket(hadPowers), player);
         });
     }
     
@@ -323,7 +322,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
                 });
                 PacketManager.sendToClient(new TrEnergyPacket(player.getId(), energy), player);
             }
-            PacketManager.sendToClient(new HadPowerTypesPacket(hadPowers), player);
+            PacketManager.sendToClient(new PreviousPowerTypesPacket(hadPowers), player);
         });
         syncLayoutWithUser();
     }

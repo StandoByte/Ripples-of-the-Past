@@ -8,7 +8,10 @@ issueTrackerURL="https://github.com/StandoByte/Ripples-of-the-Past/issues"
     version="${file.jarVersion}"
     displayName="Ripples of the Past"
     updateJSONURL="https://raw.githubusercontent.com/StandoByte/Ripples-of-the-Past/1.16.5/update.json"
-    displayURL="https://curseforge.com/minecraft/mc-mods/ripples-of-the-past/"
+    displayURL=''' 
+https://curseforge.com/minecraft/mc-mods/ripples-of-the-past/
+https://modrinth.com/mod/ripples-of-the-past
+    '''
     logoFile="logo.png"
     credits='''
     
@@ -19,6 +22,7 @@ issueTrackerURL="https://github.com/StandoByte/Ripples-of-the-Past/issues"
     JoJo SFX Green Screen & Blue Screen - https://www.youtube.com/channel/UCkxl6FSocj8mHEIJRw5KjYg
   Voice lines from Eyes of Heaven and All Star Battle games: https://sounds-resource.com/
   Asset contributions:
+  	New Star Platinum and The World models - WhiteMind, August_dr
     2D sprites - KWiNTA, Yujin
     Player animations - August_dr, iIIiBlackiIIi
     Hamon Master remodel - August_dr
@@ -30,22 +34,8 @@ issueTrackerURL="https://github.com/StandoByte/Ripples-of-the-Past/issues"
       Spanish: dhilansyt
       Ukrainian: kage0100
   Boosty subscribers:
-    YetDarker
-    ThE ReVeRsE_FlAsH
-    potato valentine
-    Кхъ
-    Pr1tcha
-    _Taske
-    ArmorForm
-    NIKKI102
-    ko1n
-    Yujin
-    Robert E.O. Scorpivan
-    999hhh20
-    wain-Beluga_UwU
-    adel
-    Lucifer Dennitsa
-    Alec
+    Wooden man, mepmop, Pypetka56, Yarik, ArchLunatic
+    YetDarker, Pr1tcha, Yujin, Robert E.O. Scorpivan, wain, adel, Lucifer Dennitsa, 999hhh20, ThE ReVeRsE_FlAsH, Кхъ, _Taske, ArmorForm, NIKKI102, ko1n, 黃藝澤, Alec
 '''
     authors="StandoByte"
     description='''

@@ -39,23 +39,26 @@ public class VampirismUtil {
             float sunDamage = getSunDamage(entity);
             if (    
                     sunDamage > 0
-                    && DamageUtil.dealUltravioletDamage(entity, sunDamage, null, null, true)
-                    && entity instanceof PlayerEntity) {
-                EffectInstance sunBurnEffect = entity.getEffect(ModStatusEffects.VAMPIRE_SUN_BURN.get());
-                int duration;
-                int amplifier;
-                if (sunBurnEffect == null) {
-                    duration = 60;
-                    amplifier = 0;
-                }
-                else {
-                    int difficulty = Math.max(entity.level.getDifficulty().getId(), 1);
-                    duration = sunBurnEffect.getDuration() + 60 / difficulty;
-                    amplifier = duration / 60;
-                }
-                VampireSunBurnEffect.giveEffectTo(entity, duration, amplifier);
+                    && DamageUtil.dealUltravioletDamage(entity, sunDamage, null, null, true)) {
+                incSunBurn(entity, 1);
             }
         }
+    }
+    
+    public static void incSunBurn(LivingEntity entity, int tickUpAmount) {
+        EffectInstance sunBurnEffect = entity.getEffect(ModStatusEffects.VAMPIRE_SUN_BURN.get());
+        int duration;
+        int amplifier;
+        if (sunBurnEffect == null) {
+            duration = 60 * tickUpAmount;
+            amplifier = tickUpAmount - 1;
+        }
+        else {
+            int difficulty = Math.max(entity.level.getDifficulty().getId(), 1);
+            duration = sunBurnEffect.getDuration() + 60 * tickUpAmount / difficulty;
+            amplifier = duration / 60;
+        }
+        VampireSunBurnEffect.giveEffectTo(entity, duration, amplifier);
     }
     
 //    private static final float MAX_SUN_DAMAGE = 10;
@@ -70,7 +73,16 @@ public class VampirismUtil {
             return 0;
         }
         World world = entity.level;
-        if (world.isDay()) {
+        if (
+                world.dimensionType().hasSkyLight()
+                && !world.dimensionType().hasCeiling()
+                && world.isDay()
+//                && !world.isRainingAt(new BlockPos(
+//                        entity.blockPosition().getX(), 
+//                        entity.getBoundingBox().maxY,
+//                        entity.blockPosition().getZ()))
+                && !world.isRaining()
+                && !world.isThundering()) {
             float brightness = entity.getBrightness();
             BlockPos blockPos = entity.getVehicle() instanceof BoatEntity ? 
                     (new BlockPos(entity.getX(), (double)Math.round(entity.getY(1.0)), entity.getZ())).above()

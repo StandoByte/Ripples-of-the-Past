@@ -5,7 +5,6 @@ import java.util.List;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 import com.google.gson.JsonSyntaxException;
 
@@ -33,15 +32,6 @@ public class CustomShaderGroup extends ShaderGroup {
         List<Shader> passes = ClientReflection.getShaderGroupPasses(this);
         passes.add(passes.size(), shader);
         return shader;
-    }
-    
-    public static final ResourceLocation TIME_STOP_PREV_EFFECT = new ResourceLocation("shaders/post/desaturate.json");
-    
-    public static final ResourceLocation TIME_STOP_TW = new ResourceLocation(JojoMod.MOD_ID, "shaders/post/time_stop_tw.json");
-    public static final ResourceLocation TIME_STOP_SP = new ResourceLocation(JojoMod.MOD_ID, "shaders/post/time_stop_sp.json");
-    
-    public static boolean hasCustomParameters(ResourceLocation shaderGroup) {
-        return TIME_STOP_TW.equals(shaderGroup) || TIME_STOP_SP.equals(shaderGroup);
     }
     
     @Nullable
