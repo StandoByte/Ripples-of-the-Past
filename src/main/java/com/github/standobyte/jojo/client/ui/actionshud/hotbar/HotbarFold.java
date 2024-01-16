@@ -26,7 +26,6 @@ public class HotbarFold {
         return NO_FOLD[slotsCount];
     }
     
-    public static final int EDGE_EXTRA_WIDTH = 15;
     private HotbarFold(int slotsCount, int selectedSlot, float foldProgress, Alignment alignment) {
         this.slotsCount = slotsCount;
         this.slotsInIndexOrder = new Slot[slotsCount];
@@ -68,11 +67,11 @@ public class HotbarFold {
             slotsInIndexOrder[i] = slot;
             slotsInRenderOrder[order[i]] = slot;
             
-            slot.slotFramePosX =    i == 0 ?                        slot.pos :  slot.pos + EDGE_EXTRA_WIDTH;
-            slot.slotTexX =         i == 0 ?                        0 :         i * 20 + EDGE_EXTRA_WIDTH;
+            slot.slotFramePosX =    i == 0 ?    slot.pos :  slot.pos + HotbarRenderer.EDGE_EXTRA_WIDTH;
+            slot.slotTexX =         i == 0 ?    0 :         i * 20 + HotbarRenderer.EDGE_EXTRA_WIDTH;
             slot.slotWidth = 20;
             if (i == 0 || i == slotsCount - 1) {
-                slot.slotWidth += EDGE_EXTRA_WIDTH;
+                slot.slotWidth += HotbarRenderer.EDGE_EXTRA_WIDTH;
             }
             
             slot.slotRenderedLeftEdge = slot.slotFramePosX;

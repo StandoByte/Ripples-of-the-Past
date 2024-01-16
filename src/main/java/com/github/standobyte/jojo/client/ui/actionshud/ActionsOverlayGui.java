@@ -71,8 +71,6 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Matrix4f;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.KeybindTextComponent;
@@ -608,7 +606,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 int i = slot.slotIndex;
                 Action<P> action = resolveVisibleActionInSlot(actions.get(i), shift, power, getMouseTarget());
                 
-                float leftIconEdge = slot.pos + 2 + HotbarFold.EDGE_EXTRA_WIDTH;
+                float leftIconEdge = slot.pos + 2 + HotbarRenderer.EDGE_EXTRA_WIDTH;
                 float rightIconEdge = leftIconEdge + 16;
                 float leftRenderBorder = slot.getFrameRenderedLeftEdge();
                 float rightRenderBorder = leftRenderBorder + slot.getFrameRenderedWidth();
