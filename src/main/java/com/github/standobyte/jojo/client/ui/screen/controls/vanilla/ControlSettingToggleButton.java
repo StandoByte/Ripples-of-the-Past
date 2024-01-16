@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.client.ui.screen.controls.vanilla;
 
-import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -10,15 +9,11 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public class ControlSettingToggleButton extends Button {
-//    private final Consumer<Boolean> settingSetter;
     private final Supplier<Boolean> settingGetter;
 
     public ControlSettingToggleButton(int pWidth, int pHeight, 
-            Consumer<Boolean> settingSetter, Supplier<Boolean> settingGetter) {
-        super(-1, -1, pWidth, pHeight, StringTextComponent.EMPTY, button -> {
-            settingSetter.accept(!settingGetter.get());
-        });
-//        this.settingSetter = settingSetter;
+            Button.IPressable onPress, Supplier<Boolean> settingGetter) {
+        super(-1, -1, pWidth, pHeight, StringTextComponent.EMPTY, onPress);
         this.settingGetter = settingGetter;
         setMessageFromSetting(settingGetter.get());
     }

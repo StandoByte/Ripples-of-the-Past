@@ -40,6 +40,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandArrowHandler;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
+import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
@@ -718,17 +719,26 @@ public class ClientEventHandler {
                     KeyBinding key = ClientReflection.getKey(keyEntry);
                     if (key == InputHandler.getInstance().attackHotbar) {
                         entriesIter.set(new ExtendedKeyEntry(keyEntry, new ControlSettingToggleButton(40, 20, 
-                                val -> modSettings.editSettings(s -> s.toggleLmbHotbar = val), 
+                                button -> {
+                                    modSettings.editSettings(s -> s.toggleLmbHotbar = !s.toggleLmbHotbar);
+                                    InputHandler.getInstance().setToggledHotbarControls(ActionsLayout.Hotbar.LEFT_CLICK, false);
+                                },
                                 () -> modSettingsRead.toggleLmbHotbar)));
                     }
                     else if (key == InputHandler.getInstance().abilityHotbar) {
                         entriesIter.set(new ExtendedKeyEntry(keyEntry, new ControlSettingToggleButton(40, 20, 
-                                val -> modSettings.editSettings(s -> s.toggleRmbHotbar = val), 
+                                button -> {
+                                    modSettings.editSettings(s -> s.toggleRmbHotbar = !s.toggleRmbHotbar);
+                                    InputHandler.getInstance().setToggledHotbarControls(ActionsLayout.Hotbar.RIGHT_CLICK, false);
+                                },
                                 () -> modSettingsRead.toggleRmbHotbar)));
                     }
                     else if (key == InputHandler.getInstance().disableHotbars) {
                         entriesIter.set(new ExtendedKeyEntry(keyEntry, new ControlSettingToggleButton(40, 20, 
-                                val -> modSettings.editSettings(s -> s.toggleDisableHotbars = val), 
+                                button -> {
+                                    modSettings.editSettings(s -> s.toggleDisableHotbars = !s.toggleDisableHotbars);
+                                    InputHandler.getInstance().setToggleHotbarsDisabled(false);
+                                },
                                 () -> modSettingsRead.toggleDisableHotbars)));
                     }
                 }
