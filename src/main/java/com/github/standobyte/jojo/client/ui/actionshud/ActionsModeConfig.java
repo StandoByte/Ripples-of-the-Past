@@ -120,6 +120,7 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
         
         @Nullable
         int[] getIconTex() {
+            if (targetType == null) return null;
             int x;
             switch (targetType) {
             case NONE:

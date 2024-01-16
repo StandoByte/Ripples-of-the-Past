@@ -28,7 +28,10 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.input.ActionsControlScheme;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
+import com.github.standobyte.jojo.client.ui.BlitFloat;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsModeConfig.SelectedTargetIcon;
+import com.github.standobyte.jojo.client.ui.actionshud.hotbar.HotbarFold;
+import com.github.standobyte.jojo.client.ui.actionshud.hotbar.HotbarRenderer;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonStatsTabGui;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -62,8 +65,6 @@ import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.WorldVertexBufferUploader;
-import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.settings.AttackIndicatorStatus;
 import net.minecraft.client.settings.KeyBinding;
@@ -71,6 +72,7 @@ import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.KeybindTextComponent;
@@ -84,7 +86,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 @SuppressWarnings("deprecation")
 public class ActionsOverlayGui extends AbstractGui {
-    public static final ResourceLocation HOTBAR_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/overlay_hotbar.png");
     public static final ResourceLocation OVERLAY_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/overlay.png");
     private static final ResourceLocation RADIAL_INDICATOR = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/radial_indicator.png");
     
@@ -163,6 +164,9 @@ public class ActionsOverlayGui extends AbstractGui {
                 element.tick();
             }
         }
+        
+        if (attackSelection) actionHotbarFold.get(ActionsLayout.Hotbar.LEFT_CLICK).reset();
+        if (abilitySelection) actionHotbarFold.get(ActionsLayout.Hotbar.RIGHT_CLICK).reset();
         
         INonStandPower power = nonStandUiMode.getPower();
         if (power != null) {
@@ -563,7 +567,7 @@ public class ActionsOverlayGui extends AbstractGui {
         if (!power.hasPower()) return false;
         List<Action<P>> actions = getEnabledActions(power, actionKey);
         if (actions.isEmpty()) return false;
-        
+
         int x = position.x;
         int y = position.y + getHotbarsYDiff() - 6 + getHotbarsYDiff() * ordinal;
         int hotbarLength = actions.size() * 20 + 2;
@@ -588,20 +592,38 @@ public class ActionsOverlayGui extends AbstractGui {
             break;
         }
         
-        // hotbar
-        mc.getTextureManager().bind(HOTBAR_LOCATION);
-        renderHotbar(matrixStack, x, y, actions.size(), alpha);
+        boolean foldHotbar = ClientModSettings.getSettingsReadOnly().hudHotbarsFold;
+        float foldProgress = foldHotbar && actionHotbar != null ? (1 - actionHotbarFold.get(actionHotbar).getValue(partialTick)) : 0;
+        HotbarFold hotbarFold = HotbarFold.makeHotbarFold(actions.size(), selected, foldProgress, position.alignment);
         
+        HotbarRenderer.renderFoldingHotbar(matrixStack, mc, x, y, hotbarFold, alpha);
         SelectedTargetIcon selectedActionTargetIcon = mode.getTargetIcon(actionKey);
         // action icons
         x += 3;
         y += 3;
-        for (int i = 0; i < actions.size(); i++) {
-            Action<P> action = resolveVisibleActionInSlot(actions.get(i), shift, power, getMouseTarget());
-            if (action != null) {
-                renderActionIcon(matrixStack, selectedActionTargetIcon, mode, action, target, x + 20 * i, y, partialTick, i == selected, alpha);
+        final int posX = x;
+        final int posY = y;
+        hotbarFold.renderSlots(slot -> {
+            if (slot.getFrameRenderedWidth() > 0) {
+                int i = slot.slotIndex;
+                Action<P> action = resolveVisibleActionInSlot(actions.get(i), shift, power, getMouseTarget());
+                
+                float leftIconEdge = slot.pos + 2 + HotbarFold.EDGE_EXTRA_WIDTH;
+                float rightIconEdge = leftIconEdge + 16;
+                float leftRenderBorder = slot.getFrameRenderedLeftEdge();
+                float rightRenderBorder = leftRenderBorder + slot.getFrameRenderedWidth();
+                
+                leftRenderBorder = Math.max(leftRenderBorder, leftIconEdge);
+                rightRenderBorder = Math.min(rightRenderBorder, rightIconEdge);
+                float iconLeftCut = leftRenderBorder - leftIconEdge;
+                float iconCutWidth = rightRenderBorder - leftRenderBorder;
+                
+                renderActionIcon(matrixStack, selectedActionTargetIcon, mode, 
+                        action, target, posX + slot.pos, posY, 
+                        partialTick, i == selected, alpha, 
+                        iconLeftCut, iconCutWidth);
             }
-        }
+        });
         
         // target type icon
         if (selected >= 0 && selected < actions.size()) {
@@ -612,13 +634,26 @@ public class ActionsOverlayGui extends AbstractGui {
                     RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
                     int texX = tex[0];
                     int texY = tex[1];
-                    int iconX = x + 20 * selected + 10;
-                    int iconY = y - 4;
+                    float iconX = x + hotbarFold.getSlotWithIndex(selected).pos + 10;
+                    float iconY = y - 4;
                     matrixStack.pushPose();
                     matrixStack.scale(0.5F, 0.5F, 1F);
                     matrixStack.translate(iconX, iconY, 0);
-                    blit(matrixStack, iconX, iconY, texX, texY, 32, 32);
+                    blitFloat(matrixStack, iconX, iconY, texX, texY, 32, 32);
                     matrixStack.popPose();
+                }
+            }
+        }
+        
+        // hotbar controls lock icon
+        if (actionHotbar != null) {
+            if (InputHandler.getInstance().areControlsLockedForHotbar(actionHotbar)) {
+                mc.getTextureManager().bind(OVERLAY_LOCATION);
+                if (position.alignment == Alignment.LEFT) {
+                    blit(matrixStack, x + hotbarLength - 2, y, 240, 240, 16, 16);
+                }
+                else {
+                    blit(matrixStack, x - 20, y, 240, 240, 16, 16);
                 }
             }
         }
@@ -638,10 +673,10 @@ public class ActionsOverlayGui extends AbstractGui {
         if (highlightSelection) {
             int highlightAlpha = (int) (ClientUtil.getHighlightAlpha(tickCount + partialTick, 40F, 40F, 0.25F, 0.5F) * 255F);
             if (selected >= 0) {
-                ClientUtil.fillSingleRect(x + selected * 20 - 4, y - 4, 24, 23, 255, 255, 255, highlightAlpha);
+                ClientUtil.fillSingleRect(x + hotbarFold.getSlotWithIndex(selected).pos - 4, y - 4, 24, 23, 255, 255, 255, highlightAlpha);
             }
             else {
-                ClientUtil.fillSingleRect(x - 3, y - 3, actions.size() * 20 + 2, 22, 255, 255, 255, highlightAlpha);
+                ClientUtil.fillSingleRect(x - 3, y - 3, hotbarLength, 22, 255, 255, 255, highlightAlpha);
             }
         }
         
@@ -673,9 +708,10 @@ public class ActionsOverlayGui extends AbstractGui {
             slot = actions.indexOf(
                     heldAction.isShiftVariation() ? heldAction.getBaseVariation() : heldAction);
             if (slot > -1) {
-                renderActionHoldProgress(matrixStack, power, heldAction, power.getHeldActionTicks(), partialTick, x + slot * 20, y);
+                renderActionHoldProgress(matrixStack, power, heldAction, power.getHeldActionTicks(), partialTick, x + hotbarFold.getSlotWithIndex(slot).pos, y);
             }
         }
+        
         
         Action<P> selectedAction;
         if (actionHotbar != null) {
@@ -687,7 +723,7 @@ public class ActionsOverlayGui extends AbstractGui {
         if (selectedAction != null && selectedAction != heldAction) {
             slot = selected;
             if (slot > -1) {
-                renderActionHoldProgress(matrixStack, power, selectedAction, -1, partialTick, x + slot * 20, y);
+                renderActionHoldProgress(matrixStack, power, selectedAction, -1, partialTick, x + hotbarFold.getSlotWithIndex(slot).pos, y);
             }
         }
         
@@ -723,9 +759,8 @@ public class ActionsOverlayGui extends AbstractGui {
         }
         
         // hotbar
-        mc.getTextureManager().bind(HOTBAR_LOCATION);
-        renderHotbar(matrixStack, x, y, 1, alpha);
-        
+        HotbarRenderer.renderFoldingHotbar(matrixStack, mc, x, y, HotbarFold.makeHotbarFold(1, 0, 0, position.alignment), alpha);
+
         // action icon
         x += 3;
         y += 3;
@@ -795,42 +830,23 @@ public class ActionsOverlayGui extends AbstractGui {
         return 2 * 2 + 22 + mc.font.lineHeight;
     }
     
-    private void renderHotbar(MatrixStack matrixStack, int x, int y, int slots, float alpha) {
-        if (slots <= 0) return;
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
-        int slotWidth = 20;
-        
-        // first slot
-        blit(matrixStack, 
-                x, y, 
-                0, 0, 
-                1 + slotWidth, 22);
-        
-        // middle slots
-        int slotsRendered = 1;
-        while (slotsRendered < slots - 1) {
-            int slotsNext = MathHelper.clamp(slots - slotsRendered - 1, 1, 8);
-            blit(matrixStack, 
-                    x + 1 + slotWidth * slotsRendered, y, 
-                    1, 0, 
-                    slotWidth * slotsNext, 22);
-            slotsRendered += slotsNext;
-        }
-        
-        // last slot
-        if (slotsRendered < slots) {
-            blit(matrixStack, 
-                    x + 1 + slotsRendered * slotWidth, y, 
-                    slotWidth * 8 + 1, 0, 
-                    slotWidth + 1, 22);
-        }
+    private <P extends IPower<P, ?>> void renderActionIcon(MatrixStack matrixStack, SelectedTargetIcon targetIcon, ActionsModeConfig<P> mode, 
+            Action<P> action, ActionTarget target, int x, int y, 
+            float partialTick, boolean isSelected, float hotbarAlpha) {
+        renderActionIcon(matrixStack, targetIcon, mode, 
+                action, target, x, y, 
+                partialTick, isSelected, hotbarAlpha,
+                0, 16);
     }
     
     private <P extends IPower<P, ?>> void renderActionIcon(MatrixStack matrixStack, SelectedTargetIcon targetIcon, ActionsModeConfig<P> mode, 
-            Action<P> action, ActionTarget target, int x, int y, float partialTick, boolean isSelected, float hotbarAlpha) {
+            Action<P> action, ActionTarget target, float x, float y, 
+            float partialTick, boolean isSelected, float hotbarAlpha, 
+            float leftCut, float cutWidth) {
         if (action == null) return;
         P power = mode.getPower();
         
+        // green highlight
         boolean heldReadyToFire = power.getHeldAction() == action
                 && action.getHoldDurationToFire(power) > 0
                 && power.getHeldActionTicks() >= action.getHoldDurationToFire(power);
@@ -849,15 +865,18 @@ public class ActionsOverlayGui extends AbstractGui {
             else {
                 RenderSystem.color4f(0.75F, 0.75F, 0.75F, 0.75F * hotbarAlpha);
             }
-            blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
+            BlitFloat.blitFloat(matrixStack, x + leftCut, y, cutWidth, 16, 
+                    leftCut, 0, cutWidth, 16, 16, 16);
             // cooldown
             float ratio = power.getCooldownRatio(action, partialTick);
             if (ratio > 0) {
                 ClientUtil.fillSingleRect(x, y + 16.0F * (1.0F - ratio), 16, 16.0F * ratio, 255, 255, 255, 127);
             }
         } else {
+            // icon itself
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, hotbarAlpha);
-            blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
+            BlitFloat.blitFloat(matrixStack, x + leftCut, y, cutWidth, 16, 
+                    leftCut, 0, cutWidth, 16, 16, 16);
         }
         // learning bar
         float learningProgress = power.getLearningProgressRatio(action);
@@ -866,8 +885,8 @@ public class ActionsOverlayGui extends AbstractGui {
             RenderSystem.disableTexture();
             RenderSystem.disableAlphaTest();
             RenderSystem.disableBlend();
-            int barX = x + 2;
-            int barY = y + 13;
+            float barX = x + 2;
+            float barY = y + 13;
             ClientUtil.fillRect(Tessellator.getInstance().getBuilder(), barX, barY, 13, 2, 0, 0, 0, 255);
             ClientUtil.fillRect(Tessellator.getInstance().getBuilder(), barX, barY, Math.round(learningProgress * 13.0F), 1, 0, 255, 0, 255);
             RenderSystem.enableBlend();
@@ -875,17 +894,10 @@ public class ActionsOverlayGui extends AbstractGui {
             RenderSystem.enableTexture();
             RenderSystem.enableDepthTest();
         }
-        // selected slot
+        // slot selection
         if (isSelected) {
-            mc.getTextureManager().bind(HOTBAR_LOCATION);
             boolean greenSelection = heldReadyToFire || action.greenSelection(power, result);
-            if (greenSelection) {
-                RenderSystem.color4f(0.0F, 1.0F, 0.0F, hotbarAlpha);
-            }
-            else {
-                RenderSystem.color4f(1.0F, 1.0F, 1.0F, hotbarAlpha);
-            }
-            blit(matrixStack, x - 4, y - 4, 0, 22, 24, 22);
+            HotbarRenderer.renderSlotSelection(matrixStack, mc, x, y, hotbarAlpha, greenSelection);
         }
     }
     
@@ -895,7 +907,9 @@ public class ActionsOverlayGui extends AbstractGui {
         ObjectWrapper<ActionTarget> targetContainer = new ObjectWrapper<>(mouseTarget);
         if (isSelected) {
             ActionConditionResult targetCheck = power.checkTarget(action, targetContainer);
-            targetIcon.update(action.getTargetRequirement(), targetCheck.isPositive());
+            if (targetIcon != null) {
+                targetIcon.update(action.getTargetRequirement(), targetCheck.isPositive());
+            }
             if (!targetCheck.isPositive()) {
                 return targetCheck;
             }
@@ -1153,7 +1167,7 @@ public class ActionsOverlayGui extends AbstractGui {
     
 
     private <P extends IPower<P, ?>> void renderActionHoldProgress(MatrixStack matrixStack, P power, Action<P> action, 
-            int ticks, float partialTick, int x, int y) {
+            int ticks, float partialTick, float x, float y) {
         if (action == null) return;
 
         int ticksToFire = action.getHoldDurationToFire(power);
@@ -1173,7 +1187,7 @@ public class ActionsOverlayGui extends AbstractGui {
             }
             mc.getTextureManager().bind(RADIAL_INDICATOR);
             int deg = (int) (ratio * 360F);
-            blit(matrixStack, x, y, deg % 19 * 13, deg / 19 * 13, 13, 13);
+            blitFloat(matrixStack, x, y, deg % 19 * 13, deg / 19 * 13, 13, 13);
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
@@ -1187,17 +1201,16 @@ public class ActionsOverlayGui extends AbstractGui {
             ));
     private void renderModeSelector(MatrixStack matrixStack, ElementPosition position, float partialTick) {
         if (modeSelectorTransparency.shouldRender()) {
-            mc.getTextureManager().bind(HOTBAR_LOCATION);
             int x = position.x;
             int y = position.y;
             matrixStack.pushPose();
             matrixStack.translate(x, y, 0);
             matrixStack.mulPose(Vector3f.ZP.rotationDegrees(90));
             matrixStack.translate(-x, -y - 22, 0);
-            renderHotbar(matrixStack, x, y, modes.size(), modeSelectorTransparency.getAlpha(partialTick));
+            HotbarRenderer.renderHotbar(matrixStack, mc, x, y, modes.size(), modeSelectorTransparency.getAlpha(partialTick));
             int selectedMode = modes.indexOf(currentMode);
             if (selectedMode > -1) {
-                blit(matrixStack, x + selectedMode * 20 - 1, y - 1, 0, 22, 24, 24);
+                blit(matrixStack, x + selectedMode * 20 - 1, y - 1, 0, 22, 24, 24, 512, 512);
             }
             matrixStack.popPose();
             renderModeSelectorIcons(matrixStack, x + 3, y + 3, partialTick);
@@ -1349,10 +1362,10 @@ public class ActionsOverlayGui extends AbstractGui {
             float fill = bowCharge.getProgress(partialTick);
             if (fill < 1) {
                 RenderSystem.color4f(0, 0, 0, 1);
-                blitFloat(matrixStack, x, y, 0, 0, 16, 16 * (1 - fill), 16, 16);
+                BlitFloat.blitFloat(matrixStack, x, y, 0, 0, 16, 16 * (1 - fill), 16, 16);
                 RenderSystem.color4f(1, 1, 1, 1);
                 float px = 16F * fill;
-                blitFloat(matrixStack, x, y + 16 - px, 0, 16 - px, 16, px, 16, 16);
+                BlitFloat.blitFloat(matrixStack, x, y + 16 - px, 0, 16 - px, 16, px, 16, 16);
             }
             else {
                 blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
@@ -1701,76 +1714,9 @@ public class ActionsOverlayGui extends AbstractGui {
     
     private void blitFloat(MatrixStack pMatrixStack, float pX, float pY, 
             float pUOffset, float pVOffset, float pUWidth, float pVHeight) {
-        blitFloat(pMatrixStack, 
+        BlitFloat.blitFloat(pMatrixStack, 
                 pX, pY, this.getBlitOffset(), 
                 pUOffset, pVOffset, pUWidth, pVHeight, 256, 256);
-    }
-    
-    private static void blitFloat(MatrixStack pMatrixStack, float pX, float pY, int pBlitOffset, 
-            float pUOffset, float pVOffset, float pUWidth, float pVHeight, int pTextureHeight, int pTextureWidth) {
-        innerBlitFloat(pMatrixStack, 
-                pX, pX + pUWidth, pY, pY + pVHeight, pBlitOffset, 
-                pUWidth, pVHeight, pUOffset, pVOffset, pTextureWidth, pTextureHeight);
-    }
-    
-//    private static void blitFloat(MatrixStack pMatrixStack, 
-//            float pX, float pY, float pBlitOffset, float pWidth, float pHeight, TextureAtlasSprite pSprite) {
-//        innerBlitFloat(pMatrixStack.last().pose(), 
-//                pX, pX + pWidth, pY, pY + pHeight, pBlitOffset, 
-//                pSprite.getU0(), pSprite.getU1(), pSprite.getV0(), pSprite.getV1());
-//    }
-    
-    private static void blitFloat(MatrixStack pMatrixStack, float pX, float pY, 
-            float pUOffset, float pVOffset, float pWidth, float pHeight, float pTextureWidth, float pTextureHeight) {
-        blitFloat(pMatrixStack, pX, pY, pWidth, pHeight, pUOffset, pVOffset, pWidth, pHeight, pTextureWidth, pTextureHeight);
-    }
-    
-    public static void blitFloat(MatrixStack pMatrixStack, float pX, float pY, 
-            float pWidth, float pHeight, float pUOffset, float pVOffset, float pUWidth, float pVHeight, float pTextureWidth, float pTextureHeight) {
-        innerBlitFloat(pMatrixStack, pX, pX + pWidth, pY, pY + pHeight, 0, pUWidth, pVHeight, pUOffset, pVOffset, pTextureWidth, pTextureHeight);
-    }
-    
-    private static void blitFloat(MatrixStack pMatrixStack, 
-            float pX, float pY, float pBlitOffset, float pWidth, float pHeight, TextureAtlasSprite pSprite,
-            float uOffsetMult, float uWidthMult, float vOffsetMult, float vHeightMult) {
-        float u0 = pSprite.getU0();
-        float u1 = pSprite.getU1();
-        float v0 = pSprite.getV0();
-        float v1 = pSprite.getV1();
-        float width = u1 - u0;
-        float height = v1 - v0;
-        u0 += width * uOffsetMult;
-        v0 += height * vOffsetMult;
-        u1 = u0 + width * uWidthMult;
-        v1 = v0 + height * vHeightMult;
-        innerBlitFloat(pMatrixStack.last().pose(), 
-                pX, pX + pWidth, pY, pY + pHeight, pBlitOffset, 
-                u0, u1, v0, v1);
-    }
-    
-    private static void innerBlitFloat(MatrixStack pMatrixStack, 
-            float pX1, float pX2, float pY1, float pY2, float pBlitOffset, 
-            float pUWidth, float pVHeight, float pUOffset, float pVOffset, float pTextureWidth, float pTextureHeight) {
-        innerBlitFloat(pMatrixStack.last().pose(), 
-                pX1, pX2, pY1, pY2, pBlitOffset, 
-                (pUOffset + 0.0F) / pTextureWidth, 
-                (pUOffset + pUWidth) / pTextureWidth, 
-                (pVOffset + 0.0F) / pTextureHeight, 
-                (pVOffset + pVHeight) / pTextureHeight);
-    }
-    
-    private static void innerBlitFloat(Matrix4f pMatrix, 
-            float pX1, float pX2, float pY1, float pY2, float pBlitOffset, 
-            float pMinU, float pMaxU, float pMinV, float pMaxV) {
-        BufferBuilder bufferbuilder = Tessellator.getInstance().getBuilder();
-        bufferbuilder.begin(7, DefaultVertexFormats.POSITION_TEX);
-        bufferbuilder.vertex(pMatrix, pX1, pY2, pBlitOffset).uv(pMinU, pMaxV).endVertex();
-        bufferbuilder.vertex(pMatrix, pX2, pY2, pBlitOffset).uv(pMaxU, pMaxV).endVertex();
-        bufferbuilder.vertex(pMatrix, pX2, pY1, pBlitOffset).uv(pMaxU, pMinV).endVertex();
-        bufferbuilder.vertex(pMatrix, pX1, pY1, pBlitOffset).uv(pMinU, pMinV).endVertex();
-        bufferbuilder.end();
-        RenderSystem.enableAlphaTest();
-        WorldVertexBufferUploader.end(bufferbuilder);
     }
     
     
@@ -1892,7 +1838,7 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    enum Alignment {
+    public enum Alignment {
         LEFT,
         RIGHT
     }
