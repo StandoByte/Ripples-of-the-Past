@@ -5,6 +5,7 @@ import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.FOOD;
 
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Optional;
 
 import com.github.standobyte.jojo.JojoMod;
@@ -23,7 +24,8 @@ import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.ClientModSettingsScreen;
-import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.KeyBindingExtraButton;
+import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.ControlSettingToggleButton;
+import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.ExtendedKeyEntry;
 import com.github.standobyte.jojo.client.ui.screen.widgets.HeightScaledSlider;
 import com.github.standobyte.jojo.client.ui.screen.widgets.ImageVanillaButton;
 import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
@@ -67,6 +69,7 @@ import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -79,14 +82,12 @@ import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Timer;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector3i;
-import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -706,39 +707,32 @@ public class ClientEventHandler {
         else if (screen instanceof ControlsScreen) {
             KeyBindingList controlList = ClientReflection.getControlList((ControlsScreen) screen);
             List<KeyBindingList.Entry> keyEntries = controlList.children();
-            long time = Util.getMillis();
             
-            keyEntries.stream()
-            .filter(entry -> entry instanceof KeyBindingList.KeyEntry)
-            .map(entry -> (KeyBindingList.KeyEntry) entry)
-            .filter(entry -> ClientReflection.getKey(entry) == InputHandler.getInstance().attackHotbar)
-            .forEach(key -> {
-                // add button for hold/toggle LMB hotbar controls
-                event.addWidget(new KeyBindingExtraButton(25, 0, 50, 20, StringTextComponent.EMPTY, button -> {
-                    
-                }, key) {
-//                    @Override
-//                    protected IFormattableTextComponent createNarrationMessage() {
-//                        return p_i232281_2_.isUnbound() ? new TranslationTextComponent("narrator.controls.unbound", p_i232281_3_) : new TranslationTextComponent("narrator.controls.bound", p_i232281_3_, super.createNarrationMessage());
-//                    }
-                });
-            });
-            
-            JojoMod.LOGGER.debug("{} ms", Util.getMillis() - time);
-            
-            keyEntries.stream()
-            .filter(entry -> entry instanceof KeyBindingList.KeyEntry
-                    && ClientReflection.getKey((KeyBindingList.KeyEntry) entry) == InputHandler.getInstance().abilityHotbar)
-            .forEach(key -> {
-                // add button for hold/toggle RMB hotbar controls
-            });
-            
-            keyEntries.stream()
-            .filter(entry -> entry instanceof KeyBindingList.KeyEntry
-                    && ClientReflection.getKey((KeyBindingList.KeyEntry) entry) == InputHandler.getInstance().disableHotbars)
-            .forEach(key -> {
-                // add button for hold/toggle L. Alt
-            });
+            ListIterator<KeyBindingList.Entry> entriesIter = keyEntries.listIterator();
+            ClientModSettings modSettings = ClientModSettings.getInstance();
+            ClientModSettings.Settings modSettingsRead = ClientModSettings.getSettingsReadOnly();
+            while (entriesIter.hasNext()) {
+                KeyBindingList.Entry entry = entriesIter.next();
+                if (entry instanceof KeyBindingList.KeyEntry) {
+                    KeyBindingList.KeyEntry keyEntry = (KeyBindingList.KeyEntry) entry;
+                    KeyBinding key = ClientReflection.getKey(keyEntry);
+                    if (key == InputHandler.getInstance().attackHotbar) {
+                        entriesIter.set(new ExtendedKeyEntry(keyEntry, new ControlSettingToggleButton(40, 20, 
+                                val -> modSettings.editSettings(s -> s.toggleLmbHotbar = val), 
+                                () -> modSettingsRead.toggleLmbHotbar)));
+                    }
+                    else if (key == InputHandler.getInstance().abilityHotbar) {
+                        entriesIter.set(new ExtendedKeyEntry(keyEntry, new ControlSettingToggleButton(40, 20, 
+                                val -> modSettings.editSettings(s -> s.toggleRmbHotbar = val), 
+                                () -> modSettingsRead.toggleRmbHotbar)));
+                    }
+                    else if (key == InputHandler.getInstance().disableHotbars) {
+                        entriesIter.set(new ExtendedKeyEntry(keyEntry, new ControlSettingToggleButton(40, 20, 
+                                val -> modSettings.editSettings(s -> s.toggleDisableHotbars = val), 
+                                () -> modSettingsRead.toggleDisableHotbars)));
+                    }
+                }
+            }
         }
     }
 

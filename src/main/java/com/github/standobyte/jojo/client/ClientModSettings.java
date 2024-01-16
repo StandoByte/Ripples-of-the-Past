@@ -30,6 +30,10 @@ public class ClientModSettings {
         public boolean timeStopAnimation = true;
         
         public boolean characterVoiceLines = true;
+        
+        public boolean toggleLmbHotbar = false;
+        public boolean toggleRmbHotbar = false;
+        public boolean toggleDisableHotbars = false;
     }
     
     

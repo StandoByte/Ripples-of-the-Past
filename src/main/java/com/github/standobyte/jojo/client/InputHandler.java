@@ -121,8 +121,6 @@ public class InputHandler {
     public KeyBinding abilityHotbar;
     public KeyBinding scrollAttack;
     public KeyBinding scrollAbility;
-    public KeyBinding lockAttackHotbar;
-    public KeyBinding lockAbilityHotbar;
 
     private static final String HUD_ALTERNATIVE_CATEGORY = new String("key.categories." + JojoMod.MOD_ID + ".hud.alternative");
     
@@ -174,8 +172,6 @@ public class InputHandler {
         ClientRegistry.registerKeyBinding(scrollMode = new KeyBinding(JojoMod.MOD_ID + ".key.scroll_mode", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
         ClientRegistry.registerKeyBinding(scrollAttack = new KeyBinding(JojoMod.MOD_ID + ".key.scroll_attack", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
         ClientRegistry.registerKeyBinding(scrollAbility = new KeyBinding(JojoMod.MOD_ID + ".key.scroll_ability", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
-        ClientRegistry.registerKeyBinding(lockAttackHotbar = new KeyBinding(JojoMod.MOD_ID + ".key.lock_attack", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
-        ClientRegistry.registerKeyBinding(lockAbilityHotbar = new KeyBinding(JojoMod.MOD_ID + ".key.lock_ability", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
     }
     
     @SubscribeEvent(priority = EventPriority.HIGH)
@@ -250,13 +246,13 @@ public class InputHandler {
                     actionsOverlay.scrollAction(ActionsLayout.Hotbar.RIGHT_CLICK, mc.player.isShiftKeyDown());
                 }
                 
-                if (lockAttackHotbar.consumeClick()) {
-                    switchLockedHotbarControls(ActionsLayout.Hotbar.LEFT_CLICK);
-                }
-                
-                if (lockAbilityHotbar.consumeClick()) {
-                    switchLockedHotbarControls(ActionsLayout.Hotbar.RIGHT_CLICK);
-                }
+//                if (lockAttackHotbar.consumeClick()) {
+//                    switchLockedHotbarControls(ActionsLayout.Hotbar.LEFT_CLICK);
+//                }
+//                
+//                if (lockAbilityHotbar.consumeClick()) {
+//                    switchLockedHotbarControls(ActionsLayout.Hotbar.RIGHT_CLICK);
+//                }
             }
             
             if (nonStandPower.hasPower()) {
