@@ -538,9 +538,7 @@ public class ActionsOverlayGui extends AbstractGui {
                     x -= 12;
                 }
 
-                // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! config option
-                // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! fix weirdness in texture
-                boolean foldHotbar = true;
+                boolean foldHotbar = ClientModSettings.getSettingsReadOnly().hudHotbarsFold;
                 float foldProgress = foldHotbar && actionHotbar != null ? (1 - actionHotbarFold.get(actionHotbar).getValue(partialTick)) : 0;
                 HotbarFold hotbarFold = HotbarFold.makeHotbarFold(actions.size(), selected, foldProgress, position.alignment);
                 // hotbar

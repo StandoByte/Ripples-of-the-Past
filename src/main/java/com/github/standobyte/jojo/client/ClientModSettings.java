@@ -23,6 +23,7 @@ public class ClientModSettings {
         public PositionConfig barsPosition = PositionConfig.TOP_LEFT;
         public PositionConfig hotbarsPosition = PositionConfig.TOP_LEFT;
         public HudNamesRender hudNamesRender = HudNamesRender.ALWAYS;
+        public boolean hudHotbarsFold = false;
         
         public boolean resolveShaders = true;
         public boolean menacingParticles = true;
