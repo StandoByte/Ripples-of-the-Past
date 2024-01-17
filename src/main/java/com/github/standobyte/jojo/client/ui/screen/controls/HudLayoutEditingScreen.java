@@ -72,7 +72,9 @@ public class HudLayoutEditingScreen extends Screen {
         // reset layout
         addButton(new CustomButton(getWindowX() + WINDOW_WIDTH - 30, getWindowY() + 6, 24, 24, 
                 button -> {
-                    ActionsControlScheme.getCurrentCtrlScheme(selectedTab).getHotbarsLayout().resetLayout();
+                    PowerTypeControlsEntry controls = ActionsControlScheme.getCtrlSchemes(selectedTab);
+                    controls.getCurrentCtrlScheme().reset();
+                    setKeybindsList(controls);
                     markLayoutEdited(selectedPower);
                 }, 
                 (button, matrixStack, x, y) -> {

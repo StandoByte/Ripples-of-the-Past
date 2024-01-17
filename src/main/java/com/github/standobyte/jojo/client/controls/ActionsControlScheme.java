@@ -111,6 +111,17 @@ public class ActionsControlScheme {
         return hotbarsLayout;
     }
     
+    public void reset() {
+        hotbarsLayout.resetLayout();
+        
+        customKeybindEntries.clear();
+        Action<?> mmbAction = hotbarsLayout.mmbActionStarting;
+        if (mmbAction != null) {
+            addKeyBindingEntry(PressActionType.CLICK, mmbAction, 
+                    InputMappings.Type.MOUSE, GLFW.GLFW_MOUSE_BUTTON_MIDDLE);
+        }
+    }
+    
     
     
     public JsonObject toJson(Gson gson) {
