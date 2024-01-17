@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.power.layout;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -16,6 +16,14 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.IPower;
 import com.google.common.collect.ImmutableList;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
@@ -24,17 +32,12 @@ import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 
-public class ActionHotbarLayout<P extends IPower<P, ?>> {
+public class ActionHotbarLayout<P extends IPower<P, ?>> { // TODO remove the generic parameter
     private final Map<Action<P>, ActionSwitch<P>> _actions = new LinkedHashMap<>();
-    private List<ActionSwitch<P>> actionsOrder = new ArrayList<>();
-    private List<Action<P>> allActionsCache = new ArrayList<>();
+    private List<ActionSwitch<P>> hotbarOrder = new ArrayList<>();
     private List<Action<P>> enabledActionsCache = new ArrayList<>();
     
     
-    
-    public Collection<Action<P>> getAll() {
-        return allActionsCache;
-    }
     
     public List<Action<P>> getEnabled() {
         return enabledActionsCache;
@@ -46,18 +49,14 @@ public class ActionHotbarLayout<P extends IPower<P, ?>> {
     }
     
     private void updateCache() {
-        this.allActionsCache = actionsOrder.stream()
-                .map(ActionSwitch::getAction)
-                .collect(Collectors.collectingAndThen(Collectors.toList(), ImmutableList::copyOf));
-        this.enabledActionsCache = actionsOrder.stream()
+        this.enabledActionsCache = hotbarOrder.stream()
                 .filter(entry -> entry.isEnabled())
                 .map(ActionSwitch::getAction)
                 .collect(Collectors.collectingAndThen(Collectors.toList(), ImmutableList::copyOf));
-        int dummy = 0;
     }
     
     public List<ActionSwitch<P>> getLayoutView() {
-        return ImmutableList.copyOf(actionsOrder);
+        return ImmutableList.copyOf(hotbarOrder);
     }
     
     void initActions(@Nullable Action<P>[] newTypeActions) {
@@ -71,8 +70,8 @@ public class ActionHotbarLayout<P extends IPower<P, ?>> {
     }
     
     void resetLayout() {
-        actionsOrder = new ArrayList<>(_actions.values());
-        editLayout(() -> actionsOrder.forEach(actionSwitch -> actionSwitch.reset()));
+        hotbarOrder = new ArrayList<>(_actions.values());
+        editLayout(() -> hotbarOrder.forEach(actionSwitch -> actionSwitch.reset()));
     }
     
     void copySwitches(ActionHotbarLayout<P> source) {
@@ -90,7 +89,7 @@ public class ActionHotbarLayout<P extends IPower<P, ?>> {
             editLayout(() -> {
                 ActionSwitch<P> actionSwitch = new ActionSwitch<>(action);
                 _actions.put(action, actionSwitch);
-                actionsOrder.add(actionSwitch);
+                hotbarOrder.add(actionSwitch);
             });
         }
     }
@@ -99,7 +98,7 @@ public class ActionHotbarLayout<P extends IPower<P, ?>> {
         if (_actions.containsKey(action)) {
             editLayout(() -> {
                 ActionSwitch<P> actionSwitch = _actions.remove(action);;
-                actionsOrder.remove(actionSwitch);
+                hotbarOrder.remove(actionSwitch);
             });
         }
     }
@@ -118,14 +117,14 @@ public class ActionHotbarLayout<P extends IPower<P, ?>> {
         if (firstIndex < 0) return;
         int secondIndex = getOrderPlaceOf(second);
         if (secondIndex < 0) return;
-        editLayout(() -> Collections.swap(actionsOrder, firstIndex, secondIndex));
+        editLayout(() -> Collections.swap(hotbarOrder, firstIndex, secondIndex));
     }
     
     private int getOrderPlaceOf(Action<?> action) {
         if (_actions.containsKey(action)) {
             ActionSwitch<?> actionSwitch = _actions.get(action);
             if (actionSwitch != null) {
-                return actionsOrder.indexOf(actionSwitch);
+                return hotbarOrder.indexOf(actionSwitch);
             }
         }
         return -1;
@@ -169,7 +168,7 @@ public class ActionHotbarLayout<P extends IPower<P, ?>> {
         }
         
         editLayout(() -> {
-            actionsOrder.clear();
+            hotbarOrder.clear();
             
             for (ActionSwitch<?> switchFromNetwork : switches) {
                 Action<?> action = switchFromNetwork.getAction();
@@ -177,7 +176,7 @@ public class ActionHotbarLayout<P extends IPower<P, ?>> {
                 if (action != null) {
                     ActionSwitch<P> switchLocal = _actions.computeIfAbsent((Action<P>) action, ActionSwitch::new);
                     switchLocal.copyFrom(switchFromNetwork);
-                    actionsOrder.add(switchLocal);
+                    hotbarOrder.add(switchLocal);
                 }
             }
             
@@ -188,11 +187,26 @@ public class ActionHotbarLayout<P extends IPower<P, ?>> {
         });
     }
     
+    private boolean fillInMissingActions() {
+        boolean wereMissing = false;
+        for (ActionSwitch<P> notAdded : _actions.values()) {
+            if (!hotbarOrder.contains(notAdded)) {
+                hotbarOrder.add(notAdded);
+                wereMissing = true;
+            }
+        }
+        return wereMissing;
+    }
+    
+    public boolean containsAction(Action<P> action) {
+        return _actions.containsKey(action);
+    }
+    
     
     
     Optional<ListNBT> toNBT() {
         ListNBT nbt = new ListNBT();
-        actionsOrder.forEach(actionSwitch -> {
+        hotbarOrder.forEach(actionSwitch -> {
             CompoundNBT actionNBT = new CompoundNBT();
             actionNBT.put("Action", StringNBT.valueOf(actionSwitch.action.getRegistryName().toString()));
             actionNBT.putBoolean("Enabled", actionSwitch.isEnabled);
@@ -203,7 +217,7 @@ public class ActionHotbarLayout<P extends IPower<P, ?>> {
     
     void fromNBT(ListNBT nbt) {
         editLayout(() -> {
-            actionsOrder.clear();
+            hotbarOrder.clear();
             
             for (INBT actionNBT : nbt) {
                 if (actionNBT instanceof CompoundNBT) {
@@ -217,7 +231,7 @@ public class ActionHotbarLayout<P extends IPower<P, ?>> {
                             if (action != null) {
                                 ActionSwitch<P> switchLocal = _actions.computeIfAbsent((Action<P>) action, ActionSwitch::new);
                                 switchLocal.fromNBT(actionCNBT);
-                                actionsOrder.add(switchLocal);
+                                hotbarOrder.add(switchLocal);
                             }
                         }
                     }
@@ -228,19 +242,71 @@ public class ActionHotbarLayout<P extends IPower<P, ?>> {
         });
     }
     
-    private boolean fillInMissingActions() {
-        boolean wereMissing = false;
-        for (ActionSwitch<P> notAdded : _actions.values()) {
-            if (!actionsOrder.contains(notAdded)) {
-                actionsOrder.add(notAdded);
-                wereMissing = true;
-            }
-        }
-        return wereMissing;
-    }
     
-    public boolean containsAction(Action<P> action) {
-        return _actions.containsKey(action);
+    
+    public static class JsonSerialization implements JsonSerializer<ActionHotbarLayout<?>>, JsonDeserializer<ActionHotbarLayout<?>> {
+        public static final JsonSerialization INSTANCE = new JsonSerialization();
+        
+        protected JsonSerialization() {}
+
+        @Override
+        public ActionHotbarLayout<?> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+                throws JsonParseException {
+            ActionHotbarLayout<?> layout = new ActionHotbarLayout<>();
+            
+            JsonObject jsonObj = json.getAsJsonObject();
+            JsonArray actions = jsonObj.get("actions").getAsJsonArray();
+            for (JsonElement actionName : actions) {
+                Action<?> action = Action.JsonSerialization.INSTANCE.deserialize(actionName, Action.class, context);
+                if (action != null) {
+                    // FIXME initialize this beforehand (with the power type instance), 
+                    // these entries must not be serialized nor deserialized
+                    addActionBase(layout, action);
+                }
+            }
+            
+            JsonObject layoutJson = jsonObj.get("hotbarOrder").getAsJsonObject();
+            for (Map.Entry<String, JsonElement> entry : layoutJson.entrySet()) {
+                Action<?> action = Action.JsonSerialization.INSTANCE.fromStringId(entry.getKey());
+                if (action != null && layout._actions.containsKey(action)) {
+                    ActionSwitch<?> actionSwitch = layout._actions.get(action);
+                    actionSwitch.isEnabled = entry.getValue().getAsBoolean();
+                    addToLayout(layout, actionSwitch);
+                }
+            }
+            
+            layout.fillInMissingActions();
+            layout.updateCache();
+            return layout;
+        }
+        
+        private static <P extends IPower<P, ?>> void addActionBase(ActionHotbarLayout<P> layout, Action<?> action) {
+            Action<P> actionP = (Action<P>) action;
+            layout._actions.put(actionP, new ActionSwitch<>(actionP));
+        }
+        
+        private static <P extends IPower<P, ?>> void addToLayout(ActionHotbarLayout<P> layout, ActionSwitch<?> actionSwitch) {
+            layout.hotbarOrder.add((ActionSwitch<P>) actionSwitch);
+        }
+
+        @Override
+        public JsonElement serialize(ActionHotbarLayout<?> src, Type typeOfSrc, JsonSerializationContext context) {
+            JsonObject json = new JsonObject();
+            
+            JsonArray actions = new JsonArray();
+            for (ActionSwitch<?> actionSwitch : src._actions.values()) {
+                actions.add(actionSwitch.action.getRegistryName().toString());
+            }
+            json.add("actions", actions);
+            
+            JsonObject actionsOrder = new JsonObject();
+            for (ActionSwitch<?> actionSwitch : src.hotbarOrder) {
+                actionsOrder.addProperty(actionSwitch.action.getRegistryName().toString(), actionSwitch.isEnabled);
+            }
+            json.add("hotbarOrder", actionsOrder);
+            
+            return json;
+        }
     }
     
     

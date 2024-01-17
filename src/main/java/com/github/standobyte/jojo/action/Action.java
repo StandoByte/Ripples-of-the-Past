@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.action;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -13,12 +14,20 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
-import com.github.standobyte.jojo.util.general.ObjectWrapper;
 import com.github.standobyte.jojo.util.general.LazySupplier;
+import com.github.standobyte.jojo.util.general.ObjectWrapper;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -37,6 +46,7 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistryEntry;
+import net.minecraftforge.registries.IForgeRegistry;
 
 public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<Action<?>> {
     private static final Map<Supplier<? extends Action<?>>, Supplier<? extends Action<?>>> SHIFT_VARIATIONS = new HashMap<>(); 
@@ -533,5 +543,38 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         }
         
         protected abstract T getThis();
+    }
+    
+    
+    
+    public static class JsonSerialization implements JsonSerializer<Action<?>>, JsonDeserializer<Action<?>> {
+        public static final JsonSerialization INSTANCE = new JsonSerialization();
+        
+        protected JsonSerialization() {}
+
+        @Override
+        public Action<?> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+                throws JsonParseException {
+            if (json.isJsonPrimitive() && ((JsonPrimitive) json).isString()) {
+                return fromStringId(json.getAsString());
+            }
+            
+            throw new JsonParseException("An action is defined by its string id");
+        }
+        
+        public Action<?> fromStringId(String idStr) {
+            ResourceLocation id = new ResourceLocation(idStr);
+            IForgeRegistry<Action<?>> registry = JojoCustomRegistries.ACTIONS.getRegistry();
+            if (registry.containsKey(id)) {
+                return registry.getValue(id);
+            }
+            return null;
+        }
+
+        @Override
+        public JsonElement serialize(Action<?> src, Type typeOfSrc, JsonSerializationContext context) {
+            return new JsonPrimitive(src.getRegistryName().toString());
+        }
+        
     }
 }

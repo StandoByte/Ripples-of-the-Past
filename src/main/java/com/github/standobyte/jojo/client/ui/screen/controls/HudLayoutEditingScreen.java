@@ -18,7 +18,7 @@ import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.InputHandler.MouseButton;
 import com.github.standobyte.jojo.client.input.ActionsControlScheme;
 import com.github.standobyte.jojo.client.input.ActionsControlScheme.SavedControlSchemes;
-import com.github.standobyte.jojo.client.input.ActionsControlScheme.Type;
+import com.github.standobyte.jojo.client.input.ActionsControlScheme.PressActionType;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.widgets.CustomButton;
 import com.github.standobyte.jojo.power.IPower;
@@ -549,6 +549,7 @@ public class HudLayoutEditingScreen extends Screen {
 //        });
         ActionsOverlayGui.getInstance().revealActionNames();
         clearInvalidKeybinds();
+        ActionsControlScheme.save();
     }
     
     private static class ActionData<P extends IPower<P, ?>> {
@@ -667,7 +668,7 @@ public class HudLayoutEditingScreen extends Screen {
     }
     
     private void createBlankKeybindEntry() {
-        ActionsControlScheme.KeybindEntry entry = keybinds.addKeyBindingEntry(Type.CLICK, null, -1);
+        ActionsControlScheme.KeybindEntry entry = keybinds.addKeyBindingEntry(PressActionType.CLICK, null, -1);
         _addKeybindEntryToUi(entry);
     }
     
@@ -682,7 +683,7 @@ public class HudLayoutEditingScreen extends Screen {
             existingEntry.get().action = action;
         }
         else {
-            ActionsControlScheme.KeybindEntry entry = keybinds.addKeyBindingEntry(Type.CLICK, action, inputType, key);
+            ActionsControlScheme.KeybindEntry entry = keybinds.addKeyBindingEntry(PressActionType.CLICK, action, inputType, key);
             _addKeybindEntryToUi(entry);
         }
     }

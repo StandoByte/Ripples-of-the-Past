@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.client.input;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
@@ -25,13 +26,14 @@ import net.minecraft.client.util.InputMappings;
 import net.minecraft.util.ResourceLocation;
 
 public class ActionsControlScheme {
-    public final ResourceLocation powerTypeId;
-    private OptionalInt savedSchemeNumber = OptionalInt.empty();
+//    public final ResourceLocation powerTypeId;
+//    private OptionalInt savedSchemeNumber = OptionalInt.empty();
     private final List<KeybindEntry> customKeybindEntries = new ArrayList<>();
+    private final ActionsLayout<?> hotbarsLayout;
     
     public ActionsControlScheme(ActionsLayout<?> hotbarsLayout, ResourceLocation powerTypeId) {
         this.hotbarsLayout = hotbarsLayout;
-        this.powerTypeId = powerTypeId;
+//        this.powerTypeId = powerTypeId;
     }
     
     private static ActionsControlScheme createDefault(IPowerType<?, ?> powerType) {
@@ -40,7 +42,7 @@ public class ActionsControlScheme {
         
         Action<?> mmbAction = powerType.createDefaultLayout().mmbActionStarting;
         if (mmbAction != null) {
-            controlScheme.addKeyBindingEntry(Type.CLICK, mmbAction, 
+            controlScheme.addKeyBindingEntry(PressActionType.CLICK, mmbAction, 
                     InputMappings.Type.MOUSE, GLFW.GLFW_MOUSE_BUTTON_MIDDLE);
         }
         
@@ -57,20 +59,29 @@ public class ActionsControlScheme {
         }
     }
 
-    private static final AtomicInteger KEY_ID = new AtomicInteger();
-    public KeybindEntry addKeyBindingEntry(ActionsControlScheme.Type type, Action<?> action, int key) {
+    public KeybindEntry addKeyBindingEntry(ActionsControlScheme.PressActionType type, Action<?> action, int key) {
         return addKeyBindingEntry(type, action, InputMappings.Type.KEYSYM, key);
     }
 
-    public KeybindEntry addKeyBindingEntry(ActionsControlScheme.Type type, Action<?> action, InputMappings.Type inputType, int key) {
+    public KeybindEntry addKeyBindingEntry(ActionsControlScheme.PressActionType type, Action<?> action, InputMappings.Type inputType, int key) {
+        KeyBinding keyBinding = createNewKeyBinding(inputType, key);
+        KeybindEntry entry = new KeybindEntry(type, action, keyBinding);
+        customKeybindEntries.add(entry);
+        return entry;
+    }
+
+    private static final AtomicInteger KEY_ID = new AtomicInteger();
+    static KeyBinding createNewKeyBinding(InputMappings.Type inputType, int key) {
         KeyBinding keyBinding = new KeyBinding(
                 JojoMod.MOD_ID + ".key.action." + String.valueOf(KEY_ID.getAndIncrement()), 
                 QuickAccessKeyConflictContext.INSTANCE, 
                 inputType, key, 
                 "key.categories." + JojoMod.MOD_ID + ".custom_keybinds");
-        KeybindEntry entry = new KeybindEntry(type, action, keyBinding);
-        customKeybindEntries.add(entry);
-        return entry;
+        return keyBinding;
+    }
+
+    static KeyBinding createBlankKeyBinding() {
+        return createNewKeyBinding(InputMappings.Type.KEYSYM, -1);
     }
     
     public Iterable<KeybindEntry> getEntriesView() {
@@ -78,30 +89,29 @@ public class ActionsControlScheme {
     }
     
     public static class KeybindEntry {
-        public Type type;
+        public PressActionType type;
         public Action<?> action;
         public KeyBinding keybind;
-        public int delay;
+        public transient int delay;
         
-        public KeybindEntry(Type type, Action<?> action, KeyBinding keybind) {
+        public KeybindEntry(PressActionType type, Action<?> action, KeyBinding keybind) {
             this.type = type;
             this.action = action;
             this.keybind = keybind;
         }
     }
     
-    public enum Type {
+    public enum PressActionType {
         SELECT,
         CLICK
     }
     
     
     
-    private final ActionsLayout<?> hotbarsLayout;
-    
     public ActionsLayout<?> getHotbarsLayout() {
         return hotbarsLayout;
     }
+    
     
     
     
@@ -133,13 +143,13 @@ public class ActionsControlScheme {
     
     
     
-    private static final Map<ResourceLocation, SavedControlSchemes> savedControlSchemes = new HashMap<>();
+    private static Map<ResourceLocation, SavedControlSchemes> savedControlSchemes = new HashMap<>();
     
     public static SavedControlSchemes getCtrlSchemesFor(IPowerType<?, ?> type) {
         ResourceLocation id = type.getRegistryName();
         SavedControlSchemes ctrlSchemesHolder = savedControlSchemes.get(id);
         if (ctrlSchemesHolder == null) {
-            ctrlSchemesHolder = new SavedControlSchemes(createDefault(type));
+            ctrlSchemesHolder = new SavedControlSchemes(ActionsControlScheme.createDefault(type));
             savedControlSchemes.put(id, ctrlSchemesHolder);
         }
         return ctrlSchemesHolder;
@@ -160,5 +170,24 @@ public class ActionsControlScheme {
         public ActionsControlScheme getCurrentCtrlScheme() {
             return currentControlScheme;
         }
+        
+        public void clearInvalidKeybinds() {
+            currentControlScheme.clearInvalidKeybinds();
+        }
     }
+    
+    
+    private static ControlSchemesJson jsonSaveLoad;
+    public static void initSaveFile(File file) {
+        jsonSaveLoad = new ControlSchemesJson(file);
+        Map<ResourceLocation, SavedControlSchemes> loaded = jsonSaveLoad.load();
+        if (loaded != null) {
+            savedControlSchemes = loaded;
+        }
+    }
+    
+    public static void save() {
+        jsonSaveLoad.save(savedControlSchemes);
+    }
+    
 }
