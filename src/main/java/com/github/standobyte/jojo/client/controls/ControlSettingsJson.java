@@ -39,6 +39,7 @@ public class ControlSettingsJson {
             .registerTypeAdapter(ResourceLocation.class, MCUtil.ResLocJson.SERIALIZATION)
             .create();
     private final JsonParser jsonParser = new JsonParser();
+    private final Map<String, JsonElement> missingTypesData = new HashMap<>();
     
     ControlSettingsJson(File saveFile) {
         this.saveFile = saveFile;
@@ -49,9 +50,13 @@ public class ControlSettingsJson {
 
         try (BufferedWriter writer = Files.newWriter(saveFile, Charsets.UTF_8)) {
             JsonObject json = new JsonObject();
+            
             for (Map.Entry<ResourceLocation, PowerTypeControlsEntry> powerTypeEntry : savedControlSchemes.entrySet()) {
                 json.add(powerTypeEntry.getKey().toString(), powerTypeEntry.getValue().toJson(gson));
             }
+            
+            missingTypesData.forEach((key, value) -> json.add(key, value));
+            
             gson.toJson(json, writer);
         }
         catch (Exception exception) {
@@ -66,6 +71,7 @@ public class ControlSettingsJson {
         
         try (BufferedReader reader = Files.newReader(saveFile, Charsets.UTF_8)) {
             Map<ResourceLocation, PowerTypeControlsEntry> mainMap = new HashMap<>();
+            missingTypesData.clear();
             
             JsonObject jsonRead = jsonParser.parse(reader).getAsJsonObject();
             for (Map.Entry<String, JsonElement> entryRead : jsonRead.entrySet()) {
@@ -73,11 +79,14 @@ public class ControlSettingsJson {
                 
                 IPowerType<?, ?> powerType = JojoCustomRegistries.STANDS.fromId(powerId);
                 if (powerType == null) powerType = JojoCustomRegistries.NON_STAND_POWERS.fromId(powerId);
-                if (powerType == null) continue;
-                
-                PowerTypeControlsEntry ctrlSettings = PowerTypeControlsEntry.fromJson(powerType, entryRead.getValue().getAsJsonObject(), gson);
-                ctrlSettings.clearInvalidKeybinds();
-                mainMap.put(powerId, ctrlSettings);
+                if (powerType != null) {
+                    PowerTypeControlsEntry ctrlSettings = PowerTypeControlsEntry.fromJson(powerType, entryRead.getValue().getAsJsonObject(), gson);
+                    ctrlSettings.clearInvalidKeybinds();
+                    mainMap.put(powerId, ctrlSettings);
+                }
+                else {
+                    missingTypesData.put(entryRead.getKey(), entryRead.getValue());
+                }
             }
             
             return mainMap;
