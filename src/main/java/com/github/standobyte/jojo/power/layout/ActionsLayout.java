@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.google.gson.JsonObject;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
@@ -129,6 +130,29 @@ public class ActionsLayout<P extends IPower<P, ?>> {
             hotbars.get(hotbar).resetLayout();
         }
     }
+    
+    
+    
+    public JsonObject stateToJson() {
+        JsonObject json = new JsonObject();
+        
+        JsonObject hotbarsJson = new JsonObject();
+        for (Hotbar hotbar : Hotbar.values()) {
+            hotbarsJson.add(hotbar.name(), hotbars.get(hotbar).stateToJson());
+        }
+        json.add("hotbars", hotbarsJson);
+        
+        return json;
+    }
+    
+    public void stateFromJson(JsonObject json) {
+        JsonObject hotbarsJson = json.get("hotbars").getAsJsonObject();
+        for (Hotbar hotbar : Hotbar.values()) {
+            JsonObject hotbarLayout = hotbarsJson.get(hotbar.name()).getAsJsonObject();
+            hotbars.get(hotbar).stateFromJson(hotbarLayout);
+        }
+    }
+    
     
     
     public static enum Hotbar {

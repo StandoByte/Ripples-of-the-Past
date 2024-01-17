@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.init.power;
 import java.util.function.Supplier;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.power.IPowerType;
 
@@ -46,6 +47,15 @@ public class CustomRegistryHolder<V extends IForgeRegistryEntry<V>> {
     
     public int getNumericId(ResourceLocation regName) {
         return ((ForgeRegistry<V>) getRegistry()).getID(regName);
+    }
+    
+    @Nullable
+    public V fromId(ResourceLocation id) {
+        IForgeRegistry<V> registry = getRegistry();
+        if (!registry.containsKey(id)) {
+            return null;
+        }
+        return registry.getValue(id);
     }
     
 }

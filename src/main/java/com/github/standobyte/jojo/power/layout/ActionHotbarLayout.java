@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.power.layout;
 
-import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -16,14 +15,8 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.IPower;
 import com.google.common.collect.ImmutableList;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
@@ -32,7 +25,7 @@ import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 
-public class ActionHotbarLayout<P extends IPower<P, ?>> { // TODO remove the generic parameter
+public class ActionHotbarLayout<P extends IPower<P, ?>> {
     private final Map<Action<P>, ActionSwitch<P>> _actions = new LinkedHashMap<>();
     private List<ActionSwitch<P>> hotbarOrder = new ArrayList<>();
     private List<Action<P>> enabledActionsCache = new ArrayList<>();
@@ -244,69 +237,35 @@ public class ActionHotbarLayout<P extends IPower<P, ?>> { // TODO remove the gen
     
     
     
-    public static class JsonSerialization implements JsonSerializer<ActionHotbarLayout<?>>, JsonDeserializer<ActionHotbarLayout<?>> {
-        public static final JsonSerialization INSTANCE = new JsonSerialization();
+    public JsonObject stateToJson() {
+        JsonObject json = new JsonObject();
         
-        protected JsonSerialization() {}
-
-        @Override
-        public ActionHotbarLayout<?> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
-                throws JsonParseException {
-            ActionHotbarLayout<?> layout = new ActionHotbarLayout<>();
+        JsonObject hotbarJson = new JsonObject();
+        for (ActionSwitch<?> actionSwitch : hotbarOrder) {
+            hotbarJson.addProperty(actionSwitch.action.getRegistryName().toString(), actionSwitch.isEnabled);
+        }
+        json.add("actions", hotbarJson);
+        
+        return json;
+    }
+    
+    public void stateFromJson(JsonObject json) {
+        editLayout(() -> {
+            hotbarOrder.clear();
             
-            JsonObject jsonObj = json.getAsJsonObject();
-            JsonArray actions = jsonObj.get("actions").getAsJsonArray();
-            for (JsonElement actionName : actions) {
-                Action<?> action = Action.JsonSerialization.INSTANCE.deserialize(actionName, Action.class, context);
-                if (action != null) {
-                    // FIXME initialize this beforehand (with the power type instance), 
-                    // these entries must not be serialized nor deserialized
-                    addActionBase(layout, action);
+            JsonObject hotbarJson = json.get("actions").getAsJsonObject();
+            
+            for (Map.Entry<String, JsonElement> entry : hotbarJson.entrySet()) {
+                Action<?> action = JojoCustomRegistries.ACTIONS.fromId(new ResourceLocation(entry.getKey()));
+                if (action != null && _actions.containsKey(action)) {
+                    ActionSwitch<P> actionSwitch = _actions.get(action);
+                    actionSwitch.setIsEnabled(entry.getValue().getAsBoolean());
+                    hotbarOrder.add(actionSwitch);
                 }
             }
             
-            JsonObject layoutJson = jsonObj.get("hotbarOrder").getAsJsonObject();
-            for (Map.Entry<String, JsonElement> entry : layoutJson.entrySet()) {
-                Action<?> action = Action.JsonSerialization.INSTANCE.fromStringId(entry.getKey());
-                if (action != null && layout._actions.containsKey(action)) {
-                    ActionSwitch<?> actionSwitch = layout._actions.get(action);
-                    actionSwitch.isEnabled = entry.getValue().getAsBoolean();
-                    addToLayout(layout, actionSwitch);
-                }
-            }
-            
-            layout.fillInMissingActions();
-            layout.updateCache();
-            return layout;
-        }
-        
-        private static <P extends IPower<P, ?>> void addActionBase(ActionHotbarLayout<P> layout, Action<?> action) {
-            Action<P> actionP = (Action<P>) action;
-            layout._actions.put(actionP, new ActionSwitch<>(actionP));
-        }
-        
-        private static <P extends IPower<P, ?>> void addToLayout(ActionHotbarLayout<P> layout, ActionSwitch<?> actionSwitch) {
-            layout.hotbarOrder.add((ActionSwitch<P>) actionSwitch);
-        }
-
-        @Override
-        public JsonElement serialize(ActionHotbarLayout<?> src, Type typeOfSrc, JsonSerializationContext context) {
-            JsonObject json = new JsonObject();
-            
-            JsonArray actions = new JsonArray();
-            for (ActionSwitch<?> actionSwitch : src._actions.values()) {
-                actions.add(actionSwitch.action.getRegistryName().toString());
-            }
-            json.add("actions", actions);
-            
-            JsonObject actionsOrder = new JsonObject();
-            for (ActionSwitch<?> actionSwitch : src.hotbarOrder) {
-                actionsOrder.addProperty(actionSwitch.action.getRegistryName().toString(), actionSwitch.isEnabled);
-            }
-            json.add("hotbarOrder", actionsOrder);
-            
-            return json;
-        }
+            fillInMissingActions();
+        });
     }
     
     

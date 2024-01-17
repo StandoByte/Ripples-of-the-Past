@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.input;
+package com.github.standobyte.jojo.client.controls;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -7,8 +7,6 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.OptionalInt;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import org.lwjgl.glfw.GLFW;
@@ -20,6 +18,9 @@ import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.layout.ActionsLayout;
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.reflect.TypeToken;
 
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
@@ -28,7 +29,7 @@ import net.minecraft.util.ResourceLocation;
 public class ActionsControlScheme {
 //    public final ResourceLocation powerTypeId;
 //    private OptionalInt savedSchemeNumber = OptionalInt.empty();
-    private final List<KeybindEntry> customKeybindEntries = new ArrayList<>();
+    private List<KeybindEntry> customKeybindEntries = new ArrayList<>();
     private final ActionsLayout<?> hotbarsLayout;
     
     public ActionsControlScheme(ActionsLayout<?> hotbarsLayout, ResourceLocation powerTypeId) {
@@ -106,24 +107,40 @@ public class ActionsControlScheme {
         CLICK
     }
     
-    
-    
     public ActionsLayout<?> getHotbarsLayout() {
         return hotbarsLayout;
     }
     
     
     
+    public JsonObject toJson(Gson gson) {
+        JsonObject json = new JsonObject();
+        json.add("customKeybindEntries", gson.toJsonTree(customKeybindEntries));
+        json.add("hotbarsLayout", hotbarsLayout.stateToJson());
+        return json;
+    }
+    
+    public static ActionsControlScheme fromJson(IPowerType<?, ?> powerType, JsonObject jsonObject, Gson gson) {
+        ActionsControlScheme controlScheme = new ActionsControlScheme(powerType.createDefaultLayout(), powerType.getRegistryName());
+        controlScheme.customKeybindEntries = new ArrayList<>(gson.fromJson(
+                jsonObject.get("customKeybindEntries"), new TypeToken<List<KeybindEntry>>() {}.getType()));
+        controlScheme.hotbarsLayout.stateFromJson(
+                jsonObject.get("hotbarsLayout").getAsJsonObject());
+        return controlScheme;
+    }
     
     
-    private static Map<PowerClassification, SavedControlSchemes> controlSchemeCache = new EnumMap<>(PowerClassification.class);
     
-    public static SavedControlSchemes getCtrlSchemes(PowerClassification power) {
+    
+    
+    private static Map<PowerClassification, PowerTypeControlsEntry> controlSchemeCache = new EnumMap<>(PowerClassification.class);
+    
+    public static PowerTypeControlsEntry getCtrlSchemes(PowerClassification power) {
         return controlSchemeCache.get(power);
     }
     
     public static ActionsControlScheme getCurrentCtrlScheme(PowerClassification power) {
-        SavedControlSchemes allSchemes = getCtrlSchemes(power);
+        PowerTypeControlsEntry allSchemes = getCtrlSchemes(power);
         return allSchemes != null ? allSchemes.getCurrentCtrlScheme() : null;
     }
     
@@ -143,44 +160,22 @@ public class ActionsControlScheme {
     
     
     
-    private static Map<ResourceLocation, SavedControlSchemes> savedControlSchemes = new HashMap<>();
+    private static Map<ResourceLocation, PowerTypeControlsEntry> savedControlSchemes = new HashMap<>();
     
-    public static SavedControlSchemes getCtrlSchemesFor(IPowerType<?, ?> type) {
+    public static PowerTypeControlsEntry getCtrlSchemesFor(IPowerType<?, ?> type) {
         ResourceLocation id = type.getRegistryName();
-        SavedControlSchemes ctrlSchemesHolder = savedControlSchemes.get(id);
+        PowerTypeControlsEntry ctrlSchemesHolder = savedControlSchemes.get(id);
         if (ctrlSchemesHolder == null) {
-            ctrlSchemesHolder = new SavedControlSchemes(ActionsControlScheme.createDefault(type));
+            ctrlSchemesHolder = new PowerTypeControlsEntry(ActionsControlScheme.createDefault(type));
             savedControlSchemes.put(id, ctrlSchemesHolder);
         }
         return ctrlSchemesHolder;
     }
     
-    public static class SavedControlSchemes {
-        private ActionsControlScheme currentControlScheme;
-        
-        SavedControlSchemes(ActionsControlScheme controlScheme) {
-            setCurrentCtrlScheme(controlScheme);
-        }
-        
-        void setCurrentCtrlScheme(ActionsControlScheme controlScheme) {
-            Objects.requireNonNull(controlScheme);
-            this.currentControlScheme = controlScheme;
-        }
-        
-        public ActionsControlScheme getCurrentCtrlScheme() {
-            return currentControlScheme;
-        }
-        
-        public void clearInvalidKeybinds() {
-            currentControlScheme.clearInvalidKeybinds();
-        }
-    }
-    
-    
-    private static ControlSchemesJson jsonSaveLoad;
+    private static ControlSettingsJson jsonSaveLoad;
     public static void initSaveFile(File file) {
-        jsonSaveLoad = new ControlSchemesJson(file);
-        Map<ResourceLocation, SavedControlSchemes> loaded = jsonSaveLoad.load();
+        jsonSaveLoad = new ControlSettingsJson(file);
+        Map<ResourceLocation, PowerTypeControlsEntry> loaded = jsonSaveLoad.load();
         if (loaded != null) {
             savedControlSchemes = loaded;
         }

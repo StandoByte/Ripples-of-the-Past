@@ -46,7 +46,6 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistryEntry;
-import net.minecraftforge.registries.IForgeRegistry;
 
 public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<Action<?>> {
     private static final Map<Supplier<? extends Action<?>>, Supplier<? extends Action<?>>> SHIFT_VARIATIONS = new HashMap<>(); 
@@ -556,19 +555,10 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         public Action<?> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
                 throws JsonParseException {
             if (json.isJsonPrimitive() && ((JsonPrimitive) json).isString()) {
-                return fromStringId(json.getAsString());
+                return JojoCustomRegistries.ACTIONS.fromId(new ResourceLocation(json.getAsString()));
             }
             
             throw new JsonParseException("An action is defined by its string id");
-        }
-        
-        public Action<?> fromStringId(String idStr) {
-            ResourceLocation id = new ResourceLocation(idStr);
-            IForgeRegistry<Action<?>> registry = JojoCustomRegistries.ACTIONS.getRegistry();
-            if (registry.containsKey(id)) {
-                return registry.getValue(id);
-            }
-            return null;
         }
 
         @Override

@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.InputHandler.ActionKey;
-import com.github.standobyte.jojo.client.input.ActionsControlScheme;
+import com.github.standobyte.jojo.client.controls.ActionsControlScheme;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.layout.ActionsLayout;

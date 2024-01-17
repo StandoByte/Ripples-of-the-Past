@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.function.UnaryOperator;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.client.input.ActionsControlScheme;
+import com.github.standobyte.jojo.client.controls.ActionsControlScheme;
 import com.github.standobyte.jojo.client.particle.AirStreamParticle;
 import com.github.standobyte.jojo.client.particle.BloodParticle;
 import com.github.standobyte.jojo.client.particle.CDRestorationParticle;

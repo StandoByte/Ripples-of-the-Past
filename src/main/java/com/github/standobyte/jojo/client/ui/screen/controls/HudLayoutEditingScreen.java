@@ -16,9 +16,9 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.InputHandler.MouseButton;
-import com.github.standobyte.jojo.client.input.ActionsControlScheme;
-import com.github.standobyte.jojo.client.input.ActionsControlScheme.SavedControlSchemes;
-import com.github.standobyte.jojo.client.input.ActionsControlScheme.PressActionType;
+import com.github.standobyte.jojo.client.controls.ActionsControlScheme;
+import com.github.standobyte.jojo.client.controls.PowerTypeControlsEntry;
+import com.github.standobyte.jojo.client.controls.ActionsControlScheme.PressActionType;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.widgets.CustomButton;
 import com.github.standobyte.jojo.power.IPower;
@@ -688,7 +688,7 @@ public class HudLayoutEditingScreen extends Screen {
         }
     }
     
-    private void setKeybindsList(SavedControlSchemes controlSchemes) {
+    private void setKeybindsList(PowerTypeControlsEntry controlSchemes) {
         keybindButtons.keySet().forEach(this::removeKeybindEntryFromUi);
         keybindButtons.clear();
         

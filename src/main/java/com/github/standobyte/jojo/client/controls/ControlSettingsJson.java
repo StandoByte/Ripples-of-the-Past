@@ -1,16 +1,16 @@
-package com.github.standobyte.jojo.client.input;
+package com.github.standobyte.jojo.client.controls;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.Map;
-import java.util.OptionalInt;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.client.input.ActionsControlScheme.SavedControlSchemes;
-import com.github.standobyte.jojo.power.layout.ActionHotbarLayout;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
+import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -21,52 +21,66 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-import com.google.gson.reflect.TypeToken;
 
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.settings.KeyModifier;
 
-public class ControlSchemesJson {
+public class ControlSettingsJson {
     private final File saveFile;
     private final Gson gson = new GsonBuilder().setPrettyPrinting()
             .registerTypeAdapter(Action.class, Action.JsonSerialization.INSTANCE)
-            .registerTypeAdapter(ActionHotbarLayout.class, ActionHotbarLayout.JsonSerialization.INSTANCE)
             .registerTypeAdapter(KeyBinding.class, KeyBindingJson.SERIALIZATION)
             .registerTypeAdapter(ResourceLocation.class, MCUtil.ResLocJson.SERIALIZATION)
-            // will list be mutable tho?
             .create();
+    private final JsonParser jsonParser = new JsonParser();
     
-    ControlSchemesJson(File saveFile) {
+    ControlSettingsJson(File saveFile) {
         this.saveFile = saveFile;
     }
     
-    private final Type mainMapType = new TypeToken<Map<ResourceLocation, SavedControlSchemes>>() {}.getType();
-    
-    public void save(Map<ResourceLocation, SavedControlSchemes> savedControlSchemes) {
+    public void save(Map<ResourceLocation, PowerTypeControlsEntry> savedControlSchemes) {
         if (saveFile == null) return;
 
         try (BufferedWriter writer = Files.newWriter(saveFile, Charsets.UTF_8)) {
-            gson.toJson(savedControlSchemes, writer);
+            JsonObject json = new JsonObject();
+            for (Map.Entry<ResourceLocation, PowerTypeControlsEntry> powerTypeEntry : savedControlSchemes.entrySet()) {
+                json.add(powerTypeEntry.getKey().toString(), powerTypeEntry.getValue().toJson(gson));
+            }
+            gson.toJson(json, writer);
         }
         catch (Exception exception) {
             JojoMod.getLogger().error("Failed to save mod control settings", exception);
         }
     }
     
-    public Map<ResourceLocation, SavedControlSchemes> load() {
+    public Map<ResourceLocation, PowerTypeControlsEntry> load() {
         if (saveFile == null || !saveFile.exists()) {
             return null;
         }
         
         try (BufferedReader reader = Files.newReader(saveFile, Charsets.UTF_8)) {
-            Map<ResourceLocation, SavedControlSchemes> load = gson.fromJson(reader, mainMapType);
-            load.values().forEach(SavedControlSchemes::clearInvalidKeybinds);
-            return load;
+            Map<ResourceLocation, PowerTypeControlsEntry> mainMap = new HashMap<>();
+            
+            JsonObject jsonRead = jsonParser.parse(reader).getAsJsonObject();
+            for (Map.Entry<String, JsonElement> entryRead : jsonRead.entrySet()) {
+                ResourceLocation powerId = new ResourceLocation(entryRead.getKey());
+                
+                IPowerType<?, ?> powerType = JojoCustomRegistries.STANDS.fromId(powerId);
+                if (powerType == null) powerType = JojoCustomRegistries.NON_STAND_POWERS.fromId(powerId);
+                if (powerType == null) continue;
+                
+                PowerTypeControlsEntry ctrlSettings = PowerTypeControlsEntry.fromJson(powerType, entryRead.getValue().getAsJsonObject(), gson);
+                ctrlSettings.clearInvalidKeybinds();
+                mainMap.put(powerId, ctrlSettings);
+            }
+            
+            return mainMap;
         }
         catch (Exception exception) {
             JojoMod.getLogger().error("Failed to load mod control settings", (Throwable) exception);
