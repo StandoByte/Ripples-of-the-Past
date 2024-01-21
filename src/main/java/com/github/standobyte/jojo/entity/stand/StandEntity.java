@@ -402,7 +402,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         if (ModPowers.VAMPIRISM.get().isHighOnBlood(getUser())) {
             durability *= 2;
         }
-        return durability * rangeEfficiency;
+        return durability * getStandEfficiency();
     }
     
     public double getPrecision() {
@@ -731,9 +731,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
     
     protected float barrageClashParryPunches(StandEntityDamageSource dmgSource, float dmgAmount) {
-        if (barrageHandler.parryCount > 0
-                && !isInvulnerableTo(dmgSource) && !isDeadOrDying() 
-                && !(dmgSource.isFire() && hasEffect(Effects.FIRE_RESISTANCE))
+        if (barrageHandler.parryCount > 0 && !isDeadOrDying() 
                 && canBlockDamage(dmgSource) && canBlockOrParryFromAngle(dmgSource.getSourcePosition())) {
             int punchesIncoming = dmgSource.getBarrageHitsCount();
             if (punchesIncoming > 0) {
@@ -787,7 +785,23 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
     
     private void setBarrageClashOpponent(@Nullable Entity opponent) {
+        Entity prevOpponent = barrageClashOpponent().orElse(null);
+        
         entityData.set(BARRAGE_CLASH_OPPONENT_ID, opponent != null ? opponent.getId() : -1);
+        
+        if (prevOpponent instanceof StandEntity) {
+            StandEntity prevStandOpponent = (StandEntity) prevOpponent;
+            if (opponent == null) {
+                if (prevStandOpponent.barrageClashOpponent().isPresent()) {
+                    prevStandOpponent.setBarrageClashOpponent(null);
+                }
+            }
+            else {
+                if (prevStandOpponent.barrageClashOpponent().orElse(null) != this) {
+                    prevStandOpponent.setBarrageClashOpponent(this);
+                }
+            }
+        }
     }
     
     @Override
@@ -1332,7 +1346,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     
     protected void clearTask(StandEntityTask clearedTask, @Nullable StandEntityAction newAction) {
         StandEntityAction oldAction = clearedTask.getAction();
-        
+
         barrageHandler.reset();
         if (blockDamage > 0) {
             prevBlockDamage += blockDamage;

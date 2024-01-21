@@ -173,7 +173,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
 
     @Override
     public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
-        return StandStatFormulas.getHeavyAttackRecovery(standEntity.getAttackSpeed());
+        return StandStatFormulas.getHeavyAttackRecovery(standEntity.getAttackSpeed(), standEntity.getLastHeavyFinisherValue());
     }
     
     @Override

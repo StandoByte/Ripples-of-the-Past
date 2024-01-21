@@ -170,7 +170,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
     
     @Override
     public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
-        return StandStatFormulas.getHeavyAttackRecovery(standEntity.getAttackSpeed());
+        return StandStatFormulas.getHeavyAttackRecovery(standEntity.getAttackSpeed(), 0);
     }
     
     @Override
