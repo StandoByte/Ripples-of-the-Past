@@ -90,7 +90,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
 
     protected void onPowerSet(T type) {
-        if (user.level.isClientSide()) {
+        if (user.level.isClientSide() && user == ClientUtil.getCameraEntity()) {
             ActionsControlScheme.cacheCtrlScheme(getPowerClassification(), type);
         }
     }
