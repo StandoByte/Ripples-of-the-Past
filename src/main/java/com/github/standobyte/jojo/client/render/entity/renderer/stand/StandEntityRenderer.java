@@ -1,7 +1,6 @@
 package com.github.standobyte.jojo.client.render.entity.renderer.stand;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientEventHandler;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -289,9 +288,12 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
     }
     
     protected void idlePoseSwaying(T entity, float ticks, MatrixStack matrixStack) {
-        if (!entity.isVisibleForAll() && entity.getStandPose() == StandPose.IDLE && getModel().attackTime == 0 && 
-                entity.isFollowingUser() && !Minecraft.getInstance().player.isShiftKeyDown()) {
-            doIdlePoseSwaying(ticks, matrixStack);
+        if (!entity.isVisibleForAll() && entity.getStandPose() == StandPose.IDLE && 
+                getModel().attackTime == 0 && entity.isFollowingUser()) {
+            LivingEntity user = entity.getUser();
+            if (!(user != null && user.isShiftKeyDown())) {
+                doIdlePoseSwaying(ticks, matrixStack);
+            }
         }
     }
     
