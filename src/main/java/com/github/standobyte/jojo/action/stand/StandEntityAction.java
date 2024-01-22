@@ -239,8 +239,8 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
                 preTaskInit(world, power, stand, target);
                 if (!world.isClientSide()) {
                     setAction(power, stand, 
-                        holdOnly(power) || continueHolding ? Integer.MAX_VALUE : getHoldDurationToFire(power), 
-                        holdOnly(power)                    ? Phase.PERFORM : Phase.BUTTON_HOLD, 
+                        holdOnly(power) || continueHolding  ? Integer.MAX_VALUE : getHoldDurationToFire(power), 
+                        holdOnly(power) && !continueHolding ? Phase.PERFORM : Phase.BUTTON_HOLD, 
                         target);
                 }
             });

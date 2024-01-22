@@ -1424,7 +1424,30 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
 
 
     
-    public ActionTarget aimWithStandOrUser(double reachDistance, ActionTarget currentTarget) {
+    /**
+     * @deprecated use {@link StandEntity#aimWithThisOrUser(double, ActionTarget)}, which returns an {@link ActionTarget} instance
+     */
+    @Deprecated
+    public RayTraceResult aimWithStandOrUser(double reachDistance, ActionTarget currentTarget) {
+        RayTraceResult aim;
+        if (!isManuallyControlled()) {
+            LivingEntity user = getUser();
+            if (user != null && currentTarget.getType() != TargetType.ENTITY) {
+                aim = precisionRayTrace(user, reachDistance);
+                if (JojoModUtil.isAnotherEntityTargeted(aim, this)
+                        || currentTarget.getType() == TargetType.EMPTY && aim.getType() != RayTraceResult.Type.MISS) {
+                    Vector3d targetPos = ActionTarget.fromRayTraceResult(aim).getTargetPos(true);
+                    if (targetPos != null) {
+                        MCUtil.rotateTowards(this, targetPos, (float) getAttackSpeed() / 16F * 18F);
+                    }
+                }
+            }
+        }
+        aim = precisionRayTrace(this, reachDistance);
+        return aim;
+    }
+    
+    public ActionTarget aimWithThisOrUser(double reachDistance, ActionTarget currentTarget) {
         ActionTarget target;
         if (currentTarget.getType() == TargetType.ENTITY && isTargetInReach(currentTarget)) {
             target = currentTarget;
@@ -1528,7 +1551,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
 
     public boolean punch(StandEntityTask task, IHasStandPunch punch, ActionTarget target) {
         if (!level.isClientSide()) {
-            ActionTarget finalTarget = aimWithStandOrUser(getAimDistance(getUser()), target);
+            ActionTarget finalTarget = aimWithThisOrUser(getAimDistance(getUser()), target);
             target = finalTarget.getType() != TargetType.EMPTY && isTargetInReach(finalTarget) ? finalTarget : ActionTarget.EMPTY;
             setTaskTarget(target);
         }
