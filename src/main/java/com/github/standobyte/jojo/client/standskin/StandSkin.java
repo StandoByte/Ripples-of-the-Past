@@ -4,9 +4,13 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.client.ResourcePathChecker;
+import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
 
 /*
  * TODO Stand skins
@@ -20,7 +24,7 @@ import net.minecraft.util.ResourceLocation;
  * [_]     stuff like projectiles
  * [V]   power icon
  * [_]   in-mod UI
- * [_]     actions atlas
+ * [V]     actions
  * [_]   particles
  *     
  * [_] lang
@@ -38,14 +42,18 @@ public class StandSkin {
     public final ResourceLocation resLoc;
     public final ResourceLocation standTypeId;
     public final int color;
+    private final ITextComponent partName;
     public final boolean defaultSkin;
+//    public final boolean inModSkin;
     
     private final Map<ResourceLocation, ResourcePathChecker> resourceCheckCache = new HashMap<>();
     
-    public StandSkin(ResourceLocation resLoc, ResourceLocation standTypeId, int color) {
+    public StandSkin(ResourceLocation resLoc, ResourceLocation standTypeId, 
+            int color, @Nullable ITextComponent partName) {
         this.resLoc = resLoc;
         this.standTypeId = standTypeId;
         this.color = color;
+        this.partName = partName;
         this.defaultSkin = resLoc.equals(standTypeId);
     }
     
@@ -57,5 +65,9 @@ public class StandSkin {
         return resourceCheckCache.computeIfAbsent(originalResPath, 
                 path -> ResourcePathChecker.getOrCreate(
                         StandSkinsManager.pathRemapFunc(this.resLoc, path)));
+    }
+    
+    public ITextComponent getPartName(StandType<?> standTypeObj) {
+        return partName != null ? partName : standTypeObj.getPartName();
     }
 }

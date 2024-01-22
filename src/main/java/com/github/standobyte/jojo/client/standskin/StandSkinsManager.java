@@ -16,11 +16,15 @@ import java.util.function.Function;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
+import com.github.standobyte.jojo.util.mod.StoryPart;
 import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
@@ -35,6 +39,9 @@ import net.minecraft.resources.IResource;
 import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.Color;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 
 public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, StandSkin>> {
     private Map<ResourceLocation, StandSkin> skins = new HashMap<>();
@@ -121,10 +128,15 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
                         for (Map.Entry<String, JsonElement> skinEntry : skinsDefinitionJson.entrySet()) {
                             JsonObject skinJson = skinEntry.getValue().getAsJsonObject();
                             ResourceLocation skinId = new ResourceLocation(skinEntry.getKey());
-                            ResourceLocation standType = new ResourceLocation(skinJson.get("stand_type").getAsString());
+                            ResourceLocation standTypeId = new ResourceLocation(skinJson.get("stand_type").getAsString());
                             int color = parseColor(skinJson.get("color"));
                             
-                            StandSkin skin = new StandSkin(skinId, standType, color);
+                            ITextComponent partName = null;
+                            if (skinJson.has("story_part")) {
+                                partName = parseStoryPart(skinJson.get("story_part"));
+                            }
+                            
+                            StandSkin skin = new StandSkin(skinId, standTypeId, color, partName);
                             skinsMap.put(skinId, skin);
                         }
                         
@@ -179,12 +191,38 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
         
         throw new JsonParseException("Couldn't parse color");
     }
+    
+    @Nullable
+    private static ITextComponent parseStoryPart(JsonElement storyPartDef) {
+        if (storyPartDef.isJsonPrimitive()) {
+            if (storyPartDef.getAsJsonPrimitive().isNumber()) {
+                int num = storyPartDef.getAsInt();
+                if (num > 0 && num <= StoryPart.values().length) {
+                    return StoryPart.values()[num - 1].getName();
+                }
+            }
+            else if (storyPartDef.getAsJsonPrimitive().isString()) {
+                return new TranslationTextComponent(storyPartDef.getAsString());
+            }
+        }
+        else if (storyPartDef.isJsonObject()) {
+            JsonObject storyPartDefObj = storyPartDef.getAsJsonObject();
+            if (storyPartDefObj.has("key") && storyPartDefObj.has("color")) {
+                IFormattableTextComponent name = new TranslationTextComponent(storyPartDefObj.get("key").getAsString());
+                int color = parseColor(storyPartDefObj.get("color"));
+                return name.withStyle(ClientUtil.textColor(color));
+            }
+        }
+        
+        return null;
+    }
 
     @Override
     protected void apply(Map<ResourceLocation, StandSkin> skinsMap, IResourceManager resourceManager, IProfiler profiler) {
         JojoCustomRegistries.STANDS.getRegistry().getValues().forEach(standType -> {
             ResourceLocation id = standType.getRegistryName();
-            skinsMap.computeIfAbsent(id, s -> new StandSkin(id, id, standType.getColor()));
+            skinsMap.computeIfAbsent(id, s -> new StandSkin(id, id, 
+                    standType.getColor(), standType.getPartName()));
         });
         this.skins = skinsMap;
         this.skinsByStand = skinsMap.entrySet().stream()
