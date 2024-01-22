@@ -1,11 +1,13 @@
 package com.github.standobyte.jojo.client.standskin;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +15,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.TreeSet;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
@@ -21,6 +24,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.resources.CustomResources;
+import com.github.standobyte.jojo.client.resources.models.StandModelOverrides;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
@@ -93,13 +97,6 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
                 .orElse(stand.getType().getColor());
     }
     
-    public static ResourceLocation pathRemapFunc(ResourceLocation skinPath, ResourceLocation originalResPath) {
-        return new ResourceLocation(
-                skinPath.getNamespace(), 
-                "stand_skins/" + skinPath.getPath() + "/assets/" + originalResPath.getNamespace() + "/" + originalResPath.getPath()
-                );
-    }
-    
     
     
     // JSON deserialization below
@@ -119,12 +116,12 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
                     profiler.push(definition.getSourceName());
 
                     try (
-                            InputStream inputstream = definition.getInputStream();
-                            Reader reader = new InputStreamReader(inputstream, StandardCharsets.UTF_8);
+                            InputStream defInputStream = definition.getInputStream();
+                            Reader defReader = new InputStreamReader(defInputStream, StandardCharsets.UTF_8);
                             ) {
                         profiler.push("parse");
                         
-                        JsonObject skinsDefinitionJson = PARSER.parse(reader).getAsJsonObject().getAsJsonObject("skins");
+                        JsonObject skinsDefinitionJson = PARSER.parse(defReader).getAsJsonObject().getAsJsonObject("skins");
                         for (Map.Entry<String, JsonElement> skinEntry : skinsDefinitionJson.entrySet()) {
                             JsonObject skinJson = skinEntry.getValue().getAsJsonObject();
                             ResourceLocation skinId = new ResourceLocation(skinEntry.getKey());
@@ -138,6 +135,27 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
                             
                             StandSkin skin = new StandSkin(skinId, standTypeId, color, partName);
                             skinsMap.put(skinId, skin);
+                            
+                            
+                            
+                            // stand models
+                            Collection<ResourceLocation> modelResources = listResources(resourceManager, skinId, standTypeId, 
+                                    "geo", fileName -> fileName.endsWith(".json"));
+                            for (ResourceLocation modelFilePath : modelResources) {
+                                ResourceLocation modelResLoc = StandSkin.remapBack(skinId, modelFilePath);
+                                modelResLoc = new ResourceLocation(modelResLoc.getNamespace(), 
+                                        modelResLoc.getPath().replace("geo/", "").replace(".json", ""));
+                                try (
+                                        IResource resource = resourceManager.getResource(modelFilePath);
+                                        InputStream modelInputStream = resource.getInputStream();
+                                        Reader modelReader = new BufferedReader(new InputStreamReader(modelInputStream, StandardCharsets.UTF_8));
+                                        ) {
+                                    JsonElement json = PARSER.parse(modelReader);
+                                    StandModelOverrides.createModel(modelResLoc, json).ifPresent(model -> {
+                                        skin.standModels.cacheValue(model.getKey(), model.getValue());
+                                    });
+                                }
+                            }
                         }
                         
                         profiler.popPush("register");
@@ -161,6 +179,12 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
 
         profiler.endTick();
         return skinsMap;
+    }
+    
+    private Collection<ResourceLocation> listResources(IResourceManager resourceManager, 
+            ResourceLocation skinId, ResourceLocation standTypeId, String folderName, Predicate<String> fileNameFilter) {
+        ResourceLocation remapped = StandSkin.pathRemapFunc(skinId, new ResourceLocation(standTypeId.getNamespace(), folderName));
+        return resourceManager.listResources(remapped.getPath(), fileNameFilter);
     }
     
     private static int parseColor(JsonElement jsonElement) throws JsonParseException {

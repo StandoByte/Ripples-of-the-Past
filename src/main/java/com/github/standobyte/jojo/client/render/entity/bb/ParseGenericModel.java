@@ -12,7 +12,6 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.render.MeshModelBox;
 import com.github.standobyte.jojo.client.render.MeshModelBox.Builder.MeshFaceBuilder;
 import com.github.standobyte.jojo.util.general.MathUtil;
@@ -42,7 +41,7 @@ public class ParseGenericModel {
             .registerTypeAdapter(ModelParsed.BlockbenchObj.class, ModelParsed.BlockbenchObj.DESERIALIZER)
             .create();
     
-    public static EntityModelUnbaked parseGenericModel(JsonElement json) {
+    public static EntityModelUnbaked parseGenericModel(JsonObject json) {
         long time = Util.getMillis();
         ModelParsed modelParsed = GSON.fromJson(json, ModelParsed.class);
         long parseTime = Util.getMillis();

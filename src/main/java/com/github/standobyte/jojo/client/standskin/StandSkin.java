@@ -7,6 +7,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ResourcePathChecker;
+import com.github.standobyte.jojo.client.standskin.resource.StandModelReskin;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 
 import net.minecraft.util.ResourceLocation;
@@ -42,9 +43,11 @@ public class StandSkin {
     public final ResourceLocation resLoc;
     public final ResourceLocation standTypeId;
     public final int color;
-    private final ITextComponent partName;
     public final boolean defaultSkin;
 //    public final boolean inModSkin;
+    
+    private final ITextComponent partName;
+    public final StandModelReskin standModels = new StandModelReskin();
     
     private final Map<ResourceLocation, ResourcePathChecker> resourceCheckCache = new HashMap<>();
     
@@ -64,8 +67,23 @@ public class StandSkin {
     public ResourcePathChecker getRemappedResPath(ResourceLocation originalResPath) {
         return resourceCheckCache.computeIfAbsent(originalResPath, 
                 path -> ResourcePathChecker.getOrCreate(
-                        StandSkinsManager.pathRemapFunc(this.resLoc, path)));
+                        pathRemapFunc(this.resLoc, path)));
     }
+    
+    public static ResourceLocation pathRemapFunc(ResourceLocation skinPath, ResourceLocation originalResPath) {
+        return new ResourceLocation(
+                skinPath.getNamespace(), 
+                "stand_skins/" + skinPath.getPath() + "/assets/" + originalResPath.getNamespace() + "/" + originalResPath.getPath()
+                );
+    }
+    
+    public static ResourceLocation remapBack(ResourceLocation skinPath, ResourceLocation remappedResPath) {
+        String path = remappedResPath.getPath()
+                .replace("stand_skins/" + skinPath.getPath() + "/assets/", "");
+        String namespace = path.split("/")[0];
+        return new ResourceLocation(namespace, path.substring(namespace.length() + 1));
+    }
+    
     
     public ITextComponent getPartName(StandType<?> standTypeObj) {
         return partName != null ? partName : standTypeObj.getPartName();
