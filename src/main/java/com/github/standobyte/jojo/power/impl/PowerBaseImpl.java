@@ -1,7 +1,5 @@
 package com.github.standobyte.jojo.power.impl;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
@@ -29,9 +27,7 @@ import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.bowcharge.BowChargeEffectInstance;
 import com.github.standobyte.jojo.power.bowcharge.IBowChargeEffect;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
-import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.github.standobyte.jojo.util.general.ObjectWrapper;
-import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -53,9 +49,6 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     @Nonnull
     protected final LivingEntity user;
     protected final Optional<ServerPlayerEntity> serverPlayerUser;
-    
-    @Deprecated
-    private Map<ResourceLocation, ActionsLayout<P>> srvSavedLayouts = new HashMap<>();
     
     private ActionCooldownTracker cooldowns = new ActionCooldownTracker();
     private int leapCooldown;
@@ -146,14 +139,6 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             getType().onNewDay(user, getThis(), prevDay, day);
         }
     }
-//    
-//    @Override
-//    public void saveActionsHudLayout(T powerType, ActionsLayout<P> clReceivedLayout) {
-//        srvSavedLayouts.put(powerType.getRegistryName(), clReceivedLayout);
-//        if (powerType == this.getType()) {
-//            this.clHudLayout = clReceivedLayout;
-//        }
-//    }
     
     @Override
     public final boolean isActionOnCooldown(Action<?> action) {
@@ -583,14 +568,6 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         cnbt.put("Cooldowns", cooldowns.writeNBT());
         cnbt.putInt("LeapCd", leapCooldown);
         
-        CompoundNBT layoutsMapNbt = new CompoundNBT();
-        srvSavedLayouts.entrySet().forEach(entry -> {
-            if (entry.getKey() != null && entry.getValue() != null) {
-                CompoundNBT layoutNbt = entry.getValue().toNBT();
-                layoutsMapNbt.put(entry.getKey().toString(), layoutNbt);
-            }
-        });
-        cnbt.put("LayoutsSaved", layoutsMapNbt);
         return cnbt;
     }
 
@@ -599,20 +576,6 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         lastTickedDay = nbt.getLong("LastDay");
         cooldowns = new ActionCooldownTracker(nbt.getCompound("Cooldowns"));
         leapCooldown = nbt.getInt("LeapCd");
-        
-        if (nbt.contains("LayoutsSaved", MCUtil.getNbtId(CompoundNBT.class))) {
-            CompoundNBT layoutsMapNbt = nbt.getCompound("LayoutsSaved");
-            layoutsMapNbt.getAllKeys().forEach(key -> {
-                if (!key.isEmpty() && layoutsMapNbt.contains(key, MCUtil.getNbtId(CompoundNBT.class))) {
-                    ResourceLocation powerTypeId = new ResourceLocation(key);
-                    IPowerType<?, ?> type = getPowerClassification().getFromRegistryId(powerTypeId);
-                    ActionsLayout<P> layout = type != null ? (ActionsLayout<P>) type.createDefaultLayout() : ActionsLayout.emptyLayout();
-                    CompoundNBT layoutNbt = layoutsMapNbt.getCompound(key);
-                    layout.fromNBT(layoutNbt);
-                    srvSavedLayouts.put(powerTypeId, layout);
-                }
-            });
-        }
     }
 
     @Override
@@ -620,17 +583,11 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         if (oldPower.hasPower() && (!wasDeath || oldPower.getType().keepOnDeath(oldPower))) {
             keepPower(oldPower, wasDeath);
         }
-        keepActionsLayout(oldPower);
     }
 
     protected void keepPower(P oldPower, boolean wasDeath) {
         this.leapCooldown = oldPower.getLeapCooldown();
         this.cooldowns = oldPower.getCooldowns();
-    }
-    
-    protected void keepActionsLayout(P oldPower) {
-        PowerBaseImpl<P, T> myCodeIsJankAf = (PowerBaseImpl<P, T>) oldPower;
-        srvSavedLayouts = myCodeIsJankAf.srvSavedLayouts;
     }
     
     @Override

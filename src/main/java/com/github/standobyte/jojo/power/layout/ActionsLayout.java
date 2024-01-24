@@ -8,13 +8,11 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.power.IPower;
-import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.google.gson.JsonObject;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Util;
 
 public class ActionsLayout<P extends IPower<P, ?>> {
@@ -85,28 +83,6 @@ public class ActionsLayout<P extends IPower<P, ?>> {
     
     
     
-    @Deprecated
-    public void toBuf(PacketBuffer buffer) {
-        for (Hotbar hotbar : Hotbar.values()) {
-            buffer.writeEnum(hotbar);
-            hotbars.get(hotbar).toBuf(buffer);
-        }
-    }
-
-    @Deprecated
-    public static <P extends IPower<P, ?>> ActionsLayout<P> fromBuf(IPowerType<P, ?> powerType, PacketBuffer buffer) {
-        ActionsLayout<P> layout = powerType.createDefaultLayout();
-        
-        for (int i = 0; i < Hotbar.values().length; i++) {
-            Hotbar hotbar = buffer.readEnum(Hotbar.class);
-            layout.getHotbar(hotbar).setFromBuf(buffer);
-        }
-        
-        return layout;
-    }
-    
-    
-
     @Deprecated
     public CompoundNBT toNBT() {
         CompoundNBT layoutNBT = new CompoundNBT();
