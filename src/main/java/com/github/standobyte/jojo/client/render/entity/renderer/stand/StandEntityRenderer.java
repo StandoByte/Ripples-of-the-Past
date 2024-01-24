@@ -57,9 +57,21 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
         return getTextureLocation(entity.getStandSkin());
     }
     
+    @Deprecated
     @Override
     public M getModel() {
         return CustomResources.getStandModelOverrides().overrideModel(model);
+    }
+    
+    public M getModel(T entity) {
+        return getModel(entity.getStandSkin());
+    }
+    
+    public M getModel(Optional<ResourceLocation> standSkin) {
+        M model = getModel();
+        M skinModel = StandSkinsManager.getInstance().getStandSkin(standSkin).map(
+                skin -> (M) skin.standModels.getOrDefault(model.getModelId(), model)).orElse(model);
+        return skinModel;
     }
     
     public ResourceLocation getTextureLocation(Optional<ResourceLocation> standSkin) {
@@ -82,7 +94,7 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
     }
 
     protected RenderType getRenderType(T entity, ResourceLocation modelTexture) {
-        return renderType(entity, getModel(), modelTexture, 
+        return renderType(entity, this.model, modelTexture, 
                 isBodyVisible(entity), visibleForSpectator(entity), Minecraft.getInstance().shouldEntityAppearGlowing(entity));
     }
 
@@ -102,7 +114,7 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
     @Deprecated
     @Override
     public RenderType getRenderType(T entity, boolean isVisible, boolean isVisibleForSpectator, boolean isGlowing) {
-        return renderType(entity, getModel(), getTextureLocation(entity), isVisible, isVisibleForSpectator, isGlowing);
+        return renderType(entity, this.model, getTextureLocation(entity), isVisible, isVisibleForSpectator, isGlowing);
     }
     
     protected float calcAlpha(T entity, float partialTick) {
@@ -171,7 +183,7 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
     @Override
     public void render(T entity, float yRotation, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
         if (MinecraftForge.EVENT_BUS.post(new RenderLivingEvent.Pre<T, M>(entity, this, partialTick, matrixStack, buffer, packedLight))) return;
-        M model = getModel();
+        M model = getModel(entity);
         matrixStack.pushPose();
         model.attackTime = this.getAttackAnim(entity, partialTick);
         boolean shouldSit = entity.isPassenger() && (entity.getVehicle() != null && entity.getVehicle().shouldRiderSit());
@@ -259,7 +271,7 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
     public void renderLayer(MatrixStack matrixStack, IVertexBuilder vertexBuilder, int packedLight,
             T entity, float walkAnimSpeed, float walkAnimPos, float partialTick,
             float ticks, float yRotationOffset, float xRotation, M model) {
-        getModel().copyPropertiesTo(model);
+        getModel(entity).copyPropertiesTo(model);
         model.setVisibility(entity, visibilityMode(entity), viewObstructionPrevention.armsOnly);
         // TODO get rid of these two method calls?
         model.prepareMobModel(entity, walkAnimSpeed, walkAnimPos, partialTick);
@@ -288,8 +300,9 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
     }
     
     protected void idlePoseSwaying(T entity, float ticks, MatrixStack matrixStack) {
+        M model = getModel(entity);
         if (!entity.isVisibleForAll() && entity.getStandPose() == StandPose.IDLE && 
-                getModel().attackTime == 0 && entity.isFollowingUser()) {
+                model.attackTime == 0 && entity.isFollowingUser()) {
             LivingEntity user = entity.getUser();
             if (!(user != null && user.isShiftKeyDown())) {
                 doIdlePoseSwaying(ticks, matrixStack);
@@ -306,7 +319,7 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
     public void renderFirstPersonArms(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, T entity, float partialTick) {
         if (entity.getStandPose().armsObstructView) return;
         
-        getModel().setVisibility(entity, VisibilityMode.ARMS_ONLY, false);
+        getModel(entity).setVisibility(entity, VisibilityMode.ARMS_ONLY, false);
         renderFirstPersonArm(HandSide.LEFT, matrixStack, buffer, packedLight, entity, partialTick);
         renderFirstPersonArm(HandSide.RIGHT, matrixStack, buffer, packedLight, entity, partialTick);
     }
@@ -314,14 +327,14 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
     protected void renderFirstPersonArm(HandSide handSide, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, T entity, float partialTick) {
         RenderType renderType = getRenderType(entity, getTextureLocation(entity));
         if (renderType != null) {
-            renderSeparateLayerArm(getModel(), handSide, matrixStack, buffer.getBuffer(renderType), packedLight, entity, partialTick);
+            renderSeparateLayerArm(getModel(entity), handSide, matrixStack, buffer.getBuffer(renderType), packedLight, entity, partialTick);
             for (LayerRenderer<T, M> layer : layers) {
                 if (layer instanceof StandModelLayerRenderer) {
                     StandModelLayerRenderer<T, M> standLayer = (StandModelLayerRenderer<T, M>) layer;
                     if (standLayer.shouldRender(entity, entity.getStandSkin())) {
                         RenderType layerRenderType = standLayer.getRenderType(entity);
                         if (layerRenderType != null) {
-                            renderSeparateLayerArm(standLayer.getLayerModel(), handSide, matrixStack, 
+                            renderSeparateLayerArm(standLayer.getLayerModel(entity), handSide, matrixStack, 
                                     buffer.getBuffer(layerRenderType), standLayer.getPackedLight(packedLight), entity, partialTick);
                         }
                     }
@@ -378,7 +391,8 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
     
     public void renderIdleWithSkin(MatrixStack matrixStack, StandSkin standSkin, IRenderTypeBuffer buffer, float ticks) {
         matrixStack.pushPose();
-        M model = getModel();
+        Optional<ResourceLocation> nonDefaultSkin = standSkin.getNonDefaultLocation();
+        M model = getModel(nonDefaultSkin);
         model.attackTime = 0;
         model.riding = false;
         model.young = false;
@@ -393,7 +407,6 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
         model.prepareMobModel(null, 0, 0, partialTick);
         model.poseIdleLoop(null, ticks, yRotationOffset, xRotation, HandSide.RIGHT);
         
-        Optional<ResourceLocation> nonDefaultSkin = standSkin.getNonDefaultLocation();
         ResourceLocation texture = getTextureLocation(nonDefaultSkin);
         RenderType renderType = model.renderType(texture);
         int packedLight = ClientUtil.MAX_MODEL_LIGHT;
@@ -406,7 +419,7 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
                 if (layerRenderer instanceof StandModelLayerRenderer) {
                     StandModelLayerRenderer<T, M> standLayer = (StandModelLayerRenderer<T, M>) layerRenderer;
                     if (standLayer.shouldRender(null, nonDefaultSkin)) {
-                        M layerModel = standLayer.getLayerModel();
+                        M layerModel = standLayer.getLayerModel(nonDefaultSkin);
                         RenderType layerRenderType = layerModel.renderType(standLayer.getLayerTexture(nonDefaultSkin));
                         IVertexBuilder layerVertexBuilder = buffer.getBuffer(layerRenderType);
                         layerModel.attackTime = 0;

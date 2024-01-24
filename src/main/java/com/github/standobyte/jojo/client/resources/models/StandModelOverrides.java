@@ -12,7 +12,8 @@ import com.github.standobyte.jojo.client.render.entity.bb.EntityModelUnbaked;
 import com.github.standobyte.jojo.client.render.entity.bb.ParseGeckoModel;
 import com.github.standobyte.jojo.client.render.entity.bb.ParseGenericModel;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
-import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel.StandModelRegistryObj;
+import com.github.standobyte.jojo.client.render.entity.model.stand.StandModelRegistry;
+import com.github.standobyte.jojo.client.render.entity.model.stand.StandModelRegistry.StandModelRegistryObj;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -34,16 +35,16 @@ public class StandModelOverrides extends JsonReloadListener {
             IProfiler pProfiler) {
         modelOverrides.clear();
         for (Map.Entry<ResourceLocation, JsonElement> entry : pObject.entrySet()) {
-            createModel(entry.getKey(), entry.getValue()).ifPresent(model -> modelOverrides.put(model.getKey(), model.getValue()));
+            createModelFromJson(entry.getKey(), entry.getValue()).ifPresent(model -> modelOverrides.put(model.getKey(), model.getValue()));
         }
     }
     
-    public static Optional<Pair<ResourceLocation, StandEntityModel<?>>> createModel(ResourceLocation modelResLoc, JsonElement json) {
+    public static Optional<Pair<ResourceLocation, StandEntityModel<?>>> createModelFromJson(ResourceLocation modelResLoc, JsonElement json) {
         Format format = modelResLoc.getPath().contains(".bb") ? Format.BB_GENERIC : Format.GECKO;
         ResourceLocation modelId = new ResourceLocation(
                 modelResLoc.getNamespace(), 
                 modelResLoc.getPath().replace(".geo", "").replace(".bb", ""));
-        StandModelRegistryObj registeredModel = StandEntityModel.getRegisteredModel(modelId);
+        StandModelRegistryObj registeredModel = StandModelRegistry.getRegisteredModel(modelId);
         if (registeredModel != null) {
             StandEntityModel<?> modelCopy = registeredModel.createNewModelCopy();
             EntityModelUnbaked modelOverride;

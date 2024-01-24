@@ -7,6 +7,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ResourcePathChecker;
+import com.github.standobyte.jojo.client.standskin.StandSkinsManager.SkinResourcePrepare;
 import com.github.standobyte.jojo.client.standskin.resource.StandModelReskin;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 
@@ -47,6 +48,12 @@ public class StandSkin {
 //    public final boolean inModSkin;
     
     private final ITextComponent partName;
+    
+    /*  Is used to save the resource pack data before it can be processed
+     *  and turned into some elements of the skin, e.g. custom Stand model. 
+     *  Otherwise is unused and == null most of the time.
+     */
+    public SkinResourcePrepare resourcePrepare = null;
     public final StandModelReskin standModels = new StandModelReskin();
     
     private final Map<ResourceLocation, ResourcePathChecker> resourceCheckCache = new HashMap<>();

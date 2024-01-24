@@ -21,6 +21,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.resources.CustomResources;
@@ -122,6 +124,7 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
                         profiler.push("parse");
                         
                         JsonObject skinsDefinitionJson = PARSER.parse(defReader).getAsJsonObject().getAsJsonObject("skins");
+                        
                         for (Map.Entry<String, JsonElement> skinEntry : skinsDefinitionJson.entrySet()) {
                             JsonObject skinJson = skinEntry.getValue().getAsJsonObject();
                             ResourceLocation skinId = new ResourceLocation(skinEntry.getKey());
@@ -136,7 +139,7 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
                             StandSkin skin = new StandSkin(skinId, standTypeId, color, partName);
                             skinsMap.put(skinId, skin);
                             
-                            
+                            skin.resourcePrepare = new SkinResourcePrepare();
                             
                             // stand models
                             Collection<ResourceLocation> modelResources = listResources(resourceManager, skinId, standTypeId, 
@@ -151,9 +154,7 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
                                         Reader modelReader = new BufferedReader(new InputStreamReader(modelInputStream, StandardCharsets.UTF_8));
                                         ) {
                                     JsonElement json = PARSER.parse(modelReader);
-                                    StandModelOverrides.createModel(modelResLoc, json).ifPresent(model -> {
-                                        skin.standModels.cacheValue(model.getKey(), model.getValue());
-                                    });
+                                    skin.resourcePrepare.prepareCustomModelData(modelResLoc, json);
                                 }
                             }
                         }
@@ -180,6 +181,78 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
         profiler.endTick();
         return skinsMap;
     }
+    
+    public static class SkinResourcePrepare {
+        List<Pair<ResourceLocation, JsonElement>> customModels;
+        
+        void prepareCustomModelData(ResourceLocation modelResLoc, JsonElement modelJson) {
+            if (customModels == null) {
+                customModels = new ArrayList<>();
+            }
+            customModels.add(Pair.of(modelResLoc, modelJson));
+        }
+        
+        void apply(StandSkin skin) {
+            if (customModels != null) {
+                for (Pair<ResourceLocation, JsonElement> customModelData : customModels) {
+                    ResourceLocation modelResLoc = customModelData.getLeft();
+                    JsonElement modelJson = customModelData.getRight();
+                    StandModelOverrides.createModelFromJson(modelResLoc, modelJson).ifPresent(model -> {
+                        skin.standModels.cacheValue(model.getKey(), model.getValue());
+                    });
+                }
+            }
+        }
+    }
+    
+    @Override
+    protected void apply(Map<ResourceLocation, StandSkin> skinsMap, IResourceManager resourceManager, IProfiler profiler) {
+        JojoCustomRegistries.STANDS.getRegistry().getValues().forEach(standType -> {
+            ResourceLocation id = standType.getRegistryName();
+            skinsMap.computeIfAbsent(id, s -> new StandSkin(id, id, 
+                    standType.getColor(), standType.getPartName()));
+        });
+        
+        
+        
+        this.skins = skinsMap;
+        this.skinsByStand = skinsMap.entrySet().stream()
+                .map(Map.Entry::getValue)
+                .collect(Collectors.groupingBy(entry -> entry.standTypeId, 
+                        toSortedList(Comparator.comparing(skin -> skin.resLoc, SKINS_ID_ORDER))));
+        
+        for (StandSkin skin : skinsMap.values()) {
+            if (skin.resourcePrepare != null) {
+                skin.resourcePrepare.apply(skin);
+                skin.resourcePrepare = null;
+            }
+        }
+        
+        
+//        pObject.apply(this.registry, this.soundEngine);
+//
+//        for(ResourceLocation resourcelocation : this.registry.keySet()) {
+//            SoundEventAccessor soundeventaccessor = this.registry.get(resourcelocation);
+//            if (soundeventaccessor.getSubtitle() instanceof TranslationTextComponent) {
+//                String s = ((TranslationTextComponent)soundeventaccessor.getSubtitle()).getKey();
+//                if (!I18n.exists(s)) {
+//                    LOGGER.debug("Missing subtitle {} for event: {}", s, resourcelocation);
+//                }
+//            }
+//        }
+//
+//        if (LOGGER.isDebugEnabled()) {
+//            for(ResourceLocation resourcelocation1 : this.registry.keySet()) {
+//                if (!Registry.SOUND_EVENT.containsKey(resourcelocation1)) {
+//                    LOGGER.debug("Not having sound event for: {}", (Object)resourcelocation1);
+//                }
+//            }
+//        }
+//
+//        this.soundEngine.reload();
+    }
+    
+    
     
     private Collection<ResourceLocation> listResources(IResourceManager resourceManager, 
             ResourceLocation skinId, ResourceLocation standTypeId, String folderName, Predicate<String> fileNameFilter) {
@@ -239,43 +312,6 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
         }
         
         return null;
-    }
-
-    @Override
-    protected void apply(Map<ResourceLocation, StandSkin> skinsMap, IResourceManager resourceManager, IProfiler profiler) {
-        JojoCustomRegistries.STANDS.getRegistry().getValues().forEach(standType -> {
-            ResourceLocation id = standType.getRegistryName();
-            skinsMap.computeIfAbsent(id, s -> new StandSkin(id, id, 
-                    standType.getColor(), standType.getPartName()));
-        });
-        this.skins = skinsMap;
-        this.skinsByStand = skinsMap.entrySet().stream()
-                .map(Map.Entry::getValue)
-                .collect(Collectors.groupingBy(entry -> entry.standTypeId, 
-                        toSortedList(Comparator.comparing(skin -> skin.resLoc, SKINS_ID_ORDER))));
-        
-        
-//        pObject.apply(this.registry, this.soundEngine);
-//
-//        for(ResourceLocation resourcelocation : this.registry.keySet()) {
-//            SoundEventAccessor soundeventaccessor = this.registry.get(resourcelocation);
-//            if (soundeventaccessor.getSubtitle() instanceof TranslationTextComponent) {
-//                String s = ((TranslationTextComponent)soundeventaccessor.getSubtitle()).getKey();
-//                if (!I18n.exists(s)) {
-//                    LOGGER.debug("Missing subtitle {} for event: {}", s, resourcelocation);
-//                }
-//            }
-//        }
-//
-//        if (LOGGER.isDebugEnabled()) {
-//            for(ResourceLocation resourcelocation1 : this.registry.keySet()) {
-//                if (!Registry.SOUND_EVENT.containsKey(resourcelocation1)) {
-//                    LOGGER.debug("Not having sound event for: {}", (Object)resourcelocation1);
-//                }
-//            }
-//        }
-//
-//        this.soundEngine.reload();
     }
     
     private static <T> Collector<T, ?, List<T>> toSortedList(Comparator<? super T> c) {

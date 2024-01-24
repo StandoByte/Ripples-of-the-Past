@@ -40,16 +40,23 @@ public abstract class StandModelLayerRenderer<T extends StandEntity, M extends S
         }
     }
 
-    public M getLayerModel() {
+    public M getLayerModel(T entity) {
+        return getLayerModel(entity.getStandSkin());
+    }
+
+    public M getLayerModel(Optional<ResourceLocation> standSkin) {
         if (useParentModel) {
-            return getParentModel();
+            return entityRenderer.getModel(standSkin);
         }
-        if (model != null) {
-            return CustomResources.getStandModelOverrides().overrideModel(model);
+        if (this.model != null) {
+            M model = CustomResources.getStandModelOverrides().overrideModel(this.model);
+            M skinModel = StandSkinsManager.getInstance().getStandSkin(standSkin).map(
+                    skin -> (M) skin.standModels.getOrDefault(model.getModelId(), model)).orElse(model);
+            return skinModel;
         }
         return null;
     }
-
+    
     public boolean shouldRender(T entity, Optional<ResourceLocation> standSkin) {
         return true;
     }
@@ -59,7 +66,7 @@ public abstract class StandModelLayerRenderer<T extends StandEntity, M extends S
     }
     
     public RenderType getRenderType(T entity) {
-        return entityRenderer.getRenderType(entity, getLayerModel(), getLayerTexture(entity.getStandSkin()));
+        return entityRenderer.getRenderType(entity, getLayerModel(Optional.empty()), getLayerTexture(entity.getStandSkin()));
     }
     
     public ResourceLocation getBaseTexture() {
@@ -78,9 +85,12 @@ public abstract class StandModelLayerRenderer<T extends StandEntity, M extends S
         if (shouldRender(entity, entity.getStandSkin())) {
             RenderType renderType = getRenderType(entity);
             if (renderType != null) {
+                M layerModel = getLayerModel(entity);
+                M parentModel = entityRenderer.getModel(entity);
+                layerModel.idleLoopTickStamp = parentModel.idleLoopTickStamp;
                 entityRenderer.renderLayer(matrixStack, buffer.getBuffer(renderType), getPackedLight(packedLight), 
                         entity, walkAnimPos, walkAnimSpeed, partialTick, 
-                        ticks, headYRotation, headXRotation, getLayerModel());
+                        ticks, headYRotation, headXRotation, layerModel);
             }
         }
     }
