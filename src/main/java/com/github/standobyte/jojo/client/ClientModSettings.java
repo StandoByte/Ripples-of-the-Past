@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.HudNamesRender;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.PositionConfig;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
 import com.google.gson.Gson;
@@ -46,21 +47,27 @@ public class ClientModSettings {
     
     
     public void load() {
-        if (!this.optionsFile.exists()) {
+        boolean fromOldPath = BETA_LEGACY_PATH.exists();
+        File path = fromOldPath ? BETA_LEGACY_PATH : optionsFile;
+        if (!path.exists()) {
             return;
         }
         
-        try (BufferedReader reader = Files.newReader(optionsFile, Charsets.UTF_8)) {
+        try (BufferedReader reader = Files.newReader(path, Charsets.UTF_8)) {
             Settings deserialized = gson.fromJson(reader, settings.getClass());
             this.settings = deserialized;
         }
         catch (Exception exception) {
             JojoMod.getLogger().error("Failed to load mod client settings", (Throwable) exception);
         }
+        
+        if (fromOldPath) {
+            BETA_LEGACY_PATH.delete();
+        }
     }
     
     public void save() {
-        try (BufferedWriter writer = Files.newWriter(optionsFile, Charsets.UTF_8)) {
+        try (BufferedWriter writer = GeneralUtil.newWriterMkDir(optionsFile, Charsets.UTF_8)) {
             gson.toJson(settings, writer);
         }
         catch (Exception exception) {
@@ -73,6 +80,7 @@ public class ClientModSettings {
     private static ClientModSettings instance;
     private final Minecraft mc;
     private final File optionsFile;
+    private final File BETA_LEGACY_PATH; // TODO remove in v0.2.3
     private final Gson gson;
     private Settings settings = new Settings();
     
@@ -85,6 +93,7 @@ public class ClientModSettings {
     private ClientModSettings(Minecraft mc, File optionsFile) {
         this.mc = mc;
         this.optionsFile = optionsFile;
+        BETA_LEGACY_PATH = new File(mc.gameDirectory, "jojo_rotp_settings.json");
         this.gson = new GsonBuilder().setPrettyPrinting().create();
         load();
     }
