@@ -220,16 +220,25 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
             return Integer.MAX_VALUE;
         }
         if (standPower.getStandManifestation() instanceof StandEntity) {
-            return StandStatFormulas.getBarrageMaxDuration(((StandEntity) standPower.getStandManifestation()).getDurability());
+            StandEntity standEntity = (StandEntity) standPower.getStandManifestation();
+            return StandStatFormulas.getBarrageMaxDuration(standEntity.getDurability());
         }
         return 20;
     }
     
     @Override
+    public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
+        return standEntity.isArmsOnlyMode() ? 0 : StandStatFormulas.getBarrageRecovery(standEntity.getAttackSpeed());
+    }
+    
+    @Override
     public boolean isFreeRecovery(IStandPower standPower, StandEntity standEntity) {
-//        LivingEntity user = standPower.getUser();
-//        return user != null && user.hasEffect(ModStatusEffects.RESOLVE.get());
-        return true;
+        if (standEntity.barrageClashOpponent().isPresent()) {
+            return true;
+        }
+        
+        LivingEntity user = standPower.getUser();
+        return user != null && user.hasEffect(ModStatusEffects.RESOLVE.get());
     }
     
     
@@ -242,7 +251,6 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
             super();
             standPose(StandPose.BARRAGE)
             .standAutoSummonMode(AutoSummonMode.ARMS).holdType().staminaCostTick(4F)
-            .standRecoveryTicks(5)
             .standUserWalkSpeed(0.15F).standOffsetFront()
             .partsRequired(StandPart.ARMS);
         }
@@ -274,7 +282,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
             this
             .damage(StandStatFormulas.getBarrageHitDamage(stand.getAttackDamage(), stand.getPrecision()))
             .addFinisher(0.005F)
-            .reduceKnockback((float) stand.getAttackDamage() * 0.0075F);
+            .reduceKnockback(target instanceof StandEntity ? 0 : (float) stand.getAttackDamage() * 0.0075F);
         }
         
         public BarrageEntityPunch barrageHits(StandEntity stand, int hits) {

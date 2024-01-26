@@ -239,8 +239,8 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
                 preTaskInit(world, power, stand, target);
                 if (!world.isClientSide()) {
                     setAction(power, stand, 
-                        !holdOnly(power) ? getHoldDurationToFire(power) : getHoldDurationMax(power), 
-                        !holdOnly(power) ? Phase.BUTTON_HOLD : Phase.PERFORM, 
+                        holdOnly(power) || continueHolding  ? Integer.MAX_VALUE : getHoldDurationToFire(power), 
+                        holdOnly(power) && !continueHolding ? Phase.PERFORM : Phase.BUTTON_HOLD, 
                         target);
                 }
             });
@@ -496,7 +496,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     }
     
     public float getUserWalkSpeed(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
-        return task.getPhase() == Phase.RECOVERY && isFreeRecovery(standPower, standEntity) ? 1F : userWalkSpeed;
+        return task.getPhase() == Phase.RECOVERY ? 1F : userWalkSpeed;
     }
     
     public StandPose getStandPose(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {

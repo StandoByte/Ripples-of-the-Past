@@ -215,7 +215,7 @@ public class ClientSetup {
         ArmorModelRegistry.registerArmorModel(BreathControlMaskModel::new, ModItems.BREATH_CONTROL_MASK.get());
         ArmorModelRegistry.registerArmorModel(SatiporojaScarfArmorModel::new, ModItems.SATIPOROJA_SCARF.get());
         
-        ClientModSettings.init(mc, new File(mc.gameDirectory, "jojo_rotp_settings.json"));
+        ClientModSettings.init(mc, new File(mc.gameDirectory, "config/jojo_rotp/client_settings.json"));
         ActionsControlScheme.initSaveFile(new File(mc.gameDirectory, "jojo_rotp_controls.json"));
 
         event.enqueueWork(() -> {
