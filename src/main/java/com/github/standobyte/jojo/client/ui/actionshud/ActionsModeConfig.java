@@ -9,10 +9,10 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.InputHandler.ActionKey;
-import com.github.standobyte.jojo.client.controls.ActionsControlScheme;
+import com.github.standobyte.jojo.client.controls.ControlScheme;
+import com.github.standobyte.jojo.client.controls.HudControlSettings;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
-import com.github.standobyte.jojo.power.layout.ActionsLayout;
 
 import net.minecraft.util.Util;
 
@@ -45,7 +45,7 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
         return power;
     }
     
-    int getSelectedSlot(ActionsLayout.Hotbar hotbar) {
+    int getSelectedSlot(ControlScheme.Hotbar hotbar) {
         switch (hotbar) {
         case LEFT_CLICK:
             return selectedAttack;
@@ -55,10 +55,13 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
         return -1;
     }
     
-    void setSelectedSlot(ActionsLayout.Hotbar hotbar, int slot, ActionTarget target) {
+    void setSelectedSlot(ControlScheme.Hotbar hotbar, int slot, ActionTarget target) {
         if (slot > -1) {
-            List<Action<P>> actions = ActionsControlScheme.getHotbarsLayout(power).getHotbar(hotbar).getEnabled();
-            if (slot >= actions.size() || actions.get(slot).getVisibleAction(power, target) == null) {
+            List<Action<?>> actions = HudControlSettings.getInstance()
+                    .getControlScheme(powerClassification)
+                    .getActionsHotbar(hotbar)
+                    .getEnabledView();
+            if (slot >= actions.size() || ((Action<P>) actions.get(slot)).getVisibleAction(power, target) == null) {
                 slot = -1;
             }
         }
@@ -78,13 +81,16 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
     }
     
     @Nullable
-    Action<P> getSelectedAction(ActionsLayout.Hotbar hotbar, boolean shiftVariation, ActionTarget target) {
+    Action<P> getSelectedAction(ControlScheme.Hotbar hotbar, boolean shiftVariation, ActionTarget target) {
         int slot = getSelectedSlot(hotbar);
         if (slot == -1) {
             return null;
         }
         P power = getPower();
-        Action<P> action = ActionsControlScheme.getHotbarsLayout(power).getBaseActionInSlot(hotbar, slot);
+        Action<P> action = (Action<P>) HudControlSettings.getInstance()
+                .getControlScheme(powerClassification)
+                .getActionsHotbar(hotbar)
+                .getBaseActionInSlot(slot);
         action = ActionsOverlayGui.resolveVisibleActionInSlot(
                 action, shiftVariation, power, ActionsOverlayGui.getInstance().getMouseTarget());
         if (action == null) {

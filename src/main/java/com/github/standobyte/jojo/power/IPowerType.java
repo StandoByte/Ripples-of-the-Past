@@ -2,9 +2,9 @@ package com.github.standobyte.jojo.power;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.power.bowcharge.IBowChargeEffect;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
-import com.github.standobyte.jojo.power.layout.ActionsLayout;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -25,7 +25,7 @@ public interface IPowerType<P extends IPower<P, T>, T extends IPowerType<P, T>> 
         return vanillaHitResult;
     }
     
-    ActionsLayout<P> createDefaultLayout();
+    ControlScheme.SaveState clCreateDefaultLayout();
     
     @Nullable default IBowChargeEffect<P, T> getBowChargeEffect() {
         return null;

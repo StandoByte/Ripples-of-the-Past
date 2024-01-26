@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.function.UnaryOperator;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.client.controls.ActionsControlScheme;
+import com.github.standobyte.jojo.client.controls.HudControlSettings;
 import com.github.standobyte.jojo.client.particle.AirStreamParticle;
 import com.github.standobyte.jojo.client.particle.BloodParticle;
 import com.github.standobyte.jojo.client.particle.CDRestorationParticle;
@@ -216,7 +216,7 @@ public class ClientSetup {
         ArmorModelRegistry.registerArmorModel(SatiporojaScarfArmorModel::new, ModItems.SATIPOROJA_SCARF.get());
         
         ClientModSettings.init(mc, new File(mc.gameDirectory, "config/jojo_rotp/client_settings.json"));
-        ActionsControlScheme.initSaveFile(new File(mc.gameDirectory, "jojo_rotp_controls.json"));
+        HudControlSettings.init(new File(mc.gameDirectory, "config/jojo_rotp/controls/"));
 
         event.enqueueWork(() -> {
             ItemModelsProperties.register(ModItems.METEORIC_SCRAP.get(), new ResourceLocation(JojoMod.MOD_ID, "icon"), (itemStack, clientWorld, livingEntity) -> {

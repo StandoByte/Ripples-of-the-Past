@@ -19,7 +19,6 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterHamonTechnique;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
-import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.block.BedBlock;
@@ -112,7 +111,7 @@ public class VampirismData extends TypeSpecificData {
     
     private void addHamonSuicideAbility() {
 //        if (vampireHamonUser) {
-//            power.clGetActionsHudLayout().addExtraAction(ModVampirismActions.VAMPIRISM_HAMON_SUICIDE.get(), ActionsLayout.Hotbar.RIGHT_CLICK);
+//            power.clGetActionsHudLayout().addExtraAction(ModVampirismActions.VAMPIRISM_HAMON_SUICIDE.get(), ControlScheme.Hotbar.RIGHT_CLICK);
 //        }
     }
 

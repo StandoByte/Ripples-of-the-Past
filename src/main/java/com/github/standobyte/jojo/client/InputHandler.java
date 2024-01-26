@@ -26,7 +26,9 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
-import com.github.standobyte.jojo.client.controls.ActionsControlScheme;
+import com.github.standobyte.jojo.client.controls.ActionKeybindEntry;
+import com.github.standobyte.jojo.client.controls.ControlScheme;
+import com.github.standobyte.jojo.client.controls.HudControlSettings;
 import com.github.standobyte.jojo.client.standskin.StandSkin;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
@@ -57,7 +59,6 @@ import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
-import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -96,6 +97,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 
 public class InputHandler {
+    public static void toDoDeleteMe() {}
     private static InputHandler instance = null;
 
     private Minecraft mc;
@@ -181,14 +183,14 @@ public class InputHandler {
         }
 
         if (actionsOverlay.isActive() && !mc.player.isSpectator()) {
-            boolean scrollAttack = controlsAreOnHotbar(ActionsLayout.Hotbar.LEFT_CLICK);
-            boolean scrollAbility = controlsAreOnHotbar(ActionsLayout.Hotbar.RIGHT_CLICK);
+            boolean scrollAttack = controlsAreOnHotbar(ControlScheme.Hotbar.LEFT_CLICK);
+            boolean scrollAbility = controlsAreOnHotbar(ControlScheme.Hotbar.RIGHT_CLICK);
             if (scrollAttack || scrollAbility) {
                 if (scrollAttack) {
-                    actionsOverlay.scrollAction(ActionsLayout.Hotbar.LEFT_CLICK, event.getScrollDelta() > 0.0D);
+                    actionsOverlay.scrollAction(ControlScheme.Hotbar.LEFT_CLICK, event.getScrollDelta() > 0.0D);
                 }
                 if (scrollAbility) {
-                    actionsOverlay.scrollAction(ActionsLayout.Hotbar.RIGHT_CLICK, event.getScrollDelta() > 0.0D);
+                    actionsOverlay.scrollAction(ControlScheme.Hotbar.RIGHT_CLICK, event.getScrollDelta() > 0.0D);
                 }
                 event.setCanceled(true);
             }
@@ -205,18 +207,18 @@ public class InputHandler {
         
         if (event.phase == TickEvent.Phase.START) {
             if (actionsOverlay.isActive()) {
-                boolean chooseAttack = controlsAreOnHotbar(ActionsLayout.Hotbar.LEFT_CLICK);
-                boolean chooseAbility = controlsAreOnHotbar(ActionsLayout.Hotbar.RIGHT_CLICK);
+                boolean chooseAttack = controlsAreOnHotbar(ControlScheme.Hotbar.LEFT_CLICK);
+                boolean chooseAbility = controlsAreOnHotbar(ControlScheme.Hotbar.RIGHT_CLICK);
                 actionsOverlay.setHotbarButtonsDows(chooseAttack, chooseAbility);
                 actionsOverlay.setHotbarsEnabled(!areHotbarsDisabled());
                 if (chooseAttack || chooseAbility) {
                     for (int i = 0; i < 9; i++) {
                         if (mc.options.keyHotbarSlots[i].consumeClick()) {
                             if (chooseAttack) {
-                                actionsOverlay.selectAction(ActionsLayout.Hotbar.LEFT_CLICK, i);
+                                actionsOverlay.selectAction(ControlScheme.Hotbar.LEFT_CLICK, i);
                             }
                             if (chooseAbility) {
-                                actionsOverlay.selectAction(ActionsLayout.Hotbar.RIGHT_CLICK, i);
+                                actionsOverlay.selectAction(ControlScheme.Hotbar.RIGHT_CLICK, i);
                             }
                         }
                     }
@@ -225,33 +227,33 @@ public class InputHandler {
 //                    if (attackSlots != null) {
 //                        for (int i = 0; i < 9; i++) {
 //                            if (attackSlots[i].consumeClick()) {
-//                                actionsOverlay.selectAction(ActionsLayout.Hotbar.LEFT_CLICK, i);
+//                                actionsOverlay.selectAction(ControlScheme.Hotbar.LEFT_CLICK, i);
 //                            }
 //                        }
 //                    }
 //                    if (abilitySlots != null) {
 //                        for (int i = 0; i < 9; i++) {
 //                            if (abilitySlots[i].consumeClick()) {
-//                                actionsOverlay.selectAction(ActionsLayout.Hotbar.RIGHT_CLICK, i);
+//                                actionsOverlay.selectAction(ControlScheme.Hotbar.RIGHT_CLICK, i);
 //                            }
 //                        }
 //                    }
 //                }
                 
                 if (scrollAttack.consumeClick()) {
-                    actionsOverlay.scrollAction(ActionsLayout.Hotbar.LEFT_CLICK, mc.player.isShiftKeyDown());
+                    actionsOverlay.scrollAction(ControlScheme.Hotbar.LEFT_CLICK, mc.player.isShiftKeyDown());
                 }
                 
                 if (scrollAbility.consumeClick()) {
-                    actionsOverlay.scrollAction(ActionsLayout.Hotbar.RIGHT_CLICK, mc.player.isShiftKeyDown());
+                    actionsOverlay.scrollAction(ControlScheme.Hotbar.RIGHT_CLICK, mc.player.isShiftKeyDown());
                 }
                 
                 if (ClientModSettings.getSettingsReadOnly().toggleLmbHotbar && attackHotbar.consumeClick()) {
-                    switchToggledHotbarControls(ActionsLayout.Hotbar.LEFT_CLICK);
+                    switchToggledHotbarControls(ControlScheme.Hotbar.LEFT_CLICK);
                 }
 
                 if (ClientModSettings.getSettingsReadOnly().toggleRmbHotbar && abilityHotbar.consumeClick()) {
-                    switchToggledHotbarControls(ActionsLayout.Hotbar.RIGHT_CLICK);
+                    switchToggledHotbarControls(ControlScheme.Hotbar.RIGHT_CLICK);
                 }
                 
                 if (ClientModSettings.getSettingsReadOnly().toggleDisableHotbars && disableHotbars.consumeClick()) {
@@ -367,7 +369,7 @@ public class InputHandler {
     }
     
     private <P extends IPower<P, T>, T extends IPowerType<P, T>> void tickCustomKeybinds(P power, boolean isHudOpen) {
-        for (ActionsControlScheme.KeybindEntry keybindEntry : ActionsControlScheme.getCurrentCtrlScheme(power.getPowerClassification()).getEntriesView()) {
+        for (ActionKeybindEntry keybindEntry : HudControlSettings.getInstance().getControlScheme(power.getPowerClassification()).getCustomKeybinds()) {
             KeyBinding keybind = keybindEntry.keybind;
             boolean needsOpenHud = true;
             
@@ -396,11 +398,11 @@ public class InputHandler {
     }
     
     
-    public void switchToggledHotbarControls(ActionsLayout.Hotbar hotbar) {
+    public void switchToggledHotbarControls(ControlScheme.Hotbar hotbar) {
         setToggledHotbarControls(hotbar, !areControlsLockedForHotbar(hotbar));
     }
     
-    public void setToggledHotbarControls(ActionsLayout.Hotbar hotbar, boolean value) {
+    public void setToggledHotbarControls(ControlScheme.Hotbar hotbar, boolean value) {
         switch (hotbar) {
         case LEFT_CLICK:
             toggledAttacksHotbar = value;
@@ -415,7 +417,7 @@ public class InputHandler {
     
     private boolean toggledAttacksHotbar;
     private boolean toggledAbilitiesHotbar;
-    public boolean areControlsLockedForHotbar(ActionsLayout.Hotbar hotbar) {
+    public boolean areControlsLockedForHotbar(ControlScheme.Hotbar hotbar) {
         if (hotbar == null) return false;
         switch (hotbar) {
         case LEFT_CLICK:
@@ -451,7 +453,7 @@ public class InputHandler {
         }
     }
     
-    private boolean controlsAreOnHotbar(ActionsLayout.Hotbar hotbar) {
+    private boolean controlsAreOnHotbar(ControlScheme.Hotbar hotbar) {
         updateHotbarsControlsState();
         HotbarInterceptingBy askedHotbar;
         HotbarInterceptingBy otherHotbar;
@@ -527,25 +529,25 @@ public class InputHandler {
     private final Map<IPower<?, ?>, KeyBinding> heldKeys = new HashMap<>();
     
     public enum ActionKey {
-        ATTACK(ActionsLayout.Hotbar.LEFT_CLICK) {
+        ATTACK(ControlScheme.Hotbar.LEFT_CLICK) {
             @Override
             protected KeyBinding getKey(Minecraft mc, InputHandler modInput) { return mc.options.keyAttack; }
         },
-        ABILITY(ActionsLayout.Hotbar.RIGHT_CLICK) {
+        ABILITY(ControlScheme.Hotbar.RIGHT_CLICK) {
             @Override
             protected KeyBinding getKey(Minecraft mc, InputHandler modInput) { return mc.options.keyUse; }
         };
         
-        private final ActionsLayout.Hotbar hotbar;
+        private final ControlScheme.Hotbar hotbar;
         
-        private ActionKey(ActionsLayout.Hotbar hotbar) {
+        private ActionKey(ControlScheme.Hotbar hotbar) {
             this.hotbar = hotbar;
         }
         
         protected abstract KeyBinding getKey(Minecraft mc, InputHandler modInput);
         
         @Nullable
-        public ActionsLayout.Hotbar getHotbar() {
+        public ControlScheme.Hotbar getHotbar() {
             return hotbar;
         }
     }
@@ -681,7 +683,7 @@ public class InputHandler {
 
         P power = (P) actionsOverlay.getCurrentPower();
 
-        ActionsLayout.Hotbar hotbar = key.getHotbar();
+        ControlScheme.Hotbar hotbar = key.getHotbar();
         boolean actionClick = false;
         if (power != null) {
             actionClick = !actionsOverlay.noActionSelected(hotbar);

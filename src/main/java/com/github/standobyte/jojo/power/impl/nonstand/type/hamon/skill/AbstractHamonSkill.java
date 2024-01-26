@@ -9,7 +9,6 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.non_stand.HamonAction;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
-import com.github.standobyte.jojo.power.layout.ActionsLayout;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
@@ -90,26 +89,19 @@ public abstract class AbstractHamonSkill extends ForgeRegistryEntry<AbstractHamo
     
     
     public enum RewardType {
-        ATTACK("attack", ActionsLayout.Hotbar.LEFT_CLICK),
-        ABILITY("ability", ActionsLayout.Hotbar.RIGHT_CLICK),
-        PASSIVE("passive", null),
-        ITEM("item", null);
+        ATTACK("attack"),
+        ABILITY("ability"),
+        PASSIVE("passive"),
+        ITEM("item");
         
         private final ITextComponent name;
-        private final ActionsLayout.Hotbar hotbar;
         
-        private RewardType(String key, ActionsLayout.Hotbar hotbar) {
+        private RewardType(String key) {
             this.name = new TranslationTextComponent("hamon.skill_type." + key).withStyle(TextFormatting.ITALIC);
-            this.hotbar = hotbar;
         }
         
         public ITextComponent getName() {
             return name;
-        }
-        
-        @Nullable
-        public ActionsLayout.Hotbar getDefaultHotbar() {
-            return hotbar;
         }
     }
     

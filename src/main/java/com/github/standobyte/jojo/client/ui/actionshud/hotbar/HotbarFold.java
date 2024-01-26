@@ -2,11 +2,11 @@ package com.github.standobyte.jojo.client.ui.actionshud.hotbar;
 
 import java.util.function.Consumer;
 
+import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.Alignment;
-import com.github.standobyte.jojo.power.layout.ActionHotbarLayout;
 
 public class HotbarFold {
-    private static final HotbarFold[] NO_FOLD = new HotbarFold[ActionHotbarLayout.ARBITRARY_ACTIONS_LIMIT];
+    private static final HotbarFold[] NO_FOLD = new HotbarFold[ControlScheme.ARBITRARY_MAX_HOTBAR_LENGTH];
     
     private final Slot[] slotsInRenderOrder;
     private final Slot[] slotsInIndexOrder;

@@ -16,6 +16,7 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.command.configpack.StandStatsConfig;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
@@ -23,7 +24,6 @@ import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
-import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
 import com.github.standobyte.jojo.util.mc.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -245,17 +245,21 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         getStats().onNewDay(user, power);
     }
     
-    @Override
-    public ActionsLayout<IStandPower> createDefaultLayout() {
-        return new ActionsLayout<>(leftClickHotbar, rightClickHotbar, defaultQuickAccess);
-    }
-    
-    public StandAction[] getDefaultHotbar(ActionsLayout.Hotbar hotbar) {
+    @Deprecated
+    public StandAction[] getDefaultHotbar(ControlScheme.Hotbar hotbar) {
         switch (hotbar) {
         case LEFT_CLICK: return leftClickHotbar;
         case RIGHT_CLICK: return rightClickHotbar;
         default: throw new IllegalArgumentException();
         }
+    }
+    
+    @Override
+    public ControlScheme.SaveState clCreateDefaultLayout() {
+        return ControlScheme.SaveState.defaultFromPowerType(
+                leftClickHotbar, 
+                rightClickHotbar, 
+                ControlScheme.SaveState.DefaultKey.mmb(defaultQuickAccess));
     }
     
     public Iterable<StandAction> getAllUnlockableActions() {

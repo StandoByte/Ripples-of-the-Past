@@ -5,13 +5,13 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.TypeSpecificData;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
-import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.util.ResourceLocation;
@@ -40,8 +40,11 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
     public void afterClear(INonStandPower power) {}
     
     @Override
-    public ActionsLayout<INonStandPower> createDefaultLayout() {
-        return new ActionsLayout<>(attacks, abilities, defaultQuickAccess);
+    public ControlScheme.SaveState clCreateDefaultLayout() {
+        return ControlScheme.SaveState.defaultFromPowerType(
+                attacks, 
+                abilities, 
+                ControlScheme.SaveState.DefaultKey.mmb(defaultQuickAccess));
     }
 
     public float getMaxEnergy(INonStandPower power) {

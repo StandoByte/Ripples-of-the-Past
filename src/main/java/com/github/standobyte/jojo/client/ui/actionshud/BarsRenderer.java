@@ -11,6 +11,7 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.ClientTicking;
 import com.github.standobyte.jojo.client.ClientTicking.ITicking;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.Alignment;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.BarsOrientation;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
@@ -19,7 +20,6 @@ import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
-import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -137,7 +137,7 @@ public abstract class BarsRenderer {
     }
     
     protected <P extends IPower<P, ?>> float getActionCost(ActionsModeConfig<P> mode, 
-            ActionsLayout.Hotbar hotbar, LivingEntity user, boolean shift, ActionTarget target) {
+            ControlScheme.Hotbar hotbar, LivingEntity user, boolean shift, ActionTarget target) {
         Action<P> action = mode.getSelectedAction(hotbar, shift, target);
         
         if (action != null) {
