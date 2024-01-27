@@ -255,11 +255,11 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     @Override
-    public ControlScheme.SaveState clCreateDefaultLayout() {
-        return ControlScheme.SaveState.defaultFromPowerType(
+    public ControlScheme clCreateDefaultLayout() {
+        return ControlScheme.defaultFromPowerType(
                 leftClickHotbar, 
                 rightClickHotbar, 
-                ControlScheme.SaveState.DefaultKey.mmb(defaultQuickAccess));
+                ControlScheme.DefaultKey.mmb(defaultQuickAccess));
     }
     
     public Iterable<StandAction> getAllUnlockableActions() {

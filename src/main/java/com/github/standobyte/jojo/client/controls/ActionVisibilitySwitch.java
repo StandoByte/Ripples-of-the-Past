@@ -1,39 +1,47 @@
 package com.github.standobyte.jojo.client.controls;
 
-import javax.annotation.Nullable;
-
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 
 import net.minecraft.util.ResourceLocation;
 
 public class ActionVisibilitySwitch {
-    final Action<?> action;
-    boolean isVisible;
+    private final ActionsHotbar parentHotbar;
+    private final ResourceLocation actionId;
+    private Action<?> action;
+    private boolean isEnabled;
     
-    private ActionVisibilitySwitch(Action<?> action, boolean isVisible) {
-        this.action = action;
-        this.isVisible = isVisible;
+    ActionVisibilitySwitch(ActionsHotbar parentHotbar, ResourceLocation actionId, boolean isEnabled) {
+        this.parentHotbar = parentHotbar;
+        this.actionId = actionId;
+        this.isEnabled = isEnabled;
     }
     
+    public void init() {
+        this.action = JojoCustomRegistries.ACTIONS.fromId(this.actionId);
+    }
     
+    boolean isValid() {
+        return action != null;
+    }
     
-    static class SaveInfo {
-        public ResourceLocation action;
-        public boolean isVisible;
-        
-        public SaveInfo(ResourceLocation action, boolean isVisible) {
-            this.action = action;
-            this.isVisible = isVisible;
-        }
-
-        @Nullable
-        ActionVisibilitySwitch createSwitch() {
-            Action<?> action = JojoCustomRegistries.ACTIONS.fromId(this.action);
-            if (action != null) {
-                return new ActionVisibilitySwitch(action, isVisible);
-            }
-            return null;
+    public Action<?> getAction() {
+        return action;
+    }
+    
+    public ResourceLocation getActionId() {
+        return actionId;
+    }
+    
+    public boolean isEnabled() {
+        return isEnabled;
+    }
+    
+    public void setIsEnabled(boolean isEnabled) {
+        if (this.isEnabled != isEnabled) {
+            this.isEnabled = isEnabled;
+            parentHotbar.updateCache();
         }
     }
+    
 }

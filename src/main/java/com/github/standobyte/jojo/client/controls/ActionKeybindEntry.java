@@ -2,8 +2,6 @@ package com.github.standobyte.jojo.client.controls;
 
 import java.util.concurrent.atomic.AtomicInteger;
 
-import javax.annotation.Nullable;
-
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.client.ui.actionshud.QuickAccess.QuickAccessKeyConflictContext;
@@ -13,26 +11,108 @@ import com.google.gson.JsonObject;
 
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
-import net.minecraft.client.util.InputMappings.Input;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.settings.KeyModifier;
 
 public class ActionKeybindEntry {
-    public PressActionType type;
-    public Action<?> action;
-    public KeyBinding keybind;
+    private PressActionType type;
+    private ResourceLocation actionId;
+    private KeyModifier keyModifier;
+    private InputMappings.Input keyCode;
+    
+    private Action<?> action;
+    private KeyBinding keybind;
+    
     public transient int delay;
     
-    public ActionKeybindEntry(PressActionType type, Action<?> action, KeyBinding keybind) {
+    public ActionKeybindEntry(PressActionType type, ResourceLocation actionId, String keySaveDesc) {
         this.type = type;
+        this.actionId = actionId;
+        if (keySaveDesc.indexOf(':') != -1) {
+            String[] pts = keySaveDesc.split(":");
+            keyModifier = KeyModifier.valueFromString(pts[1]);
+            keyCode = InputMappings.getKey(pts[0]);
+        } else {
+            keyModifier = KeyModifier.NONE;
+            keyCode = InputMappings.getKey(keySaveDesc);
+        }
+    }
+    
+    public ActionKeybindEntry(PressActionType type, Action<?> action, InputMappings.Type inputType, int key) {
+        this.type = type;
+        this.actionId = action.getRegistryName();
         this.action = action;
-        this.keybind = keybind;
+        this.keyModifier = KeyModifier.NONE;
+        this.keyCode = inputType.getOrCreate(key);
+        this.keybind = createNewKey(keyModifier, keyCode);
+    }
+    
+    void init() {
+        Action<?> action = JojoCustomRegistries.ACTIONS.fromId(this.actionId);
+        if (action != null) {
+            KeyBinding keyBinding = createNewKey(keyModifier, keyCode);
+            this.action = action;
+            this.keybind = keyBinding;
+        }
+        else {
+            this.action = null;
+            this.keybind = null;
+        }
+    }
+    
+    boolean isValid() {
+        return action != null && keybind != null;
+    }
+    
+    public void setAction(Action<?> action) {
+        this.action = action;
+        this.actionId = action.getRegistryName();
+    }
+    
+    public void setKeybind(InputMappings.Type inputType, int key) {
+        this.keyModifier = KeyModifier.NONE;
+        this.keyCode = inputType.getOrCreate(key);
+        this.keybind = createNewKey(keyModifier, keyCode);
+    }
+    
+    public JsonElement toJson() {
+        JsonObject json = new JsonObject();
+        json.addProperty("type", type.name());
+        json.addProperty("action", actionId.toString());
+        json.addProperty("keybind", keyCode.getName() + (keyModifier != KeyModifier.NONE ? ":" + keyModifier : ""));
+        return json;
+    }
+    
+    public static ActionKeybindEntry fromJson(JsonElement json) {
+        JsonObject jsonObj = json.getAsJsonObject();
+        PressActionType type = Enum.valueOf(PressActionType.class, jsonObj.get("type").getAsString());
+        ResourceLocation action = new ResourceLocation(jsonObj.get("action").getAsString());
+        String keySaveDesc = jsonObj.get("keybind").getAsString();
+        return new ActionKeybindEntry(type, action, keySaveDesc);
+    }
+    
+    public Action<?> getAction() {
+        return action;
+    }
+    
+    public ResourceLocation getActionId() {
+        return actionId;
+    }
+    
+    public KeyBinding getKeybind() {
+        return keybind;
+    }
+    
+    public PressActionType getType() {
+        return type;
     }
     
     public enum PressActionType {
         SELECT,
         CLICK
     }
+    
+    
     
     private static final AtomicInteger KEY_ID = new AtomicInteger();
     static KeyBinding createNewKey(InputMappings.Type inputType, int key) {
@@ -51,64 +131,8 @@ public class ActionKeybindEntry {
         return keyBinding;
     }
     
-    static KeyBinding createNewKeyBlank() {
-        return createNewKey(InputMappings.Type.KEYSYM, -1);
-    }
+//    static KeyBinding createNewKeyBlank() {
+//        return createNewKey(InputMappings.Type.KEYSYM, -1);
+//    }
     
-    
-    
-    static class SaveInfo {
-        public PressActionType type;
-        public ResourceLocation action;
-        public KeyModifier keyModifier;
-        public InputMappings.Input keyCode;
-        
-        public SaveInfo(PressActionType type, ResourceLocation action, 
-                String keySaveDesc) {
-            this.type = type;
-            this.action = action;
-            if (keySaveDesc.indexOf(':') != -1) {
-                String[] pts = keySaveDesc.split(":");
-                keyModifier = KeyModifier.valueFromString(pts[1]);
-                keyCode = InputMappings.getKey(pts[0]);
-            } else {
-                keyModifier = KeyModifier.NONE;
-                keyCode = InputMappings.getKey(keySaveDesc);
-            }
-        }
-        
-        public SaveInfo(PressActionType type, ResourceLocation action, 
-                KeyModifier keyModifier, Input keyCode) {
-            this.type = type;
-            this.action = action;
-            this.keyModifier = keyModifier;
-            this.keyCode = keyCode;
-        }
-        
-        public JsonElement toJson() {
-            JsonObject json = new JsonObject();
-            json.addProperty("type", type.name());
-            json.addProperty("action", action.toString());
-            json.addProperty("keybind", keyCode.getName() + (keyModifier != KeyModifier.NONE ? ":" + keyModifier : ""));
-            return json;
-        }
-        
-        public static SaveInfo fromJson(JsonElement json) {
-            JsonObject jsonObj = json.getAsJsonObject();
-            PressActionType type = Enum.valueOf(PressActionType.class, jsonObj.get("type").getAsString());
-            ResourceLocation action = new ResourceLocation(jsonObj.get("action").getAsString());
-            String keySaveDesc = jsonObj.get("keybind").getAsString();
-            return new SaveInfo(type, action, keySaveDesc);
-        }
-        
-        @Nullable
-        ActionKeybindEntry createEntry() {
-            Action<?> action = JojoCustomRegistries.ACTIONS.fromId(this.action);
-            if (action != null) {
-                KeyBinding keyBinding = createNewKey(keyModifier, keyCode);
-                return new ActionKeybindEntry(type, action, keyBinding);
-            }
-            return null;
-        }
-    }
 }

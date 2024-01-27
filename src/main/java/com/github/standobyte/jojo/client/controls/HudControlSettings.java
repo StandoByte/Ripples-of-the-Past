@@ -1,17 +1,20 @@
 package com.github.standobyte.jojo.client.controls;
 
 import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.IPowerType;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 
@@ -21,11 +24,19 @@ public class HudControlSettings {
     private final File saveDir;
     private final JsonParser jsonParser = new JsonParser();
     
-    private Map<ResourceLocation, SavedPowerTypeControlsState> fullStateMap = new HashMap<>();
-    private ControlScheme standControlsCache;
-    private ControlScheme nonStandControlsCache;
+    private Map<ResourceLocation, PowerTypeControlSchemes> fullStateMap = new HashMap<>();
+    private PowerTypeControlSchemes standControlsCache;
+    private PowerTypeControlSchemes nonStandControlsCache;
+    
+    public ControlScheme getControlScheme(IPower<?, ?> power) {
+        return getControlScheme(power.getPowerClassification());
+    }
     
     public ControlScheme getControlScheme(PowerClassification power) {
+        return getCachedControls(power).getCurrentCtrlScheme();
+    }
+    
+    public PowerTypeControlSchemes getCachedControls(PowerClassification power) {
         switch (power) {
         case STAND: return standControlsCache;
         case NON_STAND: return nonStandControlsCache;
@@ -34,25 +45,25 @@ public class HudControlSettings {
     }
     
     public void cacheControlsScheme(IPower<?, ?> power) {
-        ControlScheme controlScheme;
+        PowerTypeControlSchemes controls;
         if (!power.hasPower()) {
-            controlScheme = null;
+            controls = null;
         }
         else {
             IPowerType<?, ?> powerType = power.getType();
             ResourceLocation powerTypeId = powerType.getRegistryName();
-            SavedPowerTypeControlsState saveState = fullStateMap.computeIfAbsent(powerTypeId, id -> {
-                return new SavedPowerTypeControlsState(powerType.clCreateDefaultLayout());
+            controls = fullStateMap.computeIfAbsent(powerTypeId, id -> {
+                return new PowerTypeControlSchemes(powerType.clCreateDefaultLayout());
             });
-            controlScheme = saveState.createControlScheme(power);
+            controls.update(power);
         }
         
         switch (power.getPowerClassification()) {
         case STAND:
-            this.standControlsCache = controlScheme;
+            this.standControlsCache = controls;
             break;
         case NON_STAND:
-            this.nonStandControlsCache = controlScheme;
+            this.nonStandControlsCache = controls;
             break;
         default:
             throw new IllegalStateException();
@@ -80,32 +91,22 @@ public class HudControlSettings {
     
     
     
-//    private final Gson gson = new GsonBuilder().setPrettyPrinting()
-//            .registerTypeAdapter(Action.class, Action.JsonSerialization.INSTANCE)
-//            .registerTypeAdapter(KeyBinding.class, KeyBindingJson.SERIALIZATION)
-//            .registerTypeAdapter(ResourceLocation.class, MCUtil.ResLocJson.SERIALIZATION)
-//            .create();
-    
-    void save() {
-        InputHandler.toDoDeleteMe();
-//        if (saveFile == null || !saveFile.exists()) {
-//            return;
-//        }
-//        
-//        try (BufferedWriter writer = Files.newWriter(saveFile, Charsets.UTF_8)) {
-//            JsonObject json = new JsonObject();
-//            
-//            for (Map.Entry<ResourceLocation, PowerTypeControlsEntry> powerTypeEntry : savedControlSchemes.entrySet()) {
-//                json.add(powerTypeEntry.getKey().toString(), powerTypeEntry.getValue().toJson(gson));
-//            }
-//            
-//            missingTypesData.forEach((key, value) -> json.add(key, value));
-//            
-//            gson.toJson(json, writer);
-//        }
-//        catch (Exception exception) {
-//            JojoMod.getLogger().error("Failed to save mod control settings to {}", saveFile, exception);
-//        }
+    private final Gson gson = new GsonBuilder().setPrettyPrinting()
+            .create();
+    public void saveAll() {
+        for (Map.Entry<ResourceLocation, PowerTypeControlSchemes> entry : fullStateMap.entrySet()) {
+            File powerTypeDir = new File(saveDir, entry.getKey().toString());
+            File ctrlSchemeFile = new File(powerTypeDir, "current.json");
+            try (BufferedWriter writer = GeneralUtil.newWriterMkDir(ctrlSchemeFile, Charsets.UTF_8)) {
+                JsonElement json = entry.getValue().currentControlScheme.toJson();
+                if (json.isJsonObject()) {
+                    gson.toJson(json, writer);
+                }
+            }
+            catch (Exception exception) {
+                JojoMod.getLogger().error("Failed to save mod control settings to {}", ctrlSchemeFile, exception);
+            }
+        }
     }
     
     void load() {
@@ -116,8 +117,8 @@ public class HudControlSettings {
             if (ctrlSchemeFile.exists()) {
                 try (BufferedReader reader = Files.newReader(ctrlSchemeFile, Charsets.UTF_8)) {
                     JsonElement jsonRead = jsonParser.parse(reader);
-                    ControlScheme.SaveState currentCtrlScheme = ControlScheme.SaveState.fromJson(jsonRead);
-                    SavedPowerTypeControlsState savedState = new SavedPowerTypeControlsState(currentCtrlScheme);
+                    ControlScheme currentCtrlScheme = ControlScheme.fromJson(jsonRead);
+                    PowerTypeControlSchemes savedState = new PowerTypeControlSchemes(currentCtrlScheme);
                     fullStateMap.put(powerId, savedState);
                 }
                 catch (Exception exception) {

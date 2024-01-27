@@ -369,13 +369,15 @@ public class InputHandler {
     }
     
     private <P extends IPower<P, T>, T extends IPowerType<P, T>> void tickCustomKeybinds(P power, boolean isHudOpen) {
-        for (ActionKeybindEntry keybindEntry : HudControlSettings.getInstance().getControlScheme(power.getPowerClassification()).getCustomKeybinds()) {
-            KeyBinding keybind = keybindEntry.keybind;
+        for (ActionKeybindEntry keybindEntry : HudControlSettings.getInstance()
+                .getControlScheme(power)
+                .getCustomKeybinds()) {
+            KeyBinding keybind = keybindEntry.getKeybind();
             boolean needsOpenHud = true;
             
             if (keybind.isDown() && keybindEntry.delay <= 0 && 
                     (!needsOpenHud || isHudOpen && !areHotbarsDisabled())) {
-                HudClickResult result = handleCustomKeybind(keybindEntry.action, keybind);
+                HudClickResult result = handleCustomKeybind(keybindEntry.getAction(), keybind);
                 if (result.vanillaInput == HudClickResult.Behavior.CANCEL) {
                     KeyBinding keybinding = keyBindingMap.lookupActive(keybind.getKey());
                     if (keybinding != null) {
@@ -388,7 +390,7 @@ public class InputHandler {
                 keybindEntry.delay = 4;
             }
             
-            if (!keybindEntry.keybind.isDown()) {
+            if (!keybind.isDown()) {
                 keybindEntry.delay = 0;
             }
             else if (keybindEntry.delay > 0) {

@@ -6,6 +6,7 @@ import java.util.Random;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
+import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
@@ -110,6 +111,7 @@ public class VampirismData extends TypeSpecificData {
     }
     
     private void addHamonSuicideAbility() {
+        InputHandler.toDoDeleteMe();
 //        if (vampireHamonUser) {
 //            power.clGetActionsHudLayout().addExtraAction(ModVampirismActions.VAMPIRISM_HAMON_SUICIDE.get(), ControlScheme.Hotbar.RIGHT_CLICK);
 //        }

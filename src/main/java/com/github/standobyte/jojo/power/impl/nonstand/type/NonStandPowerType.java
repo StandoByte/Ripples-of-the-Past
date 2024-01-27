@@ -40,11 +40,11 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
     public void afterClear(INonStandPower power) {}
     
     @Override
-    public ControlScheme.SaveState clCreateDefaultLayout() {
-        return ControlScheme.SaveState.defaultFromPowerType(
+    public ControlScheme clCreateDefaultLayout() {
+        return ControlScheme.defaultFromPowerType(
                 attacks, 
                 abilities, 
-                ControlScheme.SaveState.DefaultKey.mmb(defaultQuickAccess));
+                ControlScheme.DefaultKey.mmb(defaultQuickAccess));
     }
 
     public float getMaxEnergy(INonStandPower power) {

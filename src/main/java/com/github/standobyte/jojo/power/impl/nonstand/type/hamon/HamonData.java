@@ -23,6 +23,7 @@ import com.github.standobyte.jojo.action.non_stand.HamonMetalSilverOverdrive;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
@@ -1080,6 +1081,7 @@ public class HamonData extends TypeSpecificData {
     }
 
     private void addSkillAction(AbstractHamonSkill skill) {
+        InputHandler.toDoDeleteMe();
 //        if (skill.getRewardAction() != null && skill.addsActionToHUD()) {
 //            ControlScheme.Hotbar hotbar = skill.getRewardType().getDefaultHotbar();
 //            if (hotbar != null) {

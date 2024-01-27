@@ -14,18 +14,65 @@ import com.google.gson.JsonObject;
 import net.minecraft.util.ResourceLocation;
 
 public class ActionsHotbar {
-    Map<ResourceLocation, ActionVisibilitySwitch> actions = new LinkedHashMap<>();
+    private Map<ResourceLocation, ActionVisibilitySwitch> declaredSwitches = new LinkedHashMap<>();
+    
+    private List<ActionVisibilitySwitch> actionSwitchesCache;
     private List<Action<?>> enabledActionsCache;
     
+    private boolean isInitialized = false;
+    void init() {
+        for (ActionVisibilitySwitch actionSwitch : declaredSwitches.values()) {
+            actionSwitch.init();
+        }
+        updateCache();
+        isInitialized = true;
+    }
+    
     void updateCache() {
-        this.enabledActionsCache = actions.values().stream()
-                .filter(action -> action.isVisible)
-                .map(actionSwitch -> actionSwitch.action)
+        this.enabledActionsCache = declaredSwitches.values().stream()
+                .filter(ActionVisibilitySwitch::isValid)
+                .filter(ActionVisibilitySwitch::isEnabled)
+                .map(ActionVisibilitySwitch::getAction)
                 .collect(Collectors.toList());
+        this.actionSwitchesCache = declaredSwitches.values().stream()
+                .filter(ActionVisibilitySwitch::isValid)
+                .collect(Collectors.toList());
+    }
+    
+    void addActionPreInit(ActionVisibilitySwitch action) {
+        if (isInitialized) {
+            throw new IllegalStateException();
+        }
+        declaredSwitches.put(action.getActionId(), action);
+    }
+    
+    void fromJson(JsonObject json) {
+        JsonObject actionsJson = json.get("actions").getAsJsonObject();
+        for (Map.Entry<String, JsonElement> entry : actionsJson.entrySet()) {
+            ResourceLocation actionId = new ResourceLocation(entry.getKey());
+            boolean isEnabled = entry.getValue().getAsJsonPrimitive().getAsBoolean();
+            ActionVisibilitySwitch actionSwitch = new ActionVisibilitySwitch(this, actionId, isEnabled);
+            declaredSwitches.put(actionId, actionSwitch);
+        }
+    }
+    
+    JsonElement toJson() {
+        JsonObject json = new JsonObject();
+        
+        JsonObject actionsJson = new JsonObject();
+        json.add("actions", actionsJson);
+        for (ActionVisibilitySwitch actionSwitch : declaredSwitches.values()) {
+            actionsJson.addProperty(actionSwitch.getActionId().toString(), actionSwitch.isEnabled());
+        }
+        return json;
     }
     
     public List<Action<?>> getEnabledView() {
         return enabledActionsCache;
+    }
+    
+    public List<ActionVisibilitySwitch> getActionSwitchesView() {
+        return actionSwitchesCache;
     }
     
     @Nullable
@@ -35,32 +82,6 @@ public class ActionsHotbar {
             return null;
         }
         return actions.get(index);
-    }
-    
-    
-    static class SaveState {
-        Map<ResourceLocation, ActionVisibilitySwitch.SaveInfo> actionsOrder = new LinkedHashMap<>();
-        
-        void fromJson(JsonObject json) {
-            JsonObject actionsJson = json.get("actions").getAsJsonObject();
-            for (Map.Entry<String, JsonElement> entry : actionsJson.entrySet()) {
-                ResourceLocation actionId = new ResourceLocation(entry.getKey());
-                boolean isVisible = entry.getValue().getAsJsonPrimitive().getAsBoolean();
-                ActionVisibilitySwitch.SaveInfo actionSwitch = new ActionVisibilitySwitch.SaveInfo(actionId, isVisible);
-                actionsOrder.put(actionId, actionSwitch);
-            }
-        }
-        
-        JsonElement toJson() {
-            JsonObject json = new JsonObject();
-            
-            JsonObject actionsJson = new JsonObject();
-            json.add("actions", actionsJson);
-            for (ActionVisibilitySwitch.SaveInfo actionSwitch : actionsOrder.values()) {
-                json.addProperty(actionSwitch.action.toString(), actionSwitch.isVisible);
-            }
-            return json;
-        }
     }
 
 }

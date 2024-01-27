@@ -800,7 +800,7 @@ public class ActionsOverlayGui extends AbstractGui {
         case ATTACK:
         case ABILITY:
             return HudControlSettings.getInstance()
-                    .getControlScheme(power.getPowerClassification())
+                    .getControlScheme(power)
                     .getActionsHotbar(actionKey.getHotbar())
                     .getEnabledView();
         default:
@@ -1568,7 +1568,7 @@ public class ActionsOverlayGui extends AbstractGui {
     private <P extends IPower<P, ?>> void scrollAction(ActionsModeConfig<P> mode, ControlScheme.Hotbar hotbar, boolean backwards) {
         P power = mode.getPower();
         List<Action<?>> actions = HudControlSettings.getInstance()
-                .getControlScheme(power.getPowerClassification())
+                .getControlScheme(power)
                 .getActionsHotbar(hotbar).getEnabledView();
         if (actions.size() == 0) {
             return;

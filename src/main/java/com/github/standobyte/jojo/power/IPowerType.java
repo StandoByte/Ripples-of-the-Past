@@ -25,7 +25,7 @@ public interface IPowerType<P extends IPower<P, T>, T extends IPowerType<P, T>> 
         return vanillaHitResult;
     }
     
-    ControlScheme.SaveState clCreateDefaultLayout();
+    ControlScheme clCreateDefaultLayout();
     
     @Nullable default IBowChargeEffect<P, T> getBowChargeEffect() {
         return null;
