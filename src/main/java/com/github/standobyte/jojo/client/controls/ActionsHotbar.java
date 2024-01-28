@@ -1,9 +1,8 @@
 package com.github.standobyte.jojo.client.controls;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -16,7 +15,7 @@ import com.google.gson.JsonObject;
 import net.minecraft.util.ResourceLocation;
 
 public class ActionsHotbar {
-    private Map<ResourceLocation, ActionVisibilitySwitch> declaredSwitches = new LinkedHashMap<>();
+    private List<ActionVisibilitySwitch> declaredSwitches = new ArrayList<>();
     
     private List<ActionVisibilitySwitch> actionSwitchesCache;
     private List<ActionVisibilitySwitch> switchesView;
@@ -25,7 +24,7 @@ public class ActionsHotbar {
     
     private boolean isInitialized = false;
     void init() {
-        for (ActionVisibilitySwitch actionSwitch : declaredSwitches.values()) {
+        for (ActionVisibilitySwitch actionSwitch : declaredSwitches) {
             actionSwitch.init();
         }
         updateCache();
@@ -33,7 +32,7 @@ public class ActionsHotbar {
     }
     
     void updateCache() {
-        this.actionSwitchesCache = declaredSwitches.values().stream()
+        this.actionSwitchesCache = declaredSwitches.stream()
                 .filter(ActionVisibilitySwitch::isValid)
                 .collect(Collectors.toList());
         this.enabledActionsCache = actionSwitchesCache.stream()
@@ -48,7 +47,7 @@ public class ActionsHotbar {
         if (isInitialized) {
             throw new IllegalStateException();
         }
-        declaredSwitches.put(action.getActionId(), action);
+        declaredSwitches.add(action);
     }
     
     void fromJson(JsonObject json) {
@@ -58,7 +57,7 @@ public class ActionsHotbar {
             ResourceLocation actionId = new ResourceLocation(entry.get("action").getAsString());
             boolean isEnabled = entry.get("enabled").getAsJsonPrimitive().getAsBoolean();
             ActionVisibilitySwitch actionSwitch = new ActionVisibilitySwitch(this, actionId, isEnabled);
-            declaredSwitches.put(actionId, actionSwitch);
+            declaredSwitches.add(actionSwitch);
         }
     }
     
@@ -67,7 +66,7 @@ public class ActionsHotbar {
         
         JsonArray actionsJson = new JsonArray();
         json.add("actions", actionsJson);
-        for (ActionVisibilitySwitch actionSwitch : declaredSwitches.values()) {
+        for (ActionVisibilitySwitch actionSwitch : declaredSwitches) {
             JsonObject entry = new JsonObject();
             entry.addProperty("action", actionSwitch.getActionId().toString());
             entry.addProperty("enabled", actionSwitch.isEnabled());
@@ -91,6 +90,36 @@ public class ActionsHotbar {
             return null;
         }
         return actions.get(index);
+    }
+    
+    public void moveTo(ActionVisibilitySwitch action, int index) {
+        int curValidIndex = switchesView.indexOf(action);
+        if (curValidIndex > -1 && curValidIndex != index && declaredSwitches.remove(action)) {
+//            if (curValidIndex < index) {
+//                index--;
+//            }
+            addTo(action, index);
+        }
+    }
+    
+    public void remove(ActionVisibilitySwitch action) {
+        if (declaredSwitches.remove(action)) {
+            updateCache();
+        }
+    }
+    
+    public void addTo(ActionVisibilitySwitch action, int index) {
+        if (!declaredSwitches.contains(action)) {
+            int actualIndex = 0;
+            int validCount = 0;
+            for (; validCount < index; actualIndex++) {
+                if (declaredSwitches.get(actualIndex).isValid()) {
+                    ++validCount;
+                }
+            }
+            declaredSwitches.add(actualIndex, action);
+            updateCache();
+        }
     }
 
 }

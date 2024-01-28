@@ -1,8 +1,8 @@
 package com.github.standobyte.jojo.client.controls;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -14,13 +14,13 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import net.minecraft.client.util.InputMappings;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 
 public class ControlScheme {
-    public static final int ARBITRARY_MAX_HOTBAR_LENGTH = 16;
-    private final Map<ResourceLocation, ActionKeybindEntry> declaredKeybinds = new LinkedHashMap<>();
+    public static final int ARBITRARY_MAX_HOTBAR_LENGTH = 19;
+    private final List<ActionKeybindEntry> declaredKeybinds = new ArrayList<>();
     private final List<ActionKeybindEntry> validKeybindsCache = new ArrayList<>();
+    private final List<ActionKeybindEntry> keybindsView = Collections.unmodifiableList(validKeybindsCache);
     
     private final Map<Hotbar, ActionsHotbar> hotbars = Util.make(new EnumMap<>(Hotbar.class), map -> {
         for (Hotbar hotbar : Hotbar.values()) {
@@ -32,7 +32,7 @@ public class ControlScheme {
     public boolean initLoadedFromConfig(IPower<?, ?> power) {
         if (initialized) return false;
         
-        for (ActionKeybindEntry keybind : declaredKeybinds.values()) {
+        for (ActionKeybindEntry keybind : declaredKeybinds) {
             keybind.init();
         }
         
@@ -48,7 +48,7 @@ public class ControlScheme {
 
     private void updateCache() {
         validKeybindsCache.clear();
-        for (ActionKeybindEntry keybind : declaredKeybinds.values()) {
+        for (ActionKeybindEntry keybind : declaredKeybinds) {
             if (keybind.isValid()) {
                 validKeybindsCache.add(keybind);
             }
@@ -71,7 +71,7 @@ public class ControlScheme {
         JsonArray keybindsJson = jsonObj.get("customKeybinds").getAsJsonArray();
         for (JsonElement keybindJson : keybindsJson) {
             ActionKeybindEntry keybind = ActionKeybindEntry.fromJson(keybindJson);
-            obj.declaredKeybinds.put(keybind.getActionId(), keybind);
+            obj.declaredKeybinds.add(keybind);
         }
 
         JsonObject hotbarsJson = jsonObj.get("hotbars").getAsJsonObject();
@@ -88,7 +88,7 @@ public class ControlScheme {
 
         JsonArray keybindsJson = new JsonArray();
         json.add("customKeybinds", keybindsJson);
-        for (ActionKeybindEntry keybind : declaredKeybinds.values()) {
+        for (ActionKeybindEntry keybind : declaredKeybinds) {
             keybindsJson.add(keybind.toJson());
         }
 
@@ -101,21 +101,18 @@ public class ControlScheme {
         return json;
     }
     
-    
-    
     public void reset() {
         // reset the underlying collections to their default state
+        InputHandler.toDoDeleteMe();
         updateCache();
     }
+    // before removing an ActionKeybindEntry, call ActionKeybindEntry#removeKeybindFromMap
+    // to not flood the key bindings map with keybinds that will not be used anymore
     
     
     
     public Iterable<ActionKeybindEntry> getCustomKeybinds() {
-        return validKeybindsCache;
-    }
-    
-    public ActionsHotbar getActionsHotbar(Hotbar hotbarType) {
-        return hotbars.get(hotbarType);
+        return keybindsView;
     }
     
     public ActionKeybindEntry addKeybindEntry(ActionKeybindEntry.PressActionType pressType, 
@@ -126,12 +123,23 @@ public class ControlScheme {
     public ActionKeybindEntry addKeybindEntry(ActionKeybindEntry.PressActionType pressType, 
             Action<?> action, InputMappings.Type inputType, int key) {
         ActionKeybindEntry keybind = new ActionKeybindEntry(pressType, action, inputType, key);
-        declaredKeybinds.put(action.getRegistryName(), keybind);
+        declaredKeybinds.add(keybind);
         updateCache();
         return keybind;
     }
     
+    public void removeKeybindEntry(ActionKeybindEntry keybind) {
+        if (declaredKeybinds.remove(keybind)) {
+            keybind.removeKeybindFromMap();
+            updateCache();
+        }
+    }
     
+
+    
+    public ActionsHotbar getActionsHotbar(Hotbar hotbarType) {
+        return hotbars.get(hotbarType);
+    }
     
     public enum Hotbar {
         LEFT_CLICK,
@@ -159,8 +167,7 @@ public class ControlScheme {
         }
         
         for (DefaultKey keyBinding : keyBindings) {
-            obj.declaredKeybinds.put(keyBinding.action.getRegistryName(), 
-                    new ActionKeybindEntry(ActionKeybindEntry.PressActionType.CLICK, 
+            obj.declaredKeybinds.add(new ActionKeybindEntry(ActionKeybindEntry.PressActionType.CLICK, 
                             keyBinding.action.getRegistryName(), keyBinding.keyDesc));
         }
         

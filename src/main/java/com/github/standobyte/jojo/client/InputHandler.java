@@ -128,7 +128,7 @@ public class InputHandler {
     
     // it works because the actual map is static, not sure if that's intended or just an implementation detail
     // but hey, i'll take it
-    private KeyBindingMap keyBindingMap = new KeyBindingMap();
+    public final KeyBindingMap keyBindingMap = new KeyBindingMap();
     
     private int leftClickBlockDelay;
     

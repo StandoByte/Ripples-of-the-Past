@@ -53,7 +53,7 @@ public class HudControlSettings {
             IPowerType<?, ?> powerType = power.getType();
             ResourceLocation powerTypeId = powerType.getRegistryName();
             controls = fullStateMap.computeIfAbsent(powerTypeId, id -> {
-                return new PowerTypeControlSchemes(powerType.clCreateDefaultLayout());
+                return new PowerTypeControlSchemes(id, powerType.clCreateDefaultLayout());
             });
             controls.update(power);
         }
@@ -93,19 +93,25 @@ public class HudControlSettings {
     
     private final Gson gson = new GsonBuilder().setPrettyPrinting()
             .create();
+    public void saveForPowerType(ResourceLocation id) {
+        save(id, fullStateMap.get(id));
+    }
+    
     public void saveAll() {
-        for (Map.Entry<ResourceLocation, PowerTypeControlSchemes> entry : fullStateMap.entrySet()) {
-            File powerTypeDir = new File(saveDir, entry.getKey().toString());
-            File ctrlSchemeFile = new File(powerTypeDir, "current.json");
-            try (BufferedWriter writer = GeneralUtil.newWriterMkDir(ctrlSchemeFile, Charsets.UTF_8)) {
-                JsonElement json = entry.getValue().currentControlScheme.toJson();
-                if (json.isJsonObject()) {
-                    gson.toJson(json, writer);
-                }
+        fullStateMap.forEach(this::save);
+    }
+    
+    private void save(ResourceLocation entryKey, PowerTypeControlSchemes entryValue) {
+        File powerTypeDir = new File(saveDir, entryKey.toString());
+        File ctrlSchemeFile = new File(powerTypeDir, "current.json");
+        try (BufferedWriter writer = GeneralUtil.newWriterMkDir(ctrlSchemeFile, Charsets.UTF_8)) {
+            JsonElement json = entryValue.currentControlScheme.toJson();
+            if (json.isJsonObject()) {
+                gson.toJson(json, writer);
             }
-            catch (Exception exception) {
-                JojoMod.getLogger().error("Failed to save mod control settings to {}", ctrlSchemeFile, exception);
-            }
+        }
+        catch (Exception exception) {
+            JojoMod.getLogger().error("Failed to save mod control settings to {}", ctrlSchemeFile, exception);
         }
     }
     
@@ -118,7 +124,7 @@ public class HudControlSettings {
                 try (BufferedReader reader = Files.newReader(ctrlSchemeFile, Charsets.UTF_8)) {
                     JsonElement jsonRead = jsonParser.parse(reader);
                     ControlScheme currentCtrlScheme = ControlScheme.fromJson(jsonRead);
-                    PowerTypeControlSchemes savedState = new PowerTypeControlSchemes(currentCtrlScheme);
+                    PowerTypeControlSchemes savedState = new PowerTypeControlSchemes(powerId, currentCtrlScheme);
                     fullStateMap.put(powerId, savedState);
                 }
                 catch (Exception exception) {

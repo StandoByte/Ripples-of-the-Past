@@ -254,6 +254,16 @@ public class ClientReflection {
     }
     
     
+    private static final Field KEY_BINDING_ALL_FIELD = ObfuscationReflectionHelper.findField(KeyBinding.class, "field_74516_a");
+    private static Map<String, KeyBinding> KEY_BINDINGS_ALL;
+    public static Map<String, KeyBinding> getAllKeybindingMap() {
+        if (KEY_BINDINGS_ALL == null) {
+            KEY_BINDINGS_ALL = ReflectionUtil.getFieldValue(KEY_BINDING_ALL_FIELD, null);
+        }
+        return KEY_BINDINGS_ALL;
+    }
+    
+    
     private static final Field CONTROLS_SCREEN_CONTROL_LIST = ObfuscationReflectionHelper.findField(ControlsScreen.class, "field_146494_r");
     public static KeyBindingList getControlList(ControlsScreen screen) {
         return ReflectionUtil.getFieldValue(CONTROLS_SCREEN_CONTROL_LIST, screen);

@@ -4,8 +4,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.ui.actionshud.QuickAccess.QuickAccessKeyConflictContext;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
+import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -25,7 +27,7 @@ public class ActionKeybindEntry {
     
     public transient int delay;
     
-    public ActionKeybindEntry(PressActionType type, ResourceLocation actionId, String keySaveDesc) {
+    ActionKeybindEntry(PressActionType type, ResourceLocation actionId, String keySaveDesc) {
         this.type = type;
         this.actionId = actionId;
         if (keySaveDesc.indexOf(':') != -1) {
@@ -38,7 +40,7 @@ public class ActionKeybindEntry {
         }
     }
     
-    public ActionKeybindEntry(PressActionType type, Action<?> action, InputMappings.Type inputType, int key) {
+    ActionKeybindEntry(PressActionType type, Action<?> action, InputMappings.Type inputType, int key) {
         this.type = type;
         this.actionId = action.getRegistryName();
         this.action = action;
@@ -47,16 +49,21 @@ public class ActionKeybindEntry {
         this.keybind = createNewKey(keyModifier, keyCode);
     }
     
+//    ActionKeybindEntry(PressActionType type, InputMappings.Type inputType, int key) {
+//        this.type = type;
+//        this.actionId = new ResourceLocation("");
+//        this.action = null;
+//        this.keyModifier = KeyModifier.NONE;
+//        this.keyCode = inputType.getOrCreate(key);
+//        this.keybind = createNewKey(keyModifier, keyCode);
+//    }
+    
     void init() {
         Action<?> action = JojoCustomRegistries.ACTIONS.fromId(this.actionId);
         if (action != null) {
             KeyBinding keyBinding = createNewKey(keyModifier, keyCode);
             this.action = action;
             this.keybind = keyBinding;
-        }
-        else {
-            this.action = null;
-            this.keybind = null;
         }
     }
     
@@ -72,7 +79,15 @@ public class ActionKeybindEntry {
     public void setKeybind(InputMappings.Type inputType, int key) {
         this.keyModifier = KeyModifier.NONE;
         this.keyCode = inputType.getOrCreate(key);
+        removeKeybindFromMap();
         this.keybind = createNewKey(keyModifier, keyCode);
+    }
+    
+    public void removeKeybindFromMap() {
+        if (keybind != null) {
+            ClientReflection.getAllKeybindingMap().remove(keybind.getName());
+            InputHandler.getInstance().keyBindingMap.removeKey(keybind);
+        }
     }
     
     public JsonElement toJson() {
