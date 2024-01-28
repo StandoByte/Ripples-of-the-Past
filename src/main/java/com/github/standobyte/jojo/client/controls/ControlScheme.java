@@ -14,6 +14,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import net.minecraft.client.util.InputMappings;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 
 public class ControlScheme {
@@ -46,7 +47,7 @@ public class ControlScheme {
         return true;
     }
 
-    private void updateCache() {
+    public void updateCache() {
         validKeybindsCache.clear();
         for (ActionKeybindEntry keybind : declaredKeybinds) {
             if (keybind.isValid()) {
@@ -113,6 +114,14 @@ public class ControlScheme {
     
     public Iterable<ActionKeybindEntry> getCustomKeybinds() {
         return keybindsView;
+    }
+    
+    public ActionKeybindEntry addBlankKeybindEntry(ActionKeybindEntry.PressActionType pressType) {
+        ActionKeybindEntry keybind = new ActionKeybindEntry(pressType, 
+                new ResourceLocation("blank"), InputMappings.Type.KEYSYM, -1);
+        declaredKeybinds.add(keybind);
+        updateCache();
+        return keybind;
     }
     
     public ActionKeybindEntry addKeybindEntry(ActionKeybindEntry.PressActionType pressType, 

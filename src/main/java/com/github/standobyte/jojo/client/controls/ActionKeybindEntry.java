@@ -49,14 +49,14 @@ public class ActionKeybindEntry {
         this.keybind = createNewKey(keyModifier, keyCode);
     }
     
-//    ActionKeybindEntry(PressActionType type, InputMappings.Type inputType, int key) {
-//        this.type = type;
-//        this.actionId = new ResourceLocation("");
-//        this.action = null;
-//        this.keyModifier = KeyModifier.NONE;
-//        this.keyCode = inputType.getOrCreate(key);
-//        this.keybind = createNewKey(keyModifier, keyCode);
-//    }
+    ActionKeybindEntry(PressActionType type, ResourceLocation actionId, InputMappings.Type inputType, int key) {
+        this.type = type;
+        this.actionId = actionId;
+        this.action = null;
+        this.keyModifier = KeyModifier.NONE;
+        this.keyCode = inputType.getOrCreate(key);
+        this.keybind = createNewKey(keyModifier, keyCode);
+    }
     
     void init() {
         Action<?> action = JojoCustomRegistries.ACTIONS.fromId(this.actionId);
@@ -67,7 +67,7 @@ public class ActionKeybindEntry {
         }
     }
     
-    boolean isValid() {
+    public boolean isValid() {
         return action != null && keybind != null;
     }
     
@@ -116,6 +116,12 @@ public class ActionKeybindEntry {
     
     public KeyBinding getKeybind() {
         return keybind;
+    }
+    
+    public void setKeyModifierAndCode(KeyModifier keyModifier, InputMappings.Input keyCode) {
+        this.keyModifier = keyModifier;
+        this.keyCode = keyCode;
+        keybind.setKeyModifierAndCode(keyModifier, keyCode);
     }
     
     public PressActionType getType() {

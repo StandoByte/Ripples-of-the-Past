@@ -1,6 +1,9 @@
 package com.github.standobyte.jojo.client.ui.screen.controls;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -497,8 +500,6 @@ public class HudLayoutEditingScreen extends Screen {
                 if (clickedKeybindActionSlot.isPresent()) {
                     ActionKeybindEntry slot = clickedKeybindActionSlot.get();
                     slot.setAction(dragged.actionSwitch.getAction());
-                    // TODO handle already existing entry that will conflict
-                    InputHandler.toDoDeleteMe();
                     markLayoutEdited();
                 }
             }
@@ -548,6 +549,7 @@ public class HudLayoutEditingScreen extends Screen {
             selectedPower = power;
             selectedTab = power.getPowerClassification();
             
+            clearInvalidKeybinds();
             currentControlsScreen = HudControlSettings.getInstance().getCachedControls(selectedTab);
             currentControlScheme = currentControlsScreen.getCurrentCtrlScheme();
             keybindButtons.keySet().forEach(this::removeKeybindEntryFromUi);
@@ -667,6 +669,11 @@ public class HudLayoutEditingScreen extends Screen {
     private final Map<ActionKeybindEntry, KeybindButtonsHolder> keybindButtons = new LinkedHashMap<>();
     private void renderKeybindsList(MatrixStack matrixStack, int mouseX, int mouseY) {
         hoveredKeybindSlot = getKeybindSlotAt(mouseX, mouseY);
+        Collection<KeyBinding> keys = new ArrayList<>();
+        Collections.addAll(keys, minecraft.options.keyMappings);
+        for (KeybindButtonsHolder keybindLine : keybindButtons.values()) {
+            keys.add(keybindLine.keybindEntry.getKeybind());
+        }
         
         for (Map.Entry<ActionKeybindEntry, KeybindButtonsHolder> entry : keybindButtons.entrySet()) {
             KeyBinding keybind = entry.getKey().getKeybind();
@@ -676,7 +683,7 @@ public class HudLayoutEditingScreen extends Screen {
             boolean conflicting = false;
             boolean keyCodeModifierConflict = true; // less severe form of conflict, like SHIFT conflicting with SHIFT+G
             if (!keybind.isUnbound()) {
-                for (KeyBinding otherKey : minecraft.options.keyMappings) { // TODO also check other keybinds
+                for (KeyBinding otherKey : keys) {
                     if (otherKey != keybind && keybind.same(otherKey)) {
                         conflicting = true;
                         keyCodeModifierConflict &= otherKey.hasKeyCodeModifierConflict(keybind);
@@ -697,13 +704,15 @@ public class HudLayoutEditingScreen extends Screen {
         }
         
         addKeybindButton.y = getWindowY() + 64 + keybindButtons.size() * 22;
+        addKeybindButton.visible = keybindButtons.size() < 5;
     }
     
     private boolean mouseClickedEditingKeybind(int buttonId) {
         if (selectedKey != null) {
             KeyModifier keyModifier = KeyModifier.getActiveModifier();
             
-            selectedKey.getKeybind().setKeyModifierAndCode(keyModifier, InputMappings.Type.MOUSE.getOrCreate(buttonId));
+            selectedKey.setKeyModifierAndCode(keyModifier, InputMappings.Type.MOUSE.getOrCreate(buttonId));
+            markKeybindEdited(selectedKey);
             selectedKey = null;
             KeyBinding.resetMapping();
             markLayoutEdited();
@@ -715,16 +724,16 @@ public class HudLayoutEditingScreen extends Screen {
     
     private boolean keyPressedEditingKeybind(int keyCode, int scanCode) {
         if (selectedKey != null) {
-            KeyBinding keybind = selectedKey.getKeybind();
             KeyModifier keyModifier = KeyModifier.getActiveModifier();
             
             if (keyCode == 256) {
-                keybind.setKeyModifierAndCode(keyModifier, InputMappings.UNKNOWN);
+                selectedKey.setKeyModifierAndCode(keyModifier, InputMappings.UNKNOWN);
             } else {
-                keybind.setKeyModifierAndCode(keyModifier, InputMappings.getKey(keyCode, scanCode));
+                selectedKey.setKeyModifierAndCode(keyModifier, InputMappings.getKey(keyCode, scanCode));
             }
+            markKeybindEdited(selectedKey);
             
-            if (!KeyModifier.isKeyCodeModifier(keybind.getKey())) {
+            if (!KeyModifier.isKeyCodeModifier(selectedKey.getKeybind().getKey())) {
                 selectedKey = null;
             }
             KeyBinding.resetMapping();
@@ -760,42 +769,32 @@ public class HudLayoutEditingScreen extends Screen {
     }
     
     private void createBlankKeybindEntry() {
-        // FIXME adding an entry with null action
-        InputHandler.toDoDeleteMe();
-        ActionKeybindEntry entry = currentControlScheme.addKeybindEntry(PressActionType.CLICK, null, -1);
+        ActionKeybindEntry entry = currentControlScheme.addBlankKeybindEntry(PressActionType.CLICK);
+        markKeybindEdited(entry);
         markLayoutEdited();
         _addKeybindEntryToUi(entry);
     }
     
-    // TODO handle already existing entries that will conflict
     private void setCustomKeybind(Action<?> action, InputMappings.Type inputType, int key) {
-        InputHandler.toDoDeleteMe();
-//        Optional<ActionKeybindEntry> keyAlreadyBound = keybindButtons.keySet().stream()
-//                .filter(entry -> {
-//                    InputMappings.Input input = entry.getKeybind().getKey();
-//                    return input.getType() == inputType && input.getValue() == key;
-//                })
-//                .findFirst();
-//        Optional<ActionKeybindEntry> actionAlreadyHasKey = keybindButtons.keySet().stream()
-//                .filter(entry -> {
-//                    return entry.getAction() == action;
-//                })
-//                .findFirst();
-//        
-//        markLayoutEdited();
-//        
-//        if (keyAlreadyBound.isPresent()) {
-//            keyAlreadyBound.get().setAction(action);
-//            return;
-//        }
-//        
-//        if (actionAlreadyHasKey.isPresent()) {
-//            actionAlreadyHasKey.get().setKeybind(inputType, key);
-//            return;
-//        }
-//        
-//        ActionKeybindEntry entry = keybinds.addKeybindEntry(PressActionType.CLICK, action, inputType, key);
-//        _addKeybindEntryToUi(entry);
+        Optional<ActionKeybindEntry> actionAlreadyHasKey = keybindButtons.keySet().stream()
+                .filter(entry -> {
+                    return entry.getAction() == action;
+                })
+                .findFirst();
+        
+        markLayoutEdited();
+        
+        if (actionAlreadyHasKey.isPresent()) {
+            actionAlreadyHasKey.get().setKeybind(inputType, key);
+            return;
+        }
+        else {
+            ActionKeybindEntry entry = currentControlScheme.addKeybindEntry(
+                    PressActionType.CLICK, action, inputType, key);
+            markKeybindEdited(entry);
+            _addKeybindEntryToUi(entry);
+        }
+
     }
     
     private void removeKeybindEntryFromUi(ActionKeybindEntry entry) {
@@ -871,14 +870,20 @@ public class HudLayoutEditingScreen extends Screen {
         }
     }
     
-    private void clearInvalidKeybinds() {
-        // FIXME clear only the keybinds that were added while the window was opened\
-        InputHandler.toDoDeleteMe();
-//        editedKeybindLists.forEach(ActionsControlScheme::clearInvalidKeybinds);
+    private Map<ActionKeybindEntry, ControlScheme> editedKeybinds = new HashMap<>();
+    private void markKeybindEdited(ActionKeybindEntry entry) {
+        editedKeybinds.put(entry, currentControlScheme);
     }
     
-    private static class EditedKeybindEntry {
-        ActionKeybindEntry latestValidState;
-        ActionKeybindEntry entry;
+    private void clearInvalidKeybinds() {
+        Set<ControlScheme> ctrlSchemes = new HashSet<>();
+        editedKeybinds.forEach((key, ctrlScheme) -> {
+            if (!key.isValid() || key.getKeybind().isUnbound()) {
+                ctrlScheme.removeKeybindEntry(key);
+            }
+            ctrlSchemes.add(ctrlScheme);
+        });
+        editedKeybinds.clear();
+        ctrlSchemes.forEach(ControlScheme::updateCache);
     }
 }
