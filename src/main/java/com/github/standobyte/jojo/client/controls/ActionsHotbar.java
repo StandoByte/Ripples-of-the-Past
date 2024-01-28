@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.client.controls;
 
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +9,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
@@ -17,7 +19,9 @@ public class ActionsHotbar {
     private Map<ResourceLocation, ActionVisibilitySwitch> declaredSwitches = new LinkedHashMap<>();
     
     private List<ActionVisibilitySwitch> actionSwitchesCache;
+    private List<ActionVisibilitySwitch> switchesView;
     private List<Action<?>> enabledActionsCache;
+    private List<Action<?>> actionsView;
     
     private boolean isInitialized = false;
     void init() {
@@ -29,14 +33,15 @@ public class ActionsHotbar {
     }
     
     void updateCache() {
-        this.enabledActionsCache = declaredSwitches.values().stream()
-                .filter(ActionVisibilitySwitch::isValid)
-                .filter(ActionVisibilitySwitch::isEnabled)
-                .map(ActionVisibilitySwitch::getAction)
-                .collect(Collectors.toList());
         this.actionSwitchesCache = declaredSwitches.values().stream()
                 .filter(ActionVisibilitySwitch::isValid)
                 .collect(Collectors.toList());
+        this.enabledActionsCache = actionSwitchesCache.stream()
+                .filter(ActionVisibilitySwitch::isEnabled)
+                .map(ActionVisibilitySwitch::getAction)
+                .collect(Collectors.toList());
+        this.switchesView = Collections.unmodifiableList(actionSwitchesCache);
+        this.actionsView = Collections.unmodifiableList(enabledActionsCache);
     }
     
     void addActionPreInit(ActionVisibilitySwitch action) {
@@ -47,10 +52,11 @@ public class ActionsHotbar {
     }
     
     void fromJson(JsonObject json) {
-        JsonObject actionsJson = json.get("actions").getAsJsonObject();
-        for (Map.Entry<String, JsonElement> entry : actionsJson.entrySet()) {
-            ResourceLocation actionId = new ResourceLocation(entry.getKey());
-            boolean isEnabled = entry.getValue().getAsJsonPrimitive().getAsBoolean();
+        JsonArray actionsJson = json.get("actions").getAsJsonArray();
+        for (JsonElement element : actionsJson) {
+            JsonObject entry = element.getAsJsonObject();
+            ResourceLocation actionId = new ResourceLocation(entry.get("action").getAsString());
+            boolean isEnabled = entry.get("enabled").getAsJsonPrimitive().getAsBoolean();
             ActionVisibilitySwitch actionSwitch = new ActionVisibilitySwitch(this, actionId, isEnabled);
             declaredSwitches.put(actionId, actionSwitch);
         }
@@ -59,20 +65,23 @@ public class ActionsHotbar {
     JsonElement toJson() {
         JsonObject json = new JsonObject();
         
-        JsonObject actionsJson = new JsonObject();
+        JsonArray actionsJson = new JsonArray();
         json.add("actions", actionsJson);
         for (ActionVisibilitySwitch actionSwitch : declaredSwitches.values()) {
-            actionsJson.addProperty(actionSwitch.getActionId().toString(), actionSwitch.isEnabled());
+            JsonObject entry = new JsonObject();
+            entry.addProperty("action", actionSwitch.getActionId().toString());
+            entry.addProperty("enabled", actionSwitch.isEnabled());
+            actionsJson.add(entry);
         }
         return json;
     }
     
     public List<Action<?>> getEnabledView() {
-        return enabledActionsCache;
+        return actionsView;
     }
     
     public List<ActionVisibilitySwitch> getActionSwitchesView() {
-        return actionSwitchesCache;
+        return switchesView;
     }
     
     @Nullable
