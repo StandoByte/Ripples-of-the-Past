@@ -818,7 +818,7 @@ public class GameplayEventHandler {
     public static void onPotionApply(PotionApplicableEvent event) {
         LivingEntity entity = event.getEntityLiving();
         Effect effect = event.getPotionEffect().getEffect();
-        if ((effect == Effects.POISON || effect == Effects.HUNGER || effect == Effects.REGENERATION)
+        if ((effect == Effects.HUNGER/* || effect == Effects.POISON || effect == Effects.REGENERATION*/)
                 && entity instanceof PlayerEntity && JojoModUtil.isPlayerUndead((PlayerEntity) entity)) {
             event.setResult(Result.DENY);
         }
