@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.entity.stand;
 
 import java.util.Random;
 
+import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
 import net.minecraft.util.math.MathHelper;
@@ -21,7 +22,13 @@ public class StandStatFormulas {
     }
     
     public static int getHeavyAttackRecovery(double speed) {
-        return MathHelper.floor((40 - speed * 1.25) * 0.75);
+        return getHeavyAttackRecovery(speed, 0);
+    }
+    
+    public static int getHeavyAttackRecovery(double speed, float punchFinisherMeter) {
+        float max = (40 - (float) speed * 1.25F) * 0.75F;
+        float min = max / 2;
+        return MathHelper.floor(MathHelper.lerp(punchFinisherMeter, max, min));
     }
     
     
@@ -85,15 +92,24 @@ public class StandStatFormulas {
     
     
     public static float getPhysicalResistance(double durability, double strength, float blocked, float damageDealt) {
-        double resistance = MathHelper.clamp(durability * 0.01875 + strength * 0.0125, 0, 1);
+        double resistance = MathHelper.clamp(durability * 0.032 + strength * 0.024, 0, 1);
+        double dmgCoeff = 1;
+        
         if (blocked > 0) {
-            double dmgBlockingCoeff = 0.8;
+            dmgCoeff -= 0.8 * blocked;
             double furtherReductionCap = durability / 2;
+            
             if (damageDealt < furtherReductionCap) {
-                dmgBlockingCoeff += Math.max((1 - dmgBlockingCoeff) * (1 - damageDealt / furtherReductionCap), 0);
+                dmgCoeff *= damageDealt / furtherReductionCap;
             }
-            resistance += (1 - resistance) * blocked * dmgBlockingCoeff;
         }
+        
+        double config = JojoModConfig.getCommonConfigInstance(false).standResistanceMultiplier.get();
+        if (config > 1) {
+            dmgCoeff /= config;
+        }
+        
+        resistance += (1 - resistance) * MathHelper.clamp(1 - dmgCoeff, 0, 1);
         return (float) resistance;
     }
     
@@ -106,7 +122,7 @@ public class StandStatFormulas {
     }
     
     public static float getBlockStaminaCost(float incomingDamage) {
-        return 0.5F + (float) Math.pow(incomingDamage, 2);
+        return (float) Math.pow(incomingDamage, 2) / 2;
     }
     
     public static int getSummonLockTicks(double speed) {

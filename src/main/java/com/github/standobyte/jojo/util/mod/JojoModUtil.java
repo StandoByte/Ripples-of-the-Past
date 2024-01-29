@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.util.mod;
 
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -32,7 +33,11 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.monster.AbstractIllagerEntity;
+import net.minecraft.entity.monster.HuskEntity;
+import net.minecraft.entity.monster.ZoglinEntity;
+import net.minecraft.entity.monster.ZombieEntity;
 import net.minecraft.entity.passive.WaterMobEntity;
+import net.minecraft.entity.passive.horse.ZombieHorseEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileHelper;
 import net.minecraft.item.ItemStack;
@@ -99,14 +104,13 @@ public class JojoModUtil {
         aabb.inflate(rayTraceInflate);
         double minDistanceSqr = minDistance * minDistance;
         Map<EntityRayTraceResult, Double> rayTracedWithDistance = new HashMap<>();
-        for (Entity potentialTarget : world.getEntities(entity, aabb, e -> !e.isSpectator() && e.isPickable() && (entityFilter == null || entityFilter.test(e)))) {
+        List<Entity> entities = world.getEntities(entity, aabb, e -> !e.isSpectator() && e.isPickable() && (entityFilter == null || entityFilter.test(e)));
+        for (Entity potentialTarget : entities) {
             AxisAlignedBB targetCollisionAABB = potentialTarget.getBoundingBox().inflate((double) potentialTarget.getPickRadius() + rayTraceInflate);
             targetCollisionAABB = standPrecisionTargetHitbox(targetCollisionAABB, standPrecision);
             Optional<Vector3d> clipOptional = targetCollisionAABB.clip(startPos, endPos);
             if (targetCollisionAABB.contains(startPos)) {
-                if (minDistanceSqr >= 0.0D) {
-                    rayTracedWithDistance.put(new EntityRayTraceResult(potentialTarget, clipOptional.orElse(startPos)), 0.0);
-                }
+                rayTracedWithDistance.put(new EntityRayTraceResult(potentialTarget, clipOptional.orElse(startPos)), 0.0);
             } else if (clipOptional.isPresent()) {
                 Vector3d clipVec = clipOptional.get();
                 double clipDistanceSqr = startPos.distanceToSqr(clipVec);
@@ -135,13 +139,21 @@ public class JojoModUtil {
     }
     
     private static AxisAlignedBB standPrecisionTargetHitbox(AxisAlignedBB aabb, double precision) {
-        if (precision > 0) {
-            double smallAabbAddFraction = Math.min(precision, 16) / 16;
+        if (precision > 4) {
+            double smallAabbAddFraction = Math.min(Math.pow(2, precision - 16), 1);
             aabb.inflate(
                     Math.max(1.0 - aabb.getXsize(), 0) * smallAabbAddFraction, 
-                    Math.max(2.5 - aabb.getYsize(), 0) * smallAabbAddFraction, 
+                    Math.max(1.0 - aabb.getYsize(), 0) * smallAabbAddFraction, 
                     Math.max(1.0 - aabb.getZsize(), 0) * smallAabbAddFraction);
-            aabb = aabb.inflate(precision / 20);
+            
+            double scale = precision / 5 + 0.2;
+            double xSize = aabb.getXsize();
+            double ySize = aabb.getYsize();
+            double zSize = aabb.getZsize();
+            aabb = MCUtil.scale(aabb, 
+                    Math.min(scale, 1 + 4 / xSize), 
+                    Math.min(scale, 1 + 4 / ySize), 
+                    Math.min(scale, 1 + 4 / zSize));
         }
         return aabb;
     }
@@ -255,8 +267,17 @@ public class JojoModUtil {
     }
 
     public static boolean canBleed(LivingEntity entity) {
-        return entity.getMobType() != CreatureAttribute.UNDEAD && 
-                (entity instanceof PlayerEntity || entity instanceof AgeableEntity || entity instanceof INPC || entity instanceof AbstractIllagerEntity || entity instanceof WaterMobEntity);
+        if (entity.getMobType() == CreatureAttribute.UNDEAD) {
+            return entity instanceof PlayerEntity
+                    || entity instanceof ZombieEntity && !(entity instanceof HuskEntity)
+                    || entity instanceof ZoglinEntity
+                    || entity instanceof ZombieHorseEntity;
+        }
+        return entity instanceof PlayerEntity
+                || entity instanceof AgeableEntity
+                || entity instanceof INPC
+                || entity instanceof AbstractIllagerEntity
+                || entity instanceof WaterMobEntity;
     }
 
     public static void extinguishFieryStandEntity(Entity entity, ServerWorld world) {

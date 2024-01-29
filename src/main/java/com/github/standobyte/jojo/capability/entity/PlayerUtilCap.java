@@ -54,6 +54,41 @@ public class PlayerUtilCap {
     
     public int knivesThrewTicks = 0;
     
+    private final Map<Entity, Map<DataParameter<?>, EntityDataManager.DataEntry<?>>> tsDelayedData = new HashMap<>();
+    
+    private Optional<ContinuousActionInstance<?, ?>> continuousAction = Optional.empty();
+    
+    private boolean doubleShiftPress = false;
+    private boolean shiftSynced = false;
+    private boolean isWalkingOnLiquid = false;
+    private boolean clTickSpark;
+    
+    private Set<OneTimeNotification> notificationsSent = EnumSet.noneOf(OneTimeNotification.class);
+    
+    private int knives;
+    private int removeKnifeTime;
+    
+    private boolean hasClientInput;
+    private int noClientInputTimer;
+    
+    private BedType lastBedType;
+    private int ticksNoSleep;
+    private long nextSleepTime;
+    
+    private Optional<RockPaperScissorsGame> currentGame = Optional.empty();
+    
+    private boolean walkmanEarbuds = false;
+    
+    private int chatSpamTickCount = 0;
+    
+    private Map<SoundEvent, Integer> recentlyPlayedVoiceLines = new HashMap<>();
+    
+    private final Map<CustomVillagerTrades.MapTrade, Long> lastTradeTime = new EnumMap<>(MapTrade.class);
+    private final List<PlayerStatListener<?>> statChangeListeners = new ArrayList<>();
+    private final List<TimedAction> sendWhenScreenClosed = new ArrayList<>();
+    
+    
+    
     public PlayerUtilCap(PlayerEntity player) {
         this.player = player;
 //        if (!player.level.isClientSide()) {
@@ -115,7 +150,6 @@ public class PlayerUtilCap {
     
     
     
-    private final Map<Entity, Map<DataParameter<?>, EntityDataManager.DataEntry<?>>> tsDelayedData = new HashMap<>();
     public void addDataForTSUnfreeze(Entity entity, Iterable<EntityDataManager.DataEntry<?>> newData) {
         Map<DataParameter<?>, EntityDataManager.DataEntry<?>> data = tsDelayedData.computeIfAbsent(entity, e -> new HashMap<>());
         for (EntityDataManager.DataEntry<?> dataEntry : newData) {
@@ -142,7 +176,6 @@ public class PlayerUtilCap {
     
     
     
-    private Optional<ContinuousActionInstance<?, ?>> continuousAction = Optional.empty();
     public void setContinuousAction(@Nullable ContinuousActionInstance<?, ?> action) {
         continuousAction = Optional.ofNullable(action);
         if (!player.level.isClientSide()) {
@@ -179,11 +212,6 @@ public class PlayerUtilCap {
     }
     
     
-    
-    private boolean doubleShiftPress = false;
-    private boolean shiftSynced = false;
-    private boolean isWalkingOnLiquid = false;
-    private boolean clTickSpark;
     
     public void setDoubleShiftPress() {
         doubleShiftPress = true;
@@ -240,8 +268,6 @@ public class PlayerUtilCap {
     
     
     
-    private Set<OneTimeNotification> notificationsSent = EnumSet.noneOf(OneTimeNotification.class);
-    
     public void sendNotification(OneTimeNotification notification, ITextComponent message) {
         if (!sentNotification(notification)) {
             player.sendMessage(message, Util.NIL_UUID);
@@ -291,9 +317,6 @@ public class PlayerUtilCap {
     
     
     
-    private int knives;
-    private int removeKnifeTime;
-    
     public void setKnives(int knives) {
         knives = Math.max(knives, 0);
         if (this.knives != knives) {
@@ -326,9 +349,6 @@ public class PlayerUtilCap {
     
     
     
-    private boolean hasClientInput;
-    private int noClientInputTimer;
-    
     public void setHasClientInput(boolean hasInput) {
         this.hasClientInput = hasInput;
         if (hasClientInput) {
@@ -351,10 +371,6 @@ public class PlayerUtilCap {
     }
     
     
-    
-    private BedType lastBedType;
-    private int ticksNoSleep;
-    private long nextSleepTime;
     
     private void tickNoSleepTimer() {
         if (ticksNoSleep > 0) ticksNoSleep--;
@@ -387,8 +403,6 @@ public class PlayerUtilCap {
     
     
     
-    private Optional<RockPaperScissorsGame> currentGame = Optional.empty();
-    
     public Optional<RockPaperScissorsGame> getCurrentRockPaperScissorsGame() {
         return currentGame;
     }
@@ -398,8 +412,6 @@ public class PlayerUtilCap {
     }
     
     
-    
-    private boolean walkmanEarbuds = false;
     
     public void setEarbuds(boolean earbuds) {
         if (this.walkmanEarbuds != earbuds) {
@@ -416,8 +428,6 @@ public class PlayerUtilCap {
     
     
     
-    private int chatSpamTickCount = 0;
-    
     public void onChatMsgBypassingSpamCheck(MinecraftServer server, ServerPlayerEntity serverPlayer) {
         chatSpamTickCount += 20;
         if (chatSpamTickCount > 200 && !server.getPlayerList().isOp(player.getGameProfile())) {
@@ -426,8 +436,6 @@ public class PlayerUtilCap {
     }
     
     
-    
-    private Map<SoundEvent, Integer> recentlyPlayedVoiceLines = new HashMap<>();
     
     @Nullable
     public boolean checkNotRepeatingVoiceLine(SoundEvent voiceLine, int voiceLineDelay) {
@@ -449,7 +457,6 @@ public class PlayerUtilCap {
     
     
     
-    private final Map<CustomVillagerTrades.MapTrade, Long> lastTradeTime = new EnumMap<>(MapTrade.class);
     public void setTradeTime(MapTrade type, World world) {
         lastTradeTime.put(type, world.dayTime());
     }
@@ -485,14 +492,12 @@ public class PlayerUtilCap {
     
     
     
-    private final List<PlayerStatListener<?>> statChangeListeners = new ArrayList<>();
     private void tickStatUpdates() {
         statChangeListeners.forEach(PlayerStatListener::tick);
     }
     
     
     
-    private final List<TimedAction> sendWhenScreenClosed = new ArrayList<>();
     public void doWhen(Runnable action, BooleanSupplier when) {
         if (when.getAsBoolean()) {
             action.run();

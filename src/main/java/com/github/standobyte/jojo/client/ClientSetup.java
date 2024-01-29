@@ -8,7 +8,6 @@ import java.util.Set;
 import java.util.function.UnaryOperator;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.capability.item.cassette.CassetteCap;
 import com.github.standobyte.jojo.client.particle.AirStreamParticle;
 import com.github.standobyte.jojo.client.particle.BloodParticle;
 import com.github.standobyte.jojo.client.particle.CDRestorationParticle;
@@ -103,6 +102,7 @@ import com.github.standobyte.jojo.item.CassetteRecordedItem;
 import com.github.standobyte.jojo.item.StandArrowItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
+import com.github.standobyte.jojo.item.cassette.CassetteCap;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 
 import net.minecraft.client.Minecraft;
@@ -214,7 +214,7 @@ public class ClientSetup {
         ArmorModelRegistry.registerArmorModel(BreathControlMaskModel::new, ModItems.BREATH_CONTROL_MASK.get());
         ArmorModelRegistry.registerArmorModel(SatiporojaScarfArmorModel::new, ModItems.SATIPOROJA_SCARF.get());
         
-        ClientModSettings.init(mc, new File(mc.gameDirectory, "jojo_rotp_settings.json"));
+        ClientModSettings.init(mc, new File(mc.gameDirectory, "config/jojo_rotp/client_settings.json"));
 
         event.enqueueWork(() -> {
             ItemModelsProperties.register(ModItems.METEORIC_SCRAP.get(), new ResourceLocation(JojoMod.MOD_ID, "icon"), (itemStack, clientWorld, livingEntity) -> {
@@ -242,7 +242,7 @@ public class ClientSetup {
                 return StandDiscItem.validStandDisc(itemStack, true) ? JojoCustomRegistries.STANDS.getNumericId(StandDiscItem.getStandFromStack(itemStack, true).getType().getRegistryName()) : -1;
             });
             ItemModelsProperties.register(ModItems.CASSETTE_RECORDED.get(), new ResourceLocation(JojoMod.MOD_ID, "cassette_distortion"), (itemStack, clientWorld, livingEntity) -> {
-                return CassetteRecordedItem.getCapability(itemStack)
+                return CassetteRecordedItem.getCassetteData(itemStack)
                         .map(cap -> MathHelper.clamp(cap.getGeneration(), 0, CassetteCap.MAX_GENERATION))
                         .orElse(0).floatValue();
             });
@@ -333,7 +333,7 @@ public class ClientSetup {
         itemColors.register((stack, layer) -> {
             if (layer != 1) return -1;
 
-            Optional<DyeColor> dye = CassetteRecordedItem.getCapability(stack).map(cap -> cap.getDye()).orElse(Optional.empty());
+            Optional<DyeColor> dye = CassetteRecordedItem.getCassetteData(stack).map(cap -> cap.getDye());
             return dye.isPresent() ? dye.get().getColorValue() : 0xeff0e0;
         }, ModItems.CASSETTE_RECORDED.get());
     }

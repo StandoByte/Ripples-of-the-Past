@@ -41,6 +41,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacke
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillAddPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillRemovePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSyncOnLoadPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHamonSyncPlayerLearnerPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonUiEffectPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonAuraColorPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonAuraColorPacket.HamonAuraColor;
@@ -151,8 +152,8 @@ public class HamonData extends TypeSpecificData {
         updateHeight = false;
         LivingEntity user = power.getUser();
         if (user.isAlive()) {
+            tickNewPlayerLearners(user);
             if (!user.level.isClientSide()) {
-                tickNewPlayerLearners(user);
                 tickAirSupply(user);
                 if (tcsa && (power.isUserCreative() || getCharacterTechnique() != null)) {
                     tcsa = false;
@@ -1190,28 +1191,45 @@ public class HamonData extends TypeSpecificData {
     
     
     
-    public void addNewPlayerLearner(PlayerEntity player) {
-        newLearners.add(player);
+    public boolean playerWantsToLearn(PlayerEntity playerEntity) {
+        return newLearners.contains(playerEntity);
+    }
+    
+    public void addNewPlayerLearner(PlayerEntity learnerPlayer) {
+        newLearners.add(learnerPlayer);
         LivingEntity user = power.getUser();
-        if (user instanceof PlayerEntity) {
-            ((PlayerEntity) user).displayClientMessage(new TranslationTextComponent("jojo.chat.message.new_hamon_learner", player.getDisplayName()), true);
+        if (!user.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(
+                    new TrHamonSyncPlayerLearnerPacket(user.getId(), learnerPlayer.getId(), true), user);
         }
     }
     
     private void tickNewPlayerLearners(LivingEntity user) {
         for (Iterator<PlayerEntity> it = newLearners.iterator(); it.hasNext(); ) {
             PlayerEntity player = it.next();
-            if (user.distanceToSqr(player) > 64) {
+            if (!player.isAlive() || user.distanceToSqr(player) > 64) {
                 it.remove();
             }
         }
     }
     
-    public void interactWithNewLearner(PlayerEntity player) {
-        if (newLearners.contains(player)) {
-            HamonUtil.startLearningHamon(player.level, player, INonStandPower.getPlayerNonStandPower(player), power.getUser(), this);
-            newLearners.remove(player);
+    public boolean interactWithNewLearner(PlayerEntity learnerPlayer) {
+        if (newLearners.contains(learnerPlayer)) {
+            if (!learnerPlayer.level.isClientSide()) {
+                HamonUtil.startLearningHamon(learnerPlayer.level, learnerPlayer, 
+                        INonStandPower.getPlayerNonStandPower(learnerPlayer), power.getUser(), this);
+                LivingEntity user = power.getUser();
+                PacketManager.sendToClientsTracking(
+                        new TrHamonSyncPlayerLearnerPacket(user.getId(), learnerPlayer.getId(), false), user);
+            }
+            newLearners.remove(learnerPlayer);
+            return true;
         }
+        return false;
+    }
+    
+    public void removeNewLearner(PlayerEntity player) {
+        newLearners.remove(player);
     }
     
     

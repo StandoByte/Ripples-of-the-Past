@@ -201,6 +201,19 @@ public class HamonUtil {
         return skills;
     }
     
+    public static boolean interactWithHamonTeacher(World world, PlayerEntity player, Entity targetEntity) {
+        if (targetEntity instanceof LivingEntity) {
+            LivingEntity targetLiving = (LivingEntity) targetEntity;
+            Optional<HamonData> targetHamon = INonStandPower.getNonStandPowerOptional(targetLiving).resolve()
+                    .flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get()));
+            if (targetHamon.isPresent()) {
+                HamonUtil.interactWithHamonTeacher(targetLiving.level, player, targetLiving, targetHamon.get());
+                return true;
+            }
+        }
+        return false;
+    }
+    
     public static void interactWithHamonTeacher(World world, PlayerEntity player, LivingEntity teacher, HamonData teacherHamon) {
         INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
             Optional<HamonData> hamonOptional = power.getTypeSpecificData(ModPowers.HAMON.get());
@@ -676,7 +689,7 @@ public class HamonUtil {
         }
     }
     
-    private static boolean isItemLivingMatter(ItemStack itemStack) {
+    public static boolean isItemLivingMatter(ItemStack itemStack) {
         if (itemStack.isEmpty()) {
             return false;
         }

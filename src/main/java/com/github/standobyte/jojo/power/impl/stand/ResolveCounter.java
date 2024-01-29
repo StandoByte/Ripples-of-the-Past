@@ -74,11 +74,14 @@ public class ResolveCounter {
     private float boostChat = 1;
     private float hpOnGettingAttacked = -1;
     
+    private final boolean clientSide;
+    
     
     protected ResolveCounter(IStandPower stand) {
         this.stand = stand;
         LivingEntity standUser = stand.getUser();
         this.serverPlayerUser = standUser instanceof ServerPlayerEntity ? Optional.of((ServerPlayerEntity) standUser) : Optional.empty();
+        this.clientSide = standUser.level.isClientSide();
     }
 
 
@@ -111,7 +114,7 @@ public class ResolveCounter {
                         noResolveDecayTicks--;
                     }
                 }
-                else {
+                else if (!clientSide) {
                     if (saveNextRecord) {
                         saveNextRecord = false;
                     }
@@ -168,9 +171,8 @@ public class ResolveCounter {
     }
     
     public void setMaxAchievedValue(float value) {
-        boolean send = this.maxAchievedValue != value;
-        this.maxAchievedValue = value;
-        if (send) {
+        if (this.maxAchievedValue != value) {
+            this.maxAchievedValue = value;
             serverPlayerUser.ifPresent(player -> {
                 PacketManager.sendToClient(new MaxAchievedResolvePacket(value), player);
             });
@@ -453,6 +455,7 @@ public class ResolveCounter {
                 this.resolveRecords.add(listNBT.getFloat(i));
             }
         }
+        maxAchievedValue = nbt.getFloat("MaxAchieved");
     }
 
     CompoundNBT writeNBT() {
@@ -472,6 +475,7 @@ public class ResolveCounter {
             recordNbt.add(FloatNBT.valueOf(record));
         }
         resolveNbt.put("ResolveRecord", recordNbt);
+        resolveNbt.putFloat("MaxAchieved", maxAchievedValue);
         
         return resolveNbt;
     }

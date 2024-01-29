@@ -91,6 +91,9 @@ public class StandRemoverItem extends Item {
     
     @Override
     public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
+        if (((StandRemoverItem) stack.getItem()).mode == Mode.FULL_CLEAR) {
+            tooltip.add(new TranslationTextComponent("item.jojo.stand_full_clear.hint").withStyle(TextFormatting.GRAY));
+        }
         tooltip.add(new TranslationTextComponent("item.jojo.creative_only_tooltip").withStyle(TextFormatting.DARK_GRAY));
     }
     

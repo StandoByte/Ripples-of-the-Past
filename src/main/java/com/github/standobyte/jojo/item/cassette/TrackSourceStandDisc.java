@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.capability.item.cassette;
+package com.github.standobyte.jojo.item.cassette;
 
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;

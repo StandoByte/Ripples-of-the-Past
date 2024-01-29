@@ -660,8 +660,8 @@ public class GameplayEventHandler {
     }
 
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void prepareToReduceKnockback(LivingDamageEvent event) {
+    @SubscribeEvent(receiveCanceled = true)
+    public static void prepareToReduceKnockback(LivingHurtEvent event) {
         float knockbackReduction = DamageUtil.knockbackReduction(event.getSource());
         
         if (knockbackReduction >= 0 && knockbackReduction < 1) {
@@ -889,32 +889,32 @@ public class GameplayEventHandler {
 //        overdrive was there
 //    }
     
-    @SubscribeEvent(priority = EventPriority.LOW, receiveCanceled = true)
-    public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
-        if (event.getCancellationResult() == ActionResultType.PASS && event.getHand() == Hand.MAIN_HAND && !event.getPlayer().isShiftKeyDown()) {
-            Entity target = event.getTarget();
-            if (target instanceof PlayerEntity) {
-                PlayerEntity targetPlayer = (PlayerEntity) target;
-                INonStandPower targetPower = INonStandPower.getNonStandPowerOptional(targetPlayer).orElse(null);
-                INonStandPower playerPower = INonStandPower.getNonStandPowerOptional(event.getPlayer()).orElse(null);
-                if (targetPower != null && playerPower != null && 
-                        targetPower.getType() == ModPowers.HAMON.get()
-                        && (!playerPower.hasPower() || playerPower.getType().isReplaceableWith(ModPowers.HAMON.get()))) {
-                    HamonUtil.interactWithHamonTeacher(target.level, event.getPlayer(), targetPlayer, 
-                            targetPower.getTypeSpecificData(ModPowers.HAMON.get()).get());
-                    event.setCanceled(true);
-                    event.setCancellationResult(ActionResultType.sidedSuccess(target.level.isClientSide));
-                }
-                else {
-                    playerPower.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                        hamon.interactWithNewLearner(targetPlayer);
-                        event.setCanceled(true);
-                        event.setCancellationResult(ActionResultType.sidedSuccess(target.level.isClientSide));
-                    });
-                }
-            }
-        }
-    }
+//    @SubscribeEvent(priority = EventPriority.LOW, receiveCanceled = true)
+//    public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
+//        if (event.getCancellationResult() == ActionResultType.PASS && event.getHand() == Hand.MAIN_HAND && !event.getPlayer().isShiftKeyDown()) {
+//            Entity target = event.getTarget();
+//            if (target instanceof PlayerEntity) {
+//                PlayerEntity targetPlayer = (PlayerEntity) target;
+//                INonStandPower targetPower = INonStandPower.getNonStandPowerOptional(targetPlayer).orElse(null);
+//                INonStandPower playerPower = INonStandPower.getNonStandPowerOptional(event.getPlayer()).orElse(null);
+//                if (targetPower != null && playerPower != null && 
+//                        targetPower.getType() == ModPowers.HAMON.get()
+//                        && (!playerPower.hasPower() || playerPower.getType().isReplaceableWith(ModPowers.HAMON.get()))) {
+//                    HamonUtil.interactWithHamonTeacher(target.level, event.getPlayer(), targetPlayer, 
+//                            targetPower.getTypeSpecificData(ModPowers.HAMON.get()).get());
+//                    event.setCanceled(true);
+//                    event.setCancellationResult(ActionResultType.sidedSuccess(target.level.isClientSide));
+//                }
+//                else {
+//                    playerPower.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
+//                        hamon.interactWithNewLearner(targetPlayer);
+//                        event.setCanceled(true);
+//                        event.setCancellationResult(ActionResultType.sidedSuccess(target.level.isClientSide));
+//                    });
+//                }
+//            }
+//        }
+//    }
     
     @SubscribeEvent(priority = EventPriority.LOW, receiveCanceled = true)
     public static void tripwireInteract(PlayerInteractEvent.RightClickBlock event) {

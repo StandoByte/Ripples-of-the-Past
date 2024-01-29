@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.render.entity.model.stand.bb;
+package com.github.standobyte.jojo.client.render.entity.bb;
 
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockBullet;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRepairItem;

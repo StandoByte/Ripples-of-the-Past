@@ -4,6 +4,8 @@ import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.EXPERIENCE;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.FOOD;
 
+import java.util.Optional;
+
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
@@ -21,6 +23,7 @@ import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.ClientModSettingsScreen;
 import com.github.standobyte.jojo.client.ui.screen.widgets.HeightScaledSlider;
+import com.github.standobyte.jojo.client.ui.screen.widgets.ImageVanillaButton;
 import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModStatusEffects;
@@ -29,6 +32,7 @@ import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandArrowHandler;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
@@ -52,7 +56,6 @@ import net.minecraft.client.gui.screen.OptionsScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractSlider;
 import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.client.gui.widget.button.ImageButton;
 import net.minecraft.client.renderer.FirstPersonRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.OutlineLayerBuffer;
@@ -72,11 +75,14 @@ import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Timer;
+import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -295,6 +301,45 @@ public class ClientEventHandler {
             
             deathScreenTick = mc.screen instanceof DeathScreen ? deathScreenTick + 1 : 0;
             standStatsTick = mc.screen instanceof IngameMenuScreen && doStandStatsRender(mc.screen) ? standStatsTick + 1 : 0;
+        }
+    }
+    
+    public static void onMouseTargetChanged(RayTraceResult newTarget) {
+        if (newTarget instanceof EntityRayTraceResult) {
+            Entity entity = ((EntityRayTraceResult) newTarget).getEntity();
+            if (entity instanceof PlayerEntity) {
+                @SuppressWarnings("resource")
+                PlayerEntity clientPlayer = Minecraft.getInstance().player;
+                PlayerEntity targetPlayer = (PlayerEntity) entity;
+                Optional<HamonData> playerHamon = INonStandPower.getNonStandPowerOptional(clientPlayer)
+                        .resolve().flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get()));
+                if (playerHamon.isPresent()) {
+                    if (playerHamon.get().playerWantsToLearn(targetPlayer)) {
+                        ClientUtil.setOverlayMessage(new TranslationTextComponent(
+                                "jojo.chat.message.new_hamon_learner", 
+                                targetPlayer.getDisplayName(), 
+                                new KeybindTextComponent(InputHandler.getInstance().hamonSkillsWindow.getName())));
+                    }
+                }
+                else {
+                    Optional<HamonData> targetHamon = INonStandPower.getNonStandPowerOptional(targetPlayer)
+                            .resolve().flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get()));
+                    if (targetHamon.isPresent()) {
+                        boolean hasAskedAlready = targetHamon.get().playerWantsToLearn(clientPlayer);
+                        if (hasAskedAlready) {
+                            ClientUtil.setOverlayMessage(new TranslationTextComponent(
+                                    "jojo.chat.message.asked_hamon_teacher", 
+                                    targetPlayer.getDisplayName()));
+                        }
+                        else {
+                            ClientUtil.setOverlayMessage(new TranslationTextComponent(
+                                    "jojo.chat.message.ask_hamon_teacher", 
+                                    new KeybindTextComponent(InputHandler.getInstance().hamonSkillsWindow.getName()), 
+                                    targetPlayer.getDisplayName()));
+                        }
+                    }
+                }
+            }
         }
     }
     
@@ -619,8 +664,8 @@ public class ClientEventHandler {
                     statsBgAlphaSlider.visible = doStandStatsRender(screen);
                     event.addWidget(statsBgAlphaSlider);
                     
-                    Button standStatsToggleButton = new ImageButton(screen.width - 28, screen.height - 28, 
-                            20, 20, 236, 216, 20, StandStatsRenderer.STAND_STATS_UI, 256, 256, 
+                    Button standStatsToggleButton = new ImageVanillaButton(screen.width - 28, screen.height - 28, 
+                            20, 20, 236, 236, StandStatsRenderer.STAND_STATS_UI, 256, 256, 
                             button -> {
                                 renderStandStats = !doStandStatsRender(screen);
                                 statsBgAlphaSlider.visible = doStandStatsRender(screen);
@@ -634,8 +679,8 @@ public class ClientEventHandler {
                             StringTextComponent.EMPTY);
                     event.addWidget(standStatsToggleButton);
                     
-//                    Button standSkinsButton = new ImageButton(screen.width - 28, screen.height - 159, 
-//                            20, 20, 236, 216, 20, StandSkinsScreen.TEXTURE_MAIN_WINDOW, 256, 256, 
+//                    Button standSkinsButton = new ImageVanillaButton(screen.width - 28, screen.height - 159, 
+//                            20, 20, 236, 236, StandSkinsScreen.TEXTURE_MAIN_WINDOW, 256, 256, 
 //                            button -> {
 //                                StandSkinsScreen.openScreen(screen);
 //                            }, 

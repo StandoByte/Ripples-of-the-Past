@@ -1,21 +1,19 @@
-package com.github.standobyte.jojo.capability.item.cassette;
+package com.github.standobyte.jojo.item.cassette;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.capability.item.cassette.TrackSource.TrackSourceType;
 import com.github.standobyte.jojo.client.WalkmanSoundHandler.CassetteSide;
+import com.github.standobyte.jojo.item.cassette.TrackSource.TrackSourceType;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.item.DyeColor;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.ByteNBT;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 
@@ -23,12 +21,14 @@ import net.minecraft.nbt.ListNBT;
 public class CassetteCap {
     @Nonnull private TrackSourceList tracks = TrackSourceList.BROKEN_CASSETTE;
     private int generation = 0;
-    @Nonnull private Optional<DyeColor> color = Optional.empty();
+    @Nullable private DyeColor color = null;
+    private boolean dyeCraftHint = false;
     
     private CassetteSide side = CassetteSide.SIDE_A;
     private int sideTrack = 0;
     
-    public CassetteCap(ItemStack cassetteItem) {}
+    public CassetteCap(ItemStack cassetteItem) {
+    }
     
 
     
@@ -61,11 +61,20 @@ public class CassetteCap {
     
 
     public void setDye(@Nullable DyeColor dye) {
-        this.color = Optional.ofNullable(dye);
+        this.color = dye;
     }
     
-    public Optional<DyeColor> getDye() {
+    @Nullable
+    public DyeColor getDye() {
         return color;
+    }
+    
+    public void addDyeCraftHint() {
+        dyeCraftHint = true;
+    }
+    
+    public boolean hasDyeCraftHint() {
+        return dyeCraftHint;
     }
     
     
@@ -93,7 +102,10 @@ public class CassetteCap {
         
         nbt.put("Tracks", tracks.toNBT());
         nbt.putByte("Generation", (byte)generation);
-        if (color.isPresent()) nbt.putByte("Dye", (byte) color.get().ordinal());
+        if (color != null) {
+            MCUtil.nbtPutEnum(nbt, "Dye", color);
+            nbt.putBoolean("DyeCraftHint", dyeCraftHint);
+        }
         nbt.putBoolean("Side", side == CassetteSide.SIDE_B);
         nbt.putByte("TrackNumber", (byte) sideTrack);
         
@@ -103,20 +115,10 @@ public class CassetteCap {
     public void fromNBT(CompoundNBT nbt) {
         if (nbt.contains("Tracks", MCUtil.getNbtId(ListNBT.class))) tracks = TrackSourceList.fromNBT(nbt.getList("Tracks", MCUtil.getNbtId(CompoundNBT.class)));
         generation = nbt.getInt("Generation");
-        color = getColor(nbt, "Dye");
+        color = MCUtil.nbtGetEnum(nbt, "Dye", DyeColor.class);
+        dyeCraftHint = nbt.getBoolean("DyeCraftHint");
         side = nbt.getBoolean("Side") ? CassetteSide.SIDE_B : CassetteSide.SIDE_A;
         sideTrack = nbt.getByte("TrackNumber");
-    }
-    
-    private Optional<DyeColor> getColor(CompoundNBT nbt, String nbtKey) {
-        if (nbt.contains(nbtKey, MCUtil.getNbtId(ByteNBT.class))) {
-            int ordinal = nbt.getByte(nbtKey);
-            DyeColor[] colors = DyeColor.values();
-            if (ordinal >= 0 && ordinal < colors.length) {
-                return Optional.of(colors[ordinal]);
-            }
-        }
-        return Optional.empty();
     }
     
     

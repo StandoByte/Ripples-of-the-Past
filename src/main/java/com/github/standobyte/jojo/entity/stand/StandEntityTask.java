@@ -76,7 +76,8 @@ public class StandEntityTask {
         if (target.getType() == TargetType.ENTITY) {
             Entity targetEntity = target.getEntity();
             if (targetEntity == null || targetEntity.is(standEntity)
-                    || !targetEntity.isAlive() && targetEntity.removed || !(targetEntity instanceof LivingEntity && ((LivingEntity) targetEntity).deathTime < 20)) {
+                    || !targetEntity.isAlive() && targetEntity.removed
+                    || targetEntity instanceof LivingEntity && ((LivingEntity) targetEntity).deathTime >= 20) {
                 return false;
             }
         }
@@ -137,9 +138,7 @@ public class StandEntityTask {
 
             if (action.standCanTickPerform(standEntity.level, standEntity, standPower, this)) {
                 action.standTickPerform(standEntity.level, standEntity, standPower, this);
-                if (!standEntity.level.isClientSide()) {
-                    standPower.consumeStamina(action.getStaminaCostTicking(standPower));
-                }
+                standPower.consumeStamina(action.getStaminaCostTicking(standPower), true);
             }
             break;
         case RECOVERY:

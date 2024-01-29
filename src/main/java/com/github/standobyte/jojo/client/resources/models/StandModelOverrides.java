@@ -3,10 +3,13 @@ package com.github.standobyte.jojo.client.resources.models;
 import java.util.HashMap;
 import java.util.Map;
 
+import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.client.render.entity.bb.BlockbenchStandModelHelper;
+import com.github.standobyte.jojo.client.render.entity.bb.EntityModelUnbaked;
+import com.github.standobyte.jojo.client.render.entity.bb.ParseGeckoModel;
+import com.github.standobyte.jojo.client.render.entity.bb.ParseGenericModel;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel.StandModelRegistryObj;
-import com.github.standobyte.jojo.client.render.entity.model.stand.bb.BlockbenchStandModelHelper;
-import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -29,13 +32,22 @@ public class StandModelOverrides extends JsonReloadListener {
         modelOverrides.clear();
         for (Map.Entry<ResourceLocation, JsonElement> entry : pObject.entrySet()) {
             ResourceLocation location = entry.getKey();
-            location = new ResourceLocation(location.getNamespace(), location.getPath().replace(".geo", ""));
+            boolean bb = location.getPath().contains(".bb");
+            location = new ResourceLocation(location.getNamespace(), location.getPath().replace(".geo", "").replace(".bb", ""));
             StandModelRegistryObj standModel = StandEntityModel.getRegisteredModel(location);
             if (standModel != null) {
                 JsonElement json = entry.getValue();
                 if (json.isJsonObject()) {
                     StandEntityModel<?> modelCopy = standModel.createNewModelCopy();
-                    BlockbenchStandModelHelper.fillFromGeckoJson(json.getAsJsonObject(), modelCopy);
+                    EntityModelUnbaked modelOverride;
+                    if (bb) modelOverride = ParseGenericModel.parseGenericModel(json);
+                    else    modelOverride = ParseGeckoModel.parseGeckoModel(json);
+                    try {
+                        BlockbenchStandModelHelper.replaceModelParts(modelCopy, modelOverride.getNamedModelParts());
+                    } catch (Exception e) {
+                        JojoMod.getLogger().error("Failed to import Geckolib format model as {}", modelCopy.getClass().getName());
+                        e.printStackTrace();
+                    }
                     modelCopy.afterInit();
                     modelOverrides.put(location, modelCopy);
                 }

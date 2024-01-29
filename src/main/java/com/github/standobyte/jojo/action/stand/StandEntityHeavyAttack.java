@@ -23,7 +23,7 @@ import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
-import com.github.standobyte.jojo.util.general.Container;
+import com.github.standobyte.jojo.util.general.ObjectWrapper;
 import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
 
 import net.minecraft.block.BlockState;
@@ -61,7 +61,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         if (followUp != null && standEntity != null && standEntity.getCurrentTask().map(task -> {
             return task.getAction() == this && 
                     !task.getModifierActions().filter(action -> action == followUp).findAny().isPresent() &&
-                    power.checkRequirements(followUp, new Container<>(task.getTarget()), true).isPositive();
+                    power.checkRequirements(followUp, new ObjectWrapper<>(task.getTarget()), true).isPositive();
         }).orElse(false)) {
             return followUp;
         };
@@ -135,7 +135,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         double strength = stand.getAttackDamage();
         return new HeavyPunchInstance(stand, target, dmgSource)
                 .damage(StandStatFormulas.getHeavyAttackDamage(strength))
-                .addKnockback(0.5F + (float) strength / 8)
+                .addKnockback(0.5F + (float) strength / (8 - stand.getLastHeavyFinisherValue() * 4))
                 .setStandInvulTime(10)
                 .impactSound(punchSound);
     }
@@ -173,7 +173,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
 
     @Override
     public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
-        return StandStatFormulas.getHeavyAttackRecovery(standEntity.getAttackSpeed());
+        return StandStatFormulas.getHeavyAttackRecovery(standEntity.getAttackSpeed(), standEntity.getLastHeavyFinisherValue());
     }
     
     @Override
@@ -189,6 +189,11 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     @Override
     public boolean canFollowUpBarrage() {
         return true;
+    }
+    
+    @Override
+    public boolean isFreeRecovery(IStandPower standPower, StandEntity standEntity) {
+        return isFinisher();
     }
     
     @Override
@@ -214,22 +219,22 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         return !isFinisher;
     }
     
-    @Override
-    public StandAction[] getExtraUnlockable() {
-        StandAction[] actions = new StandAction[2];
-        int i = 0;
-        if (finisherVariation.get() != null) {
-            actions[i++] = finisherVariation.get();
-        }
-        if (recoveryAction.get() != null) {
-            actions[i++] = recoveryAction.get();
-        }
-        actions = Arrays.copyOfRange(actions, 0, i);
-        for (int j = 0; j < i; j++) {
-            actions = ArrayUtils.addAll(actions, actions[j].getExtraUnlockable());
-        }
-        return actions;
-    }
+//    @Override
+//    public StandAction[] getExtraUnlockable() {
+//        StandAction[] actions = new StandAction[2];
+//        int i = 0;
+//        if (finisherVariation.get() != null) {
+//            actions[i++] = finisherVariation.get();
+//        }
+//        if (recoveryAction.get() != null) {
+//            actions[i++] = recoveryAction.get();
+//        }
+//        actions = Arrays.copyOfRange(actions, 0, i);
+//        for (int j = 0; j < i; j++) {
+//            actions = ArrayUtils.addAll(actions, actions[j].getExtraUnlockable());
+//        }
+//        return actions;
+//    }
     
     
     
@@ -246,15 +251,19 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         }
         
         public Builder setFinisherVariation(Supplier<? extends StandEntityHeavyAttack> variation) {
-            if (this.finisherVariation.get() == null && variation != null && variation.get() != null) {
+            if (variation != null) {
                 this.finisherVariation = variation;
                 variation.get().isFinisher = true;
+                addExtraUnlockable(this.finisherVariation);
             }
             return getThis();
         }
         
         public Builder setRecoveryFollowUpAction(Supplier<? extends StandEntityActionModifier> recoveryAction) {
-            this.recoveryAction = recoveryAction != null ? recoveryAction : () -> null;
+            if (recoveryAction != null) {
+                this.recoveryAction = recoveryAction;
+                addExtraUnlockable(this.recoveryAction);
+            }
             return getThis();
         }
         

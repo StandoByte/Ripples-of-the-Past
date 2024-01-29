@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.HudNamesRender;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.PositionConfig;
+import com.github.standobyte.jojo.client.ui.screen.widgets.ImageVanillaButton;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.gui.DialogTexts;
@@ -16,7 +17,6 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.SettingsScreen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.client.gui.widget.button.ImageButton;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -45,6 +45,7 @@ public class ClientModSettingsScreen extends SettingsScreen {
         };
         addButton(barsPosition.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
         
+        
         EnumSetting<PositionConfig> hotbarsPosition = new EnumSetting<PositionConfig>(settings, 
                 new TranslationTextComponent("jojo.config.client.hotbarsPosition"), 
                 new TranslationTextComponent("jojo.config.client.hotbarsPosition.tooltip"), 
@@ -53,6 +54,7 @@ public class ClientModSettingsScreen extends SettingsScreen {
             @Override public void set(PositionConfig value) { settingsValues.hotbarsPosition = value; }
         };
         addButton(hotbarsPosition.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
+        
         
         EnumSetting<HudNamesRender> hudNamesRender = new EnumSetting<HudNamesRender>(settings, 
                 new TranslationTextComponent("jojo.config.client.hudNamesRender"), 
@@ -63,6 +65,17 @@ public class ClientModSettingsScreen extends SettingsScreen {
         };
         addButton(hudNamesRender.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
         
+        
+        BooleanSetting hudHotbarsFold = new BooleanSetting(settings, 
+                new TranslationTextComponent("jojo.config.client.hudHotbarsFold"), 
+                new TranslationTextComponent("jojo.config.client.hudHotbarsFold.tooltip")
+                ) {
+            @Override public boolean get() { return settingsValues.hudHotbarsFold; }
+            @Override public void set(boolean value) { settingsValues.hudHotbarsFold = value; }
+        };
+        addButton(hudHotbarsFold.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
+        
+        
         BooleanSetting characterVoiceLines = new BooleanSetting(settings, 
                 new TranslationTextComponent("jojo.config.client.characterVoiceLines"), 
                 new TranslationTextComponent("jojo.config.client.characterVoiceLines.tooltip")
@@ -72,6 +85,7 @@ public class ClientModSettingsScreen extends SettingsScreen {
         };
         addButton(characterVoiceLines.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
         
+        
         BooleanSetting menacingParticles = new BooleanSetting(settings, 
                 new TranslationTextComponent("jojo.config.client.menacingParticles"), 
                 new TranslationTextComponent("jojo.config.client.menacingParticles.tooltip")
@@ -80,6 +94,7 @@ public class ClientModSettingsScreen extends SettingsScreen {
             @Override public void set(boolean value) { settingsValues.menacingParticles = value; }
         };
         addButton(menacingParticles.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
+        
         
         BooleanSetting resolveShaders = new BooleanSetting(settings, 
                 new TranslationTextComponent("jojo.config.client.resolveShaders"), 
@@ -95,6 +110,7 @@ public class ClientModSettingsScreen extends SettingsScreen {
         };
         addButton(resolveShaders.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
         
+        
         BooleanSetting timeStopAnimation = new BooleanSetting(settings, 
                 new TranslationTextComponent("jojo.config.client.timeStopAnimation"), 
                 new TranslationTextComponent("jojo.config.client.timeStopAnimation.tooltip")
@@ -103,6 +119,7 @@ public class ClientModSettingsScreen extends SettingsScreen {
             @Override public void set(boolean value) { settingsValues.timeStopAnimation = value; }
         };
         addButton(timeStopAnimation.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
+        
         
         
         ++i;
@@ -257,8 +274,8 @@ public class ClientModSettingsScreen extends SettingsScreen {
         }
         
         ITextComponent tooltip = new TranslationTextComponent("jojo.options.client.title");
-        return new ImageButton(buttonPos[0], buttonPos[1], 20, 20, 
-                80, 128, 20, 
+        return new ImageVanillaButton(buttonPos[0], buttonPos[1], 20, 20, 
+                80, 128, 
                 ClientUtil.ADDITIONAL_UI, 256, 256,
                 button -> {
                     optionsScreen.getMinecraft().setScreen(new ClientModSettingsScreen(optionsScreen, ClientModSettings.getInstance()));

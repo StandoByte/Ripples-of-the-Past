@@ -29,7 +29,7 @@ import com.github.standobyte.jojo.power.bowcharge.BowChargeEffectInstance;
 import com.github.standobyte.jojo.power.bowcharge.IBowChargeEffect;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.layout.ActionsLayout;
-import com.github.standobyte.jojo.util.general.Container;
+import com.github.standobyte.jojo.util.general.ObjectWrapper;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.LivingEntity;
@@ -234,7 +234,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         if (action == null || getHeldAction() == action) return false;
         boolean wasActive = isActive();
         action.onClick(user.level, user, getThis());
-        Container<ActionTarget> targetContainer = new Container<>(target);
+        ObjectWrapper<ActionTarget> targetContainer = new ObjectWrapper<>(target);
         ActionConditionResult result = checkRequirements(action, targetContainer, true);
         target = targetContainer.get();
         serverPlayerUser.ifPresent(player -> {
@@ -286,7 +286,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
 
     @Override
-    public ActionConditionResult checkRequirements(Action<P> action, Container<ActionTarget> targetContainer, boolean checkTarget) {
+    public ActionConditionResult checkRequirements(Action<P> action, ObjectWrapper<ActionTarget> targetContainer, boolean checkTarget) {
         if (!canUsePower()) {
             return ActionConditionResult.NEGATIVE;
         }
@@ -326,7 +326,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
 
     @Override
-    public ActionConditionResult checkTarget(Action<P> action, Container<ActionTarget> targetContainer) {
+    public ActionConditionResult checkTarget(Action<P> action, ObjectWrapper<ActionTarget> targetContainer) {
         ActionTarget targetInitial = targetContainer.get();
         P power = getThis();
         action.overrideVanillaMouseTarget(targetContainer, user.level, user, power);
@@ -412,7 +412,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                     return;
                 }
                 ActionTarget target = getMouseTarget();
-                Container<ActionTarget> targetContainer = new Container<>(target);
+                ObjectWrapper<ActionTarget> targetContainer = new ObjectWrapper<>(target);
                 ActionConditionResult result = checkRequirements(heldActionData.action, targetContainer, true);
                 target = targetContainer.get();
                 if (result.shouldStopHeldAction()) {
@@ -468,7 +468,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                 }
             }
             else {
-                Container<ActionTarget> targetContainer = new Container<>(target);
+                ObjectWrapper<ActionTarget> targetContainer = new ObjectWrapper<>(target);
                 boolean fire = shouldFire && heldActionData.getTicks() >= heldAction.getHoldDurationToFire(getThis()) && 
                         checkRequirements(heldAction, targetContainer, true).isPositive();
 

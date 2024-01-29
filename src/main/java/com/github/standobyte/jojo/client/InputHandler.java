@@ -41,6 +41,8 @@ import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClDoubleShiftPressPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClHamonInteractAskTeacherPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClHamonInteractTeachPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonMeditationPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHasInputPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHeldActionTargetPacket;
@@ -53,6 +55,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandSummon
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.layout.ActionsLayout;
@@ -68,6 +71,7 @@ import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.MovementInput;
@@ -205,9 +209,8 @@ public class InputHandler {
         }
 
         if (actionsOverlay.isActive() && !mc.player.isSpectator()) {
-            ClientModSettings clientSettings = ClientModSettings.getInstance();
-            boolean scrollAttack = attackHotbar.isDown() || clientSettings.areControlsLockedForHotbar(ActionsLayout.Hotbar.LEFT_CLICK);
-            boolean scrollAbility = abilityHotbar.isDown() || clientSettings.areControlsLockedForHotbar(ActionsLayout.Hotbar.RIGHT_CLICK);
+            boolean scrollAttack = attackHotbar.isDown() || areControlsLockedForHotbar(ActionsLayout.Hotbar.LEFT_CLICK);
+            boolean scrollAbility = abilityHotbar.isDown() || areControlsLockedForHotbar(ActionsLayout.Hotbar.RIGHT_CLICK);
             if (scrollAttack || scrollAbility) {
                 if (scrollAttack) {
                     actionsOverlay.scrollAction(ActionsLayout.Hotbar.LEFT_CLICK, event.getScrollDelta() > 0.0D);
@@ -227,11 +230,9 @@ public class InputHandler {
         }
         
         if (event.phase == TickEvent.Phase.START) {
-            ClientModSettings clientSettings = ClientModSettings.getInstance();
-            
             if (actionsOverlay.isActive()) {
-                boolean chooseAttack = attackHotbar.isDown() || clientSettings.areControlsLockedForHotbar(ActionsLayout.Hotbar.LEFT_CLICK);
-                boolean chooseAbility = abilityHotbar.isDown() || clientSettings.areControlsLockedForHotbar(ActionsLayout.Hotbar.RIGHT_CLICK);
+                boolean chooseAttack = attackHotbar.isDown() || areControlsLockedForHotbar(ActionsLayout.Hotbar.LEFT_CLICK);
+                boolean chooseAbility = abilityHotbar.isDown() || areControlsLockedForHotbar(ActionsLayout.Hotbar.RIGHT_CLICK);
                 actionsOverlay.setHotbarButtonsDows(chooseAttack, chooseAbility);
                 actionsOverlay.setHotbarsEnabled(!disableHotbars.isDown());
                 if (chooseAttack || chooseAbility) {
@@ -272,16 +273,16 @@ public class InputHandler {
                 }
                 
                 if (lockAttackHotbar.consumeClick()) {
-                    clientSettings.switchLockedHotbarControls(ActionsLayout.Hotbar.LEFT_CLICK);
+                    switchLockedHotbarControls(ActionsLayout.Hotbar.LEFT_CLICK);
                 }
                 
                 if (lockAbilityHotbar.consumeClick()) {
-                    clientSettings.switchLockedHotbarControls(ActionsLayout.Hotbar.RIGHT_CLICK);
+                    switchLockedHotbarControls(ActionsLayout.Hotbar.RIGHT_CLICK);
                 }
                 
                 if (actionQuickAccess.isDown() && quickAccessMmbDelay <= 0
                         && !mc.player.isSpectator() && !disableHotbars.isDown()) {
-                    HudClickResult result = handleMouseClickPowerHud(ActionKey.QUICK_ACCESS);
+                    HudClickResult result = handleMouseClickPowerHud(ActionKey.QUICK_ACCESS, actionQuickAccess);
                     if (result.vanillaInput == HudClickResult.Behavior.CANCEL) {
                         KeyBinding keybinding = keyBindingMap.lookupActive(actionQuickAccess.getKey());
                         if (keybinding != null) {
@@ -299,7 +300,7 @@ public class InputHandler {
             clickWithBusyHands();
         }
         else {
-            pickMouseTarget();
+            boolean targetChanged = pickMouseTarget();
             
             if (leftClickBlockDelay > 0) {
                 leftClickBlockDelay--;
@@ -337,21 +338,46 @@ public class InputHandler {
             
             if (hamonSkillsWindow.consumeClick()) {
                 if (nonStandPower.hasPower() && nonStandPower.getType() == ModPowers.HAMON.get()) {
-                    ClientUtil.openHamonTeacherUi();
+                    boolean taughtHamon = false;
+                    if (mouseTarget instanceof EntityRayTraceResult) {
+                        Entity mouseTargetEntity = ((EntityRayTraceResult) mouseTarget).getEntity();
+                        taughtHamon = nonStandPower.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
+                            if (mouseTargetEntity instanceof PlayerEntity) {
+                                return hamon.interactWithNewLearner((PlayerEntity) mouseTargetEntity);
+                            }
+                            return false;
+                        }).orElse(false);
+                        if (taughtHamon) {
+                            PacketManager.sendToServer(new ClHamonInteractTeachPacket(mouseTargetEntity.getId()));
+                        }
+                    }
+                    if (!taughtHamon) {
+                        ClientUtil.openHamonTeacherUi();
+                    }
                 }
                 else {
-                    ITextComponent message;
-                    if (nonStandPower.getTypeSpecificData(ModPowers.VAMPIRISM.get())
-                            .map(vampirism -> vampirism.isVampireHamonUser()).orElse(false)) {
-                        message = new TranslationTextComponent("jojo.chat.message.no_hamon_vampire");
+                    boolean askedForHamonTraining = false;
+                    if (mouseTarget instanceof EntityRayTraceResult) {
+                        Entity mouseTargetEntity = ((EntityRayTraceResult) mouseTarget).getEntity();
+                        askedForHamonTraining = HamonUtil.interactWithHamonTeacher(mc.level, mc.player, (LivingEntity) mouseTargetEntity);
+                        if (askedForHamonTraining) {
+                            PacketManager.sendToServer(new ClHamonInteractAskTeacherPacket(mouseTargetEntity.getId()));
+                        }
                     }
-                    else if (nonStandPower.hadPowerBefore(ModPowers.HAMON.get())) {
-                        message = new TranslationTextComponent("jojo.chat.message.no_hamon_abandoned");
+                    if (!askedForHamonTraining) {
+                        ITextComponent message;
+                        if (nonStandPower.getTypeSpecificData(ModPowers.VAMPIRISM.get())
+                                .map(vampirism -> vampirism.isVampireHamonUser()).orElse(false)) {
+                            message = new TranslationTextComponent("jojo.chat.message.no_hamon_vampire");
+                        }
+                        else if (nonStandPower.hadPowerBefore(ModPowers.HAMON.get())) {
+                            message = new TranslationTextComponent("jojo.chat.message.no_hamon_abandoned");
+                        }
+                        else {
+                            message = new TranslationTextComponent("jojo.chat.message.no_hamon");
+                        }
+                        mc.gui.handleChat(ChatType.GAME_INFO, message, Util.NIL_UUID);
                     }
-                    else {
-                        message = new TranslationTextComponent("jojo.chat.message.no_hamon");
-                    }
-                    mc.gui.handleChat(ChatType.GAME_INFO, message, Util.NIL_UUID);
                 }
             }
             
@@ -367,11 +393,47 @@ public class InputHandler {
                 quickAccessMmbDelay = 0;
             }
             
-            checkHeldActionAndTarget(standPower);
-            checkHeldActionAndTarget(nonStandPower);
+            checkHeldActionAndTarget(standPower, targetChanged);
+            checkHeldActionAndTarget(nonStandPower, targetChanged);
+            
+            if (targetChanged) {
+                ClientEventHandler.onMouseTargetChanged(mouseTarget);
+            }
         }
     }
-
+    
+    
+    public void switchLockedHotbarControls(ActionsLayout.Hotbar hotbar) {
+        setLockedHotbarControls(hotbar, !areControlsLockedForHotbar(hotbar));
+    }
+    
+    private void setLockedHotbarControls(ActionsLayout.Hotbar hotbar, boolean value) {
+        switch (hotbar) {
+        case LEFT_CLICK:
+            lockedAttacksHotbar = value;
+            if (value) lockedAbilitiesHotbar = false;
+            break;
+        case RIGHT_CLICK:
+            if (value) lockedAttacksHotbar = false;
+            lockedAbilitiesHotbar = value;
+            break;
+        }
+    }
+    
+    private boolean lockedAttacksHotbar;
+    private boolean lockedAbilitiesHotbar;
+    public boolean areControlsLockedForHotbar(ActionsLayout.Hotbar hotbar) {
+        if (hotbar == null) return false;
+        switch (hotbar) {
+        case LEFT_CLICK:
+            return lockedAttacksHotbar;
+        case RIGHT_CLICK:
+            return lockedAbilitiesHotbar;
+        }
+        return false;
+    }
+    
+    
     private static final Random RANDOM = new Random();
     public void setRandomStandSkin() {
         if (standPower.hasPower()) {
@@ -383,14 +445,21 @@ public class InputHandler {
         }
     }
     
-    private void pickMouseTarget() {
-        mouseTarget = mc.hitResult;
+    private boolean pickMouseTarget() {
+        RayTraceResult target = mc.hitResult;
         if (actionsOverlay != null && actionsOverlay.getCurrentPower() != null) {
             IPower<?, ?> power = actionsOverlay.getCurrentPower();
             if (power.hasPower()) {
-                mouseTarget = power.clientHitResult(mc.getCameraEntity() != null ? mc.getCameraEntity() : mc.player, mouseTarget);
+                target = power.clientHitResult(mc.getCameraEntity() != null ? mc.getCameraEntity() : mc.player, target);
             }
         }
+        
+        if (target != null && !MCUtil.rayTraceTargetEquals(target, mouseTarget)) {
+            this.mouseTarget = target;
+            return true;
+        }
+        
+        return false;
     }
     
     private final Map<IPower<?, ?>, ActionKey> heldKeys = new HashMap<>();
@@ -423,7 +492,7 @@ public class InputHandler {
         }
     }
     
-    private void checkHeldActionAndTarget(IPower<?, ?> power) {
+    private void checkHeldActionAndTarget(IPower<?, ?> power, boolean targetChanged) {
         boolean keyHeld;
         if (heldKeys.containsKey(power)) {
             keyHeld = heldKeys.get(power).getKey(mc, this).isDown();
@@ -439,7 +508,7 @@ public class InputHandler {
             stopHeldAction(power, power.getPowerClassification() == actionsOverlay.getCurrentMode());
         }
         
-        if (power.isTargetUpdateTick()) {
+        if (power.isTargetUpdateTick() && targetChanged) {
             PacketManager.sendToServer(ClHeldActionTargetPacket.withRayTraceResult(power.getPowerClassification(), mouseTarget));
         }
     }
@@ -472,17 +541,20 @@ public class InputHandler {
         }
 
         ActionKey key;
+        KeyBinding keyBinding;
         if (event.isAttack()) {
             key = ActionKey.ATTACK;
+            keyBinding = mc.options.keyAttack;
         }
         else if (event.isUseItem()) {
             key = ActionKey.ABILITY;
+            keyBinding = mc.options.keyUse;
         }
         else {
             return;
         }
         
-        HudClickResult clickResult = handleMouseClickPowerHud(key);
+        HudClickResult clickResult = handleMouseClickPowerHud(key, keyBinding);
         if (clickResult.vanillaInput == HudClickResult.Behavior.CANCEL) {
             event.setCanceled(true);
         }
@@ -494,15 +566,15 @@ public class InputHandler {
     private void clickWithBusyHands() {
         if (ClientUtil.arePlayerHandsBusy()) {
             while (mc.options.keyAttack.consumeClick()) {
-                handleMouseClickPowerHud(ActionKey.ATTACK);
+                handleMouseClickPowerHud(ActionKey.ATTACK, mc.options.keyAttack);
             }
             while (mc.options.keyUse.consumeClick()) {
-                handleMouseClickPowerHud(ActionKey.ABILITY);
+                handleMouseClickPowerHud(ActionKey.ABILITY, mc.options.keyUse);
             }
         }
     }
     
-    private <P extends IPower<P, ?>> HudClickResult handleMouseClickPowerHud(ActionKey key) {
+    private <P extends IPower<P, ?>> HudClickResult handleMouseClickPowerHud(ActionKey key, KeyBinding keyBinding) {
         HudClickResult result = new HudClickResult();
         if (!actionsOverlay.areHotbarsEnabled() || mc.player.isSpectator()) {
             return result;
