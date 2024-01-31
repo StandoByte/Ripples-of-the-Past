@@ -1,6 +1,8 @@
 {
+  "compatibilityLevel": "JAVA_8",
   "package": "com.github.standobyte.jojo.mixin",
   "refmap": "mixins.jojo.refmap.json",
+  "minVersion": "0.8",
   "mixins": [
     "LivingEntityMixin",
     "PlayerEntityMixin",
