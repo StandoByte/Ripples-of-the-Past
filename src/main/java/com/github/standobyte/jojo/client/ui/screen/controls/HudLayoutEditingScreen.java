@@ -18,6 +18,7 @@ import org.lwjgl.glfw.GLFW;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.InputHandler.MouseButton;
 import com.github.standobyte.jojo.client.controls.ActionKeybindEntry;
@@ -28,18 +29,25 @@ import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.controls.HudControlSettings;
 import com.github.standobyte.jojo.client.controls.PowerTypeControlSchemes;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
+import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.ControlSettingToggleButton;
+import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.HoldToggleKeyEntry;
+import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.VanillaKeyEntry;
 import com.github.standobyte.jojo.client.ui.screen.widgets.CustomButton;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
+import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.util.general.Vector2i;
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.screen.ControlsScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.widget.list.KeyBindingList;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.util.ResourceLocation;
@@ -72,6 +80,8 @@ public class HudLayoutEditingScreen extends Screen {
     private Set<ResourceLocation> editedLayouts = new HashSet<>();
     
     private Widget addKeybindButton;
+    
+    private List<KeyBindingList.Entry> registeredKeys = new ArrayList<>();
 
     public HudLayoutEditingScreen() {
         super(new TranslationTextComponent("jojo.screen.edit_hud_layout"));
@@ -123,6 +133,28 @@ public class HudLayoutEditingScreen extends Screen {
             }
         });
         
+        // vanilla controls settings
+        addButton(new CustomButton(getWindowX() - 26, getWindowY() + WINDOW_HEIGHT - 26, 22, 22, 
+                button -> {
+                    ControlsScreen mcControlsScreen = new ControlsScreen(this, minecraft.options);
+                    minecraft.setScreen(mcControlsScreen);
+                }, 
+                (button, matrixStack, x, y) -> {
+                    renderTooltip(matrixStack, new TranslationTextComponent("jojo.screen.edit_hud_layout.mc_controls"), x, y);
+                }) {
+
+            @Override
+            protected void renderCustomButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
+                Minecraft minecraft = Minecraft.getInstance();
+                minecraft.getTextureManager().bind(WINDOW);
+                RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+                RenderSystem.enableDepthTest();
+                blit(matrixStack, x, y, 164, 190 + getYImage(isHovered()) * height, width, height);
+            }
+        });
+        
         
         if (selectedTab != null) {
             IPower.getPowerOptional(minecraft.player, selectedTab).ifPresent(power -> {
@@ -165,7 +197,7 @@ public class HudLayoutEditingScreen extends Screen {
         renderHint(matrixStack);
         renderSlots(matrixStack, mouseX, mouseY);
         renderDragged(matrixStack, mouseX, mouseY);
-        renderKeybindsList(matrixStack, mouseX, mouseY);
+        renderKeybindsList(matrixStack, mouseX, mouseY, partialTick);
         renderToolTips(matrixStack, mouseX, mouseY);
         buttons.forEach(button -> button.render(matrixStack, mouseX, mouseY, partialTick));
     }
@@ -558,7 +590,63 @@ public class HudLayoutEditingScreen extends Screen {
             for (ActionKeybindEntry keybindEntry : currentControlScheme.getCustomKeybinds()) {
                 _addKeybindEntryToUi(keybindEntry);
             }
+            
+            
+
+            registeredKeys.clear();
+            int maxHeight = 150;
+            ClientModSettings modSettings = ClientModSettings.getInstance();
+            ClientModSettings.Settings modSettingsRead = ClientModSettings.getSettingsReadOnly();
+            registeredKeys.add(new HoldToggleKeyEntry(
+                    new VanillaKeyEntry(InputHandler.getInstance().attackHotbar, this::getSelectedKey, key -> {}, maxHeight), 
+                    new ControlSettingToggleButton(40, 20, 
+                            button -> {
+                                modSettings.editSettings(s -> s.toggleLmbHotbar = !s.toggleLmbHotbar);
+                                InputHandler.getInstance().setToggledHotbarControls(ControlScheme.Hotbar.LEFT_CLICK, false);
+                            },
+                            () -> modSettingsRead.toggleLmbHotbar)));
+            registeredKeys.add(new HoldToggleKeyEntry(
+                    new VanillaKeyEntry(InputHandler.getInstance().abilityHotbar, this::getSelectedKey, key -> {}, maxHeight), 
+                    new ControlSettingToggleButton(40, 20, 
+                            button -> {
+                                modSettings.editSettings(s -> s.toggleRmbHotbar = !s.toggleRmbHotbar);
+                                InputHandler.getInstance().setToggledHotbarControls(ControlScheme.Hotbar.RIGHT_CLICK, false);
+                            },
+                            () -> modSettingsRead.toggleRmbHotbar)));
+            registeredKeys.add(new HoldToggleKeyEntry(
+                    new VanillaKeyEntry(InputHandler.getInstance().disableHotbars, this::getSelectedKey, key -> {}, maxHeight), 
+                    new ControlSettingToggleButton(40, 20, 
+                            button -> {
+                                modSettings.editSettings(s -> s.toggleDisableHotbars = !s.toggleDisableHotbars);
+                                InputHandler.getInstance().setToggleHotbarsDisabled(false);
+                            },
+                            () -> modSettingsRead.toggleDisableHotbars)));
+            switch (selectedTab) {
+            case STAND:
+                registeredKeys.add(new VanillaKeyEntry(InputHandler.getInstance().toggleStand, 
+                        this::getSelectedKey, key -> {}, maxHeight));
+                registeredKeys.add(new VanillaKeyEntry(InputHandler.getInstance().standRemoteControl, 
+                        this::getSelectedKey, key -> {}, maxHeight));
+                registeredKeys.add(new VanillaKeyEntry(InputHandler.getInstance().standMode, 
+                        this::getSelectedKey, key -> {}, maxHeight));
+                break;
+            case NON_STAND:
+                registeredKeys.add(new VanillaKeyEntry(InputHandler.getInstance().nonStandMode, 
+                        this::getSelectedKey, key -> {}, maxHeight));
+                IPowerType<?, ?> type = power.getType();
+                if (type == ModPowers.HAMON.get()) {
+                    registeredKeys.add(new VanillaKeyEntry(InputHandler.getInstance().hamonSkillsWindow, 
+                            this::getSelectedKey, key -> {}, maxHeight));
+                }
+                break;
+            }
+            // TODO add the buttons to the screen widgets (remove the previous buttons)
         }
+    }
+    
+    @Nullable
+    private final KeyBinding getSelectedKey() {
+        return selectedKey != null ? selectedKey.getKeybind() : null;
     }
     
     private <P extends IPower<P, ?>> boolean isActionVisible(Action<P> action, IPower<?, ?> power) {
@@ -667,7 +755,7 @@ public class HudLayoutEditingScreen extends Screen {
     private ActionKeybindEntry selectedKey;
     private Optional<ActionKeybindEntry> hoveredKeybindSlot = Optional.empty();
     private final Map<ActionKeybindEntry, KeybindButtonsHolder> keybindButtons = new LinkedHashMap<>();
-    private void renderKeybindsList(MatrixStack matrixStack, int mouseX, int mouseY) {
+    private void renderKeybindsList(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
         hoveredKeybindSlot = getKeybindSlotAt(mouseX, mouseY);
         Collection<KeyBinding> keys = new ArrayList<>();
         Collections.addAll(keys, minecraft.options.keyMappings);
@@ -705,6 +793,17 @@ public class HudLayoutEditingScreen extends Screen {
         
         addKeybindButton.y = getWindowY() + 64 + keybindButtons.size() * 22;
         addKeybindButton.visible = keybindButtons.size() < 5;
+        
+        
+        
+        int i = 0;
+        int x = getWindowX() + 15;
+        int y = getWindowY() + WINDOW_HEIGHT + 4;
+        for (KeyBindingList.Entry vanillaKeyEntry : registeredKeys) {
+            vanillaKeyEntry.render(matrixStack, i, y + i * 20, x, -1, 20, 
+                    mouseX, mouseY, false, partialTick);
+            ++i;
+        }
     }
     
     private boolean mouseClickedEditingKeybind(int buttonId) {

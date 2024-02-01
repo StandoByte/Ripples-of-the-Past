@@ -26,7 +26,7 @@ import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.ClientModSettingsScreen;
 import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.ControlSettingToggleButton;
-import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.ExtendedKeyEntry;
+import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.HoldToggleKeyEntry;
 import com.github.standobyte.jojo.client.ui.screen.widgets.HeightScaledSlider;
 import com.github.standobyte.jojo.client.ui.screen.widgets.ImageVanillaButton;
 import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
@@ -718,7 +718,7 @@ public class ClientEventHandler {
                     KeyBindingList.KeyEntry keyEntry = (KeyBindingList.KeyEntry) entry;
                     KeyBinding key = ClientReflection.getKey(keyEntry);
                     if (key == InputHandler.getInstance().attackHotbar) {
-                        entriesIter.set(new ExtendedKeyEntry(keyEntry, new ControlSettingToggleButton(40, 20, 
+                        entriesIter.set(new HoldToggleKeyEntry(keyEntry, ClientReflection.getChangeButton(keyEntry), new ControlSettingToggleButton(40, 20, 
                                 button -> {
                                     modSettings.editSettings(s -> s.toggleLmbHotbar = !s.toggleLmbHotbar);
                                     InputHandler.getInstance().setToggledHotbarControls(ControlScheme.Hotbar.LEFT_CLICK, false);
@@ -726,7 +726,7 @@ public class ClientEventHandler {
                                 () -> modSettingsRead.toggleLmbHotbar)));
                     }
                     else if (key == InputHandler.getInstance().abilityHotbar) {
-                        entriesIter.set(new ExtendedKeyEntry(keyEntry, new ControlSettingToggleButton(40, 20, 
+                        entriesIter.set(new HoldToggleKeyEntry(keyEntry, ClientReflection.getChangeButton(keyEntry), new ControlSettingToggleButton(40, 20, 
                                 button -> {
                                     modSettings.editSettings(s -> s.toggleRmbHotbar = !s.toggleRmbHotbar);
                                     InputHandler.getInstance().setToggledHotbarControls(ControlScheme.Hotbar.RIGHT_CLICK, false);
@@ -734,7 +734,7 @@ public class ClientEventHandler {
                                 () -> modSettingsRead.toggleRmbHotbar)));
                     }
                     else if (key == InputHandler.getInstance().disableHotbars) {
-                        entriesIter.set(new ExtendedKeyEntry(keyEntry, new ControlSettingToggleButton(40, 20, 
+                        entriesIter.set(new HoldToggleKeyEntry(keyEntry, ClientReflection.getChangeButton(keyEntry), new ControlSettingToggleButton(40, 20, 
                                 button -> {
                                     modSettings.editSettings(s -> s.toggleDisableHotbars = !s.toggleDisableHotbars);
                                     InputHandler.getInstance().setToggleHotbarsDisabled(false);

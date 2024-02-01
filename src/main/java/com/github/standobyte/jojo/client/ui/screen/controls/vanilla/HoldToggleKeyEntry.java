@@ -3,22 +3,25 @@ package com.github.standobyte.jojo.client.ui.screen.controls.vanilla;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.gui.widget.list.KeyBindingList;
 
-public class ExtendedKeyEntry extends KeyBindingList.Entry {
-    private final KeyBindingList.KeyEntry wrappedEntry;
+public class HoldToggleKeyEntry extends KeyBindingList.Entry {
+    private final KeyBindingList.Entry wrappedEntry;
     private final Button holdToggleButton;
     private final Button changeButton;
 
-    public ExtendedKeyEntry(KeyBindingList.KeyEntry entry, Button holdToggleButton) {
-        this.wrappedEntry = entry;
+    public HoldToggleKeyEntry(VanillaKeyEntry wrappedEntry, Button holdToggleButton) {
+        this(wrappedEntry, wrappedEntry.changeButton, holdToggleButton);
+    }
+
+    public HoldToggleKeyEntry(KeyBindingList.Entry wrappedEntry, Button entryChangeKeyButton, Button holdToggleButton) {
+        this.wrappedEntry = wrappedEntry;
         this.holdToggleButton = holdToggleButton;
-        changeButton = ClientReflection.getChangeButton(entry);
+        changeButton = entryChangeKeyButton;
         changeButton.setWidth(changeButton.getWidth() - holdToggleButton.getWidth() - 0);
     }
     

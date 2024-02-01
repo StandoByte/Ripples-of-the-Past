@@ -269,6 +269,11 @@ public class ClientReflection {
         return ReflectionUtil.getFieldValue(CONTROLS_SCREEN_CONTROL_LIST, screen);
     }
     
+    private static final Field KEY_BINDING_LIST_MAX_NAME_WIDTH = ObfuscationReflectionHelper.findField(KeyBindingList.class, "field_148188_n");
+    public static int getMaxNameWidth(KeyBindingList keyBindingList) {
+        return ReflectionUtil.getIntFieldValue(KEY_BINDING_LIST_MAX_NAME_WIDTH, keyBindingList);
+    }
+    
     private static final Field KEY_BINDING_LIST_KEY_ENTRY_CHANGE_BUTTON = ObfuscationReflectionHelper.findField(KeyBindingList.KeyEntry.class, "field_148280_d");
     public static Button getChangeButton(KeyBindingList.KeyEntry keyEntry) {
         return ReflectionUtil.getFieldValue(KEY_BINDING_LIST_KEY_ENTRY_CHANGE_BUTTON, keyEntry);
