@@ -733,8 +733,11 @@ public class ActionsOverlayGui extends AbstractGui {
                 else {
                     RenderSystem.color4f(0.75F, 0.75F, 0.75F, 0.75F * hotbarAlpha);
                 }
-                BlitFloat.blitFloat(matrixStack, x + leftCut, y, cutWidth, 16, 
-                        leftCut, 0, cutWidth, 16, 16, 16);
+                BlitFloat.blitFloat(matrixStack, 
+                        x + leftCut, y, 
+                        leftCut, 0, 
+                        cutWidth, 16, 
+                        16, 16);
                 // cooldown
                 float ratio = power.getCooldownRatio(action, partialTick);
                 if (ratio > 0) {
@@ -743,8 +746,11 @@ public class ActionsOverlayGui extends AbstractGui {
             } else {
                 // icon itself
                 RenderSystem.color4f(1, 1, 1, hotbarAlpha);
-                BlitFloat.blitFloat(matrixStack, x + leftCut, y, cutWidth, 16, 
-                        leftCut, 0, cutWidth, 16, 16, 16);
+                BlitFloat.blitFloat(matrixStack, 
+                        x + leftCut, y, 
+                        leftCut, 0, 
+                        cutWidth, 16, 
+                        16, 16);
             }
             // learning bar
             float learningProgress = power.getLearningProgressRatio(action);
