@@ -18,7 +18,6 @@ import org.lwjgl.glfw.GLFW;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.InputHandler.MouseButton;
 import com.github.standobyte.jojo.client.controls.ActionKeybindEntry;
@@ -29,14 +28,9 @@ import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.controls.HudControlSettings;
 import com.github.standobyte.jojo.client.controls.PowerTypeControlSchemes;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
-import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.ControlSettingToggleButton;
-import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.HoldToggleKeyEntry;
-import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.VanillaKeyEntry;
 import com.github.standobyte.jojo.client.ui.screen.widgets.CustomButton;
-import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
-import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.util.general.Vector2i;
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -47,7 +41,6 @@ import net.minecraft.client.gui.screen.ControlsScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
-import net.minecraft.client.gui.widget.list.KeyBindingList;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.util.ResourceLocation;
@@ -80,8 +73,6 @@ public class HudLayoutEditingScreen extends Screen {
     private Set<ResourceLocation> editedLayouts = new HashSet<>();
     
     private Widget addKeybindButton;
-    
-    private List<KeyBindingList.Entry> registeredKeys = new ArrayList<>();
 
     public HudLayoutEditingScreen() {
         super(new TranslationTextComponent("jojo.screen.edit_hud_layout"));
@@ -178,6 +169,11 @@ public class HudLayoutEditingScreen extends Screen {
 
         if (selectedTab != null && selectedPower == null) {
             selectTab(IPower.getPlayerPower(minecraft.player, selectedTab));
+        }
+        
+        int i = 0;
+        for (KeybindButtonsHolder keyEntry : keybindButtons.values()) {
+            updateKeybindEntryPos(keyEntry, i++);
         }
     }
     
@@ -575,7 +571,8 @@ public class HudLayoutEditingScreen extends Screen {
         
         return mouseClickedEditingKeybind(mouseButton) || super.mouseClicked(mouseX, mouseY, mouseButton);
     }
-    
+
+//    private List<KeyBindingList.Entry> registeredKeys = new ArrayList<>();
     private void selectTab(IPower<?, ?> power) {
         if (power != null && power.hasPower()) {
             selectedPower = power;
@@ -586,67 +583,91 @@ public class HudLayoutEditingScreen extends Screen {
             currentControlScheme = currentControlsScreen.getCurrentCtrlScheme();
             keybindButtons.keySet().forEach(this::removeKeybindEntryFromUi);
             keybindButtons.clear();
-            selectedKey = null;
+            selectedKey.clear();
             for (ActionKeybindEntry keybindEntry : currentControlScheme.getCustomKeybinds()) {
                 _addKeybindEntryToUi(keybindEntry);
             }
             
             
-
-            registeredKeys.clear();
-            int maxHeight = 150;
-            ClientModSettings modSettings = ClientModSettings.getInstance();
-            ClientModSettings.Settings modSettingsRead = ClientModSettings.getSettingsReadOnly();
-            registeredKeys.add(new HoldToggleKeyEntry(
-                    new VanillaKeyEntry(InputHandler.getInstance().attackHotbar, this::getSelectedKey, key -> {}, maxHeight), 
-                    new ControlSettingToggleButton(40, 20, 
-                            button -> {
-                                modSettings.editSettings(s -> s.toggleLmbHotbar = !s.toggleLmbHotbar);
-                                InputHandler.getInstance().setToggledHotbarControls(ControlScheme.Hotbar.LEFT_CLICK, false);
-                            },
-                            () -> modSettingsRead.toggleLmbHotbar)));
-            registeredKeys.add(new HoldToggleKeyEntry(
-                    new VanillaKeyEntry(InputHandler.getInstance().abilityHotbar, this::getSelectedKey, key -> {}, maxHeight), 
-                    new ControlSettingToggleButton(40, 20, 
-                            button -> {
-                                modSettings.editSettings(s -> s.toggleRmbHotbar = !s.toggleRmbHotbar);
-                                InputHandler.getInstance().setToggledHotbarControls(ControlScheme.Hotbar.RIGHT_CLICK, false);
-                            },
-                            () -> modSettingsRead.toggleRmbHotbar)));
-            registeredKeys.add(new HoldToggleKeyEntry(
-                    new VanillaKeyEntry(InputHandler.getInstance().disableHotbars, this::getSelectedKey, key -> {}, maxHeight), 
-                    new ControlSettingToggleButton(40, 20, 
-                            button -> {
-                                modSettings.editSettings(s -> s.toggleDisableHotbars = !s.toggleDisableHotbars);
-                                InputHandler.getInstance().setToggleHotbarsDisabled(false);
-                            },
-                            () -> modSettingsRead.toggleDisableHotbars)));
-            switch (selectedTab) {
-            case STAND:
-                registeredKeys.add(new VanillaKeyEntry(InputHandler.getInstance().toggleStand, 
-                        this::getSelectedKey, key -> {}, maxHeight));
-                registeredKeys.add(new VanillaKeyEntry(InputHandler.getInstance().standRemoteControl, 
-                        this::getSelectedKey, key -> {}, maxHeight));
-                registeredKeys.add(new VanillaKeyEntry(InputHandler.getInstance().standMode, 
-                        this::getSelectedKey, key -> {}, maxHeight));
-                break;
-            case NON_STAND:
-                registeredKeys.add(new VanillaKeyEntry(InputHandler.getInstance().nonStandMode, 
-                        this::getSelectedKey, key -> {}, maxHeight));
-                IPowerType<?, ?> type = power.getType();
-                if (type == ModPowers.HAMON.get()) {
-                    registeredKeys.add(new VanillaKeyEntry(InputHandler.getInstance().hamonSkillsWindow, 
-                            this::getSelectedKey, key -> {}, maxHeight));
-                }
-                break;
-            }
-            // TODO add the buttons to the screen widgets (remove the previous buttons)
+            
+//            registeredKeys.forEach(entry -> {
+//                for (IGuiEventListener button : entry.children()) {
+////                    buttons.remove(button);
+////                    children.remove(button);
+//                    JojoMod.LOGGER.debug(buttons.remove(button) ? "removed button" : "nope");
+//                    JojoMod.LOGGER.debug(children.remove(button) ? "removed child" : "nuh-uh");
+//                }
+//            });
+//            registeredKeys.clear();
+//            int maxHeight = 150;
+//            ClientModSettings modSettings = ClientModSettings.getInstance();
+//            ClientModSettings.Settings modSettingsRead = ClientModSettings.getSettingsReadOnly();
+//            registeredKeys.add(new HoldToggleKeyEntry(
+//                    new VanillaKeyEntry(InputHandler.getInstance().attackHotbar, 
+//                            this::getSelectedKey, this::setSelectedKey, maxHeight), 
+//                    new ControlSettingToggleButton(40, 20, 
+//                            button -> {
+//                                modSettings.editSettings(s -> s.toggleLmbHotbar = !s.toggleLmbHotbar);
+//                                InputHandler.getInstance().setToggledHotbarControls(ControlScheme.Hotbar.LEFT_CLICK, false);
+//                            },
+//                            () -> modSettingsRead.toggleLmbHotbar)));
+//            registeredKeys.add(new HoldToggleKeyEntry(
+//                    new VanillaKeyEntry(InputHandler.getInstance().abilityHotbar, 
+//                            this::getSelectedKey, this::setSelectedKey, maxHeight), 
+//                    new ControlSettingToggleButton(40, 20, 
+//                            button -> {
+//                                modSettings.editSettings(s -> s.toggleRmbHotbar = !s.toggleRmbHotbar);
+//                                InputHandler.getInstance().setToggledHotbarControls(ControlScheme.Hotbar.RIGHT_CLICK, false);
+//                            },
+//                            () -> modSettingsRead.toggleRmbHotbar)));
+//            registeredKeys.add(new HoldToggleKeyEntry(
+//                    new VanillaKeyEntry(InputHandler.getInstance().disableHotbars, 
+//                            this::getSelectedKey, this::setSelectedKey, maxHeight), 
+//                    new ControlSettingToggleButton(40, 20, 
+//                            button -> {
+//                                modSettings.editSettings(s -> s.toggleDisableHotbars = !s.toggleDisableHotbars);
+//                                InputHandler.getInstance().setToggleHotbarsDisabled(false);
+//                            },
+//                            () -> modSettingsRead.toggleDisableHotbars)));
+//            switch (selectedTab) {
+//            case STAND:
+//                registeredKeys.add(new VanillaKeyEntry(InputHandler.getInstance().toggleStand, 
+//                        this::getSelectedKey, this::setSelectedKey, maxHeight));
+//                registeredKeys.add(new VanillaKeyEntry(InputHandler.getInstance().standRemoteControl, 
+//                        this::getSelectedKey, this::setSelectedKey, maxHeight));
+//                registeredKeys.add(new VanillaKeyEntry(InputHandler.getInstance().standMode, 
+//                        this::getSelectedKey, this::setSelectedKey, maxHeight));
+//                break;
+//            case NON_STAND:
+//                registeredKeys.add(new VanillaKeyEntry(InputHandler.getInstance().nonStandMode, 
+//                        this::getSelectedKey, this::setSelectedKey, maxHeight));
+//                IPowerType<?, ?> type = power.getType();
+//                if (type == ModPowers.HAMON.get()) {
+//                    registeredKeys.add(new VanillaKeyEntry(InputHandler.getInstance().hamonSkillsWindow, 
+//                            this::getSelectedKey, this::setSelectedKey, maxHeight));
+//                }
+//                break;
+//            }
+//            registeredKeys.forEach(entry -> {
+//                for (IGuiEventListener button : entry.children()) {
+//                    if (button instanceof Widget) {
+//                        addButton((Widget) button);
+//                    }
+//                    else {
+//                        addWidget(button);
+//                    }
+//                }
+//            });
         }
     }
     
     @Nullable
     private final KeyBinding getSelectedKey() {
-        return selectedKey != null ? selectedKey.getKeybind() : null;
+        return selectedKey.getKeybind();
+    }
+
+    private final void setSelectedKey(KeyBinding registeredKey) {
+        selectedKey.setKeybind(registeredKey);
     }
     
     private <P extends IPower<P, ?>> boolean isActionVisible(Action<P> action, IPower<?, ?> power) {
@@ -752,7 +773,7 @@ public class HudLayoutEditingScreen extends Screen {
     
     
     
-    private ActionKeybindEntry selectedKey;
+    private final SelectedKey selectedKey = new SelectedKey();
     private Optional<ActionKeybindEntry> hoveredKeybindSlot = Optional.empty();
     private final Map<ActionKeybindEntry, KeybindButtonsHolder> keybindButtons = new LinkedHashMap<>();
     private void renderKeybindsList(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
@@ -779,7 +800,7 @@ public class HudLayoutEditingScreen extends Screen {
                 }
             }
 
-            if (selectedKey != null && selectedKey.getKeybind() == keybindUi.keybindEntry.getKeybind()) {
+            if (!selectedKey.isEmpty() && selectedKey.getKeybind() == keybindUi.keybindEntry.getKeybind()) {
                 keybindUi.keybindButton.setMessage(
                         new StringTextComponent("> ")
                         .append(keybindUi.keybindButton.getMessage().copy().withStyle(TextFormatting.YELLOW))
@@ -796,23 +817,28 @@ public class HudLayoutEditingScreen extends Screen {
         
         
         
-        int i = 0;
-        int x = getWindowX() + 15;
-        int y = getWindowY() + WINDOW_HEIGHT + 4;
-        for (KeyBindingList.Entry vanillaKeyEntry : registeredKeys) {
-            vanillaKeyEntry.render(matrixStack, i, y + i * 20, x, -1, 20, 
-                    mouseX, mouseY, false, partialTick);
-            ++i;
-        }
+//        int i = 0;
+//        int x = getWindowX() + 15;
+//        int y = getWindowY() + WINDOW_HEIGHT + 4;
+//        for (KeyBindingList.Entry vanillaKeyEntry : registeredKeys) {
+//            vanillaKeyEntry.render(matrixStack, i, y + i * 20, x, -1, 20, 
+//                    mouseX, mouseY, false, partialTick);
+//            ++i;
+//        }
     }
     
     private boolean mouseClickedEditingKeybind(int buttonId) {
-        if (selectedKey != null) {
+        if (!selectedKey.isEmpty()) {
             KeyModifier keyModifier = KeyModifier.getActiveModifier();
             
             selectedKey.setKeyModifierAndCode(keyModifier, InputMappings.Type.MOUSE.getOrCreate(buttonId));
-            markKeybindEdited(selectedKey);
-            selectedKey = null;
+            
+            if (selectedKey.getCustomActionKeybind() != null) {
+                markKeybindEdited(selectedKey.getCustomActionKeybind());
+                markLayoutEdited();
+            }
+            
+            selectedKey.clear();
             KeyBinding.resetMapping();
             markLayoutEdited();
             return true;
@@ -822,7 +848,7 @@ public class HudLayoutEditingScreen extends Screen {
     }
     
     private boolean keyPressedEditingKeybind(int keyCode, int scanCode) {
-        if (selectedKey != null) {
+        if (!selectedKey.isEmpty()) {
             KeyModifier keyModifier = KeyModifier.getActiveModifier();
             
             if (keyCode == 256) {
@@ -830,13 +856,16 @@ public class HudLayoutEditingScreen extends Screen {
             } else {
                 selectedKey.setKeyModifierAndCode(keyModifier, InputMappings.getKey(keyCode, scanCode));
             }
-            markKeybindEdited(selectedKey);
+            
+            if (selectedKey.getCustomActionKeybind() != null) {
+                markKeybindEdited(selectedKey.getCustomActionKeybind());
+                markLayoutEdited();
+            }
             
             if (!KeyModifier.isKeyCodeModifier(selectedKey.getKeybind().getKey())) {
-                selectedKey = null;
+                selectedKey.clear();
             }
             KeyBinding.resetMapping();
-            markLayoutEdited();
             return true;
         }
         
@@ -906,14 +935,10 @@ public class HudLayoutEditingScreen extends Screen {
     }
     
     private void _addKeybindEntryToUi(ActionKeybindEntry entry) {
-        int i = keybindButtons.size();
-        int x = getWindowX() + 10;
-        int y = getWindowY() + 62 + i * 22;
-
-        Widget keyBindingButton = addButton(new Button(
-                x + 22, y, 
+        Widget keyBindingButton = new Button(
+                -1, -1, 
                 95, 20, entry.getKeybind().getTranslatedKeyMessage(), button -> {
-            HudLayoutEditingScreen.this.selectedKey = entry;
+            HudLayoutEditingScreen.this.selectedKey.setKeybind(entry);
         }) {
 //            @Override
 //            protected IFormattableTextComponent createNarrationMessage() {
@@ -929,15 +954,29 @@ public class HudLayoutEditingScreen extends Screen {
 //                
 //                return super.createNarrationMessage();
 //            }
-        });
+        };
         
 //        Widget modeButton = addButton(new Button(x, y, 24, 20, StringTextComponent.EMPTY, button -> {
 //            
 //        }));
         
         KeybindButtonsHolder buttons = new KeybindButtonsHolder(entry,
-                ImmutableList.of(keyBindingButton), keyBindingButton, x, y);
+                ImmutableList.of(keyBindingButton), keyBindingButton);
         keybindButtons.put(entry, buttons);
+        updateKeybindEntryPos(buttons, keybindButtons.size() - 1);
+    }
+    
+    private void updateKeybindEntryPos(KeybindButtonsHolder entry, int index) {
+        int x = getWindowX() + 10;
+        int y = getWindowY() + 62 + index * 22;
+        
+        entry.setPos(x, y);
+        
+        entry.keybindButton.x = x + 22;
+        entry.keybindButton.y = y;
+        if (!children.contains(entry.keybindButton)) {
+            addButton(entry.keybindButton);
+        }
     }
     
     private boolean removeButton(Widget button) {
@@ -952,12 +991,10 @@ public class HudLayoutEditingScreen extends Screen {
         private int x;
         private int y;
         
-        KeybindButtonsHolder(ActionKeybindEntry keybindEntry, List<Widget> buttons, Widget keybindButton, int x, int y) {
+        KeybindButtonsHolder(ActionKeybindEntry keybindEntry, List<Widget> buttons, Widget keybindButton) {
             this.keybindEntry = keybindEntry;
             this.buttons = buttons;
             this.keybindButton = keybindButton;
-            this.x = x;
-            this.y = y;
         }
         
         int getActionSlotX() {
@@ -967,11 +1004,18 @@ public class HudLayoutEditingScreen extends Screen {
         int getActionSlotY() {
             return y + 1;
         }
+        
+        void setPos(int x, int y) {
+            this.x = x;
+            this.y = y;
+        }
     }
     
     private Map<ActionKeybindEntry, ControlScheme> editedKeybinds = new HashMap<>();
     private void markKeybindEdited(ActionKeybindEntry entry) {
-        editedKeybinds.put(entry, currentControlScheme);
+        if (entry != null) {
+            editedKeybinds.put(entry, currentControlScheme);
+        }
     }
     
     private void clearInvalidKeybinds() {
