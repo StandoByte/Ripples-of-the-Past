@@ -9,7 +9,10 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.IntStream;
 
 import javax.annotation.Nullable;
 
@@ -32,6 +35,7 @@ import com.github.standobyte.jojo.client.ui.screen.widgets.CustomButton;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.util.general.Vector2i;
+import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -41,6 +45,7 @@ import net.minecraft.client.gui.screen.ControlsScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.widget.list.KeyBindingList;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.util.ResourceLocation;
@@ -73,6 +78,8 @@ public class HudLayoutEditingScreen extends Screen {
     private Set<ResourceLocation> editedLayouts = new HashSet<>();
     
     private Widget addKeybindButton;
+    
+    public static Predicate<KeyBindingList.Entry> scrollCtrlListTo = null;
 
     public HudLayoutEditingScreen() {
         super(new TranslationTextComponent("jojo.screen.edit_hud_layout"));
@@ -128,6 +135,16 @@ public class HudLayoutEditingScreen extends Screen {
         addButton(new CustomButton(getWindowX() - 26, getWindowY() + WINDOW_HEIGHT - 26, 22, 22, 
                 button -> {
                     ControlsScreen mcControlsScreen = new ControlsScreen(this, minecraft.options);
+                    
+                    scrollCtrlListTo = entry -> {
+                        if (entry instanceof KeyBindingList.CategoryEntry) {
+                            ITextComponent categoryName = ClientReflection.getName((KeyBindingList.CategoryEntry) entry);
+                            return InputHandler.MAIN_CATEGORY.equals(((TranslationTextComponent) categoryName).getKey());
+                        }
+                        
+                        return false;
+                    };
+                    
                     minecraft.setScreen(mcControlsScreen);
                 }, 
                 (button, matrixStack, x, y) -> {

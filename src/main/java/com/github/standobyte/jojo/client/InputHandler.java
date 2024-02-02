@@ -107,12 +107,12 @@ public class InputHandler {
     
     public RayTraceResult mouseTarget;
 
-    private static final String MAIN_CATEGORY = new String("key.categories." + JojoMod.MOD_ID);
+    public static final String MAIN_CATEGORY = new String("key.categories." + JojoMod.MOD_ID);
     public KeyBinding toggleStand;
     public KeyBinding standRemoteControl;
     public KeyBinding hamonSkillsWindow;
 
-    private static final String HUD_CATEGORY = new String("key.categories." + JojoMod.MOD_ID + ".hud");
+    public static final String HUD_CATEGORY = new String("key.categories." + JojoMod.MOD_ID + ".hud");
     public KeyBinding nonStandMode;
     public KeyBinding standMode;
     public KeyBinding scrollMode;
@@ -124,7 +124,7 @@ public class InputHandler {
     public KeyBinding scrollAttack;
     public KeyBinding scrollAbility;
 
-    private static final String HUD_ALTERNATIVE_CATEGORY = new String("key.categories." + JojoMod.MOD_ID + ".hud.alternative");
+    public static final String HUD_ALTERNATIVE_CATEGORY = new String("key.categories." + JojoMod.MOD_ID + ".hud.alternative");
     
     // it works because the actual map is static, not sure if that's intended or just an implementation detail
     // but hey, i'll take it

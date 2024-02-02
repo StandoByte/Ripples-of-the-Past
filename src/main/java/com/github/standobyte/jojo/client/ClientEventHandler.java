@@ -7,6 +7,9 @@ import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.function.Predicate;
+import java.util.stream.IntStream;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
@@ -25,6 +28,7 @@ import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.ClientModSettingsScreen;
+import com.github.standobyte.jojo.client.ui.screen.controls.HudLayoutEditingScreen;
 import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.ControlSettingToggleButton;
 import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.HoldToggleKeyEntry;
 import com.github.standobyte.jojo.client.ui.screen.widgets.HeightScaledSlider;
@@ -742,6 +746,20 @@ public class ClientEventHandler {
                                 () -> modSettingsRead.toggleDisableHotbars)));
                     }
                 }
+            }
+            
+            if (HudLayoutEditingScreen.scrollCtrlListTo != null) {
+                Predicate<KeyBindingList.Entry> scrollTo = HudLayoutEditingScreen.scrollCtrlListTo;
+                HudLayoutEditingScreen.scrollCtrlListTo = null;
+                OptionalInt index = IntStream.range(0, controlList.children().size())
+                        .filter(i -> {
+                            KeyBindingList.Entry entry = controlList.children().get(i);
+                            return scrollTo.test(entry);
+                        })
+                        .findFirst();
+                index.ifPresent(i -> {
+                    controlList.setScrollAmount(ClientReflection.getRowTop(controlList, i) - controlList.getTop());
+                });
             }
         }
     }
