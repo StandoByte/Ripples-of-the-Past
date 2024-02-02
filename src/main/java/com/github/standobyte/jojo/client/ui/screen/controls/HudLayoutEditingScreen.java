@@ -88,8 +88,9 @@ public class HudLayoutEditingScreen extends Screen {
         // reset layout
         addButton(new CustomButton(getWindowX() + WINDOW_WIDTH - 26, getWindowY() + 21, 20, 20, 
                 button -> {
-                    currentControlScheme.reset();
+                    currentControlScheme.reset(selectedPower);
                     markLayoutEdited();
+                    refreshCustomKeybindEntries();
                 }, 
                 (button, matrixStack, x, y) -> {
                     renderTooltip(matrixStack, new TranslationTextComponent("jojo.screen.edit_hud_layout.reset"), x, y);
@@ -595,12 +596,7 @@ public class HudLayoutEditingScreen extends Screen {
             clearInvalidKeybinds();
             currentControlsScreen = HudControlSettings.getInstance().getCachedControls(selectedTab);
             currentControlScheme = currentControlsScreen.getCurrentCtrlScheme();
-            keybindButtons.keySet().forEach(entry -> removeKeybindEntryFromUi(entry, false));
-            keybindButtons.clear();
-            selectedKey.clear();
-            for (ActionKeybindEntry keybindEntry : currentControlScheme.getCustomKeybinds()) {
-                _addKeybindEntryToUi(keybindEntry);
-            }
+            refreshCustomKeybindEntries();
             
             
             
@@ -672,6 +668,15 @@ public class HudLayoutEditingScreen extends Screen {
 //                    }
 //                }
 //            });
+        }
+    }
+    
+    private void refreshCustomKeybindEntries() {
+        keybindButtons.keySet().forEach(entry -> removeKeybindEntryFromUi(entry, false));
+        keybindButtons.clear();
+        selectedKey.clear();
+        for (ActionKeybindEntry keybindEntry : currentControlScheme.getCustomKeybinds()) {
+            _addKeybindEntryToUi(keybindEntry);
         }
     }
     

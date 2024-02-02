@@ -5,10 +5,15 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.client.InputHandler;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.power.IPowerType;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -19,6 +24,9 @@ import net.minecraft.util.Util;
 
 public class ControlScheme {
     public static final int ARBITRARY_MAX_HOTBAR_LENGTH = 19;
+    
+    private JsonElement defaultState;
+    
     private final List<ActionKeybindEntry> declaredKeybinds = new ArrayList<>();
     private final List<ActionKeybindEntry> validKeybindsCache = new ArrayList<>();
     private final List<ActionKeybindEntry> keybindsView = Collections.unmodifiableList(validKeybindsCache);
@@ -28,7 +36,7 @@ public class ControlScheme {
             map.put(hotbar, new ActionsHotbar());
         }
     });
-
+    
     private boolean initialized = false;
     public boolean initLoadedFromConfig(IPower<?, ?> power) {
         if (initialized) return false;
@@ -62,10 +70,9 @@ public class ControlScheme {
         // update control scheme when new actions need to be added to HUD
         // ex.: Hamon techniques
         InputHandler.toDoDeleteMe();
-        updateCache();
     }
     
-    static ControlScheme fromJson(JsonElement json) {
+    static ControlScheme fromJson(JsonElement json, @Nullable ResourceLocation powerTypeId) {
         JsonObject jsonObj = json.getAsJsonObject();
         ControlScheme obj = new ControlScheme();
 
@@ -79,6 +86,17 @@ public class ControlScheme {
         for (ControlScheme.Hotbar hotbar : ControlScheme.Hotbar.values()) {
             JsonObject hotbarJson = hotbarsJson.get(hotbar.name()).getAsJsonObject();
             obj.hotbars.get(hotbar).fromJson(hotbarJson);
+        }
+        
+        if (powerTypeId != null) {
+            Optional<IPowerType<?, ?>> powerType = Optional.ofNullable(JojoCustomRegistries.NON_STAND_POWERS.fromId(powerTypeId));
+            // Optional#or was only added in Java 9
+            if (!powerType.isPresent()) powerType = Optional.ofNullable(JojoCustomRegistries.STANDS.fromId(powerTypeId));
+            powerType.ifPresent(type -> {
+                ControlScheme controlScheme = type.clCreateDefaultLayout();
+                JsonElement defaultState = controlScheme.defaultState;
+                obj.defaultState = defaultState;
+            });
         }
 
         return obj;
@@ -102,10 +120,29 @@ public class ControlScheme {
         return json;
     }
     
-    public void reset() {
-        // reset the underlying collections to their default state
-        InputHandler.toDoDeleteMe();
-        updateCache();
+    public void reset(IPower<?, ?> power) {
+        if (defaultState != null) {
+            ControlScheme defaultControls = fromJson(defaultState, null);
+            
+            for (ActionKeybindEntry keybind : this.declaredKeybinds) {
+                keybind.removeKeybindFromMap();
+            }
+            this.declaredKeybinds.clear();
+            this.declaredKeybinds.addAll(defaultControls.declaredKeybinds);
+            for (ActionKeybindEntry keybind : this.declaredKeybinds) {
+                keybind.init();
+            }
+            
+            for (Hotbar hotbar : Hotbar.values()) {
+                ActionsHotbar hotbarState = defaultControls.hotbars.get(hotbar);
+                this.hotbars.put(hotbar, hotbarState);
+                hotbarState.init();
+                hotbarState.updateCache();
+            }
+            
+            update(power);
+            updateCache();
+        }
     }
     // before removing an ActionKeybindEntry, call ActionKeybindEntry#removeKeybindFromMap
     // to not flood the key bindings map with keybinds that will not be used anymore
@@ -182,6 +219,9 @@ public class ControlScheme {
             obj.declaredKeybinds.add(new ActionKeybindEntry(ActionKeybindEntry.PressActionType.CLICK, 
                             keyBinding.action.getRegistryName(), keyBinding.keyDesc));
         }
+        
+        JsonElement savedState = obj.toJson();
+        obj.defaultState = savedState;
         
         return obj;
     }

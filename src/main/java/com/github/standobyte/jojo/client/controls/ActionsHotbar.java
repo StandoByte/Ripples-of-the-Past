@@ -95,9 +95,6 @@ public class ActionsHotbar {
     public void moveTo(ActionVisibilitySwitch action, int index) {
         int curValidIndex = switchesView.indexOf(action);
         if (curValidIndex > -1 && curValidIndex != index && declaredSwitches.remove(action)) {
-//            if (curValidIndex < index) {
-//                index--;
-//            }
             addTo(action, index);
         }
     }
@@ -121,5 +118,4 @@ public class ActionsHotbar {
             updateCache();
         }
     }
-
 }

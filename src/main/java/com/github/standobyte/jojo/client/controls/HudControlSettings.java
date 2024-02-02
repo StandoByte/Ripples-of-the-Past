@@ -123,7 +123,7 @@ public class HudControlSettings {
             if (ctrlSchemeFile.exists()) {
                 try (BufferedReader reader = Files.newReader(ctrlSchemeFile, Charsets.UTF_8)) {
                     JsonElement jsonRead = jsonParser.parse(reader);
-                    ControlScheme currentCtrlScheme = ControlScheme.fromJson(jsonRead);
+                    ControlScheme currentCtrlScheme = ControlScheme.fromJson(jsonRead, powerId);
                     PowerTypeControlSchemes savedState = new PowerTypeControlSchemes(powerId, currentCtrlScheme);
                     fullStateMap.put(powerId, savedState);
                 }
