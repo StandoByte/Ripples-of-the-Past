@@ -147,7 +147,7 @@ public abstract class MarkerRenderer {
         private final Vector3d pos;
         private final boolean outlined;
         
-        protected MarkerInstance(Vector3d pos, boolean outlined) {
+        public MarkerInstance(Vector3d pos, boolean outlined) {
             this.pos = pos;
             this.outlined = outlined;
         }
