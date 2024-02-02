@@ -9,10 +9,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.Predicate;
-import java.util.stream.IntStream;
 
 import javax.annotation.Nullable;
 
@@ -188,10 +186,7 @@ public class HudLayoutEditingScreen extends Screen {
             selectTab(IPower.getPlayerPower(minecraft.player, selectedTab));
         }
         
-        int i = 0;
-        for (KeybindButtonsHolder keyEntry : keybindButtons.values()) {
-            updateKeybindEntryPos(keyEntry, i++);
-        }
+        updateKeybindEntriesPos();
     }
     
     public boolean works() {
@@ -598,7 +593,7 @@ public class HudLayoutEditingScreen extends Screen {
             clearInvalidKeybinds();
             currentControlsScreen = HudControlSettings.getInstance().getCachedControls(selectedTab);
             currentControlScheme = currentControlsScreen.getCurrentCtrlScheme();
-            keybindButtons.keySet().forEach(this::removeKeybindEntryFromUi);
+            keybindButtons.keySet().forEach(entry -> removeKeybindEntryFromUi(entry, false));
             keybindButtons.clear();
             selectedKey.clear();
             for (ActionKeybindEntry keybindEntry : currentControlScheme.getCustomKeybinds()) {
@@ -830,7 +825,7 @@ public class HudLayoutEditingScreen extends Screen {
         }
         
         addKeybindButton.y = getWindowY() + 64 + keybindButtons.size() * 22;
-        addKeybindButton.visible = keybindButtons.size() < 5;
+        addKeybindButton.visible = canAddKeybinds();
         
         
         
@@ -842,6 +837,10 @@ public class HudLayoutEditingScreen extends Screen {
 //                    mouseX, mouseY, false, partialTick);
 //            ++i;
 //        }
+    }
+    
+    private boolean canAddKeybinds() {
+        return keybindButtons.size() < 5;
     }
     
     private boolean mouseClickedEditingKeybind(int buttonId) {
@@ -921,6 +920,10 @@ public class HudLayoutEditingScreen extends Screen {
     }
     
     private void setCustomKeybind(Action<?> action, InputMappings.Type inputType, int key) {
+        if (!canAddKeybinds()) {
+            return;
+        }
+        
         Optional<ActionKeybindEntry> actionAlreadyHasKey = keybindButtons.keySet().stream()
                 .filter(entry -> {
                     return entry.getAction() == action;
@@ -942,12 +945,15 @@ public class HudLayoutEditingScreen extends Screen {
 
     }
     
-    private void removeKeybindEntryFromUi(ActionKeybindEntry entry) {
+    private void removeKeybindEntryFromUi(ActionKeybindEntry entry, boolean removeFromList) {
         KeybindButtonsHolder buttons = keybindButtons.get(entry);
         if (buttons != null) {
             for (Widget button : buttons.buttons) {
                 removeButton(button);
             }
+        }
+        if (removeFromList) {
+            keybindButtons.remove(buttons.keybindEntry);
         }
     }
     
@@ -973,14 +979,38 @@ public class HudLayoutEditingScreen extends Screen {
 //            }
         };
         
-//        Widget modeButton = addButton(new Button(x, y, 24, 20, StringTextComponent.EMPTY, button -> {
-//            
-//        }));
+        Widget removeButton = new CustomButton(
+                -1, -1, 
+                12, 12, StringTextComponent.EMPTY, button -> {
+            if (currentControlScheme.removeKeybindEntry(entry)) {
+                markLayoutEdited();
+                removeKeybindEntryFromUi(entry, true);
+                updateKeybindEntriesPos();
+            }
+        }) {
+            @Override
+            protected void renderCustomButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
+                Minecraft minecraft = Minecraft.getInstance();
+                minecraft.getTextureManager().bind(WINDOW);
+                RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+                RenderSystem.enableDepthTest();
+                blit(matrixStack, x, y, 144, 180 + getYImage(isHovered()) * height, width, height);
+            }
+        };
         
         KeybindButtonsHolder buttons = new KeybindButtonsHolder(entry,
-                ImmutableList.of(keyBindingButton), keyBindingButton);
+                keyBindingButton, removeButton);
         keybindButtons.put(entry, buttons);
         updateKeybindEntryPos(buttons, keybindButtons.size() - 1);
+    }
+    
+    private void updateKeybindEntriesPos() {
+        int i = 0;
+        for (KeybindButtonsHolder keyEntry : keybindButtons.values()) {
+            updateKeybindEntryPos(keyEntry, i++);
+        }
     }
     
     private void updateKeybindEntryPos(KeybindButtonsHolder entry, int index) {
@@ -991,8 +1021,12 @@ public class HudLayoutEditingScreen extends Screen {
         
         entry.keybindButton.x = x + 22;
         entry.keybindButton.y = y;
-        if (!children.contains(entry.keybindButton)) {
-            addButton(entry.keybindButton);
+        entry.removeButton.x = entry.keybindButton.x + entry.keybindButton.getWidth() + 4;
+        entry.removeButton.y = y + 3;
+        for (Widget button : entry.buttons) {
+            if (!children.contains(button)) {
+                addButton(button);
+            }
         }
     }
     
@@ -1005,13 +1039,16 @@ public class HudLayoutEditingScreen extends Screen {
         private final ActionKeybindEntry keybindEntry;
         private final List<Widget> buttons;
         private final Widget keybindButton;
+        private final Widget removeButton;
         private int x;
         private int y;
         
-        KeybindButtonsHolder(ActionKeybindEntry keybindEntry, List<Widget> buttons, Widget keybindButton) {
+        KeybindButtonsHolder(ActionKeybindEntry keybindEntry, 
+                Widget keybindButton, Widget removeButton) {
             this.keybindEntry = keybindEntry;
-            this.buttons = buttons;
             this.keybindButton = keybindButton;
+            this.removeButton = removeButton;
+            this.buttons = ImmutableList.of(keybindButton, removeButton);
         }
         
         int getActionSlotX() {

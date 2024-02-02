@@ -137,11 +137,14 @@ public class ControlScheme {
         return keybind;
     }
     
-    public void removeKeybindEntry(ActionKeybindEntry keybind) {
+    public boolean removeKeybindEntry(ActionKeybindEntry keybind) {
         if (declaredKeybinds.remove(keybind)) {
             keybind.removeKeybindFromMap();
             updateCache();
+            return true;
         }
+        
+        return false;
     }
     
 
