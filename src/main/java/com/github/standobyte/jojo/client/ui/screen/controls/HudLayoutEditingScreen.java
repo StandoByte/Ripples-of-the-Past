@@ -331,6 +331,7 @@ public class HudLayoutEditingScreen extends Screen {
     private <P extends IPower<P, ?>> void renderActionIcon(MatrixStack matrixStack, 
             int x, int y, Action<P> action, boolean isEnabled, P power) {
         if (action != null) {
+            boolean shift = hasShiftDown();
             Action<P> actionResolved = ActionsOverlayGui.resolveVisibleActionInSlot(action, shift, power, ActionTarget.EMPTY);
             if (actionResolved != null) action = actionResolved;
             if (shift) {
@@ -461,7 +462,7 @@ public class HudLayoutEditingScreen extends Screen {
     
     private <P extends IPower<P, ?>> void renderActionName(MatrixStack matrixStack, P power, Action<P> action, int mouseX, int mouseY, boolean isEnabled) {
         if (action == null) return;
-        IFormattableTextComponent name = getActionName(power, action, shift);
+        IFormattableTextComponent name = getActionName(power, action, hasShiftDown());
         
         if (!isEnabled) {
             name.withStyle(TextFormatting.DARK_GRAY);
@@ -581,7 +582,8 @@ public class HudLayoutEditingScreen extends Screen {
             }
         }
         
-        return mouseClickedEditingKeybind(mouseButton) || super.mouseClicked(mouseX, mouseY, mouseButton);
+        return mouseClickedEditingKeybind(mouseButton, /*KeyModifier.getActiveModifier()*/ KeyModifier.NONE)
+                || super.mouseClicked(mouseX, mouseY, mouseButton);
     }
 
 //    private List<KeyBindingList.Entry> registeredKeys = new ArrayList<>();
@@ -698,12 +700,8 @@ public class HudLayoutEditingScreen extends Screen {
         return super.mouseScrolled(mouseX, mouseY, scroll);
     }
     
-    private boolean shift = false;
     @Override
     public boolean keyPressed(int key, int scanCode, int modifiers) {
-        if (InputHandler.renderShiftVarInScreenUI(minecraft, key, scanCode)) {
-            shift = true;
-        }
         if (InputHandler.getInstance().editHotbars.matches(key, scanCode)) {
             onClose();
             return true;
@@ -734,7 +732,7 @@ public class HudLayoutEditingScreen extends Screen {
             }
         }
         
-        return keyPressedEditingKeybind(key, scanCode)
+        return keyPressedEditingKeybind(key, scanCode, /*KeyModifier.getActiveModifier()*/ KeyModifier.NONE)
                 || super.keyPressed(key, scanCode, modifiers);
     }
     
@@ -752,14 +750,6 @@ public class HudLayoutEditingScreen extends Screen {
         editedLayouts.add(currentControlsScreen.powerTypeId);
     }
     
-    @Override
-    public boolean keyReleased(int key, int scanCode, int modifiers) {
-        if (InputHandler.renderShiftVarInScreenUI(minecraft, key, scanCode)) {
-            shift = false;
-        }
-        return super.keyReleased(key, scanCode, modifiers);
-    }
-
     @Override
     public void onClose() {
         super.onClose();
@@ -843,10 +833,8 @@ public class HudLayoutEditingScreen extends Screen {
         return keybindButtons.size() < 5;
     }
     
-    private boolean mouseClickedEditingKeybind(int buttonId) {
+    private boolean mouseClickedEditingKeybind(int buttonId, KeyModifier keyModifier) {
         if (!selectedKey.isEmpty()) {
-            KeyModifier keyModifier = KeyModifier.getActiveModifier();
-            
             selectedKey.setKeyModifierAndCode(keyModifier, InputMappings.Type.MOUSE.getOrCreate(buttonId));
             
             if (selectedKey.getCustomActionKeybind() != null) {
@@ -863,10 +851,8 @@ public class HudLayoutEditingScreen extends Screen {
         return false;
     }
     
-    private boolean keyPressedEditingKeybind(int keyCode, int scanCode) {
+    private boolean keyPressedEditingKeybind(int keyCode, int scanCode, KeyModifier keyModifier) {
         if (!selectedKey.isEmpty()) {
-            KeyModifier keyModifier = KeyModifier.getActiveModifier();
-            
             if (keyCode == 256) {
                 selectedKey.setKeyModifierAndCode(keyModifier, InputMappings.UNKNOWN);
             } else {
