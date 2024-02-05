@@ -972,7 +972,7 @@ public class HudLayoutEditingScreen extends Screen {
         
         Widget removeButton = new CustomButton(
                 -1, -1, 
-                12, 12, StringTextComponent.EMPTY, button -> {
+                8, 8, StringTextComponent.EMPTY, button -> {
             if (currentControlScheme.removeKeybindEntry(entry)) {
                 markLayoutEdited();
                 removeKeybindEntryFromUi(entry, true);
@@ -987,7 +987,7 @@ public class HudLayoutEditingScreen extends Screen {
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();
                 RenderSystem.enableDepthTest();
-                blit(matrixStack, x, y, 144, 180 + getYImage(isHovered()) * height, width, height);
+                blit(matrixStack, x, y, 144, 192 + getYImage(isHovered()) * height, width, height);
             }
         };
         
@@ -1013,7 +1013,7 @@ public class HudLayoutEditingScreen extends Screen {
         entry.keybindButton.x = x + 22;
         entry.keybindButton.y = y;
         entry.removeButton.x = entry.keybindButton.x + entry.keybindButton.getWidth() + 4;
-        entry.removeButton.y = y + 3;
+        entry.removeButton.y = y + 5;
         for (Widget button : entry.buttons) {
             if (!children.contains(button)) {
                 addButton(button);
