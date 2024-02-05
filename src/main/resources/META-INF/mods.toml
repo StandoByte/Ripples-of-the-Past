@@ -7,7 +7,7 @@ issueTrackerURL="https://github.com/StandoByte/Ripples-of-the-Past/issues"
     modId="jojo"
     version="${file.jarVersion}"
     displayName="Ripples of the Past"
-    updateJSONURL="https://raw.githubusercontent.com/StandoByte/Ripples-of-the-Past/1.16.5/update.json"
+    updateJSONURL="https://raw.githubusercontent.com/StandoByte/Ripples-of-the-Past/1.16.5-0.2.2/update.json"
     displayURL=''' 
 https://curseforge.com/minecraft/mc-mods/ripples-of-the-past/
 https://modrinth.com/mod/ripples-of-the-past
