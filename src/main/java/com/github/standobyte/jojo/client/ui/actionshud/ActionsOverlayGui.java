@@ -866,24 +866,33 @@ public class ActionsOverlayGui extends AbstractGui {
             else {
                 RenderSystem.color4f(0.75F, 0.75F, 0.75F, 0.75F * hotbarAlpha);
             }
-            BlitFloat.blitFloat(matrixStack, 
-                    x + leftCut, y, 
-                    leftCut, 0, 
-                    cutWidth, 16, 
-                    16, 16);
-            // cooldown
-            float ratio = power.getCooldownRatio(action, partialTick);
-            if (ratio > 0) {
-                ClientUtil.fillSingleRect(x, y + 16.0F * (1.0F - ratio), 16, 16.0F * ratio, 255, 255, 255, 127);
+            if (cutWidth > 0) {
+                ClientUtil.enableGlScissor(x + leftCut, y, cutWidth, 16);
+                // action icon
+                BlitFloat.blitFloat(matrixStack, 
+                        x, y, 
+                        0, 0, 
+                        16, 16, 
+                        16, 16);
+                ClientUtil.disableGlScissor();
+                // cooldown
+                float ratio = power.getCooldownRatio(action, partialTick);
+                if (ratio > 0) {
+                    ClientUtil.fillSingleRect(x, y + 16.0F * (1.0F - ratio), 16, 16.0F * ratio, 255, 255, 255, 127);
+                }
             }
         } else {
-            // icon itself
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, hotbarAlpha);
-            BlitFloat.blitFloat(matrixStack, 
-                    x + leftCut, y, 
-                    leftCut, 0, 
-                    cutWidth, 16, 
-                    16, 16);
+            RenderSystem.color4f(1, 1, 1, hotbarAlpha);
+            if (cutWidth > 0) {
+                ClientUtil.enableGlScissor(x + leftCut, y, cutWidth, 16);
+                // action icon
+                BlitFloat.blitFloat(matrixStack, 
+                        x, y, 
+                        0, 0, 
+                        16, 16, 
+                        16, 16);
+                ClientUtil.disableGlScissor();
+            }
         }
         // learning bar
         float learningProgress = power.getLearningProgressRatio(action);
