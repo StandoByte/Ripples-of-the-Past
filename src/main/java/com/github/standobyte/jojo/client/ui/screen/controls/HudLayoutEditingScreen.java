@@ -343,7 +343,7 @@ public class HudLayoutEditingScreen extends Screen {
             float alpha = isEnabled ? isUnlocked ? 1.0F : 0.6F : 0.2F;
             float color = isEnabled && isUnlocked ? 1.0F : 0.0F;
             
-            ActionsOverlayGui.renderActionIcon(matrixStack, actionResolved, power, x, y, color, alpha);
+            ActionsOverlayGui.renderActionIcon(matrixStack, action, power, x, y, color, alpha);
         }
     }
     

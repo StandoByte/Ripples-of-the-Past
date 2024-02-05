@@ -867,10 +867,6 @@ public class ActionsOverlayGui extends AbstractGui {
             ClientUtil.fillSingleRect(x - 2, y - 2, 20, 20, 0, 255, 0, 127);
         }
         
-        ResourceLocation icon = action.getIconTexture(power);
-        mc.getTextureManager().bind(icon);
-        
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, hotbarAlpha);
         ActionConditionResult result = actionAvailability(action, mode, targetIcon, target, isSelected);
         if (!result.isPositive()) {
             float brightness;
@@ -886,19 +882,19 @@ public class ActionsOverlayGui extends AbstractGui {
             if (cutWidth > 0) {
                 ClientUtil.enableGlScissor(x + leftCut, y, cutWidth, 16);
                 renderActionIcon(matrixStack, action, power, x, y, brightness, alpha);
-                ClientUtil.disableGlScissor();
                 // cooldown
                 float ratio = power.getCooldownRatio(action, partialTick);
                 if (ratio > 0) {
                     ClientUtil.fillSingleRect(x, y + 16.0F * (1.0F - ratio), 16, 16.0F * ratio, 255, 255, 255, 127);
                 }
+                ClientUtil.disableGlScissor();
             }
-            else {
-                if (cutWidth > 0) {
-                    ClientUtil.enableGlScissor(x + leftCut, y, cutWidth, 16);
-                    renderActionIcon(matrixStack, action, power, x, y, 1, hotbarAlpha);
-                    ClientUtil.disableGlScissor();
-                }
+        }
+        else {
+            if (cutWidth > 0) {
+                ClientUtil.enableGlScissor(x + leftCut, y, cutWidth, 16);
+                renderActionIcon(matrixStack, action, power, x, y, 1, hotbarAlpha);
+                ClientUtil.disableGlScissor();
             }
         }
         // learning bar
