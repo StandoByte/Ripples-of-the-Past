@@ -2,11 +2,11 @@ package com.github.standobyte.jojo.client.ui.actionshud.hotbar;
 
 import java.util.function.Consumer;
 
+import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.Alignment;
-import com.github.standobyte.jojo.power.layout.ActionHotbarLayout;
 
 public class HotbarFold {
-    private static final HotbarFold[] NO_FOLD = new HotbarFold[ActionHotbarLayout.ARBITRARY_ACTIONS_LIMIT];
+    private static final HotbarFold[] NO_FOLD = new HotbarFold[ControlScheme.ARBITRARY_MAX_HOTBAR_LENGTH];
     
     private final Slot[] slotsInRenderOrder;
     private final Slot[] slotsInIndexOrder;
@@ -26,7 +26,6 @@ public class HotbarFold {
         return NO_FOLD[slotsCount];
     }
     
-    public static final int EDGE_EXTRA_WIDTH = 15;
     private HotbarFold(int slotsCount, int selectedSlot, float foldProgress, Alignment alignment) {
         this.slotsCount = slotsCount;
         this.slotsInIndexOrder = new Slot[slotsCount];
@@ -68,11 +67,11 @@ public class HotbarFold {
             slotsInIndexOrder[i] = slot;
             slotsInRenderOrder[order[i]] = slot;
             
-            slot.slotFramePosX =    i == 0 ?                        slot.pos :  slot.pos + EDGE_EXTRA_WIDTH;
-            slot.slotTexX =         i == 0 ?                        0 :         i * 20 + EDGE_EXTRA_WIDTH;
+            slot.slotFramePosX =    i == 0 ?    slot.pos :  slot.pos + HotbarRenderer.EDGE_EXTRA_WIDTH;
+            slot.slotTexX =         i == 0 ?    0 :         i * 20 + HotbarRenderer.EDGE_EXTRA_WIDTH;
             slot.slotWidth = 20;
             if (i == 0 || i == slotsCount - 1) {
-                slot.slotWidth += EDGE_EXTRA_WIDTH;
+                slot.slotWidth += HotbarRenderer.EDGE_EXTRA_WIDTH;
             }
             
             slot.slotRenderedLeftEdge = slot.slotFramePosX;

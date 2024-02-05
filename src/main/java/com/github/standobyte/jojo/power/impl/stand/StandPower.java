@@ -781,7 +781,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             previousStands.syncWithUser(player);
             standArrowHandler.syncWithUser(player);
         });
-        syncLayoutWithUser();
     }
     
     @Override

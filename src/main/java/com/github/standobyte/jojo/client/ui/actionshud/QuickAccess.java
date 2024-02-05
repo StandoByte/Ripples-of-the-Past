@@ -29,7 +29,7 @@ public class QuickAccess<P extends IPower<P, ?>> {
             ActionsOverlayGui actionsHud = ActionsOverlayGui.getInstance();
             if (actionsHud == null) return false;
             
-            return actionsHud.areHotbarsEnabled() && actionsHud.isQuickAccessActive();
+            return actionsHud.areHotbarsEnabled();
         }
 
         @Override
