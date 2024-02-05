@@ -17,7 +17,7 @@ public class SilverChariotLightAttack extends StandEntityLightAttack {
     private final Supplier<StandEntityLightAttack> noRapierAttack;
 
     public SilverChariotLightAttack(StandEntityLightAttack.Builder builder, Supplier<StandEntityLightAttack> noRapierAttack) {
-        super(builder);
+        super(builder.addExtraUnlockable(noRapierAttack));
         this.noRapierAttack = noRapierAttack != null ? noRapierAttack : () -> null;
     }
 
@@ -36,14 +36,14 @@ public class SilverChariotLightAttack extends StandEntityLightAttack {
                 ? noRapierAttack.get() : this;
     }
     
-    @Override
-    public StandAction[] getExtraUnlockable() {
-        if (noRapierAttack.get() != null) {
-            return new StandAction[] { noRapierAttack.get() };
-        }
-        
-        return super.getExtraUnlockable();
-    }
+//    @Override
+//    public StandAction[] getExtraUnlockable() {
+//        if (noRapierAttack.get() != null) {
+//            return new StandAction[] { noRapierAttack.get() };
+//        }
+//        
+//        return super.getExtraUnlockable();
+//    }
     
     @Override
     public Stream<SoundEvent> getSounds(StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task) {

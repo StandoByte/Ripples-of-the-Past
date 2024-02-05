@@ -194,7 +194,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         
         tmp.clear();
         for (StandAction action : unlockables) {
-            Collections.addAll(tmp, action.getExtraUnlockable());
+            tmp.addAll(action.getExtraUnlockables());
         }
         unlockables.addAll(tmp);
         

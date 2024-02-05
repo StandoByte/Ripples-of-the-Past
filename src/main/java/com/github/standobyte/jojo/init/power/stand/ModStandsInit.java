@@ -83,6 +83,7 @@ import com.github.standobyte.jojo.power.impl.stand.type.EntityStandType;
 import com.github.standobyte.jojo.power.impl.stand.type.NoSummonStandType;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType.StandSurvivalGameplayPool;
+import com.github.standobyte.jojo.util.mod.StoryPart;
 
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
@@ -103,14 +104,14 @@ import net.minecraftforge.registries.DeferredRegister;
  *
  */
 public class ModStandsInit {
-    public static final ITextComponent PART_3_NAME = new TranslationTextComponent("jojo.story_part.3").withStyle(TextFormatting.DARK_PURPLE);
-    public static final ITextComponent PART_4_NAME = new TranslationTextComponent("jojo.story_part.4").withStyle(TextFormatting.RED);
-    public static final ITextComponent PART_5_NAME = new TranslationTextComponent("jojo.story_part.5").withStyle(TextFormatting.GOLD);
-    public static final ITextComponent PART_6_NAME = new TranslationTextComponent("jojo.story_part.6").withStyle(TextFormatting.AQUA);
+    @Deprecated public static final ITextComponent PART_3_NAME = new TranslationTextComponent("jojo.story_part.3").withStyle(TextFormatting.DARK_PURPLE);
+    @Deprecated public static final ITextComponent PART_4_NAME = new TranslationTextComponent("jojo.story_part.4").withStyle(TextFormatting.RED);
+    @Deprecated public static final ITextComponent PART_5_NAME = new TranslationTextComponent("jojo.story_part.5").withStyle(TextFormatting.GOLD);
+    @Deprecated public static final ITextComponent PART_6_NAME = new TranslationTextComponent("jojo.story_part.6").withStyle(TextFormatting.AQUA);
     
-    public static final ITextComponent PART_7_NAME = new TranslationTextComponent("jojo.story_part.7").withStyle(TextFormatting.LIGHT_PURPLE);
-    public static final ITextComponent PART_8_NAME = new TranslationTextComponent("jojo.story_part.8").withStyle(TextFormatting.WHITE);
-    public static final ITextComponent PART_9_NAME = new TranslationTextComponent("jojo.story_part.9").withStyle(TextFormatting.BLUE);
+    @Deprecated public static final ITextComponent PART_7_NAME = new TranslationTextComponent("jojo.story_part.7").withStyle(TextFormatting.LIGHT_PURPLE);
+    @Deprecated public static final ITextComponent PART_8_NAME = new TranslationTextComponent("jojo.story_part.8").withStyle(TextFormatting.WHITE);
+    @Deprecated public static final ITextComponent PART_9_NAME = new TranslationTextComponent("jojo.story_part.9").withStyle(TextFormatting.BLUE);
 
     public static final DeferredRegister<StandType<?>> STAND_TYPES = DeferredRegister.create(
             (Class<StandType<?>>) ((Class<?>) StandType.class), JojoMod.MOD_ID);
@@ -206,7 +207,7 @@ public class ModStandsInit {
                     STAND_TYPES, 
                     () -> new EntityStandType.Builder<TimeStopperStandStats>()
                     .color(0x8E45FF)
-                    .storyPartName(PART_3_NAME)
+                    .storyPartName(StoryPart.STARDUST_CRUSADERS.getName())
                     .leftClickHotbar(
                             STAR_PLATINUM_PUNCH.get(), 
                             STAR_PLATINUM_BARRAGE.get(), 
@@ -219,7 +220,6 @@ public class ModStandsInit {
                             STAR_PLATINUM_TIME_STOP.get()
                             )
                     .defaultStats(TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
-                            .tier(6)
                             .power(16.0)
                             .speed(16.0)
                             .range(2.0, 10.0)
@@ -309,7 +309,7 @@ public class ModStandsInit {
                     STAND_TYPES,
                     () -> new EntityStandType.Builder<TimeStopperStandStats>()
                     .color(0xFFD800)
-                    .storyPartName(PART_3_NAME)
+                    .storyPartName(StoryPart.STARDUST_CRUSADERS.getName())
                     .leftClickHotbar(
                             THE_WORLD_PUNCH.get(), 
                             THE_WORLD_BARRAGE.get(), 
@@ -320,7 +320,6 @@ public class ModStandsInit {
                             THE_WORLD_TIME_STOP.get()
                             )
                     .defaultStats(TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
-                            .tier(6)
                             .power(16.0)
                             .speed(16.0)
                             .range(2.0, 10.0)
@@ -399,7 +398,7 @@ public class ModStandsInit {
                     STAND_TYPES, 
                     () -> new EntityStandType.Builder<>()
                     .color(0x00B319)
-                    .storyPartName(PART_3_NAME)
+                    .storyPartName(StoryPart.STARDUST_CRUSADERS.getName())
                     .leftClickHotbar(
                             HIEROPHANT_GREEN_STRING_ATTACK.get(), 
                             HIEROPHANT_GREEN_EMERALD_SPLASH.get()
@@ -410,7 +409,6 @@ public class ModStandsInit {
                             HIEROPHANT_GREEN_BARRIER.get()
                             )
                     .defaultStats(StandStats.class, new StandStats.Builder()
-                            .tier(5)
                             .power(8.0)
                             .speed(12.0)
                             .range(50.0, 100.0)
@@ -481,7 +479,7 @@ public class ModStandsInit {
                     STAND_TYPES, 
                     () -> new EntityStandType.Builder<ArmoredStandStats>()
                     .color(0xBEC8D6)
-                    .storyPartName(PART_3_NAME)
+                    .storyPartName(StoryPart.STARDUST_CRUSADERS.getName())
                     .leftClickHotbar(
                             SILVER_CHARIOT_ATTACK.get(), 
                             SILVER_CHARIOT_RAPIER_BARRAGE.get(), 
@@ -492,7 +490,6 @@ public class ModStandsInit {
                             SILVER_CHARIOT_TAKE_OFF_ARMOR.get()
                             )
                     .defaultStats(ArmoredStandStats.class, new ArmoredStandStats.Builder()
-                            .tier(5)
                             .power(9.0)
                             .speed(14.0)
                             .range(10.0)
@@ -579,7 +576,7 @@ public class ModStandsInit {
                     STAND_TYPES, 
                     () -> new EntityStandType.Builder<>()
                     .color(0xDE203A)
-                    .storyPartName(PART_3_NAME)
+                    .storyPartName(StoryPart.STARDUST_CRUSADERS.getName())
                     .leftClickHotbar(
                             MAGICIANS_RED_PUNCH.get(), 
                             MAGICIANS_RED_FLAME_BURST.get(), 
@@ -592,7 +589,6 @@ public class ModStandsInit {
                             MAGICIANS_RED_DETECTOR.get()
                             )
                     .defaultStats(StandStats.class, new StandStats.Builder()
-                            .tier(5)
                             .power(12.0)
                             .speed(12.0)
                             .range(5.0, 10.0)
@@ -721,7 +717,7 @@ public class ModStandsInit {
                     STAND_TYPES, 
                     () -> new EntityStandType.Builder<>()
                     .color(0x4BEDE6)
-                    .storyPartName(PART_4_NAME)
+                    .storyPartName(StoryPart.DIAMOND_IS_UNBREAKABLE.getName())
                     .leftClickHotbar(
                             CRAZY_DIAMOND_PUNCH.get(), 
                             CRAZY_DIAMOND_BARRAGE.get(), 
@@ -736,7 +732,6 @@ public class ModStandsInit {
                             CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE.get()
                             )
                     .defaultStats(StandStats.class, new StandStats.Builder()
-                            .tier(5)
                             .power(14.0)
                             .speed(14.0)
                             .range(2.0, 4.0)
@@ -849,9 +844,8 @@ public class ModStandsInit {
                 
                 new NoSummonStandType.Builder<>()
                 .color(0x749FA5)
-                .storyPartName(PART_4_NAME)
+                .storyPartName(StoryPart.DIAMOND_IS_UNBREAKABLE.getName())
                 .defaultStats(StandStats.class, new StandStats.Builder()
-                        .tier(0)
                         .power(0)
                         .speed(0)
                         .range(0)
