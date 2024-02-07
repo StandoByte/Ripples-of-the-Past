@@ -21,6 +21,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler.MouseButton;
 import com.github.standobyte.jojo.client.ui.screen.GridList;
 import com.github.standobyte.jojo.client.ui.screen.GridList.ElemMoveMode;
+import com.github.standobyte.jojo.client.ui.screen.widgets.FilterList;
 import com.github.standobyte.jojo.client.ui.screen.ScreenCloseMode;
 import com.github.standobyte.jojo.client.ui.screen.WasdAllowingScreen;
 import com.github.standobyte.jojo.client.ui.tooltip.CustomTooltipRender;
@@ -33,6 +34,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClAllGELifeformsBut
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.EntityTypeToInstance;
 import com.github.standobyte.jojo.util.mod.JojoModUtil.Direction2D;
+import com.google.common.collect.Streams;
 import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -44,6 +46,7 @@ import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.widget.button.CheckboxButton;
 import net.minecraft.client.gui.widget.button.ImageButton;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
@@ -77,7 +80,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     private static int savedColumn;
     private static String savedSearchFilter = "";
     
-    private FilterList filterList;
+    private FilterList<FilterEntry> filterList;
     private TextFieldWidget searchField;
     private Button clearSearchFieldButton;
     private Button unlockAllButton;
@@ -169,6 +172,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     
     
     
+    private static final int CHECKBOX_SIZE = 20;
     private void initEntityTypes() {
         LazyOptional<PlayerUtilCap> metEntityTypesCap = minecraft.player.getCapability(PlayerUtilCapProvider.CAPABILITY);
         
@@ -183,7 +187,27 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         initSelectionGrid(entityTypes);
         ignoreMouseUntilMoved = true;
         
-        filterList = new FilterList(entityTypes, width - 8, 36, 100, height - 58, this);
+        List<FilterEntry> filterListEntries = Streams.mapWithIndex(
+                entityTypes.stream(), 
+                (entityType, i) -> new FilterEntry(entityType, 
+                        new LifeformFilterListCheckbox(width - 28, -1, CHECKBOX_SIZE, CHECKBOX_SIZE, 
+                                entityType.getDescription(), 
+                                
+                                () -> ChooseLifeformScreen.getEntriesUiData(ClientUtil.getClientPlayer())
+                                        .map(cap -> !cap.isGELifeformHidden(entityType)).orElse(false),
+                                
+                                stateBeingSet -> {
+                                    if (stateBeingSet) {
+                                        showEntry(entityType, true);
+                                    }
+                                    else {
+                                        hideEntry(entityType);
+                                    }
+                                })))
+                .collect(Collectors.toCollection(ArrayList::new));
+        
+        filterList = new FilterList<>(filterListEntries, width - 108, 36, 100, height - 58, CHECKBOX_SIZE);
+        addWidget(filterList);
     }
     
     private void initSelectionGrid(List<EntityType<?>> entityTypes) {
@@ -394,8 +418,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int buttonId) {
-        if (super.mouseClicked(mouseX, mouseY, buttonId)
-                || filterList.mouseClicked(mouseX, mouseY, buttonId)) {
+        if (super.mouseClicked(mouseX, mouseY, buttonId)) {
             return true;
         }
         
@@ -539,8 +562,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     
     @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
-        return filterList.mouseScrolled(mouseX, mouseY, delta) || 
-                entityIconsGrid.onMouseScroll(mouseX, mouseY, delta) || 
+        return entityIconsGrid.onMouseScroll(mouseX, mouseY, delta) || 
                 super.mouseScrolled(mouseX, mouseY, delta);
     }
     
@@ -636,6 +658,47 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         @Override
         public void setRow(int row) {
             this.row = row;
+        }
+    }
+    
+    
+    public static class FilterEntry implements FilterList.Entry {
+        public final EntityType<?> entityType;
+        private final CheckboxButton checkbox;
+        
+        private FilterEntry(EntityType<?> entityType, CheckboxButton checkbox) {
+            this.entityType = entityType;
+            this.checkbox = checkbox;
+        }
+        
+        @Override
+        public void render(MatrixStack matrixStack, Minecraft mc, int mouseX, int mouseY, float partialTick) {
+            mc.textureManager.bind(ChooseLifeformScreen.LIFEFORM_CHOOSE_LOCATION);
+            ClientUtil.drawRightAlignedString(matrixStack, mc.font, 
+                    checkbox.getMessage(), 
+                    checkbox.x - 5, checkbox.y + (CHECKBOX_SIZE - mc.font.lineHeight) / 2, 
+                    0xFFFFFF);
+            checkbox.render(matrixStack, mouseX, mouseY, partialTick);
+        }
+        
+        @Override
+        public void setY(int y) {
+            checkbox.y = y;
+        }
+        
+        @Override
+        public void addY(int addY) {
+            checkbox.y += addY;
+        }
+        
+        @Override
+        public boolean mouseClicked(double mouseX, double mouseY, int buttonId) {
+            return checkbox.mouseClicked(mouseX, mouseY, buttonId);
+        }
+
+        @Override
+        public void setVisible(boolean isVisible) {
+            checkbox.visible = isVisible;
         }
     }
 }

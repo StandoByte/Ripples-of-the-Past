@@ -1,33 +1,28 @@
-package com.github.standobyte.jojo.client.ui.screen.stand.ge;
+package com.github.standobyte.jojo.client.ui.screen.widgets;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.google.common.collect.Streams;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.gui.AbstractGui;
-import net.minecraft.client.gui.widget.button.CheckboxButton;
-import net.minecraft.entity.EntityType;
+import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.MathHelper;
 
-public class FilterList {
-    private static final int CHECKBOX_HEIGHT = 20;
-    private static final int CHECKBOX_WIDTH = 20;
+public class FilterList<T extends FilterList.Entry> implements IGuiEventListener {
     private int topEntry = 0;
-    private final List<Entry> allEntries;
-    private List<Entry> renderedEntries;
+    private final List<T> allEntries;
+    private List<T> renderedEntries;
     public boolean visible = false;
     
-    @Nullable private Predicate<Entry> filter;
+    @Nullable private Predicate<T> filter;
     
     private int x;
     private int y;
@@ -38,29 +33,16 @@ public class FilterList {
     private int maxHeight;
     private int maxEntriesRendered;
     private int entriesRenderedCount;
+    private final int entryHeight;
     
-    public FilterList(List<EntityType<?>> entityTypes, 
-            int xRight, int yTop, int width, int yBottom, ChooseLifeformScreen screen) {
-        this.x = xRight - width;
+    public FilterList(List<T> entries, 
+            int x, int yTop, int width, int yBottom, int entryHeight) {
+        this.x = x;
         this.yTop = yTop;
         this.yBottom = yBottom;
         this.width = width;
-        this.allEntries = Streams.mapWithIndex(
-                entityTypes.stream(), 
-                (entityType, i) -> new Entry(entityType, 
-                        new LifeformFilterListCheckbox(xRight - CHECKBOX_WIDTH, -1, CHECKBOX_WIDTH, CHECKBOX_HEIGHT, 
-                                entityType.getDescription(), 
-                                () -> ChooseLifeformScreen.getEntriesUiData(ClientUtil.getClientPlayer()).map(
-                                        cap -> !cap.isGELifeformHidden(entityType)).orElse(false),
-                                stateBeingSet -> {
-                                    if (stateBeingSet) {
-                                        screen.showEntry(entityType, true);
-                                    }
-                                    else {
-                                        screen.hideEntry(entityType);
-                                    }
-                                })))
-                .collect(Collectors.toCollection(ArrayList::new));
+        this.entryHeight = entryHeight;
+        this.allEntries = entries;
         this.renderedEntries = new ArrayList<>(allEntries);
         updateMaxHeight();
     }
@@ -76,17 +58,17 @@ public class FilterList {
     
     private void updateMaxHeight() {
         this.maxHeight = yBottom - yTop;
-        this.maxEntriesRendered = Math.max(maxHeight / CHECKBOX_HEIGHT, 1);
+        this.maxEntriesRendered = Math.max(maxHeight / entryHeight, 1);
         this.entriesRenderedCount = Math.min(renderedEntries.size(), maxEntriesRendered);
-        this.height = entriesRenderedCount * CHECKBOX_HEIGHT + 32;
+        this.height = entriesRenderedCount * entryHeight + 32;
         this.y = yBottom - height;
         updatePositions();
     }
     
     private void updatePositions() {
         int i = -topEntry;
-        for (Entry entry : renderedEntries) {
-            entry.checkbox.y = this.y + 16 + (int) i * CHECKBOX_HEIGHT;
+        for (T entry : renderedEntries) {
+            entry.setY(this.y + 16 + (int) i * entryHeight);
             i++;
         }
         setTopEntryIndex(topEntry);
@@ -96,22 +78,18 @@ public class FilterList {
             int mouseX, int mouseY, float partialTick) {
         if (!visible) return;
         
-        mc.textureManager.bind(ChooseLifeformScreen.LIFEFORM_CHOOSE_LOCATION);
+        mc.textureManager.bind(ClientUtil.ADDITIONAL_UI);
         AbstractGui.blit(matrixStack, x + width / 2, y, 
-                16, getScrollUpState(mouseX, mouseY).texY, 16, 16, 128, 128);
+                16, getScrollUpState(mouseX, mouseY).texY, 16, 16, 256, 256);
         
         for (int i = 0; i < entriesRenderedCount && i + topEntry < renderedEntries.size(); i++) {
-            Entry entry = renderedEntries.get(i + topEntry);
-            ClientUtil.drawRightAlignedString(matrixStack, mc.font, 
-                    entry.checkbox.getMessage(), 
-                    x + width - 25, entry.checkbox.y + (CHECKBOX_HEIGHT - mc.font.lineHeight) / 2, 
-                    0xFFFFFF);
-            entry.checkbox.render(matrixStack, mouseX, mouseY, partialTick);
+            T entry = renderedEntries.get(i + topEntry);
+            entry.render(matrixStack, mc, mouseX, mouseY, partialTick);
         }
 
-        mc.textureManager.bind(ChooseLifeformScreen.LIFEFORM_CHOOSE_LOCATION);
+        mc.textureManager.bind(ClientUtil.ADDITIONAL_UI);
         AbstractGui.blit(matrixStack, x + width / 2, this.y + height - 16, 
-                0, getScrollDownState(mouseX, mouseY).texY, 16, 16, 128, 128);
+                0, getScrollDownState(mouseX, mouseY).texY, 16, 16, 256, 256);
     }
     
     private int getMaxTopEntryIndex() {
@@ -119,15 +97,15 @@ public class FilterList {
     }
     
     
-    public void setFilter(@Nullable Predicate<Entry> filter) {
+    public void setFilter(@Nullable Predicate<T> filter) {
         this.filter = filter; // TODO fix filter
         this.renderedEntries = new ArrayList<>();
-        for (Entry entry : allEntries) {
+        for (T entry : allEntries) {
             boolean visible = filter == null || filter.test(entry);
             if (visible) {
                 renderedEntries.add(entry);
             }
-            entry.checkbox.visible = visible;
+            entry.setVisible(visible);
         }
         
         updateMaxHeight();
@@ -151,9 +129,9 @@ public class FilterList {
     }
     
     private static enum ScrollButtonState {
-        NORMAL(80),
-        DISABLED(96),
-        HOVERED(112);
+        NORMAL(144),
+        DISABLED(160),
+        HOVERED(176);
         
         private final int texY;
         private ScrollButtonState(int texY) {
@@ -161,6 +139,7 @@ public class FilterList {
         }
     }
     
+    @Override
     public boolean mouseClicked(double mouseX, double mouseY, int buttonId) {
         if (!visible) return false;
         if (getScrollUpState((int) mouseX, (int) mouseY) == ScrollButtonState.HOVERED) {
@@ -175,32 +154,29 @@ public class FilterList {
         }
         
         for (int i = 0; i < entriesRenderedCount; i++) {
-            CheckboxButton checkbox = renderedEntries.get(i + topEntry).checkbox;
-            if (checkbox.mouseClicked(mouseX, mouseY, buttonId)) {
+            if (renderedEntries.get(i + topEntry).mouseClicked(mouseX, mouseY, buttonId)) {
                 return true;
             }
         }
         
         return false;
     }
-    
+
+    @Override
     public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
         if (!visible) return false;
         
-        if (mouseOver(mouseX, mouseY)) {
-            if (delta < 0) {
-                setTopEntryIndex(topEntry + 1);
-            }
-            else if (delta > 0) {
-                setTopEntryIndex(topEntry - 1);
-            }
-            return true;
+        if (delta < 0) {
+            setTopEntryIndex(topEntry + 1);
         }
-        
-        return false;
+        else if (delta > 0) {
+            setTopEntryIndex(topEntry - 1);
+        }
+        return true;
     }
     
-    private boolean mouseOver(double mouseX, double mouseY) {
+    @Override
+    public boolean isMouseOver(double mouseX, double mouseY) {
         return mouseX > x && mouseX < x + width && mouseY > y && mouseY < y + height;
     }
     
@@ -209,18 +185,16 @@ public class FilterList {
         if (this.topEntry != index) {
             int diff = index - this.topEntry;
             this.topEntry = index;
-            renderedEntries.forEach(entry -> entry.checkbox.y -= diff * CHECKBOX_HEIGHT);
+            renderedEntries.forEach(entry -> entry.addY(-diff * entryHeight));
         }
     }
     
     
-    public static class Entry {
-        public final EntityType<?> entityType;
-        private final CheckboxButton checkbox;
-        
-        private Entry(EntityType<?> entityType, CheckboxButton checkbox) {
-            this.entityType = entityType;
-            this.checkbox = checkbox;
-        }
+    public static interface Entry {
+        void setY(int y);
+        void addY(int addY);
+        void setVisible(boolean isVisible);
+        void render(MatrixStack matrixStack, Minecraft mc, int mouseX, int mouseY, float partialTick);
+        boolean mouseClicked(double mouseX, double mouseY, int buttonId);
     }
 }
