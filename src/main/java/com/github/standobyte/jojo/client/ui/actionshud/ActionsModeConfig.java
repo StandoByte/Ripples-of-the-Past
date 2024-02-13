@@ -60,7 +60,7 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
             List<Action<?>> actions = HudControlSettings.getInstance()
                     .getControlScheme(powerClassification)
                     .getActionsHotbar(hotbar)
-                    .getEnabledView();
+                    .getEnabledActions();
             if (slot >= actions.size() || ((Action<P>) actions.get(slot)).getVisibleAction(power, target) == null) {
                 slot = -1;
             }

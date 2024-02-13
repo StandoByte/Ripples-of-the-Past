@@ -58,7 +58,6 @@ public class ToggleBox extends Widget implements IExtendedWidget {
         }
     }
     
-    @SuppressWarnings("resource")
     @Override
     public void renderButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
         drawCenteredString(matrixStack, Minecraft.getInstance().font, getMessage(), 

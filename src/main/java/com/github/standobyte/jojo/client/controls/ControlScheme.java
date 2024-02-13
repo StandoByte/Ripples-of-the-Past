@@ -10,7 +10,6 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPowerType;
@@ -25,11 +24,13 @@ import net.minecraft.util.Util;
 public class ControlScheme {
     public static final int ARBITRARY_MAX_HOTBAR_LENGTH = 19;
     
-    private JsonElement defaultState;
+    @Nullable
+    private DefaultControls defaultState;
     
-    private final List<ActionKeybindEntry> declaredKeybinds = new ArrayList<>();
-    private final List<ActionKeybindEntry> validKeybindsCache = new ArrayList<>();
-    private final List<ActionKeybindEntry> keybindsView = Collections.unmodifiableList(validKeybindsCache);
+    private final List<ActionKeybindEntry> serializedKeybinds = new ArrayList<>();
+    private final List<ActionKeybindEntry> legalKeybinds = new ArrayList<>();
+    
+    private final List<ActionKeybindEntry> keybindsView = Collections.unmodifiableList(legalKeybinds);
     
     private final Map<Hotbar, ActionsHotbar> hotbars = Util.make(new EnumMap<>(Hotbar.class), map -> {
         for (Hotbar hotbar : Hotbar.values()) {
@@ -41,7 +42,7 @@ public class ControlScheme {
     public boolean initLoadedFromConfig(IPower<?, ?> power) {
         if (initialized) return false;
         
-        for (ActionKeybindEntry keybind : declaredKeybinds) {
+        for (ActionKeybindEntry keybind : serializedKeybinds) {
             keybind.init();
         }
         
@@ -51,101 +52,139 @@ public class ControlScheme {
         }
         
         initialized = true;
-        updateCache();
         return true;
     }
-
-    public void updateCache() {
-        validKeybindsCache.clear();
-        for (ActionKeybindEntry keybind : declaredKeybinds) {
-            if (keybind.isValid()) {
-                validKeybindsCache.add(keybind);
-            }
+    
+    // add legal actions that are missing in serializedKeybinds (to both cache and serializedKeybinds)
+    // do not add illegal actions from serializedKeybinds
+    //
+    // update control scheme when new actions need to be added to HUD
+    // ex.: Hamon techniques
+    <P extends IPower<P, T>, T extends IPowerType<P, T>> void update(IPower<?, ?> power) {
+        if (power.hasPower()) {
+            P powerObj = (P) power;
+            T type = powerObj.getType();
+            sanitizeControls(powerObj, type);
         }
-    }
-
-    // add legal actions that are missing in declaredKeybinds (to both cache and declaredKeybinds)
-    // do not add illegal actions from declaredKeybinds
-    public void update(IPower<?, ?> power) {
-        // update control scheme when new actions need to be added to HUD
-        // ex.: Hamon techniques
-        InputHandler.toDoDeleteMe();
     }
     
-    static ControlScheme fromJson(JsonElement json, @Nullable ResourceLocation powerTypeId) {
-        JsonObject jsonObj = json.getAsJsonObject();
-        ControlScheme obj = new ControlScheme();
-
-        JsonArray keybindsJson = jsonObj.get("customKeybinds").getAsJsonArray();
-        for (JsonElement keybindJson : keybindsJson) {
-            ActionKeybindEntry keybind = ActionKeybindEntry.fromJson(keybindJson);
-            obj.declaredKeybinds.add(keybind);
-        }
-
-        JsonObject hotbarsJson = jsonObj.get("hotbars").getAsJsonObject();
-        for (ControlScheme.Hotbar hotbar : ControlScheme.Hotbar.values()) {
-            JsonObject hotbarJson = hotbarsJson.get(hotbar.name()).getAsJsonObject();
-            obj.hotbars.get(hotbar).fromJson(hotbarJson);
+    <P extends IPower<P, T>, T extends IPowerType<P, T>> void sanitizeControls(P power, T powerType) {
+        this.legalKeybinds.clear();
+        for (ActionKeybindEntry keybind : serializedKeybinds) {
+           Action<?> action = keybind.getAction();
+           if (keybind.isValid() && action != null && powerType.isActionLegalInHud((Action<P>) action, power)) {
+               legalKeybinds.add(keybind);
+           }
         }
         
-        if (powerTypeId != null) {
-            Optional<IPowerType<?, ?>> powerType = Optional.ofNullable(JojoCustomRegistries.NON_STAND_POWERS.fromId(powerTypeId));
-            // Optional#or was only added in Java 9
-            if (!powerType.isPresent()) powerType = Optional.ofNullable(JojoCustomRegistries.STANDS.fromId(powerTypeId));
-            powerType.ifPresent(type -> {
-                ControlScheme controlScheme = type.clCreateDefaultLayout();
-                JsonElement defaultState = controlScheme.defaultState;
-                obj.defaultState = defaultState;
-            });
+        
+        
+        for (ControlScheme.Hotbar hotbarType : ControlScheme.Hotbar.values()) {
+            ActionsHotbar hotbar = this.hotbars.get(hotbarType);
+            hotbar.legalSwitches.clear();
+            
+            for (ActionVisibilitySwitch declaredAction : hotbar.serializedSwitches) {
+                Action<?> action = declaredAction.getAction();
+                if (action != null && powerType.isActionLegalInHud((Action<P>) action, power)) {
+                    hotbar.legalSwitches.add(declaredAction);
+                }
+            }
+            
+            
+            if (defaultState != null) {
+                Action<?>[] defaultActions = defaultState.hotbars.get(hotbarType);
+                
+                for (Action<?> action : defaultActions) {
+                    if (!hotbars.entrySet().stream()
+                            .flatMap(entry -> entry.getValue().serializedSwitches.stream())
+                            .filter(sw -> sw.getAction() == action).findAny().isPresent()) {
+                        ActionVisibilitySwitch actionSwitch = this.getActionsHotbar(hotbarType).addActionAsSerialized(action);
+                        hotbar.legalSwitches.add(actionSwitch);
+                    }
+                }
+            }
+            
+            
+            hotbar.updateCache();
         }
-
-        return obj;
     }
-
-    JsonElement toJson() {
-        JsonObject json = new JsonObject();
-
-        JsonArray keybindsJson = new JsonArray();
-        json.add("customKeybinds", keybindsJson);
-        for (ActionKeybindEntry keybind : declaredKeybinds) {
-            keybindsJson.add(keybind.toJson());
-        }
-
-        JsonObject hotbarsJson = new JsonObject();
-        json.add("hotbars", hotbarsJson);
-        for (Hotbar hotbar : Hotbar.values()) {
-            JsonElement hotbarJson = hotbars.get(hotbar).toJson();
-            hotbarsJson.add(hotbar.name(), hotbarJson);
-        }
-        return json;
-    }
+    
+    
     
     public void reset(IPower<?, ?> power) {
         if (defaultState != null) {
-            ControlScheme defaultControls = fromJson(defaultState, null);
+            for (Hotbar hotbarType : Hotbar.values()) {
+                ActionsHotbar hotbar = hotbars.get(hotbarType);
+                hotbar.serializedSwitches.clear();
+                for (Action<?> action : defaultState.hotbars.get(hotbarType)) {
+                    hotbar.addActionAsSerialized(action);
+                }
+            }
             
-            for (ActionKeybindEntry keybind : this.declaredKeybinds) {
+            for (ActionKeybindEntry keybind : this.serializedKeybinds) {
                 keybind.removeKeybindFromMap();
             }
-            this.declaredKeybinds.clear();
-            this.declaredKeybinds.addAll(defaultControls.declaredKeybinds);
-            for (ActionKeybindEntry keybind : this.declaredKeybinds) {
-                keybind.init();
-            }
-            
-            for (Hotbar hotbar : Hotbar.values()) {
-                ActionsHotbar hotbarState = defaultControls.hotbars.get(hotbar);
-                this.hotbars.put(hotbar, hotbarState);
-                hotbarState.init();
-                hotbarState.updateCache();
+            this.serializedKeybinds.clear();
+            for (DefaultControls.DefaultKey keyInfo : defaultState.keyBindings) {
+                ActionKeybindEntry keyBind = new ActionKeybindEntry(ActionKeybindEntry.PressActionType.CLICK, 
+                        keyInfo.action.getRegistryName(), keyInfo.keyDesc);
+                serializedKeybinds.add(keyBind);
+                keyBind.init();
             }
             
             update(power);
-            updateCache();
         }
     }
-    // before removing an ActionKeybindEntry, call ActionKeybindEntry#removeKeybindFromMap
-    // to not flood the key bindings map with keybinds that will not be used anymore
+    
+    public static ControlScheme createNewFromDefault(DefaultControls defaultControls) {
+        ControlScheme obj = new ControlScheme();
+        
+        for (Hotbar hotbarType : Hotbar.values()) {
+            ActionsHotbar hotbar = obj.hotbars.get(hotbarType);
+            for (Action<?> action : defaultControls.hotbars.get(hotbarType)) {
+                hotbar.addActionAsSerialized(action);
+            }
+        }
+        
+        for (DefaultControls.DefaultKey keyBinding : defaultControls.keyBindings) {
+            obj.serializedKeybinds.add(new ActionKeybindEntry(ActionKeybindEntry.PressActionType.CLICK, 
+                            keyBinding.action.getRegistryName(), keyBinding.keyDesc));
+        }
+        
+        return obj;
+    }
+    
+    public static class DefaultControls {
+        final Map<Hotbar, Action<?>[]> hotbars = new EnumMap<>(Hotbar.class);
+        final DefaultKey[] keyBindings;
+        
+        public DefaultControls(
+                Action<?>[] leftClickActions, 
+                Action<?>[] rightClickActions, 
+                DefaultKey... keyBindings) {
+            this.hotbars.put(Hotbar.LEFT_CLICK, leftClickActions);
+            this.hotbars.put(Hotbar.RIGHT_CLICK, rightClickActions);
+            this.keyBindings = keyBindings;
+        }
+        
+        public static class DefaultKey {
+            final Action<?> action;
+            final String keyDesc;
+            
+            private DefaultKey(Action<?> action, String keyDesc) {
+                this.action = action;
+                this.keyDesc = keyDesc;
+            }
+            
+            public static DefaultKey of(Action<?> action, String keyDesc) {
+                return new DefaultKey(action, keyDesc);
+            }
+            
+            public static DefaultKey mmb(Action<?> action) {
+                return new DefaultKey(action, "key.mouse.middle");
+            }
+        }
+    }
     
     
     
@@ -154,11 +193,8 @@ public class ControlScheme {
     }
     
     public ActionKeybindEntry addBlankKeybindEntry(ActionKeybindEntry.PressActionType pressType) {
-        ActionKeybindEntry keybind = new ActionKeybindEntry(pressType, 
-                new ResourceLocation("blank"), InputMappings.Type.KEYSYM, -1);
-        declaredKeybinds.add(keybind);
-        updateCache();
-        return keybind;
+        return addKeybindEntry(new ActionKeybindEntry(pressType, 
+                new ResourceLocation("blank"), InputMappings.Type.KEYSYM, -1));
     }
     
     public ActionKeybindEntry addKeybindEntry(ActionKeybindEntry.PressActionType pressType, 
@@ -168,16 +204,21 @@ public class ControlScheme {
     
     public ActionKeybindEntry addKeybindEntry(ActionKeybindEntry.PressActionType pressType, 
             Action<?> action, InputMappings.Type inputType, int key) {
-        ActionKeybindEntry keybind = new ActionKeybindEntry(pressType, action, inputType, key);
-        declaredKeybinds.add(keybind);
-        updateCache();
-        return keybind;
+        return addKeybindEntry(new ActionKeybindEntry(pressType, action, inputType, key));
     }
     
+    private ActionKeybindEntry addKeybindEntry(ActionKeybindEntry keybind) {
+        legalKeybinds.add(keybind);
+        serializedKeybinds.add(keybind);
+        return keybind;
+    }
+
+    // before removing an ActionKeybindEntry, call ActionKeybindEntry#removeKeybindFromMap
+    // to not flood the key bindings map with keybinds that will not be used anymore
     public boolean removeKeybindEntry(ActionKeybindEntry keybind) {
-        if (declaredKeybinds.remove(keybind)) {
+        if (legalKeybinds.remove(keybind)) {
+            serializedKeybinds.remove(keybind);
             keybind.removeKeybindFromMap();
-            updateCache();
             return true;
         }
         
@@ -197,50 +238,50 @@ public class ControlScheme {
     
     
     
-    public static ControlScheme defaultFromPowerType(
-            Action<?>[] leftClickActions, 
-            Action<?>[] rightClickActions, 
-            DefaultKey... keyBindings) {
+    static ControlScheme fromJson(JsonElement json, @Nullable ResourceLocation powerTypeId) {
+        JsonObject jsonObj = json.getAsJsonObject();
         ControlScheme obj = new ControlScheme();
 
-        ActionsHotbar lmbHotbar = obj.hotbars.get(Hotbar.LEFT_CLICK);
-        for (Action<?> action : leftClickActions) {
-            lmbHotbar.addActionPreInit(new ActionVisibilitySwitch(
-                    lmbHotbar, action.getRegistryName(), action.enabledInHudDefault()));
+        JsonArray keybindsJson = jsonObj.get("customKeybinds").getAsJsonArray();
+        for (JsonElement keybindJson : keybindsJson) {
+            ActionKeybindEntry keybind = ActionKeybindEntry.fromJson(keybindJson);
+            obj.serializedKeybinds.add(keybind);
+        }
+
+        JsonObject hotbarsJson = jsonObj.get("hotbars").getAsJsonObject();
+        for (ControlScheme.Hotbar hotbar : ControlScheme.Hotbar.values()) {
+            JsonObject hotbarJson = hotbarsJson.get(hotbar.name()).getAsJsonObject();
+            obj.hotbars.get(hotbar).fromJson(hotbarJson);
         }
         
-        ActionsHotbar rmbHotbar = obj.hotbars.get(Hotbar.RIGHT_CLICK);
-        for (Action<?> action : rightClickActions) {
-            rmbHotbar.addActionPreInit(new ActionVisibilitySwitch(
-                    rmbHotbar, action.getRegistryName(), action.enabledInHudDefault()));
+        if (powerTypeId != null) {
+            Optional<IPowerType<?, ?>> powerType = Optional.ofNullable(JojoCustomRegistries.NON_STAND_POWERS.fromId(powerTypeId));
+            // Optional#or was only added in Java 9
+            if (!powerType.isPresent()) powerType = Optional.ofNullable(JojoCustomRegistries.STANDS.fromId(powerTypeId));
+            powerType.ifPresent(type -> {
+                ControlScheme.DefaultControls defaultState = type.clCreateDefaultLayout();
+                obj.defaultState = defaultState;
+            });
         }
-        
-        for (DefaultKey keyBinding : keyBindings) {
-            obj.declaredKeybinds.add(new ActionKeybindEntry(ActionKeybindEntry.PressActionType.CLICK, 
-                            keyBinding.action.getRegistryName(), keyBinding.keyDesc));
-        }
-        
-        JsonElement savedState = obj.toJson();
-        obj.defaultState = savedState;
-        
+
         return obj;
     }
-    
-    public static class DefaultKey {
-        final Action<?> action;
-        final String keyDesc;
-        
-        private DefaultKey(Action<?> action, String keyDesc) {
-            this.action = action;
-            this.keyDesc = keyDesc;
+
+    JsonElement toJson() {
+        JsonObject json = new JsonObject();
+
+        JsonArray keybindsJson = new JsonArray();
+        json.add("customKeybinds", keybindsJson);
+        for (ActionKeybindEntry keybind : serializedKeybinds) {
+            keybindsJson.add(keybind.toJson());
         }
-        
-        public static DefaultKey of(Action<?> action, String keyDesc) {
-            return new DefaultKey(action, keyDesc);
+
+        JsonObject hotbarsJson = new JsonObject();
+        json.add("hotbars", hotbarsJson);
+        for (Hotbar hotbar : Hotbar.values()) {
+            JsonElement hotbarJson = hotbars.get(hotbar).toJson();
+            hotbarsJson.add(hotbar.name(), hotbarJson);
         }
-        
-        public static DefaultKey mmb(Action<?> action) {
-            return new DefaultKey(action, "key.mouse.middle");
-        }
+        return json;
     }
 }

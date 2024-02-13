@@ -13,6 +13,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
@@ -27,6 +28,7 @@ import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
 import com.github.standobyte.jojo.util.mc.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
+import com.google.common.collect.Iterables;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -255,11 +257,16 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     @Override
-    public ControlScheme clCreateDefaultLayout() {
-        return ControlScheme.defaultFromPowerType(
+    public ControlScheme.DefaultControls clCreateDefaultLayout() {
+        return new ControlScheme.DefaultControls(
                 leftClickHotbar, 
                 rightClickHotbar, 
-                ControlScheme.DefaultKey.mmb(defaultQuickAccess));
+                ControlScheme.DefaultControls.DefaultKey.mmb(defaultQuickAccess));
+    }
+    
+    @Override
+    public boolean isActionLegalInHud(Action<IStandPower> action, IStandPower power) {
+        return Iterables.contains(getAllUnlockableActions(), action) && action.isLegalInHud(power);
     }
     
     public Iterable<StandAction> getAllUnlockableActions() {

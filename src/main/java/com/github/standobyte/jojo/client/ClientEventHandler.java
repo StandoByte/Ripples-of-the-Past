@@ -333,7 +333,6 @@ public class ClientEventHandler {
             
             // Hamon learning player interaction hints
             if (entity instanceof PlayerEntity) {
-                @SuppressWarnings("resource")
                 PlayerEntity clientPlayer = Minecraft.getInstance().player;
                 PlayerEntity targetPlayer = (PlayerEntity) entity;
                 Optional<HamonData> playerHamon = INonStandPower.getNonStandPowerOptional(clientPlayer)
@@ -561,7 +560,6 @@ public class ClientEventHandler {
     }
     
     private boolean modPostedEvent = false;
-    @SuppressWarnings("resource")
     @SubscribeEvent(priority = EventPriority.LOW)
     public void onRenderHand(RenderHandEvent event) {
         ClientPlayerEntity player = Minecraft.getInstance().player;

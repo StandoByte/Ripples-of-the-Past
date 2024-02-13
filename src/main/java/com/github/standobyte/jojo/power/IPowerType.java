@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.power;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.power.bowcharge.IBowChargeEffect;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -25,7 +26,8 @@ public interface IPowerType<P extends IPower<P, T>, T extends IPowerType<P, T>> 
         return vanillaHitResult;
     }
     
-    ControlScheme clCreateDefaultLayout();
+    ControlScheme.DefaultControls clCreateDefaultLayout();
+    default boolean isActionLegalInHud(Action<P> action, P power) { return true; }
     
     @Nullable default IBowChargeEffect<P, T> getBowChargeEffect() {
         return null;

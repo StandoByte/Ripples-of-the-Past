@@ -29,6 +29,9 @@ public class HudControlSettings {
     private PowerTypeControlSchemes nonStandControlsCache;
     
     public ControlScheme getControlScheme(IPower<?, ?> power) {
+        if (!power.hasPower()) {
+            throw new IllegalStateException();
+        }
         return getControlScheme(power.getPowerClassification());
     }
     
@@ -44,7 +47,7 @@ public class HudControlSettings {
         }
     }
     
-    public void cacheControlsScheme(IPower<?, ?> power) {
+    public void refreshControls(IPower<?, ?> power) {
         PowerTypeControlSchemes controls;
         if (!power.hasPower()) {
             controls = null;
@@ -53,7 +56,8 @@ public class HudControlSettings {
             IPowerType<?, ?> powerType = power.getType();
             ResourceLocation powerTypeId = powerType.getRegistryName();
             controls = fullStateMap.computeIfAbsent(powerTypeId, id -> {
-                return new PowerTypeControlSchemes(id, powerType.clCreateDefaultLayout());
+                ControlScheme.DefaultControls defaultControls = powerType.clCreateDefaultLayout();
+                return new PowerTypeControlSchemes(id, ControlScheme.createNewFromDefault(defaultControls));
             });
             controls.update(power);
         }

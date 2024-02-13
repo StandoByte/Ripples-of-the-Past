@@ -16,7 +16,7 @@ public class PowerTypeControlSchemes {
         this.currentControlScheme = currentControlSchemeLoaded;
     }
     
-    public void update(IPower<?, ?> power) {
+    void update(IPower<?, ?> power) {
         currentControlScheme.initLoadedFromConfig(power);
         currentControlScheme.update(power);
     }

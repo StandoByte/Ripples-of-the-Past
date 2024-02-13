@@ -30,7 +30,6 @@ public class SoulRenderer<T extends SoulEntity> extends EntityRenderer<T> {
         return null;
     }
 
-    @SuppressWarnings("resource")
     @Override
     public void render(T soulEntity, float yRotation, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
         if (!soulEntity.isInvisibleTo(Minecraft.getInstance().player)) {

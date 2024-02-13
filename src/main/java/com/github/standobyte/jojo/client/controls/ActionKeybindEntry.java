@@ -30,6 +30,7 @@ public class ActionKeybindEntry {
     ActionKeybindEntry(PressActionType type, ResourceLocation actionId, String keySaveDesc) {
         this.type = type;
         this.actionId = actionId;
+        this.action = null;
         if (keySaveDesc.indexOf(':') != -1) {
             String[] pts = keySaveDesc.split(":");
             keyModifier = KeyModifier.valueFromString(pts[1]);

@@ -25,7 +25,6 @@ public class ClientModSettingsScreen extends SettingsScreen {
     private final ClientModSettings settings;
     private final ClientModSettings.Settings settingsValues;
 
-    @SuppressWarnings("resource")
     public ClientModSettingsScreen(Screen lastScreen, ClientModSettings settings) {
         super(lastScreen, lastScreen.getMinecraft().options, new TranslationTextComponent("jojo.options.client.title"));
         this.settings = settings;
