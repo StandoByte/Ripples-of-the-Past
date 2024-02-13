@@ -625,20 +625,6 @@ public class JojoModConfig {
     
     
     
-    public static class Client {
-        
-        public final ForgeConfigSpec.BooleanValue actionSlotHotkeys;
-        
-        private Client(ForgeConfigSpec.Builder builder) {
-            actionSlotHotkeys = builder
-                    .comment(" Enable hotkey settings for each individual attack and ability from 1 to 9.", 
-                            "  If your client is launched, changing the setting requires restarting the game.")
-                    .translation("jojo.config.client.slotHotkeys")
-                    .define("actionSlotHotkeys", false);
-        }
-    }
-
-
     static final ForgeConfigSpec commonSpec;
     private static final Common COMMON_FROM_FILE;
     private static final Common COMMON_SYNCED_TO_CLIENT;
@@ -658,14 +644,6 @@ public class JojoModConfig {
     
     public static Common getCommonConfigInstance(boolean isClientSide) {
         return isClientSide && !ClientUtil.isLocalServer() ? COMMON_SYNCED_TO_CLIENT : COMMON_FROM_FILE;
-    }
-
-    static final ForgeConfigSpec clientSpec;
-    public static final Client CLIENT;
-    static {
-        final Pair<Client, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(Client::new);
-        clientSpec = specPair.getRight();
-        CLIENT = specPair.getLeft();
     }
     
     @SubscribeEvent

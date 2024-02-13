@@ -23,7 +23,7 @@ public class StandLayerGlowLayer<T extends StandEntity, M extends StandEntityMod
     }
 
     @Override
-    public M getLayerModel() {
-        return layerRenderer.getLayerModel();
+    public M getLayerModel(T entity) {
+        return layerRenderer.getLayerModel(entity);
     }
 }

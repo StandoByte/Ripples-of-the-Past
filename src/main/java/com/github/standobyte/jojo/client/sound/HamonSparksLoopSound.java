@@ -39,7 +39,6 @@ public class HamonSparksLoopSound implements ITicking {
         return playSparkSound(entity, soundPos, volume, false);
     }
     
-    @SuppressWarnings("resource")
     public static boolean playSparkSound(Entity entity, Vector3d soundPos, float volume, boolean limitForEntityType) {
         double distSqr = soundPos.distanceToSqr(Minecraft.getInstance().gameRenderer.getMainCamera().getPosition());
         if (distSqr > 256) {

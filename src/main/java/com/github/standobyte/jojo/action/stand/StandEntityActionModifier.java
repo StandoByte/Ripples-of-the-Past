@@ -30,6 +30,11 @@ public abstract class StandEntityActionModifier extends StandAction implements I
         return conditionCheck.isPositive();
     }
     
+    @Override
+    public boolean isLegalInHud(IStandPower power) {
+        return false;
+    }
+    
     
     
     protected class TriggeredFlag {}

@@ -19,7 +19,7 @@ public class TheWorldHeavyPunch extends StandEntityHeavyAttack {
     public StandEntityPunch punchEntity(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
         return new TheWorldHeavyPunchInstance(stand, target, dmgSource)
                 .copyProperties(super.punchEntity(stand, target, dmgSource))
-                .armorPiercing((float) stand.getAttackDamage() * 0.01F)
+                .armorPiercing((float) stand.getAttackDamage() * 0.015F)
                 .addKnockback(6)
                 .impactSound(ModSounds.THE_WORLD_PUNCH_HEAVY_ENTITY);
     }

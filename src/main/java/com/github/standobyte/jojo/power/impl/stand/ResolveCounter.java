@@ -2,7 +2,6 @@ package com.github.standobyte.jojo.power.impl.stand;
 
 import java.util.Optional;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModStatusEffects;
@@ -126,7 +125,6 @@ public class ResolveCounter {
                         resolveRecords.add(resolve);
                     }
                     setMaxAchievedValue(Optional.ofNullable(resolveRecords.getMax()).orElse(0F));
-                    JojoMod.LOGGER.debug("{}", maxAchievedValue);
                 }
             }
             else {

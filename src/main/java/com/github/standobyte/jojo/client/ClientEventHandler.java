@@ -4,7 +4,12 @@ import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.EXPERIENCE;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.FOOD;
 
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.function.Predicate;
+import java.util.stream.IntStream;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
@@ -16,6 +21,7 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
+import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.render.block.overlay.TranslucentBlockRenderHelper;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.GlovesLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.HamonBurnLayer;
@@ -25,6 +31,9 @@ import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.ClientModSettingsScreen;
 import com.github.standobyte.jojo.client.ui.screen.standskin.StandSkinsScreen;
+import com.github.standobyte.jojo.client.ui.screen.controls.HudLayoutEditingScreen;
+import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.ControlSettingToggleButton;
+import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.HoldToggleKeyEntry;
 import com.github.standobyte.jojo.client.ui.screen.widgets.HeightScaledSlider;
 import com.github.standobyte.jojo.client.ui.screen.widgets.ImageVanillaButton;
 import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
@@ -57,6 +66,7 @@ import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.screen.ControlsScreen;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.IngameMenuScreen;
 import net.minecraft.client.gui.screen.MainMenuScreen;
@@ -64,6 +74,7 @@ import net.minecraft.client.gui.screen.OptionsScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractSlider;
 import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.widget.list.KeyBindingList;
 import net.minecraft.client.renderer.FirstPersonRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.OutlineLayerBuffer;
@@ -71,6 +82,7 @@ import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -332,7 +344,6 @@ public class ClientEventHandler {
             
             // Hamon learning player interaction hints
             if (entity instanceof PlayerEntity) {
-                @SuppressWarnings("resource")
                 PlayerEntity clientPlayer = Minecraft.getInstance().player;
                 PlayerEntity targetPlayer = (PlayerEntity) entity;
                 Optional<HamonData> playerHamon = INonStandPower.getNonStandPowerOptional(clientPlayer)
@@ -560,7 +571,6 @@ public class ClientEventHandler {
     }
     
     private boolean modPostedEvent = false;
-    @SuppressWarnings("resource")
     @SubscribeEvent(priority = EventPriority.LOW)
     public void onRenderHand(RenderHandEvent event) {
         ClientPlayerEntity player = Minecraft.getInstance().player;
@@ -738,6 +748,60 @@ public class ClientEventHandler {
         
         else if (screen instanceof OptionsScreen) {
             event.addWidget(ClientModSettingsScreen.addSettingsButton(screen, event.getWidgetList()));
+        }
+        
+        else if (screen instanceof ControlsScreen) {
+            KeyBindingList controlList = ClientReflection.getControlList((ControlsScreen) screen);
+            List<KeyBindingList.Entry> keyEntries = controlList.children();
+            
+            ListIterator<KeyBindingList.Entry> entriesIter = keyEntries.listIterator();
+            ClientModSettings modSettings = ClientModSettings.getInstance();
+            ClientModSettings.Settings modSettingsRead = ClientModSettings.getSettingsReadOnly();
+            while (entriesIter.hasNext()) {
+                KeyBindingList.Entry entry = entriesIter.next();
+                if (entry instanceof KeyBindingList.KeyEntry) {
+                    KeyBindingList.KeyEntry keyEntry = (KeyBindingList.KeyEntry) entry;
+                    KeyBinding key = ClientReflection.getKey(keyEntry);
+                    if (key == InputHandler.getInstance().attackHotbar) {
+                        entriesIter.set(new HoldToggleKeyEntry(keyEntry, ClientReflection.getChangeButton(keyEntry), new ControlSettingToggleButton(40, 20, 
+                                button -> {
+                                    modSettings.editSettings(s -> s.toggleLmbHotbar = !s.toggleLmbHotbar);
+                                    InputHandler.getInstance().setToggledHotbarControls(ControlScheme.Hotbar.LEFT_CLICK, false);
+                                },
+                                () -> modSettingsRead.toggleLmbHotbar)));
+                    }
+                    else if (key == InputHandler.getInstance().abilityHotbar) {
+                        entriesIter.set(new HoldToggleKeyEntry(keyEntry, ClientReflection.getChangeButton(keyEntry), new ControlSettingToggleButton(40, 20, 
+                                button -> {
+                                    modSettings.editSettings(s -> s.toggleRmbHotbar = !s.toggleRmbHotbar);
+                                    InputHandler.getInstance().setToggledHotbarControls(ControlScheme.Hotbar.RIGHT_CLICK, false);
+                                },
+                                () -> modSettingsRead.toggleRmbHotbar)));
+                    }
+                    else if (key == InputHandler.getInstance().disableHotbars) {
+                        entriesIter.set(new HoldToggleKeyEntry(keyEntry, ClientReflection.getChangeButton(keyEntry), new ControlSettingToggleButton(40, 20, 
+                                button -> {
+                                    modSettings.editSettings(s -> s.toggleDisableHotbars = !s.toggleDisableHotbars);
+                                    InputHandler.getInstance().setToggleHotbarsDisabled(false);
+                                },
+                                () -> modSettingsRead.toggleDisableHotbars)));
+                    }
+                }
+            }
+            
+            if (HudLayoutEditingScreen.scrollCtrlListTo != null) {
+                Predicate<KeyBindingList.Entry> scrollTo = HudLayoutEditingScreen.scrollCtrlListTo;
+                HudLayoutEditingScreen.scrollCtrlListTo = null;
+                OptionalInt index = IntStream.range(0, controlList.children().size())
+                        .filter(i -> {
+                            KeyBindingList.Entry entry = controlList.children().get(i);
+                            return scrollTo.test(entry);
+                        })
+                        .findFirst();
+                index.ifPresent(i -> {
+                    controlList.setScrollAmount(ClientReflection.getRowTop(controlList, i) - controlList.getTop());
+                });
+            }
         }
     }
 

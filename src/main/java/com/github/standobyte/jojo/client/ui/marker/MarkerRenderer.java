@@ -191,11 +191,11 @@ public abstract class MarkerRenderer {
         protected boolean outlined;
         protected final Optional<StandEffectInstance> standEffect;
         
-        protected MarkerInstance(Vector3d pos, boolean outlined) {
+        public MarkerInstance(Vector3d pos, boolean outlined) {
             this(pos, outlined, Optional.empty());
         }
         
-        protected MarkerInstance(Vector3d pos, boolean outlined, Optional<StandEffectInstance> standEffect) {
+        public MarkerInstance(Vector3d pos, boolean outlined, Optional<StandEffectInstance> standEffect) {
             this.pos = pos;
             this.outlined = outlined;
             this.standEffect = standEffect;

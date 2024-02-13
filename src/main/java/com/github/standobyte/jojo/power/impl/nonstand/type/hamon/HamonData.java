@@ -23,6 +23,7 @@ import com.github.standobyte.jojo.action.non_stand.HamonMetalSilverOverdrive;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
@@ -41,7 +42,6 @@ import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacke
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillAddPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillRemovePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSyncOnLoadPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrHamonSyncPlayerLearnerPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonUiEffectPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonAuraColorPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonAuraColorPacket.HamonAuraColor;
@@ -50,6 +50,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrHamonCharacterTec
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonEnergyTicksPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonMeditationPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonStatsPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHamonSyncPlayerLearnerPacket;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.TypeSpecificData;
@@ -59,7 +60,6 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamon
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterHamonTechnique;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.HamonTechniqueManager;
-import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -1081,12 +1081,13 @@ public class HamonData extends TypeSpecificData {
     }
 
     private void addSkillAction(AbstractHamonSkill skill) {
-        if (skill.getRewardAction() != null && skill.addsActionToHUD()) {
-            ActionsLayout.Hotbar hotbar = skill.getRewardType().getDefaultHotbar();
-            if (hotbar != null) {
-                power.getActionsHudLayout().addExtraAction(skill.getRewardAction(), hotbar);
-            }
-        }
+        InputHandler.toDoDeleteMe();
+//        if (skill.getRewardAction() != null && skill.addsActionToHUD()) {
+//            ControlScheme.Hotbar hotbar = skill.getRewardType().getDefaultHotbar();
+//            if (hotbar != null) {
+//                power.clGetActionsHudLayout().addExtraAction(skill.getRewardAction(), hotbar);
+//            }
+//        }
     }
     
     public void removeHamonSkill(AbstractHamonSkill skill) {
@@ -1103,9 +1104,9 @@ public class HamonData extends TypeSpecificData {
     }
 
     private void removeSkillAction(AbstractHamonSkill skill) {
-        if (skill.getRewardAction() != null && skill.addsActionToHUD()) {
-            power.getActionsHudLayout().removeExtraAction(skill.getRewardAction());
-        }
+//        if (skill.getRewardAction() != null && skill.addsActionToHUD()) {
+//            power.clGetActionsHudLayout().removeExtraAction(skill.getRewardAction());
+//        }
     }
     
     public static boolean canResetTab(PlayerEntity user, HamonSkillsTab type) {

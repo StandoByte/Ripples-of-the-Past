@@ -34,8 +34,8 @@ public class ParseGeckoModel {
             .registerTypeAdapter(ModelParsed.UV.class, ModelParsed.UV.DESERIALIZER)
             .create();
     
-    public static EntityModelUnbaked parseGeckoModel(JsonElement json) {
-        JsonElement modelJson = json.getAsJsonObject().get("minecraft:geometry").getAsJsonArray().get(0);
+    public static EntityModelUnbaked parseGeckoModel(JsonObject json) {
+        JsonElement modelJson = json.get("minecraft:geometry").getAsJsonArray().get(0);
         ModelParsed modelParsed = GSON.fromJson(modelJson, ModelParsed.class);
         EntityModelUnbaked modelUnbaked = modelParsed.createUnbakedModel();
         return modelUnbaked;

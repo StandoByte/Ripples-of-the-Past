@@ -305,11 +305,11 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     }
     
     @Override
-    protected void keepActionsLayout(INonStandPower oldPower) {
+    public void onClone(INonStandPower oldPower, boolean wasDeath) {
+        super.onClone(oldPower, wasDeath);
         if (typeSpecificData != null) {
             typeSpecificData.updateExtraActions();
         }
-        super.keepActionsLayout(oldPower);
     }
     
     @Override
@@ -324,7 +324,6 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
             }
             PacketManager.sendToClient(new PreviousPowerTypesPacket(hadPowers), player);
         });
-        syncLayoutWithUser();
     }
     
     @Override

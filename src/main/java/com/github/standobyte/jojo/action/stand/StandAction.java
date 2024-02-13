@@ -1,9 +1,14 @@
 package com.github.standobyte.jojo.action.stand;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
 import java.util.Optional;
+import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -39,6 +44,7 @@ public abstract class StandAction extends Action<IStandPower> {
     private final float staminaCost;
     private final float staminaCostTick;
     private final Set<StandPart> partsRequired;
+    private final List<Supplier<? extends StandAction>> extraUnlockables;
     
     public StandAction(StandAction.AbstractBuilder<?> builder) {
         super(builder);
@@ -49,6 +55,7 @@ public abstract class StandAction extends Action<IStandPower> {
         this.staminaCost = builder.staminaCost;
         this.staminaCostTick = builder.staminaCostTick;
         this.partsRequired = builder.partsRequired;
+        this.extraUnlockables = builder.extraUnlockables;
     }
 
     @Override
@@ -66,7 +73,21 @@ public abstract class StandAction extends Action<IStandPower> {
         return isTrained;
     }
     
+    public Collection<StandAction> getExtraUnlockables() {
+        List<StandAction> actions = extraUnlockables.stream()
+                .map(Supplier::get)
+                .collect(Collectors.toCollection(ArrayList::new));
+        for (StandAction action : getExtraUnlockable()) {
+            actions.add(action);
+        }
+        return actions;
+    }
+    
     private static final StandAction[] NO_EXTRA_ACTIONS = new StandAction[0];
+    /**
+     * @deprecated Use {@link StandAction.AbstractBuilder#addExtraUnlockable(Supplier)} when initializing the action
+     */
+    @Deprecated
     public StandAction[] getExtraUnlockable() {
         return NO_EXTRA_ACTIONS;
     }
@@ -223,6 +244,7 @@ public abstract class StandAction extends Action<IStandPower> {
         private float staminaCost = 0;
         private float staminaCostTick = 0;
         private final Set<StandPart> partsRequired = EnumSet.noneOf(StandPart.class);
+        private final List<Supplier<? extends StandAction>> extraUnlockables = new ArrayList<>();
 
         public T noResolveUnlock() {
             return resolveLevelToUnlock(-1);
@@ -235,6 +257,13 @@ public abstract class StandAction extends Action<IStandPower> {
         
         public T isTrained() {
             this.isTrained = true;
+            return getThis();
+        }
+        
+        public T addExtraUnlockable(Supplier<? extends StandAction> action) {
+            if (action != null) {
+                extraUnlockables.add(action);
+            }
             return getThis();
         }
         

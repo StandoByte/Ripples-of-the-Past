@@ -22,7 +22,13 @@ public class StandStatFormulas {
     }
     
     public static int getHeavyAttackRecovery(double speed) {
-        return MathHelper.floor((40 - speed * 1.25) * 0.75);
+        return getHeavyAttackRecovery(speed, 0);
+    }
+    
+    public static int getHeavyAttackRecovery(double speed, float punchFinisherMeter) {
+        float max = (40 - (float) speed * 1.25F) * 0.75F;
+        float min = max / 2;
+        return MathHelper.floor(MathHelper.lerp(punchFinisherMeter, max, min));
     }
     
     
@@ -75,7 +81,6 @@ public class StandStatFormulas {
         return Math.max((int) (speed * 8.0 - 20.0), 0);
     }
     
-    @Deprecated
     public static int getBarrageRecovery(double speed) {
         return MathHelper.floor((40.0 - speed * 1.25) * 0.25);
     }
@@ -87,7 +92,7 @@ public class StandStatFormulas {
     
     
     public static float getPhysicalResistance(double durability, double strength, float blocked, float damageDealt) {
-        double resistance = MathHelper.clamp(durability * 0.03 + strength * 0.02, 0, 1);
+        double resistance = MathHelper.clamp(durability * 0.032 + strength * 0.024, 0, 1);
         double dmgCoeff = 1;
         
         if (blocked > 0) {

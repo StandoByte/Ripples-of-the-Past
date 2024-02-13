@@ -5,12 +5,12 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.client.ui.BlitFloat;
 import com.github.standobyte.jojo.util.mc.EntityTypeToInstance;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.entity.Entity;
@@ -24,11 +24,11 @@ public class EntityTypeIcon {
     private static final ResourceLocation UNKNOWN = new ResourceLocation("textures/entity_icon/unknown.png");
 
     @SuppressWarnings("resource")
-    public static void renderIcon(EntityType<?> entityType, MatrixStack matrixStack, int x, int y) {
+    public static void renderIcon(EntityType<?> entityType, MatrixStack matrixStack, float x, float y) {
         ResourceLocation icon = getIcon(entityType);
         if (icon != UNKNOWN) {
             Minecraft.getInstance().getTextureManager().bind(icon);
-            AbstractGui.blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
+            BlitFloat.blitFloat(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
         }
         else {
             String name = entityType.getDescription().getString();

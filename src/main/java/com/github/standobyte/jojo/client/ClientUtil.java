@@ -82,7 +82,6 @@ import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.client.gui.GuiUtils;
 
-@SuppressWarnings("resource")
 public class ClientUtil {
     public static final ResourceLocation ADDITIONAL_UI = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/additional.png");
     public static final int MAX_MODEL_LIGHT = LightTexture.pack(15, 15);
@@ -349,12 +348,13 @@ public class ClientUtil {
         }
     }
     
-    public static void enableGlScissor(int x, int y, int width, int height) {
+    public static void enableGlScissor(float x, float y, float width, float height) {
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
         Minecraft mc = Minecraft.getInstance();
-        int guiScale = mc.getWindow().calculateScale(mc.options.guiScale, mc.isEnforceUnicode());
+        float guiScale = mc.getWindow().calculateScale(mc.options.guiScale, mc.isEnforceUnicode());
         y = mc.getWindow().getGuiScaledHeight() - y - height;
-        GL11.glScissor(x * guiScale, y * guiScale, width * guiScale, height * guiScale);
+        
+        GL11.glScissor((int) (x * guiScale), (int) (y * guiScale), (int) (width * guiScale), (int) (height * guiScale));
     }
     
     public static void disableGlScissor() {

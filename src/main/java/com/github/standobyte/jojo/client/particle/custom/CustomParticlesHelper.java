@@ -66,7 +66,6 @@ public class CustomParticlesHelper {
         return addParticle(particle, particle.getPos(), false, false);
     }
     
-    @SuppressWarnings("resource")
     public static boolean createBloodParticle(IParticleData type, @Nullable Entity entity, 
             double x, double y, double z, double xSpeed, double ySpeed, double zSpeed) {
         BloodFromEntityParticle particle = BloodFromEntityParticle.createCustomParticle(
@@ -74,7 +73,6 @@ public class CustomParticlesHelper {
         return addParticle(particle, new Vector3d(x, y, z), false, false);
     }
     
-    @SuppressWarnings("resource")
     public static void createHamonAuraParticle(IParticleData type, 
             LivingEntity user, double x, double y, double z) {
         IAnimatedSprite sprite = getSavedSpriteSet(type.getType());
@@ -146,7 +144,6 @@ public class CustomParticlesHelper {
         }
     }
     
-    @SuppressWarnings("resource")
     public static void createParticlesEmitter(Entity entity, IParticleData type, int ticks) {
         Minecraft.getInstance().particleEngine.createTrackingEmitter(entity, type, ticks);
     }

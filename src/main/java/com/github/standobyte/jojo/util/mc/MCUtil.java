@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.util.mc;
 
+import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -18,6 +19,13 @@ import com.github.standobyte.jojo.network.packets.fromserver.SpawnParticlePacket
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.block.DispenserBlock;
@@ -249,6 +257,23 @@ public class MCUtil {
     
     //
     
+    public static class ResLocJson implements JsonSerializer<ResourceLocation>, JsonDeserializer<ResourceLocation> {
+        public static final ResLocJson SERIALIZATION = new ResLocJson();
+        
+        private ResLocJson() {}
+
+        @Override
+        public ResourceLocation deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+                throws JsonParseException {
+            return new ResourceLocation(json.getAsString());
+        }
+
+        @Override
+        public JsonElement serialize(ResourceLocation src, Type typeOfSrc, JsonSerializationContext context) {
+            return new JsonPrimitive(src.toString());
+        }
+    }
+    
     
     
     public static Set<ServerPlayerEntity> getTrackingPlayers(Entity entity) {
@@ -256,7 +281,6 @@ public class MCUtil {
             throw new IllegalStateException();
         }
         
-        @SuppressWarnings("resource")
         ChunkManager chunkMap = ((ServerWorld) entity.level).getChunkSource().chunkMap;
         Int2ObjectMap<ChunkManager.EntityTracker> entityMap = chunkMap.entityMap;
         ChunkManager.EntityTracker tracker = entityMap.get(entity.getId());

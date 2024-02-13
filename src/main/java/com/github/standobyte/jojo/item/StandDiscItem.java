@@ -132,7 +132,11 @@ public class StandDiscItem extends Item {
             if (validStandDisc(stack, true)) {
                 StandInstance stand = getStandFromStack(stack, true);
                 tooltip.add(stand.getName());
-                tooltip.add(stand.getType().getPartName());
+                ITextComponent partName = StandSkinsManager.getInstance()
+                        .getStandSkin(stand.getSelectedSkin())
+                        .map(skin -> skin.getPartName(stand.getType()))
+                        .orElse(stand.getType().getPartName());
+                tooltip.add(partName);
                 for (StandPart standPart : StandPart.values()) {
                     if (!stand.hasPart(standPart)) {
                         tooltip.add(new TranslationTextComponent("jojo.disc.missing_part." + standPart.name().toLowerCase()).withStyle(TextFormatting.DARK_GRAY));

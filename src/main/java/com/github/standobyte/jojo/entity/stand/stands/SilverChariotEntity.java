@@ -50,7 +50,7 @@ public class SilverChariotEntity extends StandEntity {
     public static final AttributeModifier NO_RAPIER_DAMAGE_DECREASE = new AttributeModifier(
             UUID.fromString("84331a3b-73f1-4461-b240-6d688897e3f4"), "Attack damage decrease without rapier", -0.25, AttributeModifier.Operation.MULTIPLY_BASE);
     private static final AttributeModifier NO_RAPIER_ATTACK_SPEED_DECREASE = new AttributeModifier(
-            UUID.fromString("485642f9-5475-4d74-8b54-dea9c53fe62e"), "Attack speed decrease without rapier", -0.75, AttributeModifier.Operation.MULTIPLY_BASE);
+            UUID.fromString("485642f9-5475-4d74-8b54-dea9c53fe62e"), "Attack speed decrease without rapier", -0.5, AttributeModifier.Operation.MULTIPLY_BASE);
     private static final double RAPIER_RANGE = 1;
     private static final AttributeModifier NO_RAPIER_ATTACK_RANGE_DECREASE = new AttributeModifier(
             UUID.fromString("ba319644-fab3-4d4c-bcdf-26fd05dd62f5"), "Attack range decrease without rapier", -RAPIER_RANGE, AttributeModifier.Operation.ADDITION);

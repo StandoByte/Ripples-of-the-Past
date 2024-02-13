@@ -33,7 +33,11 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.monster.AbstractIllagerEntity;
+import net.minecraft.entity.monster.HuskEntity;
+import net.minecraft.entity.monster.ZoglinEntity;
+import net.minecraft.entity.monster.ZombieEntity;
 import net.minecraft.entity.passive.WaterMobEntity;
+import net.minecraft.entity.passive.horse.ZombieHorseEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileHelper;
 import net.minecraft.item.ItemStack;
@@ -263,8 +267,17 @@ public class JojoModUtil {
     }
 
     public static boolean canBleed(LivingEntity entity) {
-        return entity.getMobType() != CreatureAttribute.UNDEAD && 
-                (entity instanceof PlayerEntity || entity instanceof AgeableEntity || entity instanceof INPC || entity instanceof AbstractIllagerEntity || entity instanceof WaterMobEntity);
+        if (entity.getMobType() == CreatureAttribute.UNDEAD) {
+            return entity instanceof PlayerEntity
+                    || entity instanceof ZombieEntity && !(entity instanceof HuskEntity)
+                    || entity instanceof ZoglinEntity
+                    || entity instanceof ZombieHorseEntity;
+        }
+        return entity instanceof PlayerEntity
+                || entity instanceof AgeableEntity
+                || entity instanceof INPC
+                || entity instanceof AbstractIllagerEntity
+                || entity instanceof WaterMobEntity;
     }
 
     public static void extinguishFieryStandEntity(Entity entity, ServerWorld world) {
