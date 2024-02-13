@@ -6,9 +6,9 @@ import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import net.minecraft.util.ResourceLocation;
 
 public class ActionVisibilitySwitch {
-    private final ActionsHotbar parentHotbar;
-    private final ResourceLocation actionId;
-    private Action<?> action;
+    ActionsHotbar parentHotbar;
+    final ResourceLocation actionId;
+    Action<?> action;
     private boolean isEnabled;
     
     ActionVisibilitySwitch(ActionsHotbar parentHotbar, ResourceLocation actionId, boolean isEnabled) {
@@ -17,12 +17,15 @@ public class ActionVisibilitySwitch {
         this.isEnabled = isEnabled;
     }
     
-    public void init() {
-        this.action = JojoCustomRegistries.ACTIONS.fromId(this.actionId);
+    ActionVisibilitySwitch(ActionsHotbar parentHotbar, Action<?> action, boolean isEnabled) {
+        this.parentHotbar = parentHotbar;
+        this.action = action;
+        this.actionId = action.getRegistryName();
+        this.isEnabled = isEnabled;
     }
     
-    boolean isValid() {
-        return action != null;
+    public void init() {
+        this.action = JojoCustomRegistries.ACTIONS.fromId(this.actionId);
     }
     
     public Action<?> getAction() {

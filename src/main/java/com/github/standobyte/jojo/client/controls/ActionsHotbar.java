@@ -3,7 +3,6 @@ package com.github.standobyte.jojo.client.controls;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -15,16 +14,16 @@ import com.google.gson.JsonObject;
 import net.minecraft.util.ResourceLocation;
 
 public class ActionsHotbar {
-    private List<ActionVisibilitySwitch> declaredSwitches = new ArrayList<>();
+    final List<ActionVisibilitySwitch> serializedSwitches = new ArrayList<>();
+    final List<ActionVisibilitySwitch> legalSwitches = new ArrayList<>();
+    private final List<Action<?>> enabledActionsCache = new ArrayList<>();
     
-    private List<ActionVisibilitySwitch> actionSwitchesCache;
-    private List<ActionVisibilitySwitch> switchesView;
-    private List<Action<?>> enabledActionsCache;
-    private List<Action<?>> actionsView;
+    private final List<ActionVisibilitySwitch> switchesView = Collections.unmodifiableList(legalSwitches);
+    private final List<Action<?>> enabledActionsView = Collections.unmodifiableList(enabledActionsCache);
     
     private boolean isInitialized = false;
     void init() {
-        for (ActionVisibilitySwitch actionSwitch : declaredSwitches) {
+        for (ActionVisibilitySwitch actionSwitch : serializedSwitches) {
             actionSwitch.init();
         }
         updateCache();
@@ -32,23 +31,73 @@ public class ActionsHotbar {
     }
     
     void updateCache() {
-        this.actionSwitchesCache = declaredSwitches.stream()
-                .filter(ActionVisibilitySwitch::isValid)
-                .collect(Collectors.toList());
-        this.enabledActionsCache = actionSwitchesCache.stream()
+        enabledActionsCache.clear();
+        legalSwitches.stream()
                 .filter(ActionVisibilitySwitch::isEnabled)
                 .map(ActionVisibilitySwitch::getAction)
-                .collect(Collectors.toList());
-        this.switchesView = Collections.unmodifiableList(actionSwitchesCache);
-        this.actionsView = Collections.unmodifiableList(enabledActionsCache);
+                .forEach(enabledActionsCache::add);
     }
     
-    void addActionPreInit(ActionVisibilitySwitch action) {
-        if (isInitialized) {
-            throw new IllegalStateException();
-        }
-        declaredSwitches.add(action);
+    ActionVisibilitySwitch addActionAsSerialized(Action<?> action) {
+        ActionVisibilitySwitch actionSwitch = new ActionVisibilitySwitch(this, action, action.enabledInHudDefault());
+        serializedSwitches.add(actionSwitch);
+        return actionSwitch;
     }
+    
+    public List<Action<?>> getEnabledActions() {
+        return enabledActionsView;
+    }
+    
+    public List<ActionVisibilitySwitch> getLegalActionSwitches() {
+        return switchesView;
+    }
+    
+    @Nullable
+    public Action<?> getBaseActionInSlot(int index) {
+        List<Action<?>> actions = getEnabledActions();
+        if (index < 0 || index >= actions.size()) {
+            return null;
+        }
+        return actions.get(index);
+    }
+
+    public void moveTo(ActionVisibilitySwitch action, int index) {
+        int curValidIndex = switchesView.indexOf(action);
+        if (curValidIndex > -1 && curValidIndex != index && legalSwitches.remove(action)) {
+            serializedSwitches.remove(action);
+            addTo(action, index);
+        }
+    }
+
+    public void remove(ActionVisibilitySwitch action) {
+        if (legalSwitches.remove(action)) {
+            serializedSwitches.remove(action);
+            updateCache();
+        }
+    }
+
+    public void addTo(ActionVisibilitySwitch action, int index) {
+        legalSwitches.add(index, action);
+        
+        int serializeAtIndex;
+        if (index > 0) {
+            Object prevElement = legalSwitches.get(index - 1);
+            int prevIndex = serializedSwitches.indexOf(prevElement);
+            if (prevIndex < 0) { // though this should not happen
+                serializeAtIndex = serializedSwitches.size();
+            }
+            else {
+                serializeAtIndex = prevIndex + 1;
+            }
+        }
+        else {
+            serializeAtIndex = 0;
+        }
+        serializedSwitches.add(serializeAtIndex, action);
+        
+        updateCache();
+    }
+    
     
     void fromJson(JsonObject json) {
         JsonArray actionsJson = json.get("actions").getAsJsonArray();
@@ -57,7 +106,7 @@ public class ActionsHotbar {
             ResourceLocation actionId = new ResourceLocation(entry.get("action").getAsString());
             boolean isEnabled = entry.get("enabled").getAsJsonPrimitive().getAsBoolean();
             ActionVisibilitySwitch actionSwitch = new ActionVisibilitySwitch(this, actionId, isEnabled);
-            declaredSwitches.add(actionSwitch);
+            serializedSwitches.add(actionSwitch);
         }
     }
     
@@ -66,56 +115,12 @@ public class ActionsHotbar {
         
         JsonArray actionsJson = new JsonArray();
         json.add("actions", actionsJson);
-        for (ActionVisibilitySwitch actionSwitch : declaredSwitches) {
+        for (ActionVisibilitySwitch actionSwitch : serializedSwitches) {
             JsonObject entry = new JsonObject();
             entry.addProperty("action", actionSwitch.getActionId().toString());
             entry.addProperty("enabled", actionSwitch.isEnabled());
             actionsJson.add(entry);
         }
         return json;
-    }
-    
-    public List<Action<?>> getEnabledView() {
-        return actionsView;
-    }
-    
-    public List<ActionVisibilitySwitch> getActionSwitchesView() {
-        return switchesView;
-    }
-    
-    @Nullable
-    public Action<?> getBaseActionInSlot(int index) {
-        List<Action<?>> actions = getEnabledView();
-        if (index < 0 || index >= actions.size()) {
-            return null;
-        }
-        return actions.get(index);
-    }
-    
-    public void moveTo(ActionVisibilitySwitch action, int index) {
-        int curValidIndex = switchesView.indexOf(action);
-        if (curValidIndex > -1 && curValidIndex != index && declaredSwitches.remove(action)) {
-            addTo(action, index);
-        }
-    }
-    
-    public void remove(ActionVisibilitySwitch action) {
-        if (declaredSwitches.remove(action)) {
-            updateCache();
-        }
-    }
-    
-    public void addTo(ActionVisibilitySwitch action, int index) {
-        if (!declaredSwitches.contains(action)) {
-            int actualIndex = 0;
-            int validCount = 0;
-            for (; validCount < index; actualIndex++) {
-                if (declaredSwitches.get(actualIndex).isValid()) {
-                    ++validCount;
-                }
-            }
-            declaredSwitches.add(actualIndex, action);
-            updateCache();
-        }
     }
 }

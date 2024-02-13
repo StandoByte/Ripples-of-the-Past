@@ -802,7 +802,7 @@ public class ActionsOverlayGui extends AbstractGui {
             return HudControlSettings.getInstance()
                     .getControlScheme(power)
                     .getActionsHotbar(actionKey.getHotbar())
-                    .getEnabledView();
+                    .getEnabledActions();
         default:
             return Collections.emptyList();
         }
@@ -1584,7 +1584,7 @@ public class ActionsOverlayGui extends AbstractGui {
         P power = mode.getPower();
         List<Action<?>> actions = HudControlSettings.getInstance()
                 .getControlScheme(power)
-                .getActionsHotbar(hotbar).getEnabledView();
+                .getActionsHotbar(hotbar).getEnabledActions();
         if (actions.size() == 0) {
             return;
         }

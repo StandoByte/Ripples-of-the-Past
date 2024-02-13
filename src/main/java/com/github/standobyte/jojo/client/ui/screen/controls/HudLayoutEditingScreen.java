@@ -267,7 +267,7 @@ public class HudLayoutEditingScreen extends Screen {
             MatrixStack matrixStack, int hotbarX, int hotbarY,
             int mouseX, int mouseY) {
         int i = 0;
-        for (ActionVisibilitySwitch actionSwitch : currentControlScheme.getActionsHotbar(hotbar).getActionSwitchesView()) {
+        for (ActionVisibilitySwitch actionSwitch : currentControlScheme.getActionsHotbar(hotbar).getLegalActionSwitches()) {
             renderActionSlot(matrixStack, hotbarX + i * 18, hotbarY, mouseX, mouseY, 
                     power, actionSwitch, 
                     draggedAction.isPresent(), 
@@ -373,7 +373,7 @@ public class HudLayoutEditingScreen extends Screen {
                 .flatMap(hotbar -> {
                     List<ActionVisibilitySwitch> layout = currentControlScheme
                             .getActionsHotbar(hotbar)
-                            .getActionSwitchesView();
+                            .getLegalActionSwitches();
                     int slot = x / 18;
                     
                     if (slot >= layout.size()) {
@@ -388,7 +388,7 @@ public class HudLayoutEditingScreen extends Screen {
     @Nullable
     private Optional<Vector2i> plusSlotCoords(ControlScheme.Hotbar hotbar) {
         if (draggedAction.isPresent() && draggedAction.get().hotbar != hotbar) {
-            int hotbarLength = currentControlScheme.getActionsHotbar(hotbar).getActionSwitchesView().size();
+            int hotbarLength = currentControlScheme.getActionsHotbar(hotbar).getLegalActionSwitches().size();
             if (hotbarLength > 9) {
                 return Optional.empty();
             }
@@ -532,7 +532,7 @@ public class HudLayoutEditingScreen extends Screen {
             else if (plusSlot.isPresent()) {
                 currentControlScheme.getActionsHotbar(dragged.hotbar).remove(dragged.actionSwitch);
                 ActionsHotbar hotbarAddedTo = currentControlScheme.getActionsHotbar(plusSlot.get());
-                hotbarAddedTo.addTo(dragged.actionSwitch, hotbarAddedTo.getActionSwitchesView().size());
+                hotbarAddedTo.addTo(dragged.actionSwitch, hotbarAddedTo.getLegalActionSwitches().size());
                 draggedAction = Optional.empty();
                 markLayoutEdited();
             }
@@ -569,7 +569,7 @@ public class HudLayoutEditingScreen extends Screen {
                 
                 if (slot.isEnabled() && selectedPower == ActionsOverlayGui.getInstance().getCurrentPower()
                         && isActionVisible(slot.getAction(), selectedPower)) {
-                    int slotIndex = currentControlScheme.getActionsHotbar(hotbar).getEnabledView().indexOf(slot.getAction());
+                    int slotIndex = currentControlScheme.getActionsHotbar(hotbar).getEnabledActions().indexOf(slot.getAction());
                     if (slotIndex >= 0) {
                         ActionsOverlayGui.getInstance().selectAction(hotbar, slotIndex);
                     }
@@ -719,7 +719,7 @@ public class HudLayoutEditingScreen extends Screen {
                 if (toMove.map(action -> {
                     // moves action to specific slot after pressing number key
                     ActionsHotbar hotbar = currentControlScheme.getActionsHotbar(action.hotbar);
-                    if (numKey < hotbar.getActionSwitchesView().size()) {
+                    if (numKey < hotbar.getLegalActionSwitches().size()) {
                         hotbar.moveTo(action.actionSwitch, numKey);
                         markLayoutEdited();
                         return true;
@@ -751,7 +751,6 @@ public class HudLayoutEditingScreen extends Screen {
     }
     
     private void markLayoutEdited() {
-        JojoMod.LOGGER.debug("marked {} as edited", currentControlsScreen.powerTypeId);
         editedLayouts.add(currentControlsScreen.powerTypeId);
     }
     
@@ -1072,6 +1071,5 @@ public class HudLayoutEditingScreen extends Screen {
             ctrlSchemes.add(ctrlScheme);
         });
         editedKeybinds.clear();
-        ctrlSchemes.forEach(ControlScheme::updateCache);
     }
 }

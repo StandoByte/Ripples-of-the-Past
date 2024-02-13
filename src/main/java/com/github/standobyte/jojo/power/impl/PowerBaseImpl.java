@@ -84,7 +84,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
 
     protected void onPowerSet(T type) {
         if (user.level.isClientSide() && user == ClientUtil.getCameraEntity()) {
-            HudControlSettings.getInstance().cacheControlsScheme(getThis());
+            HudControlSettings.getInstance().refreshControls(getThis());
         }
     }
     

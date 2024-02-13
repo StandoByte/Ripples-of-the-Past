@@ -225,6 +225,10 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return true;
     }
     
+    public boolean isLegalInHud(P power) {
+        return true;
+    }
+    
     public static ActionConditionResult conditionMessage(String postfix) {
         return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.message.action_condition." + postfix));
     }
