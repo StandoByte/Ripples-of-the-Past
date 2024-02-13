@@ -17,7 +17,7 @@ public class TheWorldKick extends StandEntityHeavyAttack {
         StandEntityPunch kick = super.punchEntity(stand, target, dmgSource);
         return kick
                 .knockbackYRotDeg(60)
-                .disableBlocking((float) stand.getProximityRatio(target) - 0.25F)
+                .disableBlocking(1.0F)
                 .sweepingAttack(0.5, 0, 0.5, kick.getDamage() * 0.5F);
     }
 }

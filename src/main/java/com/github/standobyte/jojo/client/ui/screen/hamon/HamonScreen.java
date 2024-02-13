@@ -107,12 +107,12 @@ public class HamonScreen extends Screen {
     private void reorderTabs() {
         int i = 0;
         for (HamonTabGui tab : selectableTabs) {
-            if (introWasRead && tab == introTab) {
-                tab.setPosition(TabPositionType.RIGHT, 0);
-            }
-            else {
+//            if (introWasRead && tab == introTab) {
+//                tab.setPosition(TabPositionType.RIGHT, 0);
+//            }
+//            else {
                 tab.setPosition(TabPositionType.LEFT, i++);
-            }
+//            }
         }
     }
     

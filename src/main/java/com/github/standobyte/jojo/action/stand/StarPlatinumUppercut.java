@@ -19,7 +19,7 @@ public class StarPlatinumUppercut extends StandEntityHeavyAttack {
         return punch
                 .addKnockback(0.5F + (float) strength / 16 * stand.getLastHeavyFinisherValue())
                 .knockbackXRot(-60F)
-                .disableBlocking((float) stand.getProximityRatio(target) - 0.25F);
+                .disableBlocking(1.0F);
     }
 
 }
