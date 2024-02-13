@@ -97,7 +97,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 
 public class InputHandler {
-    public static void toDoDeleteMe() {}
     private static InputHandler instance = null;
 
     private Minecraft mc;

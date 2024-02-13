@@ -78,13 +78,17 @@ public class VampirismData extends TypeSpecificData {
     }
 
     public void setVampireHamonUser(boolean vampireHamonUser, Optional<HamonData> prevHamon) {
-        if (!this.vampireHamonUser == vampireHamonUser) {
-            LivingEntity user = power.getUser();
-            if (!user.level.isClientSide()) {
-                PacketManager.sendToClientsTrackingAndSelf(TrVampirismDataPacket.wasHamonUser(user.getId(), vampireHamonUser), user);
-            }
+        if (this.vampireHamonUser == vampireHamonUser) {
+            return;
         }
+        
+        LivingEntity user = power.getUser();
+        if (!user.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(TrVampirismDataPacket.wasHamonUser(user.getId(), vampireHamonUser), user);
+        }
+        
         this.vampireHamonUser = vampireHamonUser;
+        
         if (vampireHamonUser && prevHamon.isPresent()) {
             HamonData hamon = prevHamon.get();
             hamonStrengthLevel = hamon.getHamonStrengthLevel();
@@ -93,7 +97,10 @@ public class VampirismData extends TypeSpecificData {
         else {
             hamonStrengthLevel = 0;
         }
-        power.clUpdateHud();
+        
+        if (user.level.isClientSide()) {
+            power.clUpdateHud();
+        }
     }
     
     public float getPrevHamonStrengthLevel() {
