@@ -91,21 +91,19 @@ public class ControlScheme {
             }
             
             
-            if (defaultState != null) {
-                Action<?>[] defaultActions = defaultState.hotbars.get(hotbarType);
-                
-                for (Action<?> action : defaultActions) {
-                    if (!hotbars.entrySet().stream()
-                            .flatMap(entry -> entry.getValue().serializedSwitches.stream())
-                            .filter(sw -> sw.getAction() == action).findAny().isPresent()) {
-                        ActionVisibilitySwitch actionSwitch = this.getActionsHotbar(hotbarType).addActionAsSerialized(action);
-                        hotbar.legalSwitches.add(actionSwitch);
-                    }
-                }
-            }
+            powerType.clAddMissingActions(this, hotbarType, power);
             
             
             hotbar.updateCache();
+        }
+    }
+    
+    public void addIfMissing(Hotbar hotbarType, Action<?> action) {
+        if (!hotbars.entrySet().stream()
+                .flatMap(entry -> entry.getValue().serializedSwitches.stream())
+                .filter(sw -> sw.getAction() == action).findAny().isPresent()) {
+            ActionVisibilitySwitch actionSwitch = this.getActionsHotbar(hotbarType).addActionAsSerialized(action);
+            hotbars.get(hotbarType).legalSwitches.add(actionSwitch);
         }
     }
     

@@ -27,6 +27,7 @@ public interface IPowerType<P extends IPower<P, T>, T extends IPowerType<P, T>> 
     }
     
     ControlScheme.DefaultControls clCreateDefaultLayout();
+    void clAddMissingActions(ControlScheme controlScheme, ControlScheme.Hotbar hotbar, P power);
     default boolean isActionLegalInHud(Action<P> action, P power) { return true; }
     
     @Nullable default IBowChargeEffect<P, T> getBowChargeEffect() {

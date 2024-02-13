@@ -265,6 +265,26 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     @Override
+    public void clAddMissingActions(ControlScheme controlScheme, ControlScheme.Hotbar hotbar, IStandPower power) {
+        Action<?>[] actions;
+        switch (hotbar) {
+        case LEFT_CLICK:
+            actions = leftClickHotbar;
+            break;
+        case RIGHT_CLICK:
+            actions = rightClickHotbar;
+            break;
+        default:
+            actions = new Action<?>[0];
+            break;
+        }
+
+        for (Action<?> action : actions) {
+            controlScheme.addIfMissing(hotbar, action);
+        }
+    }
+    
+    @Override
     public boolean isActionLegalInHud(Action<IStandPower> action, IStandPower power) {
         return Iterables.contains(getAllUnlockableActions(), action) && action.isLegalInHud(power);
     }

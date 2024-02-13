@@ -5,6 +5,8 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.controls.HudControlSettings;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.bowcharge.BowChargeEffectInstance;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -92,6 +94,12 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     @Nullable BowChargeEffectInstance<P, T> getBowChargeEffect();
     
     ResourceLocation clGetPowerTypeIcon();
+    default void clUpdateHud() {
+        LivingEntity user = getUser();
+        if (user != null && user.level.isClientSide() && user == ClientUtil.getCameraEntity()) {
+            HudControlSettings.getInstance().refreshControls(this);
+        }
+    }
     
     INBT writeNBT();
     void readNBT(CompoundNBT nbt);
