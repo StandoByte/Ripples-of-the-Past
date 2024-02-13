@@ -268,7 +268,6 @@ public class GameplayEventHandler {
         }
     }
 
-    @SuppressWarnings("resource")
     @SubscribeEvent
     public static void onWorldTick(WorldTickEvent event) {
         if (event.side == LogicalSide.SERVER /* actually only ticks on server but ok */ && event.phase == TickEvent.Phase.END) {

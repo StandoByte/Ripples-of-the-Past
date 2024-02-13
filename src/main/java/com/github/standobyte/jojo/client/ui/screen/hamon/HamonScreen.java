@@ -350,7 +350,6 @@ public class HamonScreen extends Screen {
         matrixStack.translate(tooltipOffsetX, tooltipOffsetY, 0);
     }
     
-    @SuppressWarnings("resource")
     public static void setTeacherSkills(Collection<? extends AbstractHamonSkill> skills) {
         Screen screen = Minecraft.getInstance().screen;
         if (screen instanceof HamonScreen) {
@@ -360,7 +359,6 @@ public class HamonScreen extends Screen {
         }
     }
 
-    @SuppressWarnings("resource")
     public static void updateTabs() {
         Screen screen = Minecraft.getInstance().screen;
         if (screen instanceof HamonScreen) {
