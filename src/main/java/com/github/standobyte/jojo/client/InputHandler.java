@@ -32,9 +32,7 @@ import com.github.standobyte.jojo.client.controls.HudControlSettings;
 import com.github.standobyte.jojo.client.standskin.StandSkin;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
-import com.github.standobyte.jojo.client.ui.actionshud.QuickAccess.QuickAccessKeyConflictContext;
 import com.github.standobyte.jojo.client.ui.screen.WasdAllowingScreen;
-import com.github.standobyte.jojo.client.ui.screen.stand.ge.ChooseLifeformScreen;
 import com.github.standobyte.jojo.client.ui.screen.controls.HudLayoutEditingScreen;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.ItemProjectileEntity;
@@ -42,7 +40,6 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
-import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClDoubleShiftPressPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonInteractAskTeacherPacket;
@@ -72,7 +69,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.entity.Entity;
@@ -103,7 +99,6 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.ClientRegistry;
 
 public class InputHandler {
-    public static void toDoDeleteMe() {}
     private static InputHandler instance = null;
 
     private Minecraft mc;
@@ -654,7 +649,7 @@ public class InputHandler {
             action = ActionsOverlayGui.resolveVisibleActionInSlot(
                     action, shiftActionVar, power, ActionsOverlayGui.getInstance().getMouseTarget());
             
-            Pair<Action<P>, Boolean> click = actionsOverlay.onActionClick(power, action, sneak);
+            Pair<Action<P>, Boolean> click = actionsOverlay.onActionClick(power, action, sneak, keyBinding);
             if (click != null && click.getRight()) {
                 if (action != null) {
                     result.handSwing = action.getHoldDurationMax(power) <= 0 && action.swingHand()
@@ -721,7 +716,7 @@ public class InputHandler {
 //                click = actionsOverlay.onQuickAccessClick(power, shiftActionVar, sneak);
 //            } else 
             if (!(leftClickedBlock && leftClickBlockDelay > 0)) {
-                click = actionsOverlay.onClick(power, key.getHotbar(), shiftActionVar, sneak);
+                click = actionsOverlay.onClick(power, key.getHotbar(), shiftActionVar, sneak, keyBinding);
             }
             if (click != null && click.getRight()) {
                 Action<P> action = click.getLeft();
@@ -734,13 +729,6 @@ public class InputHandler {
                 }
                 if (leftClickedBlock && leftClickBlockDelay <= 0) {
                     leftClickBlockDelay = 4;
-                }
-                
-                if (action == ModStandsInit.GOLD_EXPERIENCE_CHOOSE_LIFEFORM.get()) {
-                    if (mc.screen == null) {
-                        Screen screen = new ChooseLifeformScreen(keyBinding);
-                        mc.setScreen(screen);
-                    }
                 }
             }
             else {
@@ -756,6 +744,8 @@ public class InputHandler {
         
         return result;
     }
+    
+    public static KeyBinding lastActionKey;
     
     public static boolean useShiftActionVariant(Minecraft mc) {
         return mc.player.isShiftKeyDown();

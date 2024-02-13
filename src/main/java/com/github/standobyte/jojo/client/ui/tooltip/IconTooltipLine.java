@@ -28,7 +28,6 @@ public class IconTooltipLine implements ITooltipLine {
     }
     
     
-    @SuppressWarnings("resource")
     @Override
     public void draw(MatrixStack matrixStack, float x, float y, FontRenderer font) {
         Minecraft.getInstance().textureManager.bind(ClientUtil.ADDITIONAL_UI);

@@ -4,6 +4,8 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
@@ -45,6 +47,31 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
                 attacks, 
                 abilities, 
                 ControlScheme.DefaultControls.DefaultKey.mmb(defaultQuickAccess));
+    }
+    
+    @Override
+    public void clAddMissingActions(ControlScheme controlScheme, ControlScheme.Hotbar hotbar, INonStandPower power) {
+        Action<?>[] actions;
+        switch (hotbar) {
+        case LEFT_CLICK:
+            actions = attacks;
+            break;
+        case RIGHT_CLICK:
+            actions = abilities;
+            break;
+        default:
+            actions = new Action<?>[0];
+            break;
+        }
+
+        for (Action<?> action : actions) {
+            controlScheme.addIfMissing(hotbar, action);
+        }
+    }
+    
+    @Override
+    public boolean isActionLegalInHud(Action<INonStandPower> action, INonStandPower power) {
+        return ArrayUtils.contains(attacks, action) || ArrayUtils.contains(abilities, action);
     }
     
     public float getMaxEnergy(INonStandPower power) {

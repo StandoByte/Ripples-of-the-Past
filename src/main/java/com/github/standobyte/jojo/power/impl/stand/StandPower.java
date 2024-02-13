@@ -122,7 +122,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public void setStandInstance(StandInstance standInstance) {
         this.standInstance = Optional.ofNullable(standInstance);
-        onPowerSet(this.standInstance.map(StandInstance::getType).orElse(null));
+        clUpdateHud();
     }
 
     @Override
@@ -189,6 +189,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             if (user != null) {
                 continuousEffects.onStandChanged(user);
             }
+            clUpdateHud();
             return true;
         }
         return false;

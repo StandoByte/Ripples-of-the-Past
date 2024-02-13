@@ -1066,22 +1066,21 @@ public class HamonData extends TypeSpecificData {
         }
         return false;
     }
-
-    @Override
-    public void updateExtraActions() {
-        HamonTechniqueManager data = hamonSkills.getTechniqueData();
-        if (data.getTechnique() != null) {
-            data.getTechnique().getPerksOnPick().forEach(techniquePerk -> {
-                addSkillAction(techniquePerk);
-            });
-        }
-        for (AbstractHamonSkill techniqueSkill : data.getLearnedSkills()) {
-            addSkillAction(techniqueSkill);
-        }
-    }
+//
+//    @Override
+//    public void updateExtraActions() {
+//        HamonTechniqueManager data = hamonSkills.getTechniqueData();
+//        if (data.getTechnique() != null) {
+//            data.getTechnique().getPerksOnPick().forEach(techniquePerk -> {
+//                addSkillAction(techniquePerk);
+//            });
+//        }
+//        for (AbstractHamonSkill techniqueSkill : data.getLearnedSkills()) {
+//            addSkillAction(techniqueSkill);
+//        }
+//    }
 
     private void addSkillAction(AbstractHamonSkill skill) {
-        InputHandler.toDoDeleteMe();
 //        if (skill.getRewardAction() != null && skill.addsActionToHUD()) {
 //            ControlScheme.Hotbar hotbar = skill.getRewardType().getDefaultHotbar();
 //            if (hotbar != null) {

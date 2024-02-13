@@ -5,15 +5,16 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.lwjgl.system.CallbackI.P;
+
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.controls.HudControlSettings;
 import com.github.standobyte.jojo.command.JojoControlsCommand;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -81,12 +82,6 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             });
             ModCriteriaTriggers.GET_POWER.get().trigger(player, getPowerClassification(), this);
         });
-    }
-
-    protected void onPowerSet(T type) {
-        if (user.level.isClientSide() && user == ClientUtil.getCameraEntity()) {
-            HudControlSettings.getInstance().refreshControls(getThis());
-        }
     }
     
     @Override

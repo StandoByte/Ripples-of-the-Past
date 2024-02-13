@@ -18,6 +18,7 @@ import com.github.standobyte.jojo.action.stand.GoldExperienceCreateLifeform;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.InputHandler.MouseButton;
 import com.github.standobyte.jojo.client.ui.screen.GridList;
 import com.github.standobyte.jojo.client.ui.screen.GridList.ElemMoveMode;
@@ -43,6 +44,7 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.IGuiEventListener;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.TextFieldWidget;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
@@ -84,6 +86,14 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     private TextFieldWidget searchField;
     private Button clearSearchFieldButton;
     private Button unlockAllButton;
+    
+    public static void openWindowOnClick() {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.screen == null) {
+            Screen screen = new ChooseLifeformScreen(InputHandler.lastActionKey);
+            mc.setScreen(screen);
+        }
+    }
     
     public ChooseLifeformScreen(KeyBinding keyHeld) {
         super(StringTextComponent.EMPTY);
