@@ -121,6 +121,8 @@ public class HudControlSettings {
     
     void load() {
         File[] subDirs = saveDir.listFiles(File::isDirectory);
+        if (subDirs == null) return;
+        
         for (File powerTypeDir : subDirs) {
             ResourceLocation powerId = new ResourceLocation(powerTypeDir.getName());
             File ctrlSchemeFile = new File(powerTypeDir, "current.json");
