@@ -1081,7 +1081,6 @@ public class HamonData extends TypeSpecificData {
 //    }
 
     private void addSkillAction(AbstractHamonSkill skill) {
-        InputHandler.toDoDeleteMe();
 //        if (skill.getRewardAction() != null && skill.addsActionToHUD()) {
 //            ControlScheme.Hotbar hotbar = skill.getRewardType().getDefaultHotbar();
 //            if (hotbar != null) {

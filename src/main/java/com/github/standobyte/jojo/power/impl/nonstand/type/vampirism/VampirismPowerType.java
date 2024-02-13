@@ -38,6 +38,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismData> {
         return JojoModConfig.getCommonConfigInstance(false).keepVampirismOnDeath.get() && power.getTypeSpecificData(this).get().isVampireAtFullPower();
     }
     
+    
     @Override
     public void clAddMissingActions(ControlScheme controlScheme, ControlScheme.Hotbar hotbar, INonStandPower power) {
         super.clAddMissingActions(controlScheme, hotbar, power);
@@ -53,6 +54,7 @@ public class VampirismPowerType extends NonStandPowerType<VampirismData> {
         }
         return super.isActionLegalInHud(action, power);
     }
+    
     
     @Override
     public void afterClear(INonStandPower power) {
