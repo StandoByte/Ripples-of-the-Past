@@ -23,7 +23,6 @@ public class EntityTypeIcon {
     private static final Map<EntityType<?>, ResourceLocation> ICONS_CACHE = new HashMap<>();
     private static final ResourceLocation UNKNOWN = new ResourceLocation("textures/entity_icon/unknown.png");
 
-    @SuppressWarnings("resource")
     public static void renderIcon(EntityType<?> entityType, MatrixStack matrixStack, float x, float y) {
         ResourceLocation icon = getIcon(entityType);
         if (icon != UNKNOWN) {

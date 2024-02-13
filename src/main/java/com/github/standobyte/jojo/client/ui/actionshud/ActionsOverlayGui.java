@@ -1651,11 +1651,12 @@ public class ActionsOverlayGui extends AbstractGui {
 
 
     @Nullable
-    public <P extends IPower<P, ?>> Pair<Action<P>, Boolean> onClick(P power, ControlScheme.Hotbar mouseButton, boolean shiftVariant, boolean sneak) {
+    public <P extends IPower<P, ?>> Pair<Action<P>, Boolean> onClick(
+            P power, ControlScheme.Hotbar mouseButton, boolean shiftVariant, boolean sneak, KeyBinding keyPressed) {
         if (currentMode != null) {
             int selectedIndex = currentMode.getSelectedSlot(mouseButton);
             if (selectedIndex >= 0) {
-                return onClick(power, mouseButton, shiftVariant, sneak, selectedIndex);
+                return onClick(power, mouseButton, shiftVariant, sneak, selectedIndex, keyPressed);
             }
         }
 
@@ -1664,13 +1665,13 @@ public class ActionsOverlayGui extends AbstractGui {
 
     @Nullable
     public <P extends IPower<P, ?>> Pair<Action<P>, Boolean> onClick(
-            P power, ControlScheme.Hotbar hotbar, boolean shiftVariant, boolean sneak, int index) {
+            P power, ControlScheme.Hotbar hotbar, boolean shiftVariant, boolean sneak, int index, KeyBinding keyPressed) {
         Action<P> action = (Action<P>) HudControlSettings.getInstance()
                 .getControlScheme(getCurrentMode())
                 .getActionsHotbar(hotbar)
                 .getBaseActionInSlot(index);
         action = resolveVisibleActionInSlot(action, shiftVariant, power, getMouseTarget());
-        return onActionClick(power, action, sneak);
+        return onActionClick(power, action, sneak, keyPressed);
     }
     
     @Nullable
@@ -1695,8 +1696,14 @@ public class ActionsOverlayGui extends AbstractGui {
     private final PacketBuffer extraInputBuf = new PacketBuffer(Unpooled.buffer());
     // sends the packet which fires the action to the server
     @Nullable
-    public <P extends IPower<P, ?>> Pair<Action<P>, Boolean> onActionClick(P power, Action<P> action, boolean sneak) {
+    public <P extends IPower<P, ?>> Pair<Action<P>, Boolean> onActionClick(
+            P power, Action<P> action, boolean sneak, KeyBinding keyPressed) {
         if (power != null && action != null) {
+            InputHandler.lastActionKey = keyPressed;
+            if (action.clientOnly()) {
+                return Pair.of(action, false);
+            }
+            
             if (power.getHeldAction() != null && action.getHoldDurationMax(power) > 0) {
                 return Pair.of(action, true);
             }
