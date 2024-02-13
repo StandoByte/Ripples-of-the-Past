@@ -107,12 +107,12 @@ public class HamonScreen extends Screen {
     private void reorderTabs() {
         int i = 0;
         for (HamonTabGui tab : selectableTabs) {
-            if (introWasRead && tab == introTab) {
-                tab.setPosition(TabPositionType.RIGHT, 0);
-            }
-            else {
+//            if (introWasRead && tab == introTab) {
+//                tab.setPosition(TabPositionType.RIGHT, 0);
+//            }
+//            else {
                 tab.setPosition(TabPositionType.LEFT, i++);
-            }
+//            }
         }
     }
     
@@ -350,7 +350,6 @@ public class HamonScreen extends Screen {
         matrixStack.translate(tooltipOffsetX, tooltipOffsetY, 0);
     }
     
-    @SuppressWarnings("resource")
     public static void setTeacherSkills(Collection<? extends AbstractHamonSkill> skills) {
         Screen screen = Minecraft.getInstance().screen;
         if (screen instanceof HamonScreen) {
@@ -360,7 +359,6 @@ public class HamonScreen extends Screen {
         }
     }
 
-    @SuppressWarnings("resource")
     public static void updateTabs() {
         Screen screen = Minecraft.getInstance().screen;
         if (screen instanceof HamonScreen) {

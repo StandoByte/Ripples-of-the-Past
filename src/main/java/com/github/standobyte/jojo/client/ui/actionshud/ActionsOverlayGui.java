@@ -874,12 +874,12 @@ public class ActionsOverlayGui extends AbstractGui {
                         0, 0, 
                         16, 16, 
                         16, 16);
-                ClientUtil.disableGlScissor();
                 // cooldown
                 float ratio = power.getCooldownRatio(action, partialTick);
                 if (ratio > 0) {
                     ClientUtil.fillSingleRect(x, y + 16.0F * (1.0F - ratio), 16, 16.0F * ratio, 255, 255, 255, 127);
                 }
+                ClientUtil.disableGlScissor();
             }
         } else {
             RenderSystem.color4f(1, 1, 1, hotbarAlpha);

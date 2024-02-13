@@ -258,7 +258,6 @@ public class MCUtil {
             throw new IllegalStateException();
         }
         
-        @SuppressWarnings("resource")
         ChunkManager chunkMap = ((ServerWorld) entity.level).getChunkSource().chunkMap;
         Int2ObjectMap<ChunkManager.EntityTracker> entityMap = chunkMap.entityMap;
         ChunkManager.EntityTracker tracker = entityMap.get(entity.getId());
