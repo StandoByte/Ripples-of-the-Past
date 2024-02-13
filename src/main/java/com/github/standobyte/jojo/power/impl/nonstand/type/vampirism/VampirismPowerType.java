@@ -6,9 +6,12 @@ import java.util.Optional;
 import java.util.Set;
 
 import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.non_stand.VampirismAction;
+import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.vampirism.ModVampirismActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -33,6 +36,22 @@ public class VampirismPowerType extends NonStandPowerType<VampirismData> {
     @Override
     public boolean keepOnDeath(INonStandPower power) {
         return JojoModConfig.getCommonConfigInstance(false).keepVampirismOnDeath.get() && power.getTypeSpecificData(this).get().isVampireAtFullPower();
+    }
+    
+    @Override
+    public void clAddMissingActions(ControlScheme controlScheme, ControlScheme.Hotbar hotbar, INonStandPower power) {
+        super.clAddMissingActions(controlScheme, hotbar, power);
+        if (hotbar == ControlScheme.Hotbar.RIGHT_CLICK && power.getTypeSpecificData(this).get().isVampireHamonUser()) {
+            controlScheme.addIfMissing(hotbar, ModVampirismActions.VAMPIRISM_HAMON_SUICIDE.get());
+        }
+    }
+    
+    @Override
+    public boolean isActionLegalInHud(Action<INonStandPower> action, INonStandPower power) {
+        if (action == ModVampirismActions.VAMPIRISM_HAMON_SUICIDE.get()) {
+            return power.getTypeSpecificData(this).get().isVampireHamonUser();
+        }
+        return super.isActionLegalInHud(action, power);
     }
     
     @Override

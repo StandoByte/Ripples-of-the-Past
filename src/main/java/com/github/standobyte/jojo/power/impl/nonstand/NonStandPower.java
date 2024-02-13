@@ -64,14 +64,13 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
         setType(type);
         onNewPowerGiven(type);
         typeSpecificData.onPowerGiven(oldType, oldData);
-        typeSpecificData.updateExtraActions();
+        clUpdateHud();
         addHadPowerBefore(type);
         return true;
     }
     
     private void setType(NonStandPowerType<?> powerType) {
         this.type = powerType;
-        onPowerSet(powerType);
     }
 
     @Override
@@ -100,6 +99,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
             clearedType.afterClear(this);
             typeSpecificData = null;
             energy = 0;
+            clUpdateHud();
             return true;
         }
         return false;
@@ -270,7 +270,6 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
                 if (data != null) {
                     setTypeSpecificData(data);
                     data.readNBT(nbt.getCompound("AdditionalData"));
-                    data.updateExtraActions();
                 }
             }
         }
@@ -302,14 +301,6 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
         oldPower.getTypeSpecificData(null).ifPresent(data -> {
             this.setTypeSpecificData(data);
         });
-    }
-    
-    @Override
-    public void onClone(INonStandPower oldPower, boolean wasDeath) {
-        super.onClone(oldPower, wasDeath);
-        if (typeSpecificData != null) {
-            typeSpecificData.updateExtraActions();
-        }
     }
     
     @Override
