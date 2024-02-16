@@ -84,6 +84,13 @@ public abstract class AbstractHamonSkill extends ForgeRegistryEntry<AbstractHamo
         return this.translationKey;
     }
     
+    public void onCommonSetup() {
+        HamonAction action = getRewardAction();
+        if (action != null) {
+            action.initUnlockingSkill(this);
+        }
+    }
+    
     
     
     

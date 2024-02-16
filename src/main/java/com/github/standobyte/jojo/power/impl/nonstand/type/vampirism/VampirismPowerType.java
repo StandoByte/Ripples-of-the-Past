@@ -40,10 +40,10 @@ public class VampirismPowerType extends NonStandPowerType<VampirismData> {
     
     
     @Override
-    public void clAddMissingActions(ControlScheme controlScheme, ControlScheme.Hotbar hotbar, INonStandPower power) {
-        super.clAddMissingActions(controlScheme, hotbar, power);
-        if (hotbar == ControlScheme.Hotbar.RIGHT_CLICK && power.getTypeSpecificData(this).get().isVampireHamonUser()) {
-            controlScheme.addIfMissing(hotbar, ModVampirismActions.VAMPIRISM_HAMON_SUICIDE.get());
+    public void clAddMissingActions(ControlScheme controlScheme, INonStandPower power) {
+        super.clAddMissingActions(controlScheme, power);
+        if (power.getTypeSpecificData(this).get().isVampireHamonUser()) {
+            controlScheme.addIfMissing(ControlScheme.Hotbar.RIGHT_CLICK, ModVampirismActions.VAMPIRISM_HAMON_SUICIDE.get());
         }
     }
     

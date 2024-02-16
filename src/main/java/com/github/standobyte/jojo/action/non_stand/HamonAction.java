@@ -26,10 +26,15 @@ import net.minecraft.world.World;
 public abstract class HamonAction extends NonStandAction {
     private final Map<Supplier<CharacterHamonTechnique>, Supplier<SoundEvent>> voiceLinesUnregistered;
     private Map<CharacterHamonTechnique, Supplier<SoundEvent>> voiceLines = null;
+    private AbstractHamonSkill unlockingSkill;
     
     public HamonAction(HamonAction.AbstractBuilder<?> builder) {
         super(builder);
         voiceLinesUnregistered = builder.voiceLines;
+    }
+    
+    public void initUnlockingSkill(AbstractHamonSkill skill) {
+        this.unlockingSkill = skill;
     }
     
     @Override
@@ -88,13 +93,14 @@ public abstract class HamonAction extends NonStandAction {
     
     @Override
     public IFormattableTextComponent getNameLocked(INonStandPower power) {
-        AbstractHamonSkill skill = getSkillToUnlock();
+        AbstractHamonSkill skill = getUnlockingSkill();
         return skill != null ? new TranslationTextComponent("jojo.layout_edit.locked.hamon_skill", skill.getNameTranslated())
                 : super.getNameLocked(power);
     }
     
-    private AbstractHamonSkill getSkillToUnlock() {
-        return null;
+    @Nullable
+    public AbstractHamonSkill getUnlockingSkill() {
+        return unlockingSkill;
     }
     
     @Override

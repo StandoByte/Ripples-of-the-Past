@@ -89,11 +89,11 @@ public class ControlScheme {
                     hotbar.legalSwitches.add(declaredAction);
                 }
             }
-            
-            
-            powerType.clAddMissingActions(this, hotbarType, power);
-            
-            
+        }
+        
+        powerType.clAddMissingActions(this, power);
+        
+        for (ActionsHotbar hotbar : hotbars.values()) {
             hotbar.updateCache();
         }
     }

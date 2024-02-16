@@ -1,11 +1,14 @@
 package com.github.standobyte.jojo.power.impl.nonstand.type.hamon;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.non_stand.HamonAction;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
@@ -13,7 +16,10 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClRunAwayPacket;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterHamonTechnique;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterTechniqueHamonSkill;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
 import net.minecraft.block.BlockState;
@@ -49,6 +55,54 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     public boolean keepOnDeath(INonStandPower power) {
         return JojoModConfig.getCommonConfigInstance(false).keepHamonOnDeath.get();
     }
+    
+    
+    @Override
+    public void clAddMissingActions(ControlScheme controlScheme, INonStandPower power) {
+        super.clAddMissingActions(controlScheme, power);
+        
+        HamonData hamon = power.getTypeSpecificData(this).get();
+        CharacterHamonTechnique technique = hamon.getCharacterTechnique();
+        Collection<CharacterTechniqueHamonSkill> techniqueSkills = hamon.getTechniqueData().getLearnedSkills();
+        
+        if (technique != null) {
+            technique.getPerksOnPick().forEach(techniquePerk -> {
+                addSkillAction(techniquePerk, controlScheme);
+            });
+        }
+        for (AbstractHamonSkill techniqueSkill : techniqueSkills) {
+            addSkillAction(techniqueSkill, controlScheme);
+        }
+    }
+    
+    private static void addSkillAction(AbstractHamonSkill skill, ControlScheme controlScheme) {
+        if (skill.getRewardAction() != null && skill.addsActionToHUD()) {
+            ControlScheme.Hotbar hotbar;
+            switch (skill.getRewardType()) {
+            case ATTACK:
+                hotbar = ControlScheme.Hotbar.LEFT_CLICK;
+                break;
+            default:
+                hotbar = ControlScheme.Hotbar.RIGHT_CLICK;
+                break;
+            }
+            controlScheme.addIfMissing(hotbar, skill.getRewardAction());
+        }
+    }
+    
+    @Override
+    public boolean isActionLegalInHud(Action<INonStandPower> action, INonStandPower power) {
+        if (action instanceof HamonAction) {
+            AbstractHamonSkill hamonSkill = ((HamonAction) action).getUnlockingSkill();
+            if (hamonSkill != null && hamonSkill.addsActionToHUD()) {
+                HamonData hamon = power.getTypeSpecificData(this).get();
+                Collection<CharacterTechniqueHamonSkill> techniqueSkills = hamon.getTechniqueData().getLearnedSkills();
+                return techniqueSkills.contains(hamonSkill);
+            }
+        }
+        return super.isActionLegalInHud(action, power);
+    }
+    
     
     @Override
     public void onClear(INonStandPower power) {

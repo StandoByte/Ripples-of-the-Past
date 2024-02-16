@@ -23,7 +23,6 @@ import com.github.standobyte.jojo.action.non_stand.HamonMetalSilverOverdrive;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
@@ -1049,7 +1048,9 @@ public class HamonData extends TypeSpecificData {
     public boolean addHamonSkill(LivingEntity user, AbstractHamonSkill skill, boolean checkRequirements, boolean sync) {
         if (!checkRequirements || !isSkillLearned(skill) && canLearnSkill(user, skill, HamonUtil.nearbyTeachersSkills(power.getUser())).isPositive()) {
             hamonSkills.addSkill(skill);
-            addSkillAction(skill);
+            if (skill.addsActionToHUD()) {
+                power.clUpdateHud();
+            }
             serverPlayer.ifPresent(player -> {
                 if (skill == ModHamonSkills.CHEAT_DEATH.get()) {
                     HamonUtil.updateCheatDeathEffect(player);
@@ -1065,28 +1066,6 @@ public class HamonData extends TypeSpecificData {
             return true;
         }
         return false;
-    }
-//
-//    @Override
-//    public void updateExtraActions() {
-//        HamonTechniqueManager data = hamonSkills.getTechniqueData();
-//        if (data.getTechnique() != null) {
-//            data.getTechnique().getPerksOnPick().forEach(techniquePerk -> {
-//                addSkillAction(techniquePerk);
-//            });
-//        }
-//        for (AbstractHamonSkill techniqueSkill : data.getLearnedSkills()) {
-//            addSkillAction(techniqueSkill);
-//        }
-//    }
-
-    private void addSkillAction(AbstractHamonSkill skill) {
-//        if (skill.getRewardAction() != null && skill.addsActionToHUD()) {
-//            ControlScheme.Hotbar hotbar = skill.getRewardType().getDefaultHotbar();
-//            if (hotbar != null) {
-//                power.clGetActionsHudLayout().addExtraAction(skill.getRewardAction(), hotbar);
-//            }
-//        }
     }
     
     public void removeHamonSkill(AbstractHamonSkill skill) {

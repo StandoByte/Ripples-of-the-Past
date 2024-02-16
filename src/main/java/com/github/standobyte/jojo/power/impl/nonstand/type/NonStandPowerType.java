@@ -50,22 +50,12 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
     }
     
     @Override
-    public void clAddMissingActions(ControlScheme controlScheme, ControlScheme.Hotbar hotbar, INonStandPower power) {
-        Action<?>[] actions;
-        switch (hotbar) {
-        case LEFT_CLICK:
-            actions = attacks;
-            break;
-        case RIGHT_CLICK:
-            actions = abilities;
-            break;
-        default:
-            actions = new Action<?>[0];
-            break;
+    public void clAddMissingActions(ControlScheme controlScheme, INonStandPower power) {
+        for (Action<?> attack : attacks) {
+            controlScheme.addIfMissing(ControlScheme.Hotbar.LEFT_CLICK, attack);
         }
-
-        for (Action<?> action : actions) {
-            controlScheme.addIfMissing(hotbar, action);
+        for (Action<?> ability : abilities) {
+            controlScheme.addIfMissing(ControlScheme.Hotbar.RIGHT_CLICK, ability);
         }
     }
     
