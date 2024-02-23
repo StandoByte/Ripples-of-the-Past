@@ -26,6 +26,10 @@ import net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent;
 public class VampirismPowerType extends NonStandPowerType<VampirismData> {
     public static final int COLOR = 0xFF0000;
 
+    public VampirismPowerType(VampirismAction[] startingAttacks, VampirismAction[] startingAbilities, VampirismAction defaultMmb) {
+        super(startingAttacks, startingAbilities, defaultMmb, VampirismData::new);
+    }
+
     public VampirismPowerType(VampirismAction[] startingAttacks, VampirismAction[] startingAbilities) {
         super(startingAttacks, startingAbilities, startingAttacks[0], VampirismData::new);
     }

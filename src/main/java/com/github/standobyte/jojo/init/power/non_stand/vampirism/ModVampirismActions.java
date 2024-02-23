@@ -54,7 +54,9 @@ public class ModVampirismActions {
                     new VampirismAction[] {
                             VAMPIRISM_BLOOD_GIFT.get(), 
                             VAMPIRISM_ZOMBIE_SUMMON.get(), 
-                            VAMPIRISM_DARK_AURA.get()}
+                            VAMPIRISM_DARK_AURA.get()},
+                    
+                    VAMPIRISM_BLOOD_DRAIN.get()
                     ));
 
 }
