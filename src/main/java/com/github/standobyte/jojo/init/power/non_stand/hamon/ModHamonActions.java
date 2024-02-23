@@ -136,7 +136,8 @@ public class ModHamonActions {
                             HAMON_DETECTOR.get(), 
                             HAMON_HYPNOSIS.get(), 
                             HAMON_SHOCK.get()
-                            }
+                            },
+                    HAMON_BREATH.get()
                     ));
     
     
