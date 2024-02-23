@@ -1,7 +1,6 @@
 package com.github.standobyte.jojo.client.ui.actionshud;
 
 import java.util.EnumMap;
-import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
@@ -21,8 +20,6 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
     private P power;
     boolean autoOpened;
     
-    private int selectedAttack = 0;
-    private int selectedAbility = 0;
     Action<?> lastCustomKeybindAction;
     
     private int costOverlayTick = 0;
@@ -46,57 +43,27 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
     }
     
     int getSelectedSlot(ControlScheme.Hotbar hotbar) {
-        switch (hotbar) {
-        case LEFT_CLICK:
-            return selectedAttack;
-        case RIGHT_CLICK:
-            return selectedAbility;
-        }
-        return -1;
+        return HudControlSettings.getInstance()
+                .getControlScheme(powerClassification)
+                .getActionsHotbar(hotbar)
+                .getSelectedSlot();
     }
     
     void setSelectedSlot(ControlScheme.Hotbar hotbar, int slot, ActionTarget target) {
-        if (slot > -1) {
-            List<Action<?>> actions = HudControlSettings.getInstance()
-                    .getControlScheme(powerClassification)
-                    .getActionsHotbar(hotbar)
-                    .getEnabledActions();
-            if (slot >= actions.size() || ((Action<P>) actions.get(slot)).getVisibleAction(power, target) == null) {
-                slot = -1;
-            }
-        }
-        else {
-            slot = -1;
-        }
+        HudControlSettings.getInstance()
+        .getControlScheme(powerClassification)
+        .getActionsHotbar(hotbar)
+        .setSelectedSlot(slot, power, target);
         
-        switch (hotbar) {
-        case LEFT_CLICK:
-            selectedAttack = slot;
-            break;
-        case RIGHT_CLICK:
-            selectedAbility = slot;
-            break;
-        }
         resetSelectedTick();
     }
     
     @Nullable
     Action<P> getSelectedAction(ControlScheme.Hotbar hotbar, boolean shiftVariation, ActionTarget target) {
-        int slot = getSelectedSlot(hotbar);
-        if (slot == -1) {
-            return null;
-        }
-        P power = getPower();
-        Action<P> action = (Action<P>) HudControlSettings.getInstance()
+        return HudControlSettings.getInstance()
                 .getControlScheme(powerClassification)
                 .getActionsHotbar(hotbar)
-                .getBaseActionInSlot(slot);
-        action = ActionsOverlayGui.resolveVisibleActionInSlot(
-                action, shiftVariation, power, ActionsOverlayGui.getInstance().getMouseTarget());
-        if (action == null) {
-            setSelectedSlot(hotbar, -1, target);
-        }
-        return action;
+                .getSelectedAction(power, shiftVariation, target);
     }
     
     void tick() {
