@@ -652,7 +652,10 @@ public class InputHandler {
                 if (action != null) {
                     result.handSwing = action.getHoldDurationMax(power) <= 0 && action.swingHand()
                             ? HudClickResult.Behavior.FORCE : HudClickResult.Behavior.CANCEL;
-                    if (action.cancelsVanillaClick()) result.cancelVanillaInput();
+                    result.cancelVanillaInput();
+                    if (action.withUserPunch()) {
+                        mcPlayerAttack();
+                    }
                 }
                 if (action.getHoldDurationMax(power) > 0) {
                     heldKeys.put(power, keyBinding);
@@ -674,6 +677,12 @@ public class InputHandler {
         }
         
         return result;
+    }
+    
+    private void mcPlayerAttack() {
+        if (mc.hitResult != null && !mc.player.isHandsBusy() && mc.hitResult.getType() == RayTraceResult.Type.ENTITY) {
+            mc.gameMode.attack(mc.player, ((EntityRayTraceResult) mc.hitResult).getEntity());
+        }
     }
     
     private <P extends IPower<P, ?>> HudClickResult handleMouseClickPowerHud(ActionKey key, KeyBinding keyBinding) {
@@ -720,7 +729,7 @@ public class InputHandler {
                 Action<P> action = click.getLeft();
                 if (action != null) {
                     result.handSwing = action.getHoldDurationMax(power) <= 0 && action.swingHand() ? HudClickResult.Behavior.FORCE : HudClickResult.Behavior.CANCEL;
-                    if (action.cancelsVanillaClick()) result.cancelVanillaInput();
+                    if (!(action.withUserPunch() && key == ActionKey.ATTACK)) result.cancelVanillaInput();
                 }
                 if (action.getHoldDurationMax(power) > 0) {
                     heldKeys.put(power, key.getKey(mc, this));

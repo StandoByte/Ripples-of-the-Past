@@ -59,7 +59,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     private final boolean needsFreeMainHand;
     private final boolean ignoresPerformerStun;
     private final boolean swingHand;
-    private final boolean cancelsVanillaClick;
+    private final boolean withUserPunch;
     private final Supplier<SoundEvent> shoutSupplier;
     private String translationKey;
     private Action<P> shiftVariation;
@@ -75,7 +75,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         this.needsFreeMainHand = builder.needsFreeMainHand;
         this.ignoresPerformerStun = builder.ignoresPerformerStun;
         this.swingHand = builder.swingHand;
-        this.cancelsVanillaClick = builder.cancelsVanillaClick;
+        this.withUserPunch = builder.withUserPunch;
         this.shoutSupplier = builder.shoutSupplier;
         if (builder.shiftVariationOf != null) {
             for (Supplier<? extends Action<?>> action : builder.shiftVariationOf) {
@@ -262,6 +262,9 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     public void onPerform(World world, LivingEntity user, P power, ActionTarget target) {
         perform(world, user, power, target);
+        if (swingHand() && withUserPunch() && user instanceof PlayerEntity) {
+            ((PlayerEntity) user).resetAttackStrengthTicker();
+        }
     }
     
     protected void perform(World world, LivingEntity user, P power, ActionTarget target) {}
@@ -309,8 +312,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return swingHand;
     }
 
-    public boolean cancelsVanillaClick() {
-        return cancelsVanillaClick;
+    public boolean withUserPunch() {
+        return withUserPunch;
     }
     
     @Nullable
@@ -473,7 +476,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         private boolean needsFreeMainHand = false;
         private boolean ignoresPerformerStun = false;
         private boolean swingHand = false;
-        private boolean cancelsVanillaClick = true;
+        private boolean withUserPunch = false;
         private Supplier<SoundEvent> shoutSupplier = () -> null;
         protected List<Supplier<? extends Action<?>>> shiftVariationOf = new ArrayList<>();
         
@@ -502,8 +505,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
             return getThis();
         }
         
-        public T doNotCancelClick() {
-            this.cancelsVanillaClick = false;
+        public T withUserPunch() {
+            this.withUserPunch = true;
             return getThis();
         }
         
