@@ -1,10 +1,6 @@
 package com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Supplier;
-
-import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.non_stand.HamonAction;
 
@@ -13,7 +9,7 @@ public class BaseHamonSkill extends AbstractHamonSkill {
     private final boolean unlockedByDefault;
 
     public BaseHamonSkill(Builder builder) {
-        super(builder.rewardType, builder.rewardAction, builder.requiredSkills);
+        super(builder);
         this.hamonStat = builder.hamonStat;
         this.unlockedByDefault = builder.unlockedByDefault;
     }
@@ -45,20 +41,17 @@ public class BaseHamonSkill extends AbstractHamonSkill {
     
     
     
-    public static class Builder {
-        private final RewardType rewardType;
+    public static class Builder extends AbstractHamonSkill.AbstractBuilder {
         private final HamonStat hamonStat;
-        private @Nullable Supplier<? extends HamonAction> rewardAction = null;
         private boolean unlockedByDefault = false;
-        private final List<Supplier<? extends AbstractHamonSkill>> requiredSkills = new ArrayList<>();
         
         public Builder(HamonStat hamonStat, RewardType rewardType) {
+            super(rewardType);
             this.hamonStat = hamonStat;
-            this.rewardType = rewardType;
         }
         
         public Builder unlocks(Supplier<? extends HamonAction> rewardAction) {
-            this.rewardAction = rewardAction;
+            this.rewardActions.put(rewardAction, false);
             return this;
         }
         
