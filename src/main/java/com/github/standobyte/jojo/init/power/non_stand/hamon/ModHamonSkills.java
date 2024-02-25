@@ -240,7 +240,7 @@ public class ModHamonSkills {
     
     public static final RegistryObject<CharacterTechniqueHamonSkill> BUBBLE_CUTTER = HAMON_SKILLS.register("bubble_cutter",
             () -> new CharacterTechniqueHamonSkill.Builder(RewardType.ATTACK)
-            .unlocks(ModHamonActions.CAESAR_BUBBLE_CUTTER)
+            .unlocks(ModHamonActions.CAESAR_BUBBLE_CUTTER).unlocks(ModHamonActions.CAESAR_BUBBLE_CUTTER_GLIDING, false)
             .requiredSkill(BUBBLE_LAUNCHER).build());
     
     public static final RegistryObject<CharacterTechniqueHamonSkill> BUBBLE_BARRIER = HAMON_SKILLS.register("bubble_barrier",
