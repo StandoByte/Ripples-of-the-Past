@@ -25,7 +25,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.IndirectEntityDamageSource;
-import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -141,6 +140,11 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
                     hamon.hamonPointsFromAction(HamonStat.STRENGTH, Math.min(hamonDamageCost, power.getEnergy()) * eff);
                 }
                 
+                if (!gaveHamonPointsForBaseHit) {
+                    gaveHamonPointsForBaseHit = true;
+                    hamon.hamonPointsFromAction(HamonStat.STRENGTH, baseHitPoints);
+                }
+                
                 return dealtHamonDamage;
             }, hamonDamageCost);
             return dealtDamage != null && dealtDamage;
@@ -172,20 +176,7 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
     protected DamageSource getDamageSource(LivingEntity owner) {
         return new IndirectEntityDamageSource(owner instanceof PlayerEntity ? "player" : "mob", this, owner);
     }
-
-    @Override
-    protected void afterEntityHit(EntityRayTraceResult entityRayTraceResult, boolean entityHurt) {
-        if (entityHurt) {
-            userHamon((power, hamon) -> {
-                if (!gaveHamonPointsForBaseHit) {
-                    gaveHamonPointsForBaseHit = true;
-                    hamon.hamonPointsFromAction(HamonStat.STRENGTH, baseHitPoints);
-                }
-                return false;
-            });
-        }
-    }
-
+    
     private Optional<INonStandPower> userPower = Optional.empty();
     private Optional<HamonData> hamon = Optional.empty();
     private boolean userHamon(BiPredicate<INonStandPower, HamonData> action) {

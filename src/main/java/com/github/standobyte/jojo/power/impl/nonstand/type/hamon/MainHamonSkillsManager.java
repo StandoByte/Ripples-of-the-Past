@@ -8,7 +8,6 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
-import com.github.standobyte.jojo.action.non_stand.HamonAction;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillAddPacket;
@@ -35,21 +34,13 @@ public class MainHamonSkillsManager implements IHamonSkillsManager<AbstractHamon
     @Override
     public void addSkill(AbstractHamonSkill skill) {
         handlerForSkill(skill).addSkill();
-        
-        HamonAction action = skill.getRewardAction();
-        if (action != null) {
-            unlockedActions.add(action);
-        }
+        skill.getRewardActions().forEach(unlockedActions::add);
     }
     
     @Override
     public void removeSkill(AbstractHamonSkill skill) {
         handlerForSkill(skill).removeSkill();
-        
-        HamonAction action = skill.getRewardAction();
-        if (action != null) {
-            unlockedActions.remove(action);
-        }
+        skill.getRewardActions().forEach(unlockedActions::remove);
     }
     
     @Override

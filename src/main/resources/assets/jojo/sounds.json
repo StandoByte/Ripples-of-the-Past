@@ -839,6 +839,9 @@
     "subtitle": "jojo.subtitle.fire_ability",
     "sounds": [ "minecraft:mob/ghast/fireball4" ]
   },
+  
+  
+  
   "josuke_crazy_diamond": {
     "subtitle": "jojo.subtitle.crazy_diamond_name",
     "sounds": [ "jojo:stand_user/josuke_crazy_diamond", "jojo:stand_user/josuke_crazy_diamond_2" ]
