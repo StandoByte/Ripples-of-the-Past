@@ -85,8 +85,28 @@ public abstract class ClientTickingSoundsHelper {
         volume = event.getVolume();
         pitch = event.getPitch();
         
-        mc.getSoundManager().play(new StoppableEntityTickableSound<StandEntity>(sound, category, volume, pitch, looping, stand, e -> 
-            e.getCurrentTaskAction() == action && (phase == null || e.getCurrentTaskPhase().map(stPhase -> stPhase == phase).orElse(false))));
+        ISound soundPlayed = new StoppableEntityTickableSound<StandEntity>(sound, category, volume, pitch, looping, stand, 
+                e -> e.getCurrentTaskAction() == action && (phase == null || e.getCurrentTaskPhase().map(stPhase -> stPhase == phase).orElse(false)));
+        mc.getSoundManager().play(soundPlayed);
+    }
+    
+    public static void playEndlessStandCrySound(StandEntity stand, SoundEvent sound, 
+            StandEntityAction action, @Nullable StandEntityAction.Phase phase, float volume, float pitch) {
+        if (!stand.isVisibleForAll() && !ClientUtil.canHearStands()) {
+            return;
+        }
+        
+        SoundCategory category = stand.getSoundSource();
+        PlaySoundAtEntityEvent event = ForgeEventFactory.onPlaySoundAtEntity(stand, sound, category, volume, pitch);
+        if (event.isCanceled() || event.getSound() == null) return;
+        sound = event.getSound();
+        category = event.getCategory();
+        volume = event.getVolume();
+        pitch = event.getPitch();
+        
+        StandCrySoundHandler.create(category, volume, pitch, false, stand, 
+                e -> e.getCurrentTaskAction() == action && (phase == null || e.getCurrentTaskPhase().map(stPhase -> stPhase == phase).orElse(false)),
+                sound);
     }
     
     public static void playStandEntityUnsummonSound(StandEntity stand, SoundEvent sound, float volume, float pitch) {

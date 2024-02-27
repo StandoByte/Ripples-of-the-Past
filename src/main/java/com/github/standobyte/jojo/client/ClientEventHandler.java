@@ -27,6 +27,7 @@ import com.github.standobyte.jojo.client.render.entity.layerrenderer.GlovesLayer
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.HamonBurnLayer;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
 import com.github.standobyte.jojo.client.resources.CustomResources;
+import com.github.standobyte.jojo.client.sound.StandCrySoundHandler;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.ClientModSettingsScreen;
@@ -294,6 +295,8 @@ public class ClientEventHandler {
                 
                 if (!mc.isPaused()) {
                     ClientTicking.tickAll();
+                    
+                    StandCrySoundHandler.tickAll();
                     
                     mc.level.getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                         cap.tick();
