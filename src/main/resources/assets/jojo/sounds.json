@@ -906,5 +906,88 @@
         "type": "event"
       }
     ]
+  },
+  
+  
+  
+  "giorno_gold_experience": {
+    "subtitle": "jojo.subtitle.gold_experience_name",
+    "sounds": [  "jojo:stand_user/giorno_gold_experience",
+                 "jojo:stand_user/giorno_gold_experience_2",
+                 "jojo:stand_user/giorno_gold_experience_3",
+                 "jojo:stand_user/giorno_gold_experience_4"
+    ]
+  },
+  "giorno_new_life": {
+    "subtitle": "jojo.subtitle.giorno_new_life",
+    "sounds": [ "jojo:stand_user/giorno_new_life", "jojo:stand_user/giorno_new_life_2" ]
+  },
+  "gold_experience_summon": {
+    "subtitle": "jojo.subtitle.stand_summon",
+    "sounds": [ "jojo:stand/gold_experience_summon" ]
+  },
+  "gold_experience_unsummon": {
+    "subtitle": "jojo.subtitle.stand_unsummon",
+    "sounds": [  ]
+  },
+  "gold_experience_punch_light": {
+    "subtitle": "jojo.subtitle.stand_attack_light",
+    "sounds": [  "jojo:stand/gold_experience_punch_light",
+                 "jojo:stand/gold_experience_punch_light_2",
+                 "jojo:stand/gold_experience_punch_light_3",
+                 "jojo:stand/gold_experience_punch_light_4"
+    ]
+  },
+  "gold_experience_punch_barrage": {
+    "subtitle": "jojo.subtitle.stand_attack_light",
+    "sounds": [  "jojo:stand/gold_experience_punch_barrage",
+                 "jojo:stand/gold_experience_punch_barrage_2",
+                 "jojo:stand/gold_experience_punch_barrage_3",
+                 "jojo:stand/gold_experience_punch_barrage_4",
+                 "jojo:stand/gold_experience_punch_light",
+                 "jojo:stand/gold_experience_punch_light_2",
+                 "jojo:stand/gold_experience_punch_light_3",
+                 "jojo:stand/gold_experience_punch_light_4"
+    ]
+  },
+  "gold_experience_punch_heavy": {
+    "subtitle": "jojo.subtitle.stand_attack_strong",
+    "sounds": [ "jojo:stand/gold_experience_punch_heavy" ]
+  },
+  "gold_experience_punch_heavy_extra": {
+    "sounds": [ "jojo:stand/gold_experience_punch_heavy_extra" ]
+  },
+  "gold_experience_muda": {
+    "subtitle": "jojo.subtitle.muda",
+    "sounds": [  ]
+  },
+  "gold_experience_muda_long": {
+    "subtitle": "jojo.subtitle.muda",
+    "sounds": [ "jojo:stand/gold_experience_muda_long", "jojo:stand/gold_experience_muda_long_2" ]
+  },
+  "gold_experience_muda_muda_muda": {
+    "subtitle": "jojo.subtitle.muda_muda_muda",
+    "sounds": [  "jojo:stand/gold_experience_muda_rush",
+                 "jojo:stand/gold_experience_muda_rush_2",
+                 "jojo:stand/gold_experience_muda_rush_3",
+                 "jojo:stand/gold_experience_muda_rush_4",
+                 "jojo:stand/gold_experience_muda_rush_5"
+    ]
+  },
+  "gold_experience_wry": {
+    "subtitle": "jojo.subtitle.wry",
+    "sounds": [ "jojo:stand/gold_experience_wry", "jojo:stand/gold_experience_wry_2" ]
+  },
+  "gold_experience_life_start": {
+    "subtitle": "jojo.subtitle.life_created",
+    "sounds": [ "jojo:stand/gold_experience_life_creation" ]
+  },
+  "gold_experience_life_revert": {
+    "subtitle": "jojo.subtitle.life_reverted",
+    "sounds": [ "jojo:stand/gold_experience_life_revert" ]
+  },
+  "gold_experience_heal": {
+    "subtitle": "jojo.subtitle.ge_heal",
+    "sounds": [ "jojo:stand/gold_experience_heal" ]
   }
 }

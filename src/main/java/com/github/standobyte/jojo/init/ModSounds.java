@@ -443,6 +443,38 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_BLOOD_CUTTER_SHOT = register("crazy_diamond_blood_cutter_shot");
     
     public static final OstSoundList CRAZY_DIAMOND_OST = new OstSoundList(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_ost"), SOUNDS);
+
+    public static final RegistryObject<SoundEvent> GIORNO_GOLD_EXPERIENCE = register("giorno_gold_experience");
+
+    public static final RegistryObject<SoundEvent> GIORNO_NEW_LIFE = register("giorno_new_life");
+
+    public static final RegistryObject<SoundEvent> GOLD_EXPERIENCE_SUMMON = register("gold_experience_summon");
+    
+    public static final RegistryObject<SoundEvent> GOLD_EXPERIENCE_UNSUMMON = register("gold_experience_unsummon");
+    
+    public static final RegistryObject<SoundEvent> GOLD_EXPERIENCE_PUNCH_LIGHT = register("gold_experience_punch_light");
+
+    public static final RegistryObject<SoundEvent> GOLD_EXPERIENCE_PUNCH_HEAVY = register("gold_experience_punch_heavy");
+
+    public static final RegistryObject<SoundEvent> GOLD_EXPERIENCE_PUNCH_HEAVY_EXTRA = register("gold_experience_punch_heavy_extra");
+
+    public static final Supplier<SoundEvent> GOLD_EXPERIENCE_PUNCH_BARRAGE = register("gold_experience_punch_barrage");
+
+    public static final RegistryObject<SoundEvent> GOLD_EXPERIENCE_MUDA = register("gold_experience_muda");
+
+    public static final RegistryObject<SoundEvent> GOLD_EXPERIENCE_MUDA_LONG = register("gold_experience_muda_long");
+
+    public static final RegistryObject<SoundEvent> GOLD_EXPERIENCE_MUDA_MUDA_MUDA = register("gold_experience_muda_muda_muda");
+
+    public static final RegistryObject<SoundEvent> GOLD_EXPERIENCE_WRY = register("gold_experience_wry");
+
+    public static final RegistryObject<SoundEvent> GOLD_EXPERIENCE_LIFE_START = register("gold_experience_life_start");
+
+    public static final RegistryObject<SoundEvent> GOLD_EXPERIENCE_LIFE_REVERT = register("gold_experience_life_revert");
+
+    public static final RegistryObject<SoundEvent> GOLD_EXPERIENCE_HEAL = register("gold_experience_heal");
+    
+    public static final OstSoundList GOLD_EXPERIENCE_OST = new OstSoundList(new ResourceLocation(JojoMod.MOD_ID, "gold_experience_ost"), SOUNDS);
     
     
     

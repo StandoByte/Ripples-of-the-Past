@@ -57,6 +57,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
 
     public GoldExperienceCreateLifeform(StandAction.Builder builder) {
         super(builder);
+        voiceLineDelay = Integer.MAX_VALUE;
     }
     
     @Override

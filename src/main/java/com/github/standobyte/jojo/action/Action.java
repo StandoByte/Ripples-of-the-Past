@@ -330,11 +330,17 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return shoutSupplier.get();
     }
     
+    protected Integer voiceLineDelay = null;
     public void playVoiceLine(LivingEntity user, P power, ActionTarget target, boolean wasActive, boolean sneak) {
         if (!sneak || playsVoiceLineOnSneak()) {
             SoundEvent shout = getShout(user, power, target, wasActive);
             if (shout != null) {
-                JojoModUtil.sayVoiceLine(user, shout);
+                if (voiceLineDelay == null) {
+                    JojoModUtil.sayVoiceLine(user, shout);
+                }
+                else {
+                    JojoModUtil.sayVoiceLine(user, shout, voiceLineDelay.intValue());
+                }
             }
         }
     }

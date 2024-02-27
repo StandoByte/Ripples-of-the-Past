@@ -1124,6 +1124,11 @@
   "jojo.message.action_condition.ge_lifeform_material_item": "You can't turn an organic item into a lifeform",
   "jojo.message.action_condition.ge_lifeform_material_block": "You can't turn an organic block into a lifeform",
   "jojo.message.action_condition.ge_too_many_mobs": "You have too many mobs summoned",
+  "jojo.subtitle.gold_experience_name": "\"Gold Experience!\"",
+  "jojo.subtitle.giorno_new_life": "\"Life, spring forth!\"",
+  "jojo.subtitle.life_created": "Life created",
+  "jojo.subtitle.life_reverted": "Life reverted",
+  "jojo.subtitle.ge_heal": "Injury mended",
   
   "stand.jojo.boy_ii_man": "Boy II Man",
   "entity.jojo.rps_kid": "Rock-Paper-Scissors Kid",
