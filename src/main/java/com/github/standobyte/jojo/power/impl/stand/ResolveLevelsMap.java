@@ -3,6 +3,8 @@ package com.github.standobyte.jojo.power.impl.stand;
 import java.util.HashMap;
 import java.util.Map;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -12,7 +14,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.registries.IForgeRegistry;
 
 public class ResolveLevelsMap {
-    private final Map<StandType<?>, ResolveLevel> wrappedMap = new HashMap<>();
+    private final Map<ResourceLocation, ResolveLevel> wrappedMap = new HashMap<>();
     private ResolveLevel levelEntryCached;
     
     public void onStandSet(StandType<?> standType) {
@@ -53,31 +55,27 @@ public class ResolveLevelsMap {
     }
     
     private void setLevelEntry(StandType<?> standType) {
-        this.levelEntryCached = wrappedMap.computeIfAbsent(standType, ResolveLevel::new);
+        this.levelEntryCached = wrappedMap.computeIfAbsent(standType.getRegistryName(), ___ -> new ResolveLevel(standType));
     }
     
     
     
     public CompoundNBT toNBT() {
         CompoundNBT nbt = new CompoundNBT();
-        wrappedMap.forEach((stand, levelEntry) -> {
-            nbt.put(stand.getRegistryName().toString(), levelEntry.toNBT());
+        wrappedMap.forEach((standId, levelEntry) -> {
+            nbt.put(standId.toString(), levelEntry.toNBT());
         });
         return nbt;
     }
     
     public void fromNBT(CompoundNBT nbt) {
         nbt.getAllKeys().forEach(key -> {
-            ResourceLocation location = new ResourceLocation(key);
+            ResourceLocation standId = new ResourceLocation(key);
             IForgeRegistry<StandType<?>> registry = JojoCustomRegistries.STANDS.getRegistry();
-            if (registry.containsKey(location)) {
-                StandType<?> stand = registry.getValue(location);
-                if (stand != null) {
-                    ResolveLevel levelEntry = wrappedMap.computeIfAbsent(stand, ResolveLevel::new);
-                    if (nbt.contains(key, MCUtil.getNbtId(CompoundNBT.class))) {
-                        levelEntry.fromNBT(nbt.getCompound(key));
-                    }
-                }
+            StandType<?> stand = registry.containsKey(standId) ? registry.getValue(standId) : null;
+            ResolveLevel levelEntry = wrappedMap.computeIfAbsent(standId, ___ -> new ResolveLevel(stand));
+            if (nbt.contains(key, MCUtil.getNbtId(CompoundNBT.class))) {
+                levelEntry.fromNBT(nbt.getCompound(key));
             }
         });
     }
@@ -101,8 +99,8 @@ public class ResolveLevelsMap {
         private int extraLevel = 0;
         private final int maxLevel;
         
-        private ResolveLevel(StandType<?> standType) {
-            this.maxLevel = standType.getMaxResolveLevel();
+        private ResolveLevel(@Nullable StandType<?> standType) {
+            this.maxLevel = standType != null ? standType.getMaxResolveLevel() : 0;
         }
         
         private void incExtraLevel() {

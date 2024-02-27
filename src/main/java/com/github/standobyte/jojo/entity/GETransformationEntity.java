@@ -7,9 +7,11 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.ai.GELifeformFollowOwnerGoal;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.util.mc.EntityOwnerResolver;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -40,6 +42,7 @@ import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.Direction;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
@@ -177,6 +180,9 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         if (!level.isClientSide()) {
             source.resolveNbtRead(level);
         }
+        else if (ClientUtil.canHearStands()) {
+            clTickSound();
+        }
         
         if (tickCount >= duration) {
             if (!level.isClientSide()) {
@@ -243,6 +249,19 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         refreshDimensions();
         
         super.tick();
+    }
+    
+    private void clTickSound() {
+        SoundEvent sound = null;
+        float volume = 1;
+        float pitch = 1;
+        if (tickCount == 1) {
+            sound = isTurningBack() ? ModSounds.GOLD_EXPERIENCE_LIFE_REVERT.get() : ModSounds.GOLD_EXPERIENCE_LIFE_START.get();
+        }
+        
+        if (sound != null) {
+            level.playLocalSound(getX(), getY(), getZ(), sound, getSoundSource(), volume, pitch, false);
+        }
     }
     
     // Mojang?!?
@@ -335,6 +354,12 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             }
             
             tickCount = duration - ticks;
+        }
+        
+        if (level.isClientSide() && ClientUtil.canHearStands()) {
+            level.playLocalSound(getX(), getY(), getZ(), 
+                    ModSounds.GOLD_EXPERIENCE_LIFE_REVERT.get(), getSoundSource(), 
+                    1, 1, false);
         }
     }
     

@@ -52,8 +52,8 @@ public class BarrageHitSoundHandler {
     }
     
     protected float getSoundGap(StandEntity entity) {
-        int hitsPerSecond = Math.max(StandStatFormulas.getBarrageHitsPerSecond(entity.getAttackSpeed()), 40);
-        float mean = 200.0F / (float) hitsPerSecond * 1.25F;
+        float mean = 250.0F / (float) Math.max(40, StandStatFormulas
+                .getBarrageHitsPerSecond(20 * entity.getStandEfficiency()));
         return (float) random.nextGaussian() + mean;
     }
 }

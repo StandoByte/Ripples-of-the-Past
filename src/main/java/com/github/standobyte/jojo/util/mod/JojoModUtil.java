@@ -317,6 +317,10 @@ public class JojoModUtil {
     public static void sayVoiceLine(LivingEntity entity, SoundEvent voiceLine) {
         sayVoiceLine(entity, voiceLine, null);
     }
+    
+    public static void sayVoiceLine(LivingEntity entity, SoundEvent voiceLine, int voiceLineDelay) {
+        sayVoiceLine(entity, voiceLine, null, 1.0F, 1.0F, voiceLineDelay, false);
+    }
 
     public static void sayVoiceLine(LivingEntity entity, SoundEvent voiceLine, 
             @Nullable ClothesSet character) {

@@ -124,6 +124,14 @@ public class ClientUtil {
         return Minecraft.getInstance().cameraEntity;
     }
     
+    public static Vector3d getCameraPos() {
+        return Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
+    }
+    
+    public static Vector3f getCameraLook() {
+        return Minecraft.getInstance().gameRenderer.getMainCamera().getLookVector();
+    }
+    
     public static float getPartialTick() {
         return ClientEventHandler.getInstance().getPartialTick();
     }

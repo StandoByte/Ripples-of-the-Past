@@ -757,14 +757,14 @@ public class ModStandsInit {
     
     public static final RegistryObject<StandEntityLightAttack> GOLD_EXPERIENCE_PUNCH = ACTIONS.register("gold_experience_punch", 
             () -> new StandEntityLightAttack(new StandEntityLightAttack.Builder()
-//                    .punchSound(ModSounds.GOLD_EXPERIENCE_PUNCH_LIGHT)
-//                    .standSound(Phase.WINDUP, ModSounds.GOLD_EXPERIENCE_MUDA)
+                    .punchSound(ModSounds.GOLD_EXPERIENCE_PUNCH_LIGHT)
+                    .standSound(Phase.WINDUP, ModSounds.GOLD_EXPERIENCE_MUDA)
                     ));
     
     public static final RegistryObject<StandEntityMeleeBarrage> GOLD_EXPERIENCE_BARRAGE = ACTIONS.register("gold_experience_barrage", 
             () -> new StandEntityMeleeBarrage(new StandEntityMeleeBarrage.Builder()
-//                    .barrageHitSound(ModSounds.GOLD_EXPERIENCE_PUNCH_BARRAGE)
-//                    .standSound(ModSounds.GOLD_EXPERIENCE_MUDA_MUDA_MUDA)
+                    .barrageHitSound(ModSounds.GOLD_EXPERIENCE_PUNCH_BARRAGE)
+                    .standSound(ModSounds.GOLD_EXPERIENCE_MUDA_MUDA_MUDA)
                     ));
     
     public static final RegistryObject<StandEntityActionModifier> GOLD_EXPERIENCE_ENTITY_LIFESHOT = ACTIONS.register("gold_experience_lifeshot", 
@@ -774,8 +774,9 @@ public class ModStandsInit {
             () -> new GoldExperienceLifeshotPunch(new StandEntityHeavyAttack.Builder()
                     .resolveLevelToUnlock(1)
                     .setRecoveryFollowUpAction(GOLD_EXPERIENCE_ENTITY_LIFESHOT)
-//                    .punchSound(ModSounds.GOLD_EXPERIENCE_PUNCH_HEAVY)
-//                    .standSound(Phase.WINDUP, ModSounds.GOLD_EXPERIENCE_MUDA_LONG)
+                    .punchSound(ModSounds.GOLD_EXPERIENCE_PUNCH_HEAVY)
+                    .standSound(Phase.WINDUP, ModSounds.GOLD_EXPERIENCE_MUDA_LONG)
+                    .standSound(Phase.PERFORM, ModSounds.GOLD_EXPERIENCE_PUNCH_HEAVY_EXTRA)
                     .partsRequired(StandPart.ARMS)));
 
     public static final RegistryObject<StandEntityActionModifier> GOLD_EXPERIENCE_TOOTH_LIFEFORM = ACTIONS.register("gold_experience_tooth_lifeform", 
@@ -784,8 +785,9 @@ public class ModStandsInit {
     public static final RegistryObject<GoldExperienceHeavyPunch> GOLD_EXPERIENCE_HEAVY_PUNCH = ACTIONS.register("gold_experience_heavy_punch", 
             () -> new GoldExperienceHeavyPunch(new StandEntityHeavyAttack.Builder()
                     .setRecoveryFollowUpAction(GOLD_EXPERIENCE_TOOTH_LIFEFORM)
-//                    .punchSound(ModSounds.GOLD_EXPERIENCE_PUNCH_HEAVY)
-//                    .standSound(Phase.WINDUP, ModSounds.GOLD_EXPERIENCE_MUDA_LONG)
+                    .punchSound(ModSounds.GOLD_EXPERIENCE_PUNCH_HEAVY)
+                    .standSound(Phase.WINDUP, ModSounds.GOLD_EXPERIENCE_MUDA_LONG)
+                    .standSound(Phase.PERFORM, ModSounds.GOLD_EXPERIENCE_PUNCH_HEAVY_EXTRA)
                     .setFinisherVariation(GOLD_EXPERIENCE_LIFESHOT_PUNCH)
                     .partsRequired(StandPart.ARMS)
                     .shiftVariationOf(GOLD_EXPERIENCE_PUNCH).shiftVariationOf(GOLD_EXPERIENCE_BARRAGE)));
@@ -799,6 +801,7 @@ public class ModStandsInit {
     public static final RegistryObject<GoldExperienceCreateLifeform> GOLD_EXPERIENCE_CREATE_LIFEFORM = ACTIONS.register("gold_experience_create_lifeform", 
             () -> new GoldExperienceCreateLifeform(new StandAction.Builder()
                     .staminaCostTick(0.2F)
+                    .shout(ModSounds.GIORNO_NEW_LIFE)
                     .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<GoldExperienceRevertLifeform> GOLD_EXPERIENCE_REVERT_LIFEFORM = ACTIONS.register("gold_experience_revert_lifeform", 
@@ -811,7 +814,7 @@ public class ModStandsInit {
                     STAND_TYPES, 
                     () -> new EntityStandType.Builder<>()
                     .color(0xD88F1F)
-                    .storyPartName(PART_5_NAME)
+                    .storyPartName(StoryPart.GOLDEN_WIND.getName())
                     .leftClickHotbar(
                             GOLD_EXPERIENCE_PUNCH.get(), 
                             GOLD_EXPERIENCE_BARRAGE.get()
@@ -825,21 +828,20 @@ public class ModStandsInit {
                             GOLD_EXPERIENCE_CHOOSE_LIFEFORM.get()
                             )
                     .defaultStats(StandStats.class, new StandStats.Builder()
-                            .tier(5)
                             .power(10.0)
                             .speed(14.0)
                             .range(2.0, 4.0)
                             .durability(7.0)
                             .precision(10.0)
                             .build())
-//                    .addSummonShout(ModSounds.GIORNO_GOLD_EXPERIENCE)
-//                    .addOst(ModSounds.GOLD_EXPERIENCE_OST)
+                    .addSummonShout(ModSounds.GIORNO_GOLD_EXPERIENCE)
+                    .addOst(ModSounds.GOLD_EXPERIENCE_OST)
                     .build(),
                     
                     ENTITIES,
                     () -> new StandEntityType<GoldExperienceEntity>(GoldExperienceEntity::new, 0.65F, 1.95F)
-//                    .summonSound(ModSounds.GOLD_EXPERIENCE_SUMMON)
-//                    .unsummonSound(ModSounds.GOLD_EXPERIENCE_UNSUMMON)
+                    .summonSound(ModSounds.GOLD_EXPERIENCE_SUMMON)
+                    .unsummonSound(ModSounds.GOLD_EXPERIENCE_UNSUMMON)
                     )
             .withDefaultStandAttributes();
     
