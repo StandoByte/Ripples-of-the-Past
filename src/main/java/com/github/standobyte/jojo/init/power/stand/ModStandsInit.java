@@ -642,7 +642,7 @@ public class ModStandsInit {
     public static final RegistryObject<CrazyDiamondHeavyPunch> CRAZY_DIAMOND_HEAVY_PUNCH = ACTIONS.register("crazy_diamond_heavy_punch", 
             () -> new CrazyDiamondHeavyPunch(new StandEntityHeavyAttack.Builder()
                     .punchSound(ModSounds.CRAZY_DIAMOND_PUNCH_HEAVY)
-                    .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_DORA_LONG)
+                    .standSound(Phase.WINDUP, false, ModSounds.CRAZY_DIAMOND_DORA_LONG)
                     .partsRequired(StandPart.ARMS)
                     .setFinisherVariation(CRAZY_DIAMOND_FINISHER_PUNCH)
                     .shiftVariationOf(CRAZY_DIAMOND_PUNCH).shiftVariationOf(CRAZY_DIAMOND_BARRAGE)));
@@ -662,7 +662,9 @@ public class ModStandsInit {
             () -> new CrazyDiamondBloodCutter(new StandEntityAction.Builder().standWindupDuration(5).staminaCost(25).cooldown(300)
                     .resolveLevelToUnlock(4)
                     .standPose(CrazyDiamondBloodCutter.BLOOD_CUTTER_SHOT_POSE)
-                    .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_FIX_STARTED, ModSounds.CRAZY_DIAMOND_DORA).standSound(Phase.PERFORM, ModSounds.CRAZY_DIAMOND_BLOOD_CUTTER_SHOT)
+                    .standSound(Phase.WINDUP, ModSounds.CRAZY_DIAMOND_FIX_STARTED)
+                    .standSound(Phase.WINDUP, false, ModSounds.CRAZY_DIAMOND_DORA)
+                    .standSound(Phase.PERFORM, ModSounds.CRAZY_DIAMOND_BLOOD_CUTTER_SHOT)
                     .standOffsetFromUser(-0.1, -0.5)
                     .partsRequired(StandPart.ARMS)));
     
@@ -758,13 +760,13 @@ public class ModStandsInit {
     public static final RegistryObject<StandEntityLightAttack> GOLD_EXPERIENCE_PUNCH = ACTIONS.register("gold_experience_punch", 
             () -> new StandEntityLightAttack(new StandEntityLightAttack.Builder()
                     .punchSound(ModSounds.GOLD_EXPERIENCE_PUNCH_LIGHT)
-                    .standSound(Phase.WINDUP, ModSounds.GOLD_EXPERIENCE_MUDA)
+                    .standSound(Phase.WINDUP, false, ModSounds.GOLD_EXPERIENCE_MUDA)
                     ));
     
     public static final RegistryObject<StandEntityMeleeBarrage> GOLD_EXPERIENCE_BARRAGE = ACTIONS.register("gold_experience_barrage", 
             () -> new StandEntityMeleeBarrage(new StandEntityMeleeBarrage.Builder()
                     .barrageHitSound(ModSounds.GOLD_EXPERIENCE_PUNCH_BARRAGE)
-                    .standSound(ModSounds.GOLD_EXPERIENCE_MUDA_MUDA_MUDA)
+                    .standSound(Phase.PERFORM, false, ModSounds.GOLD_EXPERIENCE_MUDA_MUDA_MUDA)
                     ));
     
     public static final RegistryObject<StandEntityActionModifier> GOLD_EXPERIENCE_ENTITY_LIFESHOT = ACTIONS.register("gold_experience_lifeshot", 
@@ -775,7 +777,7 @@ public class ModStandsInit {
                     .resolveLevelToUnlock(1)
                     .setRecoveryFollowUpAction(GOLD_EXPERIENCE_ENTITY_LIFESHOT)
                     .punchSound(ModSounds.GOLD_EXPERIENCE_PUNCH_HEAVY)
-                    .standSound(Phase.WINDUP, ModSounds.GOLD_EXPERIENCE_MUDA_LONG)
+                    .standSound(Phase.WINDUP, false, ModSounds.GOLD_EXPERIENCE_MUDA_LONG)
                     .standSound(Phase.PERFORM, ModSounds.GOLD_EXPERIENCE_PUNCH_HEAVY_EXTRA)
                     .partsRequired(StandPart.ARMS)));
 
@@ -786,7 +788,7 @@ public class ModStandsInit {
             () -> new GoldExperienceHeavyPunch(new StandEntityHeavyAttack.Builder()
                     .setRecoveryFollowUpAction(GOLD_EXPERIENCE_TOOTH_LIFEFORM)
                     .punchSound(ModSounds.GOLD_EXPERIENCE_PUNCH_HEAVY)
-                    .standSound(Phase.WINDUP, ModSounds.GOLD_EXPERIENCE_MUDA_LONG)
+                    .standSound(Phase.WINDUP, false, ModSounds.GOLD_EXPERIENCE_MUDA_LONG)
                     .standSound(Phase.PERFORM, ModSounds.GOLD_EXPERIENCE_PUNCH_HEAVY_EXTRA)
                     .setFinisherVariation(GOLD_EXPERIENCE_LIFESHOT_PUNCH)
                     .partsRequired(StandPart.ARMS)
