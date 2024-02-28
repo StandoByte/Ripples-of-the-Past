@@ -119,7 +119,9 @@ public class GoldExperienceChooseLifeform extends StandAction {
                     "guster",
                     "enderiophage",
                     "mimicube"
-                    );
+                    )
+            .add("rotp_zkq",
+                    "sheer_heart");
     
     public static void unlockAllEntityTypes(PlayerEntity player) {
         player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
