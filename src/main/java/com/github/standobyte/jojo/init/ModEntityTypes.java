@@ -190,7 +190,7 @@ public class ModEntityTypes {
             .build(new ResourceLocation(JojoMod.MOD_ID, "soul").toString()));
     
     public static final RegistryObject<EntityType<BlockShardEntity>> BLOCK_SHARD = ENTITIES.register("block_shard", 
-            () -> EntityType.Builder.<BlockShardEntity>of(BlockShardEntity::new, EntityClassification.MISC).sized(0.375F, 0.375F)
+            () -> EntityType.Builder.<BlockShardEntity>of(BlockShardEntity::new, EntityClassification.MISC).sized(0.5F, 0.5F)
             .build(new ResourceLocation(JojoMod.MOD_ID, "block_shard").toString()));
     
     public static final RegistryObject<EntityType<StandUserDummyEntity>> STAND_USER_DUMMY = ENTITIES.register("dummy", 

@@ -16,8 +16,8 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.github.standobyte.jojo.capability.entity.EntityUtilCap;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
+import com.github.standobyte.jojo.entity.damaging.projectile.BlockShardEntity;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
-import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -29,7 +29,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.AxisRotation;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
@@ -191,11 +190,7 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
         
         
         MutableBoolean didGlassBleeding = new MutableBoolean();
-        float armorCover = 0;
-        if (asLiving != null) {
-            armorCover = asLiving.getArmorCoverPercentage();
-        }
-        float bleedingChance = Math.max(1 - armorCover, 0.05f);
+        float bleedingChance = asLiving != null ? BlockShardEntity.glassShardBleedingChance(asLiving) : 0;
         
         MutableFloat wallDamage = new MutableFloat(0);
         
@@ -257,9 +252,10 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
 
                     // episode #158 of me being on the spectrum
                     if (!didGlassBleeding.booleanValue() && asLiving != null 
-                            && blockState.getMaterial() == Material.GLASS && asLiving.getRandom().nextFloat() < bleedingChance) {
+                            && BlockShardEntity.isGlassBlock(blockState)
+                            && asLiving.getRandom().nextFloat() < bleedingChance) {
                         didGlassBleeding.setTrue();
-                        asLiving.addEffect(new EffectInstance(ModStatusEffects.BLEEDING.get(), 100, 0, false, false, true));
+                        BlockShardEntity.glassShardBleeding(asLiving);
                     }
                     if (blockState.getMaterial() == Material.CACTUS) {
                         DamageUtil.hurtThroughInvulTicks(entity, DamageSource.CACTUS, 1);
