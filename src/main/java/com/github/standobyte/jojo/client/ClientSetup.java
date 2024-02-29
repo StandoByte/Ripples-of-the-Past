@@ -39,11 +39,11 @@ import com.github.standobyte.jojo.client.render.entity.renderer.HamonBlockCharge
 import com.github.standobyte.jojo.client.render.entity.renderer.HamonProjectileShieldRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.LeavesGliderRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.MRDetectorRenderer;
-import com.github.standobyte.jojo.client.render.entity.renderer.SpriteObjectEntityRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.PillarmanTempleEngravingRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.RoadRollerRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.SendoHamonOverdriveRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.SoulRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.SpriteObjectEntityRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.TurquoiseBlueOverdriveRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.MRFlameRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.SCFlameRenderer;
@@ -110,6 +110,7 @@ import com.github.standobyte.jojo.item.StandArrowItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
 import com.github.standobyte.jojo.item.cassette.CassetteCap;
+import com.github.standobyte.jojo.itemtracking.client.TrackedItemMarker;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 
 import net.minecraft.client.Minecraft;
@@ -290,6 +291,7 @@ public class ClientSetup {
             MarkerRenderer.Handler.addRenderer(new CrazyDiamondBloodHomingMarker(mc));
             MarkerRenderer.Handler.addRenderer(new GoldExperienceLifeformMarker(mc));
             MarkerRenderer.Handler.addRenderer(new GoldExperienceLifeformRevertMarker(mc));
+            MarkerRenderer.Handler.addRenderer(new TrackedItemMarker(mc));
             
             PlayerAnimationHandler.initAnimator();
         });

@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -200,6 +201,26 @@ public class NetworkUtil {
     
     public static <T> Optional<T> readOptional(PacketBuffer buf, Supplier<T> read) {
         return buf.readBoolean() ? Optional.of(read.get()) : Optional.empty();
+    }
+    
+    public static void writeOptionalInt(PacketBuffer buf, OptionalInt optional, boolean varInt) {
+        buf.writeBoolean(optional.isPresent());
+        optional.ifPresent(value -> {
+            if (varInt) {
+                buf.writeVarInt(value);
+            }
+            else {
+                buf.writeInt(value);
+            }
+        });
+    }
+    
+    public static OptionalInt readOptionalInt(PacketBuffer buf, boolean varInt) {
+        if (!buf.readBoolean()) {
+            return OptionalInt.empty();
+        }
+        int value = varInt ? buf.readVarInt() : buf.readInt();
+        return OptionalInt.of(value);
     }
     
     

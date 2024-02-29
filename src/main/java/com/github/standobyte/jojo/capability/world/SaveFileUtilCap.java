@@ -11,6 +11,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.entity.mob.rps.RPSPvpGamesMap;
+import com.github.standobyte.jojo.itemtracking.SidedItemTrackerMap;
 import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 
@@ -33,6 +34,8 @@ public class SaveFileUtilCap {
     
     private int walkmanId;
     private int cassetteId;
+    
+    private SidedItemTrackerMap itemsTracker = new SidedItemTrackerMap();
     
     public SaveFileUtilCap(ServerWorld overworld) {
         this.overworld = overworld;
@@ -154,6 +157,12 @@ public class SaveFileUtilCap {
     
     public int incCassetteId() {
         return ++cassetteId;
+    }
+    
+    
+    
+    public SidedItemTrackerMap getItemsTracker() {
+        return itemsTracker;
     }
     
     
