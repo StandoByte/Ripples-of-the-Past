@@ -13,6 +13,7 @@ import com.github.standobyte.jojo.action.stand.punch.IPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandBlockPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandMissedPunch;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -32,6 +33,7 @@ import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
@@ -323,8 +325,20 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
             if (barrageHits > 0) {
                 dmgSource.setBarrageHitsCount(barrageHits);
             }
+            boolean resolve = stand.getUser() != null && stand.getUser().hasEffect(ModStatusEffects.RESOLVE.get());
+            if (resolve) {
+                reduceKnockback(0);
+            }
+            
             boolean hit = super.doHit(task);
-//            target.setDeltaMovement(target.getDeltaMovement().multiply(1, 0, 1));
+            
+            if (hit && resolve && target instanceof LivingEntity) {
+                ((LivingEntity) target).getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.setNoGravityFor(3));
+                if (target instanceof MobEntity) {
+                    MobEntity mob = ((MobEntity) target);
+                    mob.getNavigation().stop();
+                }
+            }
             return hit;
         }
 

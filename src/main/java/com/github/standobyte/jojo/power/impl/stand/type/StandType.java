@@ -265,22 +265,12 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     @Override
-    public void clAddMissingActions(ControlScheme controlScheme, ControlScheme.Hotbar hotbar, IStandPower power) {
-        Action<?>[] actions;
-        switch (hotbar) {
-        case LEFT_CLICK:
-            actions = leftClickHotbar;
-            break;
-        case RIGHT_CLICK:
-            actions = rightClickHotbar;
-            break;
-        default:
-            actions = new Action<?>[0];
-            break;
+    public void clAddMissingActions(ControlScheme controlScheme, IStandPower power) {
+        for (Action<?> attack : leftClickHotbar) {
+            controlScheme.addIfMissing(ControlScheme.Hotbar.LEFT_CLICK, attack);
         }
-
-        for (Action<?> action : actions) {
-            controlScheme.addIfMissing(hotbar, action);
+        for (Action<?> ability : rightClickHotbar) {
+            controlScheme.addIfMissing(ControlScheme.Hotbar.RIGHT_CLICK, ability);
         }
     }
     

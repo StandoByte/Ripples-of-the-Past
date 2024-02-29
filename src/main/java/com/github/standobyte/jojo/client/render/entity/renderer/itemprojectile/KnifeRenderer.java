@@ -1,7 +1,6 @@
 package com.github.standobyte.jojo.client.render.entity.renderer.itemprojectile;
 
 import com.github.standobyte.jojo.entity.itemprojectile.KnifeEntity;
-import com.github.standobyte.jojo.util.general.MathUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 

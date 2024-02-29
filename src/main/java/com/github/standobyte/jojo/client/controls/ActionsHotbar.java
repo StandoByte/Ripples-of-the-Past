@@ -7,6 +7,9 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
+import com.github.standobyte.jojo.power.IPower;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -20,6 +23,8 @@ public class ActionsHotbar {
     
     private final List<ActionVisibilitySwitch> switchesView = Collections.unmodifiableList(legalSwitches);
     private final List<Action<?>> enabledActionsView = Collections.unmodifiableList(enabledActionsCache);
+    
+    private int selectedSlot = 0;
     
     private boolean isInitialized = false;
     void init() {
@@ -99,6 +104,40 @@ public class ActionsHotbar {
     }
     
     
+    public int getSelectedSlot() {
+        return selectedSlot;
+    }
+    
+    public <P extends IPower<P, ?>> void setSelectedSlot(int selectedSlot, P power, ActionTarget target) {
+        if (selectedSlot > -1) {
+            List<Action<?>> actions = getEnabledActions();
+            if (selectedSlot >= actions.size() || ((Action<P>) actions.get(selectedSlot)).getVisibleAction(power, target) == null) {
+                selectedSlot = -1;
+            }
+        }
+        else {
+            selectedSlot = -1;
+        }
+        
+        this.selectedSlot = selectedSlot;
+    }
+    
+    public <P extends IPower<P, ?>> Action<P> getSelectedAction(P power, boolean shiftVariation, ActionTarget target) {
+        int slot = getSelectedSlot();
+        if (slot == -1) {
+            return null;
+        }
+        
+        Action<P> action = (Action<P>) getBaseActionInSlot(slot);
+        action = ActionsOverlayGui.resolveVisibleActionInSlot(
+                action, shiftVariation, power, ActionsOverlayGui.getInstance().getMouseTarget());
+        if (action == null) {
+            setSelectedSlot(-1, power, target);
+        }
+        return action;
+    }
+    
+    
     void fromJson(JsonObject json) {
         JsonArray actionsJson = json.get("actions").getAsJsonArray();
         for (JsonElement element : actionsJson) {
@@ -108,6 +147,8 @@ public class ActionsHotbar {
             ActionVisibilitySwitch actionSwitch = new ActionVisibilitySwitch(this, actionId, isEnabled);
             serializedSwitches.add(actionSwitch);
         }
+        
+        selectedSlot = json.has("selectedSlot") ? json.get("selectedSlot").getAsInt() : 0;
     }
     
     JsonElement toJson() {
@@ -121,6 +162,8 @@ public class ActionsHotbar {
             entry.addProperty("enabled", actionSwitch.isEnabled());
             actionsJson.add(entry);
         }
+        
+        json.addProperty("selectedSlot", selectedSlot);
         return json;
     }
 }

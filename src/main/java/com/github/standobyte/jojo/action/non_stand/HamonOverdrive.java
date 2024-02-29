@@ -20,7 +20,7 @@ import net.minecraft.world.World;
 public class HamonOverdrive extends HamonAction {
 
     public HamonOverdrive(HamonAction.Builder builder) {
-        super(builder.doNotCancelClick());
+        super(builder.withUserPunch());
     }
 
     @Override

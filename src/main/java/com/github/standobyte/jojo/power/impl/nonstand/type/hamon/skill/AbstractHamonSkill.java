@@ -6,8 +6,6 @@ import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import javax.annotation.Nullable;
-
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.non_stand.HamonAction;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
@@ -46,6 +44,12 @@ public abstract class AbstractHamonSkill extends ForgeRegistryEntry<AbstractHamo
                 .filter(entry -> entry.getBooleanValue() == addedToHud)
                 .map(Map.Entry::getKey)
                 .map(Supplier::get);
+    }
+    
+    public boolean addsExtraToHud() {
+        return rewardActions.object2BooleanEntrySet().stream()
+                .filter(entry -> entry.getBooleanValue())
+                .findAny().isPresent();
     }
     
     public boolean isUnlockedByDefault() {
@@ -88,6 +92,10 @@ public abstract class AbstractHamonSkill extends ForgeRegistryEntry<AbstractHamo
             }
         }
         return this.translationKey;
+    }
+    
+    public void onCommonSetup() {
+        getRewardActions().forEach(action -> action.initUnlockingSkill(this));
     }
     
     

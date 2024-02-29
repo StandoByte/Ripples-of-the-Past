@@ -24,7 +24,10 @@ import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.AttributeModifier.Operation;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.passive.horse.AbstractHorseEntity;
@@ -37,6 +40,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.Explosion;
+import net.minecraftforge.common.ForgeMod;
 
 public class LivingUtilCap {
     private final LivingEntity entity;
@@ -55,6 +59,8 @@ public class LivingUtilCap {
     public boolean didStackKnockbackInstead;
     @Nullable private Vector3d blockImpactKbVec;
     private double blockImpactMultiplier;
+    
+    private int noGravityTicks = 0;
     
     private List<StandEffectInstance> standEffectsTargetedBy = new LinkedList<>();
     
@@ -90,6 +96,7 @@ public class LivingUtilCap {
             tickHypnosisProcess();
             tickKnockbackBlockImpact();
             tickLifeShotResist();
+            tickNoGravityModifier();
         }
         
         Iterator<AfterimageEntity> it = afterimages.iterator();
@@ -198,6 +205,26 @@ public class LivingUtilCap {
 //                    blockImpactKbVec = null;
 //                }
             }
+        }
+    }
+    
+    private static final AttributeModifier NO_GRAVITY_MODIFIER = new AttributeModifier(
+            UUID.fromString("4167f685-15f5-4dc6-8b8a-14adfbc05453"), "No gravity when being attacked", -1, Operation.MULTIPLY_TOTAL);
+    public void setNoGravityFor(int ticks) {
+        boolean addModifier = this.noGravityTicks <= 0;
+        this.noGravityTicks = ticks;
+        if (addModifier) {
+            Vector3d motion = entity.getDeltaMovement();
+            entity.setDeltaMovement(motion.x, Math.max(motion.y, 0), motion.z);
+            ModifiableAttributeInstance gravity = entity.getAttribute(ForgeMod.ENTITY_GRAVITY.get());
+            gravity.addTransientModifier(NO_GRAVITY_MODIFIER);
+        }
+    }
+    
+    private void tickNoGravityModifier() {
+        if (noGravityTicks > 0 && --noGravityTicks == 0) {
+            ModifiableAttributeInstance gravity = entity.getAttribute(ForgeMod.ENTITY_GRAVITY.get());
+            gravity.removeModifier(NO_GRAVITY_MODIFIER);
         }
     }
     

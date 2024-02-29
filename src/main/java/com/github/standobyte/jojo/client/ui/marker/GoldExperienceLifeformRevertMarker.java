@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.entity.ObjectEntity;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
+import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -34,7 +35,7 @@ public class GoldExperienceLifeformRevertMarker extends MarkerRenderer {
     @Override
     protected boolean shouldRender() {
         ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
-        return hud.showExtraActionHud(ModStandsInit.GOLD_EXPERIENCE_REVERT_LIFEFORM.get());
+        return hud.getCurrentMode() == PowerClassification.STAND && hud.showExtraActionHud(ModStandsInit.GOLD_EXPERIENCE_REVERT_LIFEFORM.get());
     }
     
     @SuppressWarnings("deprecation")
