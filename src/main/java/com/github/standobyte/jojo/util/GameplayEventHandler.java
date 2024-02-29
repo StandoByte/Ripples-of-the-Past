@@ -171,6 +171,7 @@ import net.minecraftforge.event.entity.living.LivingDeathEvent;
 import net.minecraftforge.event.entity.living.LivingDropsEvent;
 import net.minecraftforge.event.entity.living.LivingEntityUseItemEvent;
 import net.minecraftforge.event.entity.living.LivingEvent.LivingUpdateEvent;
+import net.minecraftforge.event.entity.living.LivingExperienceDropEvent;
 import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
@@ -1162,6 +1163,14 @@ public class GameplayEventHandler {
         category = event.getCategory();
         volume = event.getVolume();
         player.connection.send(new SPlaySoundEffectPacket(sound, category, player.getX(), player.getY(), player.getZ(), volume, pitch));
+    }
+    
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void cancelXpDrop(LivingExperienceDropEvent event) {
+        LivingEntity mob = event.getEntityLiving();
+        if (StandEffectsTracker.isTargetedBy(mob, ModStandEffects.GE_CREATED_LIFEFORM.get())) {
+            event.setCanceled(true);
+        }
     }
     
     @SubscribeEvent(priority = EventPriority.LOWEST)
