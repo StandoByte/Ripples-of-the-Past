@@ -67,7 +67,6 @@ public abstract class MarkerRenderer {
         }
     }
 
-    @SuppressWarnings("deprecation")
     protected void renderAt(Vector3d worldPos, MatrixStack matrixStack, ActiveRenderInfo camera, float partialTick, float[] rgb, boolean outline) {
         matrixStack.pushPose();
         Vector3d diff = worldPos.subtract(camera.getPosition())
@@ -81,6 +80,7 @@ public abstract class MarkerRenderer {
         
         matrixStack.translate(diff.x, diff.y, diff.z);
         matrixStack.scale(-scale, -scale, 1);
+        matrixStack.scale(0.8f, 0.8f, 0.8f);
         
         mc.getTextureManager().bind(getIcon());
         AbstractGui.blit(matrixStack, -8, -28, 0, 0, 16, 16, 16, 16);

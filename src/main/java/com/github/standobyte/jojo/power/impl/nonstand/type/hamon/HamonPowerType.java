@@ -80,7 +80,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     }
     
     private static void addSkillAction(AbstractHamonSkill skill, ControlScheme controlScheme) {
-        if (skill.getRewardAction() != null && skill.addsActionToHUD()) {
+        skill.getRewardActions(true).forEach(action -> {
             ControlScheme.Hotbar hotbar;
             switch (skill.getRewardType()) {
             case ATTACK:
@@ -90,15 +90,15 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
                 hotbar = ControlScheme.Hotbar.RIGHT_CLICK;
                 break;
             }
-            controlScheme.addIfMissing(hotbar, skill.getRewardAction());
-        }
+            controlScheme.addIfMissing(hotbar, action);
+        });
     }
     
     @Override
     public boolean isActionLegalInHud(Action<INonStandPower> action, INonStandPower power) {
         if (action instanceof HamonAction) {
             AbstractHamonSkill hamonSkill = ((HamonAction) action).getUnlockingSkill();
-            if (hamonSkill != null && hamonSkill.addsActionToHUD()) {
+            if (hamonSkill != null && hamonSkill.getRewardActions(true).findAny().isPresent()) {
                 HamonData hamon = power.getTypeSpecificData(this).get();
                 Collection<CharacterTechniqueHamonSkill> techniqueSkills = hamon.getTechniqueData().getLearnedSkills();
                 return techniqueSkills.contains(hamonSkill);

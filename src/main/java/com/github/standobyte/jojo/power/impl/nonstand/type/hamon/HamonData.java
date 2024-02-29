@@ -1048,7 +1048,7 @@ public class HamonData extends TypeSpecificData {
     public boolean addHamonSkill(LivingEntity user, AbstractHamonSkill skill, boolean checkRequirements, boolean sync) {
         if (!checkRequirements || !isSkillLearned(skill) && canLearnSkill(user, skill, HamonUtil.nearbyTeachersSkills(power.getUser())).isPositive()) {
             hamonSkills.addSkill(skill);
-            if (skill.addsActionToHUD()) {
+            if (skill.getRewardActions(true).findAny().isPresent()) {
                 power.clUpdateHud();
             }
             serverPlayer.ifPresent(player -> {
@@ -1082,9 +1082,9 @@ public class HamonData extends TypeSpecificData {
     }
 
     private void removeSkillAction(AbstractHamonSkill skill) {
-//        if (skill.getRewardAction() != null && skill.addsActionToHUD()) {
-//            power.clGetActionsHudLayout().removeExtraAction(skill.getRewardAction());
-//        }
+//        skill.getRewardActions(true).forEach(action -> {
+//            power.getActionsHudLayout().removeExtraAction(action);
+//        });
     }
     
     public static boolean canResetTab(PlayerEntity user, HamonSkillsTab type) {
