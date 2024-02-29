@@ -928,7 +928,7 @@
   },
   "gold_experience_unsummon": {
     "subtitle": "jojo.subtitle.stand_unsummon",
-    "sounds": [  ]
+    "sounds": [ "jojo:stand/stand_unsummon" ]
   },
   "gold_experience_punch_light": {
     "subtitle": "jojo.subtitle.stand_attack_light",
