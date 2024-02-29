@@ -87,6 +87,7 @@ public abstract class MarkerRenderer {
         
         matrixStack.translate(diff.x, diff.y, diff.z);
         matrixStack.scale(-scale, -scale, 1);
+        matrixStack.scale(0.8f, 0.8f, 0.8f);
         
         matrixStack.pushPose();
         matrixStack.translate(-8, -28, 0);

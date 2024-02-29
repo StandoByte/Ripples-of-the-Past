@@ -30,6 +30,7 @@ public class CrazyDiamondHeal extends StandEntityAction {
 
     public CrazyDiamondHeal(StandEntityAction.Builder builder) {
         super(builder);
+        friendlyFire = true;
     }
     
     @Override

@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.command.StandArgument;
 import com.github.standobyte.jojo.init.ModPotions;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkillTree;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 
@@ -38,6 +39,9 @@ public class CommonSetup {
             ModPotions.registerRecipes();
             
             Action.initShiftVariations();
+            for (AbstractHamonSkill hamonSkill : JojoCustomRegistries.HAMON_SKILLS.getRegistry()) {
+                hamonSkill.onCommonSetup();
+            }
             for (Action<?> action : JojoCustomRegistries.ACTIONS.getRegistry()) {
                 action.onCommonSetup();
             }
