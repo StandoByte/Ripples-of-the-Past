@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.non_stand;
 
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
@@ -32,12 +33,14 @@ import net.minecraft.entity.passive.AnimalEntity;
 import net.minecraft.entity.passive.GolemEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tags.BlockTags;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class HamonOrganismInfusion extends HamonAction {
 
@@ -165,17 +168,35 @@ public class HamonOrganismInfusion extends HamonAction {
             Material.VEGETABLE,
             Material.EGG
             ).build();
+    private static Set<ResourceLocation> otherLivingBlocksCache;
+    private static Set<ResourceLocation> exceptionBlocksCache;
     public static boolean isBlockLiving(BlockState blockState) {
-        Material material = blockState.getMaterial();
-        Block block = blockState.getBlock();
-        String blockName = block.getRegistryName().getPath();
-        
-        if (material == Material.REPLACEABLE_PLANT) {
-            return !blockName.contains("dead");
+        if (otherLivingBlocksCache == null) {
+            exceptionBlocksCache = ForgeRegistries.BLOCKS.getValues().stream()
+                    .map(Block::getRegistryName)
+                    .filter(id -> {
+                        String blockName = id.getPath();
+                        return blockName.contains("dead");
+                    })
+                    .collect(Collectors.toSet());
+            otherLivingBlocksCache = ForgeRegistries.BLOCKS.getValues().stream()
+                    .map(Block::getRegistryName)
+                    .filter(id -> {
+                        String blockName = id.getPath();
+                        return !exceptionBlocksCache.contains(id) && (blockName.contains("mossy") || blockName.contains("coral"));
+                    })
+                    .collect(Collectors.toSet());
         }
         
+        Material material = blockState.getMaterial();
+        Block block = blockState.getBlock();
+        ResourceLocation id = block.getRegistryName();
+        
+        if (material == Material.REPLACEABLE_PLANT) {
+            return !exceptionBlocksCache.contains(id);
+        }
         return LIVING_MATERIALS.contains(material) || BlockTags.LOGS.contains(block) || 
-                block instanceof SnowyDirtBlock || blockName.contains("mossy");
+                block instanceof SnowyDirtBlock || otherLivingBlocksCache.contains(id);
     }
 
 }
