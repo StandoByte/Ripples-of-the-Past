@@ -459,14 +459,14 @@ public class WalkmanSoundHandler {
         }
         SoundHandler soundManager = Minecraft.getInstance().getSoundManager();
         SoundEventAccessor accessor = soundManager.getSoundEvent(soundEvent.getLocation());
-        if (accessor == null) Stream.of(SoundHandler.EMPTY_SOUND);
+        if (accessor == null) Stream.empty();
         
         return unpackSoundsRecursive(soundManager, soundEvent, accessor);
     }
     
     private static Stream<Pair<SoundEvent, Sound>> unpackSoundsRecursive(SoundHandler soundManager, SoundEvent soundEvent, ISoundEventAccessor<Sound> accessor) {
         if (accessor == null) {
-            return Stream.of(Pair.of(soundEvent, SoundHandler.EMPTY_SOUND));
+            return Stream.empty();
         }
         if (accessor instanceof SoundEventAccessor) {
             List<ISoundEventAccessor<Sound>> list = ClientReflection.getSubAccessorsList((SoundEventAccessor) accessor);
