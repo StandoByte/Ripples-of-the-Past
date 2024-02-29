@@ -46,6 +46,12 @@ public abstract class AbstractHamonSkill extends ForgeRegistryEntry<AbstractHamo
                 .map(Supplier::get);
     }
     
+    public boolean addsExtraToHud() {
+        return rewardActions.object2BooleanEntrySet().stream()
+                .filter(entry -> entry.getBooleanValue())
+                .findAny().isPresent();
+    }
+    
     public boolean isUnlockedByDefault() {
         return false;
     }

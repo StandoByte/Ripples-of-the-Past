@@ -1048,7 +1048,7 @@ public class HamonData extends TypeSpecificData {
     public boolean addHamonSkill(LivingEntity user, AbstractHamonSkill skill, boolean checkRequirements, boolean sync) {
         if (!checkRequirements || !isSkillLearned(skill) && canLearnSkill(user, skill, HamonUtil.nearbyTeachersSkills(power.getUser())).isPositive()) {
             hamonSkills.addSkill(skill);
-            if (skill.getRewardActions(true).findAny().isPresent()) {
+            if (skill.addsExtraToHud()) {
                 power.clUpdateHud();
             }
             serverPlayer.ifPresent(player -> {

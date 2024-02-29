@@ -98,7 +98,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     public boolean isActionLegalInHud(Action<INonStandPower> action, INonStandPower power) {
         if (action instanceof HamonAction) {
             AbstractHamonSkill hamonSkill = ((HamonAction) action).getUnlockingSkill();
-            if (hamonSkill != null && hamonSkill.getRewardActions(true).findAny().isPresent()) {
+            if (hamonSkill != null && hamonSkill.addsExtraToHud()) {
                 HamonData hamon = power.getTypeSpecificData(this).get();
                 Collection<CharacterTechniqueHamonSkill> techniqueSkills = hamon.getTechniqueData().getLearnedSkills();
                 return techniqueSkills.contains(hamonSkill);
