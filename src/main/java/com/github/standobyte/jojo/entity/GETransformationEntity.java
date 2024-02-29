@@ -16,6 +16,7 @@ import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.util.mc.EntityOwnerResolver;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
+import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
@@ -131,10 +132,10 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             BlockState existingBlock = level.getBlockState(blockPos);
             if (!((existingBlock.isAir(level, blockPos) || existingBlock.getMaterial().isReplaceable())
                     && blockToPlace.canSurvive(level, blockPos))) {
-                Item item = blockToPlace.getBlock().asItem();
-                if (item != null && item != Items.AIR) {
-                    entityToSummon = new ItemEntity(level, getX(), getY(), getZ(), new ItemStack(item));
+                if (!(blockToPlace.getBlock() instanceof AbstractFireBlock)) {
+                    level.levelEvent(2001, blockPos, Block.getId(blockToPlace));
                 }
+                Block.dropResources(blockToPlace, level, blockPos, null, owner.getEntity(level), ItemStack.EMPTY);
                 
                 blockToPlace = null;
             }
