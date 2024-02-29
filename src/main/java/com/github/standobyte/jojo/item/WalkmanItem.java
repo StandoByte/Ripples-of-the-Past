@@ -6,7 +6,6 @@ import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.capability.MultipleCapsProvider;
 import com.github.standobyte.jojo.capability.item.walkman.WalkmanCassetteSlotCap;
 import com.github.standobyte.jojo.capability.item.walkman.WalkmanCassetteSlotProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -57,9 +56,7 @@ public class WalkmanItem extends Item {
 
     @Override
     public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundNBT nbt) {
-        return new MultipleCapsProvider.Builder()
-                .addSerializable(new WalkmanCassetteSlotProvider(stack), "CassetteSlot")
-                .build();
+        return new WalkmanCassetteSlotProvider(stack);
     }
     
     
