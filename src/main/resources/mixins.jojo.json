@@ -10,7 +10,8 @@
     "FireBlockMixin",
     "ForgeSimpleChannelMixin",
     "TheMostUnnecessaryMixin",
-    "itemtracking.MobEntityMixin"
+    "itemtracking.MobEntityMixin",
+    "itemtracking.PlayerInventoryMixin"
   ],
   "client": [
     "client.ParticleManagerMixin",

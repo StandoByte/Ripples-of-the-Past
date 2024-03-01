@@ -81,7 +81,7 @@ public class TrackerItemStack {
         });
     }
     
-    private void onUpdate(ServerWorld world) {
+    public void onUpdate(ServerWorld world) {
         SaveFileUtilCapProvider.getSaveFileCap(world.getServer()).getItemsTracker().addTracker(trackerUuid, this);
         if (trackingPlayerId != null) {
             PlayerEntity player = world.getPlayerByUUID(trackingPlayerId);
@@ -133,6 +133,10 @@ public class TrackerItemStack {
     
     public boolean isTracked() {
         return trackerUuid != null;
+    }
+    
+    public UUID getTrackerId() {
+        return trackerUuid;
     }
     
     

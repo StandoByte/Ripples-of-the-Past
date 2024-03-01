@@ -21,7 +21,7 @@ public class TestTrackItem extends Item {
     public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         ItemStack item = player.getItemInHand(hand);
         if (!world.isClientSide()) {
-            SaveFileUtilCapProvider.getSaveFileCap(((ServerWorld) world).getServer()).getItemsTracker().test(world, (ServerPlayerEntity) player);
+            SaveFileUtilCapProvider.getSaveFileCap(((ServerWorld) world).getServer()).getItemsTracker().tmpTest(world, (ServerPlayerEntity) player);
         }
         return ActionResult.pass(item);
     }

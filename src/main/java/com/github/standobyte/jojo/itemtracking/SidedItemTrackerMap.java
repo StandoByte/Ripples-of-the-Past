@@ -31,25 +31,28 @@ public class SidedItemTrackerMap {
         return trackingMap.values();
     }
     
-    public void test(World world, ServerPlayerEntity sendTo) {
+    public void tmpTest(World world, ServerPlayerEntity sendTo) {
         if (!world.isClientSide()) {
             trackingMap.forEach((id, tracker) -> {
                 ITextComponent message;
                 Entity entity = tracker.getAtEntity(world);
                 if (entity != null) {
-                    message = new StringTextComponent(String.format("    %s at %f.2 %f.2 %f.2 (%s)", 
-                            id.toString(), entity.getX(), entity.getY(), entity.getZ(), entity.getDisplayName().getString()));
+                    message = new StringTextComponent(String.format("    %s - %s at %f.2 %f.2 %f.2 (%s)", 
+                            id.toString(), tracker.getItem().getDisplayName().getString(), 
+                            entity.getX(), entity.getY(), entity.getZ(), entity.getDisplayName().getString()));
                 }
                 else {
                     BlockPos pos = tracker.getAtBlockPos(world);
                     if (pos != null) {
                         BlockState blockState = world.isLoaded(pos) ? world.getBlockState(pos) : null;
-                        message = new StringTextComponent(String.format("    %s at %d %d %d (%s)", 
-                                id.toString(), pos.getX(), pos.getY(), pos.getZ(), 
+                        message = new StringTextComponent(String.format("    %s - %s at %d %d %d (%s)", 
+                                id.toString(), tracker.getItem().getDisplayName().getString(), 
+                                pos.getX(), pos.getY(), pos.getZ(), 
                                 blockState != null ? blockState.getBlock().getName().getString() : "block not loaded"));
                     }
                     else {
-                        message = new StringTextComponent(String.format("    %s not found", id.toString()));
+                        message = new StringTextComponent(String.format("    %s - %s not found", 
+                                id.toString(), tracker.getItem().getDisplayName().getString()));
                     }
                 }
                 
