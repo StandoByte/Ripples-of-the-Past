@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.mixin.itemtracking;
+package com.github.standobyte.jojo.mixin.itemtracking.inventory;
 
 import java.util.Collection;
 import java.util.List;

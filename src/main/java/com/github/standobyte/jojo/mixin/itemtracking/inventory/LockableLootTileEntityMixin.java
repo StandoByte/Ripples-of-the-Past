@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.mixin.itemtracking;
+package com.github.standobyte.jojo.mixin.itemtracking.inventory;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -9,15 +9,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
 
 import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.HopperTileEntity;
 import net.minecraft.tileentity.LockableLootTileEntity;
+import net.minecraft.tileentity.LockableTileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.NonNullList;
 
-@Mixin(HopperTileEntity.class)
-public abstract class HopperTileEntityMixin extends LockableLootTileEntity {
+@Mixin(LockableLootTileEntity.class)
+public abstract class LockableLootTileEntityMixin extends LockableTileEntity {
     
-    protected HopperTileEntityMixin(TileEntityType<?> type) {
+    protected LockableLootTileEntityMixin(TileEntityType<?> type) {
         super(type);
     }
     

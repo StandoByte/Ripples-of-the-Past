@@ -10,12 +10,13 @@
     "FireBlockMixin",
     "ForgeSimpleChannelMixin",
     "TheMostUnnecessaryMixin",
-    "itemtracking.MobEntityMixin",
-    "itemtracking.PlayerInventoryMixin",
-    "itemtracking.LockableLootTileEntityMixin",
-    "itemtracking.HopperTileEntityMixin",
-    "itemtracking.ContainerSlotMixin",
-    "itemtracking.InventoryMixin"
+    "itemtracking.equip.MobEntityMixin",
+    "itemtracking.equip.ArmorStandEntityMixin",
+    "itemtracking.inventory.PlayerInventoryMixin",
+    "itemtracking.inventory.LockableLootTileEntityMixin",
+    "itemtracking.inventory.HopperTileEntityMixin",
+    "itemtracking.inventory.InventoryMixin",
+    "itemtracking.ContainerSlotMixin"
   ],
   "client": [
     "client.ParticleManagerMixin",

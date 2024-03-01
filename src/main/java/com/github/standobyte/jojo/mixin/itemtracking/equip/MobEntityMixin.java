@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.mixin.itemtracking;
+package com.github.standobyte.jojo.mixin.itemtracking.equip;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -7,15 +7,15 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
 @Mixin(MobEntity.class)
-public abstract class MobEntityMixin extends Entity {
+public abstract class MobEntityMixin extends LivingEntity {
     
     protected MobEntityMixin(EntityType<? extends MobEntity> type, World world) {
         super(type, world);
