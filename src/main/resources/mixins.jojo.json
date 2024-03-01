@@ -13,6 +13,7 @@
     "itemtracking.MobEntityMixin",
     "itemtracking.PlayerInventoryMixin",
     "itemtracking.LockableLootTileEntityMixin",
+    "itemtracking.HopperTileEntityMixin",
     "itemtracking.ContainerSlotMixin",
     "itemtracking.InventoryMixin"
   ],
