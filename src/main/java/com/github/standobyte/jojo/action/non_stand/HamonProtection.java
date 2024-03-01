@@ -49,7 +49,7 @@ public class HamonProtection extends HamonAction {
             HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
             float energyCost = dmgAmount * 50;
             damageReductionMult = hamon.consumeHamonEnergyTo(efficiency -> {
-                float baseReduction = 0.2F + hamon.getHamonControlLevelRatio() * 0.4F;
+                float baseReduction = 0.4F + hamon.getHamonControlLevelRatio() * 0.8F;
                 hamon.hamonPointsFromAction(HamonStat.CONTROL, Math.min(energyCost, power.getEnergy()) * efficiency);
                 return MathHelper.clamp(baseReduction * efficiency, 0, 1);
             }, energyCost);
