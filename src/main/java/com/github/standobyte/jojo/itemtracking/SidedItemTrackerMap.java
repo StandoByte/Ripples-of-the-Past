@@ -37,22 +37,22 @@ public class SidedItemTrackerMap {
                 ITextComponent message;
                 Entity entity = tracker.getAtEntity(world);
                 if (entity != null) {
-                    message = new StringTextComponent(String.format("    %s - %s at %f.2 %f.2 %f.2 (%s)", 
-                            id.toString(), tracker.getItem().getDisplayName(), 
-                            entity.getX(), entity.getY(), entity.getZ(), entity.getDisplayName()));
+                    message = new StringTextComponent(String.format("    %s - %s at %.2f %.2f %.2f (%s)", 
+                            id.toString(), tracker.getItem().getDisplayName().getString(), 
+                            entity.getX(), entity.getY(), entity.getZ(), entity.getDisplayName().getString()));
                 }
                 else {
                     BlockPos pos = tracker.getAtBlockPos(world);
                     if (pos != null) {
                         BlockState blockState = world.isLoaded(pos) ? world.getBlockState(pos) : null;
                         message = new StringTextComponent(String.format("    %s - %s at %d %d %d (%s)", 
-                                id.toString(), tracker.getItem().getDisplayName(), 
+                                id.toString(), tracker.getItem().getDisplayName().getString(), 
                                 pos.getX(), pos.getY(), pos.getZ(), 
                                 blockState != null ? blockState.getBlock().getName() : "block not loaded"));
                     }
                     else {
                         message = new StringTextComponent(String.format("    %s - %s not found", 
-                                id.toString(), tracker.getItem().getDisplayName()));
+                                id.toString(), tracker.getItem().getDisplayName().getString()));
                     }
                 }
                 
