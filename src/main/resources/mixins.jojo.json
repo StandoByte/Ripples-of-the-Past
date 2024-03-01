@@ -9,7 +9,8 @@
     "ServerChunkProviderMixin",
     "FireBlockMixin",
     "ForgeSimpleChannelMixin",
-    "TheMostUnnecessaryMixin"
+    "TheMostUnnecessaryMixin",
+    "itemtracking.MobEntityMixin"
   ],
   "client": [
     "client.ParticleManagerMixin",

@@ -35,50 +35,48 @@ public class TrackerItemStack {
         this.itemStack = itemStack;
     }
     
-    public static void setTracked(ItemStack itemStack, ServerPlayerEntity player) {
+    public static boolean setTracked(ItemStack itemStack, ServerPlayerEntity player) {
         if (itemStack.getCount() != 1) {
             throw new IllegalArgumentException("Cannot track stacked items, only item stacks with count == 1 are supported");
         }
-        itemStack.getCapability(TrackerItemStackProvider.CAPABILITY).ifPresent(cap -> {
+        return itemStack.getCapability(TrackerItemStackProvider.CAPABILITY).map(cap -> {
             if (cap.trackerUuid == null) {
                 cap.trackerUuid = MathHelper.createInsecureUUID(RANDOM);
                 cap.trackingPlayerId = player.getUUID();
                 SaveFileUtilCapProvider.getSaveFileCap(player).getItemsTracker().addTracker(cap.trackerUuid, cap);
+                return true;
             }
-        });
+            return false;
+        }).orElse(false);
     }
     
     public static void updateItemAtEntity(World world, ItemStack itemStack, int entityId) {
+        if (itemStack.isEmpty() || world.isClientSide()) return;
         itemStack.getCapability(TrackerItemStackProvider.CAPABILITY).ifPresent(cap -> {
             if (cap.isTracked()) {
                 cap.setAtEntity(entityId);
-                if (!world.isClientSide()) {
-                    cap.onUpdate((ServerWorld) world);
-                    
-                }
+                cap.onUpdate((ServerWorld) world);
             }
         });
     }
     
     public static void updateItemAtBlock(World world, ItemStack itemStack, BlockPos blockPos) {
+        if (itemStack.isEmpty() || world.isClientSide()) return;
         itemStack.getCapability(TrackerItemStackProvider.CAPABILITY).ifPresent(cap -> {
             if (cap.isTracked()) {
                 cap.setAtBlockPos(blockPos);
-                if (!world.isClientSide()) {
-                    cap.onUpdate((ServerWorld) world);
-                }
+                cap.onUpdate((ServerWorld) world);
             }
         });
     }
     
     public static void updateDisappeared(World world, ItemStack itemStack) {
+        if (world.isClientSide()) return;
         itemStack.getCapability(TrackerItemStackProvider.CAPABILITY).ifPresent(cap -> {
             if (cap.isTracked()) {
                 cap.positionEntity = OptionalInt.empty();
                 cap.positionBlock = null;
-                if (!world.isClientSide()) {
-                    cap.onUpdate((ServerWorld) world);
-                }
+                cap.onUpdate((ServerWorld) world);
             }
         });
     }

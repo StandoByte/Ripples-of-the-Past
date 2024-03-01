@@ -14,7 +14,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 @EventBusSubscriber(modid = JojoMod.MOD_ID)
-public class EventHandler {
+public class ItemTrackingEventHandler {
     
     @SubscribeEvent
     public static void trackItemInItemEntity(EntityJoinWorldEvent event) {

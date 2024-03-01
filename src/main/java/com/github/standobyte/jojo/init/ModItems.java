@@ -23,7 +23,7 @@ import com.github.standobyte.jojo.item.StoneMaskItem;
 import com.github.standobyte.jojo.item.SuperAjaStoneItem;
 import com.github.standobyte.jojo.item.TommyGunItem;
 import com.github.standobyte.jojo.item.WalkmanItem;
-import com.github.standobyte.jojo.itemtracking.tmp.TrackTestItem;
+import com.github.standobyte.jojo.itemtracking.tmp.TestTrackItem;
 
 import net.minecraft.enchantment.EnchantmentType;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -49,8 +49,8 @@ public class ModItems {
         }
     }).setEnchantmentCategories(new EnchantmentType[]{ModEnchantments.STAND_ARROW});
 
-    public static final RegistryObject<TrackTestItem> TMP_ITEM_TRACKING_TEST = ITEMS.register("item_tracking_test", 
-            () -> new TrackTestItem(new Item.Properties().stacksTo(1)));
+    public static final RegistryObject<TestTrackItem> TMP_ITEM_TRACKING_TEST = ITEMS.register("item_tracking_test", 
+            () -> new TestTrackItem(new Item.Properties().stacksTo(1)));
     
     
     
