@@ -11,7 +11,10 @@
     "ForgeSimpleChannelMixin",
     "TheMostUnnecessaryMixin",
     "itemtracking.MobEntityMixin",
-    "itemtracking.PlayerInventoryMixin"
+    "itemtracking.PlayerInventoryMixin",
+    "itemtracking.LockableLootTileEntityMixin",
+    "itemtracking.ContainerSlotMixin",
+    "itemtracking.InventoryMixin"
   ],
   "client": [
     "client.ParticleManagerMixin",

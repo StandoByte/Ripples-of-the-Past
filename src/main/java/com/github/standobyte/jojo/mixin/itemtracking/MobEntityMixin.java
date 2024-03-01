@@ -21,7 +21,7 @@ public abstract class MobEntityMixin extends Entity {
         super(type, world);
     }
     
-    @Inject(method = "setItemSlot", at = @At("HEAD"))
+    @Inject(method = "setItemSlot", at = @At("TAIL"))
     public void jojoOnMobItemEquip(EquipmentSlotType pSlot, ItemStack pStack, CallbackInfo ci) {
         TrackerItemStack.updateItemAtEntity(level, pStack, this.getId());
     }
