@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Random;
 import java.util.UUID;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -81,6 +82,38 @@ public class TrackerItemStack {
         });
     }
     
+    public static void trackedInEntityInv(ItemStack setItem, Stream<ItemStack> inventoryItems, 
+            World world, int entityId) {
+        trackedInInventory(setItem, inventoryItems, world, OptionalInt.of(entityId), null);
+    }
+    
+    public static void trackedInBlockInv(ItemStack setItem, Stream<ItemStack> inventoryItems, 
+            World world, BlockPos blockPos) {
+        trackedInInventory(setItem, inventoryItems, world, OptionalInt.empty(), blockPos);
+    }
+    
+    private static void trackedInInventory(ItemStack setItem, Stream<ItemStack> inventoryItems, 
+            World world, OptionalInt entityId, BlockPos blockPos) {
+        if (!world.isClientSide()) {
+            setItem.getCapability(TrackerItemStackProvider.CAPABILITY).ifPresent(oldItemTracker -> {
+                if (oldItemTracker.isTracked()) {
+                    UUID trackerId = oldItemTracker.getTrackerId();
+                    inventoryItems.anyMatch(movedItem -> {
+                        return movedItem.getCapability(TrackerItemStackProvider.CAPABILITY).map(newTracker -> {
+                            if (trackerId.equals(newTracker.getTrackerId())) {
+                                newTracker.positionEntity = entityId;
+                                newTracker.positionBlock = blockPos;
+                                newTracker.onUpdate((ServerWorld) world);
+                                return true;
+                            }
+                            return false;
+                        }).orElse(false);
+                    });
+                }
+            });
+        }
+    }
+    
     public void onUpdate(ServerWorld world) {
         SaveFileUtilCapProvider.getSaveFileCap(world.getServer()).getItemsTracker().addTracker(trackerUuid, this);
         if (trackingPlayerId != null) {
@@ -117,11 +150,11 @@ public class TrackerItemStack {
         if (positionEntity.isPresent()) {
             Entity entity = world.getEntity(positionEntity.getAsInt());
             if (entity != null) {
-                return entity.getPosition(partialTick).add(0, entity.getBbHeight() + 0.5, 0);
+                return entity.getPosition(partialTick).add(0, entity.getBbHeight() + 0.25, 0);
             }
         }
         if (positionBlock != null) {
-            return Vector3d.atCenterOf(positionBlock);
+            return Vector3d.upFromBottomCenterOf(positionBlock, 1.0);
         }
         
         return null;

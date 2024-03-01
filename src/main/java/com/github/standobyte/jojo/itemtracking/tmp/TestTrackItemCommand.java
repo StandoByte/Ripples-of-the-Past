@@ -14,6 +14,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.Hand;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 
 public class TestTrackItemCommand {
     public static final SimpleCommandExceptionType ERROR_NOT_LIVING = new SimpleCommandExceptionType(new StringTextComponent("Invalid entity"));
@@ -39,8 +40,9 @@ public class TestTrackItemCommand {
         }
         try {
             if (TrackerItemStack.setTracked(item, player)) {
-                src.sendSuccess(new StringTextComponent(String.format("Tracking %s in %s's hand", 
-                        item.getDisplayName().getString(), entity.getDisplayName().getString())), true);
+                src.sendSuccess(new TranslationTextComponent("%s is now tracking %s in %s's hand", 
+                        player.getDisplayName(),
+                        item.getDisplayName(), entity.getDisplayName()), true);
                 return 1;
             }
             else {
