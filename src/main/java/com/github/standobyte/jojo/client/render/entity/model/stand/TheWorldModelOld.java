@@ -20,6 +20,7 @@ import net.minecraft.util.HandSide;
 
 public class TheWorldModelOld extends HumanoidStandModel<TheWorldEntity> {
 
+    @SuppressWarnings("deprecation")
     public TheWorldModelOld() {
         super();
         

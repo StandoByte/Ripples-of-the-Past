@@ -53,6 +53,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     public final boolean enablePhysics;
     private final Map<Phase, List<StandSound>> standSounds;
     protected final Supplier<StandEntityMeleeBarrage> barrageVisuals;
+    protected boolean friendlyFire = false;
     
     public StandEntityAction(StandEntityAction.AbstractBuilder<?> builder) {
         super(builder);
@@ -166,10 +167,14 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         switch (target.getType()) {
         case ENTITY:
             Entity targetEntity = target.getEntity();
-            return ActionConditionResult.noMessage(targetEntity instanceof LivingEntity && standEntity.canAttack((LivingEntity) targetEntity));
+            return ActionConditionResult.noMessage(targetEntity instanceof LivingEntity && canStandTargetEntity(standEntity, (LivingEntity) targetEntity, standPower));
         default:
             return ActionConditionResult.POSITIVE;
         }
+    }
+    
+    protected boolean canStandTargetEntity(StandEntity standEntity, LivingEntity target, IStandPower power) {
+        return friendlyFire ? true : standEntity.canAttack(target);
     }
     
     @Override

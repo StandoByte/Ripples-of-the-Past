@@ -13,6 +13,7 @@ import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
 import net.minecraftforge.common.util.LazyOptional;
 
+@Deprecated
 public class MultipleCapsProvider implements ICapabilitySerializable<INBT> {
     private final ICapabilityProvider[] capProviders;
     private final Map<String, ICapabilitySerializable<INBT>> capSerializable;
@@ -55,7 +56,8 @@ public class MultipleCapsProvider implements ICapabilitySerializable<INBT> {
     }
     
     
-    
+
+    @Deprecated
     public static class Builder {
         private final List<ICapabilityProvider> capProviders = new ArrayList<>();
         private final Map<String, ICapabilitySerializable<INBT>> capSerializable = new HashMap<>();

@@ -14,6 +14,7 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 // Uncomment/edit all the stuff below to make players be able to hit Stands on some condition
 
 //@EventBusSubscriber(modid = AddonMain.MOD_ID)
+@SuppressWarnings("unused")
 public class LetEntitiesHitStands {
     
 //    @SubscribeEvent(priority = EventPriority.HIGHEST)

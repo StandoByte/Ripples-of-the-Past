@@ -22,7 +22,6 @@ import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.ClientModSettingsScreen;
-import com.github.standobyte.jojo.client.ui.screen.standskin.StandSkinsScreen;
 import com.github.standobyte.jojo.client.ui.screen.widgets.HeightScaledSlider;
 import com.github.standobyte.jojo.client.ui.screen.widgets.ImageVanillaButton;
 import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
@@ -677,17 +676,6 @@ public class ClientEventHandler {
                             }, 
                             StringTextComponent.EMPTY);
                     event.addWidget(standStatsToggleButton);
-                    
-                    Button standSkinsButton = new ImageVanillaButton(screen.width - 28, screen.height - 159, 
-                            20, 20, 236, 236, StandSkinsScreen.TEXTURE_MAIN_WINDOW, 256, 256, 
-                            button -> {
-                                StandSkinsScreen.openScreen(screen);
-                            }, 
-                            (button, matrixStack, x, y) -> {
-                                screen.renderTooltip(matrixStack, new TranslationTextComponent("jojo.stand_skins.button"), x, y);
-                            }, 
-                            StringTextComponent.EMPTY);
-                    event.addWidget(standSkinsButton);
                 }
             });
         }
