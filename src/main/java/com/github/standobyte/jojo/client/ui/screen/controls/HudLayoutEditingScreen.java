@@ -88,7 +88,7 @@ public class HudLayoutEditingScreen extends Screen {
     @Override
     protected void init() {
         // reset layout
-        addButton(new CustomButton(getWindowX() + WINDOW_WIDTH - 26, getWindowY() + 21, 20, 20, 
+        addButton(new CustomButton(getWindowX() + WINDOW_WIDTH - 28, getWindowY() + WINDOW_HEIGHT - 28, 20, 20, 
                 button -> {
                     currentControlScheme.reset(selectedPower);
                     markLayoutEdited();
@@ -133,7 +133,7 @@ public class HudLayoutEditingScreen extends Screen {
         });
         
         // vanilla controls settings
-        addButton(new CustomButton(getWindowX() - 26, getWindowY() + WINDOW_HEIGHT - 26, 22, 22, 
+        addButton(new CustomButton(getWindowX() + WINDOW_WIDTH - 30, getWindowY() + WINDOW_HEIGHT - 118, 22, 22, 
                 button -> {
                     ControlsScreen mcControlsScreen = new ControlsScreen(this, minecraft.options);
                     
@@ -462,8 +462,8 @@ public class HudLayoutEditingScreen extends Screen {
     
     private void renderHint(MatrixStack matrixStack) {
         minecraft.getTextureManager().bind(WINDOW);
-        int hintX = getWindowX() + WINDOW_WIDTH - 17;
-        int hintY = getWindowY() + 6;
+        int hintX = getWindowX() + WINDOW_WIDTH - 19;
+        int hintY = getWindowY() + 8;
         blit(matrixStack, hintX, hintY, 32, 245, 11, 11);
     }
     
@@ -480,8 +480,8 @@ public class HudLayoutEditingScreen extends Screen {
             renderActionNameTooltip(matrixStack, mouseX, mouseY);
         }
         
-        int hintX = getWindowX() + WINDOW_WIDTH - 17;
-        int hintY = getWindowY() + 6;
+        int hintX = getWindowX() + WINDOW_WIDTH - 19;
+        int hintY = getWindowY() + 8;
         if (mouseX >= hintX && mouseX < hintX + 11 && mouseY >= hintY && mouseY < hintY + 11) {
             renderComponentTooltip(matrixStack, hintTooltip, mouseX, mouseY);
         }
