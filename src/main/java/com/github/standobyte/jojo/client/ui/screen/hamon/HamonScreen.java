@@ -13,6 +13,7 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.InputHandler;
+import com.github.standobyte.jojo.client.ui.screen.JojoStuffScreen;
 import com.github.standobyte.jojo.client.ui.screen.TabPositionType;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -45,7 +46,6 @@ public class HamonScreen extends Screen {
     static final int WINDOW_UPPER_BORDER = 18;
     
     public static final ResourceLocation WINDOW = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/hamon_window.png");
-    static final ResourceLocation TABS = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/hamon_window_tabs.png");
     
     private final List<HamonTabGui> selectableTabs = new ArrayList<>();
     private final List<HamonTabGui> allTabs = new ArrayList<>();
@@ -107,12 +107,12 @@ public class HamonScreen extends Screen {
     private void reorderTabs() {
         int i = 0;
         for (HamonTabGui tab : selectableTabs) {
-            if (introWasRead && tab == introTab) {
-                tab.setPosition(TabPositionType.RIGHT, 0);
-            }
-            else {
+//            if (introWasRead && tab == introTab) {
+//                tab.setPosition(TabPositionType.RIGHT, 0);
+//            }
+//            else {
                 tab.setPosition(TabPositionType.LEFT, i++);
-            }
+//            }
         }
     }
     
@@ -142,6 +142,11 @@ public class HamonScreen extends Screen {
                 selectTab(hamonTabGui);
                 return true;
             }
+        }
+        if (JojoStuffScreen.mouseClick(mouseX, mouseY, 
+                JojoStuffScreen.uniformX(minecraft), JojoStuffScreen.uniformY(minecraft), 
+                JojoStuffScreen.TabsEnumType.HAMON)) {
+            return true;
         }
         if (selectedTab != null) {
             if (selectedTab.mouseClicked(
@@ -252,7 +257,7 @@ public class HamonScreen extends Screen {
         tabsWithSkillRequirements.clear();
         renderBackground(matrixStack);
         renderInside(matrixStack, mouseX, mouseY, x, y, partialTick);
-        renderWindow(matrixStack, x, y);
+        renderWindow(matrixStack, mouseX, mouseY, x, y);
         renderToolTips(matrixStack, mouseX, mouseY, x, y);
     }
 
@@ -284,7 +289,7 @@ public class HamonScreen extends Screen {
         }
     }
 
-    public void renderWindow(MatrixStack matrixStack, int windowX, int windowY) {
+    public void renderWindow(MatrixStack matrixStack, int mouseX, int mouseY, int windowX, int windowY) {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         RenderSystem.enableBlend();
         minecraft.getTextureManager().bind(WINDOW);
@@ -297,6 +302,9 @@ public class HamonScreen extends Screen {
         for (HamonTabGui tabGui : selectableTabs) {
             tabGui.drawIcon(matrixStack, windowX, windowY, itemRenderer);
         }
+        JojoStuffScreen.renderHamonTabs(matrixStack, 
+                JojoStuffScreen.uniformX(minecraft), JojoStuffScreen.uniformY(minecraft), false, 
+                mouseX, mouseY, this, JojoStuffScreen.HamonTab.MAIN_SCREEN);
         RenderSystem.disableBlend();
         if (selectedTab != null) {
             font.draw(matrixStack, selectedTab.getTitle(), windowX + 8, windowY + 6, 0x404040);
@@ -350,7 +358,6 @@ public class HamonScreen extends Screen {
         matrixStack.translate(tooltipOffsetX, tooltipOffsetY, 0);
     }
     
-    @SuppressWarnings("resource")
     public static void setTeacherSkills(Collection<? extends AbstractHamonSkill> skills) {
         Screen screen = Minecraft.getInstance().screen;
         if (screen instanceof HamonScreen) {
@@ -360,7 +367,6 @@ public class HamonScreen extends Screen {
         }
     }
 
-    @SuppressWarnings("resource")
     public static void updateTabs() {
         Screen screen = Minecraft.getInstance().screen;
         if (screen instanceof HamonScreen) {

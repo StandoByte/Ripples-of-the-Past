@@ -11,6 +11,7 @@ import java.util.List;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.ui.screen.JojoStuffScreen;
 import com.github.standobyte.jojo.client.ui.screen.TabPositionType;
 import com.github.standobyte.jojo.client.ui.screen.widgets.utils.IExtendedWidget;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -26,7 +27,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
-@SuppressWarnings("deprecation")
 public abstract class HamonTabGui extends AbstractGui {
     protected static final ResourceLocation ADV_WIDGETS = new ResourceLocation("textures/gui/advancements/widgets.png");
     protected final Minecraft minecraft;
@@ -72,7 +72,7 @@ public abstract class HamonTabGui extends AbstractGui {
     }
 
     void drawTab(MatrixStack matrixStack, int windowX, int windowY, boolean isSelected, boolean red) {
-        minecraft.getTextureManager().bind(HamonScreen.TABS);
+        minecraft.getTextureManager().bind(JojoStuffScreen.TABS);
         tabPositioning.draw(matrixStack, screen, windowX, windowY, WINDOW_WIDTH, WINDOW_HEIGHT, 
                 isSelected, index, false);
         if (!isSelected && red) {

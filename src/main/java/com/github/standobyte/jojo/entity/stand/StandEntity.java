@@ -98,6 +98,7 @@ import net.minecraft.util.NonNullList;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
@@ -1202,7 +1203,22 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
     
     public Vector3d collideNextPos(Vector3d pos) {
-        return noPhysics ? pos : position().add(MCUtil.collide(this, pos.subtract(position())));
+        if (noPhysics) {
+            return pos;
+        }
+        AxisAlignedBB collisionBox = getBoundingBox();
+        double height = collisionBox.getYsize();
+        double width = collisionBox.getXsize();
+        if (height > width) {
+            collisionBox = new AxisAlignedBB(
+                    collisionBox.minX, 
+                    collisionBox.maxY - Math.max(height * 0.5, width), 
+                    collisionBox.minZ, 
+                    collisionBox.maxX, 
+                    collisionBox.maxY, 
+                    collisionBox.maxZ);
+        }
+        return position().add(MCUtil.collide(this, collisionBox, pos.subtract(position())));
     }
     
     private Vector3d taskOffset(LivingEntity user, StandRelativeOffset relativeOffset, Optional<StandEntityTask> currentTask) {
@@ -2390,6 +2406,16 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     public void addAdditionalSaveData(CompoundNBT nbt) {
         super.addAdditionalSaveData(nbt);
     }
+    
+    @Override
+    public boolean saveAsPassenger(CompoundNBT pCompound) {
+        return false;
+    }
+//    
+//    @Override
+//    public CompoundNBT serializeNBT() {
+//        return super.serializeNBT();
+//    }
     
     
 

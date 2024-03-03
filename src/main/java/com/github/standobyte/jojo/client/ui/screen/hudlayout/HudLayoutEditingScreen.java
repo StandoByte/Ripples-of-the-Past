@@ -11,11 +11,13 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.InputHandler.MouseButton;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
+import com.github.standobyte.jojo.client.ui.screen.JojoStuffScreen;
 import com.github.standobyte.jojo.client.ui.screen.widgets.CustomButton;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClActionsLayoutPacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.layout.ActionHotbarLayout;
 import com.github.standobyte.jojo.power.layout.ActionHotbarLayout.ActionSwitch;
 import com.github.standobyte.jojo.power.layout.ActionsLayout;
@@ -39,8 +41,8 @@ import net.minecraft.util.text.TranslationTextComponent;
 @SuppressWarnings("deprecation")
 public class HudLayoutEditingScreen extends Screen {
     private static final ResourceLocation WINDOW = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/layout_editing.png");
-    private static final int WINDOW_WIDTH = 230;
-    private static final int WINDOW_HEIGHT = 180;
+    public static final int WINDOW_WIDTH = 230;
+    public static final int WINDOW_HEIGHT = 180;
     
     private static PowerClassification selectedTab = null;
     private IPower<?, ?> selectedPower;
@@ -125,9 +127,8 @@ public class HudLayoutEditingScreen extends Screen {
         hoveredAction = getActionAt(mouseX, mouseY);
         isQuickActionSlotHovered = isQuickAccessActionSlotAt(mouseX, mouseY);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        renderTabButtons(matrixStack, false);
         renderWindow(matrixStack);
-        renderTabButtons(matrixStack, true);
+        renderTabButtons(matrixStack, mouseX, mouseY);
         renderHint(matrixStack);
         renderSlots(matrixStack, mouseX, mouseY);
         renderDragged(matrixStack, mouseX, mouseY);
@@ -147,13 +148,20 @@ public class HudLayoutEditingScreen extends Screen {
     }
     
 
-    private void renderTabButtons(MatrixStack matrixStack, boolean renderSelectedTabButton) {
+    private void renderTabButtons(MatrixStack matrixStack, int mouseX, int mouseY) {
         for (int i = 0; i < powersPresent.size(); i++) {
             boolean isTabSelected = isTabSelected(powersPresent.get(i));
-            if (isTabSelected ^ renderSelectedTabButton) continue;
-            int textureX = i == 0 ? 200 : 228;
-            int textureY = isTabSelected ? 224 : 192;
-            minecraft.getTextureManager().bind(WINDOW);
+            int textureX;
+            int textureY;
+            if (isTabSelected) {
+                textureX = i == 0 ? 0 : 28;
+                textureY = 32;
+            }
+            else {
+                textureX = i == 0 ? 168 : 196;
+                textureY = 2;
+            }
+            minecraft.getTextureManager().bind(JojoStuffScreen.TABS);
             int[] xy = getTabButtonCoords(i);
             blit(matrixStack, xy[0], xy[1], textureX, textureY, 28, 32);
 
@@ -161,7 +169,32 @@ public class HudLayoutEditingScreen extends Screen {
             minecraft.getTextureManager().bind(powersPresent.get(i).clGetPowerTypeIcon());
             blit(matrixStack, xy[0] + 6, xy[1] + 10, 0, 0, 16, 16, 16, 16);
             RenderSystem.disableBlend();
-            if (renderSelectedTabButton) break;
+        }
+        
+        if (selectedTab != null) {
+            int tabsX = JojoStuffScreen.uniformX(minecraft);
+            int tabsY = JojoStuffScreen.uniformY(minecraft);
+            JojoStuffScreen.TabsEnumType tabsType = JojoStuffScreen.TabsEnumType.getTabsEnum(selectedPower);
+            if (tabsType != null) {
+                switch (tabsType) {
+                case STAND:
+                    JojoStuffScreen.renderStandTabs(matrixStack, 
+                            tabsX, tabsY, true, 
+                            mouseX, mouseY, this, JojoStuffScreen.StandTab.CONTROLS, 
+                            ((IStandPower) selectedPower));
+                    break;
+                case HAMON:
+                    JojoStuffScreen.renderHamonTabs(matrixStack, 
+                            tabsX, tabsY, true, 
+                            mouseX, mouseY, this, JojoStuffScreen.HamonTab.CONTROLS);
+                    break;
+                case VAMPIRISM:
+                    JojoStuffScreen.renderVampirismTabs(matrixStack, 
+                            tabsX, tabsY, true, 
+                            mouseX, mouseY, this, JojoStuffScreen.VampirismTab.CONTROLS);
+                    break;
+                }
+            }
         }
     }
     
@@ -409,6 +442,13 @@ public class HudLayoutEditingScreen extends Screen {
                 selectTab(powersPresent.get(tab));
                 return true;
             }
+            
+            JojoStuffScreen.TabsEnumType tabsType = JojoStuffScreen.TabsEnumType.getTabsEnum(selectedPower);
+            if (tabsType != null && JojoStuffScreen.mouseClick(mouseX, mouseY, 
+                    JojoStuffScreen.uniformX(minecraft), JojoStuffScreen.uniformY(minecraft), tabsType)) {
+                return true;
+            }
+            
             if (clickedSlot.isPresent()) {
                 ActionsLayout.Hotbar hotbar = clickedSlot.get().hotbar;
                 switch (button) {
@@ -438,6 +478,10 @@ public class HudLayoutEditingScreen extends Screen {
         }
         
         return super.mouseClicked(mouseX, mouseY, mouseButton);
+    }
+    
+    public void selectTab(PowerClassification power) {
+        selectTab(IPower.getPlayerPower(minecraft.player, power));
     }
     
     private void selectTab(IPower<?, ?> power) {

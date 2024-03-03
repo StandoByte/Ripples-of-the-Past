@@ -77,6 +77,7 @@ import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ChunkManager;
 import net.minecraft.world.server.ServerWorld;
@@ -88,6 +89,22 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 public class MCUtil {
     public static final IFormattableTextComponent EMPTY_TEXT = new StringTextComponent("");
     public static final IFormattableTextComponent NEW_LINE = new StringTextComponent("\n");
+    
+    /**
+     * Runs a command for the user entity, but with the permissions of the server.
+     * 
+     * @return The success value of the command, or 0 if an exception occured.
+     */
+    public static int runCommand(LivingEntity user, String command) {
+        if (user.level.isClientSide()) {
+            throw new IllegalLogicalSideException("Tried to run a command on client side!");
+        }
+        MinecraftServer server = ((ServerWorld) user.level).getServer();
+        CommandSource src = user.createCommandSourceStack()
+                .withMaximumPermission(4)
+                .withSuppressedOutput();
+        return server.getCommands().performCommand(src, command);
+    }
     
     // NBT helper functions
     private static final ImmutableMap<Class<? extends INBT>, Integer> NBT_ID = new ImmutableMap.Builder<Class<? extends INBT>, Integer>()
@@ -233,7 +250,6 @@ public class MCUtil {
             throw new IllegalStateException();
         }
         
-        @SuppressWarnings("resource")
         ChunkManager chunkMap = ((ServerWorld) entity.level).getChunkSource().chunkMap;
         Int2ObjectMap<ChunkManager.EntityTracker> entityMap = chunkMap.entityMap;
         ChunkManager.EntityTracker tracker = entityMap.get(entity.getId());
@@ -292,31 +308,34 @@ public class MCUtil {
         }
     }
     
-    
+
     
     public static Vector3d collide(Entity entity, Vector3d offsetVec) {
-        AxisAlignedBB entityBB = entity.getBoundingBox();
+        return collide(entity, entity.getBoundingBox(), offsetVec);
+    }
+    
+    public static Vector3d collide(Entity entity, AxisAlignedBB collisionBox, Vector3d offsetVec) {
         ISelectionContext selectionContext = ISelectionContext.of(entity);
         VoxelShape worldBorder = entity.level.getWorldBorder().getCollisionShape();
-        Stream<VoxelShape> worldBorderCollision = VoxelShapes.joinIsNotEmpty(worldBorder, VoxelShapes.create(entityBB.deflate(1.0E-7D)), IBooleanFunction.AND) ? Stream.empty() : Stream.of(worldBorder);
-        Stream<VoxelShape> entityCollisions = entity.level.getEntityCollisions(entity, entityBB.expandTowards(offsetVec), e -> true);
+        Stream<VoxelShape> worldBorderCollision = VoxelShapes.joinIsNotEmpty(worldBorder, VoxelShapes.create(collisionBox.deflate(1.0E-7D)), IBooleanFunction.AND) ? Stream.empty() : Stream.of(worldBorder);
+        Stream<VoxelShape> entityCollisions = entity.level.getEntityCollisions(entity, collisionBox.expandTowards(offsetVec), e -> true);
         ReuseableStream<VoxelShape> collisions = new ReuseableStream<>(Stream.concat(entityCollisions, worldBorderCollision));
-        Vector3d vector3d = offsetVec.lengthSqr() == 0 ? offsetVec : Entity.collideBoundingBoxHeuristically(entity, offsetVec, entityBB, entity.level, selectionContext, collisions);
+        Vector3d vector3d = offsetVec.lengthSqr() == 0 ? offsetVec : Entity.collideBoundingBoxHeuristically(entity, offsetVec, collisionBox, entity.level, selectionContext, collisions);
         boolean flag = offsetVec.x != vector3d.x;
         boolean flag2 = offsetVec.z != vector3d.z;
         boolean flag3 = entity.isOnGround() || offsetVec.y != vector3d.y && offsetVec.y < 0.0D;
         if (entity.maxUpStep > 0.0F && flag3 && (flag || flag2)) {
-            Vector3d vector3d1 = Entity.collideBoundingBoxHeuristically(entity, new Vector3d(offsetVec.x, entity.maxUpStep, offsetVec.z), entityBB, entity.level, selectionContext, collisions);
-            Vector3d vector3d2 = Entity.collideBoundingBoxHeuristically(entity, new Vector3d(0, entity.maxUpStep, 0), entityBB.expandTowards(offsetVec.x, 0.0D, offsetVec.z), entity.level, selectionContext, collisions);
+            Vector3d vector3d1 = Entity.collideBoundingBoxHeuristically(entity, new Vector3d(offsetVec.x, entity.maxUpStep, offsetVec.z), collisionBox, entity.level, selectionContext, collisions);
+            Vector3d vector3d2 = Entity.collideBoundingBoxHeuristically(entity, new Vector3d(0, entity.maxUpStep, 0), collisionBox.expandTowards(offsetVec.x, 0.0D, offsetVec.z), entity.level, selectionContext, collisions);
             if (vector3d2.y < entity.maxUpStep) {
-                Vector3d vector3d3 = Entity.collideBoundingBoxHeuristically(entity, new Vector3d(offsetVec.x, 0.0D, offsetVec.z), entityBB.move(vector3d2), entity.level, selectionContext, collisions).add(vector3d2);
+                Vector3d vector3d3 = Entity.collideBoundingBoxHeuristically(entity, new Vector3d(offsetVec.x, 0.0D, offsetVec.z), collisionBox.move(vector3d2), entity.level, selectionContext, collisions).add(vector3d2);
                 if (Entity.getHorizontalDistanceSqr(vector3d3) > Entity.getHorizontalDistanceSqr(vector3d1)) {
                     vector3d1 = vector3d3;
                 }
             }
             
             if (Entity.getHorizontalDistanceSqr(vector3d1) > Entity.getHorizontalDistanceSqr(vector3d)) {
-                return vector3d1.add(Entity.collideBoundingBoxHeuristically(entity, new Vector3d(0.0D, -vector3d1.y + offsetVec.y, 0.0D), entityBB.move(vector3d1), entity.level, selectionContext, collisions));
+                return vector3d1.add(Entity.collideBoundingBoxHeuristically(entity, new Vector3d(0.0D, -vector3d1.y + offsetVec.y, 0.0D), collisionBox.move(vector3d1), entity.level, selectionContext, collisions));
             }
         }
         
@@ -489,24 +508,6 @@ public class MCUtil {
     }
     
     
-
-    /**
-     * Runs a command for the user entity, but with the permissions of the server.
-     * 
-     * @return The success value of the command, or 0 if an exception occured.
-     */
-    public static int runCommand(LivingEntity user, String command) {
-        if (user.level.isClientSide()) {
-            throw new IllegalLogicalSideException("Tried to run a command on client side!");
-        }
-        MinecraftServer server = ((ServerWorld) user.level).getServer();
-        CommandSource src = user.createCommandSourceStack()
-                .withMaximumPermission(4)
-                .withSuppressedOutput();
-        return server.getCommands().performCommand(src, command);
-    }
-    
-    
     
     public static boolean isHandFree(LivingEntity entity, Hand hand) {
         if (entity.level.isClientSide() && entity.is(ClientUtil.getClientPlayer()) && ClientUtil.arePlayerHandsBusy()) {
@@ -538,6 +539,15 @@ public class MCUtil {
             attackingMob.setTarget(null);
             attackingMob.targetSelector.getRunningGoals()
             .forEach(goal -> goal.stop());
+        }
+    }
+    
+    
+    
+    public static void onPlayerResurrect(ServerPlayerEntity player) {
+        if (!player.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY) && !player.isSpectator()) {
+            player.setExperienceLevels(0);
+            player.setExperiencePoints(0);
         }
     }
     

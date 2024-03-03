@@ -308,7 +308,6 @@ public class ClientEventHandler {
         if (newTarget instanceof EntityRayTraceResult) {
             Entity entity = ((EntityRayTraceResult) newTarget).getEntity();
             if (entity instanceof PlayerEntity) {
-                @SuppressWarnings("resource")
                 PlayerEntity clientPlayer = Minecraft.getInstance().player;
                 PlayerEntity targetPlayer = (PlayerEntity) entity;
                 Optional<HamonData> playerHamon = INonStandPower.getNonStandPowerOptional(clientPlayer)
@@ -517,7 +516,6 @@ public class ClientEventHandler {
     }
     
     private boolean modPostedEvent = false;
-    @SuppressWarnings("resource")
     @SubscribeEvent(priority = EventPriority.LOW)
     public void onRenderHand(RenderHandEvent event) {
         ClientPlayerEntity player = Minecraft.getInstance().player;
@@ -678,17 +676,6 @@ public class ClientEventHandler {
                             }, 
                             StringTextComponent.EMPTY);
                     event.addWidget(standStatsToggleButton);
-                    
-//                    Button standSkinsButton = new ImageVanillaButton(screen.width - 28, screen.height - 159, 
-//                            20, 20, 236, 236, StandSkinsScreen.TEXTURE_MAIN_WINDOW, 256, 256, 
-//                            button -> {
-//                                StandSkinsScreen.openScreen(screen);
-//                            }, 
-//                            (button, matrixStack, x, y) -> {
-//                                screen.renderTooltip(matrixStack, new TranslationTextComponent("jojo.stand_skins.button"), x, y);
-//                            }, 
-//                            StringTextComponent.EMPTY);
-//                    event.addWidget(standSkinsButton);
                 }
             });
         }

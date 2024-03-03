@@ -34,7 +34,6 @@ public class HamonScreenButton extends CustomButton {
         blit(matrixStack, x + width / 2, y, 200 - width / 2, 46 + i * 20, width / 2, height);
     }
     
-    @SuppressWarnings("resource")
     public void drawName(MatrixStack matrixStack) {
         // shadow is gone for whatever reason so it's rendered here
         drawCenteredString(matrixStack, Minecraft.getInstance().font, this.getMessage(), 

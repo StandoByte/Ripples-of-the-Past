@@ -1,6 +1,8 @@
 package com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -11,6 +13,8 @@ import com.github.standobyte.jojo.action.non_stand.HamonAction;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.layout.ActionsLayout;
 
+import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2BooleanMap;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.IFormattableTextComponent;
@@ -21,26 +25,28 @@ import net.minecraftforge.registries.ForgeRegistryEntry;
 
 public abstract class AbstractHamonSkill extends ForgeRegistryEntry<AbstractHamonSkill> {
     private final RewardType rewardType;
-    private final @Nullable Supplier<? extends HamonAction> rewardAction;
+    private final Object2BooleanMap<Supplier<? extends HamonAction>> rewardActions;
     private final List<Supplier<? extends AbstractHamonSkill>> requiredSkills;
 
-    protected AbstractHamonSkill(RewardType rewardType, @Nullable Supplier<? extends HamonAction> rewardAction, 
-            List<Supplier<? extends AbstractHamonSkill>> requiredSkills) {
-        this.rewardType = rewardType;
-        this.rewardAction = rewardAction;
-        this.requiredSkills = requiredSkills;
+    protected AbstractHamonSkill(AbstractBuilder builder) {
+        this.rewardType = builder.rewardType;
+        this.rewardActions = builder.rewardActions;
+        this.requiredSkills = builder.requiredSkills;
     }
     
     public RewardType getRewardType() {
         return rewardType;
     }
     
-    public @Nullable HamonAction getRewardAction() {
-        return rewardAction != null ? rewardAction.get() : null;
+    public Stream<HamonAction> getRewardActions() {
+        return rewardActions.keySet().stream().map(Supplier::get);
     }
     
-    public boolean addsActionToHUD() {
-        return false;
+    public Stream<HamonAction> getRewardActions(boolean addedToHud) {
+        return rewardActions.object2BooleanEntrySet().stream()
+                .filter(entry -> entry.getBooleanValue() == addedToHud)
+                .map(Map.Entry::getKey)
+                .map(Supplier::get);
     }
     
     public boolean isUnlockedByDefault() {
@@ -117,5 +123,17 @@ public abstract class AbstractHamonSkill extends ForgeRegistryEntry<AbstractHamo
         BASE,
         TECHNIQUE,
         CHARACTER_TECHNIQUE;
+    }
+    
+    
+    
+    protected static class AbstractBuilder {
+        protected final RewardType rewardType;
+        protected Object2BooleanMap<Supplier<? extends HamonAction>> rewardActions = new Object2BooleanArrayMap<>();
+        protected final List<Supplier<? extends AbstractHamonSkill>> requiredSkills = new ArrayList<>();
+        
+        public AbstractBuilder(RewardType rewardType) {
+            this.rewardType = rewardType;
+        }
     }
 }
