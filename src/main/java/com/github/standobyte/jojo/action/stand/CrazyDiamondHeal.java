@@ -5,6 +5,7 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
@@ -14,15 +15,17 @@ import com.github.standobyte.jojo.entity.IHasHealth;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
-import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.BoatEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
@@ -106,11 +109,16 @@ public class CrazyDiamondHeal extends StandEntityAction {
             return heal(world, entity, 
                     entity, (e, clientSide) -> {
                         LivingEntity toHeal = e;
-                        if (!clientSide) {
-                            StandUtil.getStandUser(e).setHealth(0.001F);
+                        toHeal = StandUtil.getStandUser(e);
+                        toHeal.deathTime = Math.max(toHeal.deathTime - 2, 0);
+                        e.deathTime = toHeal.deathTime;
+                        if (!clientSide && toHeal.deathTime <= 0) {
+                            toHeal.setHealth(0.001F);
+                            if (toHeal instanceof ServerPlayerEntity) {
+                                MCUtil.onPlayerResurrect((ServerPlayerEntity) toHeal);
+                            }
                         }
-                        e.deathTime--;
-                        toHeal.deathTime--;
+                        JojoMod.LOGGER.debug(toHeal.deathTime);
                     }, e -> true);
         }
         
