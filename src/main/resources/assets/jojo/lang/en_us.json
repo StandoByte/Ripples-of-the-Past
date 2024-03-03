@@ -943,6 +943,8 @@
   
   "jojo.stand_skins.button": "Stand Skins",
   
+  "jojo.stand_ui.name": "Stand Info (WIP)",
+  
   "jojo.disc.stand": "Stand: %s",
   "jojo.arrow.stand_arrow_xp": "Spend %s levels to have a higher chance at surviving",
   "jojo.arrow.stands_hint": "%s to see the list of available Stands",
