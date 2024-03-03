@@ -2407,6 +2407,16 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         super.addAdditionalSaveData(nbt);
     }
     
+    @Override
+    public boolean saveAsPassenger(CompoundNBT pCompound) {
+        return false;
+    }
+//    
+//    @Override
+//    public CompoundNBT serializeNBT() {
+//        return super.serializeNBT();
+//    }
+    
     
 
     @Override
