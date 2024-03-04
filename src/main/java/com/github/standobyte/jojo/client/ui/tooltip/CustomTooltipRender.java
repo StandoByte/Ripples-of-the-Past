@@ -39,7 +39,7 @@ public class CustomTooltipRender {
                                         int backgroundColor, int borderColorStart, int borderColorEnd, FontRenderer font) {
         if (!tooltipLines.isEmpty())
         {
-            List<? extends ITextProperties> eventTextOnlyLines = tooltipLines.stream().map(ITooltipLine::getTextOnly).collect(Collectors.toList());
+            List<? extends ITextProperties> eventTextOnlyLines = tooltipLines.stream().flatMap(ITooltipLine::getTextOnly).collect(Collectors.toList());
             RenderTooltipEvent.Pre event = new RenderTooltipEvent.Pre(ItemStack.EMPTY, eventTextOnlyLines, mStack, mouseX, mouseY, screenWidth, screenHeight, maxTextWidth, font);
             if (MinecraftForge.EVENT_BUS.post(event))
                 return;
@@ -105,7 +105,7 @@ public class CustomTooltipRender {
                 }
                 tooltipTextWidth = wrappedTooltipWidth;
                 tooltipLines = wrappedTextLines;
-                eventTextOnlyLines = tooltipLines.stream().map(ITooltipLine::getTextOnly).collect(Collectors.toList());
+                eventTextOnlyLines = tooltipLines.stream().flatMap(ITooltipLine::getTextOnly).collect(Collectors.toList());
 
                 if (mouseX > screenWidth / 2)
                     tooltipX = mouseX - 16 - tooltipTextWidth;
@@ -114,13 +114,10 @@ public class CustomTooltipRender {
             }
 
             int tooltipY = mouseY - 12;
-            int tooltipHeight = 8;
-
-            if (tooltipLines.size() > 1)
-            {
-                tooltipHeight += (tooltipLines.size() - 1) * 10;
-                if (tooltipLines.size() > titleLinesCount)
-                    tooltipHeight += 2; // gap between title lines and next lines
+            int tooltipHeight = 2; // gap between title lines and next lines
+            
+            for (int i = 0; i < tooltipLines.size(); ++i) {
+                tooltipHeight += tooltipLines.get(i).getHeight(font);
             }
 
             if (tooltipY < 4)

@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.client.ui.tooltip;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 
@@ -44,8 +45,8 @@ public class TextTooltipLine implements ITooltipLine {
     }
 
     @Override
-    public ITextProperties getTextOnly() {
-        return text;
+    public Stream<ITextProperties> getTextOnly() {
+        return Stream.of(text);
     }
 
 }
