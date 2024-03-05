@@ -611,18 +611,18 @@ public class GameplayEventHandler {
             }
         }
     }
-    
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void preventDamagingArmor(LivingHurtEvent event) {
-        DamageSource dmgSource = event.getSource();
-        if (!dmgSource.isBypassArmor() && dmgSource instanceof IModdedDamageSource
-                && ((IModdedDamageSource) dmgSource).preventsDamagingArmor()) {
-            dmgSource.bypassArmor();
-            LivingEntity target = event.getEntityLiving();
-            event.setAmount(CombatRules.getDamageAfterAbsorb(event.getAmount(), 
-                    (float) target.getArmorValue(), (float) target.getAttributeValue(Attributes.ARMOR_TOUGHNESS)));
-        }
-    }
+//    
+//    @SubscribeEvent(priority = EventPriority.LOWEST)
+//    public static void preventDamagingArmor(LivingHurtEvent event) {
+//        DamageSource dmgSource = event.getSource();
+//        if (!dmgSource.isBypassArmor() && dmgSource instanceof IModdedDamageSource
+//                && ((IModdedDamageSource) dmgSource).preventsDamagingArmor()) {
+//            dmgSource.bypassArmor();
+//            LivingEntity target = event.getEntityLiving();
+//            event.setAmount(CombatRules.getDamageAfterAbsorb(event.getAmount(), 
+//                    (float) target.getArmorValue(), (float) target.getAttributeValue(Attributes.ARMOR_TOUGHNESS)));
+//        }
+//    }
     
 
     @SubscribeEvent(priority = EventPriority.NORMAL)
