@@ -27,7 +27,7 @@ public class StandLevelCommand {
 
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
         dispatcher.register(Commands.literal("standlevel").requires(ctx -> ctx.hasPermission(2))
-                .then(Commands.literal("set").then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("level", IntegerArgumentType.integer())
+                .then(Commands.literal("set").then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("level", IntegerArgumentType.integer(0))
                         .executes(ctx -> setStandLevel(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), IntegerArgumentType.getInteger(ctx, "level"))))))
                 .then(Commands.literal("add").then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("levels", IntegerArgumentType.integer(0))
                         .executes(ctx -> addStandLevel(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), IntegerArgumentType.getInteger(ctx, "levels"))))))
