@@ -14,6 +14,7 @@ import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.StandEntityRenderer;
 import com.github.standobyte.jojo.client.standskin.StandSkin;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
+import com.github.standobyte.jojo.client.ui.screen.JojoStuffScreen;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClSetStandSkinPacket;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -62,15 +63,15 @@ public class StandSkinsScreen extends Screen {
     @Nullable
     private SkinFullView skinFullView;
     
-    private StandSkinsScreen() {
+    public StandSkinsScreen(IStandPower power) {
         super(StringTextComponent.EMPTY);
+        setStandCap(power);
     }
     
     public static void openScreen(@Nullable Screen prevScreen) {
         IStandPower.getStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(playerStand -> {
             if (playerStand.hasPower()) {
-                StandSkinsScreen screen = new StandSkinsScreen();
-                screen.setStandCap(playerStand);
+                StandSkinsScreen screen = new StandSkinsScreen(playerStand);
                 screen.prevScreen = prevScreen;
                 Minecraft.getInstance().setScreen(screen);
             }
@@ -109,6 +110,10 @@ public class StandSkinsScreen extends Screen {
         renderBgPattern(matrixStack);
         renderContents(mouseX, mouseY, partialTick);
         renderWindow(matrixStack);
+
+        JojoStuffScreen.renderStandTabs(matrixStack, 
+                JojoStuffScreen.uniformX(minecraft), JojoStuffScreen.uniformY(minecraft), true, 
+                mouseX, mouseY, this, JojoStuffScreen.StandTab.SKINS, standCap);
         
         for (Widget button : buttons) {
             button.render(matrixStack, mouseX, mouseY, partialTick);
@@ -203,6 +208,12 @@ public class StandSkinsScreen extends Screen {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
         if (super.mouseClicked(mouseX, mouseY, mouseButton)) {
+            return true;
+        }
+
+        if (JojoStuffScreen.mouseClick(mouseX, mouseY, 
+                JojoStuffScreen.uniformX(minecraft), JojoStuffScreen.uniformY(minecraft), 
+                JojoStuffScreen.TabsEnumType.STAND)) {
             return true;
         }
         

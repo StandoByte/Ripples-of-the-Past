@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -186,21 +187,26 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         Collections.addAll(unlockables, leftClickHotbar);
         Collections.addAll(unlockables, rightClickHotbar);
         
-        Set<StandAction> tmp = new HashSet<>();
-        for (StandAction action : unlockables) {
-            if (action.hasShiftVariation()) {
-                tmp.add((StandAction) action.getShiftVariationIfPresent());
-            }
-        }
-        unlockables.addAll(tmp);
+        unlockables.addAll(
+                unlockables.stream().filter(Action::hasShiftVariation)
+                .map(action -> (StandAction) action.getShiftVariationIfPresent())
+                .collect(Collectors.toSet())
+                );
         
-        tmp.clear();
-        for (StandAction action : unlockables) {
-            tmp.addAll(action.getExtraUnlockables());
-        }
-        unlockables.addAll(tmp);
+        addAllExtraUnlockables(unlockables);
         
         this.allUnlockableActions = Collections.unmodifiableSet(unlockables);
+    }
+    
+    private static void addAllExtraUnlockables(Set<StandAction> actions) {
+        Set<StandAction> newSet = new HashSet<>();
+        for (StandAction action : actions) {
+            newSet.addAll(action.getExtraUnlockables());
+            if (!newSet.isEmpty()) {
+                addAllExtraUnlockables(newSet);
+            }
+        }
+        actions.addAll(newSet);
     }
     
     @Override
