@@ -5,6 +5,7 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.ModItems;
+import com.github.standobyte.jojo.item.GEBodyTissueItem;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -37,7 +38,9 @@ public class GoldExperienceHealingItem extends StandEntityAction {
             LivingEntity user = userPower.getUser();
             ItemStack offHandItem = user.getOffhandItem();
             offHandItem.shrink(1);
-            MCUtil.giveItemTo(user, new ItemStack(ModItems.GOLD_EXPERIENCE_BODY_TISSUE.get()), false);
+            ItemStack tissueItem = new ItemStack(ModItems.GOLD_EXPERIENCE_BODY_TISSUE.get());
+            GEBodyTissueItem.onCreated(userPower, tissueItem);
+            MCUtil.giveItemTo(user, tissueItem, false);
         }
     }
     

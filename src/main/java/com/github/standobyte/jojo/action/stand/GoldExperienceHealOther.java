@@ -38,7 +38,7 @@ public class GoldExperienceHealOther extends GoldExperienceHeal {
             if (target.getEntity() == user) {
                 return ActionConditionResult.NEGATIVE;
             }
-            return canHeal((LivingEntity) target.getEntity(), user);
+            return canHeal((LivingEntity) target.getEntity(), user, false, MAX_REGEN_LVL);
         }
         return ActionConditionResult.POSITIVE;
     }

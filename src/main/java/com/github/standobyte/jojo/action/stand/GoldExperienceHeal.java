@@ -33,7 +33,7 @@ public class GoldExperienceHeal extends StandEntityAction {
     
     @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
-        return canHeal(user, user);
+        return canHeal(user, user, false, MAX_REGEN_LVL);
     }
     
     @Override
@@ -47,32 +47,38 @@ public class GoldExperienceHeal extends StandEntityAction {
 
     public static final int MAX_REGEN_LVL = 3;
     
-    public static ActionConditionResult canHeal(LivingEntity entity, LivingEntity user) {
+    public static ActionConditionResult canHeal(LivingEntity entity, LivingEntity userGE, 
+            boolean tissueItem, int effectMax) {
         if (entity != null) {
             if (JojoModUtil.isUndead(entity)) {
                 return conditionMessage("ge_heal_undead");
             }
-            
-            int arrows = entity.getArrowCount();
-            if (arrows > 0) {
-                return ActionConditionResult.POSITIVE;
-            }
-            int knives = getKnivesCount(entity);
-            if (knives > 0) {
-                return ActionConditionResult.POSITIVE;
+            if (StandUtil.getStandUser(entity) != entity) {
+                return conditionMessage("ge_heal_stand");
             }
             
-            ItemStack offHandItem = user.getOffhandItem();
-            if (offHandItem.isEmpty()) {
-                return conditionMessage("ge_lifeform_material_only_item");
-            }
-            if (HamonUtil.isItemLivingMatter(offHandItem)) {
-                return conditionMessage("ge_lifeform_material_item");
+            if (!tissueItem) {
+                int arrows = entity.getArrowCount();
+                if (arrows > 0) {
+                    return ActionConditionResult.POSITIVE;
+                }
+                int knives = getKnivesCount(entity);
+                if (knives > 0) {
+                    return ActionConditionResult.POSITIVE;
+                }
+                
+                ItemStack offHandItem = userGE.getOffhandItem();
+                if (offHandItem.isEmpty()) {
+                    return conditionMessage("ge_lifeform_material_only_item");
+                }
+                if (HamonUtil.isItemLivingMatter(offHandItem)) {
+                    return conditionMessage("ge_lifeform_material_item");
+                }
             }
             
             int currentRegen = MCUtil.getEffectLevel(entity, Effects.REGENERATION);
-            if (currentRegen >= MAX_REGEN_LVL) {
-                if (entity == user) {
+            if (currentRegen >= effectMax) {
+                if (entity == userGE) {
                     return conditionMessage("ge_heal_stronger");
                 }
                 else {
@@ -81,7 +87,7 @@ public class GoldExperienceHeal extends StandEntityAction {
             }
             
             if (entity.getHealth() >= entity.getMaxHealth()) {
-                if (entity == user) {
+                if (entity == userGE) {
                     return conditionMessage("ge_heal_full_hp");
                 }
                 else {
@@ -123,13 +129,12 @@ public class GoldExperienceHeal extends StandEntityAction {
                     ItemStack offHandItem = user.getOffhandItem();
                     offHandItem.shrink(1);
                 }
-                giveGEHealEffect(entity, userPower, 6000, MAX_REGEN_LVL);
+                giveGEHealEffect(entity, userPower, 6000);
             }
         }
     }
     
-    public static void giveGEHealEffect(LivingEntity entity, IStandPower userPower, 
-            int durationMax, int effectMax) {
+    public static void giveGEHealEffect(LivingEntity entity, IStandPower userPower, int durationMax) {
         EffectInstance currentRegen = entity.getEffect(Effects.REGENERATION);
         
         int lvl;
@@ -142,12 +147,14 @@ public class GoldExperienceHeal extends StandEntityAction {
             lvl = 0;
         }
         
-        GEHealingEffect healingTracker = userPower.getContinuousEffects()
-                .getOrCreateEffect(ModStandEffects.GE_HEALING.get(), entity);
-        healingTracker.fullHpTicks = 0;
-        healingTracker.regenLevel = lvl;
-        if (healingTracker.tickCount == 0 && currentRegen != null) {
-            healingTracker.prevEffect = new EffectInstance(currentRegen);
+        if (userPower != null) {
+            GEHealingEffect healingTracker = userPower.getContinuousEffects()
+                    .getOrCreateEffect(ModStandEffects.GE_HEALING.get(), entity);
+            healingTracker.fullHpTicks = 0;
+            healingTracker.regenLevel = lvl;
+            if (healingTracker.tickCount == 0 && currentRegen != null) {
+                healingTracker.prevEffect = new EffectInstance(currentRegen);
+            }
         }
 
         entity.hurt(DamageSource.GENERIC, 0.0001F);

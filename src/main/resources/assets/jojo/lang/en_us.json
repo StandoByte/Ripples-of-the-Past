@@ -1135,6 +1135,7 @@
   "jojo.message.action_condition.ge_lifeform_material_block": "You can't give life to an organic block",
   "jojo.message.action_condition.ge_too_many_mobs": "You have too many mobs summoned",
   "jojo.message.action_condition.ge_heal_undead": "Undead cannot be healed",
+  "jojo.message.action_condition.ge_heal_stand": "You need to target the Stand user directly",
   "jojo.message.action_condition.ge_heal_stronger": "You are already under a strong regeneration effect",
   "jojo.message.action_condition.ge_heal_stronger.other": "%s is already under a strong regeneration effect",
   "jojo.message.action_condition.ge_heal_full_hp": "You are not injured",

@@ -118,7 +118,7 @@ public class ModItems {
             () -> new Item(new Item.Properties()));
     
     public static final RegistryObject<Item> GOLD_EXPERIENCE_BODY_TISSUE = ITEMS.register("gold_experience_body_tissue", 
-            () -> new GEBodyTissueItem(new Item.Properties()));
+            () -> new GEBodyTissueItem(new Item.Properties().stacksTo(1)));
 
 //    public static final RegistryObject<SpawnEggItem> ROCK_PAPER_SCISSORS_KID_SPAWN_EGG = ITEMS.register("rps_kid_spawn_egg", 
 //            () -> new ForgeSpawnEggItem(ModEntityTypes.ROCK_PAPER_SCISSORS_KID, 0x563C33, 0xBD8B72, new Item.Properties().tab(MAIN_TAB)));
