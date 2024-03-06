@@ -538,49 +538,51 @@ public class HudLayoutEditingScreen extends Screen {
     @Override
     public boolean mouseClicked(double mouseXd, double mouseYd, int mouseButton) {
         MouseButton button = MouseButton.getButtonFromId(mouseButton);
-        if (button == null) return false;
+        
         int mouseX = (int) mouseXd;
         int mouseY = (int) mouseYd;
         Optional<ActionSlot> clickedActionSlot = getSlotAt(mouseX, mouseY);
         
-        if (draggedAction.isPresent()) {
-            ActionSlot dragged = draggedAction.get();
-            Optional<ControlScheme.Hotbar> plusSlot = getPlusSlotAt(mouseX, mouseY);
-            
-            if (clickedActionSlot.isPresent()) {
-                ActionSlot clicked = clickedActionSlot.get();
-                // move action to another position
-                if (dragged.hotbar == clicked.hotbar) {
-                    currentControlScheme.getActionsHotbar(clicked.hotbar).moveTo(dragged.actionSwitch, clicked.index);
-                }
-                // move action to the other hotbar
-                else {
-                    currentControlScheme.getActionsHotbar(dragged.hotbar).remove(dragged.actionSwitch);
-                    currentControlScheme.getActionsHotbar(clicked.hotbar).addTo(dragged.actionSwitch, clicked.index);
-                }
-                markLayoutEdited();
-            }
-            
-            // move action to the end of the other hotbar
-            else if (plusSlot.isPresent()) {
-                currentControlScheme.getActionsHotbar(dragged.hotbar).remove(dragged.actionSwitch);
-                ActionsHotbar hotbarAddedTo = currentControlScheme.getActionsHotbar(plusSlot.get());
-                hotbarAddedTo.addTo(dragged.actionSwitch, hotbarAddedTo.getLegalActionSwitches().size());
-                draggedAction = Optional.empty();
-                markLayoutEdited();
-            }
-            
-            else {
-                Optional<ActionKeybindEntry> clickedKeybindActionSlot = getKeybindSlotAt(mouseX, mouseY);
-                if (clickedKeybindActionSlot.isPresent()) {
-                    ActionKeybindEntry slot = clickedKeybindActionSlot.get();
-                    slot.setAction(dragged.actionSwitch.getAction());
+        if (button == MouseButton.LEFT) {
+            if (draggedAction.isPresent()) {
+                ActionSlot dragged = draggedAction.get();
+                Optional<ControlScheme.Hotbar> plusSlot = getPlusSlotAt(mouseX, mouseY);
+                
+                if (clickedActionSlot.isPresent()) {
+                    ActionSlot clicked = clickedActionSlot.get();
+                    // move action to another position
+                    if (dragged.hotbar == clicked.hotbar) {
+                        currentControlScheme.getActionsHotbar(clicked.hotbar).moveTo(dragged.actionSwitch, clicked.index);
+                    }
+                    // move action to the other hotbar
+                    else {
+                        currentControlScheme.getActionsHotbar(dragged.hotbar).remove(dragged.actionSwitch);
+                        currentControlScheme.getActionsHotbar(clicked.hotbar).addTo(dragged.actionSwitch, clicked.index);
+                    }
                     markLayoutEdited();
                 }
+                
+                // move action to the end of the other hotbar
+                else if (plusSlot.isPresent()) {
+                    currentControlScheme.getActionsHotbar(dragged.hotbar).remove(dragged.actionSwitch);
+                    ActionsHotbar hotbarAddedTo = currentControlScheme.getActionsHotbar(plusSlot.get());
+                    hotbarAddedTo.addTo(dragged.actionSwitch, hotbarAddedTo.getLegalActionSwitches().size());
+                    draggedAction = Optional.empty();
+                    markLayoutEdited();
+                }
+                
+                else {
+                    Optional<ActionKeybindEntry> clickedKeybindActionSlot = getKeybindSlotAt(mouseX, mouseY);
+                    if (clickedKeybindActionSlot.isPresent()) {
+                        ActionKeybindEntry slot = clickedKeybindActionSlot.get();
+                        slot.setAction(dragged.actionSwitch.getAction());
+                        markLayoutEdited();
+                    }
+                }
+    
+                draggedAction = Optional.empty();
+                return true;
             }
-
-            draggedAction = Optional.empty();
-            return true;
         }
         
         
@@ -598,29 +600,30 @@ public class HudLayoutEditingScreen extends Screen {
         
         if (clickedActionSlot.isPresent()) {
             ControlScheme.Hotbar hotbar = clickedActionSlot.get().hotbar;
-            switch (button) {
-            case LEFT:
-                draggedAction = clickedActionSlot;
-                return true;
-            case RIGHT:
-                ActionVisibilitySwitch slot = clickedActionSlot.get().actionSwitch;
-                slot.setIsEnabled(!slot.isEnabled());
-                markLayoutEdited();
-                
-                if (slot.isEnabled() && selectedPower == ActionsOverlayGui.getInstance().getCurrentPower()
-                        && isActionVisible(slot.getAction(), selectedPower)) {
-                    int slotIndex = currentControlScheme.getActionsHotbar(hotbar).getEnabledActions().indexOf(slot.getAction());
-                    if (slotIndex >= 0) {
-                        ActionsOverlayGui.getInstance().selectAction(hotbar, slotIndex);
+            if (button != null) {
+                switch (button) {
+                case LEFT:
+                    draggedAction = clickedActionSlot;
+                    return true;
+                case RIGHT:
+                    ActionVisibilitySwitch slot = clickedActionSlot.get().actionSwitch;
+                    slot.setIsEnabled(!slot.isEnabled());
+                    markLayoutEdited();
+
+                    if (slot.isEnabled() && selectedPower == ActionsOverlayGui.getInstance().getCurrentPower()
+                            && isActionVisible(slot.getAction(), selectedPower)) {
+                        int slotIndex = currentControlScheme.getActionsHotbar(hotbar).getEnabledActions().indexOf(slot.getAction());
+                        if (slotIndex >= 0) {
+                            ActionsOverlayGui.getInstance().selectAction(hotbar, slotIndex);
+                        }
                     }
+                    return true;
+                default:
+                    break;
                 }
-                return true;
-            case MIDDLE:
-                setCustomKeybind(clickedActionSlot.get().actionSwitch.getAction(), InputMappings.Type.MOUSE, GLFW.GLFW_MOUSE_BUTTON_MIDDLE);
-                return true;
-            default:
-                return false;
             }
+            setCustomKeybind(clickedActionSlot.get().actionSwitch.getAction(), InputMappings.Type.MOUSE, mouseButton);
+            return true;
         }
         
         return mouseClickedEditingKeybind(mouseButton, /*KeyModifier.getActiveModifier()*/ KeyModifier.NONE)
