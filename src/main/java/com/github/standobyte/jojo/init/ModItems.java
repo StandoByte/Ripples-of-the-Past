@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.item.CassetteBlankItem;
 import com.github.standobyte.jojo.item.CassetteRecordedItem;
 import com.github.standobyte.jojo.item.ClackersItem;
 import com.github.standobyte.jojo.item.CustomModelArmorItem;
+import com.github.standobyte.jojo.item.GEBodyTissueItem;
 import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.item.KnifeItem;
 import com.github.standobyte.jojo.item.ModArmorMaterials;
@@ -115,6 +116,9 @@ public class ModItems {
 
     public static final RegistryObject<Item> CRAZY_DIAMOND_NON_BLOCK_ANCHOR = ITEMS.register("crazy_diamond_non_block_anchor", 
             () -> new Item(new Item.Properties()));
+    
+    public static final RegistryObject<Item> GOLD_EXPERIENCE_BODY_TISSUE = ITEMS.register("gold_experience_body_tissue", 
+            () -> new GEBodyTissueItem(new Item.Properties()));
 
 //    public static final RegistryObject<SpawnEggItem> ROCK_PAPER_SCISSORS_KID_SPAWN_EGG = ITEMS.register("rps_kid_spawn_egg", 
 //            () -> new ForgeSpawnEggItem(ModEntityTypes.ROCK_PAPER_SCISSORS_KID, 0x563C33, 0xBD8B72, new Item.Properties().tab(MAIN_TAB)));

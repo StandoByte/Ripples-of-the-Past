@@ -69,6 +69,7 @@ import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.play.server.SPlaySoundEffectPacket;
 import net.minecraft.network.play.server.SSpawnMovingSoundEffectPacket;
 import net.minecraft.particles.IParticleData;
+import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.potion.Potions;
@@ -512,6 +513,11 @@ public class MCUtil {
             return entity.removeEffect(effectInstance.getEffect());
         }
         return false;
+    }
+    
+    public static int getEffectLevel(LivingEntity entity, Effect effect) {
+        EffectInstance effInstance = entity.getEffect(effect);
+        return effInstance != null ? effInstance.getAmplifier() : -1;
     }
     
     

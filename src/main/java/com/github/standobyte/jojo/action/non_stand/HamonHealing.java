@@ -43,10 +43,10 @@ public class HamonHealing extends HamonAction {
             LivingEntity entityToHeal = targetEntity != null && canBeHealed(targetLiving, user) ? targetLiving : user;
             int regenDuration = (int) ((50F + hamonEfficiency * 50F) * (1 + hamonControl));
             int regenLvl = MathHelper.clamp((int) ((hamonControl - 0.0001F) * 3 + (hamonEfficiency - 0.25F) * 4F/3F - 1), 0, 2);
-//            if (entityToHeal.getHealth() < entityToHeal.getMaxHealth()) {
-                addPointsForAction(power, hamon, HamonStat.CONTROL, cost, hamonEfficiency);
-//            }
-            updateRegenEffect(entityToHeal, regenDuration, regenLvl);
+            addPointsForAction(power, hamon, HamonStat.CONTROL, cost, hamonEfficiency);
+
+            entityToHeal.addEffect(new EffectInstance(Effects.REGENERATION, 
+                    updateRegenEffect(entityToHeal, regenDuration, regenLvl), regenLvl));
             if (hamon.isSkillLearned(ModHamonSkills.EXPEL_VENOM.get())) {
                 entityToHeal.removeEffect(Effects.POISON);
                 entityToHeal.removeEffect(Effects.WITHER);
@@ -63,14 +63,14 @@ public class HamonHealing extends HamonAction {
     }
     
     // prevents the health regeneration being faster or slower when spamming the ability
-    private void updateRegenEffect(LivingEntity entity, int duration, int level) {
+    public static int updateRegenEffect(LivingEntity entity, int duration, int level) {
         EffectInstance currentRegen = entity.getEffect(Effects.REGENERATION);
         if (currentRegen != null && currentRegen.getAmplifier() < 5 && currentRegen.getAmplifier() <= level) {
             int regenGap = 50 >> currentRegen.getAmplifier();
             if (regenGap > 0) {
                 int oldRegenAppliesIn = currentRegen.getDuration() % (50 >> currentRegen.getAmplifier());
                 int newRegenGap = 50 >> level;
-                int newRegenAppliesIn = duration % newRegenGap;
+                int newRegenAppliesIn = newRegenGap > 0 ? duration % newRegenGap : 0;
                 
                 if (oldRegenAppliesIn > newRegenAppliesIn) {
                     int newDuration = duration + (oldRegenAppliesIn - newRegenAppliesIn);
@@ -86,7 +86,7 @@ public class HamonHealing extends HamonAction {
                 }
             }
         }
-        entity.addEffect(new EffectInstance(Effects.REGENERATION, duration, level));
+        return duration;
     }
     
     private boolean canBeHealed(LivingEntity targetEntity, LivingEntity user) {
