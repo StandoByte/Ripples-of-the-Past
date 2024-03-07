@@ -184,12 +184,8 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
             idlePose.poseModel(1.0F, entity, ticks, yRotOffsetRad, xRotRad, swingingHand);
             onPose(entity, ticks);
             
-            IActionAnimation<T> prevAnim = currentActionAnim;
             currentActionAnim = getActionAnim(entity, standPose);
             if (currentActionAnim != null) {
-                if (prevAnim != currentActionAnim) {
-                    currentActionAnim.onAnimStart(entity, yRotOffsetRad, xRotRad);
-                }
                 currentActionAnim.animate(actionPhase.get(), phaseCompletion, 
                         entity, ticks, yRotOffsetRad, xRotRad, swingingHand);
             }
