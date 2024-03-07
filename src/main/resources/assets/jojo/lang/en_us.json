@@ -928,6 +928,8 @@
   "jojo.story_part.8": "JoJolion",
   "jojo.story_part.9": "The JOJOLands",
   
+  "jojo.message.action_condition.only_stand_user": "This ability cannot affect Stands",
+  
   "entity.jojo.star_platinum": "Star Platinum",
   "entity.jojo.sp_star_finger": "Star Finger",
   "stand.jojo.star_platinum": "Star Platinum",
