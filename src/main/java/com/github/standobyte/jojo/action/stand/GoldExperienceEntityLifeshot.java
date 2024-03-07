@@ -39,6 +39,11 @@ public class GoldExperienceEntityLifeshot extends StandEntityActionModifier {
     }
     
     @Override
+    public TargetRequirement getTargetRequirement() {
+        return TargetRequirement.ENTITY;
+    }
+    
+    @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
             Entity targetEntity = task.getTarget().getEntity();

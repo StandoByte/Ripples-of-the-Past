@@ -107,6 +107,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         return !stand.canAttackMelee() ? ActionConditionResult.NEGATIVE : super.checkStandConditions(stand, power, target);
     }
     
+    @Override
     public void onClick(World world, LivingEntity user, IStandPower power) {
         super.onClick(world, user, power);
         if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
