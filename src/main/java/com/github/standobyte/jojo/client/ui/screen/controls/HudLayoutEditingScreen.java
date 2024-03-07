@@ -631,7 +631,7 @@ public class HudLayoutEditingScreen extends Screen {
     }
     
     public void selectTab(PowerClassification power) {
-        selectTab(IPower.getPlayerPower(minecraft.player, power));
+        selectTab(IPower.getPlayerPower(Minecraft.getInstance().player, power));
     }
     
 //    private List<KeyBindingList.Entry> registeredKeys = new ArrayList<>();
