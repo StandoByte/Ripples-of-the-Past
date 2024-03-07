@@ -957,10 +957,6 @@ public class HudLayoutEditingScreen extends Screen {
     }
     
     private void setCustomKeybind(Action<?> action, InputMappings.Type inputType, int key) {
-        if (!canAddKeybinds()) {
-            return;
-        }
-        
         Optional<ActionKeybindEntry> actionAlreadyHasKey = keybindButtons.keySet().stream()
                 .filter(entry -> {
                     return entry.getAction() == action;
@@ -973,7 +969,7 @@ public class HudLayoutEditingScreen extends Screen {
             actionAlreadyHasKey.get().setKeybind(inputType, key);
             return;
         }
-        else {
+        else if (canAddKeybinds()) {
             ActionKeybindEntry entry = currentControlScheme.addKeybindEntry(
                     PressActionType.CLICK, action, inputType, key);
             markKeybindEdited(entry);
