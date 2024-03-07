@@ -462,6 +462,7 @@
   "jojo.message.action_condition.no_air": "You cannot breathe in",
   "jojo.message.action_condition.hamon_no_bloodstream": "Your bloodstream can't carry oxygen",
   "jojo.message.action_condition.full_energy": "You need full energy",
+  "jojo.message.action_condition.some_energy": "You don't have any energy",
   "jojo.message.action_condition.underwater": "You have to be underwater",
   "jojo.message.action_condition.animal_infusion": "You haven't learned a way to infuse entities with Hamon",
   "jojo.message.action_condition.living_mob": "Only living entities can be infused",
@@ -890,6 +891,7 @@
   "action.jojo.hamon_life_magnetism": "Life Magnetism",
   "action.jojo.hamon_projectile_shield": "Projectile Barrier",
   "action.jojo.hamon_protection": "Hamon Protection",
+  "action.jojo.hamon_protection_off": "Dissipate Hamon Protection",
   "action.jojo.hamon_hypnosis": "Animal Hypnosis",
   "action.jojo.hamon_shock": "Hamon Shock",
   

@@ -127,8 +127,7 @@ public class ModHamonSkills {
             () -> new BaseHamonSkill.Builder(HamonStat.CONTROL, RewardType.ABILITY)
             .unlocks(ModHamonActions.HAMON_PROTECTION)
             .requiredSkill(LIFE_MAGNETISM).requiredSkill(PROJECTILE_SHIELD).build());
-    
-    
+
     public static final RegistryObject<BaseHamonSkill> DETECTOR = HAMON_SKILLS.register("detector", 
             () -> new BaseHamonSkill.Builder(HamonStat.CONTROL, RewardType.ABILITY)
             .unlocks(ModHamonActions.HAMON_DETECTOR)

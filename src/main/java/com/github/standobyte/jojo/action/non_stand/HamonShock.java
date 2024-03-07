@@ -87,8 +87,8 @@ public class HamonShock extends HamonAction {
     }
     
     
-    @Override
+    /*@Override
     public boolean cancelHeldOnGettingAttacked(INonStandPower power, DamageSource dmgSource, float dmgAmount) {
         return true;
-    }
+    }*/
 }

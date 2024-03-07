@@ -66,7 +66,15 @@ public class HamonCharge {
                                 });
                             }
                         }
+                        //adds knockback to Infused Blocks
+                        if(chargedBlock != null) {
+                    		float x = chargedBlock.getX();
+                    		float z = chargedBlock.getZ();
+                    		target.knockback(0.5F, x-target.getX(), z-target.getZ());
+                    	}
                         gavePoints = true;
+                        // One time charge
+                        chargeTicks = 0;
                     }
                 }
             }

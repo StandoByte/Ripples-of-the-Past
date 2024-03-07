@@ -23,7 +23,7 @@ public class HamonScarletOverdrive extends HamonOverdrive {
 
     @Override
     protected float getDamage() {
-        return 0.6F;
+        return 3.0F;
     }
 
     @Override

@@ -554,7 +554,7 @@ public class HamonUtil {
                                 if (cap.hasHamonCharge()) {
                                     HamonCharge hamonCharge = cap.getHamonCharge();
                                     hamonCharge.decreaseTicks((int) (hamonCharge.getInitialTicks() * hamonChargeProperties.energyRequired / 1000F));
-                                    hamonChargeProperties.applyCharge(projCharge, hamonCharge.getTickDamage() * 5, null);
+                                    hamonChargeProperties.applyCharge(projCharge, hamonCharge.getTickDamage(), null);
                                     projCharge.setMultiplyWithUserStrength(false);
                                 }
                             });
@@ -678,7 +678,7 @@ public class HamonUtil {
                                         / (float) HamonData.MAX_STAT_LEVEL * hamonEfficiency * hamonEfficiency);
                                 
                                 itemEntity.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> 
-                                cap.setHamonCharge(0.1F * hamon.getHamonDamageMultiplier() * hamonEfficiency, chargeTicks, throwerPlayer, 200));
+                                cap.setHamonCharge(hamon.getHamonDamageMultiplier() * hamonEfficiency, chargeTicks, throwerPlayer, 200));
                                 
                                 return null;
                             }, 200);
