@@ -1033,6 +1033,10 @@ public class ActionsOverlayGui extends AbstractGui {
             if (selectedAction.getHoldDurationMax(power) > 0) {
                 actionName = new TranslationTextComponent("jojo.overlay.hold", actionName);
             }
+            ElementTransparency transparency = actionNameTransparency.get(actionKey);
+            if (!actionName.equals(lastActionName.put(actionKey, actionName))) {
+                transparency.reset();
+            }
             if (selectedAction.hasShiftVariation()) {
                 Action<P> shiftVar = selectedAction.getShiftVariationIfPresent().getVisibleAction(power, getMouseTarget());
                 if (shiftVar != null) {
@@ -1042,10 +1046,6 @@ public class ActionsOverlayGui extends AbstractGui {
                 }
             }
             
-            ElementTransparency transparency = actionNameTransparency.get(actionKey);
-            if (!actionName.equals(lastActionName.put(actionKey, actionName))) {
-                transparency.reset();
-            }
             float alpha = getNameAlpha(transparency, partialTick);
             
             if (alpha > 0) {

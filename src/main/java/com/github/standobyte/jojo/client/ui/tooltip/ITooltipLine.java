@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.client.ui.tooltip;
 
 import java.util.List;
+import java.util.stream.Stream;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
 
@@ -13,5 +14,5 @@ public interface ITooltipLine {
     int getWidth(FontRenderer font);
     int getHeight(FontRenderer font);
     List<ITooltipLine> split(int width, FontRenderer font, Style style);
-    ITextProperties getTextOnly();
+    Stream<ITextProperties> getTextOnly();
 }

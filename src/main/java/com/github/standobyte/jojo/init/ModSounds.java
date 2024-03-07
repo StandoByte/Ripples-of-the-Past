@@ -464,7 +464,7 @@ public class ModSounds {
 
     public static final RegistryObject<SoundEvent> GOLD_EXPERIENCE_MUDA_LONG = register("gold_experience_muda_long");
 
-    public static final RegistryObject<SoundEvent> GOLD_EXPERIENCE_MUDA_MUDA_MUDA = register("gold_experience_muda_muda_muda");
+    public static final RegistryObject<SoundEvent> GOLD_EXPERIENCE_MUDA_RUSH = register("gold_experience_muda_muda_muda");
 
     public static final RegistryObject<SoundEvent> GOLD_EXPERIENCE_WRY = register("gold_experience_wry");
 

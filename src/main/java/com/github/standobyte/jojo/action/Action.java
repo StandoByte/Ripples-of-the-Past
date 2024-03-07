@@ -237,6 +237,10 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.message.action_condition." + postfix));
     }
     
+    public static ActionConditionResult conditionMessage(String postfix, Object... args) {
+        return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.message.action_condition." + postfix, args));
+    }
+    
     public Action<P> getShiftVariationIfPresent() {
         return hasShiftVariation() ? shiftVariation : this;
     }

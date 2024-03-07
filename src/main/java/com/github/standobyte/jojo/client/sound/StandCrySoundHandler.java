@@ -53,7 +53,7 @@ public class StandCrySoundHandler<T extends Entity> {
             T entity, Predicate<T> playWhile, SoundEvent... sounds) {
         SoundsResolved cachedOrNull = SoundsResolved.getCached(sounds);
         StandCrySoundHandler<T> handler;
-        if (sounds.length > 0 && sounds[0] == ModSounds.GOLD_EXPERIENCE_MUDA_MUDA_MUDA.get()) {
+        if (sounds.length > 0 && sounds[0] == ModSounds.GOLD_EXPERIENCE_MUDA_RUSH.get()) {
             handler = new StandCryGESoundHandler<T>(category, pitch, pitch, looping, entity, playWhile, cachedOrNull, sounds);
         }
         else {

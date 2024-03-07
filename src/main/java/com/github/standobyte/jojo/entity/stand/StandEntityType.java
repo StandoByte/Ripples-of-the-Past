@@ -46,7 +46,7 @@ public class StandEntityType<T extends StandEntity> extends EntityType<T> {
             boolean immuneToFire, float width, float height,
             Predicate<EntityType<?>> velocityUpdateSupplier, ToIntFunction<EntityType<?>> trackingRangeSupplier,
             ToIntFunction<EntityType<?>> updateIntervalSupplier, BiFunction<SpawnEntity, World, T> customClientFactory) {
-        super(null, EntityClassification.MISC, false, false, immuneToFire, false, null, EntitySize.scalable(width, height),
+        super(null, EntityClassification.MISC, true, false, immuneToFire, false, null, EntitySize.scalable(width, height),
                 -1, -1, velocityUpdateSupplier, trackingRangeSupplier, updateIntervalSupplier, customClientFactory);
         this.factory = factory;
     }

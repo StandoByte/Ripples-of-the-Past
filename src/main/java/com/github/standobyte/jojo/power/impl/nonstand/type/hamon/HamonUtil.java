@@ -699,7 +699,8 @@ public class HamonUtil {
             return HamonOrganismInfusion.isBlockLiving(((BlockItem) item).getBlock().defaultBlockState());
         }
         
-        return item instanceof EggItem;
+        return item == ModItems.GOLD_EXPERIENCE_BODY_TISSUE.get() ||
+                item instanceof EggItem;
     }
     
     

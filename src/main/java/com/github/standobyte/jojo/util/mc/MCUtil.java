@@ -69,6 +69,7 @@ import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.play.server.SPlaySoundEffectPacket;
 import net.minecraft.network.play.server.SSpawnMovingSoundEffectPacket;
 import net.minecraft.particles.IParticleData;
+import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.potion.Potions;
@@ -93,6 +94,7 @@ import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ChunkManager;
 import net.minecraft.world.server.ServerWorld;
@@ -104,6 +106,22 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 public class MCUtil {
     public static final IFormattableTextComponent EMPTY_TEXT = new StringTextComponent("");
     public static final IFormattableTextComponent NEW_LINE = new StringTextComponent("\n");
+    
+    /**
+     * Runs a command for the user entity, but with the permissions of the server.
+     * 
+     * @return The success value of the command, or 0 if an exception occured.
+     */
+    public static int runCommand(LivingEntity user, String command) {
+        if (user.level.isClientSide()) {
+            throw new IllegalLogicalSideException("Tried to run a command on client side!");
+        }
+        MinecraftServer server = ((ServerWorld) user.level).getServer();
+        CommandSource src = user.createCommandSourceStack()
+                .withMaximumPermission(4)
+                .withSuppressedOutput();
+        return server.getCommands().performCommand(src, command);
+    }
     
     // NBT helper functions
     private static final ImmutableMap<Class<? extends INBT>, Integer> NBT_ID = new ImmutableMap.Builder<Class<? extends INBT>, Integer>()
@@ -514,6 +532,11 @@ public class MCUtil {
         return false;
     }
     
+    public static int getEffectLevel(LivingEntity entity, Effect effect) {
+        EffectInstance effInstance = entity.getEffect(effect);
+        return effInstance != null ? effInstance.getAmplifier() : -1;
+    }
+    
     
     
     public static <T extends IParticleData> int sendParticles(ServerWorld world, T particleType, 
@@ -543,24 +566,6 @@ public class MCUtil {
                 return false;
             }
         }
-    }
-    
-    
-
-    /**
-     * Runs a command for the user entity, but with the permissions of the server.
-     * 
-     * @return The success value of the command, or 0 if an exception occured.
-     */
-    public static int runCommand(LivingEntity user, String command) {
-        if (user.level.isClientSide()) {
-            throw new IllegalLogicalSideException("Tried to run a command on client side!");
-        }
-        MinecraftServer server = ((ServerWorld) user.level).getServer();
-        CommandSource src = user.createCommandSourceStack()
-                .withMaximumPermission(4)
-                .withSuppressedOutput();
-        return server.getCommands().performCommand(src, command);
     }
     
     
@@ -618,6 +623,15 @@ public class MCUtil {
                     }
                 }
             }
+        }
+    }
+    
+    
+    
+    public static void onPlayerResurrect(ServerPlayerEntity player) {
+        if (!player.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY) && !player.isSpectator()) {
+            player.setExperienceLevels(0);
+            player.setExperiencePoints(0);
         }
     }
     
