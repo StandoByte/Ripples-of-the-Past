@@ -74,6 +74,7 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.EggItem;
+import net.minecraft.item.FishBucketItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.particles.IParticleData;
@@ -700,7 +701,8 @@ public class HamonUtil {
         }
         
         return item == ModItems.GOLD_EXPERIENCE_BODY_TISSUE.get() ||
-                item instanceof EggItem;
+                item instanceof EggItem || 
+                item instanceof FishBucketItem;
     }
     
     

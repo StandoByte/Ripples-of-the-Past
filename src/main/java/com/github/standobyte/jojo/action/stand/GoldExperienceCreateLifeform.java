@@ -12,7 +12,6 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.GETransformationEntity;
 import com.github.standobyte.jojo.entity.RoadRollerEntity;
-import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
@@ -39,7 +38,10 @@ import net.minecraft.entity.passive.horse.AbstractHorseEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.PotionEntity;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.BucketItem;
+import net.minecraft.item.FishBucketItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ThrowablePotionItem;
 import net.minecraft.nbt.CompoundNBT;
@@ -115,7 +117,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
         ItemStack item = user.getItemInHand(Hand.OFF_HAND);
         if (!item.isEmpty()) {
             hasAnItem = true;
-            itemFits = !HamonUtil.isItemLivingMatter(item);
+            itemFits = canGiveLifeTo(item);
         }
         
         if (canUseBlock && target.getType() == TargetType.BLOCK) {
@@ -138,6 +140,10 @@ public class GoldExperienceCreateLifeform extends StandAction {
         }
         
         return ActionConditionResult.POSITIVE;
+    }
+    
+    public static boolean canGiveLifeTo(ItemStack item) {
+        return !HamonUtil.isItemLivingMatter(item) || item.getItem() instanceof FishBucketItem;
     }
     
     @Override
@@ -223,15 +229,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                 Entity lifeFormCreated = createEntity(type, world, user);
                 int ticks = getTicksToCreate(user, power, lifeFormCreated);
                 
-                Entity performer = user;
-                if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
-                    StandEntity stand = (StandEntity) power.getStandManifestation();
-                    if (stand.isManuallyControlled()) {
-                        performer = stand;
-                    }
-                }
-                
-                
+                Entity performer = getControlledEntity(user, power);
                 GETransformationEntity tf = new GETransformationEntity(world);
                 
                 
@@ -252,9 +250,18 @@ public class GoldExperienceCreateLifeform extends StandAction {
                 }
                 if (!tfTargetFound) {
                     ItemStack heldItem = user.getItemInHand(Hand.OFF_HAND);
-                    if (!heldItem.isEmpty() && !HamonUtil.isItemLivingMatter(heldItem)) {
+                    if (!heldItem.isEmpty() && canGiveLifeTo(heldItem)) {
                         Entity itemEntity;
-                        ItemStack transformedItem = heldItem.copy();
+                        ItemStack transformedItem;
+                        if (heldItem.getItem() instanceof BucketItem) {
+                            BucketItem bucketType = (BucketItem) heldItem.getItem();
+                            Fluid fluid = bucketType.getFluid();
+                            transformedItem = new ItemStack(fluid.getBucket());
+                            bucketType.checkExtraContent(world, heldItem, performer.blockPosition());
+                        }
+                        else {
+                            transformedItem = heldItem.copy();
+                        }
                         transformedItem.setCount(1);
                         if (heldItem.getItem() instanceof ThrowablePotionItem) {
                             PotionEntity potionEntity = new PotionEntity(world, user);
