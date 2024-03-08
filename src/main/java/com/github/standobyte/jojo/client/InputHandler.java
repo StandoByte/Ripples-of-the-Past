@@ -19,7 +19,6 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.glfw.GLFW;
 
 import com.github.standobyte.jojo.JojoMod;
@@ -32,6 +31,7 @@ import com.github.standobyte.jojo.client.controls.HudControlSettings;
 import com.github.standobyte.jojo.client.standskin.StandSkin;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
+import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.ActionUseTry;
 import com.github.standobyte.jojo.client.ui.screen.WasdAllowingScreen;
 import com.github.standobyte.jojo.client.ui.screen.controls.HudLayoutEditingScreen;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
@@ -649,21 +649,27 @@ public class InputHandler {
             action = ActionsOverlayGui.resolveVisibleActionInSlot(
                     action, shiftActionVar, power, ActionsOverlayGui.getInstance().getMouseTarget());
             
-            Pair<Action<P>, Boolean> click = actionsOverlay.onActionClick(power, action, sneak, keyBinding);
-            if (click != null && click.getRight()) {
-                if (action != null) {
-                    result.handSwing = action.getHoldDurationMax(power) <= 0 && action.swingHand()
-                            ? HudClickResult.Behavior.FORCE : HudClickResult.Behavior.CANCEL;
-                    result.cancelVanillaInput();
-                    if (action.withUserPunch()) {
-                        mcPlayerAttack();
-                    }
-                }
+            ActionUseTry<P> click = actionsOverlay.onActionClick(power, action, sneak, keyBinding);
+            if (click.wentOff) {
+                result.cancelVanillaInput();
                 if (action.getHoldDurationMax(power) > 0) {
                     heldKeys.put(power, keyBinding);
                 }
-                if (leftClickedBlock && leftClickBlockDelay <= 0) {
-                    leftClickBlockDelay = 4;
+                if (!click.clientOnly) {
+                    if (action != null) {
+                        result.handSwing = action.getHoldDurationMax(power) <= 0 && action.swingHand()
+                                ? HudClickResult.Behavior.FORCE : HudClickResult.Behavior.CANCEL;
+                        if (action.withUserPunch()) {
+                            mcPlayerAttack();
+                        }
+                    }
+                    if (leftClickedBlock && leftClickBlockDelay <= 0) {
+                        leftClickBlockDelay = 4;
+                    }
+                }
+                else {
+                    result.handSwing = HudClickResult.Behavior.CANCEL;
+                    result.cancelVanillaInput();
                 }
             }
             else {
@@ -720,24 +726,30 @@ public class InputHandler {
             boolean sneak = mc.player.isShiftKeyDown();
             boolean shiftActionVar = useShiftActionVariant(mc);
             
-            Pair<Action<P>, Boolean> click = null;
+            ActionUseTry<P> click = null;
 //            if (key == ActionKey.QUICK_ACCESS) {
 //                click = actionsOverlay.onQuickAccessClick(power, shiftActionVar, sneak);
 //            } else 
             if (!(leftClickedBlock && leftClickBlockDelay > 0)) {
                 click = actionsOverlay.onClick(power, key.getHotbar(), shiftActionVar, sneak, keyBinding);
             }
-            if (click != null && click.getRight()) {
-                Action<P> action = click.getLeft();
-                if (action != null) {
-                    result.handSwing = action.getHoldDurationMax(power) <= 0 && action.swingHand() ? HudClickResult.Behavior.FORCE : HudClickResult.Behavior.CANCEL;
-                    if (!(action.withUserPunch() && key == ActionKey.ATTACK)) result.cancelVanillaInput();
-                }
+            if (click != null && click.wentOff) {
+                Action<P> action = click.action;
                 if (action.getHoldDurationMax(power) > 0) {
                     heldKeys.put(power, key.getKey(mc, this));
                 }
-                if (leftClickedBlock && leftClickBlockDelay <= 0) {
-                    leftClickBlockDelay = 4;
+                if (!click.clientOnly) {
+                    if (action != null) {
+                        result.handSwing = action.getHoldDurationMax(power) <= 0 && action.swingHand() ? HudClickResult.Behavior.FORCE : HudClickResult.Behavior.CANCEL;
+                        if (!(action.withUserPunch() && key == ActionKey.ATTACK)) result.cancelVanillaInput();
+                    }
+                    if (leftClickedBlock && leftClickBlockDelay <= 0) {
+                        leftClickBlockDelay = 4;
+                    }
+                }
+                else {
+                    result.handSwing = HudClickResult.Behavior.CANCEL;
+                    result.cancelVanillaInput();
                 }
             }
             else {
