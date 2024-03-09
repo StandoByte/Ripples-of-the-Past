@@ -6,11 +6,12 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.item.GEBodyTissueItem;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BucketItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.world.World;
 
@@ -26,7 +27,7 @@ public class GoldExperienceHealingItem extends StandEntityAction {
         if (offHandItem.isEmpty()) {
             return conditionMessage("ge_lifeform_material_only_item");
         }
-        if (HamonUtil.isItemLivingMatter(offHandItem)) {
+        if (!GoldExperienceCreateLifeform.canGiveLifeTo(offHandItem)) {
             return conditionMessage("ge_lifeform_material_item");
         }
         return ActionConditionResult.POSITIVE;
@@ -36,8 +37,16 @@ public class GoldExperienceHealingItem extends StandEntityAction {
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
             LivingEntity user = userPower.getUser();
+            
             ItemStack offHandItem = user.getOffhandItem();
-            offHandItem.shrink(1);
+            if (offHandItem.getItem() instanceof BucketItem) {
+                BucketItem bucketType = (BucketItem) offHandItem.getItem();
+                bucketType.checkExtraContent(world, offHandItem, getControlledEntity(user, userPower).blockPosition());
+            }
+            if (!(user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild)) {
+                offHandItem.shrink(1);
+            }
+            
             ItemStack tissueItem = new ItemStack(ModItems.GOLD_EXPERIENCE_BODY_TISSUE.get());
             GEBodyTissueItem.onCreated(userPower, tissueItem);
             MCUtil.giveItemTo(user, tissueItem, false);

@@ -10,7 +10,6 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -18,6 +17,7 @@ import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.BucketItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
@@ -71,7 +71,7 @@ public class GoldExperienceHeal extends StandEntityAction {
                 if (offHandItem.isEmpty()) {
                     return conditionMessage("ge_lifeform_material_only_item");
                 }
-                if (HamonUtil.isItemLivingMatter(offHandItem)) {
+                if (!GoldExperienceCreateLifeform.canGiveLifeTo(offHandItem)) {
                     return conditionMessage("ge_lifeform_material_item");
                 }
             }
@@ -125,10 +125,15 @@ public class GoldExperienceHeal extends StandEntityAction {
                         HamonHealing.updateRegenEffect(entity, 105, lvl), lvl));
             }
             else {
+                ItemStack offHandItem = user.getOffhandItem();
+                if (offHandItem.getItem() instanceof BucketItem) {
+                    BucketItem bucketType = (BucketItem) offHandItem.getItem();
+                    bucketType.checkExtraContent(world, offHandItem, getControlledEntity(user, userPower).blockPosition());
+                }
                 if (!(user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild)) {
-                    ItemStack offHandItem = user.getOffhandItem();
                     offHandItem.shrink(1);
                 }
+                
                 giveGEHealEffect(entity, userPower, 6000);
             }
         }

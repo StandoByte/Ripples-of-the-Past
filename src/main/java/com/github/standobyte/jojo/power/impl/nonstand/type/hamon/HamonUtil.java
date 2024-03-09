@@ -74,17 +74,21 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.EggItem;
+import net.minecraft.item.FishBucketItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.Property;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
@@ -700,8 +704,11 @@ public class HamonUtil {
         }
         
         return item == ModItems.GOLD_EXPERIENCE_BODY_TISSUE.get() ||
-                item instanceof EggItem;
+                item instanceof EggItem || 
+                ItemTags.getAllTags().getTagOrEmpty(RAW_FISH_TAG).contains(item) || item == Items.COD || item == Items.SALMON || item == Items.TROPICAL_FISH || item == Items.PUFFERFISH ||
+                item instanceof FishBucketItem;
     }
+    private static final ResourceLocation RAW_FISH_TAG = new ResourceLocation("forge", "raw_fishes");
     
     
     

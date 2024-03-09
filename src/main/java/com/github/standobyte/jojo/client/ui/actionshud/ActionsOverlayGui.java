@@ -1651,7 +1651,7 @@ public class ActionsOverlayGui extends AbstractGui {
 
 
     @Nullable
-    public <P extends IPower<P, ?>> Pair<Action<P>, Boolean> onClick(
+    public <P extends IPower<P, ?>> ActionUseTry<P> onClick(
             P power, ControlScheme.Hotbar mouseButton, boolean shiftVariant, boolean sneak, KeyBinding keyPressed) {
         if (currentMode != null) {
             int selectedIndex = currentMode.getSelectedSlot(mouseButton);
@@ -1660,11 +1660,11 @@ public class ActionsOverlayGui extends AbstractGui {
             }
         }
 
-        return Pair.of(null, false);
+        return new ActionUseTry<>(null, false, false);
     }
 
     @Nullable
-    public <P extends IPower<P, ?>> Pair<Action<P>, Boolean> onClick(
+    public <P extends IPower<P, ?>> ActionUseTry<P> onClick(
             P power, ControlScheme.Hotbar hotbar, boolean shiftVariant, boolean sneak, int index, KeyBinding keyPressed) {
         Action<P> action = (Action<P>) HudControlSettings.getInstance()
                 .getControlScheme(getCurrentMode())
@@ -1696,16 +1696,16 @@ public class ActionsOverlayGui extends AbstractGui {
     private final PacketBuffer extraInputBuf = new PacketBuffer(Unpooled.buffer());
     // sends the packet which fires the action to the server
     @Nullable
-    public <P extends IPower<P, ?>> Pair<Action<P>, Boolean> onActionClick(
+    public <P extends IPower<P, ?>> ActionUseTry<P> onActionClick(
             P power, Action<P> action, boolean sneak, KeyBinding keyPressed) {
         if (power != null && action != null) {
             InputHandler.lastActionKey = keyPressed;
             if (action.clientOnly()) {
-                return Pair.of(action, false);
+                return new ActionUseTry<>(action, true, true);
             }
             
             if (power.getHeldAction() != null && action.getHoldDurationMax(power) > 0) {
-                return Pair.of(action, true);
+                return new ActionUseTry<>(action, true, false);
             }
             ActionTarget mouseTarget = getMouseTarget();
             ClClickActionPacket packet = new ClClickActionPacket(
@@ -1714,9 +1714,21 @@ public class ActionsOverlayGui extends AbstractGui {
             action.clWriteExtraData(extraInputBuf);
             boolean actionWentOff = power.clickAction(action, sneak, mouseTarget, extraInputBuf);
             extraInputBuf.clear();
-            return Pair.of(action, actionWentOff);
+            return new ActionUseTry<>(action, actionWentOff, false);
         }
         return null;
+    }
+    
+    public static class ActionUseTry<P extends IPower<P, ?>> {
+        public final Action<P> action;
+        public final boolean wentOff;
+        public final boolean clientOnly;
+        
+        public ActionUseTry(Action<P> action, boolean wentOff, boolean clientOnly) {
+            this.action = action;
+            this.wentOff = wentOff;
+            this.clientOnly = clientOnly;
+        }
     }
     
     
