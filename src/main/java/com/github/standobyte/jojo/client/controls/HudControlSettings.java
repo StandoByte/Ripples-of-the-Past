@@ -106,7 +106,7 @@ public class HudControlSettings {
     }
     
     private void save(ResourceLocation entryKey, PowerTypeControlSchemes entryValue) {
-        File powerTypeDir = new File(saveDir, entryKey.toString());
+        File powerTypeDir = new File(saveDir, entryKey.toString().replace(":", ","));
         File ctrlSchemeFile = new File(powerTypeDir, "current.json");
         try (BufferedWriter writer = GeneralUtil.newWriterMkDir(ctrlSchemeFile, Charsets.UTF_8)) {
             JsonElement json = entryValue.currentControlScheme.toJson();
@@ -124,7 +124,7 @@ public class HudControlSettings {
         if (subDirs == null) return;
         
         for (File powerTypeDir : subDirs) {
-            ResourceLocation powerId = new ResourceLocation(powerTypeDir.getName());
+            ResourceLocation powerId = new ResourceLocation(powerTypeDir.getName().replace(",", ":"));
             File ctrlSchemeFile = new File(powerTypeDir, "current.json");
             if (ctrlSchemeFile.exists()) {
                 try (BufferedReader reader = Files.newReader(ctrlSchemeFile, Charsets.UTF_8)) {
