@@ -341,6 +341,7 @@
   "jojo.key.stand_mode": "HUD Mode: Stand",
   "jojo.key.non_stand_mode": "HUD Mode: Non-Stand Power",
   "jojo.key.edit_hud": "HUD Controls Settings",
+  "jojo.key.edit_hud.power_name": "Open %s HUD Controls Settings",
   "jojo.key.disable_hotbars": "Vanilla Clicks with HUD On",
   "jojo.key.attack_hotbar": "1-9/Scroll Selects LMB Action",
   "jojo.key.ability_hotbar": "1-9/Scroll Selects RMB Action",
