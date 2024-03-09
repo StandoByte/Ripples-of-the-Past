@@ -51,6 +51,7 @@ import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
+import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
 import com.google.common.base.MoreObjects;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -432,7 +433,7 @@ public class ClientEventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void disableFoodBar(RenderGameOverlayEvent.Pre event) {
-        if (event.getType() == FOOD || event.getType() == AIR) {
+        if (event.getType() == FOOD && !ModInteractionUtil.isModLoaded("vampirism") || event.getType() == AIR) {
             INonStandPower.getNonStandPowerOptional(mc.player).ifPresent(power -> {
                 if (power.getType() == ModPowers.VAMPIRISM.get()) {
                     event.setCanceled(true);

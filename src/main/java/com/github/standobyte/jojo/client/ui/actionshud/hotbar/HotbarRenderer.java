@@ -101,5 +101,6 @@ public class HotbarRenderer {
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, hotbarAlpha);
         }
         BlitFloat.blitFloat(matrixStack, slotX - 28, slotY - 28, 440, 0, 72, 72, 512, 512);
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, hotbarAlpha);
     }
 }

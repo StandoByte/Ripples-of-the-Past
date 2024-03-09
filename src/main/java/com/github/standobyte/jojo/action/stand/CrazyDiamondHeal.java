@@ -5,7 +5,6 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
@@ -118,7 +117,6 @@ public class CrazyDiamondHeal extends StandEntityAction {
                                 MCUtil.onPlayerResurrect((ServerPlayerEntity) toHeal);
                             }
                         }
-                        JojoMod.LOGGER.debug(toHeal.deathTime);
                     }, e -> true);
         }
         
