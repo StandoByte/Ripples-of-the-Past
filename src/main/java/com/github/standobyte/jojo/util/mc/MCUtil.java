@@ -77,6 +77,7 @@ import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ChunkManager;
 import net.minecraft.world.server.ServerWorld;
@@ -88,6 +89,22 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 public class MCUtil {
     public static final IFormattableTextComponent EMPTY_TEXT = new StringTextComponent("");
     public static final IFormattableTextComponent NEW_LINE = new StringTextComponent("\n");
+    
+    /**
+     * Runs a command for the user entity, but with the permissions of the server.
+     * 
+     * @return The success value of the command, or 0 if an exception occured.
+     */
+    public static int runCommand(LivingEntity user, String command) {
+        if (user.level.isClientSide()) {
+            throw new IllegalLogicalSideException("Tried to run a command on client side!");
+        }
+        MinecraftServer server = ((ServerWorld) user.level).getServer();
+        CommandSource src = user.createCommandSourceStack()
+                .withMaximumPermission(4)
+                .withSuppressedOutput();
+        return server.getCommands().performCommand(src, command);
+    }
     
     // NBT helper functions
     private static final ImmutableMap<Class<? extends INBT>, Integer> NBT_ID = new ImmutableMap.Builder<Class<? extends INBT>, Integer>()
@@ -491,24 +508,6 @@ public class MCUtil {
     }
     
     
-
-    /**
-     * Runs a command for the user entity, but with the permissions of the server.
-     * 
-     * @return The success value of the command, or 0 if an exception occured.
-     */
-    public static int runCommand(LivingEntity user, String command) {
-        if (user.level.isClientSide()) {
-            throw new IllegalLogicalSideException("Tried to run a command on client side!");
-        }
-        MinecraftServer server = ((ServerWorld) user.level).getServer();
-        CommandSource src = user.createCommandSourceStack()
-                .withMaximumPermission(4)
-                .withSuppressedOutput();
-        return server.getCommands().performCommand(src, command);
-    }
-    
-    
     
     public static boolean isHandFree(LivingEntity entity, Hand hand) {
         if (entity.level.isClientSide() && entity.is(ClientUtil.getClientPlayer()) && ClientUtil.arePlayerHandsBusy()) {
@@ -540,6 +539,15 @@ public class MCUtil {
             attackingMob.setTarget(null);
             attackingMob.targetSelector.getRunningGoals()
             .forEach(goal -> goal.stop());
+        }
+    }
+    
+    
+    
+    public static void onPlayerResurrect(ServerPlayerEntity player) {
+        if (!player.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY) && !player.isSpectator()) {
+            player.setExperienceLevels(0);
+            player.setExperiencePoints(0);
         }
     }
     

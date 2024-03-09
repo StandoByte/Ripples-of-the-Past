@@ -28,6 +28,7 @@ import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer;
 import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer.BarType;
+import com.github.standobyte.jojo.entity.HamonProjectileShieldEntity;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModStatusEffects;
@@ -41,7 +42,6 @@ import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacke
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillAddPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillRemovePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSyncOnLoadPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrHamonSyncPlayerLearnerPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonUiEffectPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonAuraColorPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonAuraColorPacket.HamonAuraColor;
@@ -50,6 +50,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrHamonCharacterTec
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonEnergyTicksPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonMeditationPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonStatsPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHamonSyncPlayerLearnerPacket;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.TypeSpecificData;
@@ -140,6 +141,8 @@ public class HamonData extends TypeSpecificData {
     private float prevBreathStability;
     private int ticksMaskWithNoHamonBreath;
     private int ticksNoBreathStabilityInc;
+    
+    public HamonProjectileShieldEntity shieldEntity;
 
     public HamonData() {
         hamonSkills = new MainHamonSkillsManager();
@@ -158,12 +161,21 @@ public class HamonData extends TypeSpecificData {
                 if (tcsa && (power.isUserCreative() || getCharacterTechnique() != null)) {
                     tcsa = false;
                 }
+                
+                if (shieldEntity != null && !shieldEntity.isAlive()) {
+                    shieldEntity = null;
+                }
             }
             tickChargeParticles();
             tickBreathStability();
         }
         else {
             setIsMeditating(user, false);
+            
+            if (shieldEntity != null) {
+                shieldEntity.remove();
+                shieldEntity = null;
+            }
         }
     }
     

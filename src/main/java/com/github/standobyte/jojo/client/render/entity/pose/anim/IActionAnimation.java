@@ -9,6 +9,7 @@ import net.minecraft.util.HandSide;
 
 public interface IActionAnimation<T extends Entity> {
     
+    @Deprecated
     default void onAnimStart(T entity, float yRotationOffset, float xRotation) {}
     
     void animate(StandEntityAction.Phase phase, float phaseCompletion, 

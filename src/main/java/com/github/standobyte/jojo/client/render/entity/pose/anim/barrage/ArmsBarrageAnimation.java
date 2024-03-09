@@ -46,7 +46,7 @@ public abstract class ArmsBarrageAnimation<T extends LivingEntity, M extends Ent
         if (swings != null) {
             float lastLoop = swings.getLoopCount();
             float loop = ticks / getLoopLen();
-            if (lastLoop > 0) {
+            if (lastLoop > 0 && loop > lastLoop) {
                 float swingsToAdd = swingsToAdd(entity, loop, lastLoop);
                 if (swingsToAdd > 0) {
                     doAddSwings(entity, swings, side, swingsToAdd);
@@ -71,13 +71,13 @@ public abstract class ArmsBarrageAnimation<T extends LivingEntity, M extends Ent
     
     public abstract BarrageSwingsHolder<T, M> getBarrageSwingsHolder(T entity);
 
-    @Override
-    public void onAnimStart(T entity, float yRotationOffset, float xRotation) {
-        BarrageSwingsHolder<T, M> swings = getBarrageSwingsHolder(entity);
-        if (swings != null) {
-            swings.resetSwingTime();
-        }
-    }
+//    @Override
+//    public void onAnimStart(T entity, float yRotationOffset, float xRotation) {
+//        BarrageSwingsHolder<T, M> swings = getBarrageSwingsHolder(entity);
+//        if (swings != null) {
+//            swings.resetSwingTime();
+//        }
+//    }
 
     protected void doAddSwings(T entity, BarrageSwingsHolder<T, M> swings, HandSide side, float hits) {
         int swingsToAdd = (int) hits;

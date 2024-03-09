@@ -51,6 +51,11 @@ public class MRFlameEntity extends ModdedProjectileEntity {
     }
     
     @Override
+    protected float knockbackMultiplier() {
+        return 0.1F;
+    }
+    
+    @Override
     public void shoot(double x, double y, double z, float velocity, float inaccuracy) {
         super.shoot(x, y, z, velocity, inaccuracy);
         startingPos = position();

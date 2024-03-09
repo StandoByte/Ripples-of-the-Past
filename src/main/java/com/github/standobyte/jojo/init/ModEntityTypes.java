@@ -238,11 +238,11 @@ public class ModEntityTypes {
             .build(new ResourceLocation(JojoMod.MOD_ID, "mr_detector").toString()));
     
     public static final RegistryObject<EntityType<CDBlockBulletEntity>> CD_BLOCK_BULLET = ENTITIES.register("cd_block_bullet", 
-            () -> EntityType.Builder.<CDBlockBulletEntity>of(CDBlockBulletEntity::new, EntityClassification.MISC).sized(0.5F, 0.5F).noSummon().noSave().setUpdateInterval(10)
+            () -> EntityType.Builder.<CDBlockBulletEntity>of(CDBlockBulletEntity::new, EntityClassification.MISC).sized(0.5F, 0.5F).noSummon().setUpdateInterval(10)
             .build(new ResourceLocation(JojoMod.MOD_ID, "cd_block_bullet").toString()));
     
     public static final RegistryObject<EntityType<CDBloodCutterEntity>> CD_BLOOD_CUTTER = ENTITIES.register("cd_blood_cutter", 
-            () -> EntityType.Builder.<CDBloodCutterEntity>of(CDBloodCutterEntity::new, EntityClassification.MISC).sized(0.5F, 0.5F).noSummon().noSave().setUpdateInterval(10)
+            () -> EntityType.Builder.<CDBloodCutterEntity>of(CDBloodCutterEntity::new, EntityClassification.MISC).sized(0.5F, 0.5F).noSummon().setUpdateInterval(10)
             .build(new ResourceLocation(JojoMod.MOD_ID, "cd_blood_cutter").toString()));
     
     public static final RegistryObject<EntityType<EyeOfEnderInsideEntity>> EYE_OF_ENDER_INSIDE = ENTITIES.register("eye_of_ender_inside", 

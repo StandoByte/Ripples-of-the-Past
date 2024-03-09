@@ -633,7 +633,12 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
 
 
     public void setStandPose(StandPose pose) {
-        this.standPose = pose;
+        if (this.standPose != pose) {
+            if (level.isClientSide() && pose == StandPose.BARRAGE) {
+                getBarrageSwingsHolder().resetSwingTime();
+            }
+            this.standPose = pose;
+        }
     }
 
     public StandPose getStandPose() {
@@ -2407,6 +2412,16 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     public void addAdditionalSaveData(CompoundNBT nbt) {
         super.addAdditionalSaveData(nbt);
     }
+    
+    @Override
+    public boolean saveAsPassenger(CompoundNBT pCompound) {
+        return false;
+    }
+//    
+//    @Override
+//    public CompoundNBT serializeNBT() {
+//        return super.serializeNBT();
+//    }
     
     
 

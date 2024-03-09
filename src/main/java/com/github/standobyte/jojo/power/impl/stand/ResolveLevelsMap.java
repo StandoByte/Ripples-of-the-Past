@@ -11,6 +11,7 @@ import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.registries.IForgeRegistry;
 
 public class ResolveLevelsMap {
@@ -109,7 +110,7 @@ public class ResolveLevelsMap {
         
         private boolean setLevel(int level) {
             boolean changed = this.level != level;
-            this.level = Math.min(level, maxLevel);
+            this.level = MathHelper.clamp(level, 0, maxLevel);
             return changed;
         }
         
