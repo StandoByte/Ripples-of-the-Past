@@ -633,7 +633,12 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
 
 
     public void setStandPose(StandPose pose) {
-        this.standPose = pose;
+        if (this.standPose != pose) {
+            if (level.isClientSide() && pose == StandPose.BARRAGE) {
+                getBarrageSwingsHolder().resetSwingTime();
+            }
+            this.standPose = pose;
+        }
     }
 
     public StandPose getStandPose() {

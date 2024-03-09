@@ -26,6 +26,19 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 @EventBusSubscriber(modid = JojoMod.MOD_ID)
 public class ModInteractionUtil {
+    
+    private static final Map<String, Boolean> MOD_IDS_CACHE = new HashMap<>();
+    public static boolean isModLoaded(String modId) {
+        Boolean cache = MOD_IDS_CACHE.get(modId);
+        if (cache != null) {
+            return cache.booleanValue();
+        }
+        
+        boolean isLoaded = ModList.get().isLoaded(modId);
+        MOD_IDS_CACHE.put(modId, isLoaded);
+        return isLoaded;
+    }
+    
     private static final ResourceLocation MOWZIES_FROZEN_EFFECT = new ResourceLocation("mowziesmobs", "frozen");
     private static final ResourceLocation TWILIGHT_FOREST_FROSTED_EFFECT = new ResourceLocation("twilightforest", "frosted");
     public static float getEntityFreeze(LivingEntity entity) {
