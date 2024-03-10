@@ -1,5 +1,8 @@
 package com.github.standobyte.jojo.init;
 
+import java.util.Map;
+import java.util.function.Function;
+
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.render.item.RoadRollerISTER;
 import com.github.standobyte.jojo.client.render.item.standdisc.StandDiscISTER;
@@ -26,10 +29,13 @@ import com.github.standobyte.jojo.item.StoneMaskItem;
 import com.github.standobyte.jojo.item.SuperAjaStoneItem;
 import com.github.standobyte.jojo.item.TommyGunItem;
 import com.github.standobyte.jojo.item.WalkmanItem;
+import com.google.common.collect.ImmutableMap;
 
+import net.minecraft.block.Block;
 import net.minecraft.enchantment.EnchantmentType;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.DyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -40,6 +46,7 @@ import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.registries.IForgeRegistryEntry;
 
 public class ModItems {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, JojoMod.MOD_ID);
@@ -62,22 +69,14 @@ public class ModItems {
     public static final RegistryObject<StoneMaskItem> STONE_MASK = ITEMS.register("stone_mask", 
             () -> new StoneMaskItem(ModArmorMaterials.STONE_MASK, EquipmentSlotType.HEAD, new Item.Properties().tab(MAIN_TAB).rarity(Rarity.RARE), ModBlocks.STONE_MASK.get()));
     
-    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_WHITE = ITEMS.register("wooden_coffin_oak_white", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_WHITE.get(), new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_ORANGE = ITEMS.register("wooden_coffin_oak_orange", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_ORANGE.get(), new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_MAGENTA = ITEMS.register("wooden_coffin_oak_magenta", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_MAGENTA.get(), new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_LIGHT_BLUE = ITEMS.register("wooden_coffin_oak_light_blue", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_LIGHT_BLUE.get(), new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_YELLOW = ITEMS.register("wooden_coffin_oak_yellow", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_YELLOW.get(), new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_LIME = ITEMS.register("wooden_coffin_oak_lime", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_LIME.get(), new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_PINK = ITEMS.register("wooden_coffin_oak_pink", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_PINK.get(), new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_GRAY = ITEMS.register("wooden_coffin_oak_gray", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_GRAY.get(), new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_LIGHT_GRAY = ITEMS.register("wooden_coffin_oak_light_gray", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_LIGHT_GRAY.get(), new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_CYAN = ITEMS.register("wooden_coffin_oak_cyan", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_CYAN.get(), new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_PURPLE = ITEMS.register("wooden_coffin_oak_purple", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_PURPLE.get(), new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_BLUE = ITEMS.register("wooden_coffin_oak_blue", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_BLUE.get(), new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_BROWN = ITEMS.register("wooden_coffin_oak_brown", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_BROWN.get(), new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_GREEN = ITEMS.register("wooden_coffin_oak_green", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_GREEN.get(), new Item.Properties().stacksTo(1)));
-    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_RED = ITEMS.register("wooden_coffin_oak_red", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_RED.get(), new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
-    public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_BLACK = ITEMS.register("wooden_coffin_oak_black", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_BLACK.get(), new Item.Properties().stacksTo(1)));
+    public static final Map<DyeColor, RegistryObject<BlockItem>> WOODEN_COFFIN_OAK = register16colorsItem("wooden_coffin_oak", 
+            dye -> {
+                Item.Properties builder = new Item.Properties().stacksTo(1);
+                if (dye == DyeColor.RED) {
+                    builder.tab(MAIN_TAB);
+                }
+                return new BlockItem(ModBlocks.WOODEN_COFFIN_OAK.get(dye).get(), builder);
+            });
     
     public static final RegistryObject<CustomModelArmorItem> BREATH_CONTROL_MASK = ITEMS.register("breath_control_mask", 
             () -> new BreathControlMaskItem(new Item.Properties().tab(MAIN_TAB)));
@@ -182,6 +181,37 @@ public class ModItems {
 
     public static final RegistryObject<CassetteRecordedItem> CASSETTE_RECORDED = ITEMS.register("cassette_recorded", 
             () -> new CassetteRecordedItem(new Item.Properties().stacksTo(1).tab(MAIN_TAB)));
-
-
+    
+    
+    
+    // waidw
+//    public static <I extends IForgeRegistryEntry<I>> Map<DyeColor, RegistryObject<I>> register16colors(
+//            DeferredRegister<? super I> registry, String idMain, Function<DyeColor, I> supplier) {
+//        ImmutableMap.Builder<DyeColor, RegistryObject<I>> colorMap = ImmutableMap.builder();
+//        for (DyeColor dye : DyeColor.values()) {
+//            RegistryObject<I> registryObject = registry.register(idMain + "_" + dye.getName().toLowerCase(), () -> supplier.apply(dye));
+//            colorMap.put(dye, registryObject);
+//        }
+//        return colorMap.build();
+//    }
+    
+    public static <I extends Item> Map<DyeColor, RegistryObject<I>> register16colorsItem(
+            String idMain, Function<DyeColor, I> supplier) {
+        ImmutableMap.Builder<DyeColor, RegistryObject<I>> colorMap = ImmutableMap.builder();
+        for (DyeColor dye : DyeColor.values()) {
+            RegistryObject<I> registryObject = ITEMS.register(idMain + "_" + dye.getName().toLowerCase(), () -> supplier.apply(dye));
+            colorMap.put(dye, registryObject);
+        }
+        return colorMap.build();
+    }
+    
+    public static <I extends Block> Map<DyeColor, RegistryObject<I>> register16colorsBlock(
+            String idMain, Function<DyeColor, I> supplier) {
+        ImmutableMap.Builder<DyeColor, RegistryObject<I>> colorMap = ImmutableMap.builder();
+        for (DyeColor dye : DyeColor.values()) {
+            RegistryObject<I> registryObject = ModBlocks.BLOCKS.register(idMain + "_" + dye.getName().toLowerCase(), () -> supplier.apply(dye));
+            colorMap.put(dye, registryObject);
+        }
+        return colorMap.build();
+    }
 }
