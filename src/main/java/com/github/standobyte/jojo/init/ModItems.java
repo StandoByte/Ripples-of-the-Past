@@ -19,6 +19,7 @@ import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.item.KnifeItem;
 import com.github.standobyte.jojo.item.ModArmorMaterials;
 import com.github.standobyte.jojo.item.OilItem;
+import com.github.standobyte.jojo.item.MolotovItem;
 import com.github.standobyte.jojo.item.RoadRollerItem;
 import com.github.standobyte.jojo.item.SatiporojaScarfItem;
 import com.github.standobyte.jojo.item.SledgehammerItem;
@@ -92,6 +93,12 @@ public class ModItems {
     
     public static final RegistryObject<SoapItem> SOAP = ITEMS.register("soap", 
             () -> new SoapItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
+    
+    public static final RegistryObject<LuckPluckSwordItem> LUCK_SWORD = ITEMS.register("luck_sword", 
+            () -> new LuckPluckSwordItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
+    
+    public static final RegistryObject<LuckPluckSwordItem> LUCK_PLUCK_SWORD = ITEMS.register("luck_pluck_sword", 
+            () -> new LuckPluckSwordItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
 
     public static final RegistryObject<SpawnEggItem> HAMON_MASTER_SPAWN_EGG = ITEMS.register("hamon_master_spawn_egg", 
             () -> new ForgeSpawnEggItem(ModEntityTypes.HAMON_MASTER, 0xF8D100, 0x542722, new Item.Properties().tab(MAIN_TAB)));
@@ -113,6 +120,18 @@ public class ModItems {
 
     public static final RegistryObject<TommyGunItem> TOMMY_GUN = ITEMS.register("tommy_gun",
             () -> new TommyGunItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
+
+    public static final RegistryObject<MolotovItem> MOLOTOV = ITEMS.register("molotov",
+            () -> new MolotovItem(new Item.Properties().tab(MAIN_TAB).stacksTo(16)));
+
+    public static final RegistryObject<LargeCrossbowItem> LARGE_CROSSBOW = ITEMS.register("large_crossbow",
+            () -> new LargeCrossbowItem(new Item.Properties().tab(MAIN_TAB).durability(652)));
+
+    public static final RegistryObject<Item> METAL_BALL = ITEMS.register("metal_ball",
+            () -> new MetalBallItem(new Item.Properties().tab(MAIN_TAB).stacksTo(16)));
+
+    public static final RegistryObject<SquidInkPasta> SQUID_INK_PASTA = ITEMS.register("squid_ink_pasta",
+            () -> new SquidInkPasta(new Item.Properties().tab(MAIN_TAB).stacksTo(16)));
 
     public static final RegistryObject<BlockItem> SLUMBERING_PILLARMAN = ITEMS.register("slumbering_pillarman", 
             () -> new BlockItem(ModBlocks.SLUMBERING_PILLARMAN.get(), new Item.Properties().rarity(Rarity.EPIC)));
@@ -148,6 +167,9 @@ public class ModItems {
     public static final RegistryObject<StandArrowItem> STAND_ARROW_BEETLE = ITEMS.register("stand_arrow_beetle", 
             () -> new StandArrowItem(new Item.Properties().tab(MAIN_TAB).rarity(Rarity.RARE).durability(250), 25));
 
+    public static final RegistryObject<StandArrowShardItem> STAND_ARROW_SHARD = ITEMS.register("stand_arrow_shard", 
+            () -> new StandArrowShardItem(new Item.Properties().tab(MAIN_TAB).rarity(Rarity.UNCOMMON)));
+
     public static final RegistryObject<StandDiscItem> STAND_DISC = ITEMS.register("stand_disc",
             () -> new StandDiscItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)
                     .setISTER(() -> StandDiscISTER::new)));
@@ -182,6 +204,24 @@ public class ModItems {
     public static final RegistryObject<CassetteRecordedItem> CASSETTE_RECORDED = ITEMS.register("cassette_recorded", 
             () -> new CassetteRecordedItem(new Item.Properties().stacksTo(1).tab(MAIN_TAB)));
     
+    public static final RegistryObject<TarotDeckItem> TAROT_DECK = ITEMS.register("tarot_deck", 
+            () -> new TarotDeckItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
+    
+    public static final RegistryObject<PolaroidItem> POLAROID = ITEMS.register("polaroid", 
+            () -> new PolaroidItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
+    
+    public static final RegistryObject<PhotoItem> PHOTO = ITEMS.register("photo", 
+            () -> new PhotoItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
+    
+    public static final RegistryObject<PhotoAlbumItem> PHOTO_ALBUM = ITEMS.register("photo_album", 
+            () -> new PhotoAlbumItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
+    
+    public static final RegistryObject<PhotoFrameItem> PHOTO_FRAME = ITEMS.register("photo_frame", 
+            () -> new PhotoFrameItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
+    
+    public static final RegistryObject<NailClippersItem> NAIL_CLIPPERS = ITEMS.register("nail_clippers", 
+            () -> new NailClippersItem(new Item.Properties().tab(MAIN_TAB).durability(240)));
+    
     public static final Map<DyeColor, RegistryObject<Item>> LADYBUG_BROOCH = register16colorsItem("ladybug_brooch", dye -> {
         Item.Properties builder = new Item.Properties();
         if (dye == DyeColor.LIGHT_BLUE) {
@@ -189,6 +229,18 @@ public class ModItems {
         }
         return new LadybugBroochItem(builder, dye);
     });
+
+    public static final RegistryObject<LighterItem> LIGHTER = ITEMS.register("lighter",
+            () -> new LighterItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
+
+    public static final RegistryObject<MistaRevolverItem> MISTA_REVOLVER = ITEMS.register("revolver",
+            () -> new MistaRevolverItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
+
+    public static final RegistryObject<StonePendantItem> STONE_PENDANT = ITEMS.register("stone_pendant", 
+            () -> new StonePendantItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
+
+    public static final RegistryObject<HarpoonItem> HARPOON = ITEMS.register("harpoon",
+            () -> new HarpoonItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
     
     
     
