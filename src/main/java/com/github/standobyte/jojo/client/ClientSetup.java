@@ -29,6 +29,7 @@ import com.github.standobyte.jojo.client.render.entity.layerrenderer.EnergyRippl
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.GlovesLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.HamonBurnLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.KnifeLayer;
+import com.github.standobyte.jojo.client.render.entity.layerrenderer.LadybugBroochLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.SpecialHeldItemLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.TornadoOverdriveEffectLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.barrage.BarrageFistAfterimagesLayer;
@@ -299,6 +300,7 @@ public class ClientSetup {
         renderer.addLayer(new EnergyRippleLayer<>(renderer));
         renderer.addLayer(new SpecialHeldItemLayer<>(renderer));
         renderer.addLayer(new GlovesLayer<>(renderer, new GlovesModel<>(0.3F, slim), slim));
+        renderer.addLayer(new LadybugBroochLayer<>(renderer));
         addLivingLayers(renderer);
         addBipedLayers(renderer);
     }

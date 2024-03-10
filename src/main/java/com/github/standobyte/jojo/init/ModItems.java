@@ -14,6 +14,7 @@ import com.github.standobyte.jojo.item.CassetteBlankItem;
 import com.github.standobyte.jojo.item.CassetteRecordedItem;
 import com.github.standobyte.jojo.item.ClackersItem;
 import com.github.standobyte.jojo.item.CustomModelArmorItem;
+import com.github.standobyte.jojo.item.LadybugBroochItem;
 import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.item.KnifeItem;
 import com.github.standobyte.jojo.item.ModArmorMaterials;
@@ -46,7 +47,6 @@ import net.minecraftforge.common.ForgeSpawnEggItem;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.minecraftforge.registries.IForgeRegistryEntry;
 
 public class ModItems {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, JojoMod.MOD_ID);
@@ -181,6 +181,14 @@ public class ModItems {
 
     public static final RegistryObject<CassetteRecordedItem> CASSETTE_RECORDED = ITEMS.register("cassette_recorded", 
             () -> new CassetteRecordedItem(new Item.Properties().stacksTo(1).tab(MAIN_TAB)));
+    
+    public static final Map<DyeColor, RegistryObject<Item>> LADYBUG_BROOCH = register16colorsItem("ladybug_brooch", dye -> {
+        Item.Properties builder = new Item.Properties();
+        if (dye == DyeColor.LIGHT_BLUE) {
+            builder.tab(MAIN_TAB);
+        }
+        return new LadybugBroochItem(builder, dye);
+    });
     
     
     

@@ -4,6 +4,7 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -16,6 +17,7 @@ import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.SpawnParticlePacket;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonDeserializationContext;
@@ -223,6 +225,33 @@ public class MCUtil {
             list.add(DoubleNBT.valueOf(vec.z));
             nbt.put(key, list);
         }
+    }
+    
+    public static void nbtPutOptionalIntArr(CompoundNBT nbt, String key, OptionalInt[] array, int emptyVal) {
+        int[] value = new int[array.length];
+        for (int i = 0; i < array.length; i++) {
+            value[i] = array[i].orElse(emptyVal);
+        }
+        nbt.putIntArray(key, value);
+    }
+    
+    public static OptionalInt[] nbtGetOptionalIntArr(CompoundNBT nbt, String key, int emptyVal) {
+        int[] value = nbt.getIntArray(key);
+        OptionalInt[] array = new OptionalInt[value.length];
+        for (int i = 0; i < array.length; i++) {
+            int num = value[i];
+            array[i] = num != emptyVal ? OptionalInt.of(num) : OptionalInt.empty();
+        }
+        return array;
+    }
+    
+    public static <T extends Enum<T>> void nbtPutEnumArray(CompoundNBT nbt, String key, T[] array) {
+        nbt.putIntArray(key, GeneralUtil.toOrdinals(array));
+    }
+    
+    public static <T extends Enum<T>> T[] nbtGetEnumArray(CompoundNBT nbt, String key, Class<T> enumClass) {
+        int[] nbtArray = nbt.getIntArray(key);
+        return GeneralUtil.fromOrdinals(nbtArray, enumClass);
     }
     
     @Nullable

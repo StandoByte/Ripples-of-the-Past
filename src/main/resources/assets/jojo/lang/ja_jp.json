@@ -11,6 +11,7 @@
   "item.jojo.satiporoja_scarf": "サティポロジャ・ビートル布のスカーフ",
   "item.jojo.clackers": "アメリカンクラッカー",
   "item.jojo.tommy_gun": "トンプソン機関銃",
+  "item.jojo.tommy_gun.reference_quote": "「スピードワゴンじいさんのかたき！宣戦布告だぜ！」",
   "item.jojo.tommy_gun.reload_prompt": "%s+%s リロードする（鉄塊と火薬を消費する）",
   "block.jojo.slumbering_pillarman": "眠れる柱の男",
   "item.jojo.knife": "ナイフ",
@@ -24,6 +25,9 @@
   "item.jojo.stand_disc": "スタンドのディスク",
   "item.jojo.stand_remover": "スタンドを取り除く",
   "item.jojo.cocoa_gum": "コーヒーガム",
+  "item.jojo.walkman": "ウォークマン",
+  "item.jojo.walkman.reference_quote": "「孫なぞわしの顔なんか忘れちまっとる！ゆるさん！大切な娘を日本人めッ！でもウォークマンは好きだがね」",
+  "item.jojo.ladybug_brooch.reference_quote": "「てんとう虫は「太陽の虫」生命象徴だったよな。『お護り』なんだろ？」",
   
   "entity.jojo.hamon_master": "波紋使いの達人",
   "entity.jojo.blade_hat": "スレッジハンマー",

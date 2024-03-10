@@ -273,6 +273,9 @@ public class ForgeBusEventSubscriber {
     private static void syncPowerData(PlayerEntity player) {
         INonStandPower.getPlayerNonStandPower(player).syncWithUserOnly();
         IStandPower.getPlayerStandPower(player).syncWithUserOnly();
+        player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+            cap.syncWithClient();
+        });
         player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
             cap.syncWithClient();
         });

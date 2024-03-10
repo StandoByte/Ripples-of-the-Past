@@ -21,6 +21,8 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.io.FileUtils;
 
+import com.google.common.collect.ObjectArrays;
+
 import net.minecraft.util.Util;
 import net.minecraftforge.common.util.LazyOptional;
 
@@ -93,6 +95,27 @@ public class GeneralUtil {
         catch (IllegalArgumentException e) {
             return null;
         }
+    }
+    
+    public static <T extends Enum<T>> int[] toOrdinals(T[] values) {
+        int[] value = new int[values.length];
+        for (int i = 0; i < values.length; i++) {
+            T elem = values[i];
+            value[i] = elem != null ? elem.ordinal() : -1;
+        }
+        return value;
+    }
+    
+    public static <T extends Enum<T>> T[] fromOrdinals(int[] ordinals, Class<T> enumClass) {
+        T[] enumValues = enumClass.getEnumConstants();
+        T[] ret = ObjectArrays.newArray(enumClass, ordinals.length);
+        for (int i = 0; i < ordinals.length; i++) {
+            int ordinal = ordinals[i];
+            if (ordinal >= 0 && ordinal < enumValues.length) {
+                ret[i] = enumValues[ordinal];
+            }
+        }
+        return ret;
     }
     
     public static <T> boolean contains(T[] array, T element) {

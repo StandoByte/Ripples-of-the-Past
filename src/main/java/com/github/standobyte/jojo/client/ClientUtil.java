@@ -563,9 +563,13 @@ public class ClientUtil {
     }
     
     public static void addItemReferenceQuote(List<ITextComponent> tooltip, Item item) {
-        tooltip.add(new StringTextComponent(" "));
         ResourceLocation itemId = item.getRegistryName();
-        tooltip.add(new TranslationTextComponent("item." + itemId.getNamespace() + "." + itemId.getPath() + ".reference_quote").withStyle(TextFormatting.ITALIC, TextFormatting.DARK_GRAY));
+        addItemReferenceQuote(tooltip, item, itemId.getNamespace() + "." + itemId.getPath());
+    }
+    
+    public static void addItemReferenceQuote(List<ITextComponent> tooltip, Item item, String itemName) {
+        tooltip.add(new StringTextComponent(" "));
+        tooltip.add(new TranslationTextComponent("item." + itemName + ".reference_quote").withStyle(TextFormatting.ITALIC, TextFormatting.DARK_GRAY));
     }
     
     public static ITextComponent donoItemTooltip(String donoUsername) {
