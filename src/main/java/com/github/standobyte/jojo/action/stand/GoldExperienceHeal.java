@@ -123,6 +123,9 @@ public class GoldExperienceHeal extends StandEntityAction {
                 int lvl = Math.min(MCUtil.getEffectLevel(entity, Effects.REGENERATION) + 1, MAX_REGEN_LVL);
                 entity.addEffect(new EffectInstance(Effects.REGENERATION, 
                         HamonHealing.updateRegenEffect(entity, 105, lvl), lvl));
+                
+                MCUtil.playSound(entity.level, null, entity, ModSounds.GOLD_EXPERIENCE_HEAL.get(), 
+                        SoundCategory.AMBIENT, 1.0F, 0.95F + entity.getRandom().nextFloat() * 0.1F, StandUtil::playerCanHearStands);
             }
             else {
                 ItemStack offHandItem = user.getOffhandItem();
