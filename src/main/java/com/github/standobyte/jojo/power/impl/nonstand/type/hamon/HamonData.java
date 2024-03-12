@@ -142,6 +142,8 @@ public class HamonData extends TypeSpecificData {
     private int ticksMaskWithNoHamonBreath;
     private int ticksNoBreathStabilityInc;
     private boolean hamonProtection = false;
+    private boolean isRebuffOverdriveOn = false;
+    private int rebuffTick = 0;
 
     public HamonData() {
         hamonSkills = new MainHamonSkillsManager();
@@ -155,8 +157,19 @@ public class HamonData extends TypeSpecificData {
         LivingEntity user = power.getUser();
         if (user.isAlive()) {
         	if(hamonProtection == true) {
-            	tickHamonProtection();
+        		if(user.level.isClientSide) {
+        			tickHamonProtection();
+        		}
             }
+        	if(isRebuffOverdriveOn == true) {
+        		if(rebuffTick<=20) {
+        			++rebuffTick;	
+        		} else {
+        			isRebuffOverdriveOn = false;
+        			rebuffTick = 0;
+        		}
+        		
+        	}
             tickNewPlayerLearners(user);
             if (!user.level.isClientSide()) {
                 tickAirSupply(user);
@@ -169,6 +182,8 @@ public class HamonData extends TypeSpecificData {
         }
         else {
             setIsMeditating(user, false);
+            hamonProtection = false;
+            isRebuffOverdriveOn = false;
         }
     }
     
@@ -474,7 +489,6 @@ public class HamonData extends TypeSpecificData {
         return action == ModHamonActions.HAMON_OVERDRIVE.get()
                 || action == ModHamonActions.HAMON_HEALING.get()
                 || action == ModHamonActions.HAMON_BREATH.get()
-                || action == ModHamonActions.HAMON_PROTECTION_OFF.get()
                 || action == ModHamonActions.CAESAR_BUBBLE_CUTTER_GLIDING.get()
                 || hamonSkills.isUnlockedFromSkills(action);
     }
@@ -1481,5 +1495,19 @@ public class HamonData extends TypeSpecificData {
             		user.getRandomX(0.5), user.getRandomY(), user.getRandomZ(0.5), 
                     (int) (MathUtil.fractionRandomInc(1) * 2));
     	}
+    }
+    
+    public boolean getRebuffOverdrive() {
+    	return isRebuffOverdriveOn;
+    }
+    
+    public boolean toggleRebuffOverdrive() {
+    	isRebuffOverdriveOn = !isRebuffOverdriveOn;
+    	return isRebuffOverdriveOn;
+    }
+    
+    public boolean offRebuffOverdrive() {
+    	isRebuffOverdriveOn = false;
+    	return isRebuffOverdriveOn;
     }
 }

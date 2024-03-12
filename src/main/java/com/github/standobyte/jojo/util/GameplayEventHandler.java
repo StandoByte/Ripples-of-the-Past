@@ -483,7 +483,8 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void cancelLivingAttack(LivingAttackEvent event) {
         if (HamonSendoWaveKick.protectFromMeleeAttackInKick(event.getEntityLiving(), event.getSource(), event.getAmount())
-                || HamonUtil.snakeMuffler(event.getEntityLiving(), event.getSource(), event.getAmount())) 
+                || HamonUtil.snakeMuffler(event.getEntityLiving(), event.getSource(), event.getAmount()) 
+                || HamonUtil.rebuffOverdrive(event.getEntityLiving(), event.getSource(), event.getAmount())) 
             event.setCanceled(true);
     }
     

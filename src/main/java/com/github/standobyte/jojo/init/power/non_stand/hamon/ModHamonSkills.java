@@ -163,12 +163,12 @@ public class ModHamonSkills {
     public static final RegistryObject<CharacterTechniqueHamonSkill> METAL_SILVER_OVERDRIVE = HAMON_SKILLS.register("metal_silver_overdrive",
             () -> new CharacterTechniqueHamonSkill.Builder(RewardType.PASSIVE)
             .unlocks(ModHamonActions.JONATHAN_METAL_SILVER_OVERDRIVE, false)
-            .requiredSkill(SENDO_OVERDRIVE).build());
+            .requiredSkill(SENDO_OVERDRIVE).requiredSkill(TURQUOISE_BLUE_OVERDRIVE).build());
     
     public static final RegistryObject<CharacterTechniqueHamonSkill> OVERDRIVE_BARRAGE = HAMON_SKILLS.register("overdrive_barrage",
             () -> new CharacterTechniqueHamonSkill.Builder(RewardType.ATTACK)
             .unlocks(ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE)
-            .requiredSkill(SPEED_BOOST).requiredSkill(SUNLIGHT_YELLOW_OVERDRIVE).build());
+            .requiredSkill(SPEED_BOOST).build());
     
     public static final RegistryObject<CharacterHamonTechnique> CHARACTER_JONATHAN = HAMON_CHARACTER_TECHNIQUES.register("jonathan", 
             () -> new CharacterHamonTechnique.Builder("jonathan", Util.make(new ArrayList<>(), list -> {
@@ -196,7 +196,7 @@ public class ModHamonSkills {
     public static final RegistryObject<CharacterTechniqueHamonSkill> TORNADO_OVERDRIVE = HAMON_SKILLS.register("tornado_overdrive",
             () -> new CharacterTechniqueHamonSkill.Builder(RewardType.ATTACK)
             .unlocks(ModHamonActions.ZEPPELI_TORNADO_OVERDRIVE)
-            .requiredSkill(JUMP).build());
+            .requiredSkill(JUMP).requiredSkill(SPEED_BOOST).build());
     
     public static final RegistryObject<CharacterHamonTechnique> CHARACTER_ZEPPELI = HAMON_CHARACTER_TECHNIQUES.register("zeppeli", 
             () -> new CharacterHamonTechnique.Builder("zeppeli", Util.make(new ArrayList<>(), list -> {
@@ -220,11 +220,16 @@ public class ModHamonSkills {
             () -> new CharacterTechniqueHamonSkill.Builder(RewardType.PASSIVE)
             .build());
     
+    public static final RegistryObject<CharacterTechniqueHamonSkill> REBUFF_OVERDRIVE = HAMON_SKILLS.register("rebuff_overdrive",
+            () -> new CharacterTechniqueHamonSkill.Builder(RewardType.ATTACK)
+            .unlocks(ModHamonActions.JOSEPH_REBUFF_OVERDRIVE)
+            .requiredSkill(SPEED_BOOST).requiredSkill(PROTECTION).build());
+    
     public static final RegistryObject<CharacterHamonTechnique> CHARACTER_JOSEPH = HAMON_CHARACTER_TECHNIQUES.register("joseph", 
             () -> new CharacterHamonTechnique.Builder("joseph", Util.make(new ArrayList<>(), list -> {
                 list.add(ModHamonSkills.ROPE_TRAP);
                 list.add(ModHamonSkills.CLACKER_VOLLEY);
-                list.add(ModHamonSkills.CHEAT_DEATH);
+                list.add(ModHamonSkills.REBUFF_OVERDRIVE);
             }))
             .musicOnPick(ModSounds.HAMON_PICK_JOSEPH).build());
     
@@ -240,12 +245,12 @@ public class ModHamonSkills {
     public static final RegistryObject<CharacterTechniqueHamonSkill> BUBBLE_CUTTER = HAMON_SKILLS.register("bubble_cutter",
             () -> new CharacterTechniqueHamonSkill.Builder(RewardType.ATTACK)
             .unlocks(ModHamonActions.CAESAR_BUBBLE_CUTTER)
-            .requiredSkill(BUBBLE_LAUNCHER).build());
+            .requiredSkill(BUBBLE_LAUNCHER).requiredSkill(ARROW_INFUSION).build());
     
     public static final RegistryObject<CharacterTechniqueHamonSkill> BUBBLE_BARRIER = HAMON_SKILLS.register("bubble_barrier",
             () -> new CharacterTechniqueHamonSkill.Builder(RewardType.ATTACK)
             .unlocks(ModHamonActions.CAESAR_BUBBLE_BARRIER)
-            .requiredSkill(BUBBLE_LAUNCHER).build());
+            .requiredSkill(BUBBLE_LAUNCHER).requiredSkill(HAMON_SHOCK).build());
     
     public static final RegistryObject<CharacterHamonTechnique> CHARACTER_CAESAR = HAMON_CHARACTER_TECHNIQUES.register("caesar", 
             () -> new CharacterHamonTechnique.Builder("caesar", Util.make(new ArrayList<>(), list -> {

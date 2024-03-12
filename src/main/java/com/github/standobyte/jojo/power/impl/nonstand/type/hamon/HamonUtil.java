@@ -182,6 +182,41 @@ public class HamonUtil {
         return false;
     }
     
+    public static boolean rebuffOverdrive(LivingEntity target, DamageSource dmgSource, float dmgAmount) {
+        if (!target.level.isClientSide() && target.canUpdate()) {
+            Entity attacker = dmgSource.getEntity();
+            if (attacker != null && dmgSource.getDirectEntity() == attacker && attacker instanceof LivingEntity
+                    && target instanceof PlayerEntity) {
+                LivingEntity livingAttacker = (LivingEntity) attacker;
+                PlayerEntity playerTarget = (PlayerEntity) target;
+                INonStandPower power = INonStandPower.getPlayerNonStandPower(playerTarget);
+                if (power.getTypeSpecificData(ModPowers.HAMON.get()).get().getRebuffOverdrive()==true) {
+                    float energyCost = 1200F;
+                    if (power.hasEnergy(energyCost)) {
+                        if (power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
+                                float efficiency = hamon.getActionEfficiency(energyCost, false);
+                                if (efficiency == 1 || efficiency >= dmgAmount / target.getMaxHealth()) {
+                                    JojoModUtil.sayVoiceLine(target, ModSounds.JOSEPH_REBUFF_OVERDRIVE.get());
+                                    JojoModUtil.sayVoiceLine(playerTarget, ModSounds.HAMON_SYO_PUNCH.get());
+                                    target.level.playSound(null, livingAttacker.getX(), livingAttacker.getEyeY(), livingAttacker.getZ(), ModSounds.HAMON_SYO_PUNCH.get(), livingAttacker.getSoundSource(), 2F, 1.0F);
+                                    power.consumeEnergy(energyCost);
+                                    DamageUtil.dealHamonDamage(attacker, 3F, target, null);
+                                    	playerTarget.attack(attacker);
+                                    	playerTarget.doHurtTarget(attacker);
+                                    	playerTarget.swing(Hand.MAIN_HAND, true);
+                                    livingAttacker.knockback(2.5F, playerTarget.getX()-livingAttacker.getX(), playerTarget.getZ()-livingAttacker.getZ());
+                                    power.getTypeSpecificData(ModPowers.HAMON.get()).get().offRebuffOverdrive();
+                                    return true;
+                                }
+                            
+                            return false;
+                        }).orElse(false)) return true;
+                    }
+                }
+            }
+        }
+        return false;
+    }
 
     @Nullable
     public static Set<AbstractHamonSkill> nearbyTeachersSkills(LivingEntity learner) {

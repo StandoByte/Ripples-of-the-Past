@@ -3,6 +3,8 @@ package com.github.standobyte.jojo.action.non_stand;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.damaging.projectile.HamonCutterEntity;
+import com.github.standobyte.jojo.init.ModItems;
+import com.github.standobyte.jojo.item.SoapItem;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -58,9 +60,9 @@ public class HamonCutter extends HamonAction {
     
     private ItemStack getUseableItem(LivingEntity entity) {
         ItemStack potionItem = entity.getMainHandItem();
-        if (potionItem.isEmpty() || !(potionItem.getItem() instanceof PotionItem)) {
+        if (potionItem.isEmpty() || !(potionItem.getItem() instanceof PotionItem) && !(potionItem.getItem() instanceof SoapItem)) {
             potionItem = entity.getOffhandItem();
-            if (potionItem.isEmpty() || !(potionItem.getItem() instanceof PotionItem)) {
+            if (potionItem.isEmpty() || !(potionItem.getItem() instanceof PotionItem) && !(potionItem.getItem() instanceof SoapItem)) {
                 return ItemStack.EMPTY;
             }
         }
