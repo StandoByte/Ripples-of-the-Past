@@ -78,6 +78,8 @@ public class HamonCharge {
                             		target.knockback(0.5F, x-target.getX(), z-target.getZ());
                         			chargeTicks = 0;
                         		}
+                        	} else {
+                        		chargeTicks = 0;
                         	}
                         }
                         gavePoints = true;
