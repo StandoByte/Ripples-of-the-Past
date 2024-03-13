@@ -34,6 +34,7 @@ public class EntityUtilCap {
         return stoppedInTime;
     }
     
+    // updates the Entity#canUpdate field that Forge adds, since it is saved in NBT
     void nbtSetWasStoppedInTime(boolean wasStoppedInTime) {
         if (wasStoppedInTime) {
             stoppedInTime = true;
