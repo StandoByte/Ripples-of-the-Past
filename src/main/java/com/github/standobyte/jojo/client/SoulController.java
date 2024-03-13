@@ -9,7 +9,9 @@ import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.InputUpdateEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderHandEvent;
+import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -43,7 +45,6 @@ public class SoulController {
     @SubscribeEvent
     public void tick(ClientTickEvent event) {
         if (mc.player != null) {
-//            JojoMod.LOGGER.debug(standPower.willSoulSpawn());
             if (mc.player.isDeadOrDying()) {
                 if (soulEntityWaitingTimer > 0) {
                     if (playerSoulEntity != null) {
@@ -86,6 +87,14 @@ public class SoulController {
         }
     }
     
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void cancelUIRender(RenderGameOverlayEvent.Pre event) {
+        if (event.getType() == ElementType.EXPERIENCE && 
+                playerSoulEntity != null && playerSoulEntity == mc.getCameraEntity() && !mc.player.isSpectator() && mc.player.isDeadOrDying()) {
+            event.setCanceled(true);
+        }
+    }
+    
     @SubscribeEvent
     public void skipAscension(InputUpdateEvent event) {
         if (isCameraEntityPlayerSoul() && event.getMovementInput().jumping) {
@@ -104,7 +113,7 @@ public class SoulController {
         boolean soul = isCameraEntityPlayerSoul();
         if (event.getGui() instanceof DeathScreen) {
             if (soulEntityWaitingTimer == -1 && standPower.willSoulSpawn()) {
-                soulEntityWaitingTimer = 1000;
+                soulEntityWaitingTimer = 60;
             }
             if (soul || soulEntityWaitingTimer > 0) {
                 event.setGui(null);
