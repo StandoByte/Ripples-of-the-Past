@@ -6,12 +6,14 @@ import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.DeathScreen;
+import net.minecraft.util.text.KeybindTextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.GuiOpenEvent;
-import net.minecraftforge.client.event.InputUpdateEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType;
+import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
@@ -24,8 +26,9 @@ public class SoulController {
     
     private final Minecraft mc;
     private SoulEntity playerSoulEntity = null;
-    private int soulEntityWaitingTimer = -1;
     private IStandPower standPower = null;
+    private boolean firstDeathFrame = false;
+    private boolean soulEntityWaiting = false;
 
     private SoulController(Minecraft mc) {
         this.mc = mc;
@@ -46,20 +49,22 @@ public class SoulController {
     public void tick(ClientTickEvent event) {
         if (mc.player != null) {
             if (mc.player.isDeadOrDying()) {
-                if (soulEntityWaitingTimer > 0) {
-                    if (playerSoulEntity != null) {
-                        soulEntityWaitingTimer = 0;
-                    }
-                    else {
-                        soulEntityWaitingTimer--;
-                    }
+                if (soulEntityWaiting && playerSoulEntity != null) {
+                    soulEntityWaiting = false;
+                }
+                if (soulEntityWaiting || isCameraEntityPlayerSoul()) {
+                    mc.gui.setOverlayMessage(new TranslationTextComponent("jojo.message.skip_soul_ascension", new KeybindTextComponent("key.jump")), false);
                 }
             }
             else {
-                soulEntityWaitingTimer = -1;
+                if (!firstDeathFrame) {
+                    firstDeathFrame = true;
+                }
+                soulEntityWaiting = false;
                 if (playerSoulEntity != null && !playerSoulEntity.isAlive()) {
                     ClientUtil.setCameraEntityPreventShaderSwitch(mc, mc.player);
                     playerSoulEntity = null;
+                    mc.gui.setOverlayMessage(StringTextComponent.EMPTY, false);
                 }
                 
                 if (standPower == null) {
@@ -95,11 +100,14 @@ public class SoulController {
         }
     }
     
-    @SubscribeEvent
-    public void skipAscension(InputUpdateEvent event) {
-        if (isCameraEntityPlayerSoul() && event.getMovementInput().jumping) {
+    public void skipAscension() {
+        if (isCameraEntityPlayerSoul()) {
             playerSoulEntity.skipAscension();
         }
+        else if (soulEntityWaiting) {
+            soulEntityWaiting = false;
+        }
+        mc.gui.setOverlayMessage(StringTextComponent.EMPTY, false);
     }
     
     public void updateStandCache() {
@@ -112,12 +120,13 @@ public class SoulController {
     public void cancelRespawnScreen(GuiOpenEvent event) {
         boolean soul = isCameraEntityPlayerSoul();
         if (event.getGui() instanceof DeathScreen) {
-            if (soulEntityWaitingTimer == -1 && standPower.willSoulSpawn()) {
-                soulEntityWaitingTimer = 60;
+            if (!soulEntityWaiting && firstDeathFrame && standPower.willSoulSpawn()) {
+                soulEntityWaiting = true;
+                firstDeathFrame = false;
             }
-            if (soul || soulEntityWaitingTimer > 0) {
+            if (soul || soulEntityWaiting) {
                 event.setGui(null);
-                if (playerSoulEntity != null && !playerSoulEntity.isAlive() && soulEntityWaitingTimer <= 0) {
+                if (playerSoulEntity != null && !playerSoulEntity.isAlive() && !soulEntityWaiting) {
                     mc.player.respawn();
                 }
             }
@@ -125,6 +134,6 @@ public class SoulController {
     }
     
     public void onSoulFailedSpawn() {
-        soulEntityWaitingTimer = 0;
+        soulEntityWaiting = false;
     }
 }
