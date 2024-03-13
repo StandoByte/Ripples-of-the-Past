@@ -45,7 +45,8 @@ public class LivingUtilCap {
     public float lastStandDamage;
     public int standInvulnerableTime;
     
-    private int hurtThroughInvulTime;
+//    private int hurtThroughInvulTime;
+    private int hurtArmorTime;
     
     private boolean reduceKnockback;
     private float futureKnockbackFactor;
@@ -121,7 +122,7 @@ public class LivingUtilCap {
         }
         
         if (standInvulnerableTime > 0) --standInvulnerableTime;
-        if (hurtThroughInvulTime > 0) --hurtThroughInvulTime;
+        if (hurtArmorTime > 0) --hurtArmorTime;
     }
     
     public void setFutureKnockbackFactor(float factor) {
@@ -151,10 +152,12 @@ public class LivingUtilCap {
     }
     
     public void onHurtThroughInvul(IModdedDamageSource dmgSource) {
-        if (hurtThroughInvulTime > 0) {
+        if (hurtArmorTime > 0) {
             dmgSource.setPreventDamagingArmor();
         }
-        hurtThroughInvulTime = 5;
+        else {
+            hurtArmorTime = 5;
+        }
     }
     
     

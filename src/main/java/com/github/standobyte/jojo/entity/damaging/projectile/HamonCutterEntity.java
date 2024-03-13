@@ -35,6 +35,11 @@ public class HamonCutterEntity extends ModdedProjectileEntity {
         this.potionItem = potionItem == null ? ItemStack.EMPTY : potionItem;
         this.color = PotionUtils.getColor(potionItem);
     }
+    
+    public HamonCutterEntity withColor(int color) {
+        this.color = color;
+        return this;
+    }
 
     public HamonCutterEntity(EntityType<? extends HamonCutterEntity> type, World world) {
         super(type, world);
