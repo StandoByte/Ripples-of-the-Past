@@ -3,7 +3,6 @@ package com.github.standobyte.jojo.client;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
-import com.github.standobyte.jojo.util.GameplayEventHandler;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screen.DeathScreen;
@@ -25,7 +24,6 @@ public class SoulController {
     private SoulEntity playerSoulEntity = null;
     private int soulEntityWaitingTimer = -1;
     private IStandPower standPower = null;
-    private boolean willSoulSpawn = false;
 
     private SoulController(Minecraft mc) {
         this.mc = mc;
@@ -45,6 +43,7 @@ public class SoulController {
     @SubscribeEvent
     public void tick(ClientTickEvent event) {
         if (mc.player != null) {
+//            JojoMod.LOGGER.debug(standPower.willSoulSpawn());
             if (mc.player.isDeadOrDying()) {
                 if (soulEntityWaitingTimer > 0) {
                     if (playerSoulEntity != null) {
@@ -65,7 +64,6 @@ public class SoulController {
                 if (standPower == null) {
                     updateStandCache();
                 }
-                willSoulSpawn = GameplayEventHandler.getSoulAscensionTicks(mc.player, standPower) > 0;
             }
         }
     }
@@ -79,22 +77,6 @@ public class SoulController {
     
     private boolean isCameraEntityPlayerSoul() {
         return playerSoulEntity != null && playerSoulEntity.isAlive() && playerSoulEntity == mc.getCameraEntity() && !mc.player.isSpectator();
-    }
-
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public void cancelRespawnScreen(GuiOpenEvent event) {
-        boolean soul = isCameraEntityPlayerSoul();
-        if (event.getGui() instanceof DeathScreen) {
-            if (soulEntityWaitingTimer == -1 && willSoulSpawn) {
-                soulEntityWaitingTimer = 100;
-            }
-            if (soul || soulEntityWaitingTimer > 0) {
-                event.setGui(null);
-                if (playerSoulEntity != null && !playerSoulEntity.isAlive() && soulEntityWaitingTimer <= 0) {
-                    mc.player.respawn();
-                }
-            }
-        }
     }
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -113,5 +95,27 @@ public class SoulController {
     
     public void updateStandCache() {
         standPower = IStandPower.getPlayerStandPower(mc.player);
+    }
+    
+    
+    
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void cancelRespawnScreen(GuiOpenEvent event) {
+        boolean soul = isCameraEntityPlayerSoul();
+        if (event.getGui() instanceof DeathScreen) {
+            if (soulEntityWaitingTimer == -1 && standPower.willSoulSpawn()) {
+                soulEntityWaitingTimer = 1000;
+            }
+            if (soul || soulEntityWaitingTimer > 0) {
+                event.setGui(null);
+                if (playerSoulEntity != null && !playerSoulEntity.isAlive() && soulEntityWaitingTimer <= 0) {
+                    mc.player.respawn();
+                }
+            }
+        }
+    }
+    
+    public void onSoulFailedSpawn() {
+        soulEntityWaitingTimer = 0;
     }
 }
