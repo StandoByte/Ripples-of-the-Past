@@ -6,7 +6,6 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
-import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
@@ -18,7 +17,6 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -31,7 +29,7 @@ public class HamonCharge {
     private int chargeTicks;
     private UUID hamonUserId;
     private Entity hamonUser;
-    private boolean gavePoints;
+    private boolean gavePoints; 
     private float energySpent;
     
     public HamonCharge(float tickDamage, int chargeTicks, @Nullable LivingEntity hamonUser, float energySpent) {

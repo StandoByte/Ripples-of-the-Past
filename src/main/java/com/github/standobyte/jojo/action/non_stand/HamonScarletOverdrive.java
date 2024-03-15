@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.action.non_stand;
 
-import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
@@ -21,8 +20,8 @@ public class HamonScarletOverdrive extends HamonSunlightYellowOverdrive {
         super(builder.needsFreeMainHand());
     }
     
-   
-
+    
+    
     @Override 
     public void forPerform(World world, LivingEntity user, INonStandPower power, ActionTarget target){
         Entity entity = target.getEntity();

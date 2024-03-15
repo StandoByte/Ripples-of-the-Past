@@ -49,6 +49,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrHamonAuraColorPac
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonBreathStabilityPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonCharacterTechniquePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonEnergyTicksPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHamonFlagsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonMeditationPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonStatsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonSyncPlayerLearnerPacket;
@@ -221,7 +222,7 @@ public class HamonData extends TypeSpecificData {
             }
             
             if (power.getEnergy() <= 0) {
-                offHamonProtection();
+                setHamonProtection(false);
             }
             
             playedEnergySound = false;
@@ -1430,6 +1431,7 @@ public class HamonData extends TypeSpecificData {
         PacketManager.sendToClient(new TrHamonEnergyTicksPacket(user.getId(), noEnergyDecayTicks), entity);
         hamonSkills.syncWithTrackingOrUser(user, entity, this);
         PacketManager.sendToClient(new TrHamonAuraColorPacket(user.getId(), auraColor), entity);
+        PacketManager.sendToClient(new TrHamonFlagsPacket(user.getId(), this), entity);
     }
     
     public enum Exercise {
@@ -1465,12 +1467,18 @@ public class HamonData extends TypeSpecificData {
     }
     
     public boolean toggleHamonProtection() {
-        hamonProtection = !hamonProtection;
+        setHamonProtection(!hamonProtection);
         return hamonProtection;
     }
     
-    public void offHamonProtection() {
-        hamonProtection = false;
+    public void setHamonProtection(boolean isEnabled) {
+        if (this.hamonProtection != isEnabled) {
+            this.hamonProtection = isEnabled;
+            LivingEntity user = power.getUser();
+            if (!user.level.isClientSide()) {
+                PacketManager.sendToClientsTrackingAndSelf(new TrHamonFlagsPacket(user.getId(), this), user);
+            }
+        }
     }
     
     public boolean isProtectionEnabled() {

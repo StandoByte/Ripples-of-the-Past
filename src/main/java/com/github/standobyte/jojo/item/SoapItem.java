@@ -1,9 +1,12 @@
 package com.github.standobyte.jojo.item;
 
+import com.github.standobyte.jojo.init.ModItems;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
-
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerInventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -22,7 +25,20 @@ public class SoapItem extends Item {
     public SoapItem(Properties properties) {
         super(properties);
     }
-
+    
+    @Override
+    public void inventoryTick(ItemStack pStack, World pLevel, Entity pEntity, int pItemSlot, boolean pIsSelected) {
+        if (pEntity instanceof PlayerEntity) {
+            PlayerInventory inventory = ((PlayerEntity) pEntity).inventory;
+            ItemStack emptyGloves = MCUtil.findInInventory(inventory, 
+                    item -> !item.isEmpty() 
+                    && item.getItem() == ModItems.BUBBLE_GLOVES.get()
+                    && TommyGunItem.getAmmo(item) <= 0);
+            if (!emptyGloves.isEmpty()) {
+                BubbleGlovesItem.reload(emptyGloves, pEntity, pLevel, pStack);
+            }
+        }
+    }
 
     @Override
     public ItemStack finishUsingItem(ItemStack pStack, World pLevel, LivingEntity pEntityLiving) {

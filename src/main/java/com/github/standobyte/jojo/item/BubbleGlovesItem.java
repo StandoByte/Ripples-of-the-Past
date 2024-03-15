@@ -1,29 +1,20 @@
 package com.github.standobyte.jojo.item;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import javax.annotation.Nullable;
 
-import net.minecraft.client.util.ITooltipFlag;
+import com.github.standobyte.jojo.util.mc.MCUtil;
+
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
 import net.minecraft.util.NonNullList;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
-import com.github.standobyte.jojo.item.TommyGunItem;
-import com.github.standobyte.jojo.util.general.MathUtil;
-import com.github.standobyte.jojo.util.mc.MCUtil;
 
 public class BubbleGlovesItem extends GlovesItem {
 
@@ -31,28 +22,37 @@ public class BubbleGlovesItem extends GlovesItem {
         super(properties);
     }
     
-    private static final int MAX_AMMO = 500;
+    public static final int MAX_AMMO = 500;
     
-    private boolean reload(ItemStack stack, LivingEntity entity, World world) {
-        int ammoToLoad = MAX_AMMO - TommyGunItem.getAmmo(stack);
+    public static boolean consumeAmmo(ItemStack gloves, int amount, LivingEntity user) {
+        boolean consumed = TommyGunItem.consumeAmmo(gloves, amount);
+        
+        if (TommyGunItem.getAmmo(gloves) <= 0) {
+            reload(gloves, user, user.level, null);
+        }
+        
+        return consumed;
+    }
+    
+    public static boolean reload(ItemStack glovesItem, Entity entity, World world, @Nullable ItemStack soapBottleItem) {
+        int ammoToLoad = MAX_AMMO - TommyGunItem.getAmmo(glovesItem);
         if (ammoToLoad > 0) {
             if (entity instanceof PlayerEntity) {
                 PlayerEntity player = (PlayerEntity) entity;
                 ammoToLoad = 500;
                 IInventory inventory = player.inventory;
                 ItemStack soapItem = null;
-                soapItem = MCUtil.findInInventory(inventory, item -> useSoap(item));
-                    if (!player.abilities.instabuild) {
-                        if (!soapItem.isEmpty()) {
-                            soapItem.shrink(1);
-                            MCUtil.giveItemTo(player, new ItemStack(Items.GLASS_BOTTLE), true);
-                        } else {
-                            return false;
-                        }
+                soapItem = soapBottleItem != null ? soapBottleItem : MCUtil.findInInventory(inventory, item -> useSoap(item));
+                if (!player.abilities.instabuild) {
+                    if (!soapItem.isEmpty()) {
+                        soapItem.shrink(1);
+                        MCUtil.giveItemTo(player, new ItemStack(Items.GLASS_BOTTLE), true);
+                    } else {
+                        return false;
                     }
+                }
                 if (!world.isClientSide()) {
-                  player.getCooldowns().addCooldown(this, 200);
-                    stack.getTag().putInt("Ammo", ammoToLoad);
+                    glovesItem.getTag().putInt("Ammo", ammoToLoad);
                 }
                 return true;
             }
@@ -64,7 +64,7 @@ public class BubbleGlovesItem extends GlovesItem {
     public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         ItemStack stack = player.getItemInHand(hand);
         if (player.isShiftKeyDown()) {
-            return reload(stack, player, world) ? ActionResult.consume(stack) : ActionResult.fail(stack);
+            return reload(stack, player, world, null) ? ActionResult.consume(stack) : ActionResult.fail(stack);
         } else {
             return ActionResult.fail(stack);
         }
