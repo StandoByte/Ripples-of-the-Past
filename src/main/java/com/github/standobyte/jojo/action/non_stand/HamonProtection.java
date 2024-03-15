@@ -51,8 +51,10 @@ public class HamonProtection extends HamonAction {
     }
     
     @Override
-    protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {    
-        power.getTypeSpecificData(ModPowers.HAMON.get()).get().toggleHamonProtection();
+    protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {  
+        if (!world.isClientSide()) {
+            power.getTypeSpecificData(ModPowers.HAMON.get()).get().toggleHamonProtection();
+        }
     }
     
     @Override
