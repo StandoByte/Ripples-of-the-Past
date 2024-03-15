@@ -38,7 +38,7 @@ public class HamonProtection extends HamonAction {
     }
     
     private final LazySupplier<ResourceLocation> protectionTex = 
-            new LazySupplier<>(() -> makeIconVariant(this, "_off"));
+            new LazySupplier<>(() -> makeIconVariant(this, "_on"));
 
     @Override
     public ResourceLocation getIconTexturePath(@Nullable INonStandPower power) {
@@ -53,6 +53,12 @@ public class HamonProtection extends HamonAction {
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {    
         power.getTypeSpecificData(ModPowers.HAMON.get()).get().toggleHamonProtection();
+    }
+    
+    @Override
+    public boolean greenSelection(INonStandPower power, ActionConditionResult conditionCheck) {
+        return power.getTypeSpecificData(ModPowers.HAMON.get())
+                .map(HamonData::isProtectionEnabled).orElse(false);
     }
 
     public float reduceDamageAmount(INonStandPower power, LivingEntity user, 
