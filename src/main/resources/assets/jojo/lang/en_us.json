@@ -9,7 +9,7 @@
   "item.jojo.breath_control_mask.hint2": "Requires the wearer to constantly perform Hamon Breath, otherwise breath stability starts decreasing.",
   "item.jojo.gloves": "Gloves",
   "item.jojo.gloves.hint": "Let you use Hamon and vampirism moves which require empty hands.",
-  "item.jojo.bubble_gloves": "Soap Loaded Gloves",
+  "item.jojo.bubble_gloves": "Soap Coated Gloves",
   "item.jojo.soap": "Soap Solution",
   "item.jojo.hamon_master_spawn_egg": "Hamon Master Spawn Egg",
   "item.jojo.hungry_zombie_spawn_egg": "Zombie Minion Spawn Egg",
@@ -473,6 +473,7 @@
   "jojo.message.action_condition.already_tamed": "This animal is tamed by you",
   "jojo.message.action_condition.potion": "You need to hold a bottle with a liquid",
   "jojo.message.action_condition.soap": "You need soap to perform that",
+  "jojo.message.action_condition.gloves_no_soap": "Your soap gloves are empty",
   
   "multiplayer.disconnect.invalid_stand_movement": "Invalid move Stand packet received",
   
@@ -829,6 +830,7 @@
   "hamon.technique.joseph": "Elaborate Traps",
   "hamon.technique.caesar": "Splendid and Fleeting",
   "hamon.technique.lisa_lisa": "Smooth as Silk",
+  "hamon.technique_perk": "Extra Perk: %s",
   
   "hamonSkill.natural_talent.name": "Natural Talent",
   "hamonSkill.natural_talent.desc": "Your Hamon training is 2x faster.",
@@ -854,6 +856,8 @@
   "hamonSkill.cheat_death.desc": "When you are about to die, you will avoid death and gain Invisibility effect (once an in-game day).\nYour next words: \"What does it have to do with Hamon?\"",
   "hamonSkill.rebuff_overdrive.name": "Rebuff Overdrive",
   "hamonSkill.rebuff_overdrive.desc": "If used against a melee attack, you counterattack the enemy, dealing Hamon damage and knockback to the attacker",
+  "hamon.caesar_soap_hint.name": "Resource: Soap",
+  "hamon.caesar_soap_hint.desc": "All bubble attacks consume soap, which comes in form of Soap Solution bottles, or Soap Coated Gloves.",
   "hamonSkill.bubble_launcher.name": "Bubble Launcher",
   "hamonSkill.bubble_launcher.desc": "Shoot a barrage of Hamon-charged bubbles.",
   "hamonSkill.bubble_cutter.name": "Bubble Cutter",

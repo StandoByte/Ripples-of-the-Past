@@ -107,7 +107,7 @@ public class TommyGunItem extends Item {
             return false;
         }
         if (ammo > 0) {
-            gun.getTag().putInt("Ammo", ammo - amount);
+            gun.getTag().putInt("Ammo", Math.max(ammo - amount, 0));
             return true;
         }
         return false;

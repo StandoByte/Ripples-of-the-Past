@@ -14,7 +14,7 @@ public class HamonSkillElementRequirement extends HamonSkillGuiElement {
     @Override
     void drawTooltip(HamonScreen hamonScreen, MatrixStack matrixStack, int mouseX, int mouseY) {
         hamonScreen.renderTooltip(matrixStack, 
-                getName().withStyle(hamonScreen.hamon.isSkillLearned(getHamonSkill()) ? TextFormatting.GREEN : TextFormatting.RED), 
+                name.withStyle(hamonScreen.hamon.isSkillLearned(getHamonSkill()) ? TextFormatting.GREEN : TextFormatting.RED), 
                 mouseX, mouseY);
     }
 }
