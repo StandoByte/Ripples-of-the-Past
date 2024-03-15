@@ -51,7 +51,7 @@ public class HamonBubbleCutterEntity extends ModdedProjectileEntity { // TODO bu
     @Override
     protected boolean hurtTarget(Entity target, LivingEntity owner) {
         boolean projectileAttack = super.hurtTarget(target, owner);
-        boolean hamonAttack = DamageUtil.dealHamonDamage(target, 0.1F, this, owner);
+        boolean hamonAttack = DamageUtil.dealHamonDamage(target, 0.3F, this, owner);
         return projectileAttack || hamonAttack;
     }
 

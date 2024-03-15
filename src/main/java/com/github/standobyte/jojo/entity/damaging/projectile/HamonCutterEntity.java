@@ -6,6 +6,7 @@ import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.item.SoapItem;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
@@ -34,6 +35,9 @@ public class HamonCutterEntity extends ModdedProjectileEntity {
         super(ModEntityTypes.HAMON_CUTTER.get(), shooter, world);
         this.potionItem = potionItem == null ? ItemStack.EMPTY : potionItem;
         this.color = PotionUtils.getColor(potionItem);
+        /*if(potionItem.getItem() instanceof SoapItem) {
+                this.color = 0x98dac0;
+                }*/
     }
     
     public HamonCutterEntity withColor(int color) {

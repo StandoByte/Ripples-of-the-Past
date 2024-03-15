@@ -135,13 +135,13 @@ public class HamonOrganismInfusion extends HamonAction {
                 world.getEntitiesOfClass(HamonBlockChargeEntity.class, 
                         new AxisAlignedBB(Vector3d.atCenterOf(blockPos), Vector3d.atCenterOf(blockPos))).forEach(Entity::remove);
                 HamonBlockChargeEntity charge = new HamonBlockChargeEntity(world, target.getBlockPos());
-                charge.setCharge(0.02F * hamon.getHamonDamageMultiplier() * hamonEfficiency, chargeTicks, user, getEnergyCost(power, target));
+                charge.setCharge(hamon.getHamonDamageMultiplier() * hamonEfficiency, chargeTicks, user, getEnergyCost(power, target));
                 world.addFreshEntity(charge);
                 break;
             case ENTITY:
                 LivingEntity entity = (LivingEntity) target.getEntity();
                 entity.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> 
-                cap.setHamonCharge(0.2F * hamon.getHamonDamageMultiplier() * hamonEfficiency, chargeTicks, user, getEnergyCost(power, target)));
+                cap.setHamonCharge(hamon.getHamonDamageMultiplier() * hamonEfficiency, chargeTicks, user, getEnergyCost(power, target)));
                 break;
             default:
                 break;
