@@ -8,21 +8,14 @@ import java.util.List;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
-import com.github.standobyte.jojo.action.ActionTarget;
+
 import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
-import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
-import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.entity.AfterimageEntity;
 import com.github.standobyte.jojo.entity.HamonSendoOverdriveEntity;
 import com.github.standobyte.jojo.entity.ai.LookAtEntityWithoutMovingGoal;
 import com.github.standobyte.jojo.init.ModStatusEffects;
-import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
-import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.potion.HamonSpreadEffect;
-import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
-import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.CollideBlocks;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
@@ -43,7 +36,6 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.Explosion;
-import net.minecraft.world.World;
 
 public class LivingUtilCap {
     private final LivingEntity entity;

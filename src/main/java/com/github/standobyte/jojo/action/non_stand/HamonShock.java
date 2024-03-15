@@ -19,7 +19,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.entity.passive.GolemEntity;
 import net.minecraft.potion.EffectInstance;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
