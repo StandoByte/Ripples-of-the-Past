@@ -38,7 +38,7 @@ public class HamonProtection extends HamonAction {
     }
     
     private final LazySupplier<ResourceLocation> protectionTex = 
-    new LazySupplier<>(() -> makeIconVariant(this, "_off"));
+            new LazySupplier<>(() -> makeIconVariant(this, "_off"));
 
     @Override
     public ResourceLocation getIconTexturePath(@Nullable INonStandPower power) {

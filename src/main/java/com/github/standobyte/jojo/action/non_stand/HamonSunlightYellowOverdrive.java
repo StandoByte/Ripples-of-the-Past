@@ -119,7 +119,7 @@ public class HamonSunlightYellowOverdrive extends HamonAction {
             hamon.hamonPointsFromAction(HamonStat.STRENGTH, power.getMaxEnergy() * holdRatio * efficiency);
         }
     }
-
+    
     @Override
     public boolean isHeldSentToTracking() {
         return true;
