@@ -35,7 +35,7 @@ public class HamonCutterEntity extends ModdedProjectileEntity {
         super(ModEntityTypes.HAMON_CUTTER.get(), shooter, world);
         this.potionItem = potionItem == null ? ItemStack.EMPTY : potionItem;
         this.color = PotionUtils.getColor(potionItem);
-        /*if(potionItem.getItem() instanceof SoapItem) {
+        /*if (potionItem.getItem() instanceof SoapItem) {
                 this.color = 0x98dac0;
                 }*/
     }

@@ -25,7 +25,7 @@ public class HamonBubbleCutter extends HamonAction {
     @Override
     protected ActionConditionResult checkHeldItems(LivingEntity user, INonStandPower power) {
         if (getBubbleItem(user).isEmpty() || TommyGunItem.getAmmo(getBubbleItem(user)) <= 0 
-        		&& getBubbleItem(user).getItem() instanceof SoapItem != true) {
+                && !(getBubbleItem(user).getItem() instanceof SoapItem)) {
             return conditionMessage("soap");
         }
         return ActionConditionResult.POSITIVE;
@@ -34,15 +34,15 @@ public class HamonBubbleCutter extends HamonAction {
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
-        	PlayerEntity player = null;
-    		player = (PlayerEntity) user;
-        		if((getBubbleItem(user).getItem() instanceof SoapItem) == true) {
-        			if (!player.abilities.instabuild) {
-        				getBubbleItem(user).shrink(1);
-                    	MCUtil.giveItemTo(user, new ItemStack(Items.GLASS_BOTTLE), true);
-        			}
+            PlayerEntity player = null;
+            player = (PlayerEntity) user;
+                if (getBubbleItem(user).getItem() instanceof SoapItem) {
+                    if (!player.abilities.instabuild) {
+                        getBubbleItem(user).shrink(1);
+                        MCUtil.giveItemTo(user, new ItemStack(Items.GLASS_BOTTLE), true);
+                    }
                 } else {
-                	TommyGunItem.consumeAmmo(getBubbleItem(user), 20);
+                    TommyGunItem.consumeAmmo(getBubbleItem(user), 20);
                 }
             boolean shift = isShiftVariation();
             int bubbles = shift ? 4 : 8;

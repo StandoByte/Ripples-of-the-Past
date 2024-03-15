@@ -43,12 +43,12 @@ public class BubbleGlovesItem extends GlovesItem {
                 ItemStack soapItem = null;
                 soapItem = MCUtil.findInInventory(inventory, item -> useSoap(item));
                     if (!player.abilities.instabuild) {
-                    	if (!soapItem.isEmpty()) {
-                    		soapItem.shrink(1);
-                    		MCUtil.giveItemTo(player, new ItemStack(Items.GLASS_BOTTLE), true);
-                    	} else {
-                    		return false;
-                    	}
+                        if (!soapItem.isEmpty()) {
+                            soapItem.shrink(1);
+                            MCUtil.giveItemTo(player, new ItemStack(Items.GLASS_BOTTLE), true);
+                        } else {
+                            return false;
+                        }
                     }
                 if (!world.isClientSide()) {
                   player.getCooldowns().addCooldown(this, 200);

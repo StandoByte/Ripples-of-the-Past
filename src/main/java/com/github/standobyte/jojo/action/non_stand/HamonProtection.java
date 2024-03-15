@@ -2,12 +2,10 @@ package com.github.standobyte.jojo.action.non_stand;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
-import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
@@ -44,18 +42,17 @@ public class HamonProtection extends HamonAction {
 
     @Override
     public ResourceLocation getIconTexturePath(@Nullable INonStandPower power) {
-    	boolean prot = power.getTypeSpecificData(ModPowers.HAMON.get()).get().getHamonProtection();
-    	if (power != null && prot == true) {
-    		return protectionTex.get();
-    		}
-    		else {
-    			return super.getIconTexturePath(power);
-    			}
-    	}
+        if (power != null && power.getTypeSpecificData(ModPowers.HAMON.get()).get().isProtectionEnabled()) {
+            return protectionTex.get();
+        }
+        else {
+            return super.getIconTexturePath(power);
+        }
+    }
     
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {    
-    	power.getTypeSpecificData(ModPowers.HAMON.get()).get().toggleHamonProtection();
+        power.getTypeSpecificData(ModPowers.HAMON.get()).get().toggleHamonProtection();
     }
 
     public float reduceDamageAmount(INonStandPower power, LivingEntity user, 

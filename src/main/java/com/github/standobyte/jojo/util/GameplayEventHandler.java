@@ -586,7 +586,7 @@ public class GameplayEventHandler {
             INonStandPower.getNonStandPowerOptional(target).ifPresent(power -> {
                 if (
                         target.getType() == ModEntityTypes.HAMON_MASTER.get() || 
-                        power.getTypeSpecificData(ModPowers.HAMON.get()).get().getHamonProtection() == true) {
+                        power.getTypeSpecificData(ModPowers.HAMON.get()).get().isProtectionEnabled()) {
                     event.setAmount(ModHamonActions.HAMON_PROTECTION.get().reduceDamageAmount(
                             power, power.getUser(), dmgSource, event.getAmount()));
                 }

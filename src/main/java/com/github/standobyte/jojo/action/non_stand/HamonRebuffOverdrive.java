@@ -18,7 +18,7 @@ public class HamonRebuffOverdrive extends HamonAction {
 
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {    
-    	power.getTypeSpecificData(ModPowers.HAMON.get()).get().toggleRebuffOverdrive();
+        power.getTypeSpecificData(ModPowers.HAMON.get()).get().toggleRebuffOverdrive();
     }
 
    /*private final LazySupplier<ResourceLocation> rebuffTex = 
@@ -26,8 +26,7 @@ public class HamonRebuffOverdrive extends HamonAction {
     
     @Override
     public ResourceLocation getIconTexturePath(@Nullable INonStandPower power) {
-    	boolean prot = power.getTypeSpecificData(ModPowers.HAMON.get()).get().getRebuffOverdrive();
-        if (power != null && prot == true) {
+        if (power != null && power.getTypeSpecificData(ModPowers.HAMON.get()).get().getRebuffOverdrive()) {
             return rebuffTex.get();
         }
         else {

@@ -201,9 +201,9 @@ public class HamonUtil {
                                     target.level.playSound(null, livingAttacker.getX(), livingAttacker.getEyeY(), livingAttacker.getZ(), ModSounds.HAMON_SYO_PUNCH.get(), livingAttacker.getSoundSource(), 2F, 1.0F);
                                     power.consumeEnergy(energyCost);
                                     DamageUtil.dealHamonDamage(attacker, 3F, target, null);
-                                    	playerTarget.attack(attacker);
-                                    	playerTarget.doHurtTarget(attacker);
-                                    	playerTarget.swing(Hand.MAIN_HAND, true);
+                                        playerTarget.attack(attacker);
+                                        playerTarget.doHurtTarget(attacker);
+                                        playerTarget.swing(Hand.MAIN_HAND, true);
                                     livingAttacker.knockback(2.5F, playerTarget.getX()-livingAttacker.getX(), playerTarget.getZ()-livingAttacker.getZ());
                                     power.getTypeSpecificData(ModPowers.HAMON.get()).get().offRebuffOverdrive();
                                     return true;

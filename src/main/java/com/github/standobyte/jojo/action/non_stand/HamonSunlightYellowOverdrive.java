@@ -100,9 +100,9 @@ public class HamonSunlightYellowOverdrive extends HamonAction {
     }
     
     public void forPerform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
-    	Entity entity = target.getEntity();
-    	LivingEntity targetEntity = (LivingEntity) entity;
-    	HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
+        Entity entity = target.getEntity();
+        LivingEntity targetEntity = (LivingEntity) entity;
+        HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
         int maxTicks = Math.max(getHoldDurationToFire(power), 1);
         int ticksHeld = Math.min(power.getHeldActionTicks(), maxTicks);
         float holdRatio = (float) ticksHeld / (float) maxTicks;

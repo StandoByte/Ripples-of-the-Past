@@ -21,7 +21,6 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.Character
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.item.PotionItem;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -139,7 +138,7 @@ public abstract class HamonAction extends NonStandAction {
     public ItemStack getBubbleItem(LivingEntity entity) {
         ItemStack soapItem = entity.getMainHandItem();
         if (soapItem.isEmpty() || !(soapItem.getItem() instanceof BubbleGlovesItem) && !(soapItem.getItem() instanceof SoapItem)) {
-        	soapItem = entity.getOffhandItem();
+            soapItem = entity.getOffhandItem();
             if (soapItem.isEmpty() || !(soapItem.getItem() instanceof BubbleGlovesItem) && !(soapItem.getItem() instanceof SoapItem)) {
                 return ItemStack.EMPTY;
             }

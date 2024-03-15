@@ -159,20 +159,20 @@ public class HamonData extends TypeSpecificData {
         updateHeight = false;
         LivingEntity user = power.getUser();
         if (user.isAlive()) {
-        	if(hamonProtection == true) {
-        		if(user.level.isClientSide) {
-        			tickHamonProtection();
-        		}
+            if (hamonProtection) {
+                if (user.level.isClientSide) {
+                    tickHamonProtection();
+                }
             }
-        	if(isRebuffOverdriveOn == true) {
-        		if(rebuffTick<=20) {
-        			++rebuffTick;	
-        		} else {
-        			isRebuffOverdriveOn = false;
-        			rebuffTick = 0;
-        		}
-        		
-        	}
+            if (isRebuffOverdriveOn) {
+                if (rebuffTick<=20) {
+                    ++rebuffTick;    
+                } else {
+                    isRebuffOverdriveOn = false;
+                    rebuffTick = 0;
+                }
+                
+            }
             tickNewPlayerLearners(user);
             if (!user.level.isClientSide()) {
                 tickAirSupply(user);
@@ -221,8 +221,8 @@ public class HamonData extends TypeSpecificData {
                 ticksMaskWithNoHamonBreath = 0;
             }
             
-            if(power.getEnergy() <= 0) {
-            	offHamonProtection();
+            if (power.getEnergy() <= 0) {
+                offHamonProtection();
             }
             
             playedEnergySound = false;
@@ -1486,40 +1486,39 @@ public class HamonData extends TypeSpecificData {
     }
     
     public boolean toggleHamonProtection() {
-    	hamonProtection = !hamonProtection;
-    	return hamonProtection;
+        hamonProtection = !hamonProtection;
+        return hamonProtection;
     }
     
-    public boolean offHamonProtection() {
-    	hamonProtection = false;
-    	return hamonProtection;
+    public void offHamonProtection() {
+        hamonProtection = false;
     }
     
-    public boolean getHamonProtection() {
-    	return hamonProtection;
+    public boolean isProtectionEnabled() {
+        return hamonProtection;
     }
    
     public void tickHamonProtection() {
-    	LivingEntity user = power.getUser();
-    	if(hamonProtection == true) {
+        LivingEntity user = power.getUser();
+        if (hamonProtection) {
             HamonSparksLoopSound.playSparkSound(user, user.getBoundingBox().getCenter(), 1.0F, 1);
             CustomParticlesHelper.createHamonSparkParticles(user, 
-            		user.getRandomX(0.5), user.getRandomY(), user.getRandomZ(0.5), 
+                    user.getRandomX(0.5), user.getRandomY(), user.getRandomZ(0.5), 
                     (int) (MathUtil.fractionRandomInc(1) * 2));
-    	}
+        }
     }
     
     public boolean getRebuffOverdrive() {
-    	return isRebuffOverdriveOn;
+        return isRebuffOverdriveOn;
     }
     
     public boolean toggleRebuffOverdrive() {
-    	isRebuffOverdriveOn = !isRebuffOverdriveOn;
-    	return isRebuffOverdriveOn;
+        isRebuffOverdriveOn = !isRebuffOverdriveOn;
+        return isRebuffOverdriveOn;
     }
     
     public boolean offRebuffOverdrive() {
-    	isRebuffOverdriveOn = false;
-    	return isRebuffOverdriveOn;
+        isRebuffOverdriveOn = false;
+        return isRebuffOverdriveOn;
     }
 }

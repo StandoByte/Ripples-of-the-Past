@@ -70,17 +70,17 @@ public class HamonCharge {
                             }
                         }
                         //adds knockback to Infused Blocks
-                        if(!world.isClientSide()) {
-                        	if(chargedBlock != null) {
-                        		if (world.getBlockState(chargedBlock).getBlock() != Blocks.COBWEB) {
-                        			float x = chargedBlock.getX();
-                            		float z = chargedBlock.getZ();
-                            		target.knockback(0.5F, x-target.getX(), z-target.getZ());
-                        			chargeTicks = 0;
-                        		}
-                        	} else {
-                        		chargeTicks = 0;
-                        	}
+                        if (!world.isClientSide()) {
+                            if (chargedBlock != null) {
+                                if (world.getBlockState(chargedBlock).getBlock() != Blocks.COBWEB) {
+                                    float x = chargedBlock.getX();
+                                    float z = chargedBlock.getZ();
+                                    target.knockback(0.5F, x-target.getX(), z-target.getZ());
+                                    chargeTicks = 0;
+                                }
+                            } else {
+                                chargeTicks = 0;
+                            }
                         }
                         gavePoints = true;
                         // One time charge
