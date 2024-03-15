@@ -98,7 +98,7 @@ public class ProjectileHamonChargeCap {
     }
     
     public float getHamonDamage() {
-        return hamonBaseDmg * chargeWearOffMultiplier();
+        return 3 * hamonBaseDmg * chargeWearOffMultiplier();
     }
     
     private float chargeWearOffMultiplier() {

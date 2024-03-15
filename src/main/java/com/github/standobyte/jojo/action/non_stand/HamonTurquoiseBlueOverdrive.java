@@ -33,7 +33,7 @@ public class HamonTurquoiseBlueOverdrive extends HamonAction {
             float hamonControl = hamon.getHamonControlLevelRatio();
             
             HamonTurquoiseBlueOverdriveEntity overdriveWave = new HamonTurquoiseBlueOverdriveEntity(world, user)
-                    .setRadius(1.5F + (float) (4.5F * hamonControl * hamonEfficiency))
+                    .setRadius(1F + (float) (2.5F * hamonControl * hamonEfficiency))
                     .setDamage(1F * hamonEfficiency)
                     .setPoints(Math.min(energyCost, power.getEnergy()) * hamonEfficiency)
                     .setDuration(30 + (int) (70 * hamonControl));

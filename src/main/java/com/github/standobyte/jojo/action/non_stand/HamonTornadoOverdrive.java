@@ -32,10 +32,10 @@ public class HamonTornadoOverdrive extends HamonAction {
             HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
             if (!world.isClientSide()) {
                 AxisAlignedBB aabb = user.getBoundingBox().expandTowards(movement).inflate(1.0D);
-                float damage = 0.1F;
+                float damage = 0.6F;
                 double gravity = user.getAttributeValue(ForgeMod.ENTITY_GRAVITY.get());
                 if (movement.y < -gravity) {
-                    damage *= (-movement.y / gravity) * 0.75F;
+                    damage *= (-movement.y / gravity) * 0.15F;
                 }
                 List<Entity> targets = user.level.getEntities(user, aabb);
                 boolean points = false;

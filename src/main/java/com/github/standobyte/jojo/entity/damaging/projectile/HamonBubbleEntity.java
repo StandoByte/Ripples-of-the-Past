@@ -38,7 +38,7 @@ public class HamonBubbleEntity extends ModdedProjectileEntity {
     
     @Override
     protected boolean hurtTarget(Entity target, LivingEntity owner) {
-        return DamageUtil.dealHamonDamage(target, 0.015F, this, owner);
+        return DamageUtil.dealHamonDamage(target, 0.3F, this, owner);
     }
 
     @Override

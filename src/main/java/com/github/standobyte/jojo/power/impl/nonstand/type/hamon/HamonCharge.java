@@ -6,16 +6,19 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil.HamonAttackProperties;
 
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -66,7 +69,22 @@ public class HamonCharge {
                                 });
                             }
                         }
+                        //adds knockback to Infused Blocks
+                        if(!world.isClientSide()) {
+                        	if(chargedBlock != null) {
+                        		if (world.getBlockState(chargedBlock).getBlock() != Blocks.COBWEB) {
+                        			float x = chargedBlock.getX();
+                            		float z = chargedBlock.getZ();
+                            		target.knockback(0.5F, x-target.getX(), z-target.getZ());
+                        			chargeTicks = 0;
+                        		}
+                        	} else {
+                        		chargeTicks = 0;
+                        	}
+                        }
                         gavePoints = true;
+                        // One time charge
+                        
                     }
                 }
             }

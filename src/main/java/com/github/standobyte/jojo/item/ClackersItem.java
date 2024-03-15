@@ -29,7 +29,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class ClackersItem extends Item {
-    public static final int TICKS_MAX_POWER = 80;
+    public static final int TICKS_MAX_POWER = 20;
     
     private final Multimap<Attribute, AttributeModifier> attributeModifiers;
 
@@ -70,7 +70,7 @@ public class ClackersItem extends Item {
         int ticksUsed = getUseDuration(stack) - remainingTicks;
         int ticksMaxPower = TICKS_MAX_POWER;
         if (clackersTexVariant(ticksUsed, ticksMaxPower) > 0) {
-//            playClackSound(world, entity);
+            //playClackSound(world, entity);
             if (ticksUsed >= ticksMaxPower / 2 && !world.isClientSide()) {
                 Vector3d sparkVec = entity.getLookAngle().scale(0.75)
                         .add(entity.getX(), entity.getY(0.6), entity.getZ());
