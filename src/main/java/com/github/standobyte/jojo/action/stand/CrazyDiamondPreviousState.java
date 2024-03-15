@@ -140,7 +140,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                     TNTEntity tnt = (TNTEntity) targetEntity;
                     if (!CrazyDiamondHeal.heal(world, tnt, tnt, (e, clientSide) -> {
                         if (!clientSide) {
-                            e.setFuse(task.getTick() == 0 ? e.getFuse() - e.tickCount + 2 : e.getFuse() + 2);
+                            e.setFuse(e.getLife() + 2);
                         }
                     }, e -> task.getTick() == 0 || e.getFuse() < 80)) {
                         CrazyDiamondHeal.heal(world, tnt, tnt, 

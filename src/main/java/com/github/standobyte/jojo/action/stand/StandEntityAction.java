@@ -53,6 +53,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     public final boolean enablePhysics;
     private final Map<Phase, List<StandSound>> standSounds;
     protected final Supplier<StandEntityMeleeBarrage> barrageVisuals;
+    protected boolean friendlyFire = false;
     
     public StandEntityAction(StandEntityAction.AbstractBuilder<?> builder) {
         super(builder);
@@ -166,10 +167,14 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         switch (target.getType()) {
         case ENTITY:
             Entity targetEntity = target.getEntity();
-            return ActionConditionResult.noMessage(targetEntity instanceof LivingEntity && standEntity.canAttack((LivingEntity) targetEntity));
+            return ActionConditionResult.noMessage(targetEntity instanceof LivingEntity && canStandTargetEntity(standEntity, (LivingEntity) targetEntity, standPower));
         default:
             return ActionConditionResult.POSITIVE;
         }
+    }
+    
+    protected boolean canStandTargetEntity(StandEntity standEntity, LivingEntity target, IStandPower power) {
+        return friendlyFire ? true : standEntity.canAttack(target);
     }
     
     @Override
@@ -239,8 +244,8 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
                 preTaskInit(world, power, stand, target);
                 if (!world.isClientSide()) {
                     setAction(power, stand, 
-                        !holdOnly(power) ? getHoldDurationToFire(power) : getHoldDurationMax(power), 
-                        !holdOnly(power) ? Phase.BUTTON_HOLD : Phase.PERFORM, 
+                        holdOnly(power) || continueHolding  ? Integer.MAX_VALUE : getHoldDurationToFire(power), 
+                        holdOnly(power) && !continueHolding ? Phase.PERFORM : Phase.BUTTON_HOLD, 
                         target);
                 }
             });
@@ -496,7 +501,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     }
     
     public float getUserWalkSpeed(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
-        return task.getPhase() == Phase.RECOVERY && isFreeRecovery(standPower, standEntity) ? 1F : userWalkSpeed;
+        return task.getPhase() == Phase.RECOVERY ? 1F : userWalkSpeed;
     }
     
     public StandPose getStandPose(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {

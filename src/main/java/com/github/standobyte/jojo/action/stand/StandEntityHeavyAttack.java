@@ -1,12 +1,9 @@
 package com.github.standobyte.jojo.action.stand;
 
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
-
-import org.apache.commons.lang3.ArrayUtils;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
@@ -173,7 +170,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
 
     @Override
     public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
-        return StandStatFormulas.getHeavyAttackRecovery(standEntity.getAttackSpeed());
+        return StandStatFormulas.getHeavyAttackRecovery(standEntity.getAttackSpeed(), standEntity.getLastHeavyFinisherValue());
     }
     
     @Override
@@ -219,22 +216,22 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         return !isFinisher;
     }
     
-    @Override
-    public StandAction[] getExtraUnlockable() {
-        StandAction[] actions = new StandAction[2];
-        int i = 0;
-        if (finisherVariation.get() != null) {
-            actions[i++] = finisherVariation.get();
-        }
-        if (recoveryAction.get() != null) {
-            actions[i++] = recoveryAction.get();
-        }
-        actions = Arrays.copyOfRange(actions, 0, i);
-        for (int j = 0; j < i; j++) {
-            actions = ArrayUtils.addAll(actions, actions[j].getExtraUnlockable());
-        }
-        return actions;
-    }
+//    @Override
+//    public StandAction[] getExtraUnlockable() {
+//        StandAction[] actions = new StandAction[2];
+//        int i = 0;
+//        if (finisherVariation.get() != null) {
+//            actions[i++] = finisherVariation.get();
+//        }
+//        if (recoveryAction.get() != null) {
+//            actions[i++] = recoveryAction.get();
+//        }
+//        actions = Arrays.copyOfRange(actions, 0, i);
+//        for (int j = 0; j < i; j++) {
+//            actions = ArrayUtils.addAll(actions, actions[j].getExtraUnlockable());
+//        }
+//        return actions;
+//    }
     
     
     
@@ -251,15 +248,19 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         }
         
         public Builder setFinisherVariation(Supplier<? extends StandEntityHeavyAttack> variation) {
-            if (this.finisherVariation.get() == null && variation != null && variation.get() != null) {
+            if (variation != null) {
                 this.finisherVariation = variation;
                 variation.get().isFinisher = true;
+                addExtraUnlockable(this.finisherVariation);
             }
             return getThis();
         }
         
         public Builder setRecoveryFollowUpAction(Supplier<? extends StandEntityActionModifier> recoveryAction) {
-            this.recoveryAction = recoveryAction != null ? recoveryAction : () -> null;
+            if (recoveryAction != null) {
+                this.recoveryAction = recoveryAction;
+                addExtraUnlockable(this.recoveryAction);
+            }
             return getThis();
         }
         

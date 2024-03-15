@@ -25,7 +25,6 @@ public class ClientModSettingsScreen extends SettingsScreen {
     private final ClientModSettings settings;
     private final ClientModSettings.Settings settingsValues;
 
-    @SuppressWarnings("resource")
     public ClientModSettingsScreen(Screen lastScreen, ClientModSettings settings) {
         super(lastScreen, lastScreen.getMinecraft().options, new TranslationTextComponent("jojo.options.client.title"));
         this.settings = settings;
@@ -45,6 +44,7 @@ public class ClientModSettingsScreen extends SettingsScreen {
         };
         addButton(barsPosition.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
         
+        
         EnumSetting<PositionConfig> hotbarsPosition = new EnumSetting<PositionConfig>(settings, 
                 new TranslationTextComponent("jojo.config.client.hotbarsPosition"), 
                 new TranslationTextComponent("jojo.config.client.hotbarsPosition.tooltip"), 
@@ -53,6 +53,7 @@ public class ClientModSettingsScreen extends SettingsScreen {
             @Override public void set(PositionConfig value) { settingsValues.hotbarsPosition = value; }
         };
         addButton(hotbarsPosition.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
+        
         
         EnumSetting<HudNamesRender> hudNamesRender = new EnumSetting<HudNamesRender>(settings, 
                 new TranslationTextComponent("jojo.config.client.hudNamesRender"), 
@@ -63,6 +64,17 @@ public class ClientModSettingsScreen extends SettingsScreen {
         };
         addButton(hudNamesRender.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
         
+        
+        BooleanSetting hudHotbarsFold = new BooleanSetting(settings, 
+                new TranslationTextComponent("jojo.config.client.hudHotbarsFold"), 
+                new TranslationTextComponent("jojo.config.client.hudHotbarsFold.tooltip")
+                ) {
+            @Override public boolean get() { return settingsValues.hudHotbarsFold; }
+            @Override public void set(boolean value) { settingsValues.hudHotbarsFold = value; }
+        };
+        addButton(hudHotbarsFold.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
+        
+        
         BooleanSetting characterVoiceLines = new BooleanSetting(settings, 
                 new TranslationTextComponent("jojo.config.client.characterVoiceLines"), 
                 new TranslationTextComponent("jojo.config.client.characterVoiceLines.tooltip")
@@ -72,6 +84,7 @@ public class ClientModSettingsScreen extends SettingsScreen {
         };
         addButton(characterVoiceLines.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
         
+        
         BooleanSetting menacingParticles = new BooleanSetting(settings, 
                 new TranslationTextComponent("jojo.config.client.menacingParticles"), 
                 new TranslationTextComponent("jojo.config.client.menacingParticles.tooltip")
@@ -80,6 +93,7 @@ public class ClientModSettingsScreen extends SettingsScreen {
             @Override public void set(boolean value) { settingsValues.menacingParticles = value; }
         };
         addButton(menacingParticles.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
+        
         
         BooleanSetting resolveShaders = new BooleanSetting(settings, 
                 new TranslationTextComponent("jojo.config.client.resolveShaders"), 
@@ -95,6 +109,7 @@ public class ClientModSettingsScreen extends SettingsScreen {
         };
         addButton(resolveShaders.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
         
+        
         BooleanSetting timeStopAnimation = new BooleanSetting(settings, 
                 new TranslationTextComponent("jojo.config.client.timeStopAnimation"), 
                 new TranslationTextComponent("jojo.config.client.timeStopAnimation.tooltip")
@@ -104,6 +119,7 @@ public class ClientModSettingsScreen extends SettingsScreen {
         };
         addButton(timeStopAnimation.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
         
+        
         BooleanSetting timeStopFreezesVisuals = new BooleanSetting(settings, 
                 new TranslationTextComponent("jojo.config.client.timeStopFreezesVisuals"), 
                 new TranslationTextComponent("jojo.config.client.timeStopFreezesVisuals.tooltip")
@@ -112,6 +128,7 @@ public class ClientModSettingsScreen extends SettingsScreen {
             @Override public void set(boolean value) { settingsValues.timeStopFreezesVisuals = value; }
         };
         addButton(timeStopFreezesVisuals.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
+        
         
         
         ++i;

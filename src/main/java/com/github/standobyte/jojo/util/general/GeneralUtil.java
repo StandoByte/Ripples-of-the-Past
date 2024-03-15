@@ -1,5 +1,12 @@
 package com.github.standobyte.jojo.util.general;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -11,6 +18,8 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import org.apache.commons.io.FileUtils;
 
 import net.minecraft.util.Util;
 import net.minecraftforge.common.util.LazyOptional;
@@ -116,5 +125,11 @@ public class GeneralUtil {
             }
         }
         return index;
+    }
+    
+    public static BufferedWriter newWriterMkDir(File file, Charset charset) throws IOException {
+        checkNotNull(file);
+        checkNotNull(charset);
+        return new BufferedWriter(new OutputStreamWriter(FileUtils.openOutputStream(file), charset));
     }
 }
