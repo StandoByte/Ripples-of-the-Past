@@ -10,6 +10,8 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.item.BubbleGlovesItem;
+import com.github.standobyte.jojo.item.SoapItem;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
@@ -17,6 +19,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamon
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterHamonTechnique;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -128,4 +131,16 @@ public abstract class HamonAction extends NonStandAction {
             return getThis();
         }
     }
+    
+    public ItemStack getBubbleItem(LivingEntity entity) {
+        ItemStack soapItem = entity.getMainHandItem();
+        if (soapItem.isEmpty() || !(soapItem.getItem() instanceof BubbleGlovesItem) && !(soapItem.getItem() instanceof SoapItem)) {
+            soapItem = entity.getOffhandItem();
+            if (soapItem.isEmpty() || !(soapItem.getItem() instanceof BubbleGlovesItem) && !(soapItem.getItem() instanceof SoapItem)) {
+                return ItemStack.EMPTY;
+            }
+        }
+        return soapItem;
+    }
+    
 }

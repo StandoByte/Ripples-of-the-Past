@@ -2016,7 +2016,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
 
     public void setNoPhysics(boolean noPhysics) {
-        if (noPhysics == true || standCanHaveNoPhysics()) {
+        if (noPhysics || standCanHaveNoPhysics()) {
             setStandFlag(StandFlag.NO_PHYSICS, noPhysics);
         }
     }

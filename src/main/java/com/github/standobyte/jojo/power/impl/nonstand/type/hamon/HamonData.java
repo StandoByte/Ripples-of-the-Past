@@ -25,6 +25,7 @@ import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
+import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer;
 import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer.BarType;
@@ -142,6 +143,9 @@ public class HamonData extends TypeSpecificData {
     private int ticksNoBreathStabilityInc;
     
     public HamonProjectileShieldEntity shieldEntity;
+    private boolean hamonProtection = false;
+    private boolean isRebuffOverdriveOn = false;
+    private int rebuffTick = 0;
 
     public HamonData() {
         hamonSkills = new MainHamonSkillsManager();
@@ -154,6 +158,20 @@ public class HamonData extends TypeSpecificData {
         updateHeight = false;
         LivingEntity user = power.getUser();
         if (user.isAlive()) {
+            if (hamonProtection) {
+                if (user.level.isClientSide) {
+                    tickHamonProtection();
+                }
+            }
+            if (isRebuffOverdriveOn) {
+                if (rebuffTick<=20) {
+                    ++rebuffTick;    
+                } else {
+                    isRebuffOverdriveOn = false;
+                    rebuffTick = 0;
+                }
+                
+            }
             tickNewPlayerLearners(user);
             if (!user.level.isClientSide()) {
                 tickAirSupply(user);
@@ -175,6 +193,8 @@ public class HamonData extends TypeSpecificData {
                 shieldEntity.remove();
                 shieldEntity = null;
             }
+            hamonProtection = false;
+            isRebuffOverdriveOn = false;
         }
     }
     
@@ -199,6 +219,11 @@ public class HamonData extends TypeSpecificData {
             else {
                 ticksMaskWithNoHamonBreath = 0;
             }
+            
+            if (power.getEnergy() <= 0) {
+                offHamonProtection();
+            }
+            
             playedEnergySound = false;
             if (noEnergyDecayTicks > 0) {
                 noEnergyDecayTicks--;
@@ -475,6 +500,7 @@ public class HamonData extends TypeSpecificData {
         return action == ModHamonActions.HAMON_OVERDRIVE.get()
                 || action == ModHamonActions.HAMON_HEALING.get()
                 || action == ModHamonActions.HAMON_BREATH.get()
+                || action == ModHamonActions.CAESAR_BUBBLE_CUTTER_GLIDING.get()
                 || hamonSkills.isUnlockedFromSkills(action);
     }
     
@@ -1436,5 +1462,42 @@ public class HamonData extends TypeSpecificData {
             }
             throw new IllegalArgumentException();
         }
+    }
+    
+    public boolean toggleHamonProtection() {
+        hamonProtection = !hamonProtection;
+        return hamonProtection;
+    }
+    
+    public void offHamonProtection() {
+        hamonProtection = false;
+    }
+    
+    public boolean isProtectionEnabled() {
+        return hamonProtection;
+    }
+   
+    public void tickHamonProtection() {
+        LivingEntity user = power.getUser();
+        if (hamonProtection) {
+            HamonSparksLoopSound.playSparkSound(user, user.getBoundingBox().getCenter(), 1.0F, 1);
+            CustomParticlesHelper.createHamonSparkParticles(user, 
+                    user.getRandomX(0.5), user.getRandomY(), user.getRandomZ(0.5), 
+                    (int) (MathUtil.fractionRandomInc(1) * 2));
+        }
+    }
+    
+    public boolean getRebuffOverdrive() {
+        return isRebuffOverdriveOn;
+    }
+    
+    public boolean toggleRebuffOverdrive() {
+        isRebuffOverdriveOn = !isRebuffOverdriveOn;
+        return isRebuffOverdriveOn;
+    }
+    
+    public boolean offRebuffOverdrive() {
+        isRebuffOverdriveOn = false;
+        return isRebuffOverdriveOn;
     }
 }

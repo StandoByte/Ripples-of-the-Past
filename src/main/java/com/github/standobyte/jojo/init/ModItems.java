@@ -6,6 +6,7 @@ import com.github.standobyte.jojo.client.render.item.standdisc.StandDiscISTER;
 import com.github.standobyte.jojo.item.AjaStoneItem;
 import com.github.standobyte.jojo.item.BladeHatItem;
 import com.github.standobyte.jojo.item.BreathControlMaskItem;
+import com.github.standobyte.jojo.item.BubbleGlovesItem;
 import com.github.standobyte.jojo.item.CassetteBlankItem;
 import com.github.standobyte.jojo.item.CassetteRecordedItem;
 import com.github.standobyte.jojo.item.ClackersItem;
@@ -16,6 +17,7 @@ import com.github.standobyte.jojo.item.ModArmorMaterials;
 import com.github.standobyte.jojo.item.RoadRollerItem;
 import com.github.standobyte.jojo.item.SatiporojaScarfItem;
 import com.github.standobyte.jojo.item.SledgehammerItem;
+import com.github.standobyte.jojo.item.SoapItem;
 import com.github.standobyte.jojo.item.StandArrowItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StandRemoverItem;
@@ -81,6 +83,12 @@ public class ModItems {
     
     public static final RegistryObject<GlovesItem> GLOVES = ITEMS.register("gloves", 
             () -> new GlovesItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
+    
+    public static final RegistryObject<GlovesItem> BUBBLE_GLOVES = ITEMS.register("bubble_gloves", 
+            () -> new BubbleGlovesItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1))); 
+    
+    public static final RegistryObject<SoapItem> SOAP = ITEMS.register("soap", 
+            () -> new SoapItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
 
     public static final RegistryObject<SpawnEggItem> HAMON_MASTER_SPAWN_EGG = ITEMS.register("hamon_master_spawn_egg", 
             () -> new ForgeSpawnEggItem(ModEntityTypes.HAMON_MASTER, 0xF8D100, 0x542722, new Item.Properties().tab(MAIN_TAB)));
@@ -170,5 +178,6 @@ public class ModItems {
 
     public static final RegistryObject<CassetteRecordedItem> CASSETTE_RECORDED = ITEMS.register("cassette_recorded", 
             () -> new CassetteRecordedItem(new Item.Properties().stacksTo(1).tab(MAIN_TAB)));
+
 
 }
