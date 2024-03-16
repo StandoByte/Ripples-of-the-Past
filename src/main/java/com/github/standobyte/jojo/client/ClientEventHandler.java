@@ -767,8 +767,7 @@ public class ClientEventHandler {
                                 20, 20, 
                                 0, 0, 16, 16, standPower.clGetPowerTypeIcon(), 16, 16, 
                                 button -> {
-                                    HudLayoutEditingScreen hudScreen = new HudLayoutEditingScreen();
-                                    hudScreen.selectTab(PowerClassification.STAND);
+                                    HudLayoutEditingScreen hudScreen = new HudLayoutEditingScreen(PowerClassification.STAND);
                                     mc.setScreen(hudScreen);
                                 }, 
                                 (button, matrixStack, mouseX, mouseY) -> screen.renderTooltip(matrixStack, tooltip, mouseX, mouseY),
@@ -780,8 +779,7 @@ public class ClientEventHandler {
                                 20, 20, 
                                 0, 0, 16, 16, nonStandPower.clGetPowerTypeIcon(), 16, 16, 
                                 button -> {
-                                    HudLayoutEditingScreen hudScreen = new HudLayoutEditingScreen();
-                                    hudScreen.selectTab(PowerClassification.NON_STAND);
+                                    HudLayoutEditingScreen hudScreen = new HudLayoutEditingScreen(PowerClassification.NON_STAND);
                                     mc.setScreen(hudScreen);
                                 }, 
                                 (button, matrixStack, mouseX, mouseY) -> screen.renderTooltip(matrixStack, tooltip, mouseX, mouseY),

@@ -31,9 +31,9 @@ public class JojoStuffScreen {
             HudLayoutEditingScreen::new) {
         @Override
         protected Screen onClick(TabsEnumType powerType) {
-            Screen controlsScreen = super.onClick(powerType);
-            ((HudLayoutEditingScreen) controlsScreen).selectTab(powerType.power);
-            return controlsScreen;
+            Screen screen = new HudLayoutEditingScreen(powerType.power);
+            Minecraft.getInstance().setScreen(screen);
+            return screen;
         }
     };
     
