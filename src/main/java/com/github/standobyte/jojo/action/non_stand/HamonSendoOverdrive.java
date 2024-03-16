@@ -61,7 +61,7 @@ public class HamonSendoOverdrive extends HamonAction {
             BlockPos blockPos = target.getBlockPos();
             HamonSendoOverdriveEntity sendoOverdrive = new HamonSendoOverdriveEntity(world, 
                     user, target.getFace().getAxis())
-                    .setRadius((4 + hamon.getHamonControlLevelRatio() * 4) * hamonEfficiency)
+                    .setRadius((2 + hamon.getHamonControlLevelRatio() * 3) * hamonEfficiency)
                     .setWaveDamage(0.75F * hamonEfficiency)
                     .setWavesCount(2 + (int) ((2 + Math.min(hamon.getHamonControlLevelRatio() * 3, 2)) * hamonEfficiency))
                     .setStatPoints(Math.min(energyCost, power.getEnergy()) * hamonEfficiency);

@@ -61,7 +61,7 @@ public class HamonSkillElementLearnable extends HamonSkillGuiElement {
     @Override
     void drawTooltip(HamonScreen hamonScreen, MatrixStack matrixStack, int mouseX, int mouseY) {
         List<ITextComponent> tooltip = new ArrayList<>();
-        tooltip.add(getName());
+        tooltip.add(name);
         
         List<AbstractHamonSkill> missingSkills = skill.getRequiredSkills().filter(skill -> 
         !hamonScreen.hamon.isSkillLearned(skill)).collect(Collectors.toList());
