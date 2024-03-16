@@ -12,6 +12,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamon
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil.HamonAttackProperties;
 
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -28,7 +29,7 @@ public class HamonCharge {
     private int chargeTicks;
     private UUID hamonUserId;
     private Entity hamonUser;
-    private boolean gavePoints;
+    private boolean gavePoints; 
     private float energySpent;
     
     public HamonCharge(float tickDamage, int chargeTicks, @Nullable LivingEntity hamonUser, float energySpent) {
@@ -66,7 +67,22 @@ public class HamonCharge {
                                 });
                             }
                         }
+                        //adds knockback to Infused Blocks
+                        if (!world.isClientSide()) {
+                            if (chargedBlock != null) {
+                                if (world.getBlockState(chargedBlock).getBlock() != Blocks.COBWEB) {
+                                    float x = chargedBlock.getX();
+                                    float z = chargedBlock.getZ();
+                                    target.knockback(0.5F, x-target.getX(), z-target.getZ());
+                                    chargeTicks = 0;
+                                }
+                            } else {
+                                chargeTicks = 0;
+                            }
+                        }
                         gavePoints = true;
+                        // One time charge
+                        
                     }
                 }
             }

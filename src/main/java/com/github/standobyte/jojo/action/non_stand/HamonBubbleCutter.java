@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.action.non_stand;
 
+import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.damaging.projectile.HamonBubbleCutterEntity;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -16,8 +17,15 @@ public class HamonBubbleCutter extends HamonAction {
     }
     
     @Override
+    protected ActionConditionResult checkHeldItems(LivingEntity user, INonStandPower power) {
+        return HamonBubbleLauncher.checkSoap(user);
+    }
+    
+    @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
+            HamonBubbleLauncher.consumeSoap(user, 20);
+            
             boolean shift = isShiftVariation();
             int bubbles = shift ? 4 : 8;
             Vector3d shootingPos = null;

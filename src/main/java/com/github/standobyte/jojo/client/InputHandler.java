@@ -269,6 +269,9 @@ public class InputHandler {
                 tickCustomKeybinds(standPower, actionsOverlay.getCurrentMode() == PowerClassification.STAND);
             }
             
+            if (mc.options.keyJump.isDown()) {
+                ControllerSoul.getInstance().skipAscension();
+            }
             tickEffects();
             clickWithBusyHands();
         }

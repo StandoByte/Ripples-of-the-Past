@@ -90,7 +90,7 @@ public class LivingUtilCap {
         lastHurtByStandTick();
         tickNoLerp();
         tickHurtAnim();
-        tickDownHamonDamage();
+        tickDownHamonDamage(); 
         
         if (!entity.level.isClientSide()) {
             tickSendoOverdriveHurtTimer();
@@ -378,7 +378,7 @@ public class LivingUtilCap {
         return canGetScarf;
     }
     
-    
+  
     
     public static HypnosisTargetCheck canBeHypnotized(LivingEntity entity, LivingEntity hypnotizer) {
         if (hypnotizer instanceof PlayerEntity) {
@@ -501,4 +501,5 @@ public class LivingUtilCap {
         lifeShotResistTicks = nbt.getInt("LifeShotTicks");
         lifeShotResist = nbt.getInt("LifeShotResist");
     }
+    
 }

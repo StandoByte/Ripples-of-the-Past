@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PreviousPowerTypesPacket;
@@ -18,6 +19,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrTypeNonStandPower
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.impl.PowerBaseImpl;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.ObjectWrapper;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
@@ -133,7 +135,13 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
         }
         return result;
     }
-
+    
+    @Override
+    public boolean isTargetUpdateTick() {
+        return super.isTargetUpdateTick() || GeneralUtil.orElseFalse(getUser().getCapability(PlayerUtilCapProvider.CAPABILITY), 
+                player -> player.getContinuousAction().map(action -> action.updateTarget()).orElse(false));
+    }
+    
     @Override
     public float getEnergy() {
         return energy;
