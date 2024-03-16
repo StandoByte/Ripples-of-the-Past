@@ -58,6 +58,7 @@ import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.bowcharge.BowChargeEffectInstance;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismPowerType;
@@ -586,7 +587,7 @@ public class GameplayEventHandler {
             INonStandPower.getNonStandPowerOptional(target).ifPresent(power -> {
                 if (
                         target.getType() == ModEntityTypes.HAMON_MASTER.get() || 
-                        power.getTypeSpecificData(ModPowers.HAMON.get()).get().isProtectionEnabled()) {
+                        power.getTypeSpecificData(ModPowers.HAMON.get()).map(HamonData::isProtectionEnabled).orElse(false)) {
                     event.setAmount(ModHamonActions.HAMON_PROTECTION.get().reduceDamageAmount(
                             power, power.getUser(), dmgSource, event.getAmount()));
                 }
