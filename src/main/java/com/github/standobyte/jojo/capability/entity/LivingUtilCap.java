@@ -78,6 +78,7 @@ public class LivingUtilCap {
     private boolean usedZoomPunch = false;
     private boolean gotScarf = false;
     
+    
     public LivingUtilCap(LivingEntity entity) {
         this.entity = entity;
     }
@@ -86,7 +87,7 @@ public class LivingUtilCap {
         lastHurtByStandTick();
         tickNoLerp();
         tickHurtAnim();
-        tickDownHamonDamage();
+        tickDownHamonDamage(); 
         
         if (!entity.level.isClientSide()) {
             tickSendoOverdriveHurtTimer();
@@ -347,7 +348,7 @@ public class LivingUtilCap {
         return canGetScarf;
     }
     
-    
+  
     
     public static HypnosisTargetCheck canBeHypnotized(LivingEntity entity, LivingEntity hypnotizer) {
         if (hypnotizer instanceof PlayerEntity) {
@@ -464,4 +465,5 @@ public class LivingUtilCap {
         }
         gotScarf = nbt.getBoolean("GotScarf");
     }
+    
 }

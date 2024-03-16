@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.capability.item.walkman;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
 import net.minecraftforge.common.capabilities.ICapabilitySerializable;
@@ -29,6 +30,8 @@ public class WalkmanCassetteSlotProvider implements ICapabilitySerializable<INBT
 
     @Override
     public void deserializeNBT(INBT nbt) {
+        if (!(nbt instanceof ListNBT)) return;
+        
         CapabilityItemHandler.ITEM_HANDLER_CAPABILITY.getStorage().readNBT(CapabilityItemHandler.ITEM_HANDLER_CAPABILITY, instance.orElseThrow(
                 () -> new IllegalArgumentException("Walkman item capability LazyOptional is not attached.")), null, nbt);
     }

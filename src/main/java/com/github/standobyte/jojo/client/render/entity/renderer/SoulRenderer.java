@@ -70,7 +70,7 @@ public class SoulRenderer<T extends SoulEntity> extends EntityRenderer<T> {
         if (rendertype != null) {
             IVertexBuilder ivertexbuilder = buffer.getBuffer(rendertype);
             int i = OverlayTexture.pack(OverlayTexture.u(0.5F), OverlayTexture.v(false));
-            float alpha = Math.min(0.75F, 3.0F * (1F - Math.min((float) soulEntity.tickCount / (float) soulEntity.getLifeSpan(), 1F)));
+            float alpha = Math.min(0.75F, 3.0F * (1F - Math.min((float) soulEntity.tickCount / (float) soulEntity.lifeSpan, 1F)));
             model.renderToBuffer(matrixStack, ivertexbuilder, packedLight, i, 1.0F, 1.0F, 0.0F, alpha);
         }
 

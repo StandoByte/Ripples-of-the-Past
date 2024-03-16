@@ -7,7 +7,7 @@ import net.minecraft.util.text.IFormattableTextComponent;
 
 public class HamonSkillGuiElement {
     protected final AbstractHamonSkill skill;
-    private final IFormattableTextComponent name;
+    protected final IFormattableTextComponent name;
     protected int x;
     protected int y;
     protected final int width;
@@ -15,16 +15,17 @@ public class HamonSkillGuiElement {
     
     public HamonSkillGuiElement(AbstractHamonSkill skill, 
             int x, int y, int width, int height) {
+        this(skill, skill.getNameTranslated(), x, y, width, height);
+    }
+    
+    public HamonSkillGuiElement(AbstractHamonSkill skill, IFormattableTextComponent name, 
+            int x, int y, int width, int height) {
         this.skill = skill;
-        this.name = skill.getNameTranslated();
+        this.name = name;
         this.x = x;
         this.y = y;
         this.width = width;
         this.height = height;
-    }
-    
-    IFormattableTextComponent getName() {
-        return name;
     }
     
     public boolean isMouseOver(int scrollX, int scrollY, int mouseX, int mouseY) {

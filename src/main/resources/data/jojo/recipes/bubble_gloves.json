@@ -1,0 +1,18 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "jojo:gloves"
+    }
+    ,
+    {
+      "item": "jojo:soap"
+    }
+  ],
+  "result": {
+    "item": "jojo:bubble_gloves",
+    "nbt":{
+    	"Ammo": 500
+    }
+  }
+}
