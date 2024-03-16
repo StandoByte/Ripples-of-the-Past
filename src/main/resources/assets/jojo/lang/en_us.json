@@ -527,6 +527,8 @@
   "jojo.config.client.hudNamesRender.tooltip": "How Power name and action names should render in the HUD.",
   "jojo.config.client.hudHotbarsFold": "Minimize HUD hotbars",
   "jojo.config.client.hudHotbarsFold.tooltip": "Minimize HUD hotbars after an action is selected.",
+  "jojo.config.client.showLockedSlots": "Show locked slots",
+  "jojo.config.client.showLockedSlots.tooltip": "Whether or not locked abilities show up in HUD hotbars as empty squares.",
   "jojo.config.client.showModeSelector": "Show HUD mode selector",
   "jojo.config.client.showModeSelector.tooltip": "Whether or not a list of available Powers shows up when switching a HUD mode.",
   "jojo.config.client.resolveShaders": "Resolve shaders",
