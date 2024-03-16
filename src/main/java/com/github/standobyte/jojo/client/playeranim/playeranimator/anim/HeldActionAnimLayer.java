@@ -58,9 +58,14 @@ public class HeldActionAnimLayer extends AnimLayerHandler {
             return poses[RANDOM.nextInt(poses.length)];
         }
         
+        if (action == ModHamonActions.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE_BARRAGE.get()) {
+            return SYO_BARRAGE_START;
+        }
+        
         return null;
     }
-
+    
+    private static final ResourceLocation SYO_BARRAGE_START = new ResourceLocation(JojoMod.MOD_ID, "syo_barrage_start");
     private static final ResourceLocation DEFAULT_POSE = new ResourceLocation(JojoMod.MOD_ID, "breath_pose/default");
     private static final Map<CharacterHamonTechnique, ResourceLocation[]> POSES = Util.make(new HashMap<>(), map -> {
         map.put(ModHamonSkills.CHARACTER_JONATHAN.get(), new ResourceLocation[] {

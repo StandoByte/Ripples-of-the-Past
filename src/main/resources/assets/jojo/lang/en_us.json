@@ -840,6 +840,8 @@
   "hamonSkill.metal_silver_overdrive.desc": "You can perform Overdrive attack with a weapon or a tool.",
   "hamonSkill.overdrive_barrage.name": "Overdrive Barrage",
   "hamonSkill.overdrive_barrage.desc": "You unleash a barrage of rapid Overdrive attacks.",
+  "hamonSkill.syo_barrage.name": "Sunlight Yellow Overdrive Barrage",
+  "hamonSkill.syo_barrage.desc": "A more powerful variation of Overdrive Barrage, followed by a devastating finishing punch. Takes a few seconds to charge.",
   "hamonSkill.hamon_cutter.name": "Hamon Cutter",
   "hamonSkill.hamon_cutter.desc": "Infuse a bottle of liquid with Hamon and shoot the liquid out at high speed. In addition to Hamon damage, the potion's effect is applied to the target.",
   "hamonSkill.sendo_wave_kick.name": "Sendo Wave Kick",
