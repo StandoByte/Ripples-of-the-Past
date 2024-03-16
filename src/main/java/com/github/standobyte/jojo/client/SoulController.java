@@ -3,8 +3,10 @@ package com.github.standobyte.jojo.client;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -93,10 +95,27 @@ public class SoulController {
     }
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public void cancelUIRender(RenderGameOverlayEvent.Pre event) {
+    public void renderSoulTimer(RenderGameOverlayEvent.Pre event) {
         if (event.getType() == ElementType.EXPERIENCE && 
                 playerSoulEntity != null && playerSoulEntity == mc.getCameraEntity() && !mc.player.isSpectator() && mc.player.isDeadOrDying()) {
             event.setCanceled(true);
+            
+            MatrixStack matrixStack = event.getMatrixStack();
+            mc.getProfiler().push("expBar");
+            mc.getTextureManager().bind(ClientUtil.ADDITIONAL_UI);
+            int i = mc.player.getXpNeededForNextLevel();
+            if (i > 0) {
+                int xPos = mc.getWindow().getGuiScaledWidth() / 2 - 91;
+                int yPos = mc.getWindow().getGuiScaledHeight() - 32 + 3;
+                int width = 182;
+                int fill = (int)((1.0F - ((float) playerSoulEntity.tickCount / playerSoulEntity.lifeSpan)) * (width + 1));
+                AbstractGui.blit(matrixStack, xPos, yPos, 0, 0, 208, width, 5, 256, 256);
+                if (fill > 0) {
+                    AbstractGui.blit(matrixStack, xPos, yPos, 0, 0, 213, fill, 5, 256, 256);
+                }
+            }
+            
+            mc.getProfiler().pop();
         }
     }
     
