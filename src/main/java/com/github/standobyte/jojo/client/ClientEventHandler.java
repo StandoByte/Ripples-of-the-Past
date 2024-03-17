@@ -4,6 +4,7 @@ import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.EXPERIENCE;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.FOOD;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.HEALTH;
+import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.HELMET;
 
 import java.util.List;
 import java.util.ListIterator;
@@ -183,11 +184,19 @@ public class ClientEventHandler {
         }
         
         if (mc.player != null && sound.getAttenuation() == AttenuationType.LINEAR && sound instanceof LocatableSound) {
-            mc.player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(playerData -> {
-                float progress = playerData.getDyingBodyProgress();
-                if (progress > 0.8F) {
-                    float volumeMult = 5 * (1 - progress);
-                    ((LocatableSound) sound).volume *= volumeMult;
+            mc.player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(player -> {
+                if (player.isDyingBody()) {
+                    float progress = player.getDyingBodyProgress();
+                    if (progress > 0.8F) {
+                        float volumeMult;
+                        if (progress < 0.84F) {
+                            volumeMult = 20 * (1 - progress) - 3;
+                        }
+                        else {
+                            volumeMult = 1.25F * (1 - progress);
+                        }
+                        ((LocatableSound) sound).volume *= volumeMult;
+                    }
                 }
             });
         }
@@ -514,6 +523,13 @@ public class ClientEventHandler {
                     event.setCanceled(true);
                 }
             });
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.NORMAL)
+    public void renderUI(RenderGameOverlayEvent.Pre event) {
+        if (event.getType() == HELMET) {
+            renderLosingVision(event.getMatrixStack(), event.getPartialTicks());
         }
     }
     
@@ -986,6 +1002,78 @@ public class ClientEventHandler {
             EntityType<?> mountedType = event.isMounting() && mounted != null ? mounted.getType() : null;
             event.getEntityMounting().getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(
                     cap -> cap.setVehicleType(mountedType));
+        }
+    }
+    
+    
+    
+    private void renderLosingVision(MatrixStack matrixStack, float partialTick) {
+        if (mc.player != null) {
+            mc.player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(player -> {
+                if (player.isDyingBody()) {
+                    int timeLeft = player.getDyingBodyTicksLeft();
+                    if (timeLeft > 0) {
+                        --timeLeft;
+                        float vignette = 0;
+                        if (timeLeft <= 60) {
+                            float vignetteTime = (60 - timeLeft) + partialTick;
+                            if (timeLeft > 20) {
+                                vignette = (MathHelper.cos(vignetteTime / 10 * (float) Math.PI) + 1) / 2;
+                            }
+                            else {
+                                vignette = (MathHelper.cos(vignetteTime / 20 * (float) Math.PI) + 1) / 2;
+                            }
+                        }
+                        else {
+                            float progress = player.getDyingBodyProgress();
+                            if (progress > 0.8F) {
+                                vignette = 1 - 5 * (1 - progress);
+                            }
+                        }
+                        
+                        if (vignette > 0) {
+                            vignette = Math.min(vignette, 1);
+                            ActionsOverlayGui.getInstance().renderVignette(matrixStack, vignette, vignette, vignette);
+                        }
+                    }
+                }
+            });
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void dyingBodyLostVision(EntityViewRenderEvent.FogDensity event) {
+        if (mc.player != null) {
+            mc.player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(player -> {
+                if (player.isDyingBody()) {
+                    int timeLeft = player.getDyingBodyTicksLeft();
+                    if (timeLeft > 0) {
+                        --timeLeft;
+                        if (timeLeft <= 20) {
+                            float lerp = (20 - timeLeft + (float) event.getRenderPartialTicks()) / 20.0F;
+                            event.setDensity(MathHelper.lerp(lerp, event.getDensity(), 1));
+                            event.setCanceled(true);
+                        }
+                    }
+                    else {
+                        event.setDensity(1);
+                        event.setCanceled(true);
+                    }
+                }
+            });
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void dyingBodyVisionDark(EntityViewRenderEvent.FogColors event) {
+        if (mc.player != null) {
+            mc.player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(player -> {
+                if (player.isDyingBody() && player.getDyingBodyTicksLeft() <= 21) {
+                    event.setRed(0);
+                    event.setGreen(0);
+                    event.setBlue(0);
+                }
+            });
         }
     }
 }

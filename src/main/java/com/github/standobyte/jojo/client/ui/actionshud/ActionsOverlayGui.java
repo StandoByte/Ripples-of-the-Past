@@ -1864,7 +1864,7 @@ public class ActionsOverlayGui extends AbstractGui {
     }
 
     private static final ResourceLocation VIGNETTE_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/vignette.png");
-    private void renderVignette(MatrixStack matrixStack, float r, float g, float b) {
+    public void renderVignette(MatrixStack matrixStack, float r, float g, float b) {
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);

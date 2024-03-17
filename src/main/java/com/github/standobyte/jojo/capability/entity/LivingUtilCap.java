@@ -399,6 +399,10 @@ public class LivingUtilCap {
         }
     }
     
+    public int getDyingBodyTicksLeft() {
+        return deadBodyTimer;
+    }
+    
     
     
     public boolean tryHurtFromSendoOverdrive(HamonSendoOverdriveEntity overdrive, int otherWavesImmuneTicks) {
