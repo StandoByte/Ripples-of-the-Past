@@ -135,9 +135,16 @@ public class PlayerUtilCap {
         tickDoubleShift();
     }
     
-    public void saveOnDeath(PlayerUtilCap cap) {
-        this.notificationsSent = cap.notificationsSent;
-        this.metEntityTypesId = cap.metEntityTypesId;
+    public void onClone(PlayerUtilCap old, boolean wasDeath) {
+        this.notificationsSent = old.notificationsSent;
+
+        this.metEntityTypesId = old.metEntityTypesId;
+        
+        this.lastBedType = old.lastBedType;
+        this.ticksNoSleep = old.ticksNoSleep;
+        this.nextSleepTime = old.nextSleepTime;
+        
+        this.lastTradeTime.putAll(old.lastTradeTime);
     }
     
     public CompoundNBT toNBT() {
@@ -215,6 +222,9 @@ public class PlayerUtilCap {
             PacketManager.sendToClient(new MetEntityTypesPacket(metEntityTypesId), player);
         }
         PacketManager.sendToClient(new GEUiDataPacket(this.GEHiddenEntries, Optional.ofNullable(GEChosenType)), player);
+        
+        PacketManager.sendToClient(new TrKnivesCountPacket(player.getId(), knives), player);
+        PacketManager.sendToClient(new TrWalkmanEarbudsPacket(player.getId(), walkmanEarbuds), player);
     }
     
     
