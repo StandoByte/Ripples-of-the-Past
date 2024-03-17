@@ -325,22 +325,6 @@ public class LivingUtilCap {
     
     
     
-    public void onTracking(ServerPlayerEntity tracking) {
-        if (deadBodyTimer >= 0) {
-            PacketManager.sendToClient(new TrDyingBodyTimerPacket(
-                    entity.getId(), deadBodyTimer), tracking);
-        }
-    }
-    
-    public void syncWithClient(ServerPlayerEntity entityAsPlayer) {
-        if (deadBodyTimer >= 0) {
-            PacketManager.sendToClient(new TrDyingBodyTimerPacket(
-                    entity.getId(), deadBodyTimer), entityAsPlayer);
-        }
-    }
-    
-    
-    
     public void setNoLerpTicks(int ticks) {
         this.noLerpTicks = ticks;
     }
@@ -522,11 +506,30 @@ public class LivingUtilCap {
         }
     }
     
-
+    
+    
+    public void onTracking(ServerPlayerEntity tracking) {
+        if (deadBodyTimer >= 0) {
+            PacketManager.sendToClient(new TrDyingBodyTimerPacket(
+                    entity.getId(), deadBodyTimer), tracking);
+        }
+    }
+    
+    public void syncWithClient(ServerPlayerEntity entityAsPlayer) {
+        if (deadBodyTimer >= 0) {
+            PacketManager.sendToClient(new TrDyingBodyTimerPacket(
+                    entity.getId(), deadBodyTimer), entityAsPlayer);
+        }
+    }
     
     public void onClone(LivingUtilCap old, boolean wasDeath) {
         hasUsedTimeStopToday = old.hasUsedTimeStopToday;
         gotScarf = old.gotScarf;
+        if (!wasDeath) {
+            deadBodyTimer = old.deadBodyTimer;
+            lifeShotResist = old.lifeShotResist;
+            lifeShotResistTicks = old.lifeShotResistTicks;
+        }
     }
     
     public CompoundNBT toNBT() {

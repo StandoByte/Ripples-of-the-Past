@@ -63,7 +63,7 @@ public class GoldExperienceHeal extends StandEntityAction {
             
             if (entity.isDeadOrDying()) {
                 boolean canResurrect = !JojoModUtil.isDyingBody(entity) && !JojoModUtil.isUndead(entity);
-                return ActionConditionResult.noMessage(canResurrect);
+                return canResurrect ? ActionConditionResult.POSITIVE : conditionMessage("resurrect_dead");
             }
             
             if (!tissueItem) {
