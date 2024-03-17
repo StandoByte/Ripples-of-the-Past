@@ -363,7 +363,7 @@ public class DamageUtil {
     
     public static void suffocateTick(LivingEntity entity, float speed) {
         if (entity.canBreatheUnderwater() || entity instanceof PlayerEntity && JojoModUtil.isPlayerUndead((PlayerEntity) entity)
-                || entity instanceof IronGolemEntity) return;
+                || JojoModUtil.isDyingBody(entity) || entity instanceof IronGolemEntity) return;
         
         if (entity.getAirSupply() > 0) {
             Optional<HamonData> hamonOptional = INonStandPower.getNonStandPowerOptional(entity).resolve().flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get()));

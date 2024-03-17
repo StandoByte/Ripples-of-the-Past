@@ -201,6 +201,9 @@ public class HamonData extends TypeSpecificData {
     
     public float tickEnergy() {
         LivingEntity user = power.getUser();
+        if (JojoModUtil.isDyingBody(user)) {
+            return 0;
+        }
         if (power.getHeldAction() == ModHamonActions.HAMON_BREATH.get() && user.getAirSupply() >= user.getMaxAirSupply()) {
             ticksMaskWithNoHamonBreath = 0;
             if (user.level.isClientSide() && power.getEnergy() > 0 && !playedEnergySound) {
@@ -273,6 +276,12 @@ public class HamonData extends TypeSpecificData {
     private int prevAir = 300;
     private void tickBreathStability() {
         LivingEntity user = power.getUser();
+        if (JojoModUtil.isDyingBody(user)) {
+            breathStability = 0;
+            prevBreathStability = 0;
+            return;
+        }
+        
         boolean canBreath = user.getAirSupply() >= user.getMaxAirSupply();
         float inc;
         float maxStability = getMaxBreathStability();

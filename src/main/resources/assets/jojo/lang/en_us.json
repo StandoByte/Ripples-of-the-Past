@@ -1153,6 +1153,7 @@
   "jojo.message.action_condition.ge_heal_stronger.other": "%s is already under a strong regeneration effect",
   "jojo.message.action_condition.ge_heal_full_hp": "You are not injured",
   "jojo.message.action_condition.ge_heal_full_hp.other": "%s is not injured",
+  "jojo.message.action_condition.dying_hamon": "Your body does not breathe and has no blood flow",
   "jojo.subtitle.gold_experience_name": "\"Gold Experience!\"",
   "jojo.subtitle.giorno_new_life": "\"Life, spring forth!\"",
   "jojo.subtitle.life_created": "Life created",
