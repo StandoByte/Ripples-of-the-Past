@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.client.sound;
 
+import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.Sound;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.MathHelper;
@@ -23,6 +24,9 @@ public class WalkmanTrackSound extends ResolvedLocationTickingSound {
             pitch = 0.95F;
             break;
         }
+        
+        attenuation = ISound.AttenuationType.NONE;
+        relative = true;
     }
 
     @Override
