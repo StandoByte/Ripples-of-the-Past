@@ -13,10 +13,12 @@ import net.minecraftforge.fml.network.NetworkEvent.Context;
 public class TrDyingBodyTimerPacket {
     private final int entityId;
     private final int timer;
+    private final int fullDuration;
     
-    public TrDyingBodyTimerPacket(int entityId, int timer) {
+    public TrDyingBodyTimerPacket(int entityId, int timer, int fullDuration) {
         this.entityId = entityId;
         this.timer = timer;
+        this.fullDuration = fullDuration;
     }
     
     
@@ -27,11 +29,12 @@ public class TrDyingBodyTimerPacket {
         public void encode(TrDyingBodyTimerPacket msg, PacketBuffer buf) {
             buf.writeInt(msg.entityId);
             buf.writeInt(msg.timer);
+            buf.writeInt(msg.fullDuration);
         }
 
         @Override
         public TrDyingBodyTimerPacket decode(PacketBuffer buf) {
-            return new TrDyingBodyTimerPacket(buf.readInt(), buf.readInt());
+            return new TrDyingBodyTimerPacket(buf.readInt(), buf.readInt(), buf.readInt());
         }
 
         @Override
@@ -39,7 +42,7 @@ public class TrDyingBodyTimerPacket {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity != null) {
                 entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(
-                        cap -> cap.setDyingBodyTimer(msg.timer));
+                        cap -> cap.setDyingBodyTimer(msg.timer, msg.fullDuration));
             }
         }
 

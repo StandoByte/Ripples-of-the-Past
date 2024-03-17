@@ -76,6 +76,7 @@ public class LivingUtilCap {
     
     public SoulEntity soulEntity;
     private int deadBodyTimer = -1;
+    private int deadBodyDuration = 1;
     
     private HamonSendoOverdriveEntity hurtFromSendoOverdrive;
     private int sendoOverdriveWaveTicks;
@@ -370,17 +371,31 @@ public class LivingUtilCap {
             else if (entity == ClientUtil.getClientPlayer()) {
                 ClientReflection.setFlashOnSetHealth(ClientUtil.getClientPlayer(), false);
             }
-            if (--deadBodyTimer == 0) {
+            if (deadBodyTimer > 0 && --deadBodyTimer == 0) {
                 
             }
         }
     }
     
     public void setDyingBodyTimer(int timer) {
+        setDyingBodyTimer(timer, timer);
+    }
+    
+    public void setDyingBodyTimer(int timer, int fullDuration) {
         this.deadBodyTimer = timer;
+        this.deadBodyDuration = Math.max(fullDuration, 1);
         if (!entity.level.isClientSide()) {
             PacketManager.sendToClientsTrackingAndSelf(new TrDyingBodyTimerPacket(
-                    entity.getId(), deadBodyTimer), entity);
+                    entity.getId(), deadBodyTimer, deadBodyDuration), entity);
+        }
+    }
+    
+    public float getDyingBodyProgress() {
+        if (isDyingBody()) {
+            return 1 - (float) deadBodyTimer / deadBodyDuration;
+        }
+        else {
+            return 0;
         }
     }
     
@@ -516,14 +531,14 @@ public class LivingUtilCap {
     public void onTracking(ServerPlayerEntity tracking) {
         if (deadBodyTimer >= 0) {
             PacketManager.sendToClient(new TrDyingBodyTimerPacket(
-                    entity.getId(), deadBodyTimer), tracking);
+                    entity.getId(), deadBodyTimer, deadBodyDuration), tracking);
         }
     }
     
     public void syncWithClient(ServerPlayerEntity entityAsPlayer) {
         if (deadBodyTimer >= 0) {
             PacketManager.sendToClient(new TrDyingBodyTimerPacket(
-                    entity.getId(), deadBodyTimer), entityAsPlayer);
+                    entity.getId(), deadBodyTimer, deadBodyDuration), entityAsPlayer);
         }
     }
     
@@ -550,6 +565,7 @@ public class LivingUtilCap {
         nbt.putInt("LifeShotTicks", lifeShotResistTicks);
         nbt.putFloat("LifeShotResist", lifeShotResist);
         nbt.putInt("DeadBody", deadBodyTimer);
+        nbt.putInt("DeadBodyDuration", deadBodyDuration);
         return nbt;
     }
     
@@ -564,7 +580,8 @@ public class LivingUtilCap {
         
         lifeShotResistTicks = nbt.getInt("LifeShotTicks");
         lifeShotResist = nbt.getInt("LifeShotResist");
-        deadBodyTimer = nbt.getInt("DeadBody");
+        deadBodyTimer = nbt.contains("DeadBody") ? nbt.getInt("DeadBody") : -1;
+        deadBodyDuration = Math.max(nbt.getInt("DeadBodyDuration"), 1);
     }
     
 }

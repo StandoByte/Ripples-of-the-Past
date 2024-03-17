@@ -32,7 +32,6 @@ import com.github.standobyte.jojo.client.sound.StandCrySoundHandler;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.ClientModSettingsScreen;
-import com.github.standobyte.jojo.client.ui.screen.standskin.StandSkinsScreen;
 import com.github.standobyte.jojo.client.ui.screen.controls.HudLayoutEditingScreen;
 import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.CategoryWithButtonsEntry;
 import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.ControlSettingToggleButton;
@@ -69,6 +68,8 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
+import net.minecraft.client.audio.ISound.AttenuationType;
+import net.minecraft.client.audio.LocatableSound;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
@@ -179,6 +180,16 @@ public class ClientEventHandler {
         ISound sound = event.getResultSound();
         if (ClientTimeStopHandler.getInstance().shouldCancelSound(sound)) {
             event.setResultSound(null);
+        }
+        
+        if (mc.player != null && sound.getAttenuation() == AttenuationType.LINEAR && sound instanceof LocatableSound) {
+            mc.player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(playerData -> {
+                float progress = playerData.getDyingBodyProgress();
+                if (progress > 0.8F) {
+                    float volumeMult = 5 * (1 - progress);
+                    ((LocatableSound) sound).volume *= volumeMult;
+                }
+            });
         }
     }
     
