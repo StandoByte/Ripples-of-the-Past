@@ -439,6 +439,10 @@ public class GameplayEventHandler {
         LivingEntity target = event.getEntityLiving();
         Entity attacker = dmgSource.getEntity();
         
+        if (target.level.isClientSide() && JojoModUtil.isDyingBody(target)) {
+            event.setCanceled(true);
+        }
+        
         if (attacker != null && attacker instanceof LivingEntity) {
             LivingEntity attackerLiving = (LivingEntity) attacker;
             if (attacker.is(dmgSource.getDirectEntity())) {
@@ -674,12 +678,16 @@ public class GameplayEventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingDamage(LivingDamageEvent event) {
-        bleed(event.getSource(), event.getAmount(), event.getEntityLiving());
-        StandType.onHurtByStand(event.getSource(), event.getAmount(), event.getEntityLiving());
+        LivingEntity entity = event.getEntityLiving();
+        DamageSource dmgSource = event.getSource();
+        float dmgAmount = event.getAmount();
+        
+        bleed(dmgSource, dmgAmount, entity);
+        StandType.onHurtByStand(dmgSource, dmgAmount, entity);
         
         for (PowerClassification powerClassification : PowerClassification.values()) {
-            IPower.getPowerOptional(event.getEntityLiving(), powerClassification).ifPresent(power -> 
-            power.onUserGettingAttacked(event.getSource(), event.getAmount()));
+            IPower.getPowerOptional(entity, powerClassification).ifPresent(power -> 
+            power.onUserGettingAttacked(dmgSource, dmgAmount));
         }
     }
 

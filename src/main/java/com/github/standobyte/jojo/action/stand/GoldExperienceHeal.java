@@ -125,7 +125,7 @@ public class GoldExperienceHeal extends StandEntityAction {
                 if (resurrect) {
                     entity.setHealth(entity.getMaxHealth());
                     MCUtil.onEntityResurrect(entity);
-                    entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(data -> data.setDyingBodyTimer(48000));
+                    entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(data -> data.setDyingBodyTimer(24000));
                 }
                 playHealSound(entity);
                 return;

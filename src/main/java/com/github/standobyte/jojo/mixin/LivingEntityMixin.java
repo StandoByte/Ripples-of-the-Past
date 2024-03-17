@@ -4,8 +4,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
@@ -42,12 +42,11 @@ public abstract class LivingEntityMixin extends Entity {
     
     
     
-    @ModifyVariable(method = "hurt", at = @At(value = "STORE", ordinal = 0), ordinal = 1, require = 1)
-    private boolean jojoNoHurtAnim(boolean flag1) {
+    @Inject(method = "playHurtSound", at = @At("HEAD"), cancellable = true)
+    public void jojoCancelHurtSound(DamageSource source, CallbackInfo ci) {
         if (this.getCapability(LivingUtilCapProvider.CAPABILITY).map(cap -> cap.isDyingBody()).orElse(false)) {
-            return false;
+            ci.cancel();
         }
-        return flag1;
     }
-
+    
 }

@@ -673,4 +673,10 @@ public class MCUtil {
     public static String getLanguageCode(MinecraftServer server) {
         return server.isDedicatedServer() ? "en_us" : ClientUtil.getCurrentLanguageCode();
     }
+    
+    
+    
+    public static class EntityEvents { // TODO
+        public static final int HONEY_PARTICLES = 53;
+    }
 }

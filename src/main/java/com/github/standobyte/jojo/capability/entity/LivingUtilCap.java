@@ -11,6 +11,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.stand.GoldExperienceEntityLifeshot;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.AfterimageEntity;
 import com.github.standobyte.jojo.entity.HamonSendoOverdriveEntity;
 import com.github.standobyte.jojo.entity.SoulEntity;
@@ -23,6 +24,7 @@ import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.CollideBlocks;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
+import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 
 import net.minecraft.entity.LivingEntity;
@@ -364,6 +366,9 @@ public class LivingUtilCap {
                     ((PlayerEntity) entity).getFoodData().setFoodLevel(17);
                 }
                 entity.setAirSupply(entity.getMaxAirSupply());
+            }
+            else if (entity == ClientUtil.getClientPlayer()) {
+                ClientReflection.setFlashOnSetHealth(ClientUtil.getClientPlayer(), false);
             }
             if (--deadBodyTimer == 0) {
                 

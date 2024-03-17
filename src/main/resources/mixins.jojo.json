@@ -15,6 +15,7 @@
     "client.ParticleManagerMixin",
     "client.TextureManagerMixin",
     "client.WorldRendererMixin",
-    "client.ClientPlayNetHandlerMixin"
+    "client.ClientPlayNetHandlerMixin",
+    "client.LivingEntityClMixin"
   ]
 }
