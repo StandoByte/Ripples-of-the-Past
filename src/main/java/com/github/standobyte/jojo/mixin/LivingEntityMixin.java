@@ -4,9 +4,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
 
 import net.minecraft.entity.CreatureAttribute;
@@ -36,6 +38,16 @@ public abstract class LivingEntityMixin extends Entity {
         if (!(damageSource instanceof IModdedDamageSource && ((IModdedDamageSource) damageSource).preventsDamagingArmor())) {
             hurtArmor(damageSource, damageAmount);
         }
+    }
+    
+    
+    
+    @ModifyVariable(method = "hurt", at = @At(value = "STORE", ordinal = 0), ordinal = 1, require = 1)
+    private boolean jojoNoHurtAnim(boolean flag1) {
+        if (this.getCapability(LivingUtilCapProvider.CAPABILITY).map(cap -> cap.isDyingBody()).orElse(false)) {
+            return false;
+        }
+        return flag1;
     }
 
 }

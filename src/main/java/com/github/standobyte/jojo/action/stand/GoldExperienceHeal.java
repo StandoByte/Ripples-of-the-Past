@@ -4,6 +4,7 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.non_stand.HamonHealing;
 import com.github.standobyte.jojo.action.stand.effect.GEHealingEffect;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -33,6 +34,9 @@ public class GoldExperienceHeal extends StandEntityAction {
     
     @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
+        if (user.isDeadOrDying()) {
+            return ActionConditionResult.NEGATIVE;
+        }
         return canHeal(user, user, false, MAX_REGEN_LVL);
     }
     
@@ -55,6 +59,11 @@ public class GoldExperienceHeal extends StandEntityAction {
             }
             if (StandUtil.getStandUser(entity) != entity) {
                 return conditionMessage("ge_heal_stand");
+            }
+            
+            if (entity.isDeadOrDying()) {
+                boolean canResurrect = !JojoModUtil.isDyingBody(entity) && !JojoModUtil.isUndead(entity);
+                return ActionConditionResult.noMessage(canResurrect);
             }
             
             if (!tissueItem) {
@@ -104,6 +113,25 @@ public class GoldExperienceHeal extends StandEntityAction {
     public static void spendAndHeal(World world, LivingEntity entity, 
             LivingEntity user, IStandPower userPower, StandEntity standEntity) {
         if (entity != null && !world.isClientSide()) {
+            if (entity.isDeadOrDying()) {
+                boolean resurrect = entity.getCapability(LivingUtilCapProvider.CAPABILITY).map(data -> {
+                    if (data.soulEntity != null && data.soulEntity.isAlive()) {
+                        int timeLeft = data.soulEntity.lifeSpan - data.soulEntity.tickCount;
+                        return timeLeft <= 20 || entity.getRandom().nextFloat() <= 0.2F;
+                    }
+                    return false;
+                }).orElse(false);
+                
+                if (resurrect) {
+                    entity.setHealth(entity.getMaxHealth());
+                    MCUtil.onEntityResurrect(entity);
+                    entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(data -> data.setDyingBodyTimer(48000));
+                }
+                playHealSound(entity);
+                return;
+            }
+            
+            
             boolean stuckProjectile = false;
             int arrows = entity.getArrowCount();
             if (arrows > 0) {
@@ -117,32 +145,44 @@ public class GoldExperienceHeal extends StandEntityAction {
                     stuckProjectile = true;
                 }
             }
-            
             if (stuckProjectile) {
-                entity.hurt(DamageSource.GENERIC, 0.0001F);
-                int lvl = Math.min(MCUtil.getEffectLevel(entity, Effects.REGENERATION) + 1, MAX_REGEN_LVL);
-                entity.addEffect(new EffectInstance(Effects.REGENERATION, 
-                        HamonHealing.updateRegenEffect(entity, 105, lvl), lvl));
-                
-                MCUtil.playSound(entity.level, null, entity, ModSounds.GOLD_EXPERIENCE_HEAL.get(), 
-                        SoundCategory.AMBIENT, 1.0F, 0.95F + entity.getRandom().nextFloat() * 0.1F, StandUtil::playerCanHearStands);
-            }
-            else {
-                ItemStack offHandItem = user.getOffhandItem();
-                if (offHandItem.getItem() instanceof BucketItem) {
-                    BucketItem bucketType = (BucketItem) offHandItem.getItem();
-                    bucketType.checkExtraContent(world, offHandItem, getControlledEntity(user, userPower).blockPosition());
+                if (JojoModUtil.isDyingBody(entity)) {
+                    entity.setHealth(entity.getHealth() + 2.0F);
                 }
-                if (!(user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild)) {
-                    offHandItem.shrink(1);
+                else {
+                    entity.hurt(DamageSource.GENERIC, 0.0001F);
+                    int lvl = Math.min(MCUtil.getEffectLevel(entity, Effects.REGENERATION) + 1, MAX_REGEN_LVL);
+                    entity.addEffect(new EffectInstance(Effects.REGENERATION, 
+                            HamonHealing.updateRegenEffect(entity, 105, lvl), lvl));
                 }
-                
-                giveGEHealEffect(entity, userPower, 6000);
+                playHealSound(entity);
+                return;
             }
+            
+            
+            ItemStack offHandItem = user.getOffhandItem();
+            if (offHandItem.getItem() instanceof BucketItem) {
+                BucketItem bucketType = (BucketItem) offHandItem.getItem();
+                bucketType.checkExtraContent(world, offHandItem, getControlledEntity(user, userPower).blockPosition());
+            }
+            if (!(user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild)) {
+                offHandItem.shrink(1);
+            }
+            
+            giveGEHealEffect(entity, userPower, 6000);
         }
     }
     
     public static void giveGEHealEffect(LivingEntity entity, IStandPower userPower, int durationMax) {
+        playHealSound(entity);
+        
+        
+        if (JojoModUtil.isDyingBody(entity)) {
+            entity.setHealth(entity.getHealth() + 2.0F);
+            return;
+        }
+        
+        
         EffectInstance currentRegen = entity.getEffect(Effects.REGENERATION);
         
         int lvl;
@@ -170,6 +210,9 @@ public class GoldExperienceHeal extends StandEntityAction {
         EffectInstance newRegen = new EffectInstance(Effects.REGENERATION, duration, lvl, false, true, true, currentRegen);
         entity.addEffect(newRegen);
         
+    }
+    
+    public static void playHealSound(LivingEntity entity) {
         MCUtil.playSound(entity.level, null, entity, ModSounds.GOLD_EXPERIENCE_HEAL.get(), 
                 SoundCategory.AMBIENT, 1.0F, 0.95F + entity.getRandom().nextFloat() * 0.1F, StandUtil::playerCanHearStands);
     }
@@ -189,6 +232,10 @@ public class GoldExperienceHeal extends StandEntityAction {
     }
     
     protected String getPostfix(LivingEntity entityToHeal) {
+        if (entityToHeal.isDeadOrDying()) {
+            return ".dying";
+        }
+        
         int arrows = entityToHeal.getArrowCount();
         if (arrows > 0) {
             return ".arrow";

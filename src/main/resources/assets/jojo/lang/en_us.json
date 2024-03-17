@@ -1126,6 +1126,7 @@
   "action.jojo.gold_experience_heal_other": "Plug up %s's wounds",
   "action.jojo.gold_experience_heal_other.arrow": "Plug up %s's arrow wound",
   "action.jojo.gold_experience_heal_other.knife": "Plug up %s's knife wound",
+  "action.jojo.gold_experience_heal_other.dying": "Give life energy to %s",
   "action.jojo.gold_experience_healing_item": "Create body tissue",
   "entity.jojo.util_object.tooth": "Tooth",
   "entity.jojo.ge_lifeform": "Gold Experience's Lifeform",

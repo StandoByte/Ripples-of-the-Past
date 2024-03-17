@@ -271,6 +271,9 @@ public class ForgeBusEventSubscriber {
         player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
             cap.syncWithClient();
         });
+        player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+            cap.syncWithClient((ServerPlayerEntity) player);
+        });
         PacketManager.sendToClient(new UpdateClientCapCachePacket(), (ServerPlayerEntity) player);
     }
     

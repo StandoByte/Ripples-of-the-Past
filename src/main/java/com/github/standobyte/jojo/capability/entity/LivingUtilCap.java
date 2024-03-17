@@ -13,8 +13,11 @@ import com.github.standobyte.jojo.action.stand.GoldExperienceEntityLifeshot;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
 import com.github.standobyte.jojo.entity.AfterimageEntity;
 import com.github.standobyte.jojo.entity.HamonSendoOverdriveEntity;
+import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.ai.LookAtEntityWithoutMovingGoal;
 import com.github.standobyte.jojo.init.ModStatusEffects;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.TrDyingBodyTimerPacket;
 import com.github.standobyte.jojo.potion.HamonSpreadEffect;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.CollideBlocks;
@@ -69,6 +72,9 @@ public class LivingUtilCap {
     private int noLerpTicks = 0;
     private int hurtTimeSaved;
     
+    public SoulEntity soulEntity;
+    private int deadBodyTimer = -1;
+    
     private HamonSendoOverdriveEntity hurtFromSendoOverdrive;
     private int sendoOverdriveWaveTicks;
     
@@ -90,7 +96,8 @@ public class LivingUtilCap {
         lastHurtByStandTick();
         tickNoLerp();
         tickHurtAnim();
-        tickDownHamonDamage(); 
+        tickDownHamonDamage();
+        tickDyingBody();
         
         if (!entity.level.isClientSide()) {
             tickSendoOverdriveHurtTimer();
@@ -98,6 +105,10 @@ public class LivingUtilCap {
             tickKnockbackBlockImpact();
             tickLifeShotResist();
             tickNoGravityModifier();
+        }
+        
+        if (soulEntity != null && !soulEntity.isAlive()) {
+            soulEntity = null;
         }
         
         Iterator<AfterimageEntity> it = afterimages.iterator();
@@ -315,6 +326,17 @@ public class LivingUtilCap {
     
     
     public void onTracking(ServerPlayerEntity tracking) {
+        if (deadBodyTimer >= 0) {
+            PacketManager.sendToClient(new TrDyingBodyTimerPacket(
+                    entity.getId(), deadBodyTimer), tracking);
+        }
+    }
+    
+    public void syncWithClient(ServerPlayerEntity entityAsPlayer) {
+        if (deadBodyTimer >= 0) {
+            PacketManager.sendToClient(new TrDyingBodyTimerPacket(
+                    entity.getId(), deadBodyTimer), entityAsPlayer);
+        }
     }
     
     
@@ -342,6 +364,34 @@ public class LivingUtilCap {
         else if (hurtTimeSaved > 0) {
             entity.hurtTime = hurtTimeSaved;
             hurtTimeSaved = 0;
+        }
+    }
+    
+    
+    
+    public boolean isDyingBody() {
+        return deadBodyTimer >= 0;
+    }
+    
+    private void tickDyingBody() {
+        if (isDyingBody()) {
+            if (!entity.level.isClientSide()) {
+                if (entity instanceof PlayerEntity) {
+                    ((PlayerEntity) entity).getFoodData().setFoodLevel(17);
+                }
+                entity.setAirSupply(entity.getMaxAirSupply());
+            }
+            if (--deadBodyTimer == 0) {
+                
+            }
+        }
+    }
+    
+    public void setDyingBodyTimer(int timer) {
+        this.deadBodyTimer = timer;
+        if (!entity.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(new TrDyingBodyTimerPacket(
+                    entity.getId(), deadBodyTimer), entity);
         }
     }
     
@@ -486,6 +536,7 @@ public class LivingUtilCap {
         
         nbt.putInt("LifeShotTicks", lifeShotResistTicks);
         nbt.putFloat("LifeShotResist", lifeShotResist);
+        nbt.putInt("DeadBody", deadBodyTimer);
         return nbt;
     }
     
@@ -500,6 +551,7 @@ public class LivingUtilCap {
         
         lifeShotResistTicks = nbt.getInt("LifeShotTicks");
         lifeShotResist = nbt.getInt("LifeShotResist");
+        deadBodyTimer = nbt.getInt("DeadBody");
     }
     
 }

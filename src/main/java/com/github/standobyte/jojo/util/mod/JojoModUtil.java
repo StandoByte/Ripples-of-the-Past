@@ -10,6 +10,8 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.InputHandler;
@@ -265,6 +267,10 @@ public class JojoModUtil {
             return powerType == ModPowers.VAMPIRISM.get();
         }).orElse(false); 
     }
+    
+    public static boolean isDyingBody(LivingEntity entity) {
+        return entity.getCapability(LivingUtilCapProvider.CAPABILITY).map(LivingUtilCap::isDyingBody).orElse(false);
+    }
 
     public static boolean canBleed(LivingEntity entity) {
         if (entity.getMobType() == CreatureAttribute.UNDEAD) {
@@ -272,6 +278,9 @@ public class JojoModUtil {
                     || entity instanceof ZombieEntity && !(entity instanceof HuskEntity)
                     || entity instanceof ZoglinEntity
                     || entity instanceof ZombieHorseEntity;
+        }
+        if (isDyingBody(entity)) {
+            return false;
         }
         return entity instanceof PlayerEntity
                 || entity instanceof AgeableEntity

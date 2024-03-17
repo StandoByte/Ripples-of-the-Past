@@ -124,7 +124,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
-import net.minecraft.util.CombatRules;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.DrinkHelper;
 import net.minecraft.util.EntityPredicates;
@@ -843,8 +842,8 @@ public class GameplayEventHandler {
     public static void onPotionApply(PotionApplicableEvent event) {
         LivingEntity entity = event.getEntityLiving();
         Effect effect = event.getPotionEffect().getEffect();
-        if ((effect == Effects.HUNGER/* || effect == Effects.POISON || effect == Effects.REGENERATION*/)
-                && entity instanceof PlayerEntity && JojoModUtil.isPlayerUndead((PlayerEntity) entity)) {
+        if ((effect == Effects.HUNGER || effect == Effects.POISON || effect == Effects.REGENERATION)
+                && (JojoModUtil.isDyingBody(entity) || entity instanceof PlayerEntity && JojoModUtil.isPlayerUndead((PlayerEntity) entity))) {
             event.setResult(Result.DENY);
         }
         else if (effect instanceof IApplicableEffect && !((IApplicableEffect) effect).isApplicable(entity)) {

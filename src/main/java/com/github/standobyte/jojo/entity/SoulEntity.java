@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.entity;
 
 import java.util.UUID;
 
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ControllerSoul;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -263,6 +264,7 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
         if (entity instanceof LivingEntity) {
             setOriginEntity((LivingEntity) entity);
             ControllerSoul.getInstance().onSoulSpawn(this);
+            entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(playerData -> playerData.soulEntity = this);
             addCloudParticles();
         }
         else {
