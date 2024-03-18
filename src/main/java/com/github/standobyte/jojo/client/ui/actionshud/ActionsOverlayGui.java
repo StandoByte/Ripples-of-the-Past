@@ -257,7 +257,8 @@ public class ActionsOverlayGui extends AbstractGui {
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public void render(RenderGameOverlayEvent.Pre event) {
         _target = null;
-        if (mc.gameMode.getPlayerMode() == GameType.SPECTATOR || mc.options.hideGui || mc.screen instanceof ChooseLifeformScreen) {
+        if (mc.gameMode.getPlayerMode() == GameType.SPECTATOR || mc.options.hideGui || mc.screen instanceof ChooseLifeformScreen
+                || mc.player.isDeadOrDying()) {
             return;
         }
         
