@@ -544,6 +544,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public void setProgressionSkipped() {
         this.skippedProgression = true;
+        clUpdateHud();
     }
     
     @Override
@@ -602,6 +603,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public void setLearningFromPacket(StandActionLearningPacket packet) {
         actionLearningProgressMap.setEntryDirectly(packet.entry);
+        clUpdateHud();
     }
     
     @Override

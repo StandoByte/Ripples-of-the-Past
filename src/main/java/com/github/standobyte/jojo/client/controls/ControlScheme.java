@@ -10,6 +10,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPowerType;
@@ -71,8 +72,9 @@ public class ControlScheme {
     <P extends IPower<P, T>, T extends IPowerType<P, T>> void sanitizeControls(P power, T powerType) {
         this.legalKeybinds.clear();
         for (ActionKeybindEntry keybind : serializedKeybinds) {
-           Action<?> action = keybind.getAction();
-           if (keybind.isValid() && action != null && powerType.isActionLegalInHud((Action<P>) action, power)) {
+           Action<P> action = (Action<P>) keybind.getAction();
+           if (keybind.isValid() && action != null && powerType.isActionLegalInHud(action, power)
+                   && (ClientModSettings.getSettingsReadOnly().showLockedSlots || action.isUnlocked(power))) {
                legalKeybinds.add(keybind);
            }
         }
@@ -84,8 +86,9 @@ public class ControlScheme {
             hotbar.legalSwitches.clear();
             
             for (ActionVisibilitySwitch declaredAction : hotbar.serializedSwitches) {
-                Action<?> action = declaredAction.getAction();
-                if (action != null && powerType.isActionLegalInHud((Action<P>) action, power)) {
+                Action<P> action = (Action<P>) declaredAction.getAction();
+                if (action != null && powerType.isActionLegalInHud((Action<P>) action, power)
+                        && (ClientModSettings.getSettingsReadOnly().showLockedSlots || action.isUnlocked(power))) {
                     hotbar.legalSwitches.add(declaredAction);
                 }
             }
