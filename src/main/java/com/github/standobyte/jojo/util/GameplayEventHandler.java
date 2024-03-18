@@ -23,14 +23,12 @@ import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.block.StoneMaskBlock;
 import com.github.standobyte.jojo.block.WoodenCoffinBlock;
 import com.github.standobyte.jojo.capability.chunk.ChunkCapProvider;
-import com.github.standobyte.jojo.capability.entity.EntityUtilCap;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
-import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDBloodCutterEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
@@ -60,6 +58,7 @@ import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.bowcharge.BowChargeEffectInstance;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismPowerType;
@@ -482,7 +481,8 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void cancelLivingAttack(LivingAttackEvent event) {
         if (HamonSendoWaveKick.protectFromMeleeAttackInKick(event.getEntityLiving(), event.getSource(), event.getAmount())
-                || HamonUtil.snakeMuffler(event.getEntityLiving(), event.getSource(), event.getAmount())) 
+                || HamonUtil.snakeMuffler(event.getEntityLiving(), event.getSource(), event.getAmount()) 
+                || HamonUtil.rebuffOverdrive(event.getEntityLiving(), event.getSource(), event.getAmount())) 
             event.setCanceled(true);
     }
     
@@ -587,7 +587,7 @@ public class GameplayEventHandler {
             INonStandPower.getNonStandPowerOptional(target).ifPresent(power -> {
                 if (
                         target.getType() == ModEntityTypes.HAMON_MASTER.get() || 
-                        power.getHeldAction() == ModHamonActions.HAMON_PROTECTION.get()) {
+                        power.getTypeSpecificData(ModPowers.HAMON.get()).map(HamonData::isProtectionEnabled).orElse(false)) {
                     event.setAmount(ModHamonActions.HAMON_PROTECTION.get().reduceDamageAmount(
                             power, power.getUser(), dmgSource, event.getAmount()));
                 }
@@ -1004,7 +1004,7 @@ public class GameplayEventHandler {
             LazyOptional<IStandPower> standOptional = IStandPower.getStandPowerOptional(dead);
             standOptional.ifPresent(stand -> {
                 stand.getContinuousEffects().onStandUserDeath(dead);
-                summonSoul(stand, dead, dmgSource);
+                stand.spawnSoulOnDeath();
             });
             
 
@@ -1021,47 +1021,6 @@ public class GameplayEventHandler {
         }
     }
     
-    private static void summonSoul(IStandPower stand, LivingEntity user, DamageSource dmgSource) {
-        if (!user.canUpdate()) return; // FIXME fix soul ascension when dying in time stop
-        
-        int ticks = getSoulAscensionTicks(user, stand);
-
-        if (ticks > 0) {
-            boolean resolveCanLvlUp = user.level.getLevelData().isHardcore()
-                    || !JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).keepStandOnDeath.get();
-            
-            EntityUtilCap.queueOnTimeResume(user, () -> {
-                if (user instanceof ServerPlayerEntity) {
-                    ModCriteriaTriggers.SOUL_ASCENSION.get().trigger((ServerPlayerEntity) user, stand, ticks);
-                }
-                SoulEntity soulEntity = new SoulEntity(user.level, user, ticks, resolveCanLvlUp);
-                LivingEntity killer = user.getKillCredit();
-                if (killer != null) {
-                    soulEntity.setNoResolveToEntity(StandUtil.getStandUser(killer));
-                }
-                user.level.addFreshEntity(soulEntity);
-            });
-        }
-    }
-    
-    public static int getSoulAscensionTicks(LivingEntity user, IStandPower stand) {
-        if (    !stand.usesResolve() || 
-                stand.getResolveLevel() == 0 ||
-                !JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).soulAscension.get() || 
-                JojoModUtil.isUndead(user) || 
-                user instanceof PlayerEntity && user.level.getGameRules().getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN)) {
-            return 0;
-        }
-
-        float resolveRatio = user.hasEffect(ModStatusEffects.RESOLVE.get()) ? 1 : stand.getResolveRatio();
-        int ticks = (int) (60 * (stand.getResolveLevel() + resolveRatio));
-        if (user.level.getLevelData().isHardcore()) {
-            ticks += ticks / 2;
-        }
-        
-        return ticks;
-    }
-
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void handleCheatDeath(LivingDeathEvent event) {
         if (!event.getEntity().level.isClientSide()) {

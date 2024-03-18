@@ -296,6 +296,9 @@ public class InputHandler {
                 }
             }
             
+            if (mc.options.keyJump.isDown()) {
+                SoulController.getInstance().skipAscension();
+            }
             tickEffects();
             clickWithBusyHands();
         }

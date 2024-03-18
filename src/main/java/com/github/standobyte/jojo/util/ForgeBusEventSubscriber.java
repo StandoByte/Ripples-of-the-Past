@@ -229,7 +229,13 @@ public class ForgeBusEventSubscriber {
         
         original.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(oldCap -> {
             player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(newCap -> {
-                newCap.saveOnDeath(oldCap);
+                newCap.onClone(oldCap, event.isWasDeath());
+            });
+        });
+        
+        original.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(oldCap -> {
+            player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(newCap -> {
+                newCap.onClone(oldCap, event.isWasDeath());
             });
         });
     }

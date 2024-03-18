@@ -71,7 +71,7 @@ public class TommyGunItem extends Item {
                     TommyGunBulletEntity bullet = new TommyGunBulletEntity(entity, world);
                     bullet.shootFromRotation(entity, 20F, 0);
                     world.addFreshEntity(bullet);
-                    consumeAmmo(stack);
+                    consumeAmmo(stack, 1);
                     // TODO gun shot visual effect
                 }
             }
@@ -96,18 +96,18 @@ public class TommyGunItem extends Item {
     }
     
     private static final int MAX_AMMO = 50;
-    private int getAmmo(ItemStack gun) {
+    public static int getAmmo(ItemStack gun) {
         return gun.getOrCreateTag().getInt("Ammo");
     }
     
-    private boolean consumeAmmo(ItemStack gun) {
+    public static boolean consumeAmmo(ItemStack gun, int amount) {
         int ammo = getAmmo(gun);
         if (ammo < 0) {
             gun.getTag().putInt("Ammo", 0);
             return false;
         }
         if (ammo > 0) {
-            gun.getTag().putInt("Ammo", --ammo);
+            gun.getTag().putInt("Ammo", Math.max(ammo - amount, 0));
             return true;
         }
         return false;

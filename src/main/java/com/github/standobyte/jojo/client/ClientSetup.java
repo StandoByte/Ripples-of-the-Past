@@ -24,6 +24,7 @@ import com.github.standobyte.jojo.client.render.armor.model.BreathControlMaskMod
 import com.github.standobyte.jojo.client.render.armor.model.GlovesModel;
 import com.github.standobyte.jojo.client.render.armor.model.SatiporojaScarfArmorModel;
 import com.github.standobyte.jojo.client.render.armor.model.StoneMaskModel;
+import com.github.standobyte.jojo.client.render.entity.layerrenderer.EnergyRippleLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.GlovesLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.HamonBurnLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.KnifeLayer;
@@ -293,6 +294,7 @@ public class ClientSetup {
         renderer.addLayer(new KnifeLayer<>(renderer));
         renderer.addLayer(new TornadoOverdriveEffectLayer<>(renderer));
         renderer.addLayer(new BarrageFistAfterimagesLayer(renderer));
+        renderer.addLayer(new EnergyRippleLayer<>(renderer));
         renderer.addLayer(new SpecialHeldItemLayer<>(renderer));
         renderer.addLayer(new GlovesLayer<>(renderer, new GlovesModel<>(0.3F, slim), slim));
         addLivingLayers(renderer);

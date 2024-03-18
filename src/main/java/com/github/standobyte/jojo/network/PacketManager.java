@@ -46,7 +46,6 @@ import com.github.standobyte.jojo.network.packets.fromserver.HamonExercisesPacke
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillAddPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillRemovePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSyncOnLoadPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrHamonSyncPlayerLearnerPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonTeachersSkillsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonUiEffectPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.LeapCooldownPacket;
@@ -65,6 +64,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.ResolveEffectStartP
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveLevelPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SkippedStandProgressionPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.SoulSpawnPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SpawnParticlePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandActionLearningPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandAssignmentDataPacket;
@@ -86,10 +86,12 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrHamonBreathStabil
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonCharacterTechniquePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonEnergyTicksPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonEntityChargePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHamonFlagsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonLiquidWalkingPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonMeditationPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonParticlesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonStatsPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHamonSyncPlayerLearnerPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHeldActionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrKnivesCountPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrNoMotionLerpPacket;
@@ -107,6 +109,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCach
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.CDBlocksRestoredPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.RPSGameStatePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.RPSOpponentPickThoughtsPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.TrSYOBarrageFinisherPacket;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -187,7 +190,7 @@ public class PacketManager {
         registerMessage(serverChannel, new TrHamonStatsPacket.Handler(),                   Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new HamonExercisesPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrHamonMeditationPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        registerMessage(serverChannel, new TrHamonSyncPlayerLearnerPacket.Handler(),         Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(serverChannel, new TrHamonSyncPlayerLearnerPacket.Handler(),       Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new HamonTeachersSkillsPacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new HamonSkillAddPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrHamonCharacterTechniquePacket.Handler(),      Optional.of(NetworkDirection.PLAY_TO_CLIENT));
@@ -198,6 +201,7 @@ public class PacketManager {
         registerMessage(serverChannel, new TrHamonEntityChargePacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrHamonAuraColorPacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrHamonLiquidWalkingPacket.Handler(),           Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(serverChannel, new TrHamonFlagsPacket.Handler(),                   Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new HamonUiEffectPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new HamonSyncOnLoadPacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrVampirismDataPacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
@@ -223,6 +227,7 @@ public class PacketManager {
         registerMessage(serverChannel, new TrStandTaskTargetPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrStandTaskModifierPacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new UpdateClientCapCachePacket.Handler(),           Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(serverChannel, new SoulSpawnPacket.Handler(),                      Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrPlayerContinuousActionPacket.Handler(),       Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrKnivesCountPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrWalkmanEarbudsPacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
@@ -242,6 +247,7 @@ public class PacketManager {
         registerMessage(serverChannel, new CommonConfigPacket.Handler(),                   Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new ResetSyncedCommonConfigPacket.Handler(),        Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new SpawnParticlePacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(serverChannel, new TrSYOBarrageFinisherPacket.Handler(),           Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new CustomExplosionPacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrDirectEntityDataPacket.Handler(),             Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new BrokenChunkBlocksPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_CLIENT));

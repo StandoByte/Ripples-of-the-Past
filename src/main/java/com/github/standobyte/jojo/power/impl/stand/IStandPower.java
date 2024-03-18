@@ -53,6 +53,10 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     int getMaxResolveLevel();
     float getResolveDmgReduction();
     float getPrevTickResolve();
+
+    boolean willSoulSpawn();
+    void clSetSoulSpawnFlag(boolean flag);
+    boolean spawnSoulOnDeath();
     
     StandEffectsTracker getContinuousEffects();
 
