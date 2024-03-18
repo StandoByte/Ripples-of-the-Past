@@ -20,20 +20,22 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
 public class HamonCharge {
-    private float tickDamage;
+    private float damage;
     private final int chargeTicksInitial;
     private int chargeTicks;
     private UUID hamonUserId;
     private Entity hamonUser;
-    private boolean gavePoints; 
+    private boolean gavePoints;
+    private boolean doLargeChargeDmg = true;
     private float energySpent;
     
-    public HamonCharge(float tickDamage, int chargeTicks, @Nullable LivingEntity hamonUser, float energySpent) {
-        this.tickDamage = tickDamage;
+    public HamonCharge(float damage, int chargeTicks, @Nullable LivingEntity hamonUser, float energySpent) {
+        this.damage = damage;
         this.chargeTicksInitial = chargeTicks;
         this.chargeTicks = chargeTicks;
         if (hamonUser != null) {
@@ -42,8 +44,8 @@ public class HamonCharge {
         this.energySpent = energySpent;
     }
     
-    public float getTickDamage() {
-        return tickDamage;
+    public float getDamage() {
+        return damage;
     }
     
     public void tick(@Nullable Entity chargedEntity, @Nullable BlockPos chargedBlock, World world, AxisAlignedBB aabb) {
@@ -52,8 +54,12 @@ public class HamonCharge {
             for (LivingEntity target : entities) {
                 if (!target.is(chargedEntity) && target.isAlive() && !target.getUUID().equals(hamonUserId)) {
                     Entity user = getUser((ServerWorld) world);
+                    float dmgAmount = this.damage;
+                    if (!doLargeChargeDmg) {
+                        dmgAmount *= 0.1F;
+                    }
                     
-                    if (DamageUtil.dealHamonDamage(target, tickDamage, chargedEntity, 
+                    if (DamageUtil.dealHamonDamage(target, dmgAmount, chargedEntity, 
                             chargedEntity instanceof LivingEntity ? null : user, HamonAttackProperties::noSrcEntityHamonMultiplier)) {
                         if (!target.isAlive() && user instanceof ServerPlayerEntity) {
                             ModCriteriaTriggers.HAMON_CHARGE_KILL.get().trigger((ServerPlayerEntity) user, target, chargedEntity, chargedBlock);
@@ -67,15 +73,32 @@ public class HamonCharge {
                                 });
                             }
                         }
+                        
+                        Vector3d chargePos = null;
+                        if (chargedBlock != null) {
+                            chargePos = Vector3d.atCenterOf(chargedBlock);
+                        }
+                        else if (chargedEntity != null) {
+                            chargePos = chargedEntity.getBoundingBox().getCenter();
+                        }
+                        if (chargePos != null && doLargeChargeDmg) {
+                            HamonUtil.emitHamonSparkParticles(world, null, chargePos, 4.0F, null);
+                        }
+                        
                         //adds knockback to Infused Blocks
                         if (!world.isClientSide()) {
+                            if (doLargeChargeDmg && chargePos != null) {
+                                Vector3d knockbackVec = new Vector3d(chargePos.x - target.getX(), 0, chargePos.z - target.getZ()).normalize();
+                                target.knockback(0.75F, knockbackVec.x, knockbackVec.z);
+                            }
+                            
                             if (chargedBlock != null) {
-                                if (world.getBlockState(chargedBlock).getBlock() != Blocks.COBWEB) {
-                                    float x = chargedBlock.getX();
-                                    float z = chargedBlock.getZ();
-                                    target.knockback(0.5F, x-target.getX(), z-target.getZ());
+                                if (doLargeChargeDmg && world.getBlockState(chargedBlock).getBlock() != Blocks.COBWEB) {
                                     chargeTicks = 0;
                                 }
+                            } else if (chargedEntity != null) {
+                                // mobs keep the charge, but will deal less damage and no knockback
+                                doLargeChargeDmg = false;
                             } else {
                                 chargeTicks = 0;
                             }
@@ -126,12 +149,13 @@ public class HamonCharge {
             charge.hamonUserId = nbt.getUUID("HamonUser");
         }
         charge.gavePoints = nbt.getBoolean("GavePoints");
+        charge.doLargeChargeDmg = nbt.getBoolean("LargeDmg");
         return charge;
     }
     
     public CompoundNBT toNBT() {
         CompoundNBT chargeNbt = new CompoundNBT();
-        chargeNbt.putFloat("Charge", tickDamage);
+        chargeNbt.putFloat("Charge", damage);
         chargeNbt.putInt("ChargeTicksInitial", chargeTicksInitial);
         chargeNbt.putInt("ChargeTicks", chargeTicks);
         if (hamonUserId != null) {
@@ -139,6 +163,7 @@ public class HamonCharge {
         }
         chargeNbt.putBoolean("GavePoints", gavePoints);
         chargeNbt.putFloat("EnergySpent", energySpent);
+        chargeNbt.putBoolean("LargeDmg", doLargeChargeDmg);
         return chargeNbt;
     }
 
