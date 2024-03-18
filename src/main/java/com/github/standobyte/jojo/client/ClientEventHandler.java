@@ -539,7 +539,8 @@ public class ClientEventHandler {
         if (!event.isCanceled() && !modPostedEvent && event.getHand() == Hand.MAIN_HAND && !player.isInvisible()) {
             INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
                 ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
-                if ((hud.showExtraActionHud(ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get()))
+                if ((hud.isActionSelectedAndEnabled(ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get(), 
+                        ModHamonActions.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE_BARRAGE.get()))
                         && MCUtil.isHandFree(player, Hand.MAIN_HAND) && MCUtil.isHandFree(player, Hand.OFF_HAND)) {
                     renderHand(Hand.OFF_HAND, event.getMatrixStack(), event.getBuffers(), event.getLight(), 
                             event.getPartialTicks(), event.getInterpolatedPitch(), player);

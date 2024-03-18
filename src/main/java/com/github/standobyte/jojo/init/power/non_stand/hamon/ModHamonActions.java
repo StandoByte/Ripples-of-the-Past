@@ -27,6 +27,7 @@ import com.github.standobyte.jojo.action.non_stand.HamonSendoWaveKick;
 import com.github.standobyte.jojo.action.non_stand.HamonShock;
 import com.github.standobyte.jojo.action.non_stand.HamonSpeedBoost;
 import com.github.standobyte.jojo.action.non_stand.HamonSunlightYellowOverdrive;
+import com.github.standobyte.jojo.action.non_stand.HamonSunlightYellowOverdriveBarrage;
 import com.github.standobyte.jojo.action.non_stand.HamonTornadoOverdrive;
 import com.github.standobyte.jojo.action.non_stand.HamonTurquoiseBlueOverdrive;
 import com.github.standobyte.jojo.action.non_stand.HamonWallClimbing;
@@ -152,6 +153,10 @@ public class ModHamonActions {
     
     public static final RegistryObject<HamonAction> JONATHAN_OVERDRIVE_BARRAGE = ACTIONS.register("jonathan_overdrive_barrage", 
             () -> new HamonOverdriveBarrage(new HamonAction.Builder().holdEnergyCost(70F).heldWalkSpeed(0.5F).shout(ModSounds.JONATHAN_OVERDRIVE_BARRAGE)));
+    
+    public static final RegistryObject<HamonSunlightYellowOverdriveBarrage> JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE_BARRAGE = ACTIONS.register("jonathan_syo_barrage", 
+            () -> new HamonSunlightYellowOverdriveBarrage(new HamonAction.Builder().holdToFire(60, false).heldWalkSpeed(0)
+                    .shout(ModSounds.JONATHAN_SYO_BARRAGE_START).shiftVariationOf(JONATHAN_OVERDRIVE_BARRAGE)));
     
     public static final RegistryObject<HamonAction> ZEPPELI_HAMON_CUTTER = ACTIONS.register("zeppeli_hamon_cutter", 
             () -> new HamonCutter(new HamonAction.Builder().energyCost(400F).swingHand().shout(ModSounds.ZEPPELI_HAMON_CUTTER)));

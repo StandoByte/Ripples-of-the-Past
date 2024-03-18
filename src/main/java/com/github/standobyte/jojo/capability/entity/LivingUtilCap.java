@@ -411,7 +411,12 @@ public class LivingUtilCap {
         }
     }
     
+
     
+    public void onClone(LivingUtilCap old, boolean wasDeath) {
+        hasUsedTimeStopToday = old.hasUsedTimeStopToday;
+        gotScarf = old.gotScarf;
+    }
     
     public CompoundNBT toNBT() {
         CompoundNBT nbt = new CompoundNBT();
