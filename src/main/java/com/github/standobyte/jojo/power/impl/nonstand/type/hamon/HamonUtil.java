@@ -589,7 +589,7 @@ public class HamonUtil {
                                 if (cap.hasHamonCharge()) {
                                     HamonCharge hamonCharge = cap.getHamonCharge();
                                     hamonCharge.decreaseTicks((int) (hamonCharge.getInitialTicks() * hamonChargeProperties.energyRequired / 1000F));
-                                    hamonChargeProperties.applyCharge(projCharge, hamonCharge.getTickDamage(), null);
+                                    hamonChargeProperties.applyCharge(projCharge, hamonCharge.getDamage(), null);
                                     projCharge.setMultiplyWithUserStrength(false);
                                 }
                             });
@@ -694,7 +694,7 @@ public class HamonUtil {
                         float radius = CommonReflection.getRadius(explosion);
                         HamonUtil.hamonExplosion(exploder.level, exploder, 
                                 hamonCharge.getUser((ServerWorld) world), explosion.getPosition(),
-                                radius, hamonCharge.getTickDamage());
+                                radius, hamonCharge.getDamage());
                     }
                 });
             }
