@@ -333,6 +333,11 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public float getStaminaTickGain() {
         float staminaRegen = getType().getStaminaRegen(this);
+        if (user != null && user.getCapability(LivingUtilCapProvider.CAPABILITY).map(
+                entity -> entity.isDyingBody() && entity.getDyingBodyTicksLeft() == 0).orElse(false)) {
+            staminaRegen -= 3.5F;
+        }
+        
         if (staminaRegen > 0) {
             staminaRegen *= INonStandPower.getNonStandPowerOptional(getUser()).map(power -> {
                 if (power.hasPower()) {

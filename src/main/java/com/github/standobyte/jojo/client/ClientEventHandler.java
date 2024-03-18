@@ -185,7 +185,7 @@ public class ClientEventHandler {
         
         if (mc.player != null && sound.getAttenuation() == AttenuationType.LINEAR && sound instanceof LocatableSound) {
             mc.player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(player -> {
-                if (player.isDyingBody()) {
+                if (player.isDyingBody() && !mc.player.isSpectator() && !mc.player.isDeadOrDying()) {
                     float progress = player.getDyingBodyProgress();
                     if (progress > 0.8F) {
                         float volumeMult;
@@ -1010,7 +1010,7 @@ public class ClientEventHandler {
     private void renderLosingVision(MatrixStack matrixStack, float partialTick) {
         if (mc.player != null) {
             mc.player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(player -> {
-                if (player.isDyingBody()) {
+                if (player.isDyingBody() && !mc.player.isSpectator() && !mc.player.isDeadOrDying()) {
                     int timeLeft = player.getDyingBodyTicksLeft();
                     if (timeLeft > 0) {
                         --timeLeft;
@@ -1045,7 +1045,7 @@ public class ClientEventHandler {
     public void dyingBodyLostVision(EntityViewRenderEvent.FogDensity event) {
         if (mc.player != null) {
             mc.player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(player -> {
-                if (player.isDyingBody()) {
+                if (player.isDyingBody() && !mc.player.isSpectator() && !mc.player.isDeadOrDying()) {
                     int timeLeft = player.getDyingBodyTicksLeft();
                     if (timeLeft > 0) {
                         --timeLeft;
@@ -1068,7 +1068,7 @@ public class ClientEventHandler {
     public void dyingBodyVisionDark(EntityViewRenderEvent.FogColors event) {
         if (mc.player != null) {
             mc.player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(player -> {
-                if (player.isDyingBody() && player.getDyingBodyTicksLeft() <= 21) {
+                if (player.isDyingBody() && !mc.player.isSpectator() && !mc.player.isDeadOrDying() && player.getDyingBodyTicksLeft() <= 21) {
                     event.setRed(0);
                     event.setGreen(0);
                     event.setBlue(0);

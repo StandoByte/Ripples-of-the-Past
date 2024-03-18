@@ -371,8 +371,13 @@ public class LivingUtilCap {
             else if (entity == ClientUtil.getClientPlayer()) {
                 ClientReflection.setFlashOnSetHealth(ClientUtil.getClientPlayer(), false);
             }
-            if (deadBodyTimer > 0 && --deadBodyTimer == 0) {
-                
+            if (deadBodyTimer > 0) {
+                if (--deadBodyTimer == 0) {
+                    if (entity.tickCount % 200 == 0) {
+                        entity.setHealth(entity.getHealth() - entity.getMaxHealth() / 30f);
+                    }
+                }
+                updateDyingBodyDebuffs();
             }
         }
     }
@@ -388,6 +393,7 @@ public class LivingUtilCap {
             PacketManager.sendToClientsTrackingAndSelf(new TrDyingBodyTimerPacket(
                     entity.getId(), deadBodyTimer, deadBodyDuration), entity);
         }
+        updateDyingBodyDebuffs();
     }
     
     public float getDyingBodyProgress() {
@@ -401,6 +407,30 @@ public class LivingUtilCap {
     
     public int getDyingBodyTicksLeft() {
         return deadBodyTimer;
+    }
+    
+    private static final AttributeModifier ATTACK_DAMAGE = new AttributeModifier(
+            UUID.fromString("4e3543ce-4c78-4caa-a04f-98931fd8beed"), "Attack damage debuff from dying body", -0.75, AttributeModifier.Operation.MULTIPLY_TOTAL);
+    private static final AttributeModifier ATTACK_SPEED = new AttributeModifier(
+            UUID.fromString("60959e38-fe5b-4bd1-8628-d3c06164ae11"), "Attack speed debuff from dying body", -0.5, AttributeModifier.Operation.MULTIPLY_TOTAL);
+    private static final AttributeModifier MOVEMENT_SPEED = new AttributeModifier(
+            UUID.fromString("51dc6321-4139-43b2-a0e8-4cb26023d65e"), "Movement speed debuff from dying body", -0.5, AttributeModifier.Operation.MULTIPLY_TOTAL);
+    private static final AttributeModifier SWIMMING_SPEED = new AttributeModifier(
+            UUID.fromString("0acee848-dcfb-4019-9ae4-c1a53e4f0dcc"), "Swimming speed debuff from dying body", -0.5, AttributeModifier.Operation.MULTIPLY_TOTAL);
+    
+    private void updateDyingBodyDebuffs() {
+        float progress = getDyingBodyProgress();
+        float debuffLvl;
+        if (progress > 0.8F) {
+            debuffLvl = 1 - 5 * (1 - progress);
+        }
+        else {
+            debuffLvl = 0;
+        }
+        MCUtil.multipliedAttrModifier(entity, Attributes.ATTACK_DAMAGE, ATTACK_DAMAGE, debuffLvl);
+        MCUtil.multipliedAttrModifier(entity, Attributes.ATTACK_SPEED, ATTACK_SPEED, debuffLvl);
+        MCUtil.multipliedAttrModifier(entity, Attributes.MOVEMENT_SPEED, MOVEMENT_SPEED, debuffLvl);
+        MCUtil.multipliedAttrModifier(entity, ForgeMod.SWIM_SPEED.get(), SWIMMING_SPEED, debuffLvl);
     }
     
     
@@ -543,6 +573,7 @@ public class LivingUtilCap {
         if (deadBodyTimer >= 0) {
             PacketManager.sendToClient(new TrDyingBodyTimerPacket(
                     entity.getId(), deadBodyTimer, deadBodyDuration), entityAsPlayer);
+            updateDyingBodyDebuffs();
         }
     }
     

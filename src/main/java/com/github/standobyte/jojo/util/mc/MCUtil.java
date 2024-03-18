@@ -41,6 +41,9 @@ import net.minecraft.entity.EntityPredicate;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.attributes.Attribute;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
 import net.minecraft.entity.ai.goal.PrioritizedGoal;
@@ -463,6 +466,19 @@ public class MCUtil {
         return new AxisAlignedBB(
                 center.x - inflX, center.y - inflY, center.z - inflZ,
                 center.x + inflX, center.y + inflY, center.z + inflZ);
+    }
+    
+    
+    
+    public static void multipliedAttrModifier(LivingEntity entity, Attribute attribute, AttributeModifier modifier, float mult) {
+        ModifiableAttributeInstance attributeInstance = entity.getAttribute(attribute);
+        if (attributeInstance != null) {
+            attributeInstance.removeModifier(modifier);
+            if (mult != 0) {
+                attributeInstance.addTransientModifier(new AttributeModifier(modifier.getId(), 
+                        modifier.getName() + " " + mult, modifier.getAmount() * mult, modifier.getOperation()));
+            }
+        }
     }
     
     
