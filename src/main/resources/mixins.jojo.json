@@ -17,6 +17,7 @@
     "client.TextureManagerMixin",
     "client.WorldRendererMixin",
     "client.ClientPlayNetHandlerMixin",
+    "client.EntityClMixin",
     "client.LivingEntityClMixin"
   ]
 }
