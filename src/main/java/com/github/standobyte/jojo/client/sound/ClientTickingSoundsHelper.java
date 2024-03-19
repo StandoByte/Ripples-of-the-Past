@@ -130,9 +130,15 @@ public abstract class ClientTickingSoundsHelper {
     
     public static void playHeldActionSound(SoundEvent sound, float volume, float pitch, boolean looping, 
             LivingEntity entity, IPower<?, ?> power, Action<?> action) {
+        playHeldActionSound(sound, volume, pitch, looping, entity, power, action, 0);
+    }
+    
+    public static void playHeldActionSound(SoundEvent sound, float volume, float pitch, boolean looping, 
+            LivingEntity entity, IPower<?, ?> power, Action<?> action, int fadeOut) {
         Minecraft.getInstance().getSoundManager().play(new StoppableEntityTickableSound<LivingEntity>(sound, entity.getSoundSource(), 
                 volume, pitch, looping, entity, 
-                e -> power.getHeldAction(true) == action));
+                e -> power.getHeldAction(true) == action)
+                .withFadeOut(fadeOut));
     }
     
     public static void playEntitySound(Entity entity, SoundEvent sound, float volume, float pitch, boolean looping) {

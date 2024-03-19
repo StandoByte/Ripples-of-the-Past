@@ -5,11 +5,14 @@ import java.util.OptionalInt;
 
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
+import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
+import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
+import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
@@ -23,6 +26,14 @@ public class HamonDetector extends HamonAction {
         super(builder.holdType());
     }
     
+    @Override
+    public void onHoldTickClientEffect(LivingEntity user, INonStandPower power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {
+        if (stateRefreshed && requirementsFulfilled) {
+            ClientTickingSoundsHelper.playHeldActionSound(ModSounds.HAMON_DETECTOR.get(), 
+                    1.0F, 1.0F, true, user, power, this, 15);
+        }
+    }
+
     private static final OptionalInt COLOR = OptionalInt.of(HamonPowerType.COLOR);
     @Override
     protected void holdTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
@@ -42,11 +53,9 @@ public class HamonDetector extends HamonAction {
                     hamon.hamonPointsFromAction(HamonStat.CONTROL, getHeldTickEnergyCost(power)); 
                 }
             }
-            if (ticksHeld % 3 == 0) {
-                // FIXME !!!!!!!!!!!!!!!!!! sfx
-                HamonUtil.emitHamonSparkParticles(world, user instanceof PlayerEntity ? (PlayerEntity) user : null, 
-                        user.getX(), user.getY(0.5), user.getZ(), 0.1F);
-            }
+            HamonSparksLoopSound.playSparkSound(user, user.position(), 1.0F);
+            CustomParticlesHelper.createHamonSparkParticles(user instanceof PlayerEntity ? (PlayerEntity) user : null, 
+                    user.getX(), user.getY(0.5), user.getZ(), 1);
         }
     }
 
