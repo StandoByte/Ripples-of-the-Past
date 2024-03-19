@@ -653,7 +653,7 @@ public class InputHandler {
                     action, shiftActionVar, power, ActionsOverlayGui.getInstance().getMouseTarget());
             
             ActionUseTry<P> click = actionsOverlay.onActionClick(power, action, sneak, keyBinding);
-            if (click.wentOff) {
+            if (click != null && click.wentOff) {
                 result.cancelVanillaInput();
                 if (action.getHoldDurationMax(power) > 0) {
                     heldKeys.put(power, keyBinding);
