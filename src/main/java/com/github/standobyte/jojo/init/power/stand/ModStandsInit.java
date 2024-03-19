@@ -838,9 +838,7 @@ public class ModStandsInit {
                             GOLD_EXPERIENCE_CREATE_LIFEFORM.get(),
                             GOLD_EXPERIENCE_HEAL.get()
                             )
-                    .defaultQuickAccess(
-                            GOLD_EXPERIENCE_CHOOSE_LIFEFORM.get()
-                            )
+                    .defaultKey(GOLD_EXPERIENCE_CHOOSE_LIFEFORM.get(), "key.keyboard.c")
                     .defaultStats(StandStats.class, new StandStats.Builder()
                             .power(10.0)
                             .speed(14.0)
