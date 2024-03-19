@@ -269,18 +269,25 @@ public class GameplayEventHandler {
 
     @SubscribeEvent
     public static void onWorldTick(WorldTickEvent event) {
-        if (event.side == LogicalSide.SERVER /* actually only ticks on server but ok */ && event.phase == TickEvent.Phase.END) {
-            ((ServerWorld) event.world).getAllEntities().forEach(entity -> {
-                entity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
-                entity.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
-            });
+        if (event.side == LogicalSide.SERVER /* actually only ticks on server but ok */) {
+            switch (event.phase) {
+            case START:
+                break;
+            case END:
+                ((ServerWorld) event.world).getAllEntities().forEach(entity -> {
+//                    entity.getCapability(EntityUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
+                    entity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
+                    entity.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
+                });
 
-            ((ServerWorld) event.world).getChunkSource().chunkMap.getChunks().forEach(chunkHolder -> {
-                Chunk chunk = chunkHolder.getTickingChunk();
-                if (chunk != null) {
-                    chunk.getCapability(ChunkCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
-                }
-            });
+                ((ServerWorld) event.world).getChunkSource().chunkMap.getChunks().forEach(chunkHolder -> {
+                    Chunk chunk = chunkHolder.getTickingChunk();
+                    if (chunk != null) {
+                        chunk.getCapability(ChunkCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
+                    }
+                });
+                break;
+            }
         }
     }
     

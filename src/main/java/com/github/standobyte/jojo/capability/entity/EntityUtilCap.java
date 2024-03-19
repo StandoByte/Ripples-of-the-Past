@@ -1,9 +1,13 @@
 package com.github.standobyte.jojo.capability.entity;
 
 import java.util.LinkedList;
+import java.util.OptionalInt;
 import java.util.Queue;
 
+import javax.annotation.Nonnull;
+
 import com.github.standobyte.jojo.capability.world.TimeStopHandler;
+import com.github.standobyte.jojo.client.IEntityGlowColor;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 
 import net.minecraft.entity.Entity;
@@ -14,8 +18,23 @@ public class EntityUtilCap {
     private boolean stoppedInTime = false;
     private Queue<Runnable> runOnTimeResume = new LinkedList<>();
     
+    private OptionalInt glowingColor = OptionalInt.empty();
+    private int glowColorTicks = -1;
+    
     public EntityUtilCap(Entity entity) {
         this.entity = entity;
+    }
+    
+    /**
+     *  currently is not called on server side, 
+     *  uncomment in
+     *  {@link GameplayEventHandler.onWorldTick(WorldTickEvent)}
+     *  if that's needed
+     */
+    public void tick() {
+        if (entity.level.isClientSide()) {
+            tickGlowingColor();
+        }
     }
     
     public void updateEntityTimeStop(boolean stopInTime) {
@@ -56,5 +75,32 @@ public class EntityUtilCap {
                     }
                 }, 
                 action);
+    }
+    
+    
+    
+    public void setClGlowingColor(@Nonnull OptionalInt color, int ticks) {
+        if (entity instanceof IEntityGlowColor) {
+            ((IEntityGlowColor) entity).setGlowColor(glowingColor);
+            this.glowingColor = color;
+            this.glowColorTicks = ticks;
+        }
+    }
+    
+    public void setClGlowingColor(@Nonnull OptionalInt color) {
+        setClGlowingColor(color, -1);
+    }
+    
+    public void resetClGlowingColor() {
+        setClGlowingColor(OptionalInt.empty(), -1);
+    }
+    
+    private void tickGlowingColor() {
+        if (glowingColor.isPresent() && glowColorTicks > 0 && --glowColorTicks == 0 && entity instanceof IEntityGlowColor) {
+            IEntityGlowColor colorData = (IEntityGlowColor) entity;
+            if (colorData.getGlowColor() == this.glowingColor) {
+                colorData.setGlowColor(OptionalInt.empty());
+            }
+        }
     }
 }
