@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.stand.StandAction;
@@ -46,9 +48,12 @@ import net.minecraftforge.registries.ForgeRegistryEntry;
 public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry<StandType<?>> implements IPowerType<IStandPower, StandType<?>> {
     @Deprecated
     private final int color;
+    
     private final StandAction[] leftClickHotbar;
     private final StandAction[] rightClickHotbar;
-    private final StandAction defaultQuickAccess;
+    private final StandAction defaultMMBAction;
+    private List<Pair<String, StandAction>> defaultKeys = null;
+    
     private String translationKey;
     private ResourceLocation iconTexture;
     
@@ -69,7 +74,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         this.partName = partName;
         this.leftClickHotbar = leftClickHotbar;
         this.rightClickHotbar = rightClickHotbar;
-        this.defaultQuickAccess = defaultQuickAccess;
+        this.defaultMMBAction = defaultQuickAccess;
         this.statsClass = statsClass;
         this.defaultStats = defaultStats;
         
@@ -83,8 +88,11 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     
     protected StandType(AbstractBuilder<?, T> builder) {
         this(builder.color, builder.storyPartName, builder.leftClickHotbar, builder.rightClickHotbar, 
-                builder.quickAccess, builder.statsClass, builder.defaultStats, 
+                builder.mmbAction, builder.statsClass, builder.defaultStats, 
                 builder.additions);
+        if (!builder.defaultKeys.isEmpty()) {
+            this.defaultKeys = builder.defaultKeys;
+        }
     }
     
 
@@ -94,7 +102,8 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         private ITextComponent storyPartName = StringTextComponent.EMPTY;
         private StandAction[] leftClickHotbar = {};
         private StandAction[] rightClickHotbar = {};
-        private StandAction quickAccess = null;
+        private StandAction mmbAction = null;
+        private List<Pair<String, StandAction>> defaultKeys = new ArrayList<>();
         private T defaultStats;
         private Class<T> statsClass;
         private StandTypeOptionals additions = null;
@@ -116,14 +125,27 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         
         public B rightClickHotbar(StandAction... actions) {
             this.rightClickHotbar = actions;
-            if (quickAccess == null) {
-                quickAccess = actions.length > 0 ? actions[0] : null;
+            if (mmbAction == null) {
+                mmbAction = actions.length > 0 ? actions[0] : null;
             }
             return getThis();
         }
         
-        public B defaultQuickAccess(StandAction quickAccess) {
-            this.quickAccess = quickAccess;
+        /**
+         * @deprecated use {@link AbstractBuilder#defaultMMB(StandAction)}
+         */
+        @Deprecated
+        public B defaultQuickAccess(StandAction mmbAction) {
+            return defaultMMB(mmbAction);
+        }
+        
+        public B defaultMMB(StandAction quickAccess) {
+            this.mmbAction = quickAccess;
+            return getThis();
+        }
+        
+        public B defaultKey(StandAction action, String keyName) {
+            defaultKeys.add(Pair.of(keyName, action));
             return getThis();
         }
         
@@ -264,10 +286,16 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     
     @Override
     public ControlScheme.DefaultControls clCreateDefaultLayout() {
-        return new ControlScheme.DefaultControls(
+        ControlScheme.DefaultControls controls = new ControlScheme.DefaultControls(
                 leftClickHotbar, 
                 rightClickHotbar, 
-                ControlScheme.DefaultControls.DefaultKey.mmb(defaultQuickAccess));
+                ControlScheme.DefaultControls.DefaultKey.mmb(defaultMMBAction));
+        if (defaultKeys != null) {
+            for (Pair<String, StandAction> actionKey : defaultKeys) {
+                controls.addKey(ControlScheme.DefaultControls.DefaultKey.of(actionKey.getValue(), actionKey.getKey()));
+            }
+        }
+        return controls;
     }
     
     @Override
