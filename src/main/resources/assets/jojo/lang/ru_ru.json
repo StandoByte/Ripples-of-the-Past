@@ -535,6 +535,7 @@
   "jojo.config.client.characterVoiceLines.tooltip": "Проигрываются ли реплики персонажей из ДжоДжо, чьи способности используют игроки",
   
   "stand.unknown": "Неизвестный Стенд: %s",
+  "non_stand.unknown": "Unknown Power: %s",
   "commands.stand.give.success.single": "Выдан %s игроку %s",
   "commands.stand.give.success.multiple": "Выдан %s %s игрокам",
   "commands.stand.give.success.multiple.random": "Выданы случайные Стенды %s игрокам",
