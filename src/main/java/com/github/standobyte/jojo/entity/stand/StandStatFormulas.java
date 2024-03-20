@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.entity.stand;
 
 import java.util.Random;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
@@ -38,7 +39,7 @@ public class StandStatFormulas {
     }
     
     private static final Random RANDOM = new Random();
-    public static int getLightAttackWindup(double speed, float finisherMeter, float guardCounter) {
+    public static int getLightAttackWindup(double speed, float finisherMeter, float guardCounter, boolean firstPunch) {
         double val = (24 - speed) / 4;
         if (val <= 0) return 0;
         
@@ -46,6 +47,11 @@ public class StandStatFormulas {
             val = Math.max(val * (1.0F - finisherMeter * 0.4F), 2);
         }
         val *= (1F - guardCounter);
+        
+        if (firstPunch) {
+            val /= 2;
+        }
+        JojoMod.LOGGER.debug(val);
         
         int ticks = MathHelper.floor(val);
         if (RANDOM.nextDouble() < val - ticks) ticks++;

@@ -96,7 +96,9 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
     @Override
     public int getStandWindupTicks(IStandPower standPower, StandEntity standEntity) {
         double speed = standEntity.getAttackSpeed();
-        return StandStatFormulas.getLightAttackWindup(speed, standEntity.getFinisherMeter(), standEntity.guardCounter());
+        int ticks = StandStatFormulas.getLightAttackWindup(speed, standEntity.getFinisherMeter(), 
+                standEntity.guardCounter(), standEntity.getCurrentTaskAction() != this);
+        return ticks;
     }
     
     @Override
