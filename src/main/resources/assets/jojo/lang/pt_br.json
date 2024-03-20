@@ -332,7 +332,6 @@
   "jojo.screen.edit_hud_layout.reset": "Redefinir layout",
   "jojo.screen.edit_hud_layout.hint.lmb": "Botão esquerdo do mouse - mover",
   "jojo.screen.edit_hud_layout.hint.rmb": "Botão direito do mouse - habilitar/desabilitar",
-  "jojo.screen.edit_hud_layout.hint.mmb": "Botão do meio do mouse - mova rapidamente para o slot de acesso rápido",
   
   "jojo.overlay.mode_deselect": "Desselecionar",
   "jojo.overlay.mode_key": "[%s] %s",

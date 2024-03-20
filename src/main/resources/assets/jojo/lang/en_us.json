@@ -357,8 +357,8 @@
   "jojo.screen.edit_hud_layout.reset": "Reset Controls",
   "jojo.screen.edit_hud_layout.add_keybind": "Add Key",
   "jojo.screen.edit_hud_layout.mc_controls": "Open Minecraft Controls Settings",
-  "jojo.screen.edit_hud_layout.hint.lmb": "Left Mouse Button - pick action",
-  "jojo.screen.edit_hud_layout.hint.rmb": "Right Mouse Button - enable/disable action",
+  "jojo.screen.edit_hud_layout.hint.lmb": "Left Mouse Button - move",
+  "jojo.screen.edit_hud_layout.hint.rmb": "Right Mouse Button - enable/disable",
   
   "jojo.overlay.mode_deselect": "Deselect",
   "jojo.overlay.mode_key": "[%s] %s",

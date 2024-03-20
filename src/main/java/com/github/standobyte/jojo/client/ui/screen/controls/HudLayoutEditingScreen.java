@@ -195,7 +195,6 @@ public class HudLayoutEditingScreen extends Screen {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         renderWindow(matrixStack);
         renderTabButtons(matrixStack, mouseX, mouseY);
-        renderHint(matrixStack);
         renderHotbars(matrixStack, mouseX, mouseY);
         renderDragged(matrixStack, mouseX, mouseY);
         renderKeybindsList(matrixStack, mouseX, mouseY, partialTick);
@@ -450,16 +449,6 @@ public class HudLayoutEditingScreen extends Screen {
     
     
     
-    private void renderHint(MatrixStack matrixStack) {
-        minecraft.getTextureManager().bind(WINDOW);
-        int hintX = getWindowX() + WINDOW_WIDTH - 19;
-        int hintY = getWindowY() + 8;
-        blit(matrixStack, hintX, hintY, 32, 245, 11, 11);
-    }
-    
-    private final List<ITextComponent> hintTooltip = ImmutableList.of(
-            new TranslationTextComponent("jojo.screen.edit_hud_layout.hint.lmb"), 
-            new TranslationTextComponent("jojo.screen.edit_hud_layout.hint.rmb"));
     private void renderToolTips(MatrixStack matrixStack, int mouseX, int mouseY) {
         if (draggedAction.isPresent()) return;
         int tab = getTabButtonAt(mouseX, mouseY);
@@ -467,31 +456,33 @@ public class HudLayoutEditingScreen extends Screen {
             renderTooltip(matrixStack, powersPresent.get(tab).getName(), mouseX, mouseY);
         }
         else {
-            renderActionNameTooltip(matrixStack, mouseX, mouseY);
-        }
-        
-        int hintX = getWindowX() + WINDOW_WIDTH - 19;
-        int hintY = getWindowY() + 8;
-        if (mouseX >= hintX && mouseX < hintX + 11 && mouseY >= hintY && mouseY < hintY + 11) {
-            renderComponentTooltip(matrixStack, hintTooltip, mouseX, mouseY);
+            hoveredAction.ifPresent(slot -> {
+                List<ITextComponent> tooltip = new ArrayList<>();
+                
+                IFormattableTextComponent name = getActionName(selectedPower, slot.actionSwitch.getAction());
+                if (!slot.actionSwitch.isEnabled()) {
+                    name.withStyle(TextFormatting.STRIKETHROUGH);
+                }
+                tooltip.add(name);
+                
+                tooltip.add(StringTextComponent.EMPTY);
+                tooltip.add(new TranslationTextComponent("jojo.screen.edit_hud_layout.hint.lmb").withStyle(TextFormatting.GRAY, TextFormatting.ITALIC));
+                tooltip.add(new TranslationTextComponent("jojo.screen.edit_hud_layout.hint.rmb").withStyle(TextFormatting.GRAY, TextFormatting.ITALIC));
+                
+                renderComponentTooltip(matrixStack, tooltip, mouseX, mouseY);
+            });
+            
+            keybindsList.getHoveredKeybindSlot().ifPresent(slot -> {
+                if (slot.getAction() != null) {
+                    IFormattableTextComponent name = getActionName(selectedPower, slot.getAction());
+                    renderTooltip(matrixStack, name, mouseX, mouseY);
+                }
+            });
         }
     }
     
-    private <P extends IPower<P, ?>> void renderActionNameTooltip(MatrixStack matrixStack, int mouseX, int mouseY) {
-        P power = (P) selectedPower;
-        hoveredAction.ifPresent(slot -> {
-            renderActionName(matrixStack, power, (Action<P>) slot.actionSwitch.getAction(), mouseX, mouseY, slot.actionSwitch.isEnabled());
-        });
-    }
-    
-    private <P extends IPower<P, ?>> void renderActionName(MatrixStack matrixStack, P power, Action<P> action, int mouseX, int mouseY, boolean isEnabled) {
-        if (action == null) return;
-        IFormattableTextComponent name = getActionName(power, action, hasShiftDown());
-        
-        if (!isEnabled) {
-            name.withStyle(TextFormatting.DARK_GRAY);
-        }
-        renderTooltip(matrixStack, name, mouseX, mouseY);
+    private <P extends IPower<P, ?>> IFormattableTextComponent getActionName(IPower<?, ?> power, Action<P> action) {
+        return getActionName((P) power, action, hasShiftDown());
     }
     
     public static <P extends IPower<P, ?>> IFormattableTextComponent getActionName(P power, Action<P> action, boolean shift) {
@@ -506,7 +497,7 @@ public class HudLayoutEditingScreen extends Screen {
         }
         
         else {
-            name = action.getNameLocked(power).withStyle(TextFormatting.GRAY, TextFormatting.ITALIC);
+            name = action.getNameLocked(power).withStyle(TextFormatting.DARK_GRAY);
         }
         
         return name;
