@@ -157,7 +157,9 @@ public class JojoStuffScreen {
                 StandInfoScreen::new).disable() /* WIP screen */),
         CONTROLS(CONTROLS_TAB),
         SKINS(new Tab(null, 0, 0, 16, 16, new TranslationTextComponent("jojo.stand_skins.button"), 
-                () -> new StandSkinsScreen(IStandPower.getPlayerStandPower(Minecraft.getInstance().player))));
+                () -> new StandSkinsScreen(IStandPower.getPlayerStandPower(Minecraft.getInstance().player)))
+                .disable() /* WIP */
+                );
         
         private final Tab tab;
         private StandTab(Tab tab) {
