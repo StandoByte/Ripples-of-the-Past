@@ -81,9 +81,9 @@ public class EntityUtilCap {
     
     public void setClGlowingColor(@Nonnull OptionalInt color, int ticks) {
         if (entity instanceof IEntityGlowColor) {
-            ((IEntityGlowColor) entity).setGlowColor(glowingColor);
             this.glowingColor = color;
             this.glowColorTicks = ticks;
+            ((IEntityGlowColor) entity).setGlowColor(glowingColor);
         }
     }
     
