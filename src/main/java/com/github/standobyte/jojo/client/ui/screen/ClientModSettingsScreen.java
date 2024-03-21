@@ -10,6 +10,8 @@ import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.HudNamesRender;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.PositionConfig;
 import com.github.standobyte.jojo.client.ui.screen.widgets.ImageVanillaButton;
+import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.gui.DialogTexts;
@@ -70,9 +72,33 @@ public class ClientModSettingsScreen extends SettingsScreen {
                 new TranslationTextComponent("jojo.config.client.hudHotbarsFold.tooltip")
                 ) {
             @Override public boolean get() { return settingsValues.hudHotbarsFold; }
-            @Override public void set(boolean value) { settingsValues.hudHotbarsFold = value; }
+            @Override public void set(boolean value) { 
+                settingsValues.hudHotbarsFold = value;
+                if (minecraft.player != null) {
+                    for (PowerClassification power : PowerClassification.values()) {
+                        IPower.getPowerOptional(minecraft.player, power).ifPresent(IPower::clUpdateHud);
+                    }
+                }
+            }
         };
         addButton(hudHotbarsFold.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
+        
+        
+        BooleanSetting showLockedSlots = new BooleanSetting(settings, 
+                new TranslationTextComponent("jojo.config.client.showLockedSlots"), 
+                new TranslationTextComponent("jojo.config.client.showLockedSlots.tooltip")
+                ) {
+            @Override public boolean get() { return settingsValues.showLockedSlots; }
+            @Override public void set(boolean value) {
+                settingsValues.showLockedSlots = value;
+                if (minecraft.player != null) {
+                    for (PowerClassification power : PowerClassification.values()) {
+                        IPower.getPowerOptional(minecraft.player, power).ifPresent(IPower::clUpdateHud);
+                    }
+                }
+            }
+        };
+        addButton(showLockedSlots.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
         
         
         BooleanSetting characterVoiceLines = new BooleanSetting(settings, 

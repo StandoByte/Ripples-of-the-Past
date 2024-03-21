@@ -127,7 +127,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public void setStandInstance(StandInstance standInstance) {
         this.standInstance = Optional.ofNullable(standInstance);
-        onPowerSet(this.standInstance.map(StandInstance::getType).orElse(null));
+        clUpdateHud();
     }
 
     @Override
@@ -194,6 +194,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             if (user != null) {
                 continuousEffects.onStandChanged(user);
             }
+            clUpdateHud();
             return true;
         }
         return false;
@@ -536,6 +537,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public void setProgressionSkipped() {
         this.skippedProgression = true;
+        clUpdateHud();
     }
     
     @Override
@@ -594,6 +596,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public void setLearningFromPacket(StandActionLearningPacket packet) {
         actionLearningProgressMap.setEntryDirectly(packet.entry);
+        clUpdateHud();
     }
     
     @Override
@@ -850,7 +853,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             tickSoulCheck();
             PacketManager.sendToClient(SoulSpawnPacket.spawnFlag(willSoulSpawn), player);
         });
-        syncLayoutWithUser();
     }
     
     @Override

@@ -19,7 +19,6 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterHamonTechnique;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
-import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.block.BedBlock;
@@ -79,13 +78,17 @@ public class VampirismData extends TypeSpecificData {
     }
 
     public void setVampireHamonUser(boolean vampireHamonUser, Optional<HamonData> prevHamon) {
-        if (!this.vampireHamonUser == vampireHamonUser) {
-            LivingEntity user = power.getUser();
-            if (!user.level.isClientSide()) {
-                PacketManager.sendToClientsTrackingAndSelf(TrVampirismDataPacket.wasHamonUser(user.getId(), vampireHamonUser), user);
-            }
+        if (this.vampireHamonUser == vampireHamonUser) {
+            return;
         }
+        
+        LivingEntity user = power.getUser();
+        if (!user.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(TrVampirismDataPacket.wasHamonUser(user.getId(), vampireHamonUser), user);
+        }
+        
         this.vampireHamonUser = vampireHamonUser;
+        
         if (vampireHamonUser && prevHamon.isPresent()) {
             HamonData hamon = prevHamon.get();
             hamonStrengthLevel = hamon.getHamonStrengthLevel();
@@ -94,7 +97,10 @@ public class VampirismData extends TypeSpecificData {
         else {
             hamonStrengthLevel = 0;
         }
-        addHamonSuicideAbility();
+        
+        if (user.level.isClientSide()) {
+            power.clUpdateHud();
+        }
     }
     
     public float getPrevHamonStrengthLevel() {
@@ -103,17 +109,6 @@ public class VampirismData extends TypeSpecificData {
     
     public Optional<CharacterHamonTechnique> getPrevHamonCharacter() {
         return hamonTechnique;
-    }
-    
-    @Override
-    public void updateExtraActions() {
-        addHamonSuicideAbility();
-    }
-    
-    private void addHamonSuicideAbility() {
-        if (vampireHamonUser) {
-            power.getActionsHudLayout().addExtraAction(ModVampirismActions.VAMPIRISM_HAMON_SUICIDE.get(), ActionsLayout.Hotbar.RIGHT_CLICK);
-        }
     }
 
     public boolean isVampireAtFullPower() {

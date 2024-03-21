@@ -216,6 +216,11 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         return !isFinisher;
     }
     
+    @Override
+    public boolean isLegalInHud(IStandPower power) {
+        return !isFinisher;
+    }
+    
 //    @Override
 //    public StandAction[] getExtraUnlockable() {
 //        StandAction[] actions = new StandAction[2];

@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.ui.screen.hudlayout;
+package com.github.standobyte.jojo.client.ui.screen.controls;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.screen.widgets.CustomButton;

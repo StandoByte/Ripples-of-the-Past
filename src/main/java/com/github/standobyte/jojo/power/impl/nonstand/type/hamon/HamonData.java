@@ -62,7 +62,6 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamon
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterHamonTechnique;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.HamonTechniqueManager;
-import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -1088,7 +1087,7 @@ public class HamonData extends TypeSpecificData {
     public boolean addHamonSkill(LivingEntity user, AbstractHamonSkill skill, boolean checkRequirements, boolean sync) {
         if (!checkRequirements || !isSkillLearned(skill) && canLearnSkill(user, skill, HamonUtil.nearbyTeachersSkills(power.getUser())).isPositive()) {
             hamonSkills.addSkill(skill);
-            addSkillAction(skill);
+            power.clUpdateHud();
             serverPlayer.ifPresent(player -> {
                 if (skill == ModHamonSkills.CHEAT_DEATH.get()) {
                     HamonUtil.updateCheatDeathEffect(player);
@@ -1105,33 +1104,11 @@ public class HamonData extends TypeSpecificData {
         }
         return false;
     }
-
-    @Override
-    public void updateExtraActions() {
-        HamonTechniqueManager data = hamonSkills.getTechniqueData();
-        if (data.getTechnique() != null) {
-            data.getTechnique().getPerksOnPick().forEach(techniquePerk -> {
-                addSkillAction(techniquePerk);
-            });
-        }
-        for (AbstractHamonSkill techniqueSkill : data.getLearnedSkills()) {
-            addSkillAction(techniqueSkill);
-        }
-    }
-
-    private void addSkillAction(AbstractHamonSkill skill) {
-        skill.getRewardActions(true).forEach(action -> {
-            ActionsLayout.Hotbar hotbar = skill.getRewardType().getDefaultHotbar();
-            if (hotbar != null) {
-                power.getActionsHudLayout().addExtraAction(action, hotbar);
-            }
-        });
-    }
     
     public void removeHamonSkill(AbstractHamonSkill skill) {
         if (!skill.isUnlockedByDefault() && isSkillLearned(skill)) {
             hamonSkills.removeSkill(skill);
-            removeSkillAction(skill);
+            power.clUpdateHud();
             serverPlayer.ifPresent(player -> {
                 PacketManager.sendToClient(new HamonSkillRemovePacket(skill), player);
                 if (skill == ModHamonSkills.CHEAT_DEATH.get()) {
@@ -1139,12 +1116,6 @@ public class HamonData extends TypeSpecificData {
                 }
             });
         }
-    }
-
-    private void removeSkillAction(AbstractHamonSkill skill) {
-        skill.getRewardActions(true).forEach(action -> {
-            power.getActionsHudLayout().removeExtraAction(action);
-        });
     }
     
     public static boolean canResetTab(PlayerEntity user, HamonSkillsTab type) {

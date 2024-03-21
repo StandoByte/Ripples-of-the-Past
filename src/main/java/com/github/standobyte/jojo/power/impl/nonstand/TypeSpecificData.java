@@ -26,7 +26,6 @@ public abstract class TypeSpecificData {
     }
     
     public void onPowerGiven(@Nullable NonStandPowerType<?> oldType, @Nullable TypeSpecificData oldData) {}
-    public void updateExtraActions() {}
     
     public abstract CompoundNBT writeNBT();
     public abstract void readNBT(CompoundNBT nbt);
