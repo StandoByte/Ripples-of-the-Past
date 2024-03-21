@@ -268,7 +268,7 @@ public class InputHandler {
             }
             
             if (mc.options.keyJump.isDown()) {
-                SoulController.getInstance().skipAscension();
+                ControllerSoul.getInstance().skipAscension();
             }
             tickEffects();
             clickWithBusyHands();
@@ -586,7 +586,7 @@ public class InputHandler {
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void cancelClickInput(ClickInputEvent event) {
-        if (SoulController.getInstance().isCameraEntityPlayerSoul()) {
+        if (ControllerSoul.getInstance().isCameraEntityPlayerSoul()) {
             event.setCanceled(true);
             event.setSwingHand(false);
         }
