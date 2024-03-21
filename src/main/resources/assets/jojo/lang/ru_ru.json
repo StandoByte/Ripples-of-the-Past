@@ -355,8 +355,8 @@
   "jojo.screen.edit_hud_layout.reset": "Сбросить управление",
   "jojo.screen.edit_hud_layout.add_keybind": "Добавить клавишу",
   "jojo.screen.edit_hud_layout.mc_controls": "Открыть настройки управления Minecraft",
-  "jojo.screen.edit_hud_layout.hint.lmb": "Left Mouse Button - pick action",
-  "jojo.screen.edit_hud_layout.hint.rmb": "Right Mouse Button - enable/disable action",
+  "jojo.screen.edit_hud_layout.hint.lmb": "Left Mouse Button - move",
+  "jojo.screen.edit_hud_layout.hint.rmb": "Right Mouse Button - enable/disable",
   
   "jojo.overlay.mode_deselect": "Убрать интерфейс",
   "jojo.overlay.hold": "(удерж.) %s",
@@ -535,6 +535,7 @@
   "jojo.config.client.characterVoiceLines.tooltip": "Проигрываются ли реплики персонажей из ДжоДжо, чьи способности используют игроки",
   
   "stand.unknown": "Неизвестный Стенд: %s",
+  "non_stand.unknown": "Unknown Power: %s",
   "commands.stand.give.success.single": "Выдан %s игроку %s",
   "commands.stand.give.success.multiple": "Выдан %s %s игрокам",
   "commands.stand.give.success.multiple.random": "Выданы случайные Стенды %s игрокам",
@@ -858,7 +859,7 @@
   "action.jojo.hamon_detector": "Hamon Life Detector",
   "action.jojo.hamon_life_magnetism": "Биомагнетизм",
   "action.jojo.hamon_projectile_shield": "Барьер от снарядов",
-  "action.jojo.hamon_protection": "Repelling Hamon",
+  "action.jojo.hamon_protection": "Отражающий Хамон",
   "action.jojo.hamon_hypnosis": "Гипноз животного",
   "action.jojo.hamon_shock": "Hamon Shock",
   

@@ -15,8 +15,11 @@ import net.minecraft.client.audio.ISoundEventAccessor;
 import net.minecraft.client.audio.Sound;
 import net.minecraft.client.audio.SoundEventAccessor;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.gui.screen.ControlsScreen;
 import net.minecraft.client.gui.screen.IngameMenuScreen;
 import net.minecraft.client.gui.screen.MainMenuScreen;
+import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.widget.list.KeyBindingList;
 import net.minecraft.client.particle.IAnimatedSprite;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.renderer.BufferBuilder;
@@ -34,6 +37,7 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.model.RenderMaterial;
 import net.minecraft.client.renderer.texture.ITickable;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.shader.Shader;
 import net.minecraft.client.shader.ShaderGroup;
 import net.minecraft.entity.LivingEntity;
@@ -41,6 +45,7 @@ import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Timer;
 import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 public class ClientReflection {
@@ -247,5 +252,46 @@ public class ClientReflection {
     private static final Field CLIENT_PLAYER_ENTITY_HANDS_BUSY = ObfuscationReflectionHelper.findField(ClientPlayerEntity.class, "field_184844_co");
     public static void setHandsBusy(ClientPlayerEntity player, boolean handsBusy) {
         ReflectionUtil.setBooleanFieldValue(CLIENT_PLAYER_ENTITY_HANDS_BUSY, player, handsBusy);
+    }
+    
+    
+    private static final Field KEY_BINDING_ALL_FIELD = ObfuscationReflectionHelper.findField(KeyBinding.class, "field_74516_a");
+    private static Map<String, KeyBinding> KEY_BINDINGS_ALL;
+    public static Map<String, KeyBinding> getAllKeybindingMap() {
+        if (KEY_BINDINGS_ALL == null) {
+            KEY_BINDINGS_ALL = ReflectionUtil.getFieldValue(KEY_BINDING_ALL_FIELD, null);
+        }
+        return KEY_BINDINGS_ALL;
+    }
+    
+    
+    private static final Field CONTROLS_SCREEN_CONTROL_LIST = ObfuscationReflectionHelper.findField(ControlsScreen.class, "field_146494_r");
+    public static KeyBindingList getControlList(ControlsScreen screen) {
+        return ReflectionUtil.getFieldValue(CONTROLS_SCREEN_CONTROL_LIST, screen);
+    }
+    
+    private static final Field KEY_BINDING_LIST_MAX_NAME_WIDTH = ObfuscationReflectionHelper.findField(KeyBindingList.class, "field_148188_n");
+    public static int getMaxNameWidth(KeyBindingList keyBindingList) {
+        return ReflectionUtil.getIntFieldValue(KEY_BINDING_LIST_MAX_NAME_WIDTH, keyBindingList);
+    }
+    
+    private static final Field KEY_BINDING_LIST_KEY_ENTRY_CHANGE_BUTTON = ObfuscationReflectionHelper.findField(KeyBindingList.KeyEntry.class, "field_148280_d");
+    public static Button getChangeButton(KeyBindingList.KeyEntry keyEntry) {
+        return ReflectionUtil.getFieldValue(KEY_BINDING_LIST_KEY_ENTRY_CHANGE_BUTTON, keyEntry);
+    }
+    
+    private static final Field KEY_BINDING_LIST_KEY_ENTRY_KEY = ObfuscationReflectionHelper.findField(KeyBindingList.KeyEntry.class, "field_148282_b");
+    public static KeyBinding getKey(KeyBindingList.KeyEntry keyEntry) {
+        return ReflectionUtil.getFieldValue(KEY_BINDING_LIST_KEY_ENTRY_KEY, keyEntry);
+    }
+    
+    private static final Field KEY_BINDING_LIST_CATEGORY_ENTRY_NAME = ObfuscationReflectionHelper.findField(KeyBindingList.CategoryEntry.class, "field_148285_b");
+    public static ITextComponent getName(KeyBindingList.CategoryEntry categoryEntry) {
+        return ReflectionUtil.getFieldValue(KEY_BINDING_LIST_CATEGORY_ENTRY_NAME, categoryEntry);
+    }
+    
+    private static final Method ABSTRACT_LIST_GET_ROW_TOP = ObfuscationReflectionHelper.findMethod(net.minecraft.client.gui.widget.list.AbstractList.class, "func_230962_i_", int.class);
+    public static int getRowTop(net.minecraft.client.gui.widget.list.AbstractList<?> uiList, int rowIndex) {
+        return ReflectionUtil.invokeMethod(ABSTRACT_LIST_GET_ROW_TOP, uiList, rowIndex);
     }
 }

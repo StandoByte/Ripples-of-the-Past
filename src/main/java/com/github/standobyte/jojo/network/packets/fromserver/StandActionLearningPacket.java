@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.ui.toasts.ActionToast;
 import com.github.standobyte.jojo.client.ui.toasts.ActionToast.IActionToastType;
 import com.github.standobyte.jojo.client.ui.toasts.FinisherAttackToast;
@@ -14,7 +15,6 @@ import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandActionLearningProgress.StandActionLearningEntry;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
-import com.github.standobyte.jojo.power.layout.ActionsLayout;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.toasts.ToastGui;
@@ -60,7 +60,7 @@ public class StandActionLearningPacket {
                         toastType = FinisherAttackToast.SpecialToastType.FINISHER_HEAVY_ATTACK;
                     }
                     else {
-                        ActionsLayout.Hotbar hotbar = getActionHotbar(action, standType);
+                        ControlScheme.Hotbar hotbar = getActionHotbar(action, standType);
                         boolean isShiftVariation = action.isShiftVariation();
                         toastType = ActionToast.Type.getToastType(PowerClassification.STAND, hotbar, isShiftVariation);
                     }
@@ -74,12 +74,12 @@ public class StandActionLearningPacket {
         }
         
         @Nullable
-        private ActionsLayout.Hotbar getActionHotbar(StandAction action, StandType<?> standType) {
+        private ControlScheme.Hotbar getActionHotbar(StandAction action, StandType<?> standType) {
             if (action.getBaseVariation() instanceof StandAction) {
                 action = (StandAction) action.getBaseVariation();
             }
             
-            for (ActionsLayout.Hotbar hotbar : ActionsLayout.Hotbar.values()) {
+            for (ControlScheme.Hotbar hotbar : ControlScheme.Hotbar.values()) {
                 for (StandAction a : standType.getDefaultHotbar(hotbar)) {
                     if (action == a || a.hasShiftVariation() && action == a.getShiftVariationIfPresent()) {
                         return hotbar;

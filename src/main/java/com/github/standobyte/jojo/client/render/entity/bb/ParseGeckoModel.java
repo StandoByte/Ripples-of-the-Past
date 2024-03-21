@@ -25,6 +25,7 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Direction.Axis;
 import net.minecraft.util.math.vector.Vector3f;
 
@@ -34,16 +35,18 @@ public class ParseGeckoModel {
             .registerTypeAdapter(ModelParsed.UV.class, ModelParsed.UV.DESERIALIZER)
             .create();
     
-    public static EntityModelUnbaked parseGeckoModel(JsonObject json) {
-        JsonElement modelJson = json.get("minecraft:geometry").getAsJsonArray().get(0);
+    public static EntityModelUnbaked parseGeckoModel(JsonElement json, ResourceLocation modelId) {
+        JsonElement modelJson = json.getAsJsonObject().get("minecraft:geometry").getAsJsonArray().get(0);
         ModelParsed modelParsed = GSON.fromJson(modelJson, ModelParsed.class);
+        
+        modelParsed.afterParse(modelId);
         EntityModelUnbaked modelUnbaked = modelParsed.createUnbakedModel();
         return modelUnbaked;
     }
     
     
     
-    private static class ModelParsed {
+    private static class ModelParsed implements IParsedModel {
         Description description;
         List<BoneParsed> bones;
         
@@ -382,6 +385,19 @@ public class ParseGeckoModel {
         
         
         
+        @Override
+        public void afterParse(ResourceLocation modelId) {
+            if (SILVER_CHARIOT_ARMOR.equals(modelId)) {
+                for (BoneParsed bone : bones) {
+                    bone.name = bone.name.replaceAll("_armor", "");
+                    if (bone.parent != null) {
+                        bone.parent = bone.parent.replaceAll("_armor", "");
+                    }
+                }
+            }
+        }
+        
+        @Override
         public EntityModelUnbaked createUnbakedModel() {
             int texWidth = description.texture_width;
             int texHeight = description.texture_height;
@@ -389,6 +405,7 @@ public class ParseGeckoModel {
             
             Map<String, BoneParsed> bonesNamed = new HashMap<>();
             for (BoneParsed bone : bones) {
+                bone.name = bone.name.replaceAll("_armor", "");
                 bonesNamed.put(bone.name, bone);
             }
             
