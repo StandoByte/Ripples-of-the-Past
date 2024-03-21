@@ -18,6 +18,7 @@ import com.github.standobyte.jojo.action.stand.CrazyDiamondMisshapingPunch;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondPreviousState;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRepairItem;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
+import com.github.standobyte.jojo.action.stand.GoldExperienceBoneMeal;
 import com.github.standobyte.jojo.action.stand.GoldExperienceChooseLifeform;
 import com.github.standobyte.jojo.action.stand.GoldExperienceCreateLifeform;
 import com.github.standobyte.jojo.action.stand.GoldExperienceEntityLifeshot;
@@ -26,6 +27,7 @@ import com.github.standobyte.jojo.action.stand.GoldExperienceHealOther;
 import com.github.standobyte.jojo.action.stand.GoldExperienceHealingItem;
 import com.github.standobyte.jojo.action.stand.GoldExperienceHeavyPunch;
 import com.github.standobyte.jojo.action.stand.GoldExperienceLifeshotPunch;
+import com.github.standobyte.jojo.action.stand.GoldExperienceLifeDetector;
 import com.github.standobyte.jojo.action.stand.GoldExperienceRevertLifeform;
 import com.github.standobyte.jojo.action.stand.GoldExperienceToothLifeform;
 import com.github.standobyte.jojo.action.stand.HierophantGreenBarrier;
@@ -813,24 +815,37 @@ public class ModStandsInit {
             () -> new GoldExperienceRevertLifeform(new StandAction.Builder()
                     .shiftVariationOf(GOLD_EXPERIENCE_CREATE_LIFEFORM)));
     
+    public static final RegistryObject<GoldExperienceBoneMeal> GOLD_EXPERIENCE_BONE_MEAL = ACTIONS.register("gold_experience_bone_meal", 
+            () -> new GoldExperienceBoneMeal(new StandEntityAction.Builder()
+                    .staminaCost(2)
+                    .standPerformDuration(5)
+                    .standAutoSummonMode(AutoSummonMode.MAIN_ARM)
+                    .partsRequired(StandPart.ARMS)));
+    
+    public static final RegistryObject<GoldExperienceLifeDetector> GOLD_EXPERIENCE_LIFE_DETECTOR = ACTIONS.register("gold_experience_life_detector", 
+            () -> new GoldExperienceLifeDetector(new StandEntityAction.Builder()
+                    .holdType().staminaCostTick(1.25F)
+                    .resolveLevelToUnlock(2)
+                    .partsRequired(StandPart.MAIN_BODY)));
+    
     public static final RegistryObject<GoldExperienceHeal> GOLD_EXPERIENCE_HEAL = ACTIONS.register("gold_experience_heal", 
             () -> new GoldExperienceHeal(new StandEntityAction.Builder()
                     .resolveLevelToUnlock(3)
-                    .staminaCost(10)
+                    .staminaCost(20)
                     .standPerformDuration(10)
                     .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<GoldExperienceHealingItem> GOLD_EXPERIENCE_HEALING_ITEM = ACTIONS.register("gold_experience_healing_item", 
             () -> new GoldExperienceHealingItem(new StandEntityAction.Builder()
                     .resolveLevelToUnlock(3)
-                    .staminaCost(10)
+                    .staminaCost(40)
                     .standPerformDuration(10)
                     .partsRequired(StandPart.ARMS)));
     
     public static final RegistryObject<GoldExperienceHealOther> GOLD_EXPERIENCE_HEAL_OTHER = ACTIONS.register("gold_experience_heal_other", 
             () -> new GoldExperienceHealOther(new StandEntityAction.Builder()
                     .resolveLevelToUnlock(3)
-                    .staminaCost(10)
+                    .staminaCost(20)
                     .standPerformDuration(10)
                     .partsRequired(StandPart.ARMS)
                     .shiftVariationOf(GOLD_EXPERIENCE_HEAL).addExtraUnlockable(GOLD_EXPERIENCE_HEALING_ITEM)));
@@ -851,11 +866,11 @@ public class ModStandsInit {
                             GOLD_EXPERIENCE_BLOCK.get(),
                             GOLD_EXPERIENCE_CHOOSE_LIFEFORM.get(),
                             GOLD_EXPERIENCE_CREATE_LIFEFORM.get(),
+                            GOLD_EXPERIENCE_BONE_MEAL.get(),
+                            GOLD_EXPERIENCE_LIFE_DETECTOR.get(),
                             GOLD_EXPERIENCE_HEAL.get()
                             )
-                    .defaultQuickAccess(
-                            GOLD_EXPERIENCE_CHOOSE_LIFEFORM.get()
-                            )
+                    .defaultKey(GOLD_EXPERIENCE_CHOOSE_LIFEFORM.get(), "key.keyboard.c")
                     .defaultStats(StandStats.class, new StandStats.Builder()
                             .power(10.0)
                             .speed(14.0)

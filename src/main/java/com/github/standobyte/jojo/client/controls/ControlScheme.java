@@ -157,7 +157,7 @@ public class ControlScheme {
     
     public static class DefaultControls {
         final Map<Hotbar, Action<?>[]> hotbars = new EnumMap<>(Hotbar.class);
-        final DefaultKey[] keyBindings;
+        final List<DefaultKey> keyBindings = new ArrayList<>();
         
         public DefaultControls(
                 Action<?>[] leftClickActions, 
@@ -165,7 +165,11 @@ public class ControlScheme {
                 DefaultKey... keyBindings) {
             this.hotbars.put(Hotbar.LEFT_CLICK, leftClickActions);
             this.hotbars.put(Hotbar.RIGHT_CLICK, rightClickActions);
-            this.keyBindings = keyBindings;
+            Collections.addAll(this.keyBindings, keyBindings);
+        }
+        
+        public void addKey(DefaultKey key) {
+            this.keyBindings.add(key);
         }
         
         public static class DefaultKey {

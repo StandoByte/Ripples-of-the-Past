@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
@@ -17,9 +18,12 @@ import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.ArmorStandEntity;
+import net.minecraft.entity.passive.GolemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BucketItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.DamageSource;
@@ -51,11 +55,17 @@ public class GoldExperienceHeal extends StandEntityAction {
 
     public static final int MAX_REGEN_LVL = 3;
     
+    public static boolean isLiving(LivingEntity entity) {
+        return !(!(entity instanceof PlayerEntity) && JojoModUtil.isUndead(entity) ||
+                entity instanceof GolemEntity ||
+                entity instanceof ArmorStandEntity);
+    }
+    
     public static ActionConditionResult canHeal(LivingEntity entity, LivingEntity userGE, 
             boolean tissueItem, int effectMax) {
         if (entity != null) {
-            if (JojoModUtil.isUndead(entity)) {
-                return conditionMessage("ge_heal_undead");
+            if (!isLiving(entity)) {
+                return conditionMessage("ge_heal_non_living");
             }
             if (StandUtil.getStandUser(entity) != entity) {
                 return conditionMessage("ge_heal_stand");
@@ -85,7 +95,7 @@ public class GoldExperienceHeal extends StandEntityAction {
                 }
             }
             
-            int currentRegen = MCUtil.getEffectLevel(entity, Effects.REGENERATION);
+            int currentRegen = MCUtil.getEffectLevel(entity, regenEffectFor(entity));
             if (currentRegen >= effectMax) {
                 if (entity == userGE) {
                     return conditionMessage("ge_heal_stronger");
@@ -108,6 +118,13 @@ public class GoldExperienceHeal extends StandEntityAction {
         }
         
         return ActionConditionResult.NEGATIVE;
+    }
+    
+    private static Effect regenEffectFor(LivingEntity entity) {
+        if (entity instanceof PlayerEntity && JojoModUtil.isPlayerUndead((PlayerEntity) entity)) {
+            return ModStatusEffects.UNDEAD_REGENERATION.get();
+        }
+        return Effects.REGENERATION;
     }
     
     public static void spendAndHeal(World world, LivingEntity entity, 
@@ -151,9 +168,9 @@ public class GoldExperienceHeal extends StandEntityAction {
                 }
                 else {
                     entity.hurt(DamageSource.GENERIC, 0.0001F);
-                    int lvl = Math.min(MCUtil.getEffectLevel(entity, Effects.REGENERATION) + 1, MAX_REGEN_LVL);
-                    entity.addEffect(new EffectInstance(Effects.REGENERATION, 
-                            HamonHealing.updateRegenEffect(entity, 105, lvl), lvl));
+                    Effect regen = regenEffectFor(entity);
+                    int lvl = Math.min(MCUtil.getEffectLevel(entity, regen) + 1, MAX_REGEN_LVL);
+                    entity.addEffect(new EffectInstance(regen, HamonHealing.updateRegenEffect(entity, 105, lvl, regen), lvl));
                 }
                 playHealSound(entity);
                 return;
@@ -183,13 +200,14 @@ public class GoldExperienceHeal extends StandEntityAction {
         }
         
         
-        EffectInstance currentRegen = entity.getEffect(Effects.REGENERATION);
+        Effect regenEffect = regenEffectFor(entity);
+        EffectInstance currentRegen = entity.getEffect(regenEffect);
         
         int lvl;
         int duration = durationMax;
         if (currentRegen != null) {
             lvl = currentRegen.getAmplifier() + 1;
-            duration = HamonHealing.updateRegenEffect(entity, duration, lvl);
+            duration = HamonHealing.updateRegenEffect(entity, duration, lvl, regenEffect);
         }
         else {
             lvl = 0;
@@ -207,7 +225,7 @@ public class GoldExperienceHeal extends StandEntityAction {
 
         entity.hurt(DamageSource.GENERIC, 0.0001F);
         
-        EffectInstance newRegen = new EffectInstance(Effects.REGENERATION, duration, lvl, false, true, true, currentRegen);
+        EffectInstance newRegen = new EffectInstance(regenEffect, duration, lvl, false, true, true, currentRegen);
         entity.addEffect(newRegen);
         
     }
