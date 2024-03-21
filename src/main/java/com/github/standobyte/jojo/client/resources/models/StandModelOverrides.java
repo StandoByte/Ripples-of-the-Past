@@ -38,18 +38,18 @@ public class StandModelOverrides extends JsonReloadListener {
             if (standModel != null) {
                 JsonElement json = entry.getValue();
                 if (json.isJsonObject()) {
-                    StandEntityModel<?> modelCopy = standModel.createNewModelCopy();
-                    EntityModelUnbaked modelOverride;
-                    if (bb) modelOverride = ParseGenericModel.parseGenericModel(json);
-                    else    modelOverride = ParseGeckoModel.parseGeckoModel(json);
                     try {
+                        StandEntityModel<?> modelCopy = standModel.createNewModelCopy();
+                        EntityModelUnbaked modelOverride;
+                        if (bb) modelOverride = ParseGenericModel.parseGenericModel(json, standModel.id);
+                        else    modelOverride = ParseGeckoModel.parseGeckoModel(json, standModel.id);
                         BlockbenchStandModelHelper.replaceModelParts(modelCopy, modelOverride.getNamedModelParts());
+                        modelCopy.afterInit();
+                        modelOverrides.put(location, modelCopy);
                     } catch (Exception e) {
-                        JojoMod.getLogger().error("Failed to import Geckolib format model as {}", modelCopy.getClass().getName());
+                        JojoMod.getLogger().error("Failed to import Geckolib format model as {}", standModel.baseModel.getClass().getName());
                         e.printStackTrace();
                     }
-                    modelCopy.afterInit();
-                    modelOverrides.put(location, modelCopy);
                 }
             }
         }
