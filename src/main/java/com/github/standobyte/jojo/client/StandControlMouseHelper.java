@@ -32,7 +32,7 @@ public class StandControlMouseHelper extends MouseHelper {
         lastMouseEventTime = time;
         
         if (isMouseGrabbed() && minecraft.isWindowActive() && minecraft.player != null) {
-            StandEntity standManual = StandController.getInstance().getManuallyControlledStand();
+            StandEntity standManual = ControllerStand.getInstance().getManuallyControlledStand();
             if (standManual != null && standManual.isAlive()) {
                 turnStand(standManual, timeDelta);
                 return;
