@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.non_stand;
 
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -13,15 +14,20 @@ import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.ArmorStandEntity;
+import net.minecraft.entity.passive.GolemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BoneMealItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
 public class HamonHealing extends HamonAction {
@@ -46,7 +52,7 @@ public class HamonHealing extends HamonAction {
             addPointsForAction(power, hamon, HamonStat.CONTROL, cost, hamonEfficiency);
 
             entityToHeal.addEffect(new EffectInstance(Effects.REGENERATION, 
-                    updateRegenEffect(entityToHeal, regenDuration, regenLvl), regenLvl));
+                    updateRegenEffect(entityToHeal, regenDuration, regenLvl, Effects.REGENERATION), regenLvl));
             if (hamon.isSkillLearned(ModHamonSkills.EXPEL_VENOM.get())) {
                 entityToHeal.removeEffect(Effects.POISON);
                 entityToHeal.removeEffect(Effects.WITHER);
@@ -63,8 +69,8 @@ public class HamonHealing extends HamonAction {
     }
     
     // prevents the health regeneration being faster or slower when spamming the ability
-    public static int updateRegenEffect(LivingEntity entity, int duration, int level) {
-        EffectInstance currentRegen = entity.getEffect(Effects.REGENERATION);
+    public static int updateRegenEffect(LivingEntity entity, int duration, int level, Effect effect) {
+        EffectInstance currentRegen = entity.getEffect(effect);
         if (currentRegen != null && currentRegen.getAmplifier() < 5 && currentRegen.getAmplifier() <= level) {
             int regenGap = 50 >> currentRegen.getAmplifier();
             if (regenGap > 0) {
@@ -91,7 +97,10 @@ public class HamonHealing extends HamonAction {
     
     private boolean canBeHealed(LivingEntity targetEntity, LivingEntity user) {
         boolean shiftVariation = JojoModUtil.useShiftVar(user);
-        return shiftVariation && !JojoModUtil.isUndead(targetEntity);
+        return shiftVariation && !(
+                JojoModUtil.isUndead(targetEntity) ||
+                targetEntity instanceof GolemEntity ||
+                targetEntity instanceof ArmorStandEntity);
     }
 
     public static boolean bonemealEffect(World world, PlayerEntity applyingPlayer, BlockPos pos, Direction face) {
@@ -126,5 +135,16 @@ public class HamonHealing extends HamonAction {
             }
         }
         return key;
+    }
+    
+    @Override
+    public IFormattableTextComponent getTranslatedName(INonStandPower power, String key) {
+        if (key.endsWith("h")) { // healing_touch
+            ActionTarget target = ActionsOverlayGui.getInstance().getMouseTarget();
+            if (target.getEntity() != null) {
+                return new TranslationTextComponent(key, target.getEntity().getDisplayName());
+            }
+        }
+        return super.getTranslatedName(power, key);
     }
 }
