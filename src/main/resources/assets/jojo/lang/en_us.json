@@ -1118,6 +1118,7 @@
   "action.jojo.gold_experience_tooth_lifeform.param": "Turn tooth into %s",
   "action.jojo.gold_experience_revert_lifeform": "Revert",
   "action.jojo.gold_experience_revert_lifeform.param": "Revert to %s",
+  "action.jojo.gold_experience_bone_meal": "Organism Growth",
   "action.jojo.gold_experience_heal": "Plug up wounds",
   "action.jojo.gold_experience_heal.arrow": "Plug up arrow wound",
   "action.jojo.gold_experience_heal.knife": "Plug up knife wound",

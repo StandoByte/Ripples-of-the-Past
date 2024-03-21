@@ -23,32 +23,42 @@ import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.world.World;
 
 public class TreeLeavesDecay {
-    private Set<BlockPos> logs = new HashSet<>();
-    private List<Set<BlockPos>> leaves = new ArrayList<>();
-    private Block logType;
-    private Block leavesType;
-    private int decayTicks = 0;
-    private int decayPerTick = 0;
+    public Set<BlockPos> logs = new HashSet<>();
+    public List<Set<BlockPos>> leaves = new ArrayList<>();
+    public Block logType;
+    public Block leavesType;
+    public int decayTicks = 0;
+    public int decayPerTick = 0;
     
     private static final int RANGE = 16;
     
     
-    public static void startDecay(World world, BlockPos blockPos, int duration, int leavesPerTick) {
+    @Nullable
+    public static TreeLeavesDecay startDecay(World world, BlockPos blockPos, int duration, int leavesPerTick) {
         if (!world.isClientSide()) {
-            world.getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+            return world.getCapability(WorldUtilCapProvider.CAPABILITY).resolve().map(cap -> {
                 TreeLeavesDecay tree = TreeLeavesDecay.createFromLogBlock(blockPos, world);
                 if (tree != null && tree.isValid()) {
                     cap.addDecayingTree(tree);
                     tree.updateDecay(duration, leavesPerTick);
+                    return tree;
                 }
-            });
+                
+                return null;
+            }).orElse(null);
         }
+        
+        return null;
+    }
+    
+    public static boolean isTreeStemBlock(Block block) {
+        return BlockTags.LOGS.contains(block) || block == Blocks.MUSHROOM_STEM;
     }
     
     @Nullable
     public static TreeLeavesDecay createFromLogBlock(BlockPos pos, World world) {
         Block block = world.getBlockState(pos).getBlock();
-        if (BlockTags.LOGS.contains(block) || block == Blocks.MUSHROOM_STEM) {
+        if (isTreeStemBlock(block)) {
             TreeLeavesDecay tree = new TreeLeavesDecay();
             tree.logType = block;
             CubeBoolArrUtil checkedTable = new CubeBoolArrUtil(RANGE * 2 + 1);
