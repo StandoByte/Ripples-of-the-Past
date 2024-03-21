@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.entity;
 import java.util.UUID;
 
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.SoulController;
+import com.github.standobyte.jojo.client.ControllerSoul;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModParticles;
@@ -262,7 +262,7 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
         Entity entity = level.getEntity(additionalData.readInt());
         if (entity instanceof LivingEntity) {
             setOriginEntity((LivingEntity) entity);
-            SoulController.getInstance().onSoulSpawn(this);
+            ControllerSoul.getInstance().onSoulSpawn(this);
             addCloudParticles();
         }
         else {
