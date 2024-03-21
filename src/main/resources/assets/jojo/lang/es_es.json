@@ -329,7 +329,6 @@
   "jojo.screen.edit_hud_layout.reset": "Restablecer diseño",
   "jojo.screen.edit_hud_layout.hint.lmb": "Botón izquierdo del ratón - mover",
   "jojo.screen.edit_hud_layout.hint.rmb": "Botón derecho del mouse - Activar/Desactivar",
-  "jojo.screen.edit_hud_layout.hint.mmb": "Botón central del ratón - muévase rápidamente a la ranura de acceso rápido",
   
   "jojo.overlay.mode_deselect": "Deseleccionar",
   "jojo.overlay.mode_key": "[%s] %s",

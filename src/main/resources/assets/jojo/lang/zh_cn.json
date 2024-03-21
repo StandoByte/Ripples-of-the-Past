@@ -360,7 +360,6 @@
  "jojo.screen.edit_hud_layout.reset": "重置布局",
  "jojo.screen.edit_hud_layout.hint.lmb": "鼠标左键-移动",
  "jojo.screen.edit_hud_layout.hint.rmb": "鼠标右键-启用/禁用",
- "jojo.screen.edit_hud_layout.hint.mmb": "鼠标中键-快速移动到快速访问槽",
  "jojo.overlay.mode_deselect": "选择取消",
  "jojo.overlay.mode_key": "[%s] %s",
  "jojo.overlay.shift": "%s (%s: %s)",

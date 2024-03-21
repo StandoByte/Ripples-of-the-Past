@@ -32,7 +32,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 
-@SuppressWarnings("deprecation")
 public abstract class BarsRenderer {
     static final int BARS_WIDTH_PX = 28;
     
@@ -47,6 +46,7 @@ public abstract class BarsRenderer {
         barTransparencies = new EnumMap<>(BarType.class);
         barTransparencies.put(BarType.ENERGY_HAMON, energy);
         barTransparencies.put(BarType.ENERGY_VAMPIRE, energy);
+        barTransparencies.put(BarType.ENERGY_OTHER, energy);
         barTransparencies.put(BarType.STAMINA, stamina);
         barTransparencies.put(BarType.RESOLVE, resolve);
     }
@@ -98,6 +98,9 @@ public abstract class BarsRenderer {
             }
             else if (nonStandPower.getType() == ModPowers.VAMPIRISM.get()) {
                 type = BarType.ENERGY_VAMPIRE;
+            }
+            else {
+                type = BarType.ENERGY_OTHER;
             }
             
             if (type != null) {
@@ -293,6 +296,7 @@ public abstract class BarsRenderer {
     public enum BarType {
         ENERGY_HAMON,
         ENERGY_VAMPIRE,
+        ENERGY_OTHER,
         STAMINA,
         RESOLVE
     }
