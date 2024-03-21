@@ -81,13 +81,13 @@ public class VampirismData extends TypeSpecificData {
         if (this.vampireHamonUser == vampireHamonUser) {
             return;
         }
+        this.vampireHamonUser = vampireHamonUser;
         
         LivingEntity user = power.getUser();
         if (!user.level.isClientSide()) {
             PacketManager.sendToClientsTrackingAndSelf(TrVampirismDataPacket.wasHamonUser(user.getId(), vampireHamonUser), user);
         }
         
-        this.vampireHamonUser = vampireHamonUser;
         
         if (vampireHamonUser && prevHamon.isPresent()) {
             HamonData hamon = prevHamon.get();
@@ -116,13 +116,19 @@ public class VampirismData extends TypeSpecificData {
     }
     
     public void setVampireFullPower(boolean vampireFullPower) {
-        if (this.vampireFullPower != vampireFullPower) {
-            LivingEntity user = power.getUser();
-            if (!user.level.isClientSide()) {
-                PacketManager.sendToClientsTrackingAndSelf(TrVampirismDataPacket.atFullPower(user.getId(), vampireFullPower), user);
-            }
+        if (this.vampireFullPower == vampireFullPower) {
+            return;
         }
+        
+        LivingEntity user = power.getUser();
         this.vampireFullPower = vampireFullPower;
+        
+        if (!user.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(TrVampirismDataPacket.atFullPower(user.getId(), vampireFullPower), user);
+        }
+        else {
+            power.clUpdateHud();
+        }
     }
     
     public int getCuringTicks() {
