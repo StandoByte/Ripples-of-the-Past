@@ -9,10 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.render.MeshModelBox;
 import com.github.standobyte.jojo.client.render.MeshModelBox.Builder.MeshFaceBuilder;
 import com.github.standobyte.jojo.util.general.MathUtil;
@@ -31,7 +31,7 @@ import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Direction.Axis;
-import net.minecraft.util.Util;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
 @SuppressWarnings("unused")
@@ -42,18 +42,17 @@ public class ParseGenericModel {
             .registerTypeAdapter(ModelParsed.BlockbenchObj.class, ModelParsed.BlockbenchObj.DESERIALIZER)
             .create();
     
-    public static EntityModelUnbaked parseGenericModel(JsonElement json) {
-        long time = Util.getMillis();
+    public static EntityModelUnbaked parseGenericModel(JsonElement json, ResourceLocation modelId) {
         ModelParsed modelParsed = GSON.fromJson(json, ModelParsed.class);
-        long parseTime = Util.getMillis();
+        
+        modelParsed.afterParse(modelId);
         EntityModelUnbaked modelUnbaked = modelParsed.createUnbakedModel();
-        long dataHandleTime = Util.getMillis();
         return modelUnbaked;
     }
     
     
     
-    private static class ModelParsed {
+    private static class ModelParsed implements IParsedModel {
         Resolution resolution;
         List<Element> elements;
         List<BlockbenchObj> outliner;
@@ -407,7 +406,25 @@ public class ParseGenericModel {
         
         
         
+        @Override
+        public void afterParse(ResourceLocation modelId) {
+            if (SILVER_CHARIOT_ARMOR.equals(modelId)) {
+                outliner.forEach(ModelParsed::fixArmorName);
+            }
+        }
+        private static void fixArmorName(BlockbenchObj obj) {
+            if (obj instanceof GroupParsed) {
+                GroupParsed group = (GroupParsed) obj;
+                group.name = group.name.replace("_armor", "");
+                for (BlockbenchObj child : group.children) {
+                    fixArmorName(child);
+                }
+            }
+        }
+        
+        
         private Map<UUID, ModelParsed.Element> initElements = new HashMap<>();
+        @Override
         public EntityModelUnbaked createUnbakedModel() {
             EntityModelUnbaked model = new EntityModelUnbaked(resolution.width, resolution.height);
             
