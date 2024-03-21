@@ -2,7 +2,6 @@ package com.github.standobyte.jojo.entity.stand;
 
 import java.util.Random;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
@@ -51,7 +50,6 @@ public class StandStatFormulas {
         if (firstPunch) {
             val /= 2;
         }
-        JojoMod.LOGGER.debug(val);
         
         int ticks = MathHelper.floor(val);
         if (RANDOM.nextDouble() < val - ticks) ticks++;

@@ -39,6 +39,18 @@ public class ControlScheme {
         }
     });
     
+    private ControlScheme() {}
+    
+    private ControlScheme(IPowerType<?, ?> powerType) {
+        if (powerType != null) {
+            this.defaultState = powerType.clCreateDefaultLayout();
+        }
+    }
+    
+    private ControlScheme(DefaultControls defaults) {
+        this.defaultState = defaults;
+    }
+    
     private boolean initialized = false;
     public boolean initLoadedFromConfig(IPower<?, ?> power) {
         if (initialized) return false;
@@ -138,7 +150,7 @@ public class ControlScheme {
     }
     
     public static ControlScheme createNewFromDefault(DefaultControls defaultControls) {
-        ControlScheme obj = new ControlScheme();
+        ControlScheme obj = new ControlScheme(defaultControls);
         
         for (Hotbar hotbarType : Hotbar.values()) {
             ActionsHotbar hotbar = obj.hotbars.get(hotbarType);
@@ -244,8 +256,18 @@ public class ControlScheme {
     
     
     static ControlScheme fromJson(JsonElement json, @Nullable ResourceLocation powerTypeId) {
+        ControlScheme obj;
+        if (powerTypeId != null) {
+            Optional<IPowerType<?, ?>> powerType = Optional.ofNullable(JojoCustomRegistries.NON_STAND_POWERS.fromId(powerTypeId));
+            // Optional#or was only added in Java 9
+            if (!powerType.isPresent()) powerType = Optional.ofNullable(JojoCustomRegistries.STANDS.fromId(powerTypeId));
+            obj = new ControlScheme(powerType.orElse(null));
+        }
+        else {
+            obj = new ControlScheme();
+        }
+        
         JsonObject jsonObj = json.getAsJsonObject();
-        ControlScheme obj = new ControlScheme();
 
         JsonArray keybindsJson = jsonObj.get("customKeybinds").getAsJsonArray();
         for (JsonElement keybindJson : keybindsJson) {
@@ -259,16 +281,6 @@ public class ControlScheme {
             obj.hotbars.get(hotbar).fromJson(hotbarJson);
         }
         
-        if (powerTypeId != null) {
-            Optional<IPowerType<?, ?>> powerType = Optional.ofNullable(JojoCustomRegistries.NON_STAND_POWERS.fromId(powerTypeId));
-            // Optional#or was only added in Java 9
-            if (!powerType.isPresent()) powerType = Optional.ofNullable(JojoCustomRegistries.STANDS.fromId(powerTypeId));
-            powerType.ifPresent(type -> {
-                ControlScheme.DefaultControls defaultState = type.clCreateDefaultLayout();
-                obj.defaultState = defaultState;
-            });
-        }
-
         return obj;
     }
 
