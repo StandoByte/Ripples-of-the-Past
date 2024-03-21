@@ -5,6 +5,7 @@ import java.util.OptionalInt;
 
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
@@ -52,8 +53,10 @@ public class HamonDetector extends HamonAction {
                         !(entity instanceof GolemEntity || entity instanceof ArmorStandEntity));
                 
                 if (world.isClientSide()) {
-                    entitiesAround.forEach(entity -> entity.getCapability(EntityUtilCapProvider.CAPABILITY).ifPresent(
-                            cap -> cap.setClGlowingColor(COLOR, 80)));
+                    if (user == ClientUtil.getClientPlayer()) {
+                        entitiesAround.forEach(entity -> entity.getCapability(EntityUtilCapProvider.CAPABILITY).ifPresent(
+                                cap -> cap.setClGlowingColor(COLOR, 80)));
+                    }
                 }
                 else if (!entitiesAround.isEmpty()) {
                     hamon.hamonPointsFromAction(HamonStat.CONTROL, getHeldTickEnergyCost(power)); 
