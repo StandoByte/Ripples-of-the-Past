@@ -1907,6 +1907,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     public void shootProjectile(ModdedProjectileEntity projectile, float velocity, float inaccuracy) {
         if (!level.isClientSide() && !projectile.isAddedToWorld()) {
             projectile.shootFromRotation(this, velocity, getProjectileInaccuracy(inaccuracy));
+            projectile.withStandSkin(getStandSkin());
             addProjectile(projectile);
         }
     }

@@ -5,8 +5,6 @@ import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WIND
 
 import java.util.List;
 
-import org.lwjgl.opengl.GL11;
-
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -109,15 +107,11 @@ public class HamonSkillDescBox {
                 mouseY >= scrollBar[1] && mouseY <= scrollBar[1] + scrollBar[3];
     }
     
-    public void drawDesc(MatrixStack matrixStack, FontRenderer font, int x, int y) {
-        Minecraft mc = Minecraft.getInstance();
-        int scale = mc.getWindow().calculateScale(mc.options.guiScale, mc.isEnforceUnicode());
-        int scissorX = (HamonScreen.screenX + this.x + x + WINDOW_THIN_BORDER) * scale;
-        int scissorY = (HamonScreen.screenY + this.y + y + WINDOW_UPPER_BORDER) * scale;
-        int scissorWidth = WIDTH * scale;
-        int scissorHeight = HEIGHT * scale;
-        GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        GL11.glScissor(scissorX, mc.getWindow().getHeight() - scissorY - scissorHeight, scissorWidth, scissorHeight);
+    public void drawDesc(MatrixStack matrixStack, FontRenderer font, Screen screen, int x, int y) {
+        int scissorX = HamonScreen.screenX + this.x + x + WINDOW_THIN_BORDER;
+        int scissorY = HamonScreen.screenY + this.y + y + WINDOW_UPPER_BORDER;
+        
+        ClientUtil.enableGlScissor(scissorX, scissorY, WIDTH, HEIGHT);
         
         for (int i = 0; i < skillDesc.size(); i++) {
             float lineY = this.y + y + EDGE_TEXT_OFFSET - yTextScroll + i * font.lineHeight;
@@ -126,7 +120,7 @@ public class HamonSkillDescBox {
             }
         }
         
-        GL11.glDisable(GL11.GL_SCISSOR_TEST);
+        ClientUtil.disableGlScissor();
     }
     
     public boolean isMouseOver(double mouseX, double mouseY, double offsetX, double offsetY) {
