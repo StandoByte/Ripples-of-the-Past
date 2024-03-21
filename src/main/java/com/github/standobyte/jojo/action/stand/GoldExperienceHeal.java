@@ -51,12 +51,16 @@ public class GoldExperienceHeal extends StandEntityAction {
 
     public static final int MAX_REGEN_LVL = 3;
     
+    public static boolean isLiving(LivingEntity entity) {
+        return !(!(entity instanceof PlayerEntity) && JojoModUtil.isUndead(entity) ||
+                entity instanceof GolemEntity ||
+                entity instanceof ArmorStandEntity);
+    }
+    
     public static ActionConditionResult canHeal(LivingEntity entity, LivingEntity userGE, 
             boolean tissueItem, int effectMax) {
         if (entity != null) {
-            if (!(entity instanceof PlayerEntity) && JojoModUtil.isUndead(entity) ||
-                    entity instanceof GolemEntity ||
-                    entity instanceof ArmorStandEntity) {
+            if (!isLiving(entity)) {
                 return conditionMessage("ge_heal_non_living");
             }
             if (StandUtil.getStandUser(entity) != entity) {

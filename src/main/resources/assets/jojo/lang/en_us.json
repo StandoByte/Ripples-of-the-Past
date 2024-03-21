@@ -1120,6 +1120,7 @@
   "action.jojo.gold_experience_revert_lifeform.param": "Revert to %s",
   "action.jojo.gold_experience_bone_meal": "Organism Growth",
   "action.jojo.gold_experience_heal": "Plug up wounds",
+  "action.jojo.gold_experience_life_detector": "Life Sensor",
   "action.jojo.gold_experience_heal.arrow": "Plug up arrow wound",
   "action.jojo.gold_experience_heal.knife": "Plug up knife wound",
   "action.jojo.gold_experience_heal_other": "Plug up %s's wounds",

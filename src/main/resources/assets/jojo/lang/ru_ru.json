@@ -1108,6 +1108,7 @@
   "action.jojo.gold_experience_revert_lifeform": "Обратить жизнь назад",
   "action.jojo.gold_experience_revert_lifeform.param": "Обратить в %s",
   "action.jojo.gold_experience_bone_meal": "Рост организма",
+  "action.jojo.gold_experience_life_detector": "Детектор жизни",
   "action.jojo.gold_experience_heal": "Закрыть раны",
   "action.jojo.gold_experience_heal.arrow": "Закрыть рану от стрелы",
   "action.jojo.gold_experience_heal.knife": "Закрыть рану от ножа",
