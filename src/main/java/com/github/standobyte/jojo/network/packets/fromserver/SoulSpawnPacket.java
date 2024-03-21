@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.SoulController;
+import com.github.standobyte.jojo.client.ControllerSoul;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
@@ -48,7 +48,7 @@ public class SoulSpawnPacket {
         @Override
         public void handle(SoulSpawnPacket msg, Supplier<NetworkEvent.Context> ctx) {
             if (msg.failedSpawnPacket) {
-                SoulController.getInstance().onSoulFailedSpawn();
+                ControllerSoul.getInstance().onSoulFailedSpawn();
             }
             else {
                 IStandPower.getStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
