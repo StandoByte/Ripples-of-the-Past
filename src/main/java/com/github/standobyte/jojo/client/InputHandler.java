@@ -589,7 +589,11 @@ public class InputHandler {
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void cancelClickInput(ClickInputEvent event) {
-        if (nonStandPower != null) {
+        if (ControllerSoul.getInstance().isCameraEntityPlayerSoul()) {
+            event.setCanceled(true);
+            event.setSwingHand(false);
+        }
+        else if (nonStandPower != null) {
             nonStandPower.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                 if (hamon.isMeditating()) {
                     event.setCanceled(true);

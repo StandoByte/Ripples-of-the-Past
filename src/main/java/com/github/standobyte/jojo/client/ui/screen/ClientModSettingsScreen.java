@@ -89,7 +89,14 @@ public class ClientModSettingsScreen extends SettingsScreen {
                 new TranslationTextComponent("jojo.config.client.showLockedSlots.tooltip")
                 ) {
             @Override public boolean get() { return settingsValues.showLockedSlots; }
-            @Override public void set(boolean value) { settingsValues.showLockedSlots = value; }
+            @Override public void set(boolean value) {
+                settingsValues.showLockedSlots = value;
+                if (minecraft.player != null) {
+                    for (PowerClassification power : PowerClassification.values()) {
+                        IPower.getPowerOptional(minecraft.player, power).ifPresent(IPower::clUpdateHud);
+                    }
+                }
+            }
         };
         addButton(showLockedSlots.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
         

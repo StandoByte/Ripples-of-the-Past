@@ -50,10 +50,10 @@ public class StandModelOverrides extends JsonReloadListener {
             EntityModelUnbaked modelOverride;
             switch (format) {
             case GECKO:
-                modelOverride = ParseGeckoModel.parseGeckoModel(json.getAsJsonObject());
+                modelOverride = ParseGeckoModel.parseGeckoModel(json, registeredModel.id);
                 break;
             case BB_GENERIC:
-                modelOverride = ParseGenericModel.parseGenericModel(json.getAsJsonObject());
+                modelOverride = ParseGenericModel.parseGenericModel(json, registeredModel.id);
                 break;
             default:
                 return Optional.empty();

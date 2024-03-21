@@ -57,6 +57,7 @@ public class ControllerSoul {
                 if (soulEntityWaiting || isCameraEntityPlayerSoul()) {
                     mc.gui.setOverlayMessage(new TranslationTextComponent("jojo.message.skip_soul_ascension", new KeybindTextComponent("key.jump")), false);
                 }
+                mc.player.deathTime = Math.min(mc.player.deathTime, 18);
             }
             else {
                 if (!firstDeathFrame) {
@@ -83,7 +84,7 @@ public class ControllerSoul {
         }
     }
     
-    private boolean isCameraEntityPlayerSoul() {
+    public boolean isCameraEntityPlayerSoul() {
         return playerSoulEntity != null && playerSoulEntity.isAlive() && playerSoulEntity == mc.getCameraEntity() && !mc.player.isSpectator();
     }
     
