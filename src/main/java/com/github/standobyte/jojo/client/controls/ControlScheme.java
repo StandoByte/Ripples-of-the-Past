@@ -23,6 +23,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 
 public class ControlScheme {
+    public static final ControlScheme EMPTY = new ControlScheme();
+    
     public static final int ARBITRARY_MAX_HOTBAR_LENGTH = 19;
     
     @Nullable
