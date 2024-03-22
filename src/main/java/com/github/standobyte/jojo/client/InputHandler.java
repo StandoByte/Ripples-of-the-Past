@@ -1074,6 +1074,8 @@ public class InputHandler {
     public void updatePowersCache() {
         standPower = IStandPower.getPlayerStandPower(mc.player);
         nonStandPower = INonStandPower.getPlayerNonStandPower(mc.player);
+        if (standPower != null) standPower.clUpdateHud();
+        if (nonStandPower != null) nonStandPower.clUpdateHud();
         heldKeys.clear();
     }
     
