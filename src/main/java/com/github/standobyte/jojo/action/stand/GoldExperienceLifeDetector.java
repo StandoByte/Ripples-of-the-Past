@@ -30,7 +30,14 @@ public class GoldExperienceLifeDetector extends StandEntityAction {
                     Math.min(radius, maxRadius), false, 
                     entity -> entity != userPower.getUser() && GoldExperienceHeal.isLiving(entity));
             entitiesAround.forEach(entity -> entity.getCapability(EntityUtilCapProvider.CAPABILITY).ifPresent(
-                    cap -> cap.setClGlowingColor(OptionalInt.of(ActionsOverlayGui.getPowerUiColor(userPower)), 80)));
+                    cap -> {
+                        if (!entity.isDeadOrDying()) {
+                            cap.setClGlowingColor(OptionalInt.of(ActionsOverlayGui.getPowerUiColor(userPower)), 80);
+                        }
+                        else {
+                            cap.setClGlowingColor(OptionalInt.empty(), 80);
+                        }
+                    }));
         }
     }
 
