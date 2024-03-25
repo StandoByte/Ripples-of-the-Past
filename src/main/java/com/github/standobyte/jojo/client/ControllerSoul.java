@@ -104,11 +104,12 @@ public class ControllerSoul {
     public void skipAscension() {
         if (isCameraEntityPlayerSoul()) {
             playerSoulEntity.skipAscension();
+            mc.gui.setOverlayMessage(StringTextComponent.EMPTY, false);
         }
         else if (soulEntityWaiting) {
             soulEntityWaiting = false;
+            mc.gui.setOverlayMessage(StringTextComponent.EMPTY, false);
         }
-        mc.gui.setOverlayMessage(StringTextComponent.EMPTY, false);
     }
     
     public void updateStandCache() {
