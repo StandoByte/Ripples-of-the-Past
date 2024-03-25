@@ -411,6 +411,9 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         if (from.isVehicle()) {
             from.getPassengers().forEach(passenger -> passenger.startRiding(to));
         }
+        if (from.hasCustomName() && !(to instanceof ItemEntity)) {
+            to.setCustomName(from.getCustomName());
+        }
     }
     
     
@@ -534,6 +537,9 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                         potionItem = MCUtil.getItemOnServer((PotionEntity) sourceEntity);
                     }
                     return potionItem.copy();
+                }
+                else if (sourceEntity.getType() == EntityType.ENDER_PEARL) {
+                    return new ItemStack(Items.ENDER_PEARL);
                 }
                 else if (sourceEntity.getType() == ModEntityTypes.ROAD_ROLLER.get()) {
                     return new ItemStack(ModItems.ROAD_ROLLER.get());

@@ -6,6 +6,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -39,6 +40,8 @@ import net.minecraft.entity.passive.horse.AbstractHorseEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
@@ -46,6 +49,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.Explosion;
 import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.common.util.Constants;
 
 public class LivingUtilCap {
     private final LivingEntity entity;
@@ -87,9 +91,12 @@ public class LivingUtilCap {
     private final List<AfterimageEntity> afterimages = new ArrayList<>();
     private boolean usedZoomPunch = false;
     private boolean gotScarf = false;
+
+    private List<EffectInstance> productPotions;
     
     private float lifeShotResist;
     private int lifeShotResistTicks;
+    
     
     public LivingUtilCap(LivingEntity entity) {
         this.entity = entity;
@@ -562,6 +569,18 @@ public class LivingUtilCap {
     
     
     
+    public void setProductEffects(List<EffectInstance> effects) {
+        this.productPotions = effects.stream().map(EffectInstance::new) // makes deep copies of effect instances
+                .collect(Collectors.toList());
+    }
+    
+    @Nullable
+    public List<EffectInstance> getProductEffects() {
+        return productPotions;
+    }
+    
+    
+    
     public void onTracking(ServerPlayerEntity tracking) {
         if (deadBodyTimer >= 0) {
             PacketManager.sendToClient(new TrDyingBodyTimerPacket(
@@ -577,6 +596,7 @@ public class LivingUtilCap {
         }
     }
     
+
     public void onClone(LivingUtilCap old, boolean wasDeath) {
         hasUsedTimeStopToday = old.hasUsedTimeStopToday;
         gotScarf = old.gotScarf;
@@ -597,6 +617,14 @@ public class LivingUtilCap {
         }
         nbt.putBoolean("GotScarf", gotScarf);
         
+        if (productPotions != null && !productPotions.isEmpty()) {
+            ListNBT effectsNbt = new ListNBT();
+            for (EffectInstance effect : productPotions) {
+                effectsNbt.add(effect.save(new CompoundNBT()));
+            }
+            nbt.put("ProductPotion", effectsNbt);
+        }
+        
         nbt.putInt("LifeShotTicks", lifeShotResistTicks);
         nbt.putFloat("LifeShotResist", lifeShotResist);
         nbt.putInt("DeadBody", deadBodyTimer);
@@ -612,6 +640,19 @@ public class LivingUtilCap {
             preHypnosisOwner = nbt.getUUID("PreHypnosisOwner");
         }
         gotScarf = nbt.getBoolean("GotScarf");
+        
+        if (nbt.contains("ProductPotion", Constants.NBT.TAG_LIST)) {
+            ListNBT effectsNbt = nbt.getList("ProductPotion", Constants.NBT.TAG_COMPOUND);
+            if (!effectsNbt.isEmpty()) {
+                this.productPotions = new ArrayList<>();
+                for (INBT element : effectsNbt) {
+                    EffectInstance effect = EffectInstance.load((CompoundNBT) element);
+                    if (effect != null) {
+                        this.productPotions.add(effect);
+                    }
+                }
+            }
+        }
         
         lifeShotResistTicks = nbt.getInt("LifeShotTicks");
         lifeShotResist = nbt.getInt("LifeShotResist");

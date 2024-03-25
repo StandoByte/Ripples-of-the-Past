@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.stand.IStandPhasedAction;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.action.stand.StandEntityActionModifier;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -26,6 +27,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.IDataSerializer;
+import net.minecraft.world.World;
 import net.minecraftforge.registries.DataSerializerEntry;
 
 public class StandEntityTask {
@@ -138,7 +140,9 @@ public class StandEntityTask {
 
             if (action.standCanTickPerform(standEntity.level, standEntity, standPower, this)) {
                 action.standTickPerform(standEntity.level, standEntity, standPower, this);
-                standPower.consumeStamina(action.getStaminaCostTicking(standPower), true);
+                if (!standEntity.level.isClientSide() || standPower.getUser() == ClientUtil.getClientPlayer()) {
+                    standPower.consumeStamina(action.getStaminaCostTicking(standPower), true);
+                }
             }
             break;
         case RECOVERY:
@@ -238,6 +242,12 @@ public class StandEntityTask {
     
     public ActionTarget getTarget() {
         return target;
+    }
+    
+    public void resolveEntityTarget(World world) {
+        if (target.getType() == TargetType.ENTITY) {
+            this.target = target.resolveEntityId(world);
+        }
     }
     
     public void overrideOffsetFromUser(StandRelativeOffset offset) {

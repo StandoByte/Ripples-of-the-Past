@@ -236,7 +236,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             Optional<StandEntityTask> taskOptional = getCurrentTask();
             
             taskOptional.ifPresent(task -> {
-                if (task.getTarget().getType() == TargetType.ENTITY) task.getTarget().resolveEntityId(level);
+                task.resolveEntityTarget(level);
                 StandEntityAction action = task.getAction();
                 StandEntityAction.Phase phase = task.getPhase();
                 action.playSound(this, userPower, phase, task);

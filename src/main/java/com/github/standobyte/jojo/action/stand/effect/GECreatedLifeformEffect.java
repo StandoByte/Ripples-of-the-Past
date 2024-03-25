@@ -1,6 +1,9 @@
 package com.github.standobyte.jojo.action.stand.effect;
 
+import java.util.List;
+
 import com.github.standobyte.jojo.action.stand.GoldExperienceRevertLifeform;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.entity.GETransformationEntity;
 import com.github.standobyte.jojo.entity.GETransformationEntity.GETransformationData;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
@@ -13,6 +16,8 @@ import net.minecraft.entity.MobEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.PotionUtils;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
@@ -81,6 +86,15 @@ public class GECreatedLifeformEffect extends StandEffectInstance {
         if (target instanceof MobEntity && user != null) {
             MobEntity lifeformMob = (MobEntity) target;
             MCUtil.makeMobNeutralTo(lifeformMob, user);
+        }
+        
+        ItemStack sourceItem = getSource().makeSourceItemView();
+        if (!sourceItem.isEmpty()) {
+            List<EffectInstance> effects = PotionUtils.getMobEffects(sourceItem);
+            if (!effects.isEmpty()) {
+                target.getCapability(LivingUtilCapProvider.CAPABILITY)
+                .ifPresent(entity -> entity.setProductEffects(effects));
+            }
         }
     }
     

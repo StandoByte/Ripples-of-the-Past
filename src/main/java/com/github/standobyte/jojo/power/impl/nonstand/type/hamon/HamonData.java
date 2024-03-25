@@ -638,7 +638,7 @@ public class HamonData extends TypeSpecificData {
         }
     }
     
-    private int getStatLevel(HamonStat stat) {
+    public int getStatLevel(HamonStat stat) {
         switch (stat) {
         case STRENGTH:
             return getHamonStrengthLevel();
