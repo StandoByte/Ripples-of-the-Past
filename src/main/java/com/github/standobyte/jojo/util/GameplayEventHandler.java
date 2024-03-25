@@ -2,11 +2,14 @@ package com.github.standobyte.jojo.util;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
@@ -20,7 +23,6 @@ import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.action.stand.effect.BoyIIManStandPartTakenEffect;
 import com.github.standobyte.jojo.action.stand.effect.DriedBloodDrops;
-import com.github.standobyte.jojo.action.stand.effect.GECreatedLifeformEffect;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.block.StoneMaskBlock;
@@ -163,6 +165,7 @@ import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
+import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingConversionEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
@@ -1266,17 +1269,8 @@ public class GameplayEventHandler {
                 || item.getItem() == Items.BOWL && target instanceof MooshroomEntity)) {
             CowEntity cow = (CowEntity) target;
             if (cow.getLeashHolder() != player && !cow.isBaby()) {
-                Optional<List<EffectInstance>> potion = cow.getCapability(LivingUtilCapProvider.CAPABILITY).resolve().flatMap(cap -> {
-                    Optional<List<EffectInstance>> potionEffects = cap.getEffectsTargetedBy()
-                            .stream()
-                            .filter(effect -> effect instanceof GECreatedLifeformEffect)
-                            .findAny()
-                            .map(effect -> (GECreatedLifeformEffect) effect)
-                            .map(effect -> effect.getSource().makeSourceItemView())
-                            .map(sourceItem -> PotionUtils.getMobEffects(sourceItem))
-                            .filter(effects -> !effects.isEmpty());
-                    return potionEffects;
-                });
+                Optional<List<EffectInstance>> potion = cow.getCapability(LivingUtilCapProvider.CAPABILITY).resolve()
+                        .map(cap -> cap.getProductEffects());
                 
                 if (potion.isPresent()) {
                     if (item.getItem() == Items.BUCKET) {
@@ -1324,6 +1318,46 @@ public class GameplayEventHandler {
             if (!effects.isEmpty()) {
                 effects.forEach(effect -> entity.addEffect(effect));
             }
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static void onAnimalOffspring(BabyEntitySpawnEvent event) {
+        List<EffectInstance> effectsA = event.getParentA().getCapability(LivingUtilCapProvider.CAPABILITY).map(
+                cap -> cap.getProductEffects()).orElse(null);
+        List<EffectInstance> effectsB = event.getParentB().getCapability(LivingUtilCapProvider.CAPABILITY).map(
+                cap -> cap.getProductEffects()).orElse(null);
+        boolean hasA = effectsA != null && !effectsA.isEmpty();
+        boolean hasB = effectsB != null && !effectsB.isEmpty();
+        if (hasA || hasB) {
+            List<EffectInstance> effectsRes = new ArrayList<>();
+            if (hasA) {
+                Map<Effect, EffectInstance> effectsMap = effectsA.stream()
+                        .collect(Collectors.toMap(EffectInstance::getEffect, Function.identity(), 
+                                (u, v) -> { throw new IllegalStateException(String.format("Duplicate key %s", u)); }, 
+                                HashMap::new));
+                for (EffectInstance effectB : effectsB) {
+                    Effect effectKey = effectB.getEffect();
+                    EffectInstance effectA = effectsMap.get(effectKey);
+                    if (effectA != null) {
+                        EffectInstance effectSum = new EffectInstance(effectKey, 
+                                Math.max(effectA.getDuration(), effectB.getDuration()),
+                                Math.max(effectA.getAmplifier(), effectB.getAmplifier()));
+                        effectsMap.put(effectKey, effectSum);
+                    }
+                    else {
+                        effectsMap.put(effectKey, effectB);
+                    }
+                }
+                effectsRes.addAll(effectsMap.values());
+            }
+            else {
+                effectsRes.addAll(effectsB);
+            }
+            
+            event.getChild().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                cap.setProductEffects(effectsRes);
+            });
         }
     }
     
