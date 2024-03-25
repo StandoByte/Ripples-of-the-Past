@@ -31,6 +31,7 @@ import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.item.BoatEntity;
 import net.minecraft.entity.item.EnderCrystalEntity;
+import net.minecraft.entity.item.EnderPearlEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.item.TNTEntity;
 import net.minecraft.entity.monster.SlimeEntity;
@@ -43,6 +44,7 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.BucketItem;
 import net.minecraft.item.FishBucketItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.item.ThrowablePotionItem;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
@@ -268,6 +270,10 @@ public class GoldExperienceCreateLifeform extends StandAction {
                             PotionEntity potionEntity = new PotionEntity(world, user);
                             potionEntity.setItem(transformedItem);
                             itemEntity = potionEntity;
+                        }
+                        else if (heldItem.getItem() == Items.ENDER_PEARL) {
+                            EnderPearlEntity pearlEntity = new EnderPearlEntity(world, user);
+                            itemEntity = pearlEntity;
                         }
                         else {
                             itemEntity = new ItemEntity(world, 0, 0, 0, transformedItem);

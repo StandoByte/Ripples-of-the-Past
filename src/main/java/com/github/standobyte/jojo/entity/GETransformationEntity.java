@@ -538,6 +538,9 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                     }
                     return potionItem.copy();
                 }
+                else if (sourceEntity.getType() == EntityType.ENDER_PEARL) {
+                    return new ItemStack(Items.ENDER_PEARL);
+                }
                 else if (sourceEntity.getType() == ModEntityTypes.ROAD_ROLLER.get()) {
                     return new ItemStack(ModItems.ROAD_ROLLER.get());
                 }
