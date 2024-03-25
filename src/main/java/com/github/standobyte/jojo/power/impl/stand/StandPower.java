@@ -505,8 +505,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             });
             return true;
         }
-
-        JojoMod.getLogger().warn("Failed summoning soul entity for {}");
+        
         serverPlayerUser.ifPresent(player -> PacketManager.sendToClient(SoulSpawnPacket.noSoulSpawned(), player));
         return false;
     }
