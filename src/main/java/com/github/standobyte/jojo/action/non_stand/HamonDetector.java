@@ -51,15 +51,20 @@ public class HamonDetector extends HamonAction {
                         entitiesAround.forEach(entity -> entity.getCapability(EntityUtilCapProvider.CAPABILITY).ifPresent(
                                 cap -> cap.setClGlowingColor(COLOR, 80)));
                     }
+                    HamonSparksLoopSound.playSparkSound(user, user.position(), 1.0F);
+                    CustomParticlesHelper.createHamonSparkParticles(user instanceof PlayerEntity ? (PlayerEntity) user : null, 
+                            user.getX(), user.getY(0.5), user.getZ(), 1);
                 }
                 else if (!entitiesAround.isEmpty()) {
                     hamon.hamonPointsFromAction(HamonStat.CONTROL, getHeldTickEnergyCost(power)); 
                 }
             }
-            HamonSparksLoopSound.playSparkSound(user, user.position(), 1.0F);
-            CustomParticlesHelper.createHamonSparkParticles(user instanceof PlayerEntity ? (PlayerEntity) user : null, 
-                    user.getX(), user.getY(0.5), user.getZ(), 1);
         }
+    }
+    
+    @Override
+    public boolean isHeldSentToTracking() {
+        return true;
     }
 
 }
