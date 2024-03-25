@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.stand.IStandPhasedAction;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.action.stand.StandEntityActionModifier;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -138,7 +139,9 @@ public class StandEntityTask {
 
             if (action.standCanTickPerform(standEntity.level, standEntity, standPower, this)) {
                 action.standTickPerform(standEntity.level, standEntity, standPower, this);
-                standPower.consumeStamina(action.getStaminaCostTicking(standPower), true);
+                if (!standEntity.level.isClientSide() || standPower.getUser() == ClientUtil.getClientPlayer()) {
+                    standPower.consumeStamina(action.getStaminaCostTicking(standPower), true);
+                }
             }
             break;
         case RECOVERY:
