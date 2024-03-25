@@ -27,6 +27,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.IDataSerializer;
+import net.minecraft.world.World;
 import net.minecraftforge.registries.DataSerializerEntry;
 
 public class StandEntityTask {
@@ -241,6 +242,12 @@ public class StandEntityTask {
     
     public ActionTarget getTarget() {
         return target;
+    }
+    
+    public void resolveEntityTarget(World world) {
+        if (target.getType() == TargetType.ENTITY) {
+            this.target = target.resolveEntityId(world);
+        }
     }
     
     public void overrideOffsetFromUser(StandRelativeOffset offset) {
