@@ -32,7 +32,7 @@ public class GoldExperienceLifeDetector extends StandEntityAction {
             
             entitiesAround.addAll(MCUtil.entitiesAround(LivingEntity.class, standEntity, 
                     radius, false, 
-                    entity -> entity != userPower.getUser() && GoldExperienceHeal.isLiving(entity)));
+                    entity -> entity != userPower.getUser() && GoldExperienceHeal.isLiving(entity) && !entity.isDeadOrDying()));
             entitiesAround.addAll(MCUtil.entitiesAround(SoulEntity.class, standEntity,
                     radius, false,
                     null));
@@ -44,6 +44,7 @@ public class GoldExperienceLifeDetector extends StandEntityAction {
                         }
                         else {
                             cap.setClGlowingColor(OptionalInt.of(ActionsOverlayGui.getPowerUiColor(userPower)), 80);
+                            cap.setShowHp();
                         }
                     }));
         }
