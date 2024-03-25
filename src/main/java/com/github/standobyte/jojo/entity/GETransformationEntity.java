@@ -411,6 +411,9 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         if (from.isVehicle()) {
             from.getPassengers().forEach(passenger -> passenger.startRiding(to));
         }
+        if (from.hasCustomName() && !(to instanceof ItemEntity)) {
+            to.setCustomName(from.getCustomName());
+        }
     }
     
     

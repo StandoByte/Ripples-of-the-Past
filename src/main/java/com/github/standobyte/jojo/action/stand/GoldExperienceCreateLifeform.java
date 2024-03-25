@@ -51,6 +51,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -232,7 +233,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                 Entity performer = getControlledEntity(user, power);
                 GETransformationEntity tf = new GETransformationEntity(world);
                 
-                
+                ITextComponent customName = null;
                 boolean tfTargetFound = false;
                 if (target.getType() == TargetType.ENTITY) {
                     Entity targetEntity = target.getEntity();
@@ -270,6 +271,9 @@ public class GoldExperienceCreateLifeform extends StandAction {
                         }
                         else {
                             itemEntity = new ItemEntity(world, 0, 0, 0, transformedItem);
+                        }
+                        if (heldItem.hasCustomHoverName()) {
+                            customName = heldItem.getHoverName();
                         }
                         if (!power.isUserCreative()) heldItem.shrink(1);
                         
@@ -310,6 +314,9 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     
                     lifeFormCreated.copyPosition(tf);
                     lifeFormCreated.setYHeadRot(lifeFormCreated.yRot);
+                    if (customName != null) {
+                        lifeFormCreated.setCustomName(customName);
+                    }
                     world.addFreshEntity(tf);
                     
                     if (!power.isUserCreative()) {
