@@ -168,6 +168,11 @@ public class ClientTimeStopHandler implements ITicking {
     }
     
     
+    public static boolean isTimeStoppedStatic() {
+        ClientTimeStopHandler handler = getInstance();
+        return handler != null ? handler.isTimeStopped() : false;
+    }
+    
     public boolean isTimeStopped() {
         return isTimeStopped;
     }

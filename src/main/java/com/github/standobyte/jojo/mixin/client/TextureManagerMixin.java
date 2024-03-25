@@ -14,7 +14,7 @@ public class TextureManagerMixin {
 
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     public void jojoTsTexturesCancelTick(CallbackInfo ci) {
-        if (ClientTimeStopHandler.getInstance().isTimeStopped()) {
+        if (ClientTimeStopHandler.isTimeStoppedStatic()) {
             ci.cancel();
         }
     }
