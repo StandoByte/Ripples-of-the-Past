@@ -30,6 +30,14 @@ public class HamonSendoOverdrive extends HamonAction {
     }
     
     @Override
+    protected Action<INonStandPower> replaceAction(INonStandPower power, ActionTarget target) {
+        if (target.getEntity() instanceof LivingEntity && !getTargetRequirement().checkTargetType(target.getType())) {
+            return ModHamonActions.HAMON_OVERDRIVE.get().getVisibleAction(power, target);
+        }
+        return super.replaceAction(power, target);
+    }
+    
+    @Override
     public void overrideVanillaMouseTarget(ObjectWrapper<ActionTarget> targetContainer, World world, LivingEntity user, INonStandPower power) {
         if (targetContainer.get().getType() == TargetType.BLOCK) {
             Vector3d pos1 = user.getEyePosition(1.0F);
@@ -74,13 +82,5 @@ public class HamonSendoOverdrive extends HamonAction {
     @Override
     public TargetRequirement getTargetRequirement() {
         return TargetRequirement.BLOCK;
-    }
-    
-    @Nullable
-    protected Action<INonStandPower> replaceAction(INonStandPower power, ActionTarget target) {
-        if (!power.getUser().level.isClientSide() && !getTargetRequirement().checkTargetType(target.getType())) {
-            return ModHamonActions.HAMON_OVERDRIVE.get().getVisibleAction(power, target);
-        }
-        return super.replaceAction(power, target);
     }
 }

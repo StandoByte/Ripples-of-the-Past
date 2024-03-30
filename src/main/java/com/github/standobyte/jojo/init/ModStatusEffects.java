@@ -113,7 +113,8 @@ public class ModStatusEffects {
                 HYPNOSIS.get(), 
                 HAMON_SPREAD.get(), 
                 FULL_INVISIBILITY.get(), 
-                VAMPIRE_SUN_BURN.get());
+                VAMPIRE_SUN_BURN.get(),
+        		FREEZE.get());
     }
     
     // Makes it so that the effect is also sent to the surrounding players, in case it is needed for visuals

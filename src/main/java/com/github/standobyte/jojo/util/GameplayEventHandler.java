@@ -30,6 +30,7 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDBloodCutterEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.SnakeMufflerEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
 import com.github.standobyte.jojo.init.ModBlocks;
@@ -60,6 +61,7 @@ import com.github.standobyte.jojo.power.bowcharge.BowChargeEffectInstance;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismUtil;
@@ -103,6 +105,8 @@ import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.item.TieredItem;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.play.server.SChatPacket;
 import net.minecraft.network.play.server.SPlayEntityEffectPacket;
 import net.minecraft.network.play.server.SPlaySoundEffectPacket;
@@ -426,10 +430,40 @@ public class GameplayEventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onLivingHurtStart(LivingAttackEvent event) {
-        DamageSource dmgSource = event.getSource();
+    	DamageSource dmgSource = event.getSource();
         LivingEntity target = event.getEntityLiving();
         Entity attacker = dmgSource.getEntity();
         
+        //Deal Hamon damage through oiled weapons
+        if (attacker != null && attacker.is(dmgSource.getDirectEntity()) && attacker instanceof PlayerEntity) {
+        	LivingEntity player = (LivingEntity) attacker;
+        	PlayerEntity pEntity = (PlayerEntity) player;
+        	ItemStack weapon = pEntity.getMainHandItem();
+        	if (weapon.getItem() instanceof TieredItem && weapon.hasTag()) {
+        		
+        		CompoundNBT nbt = weapon.getTag();
+                if (nbt.contains("Oiled", MCUtil.getNbtId(CompoundNBT.class))) {
+                	INonStandPower power = INonStandPower.getPlayerNonStandPower(pEntity);
+                	float energyCost = 500F;
+                	if (power.hasEnergy(energyCost)) {
+                		if (power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
+                                power.consumeEnergy(energyCost);
+                                float hPower = hamon.getHamonStrengthLevelRatio();
+                                DamageUtil.dealHamonDamage(target, 10 * hPower, null, pEntity);
+                                hamon.hamonPointsFromAction(HamonStat.STRENGTH, 500);
+                                CompoundNBT posNBT = nbt.getCompound("Oiled");
+                                if(posNBT.getInt("Oiled") > 1) {
+                                	posNBT.putInt("Oiled", posNBT.getInt("Oiled") - 1);
+                                } else {
+                                	nbt.remove("Oiled");
+                                }
+                                return true;
+                            
+                		}).orElse(false));
+                	}
+                }
+        	}
+        }
         if (attacker != null && attacker.is(dmgSource.getDirectEntity()) && attacker instanceof LivingEntity) {
             IStandPower.getStandPowerOptional((LivingEntity) attacker).ifPresent(attackerStand -> {
                 IStandPower.getStandPowerOptional(target).ifPresent(boyIIManStand -> {
