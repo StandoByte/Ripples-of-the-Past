@@ -11,6 +11,8 @@
   "item.jojo.gloves.hint": "Let you use Hamon and vampirism moves which require empty hands.",
   "item.jojo.bubble_gloves": "Soap Coated Gloves",
   "item.jojo.soap": "Soap Solution",
+  "item.jojo.oil": "Oil",
+  "item.jojo.oil.hint": "You can lubricate your weapon in offhand with it to deal Hamon damage through it",
   "item.jojo.hamon_master_spawn_egg": "Hamon Master Spawn Egg",
   "item.jojo.hungry_zombie_spawn_egg": "Zombie Minion Spawn Egg",
   "item.jojo.aja_stone": "Aja Red Stone",
@@ -837,7 +839,7 @@
   "hamonSkill.scarlet_overdrive.name": "Scarlet Overdrive",
   "hamonSkill.scarlet_overdrive.desc": "A special type of Overdrive attack, which deals additional damage and sets the target on fire.",
   "hamonSkill.metal_silver_overdrive.name": "Metal Silver Overdrive",
-  "hamonSkill.metal_silver_overdrive.desc": "You can perform Overdrive attack with a weapon or a tool.",
+  "hamonSkill.metal_silver_overdrive.desc": "A special type of Overdrive attack. The more armor the target wears the more damage it will deal.",
   "hamonSkill.overdrive_barrage.name": "Overdrive Barrage",
   "hamonSkill.overdrive_barrage.desc": "You unleash a barrage of rapid Overdrive attacks.",
   "hamonSkill.syo_barrage.name": "Sunlight Yellow Overdrive Barrage",
@@ -881,6 +883,7 @@
   
   "non_stand.jojo.hamon": "Hamon",
   "action.jojo.hamon_overdrive": "Overdrive",
+  "action.jojo.hamon_overdrive_beat": "Hamon Beat",
   "action.jojo.hamon_sendo_overdrive": "Sendo Overdrive",
   "action.jojo.hamon_turquoise_blue_overdrive": "Turquoise Blue Overdrive",
   "action.jojo.hamon_sunlight_yellow_overdrive": "Sunlight Yellow Overdrive",
@@ -913,6 +916,7 @@
   "action.jojo.caesar_bubble_cutter_gliding": "Bubble Cutter Gliding",
   
   "non_stand.jojo.vampirism": "Vampirism",
+  "action.jojo.vampirism_claw_lacerate": "Claw Lacerate",
   "action.jojo.vampirism_blood_drain": "Blood Drain",
   "action.jojo.vampirism_freeze": "Vaporization Freeze",
   "action.jojo.vampirism_space_ripper_stingy_eyes": "Space Ripper Stingy Eyes",

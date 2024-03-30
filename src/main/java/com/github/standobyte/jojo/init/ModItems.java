@@ -14,6 +14,7 @@ import com.github.standobyte.jojo.item.CustomModelArmorItem;
 import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.item.KnifeItem;
 import com.github.standobyte.jojo.item.ModArmorMaterials;
+import com.github.standobyte.jojo.item.OilItem;
 import com.github.standobyte.jojo.item.RoadRollerItem;
 import com.github.standobyte.jojo.item.SatiporojaScarfItem;
 import com.github.standobyte.jojo.item.SledgehammerItem;
@@ -83,6 +84,9 @@ public class ModItems {
     
     public static final RegistryObject<GlovesItem> GLOVES = ITEMS.register("gloves", 
             () -> new GlovesItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
+    
+    public static final RegistryObject<OilItem> OIL = ITEMS.register("oil", 
+            () -> new OilItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
     
     public static final RegistryObject<GlovesItem> BUBBLE_GLOVES = ITEMS.register("bubble_gloves", 
             () -> new BubbleGlovesItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1))); 
