@@ -4,6 +4,7 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.command.ConfigPackCommand;
+import com.github.standobyte.jojo.command.NonStandTypeArgument;
 import com.github.standobyte.jojo.command.StandArgument;
 import com.github.standobyte.jojo.init.ModPotions;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
@@ -12,8 +13,6 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractH
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkillTree;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 
-import net.minecraft.command.arguments.ArgumentSerializer;
-import net.minecraft.command.arguments.ArgumentTypes;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
@@ -27,7 +26,8 @@ public class CommonSetup {
         event.enqueueWork(() -> {
             ForgeBusEventSubscriber.registerCapabilities();
             
-            ArgumentTypes.register("stand", StandArgument.class, new ArgumentSerializer<>(StandArgument::new));
+            StandArgument.commonSetupRegister();
+            NonStandTypeArgument.commonSetupRegister();
 
             ModCriteriaTriggers.CriteriaTriggerSupplier.registerAll();
             

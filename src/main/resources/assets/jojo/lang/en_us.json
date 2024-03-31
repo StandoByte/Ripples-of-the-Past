@@ -596,6 +596,9 @@
   "commands.hamon.control.add.success.multiple": "Gave %s Hamon control levels to %s players",
   "commands.hamon.breathing.add.success.single": "Gave %s breathing levels to %s",
   "commands.hamon.breathing.add.success.multiple": "Gave %s breathing levels to %s players",
+  "commands.hamon.strength.query.success": "%s has %s Hamon strength levels",
+  "commands.hamon.control.query.success": "%s has %s Hamon control levels",
+  "commands.hamon.breathing.query.success": "%s has %s breathing levels",
   "commands.hamon.failed.single": "%s is not a Hamon user",
   "commands.hamon.failed.multiple": "All %s players are not Hamon users",
   

@@ -589,6 +589,9 @@
   "commands.hamon.control.add.success.multiple": "Выдано %s уровней контроля Хамона %s игрокам",
   "commands.hamon.breathing.add.success.single": "Выдано %s уровней тренировки дыхания игроку %s",
   "commands.hamon.breathing.add.success.multiple": "Выдано %s уровней тренировки дыхания %s игрокам",
+  "commands.hamon.strength.query.success": "Уровень силы Хамона %s равен %s",
+  "commands.hamon.control.query.success": "Уровень контроля Хамона игрока %s равен %s",
+  "commands.hamon.breathing.query.success": "Уровень тренировки дыхания игрока %s равен %s",
   "commands.hamon.failed.single": "%s не является пользователем Хамона",
   "commands.hamon.failed.multiple": "Все %s игроков не являются пользователями Хамона",
   

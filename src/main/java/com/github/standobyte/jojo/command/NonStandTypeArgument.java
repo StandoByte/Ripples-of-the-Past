@@ -20,6 +20,8 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
+import net.minecraft.command.arguments.ArgumentSerializer;
+import net.minecraft.command.arguments.ArgumentTypes;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.ResourceLocationException;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -28,7 +30,11 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 public class NonStandTypeArgument implements ArgumentType<NonStandPowerType<?>> {
     private static final Collection<String> EXAMPLES = Arrays.asList("hamon", "vampirism");
     public static final DynamicCommandExceptionType TYPE_UNKNOWN = new DynamicCommandExceptionType((key) -> new TranslationTextComponent("non_stand.unknown", key));
-
+    
+    public static void commonSetupRegister() {
+        ArgumentTypes.register("non_stand", NonStandTypeArgument.class, new ArgumentSerializer<>(NonStandTypeArgument::new));
+    }
+    
     @Override
     public NonStandPowerType<?> parse(StringReader reader) throws CommandSyntaxException {
         ResourceLocation resourceLocation = read(reader);

@@ -36,7 +36,8 @@ public class HudControlSettings {
     }
     
     public ControlScheme getControlScheme(PowerClassification power) {
-        return getCachedControls(power).getCurrentCtrlScheme();
+        PowerTypeControlSchemes controls = getCachedControls(power);
+        return controls != null ? controls.getCurrentCtrlScheme() : ControlScheme.EMPTY;
     }
     
     public PowerTypeControlSchemes getCachedControls(PowerClassification power) {
