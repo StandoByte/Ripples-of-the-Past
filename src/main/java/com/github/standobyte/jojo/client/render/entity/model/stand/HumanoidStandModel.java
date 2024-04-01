@@ -529,10 +529,95 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
     @Override
     public void setupAnim(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
         super.setupAnim(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
+        
+//        motionTilt(entity, ticks);
+        
         rotateJoint(leftArmJoint, leftForeArm);
         rotateJoint(rightArmJoint, rightForeArm);
         rotateJoint(leftLegJoint, leftLowerLeg);
         rotateJoint(rightLegJoint, rightLowerLeg);
+    }
+
+    protected void motionTilt(T entity, float ticks) {
+        if (entity.getStandPose() != StandPose.SUMMON) {
+            Vector3d motion;
+            if (MathHelper.floor(entity.lastMotionTiltTick) != MathHelper.floor(ticks)) {
+                motion = entity.position().subtract(entity.xOld, entity.yOld, entity.zOld);
+                entity.motionVec = motion;
+                entity.prevMotionDist = entity.motionDist;
+                entity.motionDist = motion.length();
+            }
+            else {
+                motion = entity.motionVec;
+            }
+            
+            Vector3d tiltVec = motion.yRot(entity.yBodyRot * MathUtil.DEG_TO_RAD).scale(2);
+            tiltVec = new Vector3d(tiltVec.z, 0, tiltVec.x);
+            double motionSqr = tiltVec.lengthSqr();
+            if (motionSqr > Math.pow(Math.PI / 4, 2)) {
+                tiltVec = tiltVec.normalize().scale(Math.PI / 4);
+            }
+            
+            Vector3d tiltDiff = tiltVec.subtract(entity.lastTiltVec);
+            if (tiltDiff.lengthSqr() > 1.0E-4) {
+                double dist;
+                float tickDiff = (ticks - entity.lastMotionTiltTick);
+                if (entity.motionDist >= entity.prevMotionDist) {
+                    dist = tickDiff * 0.1;
+                }
+                else {
+                    dist = tickDiff * 0.4;
+                }
+                if (tiltDiff.lengthSqr() > dist * dist) {
+                    tiltDiff = tiltDiff.normalize().scale(dist);
+                }
+                tiltVec = entity.lastTiltVec.add(tiltDiff);
+                entity.lastTiltVec = tiltVec;
+            }
+            entity.lastMotionTiltTick = ticks;
+            
+            double tiltSqr = tiltVec.lengthSqr();
+            if (tiltSqr > 1.0E-4) {
+                double tilt = Math.sqrt(tiltSqr);
+                double d1 = MathHelper.clamp(1 - tilt / Math.PI * 4, 0, 1);
+                body.xRot += tiltVec.x;
+                body.zRot += tiltVec.z;
+                body.yRot *= d1;
+
+                boolean idlePose = entity.getStandPose() == StandPose.IDLE;
+                double d = MathHelper.clamp(1 - tilt / Math.PI, 0, 1);
+                leftLowerLeg.xRot *= d;
+                rightLowerLeg.xRot *= d;
+                leftLowerLeg.yRot *= d;
+                rightLowerLeg.yRot *= d;
+                leftLowerLeg.zRot *= d;
+                rightLowerLeg.zRot *= d;
+                if (idlePose) {
+                    leftForeArm.xRot *= d;
+                    rightForeArm.xRot *= d;
+                    leftForeArm.yRot *= d;
+                    rightForeArm.yRot *= d;
+                    leftForeArm.zRot *= d;
+                    rightForeArm.zRot *= d;
+                }
+                
+                double d2 = MathHelper.clamp(1 - tilt / (2 * Math.PI), 0, 1);
+                leftLeg.xRot *= d2;
+                rightLeg.xRot *= d2;
+                leftLeg.yRot *= d2;
+                rightLeg.yRot *= d2;
+                leftLeg.zRot *= d2;
+                rightLeg.zRot *= d2;
+                if (idlePose) {
+                    leftArm.xRot *= d2;
+                    rightArm.xRot *= d2;
+                    leftArm.yRot *= d2;
+                    rightArm.yRot *= d2;
+                    leftArm.zRot *= d2;
+                    rightArm.zRot *= d2;
+                }
+            }
+        }
     }
 
     protected void rotateJoint(ModelRenderer joint, ModelRenderer limbPart) {

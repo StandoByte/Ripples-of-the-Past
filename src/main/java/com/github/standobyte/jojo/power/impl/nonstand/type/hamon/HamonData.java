@@ -1500,13 +1500,8 @@ public class HamonData extends TypeSpecificData {
         return isRebuffOverdriveOn;
     }
     
-    public boolean toggleRebuffOverdrive() {
-        isRebuffOverdriveOn = !isRebuffOverdriveOn;
-        return isRebuffOverdriveOn;
+    public void setRebuffOverdrive(boolean usingRO) {
+        this.isRebuffOverdriveOn = usingRO;
     }
     
-    public boolean offRebuffOverdrive() {
-        isRebuffOverdriveOn = false;
-        return isRebuffOverdriveOn;
-    }
 }

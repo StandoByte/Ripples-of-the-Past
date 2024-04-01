@@ -59,7 +59,7 @@ public class HamonStatCommand {
 
                         .then(Commands.literal("strength").then(Commands.argument("target", EntityArgument.player())
                                 .executes(ctx -> getHamonStat(ctx.getSource(), EntityArgument.getPlayer(ctx, "target"), HamonStat.STRENGTH))))
-                        .then(Commands.literal("conrol").then(Commands.argument("target", EntityArgument.player())
+                        .then(Commands.literal("control").then(Commands.argument("target", EntityArgument.player())
                                 .executes(ctx -> getHamonStat(ctx.getSource(), EntityArgument.getPlayer(ctx, "target"), HamonStat.CONTROL))))
                         .then(Commands.literal("breathing").then(Commands.argument("target", EntityArgument.player())
                                 .executes(ctx -> getBreathing(ctx.getSource(), EntityArgument.getPlayer(ctx, "target")))))
