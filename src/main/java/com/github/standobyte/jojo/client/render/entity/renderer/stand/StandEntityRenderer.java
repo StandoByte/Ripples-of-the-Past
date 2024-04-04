@@ -189,11 +189,6 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
         boolean shouldSit = entity.isPassenger() && (entity.getVehicle() != null && entity.getVehicle().shouldRiderSit());
         model.riding = shouldSit;
         model.young = entity.isBaby();
-        viewObstructionPrevention = obstructsView(entity, partialTick);
-        if (viewObstructionPrevention != ViewObstructionPrevention.NONE) {
-            entity.setNoFireAnimFrame();
-        }
-        model.setVisibility(entity, visibilityMode(entity), viewObstructionPrevention.armsOnly);
         float yBodyRotation = MathHelper.rotLerp(partialTick, entity.yBodyRotO, entity.yBodyRot);
         float yHeadRotation = MathHelper.rotLerp(partialTick, entity.yHeadRotO, entity.yHeadRot);
         float yRotationOffset = yHeadRotation - yBodyRotation;
@@ -242,11 +237,18 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
         model.setupAnim(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
         entity.getBarrageSwingsHolder().updateSwings(Minecraft.getInstance());
         model.addBarrageSwings(entity);
+        int packedOverlay = getOverlayCoords(entity, getWhiteOverlayProgress(entity, partialTick));
+
+        viewObstructionPrevention = obstructsView(entity, partialTick);
+        if (viewObstructionPrevention != ViewObstructionPrevention.NONE) {
+            entity.setNoFireAnimFrame();
+        }
+        model.setVisibility(entity, visibilityMode(entity), viewObstructionPrevention.armsOnly);
+        alpha = calcAlpha(entity, partialTick);
+        
         RenderType renderType = getRenderType(entity, getTextureLocation(entity));
         if (renderType != null) {
             IVertexBuilder vertexBuilder = buffer.getBuffer(renderType);
-            int packedOverlay = getOverlayCoords(entity, getWhiteOverlayProgress(entity, partialTick));
-            alpha = calcAlpha(entity, partialTick);
             model.render(entity, matrixStack, vertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, alpha);
         }
         
