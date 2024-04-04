@@ -13,6 +13,7 @@ import com.github.standobyte.jojo.init.ModContainers;
 import com.github.standobyte.jojo.init.ModDataSerializers;
 import com.github.standobyte.jojo.init.ModEnchantments;
 import com.github.standobyte.jojo.init.ModEntityAttributes;
+import com.github.standobyte.jojo.init.ModTags;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModLootModifierSerializers;
@@ -67,6 +68,7 @@ public class JojoMod {
         registerVanillaDeferredRegisters(modEventBus);
 
         modEventBus.addListener(this::preInit);
+        ModTags.initTags();
     }
 
     private void registerVanillaDeferredRegisters(IEventBus modEventBus) {

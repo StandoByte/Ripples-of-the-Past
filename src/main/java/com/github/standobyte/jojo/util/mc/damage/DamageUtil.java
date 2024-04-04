@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeC
 import com.github.standobyte.jojo.entity.HamonSendoOverdriveEntity;
 import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.init.ModTags;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
@@ -161,7 +162,9 @@ public class DamageUtil {
                     srcIndirect == null ? new EntityDamageSource(HAMON.getMsgId() + ".entity", srcDirect).bypassArmor() : 
                     new IndirectEntityDamageSource(HAMON.getMsgId() + ".entity", srcDirect, srcIndirect).bypassArmor();
                     
-            boolean undeadTarget = JojoModUtil.isUndead(livingTarget);
+            boolean undeadTarget = 
+                    JojoModUtil.isUndead(livingTarget) && !ModTags.UNDEAD_NO_HAMON_DAMAGE.contains(target.getType())
+                    || ModTags.HAMON_DAMAGE.contains(target.getType());
             if (!undeadTarget) {
                 amount *= 0.2F;
             }
