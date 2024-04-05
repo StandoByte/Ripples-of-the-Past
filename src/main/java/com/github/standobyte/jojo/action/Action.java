@@ -505,6 +505,11 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
             return getThis();
         }
         
+        @Deprecated
+        public T doNotCancelClick() {
+            return withUserPunch();
+        }
+        
         public T withUserPunch() {
             this.withUserPunch = true;
             return getThis();
