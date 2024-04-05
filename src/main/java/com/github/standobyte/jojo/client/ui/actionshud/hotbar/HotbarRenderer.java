@@ -14,6 +14,8 @@ import net.minecraft.util.math.MathHelper;
 public class HotbarRenderer {
     public static final ResourceLocation HOTBAR_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/overlay_hotbar.png");
     
+    public static final int EDGE_EXTRA_WIDTH = 15;
+    
     public static void renderHotbar(MatrixStack matrixStack, Minecraft mc, int x, int y, int slots, float alpha) {
         if (slots <= 0) return;
         mc.getTextureManager().bind(HOTBAR_LOCATION);
@@ -22,6 +24,18 @@ public class HotbarRenderer {
         HotbarTexPosition texPos = HotbarTexPosition.getHotbarFromSlotsCount(slots);
         AbstractGui.blit(matrixStack, x - 14, y - 14, texPos.texX, texPos.texY, slots * 20 + 30, 50, 512, 512);
         
+    }
+    
+    public static void renderHotbar(MatrixStack matrixStack, Minecraft mc, float x, float y, 
+            int slotsCount, float alpha) {
+        mc.getTextureManager().bind(HOTBAR_LOCATION);
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
+        HotbarTexPosition texPos = HotbarTexPosition.getHotbarFromSlotsCount(slotsCount);
+        AbstractGui.blit(matrixStack, 
+                (int) x - 14, (int) y - 14, 
+                texPos.texX, texPos.texY, 
+                20 * slotsCount + EDGE_EXTRA_WIDTH * 2, 50, 
+                512, 512);
     }
     
     public static void renderFoldingHotbar(MatrixStack matrixStack, Minecraft mc, float x, float y, HotbarFold hotbarFold, float alpha) {
@@ -35,7 +49,7 @@ public class HotbarRenderer {
             float width = slot.getFrameRenderedWidth();
             if (width > 0) {
                 BlitFloat.blitFloat(matrixStack, 
-                        x + slot.getFrameRenderedLeftEdge() - 14, y - 14, 
+                        x + slot.getFrameRenderedLeftEdge() - EDGE_EXTRA_WIDTH + 1, y - EDGE_EXTRA_WIDTH + 1, 
                         texPos.texX + slot.getFrameRenderedTexX(), texPos.texY, 
                         width, 50, 
                         512, 512);

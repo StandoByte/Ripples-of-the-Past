@@ -273,18 +273,25 @@ public class GameplayEventHandler {
 
     @SubscribeEvent
     public static void onWorldTick(WorldTickEvent event) {
-        if (event.side == LogicalSide.SERVER /* actually only ticks on server but ok */ && event.phase == TickEvent.Phase.END) {
-            ((ServerWorld) event.world).getAllEntities().forEach(entity -> {
-                entity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
-                entity.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
-            });
+        if (event.side == LogicalSide.SERVER /* actually only ticks on server but ok */) {
+            switch (event.phase) {
+            case START:
+                break;
+            case END:
+                ((ServerWorld) event.world).getAllEntities().forEach(entity -> {
+//                    entity.getCapability(EntityUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
+                    entity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
+                    entity.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
+                });
 
-            ((ServerWorld) event.world).getChunkSource().chunkMap.getChunks().forEach(chunkHolder -> {
-                Chunk chunk = chunkHolder.getTickingChunk();
-                if (chunk != null) {
-                    chunk.getCapability(ChunkCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
-                }
-            });
+                ((ServerWorld) event.world).getChunkSource().chunkMap.getChunks().forEach(chunkHolder -> {
+                    Chunk chunk = chunkHolder.getTickingChunk();
+                    if (chunk != null) {
+                        chunk.getCapability(ChunkCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
+                    }
+                });
+                break;
+            }
         }
     }
     
@@ -645,18 +652,18 @@ public class GameplayEventHandler {
             }
         }
     }
-    
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void preventDamagingArmor(LivingHurtEvent event) {
-        DamageSource dmgSource = event.getSource();
-        if (!dmgSource.isBypassArmor() && dmgSource instanceof IModdedDamageSource
-                && ((IModdedDamageSource) dmgSource).preventsDamagingArmor()) {
-            dmgSource.bypassArmor();
-            LivingEntity target = event.getEntityLiving();
-            event.setAmount(CombatRules.getDamageAfterAbsorb(event.getAmount(), 
-                    (float) target.getArmorValue(), (float) target.getAttributeValue(Attributes.ARMOR_TOUGHNESS)));
-        }
-    }
+//    
+//    @SubscribeEvent(priority = EventPriority.LOWEST)
+//    public static void preventDamagingArmor(LivingHurtEvent event) {
+//        DamageSource dmgSource = event.getSource();
+//        if (!dmgSource.isBypassArmor() && dmgSource instanceof IModdedDamageSource
+//                && ((IModdedDamageSource) dmgSource).preventsDamagingArmor()) {
+//            dmgSource.bypassArmor();
+//            LivingEntity target = event.getEntityLiving();
+//            event.setAmount(CombatRules.getDamageAfterAbsorb(event.getAmount(), 
+//                    (float) target.getArmorValue(), (float) target.getAttributeValue(Attributes.ARMOR_TOUGHNESS)));
+//        }
+//    }
     
 
     @SubscribeEvent(priority = EventPriority.NORMAL)
@@ -851,7 +858,7 @@ public class GameplayEventHandler {
     public static void onPotionApply(PotionApplicableEvent event) {
         LivingEntity entity = event.getEntityLiving();
         Effect effect = event.getPotionEffect().getEffect();
-        if ((effect == Effects.POISON || effect == Effects.HUNGER || effect == Effects.REGENERATION)
+        if ((effect == Effects.HUNGER/* || effect == Effects.POISON || effect == Effects.REGENERATION*/)
                 && entity instanceof PlayerEntity && JojoModUtil.isPlayerUndead((PlayerEntity) entity)) {
             event.setResult(Result.DENY);
         }

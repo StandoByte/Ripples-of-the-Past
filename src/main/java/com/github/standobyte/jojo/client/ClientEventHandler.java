@@ -4,16 +4,23 @@ import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.EXPERIENCE;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.FOOD;
 
+import java.util.List;
+import java.util.ListIterator;
 import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.function.Predicate;
+import java.util.stream.IntStream;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
+import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.render.block.overlay.TranslucentBlockRenderHelper;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.GlovesLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.HamonBurnLayer;
@@ -22,6 +29,10 @@ import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.ClientModSettingsScreen;
+import com.github.standobyte.jojo.client.ui.screen.controls.HudLayoutEditingScreen;
+import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.CategoryWithButtonsEntry;
+import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.ControlSettingToggleButton;
+import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.HoldToggleKeyEntry;
 import com.github.standobyte.jojo.client.ui.screen.widgets.HeightScaledSlider;
 import com.github.standobyte.jojo.client.ui.screen.widgets.ImageVanillaButton;
 import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
@@ -32,6 +43,8 @@ import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.item.OilItem;
+import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -52,6 +65,7 @@ import net.minecraft.client.audio.ISound;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.screen.ControlsScreen;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.IngameMenuScreen;
 import net.minecraft.client.gui.screen.MainMenuScreen;
@@ -59,13 +73,14 @@ import net.minecraft.client.gui.screen.OptionsScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractSlider;
 import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.widget.list.KeyBindingList;
 import net.minecraft.client.renderer.FirstPersonRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
-import net.minecraft.client.renderer.OutlineLayerBuffer;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -101,6 +116,7 @@ import net.minecraftforge.client.event.RenderNameplateEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.event.TickEvent.RenderTickEvent;
@@ -202,15 +218,6 @@ public class ClientEventHandler {
     public <T extends LivingEntity, M extends EntityModel<T>> void onRenderLiving2(RenderLivingEvent.Pre<T, M> event) {
         LivingEntity entity = event.getEntity();
 
-        // FIXME reset the glowing flag after outline is no longer needed
-        int outlineColor = outlineColor(entity);
-        if (outlineColor > 0) {
-            entity.setGlowing(true);
-            if (event.getBuffers() instanceof OutlineLayerBuffer) {
-                ((OutlineLayerBuffer) event.getBuffers()).setColor(outlineColor >> 16 & 255, outlineColor >> 8 & 255, outlineColor & 255, 255);
-            }
-        }
-
         INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
             if (power.getHeldAction(true) == ModHamonActions.ZEPPELI_TORNADO_OVERDRIVE.get()) {
                 event.getMatrixStack().mulPose(Vector3f.YP.rotation((power.getHeldActionTicks() + event.getPartialRenderTick()) * 2F % 360F));
@@ -230,10 +237,6 @@ public class ClientEventHandler {
                 }
             }
         });
-    }
-
-    private int outlineColor(LivingEntity entity) {
-        return -1;
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -280,6 +283,7 @@ public class ClientEventHandler {
                     });
                     
                     mc.level.entitiesForRendering().forEach(entity -> {
+                        entity.getCapability(EntityUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
                         entity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
                         entity.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
                     });
@@ -686,6 +690,112 @@ public class ClientEventHandler {
         
         else if (screen instanceof OptionsScreen) {
             event.addWidget(ClientModSettingsScreen.addSettingsButton(screen, event.getWidgetList()));
+        }
+        
+        else if (screen instanceof ControlsScreen) {
+            KeyBindingList controlList = ClientReflection.getControlList((ControlsScreen) screen);
+            List<KeyBindingList.Entry> keyEntries = controlList.children();
+            
+            ListIterator<KeyBindingList.Entry> entriesIter = keyEntries.listIterator();
+            ClientModSettings modSettings = ClientModSettings.getInstance();
+            ClientModSettings.Settings modSettingsRead = ClientModSettings.getSettingsReadOnly();
+            
+            boolean addHudScreenButtons;
+            LazyOptional<IStandPower> spOptional;
+            LazyOptional<INonStandPower> nspOptional;
+            if (mc.player != null) {
+                spOptional = IStandPower.getStandPowerOptional(mc.player);
+                nspOptional = INonStandPower.getNonStandPowerOptional(mc.player);
+                addHudScreenButtons = spOptional.map(IPower::hasPower).orElse(false) || nspOptional.map(IPower::hasPower).orElse(false);
+            }
+            else {
+                addHudScreenButtons = false;
+                spOptional = LazyOptional.empty();
+                nspOptional = LazyOptional.empty();
+            }
+            
+            while (entriesIter.hasNext()) {
+                KeyBindingList.Entry entry = entriesIter.next();
+                if (entry instanceof KeyBindingList.KeyEntry) {
+                    KeyBindingList.KeyEntry keyEntry = (KeyBindingList.KeyEntry) entry;
+                    KeyBinding key = ClientReflection.getKey(keyEntry);
+                    if (key == InputHandler.getInstance().attackHotbar) {
+                        entriesIter.set(new HoldToggleKeyEntry(keyEntry, ClientReflection.getChangeButton(keyEntry), new ControlSettingToggleButton(40, 20, 
+                                button -> {
+                                    modSettings.editSettings(s -> s.toggleLmbHotbar = !s.toggleLmbHotbar);
+                                    InputHandler.getInstance().setToggledHotbarControls(ControlScheme.Hotbar.LEFT_CLICK, false);
+                                },
+                                () -> modSettingsRead.toggleLmbHotbar)));
+                    }
+                    else if (key == InputHandler.getInstance().abilityHotbar) {
+                        entriesIter.set(new HoldToggleKeyEntry(keyEntry, ClientReflection.getChangeButton(keyEntry), new ControlSettingToggleButton(40, 20, 
+                                button -> {
+                                    modSettings.editSettings(s -> s.toggleRmbHotbar = !s.toggleRmbHotbar);
+                                    InputHandler.getInstance().setToggledHotbarControls(ControlScheme.Hotbar.RIGHT_CLICK, false);
+                                },
+                                () -> modSettingsRead.toggleRmbHotbar)));
+                    }
+                    else if (key == InputHandler.getInstance().disableHotbars) {
+                        entriesIter.set(new HoldToggleKeyEntry(keyEntry, ClientReflection.getChangeButton(keyEntry), new ControlSettingToggleButton(40, 20, 
+                                button -> {
+                                    modSettings.editSettings(s -> s.toggleDisableHotbars = !s.toggleDisableHotbars);
+                                    InputHandler.getInstance().setToggleHotbarsDisabled(false);
+                                },
+                                () -> modSettingsRead.toggleDisableHotbars)));
+                    }
+                }
+                else if (addHudScreenButtons && entry instanceof KeyBindingList.CategoryEntry) {
+                    KeyBindingList.CategoryEntry categoryEntry = (KeyBindingList.CategoryEntry) entry;
+                    ITextComponent categoryName = ClientReflection.getName(categoryEntry);
+                    
+                    IStandPower standPower = spOptional.resolve().get();
+                    INonStandPower nonStandPower = nspOptional.resolve().get();
+                    Button[] hudScreenButtons = new Button[standPower.hasPower() && nonStandPower.hasPower() ? 2 : 1];
+                    int i = 0;
+                    if (standPower.hasPower()) {
+                        ITextComponent tooltip = new TranslationTextComponent("jojo.key.edit_hud.power_name", standPower.getName());
+                        hudScreenButtons[i++] = new ImageVanillaButton((screen.width + mc.font.width(categoryName) + 10) / 2, -21, 
+                                20, 20, 
+                                0, 0, 16, 16, standPower.clGetPowerTypeIcon(), 16, 16, 
+                                button -> {
+                                    HudLayoutEditingScreen hudScreen = new HudLayoutEditingScreen(PowerClassification.STAND);
+                                    mc.setScreen(hudScreen);
+                                }, 
+                                (button, matrixStack, mouseX, mouseY) -> screen.renderTooltip(matrixStack, tooltip, mouseX, mouseY),
+                                tooltip);
+                    }
+                    if (nonStandPower.hasPower()) {
+                        ITextComponent tooltip = new TranslationTextComponent("jojo.key.edit_hud.power_name", nonStandPower.getName());
+                        hudScreenButtons[i] = new ImageVanillaButton((screen.width + mc.font.width(categoryName) + 10) / 2 + (i++) * 24, -21, 
+                                20, 20, 
+                                0, 0, 16, 16, nonStandPower.clGetPowerTypeIcon(), 16, 16, 
+                                button -> {
+                                    HudLayoutEditingScreen hudScreen = new HudLayoutEditingScreen(PowerClassification.NON_STAND);
+                                    mc.setScreen(hudScreen);
+                                }, 
+                                (button, matrixStack, mouseX, mouseY) -> screen.renderTooltip(matrixStack, tooltip, mouseX, mouseY),
+                                tooltip);
+                    }
+                    
+                    if (InputHandler.HUD_CATEGORY.equals(((TranslationTextComponent) categoryName).getKey())) {
+                        entriesIter.set(new CategoryWithButtonsEntry(controlList, categoryName, hudScreenButtons));
+                    }
+                }
+            }
+            
+            if (HudLayoutEditingScreen.scrollCtrlListTo != null) {
+                Predicate<KeyBindingList.Entry> scrollTo = HudLayoutEditingScreen.scrollCtrlListTo;
+                HudLayoutEditingScreen.scrollCtrlListTo = null;
+                OptionalInt index = IntStream.range(0, controlList.children().size())
+                        .filter(i -> {
+                            KeyBindingList.Entry entry = controlList.children().get(i);
+                            return scrollTo.test(entry);
+                        })
+                        .findFirst();
+                index.ifPresent(i -> {
+                    controlList.setScrollAmount(ClientReflection.getRowTop(controlList, i) - controlList.getTop());
+                });
+            }
         }
     }
 

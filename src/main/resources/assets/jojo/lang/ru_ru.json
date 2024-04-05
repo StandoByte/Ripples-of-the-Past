@@ -355,8 +355,8 @@
   "jojo.screen.edit_hud_layout.reset": "Сбросить управление",
   "jojo.screen.edit_hud_layout.add_keybind": "Добавить клавишу",
   "jojo.screen.edit_hud_layout.mc_controls": "Открыть настройки управления Minecraft",
-  "jojo.screen.edit_hud_layout.hint.lmb": "Left Mouse Button - pick action",
-  "jojo.screen.edit_hud_layout.hint.rmb": "Right Mouse Button - enable/disable action",
+  "jojo.screen.edit_hud_layout.hint.lmb": "Left Mouse Button - move",
+  "jojo.screen.edit_hud_layout.hint.rmb": "Right Mouse Button - enable/disable",
   
   "jojo.overlay.mode_deselect": "Убрать интерфейс",
   "jojo.overlay.hold": "(удерж.) %s",
@@ -535,6 +535,7 @@
   "jojo.config.client.characterVoiceLines.tooltip": "Проигрываются ли реплики персонажей из ДжоДжо, чьи способности используют игроки",
   
   "stand.unknown": "Неизвестный Стенд: %s",
+  "non_stand.unknown": "Unknown Power: %s",
   "commands.stand.give.success.single": "Выдан %s игроку %s",
   "commands.stand.give.success.multiple": "Выдан %s %s игрокам",
   "commands.stand.give.success.multiple.random": "Выданы случайные Стенды %s игрокам",
@@ -588,6 +589,9 @@
   "commands.hamon.control.add.success.multiple": "Выдано %s уровней контроля Хамона %s игрокам",
   "commands.hamon.breathing.add.success.single": "Выдано %s уровней тренировки дыхания игроку %s",
   "commands.hamon.breathing.add.success.multiple": "Выдано %s уровней тренировки дыхания %s игрокам",
+  "commands.hamon.strength.query.success": "Уровень силы Хамона %s равен %s",
+  "commands.hamon.control.query.success": "Уровень контроля Хамона игрока %s равен %s",
+  "commands.hamon.breathing.query.success": "Уровень тренировки дыхания игрока %s равен %s",
   "commands.hamon.failed.single": "%s не является пользователем Хамона",
   "commands.hamon.failed.multiple": "Все %s игроков не являются пользователями Хамона",
   

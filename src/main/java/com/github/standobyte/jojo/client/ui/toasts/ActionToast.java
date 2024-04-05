@@ -5,10 +5,10 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.IPowerType;
-import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -101,19 +101,19 @@ public class ActionToast implements IToast {
     }
     
     public static enum Type implements IActionToastType {
-//        NON_STAND_ATTACK("non_stand.attack", PowerClassification.NON_STAND, ActionsLayout.Hotbar.ATTACK, false),
-//        NON_STAND_ABILITY("non_stand.ability", PowerClassification.NON_STAND, ActionsLayout.Hotbar.ABILITY, false),
-        STAND_ATTACK("stand.attack", PowerClassification.STAND, ActionsLayout.Hotbar.LEFT_CLICK, false),
-        STAND_ABILITY("stand.ability", PowerClassification.STAND, ActionsLayout.Hotbar.RIGHT_CLICK, false),
-        STAND_ATTACK_VARIATION("stand.attack.shift", PowerClassification.STAND, ActionsLayout.Hotbar.LEFT_CLICK, true),
-        STAND_ABILITY_VARIATION("stand.ability.shift", PowerClassification.STAND, ActionsLayout.Hotbar.RIGHT_CLICK, true);
+//        NON_STAND_ATTACK("non_stand.attack", PowerClassification.NON_STAND, ControlScheme.Hotbar.ATTACK, false),
+//        NON_STAND_ABILITY("non_stand.ability", PowerClassification.NON_STAND, ControlScheme.Hotbar.ABILITY, false),
+        STAND_ATTACK("stand.attack", PowerClassification.STAND, ControlScheme.Hotbar.LEFT_CLICK, false),
+        STAND_ABILITY("stand.ability", PowerClassification.STAND, ControlScheme.Hotbar.RIGHT_CLICK, false),
+        STAND_ATTACK_VARIATION("stand.attack.shift", PowerClassification.STAND, ControlScheme.Hotbar.LEFT_CLICK, true),
+        STAND_ABILITY_VARIATION("stand.ability.shift", PowerClassification.STAND, ControlScheme.Hotbar.RIGHT_CLICK, true);
         
         private final String name;
         private final PowerClassification classification;
-        private final ActionsLayout.Hotbar actionType;
+        private final ControlScheme.Hotbar actionType;
         private final boolean shiftVariation;
         
-        private Type(String name, PowerClassification classification, ActionsLayout.Hotbar actionType, boolean shiftVariation) {
+        private Type(String name, PowerClassification classification, ControlScheme.Hotbar actionType, boolean shiftVariation) {
             this.name = name;
             this.classification = classification;
             this.actionType = actionType;
@@ -121,7 +121,7 @@ public class ActionToast implements IToast {
         }
         
         @Nullable
-        public static Type getToastType(PowerClassification classification, ActionsLayout.Hotbar actionType, boolean shiftVariation) {
+        public static Type getToastType(PowerClassification classification, ControlScheme.Hotbar actionType, boolean shiftVariation) {
             for (Type toastType : Type.values()) {
                 if (toastType.classification == classification
                         && toastType.actionType == actionType

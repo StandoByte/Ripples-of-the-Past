@@ -5,13 +5,14 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.controls.HudControlSettings;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.bowcharge.BowChargeEffectInstance;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
-import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.github.standobyte.jojo.util.general.ObjectWrapper;
 
 import net.minecraft.entity.Entity;
@@ -45,10 +46,6 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     default ITextComponent getName() {
         return hasPower() ? getType().getName() : StringTextComponent.EMPTY;
     }
-
-    ActionsLayout<P> getActionsHudLayout();
-    void setActionsHudLayout(ActionsLayout<P> layout);
-    void saveActionsHudLayout(T powerType, ActionsLayout<P> clReceivedLayout);
     
     boolean isActionOnCooldown(Action<?> action);
     float getCooldownRatio(Action<?> action, float partialTick);
@@ -97,6 +94,12 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     @Nullable BowChargeEffectInstance<P, T> getBowChargeEffect();
     
     ResourceLocation clGetPowerTypeIcon();
+    default void clUpdateHud() {
+        LivingEntity user = getUser();
+        if (user != null && user.level.isClientSide() && user == ClientUtil.getCameraEntity()) {
+            HudControlSettings.getInstance().refreshControls(this);
+        }
+    }
     
     INBT writeNBT();
     void readNBT(CompoundNBT nbt);

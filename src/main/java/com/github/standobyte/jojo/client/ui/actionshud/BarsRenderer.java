@@ -11,6 +11,7 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.ClientTicking;
 import com.github.standobyte.jojo.client.ClientTicking.ITicking;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.Alignment;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.BarsOrientation;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
@@ -19,7 +20,6 @@ import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
-import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -32,7 +32,6 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 
-@SuppressWarnings("deprecation")
 public abstract class BarsRenderer {
     static final int BARS_WIDTH_PX = 28;
     
@@ -47,6 +46,7 @@ public abstract class BarsRenderer {
         barTransparencies = new EnumMap<>(BarType.class);
         barTransparencies.put(BarType.ENERGY_HAMON, energy);
         barTransparencies.put(BarType.ENERGY_VAMPIRE, energy);
+        barTransparencies.put(BarType.ENERGY_OTHER, energy);
         barTransparencies.put(BarType.STAMINA, stamina);
         barTransparencies.put(BarType.RESOLVE, resolve);
     }
@@ -99,6 +99,9 @@ public abstract class BarsRenderer {
             else if (nonStandPower.getType() == ModPowers.VAMPIRISM.get()) {
                 type = BarType.ENERGY_VAMPIRE;
             }
+            else {
+                type = BarType.ENERGY_OTHER;
+            }
             
             if (type != null) {
                 // FIXME ! (hamon 2) bar render effect
@@ -137,7 +140,7 @@ public abstract class BarsRenderer {
     }
     
     protected <P extends IPower<P, ?>> float getActionCost(ActionsModeConfig<P> mode, 
-            ActionsLayout.Hotbar hotbar, LivingEntity user, boolean shift, ActionTarget target) {
+            ControlScheme.Hotbar hotbar, LivingEntity user, boolean shift, ActionTarget target) {
         Action<P> action = mode.getSelectedAction(hotbar, shift, target);
         
         if (action != null) {
@@ -293,6 +296,7 @@ public abstract class BarsRenderer {
     public enum BarType {
         ENERGY_HAMON,
         ENERGY_VAMPIRE,
+        ENERGY_OTHER,
         STAMINA,
         RESOLVE
     }

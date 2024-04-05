@@ -6,8 +6,8 @@ import java.util.function.Supplier;
 import org.apache.commons.lang3.ArrayUtils;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.client.ui.screen.controls.HudLayoutEditingScreen;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
-import com.github.standobyte.jojo.client.ui.screen.hudlayout.HudLayoutEditingScreen;
 import com.github.standobyte.jojo.client.ui.screen.standskin.StandSkinsScreen;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.IPower;
@@ -31,9 +31,9 @@ public class JojoStuffScreen {
             HudLayoutEditingScreen::new) {
         @Override
         protected Screen onClick(TabsEnumType powerType) {
-            Screen controlsScreen = super.onClick(powerType);
-            ((HudLayoutEditingScreen) controlsScreen).selectTab(powerType.power);
-            return controlsScreen;
+            Screen screen = new HudLayoutEditingScreen(powerType.power);
+            Minecraft.getInstance().setScreen(screen);
+            return screen;
         }
     };
     
@@ -157,7 +157,9 @@ public class JojoStuffScreen {
                 StandInfoScreen::new).disable() /* WIP screen */),
         CONTROLS(CONTROLS_TAB),
         SKINS(new Tab(null, 0, 0, 16, 16, new TranslationTextComponent("jojo.stand_skins.button"), 
-                () -> new StandSkinsScreen(IStandPower.getPlayerStandPower(Minecraft.getInstance().player))).disable() /* WIP feature, the tab is active in the beta builds */);
+                () -> new StandSkinsScreen(IStandPower.getPlayerStandPower(Minecraft.getInstance().player)))
+                .disable() /* WIP */
+                );
         
         private final Tab tab;
         private StandTab(Tab tab) {

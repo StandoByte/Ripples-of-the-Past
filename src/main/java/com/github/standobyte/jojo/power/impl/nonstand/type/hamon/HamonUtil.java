@@ -205,7 +205,7 @@ public class HamonUtil {
                                 playerTarget.doHurtTarget(attacker);
                                 playerTarget.swing(Hand.MAIN_HAND, true);
                                 livingAttacker.knockback(2.5F, playerTarget.getX()-livingAttacker.getX(), playerTarget.getZ()-livingAttacker.getZ());
-                                power.getTypeSpecificData(ModPowers.HAMON.get()).get().offRebuffOverdrive();
+                                hamon.setRebuffOverdrive(false);
                                 return true;
                             }
                         }
