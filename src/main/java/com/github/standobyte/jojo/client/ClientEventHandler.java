@@ -42,6 +42,7 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
+import com.github.standobyte.jojo.item.OilItem;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -49,6 +50,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandArrowHandler;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
+import com.github.standobyte.jojo.util.GameplayEventHandler;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
@@ -871,6 +873,10 @@ public class ClientEventHandler {
                             pos.getX(), pos.getY(), pos.getZ()).withStyle(TextFormatting.RED));
                 }
             });
+            
+           OilItem.isOiledTag(event.getItemStack()).ifPresent(string -> {
+        	   event.getToolTip().add(new TranslationTextComponent(string).withStyle(TextFormatting.GOLD));
+           });
         }
 
         if (event.getItemStack().getItem() instanceof EnchantedBookItem && !ModList.get().isLoaded("enchdesc")) {

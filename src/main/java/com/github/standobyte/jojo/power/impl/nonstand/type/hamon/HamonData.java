@@ -499,6 +499,7 @@ public class HamonData extends TypeSpecificData {
     @Override
     public boolean isActionUnlocked(Action<INonStandPower> action, INonStandPower powerData) {
         return action == ModHamonActions.HAMON_OVERDRIVE.get()
+        		|| action == ModHamonActions.HAMON_BEAT.get()
                 || action == ModHamonActions.HAMON_HEALING.get()
                 || action == ModHamonActions.HAMON_BREATH.get()
                 || action == ModHamonActions.CAESAR_BUBBLE_CUTTER_GLIDING.get()
@@ -1302,9 +1303,9 @@ public class HamonData extends TypeSpecificData {
             }
         }
         
-        if (isSkillLearned(ModHamonSkills.METAL_SILVER_OVERDRIVE.get()) && HamonMetalSilverOverdrive.itemUsesMSO(user)) {
+       /*if (isSkillLearned(ModHamonSkills.METAL_SILVER_OVERDRIVE.get()) && HamonMetalSilverOverdrive.itemUsesMSO(user)) {
             return HamonAuraColor.SILVER;
-        }
+        }*/
         
         if (isSkillLearned(ModHamonSkills.TURQUOISE_BLUE_OVERDRIVE.get()) && user.isUnderWater()) {
             return HamonAuraColor.BLUE;
