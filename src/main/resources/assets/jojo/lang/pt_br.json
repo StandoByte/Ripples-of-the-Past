@@ -752,7 +752,7 @@
   "hamonSkill.scarlet_overdrive.name": "Sobrecarga Escarlarte",
   "hamonSkill.scarlet_overdrive.desc": "Um tipo especial de ataque Overdrive, que causa dano adicional e incendeia o alvo.",
   "hamonSkill.metal_silver_overdrive.name": "Sobrecarga de Metal Prata",
-  "hamonSkill.metal_silver_overdrive.desc": "Você pode executar o ataque Overdrive com uma arma ou uma ferramenta.",
+  "hamonSkill.metal_silver_overdrive.desc": "A special type of Overdrive attack. The more armor the target is wearing, the more Hamon damage it deals.",
   "hamonSkill.overdrive_barrage.name": "Sobrecarga Barragem",
   "hamonSkill.overdrive_barrage.desc": "Você desencadeia uma enxurrada de ataques rápidos de Sobrecarga.",
   "hamonSkill.hamon_cutter.name": "Corte Hamon",

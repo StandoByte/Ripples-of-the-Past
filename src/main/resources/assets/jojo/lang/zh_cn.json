@@ -768,7 +768,7 @@
  "hamonSkill.scarlet_overdrive.name": "绯红色波纹疾走",
  "hamonSkill.scarlet_overdrive.desc": "一种特殊类型的波纹攻击，可造成额外波纹伤害并点燃目标",
  "hamonSkill.metal_silver_overdrive.name": "银白色波纹疾走",
- "hamonSkill.metal_silver_overdrive.desc": "你可以在武器和工具上缠绕波纹进行攻击，可造成额外的波纹伤害",
+ "hamonSkill.metal_silver_overdrive.desc": "A special type of Overdrive attack. The more armor the target is wearing, the more Hamon damage it deals.",
  "hamonSkill.overdrive_barrage.name": "超高速连打",
  "hamonSkill.overdrive_barrage.desc": "你可以运用附着波纹的双手快速攻击敌方",
  "hamonSkill.hamon_cutter.name": "波纹药水割刀",

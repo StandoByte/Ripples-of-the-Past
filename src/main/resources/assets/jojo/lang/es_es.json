@@ -669,7 +669,7 @@
   "hamonSkill.scarlet_overdrive.name": "Scarlet Overdrive",
   "hamonSkill.scarlet_overdrive.desc": "Un tipo especial de ataque Overdrive, que inflige daño adicional y prende fuego al objetivo.",
   "hamonSkill.metal_silver_overdrive.name": "Metal Silver Overdrive",
-  "hamonSkill.metal_silver_overdrive.desc": "Puedes realizar un ataque Overdrive con un arma o una herramienta.",
+  "hamonSkill.metal_silver_overdrive.desc": "A special type of Overdrive attack. The more armor the target is wearing, the more Hamon damage it deals.",
   "hamonSkill.overdrive_barrage.name": "Overdrive Barrage",
   "hamonSkill.overdrive_barrage.desc": "Desatas una andanada de rápidos ataques Overdrive.",
   "hamonSkill.hamon_cutter.name": "Hamon Cutter",
