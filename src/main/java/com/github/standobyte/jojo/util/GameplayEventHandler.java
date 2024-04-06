@@ -30,7 +30,6 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDBloodCutterEntity;
-import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.SnakeMufflerEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
 import com.github.standobyte.jojo.init.ModBlocks;
@@ -46,6 +45,7 @@ import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
+import com.github.standobyte.jojo.item.OilItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -105,8 +105,6 @@ import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.TieredItem;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.play.server.SChatPacket;
 import net.minecraft.network.play.server.SPlayEntityEffectPacket;
 import net.minecraft.network.play.server.SPlaySoundEffectPacket;
@@ -121,7 +119,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
-import net.minecraft.util.CombatRules;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Hand;
@@ -151,7 +148,6 @@ import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.ServerChatEvent;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
 import net.minecraftforge.event.TickEvent.WorldTickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -442,34 +438,26 @@ public class GameplayEventHandler {
         Entity attacker = dmgSource.getEntity();
         
         //Deal Hamon damage through oiled weapons
-        if (attacker != null && attacker.is(dmgSource.getDirectEntity()) && attacker instanceof PlayerEntity) {
-        	LivingEntity player = (LivingEntity) attacker;
-        	PlayerEntity pEntity = (PlayerEntity) player;
-        	ItemStack weapon = pEntity.getMainHandItem();
-        	if (weapon.getItem() instanceof TieredItem && weapon.hasTag()) {
-        		
-        		CompoundNBT nbt = weapon.getTag();
-                if (nbt.contains("Oiled", MCUtil.getNbtId(CompoundNBT.class))) {
-                	INonStandPower power = INonStandPower.getPlayerNonStandPower(pEntity);
-                	float energyCost = 500F;
-                	if (power.hasEnergy(energyCost)) {
-                		if (power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
-                                power.consumeEnergy(energyCost);
-                                float hPower = hamon.getHamonStrengthLevelRatio();
-                                DamageUtil.dealHamonDamage(target, 10 * hPower, null, pEntity);
-                                hamon.hamonPointsFromAction(HamonStat.STRENGTH, 500);
-                                CompoundNBT posNBT = nbt.getCompound("Oiled");
-                                if(posNBT.getInt("Oiled") > 1) {
-                                	posNBT.putInt("Oiled", posNBT.getInt("Oiled") - 1);
-                                } else {
-                                	nbt.remove("Oiled");
-                                }
-                                return true;
+        if (!dmgSource.isBypassArmor() && !dmgSource.getMsgId().startsWith(DamageUtil.HAMON.msgId) && 
+                attacker != null && attacker.is(dmgSource.getDirectEntity()) && attacker instanceof LivingEntity) {
+        	LivingEntity hamonUser = (LivingEntity) attacker;
+        	ItemStack weapon = hamonUser.getMainHandItem();
+        	
+        	INonStandPower.getNonStandPowerOptional(hamonUser).ifPresent(power -> {
+                OilItem.remainingOiledUses(weapon).ifPresent(oilUses -> {
+                    float energyCost = 500F;
+                    if (power.hasPower() && power.getEnergy() >= energyCost) {
+                        power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
+                            power.consumeEnergy(energyCost);
+                            DamageUtil.dealHamonDamage(target, 1.5F, hamonUser, null);
+                            hamon.hamonPointsFromAction(HamonStat.STRENGTH, 500);
                             
-                		}).orElse(false));
-                	}
-                }
-        	}
+                            OilItem.setWeaponOilUses(weapon, oilUses - 1);
+                        });
+                    }
+                });
+        	});
+        	
         }
         if (attacker != null && attacker.is(dmgSource.getDirectEntity()) && attacker instanceof LivingEntity) {
             IStandPower.getStandPowerOptional((LivingEntity) attacker).ifPresent(attackerStand -> {

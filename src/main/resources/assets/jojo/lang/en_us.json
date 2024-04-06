@@ -13,6 +13,7 @@
   "item.jojo.soap": "Soap Solution",
   "item.jojo.oil": "Oil",
   "item.jojo.oil.hint": "You can lubricate your weapon in offhand with it to deal Hamon damage through it",
+  "item.jojo.oil.uses": "Oiled: %s uses",
   "item.jojo.hamon_master_spawn_egg": "Hamon Master Spawn Egg",
   "item.jojo.hungry_zombie_spawn_egg": "Zombie Minion Spawn Egg",
   "item.jojo.aja_stone": "Aja Red Stone",

@@ -50,7 +50,6 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandArrowHandler;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
-import com.github.standobyte.jojo.util.GameplayEventHandler;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
@@ -874,8 +873,10 @@ public class ClientEventHandler {
                 }
             });
             
-           OilItem.isOiledTag(event.getItemStack()).ifPresent(string -> {
-        	   event.getToolTip().add(new TranslationTextComponent(string).withStyle(TextFormatting.GOLD));
+           OilItem.remainingOiledUses(event.getItemStack()).ifPresent(uses -> {
+               if (uses > 0) {
+                   event.getToolTip().add(new TranslationTextComponent("item.jojo.oil.uses", uses).withStyle(TextFormatting.GOLD));
+               }
            });
         }
 
