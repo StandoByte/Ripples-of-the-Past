@@ -4,8 +4,8 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
-import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.vampirism.ModVampirismActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.util.mc.LiquidOnlyRayTraceContext;
@@ -22,7 +22,6 @@ import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.monster.StrayEntity;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.EffectInstance;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -66,7 +65,7 @@ public class VampirismFreeze extends VampirismAction {
                 if (entityTarget instanceof LivingEntity && !entityTarget.isOnFire()) {
                     int difficulty = world.getDifficulty().getId();
                     LivingEntity targetLiving = (LivingEntity) entityTarget;
-                    float damage = (float) Math.pow(0.2, difficulty/20);
+                    float damage = (float) Math.pow(2, difficulty) * 0.5f;
                     if (targetLiving.getType() == EntityType.SKELETON && targetLiving.isAlive() && targetLiving.getHealth() <= damage) {
                         turnSkeletonIntoStray(targetLiving);
                     }
@@ -199,8 +198,4 @@ public class VampirismFreeze extends VampirismAction {
         return 1;
     }
     
-    @Override
-    public boolean cancelHeldOnGettingAttacked(INonStandPower power, DamageSource dmgSource, float dmgAmount) {
-        return true;
-    }
 }
