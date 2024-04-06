@@ -23,7 +23,7 @@ import net.minecraftforge.common.ForgeHooks;
 public class VampirismClawLacerate extends VampirismAction {
 
     public VampirismClawLacerate(VampirismAction.Builder builder) {
-        super(builder.doNotCancelClick());
+        super(builder.withUserPunch());
     }
 
     @Override

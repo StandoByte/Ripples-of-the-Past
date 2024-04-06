@@ -1,19 +1,14 @@
 package com.github.standobyte.jojo.action.non_stand;
 
-
 import java.util.Arrays;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.ZoomPunchEntity;
 import com.github.standobyte.jojo.init.ModParticles;
-import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
-import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
-import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
@@ -30,7 +25,7 @@ public class HamonMetalSilverOverdrive extends HamonOverdrive {
     
     @Override
     protected Action<INonStandPower> replaceAction(INonStandPower power, ActionTarget target) {
-        if (target.getEntity() instanceof LivingEntity && itemUsesMSO(target)==false) {
+        if (target.getEntity() instanceof LivingEntity && !itemUsesMSO(target)) {
             return ModHamonActions.HAMON_OVERDRIVE.get();
         }
         return super.replaceAction(power, target);
@@ -88,27 +83,14 @@ public class HamonMetalSilverOverdrive extends HamonOverdrive {
     	float ratio = 1.0F;
     	ItemStack mainHandStack = targetEntity.getMainHandItem();
     	ItemStack offhandStack = targetEntity.getMainHandItem();
-    	//It doesn't work properly :(
-    	/*for (int i = 0; i == 3; i++) {
-	    	if(!targetEntity.getItemBySlot(EquipmentSlotType.byTypeAndIndex(EquipmentSlotType.Group.ARMOR, i)).isEmpty()) {
-	    		ratio = ratio + 0.5F;
-	    	}
-    	}*/
+        for (int i = 0; i < 4; i++) {
+            if (!targetEntity.getItemBySlot(EquipmentSlotType.byTypeAndIndex(EquipmentSlotType.Group.ARMOR, i)).isEmpty()) {
+                ratio += 0.5F;
+            }
+        }
     	
-    	if(!targetEntity.getItemBySlot(EquipmentSlotType.HEAD).isEmpty()) {
-    		ratio = ratio + 0.5F;
-    	}
-    	if(!targetEntity.getItemBySlot(EquipmentSlotType.CHEST).isEmpty()) {
-    		ratio = ratio + 0.5F;
-    	}
-    	if(!targetEntity.getItemBySlot(EquipmentSlotType.LEGS).isEmpty()) {
-    		ratio = ratio + 0.5F;
-    	}
-    	if(!targetEntity.getItemBySlot(EquipmentSlotType.FEET).isEmpty()) {
-    		ratio = ratio + 0.5F;
-    	}
-    	if(mainHandStack.getItem() instanceof TieredItem || offhandStack.getItem() instanceof TieredItem) {
-    		ratio = ratio + 0.5F;
+    	if (mainHandStack.getItem() instanceof TieredItem || offhandStack.getItem() instanceof TieredItem) {
+    		ratio += 0.5F;
     	}
         return DamageUtil.dealHamonDamage(targetEntity, ratio * dmgAmount, user, null, attack -> attack.hamonParticle(ModParticles.HAMON_SPARK_SILVER.get()));
     }
