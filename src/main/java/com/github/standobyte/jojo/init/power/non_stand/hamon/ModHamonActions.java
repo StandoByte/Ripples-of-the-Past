@@ -48,7 +48,8 @@ public class ModHamonActions {
     
     public static final RegistryObject<HamonAction> HAMON_BEAT = ACTIONS.register("hamon_overdrive_beat", 
             () -> new HamonOverdrive(new HamonAction.Builder().energyCost(1500F)
-                    .needsFreeMainHand().swingHand().shiftVariationOf(HAMON_OVERDRIVE).cooldown(60)));
+                    .needsFreeMainHand().swingHand().shiftVariationOf(HAMON_OVERDRIVE).cooldown(60))
+            .setIsStrongVersion());
    
    public static final RegistryObject<HamonAction> HAMON_SENDO_OVERDRIVE = ACTIONS.register("hamon_sendo_overdrive", 
            () -> new HamonSendoOverdrive(new HamonAction.Builder().energyCost(900F)
