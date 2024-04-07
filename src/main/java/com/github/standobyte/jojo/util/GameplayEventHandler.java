@@ -79,6 +79,7 @@ import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
 import com.github.standobyte.jojo.util.mc.damage.IStandDamageSource;
+import com.github.standobyte.jojo.util.mc.damage.ModdedDamageSourceWrapper;
 import com.github.standobyte.jojo.util.mc.damage.StandLinkDamageSource;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -430,12 +431,25 @@ public class GameplayEventHandler {
             }
         }
     }
-
+    
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onLivingHurtStart(LivingAttackEvent event) {
     	DamageSource dmgSource = event.getSource();
         LivingEntity target = event.getEntityLiving();
         Entity attacker = dmgSource.getEntity();
+        
+        // Attack the entity from a different DamageSource if the attacker has the effect that lets them hit Stands
+        if (target instanceof StandEntity && !((StandEntity) target).canTakeDamageFrom(dmgSource)
+                && !(dmgSource instanceof ModdedDamageSourceWrapper && ((ModdedDamageSourceWrapper) dmgSource).canHurtStands())
+                && attacker instanceof LivingEntity) {
+            LivingEntity attackerLiving = (LivingEntity) attacker;
+            boolean canHitStands = attackerLiving.hasEffect(ModStatusEffects.INTEGRATED_STAND.get());
+            if (canHitStands) {
+                event.setCanceled(true);
+                target.hurt(new ModdedDamageSourceWrapper(dmgSource).setCanHurtStands(), event.getAmount());
+                return;
+            }
+        }
         
         //Deal Hamon damage through oiled weapons
         if (!dmgSource.isBypassArmor() && !dmgSource.getMsgId().startsWith(DamageUtil.HAMON.msgId) && 
@@ -457,8 +471,9 @@ public class GameplayEventHandler {
                     }
                 });
         	});
-        	
         }
+        
+        // Redirect an attack on a Boy II Man user who stole the attacker's arms
         if (attacker != null && attacker.is(dmgSource.getDirectEntity()) && attacker instanceof LivingEntity) {
             IStandPower.getStandPowerOptional((LivingEntity) attacker).ifPresent(attackerStand -> {
                 IStandPower.getStandPowerOptional(target).ifPresent(boyIIManStand -> {

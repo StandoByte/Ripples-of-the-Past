@@ -13,7 +13,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.EffectType;
 
-public class StandVirusEffect extends UncurableEffect implements IApplicableEffect {
+public class StandVirusEffect extends StatusEffect implements IApplicableEffect {
     
     public StandVirusEffect(int liquidColor) {
         super(EffectType.HARMFUL, liquidColor);
@@ -24,6 +24,7 @@ public class StandVirusEffect extends UncurableEffect implements IApplicableEffe
         return entity instanceof PlayerEntity;
     }
     
+    @Override
     public void applyEffectTick(LivingEntity entity, int amplifier) {
         if (!entity.level.isClientSide() && entity instanceof PlayerEntity) {
             PlayerEntity player = (PlayerEntity) entity;
