@@ -419,9 +419,9 @@ public class ClientEventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void disableFoodBar(RenderGameOverlayEvent.Pre event) {
-        if (event.getType() == FOOD && !ModInteractionUtil.isModLoaded("vampirism") || event.getType() == AIR) {
+        if (event.getType() == FOOD && !ModInteractionUtil.isModLoaded("vampirism") && !ModInteractionUtil.isModLoaded("zombie") || event.getType() == AIR) {
             INonStandPower.getNonStandPowerOptional(mc.player).ifPresent(power -> {
-                if (power.getType() == ModPowers.VAMPIRISM.get()) {
+                if (power.getType() == ModPowers.VAMPIRISM.get() || power.getType() == ModPowers.ZOMBIE.get()) {
                     event.setCanceled(true);
                 }
             });

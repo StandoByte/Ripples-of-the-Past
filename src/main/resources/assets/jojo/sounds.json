@@ -99,6 +99,10 @@
     "subtitle": "jojo.subtitle.vampire_cure_end",
     "sounds": [ "minecraft:mob/zombie/unfect" ]
   },
+  "zombie_devour": {
+    "subtitle": "jojo.subtitle.devouring",
+    "sounds": [ "jojo:zombie_devour" ]
+  },
   "hamon_pick_jonathan": {
     "sounds": [ "jojo:hamon_pick_jonathan" ]
   },

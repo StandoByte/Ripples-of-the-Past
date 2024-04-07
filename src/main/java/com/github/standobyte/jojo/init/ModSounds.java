@@ -80,6 +80,8 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> VAMPIRE_CURE_START = register("vampire_cure_start");
 
     public static final RegistryObject<SoundEvent> VAMPIRE_CURE_END = register("vampire_cure_end");
+    
+    public static final RegistryObject<SoundEvent> ZOMBIE_DEVOUR = register("zombie_devour");
 
 
     public static final RegistryObject<SoundEvent> HAMON_PICK_JONATHAN = register("hamon_pick_jonathan");

@@ -47,6 +47,7 @@ public abstract class BarsRenderer {
         barTransparencies = new EnumMap<>(BarType.class);
         barTransparencies.put(BarType.ENERGY_HAMON, energy);
         barTransparencies.put(BarType.ENERGY_VAMPIRE, energy);
+        barTransparencies.put(BarType.ENERGY_ZOMBIE, energy);
         barTransparencies.put(BarType.STAMINA, stamina);
         barTransparencies.put(BarType.RESOLVE, resolve);
     }
@@ -98,6 +99,9 @@ public abstract class BarsRenderer {
             }
             else if (nonStandPower.getType() == ModPowers.VAMPIRISM.get()) {
                 type = BarType.ENERGY_VAMPIRE;
+            }
+            else if (nonStandPower.getType() == ModPowers.ZOMBIE.get()) {
+                type = BarType.ENERGY_ZOMBIE;
             }
             
             if (type != null) {
@@ -271,6 +275,8 @@ public abstract class BarsRenderer {
             return new int[] {240, 16, ICON_WIDTH, ICON_HEIGHT, 1, 0, -7};
         case ENERGY_VAMPIRE:
             return new int[] {240, 0, ICON_WIDTH, ICON_HEIGHT, 1, 0, -3};
+        case ENERGY_ZOMBIE:
+            return new int[] {240, 0, ICON_WIDTH, ICON_HEIGHT, 1, 0, -3};
         default:
             return new int[] {240, 160, ICON_WIDTH, ICON_HEIGHT, 1, 0, 0};
         }
@@ -293,6 +299,7 @@ public abstract class BarsRenderer {
     public enum BarType {
         ENERGY_HAMON,
         ENERGY_VAMPIRE,
+        ENERGY_ZOMBIE,
         STAMINA,
         RESOLVE
     }

@@ -443,6 +443,7 @@
   "jojo.message.action_condition.no_stamina": "You don't have enough stamina",
   "jojo.message.action_condition.no_energy_hamon": "Your breath has not yet stabilized",
   "jojo.message.action_condition.no_energy_vampirism": "You are too hungry",
+  "jojo.message.action_condition.no_energy_zombie": "You are too hungry",
   "jojo.message.action_condition.not_unlocked": "You haven't unlocked this",
   "jojo.message.action_condition.target_too_far": "The target is too far",
   "jojo.message.action_condition.stun": "You are stunned",
@@ -476,6 +477,7 @@
   "jojo.message.action_condition.potion": "You need to hold a bottle with a liquid",
   "jojo.message.action_condition.soap": "You need soap to perform that",
   "jojo.message.action_condition.gloves_no_soap": "Your soap gloves are empty",
+  "jojo.message.action_condition.disguise": "You cannot use it in disguise",
   
   "multiplayer.disconnect.invalid_stand_movement": "Invalid move Stand packet received",
   
@@ -926,6 +928,11 @@
   "action.jojo.vampirism_hamon_suicide": "Use Hamon",
   
   "jojo.vampire.ready_to_cure": "You feel sleepy. Maybe sleeping a bit will finish this nightmare...",
+  
+  "non_stand.jojo.zombie": "Zombie",
+  "action.jojo.zombie_claw_lacerate": "Claw Lacerate",
+  "action.jojo.zombie_devour": "Devour",
+  "action.jojo.zombie_disguise": "Disguise",
   
   "jojo.subtitle.stand_summon": "Stand summoned",
   "jojo.subtitle.stand_unsummon": "Stand unsummoned",
