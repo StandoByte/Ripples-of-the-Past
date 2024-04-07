@@ -64,9 +64,11 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.registries.ForgeRegistries;
 
-public class ChooseLifeformScreen extends WasdAllowingScreen {
+public class ChooseLifeformListScreen extends WasdAllowingScreen {
     public static final ResourceLocation LIFEFORM_CHOOSE_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/lifeform_choose.png");
-
+    
+    
+    
     private GridList<SelectorWidget> entityIconsGrid;
     
     @Nullable private EntityType<?> chosenLifeformCache;
@@ -87,15 +89,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
     private Button clearSearchFieldButton;
     private Button unlockAllButton;
     
-    public static void openWindowOnClick() {
-        Minecraft mc = Minecraft.getInstance();
-        if (mc.screen == null) {
-            Screen screen = new ChooseLifeformScreen(InputHandler.lastActionKey);
-            mc.setScreen(screen);
-        }
-    }
-    
-    public ChooseLifeformScreen(KeyBinding keyHeld) {
+    public ChooseLifeformListScreen(KeyBinding keyHeld) {
         super(StringTextComponent.EMPTY);
         this.keyHeld = keyHeld;
     }
@@ -203,7 +197,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
                         new LifeformFilterListCheckbox(width - 28, -1, CHECKBOX_SIZE, CHECKBOX_SIZE, 
                                 entityType.getDescription(), 
                                 
-                                () -> ChooseLifeformScreen.getEntriesUiData(ClientUtil.getClientPlayer())
+                                () -> ChooseLifeformListScreen.getEntriesUiData(ClientUtil.getClientPlayer())
                                         .map(cap -> !cap.isGELifeformHidden(entityType)).orElse(false),
                                 
                                 stateBeingSet -> {
@@ -683,7 +677,7 @@ public class ChooseLifeformScreen extends WasdAllowingScreen {
         
         @Override
         public void render(MatrixStack matrixStack, Minecraft mc, int mouseX, int mouseY, float partialTick) {
-            mc.textureManager.bind(ChooseLifeformScreen.LIFEFORM_CHOOSE_LOCATION);
+            mc.textureManager.bind(ChooseLifeformListScreen.LIFEFORM_CHOOSE_LOCATION);
             ClientUtil.drawRightAlignedString(matrixStack, mc.font, 
                     checkbox.getMessage(), 
                     checkbox.x - 5, checkbox.y + (CHECKBOX_SIZE - mc.font.lineHeight) / 2, 
