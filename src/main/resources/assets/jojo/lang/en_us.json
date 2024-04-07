@@ -794,7 +794,7 @@
   "hamonSkill.life_magnetism.desc": "Turns a block of leaves into a hang glider. If not continuously charged with Hamon energy, the glider will disintegrate.",
   "hamonSkill.projectile_shield.name": "Projectile Barrier",
   "hamonSkill.projectile_shield.desc": "Creates a projectile reflecting barrier in front of the user.",
-  "hamonSkill.protection.name": "Hamon Protection",
+  "hamonSkill.protection.name": "Repelling Hamon",
   "hamonSkill.protection.desc": "Creates a Hamon-charged coating on the surface of the user's body, reducing the incoming physical damage.",
   "hamonSkill.detector.name": "Detector",
   "hamonSkill.detector.desc": "Gives entities around the user Glowing effect.",
