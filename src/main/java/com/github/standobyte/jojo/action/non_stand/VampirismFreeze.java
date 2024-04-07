@@ -4,8 +4,8 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
-import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.vampirism.ModVampirismActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.util.mc.LiquidOnlyRayTraceContext;
@@ -65,7 +65,7 @@ public class VampirismFreeze extends VampirismAction {
                 if (entityTarget instanceof LivingEntity && !entityTarget.isOnFire()) {
                     int difficulty = world.getDifficulty().getId();
                     LivingEntity targetLiving = (LivingEntity) entityTarget;
-                    float damage = (float) Math.pow(2, difficulty);
+                    float damage = (float) Math.pow(2, difficulty) * 0.5f;
                     if (targetLiving.getType() == EntityType.SKELETON && targetLiving.isAlive() && targetLiving.getHealth() <= damage) {
                         turnSkeletonIntoStray(targetLiving);
                     }
@@ -197,4 +197,5 @@ public class VampirismFreeze extends VampirismAction {
     protected int maxCuringStage() {
         return 1;
     }
+    
 }

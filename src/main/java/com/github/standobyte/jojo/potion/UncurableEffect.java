@@ -7,6 +7,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectType;
 
+@Deprecated
 public class UncurableEffect extends Effect {
 
     public UncurableEffect(EffectType type, int liquidColor) {

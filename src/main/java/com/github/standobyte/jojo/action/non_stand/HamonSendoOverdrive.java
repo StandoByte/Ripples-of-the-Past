@@ -1,7 +1,5 @@
 package com.github.standobyte.jojo.action.non_stand;
 
-import javax.annotation.Nullable;
-
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
@@ -27,6 +25,14 @@ public class HamonSendoOverdrive extends HamonAction {
 
     public HamonSendoOverdrive(HamonAction.Builder builder) {
         super(builder);
+    }
+    
+    @Override
+    protected Action<INonStandPower> replaceAction(INonStandPower power, ActionTarget target) {
+        if (target.getEntity() instanceof LivingEntity && !getTargetRequirement().checkTargetType(target.getType())) {
+            return ModHamonActions.HAMON_OVERDRIVE.get().getVisibleAction(power, target);
+        }
+        return super.replaceAction(power, target);
     }
     
     @Override
@@ -74,13 +80,5 @@ public class HamonSendoOverdrive extends HamonAction {
     @Override
     public TargetRequirement getTargetRequirement() {
         return TargetRequirement.BLOCK;
-    }
-    
-    @Nullable
-    protected Action<INonStandPower> replaceAction(INonStandPower power, ActionTarget target) {
-        if (!power.getUser().level.isClientSide() && !getTargetRequirement().checkTargetType(target.getType())) {
-            return ModHamonActions.HAMON_OVERDRIVE.get().getVisibleAction(power, target);
-        }
-        return super.replaceAction(power, target);
     }
 }

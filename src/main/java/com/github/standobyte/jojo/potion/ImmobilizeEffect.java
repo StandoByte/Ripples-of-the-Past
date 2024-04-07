@@ -7,7 +7,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.potion.EffectType;
 import net.minecraftforge.common.ForgeMod;
 
-public class ImmobilizeEffect extends UncurableEffect implements IApplicableEffect {
+public class ImmobilizeEffect extends StatusEffect implements IApplicableEffect {
     
     public ImmobilizeEffect(int liquidColor) {
         super(EffectType.HARMFUL, liquidColor);

@@ -7,7 +7,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.AttributeModifierManager;
 import net.minecraft.potion.EffectType;
 
-public class ResolveEffect extends UncurableEffect {
+public class ResolveEffect extends StatusEffect {
 
     public ResolveEffect(EffectType type, int liquidColor) {
         super(type, liquidColor);

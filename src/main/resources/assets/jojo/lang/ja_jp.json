@@ -503,7 +503,7 @@
   "hamonSkill.scarlet_overdrive.name": "緋色の波紋疾走（スカーレットオーバードライブ）",
   "hamonSkill.scarlet_overdrive.desc": "追加ダメージを与え、対象を炎上させる特殊な波紋。",
   "hamonSkill.metal_silver_overdrive.name": "銀色の波紋疾走（メタルシルバーオーバードライブ）",
-  "hamonSkill.metal_silver_overdrive.desc": "武器や道具を使って波紋攻撃を行うことができるようになる。",
+  "hamonSkill.metal_silver_overdrive.desc": "A special type of Overdrive attack. The more armor the target is wearing, the more Hamon damage it deals.",
   "hamonSkill.hamon_cutter.name": "波紋カッター",
   "hamonSkill.hamon_cutter.desc": "ポーションに波紋を注入し、高速で液体を撃ち出す。波紋のダメージに加えて、ポーションの効果が対象に適用される。",
   "hamonSkill.tornado_overdrive.name": "波紋乱渦疾走（トルネーディオーバードライブ）",

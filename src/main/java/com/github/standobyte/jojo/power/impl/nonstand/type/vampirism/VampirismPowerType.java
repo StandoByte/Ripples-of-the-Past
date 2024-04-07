@@ -178,11 +178,11 @@ public class VampirismPowerType extends NonStandPowerType<VampirismData> {
         }
         if (effect.getCategory() == EffectType.HARMFUL)                     return curingStage >= 4 ? effect == Effects.BLINDNESS ? 0 : 3 - difficulty : -1;
         if (effect == Effects.HEALTH_BOOST)                                 return difficulty * (curingStage > 0 ? 5 - curingStage * 2 : 5) - 1;
-        if (effect == ModStatusEffects.UNDEAD_REGENERATION.get())                 return Math.min(bloodLevel - 2, 4);
-        if (effect == Effects.DAMAGE_BOOST)                                 return bloodLevel - 4;
+        if (effect == ModStatusEffects.UNDEAD_REGENERATION.get())                 return Math.min(bloodLevel - 4, 6);
+        if (effect == Effects.DAMAGE_BOOST)                                 return bloodLevel - 5;
         if (effect == Effects.MOVEMENT_SPEED)                               return bloodLevel - 4;
         if (effect == Effects.DIG_SPEED)                                    return bloodLevel - 4;
-        if (effect == Effects.JUMP)                                         return bloodLevel - 4;
+        if (effect == Effects.JUMP)                                         return bloodLevel - 5;
 //        if (effect == Effects.DAMAGE_RESISTANCE)                            return bloodLevel - 6;
         if (effect == Effects.NIGHT_VISION)                                 return 0;
         return -1;
@@ -230,14 +230,14 @@ public class VampirismPowerType extends NonStandPowerType<VampirismData> {
         VampirismData vampirism = power.getTypeSpecificData(this).get();
         float leapStrength = Math.max(bloodLevel(power), 0);
         if (!vampirism.isVampireAtFullPower()) {
-            leapStrength *= 0.25F;
+            leapStrength *= 0.15F;
         }
-        return leapStrength * 0.4F;
+        return leapStrength * 0.25F;
     }
     
     @Override
     public int getLeapCooldownPeriod() {
-        return 100;
+        return 20;
     }
     
     @Override

@@ -72,30 +72,30 @@ public class VampirismBloodDrain extends VampirismAction {
                             world.getDifficulty().getId()).floatValue();
                     boolean isHuman = false;
                     if (targetEntity instanceof PlayerEntity) {
-                        bloodAndHealModifier *= 7.5F;
+                        bloodAndHealModifier *= 1.5F;
                         isHuman = true;
                     }
                     else if (targetEntity instanceof INPC || targetEntity instanceof AbstractIllagerEntity) {
-                        bloodAndHealModifier *= 5F;
+                        bloodAndHealModifier *= 1F;
                         isHuman = true;
                     }
                     if (INonStandPower.getNonStandPowerOptional(targetEntity).map(
                             p -> p.getType() == ModPowers.HAMON.get()).orElse(false)) {
-                        bloodAndHealModifier *= 4F;
+                        bloodAndHealModifier *= 2F;
                     }
                     EffectInstance freeze = targetEntity.getEffect(ModStatusEffects.FREEZE.get());
                     if (freeze != null) {
                         bloodAndHealModifier *= 1 - Math.min((freeze.getAmplifier() + 1) * 0.2F, 1);
                     }
                     power.addEnergy(bloodAndHealModifier);
-                    if (drainBlood(user, targetEntity, 4)) {
+                    if (drainBlood(user, targetEntity, 1)) {
                         if (power.getTypeSpecificData(ModPowers.VAMPIRISM.get()).map(
                                 vampirism -> vampirism.isBeingCured() && vampirism.getCuringStage() >= 3).orElse(false)) {
                             user.hurt(new DamageSource("curedVampireBlood"), Math.min(bloodAndHealModifier * 0.5F, user.getHealth() - 1));
                         }
                         else {
                             float healed = user.getHealth();
-                            user.heal(bloodAndHealModifier * 0.5F);
+                          //user.heal(bloodAndHealModifier * 0.5F);
                             healed = user.getHealth() - healed;
                             if (healed > 0) {
                                 power.addEnergy(healed * VampirismUtil.healCost(world));
@@ -174,5 +174,10 @@ public class VampirismBloodDrain extends VampirismAction {
     @Override
     protected int maxCuringStage() {
         return 2;
+    }
+    
+    @Override
+    public boolean cancelHeldOnGettingAttacked(INonStandPower power, DamageSource dmgSource, float dmgAmount) {
+        return true;
     }
 }
