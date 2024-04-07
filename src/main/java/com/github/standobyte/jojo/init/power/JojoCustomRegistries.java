@@ -5,6 +5,7 @@ import com.github.standobyte.jojo.action.stand.effect.StandEffectType;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.init.power.non_stand.vampirism.ModVampirismActions;
+import com.github.standobyte.jojo.init.power.non_stand.zombie.ModZombieActions;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
@@ -48,5 +49,6 @@ public class JojoCustomRegistries {
         // otherwise the classes with just RegistryObject instances won't load in time
         ModHamonActions.loadRegistryObjects();
         ModVampirismActions.loadRegistryObjects();
+        ModZombieActions.loadRegistryObjects();
     }
 }

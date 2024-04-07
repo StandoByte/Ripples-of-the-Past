@@ -142,7 +142,8 @@ public class VampirismUtil {
 //                                    JojoModUtil.isPlayerUndead((PlayerEntity) target) &&
                                     INonStandPower.getNonStandPowerOptional(target).map(
                                             power -> power.getTypeSpecificData(ModPowers.VAMPIRISM.get())
-                                            .map(vampirism -> vampirism.getCuringStage() < 3).orElse(false)).orElse(false));
+                                            .map(vampirism -> vampirism.getCuringStage() < 3).orElse(false)).orElse(false)) && 
+                            (INonStandPower.getPlayerNonStandPower((PlayerEntity) target).getType() == ModPowers.ZOMBIE);
                         CommonReflection.setTargetConditions(targetGoal, new EntityPredicate().range(CommonReflection.getTargetDistance(targetGoal)).selector(
                                 oldPredicate != null ? oldPredicate.and(undeadPredicate) : undeadPredicate));
                     }

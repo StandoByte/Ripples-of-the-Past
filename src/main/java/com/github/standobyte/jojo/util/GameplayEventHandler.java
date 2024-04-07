@@ -65,6 +65,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamon
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismUtil;
+import com.github.standobyte.jojo.power.impl.nonstand.type.zombie.ZombiePowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
@@ -887,6 +888,7 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void cancelPotionRemoval(PotionRemoveEvent event) {
         VampirismPowerType.cancelVampiricEffectRemoval(event);
+        ZombiePowerType.cancelZombieEffectRemoval(event);
     }
     
     @SubscribeEvent(priority = EventPriority.LOWEST)
