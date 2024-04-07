@@ -306,17 +306,29 @@ public class ClientUtil {
         }
     }
     
+    private static int latestScissorX;
+    private static int latestScissorY;
+    private static int latestScissorWidth;
+    private static int latestScissorHeight;
     public static void enableGlScissor(float x, float y, float width, float height) {
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
         Minecraft mc = Minecraft.getInstance();
         float guiScale = mc.getWindow().calculateScale(mc.options.guiScale, mc.isEnforceUnicode());
         y = mc.getWindow().getGuiScaledHeight() - y - height;
         
-        GL11.glScissor((int) (x * guiScale), (int) (y * guiScale), (int) (width * guiScale), (int) (height * guiScale));
+        latestScissorX =        (int) (guiScale * x);
+        latestScissorY =        (int) (guiScale * y);
+        latestScissorWidth =    (int) (guiScale * width);
+        latestScissorHeight =   (int) (guiScale * height);
+        GL11.glScissor(latestScissorX, latestScissorY, latestScissorWidth, latestScissorHeight);
     }
     
     public static void disableGlScissor() {
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
+    }
+    
+    public static void reenableGlScissor() {
+        GL11.glScissor(latestScissorX, latestScissorY, latestScissorWidth, latestScissorHeight);
     }
     
     public static String getShortenedTranslationKey(String originalKey) {

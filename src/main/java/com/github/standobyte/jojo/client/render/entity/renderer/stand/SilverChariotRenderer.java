@@ -4,6 +4,7 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.render.entity.model.stand.SilverChariotArmorLayerModel;
 import com.github.standobyte.jojo.client.render.entity.model.stand.SilverChariotModel;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
+import com.github.standobyte.jojo.client.render.entity.model.stand.StandModelRegistry;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.layer.SilverChariotArmorLayer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.layer.SilverChariotRapierFlameLayer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.layer.StandLayerGlowLayer;
@@ -16,12 +17,10 @@ public class SilverChariotRenderer extends StandEntityRenderer<SilverChariotEnti
     
     public SilverChariotRenderer(EntityRendererManager renderManager) {
         super(renderManager, 
-                StandEntityModel.registerModel(new SilverChariotModel(), 
-                        new ResourceLocation(JojoMod.MOD_ID, "silver_chariot"), SilverChariotModel::new), 
+                StandModelRegistry.registerModel(new ResourceLocation(JojoMod.MOD_ID, "silver_chariot"), SilverChariotModel::new), 
                 new ResourceLocation(JojoMod.MOD_ID, "textures/entity/stand/silver_chariot.png"), 0);
         SilverChariotArmorLayer armorLayer = new SilverChariotArmorLayer(this, 
-                StandEntityModel.registerModel(new SilverChariotArmorLayerModel(), 
-                        new ResourceLocation(JojoMod.MOD_ID, "silver_chariot_armor"), SilverChariotArmorLayerModel::new), 
+                StandModelRegistry.registerModel(new ResourceLocation(JojoMod.MOD_ID, "silver_chariot_armor"), SilverChariotArmorLayerModel::new), 
                 new ResourceLocation(JojoMod.MOD_ID, "textures/entity/stand/silver_chariot_armor.png"));
         addLayer(armorLayer);
         addLayer(new StandLayerGlowLayer<>(this, armorLayer));

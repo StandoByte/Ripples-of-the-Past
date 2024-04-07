@@ -21,8 +21,8 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 @EventBusSubscriber(modid = JojoMod.MOD_ID, value = Dist.CLIENT)
-public class SoulController {
-    private static SoulController instance = null;
+public class ControllerSoul {
+    private static ControllerSoul instance = null;
     
     private final Minecraft mc;
     private SoulEntity playerSoulEntity = null;
@@ -30,18 +30,18 @@ public class SoulController {
     private boolean firstDeathFrame = false;
     private boolean soulEntityWaiting = false;
 
-    private SoulController(Minecraft mc) {
+    private ControllerSoul(Minecraft mc) {
         this.mc = mc;
     }
 
     public static void init(Minecraft mc) {
         if (instance == null) {
-            instance = new SoulController(mc);
+            instance = new ControllerSoul(mc);
             MinecraftForge.EVENT_BUS.register(instance);
         }
     }
     
-    public static SoulController getInstance() {
+    public static ControllerSoul getInstance() {
         return instance;
     }
     
@@ -55,6 +55,7 @@ public class SoulController {
                 if (soulEntityWaiting || isCameraEntityPlayerSoul()) {
                     mc.gui.setOverlayMessage(new TranslationTextComponent("jojo.message.skip_soul_ascension", new KeybindTextComponent("key.jump")), false);
                 }
+                mc.player.deathTime = Math.min(mc.player.deathTime, 18);
             }
             else {
                 if (!firstDeathFrame) {
@@ -81,7 +82,7 @@ public class SoulController {
         }
     }
     
-    private boolean isCameraEntityPlayerSoul() {
+    public boolean isCameraEntityPlayerSoul() {
         return playerSoulEntity != null && playerSoulEntity.isAlive() && playerSoulEntity == mc.getCameraEntity() && !mc.player.isSpectator();
     }
     
@@ -103,11 +104,12 @@ public class SoulController {
     public void skipAscension() {
         if (isCameraEntityPlayerSoul()) {
             playerSoulEntity.skipAscension();
+            mc.gui.setOverlayMessage(StringTextComponent.EMPTY, false);
         }
         else if (soulEntityWaiting) {
             soulEntityWaiting = false;
+            mc.gui.setOverlayMessage(StringTextComponent.EMPTY, false);
         }
-        mc.gui.setOverlayMessage(StringTextComponent.EMPTY, false);
     }
     
     public void updateStandCache() {

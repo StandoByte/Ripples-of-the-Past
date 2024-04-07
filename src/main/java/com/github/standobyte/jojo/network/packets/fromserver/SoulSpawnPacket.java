@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.SoulController;
+import com.github.standobyte.jojo.client.ControllerSoul;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
@@ -12,11 +12,11 @@ import net.minecraftforge.fml.network.NetworkEvent;
 
 public class SoulSpawnPacket {
     private final boolean failedSpawnPacket;
-    private final boolean flag2;
+    private final boolean soulWillSpawnFlag;
     
     private SoulSpawnPacket(boolean failedSpawnPacket, boolean flag2) {
         this.failedSpawnPacket = failedSpawnPacket;
-        this.flag2 = flag2;
+        this.soulWillSpawnFlag = flag2;
     }
     
     public static SoulSpawnPacket noSoulSpawned() {
@@ -35,7 +35,7 @@ public class SoulSpawnPacket {
         public void encode(SoulSpawnPacket msg, PacketBuffer buf) {
             byte flags = 0;
             if (msg.failedSpawnPacket) flags  = 1;
-            if (msg.flag2)             flags |= 2;
+            if (msg.soulWillSpawnFlag) flags |= 2;
             buf.writeByte(flags);
         }
 
@@ -47,13 +47,11 @@ public class SoulSpawnPacket {
 
         @Override
         public void handle(SoulSpawnPacket msg, Supplier<NetworkEvent.Context> ctx) {
+            IStandPower.getStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
+                power.clSetSoulSpawnFlag(msg.soulWillSpawnFlag);
+            });
             if (msg.failedSpawnPacket) {
-                SoulController.getInstance().onSoulFailedSpawn();
-            }
-            else {
-                IStandPower.getStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
-                    power.clSetSoulSpawnFlag(msg.flag2);
-                });
+                ControllerSoul.getInstance().onSoulFailedSpawn();
             }
         }
 

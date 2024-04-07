@@ -1,10 +1,13 @@
 package com.github.standobyte.jojo.entity.damaging;
 
+import java.util.Optional;
+
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
@@ -26,12 +29,14 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.entity.projectile.ProjectileHelper;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.scoreboard.Team;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.IndirectEntityDamageSource;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -53,6 +58,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     private LivingEntity livingEntityOwner = null;
     private LazyOptional<IStandPower> userStandPower = LazyOptional.empty();
     private LazyOptional<INonStandPower> userNonStandPower = LazyOptional.empty();
+    private Optional<ResourceLocation> standSkin = Optional.empty();
 
     public DamagingEntity(EntityType<? extends DamagingEntity> entityType, @Nullable LivingEntity owner, World world) {
         this(entityType, world);
@@ -73,6 +79,10 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
         Vector3d pos = getPos(entity, 1.0F, entity.yRot, entity.xRot);
         setPos(pos.x, pos.y, pos.z);
         setRot(entity.yRot, entity.xRot);
+    }
+    
+    public void withStandSkin(Optional<ResourceLocation> standSkin) {
+        this.standSkin = standSkin;
     }
     
     protected final Vector3d getPos(LivingEntity owner, float partialTick, float yRot, float xRot) {
@@ -380,6 +390,10 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
         this.xRot = xRot;
         this.reapplyPosition();
     }
+    
+    public Optional<ResourceLocation> getStandSkin() {
+        return standSkin;
+    }
 
     @Override
     protected void addAdditionalSaveData(CompoundNBT nbt) {
@@ -387,6 +401,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
         nbt.putFloat("DamageFactor", damageFactor);
         nbt.putFloat("SpeedFactor", speedFactor);
         nbt.putInt("Age", tickCount);
+        standSkin.ifPresent(path -> nbt.putString("StandSkin", path.toString()));
     }
 
     @Override
@@ -395,6 +410,9 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
         damageFactor = nbt.getFloat("DamageFactor");
         speedFactor = nbt.getFloat("SpeedFactor");
         tickCount = nbt.getInt("Age");
+        standSkin = MCUtil.getNbtElement(nbt, "StandSkin", StringNBT.class)
+                .map(StringNBT::getAsString)
+                .map(ResourceLocation::new);
     }
 
     @Override
@@ -404,12 +422,14 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     public void writeSpawnData(PacketBuffer buffer) {
         buffer.writeInt(tickCount);
         buffer.writeFloat(speedFactor);
+        NetworkUtil.writeOptional(buffer, standSkin, path -> buffer.writeResourceLocation(path));
     }
 
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
         tickCount = additionalData.readInt();
         speedFactor = additionalData.readFloat();
+        standSkin = NetworkUtil.readOptional(additionalData, () -> additionalData.readResourceLocation());
     }
 
     @Override

@@ -17,7 +17,6 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamon
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterHamonTechnique;
 
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -26,10 +25,15 @@ import net.minecraft.world.World;
 public abstract class HamonAction extends NonStandAction {
     private final Map<Supplier<CharacterHamonTechnique>, Supplier<SoundEvent>> voiceLinesUnregistered;
     private Map<CharacterHamonTechnique, Supplier<SoundEvent>> voiceLines = null;
+    private AbstractHamonSkill unlockingSkill;
     
     public HamonAction(HamonAction.AbstractBuilder<?> builder) {
         super(builder);
         voiceLinesUnregistered = builder.voiceLines;
+    }
+    
+    public void initUnlockingSkill(AbstractHamonSkill skill) {
+        this.unlockingSkill = skill;
     }
     
     @Override
@@ -88,21 +92,14 @@ public abstract class HamonAction extends NonStandAction {
     
     @Override
     public IFormattableTextComponent getNameLocked(INonStandPower power) {
-        AbstractHamonSkill skill = getSkillToUnlock();
+        AbstractHamonSkill skill = getUnlockingSkill();
         return skill != null ? new TranslationTextComponent("jojo.layout_edit.locked.hamon_skill", skill.getNameTranslated())
                 : super.getNameLocked(power);
     }
     
-    private AbstractHamonSkill getSkillToUnlock() {
-        return null;
-    }
-    
-    @Override
-    public void onPerform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
-        super.onPerform(world, user, power, target);
-        if (swingHand() && cancelsVanillaClick() && user instanceof PlayerEntity) {
-            ((PlayerEntity) user).resetAttackStrengthTicker();
-        }
+    @Nullable
+    public AbstractHamonSkill getUnlockingSkill() {
+        return unlockingSkill;
     }
     
     

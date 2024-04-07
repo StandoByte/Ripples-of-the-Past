@@ -70,10 +70,10 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
         @Override
         public B rightClickHotbar(StandAction... rightClickHotbar) {
             if (rightClickHotbar.length > 0) {
-                defaultQuickAccess(rightClickHotbar[0]);
+                defaultMMB(rightClickHotbar[0]);
             }
             else {
-                defaultQuickAccess(null);
+                defaultMMB(null);
             }
             return super.rightClickHotbar(rightClickHotbar);
         }

@@ -5,6 +5,7 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.render.entity.model.stand.MagiciansRedModel;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
+import com.github.standobyte.jojo.client.render.entity.model.stand.StandModelRegistry;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.layer.MagiciansRedFlameLayer;
 import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
 
@@ -22,8 +23,7 @@ public class MagiciansRedRenderer extends StandEntityRenderer<MagiciansRedEntity
 
     public MagiciansRedRenderer(EntityRendererManager renderManager) {
         super(renderManager, 
-                StandEntityModel.registerModel(new MagiciansRedModel(), 
-                        new ResourceLocation(JojoMod.MOD_ID, "magicians_red"), MagiciansRedModel::new), 
+                StandModelRegistry.registerModel(new ResourceLocation(JojoMod.MOD_ID, "magicians_red"), MagiciansRedModel::new), 
                 new ResourceLocation(JojoMod.MOD_ID, "textures/entity/stand/magicians_red.png"), 0);
         addLayer(new MagiciansRedFlameLayer(this));
     }

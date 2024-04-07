@@ -7,7 +7,6 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
-import com.github.standobyte.jojo.network.packets.fromclient.ClActionsLayoutPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClClickActionPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClDoubleShiftPressPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonAbandonButtonPacket;
@@ -36,7 +35,6 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandManual
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandSummonPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClWalkmanControlsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ActionCooldownPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.ActionsLayoutPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ArrowXpLevelsDataPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.BrokenChunkBlocksPacket;
@@ -152,7 +150,6 @@ public class PacketManager {
         packetIndex = 0;
         registerMessage(clientChannel, new ClHasInputPacket.Handler(),                     Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClDoubleShiftPressPacket.Handler(),             Optional.of(NetworkDirection.PLAY_TO_SERVER));
-        registerMessage(clientChannel, new ClActionsLayoutPacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClToggleStandSummonPacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClToggleStandManualControlPacket.Handler(),     Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClClickActionPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_SERVER));
@@ -184,7 +181,6 @@ public class PacketManager {
         registerMessage(serverChannel, new TrTypeNonStandPowerPacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrTypeStandInstancePacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrHeldActionPacket.Handler(),                   Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        registerMessage(serverChannel, new ActionsLayoutPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrEnergyPacket.Handler(),                       Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new ActionCooldownPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new BloodParticlesPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_CLIENT));

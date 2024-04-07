@@ -10,7 +10,6 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_M;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_O;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_UNKNOWN;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_V;
-import static org.lwjgl.glfw.GLFW.GLFW_MOUSE_BUTTON_MIDDLE;
 
 import java.util.HashMap;
 import java.util.List;
@@ -24,15 +23,16 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.glfw.GLFW;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.client.controls.ActionKeybindEntry;
+import com.github.standobyte.jojo.client.controls.ControlScheme;
+import com.github.standobyte.jojo.client.controls.HudControlSettings;
 import com.github.standobyte.jojo.client.standskin.StandSkin;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
-import com.github.standobyte.jojo.client.ui.actionshud.QuickAccess.QuickAccessKeyConflictContext;
-import com.github.standobyte.jojo.client.ui.screen.hudlayout.HudLayoutEditingScreen;
+import com.github.standobyte.jojo.client.ui.screen.controls.HudLayoutEditingScreen;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.ItemProjectileEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -54,11 +54,11 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandManual
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandSummonPacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
+import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
-import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -106,42 +106,30 @@ public class InputHandler {
     
     public RayTraceResult mouseTarget;
 
-    private static final String MAIN_CATEGORY = new String("key.categories." + JojoMod.MOD_ID);
-    private KeyBinding toggleStand;
-    private KeyBinding standRemoteControl;
+    public static final String MAIN_CATEGORY = new String("key.categories." + JojoMod.MOD_ID);
+    public KeyBinding toggleStand;
+    public KeyBinding standRemoteControl;
     public KeyBinding hamonSkillsWindow;
 
-    private static final String HUD_CATEGORY = new String("key.categories." + JojoMod.MOD_ID + ".hud");
+    public static final String HUD_CATEGORY = new String("key.categories." + JojoMod.MOD_ID + ".hud");
     public KeyBinding nonStandMode;
     public KeyBinding standMode;
-    private KeyBinding scrollMode;
+    public KeyBinding scrollMode;
     public KeyBinding editHotbars;
-    public KeyBinding actionQuickAccess;
     public KeyBinding disableHotbars;
     
-    private KeyBinding attackHotbar;
-    private KeyBinding abilityHotbar;
-    private KeyBinding scrollAttack;
-    private KeyBinding scrollAbility;
-    private KeyBinding lockAttackHotbar;
-    private KeyBinding lockAbilityHotbar;
+    public KeyBinding attackHotbar;
+    public KeyBinding abilityHotbar;
+    public KeyBinding scrollAttack;
+    public KeyBinding scrollAbility;
 
-    private static final String HUD_ALTERNATIVE_CATEGORY = new String("key.categories." + JojoMod.MOD_ID + ".hud.alternative");
-    @Nullable
-    private KeyBinding[] attackSlots;
-    @Nullable
-    private KeyBinding deselectAttack;
-    @Nullable
-    private KeyBinding[] abilitySlots;
-    @Nullable
-    private KeyBinding deselectAbility;
+    public static final String HUD_ALTERNATIVE_CATEGORY = new String("key.categories." + JojoMod.MOD_ID + ".hud.alternative");
     
     // it works because the actual map is static, not sure if that's intended or just an implementation detail
     // but hey, i'll take it
-    private KeyBindingMap keyBindingMap = new KeyBindingMap();
+    public final KeyBindingMap keyBindingMap = new KeyBindingMap();
     
     private int leftClickBlockDelay;
-    private int quickAccessMmbDelay;
     
     public boolean hasInput;
     
@@ -177,8 +165,6 @@ public class InputHandler {
         ClientRegistry.registerKeyBinding(nonStandMode = new KeyBinding(JojoMod.MOD_ID + ".key.non_stand_mode", GLFW_KEY_J, HUD_CATEGORY));
         ClientRegistry.registerKeyBinding(standMode = new KeyBinding(JojoMod.MOD_ID + ".key.stand_mode", GLFW_KEY_K, HUD_CATEGORY));
         ClientRegistry.registerKeyBinding(editHotbars = new KeyBinding(JojoMod.MOD_ID + ".key.edit_hud", GLFW_KEY_BACKSLASH, HUD_CATEGORY));
-        ClientRegistry.registerKeyBinding(actionQuickAccess = new KeyBinding(JojoMod.MOD_ID + ".key.quick_access", 
-                QuickAccessKeyConflictContext.INSTANCE, InputMappings.Type.MOUSE, GLFW_MOUSE_BUTTON_MIDDLE, HUD_CATEGORY));
         
         ClientRegistry.registerKeyBinding(attackHotbar = new KeyBinding(JojoMod.MOD_ID + ".key.attack_hotbar", GLFW_KEY_V, HUD_CATEGORY));
         ClientRegistry.registerKeyBinding(abilityHotbar = new KeyBinding(JojoMod.MOD_ID + ".key.ability_hotbar", GLFW_KEY_B, HUD_CATEGORY));
@@ -187,19 +173,6 @@ public class InputHandler {
         ClientRegistry.registerKeyBinding(scrollMode = new KeyBinding(JojoMod.MOD_ID + ".key.scroll_mode", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
         ClientRegistry.registerKeyBinding(scrollAttack = new KeyBinding(JojoMod.MOD_ID + ".key.scroll_attack", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
         ClientRegistry.registerKeyBinding(scrollAbility = new KeyBinding(JojoMod.MOD_ID + ".key.scroll_ability", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
-        ClientRegistry.registerKeyBinding(lockAttackHotbar = new KeyBinding(JojoMod.MOD_ID + ".key.lock_attack", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
-        ClientRegistry.registerKeyBinding(lockAbilityHotbar = new KeyBinding(JojoMod.MOD_ID + ".key.lock_ability", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
-        
-        if (JojoModConfig.CLIENT.actionSlotHotkeys.get()) {
-            attackSlots = new KeyBinding[9];
-            abilitySlots = new KeyBinding[9];
-            for (int i = 0; i < 9; i++) {
-                ClientRegistry.registerKeyBinding(attackSlots[i] = new KeyBinding(JojoMod.MOD_ID + ".key.attack_" + (i + 1), GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
-                ClientRegistry.registerKeyBinding(abilitySlots[i] = new KeyBinding(JojoMod.MOD_ID + ".key.ability_" + (i + 1), GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
-            }
-            ClientRegistry.registerKeyBinding(deselectAttack = new KeyBinding(JojoMod.MOD_ID + ".key.deselect_attack", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
-            ClientRegistry.registerKeyBinding(deselectAbility = new KeyBinding(JojoMod.MOD_ID + ".key.deselect_ability", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
-        }
     }
     
     @SubscribeEvent(priority = EventPriority.HIGH)
@@ -209,14 +182,14 @@ public class InputHandler {
         }
 
         if (actionsOverlay.isActive() && !mc.player.isSpectator()) {
-            boolean scrollAttack = attackHotbar.isDown() || areControlsLockedForHotbar(ActionsLayout.Hotbar.LEFT_CLICK);
-            boolean scrollAbility = abilityHotbar.isDown() || areControlsLockedForHotbar(ActionsLayout.Hotbar.RIGHT_CLICK);
+            boolean scrollAttack = controlsAreOnHotbar(ControlScheme.Hotbar.LEFT_CLICK);
+            boolean scrollAbility = controlsAreOnHotbar(ControlScheme.Hotbar.RIGHT_CLICK);
             if (scrollAttack || scrollAbility) {
                 if (scrollAttack) {
-                    actionsOverlay.scrollAction(ActionsLayout.Hotbar.LEFT_CLICK, event.getScrollDelta() > 0.0D);
+                    actionsOverlay.scrollAction(ControlScheme.Hotbar.LEFT_CLICK, event.getScrollDelta() > 0.0D);
                 }
                 if (scrollAbility) {
-                    actionsOverlay.scrollAction(ActionsLayout.Hotbar.RIGHT_CLICK, event.getScrollDelta() > 0.0D);
+                    actionsOverlay.scrollAction(ControlScheme.Hotbar.RIGHT_CLICK, event.getScrollDelta() > 0.0D);
                 }
                 event.setCanceled(true);
             }
@@ -225,79 +198,77 @@ public class InputHandler {
     
     @SubscribeEvent
     public void handleKeyBindings(ClientTickEvent event) {
-        if (mc.overlay != null || (mc.screen != null && !mc.screen.passEvents) || mc.level == null || standPower == null || nonStandPower == null || actionsOverlay == null || mc.player.isSpectator()) {
+        if (mc.overlay != null || (mc.screen != null && !mc.screen.passEvents)
+                || mc.level == null || standPower == null || nonStandPower == null
+                || actionsOverlay == null || mc.player.isSpectator()) {
             return;
         }
         
         if (event.phase == TickEvent.Phase.START) {
             if (actionsOverlay.isActive()) {
-                boolean chooseAttack = attackHotbar.isDown() || areControlsLockedForHotbar(ActionsLayout.Hotbar.LEFT_CLICK);
-                boolean chooseAbility = abilityHotbar.isDown() || areControlsLockedForHotbar(ActionsLayout.Hotbar.RIGHT_CLICK);
+                boolean chooseAttack = controlsAreOnHotbar(ControlScheme.Hotbar.LEFT_CLICK);
+                boolean chooseAbility = controlsAreOnHotbar(ControlScheme.Hotbar.RIGHT_CLICK);
                 actionsOverlay.setHotbarButtonsDows(chooseAttack, chooseAbility);
-                actionsOverlay.setHotbarsEnabled(!disableHotbars.isDown());
+                actionsOverlay.setHotbarsEnabled(!areHotbarsDisabled());
                 if (chooseAttack || chooseAbility) {
                     for (int i = 0; i < 9; i++) {
                         if (mc.options.keyHotbarSlots[i].consumeClick()) {
                             if (chooseAttack) {
-                                actionsOverlay.selectAction(ActionsLayout.Hotbar.LEFT_CLICK, i);
+                                actionsOverlay.selectAction(ControlScheme.Hotbar.LEFT_CLICK, i);
                             }
                             if (chooseAbility) {
-                                actionsOverlay.selectAction(ActionsLayout.Hotbar.RIGHT_CLICK, i);
+                                actionsOverlay.selectAction(ControlScheme.Hotbar.RIGHT_CLICK, i);
                             }
                         }
                     }
                 }
-                else {
-                    if (attackSlots != null) {
-                        for (int i = 0; i < 9; i++) {
-                            if (attackSlots[i].consumeClick()) {
-                                actionsOverlay.selectAction(ActionsLayout.Hotbar.LEFT_CLICK, i);
-                            }
-                        }
-                    }
-                    if (abilitySlots != null) {
-                        for (int i = 0; i < 9; i++) {
-                            if (abilitySlots[i].consumeClick()) {
-                                actionsOverlay.selectAction(ActionsLayout.Hotbar.RIGHT_CLICK, i);
-                            }
-                        }
-                    }
-                }
+//                else {
+//                    if (attackSlots != null) {
+//                        for (int i = 0; i < 9; i++) {
+//                            if (attackSlots[i].consumeClick()) {
+//                                actionsOverlay.selectAction(ControlScheme.Hotbar.LEFT_CLICK, i);
+//                            }
+//                        }
+//                    }
+//                    if (abilitySlots != null) {
+//                        for (int i = 0; i < 9; i++) {
+//                            if (abilitySlots[i].consumeClick()) {
+//                                actionsOverlay.selectAction(ControlScheme.Hotbar.RIGHT_CLICK, i);
+//                            }
+//                        }
+//                    }
+//                }
                 
                 if (scrollAttack.consumeClick()) {
-                    actionsOverlay.scrollAction(ActionsLayout.Hotbar.LEFT_CLICK, mc.player.isShiftKeyDown());
+                    actionsOverlay.scrollAction(ControlScheme.Hotbar.LEFT_CLICK, mc.player.isShiftKeyDown());
                 }
                 
                 if (scrollAbility.consumeClick()) {
-                    actionsOverlay.scrollAction(ActionsLayout.Hotbar.RIGHT_CLICK, mc.player.isShiftKeyDown());
+                    actionsOverlay.scrollAction(ControlScheme.Hotbar.RIGHT_CLICK, mc.player.isShiftKeyDown());
                 }
                 
-                if (lockAttackHotbar.consumeClick()) {
-                    switchLockedHotbarControls(ActionsLayout.Hotbar.LEFT_CLICK);
+                if (ClientModSettings.getSettingsReadOnly().toggleLmbHotbar && attackHotbar.consumeClick()) {
+                    switchToggledHotbarControls(ControlScheme.Hotbar.LEFT_CLICK);
+                }
+
+                if (ClientModSettings.getSettingsReadOnly().toggleRmbHotbar && abilityHotbar.consumeClick()) {
+                    switchToggledHotbarControls(ControlScheme.Hotbar.RIGHT_CLICK);
                 }
                 
-                if (lockAbilityHotbar.consumeClick()) {
-                    switchLockedHotbarControls(ActionsLayout.Hotbar.RIGHT_CLICK);
-                }
-                
-                if (actionQuickAccess.isDown() && quickAccessMmbDelay <= 0
-                        && !mc.player.isSpectator() && !disableHotbars.isDown()) {
-                    HudClickResult result = handleMouseClickPowerHud(ActionKey.QUICK_ACCESS, actionQuickAccess);
-                    if (result.vanillaInput == HudClickResult.Behavior.CANCEL) {
-                        KeyBinding keybinding = keyBindingMap.lookupActive(actionQuickAccess.getKey());
-                        if (keybinding != null) {
-                            while (keybinding.consumeClick());
-                        }
-                    }
-                    if (result.handSwing == HudClickResult.Behavior.FORCE) {
-                        mc.player.swing(Hand.MAIN_HAND);
-                    }
-                    quickAccessMmbDelay = 4;
+                if (ClientModSettings.getSettingsReadOnly().toggleDisableHotbars && disableHotbars.consumeClick()) {
+                    setToggleHotbarsDisabled(!toggledHotbarsDisabled);
                 }
             }
             
+            if (nonStandPower.hasPower()) {
+                tickCustomKeybinds(nonStandPower, actionsOverlay.getCurrentMode() == PowerClassification.NON_STAND);
+            }
+            if (standPower.hasPower()) {
+                tickCustomKeybinds(standPower, actionsOverlay.getCurrentMode() == PowerClassification.STAND);
+            }
+            
             if (mc.options.keyJump.isDown()) {
-                SoulController.getInstance().skipAscension();
+                ControllerSoul.getInstance().skipAscension();
             }
             tickEffects();
             clickWithBusyHands();
@@ -307,9 +278,6 @@ public class InputHandler {
             
             if (leftClickBlockDelay > 0) {
                 leftClickBlockDelay--;
-            }
-            if (quickAccessMmbDelay > 0) {
-                quickAccessMmbDelay--;
             }
             
             if (standMode.consumeClick()) {
@@ -392,9 +360,6 @@ public class InputHandler {
             if (!mc.options.keyAttack.isDown()) {
                 leftClickBlockDelay = 0;
             }
-            if (!actionQuickAccess.isDown()) {
-                quickAccessMmbDelay = 0;
-            }
             
             checkHeldActionAndTarget(standPower, targetChanged);
             checkHeldActionAndTarget(nonStandPower, targetChanged);
@@ -405,35 +370,135 @@ public class InputHandler {
         }
     }
     
-    
-    public void switchLockedHotbarControls(ActionsLayout.Hotbar hotbar) {
-        setLockedHotbarControls(hotbar, !areControlsLockedForHotbar(hotbar));
+    private <P extends IPower<P, T>, T extends IPowerType<P, T>> void tickCustomKeybinds(P power, boolean isHudOpen) {
+        for (ActionKeybindEntry keybindEntry : HudControlSettings.getInstance()
+                .getControlScheme(power)
+                .getCustomKeybinds()) {
+            KeyBinding keybind = keybindEntry.getKeybind();
+            boolean needsOpenHud = true;
+            
+            if (keybind.isDown() && keybindEntry.delay <= 0 && 
+                    (!needsOpenHud || isHudOpen && !areHotbarsDisabled())) {
+                HudClickResult result = handleCustomKeybind(keybindEntry.getAction(), keybind);
+                if (result.vanillaInput == HudClickResult.Behavior.CANCEL) {
+                    KeyBinding keybinding = keyBindingMap.lookupActive(keybind.getKey());
+                    if (keybinding != null) {
+                        while (keybinding.consumeClick());
+                    }
+                }
+                if (result.handSwing == HudClickResult.Behavior.FORCE) {
+                    mc.player.swing(Hand.MAIN_HAND);
+                }
+                keybindEntry.delay = 4;
+            }
+            
+            if (!keybind.isDown()) {
+                keybindEntry.delay = 0;
+            }
+            else if (keybindEntry.delay > 0) {
+                --keybindEntry.delay;
+            }
+        }
     }
     
-    private void setLockedHotbarControls(ActionsLayout.Hotbar hotbar, boolean value) {
+    
+    public void switchToggledHotbarControls(ControlScheme.Hotbar hotbar) {
+        setToggledHotbarControls(hotbar, !areControlsLockedForHotbar(hotbar));
+    }
+    
+    public void setToggledHotbarControls(ControlScheme.Hotbar hotbar, boolean value) {
         switch (hotbar) {
         case LEFT_CLICK:
-            lockedAttacksHotbar = value;
-            if (value) lockedAbilitiesHotbar = false;
+            toggledAttacksHotbar = value;
+            if (value) toggledAbilitiesHotbar = false;
             break;
         case RIGHT_CLICK:
-            if (value) lockedAttacksHotbar = false;
-            lockedAbilitiesHotbar = value;
+            if (value) toggledAttacksHotbar = false;
+            toggledAbilitiesHotbar = value;
             break;
         }
     }
     
-    private boolean lockedAttacksHotbar;
-    private boolean lockedAbilitiesHotbar;
-    public boolean areControlsLockedForHotbar(ActionsLayout.Hotbar hotbar) {
+    private boolean toggledAttacksHotbar;
+    private boolean toggledAbilitiesHotbar;
+    public boolean areControlsLockedForHotbar(ControlScheme.Hotbar hotbar) {
         if (hotbar == null) return false;
         switch (hotbar) {
         case LEFT_CLICK:
-            return lockedAttacksHotbar;
+            return toggledAttacksHotbar;
         case RIGHT_CLICK:
-            return lockedAbilitiesHotbar;
+            return toggledAbilitiesHotbar;
         }
         return false;
+    }
+    
+    private HotbarInterceptingBy controlsOnLmbHotbar = HotbarInterceptingBy.NONE;
+    private HotbarInterceptingBy controlsOnRmbHotbar = HotbarInterceptingBy.NONE;
+    private enum HotbarInterceptingBy {
+        HOLD,
+        TOGGLE,
+        NONE
+    }
+    
+    private void updateHotbarsControlsState() {
+        if (ClientModSettings.getSettingsReadOnly().toggleLmbHotbar) {
+            controlsOnLmbHotbar = toggledAttacksHotbar ? HotbarInterceptingBy.TOGGLE : HotbarInterceptingBy.NONE;
+        }
+        else {
+            controlsOnLmbHotbar = attackHotbar.isDown() ? HotbarInterceptingBy.HOLD : HotbarInterceptingBy.NONE;
+        }
+        
+        
+        if (ClientModSettings.getSettingsReadOnly().toggleRmbHotbar) {
+            controlsOnRmbHotbar = toggledAbilitiesHotbar ? HotbarInterceptingBy.TOGGLE : HotbarInterceptingBy.NONE;
+        }
+        else {
+            controlsOnRmbHotbar = abilityHotbar.isDown() ? HotbarInterceptingBy.HOLD : HotbarInterceptingBy.NONE;
+        }
+    }
+    
+    private boolean controlsAreOnHotbar(ControlScheme.Hotbar hotbar) {
+        updateHotbarsControlsState();
+        HotbarInterceptingBy askedHotbar;
+        HotbarInterceptingBy otherHotbar;
+        switch (hotbar) {
+        case LEFT_CLICK:
+            askedHotbar = controlsOnLmbHotbar;
+            otherHotbar = controlsOnRmbHotbar;
+            break;
+        case RIGHT_CLICK:
+            askedHotbar = controlsOnRmbHotbar;
+            otherHotbar = controlsOnLmbHotbar;
+            break;
+        default:
+            return false;
+        }
+        
+        switch (askedHotbar) {
+        case NONE:
+            return false;
+        case TOGGLE:
+            return otherHotbar != HotbarInterceptingBy.HOLD;
+        case HOLD:
+            return true;
+        default:
+            return false;
+        }
+    }
+    
+    
+    private boolean toggledHotbarsDisabled = false;
+    private boolean areHotbarsDisabled() {
+        if (ClientModSettings.getSettingsReadOnly().toggleDisableHotbars) {
+            return toggledHotbarsDisabled;
+        }
+        else {
+            return disableHotbars.isDown();
+        }
+    }
+    
+    public void setToggleHotbarsDisabled(boolean value) {
+        this.toggledHotbarsDisabled = value;
     }
     
     
@@ -465,32 +530,28 @@ public class InputHandler {
         return false;
     }
     
-    private final Map<IPower<?, ?>, ActionKey> heldKeys = new HashMap<>();
+    private final Map<IPower<?, ?>, KeyBinding> heldKeys = new HashMap<>();
     
     public enum ActionKey {
-        ATTACK(ActionsLayout.Hotbar.LEFT_CLICK) {
+        ATTACK(ControlScheme.Hotbar.LEFT_CLICK) {
             @Override
             protected KeyBinding getKey(Minecraft mc, InputHandler modInput) { return mc.options.keyAttack; }
         },
-        ABILITY(ActionsLayout.Hotbar.RIGHT_CLICK) {
+        ABILITY(ControlScheme.Hotbar.RIGHT_CLICK) {
             @Override
             protected KeyBinding getKey(Minecraft mc, InputHandler modInput) { return mc.options.keyUse; }
-        },
-        QUICK_ACCESS(null) {
-            @Override
-            protected KeyBinding getKey(Minecraft mc, InputHandler modInput) { return modInput.actionQuickAccess; }
         };
         
-        private final ActionsLayout.Hotbar hotbar;
+        private final ControlScheme.Hotbar hotbar;
         
-        private ActionKey(ActionsLayout.Hotbar hotbar) {
+        private ActionKey(ControlScheme.Hotbar hotbar) {
             this.hotbar = hotbar;
         }
         
         protected abstract KeyBinding getKey(Minecraft mc, InputHandler modInput);
         
         @Nullable
-        public ActionsLayout.Hotbar getHotbar() {
+        public ControlScheme.Hotbar getHotbar() {
             return hotbar;
         }
     }
@@ -498,7 +559,7 @@ public class InputHandler {
     private void checkHeldActionAndTarget(IPower<?, ?> power, boolean targetChanged) {
         boolean keyHeld;
         if (heldKeys.containsKey(power)) {
-            keyHeld = heldKeys.get(power).getKey(mc, this).isDown();
+            keyHeld = heldKeys.get(power).isDown();
             if (!keyHeld) {
                 heldKeys.remove(power);
             }
@@ -525,7 +586,11 @@ public class InputHandler {
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void cancelClickInput(ClickInputEvent event) {
-        if (nonStandPower != null) {
+        if (ControllerSoul.getInstance().isCameraEntityPlayerSoul()) {
+            event.setCanceled(true);
+            event.setSwingHand(false);
+        }
+        else if (nonStandPower != null) {
             nonStandPower.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                 if (hamon.isMeditating()) {
                     event.setCanceled(true);
@@ -539,7 +604,7 @@ public class InputHandler {
     public void modActionClick(ClickInputEvent event) {
         doubleShift.reset();
         
-        if (mc.player.isSpectator() || event.getHand() == Hand.OFF_HAND || disableHotbars.isDown()) {
+        if (mc.player.isSpectator() || event.getHand() == Hand.OFF_HAND || areHotbarsDisabled()) {
             return;
         }
 
@@ -577,6 +642,56 @@ public class InputHandler {
         }
     }
     
+    private <P extends IPower<P, ?>> HudClickResult handleCustomKeybind(Action<P> action, KeyBinding keyBinding) {
+        HudClickResult result = new HudClickResult();
+        if (action == null) return result;
+        P power = (P) actionsOverlay.getCurrentPower();
+
+        if (power != null) {
+            boolean leftClickedBlock = false;
+            boolean sneak = mc.player.isShiftKeyDown();
+            boolean shiftActionVar = useShiftActionVariant(mc);
+            action = ActionsOverlayGui.resolveVisibleActionInSlot(
+                    action, shiftActionVar, power, ActionsOverlayGui.getInstance().getMouseTarget());
+            
+            Pair<Action<P>, Boolean> click = actionsOverlay.onActionClick(power, action, sneak);
+            if (click != null && click.getRight()) {
+                if (action != null) {
+                    result.handSwing = action.getHoldDurationMax(power) <= 0 && action.swingHand()
+                            ? HudClickResult.Behavior.FORCE : HudClickResult.Behavior.CANCEL;
+                    result.cancelVanillaInput();
+                    if (action.withUserPunch()) {
+                        mcPlayerAttack();
+                    }
+                }
+                if (action.getHoldDurationMax(power) > 0) {
+                    heldKeys.put(power, keyBinding);
+                }
+                if (leftClickedBlock && leftClickBlockDelay <= 0) {
+                    leftClickBlockDelay = 4;
+                }
+            }
+            else {
+                if (heldKeys.get(power) == keyBinding) {
+                    result.cancelHandSwing();
+                    result.cancelVanillaInput();
+                }
+                else if (shouldVanillaInputStun()) {
+                    result.cancelHandSwing();
+                }
+            }
+            actionsOverlay.setCustomKeybindAction(power.getPowerClassification(), action);
+        }
+        
+        return result;
+    }
+    
+    private void mcPlayerAttack() {
+        if (mc.hitResult != null && !mc.player.isHandsBusy() && mc.hitResult.getType() == RayTraceResult.Type.ENTITY) {
+            mc.gameMode.attack(mc.player, ((EntityRayTraceResult) mc.hitResult).getEntity());
+        }
+    }
+    
     private <P extends IPower<P, ?>> HudClickResult handleMouseClickPowerHud(ActionKey key, KeyBinding keyBinding) {
         HudClickResult result = new HudClickResult();
         if (!actionsOverlay.areHotbarsEnabled() || mc.player.isSpectator()) {
@@ -585,15 +700,10 @@ public class InputHandler {
 
         P power = (P) actionsOverlay.getCurrentPower();
 
-        ActionsLayout.Hotbar actionType = key.getHotbar();
+        ControlScheme.Hotbar hotbar = key.getHotbar();
         boolean actionClick = false;
         if (power != null) {
-            if (key == ActionKey.QUICK_ACCESS) {
-                actionClick = actionsOverlay.isQuickAccessActive();
-            }
-            else {
-                actionClick = !actionsOverlay.noActionSelected(actionType);
-            }
+            actionClick = !actionsOverlay.noActionSelected(hotbar);
         }
         
         if (!actionClick) {
@@ -616,27 +726,27 @@ public class InputHandler {
             boolean shiftActionVar = useShiftActionVariant(mc);
             
             Pair<Action<P>, Boolean> click = null;
-            if (key == ActionKey.QUICK_ACCESS) {
-                click = actionsOverlay.onQuickAccessClick(power, shiftActionVar, sneak);
-            }
-            else if (!(leftClickedBlock && leftClickBlockDelay > 0)) {
+//            if (key == ActionKey.QUICK_ACCESS) {
+//                click = actionsOverlay.onQuickAccessClick(power, shiftActionVar, sneak);
+//            } else 
+            if (!(leftClickedBlock && leftClickBlockDelay > 0)) {
                 click = actionsOverlay.onClick(power, key.getHotbar(), shiftActionVar, sneak);
             }
             if (click != null && click.getRight()) {
                 Action<P> action = click.getLeft();
                 if (action != null) {
                     result.handSwing = action.getHoldDurationMax(power) <= 0 && action.swingHand() ? HudClickResult.Behavior.FORCE : HudClickResult.Behavior.CANCEL;
-                    if (action.cancelsVanillaClick()) result.cancelVanillaInput();
+                    if (!(action.withUserPunch() && key == ActionKey.ATTACK)) result.cancelVanillaInput();
                 }
                 if (action.getHoldDurationMax(power) > 0) {
-                    heldKeys.put(power, key);
+                    heldKeys.put(power, key.getKey(mc, this));
                 }
                 if (leftClickedBlock && leftClickBlockDelay <= 0) {
                     leftClickBlockDelay = 4;
                 }
             }
             else {
-                if (heldKeys.get(power) == key) {
+                if (heldKeys.get(power) == key.getKey(mc, this)) {
                     result.cancelHandSwing();
                     result.cancelVanillaInput();
                 }
@@ -964,6 +1074,8 @@ public class InputHandler {
     public void updatePowersCache() {
         standPower = IStandPower.getPlayerStandPower(mc.player);
         nonStandPower = INonStandPower.getPlayerNonStandPower(mc.player);
+        if (standPower != null) standPower.clUpdateHud();
+        if (nonStandPower != null) nonStandPower.clUpdateHud();
         heldKeys.clear();
     }
     

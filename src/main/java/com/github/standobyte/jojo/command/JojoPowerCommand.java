@@ -25,13 +25,15 @@ public class JojoPowerCommand {
     private static final DynamicCommandExceptionType QUERY_MULTIPLE_FAILED_EXCEPTION = new DynamicCommandExceptionType(
             count -> new TranslationTextComponent("commands.non_stand.query.failed.multiple", count));
 
-    public static void register(CommandDispatcher<CommandSource> dispatcher) { // TODO use the registry
+    public static void register(CommandDispatcher<CommandSource> dispatcher) {
         dispatcher.register(Commands.literal("jojopower").requires(ctx -> ctx.hasPermission(2))
                 .then(Commands.literal("give").then(Commands.argument("targets", EntityArgument.players())
+
                         .then(Commands.literal("hamon").executes(ctx -> giveNonStandPowers(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), ModPowers.HAMON.get())))
                         .then(Commands.literal("vampirism").executes(ctx -> giveNonStandPowers(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), ModPowers.VAMPIRISM.get())))
                         .then(Commands.literal("zombie").executes(ctx -> giveNonStandPowers(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), ModPowers.ZOMBIE.get())))
-                		))
+                        .then(Commands.argument("type", new NonStandTypeArgument())
+                                .executes(ctx -> giveNonStandPowers(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), NonStandTypeArgument.getPowerType(ctx, "type"))))))
                 .then(Commands.literal("clear").then(Commands.argument("targets", EntityArgument.players())
                         .executes(ctx -> removeNonStandPowers(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets")))))
                 );
