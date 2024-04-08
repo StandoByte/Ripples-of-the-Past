@@ -404,6 +404,7 @@ public class ChooseLifeformGridScreen extends WasdAllowingScreen {
             String height = SIZE_FORMAT.format(entity.getBbHeight());
             double strength = GoldExperienceCreateLifeform.getAttackStrength(entity);
             int creationTicks = GoldExperienceCreateLifeform.getTicksToCreate(minecraft.player, ClientUtil.getStandPowerClCached(), entity);
+            boolean isCorrectBiome = GoldExperienceCreateLifeform.correctBiome(entity, minecraft.level, minecraft.player.blockPosition());
             String creationSecs = String.format("%.2f", (float) creationTicks / 20F);
             
             entityTypeInfo.add(new MultiTooltipLine(
@@ -416,7 +417,8 @@ public class ChooseLifeformGridScreen extends WasdAllowingScreen {
             }
             entityTypeInfo.add(new MultiTooltipLine(
                     new IconTooltipLine(IconTooltipLine.Icon.TIME),
-                    new TextTooltipLine(new TranslationTextComponent("gold_experience.lifeform_time", creationSecs))));
+                    new TextTooltipLine(new TranslationTextComponent("gold_experience.lifeform_time", creationSecs)
+                            .withStyle(isCorrectBiome ? TextFormatting.GREEN : TextFormatting.WHITE))));
             
 //            entityTypeInfo.add(new TextTooltipLine(new StringTextComponent(String.valueOf(GoldExperienceCreateLifeform.getVolume(entity)))));
             

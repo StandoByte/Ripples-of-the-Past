@@ -56,6 +56,7 @@ import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
+import net.minecraft.world.biome.Biome;
 import net.minecraft.world.server.ServerWorld;
 
 public class GoldExperienceCreateLifeform extends StandAction {
@@ -349,8 +350,18 @@ public class GoldExperienceCreateLifeform extends StandAction {
             standSpeed = stats.getBaseAttackSpeed() + stats.getDevAttackSpeed(power.getStatsDevelopment());
         }
         
-        return (int) (240 / Math.max(standSpeed, 1)
-                + MathHelper.ceil(volume * (1 + entityStrength * 0.125) * MathHelper.clamp(100 - standSpeed * 2, 0, 100)));
+        double value = 240 / Math.max(standSpeed, 1)
+                + MathHelper.ceil(volume * (1 + entityStrength * 0.125) * MathHelper.clamp(100 - standSpeed * 2, 0, 100));
+        if (correctBiome(targetEntity, user.level, user.blockPosition())) {
+            value *= 0.6;
+        }
+        return (int) value;
+    }
+    
+    public static boolean correctBiome(Entity mobInstance, World world, BlockPos pos) {
+        Biome biome = world.getBiome(pos);
+        return biome.getMobSettings().getMobs(mobInstance.getClassification(false))
+                .stream().anyMatch(spawners -> spawners.type == mobInstance.getType());
     }
     
     public float getStaminaCostTicking(IStandPower stand, Entity lifeform) {
