@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.util.mc.EntityOwnerResolver;
 import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 
 import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.block.Block;
@@ -29,7 +30,9 @@ import net.minecraft.entity.Pose;
 import net.minecraft.entity.item.BoatEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.item.TNTEntity;
+import net.minecraft.entity.passive.FoxEntity;
 import net.minecraft.entity.projectile.PotionEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -397,6 +400,17 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             tf.moveTo(pos.x, pos.y, pos.z, entity.yRot, entity.xRot);
             entity.level.addFreshEntity(tf);
             
+            if (entity instanceof LivingEntity) {
+                LivingEntity living = (LivingEntity) entity;
+                CommonReflection.dropEquipment(living);
+                if (living instanceof FoxEntity) { // i'm pretty sure this is also supposed to be in dropEquipment, and not in dropAllDeathLoot
+                    ItemStack itemstack = living.getItemBySlot(EquipmentSlotType.MAINHAND);
+                    if (!itemstack.isEmpty()) {
+                        living.spawnAtLocation(itemstack);
+                        living.setItemSlot(EquipmentSlotType.MAINHAND, ItemStack.EMPTY);
+                    }
+                }
+            }
             entity.remove();
         }
     }

@@ -237,6 +237,13 @@ public class CommonReflection {
     
     
     
+    private static final Method LIVING_ENTITY_DROP_EQUIPMENT = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "func_213337_cE");
+    public static void dropEquipment(LivingEntity entity) {
+        ReflectionUtil.invokeMethod(LIVING_ENTITY_DROP_EQUIPMENT, entity);
+    }
+    
+    
+    
     private static final Method ZOMBIE_VILLAGER_ENTITY_START_CONVERTING = ObfuscationReflectionHelper.findMethod(ZombieVillagerEntity.class, "func_191991_a", UUID.class, int.class);
     public static void startConverting(ZombieVillagerEntity entity, @Nullable UUID conversionStarter, int villagerConversionTime) {
         ReflectionUtil.invokeMethod(ZOMBIE_VILLAGER_ENTITY_START_CONVERTING, entity, 
