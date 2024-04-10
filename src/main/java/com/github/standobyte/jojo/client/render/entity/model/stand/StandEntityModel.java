@@ -43,6 +43,7 @@ import net.minecraft.util.math.MathHelper;
 
 public abstract class StandEntityModel<T extends StandEntity> extends AgeableModel<T> implements IHasArm {
     ResourceLocation modelId = null;
+    private Map<String, ModelRenderer> namedModelParts = new HashMap<>();
     
     protected VisibilityMode visibilityMode = VisibilityMode.ALL;
     protected float yRotRad;

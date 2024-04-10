@@ -464,6 +464,24 @@ public class ClientUtil {
         modelRenderer.yRot = y;
         modelRenderer.zRot = z;
     }
+    
+    public static void translateModelPart(ModelRenderer modelRenderer, Vector3f tlVec) {
+        modelRenderer.x += tlVec.x();
+        modelRenderer.y += tlVec.z();
+        modelRenderer.z += tlVec.y();
+    }
+    
+    public static void rotateModelPart(ModelRenderer modelRenderer, Vector3f rotVec) {
+        modelRenderer.xRot += rotVec.x();
+        modelRenderer.yRot += rotVec.z();
+        modelRenderer.zRot += rotVec.y();
+    }
+    
+    /**
+     * Placeholder - 1.16's ModelRenderers do not have scale fields
+     */
+    public static void scaleModelPart(ModelRenderer modelRenderer, Vector3f scaleVec) {
+    }
 
     public static void setRotationAngleDegrees(ModelRenderer modelRenderer, float x, float y, float z) {
         setRotationAngle(modelRenderer, x * MathUtil.DEG_TO_RAD, y * MathUtil.DEG_TO_RAD, z * MathUtil.DEG_TO_RAD);
