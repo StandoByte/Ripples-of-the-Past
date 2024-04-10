@@ -4,6 +4,7 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectType;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
+import com.github.standobyte.jojo.init.power.non_stand.pillarman.ModPillarmanActions;
 import com.github.standobyte.jojo.init.power.non_stand.vampirism.ModVampirismActions;
 import com.github.standobyte.jojo.init.power.non_stand.zombie.ModZombieActions;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
@@ -50,5 +51,6 @@ public class JojoCustomRegistries {
         ModHamonActions.loadRegistryObjects();
         ModVampirismActions.loadRegistryObjects();
         ModZombieActions.loadRegistryObjects();
+        ModPillarmanActions.loadRegistryObjects();
     }
 }

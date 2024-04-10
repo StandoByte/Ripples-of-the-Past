@@ -44,6 +44,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData.Exercise;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.zombie.ZombiePowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
@@ -368,6 +369,9 @@ public class ActionsOverlayGui extends AbstractGui {
             }
             else if (power.getType() == ModPowers.ZOMBIE.get()) {
                 return ZombiePowerType.COLOR;
+            }
+            else if (power.getType() == ModPowers.PILLAR_MAN.get()) {
+                return PillarmanPowerType.COLOR;
             }
             else {
                 return -1;

@@ -444,6 +444,7 @@
   "jojo.message.action_condition.no_energy_hamon": "Your breath has not yet stabilized",
   "jojo.message.action_condition.no_energy_vampirism": "You are too hungry",
   "jojo.message.action_condition.no_energy_zombie": "You are too hungry",
+  "jojo.message.action_condition.no_energy_pillarman": "You are exhausted",
   "jojo.message.action_condition.not_unlocked": "You haven't unlocked this",
   "jojo.message.action_condition.target_too_far": "The target is too far",
   "jojo.message.action_condition.stun": "You are stunned",
@@ -478,6 +479,7 @@
   "jojo.message.action_condition.soap": "You need soap to perform that",
   "jojo.message.action_condition.gloves_no_soap": "Your soap gloves are empty",
   "jojo.message.action_condition.disguise": "You cannot use it in disguise",
+  "jojo.message.action_condition.stone_form": "You cannot use it in stone form",
   
   "multiplayer.disconnect.invalid_stand_movement": "Invalid move Stand packet received",
   
@@ -933,6 +935,10 @@
   "action.jojo.zombie_claw_lacerate": "Claw Lacerate",
   "action.jojo.zombie_devour": "Devour",
   "action.jojo.zombie_disguise": "Disguise",
+  
+  "non_stand.jojo.pillarman": "Pillar man",
+  "action.jojo.pillarman_heavy_punch": "Heavy Blow",
+  "action.jojo.pillarman_stone_form": "Turn to stone",
   
   "jojo.subtitle.stand_summon": "Stand summoned",
   "jojo.subtitle.stand_unsummon": "Stand unsummoned",

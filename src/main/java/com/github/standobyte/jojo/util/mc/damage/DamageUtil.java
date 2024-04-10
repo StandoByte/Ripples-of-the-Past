@@ -165,6 +165,15 @@ public class DamageUtil {
             if (!undeadTarget) {
                 amount *= 0.2F;
             }
+            if (INonStandPower.getNonStandPowerOptional(livingTarget)
+                    .map(power -> power.getType() == ModPowers.PILLAR_MAN.get()).orElse(false)) {
+            	amount *= 0.5F;
+            }
+            if (INonStandPower.getNonStandPowerOptional(livingTarget).map(
+                    power -> power.getTypeSpecificData(ModPowers.PILLAR_MAN.get())
+                    .map(pillarman -> pillarman.isStoneFormEnabled()).orElse(false)).orElse(false)) {
+                return false;
+            }
             
             final float dmgAmount = amount;
             if (attack.srcEntityHamonMultiplier && dmgSource.getEntity() instanceof LivingEntity) {

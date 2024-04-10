@@ -62,6 +62,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
+import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismUtil;
@@ -834,10 +835,17 @@ public class GameplayEventHandler {
         if (entity instanceof PlayerEntity) {
             PlayerEntity player = (PlayerEntity) entity;
             VampirismPowerType vampirism = ModPowers.VAMPIRISM.get();
+            PillarmanPowerType pillarman = ModPowers.PILLAR_MAN.get();
             return INonStandPower.getNonStandPowerOptional(player).map(power -> {
-                if (power.getTypeSpecificData(vampirism).map(vamp -> !vamp.isVampireAtFullPower()).orElse(false) || power.givePower(vampirism)) {
+                if (power.getType() == ModPowers.PILLAR_MAN.get() || (power.getTypeSpecificData(vampirism).map(vamp -> !vamp.isVampireAtFullPower()).orElse(false) || power.givePower(vampirism))) {
                     entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.STONE_MASK_ACTIVATION_ENTITY.get(), entity.getSoundSource(), 1.0F, 1.0F);
-                    power.getTypeSpecificData(vampirism).get().setVampireFullPower(true);
+                    if(power.getType() == ModPowers.VAMPIRISM.get()) {
+                    	power.getTypeSpecificData(vampirism).get().setVampireFullPower(true);
+                    } else if (power.getTypeSpecificData(pillarman).get().getEvolutionStage() < 2) {
+                    	power.getTypeSpecificData(pillarman).get().setEvolutionStage(2);
+                    	power.getTypeSpecificData(pillarman).get().setPillarmanBuffs(entity, 1);
+                    }
+                    
                     StoneMaskItem.setActivatedArmorTexture(headStack); // TODO light beams on stone mask activation
                     headStack.hurtAndBreak(1, entity, stack -> {});
                     return true;

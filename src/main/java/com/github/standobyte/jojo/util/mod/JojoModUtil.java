@@ -262,7 +262,9 @@ public class JojoModUtil {
     public static boolean isPlayerUndead(PlayerEntity player) {
         return INonStandPower.getNonStandPowerOptional(player).map(power -> {
             NonStandPowerType<?> powerType = power.getType();
-            return powerType == ModPowers.VAMPIRISM.get() || powerType == ModPowers.ZOMBIE.get();
+            return powerType == ModPowers.VAMPIRISM.get() 	|| 
+            	   powerType == ModPowers.ZOMBIE.get() 		|| 
+            	   powerType == ModPowers.PILLAR_MAN.get();
         }).orElse(false); 
     }
 

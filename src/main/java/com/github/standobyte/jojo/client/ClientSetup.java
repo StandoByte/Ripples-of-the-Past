@@ -28,6 +28,7 @@ import com.github.standobyte.jojo.client.render.entity.layerrenderer.EnergyRippl
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.GlovesLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.HamonBurnLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.KnifeLayer;
+import com.github.standobyte.jojo.client.render.entity.layerrenderer.PillarmanLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.SpecialHeldItemLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.TornadoOverdriveEffectLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.ZombieLayer;
@@ -317,6 +318,7 @@ public class ClientSetup {
     
     private static <T extends LivingEntity, M extends BipedModel<T>> void addBipedLayers(LivingRenderer<T, M> renderer) {
     	renderer.addLayer(new ZombieLayer<>(renderer));
+    	renderer.addLayer(new PillarmanLayer<>(renderer));
     }
 
     @SubscribeEvent
