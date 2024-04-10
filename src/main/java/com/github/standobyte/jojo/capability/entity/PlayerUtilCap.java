@@ -102,7 +102,9 @@ public class PlayerUtilCap {
 
     private Set<ResourceLocation> metEntityTypesId = new HashSet<>();
     private EntityType<?> GEChosenType = null;
+    @Deprecated
     private Set<EntityType<?>> GEHiddenEntries = new HashSet<>();
+    private List<EntityType<?>> GEFavorites = new ArrayList<>();
     public int animalAgeCd;
     
     
@@ -172,6 +174,12 @@ public class PlayerUtilCap {
                     .collect(ListNBT::new, ListNBT::add, ListNBT::addAll);
             nbt.put("GEHidden", list);
         }
+        if (!GEFavorites.isEmpty()) {
+            ListNBT list = GEFavorites.stream()
+                    .map(EntityType::getRegistryName).map(Object::toString).map(StringNBT::valueOf)
+                    .collect(ListNBT::new, ListNBT::add, ListNBT::addAll);
+            nbt.put("GEFavoritesMobs", list);
+        }
         nbt.putInt("AnimalAgeCd", animalAgeCd);
         return nbt;
     }
@@ -205,6 +213,13 @@ public class PlayerUtilCap {
                         .filter(Optional::isPresent).map(Optional::get)
                         .collect(Collectors.toSet()))
                 .ifPresent(hidden -> GEHiddenEntries.addAll(hidden));
+        MCUtil.nbtGetList(nbt, "GEFavoritesMobs", StringNBT.class)
+                .map(listNbt -> listNbt
+                        .stream()
+                        .map(stringNbt -> MCUtil.registryEntryFromId(stringNbt.getAsString(), ForgeRegistries.ENTITIES))
+                        .filter(Optional::isPresent).map(Optional::get)
+                        .collect(Collectors.toSet()))
+                .ifPresent(hidden -> GEFavorites.addAll(hidden));
         animalAgeCd = nbt.getInt("AnimalAgeCd");
         
         MCUtil.getNbtElement(nbt, "TradeCD", CompoundNBT.class).ifPresent(this::tradeCooldownFromNbt);
@@ -221,7 +236,7 @@ public class PlayerUtilCap {
         if (!metEntityTypesId.isEmpty()) {
             PacketManager.sendToClient(new MetEntityTypesPacket(metEntityTypesId), player);
         }
-        PacketManager.sendToClient(new GEUiDataPacket(this.GEHiddenEntries, Optional.ofNullable(GEChosenType)), player);
+        PacketManager.sendToClient(new GEUiDataPacket(this.GEHiddenEntries, this.GEFavorites, Optional.ofNullable(GEChosenType)), player);
         
         PacketManager.sendToClient(new TrKnivesCountPacket(player.getId(), knives), player);
         PacketManager.sendToClient(new TrWalkmanEarbudsPacket(player.getId(), walkmanEarbuds), player);
@@ -542,10 +557,12 @@ public class PlayerUtilCap {
         }
     }
 
+    @Deprecated
     public boolean isGELifeformHidden(EntityType<?> type) {
         return GEHiddenEntries.contains(type);
     }
 
+    @Deprecated
     public boolean hideGELifeform(EntityType<?> type) {
         if (GEHiddenEntries.add(type) && player.level.isClientSide()) {
             PacketManager.sendToServer(ClGEUiDataPacket.hiddenEntry(type));
@@ -555,6 +572,7 @@ public class PlayerUtilCap {
         return false;
     }
 
+    @Deprecated
     public boolean showGELifeform(EntityType<?> type) {
         if (GEHiddenEntries.remove(type) && player.level.isClientSide()) {
             PacketManager.sendToServer(ClGEUiDataPacket.shownEntry(type));
@@ -564,9 +582,37 @@ public class PlayerUtilCap {
         return false;
     }
     
+    @Deprecated
     public void setGEHiddenLifeforms(Collection<EntityType<?>> allHidden) {
         GEHiddenEntries.clear();
         GEHiddenEntries.addAll(allHidden);
+    }
+    
+    public List<EntityType<?>> getGEFavoritesView() {
+        return GEFavorites;
+    }
+
+    public boolean GELifeformAddFav(EntityType<?> type) {
+        if (GEFavorites.add(type) && player.level.isClientSide()) {
+            PacketManager.sendToServer(ClGEUiDataPacket.favoriteAdded(type));
+            return true;
+        }
+        
+        return false;
+    }
+
+    public boolean GELifeformRemoveFav(EntityType<?> type) {
+        if (GEFavorites.remove(type) && player.level.isClientSide()) {
+            PacketManager.sendToServer(ClGEUiDataPacket.favoriteRemoved(type));
+            return true;
+        }
+        
+        return false;
+    }
+    
+    public void setGELifeformFavs(Collection<EntityType<?>> favorites) {
+        GEFavorites.clear();
+        GEFavorites.addAll(favorites);
     }
     
     

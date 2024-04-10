@@ -15,11 +15,15 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
 
 public class GEUiDataPacket {
+    @Deprecated
     private final Collection<EntityType<?>> hidden;
+    private final Collection<EntityType<?>> favorites;
     private final Optional<EntityType<?>> selected;
     
-    public GEUiDataPacket(Collection<EntityType<?>> hidden, Optional<EntityType<?>> selected) {
+    public GEUiDataPacket(Collection<EntityType<?>> hidden, 
+            Collection<EntityType<?>> favorites, Optional<EntityType<?>> selected) {
         this.hidden = hidden;
+        this.favorites = favorites;
         this.selected = selected;
     }
     
@@ -30,12 +34,14 @@ public class GEUiDataPacket {
         @Override
         public void encode(GEUiDataPacket msg, PacketBuffer buf) {
             NetworkUtil.writeCollection(buf, msg.hidden, type -> buf.writeRegistryId(type), false);
+            NetworkUtil.writeCollection(buf, msg.favorites, type -> buf.writeRegistryId(type), false);
             NetworkUtil.writeOptional(buf, msg.selected, type -> buf.writeRegistryId(type));
         }
 
         @Override
         public GEUiDataPacket decode(PacketBuffer buf) {
             return new GEUiDataPacket(
+                    NetworkUtil.readCollection(buf, () -> buf.readRegistryIdSafe(EntityType.class)),
                     NetworkUtil.readCollection(buf, () -> buf.readRegistryIdSafe(EntityType.class)),
                     NetworkUtil.readOptional(buf, () -> buf.readRegistryIdSafe(EntityType.class)));
         }
@@ -45,6 +51,7 @@ public class GEUiDataPacket {
             PlayerEntity player = ClientUtil.getClientPlayer();
             player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                 cap.setGEHiddenLifeforms(msg.hidden);
+                cap.setGELifeformFavs(msg.favorites);
                 cap.setGEChosenLifeformType(msg.selected.orElse(null), false);
             });
         }

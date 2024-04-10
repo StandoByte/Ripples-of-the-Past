@@ -20,12 +20,22 @@ public class ClGEUiDataPacket {
         return new ClGEUiDataPacket(Type.CHOSEN_ENTITY_TYPE, entityType);
     }
     
+    @Deprecated
     public static ClGEUiDataPacket hiddenEntry(EntityType<?> entityType) {
         return new ClGEUiDataPacket(Type.HIDDEN_ENTRY, Optional.of(entityType));
     }
-    
+
+    @Deprecated
     public static ClGEUiDataPacket shownEntry(EntityType<?> entityType) {
         return new ClGEUiDataPacket(Type.SHOWN_ENTRY, Optional.of(entityType));
+    }
+    
+    public static ClGEUiDataPacket favoriteAdded(EntityType<?> entityType) {
+        return new ClGEUiDataPacket(Type.FAVORITE_ADDED, Optional.of(entityType));
+    }
+
+    public static ClGEUiDataPacket favoriteRemoved(EntityType<?> entityType) {
+        return new ClGEUiDataPacket(Type.FAVORITE_REMOVED, Optional.of(entityType));
     }
     
     private ClGEUiDataPacket(Type type, Optional<EntityType<?>> entityType) {
@@ -64,6 +74,12 @@ public class ClGEUiDataPacket {
                 case SHOWN_ENTRY:
                     cap.showGELifeform(msg.entityType.get());
                     break;
+                case FAVORITE_ADDED:
+                    cap.GELifeformAddFav(msg.entityType.get());
+                    break;
+                case FAVORITE_REMOVED:
+                    cap.GELifeformRemoveFav(msg.entityType.get());
+                    break;
                 }
             });
         }
@@ -78,8 +94,12 @@ public class ClGEUiDataPacket {
     
     private enum Type {
         CHOSEN_ENTITY_TYPE,
+        @Deprecated
         HIDDEN_ENTRY,
-        SHOWN_ENTRY
+        @Deprecated
+        SHOWN_ENTRY,
+        FAVORITE_ADDED,
+        FAVORITE_REMOVED
     }
 
 }
