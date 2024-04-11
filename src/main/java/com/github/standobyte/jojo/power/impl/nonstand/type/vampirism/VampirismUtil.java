@@ -186,7 +186,9 @@ public class VampirismUtil {
         LivingEntity entity = event.getEntityLiving();
         if (entity.isAlive()) {
             INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
-                if (power.getType() == ModPowers.VAMPIRISM.get()) {
+                if (power.getType() == ModPowers.VAMPIRISM.get() 
+                		|| (power.getType() == ModPowers.PILLAR_MAN.get() 
+                		&& power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).get().getEvolutionStage() > 1)) {
                     float healCost = healCost(entity.level);
                     if (healCost > 0) {
                         float actualHeal = Math.min(event.getAmount(), power.getEnergy() / healCost);

@@ -28,6 +28,7 @@ import net.minecraftforge.common.ForgeMod;
 public class PillarmanData extends TypeSpecificData {
 	private int stage = 1;
 	private boolean stoneForm = false;
+	private float lastEnergy = -999;
 
 	private static final AttributeModifier ATTACK_DAMAGE = new AttributeModifier(
             UUID.fromString("8312317d-3b9c-4a0e-ac02-01318f3032a7"), "Pillar man attack damage", 1.5D, AttributeModifier.Operation.ADDITION);
@@ -50,9 +51,10 @@ public class PillarmanData extends TypeSpecificData {
         applyAttributeModifier(entity, Attributes.MOVEMENT_SPEED, MOVEMENT_SPEED, lvl);
         applyAttributeModifier(entity, ForgeMod.SWIM_SPEED.get(), SWIMMING_SPEED, lvl);
         applyAttributeModifier(entity, Attributes.MAX_HEALTH, MAX_HEALTH, lvl);
-        ServerPlayerEntity user = (ServerPlayerEntity) entity;
-        PacketManager.sendToClient(new TrPillarmanFlagsPacket(entity.getId(), this), user);
-        
+        if(stage > 1) {
+        	ServerPlayerEntity user = (ServerPlayerEntity) entity;
+            PacketManager.sendToClient(new TrPillarmanFlagsPacket(entity.getId(), this), user);
+        }
     }
     
     private static void applyAttributeModifier(LivingEntity entity, Attribute attribute, AttributeModifier modifier, int lvl) {
@@ -81,7 +83,10 @@ public class PillarmanData extends TypeSpecificData {
     @Override
     public boolean isActionUnlocked(Action<INonStandPower> action, INonStandPower power) {
         return  action == ModPillarmanActions.PILLARMAN_HEAVY_PUNCH.get() ||
-        		stage == 2 && action == ModPillarmanActions.PILLARMAN_ABSORPTION.get() ||
+        		stage > 1 && action == ModPillarmanActions.PILLARMAN_ABSORPTION.get() ||
+                stage > 1 && action == ModPillarmanActions.PILLARMAN_REGENERATION.get() ||
+                stage > 1 && action == ModPillarmanActions.PILLARMAN_ENHANCED_SENSES.get() ||
+                stage > 1 && action == ModPillarmanActions.PILLARMAN_UNNATURAL_AGILITY.get() ||
                 action == ModPillarmanActions.PILLARMAN_STONE_FORM.get();
     }
     
@@ -123,6 +128,12 @@ public class PillarmanData extends TypeSpecificData {
     public boolean isStoneFormEnabled() {
         return stoneForm;
     }
+    
+    public boolean refreshEnergy(float energy) {
+        boolean energyChanged = this.lastEnergy != energy;
+        this.lastEnergy = energy;
+        return energyChanged;
+    }
 
     @Override
     public CompoundNBT writeNBT() {
@@ -141,9 +152,9 @@ public class PillarmanData extends TypeSpecificData {
     	setPillarmanBuffs(user, 1);
     }
     
-    
     @Override
     public void syncWithTrackingOrUser(LivingEntity user, ServerPlayerEntity entity) {
     	PacketManager.sendToClient(new TrPillarmanFlagsPacket(user.getId(), this), entity);
     }
+
 }

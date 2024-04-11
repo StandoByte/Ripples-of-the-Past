@@ -33,7 +33,7 @@ public class HamonBreath extends HamonAction {
     }
 
     @Override
-    public boolean isHeldSentToTracking( {
+    public boolean isHeldSentToTracking() {
         return true;
     }
     

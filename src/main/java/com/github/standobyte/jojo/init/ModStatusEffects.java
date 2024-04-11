@@ -19,6 +19,7 @@ import com.github.standobyte.jojo.potion.StunEffect;
 import com.github.standobyte.jojo.potion.UncurableEffect;
 import com.github.standobyte.jojo.potion.UndeadRegenerationEffect;
 import com.github.standobyte.jojo.potion.VampireSunBurnEffect;
+import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.zombie.ZombiePowerType;
 
@@ -104,6 +105,7 @@ public class ModStatusEffects {
     public static void afterEffectsRegister(RegistryEvent.Register<Effect> event) {
         VampirismPowerType.initVampiricEffects();
         ZombiePowerType.initZombieEffects();
+        PillarmanPowerType.initPillarmanEffects();
         StandEntity.addSharedEffectsFromUser(TIME_STOP.get(), Effects.BLINDNESS);
         StandEntity.addSharedEffectsFromStand(STUN.get(), IMMOBILIZE.get());
         setEffectAsTracked(

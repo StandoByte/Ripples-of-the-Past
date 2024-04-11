@@ -1,7 +1,12 @@
 package com.github.standobyte.jojo.power.impl.nonstand.type.pillarman;
 
+import java.util.Collections;
+import java.util.HashSet;
+import java.util.Set;
+
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.non_stand.PillarmanAction;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
@@ -10,7 +15,12 @@ import com.github.standobyte.jojo.util.general.GeneralUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.potion.Effect;
+import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.EffectType;
+import net.minecraft.potion.Effects;
 import net.minecraft.world.World;
+import net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent;
 
 public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
     public static final int COLOR = 0xFFAA00;
@@ -30,8 +40,15 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
     
     @Override
     public void onClear(INonStandPower power) {
-    	power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).get().setEvolutionStage(1);
-    	power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).get().setPillarmanBuffs(power.getUser(), 0);
+    	power.getTypeSpecificData(this).get().setEvolutionStage(1);
+    	power.getTypeSpecificData(this).get().setPillarmanBuffs(power.getUser(), 0);
+    	LivingEntity user = power.getUser();
+        for (Effect effect : EFFECTS) {
+            EffectInstance effectInstance = user.getEffect(effect);
+            if (effectInstance != null) {
+                user.removeEffect(effectInstance.getEffect());
+            }
+        }
     }
     
     @Override
@@ -39,7 +56,7 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
         World world = power.getUser().level;
         return super.getMaxEnergy(power) * GeneralUtil.getOrLast(
                 JojoModConfig.getCommonConfigInstance(world.isClientSide()).maxBloodMultiplier.get(), world.getDifficulty().getId())
-                .floatValue();
+                .floatValue() * power.getTypeSpecificData(this).get().getEvolutionStage();
     }
     
     @Override
@@ -51,37 +68,56 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
         if (power.isUserCreative()) {
             inc = Math.max(inc, 0);
         }
-        if(power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).get().getEvolutionStage() == 1) {
+        if(power.getTypeSpecificData(this).get().getEvolutionStage() == 1) {
         	return power.getEnergy() + 0.5F * world.getDifficulty().getId()/2;
         }
-        return power.getEnergy() + inc * power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).get().getEvolutionStage();
+        return power.getEnergy() + inc * power.getTypeSpecificData(this).get().getEvolutionStage();
     }
     
     @Override
     public float getMaxStaminaFactor(INonStandPower power, IStandPower standPower) {
     	
-        return 1 * power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).get().getEvolutionStage();
+        return 1 * power.getTypeSpecificData(this).get().getEvolutionStage();
     }
     
     @Override
     public float getStaminaRegenFactor(INonStandPower power, IStandPower standPower) {
-        return 1 * power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).get().getEvolutionStage();
+        return 1 * power.getTypeSpecificData(this).get().getEvolutionStage();
     }
     
     @Override
     public void tickUser(LivingEntity entity, INonStandPower power) {
     	PillarmanData pillarman = power.getTypeSpecificData(this).get();
     	pillarman.tick();
-    	if(power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).get().getEvolutionStage() > 1) {
+    	if(pillarman.getEvolutionStage() > 1) {
 	    	if (!entity.level.isClientSide()) {
 	            if (entity instanceof PlayerEntity) {
 	                ((PlayerEntity) entity).getFoodData().setFoodLevel(17);
 	            }
 	            entity.setAirSupply(entity.getMaxAirSupply());
+	            float energy =  power.getEnergy();
+	            if(pillarman.refreshEnergy((int) power.getEnergy())) {
+		            for (Effect effect : EFFECTS) {
+	                    if (energy > power.getMaxEnergy()/10) {
+	                        entity.addEffect(new EffectInstance(effect, Integer.MAX_VALUE, 0, false, false, true));
+	                    }
+	                    else {
+	                        entity.removeEffect(effect);
+	                    }
+		            }
+	            }
 	    	}
     	}
     }
-
+    
+    private static final Set<Effect> EFFECTS = new HashSet<>();
+    public static void initPillarmanEffects() {
+        Collections.addAll(EFFECTS, 
+                ModStatusEffects.UNDEAD_REGENERATION.get(),
+                Effects.DAMAGE_RESISTANCE,
+                Effects.NIGHT_VISION);
+    }
+    
     @Override
     public boolean isReplaceableWith(NonStandPowerType<?> newType) {
         return false;
@@ -121,4 +157,18 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
         return 0;
     }
     
+    public static void cancelPillarmanEffectRemoval(PotionRemoveEvent event) {
+        EffectInstance effectInstance = event.getPotionEffect();
+        if (effectInstance != null) {
+            LivingEntity entity = event.getEntityLiving();
+            INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
+                power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).ifPresent(pillarman -> {
+                    Effect effect = event.getPotion();
+                    if (EFFECTS.contains(effect) && power.getEnergy() > power.getMaxEnergy()/10) {
+                        event.setCanceled(true);
+                    }
+                });
+            });
+        }
+    }
 }

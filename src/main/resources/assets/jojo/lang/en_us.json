@@ -939,6 +939,11 @@
   "non_stand.jojo.pillarman": "Pillar man",
   "action.jojo.pillarman_heavy_punch": "Heavy Blow",
   "action.jojo.pillarman_stone_form": "Turn to stone",
+  "action.jojo.pillarman_absorption": "Absorption",
+  "action.jojo.pillarman_regeneration": "Unnatural Regeneration",
+  "action.jojo.pillarman_enhanced_senses": "Enhanced Senses",
+  "action.jojo.pillarman_unnatural_agility": "Unnatural Agility",
+  
   
   "jojo.subtitle.stand_summon": "Stand summoned",
   "jojo.subtitle.stand_unsummon": "Stand unsummoned",

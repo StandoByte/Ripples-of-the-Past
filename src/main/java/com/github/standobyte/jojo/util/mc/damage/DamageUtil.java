@@ -225,10 +225,10 @@ public class DamageUtil {
     
     public static boolean dealPillarmanAbsorptionDamage(Entity target, float amount, @Nullable Entity src) {
         if (target instanceof LivingEntity) {
-            LivingEntity livingTarget = (LivingEntity) target;
+            /*LivingEntity livingTarget = (LivingEntity) target;
             if (!JojoModUtil.canBleed(livingTarget)) {
                 return false;
-            }
+            }*/
             DamageSource dmgSource = 
                     src == null ? PILLAR_MAN_ABSORPTION : new EntityDamageSource(PILLAR_MAN_ABSORPTION.getMsgId() + ".entity", src);
             return target.hurt(dmgSource, amount);

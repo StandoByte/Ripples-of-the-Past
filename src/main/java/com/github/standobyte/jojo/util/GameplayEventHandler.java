@@ -14,6 +14,7 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.JojoModConfig.Common;
 import com.github.standobyte.jojo.action.non_stand.HamonSendoWaveKick;
+import com.github.standobyte.jojo.action.non_stand.PillarmanUnnaturalAgility;
 import com.github.standobyte.jojo.action.non_stand.VampirismFreeze;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
@@ -505,6 +506,9 @@ public class GameplayEventHandler {
         if (VampirismFreeze.onUserAttacked(event)) {
             event.setCanceled(true);
         }
+        if (PillarmanUnnaturalAgility.onUserAttacked(event)) {
+            event.setCanceled(true);
+        }
         
         if (GeneralUtil.orElseFalse(target.getSleepingPos(), sleepingPos -> {
             BlockState blockState = target.level.getBlockState(sleepingPos);
@@ -837,11 +841,12 @@ public class GameplayEventHandler {
             VampirismPowerType vampirism = ModPowers.VAMPIRISM.get();
             PillarmanPowerType pillarman = ModPowers.PILLAR_MAN.get();
             return INonStandPower.getNonStandPowerOptional(player).map(power -> {
-                if (power.getType() == ModPowers.PILLAR_MAN.get() || (power.getTypeSpecificData(vampirism).map(vamp -> !vamp.isVampireAtFullPower()).orElse(false) || power.givePower(vampirism))) {
+                if ((power.getType() == ModPowers.PILLAR_MAN.get() && power.getTypeSpecificData(pillarman).get().getEvolutionStage() == 1) 
+                		|| (power.getTypeSpecificData(vampirism).map(vamp -> !vamp.isVampireAtFullPower()).orElse(false) || power.givePower(vampirism))) {
                     entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.STONE_MASK_ACTIVATION_ENTITY.get(), entity.getSoundSource(), 1.0F, 1.0F);
                     if(power.getType() == ModPowers.VAMPIRISM.get()) {
                     	power.getTypeSpecificData(vampirism).get().setVampireFullPower(true);
-                    } else if (power.getTypeSpecificData(pillarman).get().getEvolutionStage() < 2) {
+                    } else if (power.getType() == ModPowers.PILLAR_MAN.get()) {
                     	power.getTypeSpecificData(pillarman).get().setEvolutionStage(2);
                     	power.getTypeSpecificData(pillarman).get().setPillarmanBuffs(entity, 1);
                     }
@@ -890,6 +895,7 @@ public class GameplayEventHandler {
     public static void cancelPotionRemoval(PotionRemoveEvent event) {
         VampirismPowerType.cancelVampiricEffectRemoval(event);
         ZombiePowerType.cancelZombieEffectRemoval(event);
+        PillarmanPowerType.cancelPillarmanEffectRemoval(event);
     }
     
     @SubscribeEvent(priority = EventPriority.LOWEST)
