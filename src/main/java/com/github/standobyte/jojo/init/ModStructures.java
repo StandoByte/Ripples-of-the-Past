@@ -96,7 +96,11 @@ public class ModStructures {
                     .add(structure)
                     .build();
         }
-
+        
+        setMapSpacing(structure, structureSeparationSettings);
+    }
+    
+    public static <F extends Structure<?>> void setMapSpacing(F structure, StructureSeparationSettings structureSeparationSettings) {
         DimensionStructuresSettings.DEFAULTS = ImmutableMap.<Structure<?>, StructureSeparationSettings>builder()
                 .putAll(DimensionStructuresSettings.DEFAULTS)
                 .put(structure, structureSeparationSettings)
