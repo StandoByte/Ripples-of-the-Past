@@ -510,8 +510,6 @@
   "jojo.config.standDamageMultiplier.tooltip": "Damage multiplier applied to all Stands.",
   "jojo.config.soulAscension": "Soul Ascension",
   "jojo.config.soulAscension.tooltip": "",
-  "jojo.config.abilitiesBreakBlocks": "Abilities break blocks",
-  "jojo.config.abilitiesBreakBlocks.tooltip": "Whether or not Stands and abilities from the mod can break blocks.",
   "jojo.config.hamonDamageMultiplier": "Hamon damage multiplier",
   "jojo.config.hamonDamageMultiplier.tooltip": "Damage multiplier applied to all Hamon attacks.",
   "jojo.config.hamonEnergyTicksDown": "Hamon energy ticks down",
@@ -522,6 +520,8 @@
   "jojo.config.timeStopDamageMultiplier.tooltip": "Damage multiplier for entities frozen in time.",
   "jojo.config.endermenBeyondTimeSpace": "Endermen beyond time and space",
   "jojo.config.endermenBeyondTimeSpace.tooltip": "",
+  "gamerule.jojoAbilitiesBreakBlocks": "JoJo abilities break blocks",
+  "gamerule.jojoAbilitiesBreakBlocks.description": "Whether or not Stands and other abilities from the Ripples of the Past mod can break blocks.",
   
   "jojo.options.client.title": "Ripples of the Past client settings",
   "jojo.config.client.barsPosition": "Bars position",

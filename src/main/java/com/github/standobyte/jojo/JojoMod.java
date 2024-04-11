@@ -14,6 +14,7 @@ import com.github.standobyte.jojo.init.ModDataSerializers;
 import com.github.standobyte.jojo.init.ModEnchantments;
 import com.github.standobyte.jojo.init.ModEntityAttributes;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.ModGamerules;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModLootModifierSerializers;
 import com.github.standobyte.jojo.init.ModPaintings;
@@ -118,6 +119,8 @@ public class JojoMod {
             }
             
             BaseHamonSkillTree.initTrees();
+            
+            ModGamerules.load();
         });
     }
 }

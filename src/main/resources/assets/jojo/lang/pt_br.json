@@ -505,8 +505,6 @@
   "jojo.config.standDamageMultiplier.tooltip": "Multiplicador de dano aplicado a todos os Stands.",
   "jojo.config.soulAscension": "Soul Ascension",
   "jojo.config.soulAscension.tooltip": "",
-  "jojo.config.abilitiesBreakBlocks": "Habilidades quebrar blocos",
-  "jojo.config.abilitiesBreakBlocks.tooltip": "Se os Stands e habilidades do mod podem quebrar blocos.",
   "jojo.config.hamonDamageMultiplier": "Multiplicador do dano do Hamon",
   "jojo.config.hamonDamageMultiplier.tooltip": "Multiplicador de dano aplicado a todos os ataques de Hamon.",
   "jojo.config.hamonEnergyTicksDown": "A energia de Hamon diminui",
@@ -517,6 +515,8 @@
   "jojo.config.timeStopDamageMultiplier.tooltip": "Multiplicador de dano para entidades congeladas no tempo.",
   "jojo.config.endermenBeyondTimeSpace": "Endermen além do tempo e do espaço",
   "jojo.config.endermenBeyondTimeSpace.tooltip": ". . .",
+  "gamerule.jojoAbilitiesBreakBlocks": "Habilidades quebrar blocos",
+  "gamerule.jojoAbilitiesBreakBlocks.tooltip": "Se os Stands e habilidades do mod podem quebrar blocos.",
   
   "jojo.options.client.title": "Configurações do cliente de Ripples of the Past",
   "jojo.config.client.barsPosition": "Posição das barras",
