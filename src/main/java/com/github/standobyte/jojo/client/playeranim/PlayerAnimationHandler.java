@@ -70,7 +70,7 @@ public class PlayerAnimationHandler {
     public static void initAnimator() {
         instance = OptionalDependencyHelper.initModHandlingInterface(
                 "playeranimator", 
-                "com.github.standobyte.jojo.modintegration.client.playeranimator.PlayerAnimatorInstalled", 
+                "com.github.standobyte.jojo.modcompat.mod.client.playeranimator.PlayerAnimatorInstalled", 
                 EmptyPlayerAnimator::new, "Player Animator lib");
         instance.initAnims();
     }

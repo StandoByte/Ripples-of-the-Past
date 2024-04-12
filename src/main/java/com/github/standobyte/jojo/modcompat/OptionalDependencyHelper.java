@@ -19,7 +19,7 @@ public class OptionalDependencyHelper {
     
     public static void init() {
         vampirism = initModHandlingInterface("vampirism", 
-                "com.github.standobyte.jojo.modintegration.vampirism.VampirismModIntergration", 
+                "com.github.standobyte.jojo.modcompat.mod.vampirism.VampirismModIntergration", 
                 IVampirismModIntegration.Dummy::new, 
                 "Vampirism mod");
     }
