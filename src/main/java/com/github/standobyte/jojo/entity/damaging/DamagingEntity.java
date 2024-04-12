@@ -340,7 +340,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
 
     @Override
     public boolean isInvisibleTo(PlayerEntity player) {
-        return !player.isSpectator() && (standVisibility() && !StandUtil.playerCanSeeStands(player) || super.isInvisible());
+        return standVisibility() && !StandUtil.playerCanSeeStands(player) || !player.isSpectator() && super.isInvisible();
     }
     
     @Override
