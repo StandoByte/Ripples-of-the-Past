@@ -15,8 +15,10 @@ import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModGamerules;
+import com.github.standobyte.jojo.init.ModTags;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.item.ClothesSet;
+import com.github.standobyte.jojo.modintegration.OptionalDependencyHelper;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlayVoiceLinePacket;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -268,6 +270,12 @@ public class JojoModUtil {
             NonStandPowerType<?> powerType = power.getType();
             return powerType == ModPowers.VAMPIRISM.get();
         }).orElse(false); 
+    }
+    
+    public static boolean isAffectedByHamon(LivingEntity entity) {
+        return (JojoModUtil.isUndead(entity) || OptionalDependencyHelper.vampirism().isEntityVampire(entity))
+                        && !ModTags.UNDEAD_NO_HAMON_DAMAGE.contains(entity.getType())
+                || ModTags.HAMON_DAMAGE.contains(entity.getType());
     }
 
     public static boolean canBleed(LivingEntity entity) {

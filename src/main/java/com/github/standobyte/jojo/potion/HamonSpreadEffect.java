@@ -33,7 +33,7 @@ public class HamonSpreadEffect extends StatusEffect implements IApplicableEffect
 
     @Override
     public boolean isApplicable(LivingEntity entity) {
-        return JojoModUtil.isUndead(entity);
+        return JojoModUtil.isAffectedByHamon(entity);
     }
     
     

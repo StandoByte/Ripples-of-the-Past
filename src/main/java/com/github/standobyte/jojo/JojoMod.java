@@ -27,6 +27,7 @@ import com.github.standobyte.jojo.init.ModStructures;
 import com.github.standobyte.jojo.init.ModTags;
 import com.github.standobyte.jojo.init.ModTileEntities;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
+import com.github.standobyte.jojo.modintegration.OptionalDependencyHelper;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkillTree;
@@ -41,6 +42,7 @@ import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.config.ModConfig;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.lifecycle.InterModEnqueueEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 @Mod(JojoMod.MOD_ID)
@@ -69,6 +71,7 @@ public class JojoMod {
         registerVanillaDeferredRegisters(modEventBus);
 
         modEventBus.addListener(this::preInit);
+        modEventBus.addListener(this::interMod);
         ModTags.initTags();
     }
 
@@ -121,6 +124,12 @@ public class JojoMod {
             BaseHamonSkillTree.initTrees();
             
             ModGamerules.load();
+        });
+    }
+    
+    private void interMod(InterModEnqueueEvent event) {
+        event.enqueueWork(() -> {
+            OptionalDependencyHelper.init();
         });
     }
 }

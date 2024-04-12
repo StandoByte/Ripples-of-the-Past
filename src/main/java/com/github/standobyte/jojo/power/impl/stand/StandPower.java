@@ -20,6 +20,7 @@ import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.modintegration.OptionalDependencyHelper;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtStandEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SkippedStandProgressionPacket;
@@ -459,7 +460,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                     usesResolve() && 
                     getResolveLevel() > 0 &&
                     JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).soulAscension.get() &&
-                    !JojoModUtil.isUndead(user) &&
+                    !(JojoModUtil.isUndead(user) || OptionalDependencyHelper.vampirism().isEntityVampire(user)) &&
                     !(user instanceof PlayerEntity && user.level.getGameRules().getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN));
             if (this.willSoulSpawn != soulCanSpawn) {
                 this.willSoulSpawn = soulCanSpawn;
