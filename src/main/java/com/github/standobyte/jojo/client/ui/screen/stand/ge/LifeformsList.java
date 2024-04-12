@@ -92,7 +92,7 @@ public abstract class LifeformsList<V> extends ExtendedList<LifeformsList.Lifefo
                 ITextComponent name = getValueName.apply(entryVal);
                 
                 LifeformEntry entry = makeLifeformEntry(entryVal, name);
-                if (UNSEEN_ENTITY_TYPES.contains(entryVal)) {
+                if (isNew(entryVal)) {
                     entry.unseenEntry = true;
                 }
                 
@@ -104,7 +104,17 @@ public abstract class LifeformsList<V> extends ExtendedList<LifeformsList.Lifefo
                         (button, matrixStack, mouseX, mouseY) -> {
                             renderHoveredTooltip(matrixStack, entryVal, mouseX, mouseY);
                         },
-                        minecraft.font);
+                        minecraft.font) {
+                    
+                    @Override
+                    public ITextComponent makeText() {
+                        ITextComponent text = super.makeText();
+                        if (entry.unseenEntry) {
+                            text = new TranslationTextComponent("gold_experience.lifeform_unseen", text).withStyle(TextFormatting.AQUA);
+                        }
+                        return text;
+                    }
+                };
                 textButton.setHeight(itemHeight);
                 LifeformEntry.FavoriteButton favoritesButton = new LifeformEntry.FavoriteButton(-1, -1, 9, 9, 
                         b -> {
@@ -119,7 +129,7 @@ public abstract class LifeformsList<V> extends ExtendedList<LifeformsList.Lifefo
                             }
                         }, 
                         screen);
-                favoritesButton.isFavorited = screen.playerUISettings.getGEFavoritesView().contains(entryVal);
+                favoritesButton.isFavorited = isInFavorites(entryVal);
                 entry.addButtons(textButton, favoritesButton);
 
 //                ITextComponent widthCheck = name;
@@ -144,6 +154,8 @@ public abstract class LifeformsList<V> extends ExtendedList<LifeformsList.Lifefo
     protected abstract void select(V lifeformType);
     protected abstract void addFavorite(V lifeformType);
     protected abstract void removeFavorite(V lifeformType);
+    protected abstract boolean isInFavorites(V lifeformType);
+    protected abstract boolean isNew(V lifeformType);
     protected abstract void renderHoveredTooltip(MatrixStack matrixStack, V lifeformType, int mouseX, int mouseY);
     
     @Override

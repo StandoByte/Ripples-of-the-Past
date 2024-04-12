@@ -250,24 +250,7 @@ public abstract class ChooseLifeformScreen extends WasdAllowingScreen {
     }
     
     protected void chooseHoveredAndClose() {
-        
-        onClose();
     }
-//    
-//    private void updateHoveredElement(int mouseX, int mouseY) {
-//        boolean mouseMoved = checkMouseMoved(mouseX, mouseY);
-//        entityIconsGrid.forEach(widget -> {
-//            if (widget.visible) {
-//                widget.updateIsHovered(mouseX, mouseY);
-//                if (mouseMoved && widget.isHovered() && !widget.isSelected) {
-//                    entityIconsGrid.setSelected(widget);
-//                }
-//                entityIconsGrid.getSelected().ifPresent(w -> {
-//                    widget.setSelected(widget == w);
-//                });
-//            }
-//        });
-//    }
     
     private static final DecimalFormat SIZE_FORMAT = new DecimalFormat("0.0");
     protected void renderHoveredTooltip(MatrixStack matrixStack, EntityType<?> entityType, int mouseX, int mouseY) {
@@ -315,32 +298,7 @@ public abstract class ChooseLifeformScreen extends WasdAllowingScreen {
         if (closeOnSecondClick(buttonId)) {
             return true;
         }
-//        
-//        if (entityIconsGrid.getSelected().isPresent() && entityIconsGrid.isMouseInsideGrid(mouseX, mouseY)) {
-//            SelectorWidget hovered = entityIconsGrid.getSelected().get();
-//            MouseButton button = MouseButton.getButtonFromId(buttonId);
-//            if (button == null) return false;
-//            
-//            switch (button) {
-//            case LEFT:
-//                chooseHoveredAndClose();
-//                saveMousePos((int) mouseX, (int) mouseY);
-//                return true;
-//            case RIGHT:
-//                getEntriesUiData(minecraft.player).ifPresent(playerData -> {
-//                    if (playerData.isGELifeformHidden(hovered.entityType)) {
-//                        showEntry(hovered, false);
-//                    }
-//                    else {
-//                        hideEntry(hovered);
-//                    }
-//                });
-//                return true;
-//            default:
-//                break;
-//            }
-//        }
-//        
+        
         return false;
     }
     
@@ -362,25 +320,6 @@ public abstract class ChooseLifeformScreen extends WasdAllowingScreen {
         
         return false;
     }
-//    
-//    private boolean handleArrowKey(int pKeyCode, int pScanCode, int pModifiers) {
-//        if (!ARROW_KEYS.containsKey(pKeyCode)) return false;
-//        
-//        boolean control = (pModifiers & GLFW.GLFW_MOD_CONTROL) > 0;
-//        Direction2D direction = ARROW_KEYS.get(pKeyCode);
-//        entityIconsGrid.moveSelection(direction, control ? ElemMoveMode.EDGE : ElemMoveMode.NEIGHBOR_WRAP);
-//        
-//        return true;
-//    }
-//    
-//    
-//    protected void chooseHoveredAndClose() {
-//        entityIconsGrid.getSelected().ifPresent(widget -> {
-//            minecraft.player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(
-//                    cap -> cap.setGEChosenLifeformType(widget.entityType, true));
-//        });
-//        onClose();
-//    }
     
     @Override
     public void onClose() {
@@ -388,6 +327,7 @@ public abstract class ChooseLifeformScreen extends WasdAllowingScreen {
         if (searchField != null) {
             savedSearchFilter = searchField.getValue();
         }
+        playerUISettings.clearGENewMobs();
     }
     
     @Override

@@ -32,6 +32,16 @@ public class LifeformsMobList extends LifeformsList<EntityType<?>> {
     protected void removeFavorite(EntityType<?> lifeformType) {
         screen.playerUISettings.GELifeformRemoveFav(lifeformType);
     }
+
+    @Override
+    protected boolean isInFavorites(EntityType<?> lifeformType) {
+        return screen.playerUISettings.isGELifeformInFavorites(lifeformType);
+    }
+    
+    @Override
+    protected boolean isNew(EntityType<?> lifeformType) {
+        return screen.playerUISettings.isGELifeformNew(lifeformType);
+    }
     
     @Override
     protected void renderHoveredTooltip(MatrixStack matrixStack, EntityType<?> entityType, int mouseX, int mouseY) {

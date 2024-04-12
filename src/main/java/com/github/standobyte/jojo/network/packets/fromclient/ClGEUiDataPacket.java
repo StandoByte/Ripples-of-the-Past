@@ -37,6 +37,10 @@ public class ClGEUiDataPacket {
     public static ClGEUiDataPacket favoriteRemoved(EntityType<?> entityType) {
         return new ClGEUiDataPacket(Type.FAVORITE_REMOVED, Optional.of(entityType));
     }
+
+    public static ClGEUiDataPacket clearUnseen() {
+        return new ClGEUiDataPacket(Type.CLEAR_UNSEEN, Optional.empty());
+    }
     
     private ClGEUiDataPacket(Type type, Optional<EntityType<?>> entityType) {
         this.type = type;
@@ -80,6 +84,9 @@ public class ClGEUiDataPacket {
                 case FAVORITE_REMOVED:
                     cap.GELifeformRemoveFav(msg.entityType.get());
                     break;
+                case CLEAR_UNSEEN:
+                    cap.clearGENewMobs();
+                    break;
                 }
             });
         }
@@ -99,7 +106,8 @@ public class ClGEUiDataPacket {
         @Deprecated
         SHOWN_ENTRY,
         FAVORITE_ADDED,
-        FAVORITE_REMOVED
+        FAVORITE_REMOVED,
+        CLEAR_UNSEEN
     }
 
 }

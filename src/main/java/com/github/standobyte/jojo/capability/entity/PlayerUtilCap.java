@@ -103,8 +103,9 @@ public class PlayerUtilCap {
     private Set<ResourceLocation> metEntityTypesId = new HashSet<>();
     private EntityType<?> GEChosenType = null;
     @Deprecated
-    private Set<EntityType<?>> GEHiddenEntries = new HashSet<>();
-    private List<EntityType<?>> GEFavorites = new ArrayList<>();
+    private Set<ResourceLocation> GEHiddenEntries = new HashSet<>();
+    private Set<ResourceLocation> GEFavorites = new HashSet<>();
+    private Set<ResourceLocation> GENewUnseenMobs = new HashSet<>();
     public int animalAgeCd;
     
     
@@ -170,15 +171,21 @@ public class PlayerUtilCap {
         }
         if (!GEHiddenEntries.isEmpty()) {
             ListNBT list = GEHiddenEntries.stream()
-                    .map(EntityType::getRegistryName).map(Object::toString).map(StringNBT::valueOf)
+                    .map(Object::toString).map(StringNBT::valueOf)
                     .collect(ListNBT::new, ListNBT::add, ListNBT::addAll);
             nbt.put("GEHidden", list);
         }
         if (!GEFavorites.isEmpty()) {
             ListNBT list = GEFavorites.stream()
-                    .map(EntityType::getRegistryName).map(Object::toString).map(StringNBT::valueOf)
+                    .map(Object::toString).map(StringNBT::valueOf)
                     .collect(ListNBT::new, ListNBT::add, ListNBT::addAll);
             nbt.put("GEFavoritesMobs", list);
+        }
+        if (!GENewUnseenMobs.isEmpty()) {
+            ListNBT list = GEFavorites.stream()
+                    .map(Object::toString).map(StringNBT::valueOf)
+                    .collect(ListNBT::new, ListNBT::add, ListNBT::addAll);
+            nbt.put("GENewMobs", list);
         }
         nbt.putInt("AnimalAgeCd", animalAgeCd);
         return nbt;
@@ -209,17 +216,24 @@ public class PlayerUtilCap {
         MCUtil.nbtGetList(nbt, "GEHidden", StringNBT.class)
                 .map(listNbt -> listNbt
                         .stream()
-                        .map(stringNbt -> MCUtil.registryEntryFromId(stringNbt.getAsString(), ForgeRegistries.ENTITIES))
-                        .filter(Optional::isPresent).map(Optional::get)
-                        .collect(Collectors.toSet()))
+                        .map(elemNbt -> ((StringNBT) elemNbt).getAsString())
+                        .map(ResourceLocation::new)
+                        .collect(Collectors.toList()))
                 .ifPresent(hidden -> GEHiddenEntries.addAll(hidden));
         MCUtil.nbtGetList(nbt, "GEFavoritesMobs", StringNBT.class)
                 .map(listNbt -> listNbt
                         .stream()
-                        .map(stringNbt -> MCUtil.registryEntryFromId(stringNbt.getAsString(), ForgeRegistries.ENTITIES))
-                        .filter(Optional::isPresent).map(Optional::get)
-                        .collect(Collectors.toSet()))
+                        .map(elemNbt -> ((StringNBT) elemNbt).getAsString())
+                        .map(ResourceLocation::new)
+                        .collect(Collectors.toList()))
                 .ifPresent(hidden -> GEFavorites.addAll(hidden));
+        MCUtil.nbtGetList(nbt, "GENewMobs", StringNBT.class)
+                .map(listNbt -> listNbt
+                        .stream()
+                        .map(elemNbt -> ((StringNBT) elemNbt).getAsString())
+                        .map(ResourceLocation::new)
+                        .collect(Collectors.toList()))
+                .ifPresent(hidden -> GENewUnseenMobs.addAll(hidden));
         animalAgeCd = nbt.getInt("AnimalAgeCd");
         
         MCUtil.getNbtElement(nbt, "TradeCD", CompoundNBT.class).ifPresent(this::tradeCooldownFromNbt);
@@ -236,7 +250,7 @@ public class PlayerUtilCap {
         if (!metEntityTypesId.isEmpty()) {
             PacketManager.sendToClient(new MetEntityTypesPacket(metEntityTypesId), player);
         }
-        PacketManager.sendToClient(new GEUiDataPacket(this.GEHiddenEntries, this.GEFavorites, Optional.ofNullable(GEChosenType)), player);
+        PacketManager.sendToClient(new GEUiDataPacket(this.GEHiddenEntries, this.GEFavorites, this.GENewUnseenMobs, Optional.ofNullable(GEChosenType)), player);
         
         PacketManager.sendToClient(new TrKnivesCountPacket(player.getId(), knives), player);
         PacketManager.sendToClient(new TrWalkmanEarbudsPacket(player.getId(), walkmanEarbuds), player);
@@ -532,7 +546,11 @@ public class PlayerUtilCap {
     
     
     public boolean addMetEntityType(EntityType<?> entityType) {
-        return metEntityTypesId.add(entityType.getRegistryName());
+        boolean added = metEntityTypesId.add(entityType.getRegistryName());
+        if (added) {
+            GENewUnseenMobs.add(entityType.getRegistryName());
+        }
+        return added;
     }
     
     public boolean didPlayerMeetEntityType(EntityType<?> entityType) {
@@ -559,12 +577,12 @@ public class PlayerUtilCap {
 
     @Deprecated
     public boolean isGELifeformHidden(EntityType<?> type) {
-        return GEHiddenEntries.contains(type);
+        return GEHiddenEntries.contains(type.getRegistryName());
     }
 
     @Deprecated
     public boolean hideGELifeform(EntityType<?> type) {
-        if (GEHiddenEntries.add(type) && player.level.isClientSide()) {
+        if (GEHiddenEntries.add(type.getRegistryName()) && player.level.isClientSide()) {
             PacketManager.sendToServer(ClGEUiDataPacket.hiddenEntry(type));
             return true;
         }
@@ -574,7 +592,7 @@ public class PlayerUtilCap {
 
     @Deprecated
     public boolean showGELifeform(EntityType<?> type) {
-        if (GEHiddenEntries.remove(type) && player.level.isClientSide()) {
+        if (GEHiddenEntries.remove(type.getRegistryName()) && player.level.isClientSide()) {
             PacketManager.sendToServer(ClGEUiDataPacket.shownEntry(type));
             return true;
         }
@@ -583,17 +601,18 @@ public class PlayerUtilCap {
     }
     
     @Deprecated
-    public void setGEHiddenLifeforms(Collection<EntityType<?>> allHidden) {
+    public void setGEHiddenLifeforms(Collection<ResourceLocation> allHidden) {
         GEHiddenEntries.clear();
         GEHiddenEntries.addAll(allHidden);
     }
     
-    public List<EntityType<?>> getGEFavoritesView() {
-        return GEFavorites;
+    
+    public boolean isGELifeformInFavorites(EntityType<?> type) {
+        return GEFavorites.contains(type.getRegistryName());
     }
 
     public boolean GELifeformAddFav(EntityType<?> type) {
-        if (GEFavorites.add(type) && player.level.isClientSide()) {
+        if (GEFavorites.add(type.getRegistryName()) && player.level.isClientSide()) {
             PacketManager.sendToServer(ClGEUiDataPacket.favoriteAdded(type));
             return true;
         }
@@ -602,7 +621,7 @@ public class PlayerUtilCap {
     }
 
     public boolean GELifeformRemoveFav(EntityType<?> type) {
-        if (GEFavorites.remove(type) && player.level.isClientSide()) {
+        if (GEFavorites.remove(type.getRegistryName()) && player.level.isClientSide()) {
             PacketManager.sendToServer(ClGEUiDataPacket.favoriteRemoved(type));
             return true;
         }
@@ -610,11 +629,27 @@ public class PlayerUtilCap {
         return false;
     }
     
-    public void setGELifeformFavs(Collection<EntityType<?>> favorites) {
+    public void setGELifeformFavs(Collection<ResourceLocation> favorites) {
         GEFavorites.clear();
         GEFavorites.addAll(favorites);
     }
     
+    
+    public boolean isGELifeformNew(EntityType<?> type) {
+        return GENewUnseenMobs.contains(type.getRegistryName());
+    }
+    
+    public void clearGENewMobs() {
+        GENewUnseenMobs.clear();
+        if (player.level.isClientSide()) {
+            PacketManager.sendToServer(ClGEUiDataPacket.clearUnseen());
+        }
+    }
+    
+    public void setGELifeformsNew(Collection<ResourceLocation> newUnseen) {
+        GENewUnseenMobs.clear();
+        GENewUnseenMobs.addAll(newUnseen);
+    }
     
     
     

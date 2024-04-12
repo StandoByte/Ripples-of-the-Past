@@ -241,6 +241,7 @@ public class ChooseLifeformGridScreen extends ChooseLifeformScreen {
     }
     
     
+    @Override
     protected void chooseHoveredAndClose() {
         entityIconsGrid.getSelected().ifPresent(widget -> {
             minecraft.player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(
