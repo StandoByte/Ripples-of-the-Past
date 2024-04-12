@@ -668,7 +668,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     
     @Override
     public boolean isInvisibleTo(PlayerEntity player) {
-        return !player.isSpectator() && (!isVisibleForAll() && !StandUtil.playerCanSeeStands(player) || underInvisibilityEffect());
+        return !isVisibleForAll() && !StandUtil.playerCanSeeStands(player) || !player.isSpectator() && underInvisibilityEffect();
     }
 
     @Override

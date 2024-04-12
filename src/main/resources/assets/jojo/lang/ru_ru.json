@@ -504,8 +504,6 @@
   "jojo.config.standDamageMultiplier.tooltip": "Множитель урона, который применяется ко всем Стендам",
   "jojo.config.soulAscension": "Восхождение души",
   "jojo.config.soulAscension.tooltip": "",
-  "jojo.config.abilitiesBreakBlocks": "Abilities break blocks",
-  "jojo.config.abilitiesBreakBlocks.tooltip": "Whether or not Stands and abilities from the mod can break blocks.",
   "jojo.config.hamonDamageMultiplier": "Множитель урона от Хамона",
   "jojo.config.hamonDamageMultiplier.tooltip": "Damage multiplier applied to all Hamon attacks.",
   "jojo.config.hamonEnergyTicksDown": "Hamon energy ticks down",
@@ -516,6 +514,8 @@
   "jojo.config.timeStopDamageMultiplier.tooltip": "Damage multiplier for entities frozen in time.",
   "jojo.config.endermenBeyondTimeSpace": "Эндермены вне времени и пространства",
   "jojo.config.endermenBeyondTimeSpace.tooltip": "",
+  "gamerule.jojoAbilitiesBreakBlocks": "JoJo Abilities break blocks",
+  "gamerule.jojoAbilitiesBreakBlocks.tooltip": "Whether or not Stands and abilities from the JoJo mod can break blocks.",
   
   "jojo.options.client.title": "Клиентские настройки Ripples of the Past",
   "jojo.config.client.barsPosition": "Расположение полосок",

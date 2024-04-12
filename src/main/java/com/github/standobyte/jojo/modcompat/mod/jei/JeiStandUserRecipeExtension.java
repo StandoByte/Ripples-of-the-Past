@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.jei;
+package com.github.standobyte.jojo.modcompat.mod.jei;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -2,7 +2,6 @@ package com.github.standobyte.jojo.action.stand;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
@@ -20,6 +19,7 @@ import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.AgeableEntity;
@@ -78,7 +78,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     entity instanceof EnderCrystalEntity || 
                     entity instanceof BoatEntity);
         case BLOCK:
-            if (!JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).abilitiesBreakBlocks.get()) {
+            if (!JojoModUtil.breakingBlocksEnabled(user.level)) {
                 return ActionConditionResult.NEGATIVE;
             }
             if (!power.isUserCreative()) {
@@ -116,7 +116,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
         boolean itemFits = false;
         boolean hasABlock = false;
         boolean blockFits = false;
-        boolean canUseBlock = JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).abilitiesBreakBlocks.get();
+        boolean canUseBlock = JojoModUtil.breakingBlocksEnabled(user.level);
         
         ItemStack item = user.getItemInHand(Hand.OFF_HAND);
         if (!item.isEmpty()) {
@@ -295,7 +295,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     }
                 }
                 if (!tfTargetFound && target.getType() == TargetType.BLOCK
-                        && JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).abilitiesBreakBlocks.get()) {
+                        && JojoModUtil.breakingBlocksEnabled(user.level)) {
                     BlockPos blockPos = target.getBlockPos();
                     BlockState blockState = world.getBlockState(blockPos);
                     

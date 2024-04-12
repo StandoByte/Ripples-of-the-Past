@@ -103,7 +103,7 @@ public class StandUtil {
     }
     
     public static boolean playerCanSeeStands(PlayerEntity player) {
-        return isEntityStandUser(player) || player.hasEffect(ModStatusEffects.SPIRIT_VISION.get());
+        return player.isSpectator() || isEntityStandUser(player) || player.hasEffect(ModStatusEffects.SPIRIT_VISION.get());
     }
     
     public static boolean playerCanHearStands(PlayerEntity player) {

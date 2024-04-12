@@ -7,7 +7,6 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModBlocks;
@@ -151,7 +150,7 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
     }
     
     private void burnBlocksTick() {
-        if (!level.isClientSide() && !small && JojoModConfig.getCommonConfigInstance(false).abilitiesBreakBlocks.get()) {
+        if (!level.isClientSide() && !small && JojoModUtil.breakingBlocksEnabled(level)) {
             ServerWorld world = (ServerWorld) level;
             LivingEntity owner = getOwner();
             

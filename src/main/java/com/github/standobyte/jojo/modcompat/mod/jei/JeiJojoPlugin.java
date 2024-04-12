@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.jei;
+package com.github.standobyte.jojo.modcompat.mod.jei;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.crafting.StandUserRecipe;

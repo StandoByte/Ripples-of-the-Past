@@ -459,8 +459,6 @@
   "jojo.config.standDamageMultiplier.tooltip": "Multiplicador de daño aplicado a todos los Stands.",
   "jojo.config.soulAscension": "Ascensión Del alma",
   "jojo.config.soulAscension.tooltip": "",
-  "jojo.config.abilitiesBreakBlocks": "Las habilidades rompen bloques",
-  "jojo.config.abilitiesBreakBlocks.tooltip": "Ya sea que los Stands y las habilidades del mod puedan romper bloques.",
   "jojo.config.hamonDamageMultiplier": "Multiplicador de daño Hamon",
   "jojo.config.hamonDamageMultiplier.tooltip": "Multiplicador de daño aplicado a todos los ataques Hamon.",
   "jojo.config.timeStopChunkRange": "Rango de detencion de tiempo en chunks",
@@ -469,6 +467,8 @@
   "jojo.config.timeStopDamageMultiplier.tooltip": "Multiplicador de daño para entidades congeladas en el tiempo.",
   "jojo.config.endermenBeyondTimeSpace": "Endermen más allá del tiempo y el espacio",
   "jojo.config.endermenBeyondTimeSpace.tooltip": "",
+  "gamerule.jojoAbilitiesBreakBlocks": "Las habilidades rompen bloques",
+  "gamerule.jojoAbilitiesBreakBlocks.tooltip": "Ya sea que los Stands y las habilidades del mod puedan romper bloques.",
   
   "jojo.config.client.barsPosition": "Posición de las barras",
   "jojo.config.client.barsPosition.tooltip": "Posición de las barras de Energía, Resistencia y Resolución en el HUD.",

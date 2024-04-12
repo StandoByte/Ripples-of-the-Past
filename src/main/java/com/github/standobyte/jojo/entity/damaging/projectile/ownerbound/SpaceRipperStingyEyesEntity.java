@@ -129,7 +129,7 @@ public class SpaceRipperStingyEyesEntity extends OwnerBoundProjectileEntity {
     
     @Override
     public float getBaseDamage() {
-        return 0.05F + (level.getDifficulty().getId()/2);
+        return 1.0F + level.getDifficulty().getId();
     }
     
     @Override
