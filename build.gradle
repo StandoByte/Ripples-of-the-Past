@@ -81,16 +81,14 @@ mixin {
 }
 
 repositories {
-//    maven {
-//        name = "KosmX's maven"
-//        url = "https://maven.kosmx.dev/"
+    maven {
+        name = "KosmX's maven"
+        url = "https://maven.kosmx.dev/"
+    }
+//    flatDir {
+//        dirs 'lib/dev/kosmx/player-anim/player-animation-lib-forge/0.4.0+1.16.5'
+//        dirs 'lib/io/github/kosmx/bendy-lib/bendy-lib-forge/1.2.2'
 //    }
-    flatDir {
-        dirs 'lib/dev/kosmx/player-anim/player-animation-lib-forge/0.4.0+1.16.5'
-    }
-    flatDir {
-        dirs 'lib/io/github/kosmx/bendy-lib/bendy-lib-forge/1.2.2'
-    }
     maven {
         // location of the maven that hosts JEI files since January 2023
         name = "Jared's maven"
