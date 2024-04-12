@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.modintegration.client.playeranimator.anim.hamon;
+package com.github.standobyte.jojo.modcompat.mod.client.playeranimator.anim.hamon;
 
 import com.github.standobyte.jojo.action.stand.StandEntityAction.Phase;
 import com.github.standobyte.jojo.client.playeranim.IPlayerBarrageAnimation;

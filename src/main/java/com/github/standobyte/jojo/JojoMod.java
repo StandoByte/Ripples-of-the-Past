@@ -27,7 +27,7 @@ import com.github.standobyte.jojo.init.ModStructures;
 import com.github.standobyte.jojo.init.ModTags;
 import com.github.standobyte.jojo.init.ModTileEntities;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
-import com.github.standobyte.jojo.modintegration.OptionalDependencyHelper;
+import com.github.standobyte.jojo.modcompat.OptionalDependencyHelper;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkillTree;

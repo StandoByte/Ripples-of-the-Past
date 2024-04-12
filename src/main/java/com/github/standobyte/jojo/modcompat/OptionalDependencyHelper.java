@@ -1,11 +1,10 @@
-package com.github.standobyte.jojo.modintegration;
+package com.github.standobyte.jojo.modcompat;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.modintegration.safe.IVampirismModIntegration;
 
 import net.minecraftforge.fml.ModList;
 

@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.modintegration.safe;
+package com.github.standobyte.jojo.modcompat;
 
 import net.minecraft.entity.LivingEntity;
 

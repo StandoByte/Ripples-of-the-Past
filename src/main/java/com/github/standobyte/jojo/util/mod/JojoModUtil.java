@@ -18,7 +18,7 @@ import com.github.standobyte.jojo.init.ModGamerules;
 import com.github.standobyte.jojo.init.ModTags;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.item.ClothesSet;
-import com.github.standobyte.jojo.modintegration.OptionalDependencyHelper;
+import com.github.standobyte.jojo.modcompat.OptionalDependencyHelper;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlayVoiceLinePacket;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;

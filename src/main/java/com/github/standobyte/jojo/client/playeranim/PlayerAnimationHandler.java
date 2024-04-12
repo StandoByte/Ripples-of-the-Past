@@ -7,7 +7,7 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.barrage.BarrageFistAfterimagesLayer;
 import com.github.standobyte.jojo.client.render.entity.model.mob.HamonMasterModel;
 import com.github.standobyte.jojo.entity.mob.HamonMasterEntity;
-import com.github.standobyte.jojo.modintegration.OptionalDependencyHelper;
+import com.github.standobyte.jojo.modcompat.OptionalDependencyHelper;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;

@@ -1,6 +1,6 @@
-package com.github.standobyte.jojo.modintegration.vampirism;
+package com.github.standobyte.jojo.modcompat.mod.vampirism;
 
-import com.github.standobyte.jojo.modintegration.safe.IVampirismModIntegration;
+import com.github.standobyte.jojo.modcompat.IVampirismModIntegration;
 
 import de.teamlapen.vampirism.util.Helper;
 import net.minecraft.entity.LivingEntity;

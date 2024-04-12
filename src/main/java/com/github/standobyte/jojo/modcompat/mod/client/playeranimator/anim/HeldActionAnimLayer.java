@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.modintegration.client.playeranimator.anim;
+package com.github.standobyte.jojo.modcompat.mod.client.playeranimator.anim;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,7 +9,7 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
-import com.github.standobyte.jojo.modintegration.client.playeranimator.PlayerAnimatorInstalled.AnimLayerHandler;
+import com.github.standobyte.jojo.modcompat.mod.client.playeranimator.PlayerAnimatorInstalled.AnimLayerHandler;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterHamonTechnique;
 

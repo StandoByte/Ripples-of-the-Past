@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.modintegration.client.playeranimator.anim.mob;
+package com.github.standobyte.jojo.modcompat.mod.client.playeranimator.anim.mob;
 
 import com.github.standobyte.jojo.client.ClientTicking;
 import com.github.standobyte.jojo.client.playeranim.IEntityAnimApplier;
