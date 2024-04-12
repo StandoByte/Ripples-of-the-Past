@@ -1,7 +1,7 @@
-package com.github.standobyte.jojo.client.playeranim.playeranimator.anim;
+package com.github.standobyte.jojo.modintegration.client.playeranimator.anim;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.client.playeranim.playeranimator.PlayerAnimatorInstalled.AnimLayerHandler;
+import com.github.standobyte.jojo.modintegration.client.playeranimator.PlayerAnimatorInstalled.AnimLayerHandler;
 
 import dev.kosmx.playerAnim.api.layered.IAnimation;
 import dev.kosmx.playerAnim.api.layered.ModifierLayer;

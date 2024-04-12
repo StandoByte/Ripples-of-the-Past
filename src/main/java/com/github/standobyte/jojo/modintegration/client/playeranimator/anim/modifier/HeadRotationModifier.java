@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.playeranim.playeranimator.anim.modifier;
+package com.github.standobyte.jojo.modintegration.client.playeranimator.anim.modifier;
 
 import dev.kosmx.playerAnim.api.TransformType;
 import dev.kosmx.playerAnim.api.layered.modifier.AbstractModifier;

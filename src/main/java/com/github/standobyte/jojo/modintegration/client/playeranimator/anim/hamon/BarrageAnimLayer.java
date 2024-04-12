@@ -1,9 +1,9 @@
-package com.github.standobyte.jojo.client.playeranim.playeranimator.anim.hamon;
+package com.github.standobyte.jojo.modintegration.client.playeranimator.anim.hamon;
 
-import com.github.standobyte.jojo.client.playeranim.playeranimator.PlayerAnimatorInstalled.AnimLayerHandler;
-import com.github.standobyte.jojo.client.playeranim.playeranimator.anim.modifier.ArmsRotationModifier;
-import com.github.standobyte.jojo.client.playeranim.playeranimator.anim.modifier.HeadRotationModifier;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.barrage.BarrageFistAfterimagesLayer;
+import com.github.standobyte.jojo.modintegration.client.playeranimator.PlayerAnimatorInstalled.AnimLayerHandler;
+import com.github.standobyte.jojo.modintegration.client.playeranimator.anim.modifier.ArmsRotationModifier;
+import com.github.standobyte.jojo.modintegration.client.playeranimator.anim.modifier.HeadRotationModifier;
 
 import dev.kosmx.playerAnim.api.layered.IAnimation;
 import dev.kosmx.playerAnim.api.layered.ModifierLayer;

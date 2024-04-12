@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.playeranim.playeranimator.anim.hamon;
+package com.github.standobyte.jojo.modintegration.client.playeranimator.anim.hamon;
 
 import java.util.HashMap;
 import java.util.Map;

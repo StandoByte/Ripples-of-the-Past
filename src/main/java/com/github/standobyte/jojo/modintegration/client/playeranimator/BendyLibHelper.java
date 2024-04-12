@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.playeranim.playeranimator;
+package com.github.standobyte.jojo.modintegration.client.playeranimator;
 
 import dev.kosmx.playerAnim.impl.IBendHelper;
 import dev.kosmx.playerAnim.impl.animation.BendHelper;

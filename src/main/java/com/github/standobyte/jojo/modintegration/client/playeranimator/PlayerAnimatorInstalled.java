@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.playeranim.playeranimator;
+package com.github.standobyte.jojo.modintegration.client.playeranimator;
 
 import java.util.function.Function;
 
@@ -9,18 +9,18 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.client.playeranim.IEntityAnimApplier;
 import com.github.standobyte.jojo.client.playeranim.IPlayerBarrageAnimation;
 import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
-import com.github.standobyte.jojo.client.playeranim.playeranimator.anim.BusyArmsLayer;
-import com.github.standobyte.jojo.client.playeranim.playeranimator.anim.HeldActionAnimLayer;
-import com.github.standobyte.jojo.client.playeranim.playeranimator.anim.TestAnimLayer;
-import com.github.standobyte.jojo.client.playeranim.playeranimator.anim.hamon.BarrageAnimLayer;
-import com.github.standobyte.jojo.client.playeranim.playeranimator.anim.hamon.MeditationPoseLayer;
-import com.github.standobyte.jojo.client.playeranim.playeranimator.anim.hamon.PlayerBarrageAfterimagesAnim;
-import com.github.standobyte.jojo.client.playeranim.playeranimator.anim.mob.HamonMasterAnimApplier;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.barrage.BarrageFistAfterimagesLayer;
 import com.github.standobyte.jojo.client.render.entity.model.mob.HamonMasterModel;
 import com.github.standobyte.jojo.entity.mob.HamonMasterEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
+import com.github.standobyte.jojo.modintegration.client.playeranimator.anim.BusyArmsLayer;
+import com.github.standobyte.jojo.modintegration.client.playeranimator.anim.HeldActionAnimLayer;
+import com.github.standobyte.jojo.modintegration.client.playeranimator.anim.TestAnimLayer;
+import com.github.standobyte.jojo.modintegration.client.playeranimator.anim.hamon.BarrageAnimLayer;
+import com.github.standobyte.jojo.modintegration.client.playeranimator.anim.hamon.MeditationPoseLayer;
+import com.github.standobyte.jojo.modintegration.client.playeranimator.anim.hamon.PlayerBarrageAfterimagesAnim;
+import com.github.standobyte.jojo.modintegration.client.playeranimator.anim.mob.HamonMasterAnimApplier;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import dev.kosmx.playerAnim.api.AnimUtils;
