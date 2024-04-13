@@ -144,6 +144,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                     tileEntity = TileEntity.loadStatic(blockToPlace, source.sourceTileEntityNbt);
                 }
                 Block.dropResources(blockToPlace, level, blockPos, tileEntity, owner.getEntity(level), ItemStack.EMPTY);
+                // FIXME items in chest-like tile entities are lost
                 
                 blockToPlace = null;
             }

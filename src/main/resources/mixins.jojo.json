@@ -9,6 +9,8 @@
     "ServerPlayerEntityMixin",
     "ServerChunkProviderMixin",
     "FireBlockMixin",
+    "InventoryHelperMixin",
+    "AbstractFurnaceTEMixin",
     "ForgeSimpleChannelMixin",
     "TheMostUnnecessaryMixin"
   ],

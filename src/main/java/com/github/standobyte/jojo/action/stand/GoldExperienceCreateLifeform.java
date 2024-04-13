@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.action.stand;
 
+import java.util.Stack;
+
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
@@ -41,6 +43,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.PotionEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.inventory.IInventory;
 import net.minecraft.item.BucketItem;
 import net.minecraft.item.FishBucketItem;
 import net.minecraft.item.ItemStack;
@@ -302,7 +305,13 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     
                     if (!HamonOrganismInfusion.isBlockLiving(blockState)) {
                         TileEntity tileEntity = world.getBlockEntity(blockPos);
+                        
+                        if (tileEntity instanceof IInventory) {
+                            KEEP_ITEMS.add(tileEntity);
+                        }
                         world.removeBlock(blockPos, false);
+                        KEEP_ITEMS.remove(tileEntity);
+                        
                         tf.getTfSourceData().withBlockSource(blockState, blockPos, tileEntity);
                         tfTargetFound = true;
                         
@@ -340,6 +349,8 @@ public class GoldExperienceCreateLifeform extends StandAction {
             }
         }
     }
+    
+    public static final Stack<TileEntity> KEEP_ITEMS = new Stack<>();
     
     
     
