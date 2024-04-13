@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.client.ui.screen.stand.ge;
 
+import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;
@@ -11,6 +12,16 @@ public class LifeformsMobList extends LifeformsList<EntityType<?>> {
     public LifeformsMobList(Minecraft mc, int width, int height, int y0, int y1, int itemHeight,
             ChooseLifeformListScreen screen) {
         super(mc, width, height, y0, y1, itemHeight, screen);
+    }
+    
+    @Override
+    protected String getModName(EntityType<?> lifeformType) {
+        return ModInteractionUtil.getModName(lifeformType.getRegistryName());
+    }
+    
+    @Override
+    protected ITextComponent getValueName(EntityType<?> lifeformType) {
+        return lifeformType.getDescription();
     }
 
     @Override

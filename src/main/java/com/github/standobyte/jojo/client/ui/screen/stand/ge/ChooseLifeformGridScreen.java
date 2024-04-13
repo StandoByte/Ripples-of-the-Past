@@ -14,7 +14,6 @@ import com.github.standobyte.jojo.client.ui.screen.GridList;
 import com.github.standobyte.jojo.client.ui.screen.GridList.ElemMoveMode;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil.Direction2D;
-import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -86,7 +85,7 @@ public class ChooseLifeformGridScreen extends ChooseLifeformScreen {
         int xMiddle = width / 2;
         
         entityIconsGrid = GridList.create(entityTypes, SelectorWidget::new, Math.max((height - 46) / 30, 1), this, this::addButton);
-        entityIconsGrid.forEach(widget -> widget.setHidden(playerUISettings.isGELifeformHidden(widget.entityType)));
+//        entityIconsGrid.forEach(widget -> widget.setHidden(playerUISettings.isGELifeformHidden(widget.entityType)));
         
         int columnsCount = entityIconsGrid.getColumnsCount();
         int columnsCanFit = (xMax - xMin) / 30;
@@ -107,17 +106,8 @@ public class ChooseLifeformGridScreen extends ChooseLifeformScreen {
     }
     
     @Override
-    protected void filterEntries(String field) {
-        boolean emptyQuery = field == null || field.isEmpty();
-        Predicate<EntityType<?>> filter = emptyQuery ? null : 
-            entityType -> {
-                String searchLC = field.toLowerCase();
-                return entityType.getDescription().getString().toLowerCase().contains(searchLC)
-                        || ModInteractionUtil.getModName(entityType.getRegistryName()).toLowerCase().contains(searchLC)
-                        || entityType.getRegistryName().toString().contains(searchLC);
-            };
+    protected void filterEntries(Predicate<EntityType<?>> filter) {
         entityIconsGrid.setFilter(GeneralUtil.mapPredicate(filter, widget -> widget.entityType));
-        entityIconsGrid.setShowHidden(!emptyQuery);
     }
     
     

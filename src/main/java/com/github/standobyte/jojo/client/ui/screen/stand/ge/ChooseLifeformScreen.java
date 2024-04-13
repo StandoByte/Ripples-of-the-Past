@@ -4,6 +4,7 @@ import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
@@ -97,8 +98,7 @@ public abstract class ChooseLifeformScreen extends WasdAllowingScreen {
     protected void addSearchField() {
         searchField = new TextFieldWidget(minecraft.font, width - 101, height - 76, 84, 20, 
                 searchField, new TranslationTextComponent("jojo.ge_lifeform.search_field"));
-        searchField.visible = false;
-        searchField.setResponder(this::filterEntries);
+        searchField.setResponder(this::filterEntriesRaw);
         addWidget(searchField);
         
         addButton(clearSearchFieldButton = new ImageButton(width - 12, height - 70, 8, 7, 40, 112, 8, LIFEFORM_CHOOSE_LOCATION, 128, 128, 
@@ -175,8 +175,42 @@ public abstract class ChooseLifeformScreen extends WasdAllowingScreen {
             MOD_NAMES_ORDER);
     public static final Comparator<EntityType<?>> ENTITY_NAME_COMPARE = Comparator.comparing(t -> t.getDescription().getString());
     
-
-    protected abstract void filterEntries(String field);
+    protected void filterEntriesRaw(String field) {
+        Predicate<EntityType<?>> filter;
+        if (field.isEmpty()) {
+            filter = null;
+        }
+        else {
+            String[] words = field.split(" ");
+            @Nullable Predicate<String> modNameFilter = null;
+            StringBuilder nameFilter = new StringBuilder();
+            boolean maybeTypingKeyword = field.charAt(field.length() - 1) != ' ';
+            for (int i = 0; i < words.length; i++) {
+                String word = words[i];
+                word = word.toLowerCase();
+                if (word.startsWith("mod:")) {
+                    String modSearch = word.substring("mod:".length());
+                    Predicate<String> nextFilter = mod -> mod.contains(modSearch);
+                    modNameFilter = modNameFilter == null ? nextFilter : modNameFilter.or(nextFilter);
+                }
+                else {
+                    boolean isTypingKeyword = maybeTypingKeyword && i == words.length - 1 && "mod".startsWith(word);
+                    if (!isTypingKeyword) {
+                        if (nameFilter.length() > 0) {
+                            nameFilter.append(' ');
+                        }
+                        nameFilter.append(word);
+                    }
+                }
+            }
+            Predicate<String> finalModFilter = modNameFilter;
+            filter = entityType -> 
+                    (entityType.getDescription().getString().toLowerCase().contains(nameFilter) || entityType.getRegistryName().getPath().contains(nameFilter)) && 
+                    (finalModFilter == null || finalModFilter.test(ModInteractionUtil.getModName(entityType.getRegistryName()).toLowerCase()));
+        }
+        filterEntries(filter);
+    }
+    protected abstract void filterEntries(@Nullable Predicate<EntityType<?>> filter);
     
     @Override
     public void setFocused(@Nullable IGuiEventListener pListener) {
@@ -221,6 +255,9 @@ public abstract class ChooseLifeformScreen extends WasdAllowingScreen {
             else if (++ticksKeyHeld == 5) {
                 mode = ScreenCloseMode.HOLD;
             }
+        }
+        if (searchField != null) {
+            searchField.tick();
         }
     }
     

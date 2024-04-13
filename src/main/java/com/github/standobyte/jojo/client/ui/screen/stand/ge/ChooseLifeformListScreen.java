@@ -1,10 +1,12 @@
 package com.github.standobyte.jojo.client.ui.screen.stand.ge;
 
 import java.util.List;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.stand.GoldExperienceChooseLifeform;
-import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.settings.KeyBinding;
@@ -46,6 +48,7 @@ public class ChooseLifeformListScreen extends ChooseLifeformScreen {
         }
         
         addCommonWidgets(ViewMode.LIST);
+        addSearchField();
     }
     
     @Override
@@ -56,14 +59,13 @@ public class ChooseLifeformListScreen extends ChooseLifeformScreen {
                 playerUISettings.didPlayerMeetEntityType(type)
                 && GoldExperienceChooseLifeform.isValidLifeform(type, minecraft.level))
                 .collect(Collectors.toList());
-        mobList.update(entityTypes, 
-                type -> ModInteractionUtil.getModName(type.getRegistryName()),
-                EntityType::getDescription);
+        mobList.setAllLegalValues(entityTypes);
+        mobList.update(entityTypes);
     }
 
     @Override
-    protected void filterEntries(String field) {
-        
+    protected void filterEntries(@Nullable Predicate<EntityType<?>> filter) {
+        mobList.setFilter(filter);
     }
     
     @Override

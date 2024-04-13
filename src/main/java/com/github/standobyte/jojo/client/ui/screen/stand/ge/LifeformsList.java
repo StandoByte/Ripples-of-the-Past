@@ -10,8 +10,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ui.screen.widgets.TextButton;
 import com.google.common.collect.ImmutableList;
@@ -29,7 +33,6 @@ import net.minecraft.client.gui.widget.list.ExtendedList;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.entity.EntityType;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
@@ -39,11 +42,10 @@ import net.minecraft.util.text.TranslationTextComponent;
 public abstract class LifeformsList<V> extends ExtendedList<LifeformsList.LifeformsListEntry> {
     private static final Set<String> COLLAPSED_MOD_NAMES = new HashSet<>();
     
-    public static final Set<EntityType<?>> UNSEEN_ENTITY_TYPES = new HashSet<>(); // TODO
-    
     protected ChooseLifeformListScreen screen;
-
-    private Map<String, Collection<LifeformEntry>> allEntries = new HashMap<>();
+    
+    private List<V> allValues = new ArrayList<>();
+    private Map<String, List<LifeformEntry>> allVisibleEntries = new HashMap<>();
     
     public LifeformsList(Minecraft mc, int width, int height, int y0, int y1, int itemHeight, ChooseLifeformListScreen screen) {
         super(mc, width, height, y0, y1, itemHeight);
@@ -52,20 +54,29 @@ public abstract class LifeformsList<V> extends ExtendedList<LifeformsList.Lifefo
         this.setRenderTopAndBottom(false);
     }
     
-    public void update(Collection<V> lifeformValues, Function<V, String> getModName, Function<V, ITextComponent> getValueName) {
+    public void setAllLegalValues(Collection<V> allValues) {
+        this.allValues.clear();
+        this.allValues.addAll(allValues);
+    }
+    
+    public void update(Collection<V> lifeformValues) {
+        update(lifeformValues.stream());
+    }
+    
+    public void update(Stream<V> lifeformValues) {
         clearEntries();
-        allEntries.clear();
+        allVisibleEntries.clear();
 //        maxWidth = -1;
         
-        Map<String, List<V>> map = lifeformValues.stream()
-                .collect(Collectors.groupingBy(getModName));
+        Map<String, List<V>> map = lifeformValues
+                .collect(Collectors.groupingBy(this::getModName));
         map.keySet().stream().sorted(ChooseLifeformScreen.MOD_NAMES_ORDER).forEach(modName -> {
             ModCategoryEntry category = new ModCategoryEntry(modName);
             category.isExpanded = !COLLAPSED_MOD_NAMES.contains(modName);
             category.addExpandButton(new ModCategoryEntry.ExpandCollapseButton(
                     -1, -1, 10, 10, screen, button -> {
                         if (category.isExpanded) {
-                            for (LifeformEntry entryToHide : allEntries.get(modName)) {
+                            for (LifeformEntry entryToHide : allVisibleEntries.get(modName)) {
                                 removeEntry(entryToHide);
                             }
                             setScrollAmount(getScrollAmount());
@@ -75,7 +86,7 @@ public abstract class LifeformsList<V> extends ExtendedList<LifeformsList.Lifefo
                         else {
                             int index = children().indexOf(category);
                             if (index > -1) {
-                                children().addAll(index + 1, allEntries.get(modName));
+                                children().addAll(index + 1, allVisibleEntries.get(modName));
                             }
                             COLLAPSED_MOD_NAMES.remove(modName);
                             category.isExpanded = true;
@@ -85,11 +96,14 @@ public abstract class LifeformsList<V> extends ExtendedList<LifeformsList.Lifefo
 //            maxWidth = Math.max(maxWidth, minecraft.font.width(new StringTextComponent(modName)));
             
             List<LifeformEntry> entriesWithHidden = new ArrayList<>();
-            allEntries.put(modName, entriesWithHidden);
+            allVisibleEntries.put(modName, entriesWithHidden);
             
             List<V> values = map.get(modName);
-            values.stream().sorted(Comparator.comparing(getValueName.andThen(ITextComponent::getString), String::compareTo)).forEach(entryVal -> {
-                ITextComponent name = getValueName.apply(entryVal);
+            values.stream().sorted(Comparator.comparing(
+                    ((Function<V, ITextComponent>) (this::getValueName))
+                    .andThen(ITextComponent::getString), String::compareTo)).forEach(entryVal -> {
+                        
+                ITextComponent name = getValueName(entryVal);
                 
                 LifeformEntry entry = makeLifeformEntry(entryVal, name);
                 if (isNew(entryVal)) {
@@ -149,7 +163,9 @@ public abstract class LifeformsList<V> extends ExtendedList<LifeformsList.Lifefo
 //        updateSize(maxWidth + 54, this.height, y0, y1);
 //        setLeftPos(leftPos);
     }
-    
+
+    protected abstract String getModName(V lifeformType);
+    protected abstract ITextComponent getValueName(V lifeformType);
     protected abstract LifeformEntry makeLifeformEntry(V lifeformType, ITextComponent name);
     protected abstract void select(V lifeformType);
     protected abstract void addFavorite(V lifeformType);
@@ -157,6 +173,18 @@ public abstract class LifeformsList<V> extends ExtendedList<LifeformsList.Lifefo
     protected abstract boolean isInFavorites(V lifeformType);
     protected abstract boolean isNew(V lifeformType);
     protected abstract void renderHoveredTooltip(MatrixStack matrixStack, V lifeformType, int mouseX, int mouseY);
+    
+    private Predicate<V> filter = null;
+    public void setFilter(@Nullable Predicate<V> filter) {
+        this.filter = filter;
+        if (filter == null) {
+            update(allValues);
+        }
+        else {
+            update(allValues.stream().filter(filter));
+        }
+        setScrollAmount(getScrollAmount());
+    }
     
     @Override
     public int getRowWidth() {
