@@ -48,6 +48,7 @@ import net.minecraft.item.Items;
 import net.minecraft.item.ThrowablePotionItem;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -300,8 +301,9 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     BlockState blockState = world.getBlockState(blockPos);
                     
                     if (!HamonOrganismInfusion.isBlockLiving(blockState)) {
-                        tf.getTfSourceData().withBlockSource(blockState, blockPos);
+                        TileEntity tileEntity = world.getBlockEntity(blockPos);
                         world.removeBlock(blockPos, false);
+                        tf.getTfSourceData().withBlockSource(blockState, blockPos, tileEntity);
                         tfTargetFound = true;
                         
                         tf.moveTo(blockPos, performer.yRot, 0);

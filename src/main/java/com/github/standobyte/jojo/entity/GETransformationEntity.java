@@ -45,6 +45,7 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -138,7 +139,11 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                 if (!(blockToPlace.getBlock() instanceof AbstractFireBlock)) {
                     level.levelEvent(2001, blockPos, Block.getId(blockToPlace));
                 }
-                Block.dropResources(blockToPlace, level, blockPos, null, owner.getEntity(level), ItemStack.EMPTY);
+                TileEntity tileEntity = null;
+                if (source.sourceTileEntityNbt != null) {
+                    tileEntity = TileEntity.loadStatic(blockToPlace, source.sourceTileEntityNbt);
+                }
+                Block.dropResources(blockToPlace, level, blockPos, tileEntity, owner.getEntity(level), ItemStack.EMPTY);
                 
                 blockToPlace = null;
             }
@@ -172,6 +177,12 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                 }
                 else {
                     level.setBlock(blockPos, blockToPlace, 3);
+                    if (source.sourceTileEntityNbt != null) {
+                        TileEntity tileEntity = TileEntity.loadStatic(blockToPlace, source.sourceTileEntityNbt);
+                        if (tileEntity != null) {
+                            level.setBlockEntity(blockPos, tileEntity);
+                        }
+                    }
                 }
             }
         }
@@ -495,6 +506,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         private CompoundNBT sourceEntityNbt = null;
         private BlockState sourceBlockState;
         private BlockPos sourceBlockPos;
+        private CompoundNBT sourceTileEntityNbt = null;
         
         
         
@@ -503,9 +515,12 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             return this;
         }
         
-        public GETransformationData withBlockSource(BlockState blockState, BlockPos blockPos) {
+        public GETransformationData withBlockSource(BlockState blockState, BlockPos blockPos, @Nullable TileEntity tileEntity) {
             this.sourceBlockState = blockState;
             this.sourceBlockPos = blockPos;
+            if (tileEntity != null) {
+                sourceTileEntityNbt = tileEntity.save(new CompoundNBT());
+            }
             return this;
         }
         
@@ -519,6 +534,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             this.sourceEntity = other.sourceEntity;
             this.sourceBlockState = other.sourceBlockState;
             this.sourceBlockPos = other.sourceBlockPos;
+            this.sourceTileEntityNbt = other.sourceTileEntityNbt;
         }
         
         
@@ -626,6 +642,9 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             if (sourceBlockPos != null) {
                 nbt.put("GESourcePos", NBTUtil.writeBlockPos(sourceBlockPos));
             }
+            if (sourceTileEntityNbt != null) {
+                nbt.put("GESourceTE", sourceTileEntityNbt);
+            }
             if (aggroTarget != null) {
                 nbt.putUUID("Owner", aggroTarget);
             }
@@ -640,6 +659,9 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             }
             if (nbt.contains("GESourcePos", MCUtil.getNbtId(CompoundNBT.class))) {
                 sourceBlockPos = NBTUtil.readBlockPos(nbt.getCompound("GESourcePos"));
+            }
+            if (nbt.contains("GESourceTE", MCUtil.getNbtId(CompoundNBT.class))) {
+                sourceTileEntityNbt = nbt.getCompound("GESourceTE");
             }
             if (nbt.hasUUID("Owner")) {
                 aggroTarget = nbt.getUUID("Owner");
