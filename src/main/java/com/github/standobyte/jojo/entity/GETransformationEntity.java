@@ -1,7 +1,10 @@
 package com.github.standobyte.jojo.entity;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -44,6 +47,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.state.DirectionProperty;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -405,6 +409,22 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                 }
             }
             tf.source.copyFrom(source, world);
+            
+            if (tf.source.sourceBlockState != null) {
+                final BlockState directionalBlock = tf.source.sourceBlockState;
+                Optional<BlockState> rotated = directionalBlock.getProperties().stream()
+                        .filter(property -> property instanceof DirectionProperty)
+                        .findFirst()
+                        .map(property -> (DirectionProperty) property)
+                        .flatMap(property -> {
+                            Vector3d lookVec = entity.getLookAngle();
+                            Collection<Direction> possibleDirs = property.getPossibleValues();
+                            return possibleDirs.stream()
+                                    .max(Comparator.comparingDouble(dir -> lookVec.dot(new Vector3d(dir.getStepX(), dir.getStepY(), dir.getStepZ()))))
+                                    .map(closestDir -> directionalBlock.setValue(property, closestDir));
+                        });
+                rotated.ifPresent(rotatedBlock -> tf.source.sourceBlockState = rotatedBlock);
+            }
             
             copyStatus(entity, tf);
             
