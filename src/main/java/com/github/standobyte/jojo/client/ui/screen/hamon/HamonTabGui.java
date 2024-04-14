@@ -93,6 +93,7 @@ public abstract class HamonTabGui extends AbstractGui {
 
     void drawIcon(MatrixStack matrixStack, int windowX, int windowY, ItemRenderer itemRenderer) {}
     
+    @SuppressWarnings("deprecation")
     void drawContents(HamonScreen screen, MatrixStack matrixStack, int mouseX, int mouseY, float partialTick, float xOffset, float yOffset) {
         if (!leftUpperCorner) {
             scrollX = 0;
