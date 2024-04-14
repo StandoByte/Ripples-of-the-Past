@@ -29,30 +29,31 @@ public class StandVirusEffect extends StatusEffect implements IApplicableEffect 
         if (!entity.level.isClientSide() && entity instanceof PlayerEntity) {
             PlayerEntity player = (PlayerEntity) entity;
             
-            boolean tookAwayLevel = player.abilities.instabuild || player.experienceLevel > 0;
+            boolean hasXpLevel = player.abilities.instabuild || player.experienceLevel > 0;
             boolean stopEffect = false;
-            if (tookAwayLevel) {
-                player.giveExperienceLevels(-1);
+            if (hasXpLevel) {
                 stopEffect = IStandPower.getStandPowerOptional(player).map(power -> {
                     StandArrowHandler handler = power.getStandArrowHandler();
                     ItemStack arrowPiercedBy = handler.getStandArrowItem();
                     return handler.decXpLevelsTakenByArrow(player) >= handler.getStandXpLevelsRequirement(player.level.isClientSide(), arrowPiercedBy);
                 }).orElse(false);
             }
-            
-            float damage = 0.15F + amplifier * 0.2F;
-            if (tookAwayLevel) {
-                if (damage > entity.getHealth()) {
-                    damage = 0.001F;
-                }
-            }
-            else {
-                damage *= 10;
-            }
-            DamageUtil.hurtThroughInvulTicks(entity, DamageUtil.STAND_VIRUS, damage);
-            
+
             if (stopEffect) {
                 entity.removeEffect(this);
+            }
+            else {
+                player.giveExperienceLevels(-1);
+                float damage = 0.15F + amplifier * 0.2F;
+                if (hasXpLevel) {
+                    if (damage > entity.getHealth()) {
+                        damage = 0.001F;
+                    }
+                }
+                else {
+                    damage *= 10;
+                }
+                DamageUtil.hurtThroughInvulTicks(entity, DamageUtil.STAND_VIRUS, damage);
             }
         }
     }
