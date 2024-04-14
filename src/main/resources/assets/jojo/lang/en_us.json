@@ -1154,6 +1154,8 @@
   "jojo.ui.text_button_hovered": "> %s",
   "jojo.ui.favorite": "Add to Favorites",
   "jojo.ui.favorite_remove": "Remove from Favorites",
+  "jojo.ge_lifeform.grid_fav_add": "Right click to add to favorites",
+  "jojo.ge_lifeform.grid_fav_remove": "Right click to remove from favorites",
   "jojo.ui.lifeform_ui_mode.all": "All",
   "jojo.ui.lifeform_ui_mode.favs": "Favorites",
   "jojo.ui.lifeform_ui_mode.new": "New",

@@ -55,7 +55,7 @@ public abstract class ChooseLifeformScreen extends WasdAllowingScreen {
     private static String savedSearchFilter = "";
     private static FilterMode savedFilterMode = FilterMode.ALL;
 
-    private RadioButtonsList<FilterMode> filterList;
+    RadioButtonsList<FilterMode> filterList;
     private TextFieldWidget searchField;
     private Button clearSearchFieldButton;
     
@@ -167,6 +167,7 @@ public abstract class ChooseLifeformScreen extends WasdAllowingScreen {
         
         filterList = new RadioButtonsList<>(savedFilterMode, val -> {
             savedFilterMode = val;
+            onFilterRadioButton();
         });
         int x = width - 101;
         int y = height - 95;
@@ -238,9 +239,11 @@ public abstract class ChooseLifeformScreen extends WasdAllowingScreen {
                     (entityType.getDescription().getString().toLowerCase().contains(nameFilter) || entityType.getRegistryName().getPath().contains(nameFilter)) && 
                     (finalModFilter == null || finalModFilter.test(ModInteractionUtil.getModName(entityType.getRegistryName()).toLowerCase()));
         }
-        filterEntries(filter);
+        searchBarFilter(filter);
     }
-    protected abstract void filterEntries(@Nullable Predicate<EntityType<?>> filter);
+    
+    protected abstract void searchBarFilter(@Nullable Predicate<EntityType<?>> filter);
+    protected abstract void onFilterRadioButton();
     
     @Override
     public void setFocused(@Nullable IGuiEventListener pListener) {
@@ -324,6 +327,13 @@ public abstract class ChooseLifeformScreen extends WasdAllowingScreen {
     
     private static final DecimalFormat SIZE_FORMAT = new DecimalFormat("0.0");
     protected void renderHoveredTooltip(MatrixStack matrixStack, EntityType<?> entityType, int mouseX, int mouseY) {
+        List<ITooltipLine> entityTypeInfo = makeHoveredTooltip(entityType);
+        entityTypeInfo.stream().map(line -> line.getWidth(font)).max(Comparator.naturalOrder()).ifPresent(tooltipWidth -> {
+            CustomTooltipRender.renderWrappedToolTip(matrixStack, entityTypeInfo, mouseX, mouseY, font);
+        });
+    }
+    
+    protected List<ITooltipLine> makeHoveredTooltip(EntityType<?> entityType) {
         List<ITooltipLine> entityTypeInfo = new ArrayList<>();
         
         entityTypeInfo.add(new TextTooltipLine(entityType.getDescription()));
@@ -354,9 +364,7 @@ public abstract class ChooseLifeformScreen extends WasdAllowingScreen {
         
 //        entityTypeInfo.add(new TextTooltipLine(new StringTextComponent(String.valueOf(GoldExperienceCreateLifeform.getVolume(entity)))));
         
-        entityTypeInfo.stream().map(line -> line.getWidth(font)).max(Comparator.naturalOrder()).ifPresent(tooltipWidth -> {
-            CustomTooltipRender.renderWrappedToolTip(matrixStack, entityTypeInfo, mouseX, mouseY, font);
-        });
+        return entityTypeInfo;
     }
     
     @Override

@@ -64,13 +64,17 @@ public abstract class LifeformsList<V> extends ExtendedList<LifeformsList.Lifefo
     }
     
     public void update(Stream<V> lifeformValues) {
+        update(lifeformValues.collect(Collectors.groupingBy(this::getModName)));
+    }
+    
+    private void update(Map<String, List<V>> byModName) {
         clearEntries();
         allVisibleEntries.clear();
 //        maxWidth = -1;
         
-        Map<String, List<V>> map = lifeformValues
-                .collect(Collectors.groupingBy(this::getModName));
-        map.keySet().stream().sorted(ChooseLifeformScreen.MOD_NAMES_ORDER).forEach(modName -> {
+        byModName.entrySet().stream().sorted(Comparator.comparing(Map.Entry::getKey, ChooseLifeformScreen.MOD_NAMES_ORDER)).forEach(modEntry -> {
+            String modName = modEntry.getKey();
+            
             ModCategoryEntry category = new ModCategoryEntry(modName);
             category.isExpanded = !COLLAPSED_MOD_NAMES.contains(modName);
             category.addExpandButton(new ModCategoryEntry.ExpandCollapseButton(
@@ -98,7 +102,7 @@ public abstract class LifeformsList<V> extends ExtendedList<LifeformsList.Lifefo
             List<LifeformEntry> entriesWithHidden = new ArrayList<>();
             allVisibleEntries.put(modName, entriesWithHidden);
             
-            List<V> values = map.get(modName);
+            List<V> values = modEntry.getValue();
             values.stream().sorted(Comparator.comparing(
                     ((Function<V, ITextComponent>) (this::getValueName))
                     .andThen(ITextComponent::getString), String::compareTo)).forEach(entryVal -> {
@@ -174,16 +178,32 @@ public abstract class LifeformsList<V> extends ExtendedList<LifeformsList.Lifefo
     protected abstract boolean isNew(V lifeformType);
     protected abstract void renderHoveredTooltip(MatrixStack matrixStack, V lifeformType, int mouseX, int mouseY);
     
-    private Predicate<V> filter = null;
-    public void setFilter(@Nullable Predicate<V> filter) {
-        this.filter = filter;
-        if (filter == null) {
-            update(allValues);
-        }
-        else {
-            update(allValues.stream().filter(filter));
-        }
+    private Predicate<V> searchBarFilter = null;
+    public void setSearchBarFilter(@Nullable Predicate<V> filter) {
+        this.searchBarFilter = filter;
+        doFilter();
         setScrollAmount(getScrollAmount());
+    }
+    
+    public void updateRadioButtonFilter() {
+        doFilter();
+        setScrollAmount(getScrollAmount());
+    }
+    
+    protected void doFilter() {
+        Predicate<V> filter = searchBarFilter != null ? searchBarFilter : v -> true;
+        switch (screen.filterList.getSelectedValue()) {
+        case FAVORITES:
+            filter = filter.and(this::isInFavorites);
+            break;
+        case NEW:
+            filter = filter.and(this::isNew);
+            break;
+        default:
+            break;
+        }
+        
+        update(allValues.stream().filter(filter));
     }
     
     @Override
@@ -289,15 +309,21 @@ public abstract class LifeformsList<V> extends ExtendedList<LifeformsList.Lifefo
 
             RenderSystem.disableBlend();
         }
+        RenderSystem.enableTexture();
 
         // moved it lower to render tooltips on top of the scroll bar
         this.renderList(pMatrixStack, j1, k, pMouseX, pMouseY, pPartialTicks);
 
         this.renderDecorations(pMatrixStack, pMouseX, pMouseY);
-        RenderSystem.enableTexture();
         RenderSystem.shadeModel(7424);
         RenderSystem.enableAlphaTest();
         RenderSystem.disableBlend();
+    }
+    
+    @Override
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+        this.setScrollAmount(this.getScrollAmount() - delta * itemHeight);
+        return true;
     }
     
     protected abstract static class LifeformsListEntry extends AbstractOptionList.Entry<LifeformsListEntry> {}

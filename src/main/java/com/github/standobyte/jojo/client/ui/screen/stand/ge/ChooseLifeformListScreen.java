@@ -67,8 +67,13 @@ public class ChooseLifeformListScreen extends ChooseLifeformScreen {
     }
 
     @Override
-    protected void filterEntries(@Nullable Predicate<EntityType<?>> filter) {
-        mobList.setFilter(filter);
+    protected void searchBarFilter(@Nullable Predicate<EntityType<?>> filter) {
+        mobList.setSearchBarFilter(filter);
+    }
+    
+    @Override
+    protected void onFilterRadioButton() {
+        mobList.updateRadioButtonFilter();
     }
     
     @Override

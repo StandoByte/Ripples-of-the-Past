@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
 import org.lwjgl.glfw.GLFW;
 
 import com.github.standobyte.jojo.action.stand.GoldExperienceChooseLifeform;
@@ -12,6 +14,8 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.InputHandler.MouseButton;
 import com.github.standobyte.jojo.client.ui.screen.GridList;
 import com.github.standobyte.jojo.client.ui.screen.GridList.ElemMoveMode;
+import com.github.standobyte.jojo.client.ui.tooltip.ITooltipLine;
+import com.github.standobyte.jojo.client.ui.tooltip.TextTooltipLine;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil.Direction2D;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -25,6 +29,11 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.registries.ForgeRegistries;
 
@@ -84,7 +93,14 @@ public class ChooseLifeformGridScreen extends ChooseLifeformScreen {
         int xMax = width - 136;
         int xMiddle = width / 2;
         
-        entityIconsGrid = GridList.create(entityTypes, SelectorWidget::new, Math.max((height - 46) / 30, 1), this, this::addButton);
+        entityIconsGrid = GridList.create(entityTypes, 
+                entityType -> {
+                    SelectorWidget widget = new SelectorWidget(entityType);
+                    widget.isNew = playerUISettings.isGELifeformNew(entityType);
+                    widget.isInFavorite = playerUISettings.isGELifeformInFavorites(entityType);
+                    return widget;
+                }, 
+                Math.max((height - 46) / 30, 1), this, this::addButton);
 //        entityIconsGrid.forEach(widget -> widget.setHidden(playerUISettings.isGELifeformHidden(widget.entityType)));
         
         int columnsCount = entityIconsGrid.getColumnsCount();
@@ -105,8 +121,34 @@ public class ChooseLifeformGridScreen extends ChooseLifeformScreen {
         entityIconsGrid.setMaxWidth(xMax + 36 - x);
     }
     
+    private Predicate<EntityType<?>> searchBarFilter;
     @Override
-    protected void filterEntries(Predicate<EntityType<?>> filter) {
+    protected void searchBarFilter(@Nullable Predicate<EntityType<?>> filter) {
+        this.searchBarFilter = filter;
+        doFilter();
+    }
+    
+    @Override
+    protected void onFilterRadioButton() {
+        doFilter();
+    }
+    
+    protected void doFilter() {
+        Predicate<EntityType<?>> filter;
+        switch (filterList.getSelectedValue()) {
+        case FAVORITES:
+            filter = playerUISettings::isGELifeformInFavorites;
+            break;
+        case NEW:
+            filter = playerUISettings::isGELifeformNew;
+            break;
+        default:
+            filter = e -> true;
+            break;
+        }
+        if (searchBarFilter != null) {
+            filter = filter.and(searchBarFilter);
+        }
         entityIconsGrid.setFilter(GeneralUtil.mapPredicate(filter, widget -> widget.entityType));
     }
     
@@ -118,6 +160,26 @@ public class ChooseLifeformGridScreen extends ChooseLifeformScreen {
         entityIconsGrid.renderGrid(matrixStack, mouseX, mouseY, partialTicks);
         super.render(matrixStack, mouseX, mouseY, partialTicks);
         entityIconsGrid.getSelected().ifPresent(widget -> renderHoveredTooltip(matrixStack, widget.entityType, mouseX, mouseY));
+    }
+    
+    @Override
+    protected List<ITooltipLine> makeHoveredTooltip(EntityType<?> entityType) {
+        List<ITooltipLine> tooltip = super.makeHoveredTooltip(entityType);
+        tooltip.add(new TextTooltipLine(StringTextComponent.EMPTY));
+        
+        ITextComponent favHint = (playerUISettings.isGELifeformInFavorites(entityType) ? 
+                new TranslationTextComponent("jojo.ge_lifeform.grid_fav_remove") : new TranslationTextComponent("jojo.ge_lifeform.grid_fav_add"))
+                .withStyle(TextFormatting.DARK_GRAY, TextFormatting.ITALIC);
+        int width = tooltip.stream().mapToInt(line -> line.getWidth(minecraft.font)).max().orElse(-1);
+        if (width > -1) {
+            minecraft.font.getSplitter().splitLines(favHint, width, Style.EMPTY)
+                .forEach(line -> tooltip.add(new TextTooltipLine(line)));
+        }
+        else {
+            tooltip.add(new TextTooltipLine(favHint));
+        }
+        
+        return tooltip;
     }
     
     private void updateHoveredElement(int mouseX, int mouseY) {
@@ -182,15 +244,14 @@ public class ChooseLifeformGridScreen extends ChooseLifeformScreen {
                 chooseHoveredAndClose();
                 return true;
             case RIGHT:
-                // TODO add/remove favorite
-//                getEntriesUiData(minecraft.player).ifPresent(playerData -> {
-//                    if (playerData.isGELifeformHidden(hovered.entityType)) {
-//                        showEntry(hovered, false);
-//                    }
-//                    else {
-//                        hideEntry(hovered);
-//                    }
-//                });
+                if (hovered.isInFavorite) {
+                    playerUISettings.GELifeformRemoveFav(hovered.entityType);
+                    hovered.isInFavorite = false;
+                }
+                else {
+                    playerUISettings.GELifeformAddFav(hovered.entityType);
+                    hovered.isInFavorite = true;
+                }
                 return true;
             default:
                 break;
@@ -255,6 +316,8 @@ public class ChooseLifeformGridScreen extends ChooseLifeformScreen {
         private final EntityType<?> entityType;
         private boolean isSelected;
         private boolean isHidden;
+        private boolean isNew;
+        private boolean isInFavorite;
         
         private SelectorWidget(EntityType<?> entityType) {
             super(0, 0, 24, 24, entityType.getDescription());
@@ -281,7 +344,12 @@ public class ChooseLifeformGridScreen extends ChooseLifeformScreen {
                 RenderSystem.color4f(1, 1, 1, 0.25F);
             }
             
-            blit(matrixStack, x, y, 0, 0, 24, 24, 128, 128);
+            if (isNew) {
+                blit(matrixStack, x, y, 24, 24, 24, 24, 128, 128);
+            }
+            else {
+                blit(matrixStack, x, y, 0, 0, 24, 24, 128, 128);
+            }
 
             EntityTypeIcon.renderIcon(entityType, matrixStack, x + 4, y + 4);
             
@@ -296,6 +364,11 @@ public class ChooseLifeformGridScreen extends ChooseLifeformScreen {
             else if (this.entityType == playerUISettings.getGEChosenLifeformType()) {
                 mc.getTextureManager().bind(LIFEFORM_CHOOSE_LOCATION);
                 blit(matrixStack, x, y, 0, 24, 24, 24, 128, 128);
+            }
+            
+            if (isInFavorite) {
+                mc.getTextureManager().bind(LIFEFORM_CHOOSE_LOCATION);
+                blit(matrixStack, x + width - 5, y - 3, 119, 9, 9, 9, 128, 128);
             }
         }
         

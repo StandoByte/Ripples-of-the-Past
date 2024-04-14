@@ -33,8 +33,8 @@ public class RadioButtonsList<V> implements INestedGuiEventHandler {
     
     public RadioButtonsList<V> addButton(int x, int y, ITextComponent name, V value) {
         RadioButton button = new RadioButton(x, y, name, b -> {
-            onNewValue(value);
             this.selectedValue = value;
+            onNewValue(value);
         }, this, value);
         radioButtons.add(button);
         return this;
