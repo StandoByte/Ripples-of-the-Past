@@ -62,11 +62,17 @@ public class StandVirusEffect extends StatusEffect implements IApplicableEffect 
         super.removeAttributeModifiers(entity, attributeMap, amplifier);
         if (!entity.level.isClientSide() && entity.isAlive() && entity instanceof PlayerEntity) {
             PlayerEntity player = (PlayerEntity) entity;
-            StandType<?> stand = StandUtil.randomStand(player, player.getRandom());
-            if (stand != null) {
-                IStandPower.getStandPowerOptional(player).ifPresent(
-                        power -> StandArrowItem.giveStandFromArrow(player, power, stand));
-            }
+            IStandPower.getStandPowerOptional(player).ifPresent(
+                    power -> {
+                        StandType<?> stand = power.getStandArrowHandler().getStandToGive();
+                        power.getStandArrowHandler().clearStandToGive();
+                        if (stand == null) {
+                            stand = StandUtil.randomStand(player, player.getRandom());
+                        }
+                        if (stand != null) {
+                            StandArrowItem.giveStandFromArrow(player, power, stand);
+                        }
+                    });
         }
     }
     

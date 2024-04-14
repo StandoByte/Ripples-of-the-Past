@@ -111,6 +111,12 @@ public class StandArrowItem extends ArrowItem {
                         return giveStandFromArrow(player, standCap, stand);
                     }
                     else {
+                        StandType<?> standToGive = StandUtil.randomStand(player, player.getRandom());
+                        if (standToGive == null) {
+                            return false;
+                        }
+                        standCap.getStandArrowHandler().startArrowEffectSetStand(standToGive);
+                        
                         int virusEffectDuration = StandVirusEffect.getEffectDurationToApply(player);
                         if (virusEffectDuration > 0) {
                             int inhibitionLevel = EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.VIRUS_INHIBITION.get(), stack);

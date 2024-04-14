@@ -36,6 +36,12 @@ public class CustomRegistryHolder<V extends IForgeRegistryEntry<V>> {
         return registrySupplier.get();
     }
     
+    @Nullable
+    public V getValue(ResourceLocation id) { // why do registries even have default values?
+        IForgeRegistry<V> registry = getRegistry();
+        return registry.containsKey(id) ? registry.getValue(id) : null;
+    }
+    
     @Nonnull
     public String getKeyAsString(V powerType) {
         ResourceLocation resourceLocation = getRegistry().getKey(powerType);
