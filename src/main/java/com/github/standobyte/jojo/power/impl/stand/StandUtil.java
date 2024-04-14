@@ -73,7 +73,7 @@ public class StandUtil {
         LEAST_TAKEN {
             @Override
             public List<StandType<?>> limitStandPool(ServerWorld world, List<StandType<?>> availableStands) {
-                return SaveFileUtilCapProvider.getSaveFileCap(world.getServer()).getNotTakenStands(availableStands);
+                return SaveFileUtilCapProvider.getSaveFileCap(world.getServer()).getLeastTakenStands(availableStands);
             }
         },
         NOT_TAKEN {
