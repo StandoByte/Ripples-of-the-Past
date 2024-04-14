@@ -187,7 +187,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
 //        }
         
         return player.getCapability(PlayerUtilCapProvider.CAPABILITY).resolve()
-                .map(playerData -> playerData.getGEChosenLifeformType()).orElse(null);
+                .map(playerData -> playerData.getGELifeformsUIState().getGEChosenLifeformType()).orElse(null);
     }
     
     public static Entity createEntity(EntityType<?> type, World world, LivingEntity standUser) {

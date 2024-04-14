@@ -222,7 +222,6 @@ public abstract class LifeformsList<V> extends ExtendedList<LifeformsList.Lifefo
 //            this.renderHeader(pMatrixStack, j1, k, tessellator);
 //        }
 
-        this.renderList(pMatrixStack, j1, k, pMouseX, pMouseY, pPartialTicks);
 //        if (this.renderTopAndBottom) {
 //            this.minecraft.getTextureManager().bind(AbstractGui.BACKGROUND_LOCATION);
 //            RenderSystem.enableDepthTest();
@@ -287,9 +286,12 @@ public abstract class LifeformsList<V> extends ExtendedList<LifeformsList.Lifefo
             bufferbuilder.vertex((double)(j - 1), (double)i2, 0.0D).uv(1.0F, 0.0F).color(192, 192, 192, scrollBarAlpha).endVertex();
             bufferbuilder.vertex((double)i, (double)i2, 0.0D).uv(0.0F, 0.0F).color(192, 192, 192, scrollBarAlpha).endVertex();
             tessellator.end();
-            
+
             RenderSystem.disableBlend();
         }
+
+        // moved it lower to render tooltips on top of the scroll bar
+        this.renderList(pMatrixStack, j1, k, pMouseX, pMouseY, pPartialTicks);
 
         this.renderDecorations(pMatrixStack, pMouseX, pMouseY);
         RenderSystem.enableTexture();

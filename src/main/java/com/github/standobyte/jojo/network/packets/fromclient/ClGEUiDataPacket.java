@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.network.packets.fromclient;
 import java.util.Optional;
 import java.util.function.Supplier;
 
+import com.github.standobyte.jojo.capability.entity.LifeformsUIState;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
@@ -18,16 +19,6 @@ public class ClGEUiDataPacket {
     
     public static ClGEUiDataPacket chosenEntityType(Optional<EntityType<?>> entityType) {
         return new ClGEUiDataPacket(Type.CHOSEN_ENTITY_TYPE, entityType);
-    }
-    
-    @Deprecated
-    public static ClGEUiDataPacket hiddenEntry(EntityType<?> entityType) {
-        return new ClGEUiDataPacket(Type.HIDDEN_ENTRY, Optional.of(entityType));
-    }
-
-    @Deprecated
-    public static ClGEUiDataPacket shownEntry(EntityType<?> entityType) {
-        return new ClGEUiDataPacket(Type.SHOWN_ENTRY, Optional.of(entityType));
     }
     
     public static ClGEUiDataPacket favoriteAdded(EntityType<?> entityType) {
@@ -68,24 +59,19 @@ public class ClGEUiDataPacket {
         public void handle(ClGEUiDataPacket msg, Supplier<NetworkEvent.Context> ctx) {
             ServerPlayerEntity player = ctx.get().getSender();
             player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                LifeformsUIState state = cap.getGELifeformsUIState();
                 switch (msg.type) {
                 case CHOSEN_ENTITY_TYPE:
-                    cap.setGEChosenLifeformType(msg.entityType.orElse(null), false);
-                    break;
-                case HIDDEN_ENTRY:
-                    cap.hideGELifeform(msg.entityType.get());
-                    break;
-                case SHOWN_ENTRY:
-                    cap.showGELifeform(msg.entityType.get());
+                    state.setGEChosenLifeformType(msg.entityType.orElse(null), false);
                     break;
                 case FAVORITE_ADDED:
-                    cap.GELifeformAddFav(msg.entityType.get());
+                    state.GELifeformAddFav(msg.entityType.get());
                     break;
                 case FAVORITE_REMOVED:
-                    cap.GELifeformRemoveFav(msg.entityType.get());
+                    state.GELifeformRemoveFav(msg.entityType.get());
                     break;
                 case CLEAR_UNSEEN:
-                    cap.clearGENewMobs();
+                    state.clearGENewMobs();
                     break;
                 }
             });
@@ -101,10 +87,6 @@ public class ClGEUiDataPacket {
     
     private enum Type {
         CHOSEN_ENTITY_TYPE,
-        @Deprecated
-        HIDDEN_ENTRY,
-        @Deprecated
-        SHOWN_ENTRY,
         FAVORITE_ADDED,
         FAVORITE_REMOVED,
         CLEAR_UNSEEN

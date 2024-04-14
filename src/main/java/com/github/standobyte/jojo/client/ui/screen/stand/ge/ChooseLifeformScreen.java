@@ -13,7 +13,7 @@ import org.lwjgl.glfw.GLFW;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.GoldExperienceChooseLifeform;
 import com.github.standobyte.jojo.action.stand.GoldExperienceCreateLifeform;
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
+import com.github.standobyte.jojo.capability.entity.LifeformsUIState;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -21,6 +21,7 @@ import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.ui.screen.ScreenCloseMode;
 import com.github.standobyte.jojo.client.ui.screen.WasdAllowingScreen;
 import com.github.standobyte.jojo.client.ui.screen.widgets.ImageVanillaButton;
+import com.github.standobyte.jojo.client.ui.screen.widgets.RadioButtonsList;
 import com.github.standobyte.jojo.client.ui.tooltip.CustomTooltipRender;
 import com.github.standobyte.jojo.client.ui.tooltip.ITooltipLine;
 import com.github.standobyte.jojo.client.ui.tooltip.IconTooltipLine;
@@ -42,15 +43,19 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public abstract class ChooseLifeformScreen extends WasdAllowingScreen {
-    protected PlayerUtilCap playerUISettings;
+    protected LifeformsUIState playerUISettings;
     
+    // TODO save those on server instead
     private static String savedSearchFilter = "";
-    
+    private static FilterMode savedFilterMode = FilterMode.ALL;
+
+    private RadioButtonsList<FilterMode> filterList;
     private TextFieldWidget searchField;
     private Button clearSearchFieldButton;
     
@@ -81,6 +86,17 @@ public abstract class ChooseLifeformScreen extends WasdAllowingScreen {
         LIST
     }
     
+    public enum FilterMode {
+        ALL(new TranslationTextComponent("jojo.ui.lifeform_ui_mode.all")),
+        FAVORITES(new TranslationTextComponent("jojo.ui.lifeform_ui_mode.favs")),
+        NEW(new TranslationTextComponent("jojo.ui.lifeform_ui_mode.new"));
+        
+        public final ITextComponent uiName;
+        private FilterMode(ITextComponent uiName) {
+            this.uiName = uiName;
+        }
+    }
+    
     
     
     public ChooseLifeformScreen(KeyBinding keyHeld) {
@@ -92,7 +108,7 @@ public abstract class ChooseLifeformScreen extends WasdAllowingScreen {
     @Override
     protected void init() {
         super.init();
-        playerUISettings = minecraft.player.getCapability(PlayerUtilCapProvider.CAPABILITY).resolve().get();
+        playerUISettings = minecraft.player.getCapability(PlayerUtilCapProvider.CAPABILITY).resolve().get().getGELifeformsUIState();
     }
     
     protected void addSearchField() {
@@ -149,6 +165,18 @@ public abstract class ChooseLifeformScreen extends WasdAllowingScreen {
         addButton(listModeButton);
         addButton(gridModeButton);
         
+        filterList = new RadioButtonsList<>(savedFilterMode, val -> {
+            savedFilterMode = val;
+        });
+        int x = width - 101;
+        int y = height - 95;
+        for (int i = FilterMode.values().length - 1; i >= 0; i--) {
+            FilterMode mode = FilterMode.values()[i];
+            filterList.addButton(x, y, mode.uiName, mode);
+            y -= 16;
+        }
+        addWidget(filterList);
+        
         Button unlockAllButton = new Button(width - 101, height - 24, 95, 20, new TranslationTextComponent("jojo.ge_lifeform.unlock_all"), 
                 button -> {
                     GoldExperienceChooseLifeform.unlockAllEntityTypes(mc.player);
@@ -170,12 +198,14 @@ public abstract class ChooseLifeformScreen extends WasdAllowingScreen {
         return name1.compareTo(name2);
     };
     
-    public static final Comparator<EntityType<?>> FUCK_GENERICS = Comparator.comparing(
+    public static final Comparator<EntityType<?>> ENTITY_MOD_NAME_COMPARE = Comparator.comparing(
             type -> ModInteractionUtil.getModName(type.getRegistryName()),
             MOD_NAMES_ORDER);
     public static final Comparator<EntityType<?>> ENTITY_NAME_COMPARE = Comparator.comparing(t -> t.getDescription().getString());
     
     protected void filterEntriesRaw(String field) {
+        savedSearchFilter = field;
+        
         Predicate<EntityType<?>> filter;
         if (field.isEmpty()) {
             filter = null;
@@ -279,6 +309,9 @@ public abstract class ChooseLifeformScreen extends WasdAllowingScreen {
         if (searchField != null) {
             searchField.render(matrixStack, mouseX, mouseY, partialTicks);
         }
+        if (filterList != null) {
+            filterList.render(matrixStack, mouseX, mouseY, partialTicks);
+        }
         super.render(matrixStack, mouseX, mouseY, partialTicks);
         
         if (!holdsButton && mode == ScreenCloseMode.HOLD) {
@@ -361,9 +394,6 @@ public abstract class ChooseLifeformScreen extends WasdAllowingScreen {
     @Override
     public void onClose() {
         super.onClose();
-        if (searchField != null) {
-            savedSearchFilter = searchField.getValue();
-        }
         playerUISettings.clearGENewMobs();
     }
     

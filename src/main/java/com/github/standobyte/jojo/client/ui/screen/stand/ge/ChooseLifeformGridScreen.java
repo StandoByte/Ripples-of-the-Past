@@ -71,7 +71,7 @@ public class ChooseLifeformGridScreen extends ChooseLifeformScreen {
                 .filter(type -> 
                     GeneralUtil.orElseFalse(metEntityTypesCap, cap -> cap.didPlayerMeetEntityType(type))
                     && GoldExperienceChooseLifeform.isValidLifeform(type, minecraft.level))
-                .sorted(FUCK_GENERICS.thenComparing(ENTITY_NAME_COMPARE))
+                .sorted(ENTITY_MOD_NAME_COMPARE.thenComparing(ENTITY_NAME_COMPARE))
                 .collect(Collectors.toList());
         
         initSelectionGrid(entityTypes);
@@ -234,8 +234,7 @@ public class ChooseLifeformGridScreen extends ChooseLifeformScreen {
     @Override
     protected void chooseHoveredAndClose() {
         entityIconsGrid.getSelected().ifPresent(widget -> {
-            minecraft.player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(
-                    cap -> cap.setGEChosenLifeformType(widget.entityType, true));
+            playerUISettings.setGEChosenLifeformType(widget.entityType, true);
         });
         onClose();
     }

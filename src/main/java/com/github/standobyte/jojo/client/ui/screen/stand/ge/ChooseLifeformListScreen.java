@@ -7,6 +7,8 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.stand.GoldExperienceChooseLifeform;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.settings.KeyBinding;
@@ -31,7 +33,7 @@ public class ChooseLifeformListScreen extends ChooseLifeformScreen {
         int plantsListX = 4;
         int plantsListWidth = 135;
         
-        mobList = new LifeformsMobList(minecraft, 135, 0, 27, height - 27, 13, this);
+        mobList = new LifeformsMobList(minecraft, 135, 0, 27, height - 50, 13, this);
         mobList.setLeftPos(plantsListX + plantsListWidth + 20);
         addWidget(mobList);
         
@@ -53,10 +55,11 @@ public class ChooseLifeformListScreen extends ChooseLifeformScreen {
     
     @Override
     public void refreshEntityTypes() {
+        PlayerUtilCap metLifeforms = minecraft.player.getCapability(PlayerUtilCapProvider.CAPABILITY).resolve().get();
         List<EntityType<?>> entityTypes = ForgeRegistries.ENTITIES.getValues()
                 .stream()
                 .filter(type -> 
-                playerUISettings.didPlayerMeetEntityType(type)
+                metLifeforms.didPlayerMeetEntityType(type)
                 && GoldExperienceChooseLifeform.isValidLifeform(type, minecraft.level))
                 .collect(Collectors.toList());
         mobList.setAllLegalValues(entityTypes);
