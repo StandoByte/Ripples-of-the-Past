@@ -77,7 +77,7 @@ public class VampirismClawLacerate extends VampirismAction {
                 if (entity instanceof LivingEntity) {
                     LivingEntity targetEntity = (LivingEntity) entity;
                     PlayerEntity pEntity = (PlayerEntity) user;
-                    if (entity.hurt(EntityDamageSource.playerAttack(pEntity), getDamage(world))) {
+                    if (entity.hurt(EntityDamageSource.playerAttack(pEntity), getDamage(world, user))) {
                     	world.playSound(null, targetEntity.getX(), targetEntity.getEyeY(), targetEntity.getZ(), ModSounds.THE_WORLD_PUNCH_HEAVY_ENTITY.get(), targetEntity.getSoundSource(), 1.2F, 0.8F);
                     	targetEntity.knockback(2F, user.getX()-targetEntity.getX(), user.getZ()-targetEntity.getZ());
                     }
@@ -89,8 +89,8 @@ public class VampirismClawLacerate extends VampirismAction {
     }
 }
     
-    protected float getDamage(World world) {
-        return 8.0F + world.getDifficulty().getId();
+    protected float getDamage(World world, LivingEntity entity) {
+        return (float) entity.getAttribute(Attributes.ATTACK_DAMAGE).getValue() + 4;
     }
 
 }

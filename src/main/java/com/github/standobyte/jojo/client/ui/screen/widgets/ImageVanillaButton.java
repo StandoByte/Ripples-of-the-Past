@@ -87,6 +87,7 @@ public class ImageVanillaButton extends Button {
         this.y = pY;
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public void renderButton(MatrixStack pMatrixStack, int pMouseX, int pMouseY, float pPartialTicks) {
         Minecraft minecraft = Minecraft.getInstance();

@@ -39,7 +39,7 @@ public class StandDiscISTER extends ItemStackTileEntityRenderer {
         
         
         
-        StandInstance stand = StandDiscItem.getStandFromStack(itemStack, true);
+        StandInstance stand = StandDiscItem.getStandFromStack(itemStack);
         if (stand != null) {
             renderStandIcon(matrixStack, stand, itemStack, buffer, light, overlay);
         }
