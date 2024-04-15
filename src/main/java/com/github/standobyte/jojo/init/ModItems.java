@@ -121,9 +121,9 @@ public class ModItems {
     public static final RegistryObject<TommyGunItem> TOMMY_GUN = ITEMS.register("tommy_gun",
             () -> new TommyGunItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
 
-    public static final RegistryObject<MolotovItem> MOLOTOV = ITEMS.register("molotov",
-            () -> new MolotovItem(new Item.Properties().tab(MAIN_TAB).stacksTo(16)));
-
+//    public static final RegistryObject<MolotovItem> MOLOTOV = ITEMS.register("molotov",
+//            () -> new MolotovItem(new Item.Properties().tab(MAIN_TAB).stacksTo(16)));
+//
 //    public static final RegistryObject<LargeCrossbowItem> LARGE_CROSSBOW = ITEMS.register("large_crossbow",
 //            () -> new LargeCrossbowItem(new Item.Properties().tab(MAIN_TAB).durability(652)));
 //
