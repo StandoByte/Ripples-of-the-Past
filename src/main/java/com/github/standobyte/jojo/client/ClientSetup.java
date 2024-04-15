@@ -26,9 +26,11 @@ import com.github.standobyte.jojo.client.render.armor.model.GlovesModel;
 import com.github.standobyte.jojo.client.render.armor.model.SatiporojaScarfArmorModel;
 import com.github.standobyte.jojo.client.render.armor.model.StoneMaskModel;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.EnergyRippleLayer;
+import com.github.standobyte.jojo.client.render.entity.layerrenderer.FrozenLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.GlovesLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.HamonBurnLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.KnifeLayer;
+import com.github.standobyte.jojo.client.render.entity.layerrenderer.LadybugBroochLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.SpecialHeldItemLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.TornadoOverdriveEffectLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.barrage.BarrageFistAfterimagesLayer;
@@ -186,6 +188,7 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SNAKE_MUFFLER.get(), SnakeMufflerRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.TOMMY_GUN_BULLET.get(), TommyGunBulletRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.KNIFE.get(), KnifeRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.MOLOTOV.get(), manager -> new SpriteRenderer<>(manager, Minecraft.getInstance().getItemRenderer(), 1.0F, true));
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.STAND_ARROW.get(), StandArrowRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SOUL.get(), SoulRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.PILLARMAN_TEMPLE_ENGRAVING.get(), PillarmanTempleEngravingRenderer::new);
@@ -315,6 +318,7 @@ public class ClientSetup {
         renderer.addLayer(new EnergyRippleLayer<>(renderer));
         renderer.addLayer(new SpecialHeldItemLayer<>(renderer));
         renderer.addLayer(new GlovesLayer<>(renderer, new GlovesModel<>(0.3F, slim), slim));
+        renderer.addLayer(new LadybugBroochLayer<>(renderer));
         addLivingLayers(renderer);
         addBipedLayers(renderer);
     }
@@ -333,6 +337,7 @@ public class ClientSetup {
     }
     
     private static <T extends LivingEntity, M extends BipedModel<T>> void addBipedLayers(LivingRenderer<T, M> renderer) {
+        renderer.addLayer(new FrozenLayer<>(renderer));
     }
 
     @SubscribeEvent

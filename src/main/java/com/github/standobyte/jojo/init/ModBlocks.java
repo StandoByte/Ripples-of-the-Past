@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.init;
 
+import java.util.Map;
+
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.block.MagiciansRedFireBlock;
 import com.github.standobyte.jojo.block.MeteoricOreBlock;
@@ -39,24 +41,7 @@ public class ModBlocks {
                 return 15;
             }).sound(SoundType.WOOL)));
     
-    public static final RegistryObject<WoodenCoffinBlock> WOODEN_COFFIN_OAK_WHITE = BLOCKS.register("wooden_coffin_oak_white", () -> woodenCoffin(DyeColor.WHITE));
-    public static final RegistryObject<WoodenCoffinBlock> WOODEN_COFFIN_OAK_ORANGE = BLOCKS.register("wooden_coffin_oak_orange", () -> woodenCoffin(DyeColor.ORANGE));
-    public static final RegistryObject<WoodenCoffinBlock> WOODEN_COFFIN_OAK_MAGENTA = BLOCKS.register("wooden_coffin_oak_magenta", () -> woodenCoffin(DyeColor.MAGENTA));
-    public static final RegistryObject<WoodenCoffinBlock> WOODEN_COFFIN_OAK_LIGHT_BLUE = BLOCKS.register("wooden_coffin_oak_light_blue", () -> woodenCoffin(DyeColor.LIGHT_BLUE));
-    public static final RegistryObject<WoodenCoffinBlock> WOODEN_COFFIN_OAK_YELLOW = BLOCKS.register("wooden_coffin_oak_yellow", () -> woodenCoffin(DyeColor.YELLOW));
-    public static final RegistryObject<WoodenCoffinBlock> WOODEN_COFFIN_OAK_LIME = BLOCKS.register("wooden_coffin_oak_lime", () -> woodenCoffin(DyeColor.LIME));
-    public static final RegistryObject<WoodenCoffinBlock> WOODEN_COFFIN_OAK_PINK = BLOCKS.register("wooden_coffin_oak_pink", () -> woodenCoffin(DyeColor.PINK));
-    public static final RegistryObject<WoodenCoffinBlock> WOODEN_COFFIN_OAK_GRAY = BLOCKS.register("wooden_coffin_oak_gray", () -> woodenCoffin(DyeColor.GRAY));
-    public static final RegistryObject<WoodenCoffinBlock> WOODEN_COFFIN_OAK_LIGHT_GRAY = BLOCKS.register("wooden_coffin_oak_light_gray", () -> woodenCoffin(DyeColor.LIGHT_GRAY));
-    public static final RegistryObject<WoodenCoffinBlock> WOODEN_COFFIN_OAK_CYAN = BLOCKS.register("wooden_coffin_oak_cyan", () -> woodenCoffin(DyeColor.CYAN));
-    public static final RegistryObject<WoodenCoffinBlock> WOODEN_COFFIN_OAK_PURPLE = BLOCKS.register("wooden_coffin_oak_purple", () -> woodenCoffin(DyeColor.PURPLE));
-    public static final RegistryObject<WoodenCoffinBlock> WOODEN_COFFIN_OAK_BLUE = BLOCKS.register("wooden_coffin_oak_blue", () -> woodenCoffin(DyeColor.BLUE));
-    public static final RegistryObject<WoodenCoffinBlock> WOODEN_COFFIN_OAK_BROWN = BLOCKS.register("wooden_coffin_oak_brown", () -> woodenCoffin(DyeColor.BROWN));
-    public static final RegistryObject<WoodenCoffinBlock> WOODEN_COFFIN_OAK_GREEN = BLOCKS.register("wooden_coffin_oak_green", () -> woodenCoffin(DyeColor.GREEN));
-    public static final RegistryObject<WoodenCoffinBlock> WOODEN_COFFIN_OAK_RED = BLOCKS.register("wooden_coffin_oak_red", () -> woodenCoffin(DyeColor.RED));
-    public static final RegistryObject<WoodenCoffinBlock> WOODEN_COFFIN_OAK_BLACK = BLOCKS.register("wooden_coffin_oak_black", () -> woodenCoffin(DyeColor.BLACK));
+    public static final Map<DyeColor, RegistryObject<WoodenCoffinBlock>> WOODEN_COFFIN_OAK = ModItems.register16colorsBlock("wooden_coffin_oak", 
+            color -> new WoodenCoffinBlock(color, Block.Properties.copy(Blocks.OAK_PLANKS).harvestTool(ToolType.AXE).harvestLevel(1)));
     
-    private static WoodenCoffinBlock woodenCoffin(DyeColor color) {
-        return new WoodenCoffinBlock(color, Block.Properties.copy(Blocks.OAK_PLANKS).harvestTool(ToolType.AXE).harvestLevel(1));
-    }
 }

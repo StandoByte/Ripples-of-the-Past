@@ -26,6 +26,7 @@ import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonCha
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.render.block.overlay.TranslucentBlockRenderHelper;
+import com.github.standobyte.jojo.client.render.entity.layerrenderer.FrozenLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.GlovesLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.HamonBurnLayer;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
@@ -615,7 +616,8 @@ public class ClientEventHandler {
             });
             
             ItemStack item = player.getItemInHand(Hand.MAIN_HAND);
-            if (GlovesLayer.areGloves(item) || player.hasEffect(ModStatusEffects.HAMON_SPREAD.get())) {
+            if (GlovesLayer.areGloves(item) || item.isEmpty() && 
+                    (player.hasEffect(ModStatusEffects.HAMON_SPREAD.get()) || player.hasEffect(ModStatusEffects.FREEZE.get()))) {
                 event.setCanceled(true);
                 renderHand(Hand.MAIN_HAND, event.getMatrixStack(), event.getBuffers(), event.getLight(), 
                         event.getPartialTicks(), event.getInterpolatedPitch(), player);
@@ -644,6 +646,7 @@ public class ClientEventHandler {
             ClientReflection.renderPlayerArm(matrixStack, buffer, light, equipProgress, 
                     swingProgress, handSide, renderer);
             HamonBurnLayer.renderFirstPerson(handSide, matrixStack, buffer, light, player);
+            FrozenLayer.renderFirstPerson(handSide, matrixStack, buffer, light, player);
             GlovesLayer.renderFirstPerson(handSide, matrixStack, buffer, light, player);
             matrixStack.popPose();
             // i've won... but at what cost?

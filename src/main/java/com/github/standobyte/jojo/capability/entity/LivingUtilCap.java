@@ -19,6 +19,7 @@ import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.ai.LookAtEntityWithoutMovingGoal;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.TrCosmeticItemsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.TrDyingBodyTimerPacket;
 import com.github.standobyte.jojo.potion.HamonSpreadEffect;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -39,6 +40,7 @@ import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.passive.horse.AbstractHorseEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.DyeColor;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
@@ -97,6 +99,7 @@ public class LivingUtilCap {
     private float lifeShotResist;
     private int lifeShotResistTicks;
     
+    private DyeColor[] ladybugBroochesColored = new DyeColor[3];
     
     public LivingUtilCap(LivingEntity entity) {
         this.entity = entity;
@@ -581,10 +584,66 @@ public class LivingUtilCap {
     
     
     
+    public boolean addLadybugBrooch(DyeColor color) {
+        for (int i = 0; i < ladybugBroochesColored.length; i++) {
+            if (ladybugBroochesColored[i] == null) {
+                setBrooch(i, color);
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    public boolean canConsumeBrooch() {
+        for (int i = 0; i < ladybugBroochesColored.length; i++) {
+            if (ladybugBroochesColored[i] != null) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    public boolean consumeBrooch() {
+        for (int i = ladybugBroochesColored.length - 1; i >= 0; i--) {
+            if (ladybugBroochesColored[i] != null) {
+                setBrooch(i, null);
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    private void setBrooch(int index, @Nullable DyeColor color) {
+        if (!entity.level.isClientSide()) {
+            ladybugBroochesColored[index] = color;
+            PacketManager.sendToClientsTrackingAndSelf(TrCosmeticItemsPacket.ladybugBrooch(entity.getId(), ladybugBroochesColored), entity);
+        }
+    }
+    
+    public void clSetBrooches(DyeColor[] colors) {
+        for (int i = 0; i < colors.length && i < ladybugBroochesColored.length; i++) {
+            ladybugBroochesColored[i] = colors[i];
+        }
+    }
+    
+    @Nullable
+    public DyeColor getBroochWorn(int index) {
+        return ladybugBroochesColored[index];
+    }
+    
+    
+    
     public void onTracking(ServerPlayerEntity tracking) {
         if (deadBodyTimer >= 0) {
             PacketManager.sendToClient(new TrDyingBodyTimerPacket(
                     entity.getId(), deadBodyTimer, deadBodyDuration), tracking);
+        }
+        if (canConsumeBrooch()) {
+            PacketManager.sendToClient(TrCosmeticItemsPacket.ladybugBrooch(entity.getId(), 
+                    ladybugBroochesColored), tracking);
         }
     }
     
@@ -594,9 +653,14 @@ public class LivingUtilCap {
                     entity.getId(), deadBodyTimer, deadBodyDuration), entityAsPlayer);
             updateDyingBodyDebuffs();
         }
+        if (entity instanceof ServerPlayerEntity) {
+            if (canConsumeBrooch()) {
+                PacketManager.sendToClient(TrCosmeticItemsPacket.ladybugBrooch(entity.getId(), 
+                        ladybugBroochesColored), (ServerPlayerEntity) entity);
+            }
+        }
     }
     
-
     public void onClone(LivingUtilCap old, boolean wasDeath) {
         hasUsedTimeStopToday = old.hasUsedTimeStopToday;
         gotScarf = old.gotScarf;
@@ -629,6 +693,7 @@ public class LivingUtilCap {
         nbt.putFloat("LifeShotResist", lifeShotResist);
         nbt.putInt("DeadBody", deadBodyTimer);
         nbt.putInt("DeadBodyDuration", deadBodyDuration);
+        MCUtil.nbtPutEnumArray(nbt, "Brooches", ladybugBroochesColored);
         return nbt;
     }
     
@@ -658,6 +723,7 @@ public class LivingUtilCap {
         lifeShotResist = nbt.getInt("LifeShotResist");
         deadBodyTimer = nbt.contains("DeadBody") ? nbt.getInt("DeadBody") : -1;
         deadBodyDuration = Math.max(nbt.getInt("DeadBodyDuration"), 1);
+        ladybugBroochesColored = MCUtil.nbtGetEnumArray(nbt, "Brooches", DyeColor.class);
     }
     
 }
