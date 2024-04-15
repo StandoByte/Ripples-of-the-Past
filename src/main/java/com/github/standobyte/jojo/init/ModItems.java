@@ -233,7 +233,7 @@ public class ModItems {
 //    public static final RegistryObject<LighterItem> LIGHTER = ITEMS.register("lighter",
 //            () -> new LighterItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
 //
-//    public static final RegistryObject<MistaRevolverItem> MISTA_REVOLVER = ITEMS.register("revolver",
+//    public static final RegistryObject<MistaRevolverItem> MISTA_REVOLVER = ITEMS.register("mista_revolver",
 //            () -> new MistaRevolverItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
 //
 //    public static final RegistryObject<StonePendantItem> STONE_PENDANT = ITEMS.register("stone_pendant", 
