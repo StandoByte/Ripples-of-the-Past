@@ -22,6 +22,7 @@ import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.fml.ModList;
 
 public class ClientModSettingsScreen extends SettingsScreen {
     private final ClientModSettings settings;
@@ -263,8 +264,8 @@ public class ClientModSettingsScreen extends SettingsScreen {
         final int maxY = minY + 72;
         
         final int minX1 = 0;
-        final int maxX1 = optionsScreen.width / 2 - 155 - 20 - 10;
-        final int minX2 = optionsScreen.width / 2 + 5 + 160;
+        final int maxX1 = optionsScreen.width / 2 - 155 - 20 - 5;
+        final int minX2 = optionsScreen.width / 2 + 160;
         final int maxX2 = optionsScreen.width - 20;
         
         final int minX3 = optionsScreen.width / 2 - 155;
@@ -274,14 +275,16 @@ public class ClientModSettingsScreen extends SettingsScreen {
         int[] buttonPos = null;
         
         // try placing the button to the right side
-        for (int x = minX2; x <= maxX2 && buttonPos == null; x += 30) {
-            for (int y = maxY; y >= minY && buttonPos == null; y -= 24) {
+        for (int x = minX2; x <= maxX2 && buttonPos == null; x += 25) {
+            int y = maxY;
+            if (ModList.get().isLoaded("essential")) y -= 24; // for fuck's sake
+            for (; y >= minY && buttonPos == null; y -= 24) {
                 buttonPos = noOverlapPos(otherModdedButtons, x, y);
             }
         }
         // ...or to the left side
         if (buttonPos == null) {
-            for (int x = maxX1; x >= minX1 && buttonPos == null; x -= 30) {
+            for (int x = maxX1; x >= minX1 && buttonPos == null; x -= 25) {
                 for (int y = maxY; y >= minY && buttonPos == null; y -= 24) {
                     buttonPos = noOverlapPos(otherModdedButtons, x, y);
                 }
