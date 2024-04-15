@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.render.entity.model.animnew;
+package com.github.standobyte.jojo.client.render.entity.model.animnew.mojang;
 
 import java.util.function.Consumer;
 
