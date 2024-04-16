@@ -26,7 +26,7 @@ public class ParseAnims {
         Animation.Builder builder = Animation.Builder.create(lengthSecs);
 
         boolean loop = false;
-        boolean holdOnLastFrame = false;
+        boolean holdOnLastFrame = false; // TODO
         JsonElement loopJson = animJson.get("loop");
         if (loopJson.isJsonPrimitive()) {
             String loopMode = loopJson.getAsString();
