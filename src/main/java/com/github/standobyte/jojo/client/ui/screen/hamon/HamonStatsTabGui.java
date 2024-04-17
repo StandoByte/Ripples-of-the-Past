@@ -258,7 +258,7 @@ public class HamonStatsTabGui extends HamonTabGui {
         }
         
         textY += 4;
-        if (JojoModConfig.getCommonConfigInstance(true).breathingTrainingDeterioration.get()) {
+        if (JojoModConfig.getCommonConfigInstance(true).breathingTrainingDeterioration.get() && screen.hamon.getBreathingLevel() < HamonData.MAX_BREATHING_LEVEL) {
             for (int i = 0; i < this.breathingDeteriorationLines.size(); i++) {
                 textY += minecraft.font.lineHeight;
                 minecraft.font.draw(matrixStack, breathingDeteriorationLines.get(i), (float) textX, (float) textY, 0xFFFFFF);
@@ -386,6 +386,11 @@ public class HamonStatsTabGui extends HamonTabGui {
             else if (breathingIncrease < 0) {
                 totalExercises2 = new TranslationTextComponent("hamon.exercise.all.day_end_decrease", 
                         new TranslationTextComponent("hamon.exercise.all.tooltip_red").withStyle(TextFormatting.RED), decimalFormat.format(-breathingIncrease));
+            }
+            else {
+                if (screen.hamon.getCanSkipTrainingDays() > 0) {
+                    totalExercises2 = new TranslationTextComponent("hamon.exercise.can_skip", screen.hamon.getCanSkipTrainingDays());
+                }
             }
             
             List<IReorderingProcessor> totalExercisesTooltip = new ArrayList<>(minecraft.font.split(totalExercises1, 120));

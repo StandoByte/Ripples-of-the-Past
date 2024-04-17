@@ -267,6 +267,10 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         secondXRotMap.computeIfAbsent(modelPart, part -> new MutableFloat()).setValue(xRot);
     }
     
+    protected final void addSecondXRot(ModelRenderer modelPart, float xRot) {
+        secondXRotMap.computeIfAbsent(modelPart, part -> new MutableFloat()).add(xRot);
+    }
+    
     private void resetXRotation() {
         secondXRotMap.forEach((modelPart, xRotMutable) -> xRotMutable.setValue(0));
     }

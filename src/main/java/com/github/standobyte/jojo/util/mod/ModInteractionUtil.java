@@ -15,6 +15,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.IndirectEntityDamageSource;
 import net.minecraft.util.ResourceLocation;
@@ -108,6 +109,11 @@ public class ModInteractionUtil {
                 }
             }
         }
+    }
+
+    private static final ResourceLocation SQUID_INK_PASTA = new ResourceLocation("farmersdelight", "squid_ink_pasta");
+    public static boolean isSquidInkPasta(ItemStack item) {
+        return SQUID_INK_PASTA.equals(item.getItem().getRegistryName());
     }
     
     
