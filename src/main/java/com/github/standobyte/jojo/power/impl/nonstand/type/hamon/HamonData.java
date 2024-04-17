@@ -1035,6 +1035,11 @@ public class HamonData extends TypeSpecificData {
         updateExerciseAttributes(user);
     }
     
+    public boolean breathingCanGoDown(PlayerEntity user) {
+        return JojoModConfig.getCommonConfigInstance(false).breathingTrainingDeterioration.get() 
+                && breathingTrainingLevel < MAX_BREATHING_LEVEL;
+    }
+    
     public float getBreathingIncrease(PlayerEntity user, boolean newTrainingDay) {
         float completedExercises = getCompleteExercisesCount() + getMaxIncompleteExercise();
         /* at least 2 exercises to get positive increase, 
@@ -1043,10 +1048,7 @@ public class HamonData extends TypeSpecificData {
         boolean keepLvlThisDay = canSkipTrainingDays > 0;
         
         if (lvlInc <= 0) {
-            if (!JojoModConfig.getCommonConfigInstance(false).breathingTrainingDeterioration.get() 
-                    || keepLvlThisDay
-                    || user.abilities.instabuild
-                    || breathingTrainingLevel >= MAX_BREATHING_LEVEL) {
+            if (!breathingCanGoDown(user) || keepLvlThisDay) {
                 lvlInc = 0;
             }
             else {
@@ -1072,6 +1074,7 @@ public class HamonData extends TypeSpecificData {
             }
         }
         
+        lvlInc = MathHelper.clamp(lvlInc, -breathingTrainingLevel, MAX_BREATHING_LEVEL - breathingTrainingLevel);
         return lvlInc;
     }
     
