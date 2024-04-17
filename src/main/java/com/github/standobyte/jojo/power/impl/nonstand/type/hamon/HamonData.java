@@ -19,7 +19,6 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
-import com.github.standobyte.jojo.action.non_stand.HamonMetalSilverOverdrive;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -125,7 +124,8 @@ public class HamonData extends TypeSpecificData {
     
     private float breathingTrainingLevel;
     private float breathingTrainingDayBonus;
-    private float prevDayExercisesCount;
+//    private float prevDayExercisesCount;
+    private int canSkipTrainingDays;
     private EnumMap<Exercise, Integer> exerciseTicks = new EnumMap<Exercise, Integer>(Exercise.class);
     
     private boolean isMeditating;
@@ -1012,12 +1012,12 @@ public class HamonData extends TypeSpecificData {
         this.breathingTrainingDayBonus = trainingBonus;
     }
     
-    public float getPrevDayExercises() {
-        return prevDayExercisesCount;
+    public int getCanSkipTrainingDays() {
+        return canSkipTrainingDays;
     }
     
-    public void setPrevDayExercises(float exerciseCount) {
-        this.prevDayExercisesCount = exerciseCount;
+    public void setCanSkipTrainingDays(int days) {
+        this.canSkipTrainingDays = days;
     }
     
     public void breathingTrainingDay(PlayerEntity user) {
@@ -1040,12 +1040,13 @@ public class HamonData extends TypeSpecificData {
         /* at least 2 exercises to get positive increase, 
            >= 3 exercises give max increase */
         float lvlInc = MathHelper.clamp(completedExercises - 2, -1, 1);
-        boolean keepLvlThisDay = prevDayExercisesCount >= 4;
+        boolean keepLvlThisDay = canSkipTrainingDays > 0;
         
         if (lvlInc <= 0) {
             if (!JojoModConfig.getCommonConfigInstance(false).breathingTrainingDeterioration.get() 
                     || keepLvlThisDay
-                    || user.abilities.instabuild) {
+                    || user.abilities.instabuild
+                    || breathingTrainingLevel >= MAX_BREATHING_LEVEL) {
                 lvlInc = 0;
             }
             else {
@@ -1065,7 +1066,10 @@ public class HamonData extends TypeSpecificData {
             lvlInc = multiplyPositiveBreathingTraining(lvlInc + bonus);
         }
         if (newTrainingDay) {
-            prevDayExercisesCount = completedExercises;
+            if (canSkipTrainingDays > 0) --canSkipTrainingDays;
+            if (completedExercises >= 4) {
+                canSkipTrainingDays = Math.max(canSkipTrainingDays, 2);
+            }
         }
         
         return lvlInc;
@@ -1367,7 +1371,7 @@ public class HamonData extends TypeSpecificData {
         }
         nbt.put("Exercises", exercises);
         nbt.putFloat("TrainingBonus", breathingTrainingDayBonus);
-        nbt.putFloat("PrevDayExercises", prevDayExercisesCount);
+        nbt.putFloat("CanSkipDays", canSkipTrainingDays);
         nbt.putFloat("BreathStability", breathStability);
         nbt.putInt("EnergyTicks", noEnergyDecayTicks);
         nbt.putInt("MaskNoBreathTicks", ticksMaskWithNoHamonBreath);
@@ -1393,7 +1397,12 @@ public class HamonData extends TypeSpecificData {
         }
         setExerciseTicks(exercisesNbt[0], exercisesNbt[1], exercisesNbt[2], exercisesNbt[3], false);
         breathingTrainingDayBonus = nbt.getFloat("TrainingBonus");
-        prevDayExercisesCount = nbt.getFloat("PrevDayExercises");
+        if (nbt.getFloat("PrevDayExercises") >= 4) { // TODO legacy support, remove later
+            canSkipTrainingDays = 2;
+        }
+        else {
+            canSkipTrainingDays = nbt.getInt("CanSkipDays");
+        }
         breathStability = nbt.contains("BreathStability") ? nbt.getFloat("BreathStability") : getMaxBreathStability();
         prevBreathStability = breathStability;
         noEnergyDecayTicks = nbt.getInt("EnergyTicks");
