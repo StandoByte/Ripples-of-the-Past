@@ -79,6 +79,7 @@ public class ClientUtil {
     public static final ResourceLocation ADDITIONAL_UI = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/additional.png");
     public static final int MAX_MODEL_LIGHT = LightTexture.pack(15, 15);
     static boolean canSeeStands;
+    public static Boolean forcedCanSeeStands;
     static boolean canHearStands;
 
     public static PlayerEntity getClientPlayer() {
@@ -135,6 +136,9 @@ public class ClientUtil {
     }
     
     public static boolean canSeeStands() {
+        if (forcedCanSeeStands != null) {
+            return forcedCanSeeStands;
+        }
         return canSeeStands;
     }
     

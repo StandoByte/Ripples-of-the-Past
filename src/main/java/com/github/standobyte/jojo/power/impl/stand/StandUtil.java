@@ -102,6 +102,13 @@ public class StandUtil {
         return entity.getCapability(StandCapProvider.STAND_CAP).map(cap -> cap.hasPower()).orElse(false);
     }
     
+    public static boolean clStandEntityVisibleTo(PlayerEntity player) {
+        if (player == ClientUtil.getClientPlayer()) {
+            return ClientUtil.canSeeStands();
+        }
+        return playerCanSeeStands(player);
+    }
+    
     public static boolean playerCanSeeStands(PlayerEntity player) {
         return player.isSpectator() || isEntityStandUser(player) || player.hasEffect(ModStatusEffects.SPIRIT_VISION.get());
     }

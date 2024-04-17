@@ -21,6 +21,7 @@ import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeC
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
+import com.github.standobyte.jojo.client.polaroid.PolaroidHelper;
 import com.github.standobyte.jojo.client.render.block.overlay.TranslucentBlockRenderHelper;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.FrozenLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.GlovesLayer;
@@ -38,6 +39,7 @@ import com.github.standobyte.jojo.client.ui.screen.widgets.HeightScaledSlider;
 import com.github.standobyte.jojo.client.ui.screen.widgets.ImageVanillaButton;
 import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
@@ -420,6 +422,11 @@ public class ClientEventHandler {
             event.setFOV(event.getFOV() / zoomModifier);
         }
     }
+    
+    @SubscribeEvent
+    public static void cameraSetup(EntityViewRenderEvent.CameraSetup event) {
+        PolaroidHelper.pictureCameraSetup(event);
+    }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void disableFoodBar(RenderGameOverlayEvent.Pre event) {
@@ -526,24 +533,35 @@ public class ClientEventHandler {
     @SubscribeEvent(priority = EventPriority.LOW)
     public void onRenderHand(RenderHandEvent event) {
         ClientPlayerEntity player = Minecraft.getInstance().player;
-        if (!event.isCanceled() && !modPostedEvent && event.getHand() == Hand.MAIN_HAND && !player.isInvisible()) {
-            INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
-                ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
-                if ((hud.isActionSelectedAndEnabled(ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get(), 
-                        ModHamonActions.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE_BARRAGE.get()))
-                        && MCUtil.isHandFree(player, Hand.MAIN_HAND) && MCUtil.isHandFree(player, Hand.OFF_HAND)) {
-                    renderHand(Hand.OFF_HAND, event.getMatrixStack(), event.getBuffers(), event.getLight(), 
-                            event.getPartialTicks(), event.getInterpolatedPitch(), player);
+        Hand hand = event.getHand();
+        ItemStack item = player.getItemInHand(hand);
+        if (!event.isCanceled() && !modPostedEvent) {
+            if (hand == Hand.MAIN_HAND) {
+                if (!player.isInvisible()) {
+                    INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
+                        ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
+                        if ((hud.isActionSelectedAndEnabled(ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get(), 
+                                ModHamonActions.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE_BARRAGE.get()))
+                                && MCUtil.isHandFree(player, Hand.MAIN_HAND) && MCUtil.isHandFree(player, Hand.OFF_HAND)) {
+                            renderHand(Hand.OFF_HAND, event.getMatrixStack(), event.getBuffers(), event.getLight(), 
+                                    event.getPartialTicks(), event.getInterpolatedPitch(), player);
+                        }
+                    });
+                    
+                    if (GlovesLayer.areGloves(item) || item.isEmpty() && !player.isInvisible() && 
+                            (player.hasEffect(ModStatusEffects.HAMON_SPREAD.get()) || player.hasEffect(ModStatusEffects.FREEZE.get()))) {
+                        event.setCanceled(true);
+                        renderHand(Hand.MAIN_HAND, event.getMatrixStack(), event.getBuffers(), event.getLight(), 
+                                event.getPartialTicks(), event.getInterpolatedPitch(), player);
+                    }
                 }
-            });
-            
-            ItemStack item = player.getItemInHand(Hand.MAIN_HAND);
-            if (GlovesLayer.areGloves(item) || item.isEmpty() && 
-                    (player.hasEffect(ModStatusEffects.HAMON_SPREAD.get()) || player.hasEffect(ModStatusEffects.FREEZE.get()))) {
-                event.setCanceled(true);
-                renderHand(Hand.MAIN_HAND, event.getMatrixStack(), event.getBuffers(), event.getLight(), 
-                        event.getPartialTicks(), event.getInterpolatedPitch(), player);
             }
+            
+//            if (!item.isEmpty() && item.getItem() == ModItems.PHOTO.get()) {
+//                event.setCanceled(true);
+//                PolaroidHelper.renderPhotoInHand(event.getMatrixStack(), event.getBuffers(), event.getLight(), 
+//                        event.getEquipProgress(), MCUtil.getHandSide(player, hand), event.getSwingProgress(), item);
+//            }
         }
     }
     
