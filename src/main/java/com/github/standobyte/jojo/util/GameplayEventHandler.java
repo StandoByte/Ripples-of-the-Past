@@ -45,6 +45,7 @@ import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
+import com.github.standobyte.jojo.item.InkPastaItem;
 import com.github.standobyte.jojo.item.OilItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
@@ -83,6 +84,7 @@ import com.github.standobyte.jojo.util.mc.damage.ModdedDamageSourceWrapper;
 import com.github.standobyte.jojo.util.mc.damage.StandLinkDamageSource;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
+import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
 
 import net.minecraft.block.AbstractFurnaceBlock;
 import net.minecraft.block.Block;
@@ -341,6 +343,16 @@ public class GameplayEventHandler {
     }
     
     @SubscribeEvent(priority = EventPriority.LOW)
+    public static void onUseItem(PlayerInteractEvent.RightClickItem event) {
+        if (ModInteractionUtil.isSquidInkPasta(event.getItemStack())) {
+            InkPastaItem.useWithHamon(event.getWorld(), event.getPlayer(), event.getHand()).ifPresent(result -> {
+                event.setCanceled(true);
+                event.setCancellationResult(result.getResult());
+            });
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOW)
     public static void onBowDrawStart(LivingEntityUseItemEvent.Start event) {
         if (BowChargeEffectInstance.itemFits(event.getItem())) {
             LivingEntity entity = event.getEntityLiving();
@@ -366,6 +378,9 @@ public class GameplayEventHandler {
     public static void onFoodEaten(LivingEntityUseItemEvent.Finish event) {
         if (event.getItem().getItem() == Items.ENCHANTED_GOLDEN_APPLE) {
             VampirismUtil.onEnchantedGoldenAppleEaten(event.getEntityLiving());
+        }
+        else if (ModInteractionUtil.isSquidInkPasta(event.getItem())) {
+            InkPastaItem.onEaten(event.getEntityLiving());
         }
     }
     

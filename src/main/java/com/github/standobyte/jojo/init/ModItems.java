@@ -16,6 +16,7 @@ import com.github.standobyte.jojo.item.CassetteRecordedItem;
 import com.github.standobyte.jojo.item.ClackersItem;
 import com.github.standobyte.jojo.item.CustomModelArmorItem;
 import com.github.standobyte.jojo.item.GlovesItem;
+import com.github.standobyte.jojo.item.InkPastaItem;
 import com.github.standobyte.jojo.item.KnifeItem;
 import com.github.standobyte.jojo.item.ModArmorMaterials;
 import com.github.standobyte.jojo.item.OilItem;
@@ -37,6 +38,7 @@ import net.minecraft.enchantment.EnchantmentType;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.DyeColor;
+import net.minecraft.item.Food;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -132,8 +134,9 @@ public class ModItems {
 //    public static final RegistryObject<Item> METAL_BALL = ITEMS.register("metal_ball",
 //            () -> new MetalBallItem(new Item.Properties().tab(MAIN_TAB).stacksTo(16)));
 //
-//    public static final RegistryObject<SquidInkPasta> SQUID_INK_PASTA = ITEMS.register("squid_ink_pasta",
-//            () -> new SquidInkPasta(new Item.Properties().tab(MAIN_TAB).stacksTo(16)));
+//    public static final RegistryObject<InkPastaItem> SQUID_INK_PASTA = ITEMS.register("squid_ink_pasta",
+//            () -> new InkPastaItem(new Item.Properties().tab(MAIN_TAB).stacksTo(16)
+//                    .food(new Food.Builder().nutrition(12).saturationMod(0.9f).build())));
 
     public static final RegistryObject<BlockItem> SLUMBERING_PILLARMAN = ITEMS.register("slumbering_pillarman", 
             () -> new BlockItem(ModBlocks.SLUMBERING_PILLARMAN.get(), new Item.Properties().rarity(Rarity.EPIC)));
