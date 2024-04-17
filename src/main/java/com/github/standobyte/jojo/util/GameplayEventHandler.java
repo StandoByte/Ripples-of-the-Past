@@ -1380,9 +1380,9 @@ public class GameplayEventHandler {
     
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onAnimalOffspring(BabyEntitySpawnEvent event) {
-        List<EffectInstance> effectsA = event.getParentA().getCapability(LivingUtilCapProvider.CAPABILITY).map(
+        List<EffectInstance> effectsA = event.getParentA().getCapability(LivingUtilCapProvider.CAPABILITY).resolve().map(
                 cap -> cap.getProductEffects()).orElse(null);
-        List<EffectInstance> effectsB = event.getParentB().getCapability(LivingUtilCapProvider.CAPABILITY).map(
+        List<EffectInstance> effectsB = event.getParentB().getCapability(LivingUtilCapProvider.CAPABILITY).resolve().map(
                 cap -> cap.getProductEffects()).orElse(null);
         boolean hasA = effectsA != null && !effectsA.isEmpty();
         boolean hasB = effectsB != null && !effectsB.isEmpty();
