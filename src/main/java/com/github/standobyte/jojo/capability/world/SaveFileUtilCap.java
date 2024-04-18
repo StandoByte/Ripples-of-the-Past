@@ -33,6 +33,7 @@ public class SaveFileUtilCap {
     
     private int walkmanId;
     private int cassetteId;
+    private int polaroidPhotoId;
     
     public SaveFileUtilCap(ServerWorld overworld) {
         this.overworld = overworld;
@@ -156,6 +157,10 @@ public class SaveFileUtilCap {
         return ++cassetteId;
     }
     
+    public int incPolaroidPhotoId() {
+        return ++polaroidPhotoId;
+    }
+    
     
     
     CompoundNBT save() {
@@ -165,6 +170,7 @@ public class SaveFileUtilCap {
         nbt.putBoolean("UsedTimeStop", usedTimeStop);
         nbt.putInt("WalkmanId", walkmanId);
         nbt.putInt("CassetteId", cassetteId);
+        nbt.putInt("PolaroidPhotoId", polaroidPhotoId);
         nbt.putInt("StandEffId", StandEffectsTracker.EFFECTS_COUNTER.get());
         return nbt;
     }
@@ -176,6 +182,7 @@ public class SaveFileUtilCap {
         gameruleWeatherCycle = nbt.getBoolean("GameruleWeatherCycle");
         walkmanId = nbt.getInt("WalkmanId");
         cassetteId = nbt.getInt("CassetteId");
+        polaroidPhotoId = nbt.getInt("PolaroidPhotoId");
         int latestId = nbt.getInt("StandEffId");
         if (latestId < (1 << 30)) {
             StandEffectsTracker.EFFECTS_COUNTER.set(latestId);
