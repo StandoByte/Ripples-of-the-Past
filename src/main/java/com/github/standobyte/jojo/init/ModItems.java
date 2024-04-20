@@ -16,7 +16,6 @@ import com.github.standobyte.jojo.item.CassetteRecordedItem;
 import com.github.standobyte.jojo.item.ClackersItem;
 import com.github.standobyte.jojo.item.CustomModelArmorItem;
 import com.github.standobyte.jojo.item.GlovesItem;
-import com.github.standobyte.jojo.item.InkPastaItem;
 import com.github.standobyte.jojo.item.KnifeItem;
 import com.github.standobyte.jojo.item.ModArmorMaterials;
 import com.github.standobyte.jojo.item.OilItem;
@@ -37,8 +36,8 @@ import net.minecraft.block.Block;
 import net.minecraft.enchantment.EnchantmentType;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.BucketItem;
 import net.minecraft.item.DyeColor;
-import net.minecraft.item.Food;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -140,6 +139,9 @@ public class ModItems {
 
     public static final RegistryObject<BlockItem> SLUMBERING_PILLARMAN = ITEMS.register("slumbering_pillarman", 
             () -> new BlockItem(ModBlocks.SLUMBERING_PILLARMAN.get(), new Item.Properties().rarity(Rarity.EPIC)));
+
+    public static final RegistryObject<BucketItem> BOILING_BLOOD_BUCKET = ITEMS.register("boiling_blood_bucket", 
+            () -> new BucketItem(ModFluids.BOILING_BLOOD, new Item.Properties()));
 
     public static final RegistryObject<KnifeItem> KNIFE = ITEMS.register("knife", 
             () -> new KnifeItem(new Item.Properties().tab(MAIN_TAB).stacksTo(16)));

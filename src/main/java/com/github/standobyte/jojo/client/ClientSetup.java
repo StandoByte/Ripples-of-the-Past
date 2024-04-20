@@ -114,6 +114,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.client.particle.CloudParticle;
 import net.minecraft.client.particle.IAnimatedSprite;
+import net.minecraft.client.particle.LavaParticle;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
@@ -400,6 +401,7 @@ public class ClientSetup {
         mc.particleEngine.register(ModParticles.HAMON_AURA_YELLOW.get(),    HamonAuraParticle.Factory::new);
         mc.particleEngine.register(ModParticles.HAMON_AURA_RED.get(),       HamonAuraParticle.Factory::new);
         mc.particleEngine.register(ModParticles.HAMON_AURA_SILVER.get(),    HamonAuraParticle.Factory::new);
+        mc.particleEngine.register(ModParticles.BOILING_BLOOD_POP.get(),    LavaParticle.Factory::new);
         mc.particleEngine.register(ModParticles.METEORITE_VIRUS.get(),      MeteoriteVirusParticle.Factory::new);
         mc.particleEngine.register(ModParticles.MENACING.get(),             OnomatopoeiaParticle.GoFactory::new);
         mc.particleEngine.register(ModParticles.RESOLVE.get(),              OnomatopoeiaParticle.DoFactory::new);
