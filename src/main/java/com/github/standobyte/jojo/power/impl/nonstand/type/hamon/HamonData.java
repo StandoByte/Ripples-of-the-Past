@@ -1305,7 +1305,8 @@ public class HamonData extends TypeSpecificData {
             if (lastUsedAction == ModHamonActions.JONATHAN_SCARLET_OVERDRIVE.get()) {
                 return HamonAuraColor.RED;
             }
-            if (lastUsedAction == ModHamonActions.JONATHAN_METAL_SILVER_OVERDRIVE.get()) {
+            if (lastUsedAction == ModHamonActions.JONATHAN_METAL_SILVER_OVERDRIVE.get()
+                    || lastUsedAction == ModHamonActions.JONATHAN_METAL_SILVER_OVERDRIVE_WEAPON.get()) {
                 return HamonAuraColor.SILVER;
             }
         }

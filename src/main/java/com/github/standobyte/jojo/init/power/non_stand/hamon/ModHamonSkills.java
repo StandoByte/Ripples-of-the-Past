@@ -25,7 +25,7 @@ public class ModHamonSkills {
     
     
     public static final RegistryObject<BaseHamonSkill> OVERDRIVE = HAMON_SKILLS.register("overdrive", 
-            () -> new BaseHamonSkill.Builder(HamonStat.STRENGTH, RewardType.PASSIVE)
+            () -> new BaseHamonSkill.Builder(HamonStat.STRENGTH, RewardType.ATTACK)
             .unlockedByDefault().build());
     
     public static final RegistryObject<BaseHamonSkill> SENDO_OVERDRIVE = HAMON_SKILLS.register("sendo_overdrive", 
@@ -161,8 +161,8 @@ public class ModHamonSkills {
             .requiredSkill(SUNLIGHT_YELLOW_OVERDRIVE).build());
     
     public static final RegistryObject<CharacterTechniqueHamonSkill> METAL_SILVER_OVERDRIVE = HAMON_SKILLS.register("metal_silver_overdrive",
-            () -> new CharacterTechniqueHamonSkill.Builder(RewardType.ATTACK)
-            .unlocks(ModHamonActions.JONATHAN_METAL_SILVER_OVERDRIVE)
+            () -> new CharacterTechniqueHamonSkill.Builder(RewardType.PASSIVE)
+            .unlocks(ModHamonActions.JONATHAN_METAL_SILVER_OVERDRIVE, false).unlocks(ModHamonActions.JONATHAN_METAL_SILVER_OVERDRIVE_WEAPON, false)
             .requiredSkill(SENDO_OVERDRIVE).requiredSkill(TURQUOISE_BLUE_OVERDRIVE).build());
     
     public static final RegistryObject<CharacterTechniqueHamonSkill> OVERDRIVE_BARRAGE = HAMON_SKILLS.register("overdrive_barrage",

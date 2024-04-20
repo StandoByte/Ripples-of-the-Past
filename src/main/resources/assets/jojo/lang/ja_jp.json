@@ -540,7 +540,7 @@
   "hamonSkill.scarlet_overdrive.name": "緋色の波紋疾走（スカーレットオーバードライブ）",
   "hamonSkill.scarlet_overdrive.desc": "追加ダメージを与え、対象を炎上させる特殊な波紋。",
   "hamonSkill.metal_silver_overdrive.name": "銀色の波紋疾走（メタルシルバーオーバードライブ）",
-  "hamonSkill.metal_silver_overdrive.desc": "A special type of Overdrive attack. The more armor the target is wearing, the more Hamon damage it deals.",
+  "hamonSkill.metal_silver_overdrive.desc": "武器や道具を使って波紋攻撃を行うことができるようになる。\nWithout a weapon, the regular Overdrive deals more damage to targets with armor or an equipped melee weapon.",
   "hamonSkill.hamon_cutter.name": "波紋カッター",
   "hamonSkill.hamon_cutter.desc": "ポーションに波紋を注入し、高速で液体を撃ち出す。波紋のダメージに加えて、ポーションの効果が対象に適用される。",
   "hamonSkill.tornado_overdrive.name": "波紋乱渦疾走（トルネーディオーバードライブ）",
@@ -584,6 +584,8 @@
   "action.jojo.hamon_projectile_shield": "遠距離攻撃シールド",
   
   "action.jojo.jonathan_overdrive_barrage": "波紋疾走連打",
+  "action.jojo.jonathan_metal_silver_overdrive": "銀色の波紋疾走（メタルシルバーオーバードライブ）",
+  "action.jojo.jonathan_metal_silver_overdrive_weapon": "銀色の波紋疾走（メタルシルバーオーバードライブ）",
   "action.jojo.jonathan_scarlet_overdrive": "緋色の波紋疾走（スカーレットオーバードライブ）",
   "action.jojo.zeppeli_hamon_cutter": "波紋カッター",
   "action.jojo.zeppeli_tornado_overdrive": "波紋乱渦疾走（トルネーディオーバードライブ）",

@@ -1,12 +1,17 @@
 package com.github.standobyte.jojo.action.non_stand;
 
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 
@@ -29,6 +34,22 @@ public class HamonOverdrive extends HamonAction {
     @Override
     public TargetRequirement getTargetRequirement() {
         return TargetRequirement.ENTITY;
+    }
+    
+    @Override
+    protected Action<INonStandPower> replaceAction(INonStandPower power, ActionTarget target) {
+        if (!strongerVersion && GeneralUtil.orElseFalse(power.getTypeSpecificData(ModPowers.HAMON.get()), hamon -> {
+            return hamon.isSkillLearned(ModHamonSkills.METAL_SILVER_OVERDRIVE.get());
+        })) {
+            LivingEntity user = power.getUser();
+            if (MCUtil.isItemWeapon(user.getMainHandItem())) {
+                return ModHamonActions.JONATHAN_METAL_SILVER_OVERDRIVE_WEAPON.get();
+            }
+            if (HamonMetalSilverOverdrive.targetedByMSO(target)) {
+                return ModHamonActions.JONATHAN_METAL_SILVER_OVERDRIVE.get();
+            }
+        }
+        return super.replaceAction(power, target);
     }
     
     @Override
