@@ -42,6 +42,8 @@ public class PillarmanAbsorption extends PillarmanAction {
 
     public PillarmanAbsorption(NonStandAction.Builder builder) {
         super(builder.holdType());
+        stage = 2;
+        canBeUsedInStone = true;
     }
     
     private boolean canAbsorb = false;
@@ -73,7 +75,7 @@ public class PillarmanAbsorption extends PillarmanAction {
                 		float bloodAndHealModifier = GeneralUtil.getOrLast(
                                 JojoModConfig.getCommonConfigInstance(false).bloodDrainMultiplier.get(), 
                                 world.getDifficulty().getId()).floatValue();
-                        power.addEnergy(bloodAndHealModifier);
+                        power.addEnergy(bloodAndHealModifier * 3);
                         canAbsorb = true;
                 	} else { canAbsorb = false; }
                 	if(absorb(user, targetEntity, 2)) {}

@@ -23,6 +23,7 @@ public class PillarmanUnnaturalAgility extends PillarmanAction {
 
     public PillarmanUnnaturalAgility(PillarmanAction.Builder builder) {
         super(builder.holdType());
+        stage = 2;
     }
 
     @Override

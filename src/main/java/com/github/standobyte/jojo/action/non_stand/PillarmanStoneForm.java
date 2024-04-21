@@ -20,6 +20,8 @@ public class PillarmanStoneForm extends PillarmanAction {
 
     public PillarmanStoneForm(PillarmanAction.Builder builder) {
         super(builder);
+        stage = 1;
+        canBeUsedInStone = true;
     }
 
     @Override

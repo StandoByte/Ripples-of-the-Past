@@ -180,7 +180,7 @@ public class TimeStop extends StandAction {
     }
     
     public static boolean vampireTimeStopDuration(LivingEntity entity) {
-        return ModPowers.VAMPIRISM.get().isHighOnBlood(entity);
+        return ModPowers.VAMPIRISM.get().isHighOnBlood(entity) || ModPowers.PILLAR_MAN.get().isHighLifeForce(entity);
     }
     
     

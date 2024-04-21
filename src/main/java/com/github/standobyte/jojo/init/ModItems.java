@@ -62,6 +62,9 @@ public class ModItems {
     public static final RegistryObject<StoneMaskItem> STONE_MASK = ITEMS.register("stone_mask", 
             () -> new StoneMaskItem(ModArmorMaterials.STONE_MASK, EquipmentSlotType.HEAD, new Item.Properties().tab(MAIN_TAB).rarity(Rarity.RARE), ModBlocks.STONE_MASK.get()));
     
+    public static final RegistryObject<StoneMaskItem> AJA_STONE_MASK = ITEMS.register("aja_stone_mask", 
+            () -> new StoneMaskItem(ModArmorMaterials.STONE_MASK, EquipmentSlotType.HEAD, new Item.Properties().tab(MAIN_TAB).rarity(Rarity.RARE), ModBlocks.AJA_STONE_MASK.get()));
+    
     public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_WHITE = ITEMS.register("wooden_coffin_oak_white", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_WHITE.get(), new Item.Properties().stacksTo(1)));
     public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_ORANGE = ITEMS.register("wooden_coffin_oak_orange", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_ORANGE.get(), new Item.Properties().stacksTo(1)));
     public static final RegistryObject<BlockItem> WOODEN_COFFIN_OAK_MAGENTA = ITEMS.register("wooden_coffin_oak_magenta", () -> new BlockItem(ModBlocks.WOODEN_COFFIN_OAK_MAGENTA.get(), new Item.Properties().stacksTo(1)));

@@ -20,6 +20,7 @@ import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
+import com.github.standobyte.jojo.init.power.non_stand.pillarman.ModPillarmanActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
@@ -74,8 +75,10 @@ public class DamageUtil {
         }
         if (source instanceof EntityDamageSource) {
             if (source.getDirectEntity() instanceof LivingEntity && 
+                    (INonStandPower.getNonStandPowerOptional((LivingEntity) source.getDirectEntity())
+                    .map(power -> power.getHeldAction() == ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get()).orElse(false) || 
                     INonStandPower.getNonStandPowerOptional((LivingEntity) source.getDirectEntity())
-                    .map(power -> power.getHeldAction() == ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get()).orElse(false)) {
+                    .map(power -> power.getHeldAction() == ModPillarmanActions.PILLARMAN_BLADE_BARRAGE.get()).orElse(false))) {
                 return 0.05F;
             }
             String msgId = source.getMsgId();

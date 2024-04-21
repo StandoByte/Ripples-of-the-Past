@@ -65,8 +65,8 @@ public class VampirismUtil {
 //    private static final float MAX_SUN_DAMAGE = 10;
 //    private static final float MIN_SUN_DAMAGE = 2;
     private static float getSunDamage(LivingEntity entity) {
-        if (entity.hasEffect(ModStatusEffects.SUN_RESISTANCE.get())
-                || !(entity instanceof PlayerEntity || JojoModConfig.getCommonConfigInstance(false).undeadMobsSunDamage.get())
+        if (entity.hasEffect(ModStatusEffects.SUN_RESISTANCE.get()) 
+        		|| !(entity instanceof PlayerEntity || JojoModConfig.getCommonConfigInstance(false).undeadMobsSunDamage.get())
                 || entity.isSleeping() && entity.getSleepingPos().map(sleepingPos -> {
                     BlockState blockState = entity.level.getBlockState(sleepingPos);
                     return blockState.getBlock() instanceof WoodenCoffinBlock && blockState.getValue(WoodenCoffinBlock.CLOSED);

@@ -27,6 +27,14 @@
     "subtitle": "jojo.subtitle.pillar_man_awakening",
     "sounds": [ "jojo:pillar_man_awakening" ]
   },
+  "pillar_man_heat_mode": {
+    "subtitle": "jojo.subtitle.pillar_man_heat_mode",
+    "sounds": [ "jojo:pillar_man_heat_mode" ]
+  },
+  "pillar_man_wind_mode": {
+    "subtitle": "jojo.subtitle.pillar_man_wind_mode",
+    "sounds": [ "jojo:pillar_man_wind_mode" ]
+  },
   "aja_stone_charging": {
     "subtitle": "jojo.subtitle.aja_stone_charging",
     "sounds": [ "jojo:aja_stone_charging" ]

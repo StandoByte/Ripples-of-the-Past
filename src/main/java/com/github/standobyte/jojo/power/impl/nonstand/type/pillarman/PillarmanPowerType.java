@@ -10,15 +10,18 @@ import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanData.Mode;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.EffectType;
 import net.minecraft.potion.Effects;
+import net.minecraft.world.GameType;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent;
 
@@ -40,7 +43,8 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
     
     @Override
     public void onClear(INonStandPower power) {
-    	power.getTypeSpecificData(this).get().setEvolutionStage(1);
+    	power.getTypeSpecificData(this).get().setEvolutionStage(0);
+    	power.getTypeSpecificData(this).get().setMode(Mode.NONE);
     	power.getTypeSpecificData(this).get().setPillarmanBuffs(power.getUser(), 0);
     	LivingEntity user = power.getUser();
         for (Effect effect : EFFECTS) {
@@ -89,23 +93,29 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
     public void tickUser(LivingEntity entity, INonStandPower power) {
     	PillarmanData pillarman = power.getTypeSpecificData(this).get();
     	pillarman.tick();
-    	if(pillarman.getEvolutionStage() > 1) {
-	    	if (!entity.level.isClientSide()) {
-	            if (entity instanceof PlayerEntity) {
-	                ((PlayerEntity) entity).getFoodData().setFoodLevel(17);
-	            }
-	            entity.setAirSupply(entity.getMaxAirSupply());
-	            float energy =  power.getEnergy();
-	            if(pillarman.refreshEnergy((int) power.getEnergy())) {
-		            for (Effect effect : EFFECTS) {
-	                    if (energy > power.getMaxEnergy()/10) {
-	                        entity.addEffect(new EffectInstance(effect, Integer.MAX_VALUE, 0, false, false, true));
-	                    }
-	                    else {
-	                        entity.removeEffect(effect);
-	                    }
-		            }
-	            }
+    	if (!entity.level.isClientSide()) {
+	    	if(power.getTypeSpecificData(this).get().isInvaded() == true) {
+	    		ServerPlayerEntity player = (ServerPlayerEntity) entity;
+	    		if(player.isShiftKeyDown() || (player.getCamera() == player)) {
+	    			player.setGameMode(GameType.SURVIVAL);
+	        		power.getTypeSpecificData(this).get().setInvaded(false);
+	    		}
+	    	}
+	    	if(pillarman.getEvolutionStage() > 1) {
+	    		if (entity instanceof PlayerEntity) {
+	    			((PlayerEntity) entity).getFoodData().setFoodLevel(17);
+	    			}
+		        entity.setAirSupply(entity.getMaxAirSupply());
+		        float energy =  power.getEnergy();
+		        if(pillarman.refreshEnergy((int) power.getEnergy())) {
+		        	for (Effect effect : EFFECTS) {
+		        		if (energy > power.getMaxEnergy()/10) {
+		                entity.addEffect(new EffectInstance(effect, Integer.MAX_VALUE, 0, false, false, true));
+		                } else {
+		                	entity.removeEffect(effect);
+		                	}
+		        	}
+		        }
 	    	}
     	}
     }
@@ -164,11 +174,22 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
             INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
                 power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).ifPresent(pillarman -> {
                     Effect effect = event.getPotion();
-                    if (EFFECTS.contains(effect) && power.getEnergy() > power.getMaxEnergy()/10) {
+                    if (EFFECTS.contains(effect) 
+                    		&& power.getEnergy() > power.getMaxEnergy()/10 
+                    		&& power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).get().getEvolutionStage() > 1) {
                         event.setCanceled(true);
                     }
                 });
             });
         }
+    }
+    
+    public boolean isHighLifeForce(LivingEntity entity) {
+    	if(INonStandPower.getNonStandPowerOptional(entity).map(
+                        power -> power.getTypeSpecificData(ModPowers.PILLAR_MAN.get())
+                        .map(pillarman -> pillarman.getEvolutionStage() > 1).orElse(false)).orElse(false)) {
+    		return true;
+    	}
+        return false;
     }
 }

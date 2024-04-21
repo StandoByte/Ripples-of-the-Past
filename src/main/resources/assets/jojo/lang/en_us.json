@@ -1,7 +1,9 @@
 {
   "itemGroup.jojo_tab": "JoJo",
   "item.jojo.stone_mask": "Stone Mask",
+  "item.jojo.aja_stone_mask": "Stone Mask with Aja Red Stone",
   "block.jojo.stone_mask": "Stone Mask",
+  "block.jojo.aja_stone_mask": "Stone Mask with Aja Red Stone",
   "item.jojo.sledgehammer": "Iron Sledgehammer",
   "item.jojo.blade_hat": "Blade Hat",
   "item.jojo.breath_control_mask": "Breath Control Mask",
@@ -943,8 +945,19 @@
   "action.jojo.pillarman_regeneration": "Unnatural Regeneration",
   "action.jojo.pillarman_enhanced_senses": "Enhanced Senses",
   "action.jojo.pillarman_unnatural_agility": "Unnatural Agility",
-  
-  
+  "action.jojo.pillarman_horn_attack": "Horn Attack",
+  "action.jojo.pillarman_hide_in_entity": "Hide in creature",
+  "action.jojo.pillarman_divine_sandstorm": "Wind Mode: Divine Sandstorm",
+  "action.jojo.pillarman_small_sandstorm": "Wind Mode: Razor Wind",
+  "action.jojo.pillarman_wind_cloak": "Wind Mode: Wind Cloak",
+  "action.jojo.pillarman_atmospheric_rift": "Wind Mode: Atmospheric Rift",
+  "action.jojo.pillarman_erratic_blaze_king": "Heat Mode: Erratic Blaze King",  
+  "action.jojo.pillarman_giant_carthwheel_prison": "Heat Mode: Giant Carthwheel Prison",
+  "action.jojo.pillarman_self_detonation": "Heat Mode: Self Detonation",
+  "action.jojo.pillarman_light_flash": "Light Mode: Light Flash",
+  "action.jojo.pillarman_blade_dash_attack": "Blade Dash Attack",
+  "action.jojo.pillarman_blade_barrage": "Blade Barrage",
+
   "jojo.subtitle.stand_summon": "Stand summoned",
   "jojo.subtitle.stand_unsummon": "Stand unsummoned",
   "jojo.subtitle.stand_attack_light": "Attack",

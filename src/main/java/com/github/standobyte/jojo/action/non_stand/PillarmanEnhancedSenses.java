@@ -21,15 +21,16 @@ public class PillarmanEnhancedSenses extends PillarmanAction {
 
     public PillarmanEnhancedSenses(PillarmanAction.Builder builder) {
         super(builder.holdType());
+        stage = 2;
+        canBeUsedInStone = true;
     }
 
     @Override
     protected void holdTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
             if (!world.isClientSide() && ticksHeld < 160 || ticksHeld % 20 == 0) {
-                PillarmanData pillarman = power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).get();
-                double radius = (double) ticksHeld * (0.4D * 0.8D + 0.2D);
-                double maxRadius = 8D + 0.4D * 24D;
+                double radius = (double) ticksHeld * 0.5D;
+                double maxRadius = 36D;
                 List<LivingEntity> entitiesAround = MCUtil.entitiesAround(LivingEntity.class, user, Math.min(radius, maxRadius), false, null);
                 entitiesAround.forEach(entity -> entity.addEffect(new EffectInstance(Effects.GLOWING, 80)));
                 

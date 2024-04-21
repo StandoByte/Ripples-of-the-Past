@@ -19,15 +19,19 @@ public class TrPillarmanFlagsPacket {
     private final int entityId;
     private final boolean stoneFormEnabled;
     private final int stage;
+    private final boolean invaded;
+    public PillarmanData.Mode mode;
     
     public TrPillarmanFlagsPacket(int entityId, PillarmanData pillarmanData) {
-        this(entityId, pillarmanData.isStoneFormEnabled(), pillarmanData.getEvolutionStage());
+        this(entityId, pillarmanData.isStoneFormEnabled(), pillarmanData.getEvolutionStage(), pillarmanData.isInvaded(), pillarmanData.getMode());
     }
     
-    public TrPillarmanFlagsPacket(int entityId, boolean stoneFormEnabled, int stage) {
+    public TrPillarmanFlagsPacket(int entityId, boolean stoneFormEnabled, int stage, boolean invaded, PillarmanData.Mode mode) {
         this.entityId = entityId;
         this.stoneFormEnabled = stoneFormEnabled;
         this.stage = stage;
+        this.invaded = invaded;
+        this.mode = mode;
     }
     
     
@@ -39,11 +43,13 @@ public class TrPillarmanFlagsPacket {
             buf.writeInt(msg.entityId);
             buf.writeBoolean(msg.stoneFormEnabled);
             buf.writeInt(msg.stage);
+            buf.writeBoolean(msg.invaded);
+            buf.writeEnum(msg.mode);
         }
 
         @Override
         public TrPillarmanFlagsPacket decode(PacketBuffer buf) {
-            return new TrPillarmanFlagsPacket(buf.readInt(), buf.readBoolean(), buf.readInt());
+            return new TrPillarmanFlagsPacket(buf.readInt(), buf.readBoolean(), buf.readInt(), buf.readBoolean(), buf.readEnum(PillarmanData.Mode.class));
         }
 
         @Override
@@ -53,11 +59,9 @@ public class TrPillarmanFlagsPacket {
                 INonStandPower.getNonStandPowerOptional((LivingEntity) entity).ifPresent(power -> {
                     power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).ifPresent(pillarman -> {
                     	pillarman.setStoneFormEnabled(msg.stoneFormEnabled);
-                    });
-                });
-                INonStandPower.getNonStandPowerOptional((LivingEntity) entity).ifPresent(power -> {
-                    power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).ifPresent(pillarman -> {
                     	pillarman.setEvolutionStage(msg.stage);
+                    	pillarman.setInvaded(msg.invaded);
+                    	pillarman.setMode(msg.mode);
                     });
                 });
             }

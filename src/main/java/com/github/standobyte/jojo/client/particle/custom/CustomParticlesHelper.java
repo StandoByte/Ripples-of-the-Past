@@ -46,6 +46,8 @@ public class CustomParticlesHelper {
         CustomParticlesHelper.saveSprites(spritesMap, ModParticles.HAMON_AURA_YELLOW.get());
         CustomParticlesHelper.saveSprites(spritesMap, ModParticles.HAMON_AURA_RED.get());
         CustomParticlesHelper.saveSprites(spritesMap, ModParticles.HAMON_AURA_SILVER.get());
+        CustomParticlesHelper.saveSprites(spritesMap, ModParticles.HAMON_AURA_GREEN.get());
+        CustomParticlesHelper.saveSprites(spritesMap, ModParticles.HAMON_AURA_RAINBOW.get());
     }
     
     public static IAnimatedSprite getSavedSpriteSet(ParticleType<?> particleType) {

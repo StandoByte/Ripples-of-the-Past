@@ -400,7 +400,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     
     public double getDurability() {
         double durability = getAttributeValue(ModEntityAttributes.STAND_DURABILITY.get());
-        if (ModPowers.VAMPIRISM.get().isHighOnBlood(getUser())) {
+        if (ModPowers.VAMPIRISM.get().isHighOnBlood(getUser()) || ModPowers.PILLAR_MAN.get().isHighLifeForce(getUser())) {
             durability *= 2;
         }
         return durability * getStandEfficiency();

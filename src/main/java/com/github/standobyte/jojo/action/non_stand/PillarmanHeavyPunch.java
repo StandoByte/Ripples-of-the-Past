@@ -26,22 +26,20 @@ public class PillarmanHeavyPunch extends PillarmanAction {
 
     public PillarmanHeavyPunch(PillarmanAction.Builder builder) {
         super(builder.doNotCancelClick());
+        stage = 1;
     }
 
     @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
-    	if(!power.getTypeSpecificData(ModPowers.PILLAR_MAN.get())
-                .map(PillarmanData::isStoneFormEnabled).orElse(false)) {
-    		switch (target.getType()) {
-        	case BLOCK:
-        		return ActionConditionResult.POSITIVE;
-        	case ENTITY:
-        		return ActionConditionResult.POSITIVE;
-        	default:
-        		return ActionConditionResult.NEGATIVE;
+    	switch (target.getType()) {
+        case BLOCK:
+        	return ActionConditionResult.POSITIVE;
+        case ENTITY:
+        	return ActionConditionResult.POSITIVE;
+        default:
+        	return ActionConditionResult.NEGATIVE;
         	}
-    	}
-    	return conditionMessage("stone_form");
+
     }
  
     @Override
