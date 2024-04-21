@@ -24,7 +24,6 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.InputHandler.MouseButton;
 import com.github.standobyte.jojo.client.controls.ActionKeybindEntry;
-import com.github.standobyte.jojo.client.controls.ActionKeybindEntry.PressActionType;
 import com.github.standobyte.jojo.client.controls.ActionVisibilitySwitch;
 import com.github.standobyte.jojo.client.controls.ActionsHotbar;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
@@ -169,15 +168,25 @@ public class HudLayoutEditingScreen extends Screen {
         powersPresent.clear();
         for (PowerClassification powerClassification : PowerClassification.values()) {
             IPower.getPowerOptional(minecraft.player, powerClassification).ifPresent(power -> {
+                PowerClassification firstPresent = null;
+                PowerClassification activeHud = null;
+                
                 if (power.hasPower()) {
                     powersPresent.add(power);
-                    if (selectedTab == null || powerClassification == ActionsOverlayGui.getInstance().getCurrentMode()) {
-                        selectTab(power);
+                    if (firstPresent == null) {
+                        firstPresent = powerClassification;
                     }
+                    if (powerClassification == ActionsOverlayGui.getInstance().getCurrentMode()) {
+                        activeHud = powerClassification;
+                    }
+                }
+                
+                if (selectedTab == null) {
+                    selectedTab = activeHud != null ? activeHud : firstPresent;
                 }
             });
         }
-
+        
         if (selectedTab != null && selectedPower == null) {
             selectTab(IPower.getPlayerPower(minecraft.player, selectedTab));
         }
@@ -196,8 +205,8 @@ public class HudLayoutEditingScreen extends Screen {
         renderWindow(matrixStack);
         renderTabButtons(matrixStack, mouseX, mouseY);
         renderHotbars(matrixStack, mouseX, mouseY);
-        renderDragged(matrixStack, mouseX, mouseY);
         renderKeybindsList(matrixStack, mouseX, mouseY, partialTick);
+        renderDragged(matrixStack, mouseX, mouseY);
         renderToolTips(matrixStack, mouseX, mouseY);
         buttons.forEach(button -> button.render(matrixStack, mouseX, mouseY, partialTick));
     }
@@ -780,7 +789,7 @@ public class HudLayoutEditingScreen extends Screen {
     }
     
     private void createBlankKeybindEntry() {
-        ActionKeybindEntry entry = currentControlScheme.addBlankKeybindEntry(PressActionType.CLICK);
+        ActionKeybindEntry entry = currentControlScheme.addBlankKeybindEntry();
         markKeybindEdited(entry);
         markLayoutEdited();
         _addKeybindEntryToUi(entry);
@@ -800,8 +809,7 @@ public class HudLayoutEditingScreen extends Screen {
             return;
         }
         else {
-            ActionKeybindEntry entry = currentControlScheme.addKeybindEntry(
-                    PressActionType.CLICK, action, inputType, key);
+            ActionKeybindEntry entry = currentControlScheme.addKeybindEntry(action, inputType, key);
             markKeybindEdited(entry);
             _addKeybindEntryToUi(entry);
         }

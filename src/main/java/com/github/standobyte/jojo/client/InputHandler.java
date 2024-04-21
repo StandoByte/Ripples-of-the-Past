@@ -27,6 +27,8 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.controls.ActionKeybindEntry;
+import com.github.standobyte.jojo.client.controls.ActionKeybindEntry.HudActiveType;
+import com.github.standobyte.jojo.client.controls.ActionKeybindEntry.OnKeyPress;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.controls.HudControlSettings;
 import com.github.standobyte.jojo.client.standskin.StandSkin;
@@ -370,26 +372,38 @@ public class InputHandler {
         }
     }
     
-    private <P extends IPower<P, T>, T extends IPowerType<P, T>> void tickCustomKeybinds(P power, boolean isHudOpen) {
+    private <P extends IPower<P, T>, T extends IPowerType<P, T>> void tickCustomKeybinds(P power, boolean isHudActive) {
+        isHudActive &= !areHotbarsDisabled();
         for (ActionKeybindEntry keybindEntry : HudControlSettings.getInstance()
                 .getControlScheme(power)
                 .getCustomKeybinds()) {
             KeyBinding keybind = keybindEntry.getKeybind();
-            boolean needsOpenHud = true;
+            OnKeyPress onPress = keybindEntry.getOnKeyPress();
+            HudActiveType needsOpenHud = keybindEntry.getHudInteraction();
             
-            if (keybind.isDown() && keybindEntry.delay <= 0 && 
-                    (!needsOpenHud || isHudOpen && !areHotbarsDisabled())) {
-                HudClickResult result = handleCustomKeybind(keybindEntry.getAction(), keybind);
-                if (result.vanillaInput == HudClickResult.Behavior.CANCEL) {
-                    KeyBinding keybinding = keyBindingMap.lookupActive(keybind.getKey());
-                    if (keybinding != null) {
-                        while (keybinding.consumeClick());
+            if (keybind.isDown() && keybindEntry.delay <= 0 && needsOpenHud.canTrigger(isHudActive)) {
+                switch (onPress) {
+                case PERFORM:
+                    HudClickResult result = handleCustomKeybind(keybindEntry.getAction(), power, keybind);
+                    if (result.vanillaInput == HudClickResult.Behavior.CANCEL) {
+                        KeyBinding keybinding = keyBindingMap.lookupActive(keybind.getKey());
+                        if (keybinding != null) {
+                            while (keybinding.consumeClick());
+                        }
                     }
+                    if (result.handSwing == HudClickResult.Behavior.FORCE) {
+                        mc.player.swing(Hand.MAIN_HAND);
+                    }
+                    keybindEntry.delay = 4;
+                    break;
+                case SELECT:
+                    ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
+                    hud.setMode(power.getPowerClassification());
+                    
+                    break;
+                default:
+                    break;
                 }
-                if (result.handSwing == HudClickResult.Behavior.FORCE) {
-                    mc.player.swing(Hand.MAIN_HAND);
-                }
-                keybindEntry.delay = 4;
             }
             
             if (!keybind.isDown()) {
@@ -642,15 +656,15 @@ public class InputHandler {
         }
     }
     
-    private <P extends IPower<P, ?>> HudClickResult handleCustomKeybind(Action<P> action, KeyBinding keyBinding) {
+    private <P extends IPower<P, ?>> HudClickResult handleCustomKeybind(Action<?> entryAction, P power, KeyBinding keyBinding) {
         HudClickResult result = new HudClickResult();
-        if (action == null) return result;
-        P power = (P) actionsOverlay.getCurrentPower();
+        if (entryAction == null) return result;
 
         if (power != null) {
             boolean leftClickedBlock = false;
             boolean sneak = mc.player.isShiftKeyDown();
             boolean shiftActionVar = useShiftActionVariant(mc);
+            Action<P> action = (Action<P>) entryAction;
             action = ActionsOverlayGui.resolveVisibleActionInSlot(
                     action, shiftActionVar, power, ActionsOverlayGui.getInstance().getMouseTarget());
             
