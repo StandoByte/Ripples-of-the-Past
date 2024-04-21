@@ -149,8 +149,8 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
     
     @Override
     public float getLeapStrength(INonStandPower power) {
-        float leapStrength = 3F; //Math.max(bloodLevel(power), 0);
-        return leapStrength * 0.35F;
+        float leapStrength = 2F + Math.min(power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).get().getEvolutionStage(), 2.25F)/2;
+        return leapStrength * 0.60F;
     }
     
     @Override
@@ -160,10 +160,6 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
     
     @Override
     public float getLeapEnergyCost() {
-    	/*if(INonStandPower.getNonStandPowerOptional().map(power -> power.getTypeSpecificData(ModPowers.PILLAR_MAN.get())
-                .map(pillarman -> pillarman.getEvolutionStage() < 2).orElse(false)).orElse(false)) {
-    		return 50;
-    	}*/
         return 0;
     }
     

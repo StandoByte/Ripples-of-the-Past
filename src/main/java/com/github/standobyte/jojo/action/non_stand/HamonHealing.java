@@ -16,6 +16,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BoneMealItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.Direction;
@@ -46,7 +47,7 @@ public class HamonHealing extends HamonAction {
 //            if (entityToHeal.getHealth() < entityToHeal.getMaxHealth()) {
                 addPointsForAction(power, hamon, HamonStat.CONTROL, cost, hamonEfficiency);
 //            }
-            updateRegenEffect(entityToHeal, regenDuration, regenLvl);
+            updateRegenEffect(entityToHeal, regenDuration, regenLvl, user.getEffect(Effects.REGENERATION), Effects.REGENERATION);
             if (hamon.isSkillLearned(ModHamonSkills.EXPEL_VENOM.get())) {
                 entityToHeal.removeEffect(Effects.POISON);
                 entityToHeal.removeEffect(Effects.WITHER);
@@ -63,8 +64,8 @@ public class HamonHealing extends HamonAction {
     }
     
     // prevents the health regeneration being faster or slower when spamming the ability
-    private void updateRegenEffect(LivingEntity entity, int duration, int level) {
-        EffectInstance currentRegen = entity.getEffect(Effects.REGENERATION);
+    public static void updateRegenEffect(LivingEntity entity, int duration, int level, EffectInstance currentRegen, Effect effect) {
+        //EffectInstance currentRegen = entity.getEffect(Effects.REGENERATION);
         if (currentRegen != null && currentRegen.getAmplifier() < 5 && currentRegen.getAmplifier() <= level) {
             int regenGap = 50 >> currentRegen.getAmplifier();
             if (regenGap > 0) {
@@ -86,7 +87,7 @@ public class HamonHealing extends HamonAction {
                 }
             }
         }
-        entity.addEffect(new EffectInstance(Effects.REGENERATION, duration, level));
+        entity.addEffect(new EffectInstance(effect, duration, level));
     }
     
     private boolean canBeHealed(LivingEntity targetEntity, LivingEntity user) {
