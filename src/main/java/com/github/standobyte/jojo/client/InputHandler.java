@@ -27,9 +27,11 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.controls.ActionKeybindEntry;
-import com.github.standobyte.jojo.client.controls.ActionKeybindEntry.HudActiveType;
+import com.github.standobyte.jojo.client.controls.ActionKeybindEntry.KeyActiveType;
 import com.github.standobyte.jojo.client.controls.ActionKeybindEntry.OnKeyPress;
+import com.github.standobyte.jojo.client.controls.ActionsHotbar;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
+import com.github.standobyte.jojo.client.controls.ControlScheme.Hotbar;
 import com.github.standobyte.jojo.client.controls.HudControlSettings;
 import com.github.standobyte.jojo.client.standskin.StandSkin;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
@@ -207,11 +209,15 @@ public class InputHandler {
         }
         
         if (event.phase == TickEvent.Phase.START) {
+            if (ClientModSettings.getSettingsReadOnly().toggleDisableHotbars && disableHotbars.consumeClick()) {
+                setToggleHotbarsDisabled(!toggledHotbarsDisabled);
+            }
+            actionsOverlay.setHotbarsEnabled(!areHotbarsDisabled());
+            
             if (actionsOverlay.isActive()) {
                 boolean chooseAttack = controlsAreOnHotbar(ControlScheme.Hotbar.LEFT_CLICK);
                 boolean chooseAbility = controlsAreOnHotbar(ControlScheme.Hotbar.RIGHT_CLICK);
                 actionsOverlay.setHotbarButtonsDows(chooseAttack, chooseAbility);
-                actionsOverlay.setHotbarsEnabled(!areHotbarsDisabled());
                 if (chooseAttack || chooseAbility) {
                     for (int i = 0; i < 9; i++) {
                         if (mc.options.keyHotbarSlots[i].consumeClick()) {
@@ -224,22 +230,6 @@ public class InputHandler {
                         }
                     }
                 }
-//                else {
-//                    if (attackSlots != null) {
-//                        for (int i = 0; i < 9; i++) {
-//                            if (attackSlots[i].consumeClick()) {
-//                                actionsOverlay.selectAction(ControlScheme.Hotbar.LEFT_CLICK, i);
-//                            }
-//                        }
-//                    }
-//                    if (abilitySlots != null) {
-//                        for (int i = 0; i < 9; i++) {
-//                            if (abilitySlots[i].consumeClick()) {
-//                                actionsOverlay.selectAction(ControlScheme.Hotbar.RIGHT_CLICK, i);
-//                            }
-//                        }
-//                    }
-//                }
                 
                 if (scrollAttack.consumeClick()) {
                     actionsOverlay.scrollAction(ControlScheme.Hotbar.LEFT_CLICK, mc.player.isShiftKeyDown());
@@ -256,12 +246,8 @@ public class InputHandler {
                 if (ClientModSettings.getSettingsReadOnly().toggleRmbHotbar && abilityHotbar.consumeClick()) {
                     switchToggledHotbarControls(ControlScheme.Hotbar.RIGHT_CLICK);
                 }
-                
-                if (ClientModSettings.getSettingsReadOnly().toggleDisableHotbars && disableHotbars.consumeClick()) {
-                    setToggleHotbarsDisabled(!toggledHotbarsDisabled);
-                }
             }
-            
+
             if (nonStandPower.hasPower()) {
                 tickCustomKeybinds(nonStandPower, actionsOverlay.getCurrentMode() == PowerClassification.NON_STAND);
             }
@@ -283,11 +269,11 @@ public class InputHandler {
             }
             
             if (standMode.consumeClick()) {
-                actionsOverlay.setMode(PowerClassification.STAND);
+                actionsOverlay.switchMode(PowerClassification.STAND);
             }
             
             if (nonStandMode.consumeClick()) {
-                actionsOverlay.setMode(PowerClassification.NON_STAND);
+                actionsOverlay.switchMode(PowerClassification.NON_STAND);
             }
             
             if (scrollMode.consumeClick()) {
@@ -373,13 +359,12 @@ public class InputHandler {
     }
     
     private <P extends IPower<P, T>, T extends IPowerType<P, T>> void tickCustomKeybinds(P power, boolean isHudActive) {
-        isHudActive &= !areHotbarsDisabled();
         for (ActionKeybindEntry keybindEntry : HudControlSettings.getInstance()
                 .getControlScheme(power)
                 .getCustomKeybinds()) {
             KeyBinding keybind = keybindEntry.getKeybind();
             OnKeyPress onPress = keybindEntry.getOnKeyPress();
-            HudActiveType needsOpenHud = keybindEntry.getHudInteraction();
+            KeyActiveType needsOpenHud = keybindEntry.getHudInteraction();
             
             if (keybind.isDown() && keybindEntry.delay <= 0 && needsOpenHud.canTrigger(isHudActive)) {
                 switch (onPress) {
@@ -398,8 +383,27 @@ public class InputHandler {
                     break;
                 case SELECT:
                     ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
-                    hud.setMode(power.getPowerClassification());
+                    ControlScheme controls = HudControlSettings.getInstance().getControlScheme(power.getPowerClassification());
                     
+                    Hotbar foundHotbar = null;
+                    int foundIndex = -1;
+                    for (Hotbar hotbarType : Hotbar.values()) {
+                        ActionsHotbar hotbar = controls.getActionsHotbar(hotbarType);
+                        List<Action<?>> actions = hotbar.getEnabledActions();
+                        for (int i = 0; i < actions.size() && foundIndex < 0; i++) {
+                            Action<?> action = actions.get(i);
+                            if (action == keybindEntry.getAction() || action.getShiftVariationIfPresent() == keybindEntry.getAction()) {
+                                foundIndex = i;
+                                foundHotbar = hotbarType;
+                            }
+                        }
+                        if (foundHotbar != null) break;
+                    }
+                    
+                    if (foundHotbar != null && foundIndex >= 0) {
+                        hud.setMode(power.getPowerClassification());
+                        hud.selectAction(foundHotbar, foundIndex);
+                    }
                     break;
                 default:
                     break;

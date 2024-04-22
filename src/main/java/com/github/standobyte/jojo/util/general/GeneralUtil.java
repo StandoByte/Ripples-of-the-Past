@@ -97,6 +97,19 @@ public class GeneralUtil {
         }
     }
     
+    public static <T extends Enum<T>> T nextEnumValCycle(T enumVal) {
+        Class<?> enumClass = enumVal.getClass();
+        // to make it work with enums with abstract methods
+        Class<?> superClass = enumClass.getSuperclass();
+        if (superClass != Enum.class) {
+            enumClass = superClass;
+        }
+        
+        T[] values = ((Class<T>) enumClass).getEnumConstants();
+        int ordinal = enumVal.ordinal();
+        return values[(ordinal + 1) % values.length];
+    }
+    
     public static <T extends Enum<T>> int[] toOrdinals(T[] values) {
         int[] value = new int[values.length];
         for (int i = 0; i < values.length; i++) {

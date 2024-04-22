@@ -331,9 +331,9 @@ public class ClientUtil {
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
     }
     
-    public static void reenableGlScissor() {
-        GL11.glScissor(latestScissorX, latestScissorY, latestScissorWidth, latestScissorHeight);
-    }
+//    public static void reenableGlScissor() {
+//        GL11.glScissor(latestScissorX, latestScissorY, latestScissorWidth, latestScissorHeight);
+//    }
     
     public static String getShortenedTranslationKey(String originalKey) {
         String shortenedKey = originalKey + ".shortened";

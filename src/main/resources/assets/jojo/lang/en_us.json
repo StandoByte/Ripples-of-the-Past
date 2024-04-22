@@ -418,6 +418,13 @@
   "jojo.screen.edit_hud_layout.mc_controls": "Open Minecraft Controls Settings",
   "jojo.screen.edit_hud_layout.hint.lmb": "Left Mouse Button - move",
   "jojo.screen.edit_hud_layout.hint.rmb": "Right Mouse Button - enable/disable",
+  "jojo.keybind_mode.key_press.title": "When key is pressed:",
+  "jojo.keybind_mode.key_press.perform": "Use the ability",
+  "jojo.keybind_mode.key_press.select": "Select the ability in the HUD",
+  "jojo.keybind_mode.is_active.title": "Keybind is active:",
+  "jojo.keybind_mode.is_active.inside_hud": "When %s HUD is open",
+  "jojo.keybind_mode.is_active.outside_hud": "When %s HUD is closed",
+  "jojo.keybind_mode.is_active.always": "Always",
   
   "jojo.overlay.mode_deselect": "Deselect",
   "jojo.overlay.mode_key": "[%s] %s",

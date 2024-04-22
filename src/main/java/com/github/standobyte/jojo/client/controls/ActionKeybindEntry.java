@@ -22,7 +22,7 @@ public class ActionKeybindEntry {
     private InputMappings.Input keyCode;
     
     private OnKeyPress onKeyPress = OnKeyPress.PERFORM;
-    private HudActiveType hudInteraction = HudActiveType.INSIDE_HUD;
+    private KeyActiveType hudInteraction = KeyActiveType.INSIDE_HUD;
     
     private Action<?> action;
     private KeyBinding keybind;
@@ -89,7 +89,7 @@ public class ActionKeybindEntry {
         }
     }
     
-    public void setHudInteraction(HudActiveType hudInteraction) {
+    public void setHudInteraction(KeyActiveType hudInteraction) {
         if (hudInteraction != null) {
             this.hudInteraction = hudInteraction;
         }
@@ -117,7 +117,7 @@ public class ActionKeybindEntry {
         String keySaveDesc = jsonObj.get("keybind").getAsString();
         ActionKeybindEntry entry = new ActionKeybindEntry(action, keySaveDesc);
         try { entry.setOnPress(Enum.valueOf(OnKeyPress.class, jsonObj.get("onKeyPress").getAsString())); } catch (Exception notSpecified) {}
-        try { entry.setHudInteraction(Enum.valueOf(HudActiveType.class, jsonObj.get("withHud").getAsString())); } catch (Exception notSpecified) {}
+        try { entry.setHudInteraction(Enum.valueOf(KeyActiveType.class, jsonObj.get("withHud").getAsString())); } catch (Exception notSpecified) {}
         return entry;
     }
     
@@ -143,16 +143,16 @@ public class ActionKeybindEntry {
         return onKeyPress;
     }
     
-    public HudActiveType getHudInteraction() {
+    public KeyActiveType getHudInteraction() {
         return hudInteraction;
     }
     
     public enum OnKeyPress {
-        SELECT,
-        PERFORM
+        PERFORM,
+        SELECT
     }
     
-    public enum HudActiveType {
+    public enum KeyActiveType {
         INSIDE_HUD  { @Override public boolean canTrigger(boolean isHudActive) { return isHudActive; }},
         OUTSIDE_HUD { @Override public boolean canTrigger(boolean isHudActive) { return !isHudActive; }},
         ALWAYS      { @Override public boolean canTrigger(boolean isHudActive) { return true; }};
