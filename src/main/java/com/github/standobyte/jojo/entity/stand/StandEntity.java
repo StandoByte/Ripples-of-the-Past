@@ -1914,7 +1914,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     public void addProjectile(DamagingEntity projectile) {
         if (!level.isClientSide() && !projectile.isAddedToWorld()) {
             projectile.setDamageFactor(projectile.getDamageFactor() * (float) getAttackDamage() / 8);
-            projectile.setSpeedFactor(projectile.getSpeedFactor() * (float) getAttackSpeed() / 8);
+            projectile.setSpeedFactor(projectile.getSpeedFactor() * getAttackSpeed() / 8);
             level.addFreshEntity(projectile);
         }
     }
