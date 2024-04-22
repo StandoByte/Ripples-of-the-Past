@@ -325,8 +325,7 @@ public class InputHandler {
                     }
                     if (!askedForHamonTraining) {
                         ITextComponent message;
-                        if (nonStandPower.getTypeSpecificData(ModPowers.VAMPIRISM.get())
-                                .map(vampirism -> vampirism.isVampireHamonUser()).orElse(false)) {
+                        if (nonStandPower.getType() == ModPowers.VAMPIRISM.get()) {
                             message = new TranslationTextComponent("jojo.chat.message.no_hamon_vampire");
                         }
                         else if (nonStandPower.hadPowerBefore(ModPowers.HAMON.get())) {

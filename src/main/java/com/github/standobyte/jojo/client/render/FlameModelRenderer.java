@@ -65,6 +65,8 @@ public class FlameModelRenderer extends ModelRenderer {
             double xOffset, double yOffset, double zOffset, Direction flameDirection) {
         matrixStack.pushPose();
         matrixStack.translate(xOffset, yOffset, zOffset);
+        matrixStack.last().normal().setIdentity();
+        matrixStack.last().normal().mul(-1);
         switch (flameDirection) {
         case UP:
             matrixStack.mulPose(Vector3f.XP.rotationDegrees(180));
