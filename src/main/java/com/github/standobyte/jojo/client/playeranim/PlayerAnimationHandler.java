@@ -68,6 +68,10 @@ public class PlayerAnimationHandler {
     
     
     public static void initAnimator() {
+        if (instance != null) {
+            JojoMod.getLogger().error("Player animation interface is already initialized!");
+            return;
+        }
         instance = OptionalDependencyHelper.initModHandlingInterface(
                 "playeranimator", 
                 "com.github.standobyte.jojo.modcompat.mod.client.playeranimator.PlayerAnimatorInstalled", 
