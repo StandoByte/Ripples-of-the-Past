@@ -12,6 +12,7 @@ public class PillarmanHornAttack extends PillarmanAction {
     public PillarmanHornAttack(PillarmanAction.Builder builder) {
         super(builder);
         stage = 2;
+        canBeUsedInStone = true;
     }
 
     @Override

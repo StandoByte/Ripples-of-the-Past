@@ -51,7 +51,7 @@ public class PillarmanBladeDashAttack extends PillarmanAction implements IPlayer
                 user.hasImpulse = true;
                 Vector3d leap = Vector3d.directionFromRotation(MathHelper.clamp(user.xRot, -45F, -18F), user.yRot)
                         .scale(1 + user.getAttributeValue(Attributes.MOVEMENT_SPEED) * 5);
-                user.setDeltaMovement(leap.x, leap.y * 0.1, leap.z);
+                user.setDeltaMovement(leap.x, leap.y * 0.25, leap.z);
             }
         }
     }

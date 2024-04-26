@@ -23,7 +23,7 @@ public class ModZombieActions {
             () -> new ZombieDevour(new NonStandAction.Builder().needsFreeMainHand()));
     
     public static final RegistryObject<ZombieAction> ZOMBIE_DISGUISE = ACTIONS.register("zombie_disguise", 
-            () -> new ZombieDisguise(new NonStandAction.Builder()));
+            () -> new ZombieDisguise(new NonStandAction.Builder().holdToFire(60, false)));
 
 
 

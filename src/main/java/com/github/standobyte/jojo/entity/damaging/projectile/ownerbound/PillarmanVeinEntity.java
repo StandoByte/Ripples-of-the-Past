@@ -55,7 +55,7 @@ public class PillarmanVeinEntity extends OwnerBoundProjectileEntity {
     
     @Override
     public float getBaseDamage() {
-        return 1F;
+        return 0.5F;
     }
     
     public void addKnockback(float knockback) {

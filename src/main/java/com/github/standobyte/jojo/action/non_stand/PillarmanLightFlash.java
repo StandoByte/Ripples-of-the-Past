@@ -25,15 +25,9 @@ public class PillarmanLightFlash extends PillarmanAction {
     }
 
     @Override
-    public void onHoldTickClientEffect(LivingEntity user, INonStandPower power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {
+    public void onHoldTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
-        	for (int i = 0; i < 12; i++) {
-            Vector3d particlePos = user.position().add(
-                    (Math.random() - 0.5) * (user.getBbWidth() + 0.5), 
-                    Math.random() * (user.getBbHeight()), 
-                    (Math.random() - 0.5) * (user.getBbWidth() + 0.5));
-            user.level.addParticle(ModParticles.HAMON_AURA_RAINBOW.get(), particlePos.x, particlePos.y, particlePos.z, 0, 0, 0);
-        	}
+        	PillarmanDivineSandstorm.auraEffect(user, ModParticles.HAMON_AURA_RAINBOW.get());
         }
     }
     
@@ -63,5 +57,9 @@ public class PillarmanLightFlash extends PillarmanAction {
         
     }
 
+    @Override
+    public boolean isHeldSentToTracking() {
+        return true;
+    }
     
 }

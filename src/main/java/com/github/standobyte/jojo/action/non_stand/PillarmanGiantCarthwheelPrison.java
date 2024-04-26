@@ -19,15 +19,9 @@ public class PillarmanGiantCarthwheelPrison extends PillarmanErraticBlazeKing {
     }
  
     @Override
-    public void onHoldTickClientEffect(LivingEntity user, INonStandPower power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {
+    public void onHoldTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
-        	for (int i = 0; i < 12; i++) {
-            Vector3d particlePos = user.position().add(
-                    (Math.random() - 0.5) * (user.getBbWidth() + 0.5), 
-                    Math.random() * (user.getBbHeight()), 
-                    (Math.random() - 0.5) * (user.getBbWidth() + 0.5));
-            user.level.addParticle(ModParticles.HAMON_AURA_RED.get(), particlePos.x, particlePos.y, particlePos.z, 0, 0, 0);
-        	}
+        	PillarmanDivineSandstorm.auraEffect(user, ModParticles.HAMON_AURA_RED.get());
         }
     }
     
@@ -48,7 +42,12 @@ public class PillarmanGiantCarthwheelPrison extends PillarmanErraticBlazeKing {
                 addVeinProjectile(world, power, user, rotOffsets.y, rotOffsets.x);
             }
             addVeinProjectile(world, power, user, 0, 0);
-        }
-}
+            }
+    	}
+    
+    @Override
+    public boolean isHeldSentToTracking() {
+        return true;
+    }
     
 }

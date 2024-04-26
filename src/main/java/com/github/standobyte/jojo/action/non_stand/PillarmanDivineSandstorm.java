@@ -10,7 +10,9 @@ import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanData.Mode;
 
+import net.minecraft.client.particle.Particle;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.particles.IParticleData;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
@@ -36,22 +38,17 @@ public class PillarmanDivineSandstorm extends PillarmanAction {
     	int maxTicks = Math.max(getHoldDurationToFire(power), 1);
         int ticksHeld = Math.min(power.getHeldActionTicks(), maxTicks);
     	if(ticksHeld >= maxTicks) {
-    		return 5.0F;
+    		return 3.0F;
     	}
         	return 0;
     }
     
     @Override
-    public void onHoldTickClientEffect(LivingEntity user, INonStandPower power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {
+    public void onHoldTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
-        	for (int i = 0; i < 12; i++) {
-            Vector3d particlePos = user.position().add(
-                    (Math.random() - 0.5) * (user.getBbWidth() + 0.5), 
-                    Math.random() * (user.getBbHeight()), 
-                    (Math.random() - 0.5) * (user.getBbWidth() + 0.5));
-            user.level.addParticle(ModParticles.HAMON_AURA_GREEN.get(), particlePos.x, particlePos.y, particlePos.z, 0, 0, 0);
-        	}
+        	auraEffect(user, ModParticles.HAMON_AURA_GREEN.get());
         }
+        super.onHoldTick(world, user, power, ticksHeld, target, requirementsFulfilled);
     }
     
     @Override
@@ -60,13 +57,27 @@ public class PillarmanDivineSandstorm extends PillarmanAction {
         	int maxTicks = Math.max(getHoldDurationToFire(power), 1);
         	if(ticksHeld >= maxTicks && power.getEnergy() > 0) {
         		PillarmanDivineSandstormEntity sanstormWave = new PillarmanDivineSandstormEntity(world, user)
-                        .setRadius(1.75F)
+                        .setRadius(1.5F)
                         .setDamage(2F)
-                        .setDuration(20);
-                sanstormWave.shootFromRotation(user, 0.5F, 0.5F);
+                        .setDuration(10);
+                sanstormWave.shootFromRotation(user, 0.9F, 1F);
                 world.addFreshEntity(sanstormWave);
         	}
         }
     }
-
+    
+    public static void auraEffect(LivingEntity user, IParticleData particles) {
+    	for (int i = 0; i < 12; i++) {
+            Vector3d particlePos = user.position().add(
+                    (Math.random() - 0.5) * (user.getBbWidth() + 0.5), 
+                    Math.random() * (user.getBbHeight()), 
+                    (Math.random() - 0.5) * (user.getBbWidth() + 0.5));
+            user.level.addParticle(particles, particlePos.x, particlePos.y, particlePos.z, 0, 0, 0);
+        	}
+    }
+    
+    @Override
+    public boolean isHeldSentToTracking() {
+        return true;
+    }
 }

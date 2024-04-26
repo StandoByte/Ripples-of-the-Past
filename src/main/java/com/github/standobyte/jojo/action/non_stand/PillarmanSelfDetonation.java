@@ -25,22 +25,10 @@ public class PillarmanSelfDetonation extends PillarmanAction {
     }
  
     @Override
-    public void onHoldTickClientEffect(LivingEntity user, INonStandPower power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {
+    public void onHoldTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
-        	for (int i = 0; i < 12; i++) {
-            Vector3d particlePos = user.position().add(
-                    (Math.random() - 0.5) * (user.getBbWidth() + 0.5), 
-                    Math.random() * (user.getBbHeight()), 
-                    (Math.random() - 0.5) * (user.getBbWidth() + 0.5));
-            user.level.addParticle(ModParticles.HAMON_AURA_RED.get(), particlePos.x, particlePos.y, particlePos.z, 0, 0, 0);
-        	}
-        	for (int i = 0; i < 12; i++) {
-                Vector3d particlePos = user.position().add(
-                        (Math.random() - 0.5) * (user.getBbWidth() + 0.25), 
-                        Math.random() * (user.getBbHeight()), 
-                        (Math.random() - 0.5) * (user.getBbWidth() + 0.25));
-                user.level.addParticle(ModParticles.BLOOD.get(), particlePos.x, particlePos.y, particlePos.z, 0, -1, 0);
-            	}
+        	PillarmanDivineSandstorm.auraEffect(user, ModParticles.HAMON_AURA_RED.get());
+        	PillarmanDivineSandstorm.auraEffect(user, ModParticles.BLOOD.get());
         }
     }
     
@@ -56,6 +44,11 @@ public class PillarmanSelfDetonation extends PillarmanAction {
             	user.addEffect(new EffectInstance(Effects.FIRE_RESISTANCE, 200, 0));
             }
     	}
+    }
+    
+    @Override
+    public boolean isHeldSentToTracking() {
+        return true;
     }
     
 }

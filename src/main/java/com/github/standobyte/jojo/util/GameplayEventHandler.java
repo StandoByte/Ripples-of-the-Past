@@ -858,7 +858,12 @@ public class GameplayEventHandler {
 	                    	double randomMode = Math.random();
 	                    	if(randomMode > 0 && randomMode < 0.33F) {
 	                    		power.getTypeSpecificData(pillarman).get().setMode(Mode.WIND);
-	                    		entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.PILLAR_MAN_WIND_MODE.get(), entity.getSoundSource(), 0.75F, 1.0F);
+	                    		if(randomMode < 0.06F) {
+	                    			entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.PILLAR_MAN_WIND_MODE2.get(), entity.getSoundSource(), 1F, 1.0F);
+	                    		} else {
+	                    			entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.PILLAR_MAN_WIND_MODE.get(), entity.getSoundSource(), 1F, 1.0F);
+	                    		}
+	                    		
 	                    	} else if(randomMode > 0.33 && randomMode < 0.66F) {
 	                    		power.getTypeSpecificData(pillarman).get().setMode(Mode.HEAT);
 	                    		entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.PILLAR_MAN_HEAT_MODE.get(), entity.getSoundSource(), 1.0F, 1.0F);

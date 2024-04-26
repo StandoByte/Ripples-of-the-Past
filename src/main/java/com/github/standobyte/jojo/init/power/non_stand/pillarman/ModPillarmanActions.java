@@ -35,13 +35,13 @@ public class ModPillarmanActions {
 public static void loadRegistryObjects() {}
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_HEAVY_PUNCH = ACTIONS.register("pillarman_heavy_punch", 
-        () -> new PillarmanHeavyPunch(new NonStandAction.Builder().needsFreeMainHand().swingHand().energyCost(30F).cooldown(40)));
+        () -> new PillarmanHeavyPunch(new NonStandAction.Builder().needsFreeMainHand().swingHand().energyCost(10F).cooldown(40)));
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_ABSORPTION = ACTIONS.register("pillarman_absorption", 
         () -> new PillarmanAbsorption(new NonStandAction.Builder().needsFreeMainHand()));
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_HORN_ATTACK = ACTIONS.register("pillarman_horn_attack", 
-        () -> new PillarmanHornAttack(new NonStandAction.Builder().energyCost(30F).cooldown(60)));
+        () -> new PillarmanHornAttack(new NonStandAction.Builder().energyCost(15F).cooldown(60)));
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_HIDE_IN_ENTITY = ACTIONS.register("pillarman_hide_in_entity", 
         () -> new PillarmanHideInEntity(new NonStandAction.Builder().holdToFire(20, false).heldWalkSpeed(0.5F)));
@@ -50,46 +50,46 @@ public static final RegistryObject<PillarmanAction> PILLARMAN_STONE_FORM = ACTIO
         () -> new PillarmanStoneForm(new NonStandAction.Builder().holdToFire(40, false).heldWalkSpeed(0.5F)));
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_REGENERATION = ACTIONS.register("pillarman_regeneration", 
-        () -> new PillarmanRegeneration(new NonStandAction.Builder().energyCost(75F).cooldown(20)));
+        () -> new PillarmanRegeneration(new NonStandAction.Builder().energyCost(40F).cooldown(20)));
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_ENHANCED_SENSES = ACTIONS.register("pillarman_enhanced_senses", 
         () -> new PillarmanEnhancedSenses(new NonStandAction.Builder().holdEnergyCost(0.05F).heldWalkSpeed(0.5F)));
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_UNNATURAL_AGILITY = ACTIONS.register("pillarman_unnatural_agility", 
-        () -> new PillarmanUnnaturalAgility(new NonStandAction.Builder().holdEnergyCost(2F).heldWalkSpeed(0.5F)));
+        () -> new PillarmanUnnaturalAgility(new NonStandAction.Builder().holdEnergyCost(1F).heldWalkSpeed(0.5F)));
 
 // NEXT IS MODE TECHNIQUES---------------------
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_SMALL_SANDSTORM = ACTIONS.register("pillarman_small_sandstorm", 
-        () -> new PillarmanSmallSandstorm(new NonStandAction.Builder().energyCost(40F).cooldown(10).swingHand()));
+        () -> new PillarmanSmallSandstorm(new NonStandAction.Builder().energyCost(20F).cooldown(10).swingHand()));
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_DIVINE_SANDSTORM = ACTIONS.register("pillarman_divine_sandstorm", 
-        () -> new PillarmanDivineSandstorm(new NonStandAction.Builder().holdToFire(60, true).heldWalkSpeed(0.2F)
+        () -> new PillarmanDivineSandstorm(new NonStandAction.Builder().holdToFire(40, true).heldWalkSpeed(0.2F)
         		.shiftVariationOf(PILLARMAN_SMALL_SANDSTORM)));
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_WIND_CLOAK = ACTIONS.register("pillarman_wind_cloak", 
-        () -> new PillarmanWindCloak(new NonStandAction.Builder().energyCost(120F).cooldown(20).swingHand().holdToFire(30, false)));
+        () -> new PillarmanWindCloak(new NonStandAction.Builder().energyCost(60F).cooldown(20).swingHand().holdToFire(30, false)));
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_ATMOSPHERIC_RIFT = ACTIONS.register("pillarman_atmospheric_rift", 
-        () -> new PillarmanAtmosphericRift(new NonStandAction.Builder().holdToFire(80, true).heldWalkSpeed(0.1F)));
+        () -> new PillarmanAtmosphericRift(new NonStandAction.Builder().holdToFire(60, true).heldWalkSpeed(0.1F)));
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_ERRATIC_BLAZE_KING = ACTIONS.register("pillarman_erratic_blaze_king", 
-        () -> new PillarmanErraticBlazeKing(new NonStandAction.Builder().energyCost(40F).cooldown(20, 0)));
+        () -> new PillarmanErraticBlazeKing(new NonStandAction.Builder().energyCost(20F).cooldown(20, 0)));
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_GIANT_CARTHWHEEL_PRISON = ACTIONS.register("pillarman_giant_carthwheel_prison", 
-        () -> new PillarmanGiantCarthwheelPrison(new NonStandAction.Builder().energyCost(250F).cooldown(100).holdToFire(60, false)));
+        () -> new PillarmanGiantCarthwheelPrison(new NonStandAction.Builder().energyCost(125F).cooldown(100).holdToFire(60, false)));
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_SELF_DETONATION = ACTIONS.register("pillarman_self_detonation", 
-        () -> new PillarmanSelfDetonation(new NonStandAction.Builder().energyCost(250F).cooldown(200, 0).holdToFire(80, false)));
+        () -> new PillarmanSelfDetonation(new NonStandAction.Builder().energyCost(150F).cooldown(200, 0).holdToFire(80, false)));
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_LIGHT_FLASH = ACTIONS.register("pillarman_light_flash", 
-        () -> new PillarmanLightFlash(new NonStandAction.Builder().energyCost(100F).cooldown(80).holdToFire(60, false)));
+        () -> new PillarmanLightFlash(new NonStandAction.Builder().energyCost(25F).cooldown(80).holdToFire(60, false)));
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_BLADE_DASH_ATTACK = ACTIONS.register("pillarman_blade_dash_attack", 
-        () -> new PillarmanBladeDashAttack(new NonStandAction.Builder().energyCost(100F).cooldown(10)));
+        () -> new PillarmanBladeDashAttack(new NonStandAction.Builder().energyCost(40F).cooldown(10)));
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_BLADE_BARRAGE = ACTIONS.register("pillarman_blade_barrage", 
-        () -> new PillarmanBladeBarrage(new PillarmanAction.Builder().holdEnergyCost(5F).heldWalkSpeed(0.5F)));
+        () -> new PillarmanBladeBarrage(new PillarmanAction.Builder().holdEnergyCost(2.5F).heldWalkSpeed(0.5F)));
 
 
 

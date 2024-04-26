@@ -22,7 +22,7 @@ public class PillarmanAtmosphericRift extends PillarmanDivineSandstorm {
     	int maxTicks = Math.max(getHoldDurationToFire(power), 1);
         int ticksHeld = Math.min(power.getHeldActionTicks(), maxTicks);
     	if(ticksHeld >= maxTicks) {
-    		return 7.5F;
+    		return 5.0F;
     	}
         	return 0;
     }
@@ -35,8 +35,8 @@ public class PillarmanAtmosphericRift extends PillarmanDivineSandstorm {
         		PillarmanDivineSandstormEntity sanstormWave = new PillarmanDivineSandstormEntity(world, user)
                         .setRadius(0.5F)
                         .setDamage(2F)
-                        .setDuration(80);
-                sanstormWave.shootFromRotation(user, 0.5F, 0.5F);
+                        .setDuration(60);
+                sanstormWave.shootFromRotation(user, 0.9F, 1F);
                 world.addFreshEntity(sanstormWave);
                 PlayerEntity playerentity = user instanceof PlayerEntity ? (PlayerEntity)user : null;
                 if (playerentity == null || !playerentity.abilities.instabuild) {
