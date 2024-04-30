@@ -38,7 +38,7 @@ import net.minecraft.util.ResourceLocation;
 public class StandModelOverrides extends ReloadListener<Map<ResourceLocation, StandModelOverrides.CustomModelPrepared>> {
     private static final Logger LOGGER = LogManager.getLogger();
     private final Gson gson;
-    private final Map<ResourceLocation, StandEntityModel<?>> modelOverrides = new HashMap<>();
+    private final Map<ResourceLocation, StandEntityModel<?>> standModelOverrides = new HashMap<>();
 
     public StandModelOverrides(Gson gson) {
         this.gson = gson;
@@ -88,17 +88,20 @@ public class StandModelOverrides extends ReloadListener<Map<ResourceLocation, St
     @Override
     protected void apply(Map<ResourceLocation, CustomModelPrepared> pObject, 
             IResourceManager pResourceManager, IProfiler pProfiler) {
-        modelOverrides.clear();
+        standModelOverrides.clear();
         for (Map.Entry<ResourceLocation, CustomModelPrepared> entry : pObject.entrySet()) {
-            createModelFromJson(entry.getKey(), entry.getValue().modelJson, entry.getValue().format).ifPresent(model -> modelOverrides.put(model.getKey(), model.getValue()));
+            ResourceLocation modelId = clearFormatExtension(entry.getKey());
+            Optional<Pair<ResourceLocation, StandEntityModel<?>>> standModel = 
+                    createStandModelFromJson(modelId, entry.getValue().modelJson, entry.getValue().format);
+            standModel.ifPresent(model -> standModelOverrides.put(model.getKey(), model.getValue()));
+            if (!standModel.isPresent()) {
+                ResourceEntityModels.loadEntityModel(modelId, entry.getValue().modelJson, entry.getValue().format);
+            }
         }
     }
     
-    public static Optional<Pair<ResourceLocation, StandEntityModel<?>>> createModelFromJson(
-            ResourceLocation modelResLoc, JsonElement modelJson, Format format) {
-        ResourceLocation modelId = new ResourceLocation(
-                modelResLoc.getNamespace(), 
-                modelResLoc.getPath().replace(".geo", "").replace(".bb", ""));
+    public static Optional<Pair<ResourceLocation, StandEntityModel<?>>> createStandModelFromJson(
+            ResourceLocation modelId, JsonElement modelJson, Format format) {
         StandModelRegistryObj registeredModel = StandModelRegistry.getRegisteredModel(modelId);
         if (registeredModel != null) {
             StandEntityModel<?> modelCopy = registeredModel.createNewModelCopy();
@@ -116,21 +119,28 @@ public class StandModelOverrides extends ReloadListener<Map<ResourceLocation, St
         return Optional.empty();
     }
     
+    public static ResourceLocation clearFormatExtension(ResourceLocation modelResLoc) {
+        return new ResourceLocation(
+                modelResLoc.getNamespace(), 
+                modelResLoc.getPath().replace(".geo", "").replace(".bb", ""));
+    }
+    
+    
     public static enum Format {
         GECKO {
             @Override
-            public EntityModelUnbaked parse(JsonElement json, ResourceLocation id) {
-                return ParseGeckoModel.parseGeckoModel(json, id);
+            public EntityModelUnbaked parse(JsonElement json, ResourceLocation modelId) {
+                return ParseGeckoModel.parseGeckoModel(json, modelId);
             }
         },
         BB_GENERIC {
             @Override
-            public EntityModelUnbaked parse(JsonElement json, ResourceLocation id) {
-                return ParseGenericModel.parseGenericModel(json, id);
+            public EntityModelUnbaked parse(JsonElement json, ResourceLocation modelId) {
+                return ParseGenericModel.parseGenericModel(json, modelId);
             }
         };
         
-        public abstract EntityModelUnbaked parse(JsonElement json, ResourceLocation id);
+        public abstract EntityModelUnbaked parse(JsonElement json, ResourceLocation modelId);
     }
     
     public static class CustomModelPrepared {
@@ -146,7 +156,7 @@ public class StandModelOverrides extends ReloadListener<Map<ResourceLocation, St
     public <T extends StandEntity, M extends StandEntityModel<T>> M overrideModel(M model) {
         ResourceLocation modelId = model.getModelId();
         if (modelId != null) {
-            StandEntityModel<?> resourcePackModel = modelOverrides.get(modelId);
+            StandEntityModel<?> resourcePackModel = standModelOverrides.get(modelId);
             if (resourcePackModel != null) {
                 return (M) resourcePackModel;
             }
