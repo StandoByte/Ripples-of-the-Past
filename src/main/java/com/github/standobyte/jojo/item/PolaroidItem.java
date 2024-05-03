@@ -32,23 +32,26 @@ public class PolaroidItem extends Item {
     public ActionResult<ItemStack> use(World world, PlayerEntity cameraPlayer, Hand hand) {
         ItemStack stack = cameraPlayer.getItemInHand(hand);
         
-        ItemStack paperItem = ItemStack.EMPTY;
-        for (int i = 0; i < cameraPlayer.inventory.getContainerSize(); ++i) {
-            ItemStack item = cameraPlayer.inventory.getItem(i);
-            if (!item.isEmpty() && item.getItem() == Items.PAPER) {
-                paperItem = item;
-                break;
+        if (!cameraPlayer.abilities.instabuild) {
+            ItemStack paperItem = ItemStack.EMPTY;
+            for (int i = 0; i < cameraPlayer.inventory.getContainerSize(); ++i) {
+                ItemStack item = cameraPlayer.inventory.getItem(i);
+                if (!item.isEmpty() && item.getItem() == Items.PAPER) {
+                    paperItem = item;
+                    break;
+                }
             }
-        }
-        
-        if (paperItem.isEmpty()) {
+            
+            if (paperItem.isEmpty()) {
+                if (!world.isClientSide()) {
+                    ((ServerPlayerEntity) cameraPlayer).displayClientMessage(new TranslationTextComponent("jojo.polaroid.paper"), true);
+                }
+                return ActionResult.fail(stack);
+            }
+            
             if (!world.isClientSide()) {
-                ((ServerPlayerEntity) cameraPlayer).displayClientMessage(new TranslationTextComponent("jojo.polaroid.paper"), true);
+                paperItem.shrink(1);
             }
-            return ActionResult.fail(stack);
-        }
-        if (!world.isClientSide() && !cameraPlayer.abilities.instabuild) {
-            paperItem.shrink(1);
         }
         
 //        /* Other classes necessary:
