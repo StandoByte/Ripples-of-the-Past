@@ -9,8 +9,10 @@ import com.github.standobyte.jojo.block.PillarmanBossMultiBlock;
 import com.github.standobyte.jojo.block.StoneMaskBlock;
 import com.github.standobyte.jojo.block.WoodenCoffinBlock;
 
+import net.minecraft.block.AbstractBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.FlowingFluidBlock;
 import net.minecraft.block.SoundType;
 import net.minecraft.block.material.Material;
 import net.minecraft.block.material.MaterialColor;
@@ -29,6 +31,10 @@ public class ModBlocks {
     
     public static final RegistryObject<PillarmanBossMultiBlock> SLUMBERING_PILLARMAN = BLOCKS.register("slumbering_pillarman", 
             () -> new PillarmanBossMultiBlock(Block.Properties.copy(Blocks.BEDROCK).isValidSpawn((state, reader, pos, entityType) -> false)));
+    
+    public static final RegistryObject<FlowingFluidBlock> BOILING_BLOOD = BLOCKS.register("boiling_blood", 
+            () -> new FlowingFluidBlock(ModFluids.BOILING_BLOOD, AbstractBlock.Properties.of(Material.LAVA)
+                    .noCollission().randomTicks().strength(100.0F).lightLevel(blockState -> 15).noDrops()));
     
     public static final RegistryObject<Block> METEORIC_IRON = BLOCKS.register("meteoric_iron", 
            () -> new Block(Block.Properties.copy(Blocks.IRON_BLOCK).harvestTool(ToolType.PICKAXE).harvestLevel(1).requiresCorrectToolForDrops()));

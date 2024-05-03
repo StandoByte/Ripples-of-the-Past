@@ -141,8 +141,7 @@ public class ControlScheme {
             }
             this.serializedKeybinds.clear();
             for (DefaultControls.DefaultKey keyInfo : defaultState.keyBindings) {
-                ActionKeybindEntry keyBind = new ActionKeybindEntry(ActionKeybindEntry.PressActionType.CLICK, 
-                        keyInfo.action.getRegistryName(), keyInfo.keyDesc);
+                ActionKeybindEntry keyBind = new ActionKeybindEntry(keyInfo.action.getRegistryName(), keyInfo.keyDesc);
                 serializedKeybinds.add(keyBind);
                 keyBind.init();
             }
@@ -162,8 +161,7 @@ public class ControlScheme {
         }
         
         for (DefaultControls.DefaultKey keyBinding : defaultControls.keyBindings) {
-            obj.serializedKeybinds.add(new ActionKeybindEntry(ActionKeybindEntry.PressActionType.CLICK, 
-                            keyBinding.action.getRegistryName(), keyBinding.keyDesc));
+            obj.serializedKeybinds.add(new ActionKeybindEntry(keyBinding.action.getRegistryName(), keyBinding.keyDesc));
         }
         
         return obj;
@@ -211,19 +209,16 @@ public class ControlScheme {
         return keybindsView;
     }
     
-    public ActionKeybindEntry addBlankKeybindEntry(ActionKeybindEntry.PressActionType pressType) {
-        return addKeybindEntry(new ActionKeybindEntry(pressType, 
-                new ResourceLocation("blank"), InputMappings.Type.KEYSYM, -1));
+    public ActionKeybindEntry addBlankKeybindEntry() {
+        return addKeybindEntry(new ActionKeybindEntry(new ResourceLocation("blank"), InputMappings.Type.KEYSYM, -1));
     }
     
-    public ActionKeybindEntry addKeybindEntry(ActionKeybindEntry.PressActionType pressType, 
-            Action<?> action, int key) {
-        return addKeybindEntry(pressType, action, InputMappings.Type.KEYSYM, key);
+    public ActionKeybindEntry addKeybindEntry(Action<?> action, int key) {
+        return addKeybindEntry(action, InputMappings.Type.KEYSYM, key);
     }
     
-    public ActionKeybindEntry addKeybindEntry(ActionKeybindEntry.PressActionType pressType, 
-            Action<?> action, InputMappings.Type inputType, int key) {
-        return addKeybindEntry(new ActionKeybindEntry(pressType, action, inputType, key));
+    public ActionKeybindEntry addKeybindEntry(Action<?> action, InputMappings.Type inputType, int key) {
+        return addKeybindEntry(new ActionKeybindEntry(action, inputType, key));
     }
     
     private ActionKeybindEntry addKeybindEntry(ActionKeybindEntry keybind) {

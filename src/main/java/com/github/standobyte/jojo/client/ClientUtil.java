@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 
@@ -144,6 +145,15 @@ public class ClientUtil {
     public static boolean isInSinglePlayer() {
         Minecraft mc = Minecraft.getInstance();
         return mc.hasSingleplayerServer() && !mc.getSingleplayerServer().isPublished();
+    }
+    
+    public static boolean hasOtherPlayers() {
+        Minecraft mc = Minecraft.getInstance();
+        return mc.isLocalServer() && mc.player.connection.getOnlinePlayers().size() <= 1;
+    }
+    
+    public static UUID getServerUUID() {
+        return ClientEventHandler.getInstance().getServerId();
     }
     
     public static boolean useActionShiftVar(PlayerEntity player) {
@@ -381,9 +391,9 @@ public class ClientUtil {
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
     }
     
-    public static void reenableGlScissor() {
-        GL11.glScissor(latestScissorX, latestScissorY, latestScissorWidth, latestScissorHeight);
-    }
+//    public static void reenableGlScissor() {
+//        GL11.glScissor(latestScissorX, latestScissorY, latestScissorWidth, latestScissorHeight);
+//    }
     
     public static String getShortenedTranslationKey(String originalKey) {
         String shortenedKey = originalKey + ".shortened";

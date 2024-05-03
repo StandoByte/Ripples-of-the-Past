@@ -8,6 +8,7 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.function.IntBinaryOperator;
 import java.util.function.IntUnaryOperator;
 import java.util.function.Predicate;
@@ -270,18 +271,18 @@ public class ActionsOverlayGui extends AbstractGui {
         boolean showModeSelector = false;
         
         Action<?> lastCustomKeybindAction = null;
-        if (currentMode != null) {
-            if (customKeybindActionTransparency.get(currentMode.powerClassification).shouldRender()) {
-                lastCustomKeybindAction = currentMode.lastCustomKeybindAction;
+        for (PowerClassification power : PowerClassification.values()) {
+            ActionsModeConfig<?> mode = getHudMode(power);
+            if (customKeybindActionTransparency.get(power).shouldRender()) {
+                lastCustomKeybindAction = mode.lastCustomKeybindAction;
             }
             else {
-                currentMode.lastCustomKeybindAction = null;
+                mode.lastCustomKeybindAction = null;
             }
         }
-        boolean renderCustomKeybindAction = lastCustomKeybindAction != null;
             
         updateWarnings(currentMode);
-        updateElementPositions(barsPosConfig, hotbarsPosConfig, renderCustomKeybindAction, screenWidth, screenHeight);
+        updateElementPositions(barsPosConfig, hotbarsPosConfig, lastCustomKeybindAction != null, screenWidth, screenHeight);
         
         RenderGameOverlayEvent.ElementType elementTypeRender = event.getType();
         switch (elementTypeRender) {
@@ -340,7 +341,9 @@ public class ActionsOverlayGui extends AbstractGui {
         default:
             break;
         }
-        
+
+        int hotbarsRenderedCount = 0;
+        int hotbarI = 0;
         if (currentMode != null) {
             if (currentMode.getPower() == null || !currentMode.getPower().hasPower()) {
                 JojoMod.getLogger().warn("Failed rendering {} HUD", currentMode.powerClassification);
@@ -357,7 +360,6 @@ public class ActionsOverlayGui extends AbstractGui {
                 for (int i = 0; i < hotbarsRendered.length; i++) {
                     hotbarsRendered[i] = false;
                 }
-                int hotbarsRenderedCount = 0;
                 if (renderActionsHotbar(matrixStack, hotbarsPosition, InputHandler.ActionKey.ATTACK,
                         currentMode, getMouseTarget(), hotbarsRenderedCount, partialTick)) { 
                     hotbarsRendered[0] = true; 
@@ -367,10 +369,6 @@ public class ActionsOverlayGui extends AbstractGui {
                         currentMode, getMouseTarget(), hotbarsRenderedCount, partialTick)) { 
                     hotbarsRendered[1] = true; 
                     hotbarsRenderedCount++; 
-                }
-                if (renderCustomKeybindAction) {
-                    renderCustomKeybindActionSlot(matrixStack, hotbarsPosition, lastCustomKeybindAction, currentMode, getMouseTarget(), 
-                            hotbarsRenderedCount, partialTick);
                 }
                 
                 renderWarningIcons(matrixStack, warningsPosition, warningLines);
@@ -384,16 +382,31 @@ public class ActionsOverlayGui extends AbstractGui {
                 int color = getPowerUiColor(currentMode.getPower());
                 drawPowerName(matrixStack, hotbarsPosition, currentMode, color, partialTick);
 
-                int hotbarI = 0;
                 if (hotbarsRendered[0]) drawHotbarText(matrixStack, hotbarsPosition, InputHandler.ActionKey.ATTACK, 
                         currentMode, getMouseTarget(), color, hotbarI++, partialTick);
                 if (hotbarsRendered[1]) drawHotbarText(matrixStack, hotbarsPosition, InputHandler.ActionKey.ABILITY, currentMode, 
                         getMouseTarget(), color, hotbarI++, partialTick);
-                if (renderCustomKeybindAction) {
-                    drawCustomKeybindActionText(matrixStack, hotbarsPosition, lastCustomKeybindAction, currentMode, getMouseTarget(), color, hotbarI, partialTick);
-                }
                 
                 drawWarningText(matrixStack, warningsPosition, warningLines);
+                break;
+            default:
+                break;
+            }
+        }
+        
+        if (lastCustomKeybindAction != null) {
+            ActionsModeConfig<?> hudMode = getHudMode(lastCustomKeybindAction.getPowerClassification());
+            switch (elementTypeRender) {
+            case ALL:
+                renderCustomKeybindActionSlot(matrixStack, 
+                        hotbarsPosition, lastCustomKeybindAction, hudMode, 
+                        getMouseTarget(), hotbarsRenderedCount, partialTick);
+                
+                break;
+            case TEXT:
+                drawCustomKeybindActionText(matrixStack, hotbarsPosition, 
+                        lastCustomKeybindAction, hudMode, getMouseTarget(), 
+                        getPowerUiColor(hudMode.getPower()), hotbarI, partialTick);
                 break;
             default:
                 break;
@@ -741,8 +754,8 @@ public class ActionsOverlayGui extends AbstractGui {
 
     private final SelectedTargetIcon skbaTargetIcon /*short for "selected keybind action"*/ = new SelectedTargetIcon();
     private <P extends IPower<P, ?>> void renderCustomKeybindActionSlot(MatrixStack matrixStack, 
-            ElementPosition position, Action<P> action, ActionsModeConfig<?> currentMode, ActionTarget target, 
-            int ordinal, float partialTick) {
+            ElementPosition position, Action<P> action, ActionsModeConfig<?> currentMode, 
+            ActionTarget target, int ordinal, float partialTick) {
         if (action == null) return;
         ActionsModeConfig<P> mode = (ActionsModeConfig<P>) currentMode;
         P power = mode.getPower();
@@ -1048,7 +1061,7 @@ public class ActionsOverlayGui extends AbstractGui {
             float alpha = getNameAlpha(transparency, partialTick);
             
             if (alpha > 0) {
-                if (!hotbarsEnabled) alpha *= 0.25F;
+                if (!hotbarsEnabled) alpha = mulAlpha(alpha, 0.25F);
                 int width = mc.font.width(actionName);
                 RenderSystem.pushMatrix();
                 RenderSystem.enableBlend();
@@ -1101,7 +1114,7 @@ public class ActionsOverlayGui extends AbstractGui {
             float alpha = transparency.getAlpha(partialTick);
             
             if (alpha > 0) {
-                if (!hotbarsEnabled) alpha *= 0.25F;
+                if (!hotbarsEnabled) alpha = mulAlpha(alpha, 0.25F);
                 int width = mc.font.width(actionName);
                 RenderSystem.pushMatrix();
                 RenderSystem.enableBlend();
@@ -1127,6 +1140,10 @@ public class ActionsOverlayGui extends AbstractGui {
         default:
             return 1;
         }
+    }
+    
+    private float mulAlpha(float alpha, float multiplier) {
+        return Math.max(alpha * multiplier, 1f / 63f);
     }
     
     
@@ -1234,7 +1251,7 @@ public class ActionsOverlayGui extends AbstractGui {
             float alpha = !hotbarsEnabled ? 0.25F : 1.0F;
             if (ticks < 0) {
                 ratio = 0;
-                alpha *= 0.75F;
+                alpha = mulAlpha(alpha, 0.75F);
             }
             else {
                 ratio = MathHelper.clamp(((float) ticks + partialTick) / (float) ticksToFire, 0, 1);
@@ -1522,7 +1539,17 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
+
     
+    public void switchMode(PowerClassification power) {
+        Objects.requireNonNull(power);
+        if (getCurrentMode() != power) {
+            setMode(power);
+        }
+        else {
+            setMode(null);
+        }
+    }
     
     public boolean setMode(@Nullable PowerClassification power) {
         if (power == null) {
@@ -1555,28 +1582,7 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     private boolean setPowerMode(@Nullable ActionsModeConfig<?> mode) {
-        if (mode != null && currentMode != mode) {
-            if (mode.getPower().hasPower()) {
-                modeSelectorTransparency.reset();
-                powerNameTransparency.reset();
-                actionNameTransparency.values().forEach(ElementTransparency::reset);
-                actionHotbarFold.values().forEach(FadeOut::reset);
-                if (currentMode != null) {
-                    if (mode != nonStandUiMode) {
-                        energyBarTransparency.reset();
-                    }
-                    else if (mode != standUiMode) {
-                        staminaBarTransparency.reset();
-                        resolveBarTransparency.reset();
-                    }
-                }
-                currentMode = mode;
-                currentMode.resetSelectedTick();
-                return true;
-            }
-            return false;
-        }
-        else {
+        if (mode == null) {
             modeSelectorTransparency.reset();
             if (currentMode == nonStandUiMode) {
                 energyBarTransparency.reset();
@@ -1588,6 +1594,25 @@ public class ActionsOverlayGui extends AbstractGui {
             currentMode = null;
             return true;
         }
+        else if (currentMode != mode && mode.getPower().hasPower()) {
+            modeSelectorTransparency.reset();
+            powerNameTransparency.reset();
+            actionNameTransparency.values().forEach(ElementTransparency::reset);
+            actionHotbarFold.values().forEach(FadeOut::reset);
+            if (currentMode != null) {
+                if (mode != nonStandUiMode) {
+                    energyBarTransparency.reset();
+                }
+                else if (mode != standUiMode) {
+                    staminaBarTransparency.reset();
+                    resolveBarTransparency.reset();
+                }
+            }
+            currentMode = mode;
+            currentMode.resetSelectedTick();
+            return true;
+        }
+        return false;
     }
     
     public void revealActionNames() {

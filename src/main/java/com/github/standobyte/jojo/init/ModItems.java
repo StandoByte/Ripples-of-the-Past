@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.render.item.RoadRollerISTER;
+import com.github.standobyte.jojo.client.render.item.polaroid.PolaroidISTER;
 import com.github.standobyte.jojo.client.render.item.standdisc.StandDiscISTER;
 import com.github.standobyte.jojo.item.AjaStoneItem;
 import com.github.standobyte.jojo.item.BladeHatItem;
@@ -18,10 +19,11 @@ import com.github.standobyte.jojo.item.CustomModelArmorItem;
 import com.github.standobyte.jojo.item.LadybugBroochItem;
 import com.github.standobyte.jojo.item.GEBodyTissueItem;
 import com.github.standobyte.jojo.item.GlovesItem;
-import com.github.standobyte.jojo.item.InkPastaItem;
 import com.github.standobyte.jojo.item.KnifeItem;
 import com.github.standobyte.jojo.item.ModArmorMaterials;
 import com.github.standobyte.jojo.item.OilItem;
+import com.github.standobyte.jojo.item.PhotoItem;
+import com.github.standobyte.jojo.item.PolaroidItem;
 import com.github.standobyte.jojo.item.RoadRollerItem;
 import com.github.standobyte.jojo.item.SatiporojaScarfItem;
 import com.github.standobyte.jojo.item.SledgehammerItem;
@@ -39,8 +41,8 @@ import net.minecraft.block.Block;
 import net.minecraft.enchantment.EnchantmentType;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.BlockItem;
+import net.minecraft.item.BucketItem;
 import net.minecraft.item.DyeColor;
-import net.minecraft.item.Food;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
@@ -143,6 +145,9 @@ public class ModItems {
     public static final RegistryObject<BlockItem> SLUMBERING_PILLARMAN = ITEMS.register("slumbering_pillarman", 
             () -> new BlockItem(ModBlocks.SLUMBERING_PILLARMAN.get(), new Item.Properties().rarity(Rarity.EPIC)));
 
+    public static final RegistryObject<BucketItem> BOILING_BLOOD_BUCKET = ITEMS.register("boiling_blood_bucket", 
+            () -> new BucketItem(ModFluids.BOILING_BLOOD, new Item.Properties()));
+
     public static final RegistryObject<KnifeItem> KNIFE = ITEMS.register("knife", 
             () -> new KnifeItem(new Item.Properties().tab(MAIN_TAB).stacksTo(16)));
 
@@ -217,12 +222,13 @@ public class ModItems {
 //    public static final RegistryObject<TarotDeckItem> TAROT_DECK = ITEMS.register("tarot_deck", 
 //            () -> new TarotDeckItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
 //    
-//    public static final RegistryObject<PolaroidItem> POLAROID = ITEMS.register("polaroid", 
-//            () -> new PolaroidItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
-//    
-//    public static final RegistryObject<PhotoItem> PHOTO = ITEMS.register("photo", 
-//            () -> new PhotoItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
-//    
+    public static final RegistryObject<PolaroidItem> POLAROID = ITEMS.register("polaroid", 
+            () -> new PolaroidItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)
+                    .setISTER(() -> PolaroidISTER::new)));
+    
+    public static final RegistryObject<PhotoItem> PHOTO = ITEMS.register("photo", 
+            () -> new PhotoItem(new Item.Properties().stacksTo(1)));
+    
 //    public static final RegistryObject<PhotoAlbumItem> PHOTO_ALBUM = ITEMS.register("photo_album", 
 //            () -> new PhotoAlbumItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
 //    

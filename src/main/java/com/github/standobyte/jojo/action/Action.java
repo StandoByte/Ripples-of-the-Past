@@ -79,10 +79,11 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         this.swingHand = builder.swingHand;
         this.withUserPunch = builder.withUserPunch;
         this.shoutSupplier = builder.shoutSupplier;
-        if (builder.shiftVariationOf != null) {
-            for (Supplier<? extends Action<?>> action : builder.shiftVariationOf) {
-                SHIFT_VARIATIONS.put(action, () -> this);
-            }
+        for (Supplier<? extends Action<?>> action : builder.shiftVariationOf) {
+            SHIFT_VARIATIONS.put(action, () -> this);
+        }
+        for (Supplier<? extends Action<?>> action : builder.addShiftVariation) {
+            SHIFT_VARIATIONS.put(() -> this, action);
         }
     }
     
@@ -501,6 +502,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         private boolean withUserPunch = false;
         private Supplier<SoundEvent> shoutSupplier = () -> null;
         protected List<Supplier<? extends Action<?>>> shiftVariationOf = new ArrayList<>();
+        protected List<Supplier<? extends Action<?>>> addShiftVariation = new ArrayList<>();
         
         public T cooldown(int cooldown) {
             return cooldown(0, cooldown);
@@ -570,8 +572,13 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
             return getThis();
         }
         
-        public T shiftVariationOf(Supplier<? extends Action<?>> action) {
-            this.shiftVariationOf.add(action);
+        public T shiftVariationOf(Supplier<? extends Action<?>> base) {
+            this.shiftVariationOf.add(base);
+            return getThis();
+        }
+        
+        public T addShiftVariation(Supplier<? extends Action<?>> shift) {
+            this.addShiftVariation.add(shift);
             return getThis();
         }
         

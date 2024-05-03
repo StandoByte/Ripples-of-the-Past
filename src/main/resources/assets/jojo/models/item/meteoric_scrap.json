@@ -75,6 +75,12 @@
         "jojo:icon": 12
       },
       "model": "jojo:item/item_icon_mr_fireball"
+    },
+    {
+      "predicate": {
+        "jojo:icon": 13
+      },
+      "model": "jojo:item/item_icon_steve_muscle"
     }
   ]
 }

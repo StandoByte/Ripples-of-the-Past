@@ -205,9 +205,9 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
         void apply(StandSkin skin) {
             if (customModels != null) {
                 for (Pair<ResourceLocation, CustomModelPrepared> customModelData : customModels) {
-                    ResourceLocation modelResLoc = customModelData.getLeft();
+                    ResourceLocation modelResLoc = StandModelOverrides.clearFormatExtension(customModelData.getLeft());
                     CustomModelPrepared modelJson = customModelData.getRight();
-                    StandModelOverrides.createModelFromJson(modelResLoc, modelJson.modelJson, modelJson.format).ifPresent(model -> {
+                    StandModelOverrides.createStandModelFromJson(modelResLoc, modelJson.modelJson, modelJson.format).ifPresent(model -> {
                         skin.standModels.cacheValue(model.getKey(), model.getValue());
                     });
                 }

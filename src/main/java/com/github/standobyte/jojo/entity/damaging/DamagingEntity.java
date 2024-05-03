@@ -54,7 +54,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     protected static final Vector3d DEFAULT_POS_OFFSET = new Vector3d(0.0D, -0.3D, 0.0D);
     private float damageFactor = 1F;
     // only used for OwnerBoundProjectileEntity
-    protected float speedFactor = 1F;
+    protected double speedFactor = 1F;
     private LivingEntity livingEntityOwner = null;
     private LazyOptional<IStandPower> userStandPower = LazyOptional.empty();
     private LazyOptional<INonStandPower> userNonStandPower = LazyOptional.empty();
@@ -313,11 +313,11 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
         return damageFactor;
     }
     
-    public void setSpeedFactor(float speedFactor) {
+    public void setSpeedFactor(double speedFactor) {
         this.speedFactor = speedFactor;
     }
     
-    public float getSpeedFactor() {
+    public double getSpeedFactor() {
         return speedFactor;
     }
     
@@ -399,7 +399,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     protected void addAdditionalSaveData(CompoundNBT nbt) {
         super.addAdditionalSaveData(nbt);
         nbt.putFloat("DamageFactor", damageFactor);
-        nbt.putFloat("SpeedFactor", speedFactor);
+        nbt.putDouble("SpeedFactor", speedFactor);
         nbt.putInt("Age", tickCount);
         standSkin.ifPresent(path -> nbt.putString("StandSkin", path.toString()));
     }
@@ -408,7 +408,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     protected void readAdditionalSaveData(CompoundNBT nbt) {
         super.readAdditionalSaveData(nbt);
         damageFactor = nbt.getFloat("DamageFactor");
-        speedFactor = nbt.getFloat("SpeedFactor");
+        speedFactor = nbt.getDouble("SpeedFactor");
         tickCount = nbt.getInt("Age");
         standSkin = MCUtil.getNbtElement(nbt, "StandSkin", StringNBT.class)
                 .map(StringNBT::getAsString)
@@ -421,14 +421,14 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     @Override
     public void writeSpawnData(PacketBuffer buffer) {
         buffer.writeInt(tickCount);
-        buffer.writeFloat(speedFactor);
+        buffer.writeDouble(speedFactor);
         NetworkUtil.writeOptional(buffer, standSkin, path -> buffer.writeResourceLocation(path));
     }
 
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
         tickCount = additionalData.readInt();
-        speedFactor = additionalData.readFloat();
+        speedFactor = additionalData.readDouble();
         standSkin = NetworkUtil.readOptional(additionalData, () -> additionalData.readResourceLocation());
     }
 

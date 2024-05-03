@@ -45,7 +45,7 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     private static final DataParameter<Integer> ENTITY_ATTACHED_TO = EntityDataManager.defineId(OwnerBoundProjectileEntity.class, DataSerializers.INT);
     private static final DataParameter<Boolean> IS_MOVING_FORWARD = EntityDataManager.defineId(OwnerBoundProjectileEntity.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> IS_RETRACTING = EntityDataManager.defineId(OwnerBoundProjectileEntity.class, DataSerializers.BOOLEAN);
-    private static final DataParameter<Float> DISTANCE = EntityDataManager.defineId(OwnerBoundProjectileEntity.class, DataSerializers.FLOAT);
+    private double distance;
     private LivingEntity attachedEntity;
     private UUID attachedEntityUUID;
     private int lifeSpan;
@@ -185,23 +185,23 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     @Nullable
     protected Vector3d getNextOriginOffset() {
         LivingEntity owner = getOwner();
-        float distance = updateDistance();
+        double distance = updateDistance();
         updateMotionFlags();
         if (isRetracting() && distance <= 0) {
             return null;
         }
-        if (!level.isClientSide()) setDistance(distance);
+        setDistance(distance);
         return originOffset(owner.yRot, owner.xRot, distance);
     }
     
     protected float updateDistance() {
         if (isRetracting()) {
-            return getDistance() - retractSpeed() * speedFactor;
+            return (float) (getDistance() - retractSpeed() * speedFactor);
         }
         if (isMovingForward()) {
-            return getDistance() + movementSpeed() * speedFactor;
+            return (float) (getDistance() + movementSpeed() * speedFactor);
         }
-        return getDistance();
+        return (float) getDistance();
     }
     
     protected abstract float movementSpeed();
@@ -209,7 +209,7 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     protected int timeAtFullLength() {
         return 0;
     }
-    
+
     protected float retractSpeed() {
         return movementSpeed();
     }
@@ -224,7 +224,7 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
         }
     }
     
-    private float maxDistance() {
+    private double maxDistance() {
         return movementSpeed() * retractSpeed() * (ticksLifespan() - timeAtFullLength()) / (movementSpeed() + retractSpeed());
     }
     
@@ -333,12 +333,12 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
         return entityData.get(BLOCK_ATTACHED_TO);
     }
     
-    protected void setDistance(float distance) {
-        entityData.set(DISTANCE, distance);
+    protected void setDistance(double distance) {
+        this.distance = distance;
     }
     
-    protected float getDistance() {
-        return entityData.get(DISTANCE);
+    protected double getDistance() {
+        return distance;
     }
     
     protected void setIsMovingForward(boolean isMovingForward) {
@@ -372,7 +372,6 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
         entityData.define(IS_BOUND_TO_OWNER, true);
         entityData.define(ENTITY_ATTACHED_TO, -1);
         entityData.define(BLOCK_ATTACHED_TO, Optional.empty());
-        entityData.define(DISTANCE, 0F);
         entityData.define(IS_MOVING_FORWARD, true);
         entityData.define(IS_RETRACTING, false);
     }
@@ -437,7 +436,7 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
         else if (attachedEntity != null) {
             nbt.putUUID("AttachedEntity", attachedEntity.getUUID());
         }
-        nbt.putFloat("Distance", getDistance());
+        nbt.putDouble("Distance", getDistance());
         nbt.putBoolean("IsMovingForward", isMovingForward());
         nbt.putBoolean("IsRetracting", isRetracting());
         nbt.putInt("LifeSpan", lifeSpan);
@@ -454,7 +453,7 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
         else if (nbt.hasUUID("BoundTarget")) {
             this.attachedEntityUUID = nbt.getUUID("AttachedEntity");
         }
-        setDistance(nbt.getFloat("Distance"));
+        setDistance(nbt.getDouble("Distance"));
         setIsMovingForward(nbt.getBoolean("IsMovingForward"));
         setIsRetracting(nbt.getBoolean("IsRetracting"));
         lifeSpan = nbt.getInt("LifeSpan");
@@ -464,11 +463,13 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
     public void writeSpawnData(PacketBuffer buffer) {
         super.writeSpawnData(buffer);
         buffer.writeVarInt(lifeSpan);
+        buffer.writeDouble(distance);
     }
 
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
         super.readSpawnData(additionalData);
         lifeSpan = additionalData.readVarInt();
+        distance = additionalData.readDouble();
     }
 }

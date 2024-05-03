@@ -16,7 +16,7 @@ public class ElementTransparency extends FadeOut {
         return ClientUtil.addAlpha(color, getAlpha(partialTick));
     }
     
-    private static final float MIN_ALPHA = 1F / 63F;
+    public static final float MIN_ALPHA = 1F / 63F;
     float getAlpha(float partialTick) {
         return ticks > 0 ? Math.max(getValue(partialTick), MIN_ALPHA) : 0;
     }
