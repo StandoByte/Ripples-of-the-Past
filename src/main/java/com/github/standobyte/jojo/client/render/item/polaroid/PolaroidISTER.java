@@ -38,8 +38,8 @@ public class PolaroidISTER extends CustomModelItemISTER<PolaroidModel> {
     protected void doRender(ItemStack itemStack, ItemCameraTransforms.TransformType transformType, MatrixStack matrixStack, 
             IRenderTypeBuffer renderTypeBuffer, int light, int overlay) {
         boolean isHeld = entity != null && (entity.getItemInHand(Hand.MAIN_HAND) == itemStack || entity.getItemInHand(Hand.OFF_HAND) == itemStack);
-        float ticks = Minecraft.getInstance().player.tickCount + ClientUtil.getPartialTick();
-        float photoProgress = ticks % 100 < 20 ? (ticks % 100) / 20 : 0;
+//        float ticks = Minecraft.getInstance().player.tickCount + ClientUtil.getPartialTick();
+        float photoProgress = 0;
         model.setAnim(isHeld, photoProgress);
         model.setRenderPhoto(false);
         super.doRender(itemStack, transformType, matrixStack, renderTypeBuffer, light, overlay);
