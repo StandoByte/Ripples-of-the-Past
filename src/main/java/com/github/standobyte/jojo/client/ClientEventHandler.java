@@ -8,8 +8,11 @@ import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
+
+import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
@@ -21,6 +24,7 @@ import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeC
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
+import com.github.standobyte.jojo.client.polaroid.PhotosCache;
 import com.github.standobyte.jojo.client.polaroid.PolaroidHelper;
 import com.github.standobyte.jojo.client.render.block.overlay.TranslucentBlockRenderHelper;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.FrozenLayer;
@@ -46,6 +50,7 @@ import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.item.OilItem;
+import com.github.standobyte.jojo.network.packets.fromserver.ServerIdPacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -107,6 +112,7 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent;
@@ -292,6 +298,7 @@ public class ClientEventHandler {
                 }
                 
                 tickResolveEffect();
+                PhotosCache.tick();
                 break;
             case END:
                 ShaderEffectApplier.getInstance().shaderTick();
@@ -410,7 +417,7 @@ public class ClientEventHandler {
 
 
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
+    @SubscribeEvent(priority = EventPriority.LOW)
     public void zoom(EntityViewRenderEvent.FOVModifier event) {
         if (isZooming) {
             zoomModifier = Math.min(zoomModifier + mc.getDeltaFrameTime() / 3F, 60);
@@ -424,8 +431,15 @@ public class ClientEventHandler {
     }
     
     @SubscribeEvent
-    public static void cameraSetup(EntityViewRenderEvent.CameraSetup event) {
+    public void cameraSetup(EntityViewRenderEvent.CameraSetup event) {
         PolaroidHelper.pictureCameraSetup(event);
+    }
+
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void photoFOV(EntityViewRenderEvent.FOVModifier event) {
+        if (PolaroidHelper.isTakingPhoto()) {
+            event.setFOV(70);
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.HIGH)
@@ -557,11 +571,11 @@ public class ClientEventHandler {
                 }
             }
             
-//            if (!item.isEmpty() && item.getItem() == ModItems.PHOTO.get()) {
-//                event.setCanceled(true);
-//                PolaroidHelper.renderPhotoInHand(event.getMatrixStack(), event.getBuffers(), event.getLight(), 
-//                        event.getEquipProgress(), MCUtil.getHandSide(player, hand), event.getSwingProgress(), item);
-//            }
+            if (!item.isEmpty() && item.getItem() == ModItems.PHOTO.get()) {
+                event.setCanceled(true);
+                PolaroidHelper.renderPhotoInHand(event.getMatrixStack(), event.getBuffers(), event.getLight(), 
+                        event.getEquipProgress(), MCUtil.getHandSide(player, hand), event.getSwingProgress(), item, event.getPartialTicks());
+            }
         }
     }
     
@@ -939,5 +953,30 @@ public class ClientEventHandler {
             event.getEntityMounting().getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(
                     cap -> cap.setVehicleType(mountedType));
         }
+    }
+    
+    
+
+    private UUID serverId;
+    private boolean isLoggedIn = false;
+    
+    public void setServerId(ServerIdPacket packet) {
+        serverId = packet.serverId;
+    }
+    
+    @Nullable
+    public UUID getServerId() {
+        return isLoggedIn ? serverId : null;
+    }
+    
+    @SubscribeEvent
+    public void clientLoggedIn(ClientPlayerNetworkEvent.LoggedInEvent event) {
+        isLoggedIn = true;
+    }
+    
+    @SubscribeEvent
+    public void clientLoggedOut(ClientPlayerNetworkEvent.LoggedOutEvent event) {
+        PhotosCache.onLogOut(serverId);
+        isLoggedIn = false;
     }
 }

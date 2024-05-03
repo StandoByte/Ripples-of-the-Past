@@ -36,6 +36,7 @@ import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.model.ModelBakery;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.model.RenderMaterial;
+import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.client.shader.Shader;
@@ -300,4 +301,11 @@ public class ClientReflection {
     public static void setMirror(ActiveRenderInfo camera, boolean mirror) {
         ReflectionUtil.setBooleanFieldValue(ACTIVE_RENDER_INFO_MIRROR, camera, mirror);
     }
+    
+    
+    private static final Field NATIVE_IMAGE_PIXELS = ObfuscationReflectionHelper.findField(NativeImage.class, "field_195722_d");
+    public static long getPixelsAddress(NativeImage image) {
+        return ReflectionUtil.getLongFieldValue(NATIVE_IMAGE_PIXELS, image);
+    }
+    
 }

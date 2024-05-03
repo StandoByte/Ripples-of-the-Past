@@ -21,11 +21,10 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 
 public class CustomModelItemISTER<M extends Model> extends ItemStackTileEntityRenderer {
-    private final ResourceLocation modelResource;
-    private final ResourceLocation texture;
-    private final Supplier<? extends Item> item;
-    private final Supplier<M> modelObjConstructor;
-    
+    protected final ResourceLocation modelResource;
+    protected final ResourceLocation texture;
+    protected final Supplier<? extends Item> item;
+    protected final Supplier<M> modelObjConstructor;
     protected M model;
     @Nullable protected LivingEntity entity;
     
@@ -41,7 +40,7 @@ public class CustomModelItemISTER<M extends Model> extends ItemStackTileEntityRe
                 BlockbenchStandModelHelper.replaceModelParts(newModel, parsedModel.getNamedModelParts());
                 this.model = newModel;
             } catch (IllegalArgumentException | IllegalAccessException e) {
-                JojoMod.LOGGER.error("Failed to load model {}", this.modelResource);
+                JojoMod.getLogger().error("Failed to load model {}", this.modelResource);
                 e.printStackTrace();
             }
         });
@@ -59,15 +58,16 @@ public class CustomModelItemISTER<M extends Model> extends ItemStackTileEntityRe
             matrixStack.pushPose();
             matrixStack.scale(-1.0F, -1.0F, 1.0F);
             matrixStack.translate(-0.5, -1.5, 0.5);
-            IVertexBuilder vertexBuilder = ItemRenderer.getFoilBufferDirect(
-                    renderTypeBuffer, model.renderType(texture), false, itemStack.hasFoil());
-            beforeRender(itemStack, transformType, matrixStack, renderTypeBuffer, light, overlay);
-            model.renderToBuffer(matrixStack, vertexBuilder, light, overlay, 1.0F, 1.0F, 1.0F, 1.0F);
+            doRender(itemStack, transformType, matrixStack, renderTypeBuffer, light, overlay);
             matrixStack.popPose();
         }
     }
     
-    protected void beforeRender(ItemStack itemStack, ItemCameraTransforms.TransformType transformType, MatrixStack matrixStack, 
-            IRenderTypeBuffer renderTypeBuffer, int light, int overlay) {}
+    protected void doRender(ItemStack itemStack, ItemCameraTransforms.TransformType transformType, MatrixStack matrixStack, 
+            IRenderTypeBuffer renderTypeBuffer, int light, int overlay) {
+        IVertexBuilder vertexBuilder = ItemRenderer.getFoilBufferDirect(
+                renderTypeBuffer, model.renderType(texture), false, itemStack.hasFoil());
+        model.renderToBuffer(matrixStack, vertexBuilder, light, overlay, 1.0F, 1.0F, 1.0F, 1.0F);
+    }
 
 }

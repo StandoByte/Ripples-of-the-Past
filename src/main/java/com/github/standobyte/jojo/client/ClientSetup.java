@@ -86,6 +86,7 @@ import com.github.standobyte.jojo.client.render.entity.renderer.stand.SilverChar
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.StarPlatinumRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.TheWorldRenderer;
 import com.github.standobyte.jojo.client.render.item.RoadRollerBakedModel;
+import com.github.standobyte.jojo.client.render.item.generic.ItemISTERModelWrapper;
 import com.github.standobyte.jojo.client.render.item.standdisc.StandDiscISTERModel;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
 import com.github.standobyte.jojo.client.resources.CustomResources;
@@ -137,6 +138,7 @@ import net.minecraft.item.IItemPropertyGetter;
 import net.minecraft.item.ItemModelsProperties;
 import net.minecraft.item.Items;
 import net.minecraft.particles.BasicParticleType;
+import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.api.distmarker.Dist;
@@ -255,6 +257,9 @@ public class ClientSetup {
                         .orElse(0).floatValue();
             });
 //            ItemModelsProperties.register(ModItems.EMPEROR.get(), new ResourceLocation(JojoMod.MOD_ID, "stand_invisible"), STAND_ITEM_INVISIBLE);
+            ItemModelsProperties.register(ModItems.POLAROID.get(), new ResourceLocation(JojoMod.MOD_ID, "is_held"), (itemStack, clientWorld, livingEntity) -> {
+                return livingEntity != null && (livingEntity.getItemInHand(Hand.MAIN_HAND) == itemStack || livingEntity.getItemInHand(Hand.OFF_HAND) == itemStack) ? 1 : 0;
+            });
 
             RenderTypeLookup.setRenderLayer(ModBlocks.STONE_MASK.get(), RenderType.cutoutMipped());
             RenderTypeLookup.setRenderLayer(ModBlocks.SLUMBERING_PILLARMAN.get(), RenderType.cutoutMipped());
@@ -356,6 +361,8 @@ public class ClientSetup {
                 model -> new RoadRollerBakedModel(model));
         registerCustomBakedModel(ModItems.STAND_DISC.get().getRegistryName(), event.getModelRegistry(), 
                 model -> new StandDiscISTERModel(model));
+        registerCustomBakedModel(ModItems.POLAROID.get().getRegistryName(), event.getModelRegistry(), 
+                model -> new ItemISTERModelWrapper(model).setCaptureEntity());
     }
     
     private static void registerCustomBakedModel(ResourceLocation resLoc, 

@@ -6,23 +6,32 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.entity.mob.rps.RPSPvpGamesMap;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
+import com.github.standobyte.jojo.item.polaroid.PhotosHandler;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.ServerIdPacket;
 import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.util.Constants;
 
 public class SaveFileUtilCap {
     private final ServerWorld overworld;
+
+    private UUID serverId;
     
-    Map<StandType<?>, Integer> timesStandsTaken = new HashMap<>();
+    private Map<StandType<?>, Integer> timesStandsTaken = new HashMap<>();
     
     private final RPSPvpGamesMap rpsPvpGames = new RPSPvpGamesMap();
     
@@ -33,10 +42,19 @@ public class SaveFileUtilCap {
     
     private int walkmanId;
     private int cassetteId;
-    private int polaroidPhotoId;
+    
+    private final PhotosHandler polaroidPhotos;
     
     public SaveFileUtilCap(ServerWorld overworld) {
         this.overworld = overworld;
+        if (!overworld.isClientSide()) {
+            this.serverId = UUID.randomUUID();
+        }
+        this.polaroidPhotos = new PhotosHandler(overworld.getServer());
+    }
+    
+    public UUID getServerUUID() {
+        return serverId;
     }
     
     public void tick() {
@@ -50,6 +68,10 @@ public class SaveFileUtilCap {
             }
             refreshNextTick = false;
         }
+    }
+    
+    public void onPlayerLogIn(ServerPlayerEntity player) {
+        PacketManager.sendToClient(new ServerIdPacket(serverId), player);
     }
     
     public void addPlayerStand(StandType<?> type) {
@@ -157,32 +179,56 @@ public class SaveFileUtilCap {
         return ++cassetteId;
     }
     
-    public int incPolaroidPhotoId() {
-        return ++polaroidPhotoId;
+    public PhotosHandler getPolaroidPhotos() {
+        return polaroidPhotos;
     }
     
     
     
     CompoundNBT save() {
         CompoundNBT nbt = new CompoundNBT();
+        nbt.putUUID("ServerId", serverId);
+        
+        CompoundNBT timesStandsTakenMap = new CompoundNBT();
+        for (Map.Entry<StandType<?>, Integer> entry : timesStandsTaken.entrySet()) {
+            timesStandsTakenMap.putInt(JojoCustomRegistries.STANDS.getKeyAsString(entry.getKey()), entry.getValue());
+        }
+        nbt.put("StandsTaken", timesStandsTakenMap);
+        
         nbt.putBoolean("GameruleDayLightCycle", gameruleDayLightCycle);
         nbt.putBoolean("GameruleWeatherCycle", gameruleWeatherCycle);
         nbt.putBoolean("UsedTimeStop", usedTimeStop);
         nbt.putInt("WalkmanId", walkmanId);
         nbt.putInt("CassetteId", cassetteId);
-        nbt.putInt("PolaroidPhotoId", polaroidPhotoId);
+        nbt.put("PolaroidPhotos", polaroidPhotos.toNBT());
         nbt.putInt("StandEffId", StandEffectsTracker.EFFECTS_COUNTER.get());
         return nbt;
     }
     
     void load(CompoundNBT nbt) {
+        if (nbt.hasUUID("ServerId")) {
+            serverId = nbt.getUUID("ServerId");
+        }
+        
+        if (nbt.contains("StandsTaken", 10)) {
+            Map<StandType<?>, Integer> stands = new HashMap<>();
+            CompoundNBT timesStandsTakenNBT = nbt.getCompound("StandsTaken");
+            JojoCustomRegistries.STANDS.getRegistry().forEach(stand -> {
+                int timesTaken = timesStandsTakenNBT.getInt(JojoCustomRegistries.STANDS.getKeyAsString(stand));
+                if (timesTaken > 0) {
+                    stands.put(stand, timesTaken);
+                }
+            });
+            timesStandsTaken = stands;
+        }
+        
         usedTimeStop = nbt.getBoolean("UsedTimeStop");
         refreshNextTick = usedTimeStop;
         gameruleDayLightCycle = nbt.getBoolean("GameruleDayLightCycle");
         gameruleWeatherCycle = nbt.getBoolean("GameruleWeatherCycle");
         walkmanId = nbt.getInt("WalkmanId");
         cassetteId = nbt.getInt("CassetteId");
-        polaroidPhotoId = nbt.getInt("PolaroidPhotoId");
+        if (nbt.contains("PolaroidPhotos", Constants.NBT.TAG_COMPOUND)) polaroidPhotos.fromNBT(nbt.getCompound("PolaroidPhotos"));
         int latestId = nbt.getInt("StandEffId");
         if (latestId < (1 << 30)) {
             StandEffectsTracker.EFFECTS_COUNTER.set(latestId);

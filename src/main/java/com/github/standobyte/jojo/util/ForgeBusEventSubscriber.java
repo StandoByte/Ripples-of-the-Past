@@ -251,7 +251,9 @@ public class ForgeBusEventSubscriber {
 
     @SubscribeEvent
     public static void onPlayerLoggedIn(PlayerLoggedInEvent event) {
-        JojoModConfig.Common.SyncedValues.syncWithClient((ServerPlayerEntity) event.getPlayer());
+        ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
+        SaveFileUtilCapProvider.getSaveFileCap(player).onPlayerLogIn(player);
+        JojoModConfig.Common.SyncedValues.syncWithClient(player);
         syncPowerData(event.getPlayer());
         IStandPower.getStandPowerOptional(event.getPlayer()).ifPresent(power -> {
             if (power.hasPower()) {

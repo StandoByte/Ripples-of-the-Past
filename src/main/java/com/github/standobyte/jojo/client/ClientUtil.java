@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
@@ -129,6 +130,15 @@ public class ClientUtil {
     public static boolean isInSinglePlayer() {
         Minecraft mc = Minecraft.getInstance();
         return mc.hasSingleplayerServer() && !mc.getSingleplayerServer().isPublished();
+    }
+    
+    public static boolean hasOtherPlayers() {
+        Minecraft mc = Minecraft.getInstance();
+        return mc.isLocalServer() && mc.player.connection.getOnlinePlayers().size() <= 1;
+    }
+    
+    public static UUID getServerUUID() {
+        return ClientEventHandler.getInstance().getServerId();
     }
     
     public static boolean useActionShiftVar(PlayerEntity player) {
