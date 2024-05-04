@@ -138,18 +138,6 @@ public class CustomVerticesModelBox extends ModelRenderer.ModelBox {
             return this;
         }
         
-        /*
-         *    u0   u1       u2   u3  u4   u5
-         * v0       ┌────────┬────────┐
-         *          │   U    │   D    │
-         * v1  ┌────┼────────┼────┬───┴────┐ ⎫
-         *     │    │        │    │        │ ⎪
-         *     │ E  │   N    │ W  │   S    │ ⎬ size.y
-         *     │    │        │    │        │ ⎪
-         *     │    │        │    │        │ ⎪
-         * v2  └────┴────────┴────┴────────┘ ⎭
-         *     size.z               size.x
-         */
         public Builder withUvFace(Direction direction, float u0, float v0, float uWidth, float vHeight) {
             if (livingEntityRenderHacks) {
                 direction = direction.getAxis() == Axis.Z ? direction : direction.getOpposite();

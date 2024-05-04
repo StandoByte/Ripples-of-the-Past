@@ -88,16 +88,17 @@ public class ParseGenericModel {
                                 if (typePrim.isString()) {
                                     String type = typePrim.getAsString();
                                     try {
-                                    switch (type) {
-                                    case "cube":
-                                        return context.deserialize(json, ElementCube.class);
-                                    case "mesh":
-                                        return context.deserialize(json, ElementMesh.class);
-                                    default:
-                                        throw new JsonParseException("Unknown element type: \"" + type + "\"");
-                                    }
+                                        switch (type) {
+                                        case "cube":
+                                            return context.deserialize(json, ElementCube.class);
+                                        case "mesh":
+                                            return context.deserialize(json, ElementMesh.class);
+                                        default:
+                                            throw new JsonParseException("Unknown element type: \"" + type + "\"");
+                                        }
                                     }
                                     catch (Exception e) {
+                                        e.printStackTrace();
                                         throw e;
                                     }
                                 }
@@ -291,20 +292,6 @@ public class ParseGenericModel {
                     polygons = Arrays.copyOf(polygons, polygonsCount);
                 }
                 ClientReflection.setPolygons(box, polygons);
-                
-                
-                /*
-                 *    u0   u1       u2   u3  u4   u5
-                 * v0       ┌────────┬────────┐
-                 *          │   U    │   D    │
-                 * v1  ┌────┼────────┼────┬───┴────┐ ⎫
-                 *     │    │        │    │        │ ⎪
-                 *     │ E  │   N    │ W  │   S    │ ⎬ size.y
-                 *     │    │        │    │        │ ⎪
-                 *     │    │        │    │        │ ⎪
-                 * v2  └────┴────────┴────┴────────┘ ⎭
-                 *     size.z               size.x
-                 */
                 
                 return box;
             }

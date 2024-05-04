@@ -31,13 +31,11 @@ import net.minecraft.util.text.ITextComponent;
  *     
  * [_] lang
  *     
- * [_] Geckolib format model
+ * [V] Stand model
  *     
  * [_] sounds
  * [_]   sounds.json
  * [_]   sound files
- *     
- * [_] particles definition?
  * 
  */
 public class StandSkin {

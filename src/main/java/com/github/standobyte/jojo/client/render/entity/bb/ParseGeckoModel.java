@@ -304,30 +304,6 @@ public class ParseGeckoModel {
                         polygons = Arrays.copyOf(polygons, polygonsCount);
                     }
                     ClientReflection.setPolygons(box, polygons);
-                    
-                    
-                    // i'll just leave this here
-                    /*
-                     *    u0   u1       u2   u3  u4   u5
-                     * v0       ┌────────┬────────┐
-                     *          │   U    │   D    │
-                     * v1  ┌────┼────────┼────┬───┴────┐ ⎫
-                     *     │    │        │    │        │ ⎪
-                     *     │ E  │   N    │ W  │   S    │ ⎬ size.y
-                     *     │    │        │    │        │ ⎪
-                     *     │    │        │    │        │ ⎪
-                     * v2  └────┴────────┴────┴────────┘ ⎭
-                     *     size.z               size.x
-                     */
-//                    float u0 = texCoordU;
-//                    float u1 = texCoordU + size.z();
-//                    float u2 = texCoordU + size.z() + size.x();
-//                    float u4 = texCoordU + size.z() + size.x() + size.x();
-//                    float u3 = texCoordU + size.z() + size.x() + size.z();
-//                    float u5 = texCoordU + size.z() + size.x() + size.z() + size.x();
-//                    float v0 = texCoordV;
-//                    float v1 = texCoordV + size.z();
-//                    float v2 = texCoordV + size.z() + size.y();
                 }
                 
                 return box;
