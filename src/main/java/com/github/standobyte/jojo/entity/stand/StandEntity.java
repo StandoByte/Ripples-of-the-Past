@@ -536,6 +536,21 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
     
     protected void addSummonParticles() {}
+    
+    public int getUnsummonDuration() {
+        LivingEntity user = getUser();
+        boolean resolve = user != null && user.hasEffect(ModStatusEffects.RESOLVE.get());
+        if (resolve) {
+            return isArmsOnlyMode() ? 3 : 5;
+        }
+        else {
+            int ticks = isArmsOnlyMode() ? 7 : 10;
+            double staminaDebuff = getStaminaCondition();  // 0.25 ~ 1
+            staminaDebuff = (staminaDebuff * 2 + 1) / 3.0; // 0.5  ~ 1
+            if (staminaDebuff < 1) ticks = MathHelper.ceil((double) ticks / staminaDebuff);
+            return ticks;
+        }
+    }
 
 
 

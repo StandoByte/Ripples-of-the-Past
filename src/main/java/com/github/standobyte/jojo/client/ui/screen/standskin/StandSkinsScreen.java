@@ -11,6 +11,7 @@ import org.lwjgl.glfw.GLFW;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
+import com.github.standobyte.jojo.client.render.FlameModelRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.StandEntityRenderer;
 import com.github.standobyte.jojo.client.standskin.StandSkin;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
@@ -462,9 +463,11 @@ public class StandSkinsScreen extends Screen {
         IRenderTypeBuffer.Impl buffer = Minecraft.getInstance().renderBuffers().bufferSource();
         EntityRendererManager entityRendererManager = Minecraft.getInstance().getEntityRenderDispatcher();
         StandEntityRenderer<?, ?> renderer = (StandEntityRenderer<?, ?>) entityRendererManager.renderers.get(standType.getEntityType());
+        FlameModelRenderer.renderingUI = true;
         RenderSystem.runAsFancy(() -> {
             renderer.renderIdleWithSkin(matrixStack, standSkin, buffer, ticks);
         });
+        FlameModelRenderer.renderingUI = false;
         buffer.endBatch();
         entityrenderermanager.setRenderShadow(true);
         RenderSystem.popMatrix();
