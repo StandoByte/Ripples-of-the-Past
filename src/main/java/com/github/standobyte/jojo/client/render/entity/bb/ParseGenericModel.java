@@ -265,7 +265,7 @@ public class ParseGenericModel {
                     Direction uvPart = direction.getAxis() == Axis.Z ? direction : direction.getOpposite();
                     if (perFaceUv.containsKey(uvPart)) {
                         BoxFace uv = perFaceUv.get(uvPart);
-                        if (uv.texture != null) {
+//                        if (uv.texture != null) {
                             float u0;
                             float v0;
                             float u1;
@@ -285,7 +285,7 @@ public class ParseGenericModel {
                             polygons[polygonsCount++] = new ModelRenderer.TexturedQuad(faceVertices.get(direction), 
                                     u0, v0, u1, v1, 
                                     texWidth, texHeight, false, direction);
-                        }
+//                        }
                     }
                 }
                 if (polygonsCount < polygons.length) {

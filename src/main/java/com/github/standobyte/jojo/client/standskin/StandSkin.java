@@ -20,14 +20,15 @@ import net.minecraft.util.text.ITextComponent;
  * [V] UI color
  * [_] appearance part
  * 
- * [_] in-mod textures
- * [_]   entity textures
+ *     in-mod textures
+ *       entity textures
  * [V]     Stand entity
  * [_]     stuff like projectiles
  * [V]   power icon
  * [_]   in-mod UI
  * [V]     actions
  * [_]   particles
+ * [_]   shaders
  *     
  * [_] lang
  *     
