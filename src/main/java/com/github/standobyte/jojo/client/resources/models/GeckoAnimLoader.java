@@ -16,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 
 import com.github.standobyte.jojo.client.render.entity.model.animnew.ParseAnims;
 import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Animation;
+import com.github.standobyte.jojo.client.render.entity.model.animnew.stand.StandAnimator;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -32,7 +33,7 @@ import net.minecraft.util.ResourceLocation;
 public class GeckoAnimLoader extends ReloadListener<Map<ResourceLocation, JsonElement>> {
     private static final Logger LOGGER = LogManager.getLogger();
     private final Gson gson;
-    private final Map<ResourceLocation, Map<String, Animation>> loadedAnims = new HashMap<>();
+    private final Map<ResourceLocation, StandAnimator> loadedAnims = new HashMap<>();
     
     public GeckoAnimLoader(Gson gson) {
         this.gson = gson;
@@ -77,28 +78,27 @@ public class GeckoAnimLoader extends ReloadListener<Map<ResourceLocation, JsonEl
         
         for (Map.Entry<ResourceLocation, JsonElement> rawModelEntry : pObject.entrySet()) {
             JsonObject modelAnimsJson = rawModelEntry.getValue().getAsJsonObject().getAsJsonObject("animations");
-            Map<String, Animation> singleModelAnims = new HashMap<>();
+            StandAnimator singleModelAnims = new StandAnimator();
             for (Map.Entry<String, JsonElement> animJson : modelAnimsJson.entrySet()) {
                 try {
                     Animation animation = ParseAnims.parseAnim(animJson.getValue().getAsJsonObject());
-                    singleModelAnims.put(animJson.getKey(), animation);
+                    singleModelAnims.putNamedAnim(animJson.getKey(), animation);
                 }
                 catch (Exception e) {
                     LOGGER.error("Failed to load animation {} from {}", animJson.getKey(), rawModelEntry.getKey());
                     e.printStackTrace();
                 }
             }
-            if (!singleModelAnims.isEmpty()) {
-                loadedAnims.put(rawModelEntry.getKey(), singleModelAnims);
-            }
+            loadedAnims.put(rawModelEntry.getKey(), singleModelAnims);
         }
     }
     
     
     @Nullable
     public Animation getAnim(ResourceLocation modelId, String animName) {
-        Map<String, Animation> modelAnims = loadedAnims.get(modelId);
-        return modelAnims != null ? modelAnims.get(animName) : null;
+        StandAnimator modelAnims = loadedAnims.get(modelId);
+        return modelAnims != null ? modelAnims.getNamedAnim(animName) : null;
     }
+    
 
 }

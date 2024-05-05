@@ -16,9 +16,6 @@ import org.apache.commons.lang3.mutable.MutableFloat;
 import com.github.standobyte.jojo.action.stand.StandEntityAction.Phase;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.render.entity.model.animnew.INamedModelParts;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Animation;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Keyframe;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Transformation;
 import com.github.standobyte.jojo.client.render.entity.pose.IModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose.ModelAnim;
@@ -27,7 +24,6 @@ import com.github.standobyte.jojo.client.render.entity.pose.RotationAngle;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.IActionAnimation;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.barrage.BarrageSwingsHolder;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.barrage.IBarrageAnimation;
-import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -45,7 +41,6 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3f;
 
 public abstract class StandEntityModel<T extends StandEntity> extends AgeableModel<T> implements IHasArm, INamedModelParts {
     ResourceLocation modelId = null;
@@ -131,6 +126,9 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         headParts().forEach(part -> {
             setRotationAngle(part, 0, 0, 0);
         });
+        bodyParts().forEach(part -> {
+            setRotationAngle(part, 0, 0, 0);
+        });
 
 //        initPoses();
 //        initActionPoses();
@@ -157,6 +155,23 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     }
     
     protected void poseStand(T entity, float ticks, float yRotOffsetRad, float xRotRad, 
+            StandPose standPose, Optional<Phase> actionPhase, float phaseCompletion, HandSide swingingHand) {
+        
+//        Animation newIdleAnim = CustomResources.getStandModelAnimations().getAnim(getModelId(), "idle");
+//        if (newIdleAnim != null) {
+//            StandAnimator.animate(this, newIdleAnim, ticks - idleLoopTickStamp, 1);
+//        }
+        
+        legacyPoseStand(entity, ticks, yRotOffsetRad, xRotRad, standPose, actionPhase, phaseCompletion, swingingHand);
+    }
+    
+    public ModelRenderer getModelPart(String name) {
+        return namedModelParts.get(name);
+    }
+    
+    
+    
+    protected void legacyPoseStand(T entity, float ticks, float yRotOffsetRad, float xRotRad, 
             StandPose standPose, Optional<Phase> actionPhase, float phaseCompletion, HandSide swingingHand) {
         if (actionAnim.containsKey(standPose)) {
             idlePose.poseModel(1.0F, entity, ticks, yRotOffsetRad, xRotRad, swingingHand);
@@ -209,13 +224,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     }
     
     public void poseIdleLoop(T entity, float ticks, float yRotOffsetRad, float xRotRad, HandSide swingingHand) {
-        Animation newIdleAnim = CustomResources.getStandModelAnimations().getAnim(getModelId(), "idle");
-        if (newIdleAnim != null) {
-            animate(this, newIdleAnim, ticks - idleLoopTickStamp, 1);
-        }
-        else {
-            idleLoop.poseModel(ticks - idleLoopTickStamp, entity, ticks, yRotOffsetRad, xRotRad, swingingHand);
-        }
+        idleLoop.poseModel(ticks - idleLoopTickStamp, entity, ticks, yRotOffsetRad, xRotRad, swingingHand);
     }
     
     protected void initPoses() {
@@ -335,29 +344,6 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     protected final BiMap<ModelRenderer, ModelRenderer> oppositeHandside = HashBiMap.create();
     public final ModelRenderer getOppositeHandside(ModelRenderer modelRenderer) {
         return oppositeHandside.computeIfAbsent(modelRenderer, k -> oppositeHandside.inverse().getOrDefault(modelRenderer, modelRenderer));
-    }
-    
-    
-    private static final Vector3f TEMP = new Vector3f();
-    protected static void animate(StandEntityModel<?> model, Animation animation, float ticks, float scale) {
-        float seconds = animation.looping() ? (ticks / 20.0f) % animation.lengthInSeconds() : ticks / 20.0f;
-        for (Map.Entry<String, List<Transformation>> entry : animation.boneAnimations().entrySet()) {
-            ModelRenderer modelPart = model.namedModelParts.get(entry.getKey());
-            if (modelPart != null) {
-                List<Transformation> transformations = entry.getValue();
-                for (Transformation tf : transformations) {
-                    Keyframe[] keyframes = tf.keyframes();
-                    int i = Math.max(0, MathHelper.binarySearch(0, keyframes.length, index -> seconds <= keyframes[index].timestamp()) - 1);
-                    int j = Math.min(keyframes.length - 1, i + 1);
-                    Keyframe keyframe = keyframes[i];
-                    Keyframe keyframe2 = keyframes[j];
-                    float h = seconds - keyframe.timestamp();
-                    float k = j != i ? MathHelper.clamp(h / (keyframe2.timestamp() - keyframe.timestamp()), 0.0f, 1.0f) : 0.0f;
-                    keyframe2.interpolation().apply(TEMP, k, keyframes, i, j, scale);
-                    tf.target().apply(modelPart, TEMP);
-                }
-            }
-        }
     }
     
     

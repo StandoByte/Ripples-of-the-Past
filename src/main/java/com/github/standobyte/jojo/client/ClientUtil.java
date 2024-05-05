@@ -474,9 +474,9 @@ public class ClientUtil {
     }
     
     public static void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
-        modelRenderer.xRot = x;
-        modelRenderer.yRot = y;
-        modelRenderer.zRot = z;
+        modelRenderer.xRot += x;
+        modelRenderer.yRot += y;
+        modelRenderer.zRot += z;
     }
     
     public static void translateModelPart(ModelRenderer modelRenderer, Vector3f tlVec) {

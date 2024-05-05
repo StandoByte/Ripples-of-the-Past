@@ -18,7 +18,7 @@ import net.minecraft.util.text.ITextComponent;
  * TODO Stand skins
  * 
  * [V] UI color
- * [_] appearance part
+ * [V] appearance part
  * 
  *     in-mod textures
  *       entity textures
