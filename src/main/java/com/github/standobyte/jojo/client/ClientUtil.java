@@ -481,14 +481,14 @@ public class ClientUtil {
     
     public static void translateModelPart(ModelRenderer modelRenderer, Vector3f tlVec) {
         modelRenderer.x += tlVec.x();
-        modelRenderer.y += tlVec.z();
-        modelRenderer.z += tlVec.y();
+        modelRenderer.y += tlVec.y();
+        modelRenderer.z += tlVec.z();
     }
     
     public static void rotateModelPart(ModelRenderer modelRenderer, Vector3f rotVec) {
-        modelRenderer.xRot += rotVec.x();
-        modelRenderer.yRot += rotVec.z();
-        modelRenderer.zRot += rotVec.y();
+        modelRenderer.xRot = rotVec.x();
+        modelRenderer.yRot = rotVec.y();
+        modelRenderer.zRot = rotVec.z();
     }
     
     /**
