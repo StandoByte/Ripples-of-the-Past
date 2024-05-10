@@ -473,7 +473,7 @@ public class ClientUtil {
         }
     }
     
-    public static void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
+    public static void addRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
         modelRenderer.xRot += x;
         modelRenderer.yRot += y;
         modelRenderer.zRot += z;
@@ -496,7 +496,13 @@ public class ClientUtil {
      */
     public static void scaleModelPart(ModelRenderer modelRenderer, Vector3f scaleVec) {
     }
-
+    
+    public static void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
+        modelRenderer.xRot = x;
+        modelRenderer.yRot = y;
+        modelRenderer.zRot = z;
+    }
+    
     public static void setRotationAngleDegrees(ModelRenderer modelRenderer, float x, float y, float z) {
         setRotationAngle(modelRenderer, x * MathUtil.DEG_TO_RAD, y * MathUtil.DEG_TO_RAD, z * MathUtil.DEG_TO_RAD);
     }
