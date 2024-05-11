@@ -32,7 +32,6 @@ import com.github.standobyte.jojo.client.render.entity.layerrenderer.HamonBurnLa
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.InkLipsLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.KnifeLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.LadybugBroochLayer;
-import com.github.standobyte.jojo.client.render.entity.layerrenderer.SpecialHeldItemLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.TornadoOverdriveEffectLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.barrage.BarrageFistAfterimagesLayer;
 import com.github.standobyte.jojo.client.render.entity.renderer.AfterimageRenderer;
@@ -307,7 +306,6 @@ public class ClientSetup {
         renderer.addLayer(new TornadoOverdriveEffectLayer<>(renderer));
         renderer.addLayer(new BarrageFistAfterimagesLayer(renderer));
         renderer.addLayer(new EnergyRippleLayer<>(renderer));
-        renderer.addLayer(new SpecialHeldItemLayer<>(renderer));
         renderer.addLayer(new GlovesLayer<>(renderer, new GlovesModel<>(0.3F, slim), slim));
         renderer.addLayer(new LadybugBroochLayer<>(renderer));
         renderer.addLayer(new InkLipsLayer<>(renderer));
@@ -362,6 +360,8 @@ public class ClientSetup {
         registerCustomBakedModel(ModItems.STAND_DISC.get().getRegistryName(), event.getModelRegistry(), 
                 model -> new StandDiscISTERModel(model));
         registerCustomBakedModel(ModItems.POLAROID.get().getRegistryName(), event.getModelRegistry(), 
+                model -> new ItemISTERModelWrapper(model).setCaptureEntity());
+        registerCustomBakedModel(ModItems.CLACKERS.get().getRegistryName(), event.getModelRegistry(), 
                 model -> new ItemISTERModelWrapper(model).setCaptureEntity());
     }
     

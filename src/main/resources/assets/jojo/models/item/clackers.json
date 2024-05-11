@@ -1,21 +1,20 @@
 {
-	"credit": "Made with Blockbench",
 	"parent": "item/generated",
 	"textures": {
 		"layer0": "jojo:item/clackers"
 	},
 	"display": {
 		"thirdperson_righthand": {
-			"scale": [0, 0, 0]
+			"translation": [8, 8, 8]
 		},
 		"thirdperson_lefthand": {
-			"scale": [0, 0, 0]
+			"translation": [-8, 8, 8]
 		},
 		"firstperson_righthand": {
-			"scale": [0, 0, 0]
+			"translation": [16, 8, 0]
 		},
 		"firstperson_lefthand": {
-			"scale": [0, 0, 0]
+			"translation": [0, 8, 0]
 		}
 	}
 }

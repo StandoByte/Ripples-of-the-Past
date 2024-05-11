@@ -18,8 +18,8 @@ public class ISTERItemCaptureEntity extends ItemOverrideList {
     @Override
     public IBakedModel resolve(IBakedModel model, ItemStack item, @Nullable ClientWorld world, @Nullable LivingEntity entity) {
         ItemStackTileEntityRenderer ister = item.getItem().getItemStackTileEntityRenderer();
-        if (ister instanceof CustomModelItemISTER) {
-            ((CustomModelItemISTER<?>) ister).setEntity(entity);
+        if (ister instanceof ISTERWithEntity) {
+            ((ISTERWithEntity) ister).setEntity(entity);
         }
         return model;
     }

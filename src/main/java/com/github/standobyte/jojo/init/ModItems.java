@@ -5,6 +5,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.client.render.item.ClackersISTER;
 import com.github.standobyte.jojo.client.render.item.RoadRollerISTER;
 import com.github.standobyte.jojo.client.render.item.polaroid.PolaroidISTER;
 import com.github.standobyte.jojo.client.render.item.standdisc.StandDiscISTER;
@@ -120,7 +121,8 @@ public class ModItems {
             () -> new SatiporojaScarfItem(ModArmorMaterials.SATIPOROJA_SCARF, EquipmentSlotType.HEAD, new Item.Properties().tab(MAIN_TAB).rarity(Rarity.UNCOMMON)));
 
     public static final RegistryObject<ClackersItem> CLACKERS = ITEMS.register("clackers",
-            () -> new ClackersItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
+            () -> new ClackersItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)
+                    .setISTER(() -> ClackersISTER::new)));
 
     public static final RegistryObject<TommyGunItem> TOMMY_GUN = ITEMS.register("tommy_gun",
             () -> new TommyGunItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
