@@ -74,17 +74,21 @@ import net.minecraft.fluid.FluidState;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.EggItem;
+import net.minecraft.item.FishBucketItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.state.BooleanProperty;
 import net.minecraft.state.Property;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
@@ -182,6 +186,41 @@ public class HamonUtil {
         return false;
     }
     
+    public static boolean rebuffOverdrive(LivingEntity target, DamageSource dmgSource, float dmgAmount) {
+        if (!target.level.isClientSide() && target.canUpdate()) {
+            Entity attacker = dmgSource.getEntity();
+            if (attacker != null && dmgSource.getDirectEntity() == attacker && attacker instanceof LivingEntity
+                    && target instanceof PlayerEntity) {
+                LivingEntity livingAttacker = (LivingEntity) attacker;
+                PlayerEntity playerTarget = (PlayerEntity) target;
+                INonStandPower power = INonStandPower.getPlayerNonStandPower(playerTarget);
+                return power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
+                    if (hamon.getRebuffOverdrive()) {
+                        float energyCost = 1200F;
+                        if (power.hasEnergy(energyCost)) {
+                            float efficiency = hamon.getActionEfficiency(energyCost, false);
+                            if (efficiency == 1 || efficiency >= dmgAmount / target.getMaxHealth()) {
+                                JojoModUtil.sayVoiceLine(target, ModSounds.JOSEPH_REBUFF_OVERDRIVE.get());
+                                JojoModUtil.sayVoiceLine(playerTarget, ModSounds.HAMON_SYO_PUNCH.get());
+                                target.level.playSound(null, livingAttacker.getX(), livingAttacker.getEyeY(), livingAttacker.getZ(), ModSounds.HAMON_SYO_PUNCH.get(), livingAttacker.getSoundSource(), 2F, 1.0F);
+                                power.consumeEnergy(energyCost);
+                                DamageUtil.dealHamonDamage(attacker, 3F, target, null);
+                                playerTarget.attack(attacker);
+                                playerTarget.doHurtTarget(attacker);
+                                playerTarget.swing(Hand.MAIN_HAND, true);
+                                livingAttacker.knockback(2.5F, playerTarget.getX()-livingAttacker.getX(), playerTarget.getZ()-livingAttacker.getZ());
+                                hamon.setRebuffOverdrive(false);
+                                return true;
+                            }
+                        }
+                    }
+
+                    return false;
+                }).orElse(false);
+            }
+        }
+        return false;
+    }
 
     @Nullable
     public static Set<AbstractHamonSkill> nearbyTeachersSkills(LivingEntity learner) {
@@ -246,12 +285,12 @@ public class HamonUtil {
             JojoModUtil.sayVoiceLine(teacher, ModSounds.ZEPPELI_FORCE_BREATH.get());
             teacher.swing(Hand.MAIN_HAND, true);
             if (player.getRandom().nextFloat() <= 0.01F) {
-                player.hurt(DamageSource.GENERIC, 4.0F);
+                player.hurt(DamageUtil.SUFFOCATION, Math.min(10.0F, player.getHealth() - 0.0001F));
                 player.setAirSupply(0);
                 return;
             }
             else {
-                player.hurt(DamageSource.GENERIC, 0.1F);
+                player.hurt(DamageUtil.SUFFOCATION, Math.min(0.1F, player.getHealth() - 0.0001F));
             }
         } 
         if (playerPower.givePower(ModPowers.HAMON.get())) {
@@ -554,7 +593,7 @@ public class HamonUtil {
                                 if (cap.hasHamonCharge()) {
                                     HamonCharge hamonCharge = cap.getHamonCharge();
                                     hamonCharge.decreaseTicks((int) (hamonCharge.getInitialTicks() * hamonChargeProperties.energyRequired / 1000F));
-                                    hamonChargeProperties.applyCharge(projCharge, hamonCharge.getTickDamage() * 5, null);
+                                    hamonChargeProperties.applyCharge(projCharge, hamonCharge.getDamage(), null);
                                     projCharge.setMultiplyWithUserStrength(false);
                                 }
                             });
@@ -659,7 +698,7 @@ public class HamonUtil {
                         float radius = CommonReflection.getRadius(explosion);
                         HamonUtil.hamonExplosion(exploder.level, exploder, 
                                 hamonCharge.getUser((ServerWorld) world), explosion.getPosition(),
-                                radius, hamonCharge.getTickDamage());
+                                radius, hamonCharge.getDamage());
                     }
                 });
             }
@@ -678,7 +717,7 @@ public class HamonUtil {
                                         / (float) HamonData.MAX_STAT_LEVEL * hamonEfficiency * hamonEfficiency);
                                 
                                 itemEntity.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> 
-                                cap.setHamonCharge(0.1F * hamon.getHamonDamageMultiplier() * hamonEfficiency, chargeTicks, throwerPlayer, 200));
+                                cap.setHamonCharge(hamon.getHamonDamageMultiplier() * hamonEfficiency, chargeTicks, throwerPlayer, 200));
                                 
                                 return null;
                             }, 200);
@@ -699,8 +738,12 @@ public class HamonUtil {
             return HamonOrganismInfusion.isBlockLiving(((BlockItem) item).getBlock().defaultBlockState());
         }
         
-        return item instanceof EggItem;
+        return item == ModItems.GOLD_EXPERIENCE_BODY_TISSUE.get() ||
+                item instanceof EggItem || 
+                ItemTags.getAllTags().getTagOrEmpty(RAW_FISH_TAG).contains(item) || item == Items.COD || item == Items.SALMON || item == Items.TROPICAL_FISH || item == Items.PUFFERFISH ||
+                item instanceof FishBucketItem;
     }
+    private static final ResourceLocation RAW_FISH_TAG = new ResourceLocation("forge", "raw_fishes");
     
     
     

@@ -173,6 +173,14 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     private IPunch lastPunch;
     private BarrageSwingsHolder<?, ?> barrageSwings;
     private final BarrageHitSoundHandler barrageSounds;
+
+    public float lastMotionTiltTick = -1;
+//    public Vector3d motionVec = Vector3d.ZERO;
+//    public double motionDist = 0;
+//    public double prevMotionDist = 0;
+    
+    public Vector3d prevTiltVec = Vector3d.ZERO;
+    public Vector3d tiltVec = Vector3d.ZERO;
     
     public static final DataParameter<Optional<ResourceLocation>> DATA_PARAM_STAND_SKIN = EntityDataManager.defineId(StandEntity.class, 
             (IDataSerializer<Optional<ResourceLocation>>) ModDataSerializers.OPTIONAL_RES_LOC.get().getSerializer());
@@ -236,7 +244,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             Optional<StandEntityTask> taskOptional = getCurrentTask();
             
             taskOptional.ifPresent(task -> {
-                if (task.getTarget().getType() == TargetType.ENTITY) task.getTarget().resolveEntityId(level);
+                task.resolveEntityTarget(level);
                 StandEntityAction action = task.getAction();
                 StandEntityAction.Phase phase = task.getPhase();
                 action.playSound(this, userPower, phase, task);
@@ -633,7 +641,12 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
 
 
     public void setStandPose(StandPose pose) {
-        this.standPose = pose;
+        if (this.standPose != pose) {
+            if (level.isClientSide() && pose == StandPose.BARRAGE) {
+                getBarrageSwingsHolder().resetSwingTime();
+            }
+            this.standPose = pose;
+        }
     }
 
     public StandPose getStandPose() {
@@ -657,7 +670,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     
     @Override
     public boolean isInvisibleTo(PlayerEntity player) {
-        return !player.isSpectator() && (!isVisibleForAll() && !StandUtil.playerCanSeeStands(player) || underInvisibilityEffect());
+        return !isVisibleForAll() && !StandUtil.clStandEntityVisibleTo(player) || !player.isSpectator() && underInvisibilityEffect();
     }
 
     @Override
@@ -1042,16 +1055,23 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
 
 
-
-    // FIXME fix too far clockwise body rotation
+    
     @Override
-    protected float tickHeadTurn(float p_110146_1_, float p_110146_2_) {
+    protected float tickHeadTurn(float yRot, float animStep) {
         if (getCurrentTask().isPresent() || getStandPose() == StandPose.SUMMON) {
-            yBodyRot = yRot;
-            return p_110146_2_;
+            yBodyRot = this.yRot;
+            return animStep;
         }
         else {
-            return super.tickHeadTurn(p_110146_1_, p_110146_2_);
+            if (isFollowingUser()) {
+                LivingEntity user = getUser();
+                if (user != null) {
+                    this.yBodyRot = user.yBodyRot;
+                    return animStep;
+                }
+            }
+            
+            return super.tickHeadTurn(yRot, animStep);
         }
     }
 
@@ -1897,7 +1917,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     public void addProjectile(DamagingEntity projectile) {
         if (!level.isClientSide() && !projectile.isAddedToWorld()) {
             projectile.setDamageFactor(projectile.getDamageFactor() * (float) getAttackDamage() / 8);
-            projectile.setSpeedFactor(projectile.getSpeedFactor() * (float) getAttackSpeed() / 8);
+            projectile.setSpeedFactor(projectile.getSpeedFactor() * getAttackSpeed() / 8);
             level.addFreshEntity(projectile);
         }
     }
@@ -2015,7 +2035,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
 
     public void setNoPhysics(boolean noPhysics) {
-        if (noPhysics == true || standCanHaveNoPhysics()) {
+        if (noPhysics || standCanHaveNoPhysics()) {
             setStandFlag(StandFlag.NO_PHYSICS, noPhysics);
         }
     }
@@ -2410,6 +2430,16 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     public void addAdditionalSaveData(CompoundNBT nbt) {
         super.addAdditionalSaveData(nbt);
     }
+    
+    @Override
+    public boolean saveAsPassenger(CompoundNBT pCompound) {
+        return false;
+    }
+//    
+//    @Override
+//    public CompoundNBT serializeNBT() {
+//        return super.serializeNBT();
+//    }
     
     
 

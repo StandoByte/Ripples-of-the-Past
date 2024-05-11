@@ -1,8 +1,10 @@
 package com.github.standobyte.jojo.util.mc;
 
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
@@ -16,6 +18,8 @@ import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.SpawnParticlePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrResetDeathTimePacket;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.google.common.collect.ImmutableMap;
@@ -40,6 +44,10 @@ import net.minecraft.entity.EntityPredicate;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.attributes.Attribute;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.ai.goal.Goal;
 import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
 import net.minecraft.entity.ai.goal.PrioritizedGoal;
@@ -48,8 +56,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.PotionEntity;
 import net.minecraft.entity.projectile.ProjectileItemEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.TieredItem;
 import net.minecraft.nbt.ByteArrayNBT;
 import net.minecraft.nbt.ByteNBT;
 import net.minecraft.nbt.CompoundNBT;
@@ -69,6 +79,7 @@ import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.play.server.SPlaySoundEffectPacket;
 import net.minecraft.network.play.server.SSpawnMovingSoundEffectPacket;
 import net.minecraft.particles.IParticleData;
+import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.potion.Potions;
@@ -93,6 +104,7 @@ import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ChunkManager;
 import net.minecraft.world.server.ServerWorld;
@@ -104,6 +116,22 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 public class MCUtil {
     public static final IFormattableTextComponent EMPTY_TEXT = new StringTextComponent("");
     public static final IFormattableTextComponent NEW_LINE = new StringTextComponent("\n");
+    
+    /**
+     * Runs a command for the user entity, but with the permissions of the server.
+     * 
+     * @return The success value of the command, or 0 if an exception occured.
+     */
+    public static int runCommand(LivingEntity user, String command) {
+        if (user.level.isClientSide()) {
+            throw new IllegalLogicalSideException("Tried to run a command on client side!");
+        }
+        MinecraftServer server = ((ServerWorld) user.level).getServer();
+        CommandSource src = user.createCommandSourceStack()
+                .withMaximumPermission(4)
+                .withSuppressedOutput();
+        return server.getCommands().performCommand(src, command);
+    }
     
     // NBT helper functions
     private static final ImmutableMap<Class<? extends INBT>, Integer> NBT_ID = new ImmutableMap.Builder<Class<? extends INBT>, Integer>()
@@ -224,6 +252,33 @@ public class MCUtil {
             list.add(DoubleNBT.valueOf(vec.z));
             nbt.put(key, list);
         }
+    }
+    
+    public static void nbtPutOptionalIntArr(CompoundNBT nbt, String key, OptionalInt[] array, int emptyVal) {
+        int[] value = new int[array.length];
+        for (int i = 0; i < array.length; i++) {
+            value[i] = array[i].orElse(emptyVal);
+        }
+        nbt.putIntArray(key, value);
+    }
+    
+    public static OptionalInt[] nbtGetOptionalIntArr(CompoundNBT nbt, String key, int emptyVal) {
+        int[] value = nbt.getIntArray(key);
+        OptionalInt[] array = new OptionalInt[value.length];
+        for (int i = 0; i < array.length; i++) {
+            int num = value[i];
+            array[i] = num != emptyVal ? OptionalInt.of(num) : OptionalInt.empty();
+        }
+        return array;
+    }
+    
+    public static <T extends Enum<T>> void nbtPutEnumArray(CompoundNBT nbt, String key, T[] array) {
+        nbt.putIntArray(key, GeneralUtil.toOrdinals(array));
+    }
+    
+    public static <T extends Enum<T>> T[] nbtGetEnumArray(CompoundNBT nbt, String key, Class<T> enumClass) {
+        int[] nbtArray = nbt.getIntArray(key);
+        return GeneralUtil.fromOrdinals(nbtArray, enumClass);
     }
     
     @Nullable
@@ -448,6 +503,19 @@ public class MCUtil {
     
     
     
+    public static void multipliedAttrModifier(LivingEntity entity, Attribute attribute, AttributeModifier modifier, float mult) {
+        ModifiableAttributeInstance attributeInstance = entity.getAttribute(attribute);
+        if (attributeInstance != null) {
+            attributeInstance.removeModifier(modifier);
+            if (mult != 0) {
+                attributeInstance.addTransientModifier(new AttributeModifier(modifier.getId(), 
+                        modifier.getName() + " " + mult, modifier.getAmount() * mult, modifier.getOperation()));
+            }
+        }
+    }
+    
+    
+    
     public static boolean isControlledThisSide(Entity entity) {
         if (entity instanceof PlayerEntity) {
             return ((PlayerEntity) entity).isLocalPlayer();
@@ -507,11 +575,39 @@ public class MCUtil {
     
     
     
+    public static boolean isItemWeapon(ItemStack itemStack) {
+        if (itemStack.isEmpty()) {
+            return false;
+        }
+        
+        if (itemStack.getItem() instanceof TieredItem) {
+            return true;
+        }
+        
+        // other items dealing extra damage (trident, knife, potentially unique modded weapons)
+        Collection<AttributeModifier> damageModifiers = itemStack
+                .getItem().getAttributeModifiers(EquipmentSlotType.MAINHAND, itemStack).get(Attributes.ATTACK_DAMAGE);
+        if (damageModifiers != null) {
+            return damageModifiers.stream().anyMatch(modifier -> modifier.getOperation() == AttributeModifier.Operation.ADDITION && modifier.getAmount() > 0);
+        }
+        
+        // TODO compatibility with Tinkers Construct
+        
+        return false;
+    }
+    
+    
+    
     public static boolean removeEffectInstance(LivingEntity entity, EffectInstance effectInstance) {
         if (entity.getActiveEffectsMap().get(effectInstance.getEffect()) == effectInstance) {
             return entity.removeEffect(effectInstance.getEffect());
         }
         return false;
+    }
+    
+    public static int getEffectLevel(LivingEntity entity, Effect effect) {
+        EffectInstance effInstance = entity.getEffect(effect);
+        return effInstance != null ? effInstance.getAmplifier() : -1;
     }
     
     
@@ -543,24 +639,6 @@ public class MCUtil {
                 return false;
             }
         }
-    }
-    
-    
-
-    /**
-     * Runs a command for the user entity, but with the permissions of the server.
-     * 
-     * @return The success value of the command, or 0 if an exception occured.
-     */
-    public static int runCommand(LivingEntity user, String command) {
-        if (user.level.isClientSide()) {
-            throw new IllegalLogicalSideException("Tried to run a command on client side!");
-        }
-        MinecraftServer server = ((ServerWorld) user.level).getServer();
-        CommandSource src = user.createCommandSourceStack()
-                .withMaximumPermission(4)
-                .withSuppressedOutput();
-        return server.getCommands().performCommand(src, command);
     }
     
     
@@ -623,6 +701,23 @@ public class MCUtil {
     
     
     
+    public static void onEntityResurrect(LivingEntity entity) {
+        entity.deathTime = 0;
+        if (!entity.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(new TrResetDeathTimePacket(entity.getId()), entity);
+            
+            if (entity instanceof ServerPlayerEntity) {
+                ServerPlayerEntity player = (ServerPlayerEntity) entity;
+                if (!player.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY) && !player.isSpectator()) {
+                    player.setExperienceLevels(0);
+                    player.setExperiencePoints(0);
+                }
+            }
+        }
+    }
+    
+    
+    
     public static boolean isPotionWaterBottle(PotionEntity entity) {
         ItemStack potionItem = entity.getItem();
         return PotionUtils.getPotion(potionItem) == Potions.WATER && PotionUtils.getMobEffects(potionItem).isEmpty();
@@ -649,5 +744,11 @@ public class MCUtil {
     
     public static String getLanguageCode(MinecraftServer server) {
         return server.isDedicatedServer() ? "en_us" : ClientUtil.getCurrentLanguageCode();
+    }
+    
+    
+    
+    public static class EntityEvents { // TODO
+        public static final int HONEY_PARTICLES = 53;
     }
 }

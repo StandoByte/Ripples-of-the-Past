@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.client.ui.tooltip;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Stream;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -11,7 +12,6 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.util.text.ITextProperties;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
 
 public class IconTooltipLine implements ITooltipLine {
@@ -54,8 +54,8 @@ public class IconTooltipLine implements ITooltipLine {
     }
     
     @Override
-    public ITextProperties getTextOnly() {
-        return StringTextComponent.EMPTY;
+    public Stream<ITextProperties> getTextOnly() {
+        return Stream.empty();
     }
     
     

@@ -114,6 +114,17 @@ public abstract class StandAction extends Action<IStandPower> {
         return power.isActive() && (power.getStandManifestation() instanceof StandEntity) ? (StandEntity) power.getStandManifestation() : user;
     }
     
+    public static LivingEntity getControlledEntity(LivingEntity user, IStandPower power) {
+        if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
+            StandEntity stand = (StandEntity) power.getStandManifestation();
+            if (stand.isManuallyControlled()) {
+                return stand;
+            }
+        }
+        
+        return user;
+    }
+    
     @Override
     public ActionConditionResult checkConditions(LivingEntity user, IStandPower power, ActionTarget target) {
         for (StandPart part : partsRequired) {

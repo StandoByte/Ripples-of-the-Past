@@ -1,7 +1,5 @@
 package com.github.standobyte.jojo.action.non_stand;
 
-import javax.annotation.Nullable;
-
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
@@ -27,6 +25,14 @@ public class HamonSendoOverdrive extends HamonAction {
 
     public HamonSendoOverdrive(HamonAction.Builder builder) {
         super(builder);
+    }
+    
+    @Override
+    protected Action<INonStandPower> replaceAction(INonStandPower power, ActionTarget target) {
+        if (target.getEntity() instanceof LivingEntity && !getTargetRequirement().checkTargetType(target.getType())) {
+            return ModHamonActions.HAMON_OVERDRIVE.get().getVisibleAction(power, target);
+        }
+        return super.replaceAction(power, target);
     }
     
     @Override
@@ -61,7 +67,7 @@ public class HamonSendoOverdrive extends HamonAction {
             BlockPos blockPos = target.getBlockPos();
             HamonSendoOverdriveEntity sendoOverdrive = new HamonSendoOverdriveEntity(world, 
                     user, target.getFace().getAxis())
-                    .setRadius((4 + hamon.getHamonControlLevelRatio() * 4) * hamonEfficiency)
+                    .setRadius((2 + hamon.getHamonControlLevelRatio() * 3) * hamonEfficiency)
                     .setWaveDamage(0.75F * hamonEfficiency)
                     .setWavesCount(2 + (int) ((2 + Math.min(hamon.getHamonControlLevelRatio() * 3, 2)) * hamonEfficiency))
                     .setStatPoints(Math.min(energyCost, power.getEnergy()) * hamonEfficiency);
@@ -74,13 +80,5 @@ public class HamonSendoOverdrive extends HamonAction {
     @Override
     public TargetRequirement getTargetRequirement() {
         return TargetRequirement.BLOCK;
-    }
-    
-    @Nullable
-    protected Action<INonStandPower> replaceAction(INonStandPower power, ActionTarget target) {
-        if (!power.getUser().level.isClientSide() && !getTargetRequirement().checkTargetType(target.getType())) {
-            return ModHamonActions.HAMON_OVERDRIVE.get().getVisibleAction(power, target);
-        }
-        return super.replaceAction(power, target);
     }
 }

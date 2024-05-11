@@ -9,14 +9,18 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.init.ModGamerules;
+import com.github.standobyte.jojo.init.ModTags;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.item.ClothesSet;
+import com.github.standobyte.jojo.modcompat.OptionalDependencyHelper;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlayVoiceLinePacket;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -212,7 +216,7 @@ public class JojoModUtil {
 
 
     public static boolean canEntityDestroy(ServerWorld world, BlockPos blockPos, BlockState blockState, LivingEntity entity) {
-        if (JojoModConfig.getCommonConfigInstance(world.isClientSide()).abilitiesBreakBlocks.get()
+        if (breakingBlocksEnabled(world)
                 && blockState.canEntityDestroy(world, blockPos, entity)
                 && ForgeEventFactory.onEntityDestroyBlock(entity, blockPos, blockState)) {
             PlayerEntity player = null;
@@ -228,6 +232,10 @@ public class JojoModUtil {
             return player == null || world.mayInteract(player, blockPos);
         }
         return false;
+    }
+    
+    public static boolean breakingBlocksEnabled(World world) {
+        return world.getGameRules().getBoolean(ModGamerules.BREAK_BLOCKS);
     }
 
 
@@ -266,12 +274,25 @@ public class JojoModUtil {
         }).orElse(false); 
     }
 
+    public static boolean isAffectedByHamon(LivingEntity entity) {
+        return (JojoModUtil.isUndead(entity) || OptionalDependencyHelper.vampirism().isEntityVampire(entity))
+                        && !ModTags.UNDEAD_NO_HAMON_DAMAGE.contains(entity.getType())
+                || ModTags.HAMON_DAMAGE.contains(entity.getType());
+    }
+
+    public static boolean isDyingBody(LivingEntity entity) {
+        return entity.getCapability(LivingUtilCapProvider.CAPABILITY).map(LivingUtilCap::isDyingBody).orElse(false);
+    }
+
     public static boolean canBleed(LivingEntity entity) {
         if (entity.getMobType() == CreatureAttribute.UNDEAD) {
             return entity instanceof PlayerEntity
                     || entity instanceof ZombieEntity && !(entity instanceof HuskEntity)
                     || entity instanceof ZoglinEntity
                     || entity instanceof ZombieHorseEntity;
+        }
+        if (isDyingBody(entity)) {
+            return false;
         }
         return entity instanceof PlayerEntity
                 || entity instanceof AgeableEntity

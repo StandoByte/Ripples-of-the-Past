@@ -15,20 +15,21 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.github.standobyte.jojo.action.stand.effect.BoyIIManStandPartTakenEffect;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
+import com.github.standobyte.jojo.init.ModCustomStats;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
-import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
+import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.RPSGameStatePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.RPSOpponentPickThoughtsPacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
+import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
-import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.google.common.collect.Maps;
@@ -176,6 +177,10 @@ public class RockPaperScissorsGame {
             sendToBothPlayers(serverWorld, (player, opponent) -> RPSGameStatePacket.gameOver(player == winner));
             triggerAchievement(player1.getGamePlayerEntity(serverWorld));
             triggerAchievement(player2.getGamePlayerEntity(serverWorld));
+            if (winner.entity instanceof ServerPlayerEntity) {
+                ServerPlayerEntity player = (ServerPlayerEntity) winner.entity;
+                player.awardStat(ModCustomStats.RPS_WON);
+            }
         }
     }
     

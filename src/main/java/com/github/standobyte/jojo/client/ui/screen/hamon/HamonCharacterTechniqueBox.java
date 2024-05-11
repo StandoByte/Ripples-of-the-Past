@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.screen.widgets.utils.WidgetExtension;
+import com.github.standobyte.jojo.init.ModItems;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterHamonTechnique;
 import com.google.common.collect.Streams;
@@ -16,7 +18,10 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.IReorderingProcessor;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 
 public class HamonCharacterTechniqueBox {
     final CharacterHamonTechnique technique;
@@ -37,7 +42,13 @@ public class HamonCharacterTechniqueBox {
         this.perks = Streams.mapWithIndex(
                 technique.getPerksOnPick().filter(perk -> perk != null), 
                 (skill, i) -> new HamonSkillElementTechniquePerk(skill, this.x + (int) i * 18, this.y, font))
-                .collect(Collectors.toList());
+                .collect(Collectors.toCollection(ArrayList::new));
+        if (technique == ModHamonSkills.CHARACTER_CAESAR.get()) {
+            perks.add(new HamonSkillElementTechniquePerk(this.x + (perks.size() - 1) * 18, this.y, font, 
+                    new TranslationTextComponent("hamon.caesar_soap_hint.name"),
+                    new TranslationTextComponent("hamon.caesar_soap_hint.desc").withStyle(TextFormatting.ITALIC))
+                    .withItemIcon(new ItemStack(ModItems.SOAP.get())));
+        }
         this.width = WINDOW_WIDTH - WINDOW_THIN_BORDER * 2 - 16;
         this.height = Math.max(name.size() * 9 + 26, 36);
     }

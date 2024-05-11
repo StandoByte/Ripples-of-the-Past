@@ -8,10 +8,11 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.AttributeModifierManager;
 import net.minecraft.potion.EffectType;
 
-public class HypnosisEffect extends UncurableEffect {
+public class HypnosisEffect extends StatusEffect {
     
     public HypnosisEffect(int liquidColor) {
         super(EffectType.HARMFUL, liquidColor);
+        setUncurable();
     }
     
     @Override

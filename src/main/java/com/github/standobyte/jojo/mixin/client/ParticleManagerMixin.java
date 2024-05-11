@@ -15,14 +15,14 @@ public class ParticleManagerMixin {
 
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     public void jojoTsParticleCancelTick(CallbackInfo ci) {
-        if (ClientTimeStopHandler.getInstance().isTimeStopped()) {
+        if (ClientTimeStopHandler.isTimeStoppedStatic()) {
             ci.cancel();
         }
     }
     
     @ModifyVariable(method = "renderParticles", remap = false, at = @At("HEAD"), argsOnly = true, ordinal = 0)
     private float jojoTsParticleChangePartialTick(float partialTick) {
-        if (ClientTimeStopHandler.getInstance().isTimeStopped()) {
+        if (ClientTimeStopHandler.isTimeStoppedStatic()) {
             return 1.0F;
         }
         return partialTick;

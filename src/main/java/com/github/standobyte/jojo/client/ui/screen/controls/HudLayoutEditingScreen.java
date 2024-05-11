@@ -1,16 +1,17 @@
 package com.github.standobyte.jojo.client.ui.screen.controls;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
@@ -19,30 +20,36 @@ import org.lwjgl.glfw.GLFW;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.InputHandler.MouseButton;
 import com.github.standobyte.jojo.client.controls.ActionKeybindEntry;
-import com.github.standobyte.jojo.client.controls.ActionKeybindEntry.PressActionType;
 import com.github.standobyte.jojo.client.controls.ActionVisibilitySwitch;
 import com.github.standobyte.jojo.client.controls.ActionsHotbar;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.controls.HudControlSettings;
 import com.github.standobyte.jojo.client.controls.PowerTypeControlSchemes;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
+import com.github.standobyte.jojo.client.ui.screen.JojoStuffScreen;
 import com.github.standobyte.jojo.client.ui.screen.widgets.CustomButton;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.Vector2i;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.Iterables;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.gui.IGuiEventListener;
 import net.minecraft.client.gui.screen.ControlsScreen;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.widget.list.AbstractOptionList;
 import net.minecraft.client.gui.widget.list.KeyBindingList;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
@@ -61,8 +68,8 @@ import net.minecraftforge.client.settings.KeyModifier;
 @SuppressWarnings("deprecation")
 public class HudLayoutEditingScreen extends Screen {
     private static final ResourceLocation WINDOW = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/layout_editing.png");
-    private static final int WINDOW_WIDTH = 230;
-    private static final int WINDOW_HEIGHT = 180;
+    public static final int WINDOW_WIDTH = 230;
+    public static final int WINDOW_HEIGHT = 180;
     
     private static PowerClassification selectedTab = null;
     private IPower<?, ?> selectedPower;
@@ -75,6 +82,8 @@ public class HudLayoutEditingScreen extends Screen {
     private ControlScheme currentControlScheme;
     private Set<ResourceLocation> editedLayouts = new HashSet<>();
     
+    private final SelectedKey selectedKey = new SelectedKey();
+    private ActionKeybindsList keybindsList;
     private Widget addKeybindButton;
     
     public static Predicate<KeyBindingList.Entry> scrollCtrlListTo = null;
@@ -82,11 +91,16 @@ public class HudLayoutEditingScreen extends Screen {
     public HudLayoutEditingScreen() {
         super(new TranslationTextComponent("jojo.screen.edit_hud_layout"));
     }
+
+    public HudLayoutEditingScreen(PowerClassification selectTab) {
+        this();
+        selectedTab = selectTab;
+    }
     
     @Override
     protected void init() {
         // reset layout
-        addButton(new CustomButton(getWindowX() + WINDOW_WIDTH - 26, getWindowY() + 21, 20, 20, 
+        addButton(new CustomButton(getWindowX() + WINDOW_WIDTH - 30, getWindowY() + WINDOW_HEIGHT - 30, 20, 20, 
                 button -> {
                     currentControlScheme.reset(selectedPower);
                     markLayoutEdited();
@@ -108,30 +122,8 @@ public class HudLayoutEditingScreen extends Screen {
             }
         });
         
-        // add keybind
-        addButton(addKeybindButton = new CustomButton(getWindowX() + 10, getWindowY() + 64, 20, 20, 
-                button -> {
-                    createBlankKeybindEntry();
-                    markLayoutEdited();
-                }, 
-                (button, matrixStack, x, y) -> {
-                    renderTooltip(matrixStack, new TranslationTextComponent("jojo.screen.edit_hud_layout.add_keybind"), x, y);
-                }) {
-
-            @Override
-            protected void renderCustomButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
-                Minecraft minecraft = Minecraft.getInstance();
-                minecraft.getTextureManager().bind(WINDOW);
-                RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
-                RenderSystem.enableBlend();
-                RenderSystem.defaultBlendFunc();
-                RenderSystem.enableDepthTest();
-                blit(matrixStack, x, y, 144, 196 + getYImage(isHovered()) * height, width, height);
-            }
-        });
-        
         // vanilla controls settings
-        addButton(new CustomButton(getWindowX() - 26, getWindowY() + WINDOW_HEIGHT - 26, 22, 22, 
+        addButton(new CustomButton(getWindowX() + WINDOW_WIDTH - 32, getWindowY() + WINDOW_HEIGHT - 120, 22, 22, 
                 button -> {
                     ControlsScreen mcControlsScreen = new ControlsScreen(this, minecraft.options);
                     
@@ -162,6 +154,9 @@ public class HudLayoutEditingScreen extends Screen {
             }
         });
         
+        keybindsList = new ActionKeybindsList(minecraft, 228, 0, getWindowY() + 57, getWindowY() + 171, 22, this, selectedKey);
+        keybindsList.setLeftPos(getWindowX() + 9);
+        children.add(keybindsList);
         
         if (selectedTab != null) {
             IPower.getPowerOptional(minecraft.player, selectedTab).ifPresent(power -> {
@@ -174,20 +169,28 @@ public class HudLayoutEditingScreen extends Screen {
         powersPresent.clear();
         for (PowerClassification powerClassification : PowerClassification.values()) {
             IPower.getPowerOptional(minecraft.player, powerClassification).ifPresent(power -> {
+                PowerClassification firstPresent = null;
+                PowerClassification activeHud = null;
+                
                 if (power.hasPower()) {
                     powersPresent.add(power);
-                    if (selectedTab == null || powerClassification == ActionsOverlayGui.getInstance().getCurrentMode()) {
-                        selectTab(power);
+                    if (firstPresent == null) {
+                        firstPresent = powerClassification;
                     }
+                    if (powerClassification == ActionsOverlayGui.getInstance().getCurrentMode()) {
+                        activeHud = powerClassification;
+                    }
+                }
+                
+                if (selectedTab == null) {
+                    selectedTab = activeHud != null ? activeHud : firstPresent;
                 }
             });
         }
-
+        
         if (selectedTab != null && selectedPower == null) {
             selectTab(IPower.getPlayerPower(minecraft.player, selectedTab));
         }
-        
-        updateKeybindEntriesPos();
     }
     
     public boolean works() {
@@ -197,16 +200,15 @@ public class HudLayoutEditingScreen extends Screen {
     @Override
     public void render(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
         if (!works()) return;
+        renderAfterScissor = null;
         renderBackground(matrixStack, 0);
         hoveredAction = getSlotAt(mouseX, mouseY);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        renderTabButtons(matrixStack, false);
         renderWindow(matrixStack);
-        renderTabButtons(matrixStack, true);
-        renderHint(matrixStack);
-        renderSlots(matrixStack, mouseX, mouseY);
-        renderDragged(matrixStack, mouseX, mouseY);
+        renderTabButtons(matrixStack, mouseX, mouseY);
+        renderHotbars(matrixStack, mouseX, mouseY);
         renderKeybindsList(matrixStack, mouseX, mouseY, partialTick);
+        renderDragged(matrixStack, mouseX, mouseY);
         renderToolTips(matrixStack, mouseX, mouseY);
         buttons.forEach(button -> button.render(matrixStack, mouseX, mouseY, partialTick));
     }
@@ -222,13 +224,20 @@ public class HudLayoutEditingScreen extends Screen {
     }
     
 
-    private void renderTabButtons(MatrixStack matrixStack, boolean renderSelectedTabButton) {
+    private void renderTabButtons(MatrixStack matrixStack, int mouseX, int mouseY) {
         for (int i = 0; i < powersPresent.size(); i++) {
             boolean isTabSelected = isTabSelected(powersPresent.get(i));
-            if (isTabSelected ^ renderSelectedTabButton) continue;
-            int textureX = i == 0 ? 200 : 228;
-            int textureY = isTabSelected ? 224 : 192;
-            minecraft.getTextureManager().bind(WINDOW);
+            int textureX;
+            int textureY;
+            if (isTabSelected) {
+                textureX = i == 0 ? 0 : 28;
+                textureY = 32;
+            }
+            else {
+                textureX = i == 0 ? 168 : 196;
+                textureY = 2;
+            }
+            minecraft.getTextureManager().bind(JojoStuffScreen.TABS);
             int[] xy = getTabButtonCoords(i);
             blit(matrixStack, xy[0], xy[1], textureX, textureY, 28, 32);
 
@@ -236,7 +245,32 @@ public class HudLayoutEditingScreen extends Screen {
             minecraft.getTextureManager().bind(powersPresent.get(i).clGetPowerTypeIcon());
             blit(matrixStack, xy[0] + 6, xy[1] + 10, 0, 0, 16, 16, 16, 16);
             RenderSystem.disableBlend();
-            if (renderSelectedTabButton) break;
+        }
+        
+        if (selectedTab != null) {
+            int tabsX = JojoStuffScreen.uniformX(minecraft);
+            int tabsY = JojoStuffScreen.uniformY(minecraft);
+            JojoStuffScreen.TabsEnumType tabsType = JojoStuffScreen.TabsEnumType.getTabsEnum(selectedPower);
+            if (tabsType != null) {
+                switch (tabsType) {
+                case STAND:
+                    JojoStuffScreen.renderStandTabs(matrixStack, 
+                            tabsX, tabsY, true, 
+                            mouseX, mouseY, this, JojoStuffScreen.StandTab.CONTROLS, 
+                            ((IStandPower) selectedPower));
+                    break;
+                case HAMON:
+                    JojoStuffScreen.renderHamonTabs(matrixStack, 
+                            tabsX, tabsY, true, 
+                            mouseX, mouseY, this, JojoStuffScreen.HamonTab.CONTROLS);
+                    break;
+                case VAMPIRISM:
+                    JojoStuffScreen.renderVampirismTabs(matrixStack, 
+                            tabsX, tabsY, true, 
+                            mouseX, mouseY, this, JojoStuffScreen.VampirismTab.CONTROLS);
+                    break;
+                }
+            }
         }
     }
     
@@ -253,13 +287,12 @@ public class HudLayoutEditingScreen extends Screen {
     private static final int HOTBARS_X = 20;
     private static final int ATTACKS_HOTBAR_Y = 10;
     private static final int ABILITIES_HOTBAR_Y = 36;
-    private <P extends IPower<P, ?>> void renderSlots(MatrixStack matrixStack, int mouseX, int mouseY) {
+    private <P extends IPower<P, ?>> void renderHotbars(MatrixStack matrixStack, int mouseX, int mouseY) {
         RenderSystem.enableBlend();
         P iSuckAtThis = (P) selectedPower;
         int x = HOTBARS_X + getWindowX();
         renderHotbar(iSuckAtThis, ControlScheme.Hotbar.LEFT_CLICK, matrixStack, x, ATTACKS_HOTBAR_Y + getWindowY(), mouseX, mouseY);
         renderHotbar(iSuckAtThis, ControlScheme.Hotbar.RIGHT_CLICK, matrixStack, x, ABILITIES_HOTBAR_Y + getWindowY(), mouseX, mouseY);
-        renderKeybindSlots(iSuckAtThis, matrixStack, mouseX, mouseY);
         RenderSystem.disableBlend();
     }
     
@@ -422,16 +455,7 @@ public class HudLayoutEditingScreen extends Screen {
     
     
     
-    private void renderHint(MatrixStack matrixStack) {
-        minecraft.getTextureManager().bind(WINDOW);
-        int hintX = getWindowX() + WINDOW_WIDTH - 17;
-        int hintY = getWindowY() + 6;
-        blit(matrixStack, hintX, hintY, 32, 245, 11, 11);
-    }
-    
-    private final List<ITextComponent> hintTooltip = ImmutableList.of(
-            new TranslationTextComponent("jojo.screen.edit_hud_layout.hint.lmb"), 
-            new TranslationTextComponent("jojo.screen.edit_hud_layout.hint.rmb"));
+    private Runnable renderAfterScissor = null;
     private void renderToolTips(MatrixStack matrixStack, int mouseX, int mouseY) {
         if (draggedAction.isPresent()) return;
         int tab = getTabButtonAt(mouseX, mouseY);
@@ -439,31 +463,38 @@ public class HudLayoutEditingScreen extends Screen {
             renderTooltip(matrixStack, powersPresent.get(tab).getName(), mouseX, mouseY);
         }
         else {
-            renderActionNameTooltip(matrixStack, mouseX, mouseY);
+            hoveredAction.ifPresent(slot -> {
+                List<ITextComponent> tooltip = new ArrayList<>();
+                
+                IFormattableTextComponent name = getActionName(selectedPower, slot.actionSwitch.getAction());
+                if (!slot.actionSwitch.isEnabled()) {
+                    name.withStyle(TextFormatting.STRIKETHROUGH);
+                }
+                tooltip.add(name);
+                
+                tooltip.add(StringTextComponent.EMPTY);
+                tooltip.add(new TranslationTextComponent("jojo.screen.edit_hud_layout.hint.lmb").withStyle(TextFormatting.GRAY, TextFormatting.ITALIC));
+                tooltip.add(new TranslationTextComponent("jojo.screen.edit_hud_layout.hint.rmb").withStyle(TextFormatting.GRAY, TextFormatting.ITALIC));
+                
+                renderComponentTooltip(matrixStack, tooltip, mouseX, mouseY);
+            });
+            
+            keybindsList.getHoveredKeybindSlot().ifPresent(slot -> {
+                if (slot.getAction() != null) {
+                    IFormattableTextComponent name = getActionName(selectedPower, slot.getAction());
+                    renderTooltip(matrixStack, name, mouseX, mouseY);
+                }
+            });
         }
         
-        int hintX = getWindowX() + WINDOW_WIDTH - 17;
-        int hintY = getWindowY() + 6;
-        if (mouseX >= hintX && mouseX < hintX + 11 && mouseY >= hintY && mouseY < hintY + 11) {
-            renderComponentTooltip(matrixStack, hintTooltip, mouseX, mouseY);
+        if (renderAfterScissor != null) {
+            renderAfterScissor.run();
+            renderAfterScissor = null;
         }
     }
     
-    private <P extends IPower<P, ?>> void renderActionNameTooltip(MatrixStack matrixStack, int mouseX, int mouseY) {
-        P power = (P) selectedPower;
-        hoveredAction.ifPresent(slot -> {
-            renderActionName(matrixStack, power, (Action<P>) slot.actionSwitch.getAction(), mouseX, mouseY, slot.actionSwitch.isEnabled());
-        });
-    }
-    
-    private <P extends IPower<P, ?>> void renderActionName(MatrixStack matrixStack, P power, Action<P> action, int mouseX, int mouseY, boolean isEnabled) {
-        if (action == null) return;
-        IFormattableTextComponent name = getActionName(power, action, hasShiftDown());
-        
-        if (!isEnabled) {
-            name.withStyle(TextFormatting.DARK_GRAY);
-        }
-        renderTooltip(matrixStack, name, mouseX, mouseY);
+    private <P extends IPower<P, ?>> IFormattableTextComponent getActionName(IPower<?, ?> power, Action<P> action) {
+        return getActionName((P) power, action, hasShiftDown());
     }
     
     public static <P extends IPower<P, ?>> IFormattableTextComponent getActionName(P power, Action<P> action, boolean shift) {
@@ -478,7 +509,7 @@ public class HudLayoutEditingScreen extends Screen {
         }
         
         else {
-            name = action.getNameLocked(power).withStyle(TextFormatting.GRAY, TextFormatting.ITALIC);
+            name = action.getNameLocked(power).withStyle(TextFormatting.DARK_GRAY);
         }
         
         return name;
@@ -500,49 +531,51 @@ public class HudLayoutEditingScreen extends Screen {
     @Override
     public boolean mouseClicked(double mouseXd, double mouseYd, int mouseButton) {
         MouseButton button = MouseButton.getButtonFromId(mouseButton);
-        if (button == null) return false;
+        
         int mouseX = (int) mouseXd;
         int mouseY = (int) mouseYd;
         Optional<ActionSlot> clickedActionSlot = getSlotAt(mouseX, mouseY);
         
-        if (draggedAction.isPresent()) {
-            ActionSlot dragged = draggedAction.get();
-            Optional<ControlScheme.Hotbar> plusSlot = getPlusSlotAt(mouseX, mouseY);
-            
-            if (clickedActionSlot.isPresent()) {
-                ActionSlot clicked = clickedActionSlot.get();
-                // move action to another position
-                if (dragged.hotbar == clicked.hotbar) {
-                    currentControlScheme.getActionsHotbar(clicked.hotbar).moveTo(dragged.actionSwitch, clicked.index);
-                }
-                // move action to the other hotbar
-                else {
-                    currentControlScheme.getActionsHotbar(dragged.hotbar).remove(dragged.actionSwitch);
-                    currentControlScheme.getActionsHotbar(clicked.hotbar).addTo(dragged.actionSwitch, clicked.index);
-                }
-                markLayoutEdited();
-            }
-            
-            // move action to the end of the other hotbar
-            else if (plusSlot.isPresent()) {
-                currentControlScheme.getActionsHotbar(dragged.hotbar).remove(dragged.actionSwitch);
-                ActionsHotbar hotbarAddedTo = currentControlScheme.getActionsHotbar(plusSlot.get());
-                hotbarAddedTo.addTo(dragged.actionSwitch, hotbarAddedTo.getLegalActionSwitches().size());
-                draggedAction = Optional.empty();
-                markLayoutEdited();
-            }
-            
-            else {
-                Optional<ActionKeybindEntry> clickedKeybindActionSlot = getKeybindSlotAt(mouseX, mouseY);
-                if (clickedKeybindActionSlot.isPresent()) {
-                    ActionKeybindEntry slot = clickedKeybindActionSlot.get();
-                    slot.setAction(dragged.actionSwitch.getAction());
+        if (button == MouseButton.LEFT) {
+            if (draggedAction.isPresent()) {
+                ActionSlot dragged = draggedAction.get();
+                Optional<ControlScheme.Hotbar> plusSlot = getPlusSlotAt(mouseX, mouseY);
+                
+                if (clickedActionSlot.isPresent()) {
+                    ActionSlot clicked = clickedActionSlot.get();
+                    // move action to another position
+                    if (dragged.hotbar == clicked.hotbar) {
+                        currentControlScheme.getActionsHotbar(clicked.hotbar).moveTo(dragged.actionSwitch, clicked.index);
+                    }
+                    // move action to the other hotbar
+                    else {
+                        currentControlScheme.getActionsHotbar(dragged.hotbar).remove(dragged.actionSwitch);
+                        currentControlScheme.getActionsHotbar(clicked.hotbar).addTo(dragged.actionSwitch, clicked.index);
+                    }
                     markLayoutEdited();
                 }
+                
+                // move action to the end of the other hotbar
+                else if (plusSlot.isPresent()) {
+                    currentControlScheme.getActionsHotbar(dragged.hotbar).remove(dragged.actionSwitch);
+                    ActionsHotbar hotbarAddedTo = currentControlScheme.getActionsHotbar(plusSlot.get());
+                    hotbarAddedTo.addTo(dragged.actionSwitch, hotbarAddedTo.getLegalActionSwitches().size());
+                    draggedAction = Optional.empty();
+                    markLayoutEdited();
+                }
+                
+                else {
+                    Optional<ActionKeybindEntry> clickedKeybindActionSlot = keybindsList.getHoveredKeybindSlot();
+                    if (clickedKeybindActionSlot.isPresent()) {
+                        ActionKeybindEntry slot = clickedKeybindActionSlot.get();
+                        slot.setAction(dragged.actionSwitch.getAction());
+                        markLayoutEdited();
+                    }
+                }
+    
+                draggedAction = Optional.empty();
+                return true;
             }
-
-            draggedAction = Optional.empty();
-            return true;
         }
         
         
@@ -551,38 +584,49 @@ public class HudLayoutEditingScreen extends Screen {
             selectTab(powersPresent.get(tab));
             return true;
         }
+        
+        JojoStuffScreen.TabsEnumType tabsType = JojoStuffScreen.TabsEnumType.getTabsEnum(selectedPower);
+        if (tabsType != null && JojoStuffScreen.mouseClick(mouseX, mouseY, 
+                JojoStuffScreen.uniformX(minecraft), JojoStuffScreen.uniformY(minecraft), tabsType)) {
+            return true;
+        }
+        
         if (clickedActionSlot.isPresent()) {
             ControlScheme.Hotbar hotbar = clickedActionSlot.get().hotbar;
-            switch (button) {
-            case LEFT:
-                draggedAction = clickedActionSlot;
-                return true;
-            case RIGHT:
-                ActionVisibilitySwitch slot = clickedActionSlot.get().actionSwitch;
-                slot.setIsEnabled(!slot.isEnabled());
-                markLayoutEdited();
-                
-                if (slot.isEnabled() && selectedPower == ActionsOverlayGui.getInstance().getCurrentPower()
-                        && isActionVisible(slot.getAction(), selectedPower)) {
-                    int slotIndex = currentControlScheme.getActionsHotbar(hotbar).getEnabledActions().indexOf(slot.getAction());
-                    if (slotIndex >= 0) {
-                        ActionsOverlayGui.getInstance().selectAction(hotbar, slotIndex);
+            if (button != null) {
+                switch (button) {
+                case LEFT:
+                    draggedAction = clickedActionSlot;
+                    return true;
+                case RIGHT:
+                    ActionVisibilitySwitch slot = clickedActionSlot.get().actionSwitch;
+                    slot.setIsEnabled(!slot.isEnabled());
+                    markLayoutEdited();
+
+                    if (slot.isEnabled() && selectedPower == ActionsOverlayGui.getInstance().getCurrentPower()
+                            && isActionVisible(slot.getAction(), selectedPower)) {
+                        int slotIndex = currentControlScheme.getActionsHotbar(hotbar).getEnabledActions().indexOf(slot.getAction());
+                        if (slotIndex >= 0) {
+                            ActionsOverlayGui.getInstance().selectAction(hotbar, slotIndex);
+                        }
                     }
+                    return true;
+                default:
+                    break;
                 }
-                return true;
-            case MIDDLE:
-                setCustomKeybind(clickedActionSlot.get().actionSwitch.getAction(), InputMappings.Type.MOUSE, GLFW.GLFW_MOUSE_BUTTON_MIDDLE);
-                return true;
-            default:
-                return false;
             }
+            setCustomKeybind(clickedActionSlot.get().actionSwitch.getAction(), InputMappings.Type.MOUSE, mouseButton);
+            return true;
         }
         
         return mouseClickedEditingKeybind(mouseButton, /*KeyModifier.getActiveModifier()*/ KeyModifier.NONE)
                 || super.mouseClicked(mouseX, mouseY, mouseButton);
     }
-
-//    private List<KeyBindingList.Entry> registeredKeys = new ArrayList<>();
+    
+    public void selectTab(PowerClassification power) {
+        selectTab(IPower.getPlayerPower(Minecraft.getInstance().player, power));
+    }
+    
     private void selectTab(IPower<?, ?> power) {
         if (power != null && power.hasPower()) {
             selectedPower = power;
@@ -592,83 +636,11 @@ public class HudLayoutEditingScreen extends Screen {
             currentControlsScreen = HudControlSettings.getInstance().getCachedControls(selectedTab);
             currentControlScheme = currentControlsScreen.getCurrentCtrlScheme();
             refreshCustomKeybindEntries();
-            
-            
-            
-//            registeredKeys.forEach(entry -> {
-//                for (IGuiEventListener button : entry.children()) {
-////                    buttons.remove(button);
-////                    children.remove(button);
-//                    JojoMod.LOGGER.debug(buttons.remove(button) ? "removed button" : "nope");
-//                    JojoMod.LOGGER.debug(children.remove(button) ? "removed child" : "nuh-uh");
-//                }
-//            });
-//            registeredKeys.clear();
-//            int maxHeight = 150;
-//            ClientModSettings modSettings = ClientModSettings.getInstance();
-//            ClientModSettings.Settings modSettingsRead = ClientModSettings.getSettingsReadOnly();
-//            registeredKeys.add(new HoldToggleKeyEntry(
-//                    new VanillaKeyEntry(InputHandler.getInstance().attackHotbar, 
-//                            this::getSelectedKey, this::setSelectedKey, maxHeight), 
-//                    new ControlSettingToggleButton(40, 20, 
-//                            button -> {
-//                                modSettings.editSettings(s -> s.toggleLmbHotbar = !s.toggleLmbHotbar);
-//                                InputHandler.getInstance().setToggledHotbarControls(ControlScheme.Hotbar.LEFT_CLICK, false);
-//                            },
-//                            () -> modSettingsRead.toggleLmbHotbar)));
-//            registeredKeys.add(new HoldToggleKeyEntry(
-//                    new VanillaKeyEntry(InputHandler.getInstance().abilityHotbar, 
-//                            this::getSelectedKey, this::setSelectedKey, maxHeight), 
-//                    new ControlSettingToggleButton(40, 20, 
-//                            button -> {
-//                                modSettings.editSettings(s -> s.toggleRmbHotbar = !s.toggleRmbHotbar);
-//                                InputHandler.getInstance().setToggledHotbarControls(ControlScheme.Hotbar.RIGHT_CLICK, false);
-//                            },
-//                            () -> modSettingsRead.toggleRmbHotbar)));
-//            registeredKeys.add(new HoldToggleKeyEntry(
-//                    new VanillaKeyEntry(InputHandler.getInstance().disableHotbars, 
-//                            this::getSelectedKey, this::setSelectedKey, maxHeight), 
-//                    new ControlSettingToggleButton(40, 20, 
-//                            button -> {
-//                                modSettings.editSettings(s -> s.toggleDisableHotbars = !s.toggleDisableHotbars);
-//                                InputHandler.getInstance().setToggleHotbarsDisabled(false);
-//                            },
-//                            () -> modSettingsRead.toggleDisableHotbars)));
-//            switch (selectedTab) {
-//            case STAND:
-//                registeredKeys.add(new VanillaKeyEntry(InputHandler.getInstance().toggleStand, 
-//                        this::getSelectedKey, this::setSelectedKey, maxHeight));
-//                registeredKeys.add(new VanillaKeyEntry(InputHandler.getInstance().standRemoteControl, 
-//                        this::getSelectedKey, this::setSelectedKey, maxHeight));
-//                registeredKeys.add(new VanillaKeyEntry(InputHandler.getInstance().standMode, 
-//                        this::getSelectedKey, this::setSelectedKey, maxHeight));
-//                break;
-//            case NON_STAND:
-//                registeredKeys.add(new VanillaKeyEntry(InputHandler.getInstance().nonStandMode, 
-//                        this::getSelectedKey, this::setSelectedKey, maxHeight));
-//                IPowerType<?, ?> type = power.getType();
-//                if (type == ModPowers.HAMON.get()) {
-//                    registeredKeys.add(new VanillaKeyEntry(InputHandler.getInstance().hamonSkillsWindow, 
-//                            this::getSelectedKey, this::setSelectedKey, maxHeight));
-//                }
-//                break;
-//            }
-//            registeredKeys.forEach(entry -> {
-//                for (IGuiEventListener button : entry.children()) {
-//                    if (button instanceof Widget) {
-//                        addButton((Widget) button);
-//                    }
-//                    else {
-//                        addWidget(button);
-//                    }
-//                }
-//            });
         }
     }
     
     private void refreshCustomKeybindEntries() {
-        keybindButtons.keySet().forEach(entry -> removeKeybindEntryFromUi(entry, false));
-        keybindButtons.clear();
+        keybindsList.clear();
         selectedKey.clear();
         for (ActionKeybindEntry keybindEntry : currentControlScheme.getCustomKeybinds()) {
             _addKeybindEntryToUi(keybindEntry);
@@ -678,10 +650,6 @@ public class HudLayoutEditingScreen extends Screen {
     @Nullable
     private final KeyBinding getSelectedKey() {
         return selectedKey.getKeybind();
-    }
-
-    private final void setSelectedKey(KeyBinding registeredKey) {
-        selectedKey.setKeybind(registeredKey);
     }
     
     private <P extends IPower<P, ?>> boolean isActionVisible(Action<P> action, IPower<?, ?> power) {
@@ -774,62 +742,8 @@ public class HudLayoutEditingScreen extends Screen {
     
     
     
-    private final SelectedKey selectedKey = new SelectedKey();
-    private Optional<ActionKeybindEntry> hoveredKeybindSlot = Optional.empty();
-    private final Map<ActionKeybindEntry, KeybindButtonsHolder> keybindButtons = new LinkedHashMap<>();
     private void renderKeybindsList(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
-        hoveredKeybindSlot = getKeybindSlotAt(mouseX, mouseY);
-        Collection<KeyBinding> keys = new ArrayList<>();
-        Collections.addAll(keys, minecraft.options.keyMappings);
-        for (KeybindButtonsHolder keybindLine : keybindButtons.values()) {
-            keys.add(keybindLine.keybindEntry.getKeybind());
-        }
-        
-        for (Map.Entry<ActionKeybindEntry, KeybindButtonsHolder> entry : keybindButtons.entrySet()) {
-            KeyBinding keybind = entry.getKey().getKeybind();
-            KeybindButtonsHolder keybindUi = entry.getValue();
-            
-            keybindUi.keybindButton.setMessage(keybind.getTranslatedKeyMessage());
-            boolean conflicting = false;
-            boolean keyCodeModifierConflict = true; // less severe form of conflict, like SHIFT conflicting with SHIFT+G
-            if (!keybind.isUnbound()) {
-                for (KeyBinding otherKey : keys) {
-                    if (otherKey != keybind && keybind.same(otherKey)) {
-                        conflicting = true;
-                        keyCodeModifierConflict &= otherKey.hasKeyCodeModifierConflict(keybind);
-                    }
-                }
-            }
-
-            if (!selectedKey.isEmpty() && selectedKey.getKeybind() == keybindUi.keybindEntry.getKeybind()) {
-                keybindUi.keybindButton.setMessage(
-                        new StringTextComponent("> ")
-                        .append(keybindUi.keybindButton.getMessage().copy().withStyle(TextFormatting.YELLOW))
-                        .append(" <").withStyle(TextFormatting.YELLOW));
-            } else if (conflicting) {
-                keybindUi.keybindButton.setMessage(
-                        keybindUi.keybindButton.getMessage().copy()
-                        .withStyle(keyCodeModifierConflict ? TextFormatting.GOLD : TextFormatting.RED));
-            }
-        }
-        
-        addKeybindButton.y = getWindowY() + 64 + keybindButtons.size() * 22;
-        addKeybindButton.visible = canAddKeybinds();
-        
-        
-        
-//        int i = 0;
-//        int x = getWindowX() + 15;
-//        int y = getWindowY() + WINDOW_HEIGHT + 4;
-//        for (KeyBindingList.Entry vanillaKeyEntry : registeredKeys) {
-//            vanillaKeyEntry.render(matrixStack, i, y + i * 20, x, -1, 20, 
-//                    mouseX, mouseY, false, partialTick);
-//            ++i;
-//        }
-    }
-    
-    private boolean canAddKeybinds() {
-        return keybindButtons.size() < 5;
+        keybindsList.render(matrixStack, mouseX, mouseY, partialTick);
     }
     
     private boolean mouseClickedEditingKeybind(int buttonId, KeyModifier keyModifier) {
@@ -873,43 +787,15 @@ public class HudLayoutEditingScreen extends Screen {
         return false;
     }
     
-    private Optional<ActionKeybindEntry> getKeybindSlotAt(int mouseX, int mouseY) {
-        return keybindButtons.values().stream()
-                .filter(pos -> {
-                    int slotX = pos.getActionSlotX();
-                    int slotY = pos.getActionSlotY();
-                    return mouseX >= slotX && mouseX < slotX + 18 && mouseY >= slotY && mouseY < slotY + 18;
-                })
-                .findFirst()
-                .map(ui -> ui.keybindEntry);
-    }
-    
-    private <P extends IPower<P, ?>> void renderKeybindSlots(P power, 
-            MatrixStack matrixStack, int mouseX, int mouseY) {
-        for (Map.Entry<ActionKeybindEntry, KeybindButtonsHolder> actionEntry : keybindButtons.entrySet()) {
-            Action<P> action = (Action<P>) actionEntry.getKey().getAction();
-            KeybindButtonsHolder pos = actionEntry.getValue();
-            renderActionSlot(matrixStack, pos.getActionSlotX(), pos.getActionSlotY(), mouseX, mouseY, 
-                    power, action, true, 
-                    draggedAction.isPresent(), 
-                    hoveredKeybindSlot.map(hovered -> hovered == actionEntry.getKey()).orElse(false),
-                    action != null);
-        }
-    }
-    
     private void createBlankKeybindEntry() {
-        ActionKeybindEntry entry = currentControlScheme.addBlankKeybindEntry(PressActionType.CLICK);
+        ActionKeybindEntry entry = currentControlScheme.addBlankKeybindEntry();
         markKeybindEdited(entry);
         markLayoutEdited();
         _addKeybindEntryToUi(entry);
     }
     
     private void setCustomKeybind(Action<?> action, InputMappings.Type inputType, int key) {
-        if (!canAddKeybinds()) {
-            return;
-        }
-        
-        Optional<ActionKeybindEntry> actionAlreadyHasKey = keybindButtons.keySet().stream()
+        Optional<ActionKeybindEntry> actionAlreadyHasKey = keybindsList.getKeys()
                 .filter(entry -> {
                     return entry.getAction() == action;
                 })
@@ -922,24 +808,11 @@ public class HudLayoutEditingScreen extends Screen {
             return;
         }
         else {
-            ActionKeybindEntry entry = currentControlScheme.addKeybindEntry(
-                    PressActionType.CLICK, action, inputType, key);
+            ActionKeybindEntry entry = currentControlScheme.addKeybindEntry(action, inputType, key);
             markKeybindEdited(entry);
             _addKeybindEntryToUi(entry);
         }
 
-    }
-    
-    private void removeKeybindEntryFromUi(ActionKeybindEntry entry, boolean removeFromList) {
-        KeybindButtonsHolder buttons = keybindButtons.get(entry);
-        if (buttons != null) {
-            for (Widget button : buttons.buttons) {
-                removeButton(button);
-            }
-        }
-        if (removeFromList) {
-            keybindButtons.remove(buttons.keybindEntry);
-        }
     }
     
     private void _addKeybindEntryToUi(ActionKeybindEntry entry) {
@@ -963,14 +836,70 @@ public class HudLayoutEditingScreen extends Screen {
 //                return super.createNarrationMessage();
 //            }
         };
+
+        Widget keyPressModeButton = new CustomButton(
+                -1, -1, 
+                13, 13, StringTextComponent.EMPTY, button -> {
+                    markLayoutEdited();
+                    entry.setOnPress(GeneralUtil.nextEnumValCycle(entry.getOnKeyPress()));
+                }, 
+                (button, matrixStack, x, y) -> {
+                    renderAfterScissor = () -> {
+                        List<ITextComponent> tooltip = new ArrayList<>(2);
+                        tooltip.add(new TranslationTextComponent("jojo.keybind_mode.key_press.title").withStyle(TextFormatting.BOLD));
+                        tooltip.add(new TranslationTextComponent("jojo.keybind_mode.key_press." + entry.getOnKeyPress().name().toLowerCase()));
+                        renderComponentTooltip(matrixStack, tooltip, x, y);
+                    };
+                }) {
+            @Override
+            protected void renderCustomButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
+                Minecraft minecraft = Minecraft.getInstance();
+                minecraft.getTextureManager().bind(WINDOW);
+                RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+                RenderSystem.enableDepthTest();
+                int texX = 188 + entry.getOnKeyPress().ordinal() * width;
+                int texY = 217;
+                blit(matrixStack, x, y, texX, texY + getYImage(isHovered()) * height, width, height);
+            }
+        };
+        
+        Widget keyActiveModeButton = new CustomButton(
+                -1, -1, 
+                13, 13, StringTextComponent.EMPTY, button -> {
+                    markLayoutEdited();
+                    entry.setHudInteraction(GeneralUtil.nextEnumValCycle(entry.getHudInteraction()));
+                }, 
+                (button, matrixStack, x, y) -> {
+                    renderAfterScissor = () -> {
+                        List<ITextComponent> tooltip = new ArrayList<>(2);
+                        tooltip.add(new TranslationTextComponent("jojo.keybind_mode.is_active.title").withStyle(TextFormatting.BOLD));
+                        tooltip.add(new TranslationTextComponent("jojo.keybind_mode.is_active." + entry.getHudInteraction().name().toLowerCase(), 
+                                selectedPower.getName()));
+                        renderComponentTooltip(matrixStack, tooltip, x, y);
+                    };
+                }) {
+            @Override
+            protected void renderCustomButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
+                Minecraft minecraft = Minecraft.getInstance();
+                minecraft.getTextureManager().bind(WINDOW);
+                RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+                RenderSystem.enableDepthTest();
+                int texX = 216 + entry.getHudInteraction().ordinal() * width;
+                int texY = 217;
+                blit(matrixStack, x, y, texX, texY + getYImage(isHovered()) * height, width, height);
+            }
+        };
         
         Widget removeButton = new CustomButton(
                 -1, -1, 
                 8, 8, StringTextComponent.EMPTY, button -> {
             if (currentControlScheme.removeKeybindEntry(entry)) {
                 markLayoutEdited();
-                removeKeybindEntryFromUi(entry, true);
-                updateKeybindEntriesPos();
+                keybindsList.removeByKey(entry);
             }
         }) {
             @Override
@@ -985,69 +914,8 @@ public class HudLayoutEditingScreen extends Screen {
             }
         };
         
-        KeybindButtonsHolder buttons = new KeybindButtonsHolder(entry,
-                keyBindingButton, removeButton);
-        keybindButtons.put(entry, buttons);
-        updateKeybindEntryPos(buttons, keybindButtons.size() - 1);
-    }
-    
-    private void updateKeybindEntriesPos() {
-        int i = 0;
-        for (KeybindButtonsHolder keyEntry : keybindButtons.values()) {
-            updateKeybindEntryPos(keyEntry, i++);
-        }
-    }
-    
-    private void updateKeybindEntryPos(KeybindButtonsHolder entry, int index) {
-        int x = getWindowX() + 10;
-        int y = getWindowY() + 62 + index * 22;
-        
-        entry.setPos(x, y);
-        
-        entry.keybindButton.x = x + 22;
-        entry.keybindButton.y = y;
-        entry.removeButton.x = entry.keybindButton.x + entry.keybindButton.getWidth() + 4;
-        entry.removeButton.y = y + 5;
-        for (Widget button : entry.buttons) {
-            if (!children.contains(button)) {
-                addButton(button);
-            }
-        }
-    }
-    
-    private boolean removeButton(Widget button) {
-        buttons.remove(button);
-        return children.remove(button);
-    }
-    
-    private static class KeybindButtonsHolder {
-        private final ActionKeybindEntry keybindEntry;
-        private final List<Widget> buttons;
-        private final Widget keybindButton;
-        private final Widget removeButton;
-        private int x;
-        private int y;
-        
-        KeybindButtonsHolder(ActionKeybindEntry keybindEntry, 
-                Widget keybindButton, Widget removeButton) {
-            this.keybindEntry = keybindEntry;
-            this.keybindButton = keybindButton;
-            this.removeButton = removeButton;
-            this.buttons = ImmutableList.of(keybindButton, removeButton);
-        }
-        
-        int getActionSlotX() {
-            return x;
-        }
-        
-        int getActionSlotY() {
-            return y + 1;
-        }
-        
-        void setPos(int x, int y) {
-            this.x = x;
-            this.y = y;
-        }
+        keybindsList.addKeybindEntry(keybindsList.new KeybindUIEntry(entry, 
+                keyBindingButton, keyPressModeButton, keyActiveModeButton, removeButton));
     }
     
     private Map<ActionKeybindEntry, ControlScheme> editedKeybinds = new HashMap<>();
@@ -1066,5 +934,258 @@ public class HudLayoutEditingScreen extends Screen {
             ctrlSchemes.add(ctrlScheme);
         });
         editedKeybinds.clear();
+    }
+    
+    
+    
+    
+    
+    public static class ActionKeybindsList extends AbstractOptionList<ActionKeybindsList.Entry> {
+        private final Map<ActionKeybindEntry, ActionKeybindsList.KeybindUIEntry> keybindsMap = new HashMap<>();
+        private final HudLayoutEditingScreen screen;
+        private final SelectedKey selectedKeyHolder;
+
+        public ActionKeybindsList(Minecraft mc, int width, int height, 
+                int y0, int y1, int itemHeight, 
+                HudLayoutEditingScreen screen, SelectedKey selectedKeyHolder) {
+            super(mc, width, height, y0, y1, itemHeight);
+            this.screen = screen;
+            this.selectedKeyHolder = selectedKeyHolder;
+            this.setRenderBackground(false);
+            this.setRenderTopAndBottom(false);
+            addNewKeybindKey();
+        }
+        
+        private final Collection<KeyBinding> vanillaKeys = Arrays.asList(minecraft.options.keyMappings);
+        private final Collection<KeyBinding> entryKeys = new ArrayList<>();
+        private final Iterable<KeyBinding> conflictKeys = Iterables.concat(vanillaKeys, entryKeys);
+        private Optional<ActionKeybindEntry> hoveredKeybindSlot = Optional.empty();
+        @Override
+        protected void renderList(MatrixStack pMatrixStack, int pX, int pY, int pMouseX, int pMouseY, float pPartialTicks) {
+            entryKeys.clear();
+            for (ActionKeybindsList.KeybindUIEntry entry : keybindsMap.values()) {
+                entryKeys.add(entry.keybindEntry.getKeybind());
+            }
+            hoveredKeybindSlot = Optional.empty();
+            super.renderList(pMatrixStack, pX, pY, pMouseX, pMouseY, pPartialTicks);
+        }
+        
+        public void addKeybindEntry(ActionKeybindsList.KeybindUIEntry entry) {
+            ActionKeybindEntry keybind = entry.keybindEntry;
+            if (keybindsMap.containsKey(keybind)) {
+                return;
+            }
+            keybindsMap.put(keybind, entry);
+            
+            this.children().add(children().size() - 1, entry);
+        }
+        
+        public boolean removeByKey(ActionKeybindEntry key) {
+            ActionKeybindsList.KeybindUIEntry entry = keybindsMap.remove(key);
+            if (entry != null) {
+                boolean removed = removeEntry(entry);
+                setScrollAmount(getScrollAmount());
+                return removed;
+            }
+            return false;
+        }
+        
+        public void clear() {
+            super.clearEntries();
+            keybindsMap.clear();
+            addNewKeybindKey();
+            setScrollAmount(getScrollAmount());
+        }
+        
+        private void addNewKeybindKey() {
+            super.addEntry(new AddNewKeyEntry(new CustomButton(screen.getWindowX() + 10, screen.getWindowY() + 64, 20, 20, 
+                    button -> {
+                        screen.createBlankKeybindEntry();
+                        screen.markLayoutEdited();
+                    }, 
+                    (button, matrixStack, x, y) -> {
+                        screen.renderTooltip(matrixStack, new TranslationTextComponent("jojo.screen.edit_hud_layout.add_keybind"), x, y);
+                    }) {
+                
+                @Override
+                protected void renderCustomButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
+                    Minecraft minecraft = Minecraft.getInstance();
+                    minecraft.getTextureManager().bind(WINDOW);
+                    RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
+                    RenderSystem.enableBlend();
+                    RenderSystem.defaultBlendFunc();
+                    RenderSystem.enableDepthTest();
+                    blit(matrixStack, x, y, 144, 196 + getYImage(isHovered()) * height, width, height);
+                }
+            }));
+        }
+        
+        @Override
+        public int getItemCount() {
+            return super.getItemCount();
+        }
+        
+        public Stream<ActionKeybindEntry> getKeys() {
+            return keybindsMap.keySet().stream();
+        }
+        
+        @Override
+        public void render(MatrixStack pMatrixStack, int pMouseX, int pMouseY, float pPartialTicks) {
+            ClientUtil.enableGlScissor(x0, y0, x1 - x0, y1 - y0);
+            super.render(pMatrixStack, pMouseX, pMouseY, pPartialTicks);
+            ClientUtil.disableGlScissor();
+        }
+        
+        @Override
+        protected int getScrollbarPosition() {
+            return x1 - 50;
+        }
+        
+        @Override
+        public int getRowLeft() {
+            return x0 + 2;
+        }
+        
+        public Optional<ActionKeybindEntry> getHoveredKeybindSlot() {
+            return hoveredKeybindSlot;
+        }
+        
+        
+        
+
+        public abstract class Entry extends AbstractOptionList.Entry<ActionKeybindsList.Entry> {}
+        
+        public class KeybindUIEntry extends ActionKeybindsList.Entry {
+            private final ActionKeybindEntry keybindEntry;
+            private final List<Widget> buttons;
+            private final Widget keybindButton;
+            private final Widget keyPressModeButton;
+            private final Widget keyActiveModeButton;
+            private final Widget removeButton;
+            private int actionSlotX;
+            private int actionSlotY;
+            
+            public KeybindUIEntry(ActionKeybindEntry keybindEntry, 
+                    Widget keybindButton, Widget keyPressModeButton, Widget keyActiveModeButton, Widget removeButton) {
+                this.keybindEntry = keybindEntry;
+                this.keybindButton = keybindButton;
+                this.keyPressModeButton = keyPressModeButton;
+                this.keyActiveModeButton = keyActiveModeButton;
+                this.removeButton = removeButton;
+                this.buttons = ImmutableList.of(keybindButton, keyPressModeButton, keyActiveModeButton, removeButton);
+            }
+            
+            @Override
+            public void render(MatrixStack matrixStack, int index, int top, int left, 
+                    int width, int height, int mouseX, int mouseY, boolean isMouseOver, float partialTicks) {
+                KeyBinding keybind = keybindEntry.getKeybind();
+                
+                keybindButton.x = left + 22;
+                keybindButton.y = top;
+                keybindButton.setMessage(keybind.getTranslatedKeyMessage());
+                
+                keyPressModeButton.x = keybindButton.x + keybindButton.getWidth() + 8;
+                keyPressModeButton.y = top + 3;
+                
+                keyActiveModeButton.x = keyPressModeButton.x + keyPressModeButton.getWidth() + 2;
+                keyActiveModeButton.y = top + 3;
+                
+                removeButton.x = keyActiveModeButton.x + keyActiveModeButton.getWidth() + 8;
+                removeButton.y = top + 5;
+                
+                actionSlotX = left;
+                actionSlotY = top + 1;
+                
+                if (mouseX >= actionSlotX && mouseX < actionSlotX + 18 && 
+                        mouseY >= actionSlotY && mouseY < actionSlotY + 18) {
+                    hoveredKeybindSlot = Optional.of(keybindEntry);
+                }
+                
+                boolean conflicting = false;
+                boolean keyCodeModifierConflict = true; // less severe form of conflict, like SHIFT conflicting with SHIFT+G
+                if (!keybind.isUnbound()) {
+                    for (KeyBinding otherKey : conflictKeys) {
+                        if (otherKey != keybind && keybind.same(otherKey)) {
+                            conflicting = true;
+                            keyCodeModifierConflict &= otherKey.hasKeyCodeModifierConflict(keybind);
+                        }
+                    }
+                }
+                
+                if (!selectedKeyHolder.isEmpty() && selectedKeyHolder.getKeybind() == this.keybindEntry.getKeybind()) {
+                    this.keybindButton.setMessage(
+                            new StringTextComponent("> ")
+                            .append(this.keybindButton.getMessage().copy().withStyle(TextFormatting.YELLOW))
+                            .append(" <").withStyle(TextFormatting.YELLOW));
+                } else if (conflicting) {
+                    this.keybindButton.setMessage(
+                            this.keybindButton.getMessage().copy()
+                            .withStyle(keyCodeModifierConflict ? TextFormatting.GOLD : TextFormatting.RED));
+                }
+                
+                keybindButton.render(matrixStack, mouseX, mouseY, partialTicks);
+                keyPressModeButton.render(matrixStack, mouseX, mouseY, partialTicks);
+                keyActiveModeButton.render(matrixStack, mouseX, mouseY, partialTicks);
+                removeButton.render(matrixStack, mouseX, mouseY, partialTicks);
+                
+                renderActionSlot(matrixStack, mouseX, mouseY);
+            }
+
+            // TODO render keybind slots
+            private <P extends IPower<P, ?>> void renderActionSlot(MatrixStack matrixStack, double mouseX, double mouseY) {
+                Action<?> action = keybindEntry.getAction();
+                screen.renderActionSlot(matrixStack, actionSlotX, actionSlotY, (int) mouseX, (int) mouseY, 
+                        (P) screen.selectedPower, action, true, 
+                        screen.draggedAction.isPresent(), 
+                        hoveredKeybindSlot.map(hovered -> hovered == keybindEntry).orElse(false),
+                        action != null);
+            }
+
+            @Override
+            public List<? extends IGuiEventListener> children() {
+                return buttons;
+            }
+
+            @Override
+            public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
+                for (Widget button : buttons) {
+                    if (button.mouseClicked(pMouseX, pMouseY, pButton)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+
+            @Override
+            public boolean mouseReleased(double pMouseX, double pMouseY, int pButton) {
+                for (Widget button : buttons) {
+                    if (button.mouseReleased(pMouseX, pMouseY, pButton)) {
+                        return true;
+                    }
+                }
+                return false;
+            }
+        }
+        
+        public class AddNewKeyEntry extends ActionKeybindsList.Entry {
+            private final Button addNewKeybindButton;
+            
+            public AddNewKeyEntry(Button addNewKeybindButton) {
+                this.addNewKeybindButton = addNewKeybindButton;
+            }
+            
+            @Override
+            public List<? extends IGuiEventListener> children() {
+                return Collections.singletonList(addNewKeybindButton);
+            }
+
+            @Override
+            public void render(MatrixStack matrixStack, int index, int top, int left, int width, int height,
+                    int mouseX, int mouseY, boolean isMouseOver, float partialTicks) {
+                addNewKeybindButton.x = left;
+                addNewKeybindButton.y = top;
+                addNewKeybindButton.render(matrixStack, mouseX, mouseY, partialTicks);
+            }
+        }
     }
 }

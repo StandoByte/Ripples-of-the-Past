@@ -14,6 +14,7 @@ import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.StandEntityRenderer;
 import com.github.standobyte.jojo.client.standskin.StandSkin;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
+import com.github.standobyte.jojo.client.ui.screen.JojoStuffScreen;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClSetStandSkinPacket;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -62,15 +63,15 @@ public class StandSkinsScreen extends Screen {
     @Nullable
     private SkinFullView skinFullView;
     
-    private StandSkinsScreen() {
+    public StandSkinsScreen(IStandPower power) {
         super(StringTextComponent.EMPTY);
+        setStandCap(power);
     }
     
     public static void openScreen(@Nullable Screen prevScreen) {
         IStandPower.getStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(playerStand -> {
             if (playerStand.hasPower()) {
-                StandSkinsScreen screen = new StandSkinsScreen();
-                screen.setStandCap(playerStand);
+                StandSkinsScreen screen = new StandSkinsScreen(playerStand);
                 screen.prevScreen = prevScreen;
                 Minecraft.getInstance().setScreen(screen);
             }
@@ -110,6 +111,10 @@ public class StandSkinsScreen extends Screen {
         renderContents(mouseX, mouseY, partialTick);
         renderWindow(matrixStack);
         
+        JojoStuffScreen.renderStandTabs(matrixStack, 
+                JojoStuffScreen.uniformX(minecraft), JojoStuffScreen.uniformY(minecraft), true, 
+                mouseX, mouseY, this, JojoStuffScreen.StandTab.SKINS, standCap);
+        
         for (Widget button : buttons) {
             button.render(matrixStack, mouseX, mouseY, partialTick);
         }
@@ -123,22 +128,20 @@ public class StandSkinsScreen extends Screen {
     @SuppressWarnings("deprecation")
     private void renderBgPattern(MatrixStack matrixStack) {
         RenderSystem.pushMatrix();
-        RenderSystem.enableDepthTest();
-        RenderSystem.translatef(getWindowX() + 4, getWindowY() + 4, 750.0F);
-        RenderSystem.colorMask(false, false, false, false);
-        fill(matrixStack, 4680, 2260, -4680, -2260, -0x1000000);
-        RenderSystem.colorMask(true, true, true, true);
-        RenderSystem.translatef(0.0F, 0.0F, -750.0F);
-        RenderSystem.depthFunc(518);
-        fill(matrixStack, WINDOW_WIDTH - 8, WINDOW_HEIGHT - 8, 0, 0, -0x1000000);
-        RenderSystem.depthFunc(515);
+        RenderSystem.translatef(getWindowX() + 4, getWindowY() + 4, 0);
         minecraft.getTextureManager().bind(TEXTURE_BG);
+        
+        int x = getWindowX() + WINDOW_INSIDE_X;
+        int y = getWindowY() + WINDOW_INSIDE_Y;
+        ClientUtil.enableGlScissor(x, y, WINDOW_INSIDE_WIDTH, WINDOW_INSIDE_HEIGHT);
         int l = -scroll % 16;
         for (int i1 = -1; i1 <= 12; ++i1) {
             for (int j1 = -1; j1 <= 11; ++j1) {
                 blit(matrixStack, 5 + 16 * i1, l + 16 * j1, 0.0F, 0.0F, 16, 16, 16, 16);
             }
         }
+        ClientUtil.disableGlScissor();
+        
         RenderSystem.popMatrix();
     }
     
@@ -161,12 +164,12 @@ public class StandSkinsScreen extends Screen {
         }
         else {
             RenderSystem.translatef(0, -scroll, 0);
+            ClientUtil.enableGlScissor(x, y, WINDOW_INSIDE_WIDTH, WINDOW_INSIDE_HEIGHT);
             // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! filter to only visible
             for (SkinView skin : skins) {
                 skin.renderStand(matrixStack, mouseX, mouseY, ticks);
             }
 
-            ClientUtil.enableGlScissor(x, y, WINDOW_INSIDE_WIDTH, WINDOW_INSIDE_HEIGHT);
             Optional<SkinView> hoveredSkin = getSkinAt(mouseX, mouseY);
             for (SkinView skin : skins) {
                 skin.renderAdditional(matrixStack, mouseX, mouseY, ticks, 
@@ -203,6 +206,12 @@ public class StandSkinsScreen extends Screen {
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
         if (super.mouseClicked(mouseX, mouseY, mouseButton)) {
+            return true;
+        }
+
+        if (JojoStuffScreen.mouseClick(mouseX, mouseY, 
+                JojoStuffScreen.uniformX(minecraft), JojoStuffScreen.uniformY(minecraft), 
+                JojoStuffScreen.TabsEnumType.STAND)) {
             return true;
         }
         

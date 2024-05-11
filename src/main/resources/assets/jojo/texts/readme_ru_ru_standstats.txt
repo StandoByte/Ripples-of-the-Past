@@ -17,6 +17,8 @@ Here is what each stat in these blocks affects:
 Each Stand also has two range parameters, relevant for the manual control mode:
     rangeEffective - maximum range (in blocks) at which the Stand doesn't lose its strength
     rangeMax - the Stand cannot move beyond that range
+    
+The setting called "randomWeight" determines how likely the Stand is to get from an Arrow. By default most Stands have it on 2, but such Stands as Star Platinum or The World have it at 1, so they are twice as rare.
 
 Currently, The World and Star Platinum have additional settings which affect their time stop abilities:
     timeStopMaxTicks - maximum time stop duration limit you can go up to while not being a vampire 

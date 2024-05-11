@@ -1,7 +1,6 @@
 package com.github.standobyte.jojo.capability.entity;
 
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
@@ -12,7 +11,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BooleanSupplier;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -24,16 +22,15 @@ import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromclient.ClGEUiDataPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.NotificationSyncPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDirectEntityDataPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDoubleShiftPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonLiquidWalkingPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrKnivesCountPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerContinuousActionPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerVisualDetailPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrWalkmanEarbudsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.GESplitConsciousnessPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.GEUiDataPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.MetEntityTypesPacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
@@ -60,7 +57,6 @@ import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
-import net.minecraftforge.registries.ForgeRegistries;
 
 public class PlayerUtilCap {
     private final PlayerEntity player;
@@ -80,6 +76,8 @@ public class PlayerUtilCap {
     
     private int knives;
     private int removeKnifeTime;
+    
+    private int ateInkPastaTicks = 0;
     
     private boolean hasClientInput;
     private int noClientInputTimer;
@@ -101,14 +99,14 @@ public class PlayerUtilCap {
     private final List<TimedAction> sendWhenScreenClosed = new ArrayList<>();
 
     private Set<ResourceLocation> metEntityTypesId = new HashSet<>();
-    private EntityType<?> GEChosenType = null;
-    private Set<EntityType<?>> GEHiddenEntries = new HashSet<>();
+    private final LifeformsUIState geUIState;
     public int animalAgeCd;
     
     
     
     public PlayerUtilCap(PlayerEntity player) {
         this.player = player;
+        geUIState = new LifeformsUIState(player);
 //        if (!player.level.isClientSide()) {
 //            statChangeListeners.add(new CustomVillagerTrades.MapItemStackTradeListener((ServerPlayerEntity) player));
 //        }
@@ -130,14 +128,22 @@ public class PlayerUtilCap {
             if (chatSpamTickCount > 0) chatSpamTickCount--;
             if (animalAgeCd > 0) animalAgeCd--;
         }
-        
+
+        if (ateInkPastaTicks > 0) --ateInkPastaTicks;
         tickContinuousAction();
         tickDoubleShift();
     }
     
-    public void saveOnDeath(PlayerUtilCap cap) {
-        this.notificationsSent = cap.notificationsSent;
-        this.metEntityTypesId = cap.metEntityTypesId;
+    public void onClone(PlayerUtilCap old, boolean wasDeath) {
+        this.notificationsSent = old.notificationsSent;
+
+        this.metEntityTypesId = old.metEntityTypesId;
+        
+        this.lastBedType = old.lastBedType;
+        this.ticksNoSleep = old.ticksNoSleep;
+        this.nextSleepTime = old.nextSleepTime;
+        
+        this.lastTradeTime.putAll(old.lastTradeTime);
     }
     
     public CompoundNBT toNBT() {
@@ -156,15 +162,7 @@ public class PlayerUtilCap {
         
         nbt.put("TradeCD", tradeCooldownToNbt());
         
-        if (GEChosenType != null) {
-            MCUtil.nbtPutRegistryEntry(nbt, "GEChosenType", GEChosenType);
-        }
-        if (!GEHiddenEntries.isEmpty()) {
-            ListNBT list = GEHiddenEntries.stream()
-                    .map(EntityType::getRegistryName).map(Object::toString).map(StringNBT::valueOf)
-                    .collect(ListNBT::new, ListNBT::add, ListNBT::addAll);
-            nbt.put("GEHidden", list);
-        }
+        nbt.put("GE_UI", geUIState.toNBT());
         nbt.putInt("AnimalAgeCd", animalAgeCd);
         return nbt;
     }
@@ -190,14 +188,7 @@ public class PlayerUtilCap {
             });
         }
         
-        GEChosenType = MCUtil.nbtGetRegistryEntry(nbt, "GEChosenType", ForgeRegistries.ENTITIES).orElse(null);
-        MCUtil.nbtGetList(nbt, "GEHidden", StringNBT.class)
-                .map(listNbt -> listNbt
-                        .stream()
-                        .map(stringNbt -> MCUtil.registryEntryFromId(stringNbt.getAsString(), ForgeRegistries.ENTITIES))
-                        .filter(Optional::isPresent).map(Optional::get)
-                        .collect(Collectors.toSet()))
-                .ifPresent(hidden -> GEHiddenEntries.addAll(hidden));
+        MCUtil.nbtGetCompoundOptional(nbt, "GE_UI").ifPresent(geUIState::fromNBT);
         animalAgeCd = nbt.getInt("AnimalAgeCd");
         
         MCUtil.getNbtElement(nbt, "TradeCD", CompoundNBT.class).ifPresent(this::tradeCooldownFromNbt);
@@ -206,6 +197,7 @@ public class PlayerUtilCap {
     public void onTracking(ServerPlayerEntity tracking) {
         PacketManager.sendToClient(new TrKnivesCountPacket(player.getId(), knives), tracking);
         PacketManager.sendToClient(new TrWalkmanEarbudsPacket(player.getId(), walkmanEarbuds), tracking);
+        PacketManager.sendToClient(new TrPlayerVisualDetailPacket(player.getId(), ateInkPastaTicks), tracking);
     }
     
     public void syncWithClient() {
@@ -214,7 +206,11 @@ public class PlayerUtilCap {
         if (!metEntityTypesId.isEmpty()) {
             PacketManager.sendToClient(new MetEntityTypesPacket(metEntityTypesId), player);
         }
-        PacketManager.sendToClient(new GEUiDataPacket(this.GEHiddenEntries, Optional.ofNullable(GEChosenType)), player);
+        PacketManager.sendToClient(geUIState.makePacket(), player);
+        
+        PacketManager.sendToClient(new TrKnivesCountPacket(player.getId(), knives), player);
+        PacketManager.sendToClient(new TrWalkmanEarbudsPacket(player.getId(), walkmanEarbuds), player);
+        PacketManager.sendToClient(new TrPlayerVisualDetailPacket(player.getId(), ateInkPastaTicks), player);
     }
     
     
@@ -416,6 +412,23 @@ public class PlayerUtilCap {
         }
     }
     
+
+    
+    public int getInkPastaVisuals() {
+        return ateInkPastaTicks;
+    }
+    
+    public void setInkPastaVisuals() {
+        setInkPastaVisuals(600);
+    }
+    
+    public void setInkPastaVisuals(int ticks) {
+        this.ateInkPastaTicks = ticks;
+        if (!player.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(new TrPlayerVisualDetailPacket(player.getId(), ateInkPastaTicks), player);
+        }
+    }
+    
     
     
     public void setHasClientInput(boolean hasInput) {
@@ -507,7 +520,11 @@ public class PlayerUtilCap {
     
     
     public boolean addMetEntityType(EntityType<?> entityType) {
-        return metEntityTypesId.add(entityType.getRegistryName());
+        boolean added = metEntityTypesId.add(entityType.getRegistryName());
+        if (added) {
+            geUIState.newUnseenMobs.add(entityType.getRegistryName());
+        }
+        return added;
     }
     
     public boolean didPlayerMeetEntityType(EntityType<?> entityType) {
@@ -518,47 +535,9 @@ public class PlayerUtilCap {
         metEntityTypesId.add(id);
     }
     
-    
-    
-    @Nullable
-    public EntityType<?> getGEChosenLifeformType() {
-        return GEChosenType;
+    public LifeformsUIState getGELifeformsUIState() {
+        return geUIState;
     }
-
-    public void setGEChosenLifeformType(EntityType<?> type, boolean syncToServer) {
-        this.GEChosenType = type;
-        if (syncToServer && player.level.isClientSide()) {
-            PacketManager.sendToServer(ClGEUiDataPacket.chosenEntityType(Optional.ofNullable(type)));
-        }
-    }
-
-    public boolean isGELifeformHidden(EntityType<?> type) {
-        return GEHiddenEntries.contains(type);
-    }
-
-    public boolean hideGELifeform(EntityType<?> type) {
-        if (GEHiddenEntries.add(type) && player.level.isClientSide()) {
-            PacketManager.sendToServer(ClGEUiDataPacket.hiddenEntry(type));
-            return true;
-        }
-        
-        return false;
-    }
-
-    public boolean showGELifeform(EntityType<?> type) {
-        if (GEHiddenEntries.remove(type) && player.level.isClientSide()) {
-            PacketManager.sendToServer(ClGEUiDataPacket.shownEntry(type));
-            return true;
-        }
-        
-        return false;
-    }
-    
-    public void setGEHiddenLifeforms(Collection<EntityType<?>> allHidden) {
-        GEHiddenEntries.clear();
-        GEHiddenEntries.addAll(allHidden);
-    }
-    
     
     
     

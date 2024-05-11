@@ -43,6 +43,7 @@ import net.minecraft.util.math.MathHelper;
 
 public abstract class StandEntityModel<T extends StandEntity> extends AgeableModel<T> implements IHasArm {
     ResourceLocation modelId = null;
+    private Map<String, ModelRenderer> namedModelParts = new HashMap<>();
     
     protected VisibilityMode visibilityMode = VisibilityMode.ALL;
     protected float yRotRad;
@@ -155,12 +156,8 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
             idlePose.poseModel(1.0F, entity, ticks, yRotOffsetRad, xRotRad, swingingHand);
             onPose(entity, ticks);
             
-            IActionAnimation<T> prevAnim = currentActionAnim;
             currentActionAnim = getActionAnim(entity, standPose);
             if (currentActionAnim != null) {
-                if (prevAnim != currentActionAnim) {
-                    currentActionAnim.onAnimStart(entity, yRotOffsetRad, xRotRad);
-                }
                 currentActionAnim.animate(actionPhase.get(), phaseCompletion, 
                         entity, ticks, yRotOffsetRad, xRotRad, swingingHand);
             }
@@ -268,6 +265,10 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     
     protected final void setSecondXRot(ModelRenderer modelPart, float xRot) {
         secondXRotMap.computeIfAbsent(modelPart, part -> new MutableFloat()).setValue(xRot);
+    }
+    
+    protected final void addSecondXRot(ModelRenderer modelPart, float xRot) {
+        secondXRotMap.computeIfAbsent(modelPart, part -> new MutableFloat()).add(xRot);
     }
     
     private void resetXRotation() {

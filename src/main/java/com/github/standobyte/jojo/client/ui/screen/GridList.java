@@ -222,6 +222,7 @@ public class GridList<T extends Widget & GridList.IGridElement> {
         return filter;
     }
     
+    @Deprecated
     public void setShowHidden(boolean showHidden) {
         this.showHidden = showHidden;
     }

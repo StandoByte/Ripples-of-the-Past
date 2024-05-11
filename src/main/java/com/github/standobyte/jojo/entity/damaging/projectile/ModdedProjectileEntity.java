@@ -61,19 +61,10 @@ public abstract class ModdedProjectileEntity extends DamagingEntity {
     public void shootFromRotation(Entity shooter, float xRot, float yRot, float yAxisRotOffset, float velocity, float inaccuracy) {
         Vector3d shootingVec = Vector3d.directionFromRotation(xRot, yRot);
         shoot(shootingVec.x, shootingVec.y, shootingVec.z, velocity, inaccuracy);
-        addShooterMotion(shooter);
-    }
-    
-    protected void addShooterMotion(Entity shooter) {
-        if (isNoGravity()) {
-            Vector3d shooterMotion = shooter.getDeltaMovement();
-            setDeltaMovement(getDeltaMovement().add(shooterMotion.x, shooter.isOnGround() ? 0.0D : shooterMotion.y, shooterMotion.z));
-        }
     }
     
     public void shoot(Entity shooter, Entity target, float velocity, float inaccuracy) {
         shoot(target.getX(), target.getY(), target.getZ(), velocity, inaccuracy);
-        addShooterMotion(shooter);
     }
     
     @Override

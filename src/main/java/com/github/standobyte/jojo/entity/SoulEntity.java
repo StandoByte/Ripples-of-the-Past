@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.entity;
 
 import java.util.UUID;
 
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ControllerSoul;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -22,7 +23,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.Pose;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
@@ -32,8 +32,6 @@ import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.util.text.KeybindTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
@@ -42,7 +40,7 @@ import net.minecraftforge.fml.network.NetworkHooks;
 public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
     private LivingEntity originEntity;
     private UUID originUuid;
-    private int lifeSpan;
+    public int lifeSpan;
     private boolean resolveCanLvlUp;
     private Entity noResolveEntity;
     private UUID noResolveEntityUUID;
@@ -63,10 +61,6 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
         this.originEntity = entity;
         if (entity != null) {
             copyPosition(entity);
-            if (!level.isClientSide() && entity instanceof ServerPlayerEntity) {
-                ((ServerPlayerEntity) entity).displayClientMessage(
-                        new TranslationTextComponent("jojo.message.skip_soul_ascension", new KeybindTextComponent("key.jump")), true);
-            }
             entity.setRemainingFireTicks(-20);
         }
     }
@@ -77,14 +71,6 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
     
     public LivingEntity getOriginEntity() {
         return originEntity;
-    }
-    
-    public void setLifeSpan(int lifeSpan) {
-        this.lifeSpan = lifeSpan;
-    }
-    
-    public int getLifeSpan() {
-        return lifeSpan;
     }
     
     @Override
@@ -189,7 +175,7 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
         }
         tickCount = lifeSpan - 1;
     }
-
+    
     private static final Vector3d UPWARDS_MOVEMENT = new Vector3d(0, 0.04D, 0);
     @Override
     public Vector3d getDeltaMovement() {
@@ -210,7 +196,7 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
     
     @Override
     public boolean isInvisibleTo(PlayerEntity player) {
-        return !player.isSpectator() && !player.is(originEntity) && (!StandUtil.playerCanSeeStands(player) || invisibleFlag());
+        return !player.is(originEntity) && (!StandUtil.clStandEntityVisibleTo(player) || !player.isSpectator() && invisibleFlag());
     }
     
     @Override
@@ -278,6 +264,7 @@ public class SoulEntity extends Entity implements IEntityAdditionalSpawnData {
         if (entity instanceof LivingEntity) {
             setOriginEntity((LivingEntity) entity);
             ControllerSoul.getInstance().onSoulSpawn(this);
+            entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(playerData -> playerData.soulEntity = this);
             addCloudParticles();
         }
         else {

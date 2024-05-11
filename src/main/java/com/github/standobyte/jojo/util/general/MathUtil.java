@@ -139,6 +139,27 @@ public class MathUtil {
     }
     
     
+    /**
+     * Interpolates a point on a Catmull-Rom Spline. This spline has a property that if there are two
+     * splines with arguments {@code p0, p1, p2, p3} and {@code p1, p2, p3, p4}, the resulting curve
+     * will have a continuous first derivative at {@code p2}, where the two input curves connect. For
+     * higher-dimensional curves, the interpolation on the curve is done component-wise: for
+     * inputs {@code delta, (p0x, p0y), (p1x, p1y), (p2x, p2y), (p3x, p3y)}, the output is
+     * {@code (catmullRom(delta, p0x, p1x, p2x, p3x), catmullRom(delta, p0y, p1y, p2y, p3y))}.
+     * 
+     * @see <a href="https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Catmull%E2%80%93Rom_spline">Cubic Hermite spline (Catmull\u2013Rom spline)</a>
+     * 
+     * @param delta the progress along the interpolation
+     * @param p0 the previous data point to assist in curve-smoothing
+     * @param p1 the output if {@code delta} is 0
+     * @param p2 the output if {@code delta} is 1
+     * @param p3 the next data point to assist in curve-smoothing
+     */
+    public static float catmullRom(float delta, float p0, float p1, float p2, float p3) {
+        return 0.5f * (2.0f * p1 + (p2 - p0) * delta + (2.0f * p0 - 5.0f * p1 + 4.0f * p2 - p3) * delta * delta + (3.0f * p1 - p0 - 3.0f * p2 + p3) * delta * delta * delta);
+    }
+    
+    
     public static Vector3f multiplyPoint(Matrix4f matrix, Vector3d point) {
         Vector3f pointF = new Vector3f((float) point.x, (float) point.y, (float) point.z);
         Vector3f res = new Vector3f();

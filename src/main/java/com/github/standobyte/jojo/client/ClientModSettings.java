@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.HudNamesRender;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.PositionConfig;
+import com.github.standobyte.jojo.client.ui.screen.stand.ge.ChooseLifeformScreen;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -20,11 +21,13 @@ public class ClientModSettings {
     
     public static class Settings {
         public float standStatsTranslucency = 0.75F;
+        public ChooseLifeformScreen.ViewMode viewModeGE = null;
         
         public PositionConfig barsPosition = PositionConfig.TOP_LEFT;
         public PositionConfig hotbarsPosition = PositionConfig.TOP_LEFT;
         public HudNamesRender hudNamesRender = HudNamesRender.ALWAYS;
         public boolean hudHotbarsFold = false;
+        public boolean showLockedSlots = false;
         
         public boolean resolveShaders = true;
         public boolean menacingParticles = true;
@@ -38,6 +41,14 @@ public class ClientModSettings {
     }
     
     
+    
+    public static void edit(Consumer<Settings> edit) {
+        ClientModSettings instance = getInstance();
+        edit.accept(instance.settings);
+        instance.save();
+    }
+    
+    @Deprecated
     public void editSettings(Consumer<Settings> edit) {
         edit.accept(settings);
         save();

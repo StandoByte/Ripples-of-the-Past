@@ -1,0 +1,28 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " ii",
+    "rdg",
+    "iib"
+  ],
+  "key": {
+    "i": {
+      "tag": "forge:ingots/iron"
+    },
+    "b": {
+      "tag": "minecraft:buttons"
+    },
+    "g": {
+      "tag": "forge:glass_panes/colorless"
+    },
+    "d": {
+      "tag": "forge:dusts/glowstone"
+    },
+    "r": {
+      "tag": "forge:dusts/redstone"
+    }
+  },
+  "result": {
+    "item": "jojo:polaroid"
+  }
+}

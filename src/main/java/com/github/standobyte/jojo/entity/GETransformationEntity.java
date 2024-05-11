@@ -1,7 +1,10 @@
 package com.github.standobyte.jojo.entity;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -15,6 +18,7 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.util.mc.EntityOwnerResolver;
 import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 
 import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.block.Block;
@@ -29,7 +33,9 @@ import net.minecraft.entity.Pose;
 import net.minecraft.entity.item.BoatEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.item.TNTEntity;
+import net.minecraft.entity.passive.FoxEntity;
 import net.minecraft.entity.projectile.PotionEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -41,7 +47,9 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.state.DirectionProperty;
 import net.minecraft.tags.FluidTags;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -135,7 +143,12 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                 if (!(blockToPlace.getBlock() instanceof AbstractFireBlock)) {
                     level.levelEvent(2001, blockPos, Block.getId(blockToPlace));
                 }
-                Block.dropResources(blockToPlace, level, blockPos, null, owner.getEntity(level), ItemStack.EMPTY);
+                TileEntity tileEntity = null;
+                if (source.sourceTileEntityNbt != null) {
+                    tileEntity = TileEntity.loadStatic(blockToPlace, source.sourceTileEntityNbt);
+                }
+                Block.dropResources(blockToPlace, level, blockPos, tileEntity, owner.getEntity(level), ItemStack.EMPTY);
+                // FIXME items in chest-like tile entities are lost
                 
                 blockToPlace = null;
             }
@@ -169,6 +182,12 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                 }
                 else {
                     level.setBlock(blockPos, blockToPlace, 3);
+                    if (source.sourceTileEntityNbt != null) {
+                        TileEntity tileEntity = TileEntity.loadStatic(blockToPlace, source.sourceTileEntityNbt);
+                        if (tileEntity != null) {
+                            level.setBlockEntity(blockPos, tileEntity);
+                        }
+                    }
                 }
             }
         }
@@ -391,12 +410,39 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             }
             tf.source.copyFrom(source, world);
             
+            if (tf.source.sourceBlockState != null) {
+                final BlockState directionalBlock = tf.source.sourceBlockState;
+                Optional<BlockState> rotated = directionalBlock.getProperties().stream()
+                        .filter(property -> property instanceof DirectionProperty)
+                        .findFirst()
+                        .map(property -> (DirectionProperty) property)
+                        .flatMap(property -> {
+                            Vector3d lookVec = entity.getLookAngle();
+                            Collection<Direction> possibleDirs = property.getPossibleValues();
+                            return possibleDirs.stream()
+                                    .max(Comparator.comparingDouble(dir -> lookVec.dot(new Vector3d(dir.getStepX(), dir.getStepY(), dir.getStepZ()))))
+                                    .map(closestDir -> directionalBlock.setValue(property, closestDir));
+                        });
+                rotated.ifPresent(rotatedBlock -> tf.source.sourceBlockState = rotatedBlock);
+            }
+            
             copyStatus(entity, tf);
             
             Vector3d pos = entity.position();
             tf.moveTo(pos.x, pos.y, pos.z, entity.yRot, entity.xRot);
             entity.level.addFreshEntity(tf);
             
+            if (entity instanceof LivingEntity) {
+                LivingEntity living = (LivingEntity) entity;
+                CommonReflection.dropEquipment(living);
+                if (living instanceof FoxEntity) { // i'm pretty sure this is also supposed to be in dropEquipment, and not in dropAllDeathLoot
+                    ItemStack itemstack = living.getItemBySlot(EquipmentSlotType.MAINHAND);
+                    if (!itemstack.isEmpty()) {
+                        living.spawnAtLocation(itemstack);
+                        living.setItemSlot(EquipmentSlotType.MAINHAND, ItemStack.EMPTY);
+                    }
+                }
+            }
             entity.remove();
         }
     }
@@ -410,6 +456,9 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         }
         if (from.isVehicle()) {
             from.getPassengers().forEach(passenger -> passenger.startRiding(to));
+        }
+        if (from.hasCustomName() && !(to instanceof ItemEntity)) {
+            to.setCustomName(from.getCustomName());
         }
     }
     
@@ -478,6 +527,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         private CompoundNBT sourceEntityNbt = null;
         private BlockState sourceBlockState;
         private BlockPos sourceBlockPos;
+        private CompoundNBT sourceTileEntityNbt = null;
         
         
         
@@ -486,9 +536,12 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             return this;
         }
         
-        public GETransformationData withBlockSource(BlockState blockState, BlockPos blockPos) {
+        public GETransformationData withBlockSource(BlockState blockState, BlockPos blockPos, @Nullable TileEntity tileEntity) {
             this.sourceBlockState = blockState;
             this.sourceBlockPos = blockPos;
+            if (tileEntity != null) {
+                sourceTileEntityNbt = tileEntity.save(new CompoundNBT());
+            }
             return this;
         }
         
@@ -502,6 +555,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             this.sourceEntity = other.sourceEntity;
             this.sourceBlockState = other.sourceBlockState;
             this.sourceBlockPos = other.sourceBlockPos;
+            this.sourceTileEntityNbt = other.sourceTileEntityNbt;
         }
         
         
@@ -534,6 +588,9 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                         potionItem = MCUtil.getItemOnServer((PotionEntity) sourceEntity);
                     }
                     return potionItem.copy();
+                }
+                else if (sourceEntity.getType() == EntityType.ENDER_PEARL) {
+                    return new ItemStack(Items.ENDER_PEARL);
                 }
                 else if (sourceEntity.getType() == ModEntityTypes.ROAD_ROLLER.get()) {
                     return new ItemStack(ModItems.ROAD_ROLLER.get());
@@ -606,6 +663,9 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             if (sourceBlockPos != null) {
                 nbt.put("GESourcePos", NBTUtil.writeBlockPos(sourceBlockPos));
             }
+            if (sourceTileEntityNbt != null) {
+                nbt.put("GESourceTE", sourceTileEntityNbt);
+            }
             if (aggroTarget != null) {
                 nbt.putUUID("Owner", aggroTarget);
             }
@@ -620,6 +680,9 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             }
             if (nbt.contains("GESourcePos", MCUtil.getNbtId(CompoundNBT.class))) {
                 sourceBlockPos = NBTUtil.readBlockPos(nbt.getCompound("GESourcePos"));
+            }
+            if (nbt.contains("GESourceTE", MCUtil.getNbtId(CompoundNBT.class))) {
+                sourceTileEntityNbt = nbt.getCompound("GESourceTE");
             }
             if (nbt.hasUUID("Owner")) {
                 aggroTarget = nbt.getUUID("Owner");

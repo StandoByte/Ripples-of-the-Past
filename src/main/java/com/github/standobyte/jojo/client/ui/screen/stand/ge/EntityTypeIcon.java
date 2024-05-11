@@ -24,12 +24,16 @@ public class EntityTypeIcon {
     private static final ResourceLocation UNKNOWN = new ResourceLocation("textures/entity_icon/unknown.png");
 
     public static void renderIcon(EntityType<?> entityType, MatrixStack matrixStack, float x, float y) {
+        renderIcon(entityType, matrixStack, x, y, true);
+    }
+
+    public static void renderIcon(EntityType<?> entityType, MatrixStack matrixStack, float x, float y, boolean missingIconLetters) {
         ResourceLocation icon = getIcon(entityType);
         if (icon != UNKNOWN) {
             Minecraft.getInstance().getTextureManager().bind(icon);
             BlitFloat.blitFloat(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
         }
-        else {
+        else if (missingIconLetters) {
             String name = entityType.getDescription().getString();
             if (!name.isEmpty()) {
                 FontRenderer font = Minecraft.getInstance().font;

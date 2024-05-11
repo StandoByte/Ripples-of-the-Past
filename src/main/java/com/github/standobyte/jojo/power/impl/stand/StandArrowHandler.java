@@ -7,8 +7,10 @@ import com.github.standobyte.jojo.JojoModConfig.Common;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.enchantment.StandArrowXpReductionEnchantment;
 import com.github.standobyte.jojo.init.ModEnchantments;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.ArrowXpLevelsDataPacket;
+import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -18,7 +20,9 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.util.Constants;
 
 public class StandArrowHandler {
     private int xpLevelsTakenByArrow;
@@ -26,8 +30,13 @@ public class StandArrowHandler {
     private UUID standArrowShooterUUID;
     private ItemStack standArrowItem = ItemStack.EMPTY;
     private boolean healStandArrowDamage;
+    private StandType<?> standToGive;
     
     
+    
+    public void startArrowEffectSetStand(StandType<?> standType) {
+        this.standToGive = standType;
+    }
     
     public void tick(LivingEntity user) {
         if (healStandArrowDamage) {
@@ -58,6 +67,9 @@ public class StandArrowHandler {
         nbt.putInt("ArrowLevels", xpLevelsTakenByArrow);
         nbt.putInt("ArrowStands", standsGotFromArrow);
         nbt.put("ArrowItem", standArrowItem.save(new CompoundNBT()));
+        if (standToGive != null) {
+            nbt.putString("StandToGive", standToGive.getRegistryName().toString());
+        }
         return nbt;
     }
     
@@ -66,6 +78,10 @@ public class StandArrowHandler {
         standsGotFromArrow = nbt.getInt("ArrowStands");
         if (nbt.contains("ArrowItem", MCUtil.getNbtId(CompoundNBT.class))) {
             standArrowItem = ItemStack.of(nbt.getCompound("ArrowItem"));
+        }
+        if (nbt.contains("StandToGive", Constants.NBT.TAG_STRING)) {
+            ResourceLocation id = new ResourceLocation(nbt.getString("StandToGive"));
+            standToGive = JojoCustomRegistries.STANDS.getValue(id);
         }
     }
     
@@ -93,6 +109,14 @@ public class StandArrowHandler {
         levels = Math.max(levels - StandArrowXpReductionEnchantment.getXpRequirementReduction(
                 EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.STAND_ARROW_XP_REDUCTION.get(), arrowItem)), 0);
         return levels;
+    }
+    
+    public StandType<?> getStandToGive() {
+        return standToGive;
+    }
+    
+    public void clearStandToGive() {
+        standToGive = null;
     }
     
     public void onGettingStandFromArrow(LivingEntity user) {

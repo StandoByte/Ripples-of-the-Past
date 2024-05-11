@@ -35,6 +35,11 @@ public class HamonCutterEntity extends ModdedProjectileEntity {
         this.potionItem = potionItem == null ? ItemStack.EMPTY : potionItem;
         this.color = PotionUtils.getColor(potionItem);
     }
+    
+    public HamonCutterEntity withColor(int color) {
+        this.color = color;
+        return this;
+    }
 
     public HamonCutterEntity(EntityType<? extends HamonCutterEntity> type, World world) {
         super(type, world);
@@ -126,6 +131,7 @@ public class HamonCutterEntity extends ModdedProjectileEntity {
         if (!potionItem.isEmpty()) {
             nbt.put("Potion", potionItem.save(new CompoundNBT()));
         }
+        nbt.putInt("Color", color);
         nbt.putFloat("Points", hamonStatPoints);
     }
 
@@ -133,7 +139,7 @@ public class HamonCutterEntity extends ModdedProjectileEntity {
     public void readAdditionalSaveData(CompoundNBT nbt) {
         super.readAdditionalSaveData(nbt);
         potionItem = ItemStack.of(nbt.getCompound("Potion"));
-        color = PotionUtils.getColor(potionItem);
+        color = nbt.getInt("Color");
         hamonStatPoints = nbt.getFloat("Points");
     }
 

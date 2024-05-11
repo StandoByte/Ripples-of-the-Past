@@ -40,6 +40,7 @@ import net.minecraft.potion.Effect;
 import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.Explosion;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.gen.ChunkGenerator;
 import net.minecraft.world.gen.FlatGenerationSettings;
 import net.minecraft.world.gen.feature.StructureFeature;
@@ -237,6 +238,13 @@ public class CommonReflection {
     
     
     
+    private static final Method LIVING_ENTITY_DROP_EQUIPMENT = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "func_213337_cE");
+    public static void dropEquipment(LivingEntity entity) {
+        ReflectionUtil.invokeMethod(LIVING_ENTITY_DROP_EQUIPMENT, entity);
+    }
+    
+    
+    
     private static final Method ZOMBIE_VILLAGER_ENTITY_START_CONVERTING = ObfuscationReflectionHelper.findMethod(ZombieVillagerEntity.class, "func_191991_a", UUID.class, int.class);
     public static void startConverting(ZombieVillagerEntity entity, @Nullable UUID conversionStarter, int villagerConversionTime) {
         ReflectionUtil.invokeMethod(ZOMBIE_VILLAGER_ENTITY_START_CONVERTING, entity, 
@@ -252,5 +260,12 @@ public class CommonReflection {
             ENTITY_DATA_CUSTOM_NAME = ReflectionUtil.getFieldValue(ENTITY_DATA_CUSTOM_NAME_FIELD, null);
         }
         return ENTITY_DATA_CUSTOM_NAME;
+    }
+    
+    
+    
+    private static final Method GAME_RULES_BOOLEAN_VALUE_CREATE = ObfuscationReflectionHelper.findMethod(GameRules.BooleanValue.class, "func_223568_b", boolean.class);
+    public static GameRules.RuleType<GameRules.BooleanValue> createBooleanGameRule(boolean defaultValue) {
+        return ReflectionUtil.invokeMethod(GAME_RULES_BOOLEAN_VALUE_CREATE, null, defaultValue);
     }
 }

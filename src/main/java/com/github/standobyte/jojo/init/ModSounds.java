@@ -104,6 +104,8 @@ public class ModSounds {
     
     public static final RegistryObject<SoundEvent> GLIDER_FLIGHT = register("glider_flight");
     
+    public static final RegistryObject<SoundEvent> HAMON_DETECTOR = register("hamon_detector");
+    
     public static final RegistryObject<SoundEvent> BREATH_DEFAULT = SOUNDS.register("player_breath", 
             () -> new SoundEvent(new ResourceLocation("entity.player.breath")));
     
@@ -464,7 +466,7 @@ public class ModSounds {
 
     public static final RegistryObject<SoundEvent> GOLD_EXPERIENCE_MUDA_LONG = register("gold_experience_muda_long");
 
-    public static final RegistryObject<SoundEvent> GOLD_EXPERIENCE_MUDA_MUDA_MUDA = register("gold_experience_muda_muda_muda");
+    public static final RegistryObject<SoundEvent> GOLD_EXPERIENCE_MUDA_RUSH = register("gold_experience_muda_muda_muda");
 
     public static final RegistryObject<SoundEvent> GOLD_EXPERIENCE_WRY = register("gold_experience_wry");
 

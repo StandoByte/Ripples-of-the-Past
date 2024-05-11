@@ -6,8 +6,11 @@
   "mixins": [
     "LivingEntityMixin",
     "PlayerEntityMixin",
+    "ServerPlayerEntityMixin",
     "ServerChunkProviderMixin",
     "FireBlockMixin",
+    "InventoryHelperMixin",
+    "AbstractFurnaceTEMixin",
     "ForgeSimpleChannelMixin",
     "TheMostUnnecessaryMixin",
     "itemtracking.equip.MobEntityMixin",
@@ -22,6 +25,8 @@
     "client.ParticleManagerMixin",
     "client.TextureManagerMixin",
     "client.WorldRendererMixin",
-    "client.ClientPlayNetHandlerMixin"
+    "client.ClientPlayNetHandlerMixin",
+    "client.EntityClMixin",
+    "client.LivingEntityClMixin"
   ]
 }

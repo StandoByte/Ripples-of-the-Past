@@ -252,13 +252,29 @@ public class HamonStatsTabGui extends HamonTabGui {
         
         textY += 11;
         exercisesAvgY = textY;
+        
+        float breathingIncrease = screen.hamon.getBreathingIncrease(minecraft.player, false);
+        if (breathingIncrease != 0) {
+            DecimalFormat decimalFormat = new DecimalFormat("+#.##;-#");
+            IFormattableTextComponent breathingIncreaseLine = new StringTextComponent(decimalFormat.format(breathingIncrease));
+            if (breathingIncrease < 0) {
+                breathingIncreaseLine.withStyle(TextFormatting.RED);
+            }
+            else if (breathingIncrease > 0) {
+                breathingIncreaseLine.withStyle(TextFormatting.GREEN);
+            }
+            float middleX = textX + (float) (HamonScreen.WINDOW_WIDTH - HamonScreen.WINDOW_THIN_BORDER * 2 - minecraft.font.width(breathingIncreaseLine)) / 2;
+            minecraft.font.drawShadow(matrixStack, breathingIncreaseLine, middleX, (float) textY + 8, 0xFFFFFF);
+        }
+        
+        textY += 11;
         for (int i = 0; i < exercisesDescLines.size(); i++) {
             textY += minecraft.font.lineHeight;
             minecraft.font.draw(matrixStack, exercisesDescLines.get(i), (float) textX, (float) textY, 0xFFFFFF);
         }
         
         textY += 4;
-        if (JojoModConfig.getCommonConfigInstance(true).breathingTrainingDeterioration.get()) {
+        if (screen.hamon.breathingCanGoDown(minecraft.player)) {
             for (int i = 0; i < this.breathingDeteriorationLines.size(); i++) {
                 textY += minecraft.font.lineHeight;
                 minecraft.font.draw(matrixStack, breathingDeteriorationLines.get(i), (float) textX, (float) textY, 0xFFFFFF);
@@ -386,6 +402,11 @@ public class HamonStatsTabGui extends HamonTabGui {
             else if (breathingIncrease < 0) {
                 totalExercises2 = new TranslationTextComponent("hamon.exercise.all.day_end_decrease", 
                         new TranslationTextComponent("hamon.exercise.all.tooltip_red").withStyle(TextFormatting.RED), decimalFormat.format(-breathingIncrease));
+            }
+            else {
+                if (screen.hamon.getCanSkipTrainingDays() > 0 && screen.hamon.breathingCanGoDown(minecraft.player)) {
+                    totalExercises2 = new TranslationTextComponent("hamon.exercise.can_skip", screen.hamon.getCanSkipTrainingDays());
+                }
             }
             
             List<IReorderingProcessor> totalExercisesTooltip = new ArrayList<>(minecraft.font.split(totalExercises1, 120));

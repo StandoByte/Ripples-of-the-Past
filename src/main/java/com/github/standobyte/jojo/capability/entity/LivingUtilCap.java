@@ -6,20 +6,27 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.stand.GoldExperienceEntityLifeshot;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.AfterimageEntity;
 import com.github.standobyte.jojo.entity.HamonSendoOverdriveEntity;
+import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.ai.LookAtEntityWithoutMovingGoal;
 import com.github.standobyte.jojo.init.ModStatusEffects;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.TrCosmeticItemsPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.TrDyingBodyTimerPacket;
 import com.github.standobyte.jojo.potion.HamonSpreadEffect;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.CollideBlocks;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
+import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 
 import net.minecraft.entity.LivingEntity;
@@ -33,7 +40,10 @@ import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.passive.horse.AbstractHorseEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.DyeColor;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.BlockPos;
@@ -41,6 +51,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.Explosion;
 import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.common.util.Constants;
 
 public class LivingUtilCap {
     private final LivingEntity entity;
@@ -50,7 +61,8 @@ public class LivingUtilCap {
     public float lastStandDamage;
     public int standInvulnerableTime;
     
-    private int hurtThroughInvulTime;
+//    private int hurtThroughInvulTime;
+    private int hurtArmorTime;
     
     private boolean reduceKnockback;
     private float futureKnockbackFactor;
@@ -68,6 +80,10 @@ public class LivingUtilCap {
     private int noLerpTicks = 0;
     private int hurtTimeSaved;
     
+    public SoulEntity soulEntity;
+    private int deadBodyTimer = -1;
+    private int deadBodyDuration = 1;
+    
     private HamonSendoOverdriveEntity hurtFromSendoOverdrive;
     private int sendoOverdriveWaveTicks;
     
@@ -77,9 +93,13 @@ public class LivingUtilCap {
     private final List<AfterimageEntity> afterimages = new ArrayList<>();
     private boolean usedZoomPunch = false;
     private boolean gotScarf = false;
+
+    private List<EffectInstance> productPotions;
     
     private float lifeShotResist;
     private int lifeShotResistTicks;
+    
+    private DyeColor[] ladybugBroochesColored = new DyeColor[3];
     
     public LivingUtilCap(LivingEntity entity) {
         this.entity = entity;
@@ -90,6 +110,7 @@ public class LivingUtilCap {
         tickNoLerp();
         tickHurtAnim();
         tickDownHamonDamage();
+        tickDyingBody();
         
         if (!entity.level.isClientSide()) {
             tickSendoOverdriveHurtTimer();
@@ -97,6 +118,10 @@ public class LivingUtilCap {
             tickKnockbackBlockImpact();
             tickLifeShotResist();
             tickNoGravityModifier();
+        }
+        
+        if (soulEntity != null && !soulEntity.isAlive()) {
+            soulEntity = null;
         }
         
         Iterator<AfterimageEntity> it = afterimages.iterator();
@@ -133,7 +158,7 @@ public class LivingUtilCap {
         }
         
         if (standInvulnerableTime > 0) --standInvulnerableTime;
-        if (hurtThroughInvulTime > 0) --hurtThroughInvulTime;
+        if (hurtArmorTime > 0) --hurtArmorTime;
     }
     
     public void setFutureKnockbackFactor(float factor) {
@@ -163,10 +188,12 @@ public class LivingUtilCap {
     }
     
     public void onHurtThroughInvul(IModdedDamageSource dmgSource) {
-        if (hurtThroughInvulTime > 0) {
+        if (hurtArmorTime > 0) {
             dmgSource.setPreventDamagingArmor();
         }
-        hurtThroughInvulTime = 5;
+        else {
+            hurtArmorTime = 5;
+        }
     }
     
     
@@ -311,11 +338,6 @@ public class LivingUtilCap {
     
     
     
-    public void onTracking(ServerPlayerEntity tracking) {
-    }
-    
-    
-    
     public void setNoLerpTicks(int ticks) {
         this.noLerpTicks = ticks;
     }
@@ -340,6 +362,85 @@ public class LivingUtilCap {
             entity.hurtTime = hurtTimeSaved;
             hurtTimeSaved = 0;
         }
+    }
+    
+    
+    
+    public boolean isDyingBody() {
+        return deadBodyTimer >= 0;
+    }
+    
+    private void tickDyingBody() {
+        if (isDyingBody()) {
+            if (!entity.level.isClientSide()) {
+                if (entity instanceof PlayerEntity) {
+                    ((PlayerEntity) entity).getFoodData().setFoodLevel(17);
+                }
+                entity.setAirSupply(entity.getMaxAirSupply());
+            }
+            else if (entity == ClientUtil.getClientPlayer()) {
+                ClientReflection.setFlashOnSetHealth(ClientUtil.getClientPlayer(), false);
+            }
+            if (deadBodyTimer > 0) {
+                if (--deadBodyTimer == 0) {
+                    if (entity.tickCount % 200 == 0) {
+                        entity.setHealth(entity.getHealth() - entity.getMaxHealth() / 30f);
+                    }
+                }
+                updateDyingBodyDebuffs();
+            }
+        }
+    }
+    
+    public void setDyingBodyTimer(int timer) {
+        setDyingBodyTimer(timer, timer);
+    }
+    
+    public void setDyingBodyTimer(int timer, int fullDuration) {
+        this.deadBodyTimer = timer;
+        this.deadBodyDuration = Math.max(fullDuration, 1);
+        if (!entity.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(new TrDyingBodyTimerPacket(
+                    entity.getId(), deadBodyTimer, deadBodyDuration), entity);
+        }
+        updateDyingBodyDebuffs();
+    }
+    
+    public float getDyingBodyProgress() {
+        if (isDyingBody()) {
+            return 1 - (float) deadBodyTimer / deadBodyDuration;
+        }
+        else {
+            return 0;
+        }
+    }
+    
+    public int getDyingBodyTicksLeft() {
+        return deadBodyTimer;
+    }
+    
+    private static final AttributeModifier ATTACK_DAMAGE = new AttributeModifier(
+            UUID.fromString("4e3543ce-4c78-4caa-a04f-98931fd8beed"), "Attack damage debuff from dying body", -0.75, AttributeModifier.Operation.MULTIPLY_TOTAL);
+    private static final AttributeModifier ATTACK_SPEED = new AttributeModifier(
+            UUID.fromString("60959e38-fe5b-4bd1-8628-d3c06164ae11"), "Attack speed debuff from dying body", -0.5, AttributeModifier.Operation.MULTIPLY_TOTAL);
+    private static final AttributeModifier MOVEMENT_SPEED = new AttributeModifier(
+            UUID.fromString("51dc6321-4139-43b2-a0e8-4cb26023d65e"), "Movement speed debuff from dying body", -0.5, AttributeModifier.Operation.MULTIPLY_TOTAL);
+    private static final AttributeModifier SWIMMING_SPEED = new AttributeModifier(
+            UUID.fromString("0acee848-dcfb-4019-9ae4-c1a53e4f0dcc"), "Swimming speed debuff from dying body", -0.5, AttributeModifier.Operation.MULTIPLY_TOTAL);
+    
+    private void updateDyingBodyDebuffs() {
+        float progress = getDyingBodyProgress();
+        float debuffLvl;
+        if (progress > 0.8F) {
+            debuffLvl = 1 - 5 * (1 - progress);
+        }
+        else {
+            debuffLvl = 0;
+        }
+        MCUtil.multipliedAttrModifier(entity, Attributes.ATTACK_DAMAGE, ATTACK_DAMAGE, debuffLvl);
+        MCUtil.multipliedAttrModifier(entity, Attributes.ATTACK_SPEED, ATTACK_SPEED, debuffLvl);
+        MCUtil.multipliedAttrModifier(entity, Attributes.MOVEMENT_SPEED, MOVEMENT_SPEED, debuffLvl);
+        MCUtil.multipliedAttrModifier(entity, ForgeMod.SWIM_SPEED.get(), SWIMMING_SPEED, debuffLvl);
     }
     
     
@@ -375,7 +476,7 @@ public class LivingUtilCap {
         return canGetScarf;
     }
     
-    
+  
     
     public static HypnosisTargetCheck canBeHypnotized(LivingEntity entity, LivingEntity hypnotizer) {
         if (hypnotizer instanceof PlayerEntity) {
@@ -471,6 +572,105 @@ public class LivingUtilCap {
     
     
     
+    public void setProductEffects(List<EffectInstance> effects) {
+        this.productPotions = effects.stream().map(EffectInstance::new) // makes deep copies of effect instances
+                .collect(Collectors.toList());
+    }
+    
+    @Nullable
+    public List<EffectInstance> getProductEffects() {
+        return productPotions;
+    }
+    
+    
+    
+    public boolean addLadybugBrooch(DyeColor color) {
+        for (int i = 0; i < ladybugBroochesColored.length; i++) {
+            if (ladybugBroochesColored[i] == null) {
+                setBrooch(i, color);
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    public boolean canConsumeBrooch() {
+        for (int i = 0; i < ladybugBroochesColored.length; i++) {
+            if (ladybugBroochesColored[i] != null) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    public boolean consumeBrooch() {
+        for (int i = ladybugBroochesColored.length - 1; i >= 0; i--) {
+            if (ladybugBroochesColored[i] != null) {
+                setBrooch(i, null);
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    private void setBrooch(int index, @Nullable DyeColor color) {
+        if (!entity.level.isClientSide()) {
+            ladybugBroochesColored[index] = color;
+            PacketManager.sendToClientsTrackingAndSelf(TrCosmeticItemsPacket.ladybugBrooch(entity.getId(), ladybugBroochesColored), entity);
+        }
+    }
+    
+    public void clSetBrooches(DyeColor[] colors) {
+        for (int i = 0; i < colors.length && i < ladybugBroochesColored.length; i++) {
+            ladybugBroochesColored[i] = colors[i];
+        }
+    }
+    
+    @Nullable
+    public DyeColor getBroochWorn(int index) {
+        return ladybugBroochesColored[index];
+    }
+    
+    
+    
+    public void onTracking(ServerPlayerEntity tracking) {
+        if (deadBodyTimer >= 0) {
+            PacketManager.sendToClient(new TrDyingBodyTimerPacket(
+                    entity.getId(), deadBodyTimer, deadBodyDuration), tracking);
+        }
+        if (canConsumeBrooch()) {
+            PacketManager.sendToClient(TrCosmeticItemsPacket.ladybugBrooch(entity.getId(), 
+                    ladybugBroochesColored), tracking);
+        }
+    }
+    
+    public void syncWithClient(ServerPlayerEntity entityAsPlayer) {
+        if (deadBodyTimer >= 0) {
+            PacketManager.sendToClient(new TrDyingBodyTimerPacket(
+                    entity.getId(), deadBodyTimer, deadBodyDuration), entityAsPlayer);
+            updateDyingBodyDebuffs();
+        }
+        if (entity instanceof ServerPlayerEntity) {
+            if (canConsumeBrooch()) {
+                PacketManager.sendToClient(TrCosmeticItemsPacket.ladybugBrooch(entity.getId(), 
+                        ladybugBroochesColored), (ServerPlayerEntity) entity);
+            }
+        }
+    }
+    
+    public void onClone(LivingUtilCap old, boolean wasDeath) {
+        hasUsedTimeStopToday = old.hasUsedTimeStopToday;
+        gotScarf = old.gotScarf;
+        if (!wasDeath) {
+            deadBodyTimer = old.deadBodyTimer;
+            lifeShotResist = old.lifeShotResist;
+            lifeShotResistTicks = old.lifeShotResistTicks;
+        }
+    }
+    
     public CompoundNBT toNBT() {
         CompoundNBT nbt = new CompoundNBT();
         nbt.putFloat("HamonSpread", receivedHamonDamage);
@@ -481,8 +681,19 @@ public class LivingUtilCap {
         }
         nbt.putBoolean("GotScarf", gotScarf);
         
+        if (productPotions != null && !productPotions.isEmpty()) {
+            ListNBT effectsNbt = new ListNBT();
+            for (EffectInstance effect : productPotions) {
+                effectsNbt.add(effect.save(new CompoundNBT()));
+            }
+            nbt.put("ProductPotion", effectsNbt);
+        }
+        
         nbt.putInt("LifeShotTicks", lifeShotResistTicks);
         nbt.putFloat("LifeShotResist", lifeShotResist);
+        nbt.putInt("DeadBody", deadBodyTimer);
+        nbt.putInt("DeadBodyDuration", deadBodyDuration);
+        MCUtil.nbtPutEnumArray(nbt, "Brooches", ladybugBroochesColored);
         return nbt;
     }
     
@@ -495,7 +706,24 @@ public class LivingUtilCap {
         }
         gotScarf = nbt.getBoolean("GotScarf");
         
+        if (nbt.contains("ProductPotion", Constants.NBT.TAG_LIST)) {
+            ListNBT effectsNbt = nbt.getList("ProductPotion", Constants.NBT.TAG_COMPOUND);
+            if (!effectsNbt.isEmpty()) {
+                this.productPotions = new ArrayList<>();
+                for (INBT element : effectsNbt) {
+                    EffectInstance effect = EffectInstance.load((CompoundNBT) element);
+                    if (effect != null) {
+                        this.productPotions.add(effect);
+                    }
+                }
+            }
+        }
+        
         lifeShotResistTicks = nbt.getInt("LifeShotTicks");
         lifeShotResist = nbt.getInt("LifeShotResist");
+        deadBodyTimer = nbt.contains("DeadBody") ? nbt.getInt("DeadBody") : -1;
+        deadBodyDuration = Math.max(nbt.getInt("DeadBodyDuration"), 1);
+        ladybugBroochesColored = MCUtil.nbtGetEnumArray(nbt, "Brooches", DyeColor.class);
     }
+    
 }

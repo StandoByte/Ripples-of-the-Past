@@ -13,6 +13,7 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.client.particle.custom.StandCrumbleParticle;
 import com.github.standobyte.jojo.client.render.entity.pose.IModelPose;
@@ -529,10 +530,109 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
     @Override
     public void setupAnim(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
         super.setupAnim(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
+        
+//        motionTilt(entity, ticks);
+        
         rotateJoint(leftArmJoint, leftForeArm);
         rotateJoint(rightArmJoint, rightForeArm);
         rotateJoint(leftLegJoint, leftLowerLeg);
         rotateJoint(rightLegJoint, rightLowerLeg);
+    }
+
+    protected void motionTilt(T entity, float ticks) {
+        if (entity.getStandPose() != StandPose.SUMMON) {
+            Vector3d tiltVec;
+            if (MathHelper.floor(entity.lastMotionTiltTick) != MathHelper.floor(ticks)) {
+                Vector3d motion = entity.position().subtract(entity.xOld, entity.yOld, entity.zOld);
+                
+                tiltVec = motion.yRot(entity.yBodyRot * MathUtil.DEG_TO_RAD).scale(2);
+                tiltVec = new Vector3d(tiltVec.z, 0, tiltVec.x);
+                double motionSqr = tiltVec.lengthSqr();
+                if (motionSqr > Math.pow(Math.PI / 4, 2)) {
+                    tiltVec = tiltVec.normalize().scale(Math.PI / 4);
+                }
+                
+//                Vector3d tiltDiff = tiltVec.subtract(entity.prevTiltVec);
+//                if (tiltDiff.lengthSqr() > 1.0E-4) {
+//                    double maxDiff;
+//                    if (entity.motionDist >= entity.prevMotionDist) {
+//                        maxDiff = 0.1;
+//                    }
+//                    else {
+//                        maxDiff = 0.4;
+//                    }
+//                    if (tiltDiff.lengthSqr() > maxDiff * maxDiff) {
+//                        tiltDiff = tiltDiff.normalize().scale(maxDiff);
+//                    }
+//                    tiltVec = entity.prevTiltVec.add(tiltDiff);
+//                }
+                
+//                entity.prevMotionDist = entity.motionDist;
+//                entity.motionVec = motion;
+//                entity.motionDist = motion.length();
+                entity.prevTiltVec = entity.tiltVec;
+                entity.tiltVec = tiltVec;
+                entity.lastMotionTiltTick = ticks;
+            }
+            else {
+                tiltVec = entity.tiltVec;
+            }
+            
+            float partialTick = MathHelper.frac(ticks);
+            tiltVec = new Vector3d(
+                    MathHelper.lerp(partialTick, entity.prevTiltVec.x, entity.tiltVec.x),
+                    MathHelper.lerp(partialTick, entity.prevTiltVec.y, entity.tiltVec.y),
+                    MathHelper.lerp(partialTick, entity.prevTiltVec.z, entity.tiltVec.z));
+            
+            double tiltSqr = tiltVec.lengthSqr();
+            if (tiltSqr > 1.0E-4) {
+                double tilt = Math.sqrt(tiltSqr);
+                double d1 = MathHelper.clamp(1 - tilt / Math.PI * 4, 0, 1);
+                boolean idlePose = entity.getStandPose() == StandPose.IDLE;
+
+                body.xRot += tiltVec.x;
+                if (idlePose) {
+                    body.zRot += tiltVec.z;
+                    body.yRot *= d1;
+                }
+
+                double d = MathHelper.clamp(1 - 1.5 * tilt / Math.PI, 0, 1);
+                leftLowerLeg.xRot *= d;
+                rightLowerLeg.xRot *= d;
+                leftLowerLeg.yRot *= d;
+                rightLowerLeg.yRot *= d;
+                leftLowerLeg.zRot *= d;
+                rightLowerLeg.zRot *= d;
+                if (idlePose) {
+                    leftForeArm.xRot *= d;
+                    rightForeArm.xRot *= d;
+                    leftForeArm.yRot *= d;
+                    rightForeArm.yRot *= d;
+                    leftForeArm.zRot *= d;
+                    rightForeArm.zRot *= d;
+                }
+                
+                double d2 = MathHelper.clamp(1 - tilt / (2 * Math.PI), 0, 1);
+                leftLeg.xRot *= d2;
+                rightLeg.xRot *= d2;
+                leftLeg.yRot *= d2;
+                rightLeg.yRot *= d2;
+                leftLeg.zRot *= d2;
+                rightLeg.zRot *= d2;
+                if (idlePose) {
+                    leftArm.xRot *= d2;
+                    rightArm.xRot *= d2;
+                    leftArm.yRot *= d2;
+                    rightArm.yRot *= d2;
+                    leftArm.zRot *= d2;
+                    rightArm.zRot *= d2;
+                }
+                else {
+                    addSecondXRot(leftArm, (float) -tiltVec.x);
+                    addSecondXRot(rightArm, (float) -tiltVec.x);
+                }
+            }
+        }
     }
 
     protected void rotateJoint(ModelRenderer joint, ModelRenderer limbPart) {

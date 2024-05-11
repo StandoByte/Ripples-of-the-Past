@@ -161,7 +161,7 @@ public class DamageUtil {
                     srcIndirect == null ? new EntityDamageSource(HAMON.getMsgId() + ".entity", srcDirect).bypassArmor() : 
                     new IndirectEntityDamageSource(HAMON.getMsgId() + ".entity", srcDirect, srcIndirect).bypassArmor();
                     
-            boolean undeadTarget = JojoModUtil.isUndead(livingTarget);
+            boolean undeadTarget = JojoModUtil.isAffectedByHamon(livingTarget);
             if (!undeadTarget) {
                 amount *= 0.2F;
             }
@@ -181,6 +181,8 @@ public class DamageUtil {
                 amount *= hamonMultiplier;
             }
             amount *= JojoModConfig.getCommonConfigInstance(false).hamonDamageMultiplier.get().floatValue();
+            
+//            JojoMod.LOGGER.debug(amount);
             
             if (hurtThroughInvulTicks(target, dmgSource, amount)) {
                 HamonUtil.createHamonSparkParticlesEmitter(target, amount / (HamonData.MAX_HAMON_STRENGTH_MULTIPLIER * 5), attack.soundVolumeMultiplier, attack.hamonParticle);
@@ -363,7 +365,7 @@ public class DamageUtil {
     
     public static void suffocateTick(LivingEntity entity, float speed) {
         if (entity.canBreatheUnderwater() || entity instanceof PlayerEntity && JojoModUtil.isPlayerUndead((PlayerEntity) entity)
-                || entity instanceof IronGolemEntity) return;
+                || JojoModUtil.isDyingBody(entity) || entity instanceof IronGolemEntity) return;
         
         if (entity.getAirSupply() > 0) {
             Optional<HamonData> hamonOptional = INonStandPower.getNonStandPowerOptional(entity).resolve().flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get()));

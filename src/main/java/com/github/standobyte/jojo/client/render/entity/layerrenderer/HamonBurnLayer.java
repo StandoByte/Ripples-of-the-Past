@@ -108,7 +108,7 @@ public class HamonBurnLayer<T extends LivingEntity, M extends EntityModel<T>> ex
         });
     });
     
-    private static enum TextureSize {
+    public static enum TextureSize {
         _64x32(6, 5),
         _64x64(6, 6),
         _128x64(7, 6),
@@ -124,7 +124,7 @@ public class HamonBurnLayer<T extends LivingEntity, M extends EntityModel<T>> ex
             this.heightLog2 = heightLog2;
         }
         
-        private static TextureSize getClosestTexSize(Model model) {
+        public static TextureSize getClosestTexSize(Model model) {
             int widthLog = MathHelper.ceillog2(model.texWidth);
             int heightLog = MathHelper.ceillog2(model.texHeight);
             

@@ -10,6 +10,8 @@ import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.HudNamesRender;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.PositionConfig;
 import com.github.standobyte.jojo.client.ui.screen.widgets.ImageVanillaButton;
+import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.gui.DialogTexts;
@@ -20,6 +22,7 @@ import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.fml.ModList;
 
 public class ClientModSettingsScreen extends SettingsScreen {
     private final ClientModSettings settings;
@@ -70,9 +73,33 @@ public class ClientModSettingsScreen extends SettingsScreen {
                 new TranslationTextComponent("jojo.config.client.hudHotbarsFold.tooltip")
                 ) {
             @Override public boolean get() { return settingsValues.hudHotbarsFold; }
-            @Override public void set(boolean value) { settingsValues.hudHotbarsFold = value; }
+            @Override public void set(boolean value) { 
+                settingsValues.hudHotbarsFold = value;
+                if (minecraft.player != null) {
+                    for (PowerClassification power : PowerClassification.values()) {
+                        IPower.getPowerOptional(minecraft.player, power).ifPresent(IPower::clUpdateHud);
+                    }
+                }
+            }
         };
         addButton(hudHotbarsFold.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
+        
+        
+        BooleanSetting showLockedSlots = new BooleanSetting(settings, 
+                new TranslationTextComponent("jojo.config.client.showLockedSlots"), 
+                new TranslationTextComponent("jojo.config.client.showLockedSlots.tooltip")
+                ) {
+            @Override public boolean get() { return settingsValues.showLockedSlots; }
+            @Override public void set(boolean value) {
+                settingsValues.showLockedSlots = value;
+                if (minecraft.player != null) {
+                    for (PowerClassification power : PowerClassification.values()) {
+                        IPower.getPowerOptional(minecraft.player, power).ifPresent(IPower::clUpdateHud);
+                    }
+                }
+            }
+        };
+        addButton(showLockedSlots.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
         
         
         BooleanSetting characterVoiceLines = new BooleanSetting(settings, 
@@ -237,8 +264,8 @@ public class ClientModSettingsScreen extends SettingsScreen {
         final int maxY = minY + 72;
         
         final int minX1 = 0;
-        final int maxX1 = optionsScreen.width / 2 - 155 - 20 - 10;
-        final int minX2 = optionsScreen.width / 2 + 5 + 160;
+        final int maxX1 = optionsScreen.width / 2 - 155 - 20 - 5;
+        final int minX2 = optionsScreen.width / 2 + 160;
         final int maxX2 = optionsScreen.width - 20;
         
         final int minX3 = optionsScreen.width / 2 - 155;
@@ -248,14 +275,16 @@ public class ClientModSettingsScreen extends SettingsScreen {
         int[] buttonPos = null;
         
         // try placing the button to the right side
-        for (int x = minX2; x <= maxX2 && buttonPos == null; x += 30) {
-            for (int y = maxY; y >= minY && buttonPos == null; y -= 24) {
+        for (int x = minX2; x <= maxX2 && buttonPos == null; x += 25) {
+            int y = maxY;
+            if (ModList.get().isLoaded("essential")) y -= 24; // for fuck's sake
+            for (; y >= minY && buttonPos == null; y -= 24) {
                 buttonPos = noOverlapPos(otherModdedButtons, x, y);
             }
         }
         // ...or to the left side
         if (buttonPos == null) {
-            for (int x = maxX1; x >= minX1 && buttonPos == null; x -= 30) {
+            for (int x = maxX1; x >= minX1 && buttonPos == null; x -= 25) {
                 for (int y = maxY; y >= minY && buttonPos == null; y -= 24) {
                     buttonPos = noOverlapPos(otherModdedButtons, x, y);
                 }

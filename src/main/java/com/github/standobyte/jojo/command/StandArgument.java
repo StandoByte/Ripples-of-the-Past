@@ -21,6 +21,8 @@ import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 
+import net.minecraft.command.arguments.ArgumentSerializer;
+import net.minecraft.command.arguments.ArgumentTypes;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.ResourceLocationException;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -30,6 +32,10 @@ import net.minecraftforge.registries.IForgeRegistryEntry;
 public class StandArgument implements ArgumentType<StandType<?>> {
     private static final Collection<String> EXAMPLES = Arrays.asList("star_platinum", "jojo:hierophant_green");
     public static final DynamicCommandExceptionType STAND_UNKNOWN = new DynamicCommandExceptionType((key) -> new TranslationTextComponent("stand.unknown", key));
+    
+    public static void commonSetupRegister() {
+        ArgumentTypes.register("stand", StandArgument.class, new ArgumentSerializer<>(StandArgument::new));
+    }
 
     @Override
     public StandType<?> parse(StringReader reader) throws CommandSyntaxException {

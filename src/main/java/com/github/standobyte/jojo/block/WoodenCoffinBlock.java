@@ -263,6 +263,7 @@ public class WoodenCoffinBlock extends HorizontalBlock {
                 .map(power -> power.getType() == ModPowers.VAMPIRISM.get()).orElse(false);
     }
 
+    @SuppressWarnings("deprecation")
     @Override
     public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, IWorld world, BlockPos pos, BlockPos neighborPos) {
         if (direction == getNeighbourDirection(state.getValue(PART), state.getValue(FACING))) {

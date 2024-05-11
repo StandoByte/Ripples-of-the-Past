@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.action.stand;
 
+import com.github.standobyte.jojo.action.ActionConditionResult;
+import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
@@ -24,6 +26,24 @@ public class GoldExperienceEntityLifeshot extends StandEntityActionModifier {
     }
     
     @Override
+    public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, IStandPower power) {
+        Entity targetEntity = target.getEntity();
+        if (!(targetEntity instanceof LivingEntity)) {
+            return ActionConditionResult.NEGATIVE;
+        }
+        if (StandUtil.getStandUser((LivingEntity) targetEntity) != targetEntity) {
+            return conditionMessage("only_stand_user");
+        }
+        
+        return super.checkTarget(target, user, power);
+    }
+    
+    @Override
+    public TargetRequirement getTargetRequirement() {
+        return TargetRequirement.ENTITY;
+    }
+    
+    @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
             Entity targetEntity = task.getTarget().getEntity();
@@ -45,7 +65,7 @@ public class GoldExperienceEntityLifeshot extends StandEntityActionModifier {
     }
     
     public static final int MAX_DURATION = 100;
-    public static final int RESIST_TICKS = 400;
+    public static final int RESIST_TICKS = 1200;
     public static final float RESIST_TICK_DOWN = 0.125F;
     public static final int REDUCTION_SHORT_DELAY = 40;
     public static final int REDUCTION_LONG_DELAY = 20;

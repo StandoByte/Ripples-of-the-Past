@@ -138,11 +138,16 @@ public class StandEffectsTracker {
     }
     
     @SuppressWarnings("unchecked")
-    public <T extends StandEffectInstance> T getOrCreateEffect(StandEffectType<T> effectType, LivingEntity target) {
+    public <T extends StandEffectInstance> Optional<T> getEffectTargeting(StandEffectType<T> effectType, LivingEntity target) {
         Stream<StandEffectInstance> effects = getEffects().filter(effect -> 
                 effect.effectType == effectType && 
                 (target == null ? effect.getTargetUUID() == null : target.getUUID().equals(effect.getTargetUUID())));
         Optional<T> effect = effects.findFirst().map(e -> (T) e);
+        return effect;
+    }
+    
+    public <T extends StandEffectInstance> T getOrCreateEffect(StandEffectType<T> effectType, LivingEntity target) {
+        Optional<T> effect = getEffectTargeting(effectType, target);
         if (effect.isPresent()) {
             return effect.get();
         }

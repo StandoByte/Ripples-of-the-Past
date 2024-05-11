@@ -15,7 +15,7 @@ public class WorldRendererMixin {
     
     @ModifyVariable(method = "renderSnowAndRain", at = @At("HEAD"), argsOnly = true, ordinal = 0)
     private float jojoTsWeatherChangePartialTick(float partialTick) {
-        if (ClientTimeStopHandler.getInstance().isTimeStopped()) {
+        if (ClientTimeStopHandler.isTimeStoppedStatic()) {
             return 1.0F;
         }
         return partialTick;
@@ -23,7 +23,7 @@ public class WorldRendererMixin {
     
     @ModifyVariable(method = "renderClouds", at = @At("HEAD"), argsOnly = true, ordinal = 0)
     private float jojoTsCloudsChangePartialTick(float partialTick) {
-        if (ClientTimeStopHandler.getInstance().isTimeStopped()) {
+        if (ClientTimeStopHandler.isTimeStoppedStatic()) {
             return 1.0F;
         }
         return partialTick;
@@ -31,7 +31,7 @@ public class WorldRendererMixin {
 
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     public void jojoTsWorldRendererCancelTick(CallbackInfo ci) {
-        if (ClientTimeStopHandler.getInstance().isTimeStopped()) {
+        if (ClientTimeStopHandler.isTimeStoppedStatic()) {
             ci.cancel();
         }
     }

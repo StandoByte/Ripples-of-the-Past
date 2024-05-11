@@ -97,7 +97,7 @@ public abstract class TrackSource {
             
             @Override
             public TrackSource getMusic(ItemStack item) {
-                StandInstance stand = StandDiscItem.getStandFromStack(item, false);
+                StandInstance stand = StandDiscItem.getStandFromStack(item);
                 if (stand != null) {
                     return new TrackSourceStandDisc(stand.getType());
                 }

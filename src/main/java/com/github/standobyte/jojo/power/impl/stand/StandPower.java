@@ -9,18 +9,23 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
+import com.github.standobyte.jojo.capability.entity.EntityUtilCap;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer;
 import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer.BarType;
+import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.modcompat.OptionalDependencyHelper;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtStandEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SkippedStandProgressionPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.SoulSpawnPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandActionLearningPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandFullClearPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStaminaPacket;
@@ -33,6 +38,7 @@ import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.github.standobyte.jojo.util.mod.LegacyUtil;
 
 import net.minecraft.entity.LivingEntity;
@@ -46,6 +52,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.GameRules;
 
 public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> implements IStandPower {
     private Optional<StandInstance> standInstance = Optional.empty();
@@ -229,6 +236,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         }
         if (!user.level.isClientSide()) {
             standArrowHandler.tick(user);
+            tickSoulCheck();
         }
         else if (user == ClientUtil.getClientPlayer()) {
             if (getStamina() < getMaxStamina() * 0.5F && !StandUtil.standIgnoresStaminaDebuff(this)) {
@@ -326,6 +334,11 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public float getStaminaTickGain() {
         float staminaRegen = getType().getStaminaRegen(this);
+        if (user != null && user.getCapability(LivingUtilCapProvider.CAPABILITY).map(
+                entity -> entity.isDyingBody() && entity.getDyingBodyTicksLeft() == 0).orElse(false)) {
+            staminaRegen -= 3.5F;
+        }
+        
         if (staminaRegen > 0) {
             staminaRegen *= INonStandPower.getNonStandPowerOptional(getUser()).map(power -> {
                 if (power.hasPower()) {
@@ -445,7 +458,67 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         return resolveCounter.getPrevTickResolveValue();
     }
     
+    
+    public boolean willSoulSpawn;
+    private void tickSoulCheck() {
+        if (user != null && user.isAlive()) {
+            boolean soulCanSpawn = 
+                    usesResolve() && 
+                    getResolveLevel() > 0 &&
+                    JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).soulAscension.get() &&
+                    !(JojoModUtil.isUndead(user) || OptionalDependencyHelper.vampirism().isEntityVampire(user)) &&
+                    !(user instanceof PlayerEntity && user.level.getGameRules().getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN));
+            if (this.willSoulSpawn != soulCanSpawn) {
+                this.willSoulSpawn = soulCanSpawn;
+                serverPlayerUser.ifPresent(player -> PacketManager.sendToClient(SoulSpawnPacket.spawnFlag(soulCanSpawn), player));
+            }
+        }
+    }
+    
+    @Override
+    public boolean willSoulSpawn() {
+        return willSoulSpawn;
+    }
+    
+    @Override
+    public void clSetSoulSpawnFlag(boolean flag) {
+        this.willSoulSpawn = flag;
+    }
+    
+    @Override
+    public boolean spawnSoulOnDeath() {
+        tickSoulCheck();
+        if (willSoulSpawn) {
+            float resolveRatio = user.hasEffect(ModStatusEffects.RESOLVE.get()) ? 1 : getResolveRatio();
+            int ticks = (int) (60 * (getResolveLevel() + resolveRatio));
+            if (user.level.getLevelData().isHardcore()) {
+                ticks += ticks / 2;
+            }
+            int ticksClsr = ticks;
 
+            boolean resolveCanLvlUp = user.level.getLevelData().isHardcore()
+                    || !JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).keepStandOnDeath.get();
+
+            EntityUtilCap.queueOnTimeResume(user, () -> {
+                if (user instanceof ServerPlayerEntity) {
+                    ModCriteriaTriggers.SOUL_ASCENSION.get().trigger((ServerPlayerEntity) user, this, ticksClsr);
+                }
+                SoulEntity soulEntity = new SoulEntity(user.level, user, ticksClsr, resolveCanLvlUp);
+                LivingEntity killer = user.getKillCredit();
+                if (killer != null) {
+                    soulEntity.setNoResolveToEntity(StandUtil.getStandUser(killer));
+                }
+                user.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(data -> data.soulEntity = soulEntity);
+                user.level.addFreshEntity(soulEntity);
+            });
+            return true;
+        }
+        
+        serverPlayerUser.ifPresent(player -> PacketManager.sendToClient(SoulSpawnPacket.noSoulSpawned(), player));
+        return false;
+    }
+    
+    
     @Override
     public StandEffectsTracker getContinuousEffects() {
         return continuousEffects;
@@ -471,6 +544,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public void setProgressionSkipped() {
         this.skippedProgression = true;
+        clUpdateHud();
     }
     
     @Override
@@ -529,6 +603,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public void setLearningFromPacket(StandActionLearningPacket packet) {
         actionLearningProgressMap.setEntryDirectly(packet.entry);
+        clUpdateHud();
     }
     
     @Override
@@ -781,6 +856,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             continuousEffects.syncWithUserOnly(player);
             previousStands.syncWithUser(player);
             standArrowHandler.syncWithUser(player);
+            
+            tickSoulCheck();
+            PacketManager.sendToClient(SoulSpawnPacket.spawnFlag(willSoulSpawn), player);
         });
     }
     

@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "ingredients": [
+    {
+      "item": "minecraft:rabbit"
+    },
+    {
+      "item": "minecraft:bone"
+    },
+    {
+      "item": "minecraft:leather"
+    },
+    {
+      "item": "minecraft:glass_bottle"
+    }
+    ,
+    {
+      "item": "minecraft:water_bucket"
+    }
+  ],
+  "result": {
+    "item": "jojo:soap",
+    "count": 1
+  }
+}

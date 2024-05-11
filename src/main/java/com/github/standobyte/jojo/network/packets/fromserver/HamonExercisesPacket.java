@@ -21,7 +21,7 @@ public class HamonExercisesPacket {
 
     private final boolean sendBonus;
     private final float trainingBonus;
-    private final float prevDayExercises;
+    private final int canSkipTrainingDays;
     
     public static HamonExercisesPacket allData(HamonData hamon) {
         return new HamonExercisesPacket(
@@ -31,7 +31,7 @@ public class HamonExercisesPacket {
                 hamon.getExerciseTicks(Exercise.MEDITATION), 
                 true,
                 hamon.getTrainingBonus(false),
-                hamon.getPrevDayExercises());
+                hamon.getCanSkipTrainingDays());
     }
     
     public static HamonExercisesPacket exercisesOnly(HamonData hamon) {
@@ -44,7 +44,7 @@ public class HamonExercisesPacket {
     }
 
     private HamonExercisesPacket(int miningTicks, int runningTicks, int swimmingTicks, int meditationTicks, 
-            boolean sendBonus, float trainingBonus, float prevDayExercises) {
+            boolean sendBonus, float trainingBonus, int canSkipTrainingDays) {
         this.miningTicks = miningTicks;
         this.runningTicks = runningTicks;
         this.swimmingTicks = swimmingTicks;
@@ -52,7 +52,7 @@ public class HamonExercisesPacket {
         
         this.sendBonus = sendBonus;
         this.trainingBonus = trainingBonus;
-        this.prevDayExercises = prevDayExercises;
+        this.canSkipTrainingDays = canSkipTrainingDays;
     }
     
     
@@ -65,7 +65,7 @@ public class HamonExercisesPacket {
             buf.writeBoolean(msg.sendBonus);
             if (msg.sendBonus) {
                 buf.writeFloat(msg.trainingBonus);
-                buf.writeFloat(msg.prevDayExercises);
+                buf.writeVarInt(msg.canSkipTrainingDays);
             }
         }
     
@@ -75,14 +75,14 @@ public class HamonExercisesPacket {
             
             boolean readBonus = buf.readBoolean();
             float trainingBonus = readBonus ? buf.readFloat() : 0;
-            float prevDayExercises = readBonus ? buf.readFloat() : 0;
+            int canSkipTrainingDays = readBonus ? buf.readVarInt() : 0;
             
             return new HamonExercisesPacket(
                     exerciseTicks[0], 
                     exerciseTicks[1], 
                     exerciseTicks[2], 
                     exerciseTicks[3], 
-                    readBonus, trainingBonus, prevDayExercises);
+                    readBonus, trainingBonus, canSkipTrainingDays);
         }
         
         public void handle(HamonExercisesPacket msg, Supplier<NetworkEvent.Context> ctx) {
@@ -91,7 +91,7 @@ public class HamonExercisesPacket {
                     hamon.setExerciseTicks(msg.miningTicks, msg.runningTicks, msg.swimmingTicks, msg.meditationTicks, true);
                     if (msg.sendBonus) {
                         hamon.setTrainingBonus(msg.trainingBonus);
-                        hamon.setPrevDayExercises(msg.prevDayExercises);
+                        hamon.setCanSkipTrainingDays(msg.canSkipTrainingDays);
                     }
                 });
             });

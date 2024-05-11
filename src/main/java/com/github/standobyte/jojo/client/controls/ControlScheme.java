@@ -10,6 +10,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPowerType;
@@ -22,6 +23,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 
 public class ControlScheme {
+    public static final ControlScheme EMPTY = new ControlScheme();
+    
     public static final int ARBITRARY_MAX_HOTBAR_LENGTH = 19;
     
     @Nullable
@@ -37,6 +40,18 @@ public class ControlScheme {
             map.put(hotbar, new ActionsHotbar());
         }
     });
+    
+    private ControlScheme() {}
+    
+    private ControlScheme(IPowerType<?, ?> powerType) {
+        if (powerType != null) {
+            this.defaultState = powerType.clCreateDefaultLayout();
+        }
+    }
+    
+    private ControlScheme(DefaultControls defaults) {
+        this.defaultState = defaults;
+    }
     
     private boolean initialized = false;
     public boolean initLoadedFromConfig(IPower<?, ?> power) {
@@ -71,8 +86,9 @@ public class ControlScheme {
     <P extends IPower<P, T>, T extends IPowerType<P, T>> void sanitizeControls(P power, T powerType) {
         this.legalKeybinds.clear();
         for (ActionKeybindEntry keybind : serializedKeybinds) {
-           Action<?> action = keybind.getAction();
-           if (keybind.isValid() && action != null && powerType.isActionLegalInHud((Action<P>) action, power)) {
+           Action<P> action = (Action<P>) keybind.getAction();
+           if (keybind.isValid() && action != null && powerType.isActionLegalInHud(action, power)
+                   && (ClientModSettings.getSettingsReadOnly().showLockedSlots || action.isUnlocked(power))) {
                legalKeybinds.add(keybind);
            }
         }
@@ -84,8 +100,9 @@ public class ControlScheme {
             hotbar.legalSwitches.clear();
             
             for (ActionVisibilitySwitch declaredAction : hotbar.serializedSwitches) {
-                Action<?> action = declaredAction.getAction();
-                if (action != null && powerType.isActionLegalInHud((Action<P>) action, power)) {
+                Action<P> action = (Action<P>) declaredAction.getAction();
+                if (action != null && powerType.isActionLegalInHud((Action<P>) action, power)
+                        && (ClientModSettings.getSettingsReadOnly().showLockedSlots || action.isUnlocked(power))) {
                     hotbar.legalSwitches.add(declaredAction);
                 }
             }
@@ -124,8 +141,7 @@ public class ControlScheme {
             }
             this.serializedKeybinds.clear();
             for (DefaultControls.DefaultKey keyInfo : defaultState.keyBindings) {
-                ActionKeybindEntry keyBind = new ActionKeybindEntry(ActionKeybindEntry.PressActionType.CLICK, 
-                        keyInfo.action.getRegistryName(), keyInfo.keyDesc);
+                ActionKeybindEntry keyBind = new ActionKeybindEntry(keyInfo.action.getRegistryName(), keyInfo.keyDesc);
                 serializedKeybinds.add(keyBind);
                 keyBind.init();
             }
@@ -135,7 +151,7 @@ public class ControlScheme {
     }
     
     public static ControlScheme createNewFromDefault(DefaultControls defaultControls) {
-        ControlScheme obj = new ControlScheme();
+        ControlScheme obj = new ControlScheme(defaultControls);
         
         for (Hotbar hotbarType : Hotbar.values()) {
             ActionsHotbar hotbar = obj.hotbars.get(hotbarType);
@@ -145,8 +161,7 @@ public class ControlScheme {
         }
         
         for (DefaultControls.DefaultKey keyBinding : defaultControls.keyBindings) {
-            obj.serializedKeybinds.add(new ActionKeybindEntry(ActionKeybindEntry.PressActionType.CLICK, 
-                            keyBinding.action.getRegistryName(), keyBinding.keyDesc));
+            obj.serializedKeybinds.add(new ActionKeybindEntry(keyBinding.action.getRegistryName(), keyBinding.keyDesc));
         }
         
         return obj;
@@ -154,7 +169,7 @@ public class ControlScheme {
     
     public static class DefaultControls {
         final Map<Hotbar, Action<?>[]> hotbars = new EnumMap<>(Hotbar.class);
-        final DefaultKey[] keyBindings;
+        final List<DefaultKey> keyBindings = new ArrayList<>();
         
         public DefaultControls(
                 Action<?>[] leftClickActions, 
@@ -162,7 +177,11 @@ public class ControlScheme {
                 DefaultKey... keyBindings) {
             this.hotbars.put(Hotbar.LEFT_CLICK, leftClickActions);
             this.hotbars.put(Hotbar.RIGHT_CLICK, rightClickActions);
-            this.keyBindings = keyBindings;
+            Collections.addAll(this.keyBindings, keyBindings);
+        }
+        
+        public void addKey(DefaultKey key) {
+            this.keyBindings.add(key);
         }
         
         public static class DefaultKey {
@@ -190,19 +209,16 @@ public class ControlScheme {
         return keybindsView;
     }
     
-    public ActionKeybindEntry addBlankKeybindEntry(ActionKeybindEntry.PressActionType pressType) {
-        return addKeybindEntry(new ActionKeybindEntry(pressType, 
-                new ResourceLocation("blank"), InputMappings.Type.KEYSYM, -1));
+    public ActionKeybindEntry addBlankKeybindEntry() {
+        return addKeybindEntry(new ActionKeybindEntry(new ResourceLocation("blank"), InputMappings.Type.KEYSYM, -1));
     }
     
-    public ActionKeybindEntry addKeybindEntry(ActionKeybindEntry.PressActionType pressType, 
-            Action<?> action, int key) {
-        return addKeybindEntry(pressType, action, InputMappings.Type.KEYSYM, key);
+    public ActionKeybindEntry addKeybindEntry(Action<?> action, int key) {
+        return addKeybindEntry(action, InputMappings.Type.KEYSYM, key);
     }
     
-    public ActionKeybindEntry addKeybindEntry(ActionKeybindEntry.PressActionType pressType, 
-            Action<?> action, InputMappings.Type inputType, int key) {
-        return addKeybindEntry(new ActionKeybindEntry(pressType, action, inputType, key));
+    public ActionKeybindEntry addKeybindEntry(Action<?> action, InputMappings.Type inputType, int key) {
+        return addKeybindEntry(new ActionKeybindEntry(action, inputType, key));
     }
     
     private ActionKeybindEntry addKeybindEntry(ActionKeybindEntry keybind) {
@@ -237,8 +253,18 @@ public class ControlScheme {
     
     
     static ControlScheme fromJson(JsonElement json, @Nullable ResourceLocation powerTypeId) {
+        ControlScheme obj;
+        if (powerTypeId != null) {
+            Optional<IPowerType<?, ?>> powerType = Optional.ofNullable(JojoCustomRegistries.NON_STAND_POWERS.fromId(powerTypeId));
+            // Optional#or was only added in Java 9
+            if (!powerType.isPresent()) powerType = Optional.ofNullable(JojoCustomRegistries.STANDS.fromId(powerTypeId));
+            obj = new ControlScheme(powerType.orElse(null));
+        }
+        else {
+            obj = new ControlScheme();
+        }
+        
         JsonObject jsonObj = json.getAsJsonObject();
-        ControlScheme obj = new ControlScheme();
 
         JsonArray keybindsJson = jsonObj.get("customKeybinds").getAsJsonArray();
         for (JsonElement keybindJson : keybindsJson) {
@@ -252,16 +278,6 @@ public class ControlScheme {
             obj.hotbars.get(hotbar).fromJson(hotbarJson);
         }
         
-        if (powerTypeId != null) {
-            Optional<IPowerType<?, ?>> powerType = Optional.ofNullable(JojoCustomRegistries.NON_STAND_POWERS.fromId(powerTypeId));
-            // Optional#or was only added in Java 9
-            if (!powerType.isPresent()) powerType = Optional.ofNullable(JojoCustomRegistries.STANDS.fromId(powerTypeId));
-            powerType.ifPresent(type -> {
-                ControlScheme.DefaultControls defaultState = type.clCreateDefaultLayout();
-                obj.defaultState = defaultState;
-            });
-        }
-
         return obj;
     }
 

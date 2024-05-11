@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.command;
 
+import java.text.DecimalFormat;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.function.BinaryOperator;
@@ -29,31 +30,40 @@ public class HamonStatCommand {
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
         dispatcher.register(Commands.literal("hamonstat").requires(ctx -> ctx.hasPermission(2))
                 .then(Commands.literal("set")
-                
-                .then(Commands.literal("strength").then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("level", FloatArgumentType.floatArg(0, HamonData.MAX_STAT_LEVEL))
-                        .executes(ctx -> setHamonStat(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), FloatArgumentType.getFloat(ctx, "level"), HamonStat.STRENGTH, true))
-                        .then(Commands.argument("ignoreBreathing", BoolArgumentType.bool())
-                                .executes(ctx -> setHamonStat(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), FloatArgumentType.getFloat(ctx, "level"), HamonStat.STRENGTH, BoolArgumentType.getBool(ctx, "ignoreBreathing")))))))
-                .then(Commands.literal("control").then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("level", FloatArgumentType.floatArg(0, HamonData.MAX_STAT_LEVEL))
-                        .executes(ctx -> setHamonStat(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), FloatArgumentType.getFloat(ctx, "level"), HamonStat.CONTROL, true))
-                        .then(Commands.argument("ignoreBreathing", BoolArgumentType.bool())
-                                .executes(ctx -> setHamonStat(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), FloatArgumentType.getFloat(ctx, "level"), HamonStat.CONTROL, BoolArgumentType.getBool(ctx, "ignoreBreathing")))))))
-                .then(Commands.literal("breathing").then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("level", FloatArgumentType.floatArg(0, HamonData.MAX_BREATHING_LEVEL))
-                        .executes(ctx -> setBreathing(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), FloatArgumentType.getFloat(ctx, "level")))))))
-                
+
+                        .then(Commands.literal("strength").then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("level", FloatArgumentType.floatArg(0, HamonData.MAX_STAT_LEVEL))
+                                .executes(ctx -> setHamonStat(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), FloatArgumentType.getFloat(ctx, "level"), HamonStat.STRENGTH, true))
+                                .then(Commands.argument("ignoreBreathing", BoolArgumentType.bool())
+                                        .executes(ctx -> setHamonStat(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), FloatArgumentType.getFloat(ctx, "level"), HamonStat.STRENGTH, BoolArgumentType.getBool(ctx, "ignoreBreathing")))))))
+                        .then(Commands.literal("control").then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("level", FloatArgumentType.floatArg(0, HamonData.MAX_STAT_LEVEL))
+                                .executes(ctx -> setHamonStat(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), FloatArgumentType.getFloat(ctx, "level"), HamonStat.CONTROL, true))
+                                .then(Commands.argument("ignoreBreathing", BoolArgumentType.bool())
+                                        .executes(ctx -> setHamonStat(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), FloatArgumentType.getFloat(ctx, "level"), HamonStat.CONTROL, BoolArgumentType.getBool(ctx, "ignoreBreathing")))))))
+                        .then(Commands.literal("breathing").then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("level", FloatArgumentType.floatArg(0, HamonData.MAX_BREATHING_LEVEL))
+                                .executes(ctx -> setBreathing(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), FloatArgumentType.getFloat(ctx, "level")))))))
+
                 .then(Commands.literal("add")
-                
-                .then(Commands.literal("strength").then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("level", FloatArgumentType.floatArg(0, HamonData.MAX_STAT_LEVEL))
-                        .executes(ctx -> addHamonStat(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), FloatArgumentType.getFloat(ctx, "level"), HamonStat.STRENGTH, true))
-                        .then(Commands.argument("ignoreBreathing", BoolArgumentType.bool())
-                                .executes(ctx -> addHamonStat(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), FloatArgumentType.getFloat(ctx, "level"), HamonStat.STRENGTH, BoolArgumentType.getBool(ctx, "ignoreBreathing")))))))
-                .then(Commands.literal("control").then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("level", FloatArgumentType.floatArg(0, HamonData.MAX_STAT_LEVEL))
-                        .executes(ctx -> addHamonStat(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), FloatArgumentType.getFloat(ctx, "level"), HamonStat.CONTROL, true))
-                        .then(Commands.argument("ignoreBreathing", BoolArgumentType.bool())
-                                .executes(ctx -> addHamonStat(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), FloatArgumentType.getFloat(ctx, "level"), HamonStat.CONTROL, BoolArgumentType.getBool(ctx, "ignoreBreathing")))))))
-                .then(Commands.literal("breathing").then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("level", FloatArgumentType.floatArg(0, HamonData.MAX_BREATHING_LEVEL))
-                        .executes(ctx -> addBreathing(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), FloatArgumentType.getFloat(ctx, "level")))))))
-                );
+
+                        .then(Commands.literal("strength").then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("level", FloatArgumentType.floatArg(0, HamonData.MAX_STAT_LEVEL))
+                                .executes(ctx -> addHamonStat(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), FloatArgumentType.getFloat(ctx, "level"), HamonStat.STRENGTH, true))
+                                .then(Commands.argument("ignoreBreathing", BoolArgumentType.bool())
+                                        .executes(ctx -> addHamonStat(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), FloatArgumentType.getFloat(ctx, "level"), HamonStat.STRENGTH, BoolArgumentType.getBool(ctx, "ignoreBreathing")))))))
+                        .then(Commands.literal("control").then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("level", FloatArgumentType.floatArg(0, HamonData.MAX_STAT_LEVEL))
+                                .executes(ctx -> addHamonStat(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), FloatArgumentType.getFloat(ctx, "level"), HamonStat.CONTROL, true))
+                                .then(Commands.argument("ignoreBreathing", BoolArgumentType.bool())
+                                        .executes(ctx -> addHamonStat(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), FloatArgumentType.getFloat(ctx, "level"), HamonStat.CONTROL, BoolArgumentType.getBool(ctx, "ignoreBreathing")))))))
+                        .then(Commands.literal("breathing").then(Commands.argument("targets", EntityArgument.players()).then(Commands.argument("level", FloatArgumentType.floatArg(0, HamonData.MAX_BREATHING_LEVEL))
+                                .executes(ctx -> addBreathing(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), FloatArgumentType.getFloat(ctx, "level")))))))
+
+                .then(Commands.literal("query")
+
+                        .then(Commands.literal("strength").then(Commands.argument("target", EntityArgument.player())
+                                .executes(ctx -> getHamonStat(ctx.getSource(), EntityArgument.getPlayer(ctx, "target"), HamonStat.STRENGTH))))
+                        .then(Commands.literal("control").then(Commands.argument("target", EntityArgument.player())
+                                .executes(ctx -> getHamonStat(ctx.getSource(), EntityArgument.getPlayer(ctx, "target"), HamonStat.CONTROL))))
+                        .then(Commands.literal("breathing").then(Commands.argument("target", EntityArgument.player())
+                                .executes(ctx -> getBreathing(ctx.getSource(), EntityArgument.getPlayer(ctx, "target")))))
+                ));
         JojoCommandsCommand.addCommand("hamonstat");
     }
 
@@ -134,6 +144,34 @@ public class HamonStatCommand {
                 source.sendSuccess(new TranslationTextComponent("commands.hamon.breathing." + msg + "success.multiple", level, success), true);
             }
             return success;
+        }
+    }
+    
+    private static int getHamonStat(CommandSource source, ServerPlayerEntity target, HamonStat stat) throws CommandSyntaxException {
+        Optional<HamonData> playerHamon = INonStandPower.getNonStandPowerOptional(target).resolve().flatMap(
+                power -> power.getTypeSpecificData(ModPowers.HAMON.get()));
+        if (playerHamon.isPresent()) {
+            float level = playerHamon.get().getStatLevel(stat);
+            source.sendSuccess(new TranslationTextComponent(stat == HamonStat.STRENGTH ? "commands.hamon.strength.query.success" : "commands.hamon.control.query.success", 
+                    target.getDisplayName(), new DecimalFormat("#.##").format(level)), false);
+            return (int) level;
+        }
+        else {
+            throw SINGLE_FAILED_EXCEPTION.create(target);
+        }
+    }
+    
+    private static int getBreathing(CommandSource source, ServerPlayerEntity target) throws CommandSyntaxException {
+        Optional<HamonData> playerHamon = INonStandPower.getNonStandPowerOptional(target).resolve().flatMap(
+                power -> power.getTypeSpecificData(ModPowers.HAMON.get()));
+        if (playerHamon.isPresent()) {
+            float level = playerHamon.get().getBreathingLevel();
+            source.sendSuccess(new TranslationTextComponent("commands.hamon.breathing.query.success", 
+                    target.getDisplayName(), new DecimalFormat("#.##").format(level)), false);
+            return (int) level;
+        }
+        else {
+            throw SINGLE_FAILED_EXCEPTION.create(target);
         }
     }
 

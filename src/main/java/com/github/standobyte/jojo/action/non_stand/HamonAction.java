@@ -14,10 +14,10 @@ import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterHamonTechnique;
 
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -50,6 +50,9 @@ public abstract class HamonAction extends NonStandAction {
         }).orElse(ActionConditionResult.NEGATIVE);
         if (!hamonCheck.isPositive()) {
             return hamonCheck;
+        }
+        if (JojoModUtil.isDyingBody(user)) {
+            return conditionMessage("dying_hamon");
         }
         
         return super.checkConditions(user, power, target);
@@ -129,4 +132,5 @@ public abstract class HamonAction extends NonStandAction {
             return getThis();
         }
     }
+    
 }

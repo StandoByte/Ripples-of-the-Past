@@ -244,7 +244,13 @@ public class ForgeBusEventSubscriber {
         
         original.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(oldCap -> {
             player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(newCap -> {
-                newCap.saveOnDeath(oldCap);
+                newCap.onClone(oldCap, event.isWasDeath());
+            });
+        });
+        
+        original.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(oldCap -> {
+            player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(newCap -> {
+                newCap.onClone(oldCap, event.isWasDeath());
             });
         });
     }
@@ -260,7 +266,9 @@ public class ForgeBusEventSubscriber {
 
     @SubscribeEvent
     public static void onPlayerLoggedIn(PlayerLoggedInEvent event) {
-        JojoModConfig.Common.SyncedValues.syncWithClient((ServerPlayerEntity) event.getPlayer());
+        ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
+        SaveFileUtilCapProvider.getSaveFileCap(player).onPlayerLogIn(player);
+        JojoModConfig.Common.SyncedValues.syncWithClient(player);
         syncPowerData(event.getPlayer());
         IStandPower.getStandPowerOptional(event.getPlayer()).ifPresent(power -> {
             if (power.hasPower()) {
@@ -284,6 +292,9 @@ public class ForgeBusEventSubscriber {
         IStandPower.getPlayerStandPower(player).syncWithUserOnly();
         player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
             cap.syncWithClient();
+        });
+        player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+            cap.syncWithClient((ServerPlayerEntity) player);
         });
         PacketManager.sendToClient(new UpdateClientCapCachePacket(), (ServerPlayerEntity) player);
     }
