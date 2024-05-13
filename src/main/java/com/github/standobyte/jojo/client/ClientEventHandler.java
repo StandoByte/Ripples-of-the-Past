@@ -24,6 +24,7 @@ import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeC
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
+import com.github.standobyte.jojo.client.particle.custom.FirstPersonHamonAura;
 import com.github.standobyte.jojo.client.polaroid.PhotosCache;
 import com.github.standobyte.jojo.client.polaroid.PolaroidHelper;
 import com.github.standobyte.jojo.client.render.block.overlay.TranslucentBlockRenderHelper;
@@ -117,6 +118,7 @@ import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.InitGuiEvent;
+import net.minecraftforge.client.event.RenderArmEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
@@ -295,6 +297,8 @@ public class ClientEventHandler {
                         entity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
                         entity.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
                     });
+                    
+                    FirstPersonHamonAura.getInstance().tick();
                 }
                 
                 tickResolveEffect();
@@ -628,6 +632,13 @@ public class ClientEventHandler {
             offHandRendered = true;
             break;
         }
+    }
+    
+    @SubscribeEvent
+    public void onHandRenderSpecific(RenderArmEvent event) {
+        Minecraft mc = Minecraft.getInstance();
+        FirstPersonHamonAura.getInstance().renderParticles(event.getPoseStack(), event.getMultiBufferSource(), mc.gameRenderer.lightTexture(), 
+                mc.gameRenderer.getMainCamera(), ClientUtil.getPartialTick(), event.getArm());
     }
     
     

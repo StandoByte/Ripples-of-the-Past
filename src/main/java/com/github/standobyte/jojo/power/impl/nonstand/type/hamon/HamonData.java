@@ -1276,7 +1276,7 @@ public class HamonData extends TypeSpecificData {
         }
         if (user.level.isClientSide()) {
             float particlesPerTick = power.getEnergy() / power.getMaxEnergy() * getHamonDamageMultiplier();
-            boolean isUserTheCameraEntity = user == ClientUtil.getClientPlayer();
+            boolean isUserTheCameraEntity = user == ClientUtil.getCameraEntity();
             IParticleData particleType = PARTICLE_TYPE.get(auraColor).get();
             
             GeneralUtil.doFractionTimes(() -> {
