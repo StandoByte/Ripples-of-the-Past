@@ -208,7 +208,38 @@ public class ClientModSettingsScreen extends SettingsScreen {
         protected void addButtons() {
             int i = 0;
             
-            // TODO
+            BooleanSetting thirdPersonHamonAura = new BooleanSetting(settings, 
+                    new TranslationTextComponent("jojo.config.client.thirdPersonHamonAura"), 
+                    new TranslationTextComponent("jojo.config.client.thirdPersonHamonAura.tooltip")
+                    ) {
+                @Override public boolean get() { return settingsValues.thirdPersonHamonAura; }
+                @Override public void set(boolean value) { 
+                    settingsValues.thirdPersonHamonAura = value;
+                }
+            };
+            addButton(thirdPersonHamonAura.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
+            
+            BooleanSetting firstPersonHamonAura = new BooleanSetting(settings, 
+                    new TranslationTextComponent("jojo.config.client.firstPersonHamonAura"), 
+                    new TranslationTextComponent("jojo.config.client.firstPersonHamonAura.tooltip")
+                    ) {
+                @Override public boolean get() { return settingsValues.firstPersonHamonAura; }
+                @Override public void set(boolean value) { 
+                    settingsValues.firstPersonHamonAura = value;
+                }
+            };
+            addButton(firstPersonHamonAura.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
+            
+            BooleanSetting hamonAuraBlur = new BooleanSetting(settings, 
+                    new TranslationTextComponent("jojo.config.client.hamonAuraBlur"), 
+                    new TranslationTextComponent("jojo.config.client.hamonAuraBlur.tooltip")
+                    ) {
+                @Override public boolean get() { return settingsValues.hamonAuraBlur; }
+                @Override public void set(boolean value) { 
+                    settingsValues.hamonAuraBlur = value;
+                }
+            };
+            addButton(hamonAuraBlur.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
             
             addBackButton(DialogTexts.GUI_BACK, i);
         }

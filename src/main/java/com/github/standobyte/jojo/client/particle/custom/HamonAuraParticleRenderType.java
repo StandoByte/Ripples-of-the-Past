@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.client.particle.custom;
 
 import org.lwjgl.opengl.GL11;
 
+import com.github.standobyte.jojo.client.ClientModSettings;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.Minecraft;
@@ -31,7 +32,7 @@ public class HamonAuraParticleRenderType implements IParticleRenderType {
         RenderSystem.disableLighting();
 
         textureManager.bind(AtlasTexture.LOCATION_PARTICLES);
-        if (false) {
+        if (ClientModSettings.getSettingsReadOnly().hamonAuraBlur) {
             textureManager.getTexture(AtlasTexture.LOCATION_PARTICLES).setBlurMipmap(true, false);
         }
         bufferBuilder.begin(GL11.GL_QUADS, DefaultVertexFormats.PARTICLE);

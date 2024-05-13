@@ -1277,7 +1277,8 @@ public class HamonData extends TypeSpecificData {
         }
         if (user.level.isClientSide()) {
             float energyRatio;
-            if (power.getHeldAction() == ModHamonActions.HAMON_SUNLIGHT_YELLOW_OVERDRIVE.get()) {
+            if (power.getHeldAction() == ModHamonActions.HAMON_SUNLIGHT_YELLOW_OVERDRIVE.get()
+                    || power.getHeldAction() == ModHamonActions.JONATHAN_SCARLET_OVERDRIVE.get()) {
                 energyRatio = 1;
             }
             else {
@@ -1302,6 +1303,9 @@ public class HamonData extends TypeSpecificData {
     private HamonAuraColor getThisTickAuraColor(LivingEntity user) {
         if (power.getHeldAction() == ModHamonActions.HAMON_SUNLIGHT_YELLOW_OVERDRIVE.get()) {
             return HamonAuraColor.YELLOW;
+        }
+        if (power.getHeldAction() == ModHamonActions.JONATHAN_SCARLET_OVERDRIVE.get()) {
+            return HamonAuraColor.RED;
         }
         if (power.getEnergy() == 0) {
              lastUsedAction = null;

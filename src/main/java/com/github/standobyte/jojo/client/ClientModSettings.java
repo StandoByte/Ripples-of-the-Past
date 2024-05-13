@@ -36,6 +36,10 @@ public class ClientModSettings {
         public boolean toggleLmbHotbar = false;
         public boolean toggleRmbHotbar = false;
         public boolean toggleDisableHotbars = false;
+        
+        public boolean thirdPersonHamonAura = true;
+        public boolean firstPersonHamonAura = true;
+        public boolean hamonAuraBlur = false;
     }
     
     

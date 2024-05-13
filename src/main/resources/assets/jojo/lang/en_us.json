@@ -610,6 +610,12 @@
   "jojo.config.client.timeStopAnimation.tooltip": "Enables the visual effect at the beginning of time stop when its duration is 5 seconds or longer.",
   "jojo.config.client.characterVoiceLines": "Character voice lines",
   "jojo.config.client.characterVoiceLines.tooltip": "Whether or not voice lines of the JoJo characters whose powers the players use are played.",
+  "jojo.config.client.thirdPersonHamonAura": "Hamon aura in 3rd person",
+  "jojo.config.client.thirdPersonHamonAura.tooltip": "Render Hamon aura particles around players with Hamon energy",
+  "jojo.config.client.firstPersonHamonAura": "Hamon aura in 1st person",
+  "jojo.config.client.firstPersonHamonAura.tooltip": "Render Hamon aura particles around the player's hand",
+  "jojo.config.client.hamonAuraBlur": "Hamon aura blur",
+  "jojo.config.client.hamonAuraBlur.tooltip": "Blur Hamon aura particles",
   
 
   "stand.unknown": "Unknown Stand: %s",

@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.Queue;
 import java.util.Random;
 
+import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.google.common.collect.EvictingQueue;
 import com.google.common.collect.Queues;
@@ -97,6 +98,8 @@ public class FirstPersonHamonAura {
     @SuppressWarnings("deprecation")
     public void renderParticles(MatrixStack pMatrixStack, IRenderTypeBuffer pBuffer, 
             LightTexture pLightTexture, float pPartialTicks, HandSide handSide) {
+        if (!ClientModSettings.getSettingsReadOnly().firstPersonHamonAura) return;
+        
         Queue<FirstPersonPseudoParticle> particles;
         switch (handSide) {
         case LEFT:
