@@ -9,7 +9,6 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.HamonAuraParticle;
 import com.github.standobyte.jojo.client.particle.SendoHamonOverdriveParticle;
-import com.github.standobyte.jojo.client.particle.custom.FirstPersonHamonAura.FirstPersonPseudoParticle;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
@@ -26,6 +25,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.particles.ParticleType;
 import net.minecraft.util.Hand;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -92,20 +92,24 @@ public class CustomParticlesHelper {
     public static void summonHamonAuraParticlesFirstPerson(IParticleData type, LivingEntity user, float particlesPerTick) {
         IAnimatedSprite sprite = getSavedSpriteSet(type.getType());
         if (sprite != null) {
-            Minecraft mc = Minecraft.getInstance();
             Random random = user.getRandom();
             FirstPersonHamonAura particles = FirstPersonHamonAura.getInstance();
             
-            GeneralUtil.doFractionTimes(() -> {
-//                double x = random.nextDouble() * 0.25 - 0.5;   // -0.5 - -0.25
-//                double y = random.nextDouble() * 0.75 + 0.125; // 0.125 - 0.875
-//                double z = random.nextDouble() * 0.25 - 0.125; // -0.125 - 0.125
-                double x = random.nextDouble() * 0.5 - 0.625;
-                double y = random.nextDouble();
-                double z = random.nextDouble() * 0.5 - 0.25;
-                
-                particles.add(FirstPersonPseudoParticle.createParticle(sprite, x, y, z));
-            }, particlesPerTick);
+            for (HandSide handSide : HandSide.values()) {
+                GeneralUtil.doFractionTimes(() -> {
+//                    double x = random.nextDouble() * 0.25 - 0.5;   // -0.5 - -0.25
+//                    double y = random.nextDouble() * 0.75 + 0.125; // 0.125 - 0.875
+//                    double z = random.nextDouble() * 0.25 - 0.125; // -0.125 - 0.125
+                    double x = random.nextDouble() * 0.5 - 0.625;
+                    double y = random.nextDouble();
+                    double z = random.nextDouble() * 0.5 - 0.25;
+                    if (handSide == HandSide.LEFT) {
+                        x = -x;
+                    }
+                    
+                    particles.add(new FirstPersonHamonAura.FirstPersonPseudoParticle(x, y, z, sprite, handSide));
+                }, particlesPerTick);
+            }
         }
     }
     

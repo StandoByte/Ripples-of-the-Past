@@ -63,6 +63,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.Character
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.HamonTechniqueManager;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
 
@@ -1275,7 +1276,14 @@ public class HamonData extends TypeSpecificData {
             }
         }
         if (user.level.isClientSide()) {
-            float particlesPerTick = power.getEnergy() / power.getMaxEnergy() * getHamonDamageMultiplier();
+            float energyRatio;
+            if (power.getHeldAction() == ModHamonActions.HAMON_SUNLIGHT_YELLOW_OVERDRIVE.get()) {
+                energyRatio = 1;
+            }
+            else {
+                energyRatio = power.getEnergy() / power.getMaxEnergy();
+            }
+            float particlesPerTick = energyRatio * getHamonDamageMultiplier();
             boolean isUserTheCameraEntity = user == ClientUtil.getCameraEntity();
             IParticleData particleType = PARTICLE_TYPE.get(auraColor).get();
             
@@ -1286,12 +1294,15 @@ public class HamonData extends TypeSpecificData {
                         user.getZ() + (random.nextDouble() - 0.5) * (user.getBbWidth() + 0.5F));
             }, particlesPerTick);
             if (isUserTheCameraEntity) {
-                CustomParticlesHelper.summonHamonAuraParticlesFirstPerson(particleType, user, particlesPerTick);
+                CustomParticlesHelper.summonHamonAuraParticlesFirstPerson(particleType, user, particlesPerTick / 5);
             }
         }
     }
     
     private HamonAuraColor getThisTickAuraColor(LivingEntity user) {
+        if (power.getHeldAction() == ModHamonActions.HAMON_SUNLIGHT_YELLOW_OVERDRIVE.get()) {
+            return HamonAuraColor.YELLOW;
+        }
         if (power.getEnergy() == 0) {
              lastUsedAction = null;
         }
@@ -1311,9 +1322,9 @@ public class HamonData extends TypeSpecificData {
             }
         }
         
-       /*if (isSkillLearned(ModHamonSkills.METAL_SILVER_OVERDRIVE.get()) && HamonMetalSilverOverdrive.itemUsesMSO(user)) {
+        if (isSkillLearned(ModHamonSkills.METAL_SILVER_OVERDRIVE.get()) && MCUtil.isItemWeapon(user.getMainHandItem())) {
             return HamonAuraColor.SILVER;
-        }*/
+        }
         
         if (isSkillLearned(ModHamonSkills.TURQUOISE_BLUE_OVERDRIVE.get()) && user.isUnderWater()) {
             return HamonAuraColor.BLUE;

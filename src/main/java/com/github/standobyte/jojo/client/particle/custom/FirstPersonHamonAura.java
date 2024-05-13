@@ -4,6 +4,7 @@ import java.util.Iterator;
 import java.util.Queue;
 import java.util.Random;
 
+import com.github.standobyte.jojo.util.general.MathUtil;
 import com.google.common.collect.EvictingQueue;
 import com.google.common.collect.Queues;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -13,7 +14,6 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.IAnimatedSprite;
 import net.minecraft.client.particle.IParticleRenderType;
-import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.LightTexture;
@@ -23,15 +23,16 @@ import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.crash.ReportedException;
 import net.minecraft.util.HandSide;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Quaternion;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 
 public class FirstPersonHamonAura {
     private static final IParticleRenderType RENDER_TYPE = HamonAuraParticleRenderType.HAMON_AURA;
     private final Queue<FirstPersonPseudoParticle> particlesToAdd = Queues.newArrayDeque();
-    private final Queue<FirstPersonPseudoParticle> particles = EvictingQueue.create(16384);
+    private final Queue<FirstPersonPseudoParticle> particlesLeft = EvictingQueue.create(16384);
+    private final Queue<FirstPersonPseudoParticle> particlesRight = EvictingQueue.create(16384);
     
     private FirstPersonHamonAura() {}
     
@@ -51,6 +52,26 @@ public class FirstPersonHamonAura {
     }
 
     public void tick() {
+        tickParticles(particlesLeft);
+        tickParticles(particlesRight);
+        
+        FirstPersonPseudoParticle particle;
+        if (!particlesToAdd.isEmpty()) {
+            while((particle = particlesToAdd.poll()) != null) {
+                switch (particle.handSide) {
+                case LEFT:
+                    particlesLeft.add(particle);
+                    break;
+                case RIGHT:
+                    particlesRight.add(particle);
+                    break;
+                }
+            }
+        }
+
+    }
+    
+    private void tickParticles(Queue<FirstPersonPseudoParticle> particles) {
         if (!particles.isEmpty()) {
             Iterator<FirstPersonPseudoParticle> iterator = particles.iterator();
 
@@ -70,20 +91,23 @@ public class FirstPersonHamonAura {
                 }
             }
         }
-
-        FirstPersonPseudoParticle particle;
-        if (!particlesToAdd.isEmpty()) {
-            while((particle = particlesToAdd.poll()) != null) {
-                particles.add(particle);
-            }
-        }
-
     }
 
 
     @SuppressWarnings("deprecation")
-    public void renderParticles(MatrixStack pMatrixStack, IRenderTypeBuffer pBuffer, LightTexture pLightTexture, 
-            ActiveRenderInfo pActiveRenderInfo, float pPartialTicks, HandSide handSide) {
+    public void renderParticles(MatrixStack pMatrixStack, IRenderTypeBuffer pBuffer, 
+            LightTexture pLightTexture, float pPartialTicks, HandSide handSide) {
+        Queue<FirstPersonPseudoParticle> particles;
+        switch (handSide) {
+        case LEFT:
+            particles = particlesLeft;
+            break;
+        case RIGHT:
+            particles = particlesRight;
+            break;
+        default:
+            return;
+        }
         if (particles.isEmpty()) return;
         
         pLightTexture.turnOnLightLayer();
@@ -99,7 +123,7 @@ public class FirstPersonHamonAura {
         RenderSystem.pushMatrix();
         RenderSystem.multMatrix(pMatrixStack.last().pose());
 
-        enable.run(); //Forge: MC-168672 Make sure all render types have the correct GL state.
+        enable.run();
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuilder();
@@ -107,7 +131,7 @@ public class FirstPersonHamonAura {
         
         for (FirstPersonPseudoParticle particle : particles) {
             try {
-                particle.render(bufferbuilder, pActiveRenderInfo, pPartialTicks);
+                particle.render(bufferbuilder, pPartialTicks);
             } catch (Throwable throwable) {
                 CrashReport crashreport = CrashReport.forThrowable(throwable, "Rendering Particle");
                 CrashReportCategory crashreportcategory = crashreport.addCategory("Particle being rendered");
@@ -132,7 +156,6 @@ public class FirstPersonHamonAura {
     
     public static class FirstPersonPseudoParticle {
         private static final Random RANDOM = new Random();
-        private static final AxisAlignedBB INITIAL_AABB = new AxisAlignedBB(0.0D, 0.0D, 0.0D, 0.0D, 0.0D, 0.0D);
         private double xo;
         private double yo;
         private double zo;
@@ -142,10 +165,7 @@ public class FirstPersonHamonAura {
         private double xd;
         private double yd;
         private double zd;
-        private AxisAlignedBB bb = INITIAL_AABB;
         private boolean removed;
-        private float bbWidth = 0.6F;
-        private float bbHeight = 1.8F;
         private int age;
         private int lifetime;
         private float rCol = 1.0F;
@@ -157,18 +177,31 @@ public class FirstPersonHamonAura {
         private final IAnimatedSprite sprites;
         private final double fallSpeed;
         private final int startingSpriteRandom;
+        private final HandSide handSide;
         
+        private float yRot;
+        private float xRot;
+        private Quaternion renderRot = new Quaternion(Quaternion.ONE);
         
-        public static FirstPersonPseudoParticle createParticle(IAnimatedSprite sprites, double x, double y, double z) {
-            FirstPersonPseudoParticle particle = new FirstPersonPseudoParticle(x, y, z, 0, 0, 0, sprites);
-            return particle;
+        private static final float RIGHT_Y_ROT = 57.5f * MathUtil.DEG_TO_RAD;
+        private static final float RIGHT_X_ROT = -62.5f * MathUtil.DEG_TO_RAD;
+        private static final float LEFT_Y_ROT = -RIGHT_Y_ROT;
+        private static final float LEFT_X_ROT = RIGHT_X_ROT;
+        private static final Quaternion RIGHT_ROT;
+        private static final Quaternion LEFT_ROT;
+        static {
+            RIGHT_ROT = new Quaternion(Quaternion.ONE);
+            RIGHT_ROT.mul(Vector3f.YP.rotation(RIGHT_Y_ROT));
+            RIGHT_ROT.mul(Vector3f.XP.rotation(RIGHT_X_ROT));
+            LEFT_ROT = new Quaternion(Quaternion.ONE);
+            LEFT_ROT.mul(Vector3f.YP.rotation(LEFT_Y_ROT));
+            LEFT_ROT.mul(Vector3f.XP.rotation(LEFT_X_ROT));
         }
-
-
-
-        private FirstPersonPseudoParticle(double x, double y, double z, 
-                double xda, double yda, double zda, IAnimatedSprite sprites) {
-            this.setSize(0.2F, 0.2F);
+        
+        
+        
+        public FirstPersonPseudoParticle(double x, double y, double z, 
+                IAnimatedSprite sprites, HandSide handSide) {
             this.setPos(x, y, z);
             this.xo = x;
             this.yo = y;
@@ -184,14 +217,11 @@ public class FirstPersonHamonAura {
             this.yd = yd / f1 * f * 0.4 + 0.1;
             this.zd = zd / f1 * f * 0.4;
 
-            this.fallSpeed = 0.004;
+            this.fallSpeed = 0.0005;
             this.sprites = sprites;
-            this.xd *= 0.1;
+            this.xd *= 0.05;
             this.yd *= 0.1;
-            this.zd *= 0.1;
-            this.xd += xda;
-            this.yd += yda;
-            this.zd += zda;
+            this.zd *= 0.05;
             float f3 = 1.2F + 0.6F * RANDOM.nextFloat();
             this.quadSize *= 0.75F * f3;
             this.lifetime = (int)(8 / (RANDOM.nextDouble() * 0.8 + 0.2));
@@ -205,6 +235,20 @@ public class FirstPersonHamonAura {
             startingSpriteRandom = RANDOM.nextInt(lifetime);
             setSpriteFromAge(sprites);
             alpha = 0.25F;
+            
+            this.handSide = handSide;
+            switch (handSide) {
+            case LEFT:
+                yRot = LEFT_Y_ROT;
+                xRot = LEFT_X_ROT;
+                renderRot = LEFT_ROT;
+                break;
+            case RIGHT:
+                yRot = RIGHT_Y_ROT;
+                xRot = RIGHT_X_ROT;
+                renderRot = RIGHT_ROT;
+                break;
+            }
         }
 
         private int getLightColor(float partialTick) {
@@ -220,7 +264,7 @@ public class FirstPersonHamonAura {
             } else {
                 setSpriteFromAge(sprites);
                 yd += fallSpeed;
-//                move(xd, yd, zd);
+                move(xd, yd, zd);
                 if (y == yo) {
                     xd *= 1.1D;
                     zd *= 1.1D;
@@ -235,7 +279,7 @@ public class FirstPersonHamonAura {
 
         private static final float ALPHA_MIN = 0.05F;
         private static final float ALPHA_DIFF = 0.3F;
-        public void render(IVertexBuilder buffer, ActiveRenderInfo camera, float partialTick) {
+        public void render(IVertexBuilder buffer, float partialTick) {
             float ageF = ((float) age + partialTick) / (float) lifetime;
             float alphaFunc = ageF <= 0.5F ? ageF * 2 : (1 - ageF) * 2;
             this.alpha = ALPHA_MIN + alphaFunc * ALPHA_DIFF;
@@ -243,8 +287,7 @@ public class FirstPersonHamonAura {
             float f = (float)(MathHelper.lerp((double)partialTick, this.xo, this.x));
             float f1 = (float)(MathHelper.lerp((double)partialTick, this.yo, this.y));
             float f2 = (float)(MathHelper.lerp((double)partialTick, this.zo, this.z));
-            Quaternion quaternion = camera.rotation();
-            quaternion = Quaternion.ONE;
+            Quaternion quaternion = renderRot;
 
             Vector3f vector3f1 = new Vector3f(-1.0F, -1.0F, 0.0F);
             vector3f1.transform(quaternion);
@@ -294,36 +337,21 @@ public class FirstPersonHamonAura {
             return !this.removed;
         }
 
-        private void setSize(float pWidth, float pHeight) {
-            if (pWidth != this.bbWidth || pHeight != this.bbHeight) {
-                this.bbWidth = pWidth;
-                this.bbHeight = pHeight;
-                double x0 = (bb.minX + bb.maxX - pWidth) / 2.0;
-                double z0 = (bb.minZ + bb.maxZ - pWidth) / 2.0;
-                bb = new AxisAlignedBB(x0, bb.minY, z0, x0 + (double)this.bbWidth, bb.minY + (double)this.bbHeight, z0 + (double)this.bbWidth);
-            }
-        }
-
         private void setPos(double pX, double pY, double pZ) {
             this.x = pX;
             this.y = pY;
             this.z = pZ;
-            bb = new AxisAlignedBB(
-                    pX - bbWidth / 2, pY,            pZ - bbWidth / 2, 
-                    pX + bbWidth / 2, pY + bbHeight, pZ + bbWidth / 2);
         }
 
         private void move(double pX, double pY, double pZ) {
             if (pX != 0.0 || pY != 0.0 || pZ != 0.0) {
-                bb = bb.move(pX, pY, pZ);
-                setLocationFromBoundingbox();
+                Vector3d moveVec = new Vector3d(pX, pY, pZ);
+                moveVec = moveVec.xRot(-xRot);
+                moveVec = moveVec.yRot(yRot);
+                this.x += moveVec.x;
+                this.y += moveVec.y;
+                this.z += moveVec.z;
             }
-        }
-
-        private void setLocationFromBoundingbox() {
-            this.x = (bb.minX + bb.maxX) / 2.0;
-            this.y = bb.minY;
-            this.z = (bb.minZ + bb.maxZ) / 2.0;
         }
         
     }
