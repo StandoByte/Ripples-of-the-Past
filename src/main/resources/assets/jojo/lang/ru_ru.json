@@ -532,6 +532,10 @@
   "gamerule.jojoAbilitiesBreakBlocks.tooltip": "Whether or not Stands and abilities from the JoJo mod can break blocks.",
   
   "jojo.options.client.title": "Клиентские настройки Ripples of the Past",
+  "jojo.options.client.hud": "Интерфейс...",
+  "jojo.options.client.stand": "Стенд...",
+  "jojo.options.client.hamon": "Хамон...",
+  "jojo.options.client.misc": "Дополнительно...",
   "jojo.config.client.barsPosition": "Расположение полосок",
   "jojo.config.client.barsPosition.tooltip": "Расположение полосок энергии и решимости",
   "jojo.config.client.hotbarsPosition": "Расположение панелей способностей",

@@ -586,6 +586,10 @@
   "gamerule.jojoAbilitiesBreakBlocks.description": "Whether or not Stands and other abilities from the Ripples of the Past mod can break blocks.",
   
   "jojo.options.client.title": "Ripples of the Past client settings",
+  "jojo.options.client.hud": "HUD...",
+  "jojo.options.client.stand": "Stand...",
+  "jojo.options.client.hamon": "Hamon...",
+  "jojo.options.client.misc": "Misc...",
   "jojo.config.client.barsPosition": "Bars position",
   "jojo.config.client.barsPosition.tooltip": "Position of Energy, Stamina and Resolve bars in the HUD.",
   "jojo.config.client.hotbarsPosition": "Hotbars position",
