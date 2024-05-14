@@ -100,7 +100,7 @@ public class HudLayoutEditingScreen extends Screen {
     @Override
     protected void init() {
         // reset layout
-        addButton(new CustomButton(getWindowX() + WINDOW_WIDTH - 30, getWindowY() + WINDOW_HEIGHT - 30, 20, 20, 
+        addButton(new CustomButton(getWindowX() + WINDOW_WIDTH - 34, getWindowY() + WINDOW_HEIGHT - 34, 24, 24, 
                 button -> {
                     currentControlScheme.reset(selectedPower);
                     markLayoutEdited();
@@ -118,7 +118,7 @@ public class HudLayoutEditingScreen extends Screen {
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();
                 RenderSystem.enableDepthTest();
-                blit(matrixStack, x, y, 0, 196 + getYImage(isHovered()) * height, width, height);
+                blit(matrixStack, x, y, 0, 184 + getYImage(isHovered()) * height, width, height);
             }
         });
         
