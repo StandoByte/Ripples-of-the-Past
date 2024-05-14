@@ -517,15 +517,15 @@ public class ClientEventHandler {
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void disableFoodBar(RenderGameOverlayEvent.Pre event) {
         boolean isVampirismModVampire = OptionalDependencyHelper.vampirism().isEntityVampire(mc.player);
-        if (event.getType() == FOOD && !isVampirismModVampire
-                || event.getType() == AIR
-                || event.getType() == HEALTH) {
+        if (event.getType() == FOOD && !isVampirismModVampire || event.getType() == AIR) {
             INonStandPower.getNonStandPowerOptional(mc.player).ifPresent(power -> {
-                if (power.getType() == ModPowers.VAMPIRISM.get() && event.getType() != HEALTH
-                        || JojoModUtil.isDyingBody(mc.player)) {
+                if (power.getType() == ModPowers.VAMPIRISM.get()) {
                     event.setCanceled(true);
                 }
             });
+        }
+        else if (event.getType() == HEALTH && JojoModUtil.isDyingBody(mc.player)) {
+            event.setCanceled(true);
         }
         
         if (event.getType() == EXPERIENCE && mc.gameMode.hasExperience()
