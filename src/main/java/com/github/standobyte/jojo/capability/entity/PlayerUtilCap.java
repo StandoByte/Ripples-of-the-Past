@@ -26,6 +26,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrDoubleShiftPacket
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonLiquidWalkingPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrKnivesCountPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerContinuousActionPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerVisualDetailPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrWalkmanEarbudsPacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
@@ -67,6 +68,8 @@ public class PlayerUtilCap {
     
     private int knives;
     private int removeKnifeTime;
+    
+    private int ateInkPastaTicks = 0;
     
     private boolean hasClientInput;
     private int noClientInputTimer;
@@ -110,7 +113,8 @@ public class PlayerUtilCap {
             if (knivesThrewTicks > 0) knivesThrewTicks--;
             if (chatSpamTickCount > 0) chatSpamTickCount--;
         }
-        
+
+        if (ateInkPastaTicks > 0) --ateInkPastaTicks;
         tickContinuousAction();
         tickDoubleShift();
     }
@@ -148,6 +152,7 @@ public class PlayerUtilCap {
     public void onTracking(ServerPlayerEntity tracking) {
         PacketManager.sendToClient(new TrKnivesCountPacket(player.getId(), knives), tracking);
         PacketManager.sendToClient(new TrWalkmanEarbudsPacket(player.getId(), walkmanEarbuds), tracking);
+        PacketManager.sendToClient(new TrPlayerVisualDetailPacket(player.getId(), ateInkPastaTicks), tracking);
     }
     
     public void syncWithClient() {
@@ -155,6 +160,7 @@ public class PlayerUtilCap {
         PacketManager.sendToClient(new NotificationSyncPacket(notificationsSent), player);
         PacketManager.sendToClient(new TrKnivesCountPacket(player.getId(), knives), player);
         PacketManager.sendToClient(new TrWalkmanEarbudsPacket(player.getId(), walkmanEarbuds), player);
+        PacketManager.sendToClient(new TrPlayerVisualDetailPacket(player.getId(), ateInkPastaTicks), player);
     }
     
     
@@ -353,6 +359,23 @@ public class PlayerUtilCap {
             if (removeKnifeTime <= 0) {
                 setKnives(knives - 1);
             }
+        }
+    }
+    
+
+    
+    public int getInkPastaVisuals() {
+        return ateInkPastaTicks;
+    }
+    
+    public void setInkPastaVisuals() {
+        setInkPastaVisuals(600);
+    }
+    
+    public void setInkPastaVisuals(int ticks) {
+        this.ateInkPastaTicks = ticks;
+        if (!player.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(new TrPlayerVisualDetailPacket(player.getId(), ateInkPastaTicks), player);
         }
     }
     

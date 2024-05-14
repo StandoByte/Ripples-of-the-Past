@@ -124,7 +124,7 @@ public class MRDetectorEntity extends Entity implements IEntityAdditionalSpawnDa
 
     @Override
     public boolean isInvisibleTo(PlayerEntity player) {
-        return !player.isSpectator() && (!StandUtil.playerCanSeeStands(player) || super.isInvisible());
+        return !StandUtil.clStandEntityVisibleTo(player) || !player.isSpectator() && super.isInvisible();
     }
 
     @Override

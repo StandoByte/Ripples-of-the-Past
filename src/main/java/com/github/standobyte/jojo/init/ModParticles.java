@@ -27,6 +27,8 @@ public class ModParticles {
     public static final RegistryObject<BasicParticleType> HAMON_AURA_GREEN = PARTICLES.register("hamon_aura_green", () -> new BasicParticleType(false));
     public static final RegistryObject<BasicParticleType> HAMON_AURA_RAINBOW = PARTICLES.register("hamon_aura_rainbow", () -> new BasicParticleType(false));
     
+    public static final RegistryObject<BasicParticleType> BOILING_BLOOD_POP = PARTICLES.register("boiling_blood", () -> new BasicParticleType(false));
+
     public static final RegistryObject<BasicParticleType> METEORITE_VIRUS = PARTICLES.register("meteorite_virus", () -> new BasicParticleType(false));
     
     public static final RegistryObject<BasicParticleType> MENACING = PARTICLES.register("menacing", () -> new BasicParticleType(false));

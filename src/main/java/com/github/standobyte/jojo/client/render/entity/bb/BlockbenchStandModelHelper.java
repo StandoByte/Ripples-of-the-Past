@@ -14,11 +14,12 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.reflect.FieldUtils;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.client.render.entity.model.animnew.INamedModelParts;
 import com.github.standobyte.jojo.client.render.entity.pose.XRotationModelRenderer;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 
 import it.unimi.dsi.fastutil.objects.ObjectList;
-import net.minecraft.client.renderer.entity.model.EntityModel;
+import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
 
 public class BlockbenchStandModelHelper {
@@ -34,8 +35,7 @@ public class BlockbenchStandModelHelper {
      * CrazyDiamondModel2 can be used interchangeably with CrazyDiamondModel in CrazyDiamondRenderer.
      *
      */
-    public static void fillFromBlockbenchExport(
-            EntityModel<?> bbSourceModel, EntityModel<?> inModModel) {
+    public static void fillFromBlockbenchExport(Model bbSourceModel, Model inModModel) {
         Field[] bbModelPartFields = bbSourceModel.getClass().getDeclaredFields();
         Map<String, ModelRenderer> bbModelParts = new HashMap<>();
 
@@ -57,12 +57,13 @@ public class BlockbenchStandModelHelper {
         inModModel.texHeight = bbSourceModel.texHeight;
     }
     
-    public static void replaceModelParts(EntityModel<?> inModModel, Map<String, ModelRenderer> source) throws IllegalArgumentException, IllegalAccessException {
+    public static void replaceModelParts(Model inModModel, Map<String, ModelRenderer> source) throws IllegalArgumentException, IllegalAccessException {
         Set<Field> declaredModelParts = FieldUtils.getAllFieldsList(inModModel.getClass()).stream()
                 .filter(field -> ModelRenderer.class.isAssignableFrom(field.getType()))
                 .collect(Collectors.toCollection(HashSet::new));
         List<ModelRenderer> editedParts = new ArrayList<>();
         Map<ModelRenderer, ModelRenderer> remapParents = new HashMap<>();
+        INamedModelParts putNamed = inModModel instanceof INamedModelParts ? (INamedModelParts) inModModel : null;
         
         for (Map.Entry<String, ModelRenderer> entry : source.entrySet()) {
             String name = entry.getKey();
@@ -94,6 +95,9 @@ public class BlockbenchStandModelHelper {
                     inModPartField.setAccessible(true);
                     editedParts.add(blockbenchPart);
                     inModPartField.set(inModModel, blockbenchPart);
+                    if (putNamed != null) {
+                        putNamed.putMamedModelPart(name, blockbenchPart);
+                    }
                     
                     it.remove();
                     foundModelPart = true;
@@ -120,7 +124,7 @@ public class BlockbenchStandModelHelper {
         }
     }
     
-    public static void replaceCubes(EntityModel<?> inModModel, Map<String, ModelRenderer> source) throws IllegalArgumentException, IllegalAccessException {
+    public static void replaceCubes(Model inModModel, Map<String, ModelRenderer> source) throws IllegalArgumentException, IllegalAccessException {
         List<Field> inModModelParts = FieldUtils.getAllFieldsList(inModModel.getClass()).stream()
                 .filter(field -> ModelRenderer.class.isAssignableFrom(field.getType()))
                 .collect(Collectors.toList());
@@ -165,7 +169,7 @@ public class BlockbenchStandModelHelper {
     
     
     
-    public static <M extends EntityModel<?>> void fillFromUnbaked(EntityModelUnbaked model, M inModModel) {
+    public static <M extends Model> void fillFromUnbaked(EntityModelUnbaked model, M inModModel) {
         try {
             replaceModelParts(inModModel, model.getNamedModelParts());
         } catch (Exception e) {

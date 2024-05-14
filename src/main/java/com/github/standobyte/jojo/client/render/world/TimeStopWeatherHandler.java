@@ -20,6 +20,7 @@ import net.minecraft.world.gen.Heightmap;
 import net.minecraftforge.client.IWeatherParticleRenderHandler;
 import net.minecraftforge.client.IWeatherRenderHandler;
 
+// not used in the code anymore
 public class TimeStopWeatherHandler implements IWeatherRenderHandler, IWeatherParticleRenderHandler {
     private static final ResourceLocation RAIN_LOCATION = new ResourceLocation("textures/environment/rain.png");
     private static final ResourceLocation SNOW_LOCATION = new ResourceLocation("textures/environment/snow.png");

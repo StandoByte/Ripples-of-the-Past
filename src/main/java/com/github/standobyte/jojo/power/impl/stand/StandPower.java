@@ -20,6 +20,7 @@ import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.modcompat.OptionalDependencyHelper;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtStandEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SkippedStandProgressionPacket;
@@ -127,7 +128,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public void setStandInstance(StandInstance standInstance) {
         this.standInstance = Optional.ofNullable(standInstance);
-        onPowerSet(this.standInstance.map(StandInstance::getType).orElse(null));
+        clUpdateHud();
     }
 
     @Override
@@ -194,6 +195,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             if (user != null) {
                 continuousEffects.onStandChanged(user);
             }
+            clUpdateHud();
             return true;
         }
         return false;
@@ -458,7 +460,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                     usesResolve() && 
                     getResolveLevel() > 0 &&
                     JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).soulAscension.get() &&
-                    !JojoModUtil.isUndead(user) &&
+                    !(JojoModUtil.isUndead(user) || OptionalDependencyHelper.vampirism().isEntityVampire(user)) &&
                     !(user instanceof PlayerEntity && user.level.getGameRules().getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN));
             if (this.willSoulSpawn != soulCanSpawn) {
                 this.willSoulSpawn = soulCanSpawn;
@@ -504,8 +506,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             });
             return true;
         }
-
-        JojoMod.getLogger().warn("Failed summoning soul entity for {}");
+        
         serverPlayerUser.ifPresent(player -> PacketManager.sendToClient(SoulSpawnPacket.noSoulSpawned(), player));
         return false;
     }
@@ -536,6 +537,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public void setProgressionSkipped() {
         this.skippedProgression = true;
+        clUpdateHud();
     }
     
     @Override
@@ -594,6 +596,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public void setLearningFromPacket(StandActionLearningPacket packet) {
         actionLearningProgressMap.setEntryDirectly(packet.entry);
+        clUpdateHud();
     }
     
     @Override
@@ -850,7 +853,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             tickSoulCheck();
             PacketManager.sendToClient(SoulSpawnPacket.spawnFlag(willSoulSpawn), player);
         });
-        syncLayoutWithUser();
     }
     
     @Override

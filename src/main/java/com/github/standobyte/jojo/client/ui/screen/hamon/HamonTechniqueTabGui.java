@@ -64,18 +64,6 @@ public class HamonTechniqueTabGui extends HamonSkillsTabGui {
     }
     
     @Override
-    void drawTab(MatrixStack matrixStack, int windowX, int windowY, boolean isSelected, boolean red) {
-        TmpHamonWipTabGui.makeCompilerShoutAtMeWhenIDeleteThis(); // delete this method overriding
-        super.drawTab(matrixStack, windowX, windowY + HamonScreen.WINDOW_HEIGHT - (index + 1) * 32, isSelected, red);
-    }
-    
-    @Override
-    boolean isMouseOnTabIcon(int windowX, int windowY, double mouseX, double mouseY) {
-        TmpHamonWipTabGui.makeCompilerShoutAtMeWhenIDeleteThis(); // delete this method overriding
-        return super.isMouseOnTabIcon(windowX, windowY + HamonScreen.WINDOW_HEIGHT - (index + 1) * 32, mouseX, mouseY);
-    }
-    
-    @Override
     protected ITextComponent createTabDescription(String key) {
         TmpHamonWipTabGui.makeCompilerShoutAtMeWhenIDeleteThis(); // uncomment this
         return new TranslationTextComponent(key, 

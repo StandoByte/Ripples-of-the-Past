@@ -1,7 +1,5 @@
 package com.github.standobyte.jojo.action.non_stand;
 
-import javax.annotation.Nullable;
-
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;

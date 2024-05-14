@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.client.render.entity.renderer.stand.layer;
 
+import java.util.Optional;
+
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.SilverChariotRenderer;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
@@ -7,19 +9,13 @@ import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 import net.minecraft.util.ResourceLocation;
 
 public class SilverChariotArmorLayer extends StandModelLayerRenderer<SilverChariotEntity, StandEntityModel<SilverChariotEntity>> {
-    private final ResourceLocation texture;
 
     public SilverChariotArmorLayer(SilverChariotRenderer entityRenderer, StandEntityModel<SilverChariotEntity> armorModel, ResourceLocation texture) {
-        super(entityRenderer, armorModel);
-        this.texture = texture;
+        super(entityRenderer, armorModel, texture);
     }
     
-    public boolean shouldRender(SilverChariotEntity entity) {
-        return entity.hasArmor();
-    }
-
     @Override
-    public ResourceLocation getLayerTexture() {
-        return texture;
+    public boolean shouldRender(SilverChariotEntity entity, Optional<ResourceLocation> standSkin) {
+        return entity == null || entity.hasArmor();
     }
 }

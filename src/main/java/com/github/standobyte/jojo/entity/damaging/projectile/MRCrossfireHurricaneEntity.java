@@ -1,11 +1,13 @@
 package com.github.standobyte.jojo.entity.damaging.projectile;
 
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModEntityTypes;
@@ -149,7 +151,7 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
     }
     
     private void burnBlocksTick() {
-        if (!level.isClientSide() && !small && JojoModConfig.getCommonConfigInstance(false).abilitiesBreakBlocks.get()) {
+        if (!level.isClientSide() && !small && JojoModUtil.breakingBlocksEnabled(level)) {
             ServerWorld world = (ServerWorld) level;
             LivingEntity owner = getOwner();
             
@@ -165,6 +167,8 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
                         if (JojoModUtil.canEntityDestroy(world, blockPos, level.getBlockState(blockPos), owner)
                                 && !MRFlameEntity.meltIceAndSnow(level, blockState, blockPos) && blockState.isFlammable(level, blockPos, Direction.UP)) {
                             blockState.catchFire(level, blockPos, Direction.UP, getOwner());
+                            CrazyDiamondRestoreTerrain.rememberBrokenBlock(world, blockPos, blockState, 
+                                    Optional.ofNullable(world.getBlockEntity(blockPos)), Collections.emptyList());
                             level.removeBlock(blockPos, false);
                         }
                     }

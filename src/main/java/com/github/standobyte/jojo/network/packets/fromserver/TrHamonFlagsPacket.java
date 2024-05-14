@@ -58,12 +58,4 @@ public class TrHamonFlagsPacket {
             return TrHamonFlagsPacket.class;
         }
     }
-    
-    public static enum HamonAuraColor {
-        ORANGE,
-        BLUE,
-        YELLOW,
-        RED,
-        SILVER
-    }
 }

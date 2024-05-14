@@ -73,15 +73,15 @@ public class CustomVillagerTrades {
     public static enum MapTrade {
         METEORITE_MAP(
                 new EmeraldForMapTrade(16, ModStructures.METEORITE, MapDecoration.Type.TARGET_POINT, 0x6d6bb9, 1, 15), 
-                240000,
+                24000,
                 VillagerType.SNOW),
         HAMON_MAP(
                 new EmeraldForMapTrade(24, ModStructures.HAMON_TEMPLE, MapDecoration.Type.TARGET_POINT, 0x474747, 1, 23), 
-                480000, 
+                48000, 
                 VillagerType.TAIGA),
         PILLARMAN_MAP(
                 new EmeraldForMapTrade(32, ModStructures.PILLARMAN_TEMPLE, MapDecoration.Type.TARGET_POINT, 0x508d50, 1, 30), 
-                960000, 
+                96000, 
                 VillagerType.JUNGLE);
         
         final ITrade trade;

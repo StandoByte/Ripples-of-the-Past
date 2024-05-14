@@ -12,7 +12,7 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.capability.entity.power.StandCapProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.StandController;
+import com.github.standobyte.jojo.client.ControllerStand;
 import com.github.standobyte.jojo.command.configpack.standassign.PlayerStandAssignmentConfig;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModStatusEffects;
@@ -73,7 +73,7 @@ public class StandUtil {
         LEAST_TAKEN {
             @Override
             public List<StandType<?>> limitStandPool(ServerWorld world, List<StandType<?>> availableStands) {
-                return SaveFileUtilCapProvider.getSaveFileCap(world.getServer()).getNotTakenStands(availableStands);
+                return SaveFileUtilCapProvider.getSaveFileCap(world.getServer()).getLeastTakenStands(availableStands);
             }
         },
         NOT_TAKEN {
@@ -102,8 +102,15 @@ public class StandUtil {
         return entity.getCapability(StandCapProvider.STAND_CAP).map(cap -> cap.hasPower()).orElse(false);
     }
     
+    public static boolean clStandEntityVisibleTo(PlayerEntity player) {
+        if (player == ClientUtil.getClientPlayer()) {
+            return ClientUtil.canSeeStands();
+        }
+        return playerCanSeeStands(player);
+    }
+    
     public static boolean playerCanSeeStands(PlayerEntity player) {
-        return isEntityStandUser(player) || player.hasEffect(ModStatusEffects.SPIRIT_VISION.get());
+        return player.isSpectator() || isEntityStandUser(player) || player.hasEffect(ModStatusEffects.SPIRIT_VISION.get());
     }
     
     public static boolean playerCanHearStands(PlayerEntity player) {
@@ -126,7 +133,7 @@ public class StandUtil {
                             mc.player.xxa = 0;
                             mc.player.zza = 0;
                             mc.player.setJumping(false);
-                            StandController.setStartedControllingStand();
+                            ControllerStand.setStartedControllingStand();
                         }
                     }
                 }

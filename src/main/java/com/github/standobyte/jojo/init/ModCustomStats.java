@@ -18,6 +18,7 @@ public class ModCustomStats {
     public static final ResourceLocation VAMPIRE_ANIMALS_DRAINED = new ResourceLocation(JojoMod.MOD_ID, "vampire_animals_drained");
     public static final ResourceLocation VAMPIRE_ZOMBIES_CREATED = new ResourceLocation(JojoMod.MOD_ID, "vampire_zombies_created");
     public static final ResourceLocation VAMPIRE_ZOMBIES_SUMMONED = new ResourceLocation(JojoMod.MOD_ID, "vampire_zombies_summoned");
+    public static final ResourceLocation RPS_WON = new ResourceLocation(JojoMod.MOD_ID, "rps_won");
     
     @SubscribeEvent(priority = EventPriority.LOW)
     public static final void registerCustomStats(RegistryEvent.Register<StatType<?>> event) {
@@ -25,6 +26,7 @@ public class ModCustomStats {
         registerCustomStat(VAMPIRE_ANIMALS_DRAINED, IStatFormatter.DEFAULT);
         registerCustomStat(VAMPIRE_ZOMBIES_CREATED, IStatFormatter.DEFAULT);
         registerCustomStat(VAMPIRE_ZOMBIES_SUMMONED, IStatFormatter.DEFAULT);
+        registerCustomStat(RPS_WON, IStatFormatter.DEFAULT);
     }
 
     private static ResourceLocation registerCustomStat(ResourceLocation resLoc, IStatFormatter statFormatter) {

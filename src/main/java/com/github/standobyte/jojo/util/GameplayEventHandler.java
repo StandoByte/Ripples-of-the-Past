@@ -33,7 +33,6 @@ import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeC
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.client.ui.toasts.ActionToast.Type;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDBloodCutterEntity;
-import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.SnakeMufflerEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
 import com.github.standobyte.jojo.init.ModBlocks;
@@ -49,6 +48,8 @@ import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
+import com.github.standobyte.jojo.item.InkPastaItem;
+import com.github.standobyte.jojo.item.OilItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -86,9 +87,11 @@ import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
 import com.github.standobyte.jojo.util.mc.damage.IStandDamageSource;
+import com.github.standobyte.jojo.util.mc.damage.ModdedDamageSourceWrapper;
 import com.github.standobyte.jojo.util.mc.damage.StandLinkDamageSource;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
+import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
 
 import net.minecraft.block.AbstractFurnaceBlock;
 import net.minecraft.block.Block;
@@ -112,8 +115,6 @@ import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.TieredItem;
-import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.play.server.SChatPacket;
 import net.minecraft.network.play.server.SPlayEntityEffectPacket;
 import net.minecraft.network.play.server.SPlaySoundEffectPacket;
@@ -128,7 +129,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
-import net.minecraft.util.CombatRules;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Hand;
@@ -158,7 +158,6 @@ import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.ServerChatEvent;
-import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
 import net.minecraftforge.event.TickEvent.WorldTickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
@@ -280,18 +279,25 @@ public class GameplayEventHandler {
 
     @SubscribeEvent
     public static void onWorldTick(WorldTickEvent event) {
-        if (event.side == LogicalSide.SERVER /* actually only ticks on server but ok */ && event.phase == TickEvent.Phase.END) {
-            ((ServerWorld) event.world).getAllEntities().forEach(entity -> {
-                entity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
-                entity.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
-            });
+        if (event.side == LogicalSide.SERVER /* actually only ticks on server but ok */) {
+            switch (event.phase) {
+            case START:
+                break;
+            case END:
+                ((ServerWorld) event.world).getAllEntities().forEach(entity -> {
+//                    entity.getCapability(EntityUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
+                    entity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
+                    entity.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
+                });
 
-            ((ServerWorld) event.world).getChunkSource().chunkMap.getChunks().forEach(chunkHolder -> {
-                Chunk chunk = chunkHolder.getTickingChunk();
-                if (chunk != null) {
-                    chunk.getCapability(ChunkCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
-                }
-            });
+                ((ServerWorld) event.world).getChunkSource().chunkMap.getChunks().forEach(chunkHolder -> {
+                    Chunk chunk = chunkHolder.getTickingChunk();
+                    if (chunk != null) {
+                        chunk.getCapability(ChunkCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
+                    }
+                });
+                break;
+            }
         }
     }
     
@@ -344,6 +350,16 @@ public class GameplayEventHandler {
     }
     
     @SubscribeEvent(priority = EventPriority.LOW)
+    public static void onUseItem(PlayerInteractEvent.RightClickItem event) {
+        if (ModInteractionUtil.isSquidInkPasta(event.getItemStack())) {
+            InkPastaItem.useWithHamon(event.getWorld(), event.getPlayer(), event.getHand()).ifPresent(result -> {
+                event.setCanceled(true);
+                event.setCancellationResult(result.getResult());
+            });
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOW)
     public static void onBowDrawStart(LivingEntityUseItemEvent.Start event) {
         if (BowChargeEffectInstance.itemFits(event.getItem())) {
             LivingEntity entity = event.getEntityLiving();
@@ -369,6 +385,9 @@ public class GameplayEventHandler {
     public static void onFoodEaten(LivingEntityUseItemEvent.Finish event) {
         if (event.getItem().getItem() == Items.ENCHANTED_GOLDEN_APPLE) {
             VampirismUtil.onEnchantedGoldenAppleEaten(event.getEntityLiving());
+        }
+        else if (ModInteractionUtil.isSquidInkPasta(event.getItem())) {
+            InkPastaItem.onEaten(event.getEntityLiving());
         }
     }
     
@@ -434,43 +453,49 @@ public class GameplayEventHandler {
             }
         }
     }
-
+    
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onLivingHurtStart(LivingAttackEvent event) {
     	DamageSource dmgSource = event.getSource();
         LivingEntity target = event.getEntityLiving();
         Entity attacker = dmgSource.getEntity();
         
-        //Deal Hamon damage through oiled weapons
-        if (attacker != null && attacker.is(dmgSource.getDirectEntity()) && attacker instanceof PlayerEntity) {
-        	LivingEntity player = (LivingEntity) attacker;
-        	PlayerEntity pEntity = (PlayerEntity) player;
-        	ItemStack weapon = pEntity.getMainHandItem();
-        	if (weapon.getItem() instanceof TieredItem && weapon.hasTag()) {
-        		
-        		CompoundNBT nbt = weapon.getTag();
-                if (nbt.contains("Oiled", MCUtil.getNbtId(CompoundNBT.class))) {
-                	INonStandPower power = INonStandPower.getPlayerNonStandPower(pEntity);
-                	float energyCost = 500F;
-                	if (power.hasEnergy(energyCost)) {
-                		if (power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
-                                power.consumeEnergy(energyCost);
-                                float hPower = hamon.getHamonStrengthLevelRatio();
-                                DamageUtil.dealHamonDamage(target, 10 * hPower, null, pEntity);
-                                hamon.hamonPointsFromAction(HamonStat.STRENGTH, 500);
-                                CompoundNBT posNBT = nbt.getCompound("Oiled");
-                                if(posNBT.getInt("Oiled") > 1) {
-                                	posNBT.putInt("Oiled", posNBT.getInt("Oiled") - 1);
-                                } else {
-                                	nbt.remove("Oiled");
-                                }
-                                return true;
-                            
-                		}).orElse(false));
-                	}
-                }
-        	}
+        // Attack the entity from a different DamageSource if the attacker has the effect that lets them hit Stands
+        if (target instanceof StandEntity && !((StandEntity) target).canTakeDamageFrom(dmgSource)
+                && !(dmgSource instanceof ModdedDamageSourceWrapper && ((ModdedDamageSourceWrapper) dmgSource).canHurtStands())
+                && attacker instanceof LivingEntity) {
+            LivingEntity attackerLiving = (LivingEntity) attacker;
+            boolean canHitStands = attackerLiving.hasEffect(ModStatusEffects.INTEGRATED_STAND.get());
+            if (canHitStands) {
+                event.setCanceled(true);
+                target.hurt(new ModdedDamageSourceWrapper(dmgSource).setCanHurtStands(), event.getAmount());
+                return;
+            }
         }
+        
+        //Deal Hamon damage through oiled weapons
+        if (!dmgSource.isBypassArmor() && !dmgSource.getMsgId().startsWith(DamageUtil.HAMON.msgId) && 
+                attacker != null && attacker.is(dmgSource.getDirectEntity()) && attacker instanceof LivingEntity) {
+        	LivingEntity hamonUser = (LivingEntity) attacker;
+        	ItemStack weapon = hamonUser.getMainHandItem();
+        	
+        	INonStandPower.getNonStandPowerOptional(hamonUser).ifPresent(power -> {
+                OilItem.remainingOiledUses(weapon).ifPresent(oilUses -> {
+                    float energyCost = 500F;
+                    if (power.hasPower() && power.getEnergy() >= energyCost) {
+                        power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
+                            power.consumeEnergy(energyCost);
+                            DamageUtil.dealHamonDamage(target, 1.5F, hamonUser, null);
+                            hamon.hamonPointsFromAction(HamonStat.STRENGTH, 500);
+                            
+                            OilItem.setWeaponOilUses(weapon, oilUses - 1);
+                        });
+                    }
+                });
+        	});
+        }
+        
+        // Redirect an attack on a Boy II Man user who stole the attacker's arms
         if (attacker != null && attacker.is(dmgSource.getDirectEntity()) && attacker instanceof LivingEntity) {
             IStandPower.getStandPowerOptional((LivingEntity) attacker).ifPresent(attackerStand -> {
                 IStandPower.getStandPowerOptional(target).ifPresent(boyIIManStand -> {
@@ -655,18 +680,18 @@ public class GameplayEventHandler {
             }
         }
     }
-    
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void preventDamagingArmor(LivingHurtEvent event) {
-        DamageSource dmgSource = event.getSource();
-        if (!dmgSource.isBypassArmor() && dmgSource instanceof IModdedDamageSource
-                && ((IModdedDamageSource) dmgSource).preventsDamagingArmor()) {
-            dmgSource.bypassArmor();
-            LivingEntity target = event.getEntityLiving();
-            event.setAmount(CombatRules.getDamageAfterAbsorb(event.getAmount(), 
-                    (float) target.getArmorValue(), (float) target.getAttributeValue(Attributes.ARMOR_TOUGHNESS)));
-        }
-    }
+//    
+//    @SubscribeEvent(priority = EventPriority.LOWEST)
+//    public static void preventDamagingArmor(LivingHurtEvent event) {
+//        DamageSource dmgSource = event.getSource();
+//        if (!dmgSource.isBypassArmor() && dmgSource instanceof IModdedDamageSource
+//                && ((IModdedDamageSource) dmgSource).preventsDamagingArmor()) {
+//            dmgSource.bypassArmor();
+//            LivingEntity target = event.getEntityLiving();
+//            event.setAmount(CombatRules.getDamageAfterAbsorb(event.getAmount(), 
+//                    (float) target.getArmorValue(), (float) target.getAttributeValue(Attributes.ARMOR_TOUGHNESS)));
+//        }
+//    }
     
 
     @SubscribeEvent(priority = EventPriority.NORMAL)
@@ -908,7 +933,7 @@ public class GameplayEventHandler {
     public static void onPotionApply(PotionApplicableEvent event) {
         LivingEntity entity = event.getEntityLiving();
         Effect effect = event.getPotionEffect().getEffect();
-        if ((effect == Effects.POISON || effect == Effects.HUNGER || effect == Effects.REGENERATION)
+        if ((effect == Effects.HUNGER/* || effect == Effects.POISON || effect == Effects.REGENERATION*/)
                 && entity instanceof PlayerEntity && JojoModUtil.isPlayerUndead((PlayerEntity) entity)) {
             event.setResult(Result.DENY);
         }

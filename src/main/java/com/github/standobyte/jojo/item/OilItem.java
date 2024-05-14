@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.item;
 
 import java.util.List;
-import java.util.Optional;
+import java.util.OptionalInt;
 
 import javax.annotation.Nullable;
 
@@ -12,7 +12,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.TieredItem;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
@@ -33,27 +32,23 @@ public class OilItem extends Item {
 
 	@Override
     public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
-		ItemStack weaponStack = player.getOffhandItem();
-		ItemStack weaponStack2 = player.getMainHandItem();
-        ItemStack stack = player.getItemInHand(hand);
-        CompoundNBT mainNBT = new CompoundNBT();
-		mainNBT.putInt("Oiled", MAX_USES);
+	    Hand opposite = hand == Hand.MAIN_HAND ? Hand.OFF_HAND : Hand.MAIN_HAND;
+        ItemStack oilStack = player.getItemInHand(hand);
+		ItemStack weaponStack = player.getItemInHand(opposite);
 		
-        if(stack.getItem() instanceof OilItem && (weaponStack.getItem() instanceof TieredItem || weaponStack2.getItem() instanceof TieredItem)) {
+        if (MCUtil.isItemWeapon(weaponStack)) {
         	if (!world.isClientSide()) {
-        		if(weaponStack.getItem() instanceof TieredItem) {
-        			weaponStack.getOrCreateTag().put("Oiled", mainNBT);
-        		} else {
-        			weaponStack2.getOrCreateTag().put("Oiled", mainNBT);
-        		}
-                if (player == null || !player.abilities.instabuild) {
+        	    setWeaponOilUses(weaponStack, MAX_USES);
+                if (!player.abilities.instabuild) {
+                    oilStack.shrink(1);
         			player.inventory.add(new ItemStack(Items.GLASS_BOTTLE));
         		}
-                world.playSound(null, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.BOTTLE_EMPTY, player.getSoundSource(), 1F, 1F);
-                stack.shrink(1);
             }
+            world.playSound(player, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.BOTTLE_EMPTY, player.getSoundSource(), 1F, 1F);
+            return ActionResult.consume(oilStack);
         }
-        return ActionResult.fail(stack);
+        
+        return ActionResult.fail(oilStack);
 	}
     
      @Override
@@ -61,16 +56,26 @@ public class OilItem extends Item {
              tooltip.add(new TranslationTextComponent("item.jojo.oil.hint").withStyle(TextFormatting.GRAY)); 
      }
      
-     public static Optional<String> isOiledTag(ItemStack stack) {
-    	 if (stack.hasTag()) {
+     public static OptionalInt remainingOiledUses(ItemStack stack) {
+    	 if (!stack.isEmpty() && stack.hasTag()) {
              CompoundNBT nbt = stack.getTag();
-             if (nbt.contains("Oiled", MCUtil.getNbtId(CompoundNBT.class))) {
-            	 CompoundNBT posNBT = nbt.getCompound("Oiled");
-            	 String string = new String("Oiled: " + posNBT.getInt("Oiled") + " uses").toString();
-            	 return Optional.of(string); 
+             if (nbt.contains("HamonOiled")) {
+                 int usesLeft = nbt.getInt("HamonOiled");
+            	 return OptionalInt.of(usesLeft); 
              }
          }
-         return Optional.empty();
+         return OptionalInt.empty();
      } 
+     
+     public static void setWeaponOilUses(ItemStack weaponStack, int uses) {
+         if (weaponStack.isEmpty()) return;
+         
+         if (uses > 0) {
+             weaponStack.getOrCreateTag().putInt("HamonOiled", uses);
+         }
+         else if (weaponStack.hasTag()) {
+             weaponStack.getTag().remove("HamonOiled");
+         }
+     }
          
 }

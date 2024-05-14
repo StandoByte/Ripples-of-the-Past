@@ -174,6 +174,11 @@
     "sounds": [ "minecraft:item/elytra/elytra_loop" ]
   },
   
+  "hamon_detector": {
+    "subtitle": "jojo.subtitle.hamon_concentration",
+    "sounds": [ "jojo:hamon_detector" ]
+  },
+  
   "hamon_concentration": {
     "subtitle": "jojo.subtitle.hamon_concentration",
     "sounds": [ "jojo:hamon_concentration" ]

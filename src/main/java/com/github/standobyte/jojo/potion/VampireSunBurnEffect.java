@@ -10,7 +10,7 @@ import net.minecraft.potion.EffectType;
 import net.minecraft.potion.Effects;
 import net.minecraft.world.World;
 
-public class VampireSunBurnEffect extends UncurableEffect implements IApplicableEffect {
+public class VampireSunBurnEffect extends StatusEffect implements IApplicableEffect {
 
     public VampireSunBurnEffect() {
         super(EffectType.HARMFUL, Effects.WEAKNESS.getColor());

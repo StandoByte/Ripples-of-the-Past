@@ -12,7 +12,6 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.render.MeshModelBox;
 import com.github.standobyte.jojo.client.render.MeshModelBox.Builder.MeshFaceBuilder;
 import com.github.standobyte.jojo.util.general.MathUtil;
@@ -31,7 +30,7 @@ import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Direction.Axis;
-import net.minecraft.util.Util;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
 @SuppressWarnings("unused")
@@ -42,18 +41,17 @@ public class ParseGenericModel {
             .registerTypeAdapter(ModelParsed.BlockbenchObj.class, ModelParsed.BlockbenchObj.DESERIALIZER)
             .create();
     
-    public static EntityModelUnbaked parseGenericModel(JsonElement json) {
-        long time = Util.getMillis();
+    public static EntityModelUnbaked parseGenericModel(JsonElement json, ResourceLocation modelId) {
         ModelParsed modelParsed = GSON.fromJson(json, ModelParsed.class);
-        long parseTime = Util.getMillis();
+        
+        modelParsed.afterParse(modelId);
         EntityModelUnbaked modelUnbaked = modelParsed.createUnbakedModel();
-        long dataHandleTime = Util.getMillis();
         return modelUnbaked;
     }
     
     
     
-    private static class ModelParsed {
+    private static class ModelParsed implements IParsedModel {
         Resolution resolution;
         List<Element> elements;
         List<BlockbenchObj> outliner;
@@ -89,13 +87,19 @@ public class ParseGenericModel {
                                 JsonPrimitive typePrim = typeElem.getAsJsonPrimitive();
                                 if (typePrim.isString()) {
                                     String type = typePrim.getAsString();
-                                    switch (type) {
-                                    case "cube":
-                                        return context.deserialize(json, ElementCube.class);
-                                    case "mesh":
-                                        return context.deserialize(json, ElementMesh.class);
-                                    default:
-                                        throw new JsonParseException("Unknown element type: \"" + type + "\"");
+                                    try {
+                                        switch (type) {
+                                        case "cube":
+                                            return context.deserialize(json, ElementCube.class);
+                                        case "mesh":
+                                            return context.deserialize(json, ElementMesh.class);
+                                        default:
+                                            throw new JsonParseException("Unknown element type: \"" + type + "\"");
+                                        }
+                                    }
+                                    catch (Exception e) {
+                                        e.printStackTrace();
+                                        throw e;
                                     }
                                 }
                             }
@@ -182,7 +186,7 @@ public class ParseGenericModel {
             
             class BoxFace {
                 float[] uv;
-                int texture;
+                Integer texture;
             }
             
             private ModelRenderer.ModelBox makeModelBox(float texWidth, float texHeight, GroupParsed parentParsed) {
@@ -261,45 +265,33 @@ public class ParseGenericModel {
                     Direction uvPart = direction.getAxis() == Axis.Z ? direction : direction.getOpposite();
                     if (perFaceUv.containsKey(uvPart)) {
                         BoxFace uv = perFaceUv.get(uvPart);
-                        float u0;
-                        float v0;
-                        float u1;
-                        float v1;
-                        if (direction.getAxis() == Axis.Y) {
-                            u0 = uv.uv[2];
-                            v0 = uv.uv[3];
-                            u1 = uv.uv[0];
-                            v1 = uv.uv[1];
-                        }
-                        else {
-                            u0 = uv.uv[0];
-                            v0 = uv.uv[1];
-                            u1 = uv.uv[2];
-                            v1 = uv.uv[3];
-                        }
-                        polygons[polygonsCount++] = new ModelRenderer.TexturedQuad(faceVertices.get(direction), 
-                                u0, v0, u1, v1, 
-                                texWidth, texHeight, false, direction);
+//                        if (uv.texture != null) {
+                            float u0;
+                            float v0;
+                            float u1;
+                            float v1;
+                            if (direction.getAxis() == Axis.Y) {
+                                u0 = uv.uv[2];
+                                v0 = uv.uv[3];
+                                u1 = uv.uv[0];
+                                v1 = uv.uv[1];
+                            }
+                            else {
+                                u0 = uv.uv[0];
+                                v0 = uv.uv[1];
+                                u1 = uv.uv[2];
+                                v1 = uv.uv[3];
+                            }
+                            polygons[polygonsCount++] = new ModelRenderer.TexturedQuad(faceVertices.get(direction), 
+                                    u0, v0, u1, v1, 
+                                    texWidth, texHeight, false, direction);
+//                        }
                     }
                 }
                 if (polygonsCount < polygons.length) {
                     polygons = Arrays.copyOf(polygons, polygonsCount);
                 }
                 ClientReflection.setPolygons(box, polygons);
-                
-                
-                /*
-                 *    u0   u1       u2   u3  u4   u5
-                 * v0       ┌────────┬────────┐
-                 *          │   U    │   D    │
-                 * v1  ┌────┼────────┼────┬───┴────┐ ⎫
-                 *     │    │        │    │        │ ⎪
-                 *     │ E  │   N    │ W  │   S    │ ⎬ size.y
-                 *     │    │        │    │        │ ⎪
-                 *     │    │        │    │        │ ⎪
-                 * v2  └────┴────────┴────┴────────┘ ⎭
-                 *     size.z               size.x
-                 */
                 
                 return box;
             }
@@ -407,7 +399,25 @@ public class ParseGenericModel {
         
         
         
+        @Override
+        public void afterParse(ResourceLocation modelId) {
+            if (SILVER_CHARIOT_ARMOR.equals(modelId)) {
+                outliner.forEach(ModelParsed::fixArmorName);
+            }
+        }
+        private static void fixArmorName(BlockbenchObj obj) {
+            if (obj instanceof GroupParsed) {
+                GroupParsed group = (GroupParsed) obj;
+                group.name = group.name.replace("_armor", "");
+                for (BlockbenchObj child : group.children) {
+                    fixArmorName(child);
+                }
+            }
+        }
+        
+        
         private Map<UUID, ModelParsed.Element> initElements = new HashMap<>();
+        @Override
         public EntityModelUnbaked createUnbakedModel() {
             EntityModelUnbaked model = new EntityModelUnbaked(resolution.width, resolution.height);
             

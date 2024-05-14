@@ -13,11 +13,14 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.command.configpack.StandStatsConfig;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
@@ -25,10 +28,10 @@ import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
-import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
 import com.github.standobyte.jojo.util.mc.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
+import com.google.common.collect.Iterables;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -45,9 +48,12 @@ import net.minecraftforge.registries.ForgeRegistryEntry;
 public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry<StandType<?>> implements IPowerType<IStandPower, StandType<?>> {
     @Deprecated
     private final int color;
+    
     private final StandAction[] leftClickHotbar;
     private final StandAction[] rightClickHotbar;
-    private final StandAction defaultQuickAccess;
+    private final StandAction defaultMMBAction;
+    private List<Pair<String, StandAction>> defaultKeys = null;
+    
     private String translationKey;
     private ResourceLocation iconTexture;
     
@@ -68,7 +74,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         this.partName = partName;
         this.leftClickHotbar = leftClickHotbar;
         this.rightClickHotbar = rightClickHotbar;
-        this.defaultQuickAccess = defaultQuickAccess;
+        this.defaultMMBAction = defaultQuickAccess;
         this.statsClass = statsClass;
         this.defaultStats = defaultStats;
         
@@ -82,8 +88,11 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     
     protected StandType(AbstractBuilder<?, T> builder) {
         this(builder.color, builder.storyPartName, builder.leftClickHotbar, builder.rightClickHotbar, 
-                builder.quickAccess, builder.statsClass, builder.defaultStats, 
+                builder.mmbAction, builder.statsClass, builder.defaultStats, 
                 builder.additions);
+        if (!builder.defaultKeys.isEmpty()) {
+            this.defaultKeys = builder.defaultKeys;
+        }
     }
     
 
@@ -93,7 +102,8 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         private ITextComponent storyPartName = StringTextComponent.EMPTY;
         private StandAction[] leftClickHotbar = {};
         private StandAction[] rightClickHotbar = {};
-        private StandAction quickAccess = null;
+        private StandAction mmbAction = null;
+        private List<Pair<String, StandAction>> defaultKeys = new ArrayList<>();
         private T defaultStats;
         private Class<T> statsClass;
         private StandTypeOptionals additions = null;
@@ -115,14 +125,27 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         
         public B rightClickHotbar(StandAction... actions) {
             this.rightClickHotbar = actions;
-            if (quickAccess == null) {
-                quickAccess = actions.length > 0 ? actions[0] : null;
+            if (mmbAction == null) {
+                mmbAction = actions.length > 0 ? actions[0] : null;
             }
             return getThis();
         }
         
-        public B defaultQuickAccess(StandAction quickAccess) {
-            this.quickAccess = quickAccess;
+        /**
+         * @deprecated use {@link AbstractBuilder#defaultMMB(StandAction)}
+         */
+        @Deprecated
+        public B defaultQuickAccess(StandAction mmbAction) {
+            return defaultMMB(mmbAction);
+        }
+        
+        public B defaultMMB(StandAction quickAccess) {
+            this.mmbAction = quickAccess;
+            return getThis();
+        }
+        
+        public B defaultKey(StandAction action, String keyName) {
+            defaultKeys.add(Pair.of(keyName, action));
             return getThis();
         }
         
@@ -252,17 +275,42 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         getStats().onNewDay(user, power);
     }
     
-    @Override
-    public ActionsLayout<IStandPower> createDefaultLayout() {
-        return new ActionsLayout<>(leftClickHotbar, rightClickHotbar, defaultQuickAccess);
-    }
-    
-    public StandAction[] getDefaultHotbar(ActionsLayout.Hotbar hotbar) {
+    @Deprecated
+    public StandAction[] getDefaultHotbar(ControlScheme.Hotbar hotbar) {
         switch (hotbar) {
         case LEFT_CLICK: return leftClickHotbar;
         case RIGHT_CLICK: return rightClickHotbar;
         default: throw new IllegalArgumentException();
         }
+    }
+    
+    @Override
+    public ControlScheme.DefaultControls clCreateDefaultLayout() {
+        ControlScheme.DefaultControls controls = new ControlScheme.DefaultControls(
+                leftClickHotbar, 
+                rightClickHotbar, 
+                ControlScheme.DefaultControls.DefaultKey.mmb(defaultMMBAction));
+        if (defaultKeys != null) {
+            for (Pair<String, StandAction> actionKey : defaultKeys) {
+                controls.addKey(ControlScheme.DefaultControls.DefaultKey.of(actionKey.getValue(), actionKey.getKey()));
+            }
+        }
+        return controls;
+    }
+    
+    @Override
+    public void clAddMissingActions(ControlScheme controlScheme, IStandPower power) {
+        for (Action<?> attack : leftClickHotbar) {
+            controlScheme.addIfMissing(ControlScheme.Hotbar.LEFT_CLICK, attack);
+        }
+        for (Action<?> ability : rightClickHotbar) {
+            controlScheme.addIfMissing(ControlScheme.Hotbar.RIGHT_CLICK, ability);
+        }
+    }
+    
+    @Override
+    public boolean isActionLegalInHud(Action<IStandPower> action, IStandPower power) {
+        return Iterables.contains(getAllUnlockableActions(), action) && action.isLegalInHud(power);
     }
     
     public Iterable<StandAction> getAllUnlockableActions() {
@@ -452,6 +500,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     
     public static enum StandSurvivalGameplayPool {
         PLAYER_ARROW,
+        NON_ARROW, // Requiems, C-Moon, Made in Heaven, Acts depending on their implementation, etc.
         NPC_ENCOUNTER
     }
 }

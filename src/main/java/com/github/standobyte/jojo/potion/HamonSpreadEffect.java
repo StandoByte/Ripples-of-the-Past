@@ -11,7 +11,7 @@ import net.minecraft.potion.Effects;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.common.ForgeMod;
 
-public class HamonSpreadEffect extends UncurableEffect implements IApplicableEffect {
+public class HamonSpreadEffect extends StatusEffect implements IApplicableEffect {
 
     public HamonSpreadEffect(EffectType type, int liquidColor) {
         super(type, liquidColor);
@@ -33,7 +33,7 @@ public class HamonSpreadEffect extends UncurableEffect implements IApplicableEff
 
     @Override
     public boolean isApplicable(LivingEntity entity) {
-        return JojoModUtil.isUndead(entity);
+        return JojoModUtil.isAffectedByHamon(entity);
     }
     
     

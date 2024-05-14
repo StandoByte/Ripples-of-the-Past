@@ -1,0 +1,6 @@
+{
+  "parent": "jojo:item/ladybug_brooch",
+  "textures": {
+    "layer0": "jojo_clothes:misc/brooch/ladybug_pink"
+  }
+}

@@ -205,7 +205,7 @@ public class HamonUtil {
                                 playerTarget.doHurtTarget(attacker);
                                 playerTarget.swing(Hand.MAIN_HAND, true);
                                 livingAttacker.knockback(2.5F, playerTarget.getX()-livingAttacker.getX(), playerTarget.getZ()-livingAttacker.getZ());
-                                power.getTypeSpecificData(ModPowers.HAMON.get()).get().offRebuffOverdrive();
+                                hamon.setRebuffOverdrive(false);
                                 return true;
                             }
                         }
@@ -281,12 +281,12 @@ public class HamonUtil {
             JojoModUtil.sayVoiceLine(teacher, ModSounds.ZEPPELI_FORCE_BREATH.get());
             teacher.swing(Hand.MAIN_HAND, true);
             if (player.getRandom().nextFloat() <= 0.01F) {
-                player.hurt(DamageSource.GENERIC, 4.0F);
+                player.hurt(DamageUtil.SUFFOCATION, Math.min(10.0F, player.getHealth() - 0.0001F));
                 player.setAirSupply(0);
                 return;
             }
             else {
-                player.hurt(DamageSource.GENERIC, 0.1F);
+                player.hurt(DamageUtil.SUFFOCATION, Math.min(0.1F, player.getHealth() - 0.0001F));
             }
         } 
         if (playerPower.givePower(ModPowers.HAMON.get())) {

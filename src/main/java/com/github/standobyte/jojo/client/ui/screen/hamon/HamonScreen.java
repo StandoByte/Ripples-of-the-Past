@@ -58,6 +58,7 @@ public class HamonScreen extends Screen {
     private Set<HamonTabGui> tabsWithSkillRequirements = new HashSet<>();
     boolean isTeacherNearby = false;
     @Nullable Collection<? extends AbstractHamonSkill> teacherSkills = null;
+    protected int tickCount = 0;
     
     HamonData hamon;
     
@@ -263,6 +264,7 @@ public class HamonScreen extends Screen {
 
     @Override
     public void tick() {
+        tickCount++;
         for (HamonTabGui tabGui : selectableTabs) {
             tabGui.tick();
         }

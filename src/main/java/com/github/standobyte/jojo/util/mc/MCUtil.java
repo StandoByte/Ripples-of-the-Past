@@ -1,7 +1,10 @@
 package com.github.standobyte.jojo.util.mc;
 
+import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -14,8 +17,16 @@ import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.SpawnParticlePacket;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.google.common.collect.ImmutableMap;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.block.DispenserBlock;
@@ -28,12 +39,16 @@ import net.minecraft.dispenser.IBlockSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.PotionEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.TieredItem;
 import net.minecraft.nbt.ByteArrayNBT;
 import net.minecraft.nbt.ByteNBT;
 import net.minecraft.nbt.CompoundNBT;
@@ -212,6 +227,33 @@ public class MCUtil {
         }
     }
     
+    public static void nbtPutOptionalIntArr(CompoundNBT nbt, String key, OptionalInt[] array, int emptyVal) {
+        int[] value = new int[array.length];
+        for (int i = 0; i < array.length; i++) {
+            value[i] = array[i].orElse(emptyVal);
+        }
+        nbt.putIntArray(key, value);
+    }
+    
+    public static OptionalInt[] nbtGetOptionalIntArr(CompoundNBT nbt, String key, int emptyVal) {
+        int[] value = nbt.getIntArray(key);
+        OptionalInt[] array = new OptionalInt[value.length];
+        for (int i = 0; i < array.length; i++) {
+            int num = value[i];
+            array[i] = num != emptyVal ? OptionalInt.of(num) : OptionalInt.empty();
+        }
+        return array;
+    }
+    
+    public static <T extends Enum<T>> void nbtPutEnumArray(CompoundNBT nbt, String key, T[] array) {
+        nbt.putIntArray(key, GeneralUtil.toOrdinals(array));
+    }
+    
+    public static <T extends Enum<T>> T[] nbtGetEnumArray(CompoundNBT nbt, String key, Class<T> enumClass) {
+        int[] nbtArray = nbt.getIntArray(key);
+        return GeneralUtil.fromOrdinals(nbtArray, enumClass);
+    }
+    
     @Nullable
     public static Vector3d nbtGetVec3d(CompoundNBT nbt, String key) {
         return getNbtElement(nbt, key, ListNBT.class).map(list -> {
@@ -242,6 +284,23 @@ public class MCUtil {
     }
     
     //
+    
+    public static class ResLocJson implements JsonSerializer<ResourceLocation>, JsonDeserializer<ResourceLocation> {
+        public static final ResLocJson SERIALIZATION = new ResLocJson();
+        
+        private ResLocJson() {}
+
+        @Override
+        public ResourceLocation deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+                throws JsonParseException {
+            return new ResourceLocation(json.getAsString());
+        }
+
+        @Override
+        public JsonElement serialize(ResourceLocation src, Type typeOfSrc, JsonSerializationContext context) {
+            return new JsonPrimitive(src.toString());
+        }
+    }
     
     
     
@@ -469,6 +528,29 @@ public class MCUtil {
     
     
     
+    public static boolean isItemWeapon(ItemStack itemStack) {
+        if (itemStack.isEmpty()) {
+            return false;
+        }
+        
+        if (itemStack.getItem() instanceof TieredItem) {
+            return true;
+        }
+        
+        // other items dealing extra damage (trident, knife, potentially unique modded weapons)
+        Collection<AttributeModifier> damageModifiers = itemStack
+                .getItem().getAttributeModifiers(EquipmentSlotType.MAINHAND, itemStack).get(Attributes.ATTACK_DAMAGE);
+        if (damageModifiers != null) {
+            return damageModifiers.stream().anyMatch(modifier -> modifier.getOperation() == AttributeModifier.Operation.ADDITION && modifier.getAmount() > 0);
+        }
+        
+        // TODO compatibility with Tinkers Construct
+        
+        return false;
+    }
+    
+    
+    
     public static boolean removeEffectInstance(LivingEntity entity, EffectInstance effectInstance) {
         if (entity.getActiveEffectsMap().get(effectInstance.getEffect()) == effectInstance) {
             return entity.removeEffect(effectInstance.getEffect());
@@ -513,8 +595,10 @@ public class MCUtil {
         if (entity.level.isClientSide() && entity.is(ClientUtil.getClientPlayer()) && ClientUtil.arePlayerHandsBusy()) {
             return false;
         }
-        
-        ItemStack item = entity.getItemInHand(hand);
+        return itemHandFree(entity.getItemInHand(hand));
+    }
+    
+    public static boolean itemHandFree(ItemStack item) {
         if (item.isEmpty()) {
             return true;
         }

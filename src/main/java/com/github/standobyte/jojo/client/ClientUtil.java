@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
@@ -79,6 +80,7 @@ public class ClientUtil {
     public static final ResourceLocation ADDITIONAL_UI = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/additional.png");
     public static final int MAX_MODEL_LIGHT = LightTexture.pack(15, 15);
     static boolean canSeeStands;
+    public static Boolean forcedCanSeeStands;
     static boolean canHearStands;
 
     public static PlayerEntity getClientPlayer() {
@@ -130,11 +132,23 @@ public class ClientUtil {
         return mc.hasSingleplayerServer() && !mc.getSingleplayerServer().isPublished();
     }
     
+    public static boolean hasOtherPlayers() {
+        Minecraft mc = Minecraft.getInstance();
+        return mc.isLocalServer() && mc.player.connection.getOnlinePlayers().size() <= 1;
+    }
+    
+    public static UUID getServerUUID() {
+        return ClientEventHandler.getInstance().getServerId();
+    }
+    
     public static boolean useActionShiftVar(PlayerEntity player) {
         return player.isShiftKeyDown();
     }
     
     public static boolean canSeeStands() {
+        if (forcedCanSeeStands != null) {
+            return forcedCanSeeStands;
+        }
         return canSeeStands;
     }
     
@@ -306,18 +320,30 @@ public class ClientUtil {
         }
     }
     
+    private static int latestScissorX;
+    private static int latestScissorY;
+    private static int latestScissorWidth;
+    private static int latestScissorHeight;
     public static void enableGlScissor(float x, float y, float width, float height) {
         GL11.glEnable(GL11.GL_SCISSOR_TEST);
         Minecraft mc = Minecraft.getInstance();
         float guiScale = mc.getWindow().calculateScale(mc.options.guiScale, mc.isEnforceUnicode());
         y = mc.getWindow().getGuiScaledHeight() - y - height;
         
-        GL11.glScissor((int) (x * guiScale), (int) (y * guiScale), (int) (width * guiScale), (int) (height * guiScale));
+        latestScissorX =        (int) (guiScale * x);
+        latestScissorY =        (int) (guiScale * y);
+        latestScissorWidth =    (int) (guiScale * width);
+        latestScissorHeight =   (int) (guiScale * height);
+        GL11.glScissor(latestScissorX, latestScissorY, latestScissorWidth, latestScissorHeight);
     }
     
     public static void disableGlScissor() {
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
     }
+    
+//    public static void reenableGlScissor() {
+//        GL11.glScissor(latestScissorX, latestScissorY, latestScissorWidth, latestScissorHeight);
+//    }
     
     public static String getShortenedTranslationKey(String originalKey) {
         String shortenedKey = originalKey + ".shortened";
@@ -447,12 +473,36 @@ public class ClientUtil {
         }
     }
     
+    public static void addRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
+        modelRenderer.xRot += x;
+        modelRenderer.yRot += y;
+        modelRenderer.zRot += z;
+    }
+    
+    public static void translateModelPart(ModelRenderer modelRenderer, Vector3f tlVec) {
+        modelRenderer.x += tlVec.x();
+        modelRenderer.y += tlVec.y();
+        modelRenderer.z += tlVec.z();
+    }
+    
+    public static void rotateModelPart(ModelRenderer modelRenderer, Vector3f rotVec) {
+        modelRenderer.xRot = rotVec.x();
+        modelRenderer.yRot = rotVec.y();
+        modelRenderer.zRot = rotVec.z();
+    }
+    
+    /**
+     * Placeholder - 1.16's ModelRenderers do not have scale fields
+     */
+    public static void scaleModelPart(ModelRenderer modelRenderer, Vector3f scaleVec) {
+    }
+    
     public static void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
         modelRenderer.xRot = x;
         modelRenderer.yRot = y;
         modelRenderer.zRot = z;
     }
-
+    
     public static void setRotationAngleDegrees(ModelRenderer modelRenderer, float x, float y, float z) {
         setRotationAngle(modelRenderer, x * MathUtil.DEG_TO_RAD, y * MathUtil.DEG_TO_RAD, z * MathUtil.DEG_TO_RAD);
     }
@@ -533,9 +583,13 @@ public class ClientUtil {
     }
     
     public static void addItemReferenceQuote(List<ITextComponent> tooltip, Item item) {
-        tooltip.add(new StringTextComponent(" "));
         ResourceLocation itemId = item.getRegistryName();
-        tooltip.add(new TranslationTextComponent("item." + itemId.getNamespace() + "." + itemId.getPath() + ".reference_quote").withStyle(TextFormatting.ITALIC, TextFormatting.DARK_GRAY));
+        addItemReferenceQuote(tooltip, item, itemId.getNamespace() + "." + itemId.getPath());
+    }
+    
+    public static void addItemReferenceQuote(List<ITextComponent> tooltip, Item item, String itemName) {
+        tooltip.add(new StringTextComponent(" "));
+        tooltip.add(new TranslationTextComponent("item." + itemName + ".reference_quote").withStyle(TextFormatting.ITALIC, TextFormatting.DARK_GRAY));
     }
     
     public static ITextComponent donoItemTooltip(String donoUsername) {

@@ -187,7 +187,7 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
                 intScrollX + 205, intScrollY + 8, 0xFFFFFF);
         
         if (selectedSkillDesc != null) {
-            selectedSkillDesc.drawDesc(matrixStack, minecraft.font, intScrollX, intScrollY);
+            selectedSkillDesc.drawDesc(matrixStack, minecraft.font, screen, intScrollX, intScrollY);
         }
     }
     
@@ -265,6 +265,7 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
     
     @Override
     void tick() {
+        super.tick();
         lastClickDelay++;
     }
 

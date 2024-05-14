@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.action;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -13,12 +14,20 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
-import com.github.standobyte.jojo.util.general.ObjectWrapper;
 import com.github.standobyte.jojo.util.general.LazySupplier;
+import com.github.standobyte.jojo.util.general.ObjectWrapper;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -50,7 +59,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     private final boolean needsFreeMainHand;
     private final boolean ignoresPerformerStun;
     private final boolean swingHand;
-    private final boolean cancelsVanillaClick;
+    private final boolean withUserPunch;
     private final Supplier<SoundEvent> shoutSupplier;
     private String translationKey;
     private Action<P> shiftVariation;
@@ -66,12 +75,13 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         this.needsFreeMainHand = builder.needsFreeMainHand;
         this.ignoresPerformerStun = builder.ignoresPerformerStun;
         this.swingHand = builder.swingHand;
-        this.cancelsVanillaClick = builder.cancelsVanillaClick;
+        this.withUserPunch = builder.withUserPunch;
         this.shoutSupplier = builder.shoutSupplier;
-        if (builder.shiftVariationOf != null) {
-            for (Supplier<? extends Action<?>> action : builder.shiftVariationOf) {
-                SHIFT_VARIATIONS.put(action, () -> this);
-            }
+        for (Supplier<? extends Action<?>> action : builder.shiftVariationOf) {
+            SHIFT_VARIATIONS.put(action, () -> this);
+        }
+        for (Supplier<? extends Action<?>> action : builder.addShiftVariation) {
+            SHIFT_VARIATIONS.put(() -> this, action);
         }
     }
     
@@ -216,6 +226,10 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return true;
     }
     
+    public boolean isLegalInHud(P power) {
+        return true;
+    }
+    
     public static ActionConditionResult conditionMessage(String postfix) {
         return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.message.action_condition." + postfix));
     }
@@ -249,6 +263,9 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     public void onPerform(World world, LivingEntity user, P power, ActionTarget target) {
         perform(world, user, power, target);
+        if (swingHand() && withUserPunch() && user instanceof PlayerEntity) {
+            ((PlayerEntity) user).resetAttackStrengthTicker();
+        }
     }
     
     protected void perform(World world, LivingEntity user, P power, ActionTarget target) {}
@@ -296,8 +313,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return swingHand;
     }
 
-    public boolean cancelsVanillaClick() {
-        return cancelsVanillaClick;
+    public boolean withUserPunch() {
+        return withUserPunch;
     }
     
     @Nullable
@@ -460,9 +477,10 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         private boolean needsFreeMainHand = false;
         private boolean ignoresPerformerStun = false;
         private boolean swingHand = false;
-        private boolean cancelsVanillaClick = true;
+        private boolean withUserPunch = false;
         private Supplier<SoundEvent> shoutSupplier = () -> null;
         protected List<Supplier<? extends Action<?>>> shiftVariationOf = new ArrayList<>();
+        protected List<Supplier<? extends Action<?>>> addShiftVariation = new ArrayList<>();
         
         public T cooldown(int cooldown) {
             return cooldown(0, cooldown);
@@ -489,8 +507,13 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
             return getThis();
         }
         
+        @Deprecated
         public T doNotCancelClick() {
-            this.cancelsVanillaClick = false;
+            return withUserPunch();
+        }
+        
+        public T withUserPunch() {
+            this.withUserPunch = true;
             return getThis();
         }
         
@@ -527,11 +550,40 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
             return getThis();
         }
         
-        public T shiftVariationOf(Supplier<? extends Action<?>> action) {
-            this.shiftVariationOf.add(action);
+        public T shiftVariationOf(Supplier<? extends Action<?>> base) {
+            this.shiftVariationOf.add(base);
+            return getThis();
+        }
+        
+        public T addShiftVariation(Supplier<? extends Action<?>> shift) {
+            this.addShiftVariation.add(shift);
             return getThis();
         }
         
         protected abstract T getThis();
+    }
+    
+    
+    
+    public static class JsonSerialization implements JsonSerializer<Action<?>>, JsonDeserializer<Action<?>> {
+        public static final JsonSerialization INSTANCE = new JsonSerialization();
+        
+        protected JsonSerialization() {}
+
+        @Override
+        public Action<?> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
+                throws JsonParseException {
+            if (json.isJsonPrimitive() && ((JsonPrimitive) json).isString()) {
+                return JojoCustomRegistries.ACTIONS.fromId(new ResourceLocation(json.getAsString()));
+            }
+            
+            throw new JsonParseException("An action is defined by its string id");
+        }
+
+        @Override
+        public JsonElement serialize(Action<?> src, Type typeOfSrc, JsonSerializationContext context) {
+            return new JsonPrimitive(src.getRegistryName().toString());
+        }
+        
     }
 }

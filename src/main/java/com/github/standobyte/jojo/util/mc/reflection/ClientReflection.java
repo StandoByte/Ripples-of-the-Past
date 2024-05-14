@@ -15,10 +15,14 @@ import net.minecraft.client.audio.ISoundEventAccessor;
 import net.minecraft.client.audio.Sound;
 import net.minecraft.client.audio.SoundEventAccessor;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.gui.screen.ControlsScreen;
 import net.minecraft.client.gui.screen.IngameMenuScreen;
 import net.minecraft.client.gui.screen.MainMenuScreen;
+import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.gui.widget.list.KeyBindingList;
 import net.minecraft.client.particle.IAnimatedSprite;
 import net.minecraft.client.particle.ParticleManager;
+import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.FirstPersonRenderer;
 import net.minecraft.client.renderer.GameRenderer;
@@ -32,15 +36,18 @@ import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.model.ModelBakery;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.model.RenderMaterial;
-import net.minecraft.client.renderer.texture.ITickable;
-import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.client.renderer.texture.NativeImage;
+import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.client.shader.Shader;
 import net.minecraft.client.shader.ShaderGroup;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Timer;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 public class ClientReflection {
@@ -195,27 +202,6 @@ public class ClientReflection {
     public static Set<RenderMaterial> getModelBakeryUnreferencedTextures() {
         return ReflectionUtil.getFieldValue(MODEL_BAKERY_UNREFERENCED_TEXTURES, null);
     }
-
-    
-    private static final Field TEXTURE_MANAGER_TICKABLE_TEXTURES = ObfuscationReflectionHelper.findField(TextureManager.class, "field_110583_b");
-    public static Set<ITickable> getTickableTextures(TextureManager textureManager) {
-        return ReflectionUtil.getFieldValue(TEXTURE_MANAGER_TICKABLE_TEXTURES, textureManager);
-    }
-    
-    public static void setTickableTextures(TextureManager textureManager, Set<ITickable> textures) {
-        ReflectionUtil.setFieldValue(TEXTURE_MANAGER_TICKABLE_TEXTURES, textureManager, textures);
-    }
-    
-    
-    private static final Field MINECRAFT_PARTICLE_ENGINE = ObfuscationReflectionHelper.findField(Minecraft.class, "field_71452_i");
-    public static void setParticleEngine(Minecraft mc, ParticleManager particleEngine) {
-        ReflectionUtil.setFieldValue(MINECRAFT_PARTICLE_ENGINE, mc, particleEngine);
-    }
-    
-    private static final Field PARTICLE_MANAGER_TEXTURE_MANAGER = ObfuscationReflectionHelper.findField(ParticleManager.class, "field_78877_c");
-    public static void setTextureManager(ParticleManager particleManager, TextureManager textureManager) {
-        ReflectionUtil.setFieldValue(PARTICLE_MANAGER_TEXTURE_MANAGER, particleManager, textureManager);
-    }
     
     private static final Field MINECRAFT_MOUSE_HANDLER = ObfuscationReflectionHelper.findField(Minecraft.class, "field_71417_B");
     public static void setMouseHandler(Minecraft mc, MouseHelper mouseHandler) {
@@ -248,4 +234,78 @@ public class ClientReflection {
     public static void setHandsBusy(ClientPlayerEntity player, boolean handsBusy) {
         ReflectionUtil.setBooleanFieldValue(CLIENT_PLAYER_ENTITY_HANDS_BUSY, player, handsBusy);
     }
+    
+    
+    private static final Field KEY_BINDING_ALL_FIELD = ObfuscationReflectionHelper.findField(KeyBinding.class, "field_74516_a");
+    private static Map<String, KeyBinding> KEY_BINDINGS_ALL;
+    public static Map<String, KeyBinding> getAllKeybindingMap() {
+        if (KEY_BINDINGS_ALL == null) {
+            KEY_BINDINGS_ALL = ReflectionUtil.getFieldValue(KEY_BINDING_ALL_FIELD, null);
+        }
+        return KEY_BINDINGS_ALL;
+    }
+    
+    
+    private static final Field CONTROLS_SCREEN_CONTROL_LIST = ObfuscationReflectionHelper.findField(ControlsScreen.class, "field_146494_r");
+    public static KeyBindingList getControlList(ControlsScreen screen) {
+        return ReflectionUtil.getFieldValue(CONTROLS_SCREEN_CONTROL_LIST, screen);
+    }
+    
+    private static final Field KEY_BINDING_LIST_MAX_NAME_WIDTH = ObfuscationReflectionHelper.findField(KeyBindingList.class, "field_148188_n");
+    public static int getMaxNameWidth(KeyBindingList keyBindingList) {
+        return ReflectionUtil.getIntFieldValue(KEY_BINDING_LIST_MAX_NAME_WIDTH, keyBindingList);
+    }
+    
+    private static final Field KEY_BINDING_LIST_KEY_ENTRY_CHANGE_BUTTON = ObfuscationReflectionHelper.findField(KeyBindingList.KeyEntry.class, "field_148280_d");
+    public static Button getChangeButton(KeyBindingList.KeyEntry keyEntry) {
+        return ReflectionUtil.getFieldValue(KEY_BINDING_LIST_KEY_ENTRY_CHANGE_BUTTON, keyEntry);
+    }
+    
+    private static final Field KEY_BINDING_LIST_KEY_ENTRY_KEY = ObfuscationReflectionHelper.findField(KeyBindingList.KeyEntry.class, "field_148282_b");
+    public static KeyBinding getKey(KeyBindingList.KeyEntry keyEntry) {
+        return ReflectionUtil.getFieldValue(KEY_BINDING_LIST_KEY_ENTRY_KEY, keyEntry);
+    }
+    
+    private static final Field KEY_BINDING_LIST_CATEGORY_ENTRY_NAME = ObfuscationReflectionHelper.findField(KeyBindingList.CategoryEntry.class, "field_148285_b");
+    public static ITextComponent getName(KeyBindingList.CategoryEntry categoryEntry) {
+        return ReflectionUtil.getFieldValue(KEY_BINDING_LIST_CATEGORY_ENTRY_NAME, categoryEntry);
+    }
+    
+    private static final Method ABSTRACT_LIST_GET_ROW_TOP = ObfuscationReflectionHelper.findMethod(net.minecraft.client.gui.widget.list.AbstractList.class, "func_230962_i_", int.class);
+    public static int getRowTop(net.minecraft.client.gui.widget.list.AbstractList<?> uiList, int rowIndex) {
+        return ReflectionUtil.invokeMethod(ABSTRACT_LIST_GET_ROW_TOP, uiList, rowIndex);
+    }
+    
+    
+    private static final Field MINECRAFT_PAUSE_PARTIAL_TICK = ObfuscationReflectionHelper.findField(Minecraft.class, "field_193996_ah");
+    public static float getPausePartialTick(Minecraft mc) {
+        return ReflectionUtil.getFloatFieldValue(MINECRAFT_PAUSE_PARTIAL_TICK, mc);
+    }
+    
+    private static final Field MINECRAFT_MAIN_RENDER_TARGET = ObfuscationReflectionHelper.findField(Minecraft.class, "field_147124_at");
+    public static void setMainRenderTarget(Minecraft mc, Framebuffer buffer) {
+        ReflectionUtil.setFieldValue(MINECRAFT_MAIN_RENDER_TARGET, mc, buffer);
+    }
+    
+    private static final Method ACTIVE_RENDER_INFO_SET_POSITION = ObfuscationReflectionHelper.findMethod(ActiveRenderInfo.class, "func_216774_a", Vector3d.class);
+    public static void setPosition(ActiveRenderInfo camera, Vector3d position) {
+        ReflectionUtil.invokeMethod(ACTIVE_RENDER_INFO_SET_POSITION, camera, position);
+    }
+    
+    private static final Field ACTIVE_RENDER_INFO_DETACHED = ObfuscationReflectionHelper.findField(ActiveRenderInfo.class, "field_216799_k");
+    public static void setIsDetached(ActiveRenderInfo camera, boolean detached) {
+        ReflectionUtil.setBooleanFieldValue(ACTIVE_RENDER_INFO_DETACHED, camera, detached);
+    }
+    
+    private static final Field ACTIVE_RENDER_INFO_MIRROR = ObfuscationReflectionHelper.findField(ActiveRenderInfo.class, "field_216800_l");
+    public static void setMirror(ActiveRenderInfo camera, boolean mirror) {
+        ReflectionUtil.setBooleanFieldValue(ACTIVE_RENDER_INFO_MIRROR, camera, mirror);
+    }
+    
+    
+    private static final Field NATIVE_IMAGE_PIXELS = ObfuscationReflectionHelper.findField(NativeImage.class, "field_195722_d");
+    public static long getPixelsAddress(NativeImage image) {
+        return ReflectionUtil.getLongFieldValue(NATIVE_IMAGE_PIXELS, image);
+    }
+    
 }

@@ -76,7 +76,7 @@ public class JojoModConfig {
         private List<StandType<?>> bannedStandsSynced = null;
         private List<ResourceLocation> bannedStandsResLocs;
 
-        public final ForgeConfigSpec.BooleanValue abilitiesBreakBlocks;
+//        public final ForgeConfigSpec.BooleanValue abilitiesBreakBlocks;
         public final ForgeConfigSpec.DoubleValue standDamageMultiplier;
         public final ForgeConfigSpec.DoubleValue standResistanceMultiplier;
         public final ForgeConfigSpec.BooleanValue skipStandProgression;
@@ -278,10 +278,10 @@ public class JojoModConfig {
                             .defineInRange("timeStopDamageMultiplier", 1.0, 0.0, 1.0);
                 builder.pop();
                 
-                abilitiesBreakBlocks = builder
-                        .comment("    Whether or not Stands and abilities can break blocks.")
-                        .translation("jojo.config.abilitiesBreakBlocks")
-                        .define("abilitiesBreakBlocks", true);
+//                abilitiesBreakBlocks = builder
+//                        .comment("    Whether or not Stands and abilities can break blocks.")
+//                        .translation("jojo.config.abilitiesBreakBlocks")
+//                        .define("abilitiesBreakBlocks", true);
             
                 standDamageMultiplier = builder
                         .comment("    Damage multiplier applied to all Stands.")
@@ -390,7 +390,7 @@ public class JojoModConfig {
             private final StandUtil.StandRandomPoolFilter standRandomPoolMode;
             private final List<StandType<?>> bannedStands;
             
-            private final boolean abilitiesBreakBlocks;
+//            private final boolean abilitiesBreakBlocks;
 //            private final double standDamageMultiplier;
             private final boolean skipStandProgression;
             private final boolean standStamina;
@@ -431,7 +431,7 @@ public class JojoModConfig {
                 breathingTrainingDeterioration =    (flags[0] & 64) > 0;
 //                _ =                      (flags[0] & 128) > 0;
                 
-                abilitiesBreakBlocks =              (flags[1] & 1) > 0;
+//                abilitiesBreakBlocks =              (flags[1] & 1) > 0;
                 skipStandProgression =              (flags[1] & 2) > 0;
                 standStamina =                      (flags[1] & 4) > 0;
                 dropStandDisc =                     (flags[1] & 8) > 0;
@@ -470,7 +470,7 @@ public class JojoModConfig {
                 if (breathingTrainingDeterioration)     flags[0] |= 64;
 //                if (_)                       flags[0] |= 128;
                 
-                if (abilitiesBreakBlocks)               flags[1] |= 1;
+//                if (abilitiesBreakBlocks)               flags[1] |= 1;
                 if (skipStandProgression)               flags[1] |= 2;
                 if (standStamina)                       flags[1] |= 4;
                 if (dropStandDisc)                      flags[1] |= 8;
@@ -513,7 +513,7 @@ public class JojoModConfig {
                         .map(key -> JojoCustomRegistries.STANDS.getRegistry().getValue(key))
                         .collect(Collectors.toList());
                 
-                abilitiesBreakBlocks = config.abilitiesBreakBlocks.get();
+//                abilitiesBreakBlocks = config.abilitiesBreakBlocks.get();
 //                standDamageMultiplier = config.standDamageMultiplier.get()
                 skipStandProgression = config.skipStandProgression.get();
                 standStamina = config.standStamina.get();
@@ -551,7 +551,7 @@ public class JojoModConfig {
                 COMMON_SYNCED_TO_CLIENT.standRandomPoolFilter.set(standRandomPoolMode);
                 COMMON_SYNCED_TO_CLIENT.bannedStandsSynced = bannedStands;
                 
-                COMMON_SYNCED_TO_CLIENT.abilitiesBreakBlocks.set(abilitiesBreakBlocks);
+//                COMMON_SYNCED_TO_CLIENT.abilitiesBreakBlocks.set(abilitiesBreakBlocks);
 //                COMMON_SYNCED_TO_CLIENT.standDamageMultiplier.set(standDamageMultiplier);
                 COMMON_SYNCED_TO_CLIENT.skipStandProgression.set(skipStandProgression);
                 COMMON_SYNCED_TO_CLIENT.standStamina.set(standStamina);
@@ -591,7 +591,7 @@ public class JojoModConfig {
                 COMMON_SYNCED_TO_CLIENT.standRandomPoolFilter.clearCache();
                 COMMON_SYNCED_TO_CLIENT.bannedStandsSynced = null;
                 
-                COMMON_SYNCED_TO_CLIENT.abilitiesBreakBlocks.clearCache();
+//                COMMON_SYNCED_TO_CLIENT.abilitiesBreakBlocks.clearCache();
 //                COMMON_SYNCED_TO_CLIENT.standDamageMultiplier.clearCache();
                 COMMON_SYNCED_TO_CLIENT.skipStandProgression.clearCache();
                 COMMON_SYNCED_TO_CLIENT.standStamina.clearCache();
@@ -625,20 +625,6 @@ public class JojoModConfig {
     
     
     
-    public static class Client {
-        
-        public final ForgeConfigSpec.BooleanValue actionSlotHotkeys;
-        
-        private Client(ForgeConfigSpec.Builder builder) {
-            actionSlotHotkeys = builder
-                    .comment(" Enable hotkey settings for each individual attack and ability from 1 to 9.", 
-                            "  If your client is launched, changing the setting requires restarting the game.")
-                    .translation("jojo.config.client.slotHotkeys")
-                    .define("actionSlotHotkeys", false);
-        }
-    }
-
-
     static final ForgeConfigSpec commonSpec;
     private static final Common COMMON_FROM_FILE;
     private static final Common COMMON_SYNCED_TO_CLIENT;
@@ -658,14 +644,6 @@ public class JojoModConfig {
     
     public static Common getCommonConfigInstance(boolean isClientSide) {
         return isClientSide && !ClientUtil.isLocalServer() ? COMMON_SYNCED_TO_CLIENT : COMMON_FROM_FILE;
-    }
-
-    static final ForgeConfigSpec clientSpec;
-    public static final Client CLIENT;
-    static {
-        final Pair<Client, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(Client::new);
-        clientSpec = specPair.getRight();
-        CLIENT = specPair.getLeft();
     }
     
     @SubscribeEvent

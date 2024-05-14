@@ -95,7 +95,7 @@ public class StandUserDummyEntity extends MobEntity implements IMobStandUser, IE
                 previousDiscStand.ifPresent(prevStand -> player.drop(StandDiscItem.withStand(
                         new ItemStack(ModItems.STAND_DISC.get()), prevStand), false));
                 
-                StandInstance discStand = StandDiscItem.getStandFromStack(item, false);
+                StandInstance discStand = StandDiscItem.getStandFromStack(item);
                 if (StandDiscItem.giveStandFromDisc(stand, discStand, item)) {
                     stand.skipProgression();
                     if (!player.abilities.instabuild) {

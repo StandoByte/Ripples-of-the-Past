@@ -1,7 +1,5 @@
 package com.github.standobyte.jojo.power.impl;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 
 import javax.annotation.Nonnull;
@@ -28,9 +26,7 @@ import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.bowcharge.BowChargeEffectInstance;
 import com.github.standobyte.jojo.power.bowcharge.IBowChargeEffect;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
-import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.github.standobyte.jojo.util.general.ObjectWrapper;
-import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -52,9 +48,6 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     @Nonnull
     protected final LivingEntity user;
     protected final Optional<ServerPlayerEntity> serverPlayerUser;
-    
-    private ActionsLayout<P> clHudLayout = ActionsLayout.emptyLayout();
-    private Map<ResourceLocation, ActionsLayout<P>> srvSavedLayouts = new HashMap<>();
     
     private ActionCooldownTracker cooldowns = new ActionCooldownTracker();
     private int leapCooldown;
@@ -86,27 +79,6 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             });
             ModCriteriaTriggers.GET_POWER.get().trigger(player, getPowerClassification(), this);
         });
-
-        if (!user.level.isClientSide()) {
-            serverPlayerUser.ifPresent(player -> {
-                clHudLayout.syncWithUser(player, getPowerClassification(), type);
-            });
-        }
-    }
-
-    protected void onPowerSet(T type) {
-        if (!user.level.isClientSide()) {
-            if (type != null) {
-                ResourceLocation key = type.getRegistryName();
-                clHudLayout = type.createDefaultLayout();
-                if (srvSavedLayouts.containsKey(key)) {
-                    clHudLayout.copySwitchesState(srvSavedLayouts.get(key));
-                }
-            }
-            else {
-                clHudLayout = ActionsLayout.emptyLayout();
-            }
-        }
     }
     
     @Override
@@ -158,24 +130,6 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     protected void onNewDay(long prevDay, long day) {
         if (hasPower()) {
             getType().onNewDay(user, getThis(), prevDay, day);
-        }
-    }
-    
-    @Override
-    public ActionsLayout<P> getActionsHudLayout() {
-        return clHudLayout;
-    }
-    
-    @Override
-    public void setActionsHudLayout(ActionsLayout<P> layout) {
-        this.clHudLayout = layout;
-    }
-    
-    @Override
-    public void saveActionsHudLayout(T powerType, ActionsLayout<P> clReceivedLayout) {
-        srvSavedLayouts.put(powerType.getRegistryName(), clReceivedLayout);
-        if (powerType == this.getType()) {
-            this.clHudLayout = clReceivedLayout;
         }
     }
     
@@ -607,14 +561,6 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         cnbt.put("Cooldowns", cooldowns.writeNBT());
         cnbt.putInt("LeapCd", leapCooldown);
         
-        CompoundNBT layoutsMapNbt = new CompoundNBT();
-        srvSavedLayouts.entrySet().forEach(entry -> {
-            if (entry.getKey() != null && entry.getValue() != null) {
-                CompoundNBT layoutNbt = entry.getValue().toNBT();
-                layoutsMapNbt.put(entry.getKey().toString(), layoutNbt);
-            }
-        });
-        cnbt.put("LayoutsSaved", layoutsMapNbt);
         return cnbt;
     }
 
@@ -623,23 +569,6 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         lastTickedDay = nbt.getLong("LastDay");
         cooldowns = new ActionCooldownTracker(nbt.getCompound("Cooldowns"));
         leapCooldown = nbt.getInt("LeapCd");
-        
-        if (nbt.contains("LayoutsSaved", MCUtil.getNbtId(CompoundNBT.class))) {
-            CompoundNBT layoutsMapNbt = nbt.getCompound("LayoutsSaved");
-            layoutsMapNbt.getAllKeys().forEach(key -> {
-                if (!key.isEmpty() && layoutsMapNbt.contains(key, MCUtil.getNbtId(CompoundNBT.class))) {
-                    ResourceLocation powerTypeId = new ResourceLocation(key);
-                    IPowerType<?, ?> type = getPowerClassification().getFromRegistryId(powerTypeId);
-                    ActionsLayout<P> layout = type != null ? (ActionsLayout<P>) type.createDefaultLayout() : ActionsLayout.emptyLayout();
-                    CompoundNBT layoutNbt = layoutsMapNbt.getCompound(key);
-                    layout.fromNBT(layoutNbt);
-                    srvSavedLayouts.put(powerTypeId, layout);
-                    if (type == getType()) {
-                        clHudLayout = layout;
-                    }
-                }
-            });
-        }
     }
 
     @Override
@@ -647,18 +576,11 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         if (oldPower.hasPower() && (!wasDeath || oldPower.getType().keepOnDeath(oldPower))) {
             keepPower(oldPower, wasDeath);
         }
-        keepActionsLayout(oldPower);
     }
 
     protected void keepPower(P oldPower, boolean wasDeath) {
         this.leapCooldown = oldPower.getLeapCooldown();
         this.cooldowns = oldPower.getCooldowns();
-    }
-    
-    protected void keepActionsLayout(P oldPower) {
-        PowerBaseImpl<P, T> myCodeIsJankAf = (PowerBaseImpl<P, T>) oldPower;
-        clHudLayout = myCodeIsJankAf.clHudLayout;
-        srvSavedLayouts = myCodeIsJankAf.srvSavedLayouts;
     }
     
     @Override
@@ -672,15 +594,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             }
         });
     }
-
-    protected final void syncLayoutWithUser() {
-        serverPlayerUser.ifPresent(player -> {
-            if (hasPower()) {
-                clHudLayout.syncWithUser(player, getPowerClassification(), getType());
-            }
-        });
-    }
-
+    
     @Override
     public void syncWithTrackingOrUser(ServerPlayerEntity player) {
         if (hasPower() && user != null) {

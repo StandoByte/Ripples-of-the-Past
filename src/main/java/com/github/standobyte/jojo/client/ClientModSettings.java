@@ -25,13 +25,21 @@ public class ClientModSettings {
         public PositionConfig hotbarsPosition = PositionConfig.TOP_LEFT;
         public HudNamesRender hudNamesRender = HudNamesRender.ALWAYS;
         public boolean hudHotbarsFold = false;
+        public boolean showLockedSlots = false;
         
         public boolean resolveShaders = true;
         public boolean menacingParticles = true;
-        public boolean timeStopFreezesVisuals = false;
         public boolean timeStopAnimation = true;
         
         public boolean characterVoiceLines = true;
+        
+        public boolean toggleLmbHotbar = false;
+        public boolean toggleRmbHotbar = false;
+        public boolean toggleDisableHotbars = false;
+        
+        public boolean thirdPersonHamonAura = true;
+        public boolean firstPersonHamonAura = true;
+        public boolean hamonAuraBlur = false;
     }
     
     
