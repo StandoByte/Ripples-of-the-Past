@@ -1,13 +1,26 @@
 package com.github.standobyte.jojo.client.particle.custom;
 
 import java.util.Iterator;
+import java.util.Optional;
 import java.util.Queue;
 import java.util.Random;
 
 import com.github.standobyte.jojo.client.ClientModSettings;
+import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.init.ModItems;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
+import com.github.standobyte.jojo.item.AjaStoneItem;
+import com.github.standobyte.jojo.item.OilItem;
+import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
 import com.github.standobyte.jojo.util.general.MathUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.google.common.collect.EvictingQueue;
 import com.google.common.collect.Queues;
+import com.google.common.collect.Streams;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -23,6 +36,15 @@ import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.crash.CrashReport;
 import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.crash.ReportedException;
+import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.item.ShootableItem;
+import net.minecraft.item.TridentItem;
+import net.minecraft.potion.PotionUtils;
+import net.minecraft.potion.Potions;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Quaternion;
@@ -93,11 +115,50 @@ public class FirstPersonHamonAura {
             }
         }
     }
+    
+    public static boolean auraRendersAtItem(ItemStack itemStack, HandSide handSide) {
+        if ((handSide == HandSide.LEFT ? getInstance().particlesLeft : getInstance().particlesRight).isEmpty() || MCUtil.itemHandFree(itemStack)) {
+            return false;
+        }
+        
+        Entity cameraEntity = Minecraft.getInstance().getCameraEntity();
+        if (cameraEntity instanceof LivingEntity) {
+            LivingEntity entity = (LivingEntity) cameraEntity;
+            Optional<HamonData> hamonOptional = INonStandPower.getNonStandPowerOptional(entity).resolve()
+                    .flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get()));
+            return hamonOptional.map(hamon -> {
+                Item item = itemStack.getItem();
+                return entity.getMainArm() == handSide && (hamon.isSkillLearned(ModHamonSkills.METAL_SILVER_OVERDRIVE.get()) || OilItem.remainingOiledUses(itemStack).isPresent()) && MCUtil.isItemWeapon(itemStack)
+                        || hamon.isSkillLearned(ModHamonSkills.PLANT_ITEM_INFUSION.get()) && HamonUtil.isItemLivingMatter(itemStack)
+                        || hamon.isSkillLearned(ModHamonSkills.THROWABLES_INFUSION.get()) && (item == Items.EGG || item == Items.SNOWBALL || ((item == Items.SPLASH_POTION || item == Items.LINGERING_POTION) && PotionUtils.getPotion(itemStack) == Potions.WATER))
+                        || hamon.isSkillLearned(ModHamonSkills.ARROW_INFUSION.get()) && (item instanceof ShootableItem || item instanceof TridentItem || item == ModItems.KNIFE.get() || item == ModItems.BLADE_HAT.get())
+                        || hamon.isSkillLearned(ModHamonSkills.CLACKER_VOLLEY.get()) && item == ModItems.CLACKERS.get()
+                        || hamon.isSkillLearned(ModHamonSkills.AJA_STONE_KEEPER.get()) && item instanceof AjaStoneItem
+                        || hamon.isSkillLearned(ModHamonSkills.SATIPOROJA_SCARF.get()) && item == ModItems.SATIPOROJA_SCARF.get()
+                        || Streams.stream(hamon.getLearnedSkills())
+                            .flatMap(AbstractHamonSkill::getRewardActions)
+                            .anyMatch(action -> action.renderHamonAuraOnItem(itemStack, handSide));
+            }).orElse(false);
+        }
+        
+        return false;
+    }
+    
+    public static void itemMatrixTransform(MatrixStack matrixStack, HandSide handSide, ItemStack itemStack) {
+        boolean flag = handSide != HandSide.LEFT;
+        float f = flag ? 1.0F : -1.0F;
+        matrixStack.translate(f * 0.64000005, -0.6, -0.71999997);
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(f * 45.0F));
+        matrixStack.translate(-f, 3.6, 3.5);
+        matrixStack.mulPose(Vector3f.ZP.rotationDegrees(f * 120.0F));
+        matrixStack.mulPose(Vector3f.XP.rotationDegrees(200.0F));
+        matrixStack.mulPose(Vector3f.YP.rotationDegrees(f * -135.0F));
+        matrixStack.translate(f * 5.3, 0, 0);
+    }
 
 
     @SuppressWarnings("deprecation")
-    public void renderParticles(MatrixStack pMatrixStack, IRenderTypeBuffer pBuffer, 
-            LightTexture pLightTexture, float pPartialTicks, HandSide handSide) {
+    public void renderParticles(MatrixStack pMatrixStack, IRenderTypeBuffer pBuffer, HandSide handSide) {
         if (!ClientModSettings.getSettingsReadOnly().firstPersonHamonAura) return;
         
         Queue<FirstPersonPseudoParticle> particles;
@@ -113,7 +174,11 @@ public class FirstPersonHamonAura {
         }
         if (particles.isEmpty()) return;
         
-        pLightTexture.turnOnLightLayer();
+
+        LightTexture lightTexture = Minecraft.getInstance().gameRenderer.lightTexture();
+        float partialTicks = ClientUtil.getPartialTick();
+        
+        lightTexture.turnOnLightLayer();
         Runnable enable = () -> {
             RenderSystem.enableAlphaTest();
             RenderSystem.defaultAlphaFunc();
@@ -134,7 +199,7 @@ public class FirstPersonHamonAura {
         
         for (FirstPersonPseudoParticle particle : particles) {
             try {
-                particle.render(bufferbuilder, pPartialTicks);
+                particle.render(bufferbuilder, partialTicks);
             } catch (Throwable throwable) {
                 CrashReport crashreport = CrashReport.forThrowable(throwable, "Rendering Particle");
                 CrashReportCategory crashreportcategory = crashreport.addCategory("Particle being rendered");
@@ -151,7 +216,7 @@ public class FirstPersonHamonAura {
         RenderSystem.depthFunc(515);
         RenderSystem.disableBlend();
         RenderSystem.defaultAlphaFunc();
-        pLightTexture.turnOffLightLayer();
+        lightTexture.turnOffLightLayer();
         RenderSystem.disableFog();
     }
     

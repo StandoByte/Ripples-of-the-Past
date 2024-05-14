@@ -595,8 +595,10 @@ public class MCUtil {
         if (entity.level.isClientSide() && entity.is(ClientUtil.getClientPlayer()) && ClientUtil.arePlayerHandsBusy()) {
             return false;
         }
-        
-        ItemStack item = entity.getItemInHand(hand);
+        return itemHandFree(entity.getItemInHand(hand));
+    }
+    
+    public static boolean itemHandFree(ItemStack item) {
         if (item.isEmpty()) {
             return true;
         }

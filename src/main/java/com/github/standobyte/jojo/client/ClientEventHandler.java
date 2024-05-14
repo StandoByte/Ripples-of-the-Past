@@ -639,8 +639,7 @@ public class ClientEventHandler {
         Hand hand = event.getArm() == event.getPlayer().getMainArm() ? Hand.MAIN_HAND : Hand.OFF_HAND;
         if (MCUtil.isHandFree(event.getPlayer(), hand)) {
             Minecraft mc = Minecraft.getInstance();
-            FirstPersonHamonAura.getInstance().renderParticles(event.getPoseStack(), event.getMultiBufferSource(), 
-                    mc.gameRenderer.lightTexture(), ClientUtil.getPartialTick(), event.getArm());
+            FirstPersonHamonAura.getInstance().renderParticles(event.getPoseStack(), event.getMultiBufferSource(), event.getArm());
         }
     }
     
