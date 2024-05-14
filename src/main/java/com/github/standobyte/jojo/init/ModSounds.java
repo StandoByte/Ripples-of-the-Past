@@ -30,6 +30,12 @@ public class ModSounds {
     
     public static final RegistryObject<SoundEvent> PILLAR_MAN_AWAKENING = register("pillar_man_awakening");
     
+    public static final RegistryObject<SoundEvent> PILLAR_MAN_HEAT_MODE = register("pillar_man_heat_mode");
+    
+    public static final RegistryObject<SoundEvent> PILLAR_MAN_WIND_MODE = register("pillar_man_wind_mode");
+    
+    public static final RegistryObject<SoundEvent> PILLAR_MAN_WIND_MODE2 = register("pillar_man_wind_mode2");
+    
     public static final RegistryObject<SoundEvent> AJA_STONE_CHARGING = register("aja_stone_charging");
     
     public static final RegistryObject<SoundEvent> AJA_STONE_BEAM = register("aja_stone_beam");
@@ -80,6 +86,8 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> VAMPIRE_CURE_START = register("vampire_cure_start");
 
     public static final RegistryObject<SoundEvent> VAMPIRE_CURE_END = register("vampire_cure_end");
+    
+    public static final RegistryObject<SoundEvent> ZOMBIE_DEVOUR = register("zombie_devour");
 
 
     public static final RegistryObject<SoundEvent> HAMON_PICK_JONATHAN = register("hamon_pick_jonathan");

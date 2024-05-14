@@ -26,6 +26,7 @@ import com.github.standobyte.jojo.entity.damaging.projectile.HamonTurquoiseBlueO
 import com.github.standobyte.jojo.entity.damaging.projectile.MRCrossfireHurricaneEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRFireballEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRFlameEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.PillarmanDivineSandstormEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.SCFlameSwingEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.TommyGunBulletEntity;
@@ -33,6 +34,8 @@ import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGBarrie
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGGrapplingStringEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGStringEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.MRRedBindEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.PillarmanHornEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.PillarmanVeinEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.SPStarFingerEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.SatiporojaScarfBindingEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.SatiporojaScarfEntity;
@@ -189,7 +192,7 @@ public class ModEntityTypes {
     public static final RegistryObject<EntityType<SPStarFingerEntity>> SP_STAR_FINGER = ENTITIES.register("sp_star_finger", 
             () -> EntityType.Builder.<SPStarFingerEntity>of(SPStarFingerEntity::new, EntityClassification.MISC).sized(0.125F, 0.125F).noSummon().noSave().setUpdateInterval(20)
             .build(new ResourceLocation(JojoMod.MOD_ID, "sp_star_finger").toString()));
-    
+
     public static final RegistryObject<EntityType<HGStringEntity>> HG_STRING = ENTITIES.register("hg_string", 
             () -> EntityType.Builder.<HGStringEntity>of(HGStringEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().noSave().setUpdateInterval(20)
             .build(new ResourceLocation(JojoMod.MOD_ID, "hg_string").toString()));
@@ -257,6 +260,18 @@ public class ModEntityTypes {
     public static final RegistryObject<EntityType<FireworkInsideEntity>> FIREWORK_INSIDE = ENTITIES.register("firework_inside", 
             () -> EntityType.Builder.<FireworkInsideEntity>of(FireworkInsideEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10)
             .build(new ResourceLocation(JojoMod.MOD_ID, "firework_inside").toString()));
+    
+    public static final RegistryObject<EntityType<PillarmanDivineSandstormEntity>> PILLARMAN_DIVINE_SANDSTORM = ENTITIES.register("pillarman_divine_sandstorm", 
+            () -> EntityType.Builder.<PillarmanDivineSandstormEntity>of(PillarmanDivineSandstormEntity::new, EntityClassification.MISC).sized(4F, 2F).noSummon().setUpdateInterval(20).fireImmune()
+            .build(new ResourceLocation(JojoMod.MOD_ID, "pillarman_divine_sandstorm").toString()));
+    
+    public static final RegistryObject<EntityType<PillarmanHornEntity>> PILLARMAN_HORN = ENTITIES.register("pm_horn", 
+            () -> EntityType.Builder.<PillarmanHornEntity>of(PillarmanHornEntity::new, EntityClassification.MISC).sized(0.125F, 0.125F).noSummon().noSave().setUpdateInterval(20)
+            .build(new ResourceLocation(JojoMod.MOD_ID, "pm_horn").toString()));
+    
+    public static final RegistryObject<EntityType<PillarmanVeinEntity>> PILLARMAN_VEINS = ENTITIES.register("pillarman_veins", 
+            () -> EntityType.Builder.<PillarmanVeinEntity>of(PillarmanVeinEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().noSave().setUpdateInterval(20)
+            .build(new ResourceLocation(JojoMod.MOD_ID, "pillarman_veins").toString()));
 
     
     

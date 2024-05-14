@@ -451,7 +451,8 @@ public class ClientEventHandler {
         boolean isVampirismModVampire = OptionalDependencyHelper.vampirism().isEntityVampire(mc.player);
         if (event.getType() == FOOD && !isVampirismModVampire || event.getType() == AIR) {
             INonStandPower.getNonStandPowerOptional(mc.player).ifPresent(power -> {
-                if (power.getType() == ModPowers.VAMPIRISM.get()) {
+                if (power.getType() == ModPowers.VAMPIRISM.get() || power.getType() == ModPowers.ZOMBIE.get() 
+                		|| (power.getType() == ModPowers.PILLAR_MAN.get() && power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).get().getEvolutionStage() > 1)) {
                     event.setCanceled(true);
                 }
             });

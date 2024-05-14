@@ -24,8 +24,20 @@
     "sounds": [ "jojo:blade_hat_entity_hit" ]
   },
   "pillar_man_awakening": {
-    "subtitle": "jojo.subtitle.pillar_man_awakening",
+    "subtitle": "jojo.subtitle.pillar_man_light_mode",
     "sounds": [ "jojo:pillar_man_awakening" ]
+  },
+  "pillar_man_heat_mode": {
+    "subtitle": "jojo.subtitle.pillar_man_heat_mode",
+    "sounds": [ "jojo:pillar_man_heat_mode" ]
+  },
+  "pillar_man_wind_mode": {
+    "subtitle": "jojo.subtitle.pillar_man_wind_mode",
+    "sounds": [ "jojo:pillar_man_wind_mode" ]
+  },
+  "pillar_man_wind_mode2": {
+    "subtitle": "jojo.subtitle.pillar_man_wind_mode",
+    "sounds": [ "jojo:pillar_man_wind_mode2" ]
   },
   "aja_stone_charging": {
     "subtitle": "jojo.subtitle.aja_stone_charging",
@@ -98,6 +110,10 @@
   "vampire_cure_end": {
     "subtitle": "jojo.subtitle.vampire_cure_end",
     "sounds": [ "minecraft:mob/zombie/unfect" ]
+  },
+  "zombie_devour": {
+    "subtitle": "jojo.subtitle.devouring",
+    "sounds": [ "jojo:zombie_devour" ]
   },
   "hamon_pick_jonathan": {
     "sounds": [ "jojo:hamon_pick_jonathan" ]

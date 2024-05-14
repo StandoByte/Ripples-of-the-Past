@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.potion.VampireSunBurnEffect;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanData;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
@@ -64,12 +65,14 @@ public class VampirismUtil {
 //    private static final float MAX_SUN_DAMAGE = 10;
 //    private static final float MIN_SUN_DAMAGE = 2;
     private static float getSunDamage(LivingEntity entity) {
-        if (entity.hasEffect(ModStatusEffects.SUN_RESISTANCE.get())
-                || !(entity instanceof PlayerEntity || JojoModConfig.getCommonConfigInstance(false).undeadMobsSunDamage.get())
+        if (entity.hasEffect(ModStatusEffects.SUN_RESISTANCE.get()) 
+        		|| !(entity instanceof PlayerEntity || JojoModConfig.getCommonConfigInstance(false).undeadMobsSunDamage.get())
                 || entity.isSleeping() && entity.getSleepingPos().map(sleepingPos -> {
                     BlockState blockState = entity.level.getBlockState(sleepingPos);
                     return blockState.getBlock() instanceof WoodenCoffinBlock && blockState.getValue(WoodenCoffinBlock.CLOSED);
-                }).orElse(false)) {
+                }).orElse(false) || INonStandPower.getNonStandPowerOptional(entity).map(
+                        power -> power.getTypeSpecificData(ModPowers.PILLAR_MAN.get())
+                        .map(pillarman -> pillarman.isStoneFormEnabled()).orElse(false)).orElse(false)) {
             return 0;
         }
         World world = entity.level;
@@ -137,12 +140,17 @@ public class VampirismUtil {
                     EntityPredicate selector = CommonReflection.getTargetConditions(targetGoal);
                     if (selector != null) {
                         Predicate<LivingEntity> oldPredicate = CommonReflection.getTargetSelector(selector);
-                        Predicate<LivingEntity> undeadPredicate = target -> 
+						Predicate<LivingEntity> undeadPredicate = target -> 
                             target instanceof PlayerEntity && !(
 //                                    JojoModUtil.isPlayerUndead((PlayerEntity) target) &&
                                     INonStandPower.getNonStandPowerOptional(target).map(
                                             power -> power.getTypeSpecificData(ModPowers.VAMPIRISM.get())
-                                            .map(vampirism -> vampirism.getCuringStage() < 3).orElse(false)).orElse(false));
+                                            .map(vampirism -> vampirism.getCuringStage() < 3).orElse(false)).orElse(false)) 
+                            && !(INonStandPower.getNonStandPowerOptional(target).map(power ->power.getType() == ModPowers.ZOMBIE.get()).orElse(false)) 
+                            && !(INonStandPower.getNonStandPowerOptional(target).map(power -> power.getTypeSpecificData(ModPowers.PILLAR_MAN.get())
+                                    .map(pillarman -> pillarman.isStoneFormEnabled()).orElse(false)).orElse(false) || 
+                            		INonStandPower.getNonStandPowerOptional(target).map(power -> power.getTypeSpecificData(ModPowers.PILLAR_MAN.get())
+                                            .map(pillarman -> pillarman.getEvolutionStage() > 1).orElse(false)).orElse(false));
                         CommonReflection.setTargetConditions(targetGoal, new EntityPredicate().range(CommonReflection.getTargetDistance(targetGoal)).selector(
                                 oldPredicate != null ? oldPredicate.and(undeadPredicate) : undeadPredicate));
                     }
@@ -178,7 +186,9 @@ public class VampirismUtil {
         LivingEntity entity = event.getEntityLiving();
         if (entity.isAlive()) {
             INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
-                if (power.getType() == ModPowers.VAMPIRISM.get()) {
+                if (power.getType() == ModPowers.VAMPIRISM.get() 
+                		|| (power.getType() == ModPowers.PILLAR_MAN.get() 
+                		&& power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).get().getEvolutionStage() > 1)) {
                     float healCost = healCost(entity.level);
                     if (healCost > 0) {
                         float actualHeal = Math.min(event.getAmount(), power.getEnergy() / healCost);

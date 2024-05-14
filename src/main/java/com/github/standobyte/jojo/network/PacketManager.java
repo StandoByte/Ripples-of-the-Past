@@ -101,6 +101,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrHamonSyncPlayerLe
 import com.github.standobyte.jojo.network.packets.fromserver.TrHeldActionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrKnivesCountPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrNoMotionLerpPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrPillarmanFlagsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerContinuousActionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerVisualDetailPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
@@ -112,6 +113,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrTypeNonStandPower
 import com.github.standobyte.jojo.network.packets.fromserver.TrTypeStandInstancePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrVampirismDataPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrWalkmanEarbudsPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrZombieFlagsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCachePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.CDBlocksRestoredPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.RPSGameStatePacket;
@@ -267,6 +269,8 @@ public class PacketManager {
         registerMessage(serverChannel, new PhotoDataPacket.Handler(),                      Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new RPSGameStatePacket.Handler(),                   Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new RPSOpponentPickThoughtsPacket.Handler(),        Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(serverChannel, new TrZombieFlagsPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(serverChannel, new TrPillarmanFlagsPacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new PhotoForOtherPlayerPacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_CLIENT));
     }
     

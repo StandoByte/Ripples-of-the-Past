@@ -342,6 +342,13 @@ public abstract class CustomExplosion extends Explosion {
                 return MRCrossfireHurricaneEntity.CrossfireHurricaneExplosion::new;
             }
         },
+        
+        PILLAR_MAN_DETONATION {
+            @Override public CustomExplosionSupplier explosionSupplier() {
+                return MRCrossfireHurricaneEntity.PillarmanExplosion::new;
+            }
+        },
+        
         HAMON {
             @Deprecated @Override public CustomExplosionSupplier explosionSupplier() { return null; }
             
