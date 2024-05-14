@@ -3,13 +3,11 @@ package com.github.standobyte.jojo.power.impl.nonstand.type.pillarman;
 import java.util.UUID;
 
 import com.github.standobyte.jojo.init.ModStatusEffects;
-import com.github.standobyte.jojo.init.power.non_stand.pillarman.ModPillarmanActions;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrPillarmanFlagsPacket;
 import com.github.standobyte.jojo.power.impl.nonstand.TypeSpecificData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
-import com.github.standobyte.jojo.power.layout.ActionsLayout;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.LivingEntity;
@@ -88,40 +86,41 @@ public class PillarmanData extends TypeSpecificData {
         });
     }
     
-    @Override
-    public void updateExtraActions() {
-        addMoreAbilities();
-    }
-    
-    public void addMoreAbilities() {
-    	if (stage > 1 ) {
-    		power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_ABSORPTION.get(), ActionsLayout.Hotbar.LEFT_CLICK);
-    		power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_HORN_ATTACK.get(), ActionsLayout.Hotbar.LEFT_CLICK);
-    		power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_HIDE_IN_ENTITY.get(), ActionsLayout.Hotbar.LEFT_CLICK);
-    		power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_REGENERATION.get(), ActionsLayout.Hotbar.RIGHT_CLICK);
-    		power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_ENHANCED_SENSES.get(), ActionsLayout.Hotbar.RIGHT_CLICK);
-    		power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_UNNATURAL_AGILITY.get(), ActionsLayout.Hotbar.RIGHT_CLICK);
-    	}
-        switch(mode) {
-        case WIND:
-        	power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_SMALL_SANDSTORM.get(), ActionsLayout.Hotbar.LEFT_CLICK);
-            power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_ATMOSPHERIC_RIFT.get(), ActionsLayout.Hotbar.LEFT_CLICK);
-            power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_WIND_CLOAK.get(), ActionsLayout.Hotbar.RIGHT_CLICK);
-            break;
-        case HEAT:
-        	power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_ERRATIC_BLAZE_KING.get(), ActionsLayout.Hotbar.LEFT_CLICK);
-        	power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_GIANT_CARTHWHEEL_PRISON.get(), ActionsLayout.Hotbar.LEFT_CLICK);
-        	power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_SELF_DETONATION.get(), ActionsLayout.Hotbar.LEFT_CLICK);
-        	break;
-        case LIGHT:
-        	power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_LIGHT_FLASH.get(), ActionsLayout.Hotbar.RIGHT_CLICK);
-        	power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_BLADE_DASH_ATTACK.get(), ActionsLayout.Hotbar.LEFT_CLICK);
-        	power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_BLADE_BARRAGE.get(), ActionsLayout.Hotbar.LEFT_CLICK);
-        	break;
-        default:
-        	break;
-        }
-    }
+    // FIXME extra pillar man actions were written for an old version; rewrite this
+//    @Override
+//    public void updateExtraActions() {
+//        addMoreAbilities();
+//    }
+//    
+//    public void addMoreAbilities() {
+//    	if (stage > 1 ) {
+//    		power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_ABSORPTION.get(), ActionsLayout.Hotbar.LEFT_CLICK);
+//    		power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_HORN_ATTACK.get(), ActionsLayout.Hotbar.LEFT_CLICK);
+//    		power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_HIDE_IN_ENTITY.get(), ActionsLayout.Hotbar.LEFT_CLICK);
+//    		power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_REGENERATION.get(), ActionsLayout.Hotbar.RIGHT_CLICK);
+//    		power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_ENHANCED_SENSES.get(), ActionsLayout.Hotbar.RIGHT_CLICK);
+//    		power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_UNNATURAL_AGILITY.get(), ActionsLayout.Hotbar.RIGHT_CLICK);
+//    	}
+//        switch(mode) {
+//        case WIND:
+//        	power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_SMALL_SANDSTORM.get(), ActionsLayout.Hotbar.LEFT_CLICK);
+//            power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_ATMOSPHERIC_RIFT.get(), ActionsLayout.Hotbar.LEFT_CLICK);
+//            power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_WIND_CLOAK.get(), ActionsLayout.Hotbar.RIGHT_CLICK);
+//            break;
+//        case HEAT:
+//        	power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_ERRATIC_BLAZE_KING.get(), ActionsLayout.Hotbar.LEFT_CLICK);
+//        	power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_GIANT_CARTHWHEEL_PRISON.get(), ActionsLayout.Hotbar.LEFT_CLICK);
+//        	power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_SELF_DETONATION.get(), ActionsLayout.Hotbar.LEFT_CLICK);
+//        	break;
+//        case LIGHT:
+//        	power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_LIGHT_FLASH.get(), ActionsLayout.Hotbar.RIGHT_CLICK);
+//        	power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_BLADE_DASH_ATTACK.get(), ActionsLayout.Hotbar.LEFT_CLICK);
+//        	power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_BLADE_BARRAGE.get(), ActionsLayout.Hotbar.LEFT_CLICK);
+//        	break;
+//        default:
+//        	break;
+//        }
+//    }
     
     public void tick() {
     	LivingEntity user = power.getUser();
@@ -175,7 +174,7 @@ public class PillarmanData extends TypeSpecificData {
     
 	public void setEvolutionStage(int stage) {
     	this.stage = stage;
-    	addMoreAbilities();
+//    	addMoreAbilities();
     }
     
     public boolean toggleStoneForm() {
@@ -221,6 +220,6 @@ public class PillarmanData extends TypeSpecificData {
     	if (!user.level.isClientSide()) {
             PacketManager.sendToClientsTrackingAndSelf(new TrPillarmanFlagsPacket(user.getId(), this), user);
         }
-    	addMoreAbilities();
+//    	addMoreAbilities();
     }
 }
