@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.client.particle;
 
 import java.util.Random;
 
+import com.github.standobyte.jojo.client.particle.custom.HamonAuraParticleRenderType;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import net.minecraft.client.particle.IAnimatedSprite;
@@ -30,7 +31,7 @@ public class HamonAuraParticle extends RisingParticle {
     
     @Override
     public IParticleRenderType getRenderType() {
-        return IParticleRenderType.PARTICLE_SHEET_TRANSLUCENT;
+        return HamonAuraParticleRenderType.HAMON_AURA;
     }
     
     @Override

@@ -18,26 +18,25 @@ import net.minecraft.util.text.ITextComponent;
  * TODO Stand skins
  * 
  * [V] UI color
- * [_] appearance part
+ * [V] appearance part
  * 
- * [_] in-mod textures
- * [_]   entity textures
+ *     in-mod textures
+ *       entity textures
  * [V]     Stand entity
  * [_]     stuff like projectiles
  * [V]   power icon
  * [_]   in-mod UI
  * [V]     actions
  * [_]   particles
+ * [_]   shaders
  *     
  * [_] lang
  *     
- * [_] Geckolib format model
+ * [V] Stand model
  *     
  * [_] sounds
  * [_]   sounds.json
  * [_]   sound files
- *     
- * [_] particles definition?
  * 
  */
 public class StandSkin {

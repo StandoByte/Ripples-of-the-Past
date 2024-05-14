@@ -36,6 +36,7 @@ import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.ForgeBusEventSubscriber;
 import com.github.standobyte.jojo.util.mod.JojoModVersion;
 
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.item.ItemGroup;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -127,6 +128,8 @@ public class JojoMod {
             
             ModGamerules.load();
         });
+        
+        Attributes.ATTACK_DAMAGE.setSyncable(true);
     }
     
     private void interMod(InterModEnqueueEvent event) {

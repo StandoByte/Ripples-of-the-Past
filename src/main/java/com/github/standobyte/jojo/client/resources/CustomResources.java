@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.client.resources;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.client.resources.models.GeckoAnimLoader;
 import com.github.standobyte.jojo.client.resources.models.StandModelOverrides;
 import com.github.standobyte.jojo.client.resources.sprites.HamonSkillSpriteUploader;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
@@ -16,6 +17,7 @@ public class CustomResources {
     private static ModSplashes modSplashes;
     private static StandSkinsManager standSkinsLoader;
     private static StandModelOverrides standModelOverrides;
+    private static GeckoAnimLoader standModelAnimations;
 
     public static void initCustomResourceManagers(Minecraft mc) {
         IReloadableResourceManager resourceManager = (IReloadableResourceManager) mc.getResourceManager();
@@ -26,6 +28,7 @@ public class CustomResources {
         resourceManager.registerReloadListener(new ResourceReloadNotifier());
         resourceManager.registerReloadListener(standSkinsLoader = new StandSkinsManager());
         resourceManager.registerReloadListener(standModelOverrides = new StandModelOverrides(new Gson()));
+        resourceManager.registerReloadListener(standModelAnimations = new GeckoAnimLoader(new Gson()));
     }
     
     public static HamonSkillSpriteUploader getHamonSkillSprites() {
@@ -46,6 +49,10 @@ public class CustomResources {
     
     public static StandModelOverrides getStandModelOverrides() {
         return standModelOverrides;
+    }
+    
+    public static GeckoAnimLoader getStandModelAnimations() {
+        return standModelAnimations;
     }
 
 }

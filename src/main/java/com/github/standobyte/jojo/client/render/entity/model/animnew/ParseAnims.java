@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Anim
 import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Keyframe;
 import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Transformation;
 import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Transformation.Interpolation;
+import com.github.standobyte.jojo.util.general.MathUtil;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -44,7 +45,7 @@ public class ParseAnims {
         JsonObject boneAnims = animJson.getAsJsonObject("bones");
         for (Map.Entry<String, JsonElement> bone : boneAnims.entrySet()) {
             JsonObject tfJson = bone.getValue().getAsJsonObject();
-            parseKeyframes(builder, tfJson, "rotations", Transformation.Targets.ROTATE, bone.getKey());
+            parseKeyframes(builder, tfJson, "rotation", Transformation.Targets.ROTATE, bone.getKey());
         }
         
         return builder.build();
@@ -58,12 +59,17 @@ public class ParseAnims {
                 float time = Float.parseFloat(rotationJson.getKey());
                 
                 JsonObject rotation = rotationJson.getValue().getAsJsonObject();
-                JsonArray rotVecJson = rotation.get("vector").getAsJsonArray();
+                JsonElement rotVecJsonElem = rotation.get("vector");
+                if (rotVecJsonElem == null && rotation.has("post")) rotVecJsonElem = rotation.get("post").getAsJsonObject().get("vector");
+                JsonArray rotVecJson = rotVecJsonElem.getAsJsonArray();
                 Vector3f rotVec = fromJson(rotVecJson);
+                if ("rotation".equals(targetName)) {
+                    rotVec.mul(MathUtil.DEG_TO_RAD);
+                }
                 
                 String easingName = Optional.ofNullable(rotation.get("easing"))
                         .map(JsonElement::getAsString)
-                        .orElse("linear");
+                        .orElse(rotation.has("lerp_mode") ? rotation.get("lerp_mode").getAsString() : "linear");
                 double[] easingArgs = Optional.ofNullable(rotation.get("easingArgs"))
                         .map(JsonElement::getAsJsonArray)
                         .map(json -> {

@@ -29,6 +29,7 @@ import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.resources.models.StandModelOverrides;
 import com.github.standobyte.jojo.client.resources.models.StandModelOverrides.CustomModelPrepared;
 import com.github.standobyte.jojo.client.resources.models.StandModelOverrides.Format;
+import com.github.standobyte.jojo.client.resources.models.StandModelOverrides.ModelPathInfo;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
@@ -143,9 +144,10 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
                             
                             skin.resourcePrepare = new SkinResourcePrepare();
                             
-                            prepareModels(skin, standTypeId, skinId, "geo", ".json", resourceManager, Format.GECKO);
-                            prepareModels(skin, standTypeId, skinId, "bb", ".bb.json", resourceManager, Format.BB_GENERIC);
-                            prepareModels(skin, standTypeId, skinId, "bb", ".bbmodel", resourceManager, Format.BB_GENERIC);
+                            for (ModelPathInfo path : StandModelOverrides.FILE_PATHS) {
+                                prepareModels(skin, standTypeId, skinId, path.directory, 
+                                        path.filePostfix, resourceManager, path.format);
+                            }
                         }
                         
                         profiler.popPush("register");
@@ -207,7 +209,7 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
                 for (Pair<ResourceLocation, CustomModelPrepared> customModelData : customModels) {
                     ResourceLocation modelResLoc = StandModelOverrides.clearFormatExtension(customModelData.getLeft());
                     CustomModelPrepared modelJson = customModelData.getRight();
-                    StandModelOverrides.createStandModelFromJson(modelResLoc, modelJson.modelJson, modelJson.format).ifPresent(model -> {
+                    StandModelOverrides.createStandModelFromJson(modelResLoc, modelJson).ifPresent(model -> {
                         skin.standModels.cacheValue(model.getKey(), model.getValue());
                     });
                 }

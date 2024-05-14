@@ -13,7 +13,6 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.client.particle.custom.StandCrumbleParticle;
 import com.github.standobyte.jojo.client.render.entity.pose.IModelPose;
@@ -175,6 +174,19 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
     @Override
     public void afterInit() {
         super.afterInit();
+        
+        namedModelParts.put("head", head);
+        namedModelParts.put("body", body);
+        namedModelParts.put("upperPart", upperPart);
+        namedModelParts.put("torso", torso);
+        namedModelParts.put("leftArm", leftArm);
+        namedModelParts.put("leftForeArm", leftForeArm);
+        namedModelParts.put("rightArm", rightArm);
+        namedModelParts.put("rightForeArm", rightForeArm);
+        namedModelParts.put("leftLeg", leftLeg);
+        namedModelParts.put("leftLowerLeg", leftLowerLeg);
+        namedModelParts.put("rightLeg", rightLeg);
+        namedModelParts.put("rightLowerLeg", rightLowerLeg);
     }
 
     protected final void addHumanoidBaseBoxes(@Nullable Predicate<ModelRenderer> partPredicate) {
