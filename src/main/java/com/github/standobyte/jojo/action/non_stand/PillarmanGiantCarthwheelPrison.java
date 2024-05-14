@@ -21,13 +21,13 @@ public class PillarmanGiantCarthwheelPrison extends PillarmanErraticBlazeKing {
     @Override
     public void onHoldTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
-        	PillarmanDivineSandstorm.auraEffect(user, ModParticles.HAMON_AURA_RED.get());
+            PillarmanDivineSandstorm.auraEffect(user, ModParticles.HAMON_AURA_RED.get());
         }
     }
     
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
-    	if (!world.isClientSide()) {
+        if (!world.isClientSide()) {
             int n = 20;
             for (int i = 0; i < n; i++) {
                 Vector2f rotOffsets = MathUtil.xRotYRotOffsets((double) i / (double) n * Math.PI * 2, 5);
@@ -43,7 +43,7 @@ public class PillarmanGiantCarthwheelPrison extends PillarmanErraticBlazeKing {
             }
             addVeinProjectile(world, power, user, 0, 0);
             }
-    	}
+        }
     
     @Override
     public boolean isHeldSentToTracking() {

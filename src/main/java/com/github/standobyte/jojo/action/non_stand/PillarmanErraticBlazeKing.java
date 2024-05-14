@@ -40,7 +40,7 @@ public class PillarmanErraticBlazeKing extends PillarmanAction {
 
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
-    	if (!world.isClientSide()) {
+        if (!world.isClientSide()) {
             int n = 7;
             for (int i = 0; i < n; i++) {
                 Vector2f rotOffsets = MathUtil.xRotYRotOffsets((double) i / (double) n * Math.PI * 2, 5);

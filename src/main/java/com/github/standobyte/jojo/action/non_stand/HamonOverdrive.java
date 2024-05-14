@@ -64,10 +64,10 @@ public class HamonOverdrive extends HamonAction {
                 
                 int attackStrengthTicker = CommonReflection.getAttackStrengthTicker(user);
                 if (dealDamage(target, targetEntity, getDamage() * efficiency, user, power, hamon)) {
-                	if (strongerVersion) {
-                		world.playSound(null, targetEntity.getX(), targetEntity.getEyeY(), targetEntity.getZ(), ModSounds.HAMON_SYO_PUNCH.get(), targetEntity.getSoundSource(), 1F, 1.5F);
-                		targetEntity.knockback(1.25F, user.getX() - targetEntity.getX(), user.getZ() - targetEntity.getZ());
-                	}
+                    if (strongerVersion) {
+                        world.playSound(null, targetEntity.getX(), targetEntity.getEyeY(), targetEntity.getZ(), ModSounds.HAMON_SYO_PUNCH.get(), targetEntity.getSoundSource(), 1F, 1.5F);
+                        targetEntity.knockback(1.25F, user.getX() - targetEntity.getX(), user.getZ() - targetEntity.getZ());
+                    }
                     addPointsForAction(power, hamon, HamonStat.STRENGTH, cost, efficiency);
                 }
                 CommonReflection.setAttackStrengthTicker(user, attackStrengthTicker);

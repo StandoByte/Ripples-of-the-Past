@@ -23,7 +23,7 @@ public class PillarmanSmallSandstorm extends PillarmanAction {
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
-        	PillarmanDivineSandstormEntity sandstormWave = new PillarmanDivineSandstormEntity(world, user)
+            PillarmanDivineSandstormEntity sandstormWave = new PillarmanDivineSandstormEntity(world, user)
                     .setRadius(1.5F)
                     .setDamage(7.5F)
                     .setDuration(40);

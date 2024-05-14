@@ -456,7 +456,7 @@ public class GameplayEventHandler {
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onLivingHurtStart(LivingAttackEvent event) {
-    	DamageSource dmgSource = event.getSource();
+        DamageSource dmgSource = event.getSource();
         LivingEntity target = event.getEntityLiving();
         Entity attacker = dmgSource.getEntity();
         
@@ -476,10 +476,10 @@ public class GameplayEventHandler {
         //Deal Hamon damage through oiled weapons
         if (!dmgSource.isBypassArmor() && !dmgSource.getMsgId().startsWith(DamageUtil.HAMON.msgId) && 
                 attacker != null && attacker.is(dmgSource.getDirectEntity()) && attacker instanceof LivingEntity) {
-        	LivingEntity hamonUser = (LivingEntity) attacker;
-        	ItemStack weapon = hamonUser.getMainHandItem();
-        	
-        	INonStandPower.getNonStandPowerOptional(hamonUser).ifPresent(power -> {
+            LivingEntity hamonUser = (LivingEntity) attacker;
+            ItemStack weapon = hamonUser.getMainHandItem();
+            
+            INonStandPower.getNonStandPowerOptional(hamonUser).ifPresent(power -> {
                 OilItem.remainingOiledUses(weapon).ifPresent(oilUses -> {
                     float energyCost = 500F;
                     if (power.hasPower() && power.getEnergy() >= energyCost) {
@@ -492,7 +492,7 @@ public class GameplayEventHandler {
                         });
                     }
                 });
-        	});
+            });
         }
         
         // Redirect an attack on a Boy II Man user who stole the attacker's arms
@@ -870,51 +870,51 @@ public class GameplayEventHandler {
             VampirismPowerType vampirism = ModPowers.VAMPIRISM.get();
             PillarmanPowerType pillarman = ModPowers.PILLAR_MAN.get();
             return INonStandPower.getNonStandPowerOptional(player).map(power -> {
-            	//Prevents aja-stone mask to work on non pillar men
-            	if(headStack.getItem() == ModItems.AJA_STONE_MASK.get()) {
-            		if(power.getType() != pillarman) {
-            			entity.kill();
-                		return false;
-            		} else {
-            			if(power.getTypeSpecificData(pillarman).get().getEvolutionStage() < 3) {
-            				power.getTypeSpecificData(pillarman).get().setEvolutionStage(3);
-	                    	power.getTypeSpecificData(pillarman).get().setPillarmanBuffs(entity, 1);
-	                    	//Gives a random Mode
-	                    	double randomMode = Math.random();
-	                    	if(randomMode > 0 && randomMode < 0.33F) {
-	                    		power.getTypeSpecificData(pillarman).get().setMode(Mode.WIND);
-	                    		if(randomMode < 0.06F) {
-	                    			entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.PILLAR_MAN_WIND_MODE2.get(), entity.getSoundSource(), 1F, 1.0F);
-	                    		} else {
-	                    			entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.PILLAR_MAN_WIND_MODE.get(), entity.getSoundSource(), 1F, 1.0F);
-	                    		}
-	                    		
-	                    	} else if(randomMode > 0.33 && randomMode < 0.66F) {
-	                    		power.getTypeSpecificData(pillarman).get().setMode(Mode.HEAT);
-	                    		entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.PILLAR_MAN_HEAT_MODE.get(), entity.getSoundSource(), 1.0F, 1.0F);
-	                    	} else {
-	                    		power.getTypeSpecificData(pillarman).get().setMode(Mode.LIGHT);
-	                    		entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.PILLAR_MAN_AWAKENING.get(), entity.getSoundSource(), 1.0F, 1.0F);
-	                    	}
-	                    	applyMaskEffect(entity, headStack);
-	                    	return true;
-            			}
-            		}
-            	}
+                //Prevents aja-stone mask to work on non pillar men
+                if(headStack.getItem() == ModItems.AJA_STONE_MASK.get()) {
+                    if(power.getType() != pillarman) {
+                        entity.kill();
+                        return false;
+                    } else {
+                        if(power.getTypeSpecificData(pillarman).get().getEvolutionStage() < 3) {
+                            power.getTypeSpecificData(pillarman).get().setEvolutionStage(3);
+                            power.getTypeSpecificData(pillarman).get().setPillarmanBuffs(entity, 1);
+                            //Gives a random Mode
+                            double randomMode = Math.random();
+                            if(randomMode > 0 && randomMode < 0.33F) {
+                                power.getTypeSpecificData(pillarman).get().setMode(Mode.WIND);
+                                if(randomMode < 0.06F) {
+                                    entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.PILLAR_MAN_WIND_MODE2.get(), entity.getSoundSource(), 1F, 1.0F);
+                                } else {
+                                    entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.PILLAR_MAN_WIND_MODE.get(), entity.getSoundSource(), 1F, 1.0F);
+                                }
+                                
+                            } else if(randomMode > 0.33 && randomMode < 0.66F) {
+                                power.getTypeSpecificData(pillarman).get().setMode(Mode.HEAT);
+                                entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.PILLAR_MAN_HEAT_MODE.get(), entity.getSoundSource(), 1.0F, 1.0F);
+                            } else {
+                                power.getTypeSpecificData(pillarman).get().setMode(Mode.LIGHT);
+                                entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.PILLAR_MAN_AWAKENING.get(), entity.getSoundSource(), 1.0F, 1.0F);
+                            }
+                            applyMaskEffect(entity, headStack);
+                            return true;
+                        }
+                    }
+                }
                 if ((power.getType() == pillarman) 
-                		|| (power.getTypeSpecificData(vampirism).map(vamp -> !vamp.isVampireAtFullPower()).orElse(false) || power.givePower(vampirism))) {
-                	if (headStack.getItem() == ModItems.STONE_MASK.get()) {
-                		if(power.getType() == vampirism) {
-	                    	power.getTypeSpecificData(vampirism).get().setVampireFullPower(true);
-	                    	applyMaskEffect(entity, headStack);
-	                    	return true;
-	                    	} else if (power.getType() == pillarman && power.getTypeSpecificData(pillarman).get().getEvolutionStage() < 2) {
-		                    	power.getTypeSpecificData(pillarman).get().setEvolutionStage(2);
-		                    	power.getTypeSpecificData(pillarman).get().setPillarmanBuffs(entity, 1);
-		                    	applyMaskEffect(entity, headStack);
-		                    	return true;
-	                    	}
-                		}
+                        || (power.getTypeSpecificData(vampirism).map(vamp -> !vamp.isVampireAtFullPower()).orElse(false) || power.givePower(vampirism))) {
+                    if (headStack.getItem() == ModItems.STONE_MASK.get()) {
+                        if(power.getType() == vampirism) {
+                            power.getTypeSpecificData(vampirism).get().setVampireFullPower(true);
+                            applyMaskEffect(entity, headStack);
+                            return true;
+                            } else if (power.getType() == pillarman && power.getTypeSpecificData(pillarman).get().getEvolutionStage() < 2) {
+                                power.getTypeSpecificData(pillarman).get().setEvolutionStage(2);
+                                power.getTypeSpecificData(pillarman).get().setPillarmanBuffs(entity, 1);
+                                applyMaskEffect(entity, headStack);
+                                return true;
+                            }
+                        }
                     return false;
                 }
                 return false;
@@ -924,7 +924,7 @@ public class GameplayEventHandler {
     }
     
     private static void applyMaskEffect(LivingEntity entity, ItemStack headStack) {
-    	entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.STONE_MASK_ACTIVATION_ENTITY.get(), entity.getSoundSource(), 1.0F, 1.0F);
+        entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.STONE_MASK_ACTIVATION_ENTITY.get(), entity.getSoundSource(), 1.0F, 1.0F);
         StoneMaskItem.setActivatedArmorTexture(headStack); // TODO light beams on stone mask activation
         headStack.hurtAndBreak(1, entity, stack -> {});
     }

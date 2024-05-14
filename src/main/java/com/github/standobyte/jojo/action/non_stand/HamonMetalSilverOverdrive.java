@@ -26,17 +26,17 @@ public class HamonMetalSilverOverdrive extends HamonOverdrive {
     }
   
     public static boolean targetedByMSO(ActionTarget target) {
-    	Entity entity = target.getEntity();
-    	if (entity instanceof LivingEntity) {
-    	    LivingEntity targetEntity = (LivingEntity) entity;
-    	    return getDamageMultiplier(targetEntity) > 1;
-    	}
-    	return false;
+        Entity entity = target.getEntity();
+        if (entity instanceof LivingEntity) {
+            LivingEntity targetEntity = (LivingEntity) entity;
+            return getDamageMultiplier(targetEntity) > 1;
+        }
+        return false;
     }
     
     @Override
     protected boolean dealDamage(ActionTarget target, LivingEntity targetEntity, float dmgAmount, LivingEntity user, INonStandPower power, HamonData hamon) {
-    	float ratio = getDamageMultiplier(targetEntity);
+        float ratio = getDamageMultiplier(targetEntity);
         return DamageUtil.dealHamonDamage(targetEntity, ratio * dmgAmount, user, null, attack -> attack.hamonParticle(ModParticles.HAMON_SPARK_SILVER.get()));
     }
     

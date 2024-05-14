@@ -17,9 +17,9 @@ public class PillarmanHornAttack extends PillarmanAction {
 
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
-    	if (!world.isClientSide()) {
-    		PillarmanHornEntity pillarmanHorn = new PillarmanHornEntity(world, user);
-    		pillarmanHorn.setLifeSpan(40);
+        if (!world.isClientSide()) {
+            PillarmanHornEntity pillarmanHorn = new PillarmanHornEntity(world, user);
+            pillarmanHorn.setLifeSpan(40);
             world.addFreshEntity(pillarmanHorn);
         }
 }

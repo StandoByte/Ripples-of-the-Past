@@ -82,7 +82,7 @@ public class PillarmanBladeBarrage extends PillarmanAction {
                 }
                 if (!world.isClientSide()) {
                     DamageUtil.hurtThroughInvulTicks(targetLiving, EntityDamageSource.playerAttack((PlayerEntity) user), 
-                    		(DamageUtil.getDamageWithoutHeldItem(user)*0.2F));
+                            (DamageUtil.getDamageWithoutHeldItem(user)*0.2F));
                 }
                 break;
             default:

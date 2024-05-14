@@ -339,8 +339,8 @@ public class ClientSetup {
     }
     
     private static <T extends LivingEntity, M extends BipedModel<T>> void addBipedLayers(LivingRenderer<T, M> renderer) {
-    	  renderer.addLayer(new ZombieLayer<>(renderer));
-    	  renderer.addLayer(new PillarmanLayer<>(renderer));
+          renderer.addLayer(new ZombieLayer<>(renderer));
+          renderer.addLayer(new PillarmanLayer<>(renderer));
         renderer.addLayer(new FrozenLayer<>(renderer));
     }
 

@@ -71,14 +71,14 @@ public class PillarmanAbsorption extends PillarmanAction {
             if (!world.isClientSide() && target.getEntity() instanceof LivingEntity) {
                 LivingEntity targetEntity = (LivingEntity) target.getEntity();
                 if (!targetEntity.isDeadOrDying()) {
-                	if(!HamonUtil.preventBlockDamage(targetEntity, user.level, null, null, DamageUtil.PILLAR_MAN_ABSORPTION, 2)){
-                		float bloodAndHealModifier = GeneralUtil.getOrLast(
+                    if(!HamonUtil.preventBlockDamage(targetEntity, user.level, null, null, DamageUtil.PILLAR_MAN_ABSORPTION, 2)){
+                        float bloodAndHealModifier = GeneralUtil.getOrLast(
                                 JojoModConfig.getCommonConfigInstance(false).bloodDrainMultiplier.get(), 
                                 world.getDifficulty().getId()).floatValue();
                         power.addEnergy(bloodAndHealModifier * 4F);
                         canAbsorb = true;
-                	} else { canAbsorb = false; }
-                	if(absorb(user, targetEntity, 2)) {}
+                    } else { canAbsorb = false; }
+                    if(absorb(user, targetEntity, 2)) {}
                 }
             }
         }
@@ -93,16 +93,16 @@ public class PillarmanAbsorption extends PillarmanAction {
     public static boolean absorb(LivingEntity attacker, LivingEntity target, float absorbDamage) {
         boolean hurt = false;
         if(HamonUtil.preventBlockDamage(target, attacker.level, null, null, DamageUtil.PILLAR_MAN_ABSORPTION, 2)){
-    		Vector3d userPos = attacker.getEyePosition(1.0F);
+            Vector3d userPos = attacker.getEyePosition(1.0F);
             double distanceToTarget = JojoModUtil.getDistance(attacker, target.getEntity().getBoundingBox());
             Vector3d targetPos = attacker.getEyePosition(1.0F).add(attacker.getLookAngle().scale(distanceToTarget));
             Vector3d particlesPos = userPos.add(targetPos.subtract(userPos).scale(0.5));
             //The sound doesn't seem to work :(
             HamonSparksLoopSound.playSparkSound(attacker, particlesPos, 1.0F, true);
             CustomParticlesHelper.createHamonSparkParticles(null, particlesPos, 1);
-    	} else {
-    		hurt = DamageUtil.dealPillarmanAbsorptionDamage(target, absorbDamage, null);
-    	}
+        } else {
+            hurt = DamageUtil.dealPillarmanAbsorptionDamage(target, absorbDamage, null);
+        }
         if (hurt) {
             int effectsLvl = attacker.level.getDifficulty().getId() - 1;
             if (effectsLvl >= 0) {

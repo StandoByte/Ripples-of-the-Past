@@ -35,18 +35,18 @@ public class PillarmanDivineSandstorm extends PillarmanAction {
     
     @Override
     public float getHeldTickEnergyCost(INonStandPower power) {
-    	int maxTicks = Math.max(getHoldDurationToFire(power), 1);
+        int maxTicks = Math.max(getHoldDurationToFire(power), 1);
         int ticksHeld = Math.min(power.getHeldActionTicks(), maxTicks);
-    	if(ticksHeld >= maxTicks) {
-    		return 3.0F;
-    	}
-        	return 0;
+        if(ticksHeld >= maxTicks) {
+            return 3.0F;
+        }
+            return 0;
     }
     
     @Override
     public void onHoldTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
-        	auraEffect(user, ModParticles.HAMON_AURA_GREEN.get());
+            auraEffect(user, ModParticles.HAMON_AURA_GREEN.get());
         }
         super.onHoldTick(world, user, power, ticksHeld, target, requirementsFulfilled);
     }
@@ -54,26 +54,26 @@ public class PillarmanDivineSandstorm extends PillarmanAction {
     @Override
     protected void holdTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (!world.isClientSide()) {
-        	int maxTicks = Math.max(getHoldDurationToFire(power), 1);
-        	if(ticksHeld >= maxTicks && power.getEnergy() > 0) {
-        		PillarmanDivineSandstormEntity sanstormWave = new PillarmanDivineSandstormEntity(world, user)
+            int maxTicks = Math.max(getHoldDurationToFire(power), 1);
+            if(ticksHeld >= maxTicks && power.getEnergy() > 0) {
+                PillarmanDivineSandstormEntity sanstormWave = new PillarmanDivineSandstormEntity(world, user)
                         .setRadius(1.5F)
                         .setDamage(2F)
                         .setDuration(10);
                 sanstormWave.shootFromRotation(user, 0.9F, 1F);
                 world.addFreshEntity(sanstormWave);
-        	}
+            }
         }
     }
     
     public static void auraEffect(LivingEntity user, IParticleData particles) {
-    	for (int i = 0; i < 12; i++) {
+        for (int i = 0; i < 12; i++) {
             Vector3d particlePos = user.position().add(
                     (Math.random() - 0.5) * (user.getBbWidth() + 0.5), 
                     Math.random() * (user.getBbHeight()), 
                     (Math.random() - 0.5) * (user.getBbWidth() + 0.5));
             user.level.addParticle(particles, particlePos.x, particlePos.y, particlePos.z, 0, 0, 0);
-        	}
+            }
     }
     
     @Override

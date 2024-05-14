@@ -122,7 +122,7 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
     public static boolean protectFromMeleeAttackInKick(LivingEntity user, DamageSource dmgSource, float dmgAmount) {
         return user.getCapability(PlayerUtilCapProvider.CAPABILITY).map(cap -> {
             return (cap.getContinuousAction().map(action -> action.getAction() == ModHamonActions.ZEPPELI_SENDO_WAVE_KICK.get()).orElse(false) 
-            		|| cap.getContinuousAction().map(action -> action.getAction() == ModPillarmanActions.PILLARMAN_BLADE_DASH_ATTACK.get()).orElse(false)) && 
+                    || cap.getContinuousAction().map(action -> action.getAction() == ModPillarmanActions.PILLARMAN_BLADE_DASH_ATTACK.get()).orElse(false)) && 
                     dmgSource.getEntity() != null && dmgSource.getDirectEntity() != null && dmgSource.getEntity().is(dmgSource.getDirectEntity());
         }).orElse(false);
     }

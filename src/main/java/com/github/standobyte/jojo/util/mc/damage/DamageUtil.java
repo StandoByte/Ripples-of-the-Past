@@ -170,7 +170,7 @@ public class DamageUtil {
             }
             if (INonStandPower.getNonStandPowerOptional(livingTarget)
                     .map(power -> power.getType() == ModPowers.PILLAR_MAN.get()).orElse(false)) {
-            	amount *= 0.5F;
+                amount *= 0.5F;
             }
             if (INonStandPower.getNonStandPowerOptional(livingTarget).map(
                     power -> power.getTypeSpecificData(ModPowers.PILLAR_MAN.get())

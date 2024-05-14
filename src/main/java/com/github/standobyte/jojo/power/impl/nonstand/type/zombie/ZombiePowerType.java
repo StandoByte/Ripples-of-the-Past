@@ -108,18 +108,18 @@ public class ZombiePowerType extends NonStandPowerType<ZombieData> {
             int bloodLevel = bloodLevel(power, difficulty);
             //Disguise toggle
             if(!(power.getTypeSpecificData(ModPowers.ZOMBIE.get()).get().isDisguiseEnabled())) {
-            	for (Effect effect : EFFECTS) {
-            		if(effect != Effects.HEALTH_BOOST) {
-            			entity.removeEffect(effect);
-            		}
-            	}
-            } else {
-            	for (Effect effect : EFFECTS) {
-            		int amplifier = getEffectAmplifier(effect, bloodLevel, difficulty, power);
-            		if (effect.isBeneficial() && effect != Effects.HEALTH_BOOST) {
-                		entity.addEffect(new EffectInstance(effect, Integer.MAX_VALUE, amplifier, false, false));
+                for (Effect effect : EFFECTS) {
+                    if(effect != Effects.HEALTH_BOOST) {
+                        entity.removeEffect(effect);
                     }
-            	}
+                }
+            } else {
+                for (Effect effect : EFFECTS) {
+                    int amplifier = getEffectAmplifier(effect, bloodLevel, difficulty, power);
+                    if (effect.isBeneficial() && effect != Effects.HEALTH_BOOST) {
+                        entity.addEffect(new EffectInstance(effect, Integer.MAX_VALUE, amplifier, false, false));
+                    }
+                }
             }
             
             if (zombie.refreshBloodLevel(bloodLevel)) {

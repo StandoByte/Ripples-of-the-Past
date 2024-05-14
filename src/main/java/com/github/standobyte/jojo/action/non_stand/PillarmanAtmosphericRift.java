@@ -19,20 +19,20 @@ public class PillarmanAtmosphericRift extends PillarmanDivineSandstorm {
     
     @Override
     public float getHeldTickEnergyCost(INonStandPower power) {
-    	int maxTicks = Math.max(getHoldDurationToFire(power), 1);
+        int maxTicks = Math.max(getHoldDurationToFire(power), 1);
         int ticksHeld = Math.min(power.getHeldActionTicks(), maxTicks);
-    	if(ticksHeld >= maxTicks) {
-    		return 5.0F;
-    	}
-        	return 0;
+        if(ticksHeld >= maxTicks) {
+            return 5.0F;
+        }
+            return 0;
     }
     
     @Override
     protected void holdTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (!world.isClientSide()) {
-        	int maxTicks = Math.max(getHoldDurationToFire(power), 1);
-        	if(ticksHeld >= maxTicks && power.getEnergy() > 0) {
-        		PillarmanDivineSandstormEntity sanstormWave = new PillarmanDivineSandstormEntity(world, user)
+            int maxTicks = Math.max(getHoldDurationToFire(power), 1);
+            if(ticksHeld >= maxTicks && power.getEnergy() > 0) {
+                PillarmanDivineSandstormEntity sanstormWave = new PillarmanDivineSandstormEntity(world, user)
                         .setRadius(0.5F)
                         .setDamage(2F)
                         .setDuration(60);
@@ -40,9 +40,9 @@ public class PillarmanAtmosphericRift extends PillarmanDivineSandstorm {
                 world.addFreshEntity(sanstormWave);
                 PlayerEntity playerentity = user instanceof PlayerEntity ? (PlayerEntity)user : null;
                 if (playerentity == null || !playerentity.abilities.instabuild) {
-                	user.hurt(EntityDamageSource.GENERIC, 2F);
+                    user.hurt(EntityDamageSource.GENERIC, 2F);
                 }
-        	}
+            }
         }
     }
 

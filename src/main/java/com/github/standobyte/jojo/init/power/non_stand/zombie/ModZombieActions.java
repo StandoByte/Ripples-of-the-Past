@@ -31,10 +31,10 @@ public class ModZombieActions {
     public static final RegistryObject<ZombiePowerType> ZOMBIE = NON_STAND_POWERS.register("zombie", 
             () -> new ZombiePowerType(
                     new ZombieAction[] {
-                    		ZOMBIE_CLAW_LACERATE.get(),
+                            ZOMBIE_CLAW_LACERATE.get(),
                             ZOMBIE_DEVOUR.get()}, 
                     new ZombieAction[] {
-                    		ZOMBIE_DISGUISE.get()},
+                            ZOMBIE_DISGUISE.get()},
                     ZOMBIE_DEVOUR.get()
                     ));
 

@@ -28,12 +28,12 @@ public class PillarmanHideInEntity extends PillarmanAction {
 
     @Override
     public ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
-    	switch (target.getType()) {
+        switch (target.getType()) {
             case ENTITY:
-            	return ActionConditionResult.POSITIVE;
+                return ActionConditionResult.POSITIVE;
             default:
-            	return ActionConditionResult.NEGATIVE;
-    	}
+                return ActionConditionResult.NEGATIVE;
+        }
 
 }
 

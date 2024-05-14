@@ -40,10 +40,10 @@ public class ZombieData extends TypeSpecificData {
     }
     
     public void tick() {
-    	LivingEntity user = power.getUser();
-    	if (!user.isAlive()) {
-    		disguised = false;
-    	}
+        LivingEntity user = power.getUser();
+        if (!user.isAlive()) {
+            disguised = false;
+        }
     }
     
     public boolean toggleDisguise() {
@@ -67,13 +67,13 @@ public class ZombieData extends TypeSpecificData {
 
     @Override
     public CompoundNBT writeNBT() {
-    	CompoundNBT nbt = new CompoundNBT();
+        CompoundNBT nbt = new CompoundNBT();
         return nbt;
     }
     
     @Override
     public void readNBT(CompoundNBT nbt) {
-    	
+        
     }
     
     @Override
@@ -89,6 +89,6 @@ public class ZombieData extends TypeSpecificData {
     
     @Override
     public void syncWithTrackingOrUser(LivingEntity user, ServerPlayerEntity entity) {
-    	PacketManager.sendToClient(new TrZombieFlagsPacket(user.getId(), this), entity);
+        PacketManager.sendToClient(new TrZombieFlagsPacket(user.getId(), this), entity);
     }
 }

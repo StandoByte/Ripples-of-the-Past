@@ -114,16 +114,16 @@ public class PillarmanDivineSandstormEntity extends ModdedProjectileEntity {
     
     @Override
     protected void afterBlockHit(BlockRayTraceResult blockRayTraceResult, boolean blockDestroyed) {
-    	super.afterBlockHit(blockRayTraceResult, blockDestroyed);
+        super.afterBlockHit(blockRayTraceResult, blockDestroyed);
     }
     
     @Override
     protected void breakProjectile(TargetType targetType, RayTraceResult hitTarget) {
         if (targetType != TargetType.ENTITY) {
-        	if (!level.isClientSide()) {
+            if (!level.isClientSide()) {
                 remove();
             } else {
-            	super.breakProjectile(targetType, hitTarget);
+                super.breakProjectile(targetType, hitTarget);
             }
         }
     }

@@ -58,10 +58,10 @@ public class TrPillarmanFlagsPacket {
             if (entity instanceof LivingEntity) {
                 INonStandPower.getNonStandPowerOptional((LivingEntity) entity).ifPresent(power -> {
                     power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).ifPresent(pillarman -> {
-                    	pillarman.setStoneFormEnabled(msg.stoneFormEnabled);
-                    	pillarman.setEvolutionStage(msg.stage);
-                    	pillarman.setInvaded(msg.invaded);
-                    	pillarman.setMode(msg.mode);
+                        pillarman.setStoneFormEnabled(msg.stoneFormEnabled);
+                        pillarman.setEvolutionStage(msg.stage);
+                        pillarman.setInvaded(msg.invaded);
+                        pillarman.setMode(msg.mode);
                     });
                 });
             }

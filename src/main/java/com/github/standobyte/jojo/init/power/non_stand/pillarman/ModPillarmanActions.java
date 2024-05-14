@@ -65,7 +65,7 @@ public static final RegistryObject<PillarmanAction> PILLARMAN_SMALL_SANDSTORM = 
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_DIVINE_SANDSTORM = ACTIONS.register("pillarman_divine_sandstorm", 
         () -> new PillarmanDivineSandstorm(new NonStandAction.Builder().holdToFire(40, true).heldWalkSpeed(0.2F)
-        		.shiftVariationOf(PILLARMAN_SMALL_SANDSTORM)));
+                .shiftVariationOf(PILLARMAN_SMALL_SANDSTORM)));
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_WIND_CLOAK = ACTIONS.register("pillarman_wind_cloak", 
         () -> new PillarmanWindCloak(new NonStandAction.Builder().energyCost(60F).cooldown(20).swingHand().holdToFire(30, false)));
@@ -96,10 +96,10 @@ public static final RegistryObject<PillarmanAction> PILLARMAN_BLADE_BARRAGE = AC
     public static final RegistryObject<PillarmanPowerType> PILLAR_MAN = NON_STAND_POWERS.register("pillarman", 
             () -> new PillarmanPowerType(
                     new PillarmanAction[] {
-                    		PILLARMAN_HEAVY_PUNCH.get()
+                            PILLARMAN_HEAVY_PUNCH.get()
                     }, 
                     new PillarmanAction[] {
-                    		PILLARMAN_STONE_FORM.get()
+                            PILLARMAN_STONE_FORM.get()
                     },
                     PILLARMAN_ABSORPTION.get()
                     ));

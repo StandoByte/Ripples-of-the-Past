@@ -27,23 +27,23 @@ public class PillarmanSelfDetonation extends PillarmanAction {
     @Override
     public void onHoldTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
-        	PillarmanDivineSandstorm.auraEffect(user, ModParticles.HAMON_AURA_RED.get());
-        	PillarmanDivineSandstorm.auraEffect(user, ModParticles.BLOOD.get());
+            PillarmanDivineSandstorm.auraEffect(user, ModParticles.HAMON_AURA_RED.get());
+            PillarmanDivineSandstorm.auraEffect(user, ModParticles.BLOOD.get());
         }
     }
     
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
-    	if(!world.isClientSide) {
-    		CustomExplosion.explode(world, user, DamageSource.ON_FIRE.setExplosion(), null, 
+        if(!world.isClientSide) {
+            CustomExplosion.explode(world, user, DamageSource.ON_FIRE.setExplosion(), null, 
                     user.getX(), user.getY(), user.getZ(), 3.0F, 
                     true, Explosion.Mode.BREAK, CustomExplosionType.PILLAR_MAN_DETONATION);
-    		PlayerEntity playerentity = user instanceof PlayerEntity ? (PlayerEntity)user : null;
+            PlayerEntity playerentity = user instanceof PlayerEntity ? (PlayerEntity)user : null;
             if (playerentity == null || !playerentity.abilities.instabuild) {
-            	user.hurt(EntityDamageSource.explosion(user), 40F);
-            	user.addEffect(new EffectInstance(Effects.FIRE_RESISTANCE, 200, 0));
+                user.hurt(EntityDamageSource.explosion(user), 40F);
+                user.addEffect(new EffectInstance(Effects.FIRE_RESISTANCE, 200, 0));
             }
-    	}
+        }
     }
     
     @Override

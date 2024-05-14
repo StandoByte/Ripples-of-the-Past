@@ -30,26 +30,26 @@ public class OilItem extends Item {
     public static final int MAX_USES = 120;
      
 
-	@Override
+    @Override
     public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
-	    Hand opposite = hand == Hand.MAIN_HAND ? Hand.OFF_HAND : Hand.MAIN_HAND;
+        Hand opposite = hand == Hand.MAIN_HAND ? Hand.OFF_HAND : Hand.MAIN_HAND;
         ItemStack oilStack = player.getItemInHand(hand);
-		ItemStack weaponStack = player.getItemInHand(opposite);
-		
+        ItemStack weaponStack = player.getItemInHand(opposite);
+        
         if (MCUtil.isItemWeapon(weaponStack)) {
-        	if (!world.isClientSide()) {
-        	    setWeaponOilUses(weaponStack, MAX_USES);
+            if (!world.isClientSide()) {
+                setWeaponOilUses(weaponStack, MAX_USES);
                 if (!player.abilities.instabuild) {
                     oilStack.shrink(1);
-        			player.inventory.add(new ItemStack(Items.GLASS_BOTTLE));
-        		}
+                    player.inventory.add(new ItemStack(Items.GLASS_BOTTLE));
+                }
             }
             world.playSound(player, player.getX(), player.getEyeY(), player.getZ(), SoundEvents.BOTTLE_EMPTY, player.getSoundSource(), 1F, 1F);
             return ActionResult.consume(oilStack);
         }
         
         return ActionResult.fail(oilStack);
-	}
+    }
     
      @Override
      public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
@@ -57,11 +57,11 @@ public class OilItem extends Item {
      }
      
      public static OptionalInt remainingOiledUses(ItemStack stack) {
-    	 if (!stack.isEmpty() && stack.hasTag()) {
+         if (!stack.isEmpty() && stack.hasTag()) {
              CompoundNBT nbt = stack.getTag();
              if (nbt.contains("HamonOiled")) {
                  int usesLeft = nbt.getInt("HamonOiled");
-            	 return OptionalInt.of(usesLeft); 
+                 return OptionalInt.of(usesLeft); 
              }
          }
          return OptionalInt.empty();

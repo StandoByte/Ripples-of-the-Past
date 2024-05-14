@@ -500,7 +500,7 @@ public class HamonData extends TypeSpecificData {
     @Override
     public boolean isActionUnlocked(Action<INonStandPower> action, INonStandPower powerData) {
         return action == ModHamonActions.HAMON_OVERDRIVE.get()
-        		|| action == ModHamonActions.HAMON_BEAT.get()
+                || action == ModHamonActions.HAMON_BEAT.get()
                 || action == ModHamonActions.HAMON_HEALING.get()
                 || action == ModHamonActions.HAMON_BREATH.get()
                 || action == ModHamonActions.CAESAR_BUBBLE_CUTTER_GLIDING.get()

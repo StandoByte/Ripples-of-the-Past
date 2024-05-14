@@ -43,10 +43,10 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
     
     @Override
     public void onClear(INonStandPower power) {
-    	power.getTypeSpecificData(this).get().setEvolutionStage(0);
-    	power.getTypeSpecificData(this).get().setMode(Mode.NONE);
-    	power.getTypeSpecificData(this).get().setPillarmanBuffs(power.getUser(), 0);
-    	LivingEntity user = power.getUser();
+        power.getTypeSpecificData(this).get().setEvolutionStage(0);
+        power.getTypeSpecificData(this).get().setMode(Mode.NONE);
+        power.getTypeSpecificData(this).get().setPillarmanBuffs(power.getUser(), 0);
+        LivingEntity user = power.getUser();
         for (Effect effect : EFFECTS) {
             EffectInstance effectInstance = user.getEffect(effect);
             if (effectInstance != null) {
@@ -67,20 +67,20 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
     public float tickEnergy(INonStandPower power) {
         World world = power.getUser().level;
         float inc = -GeneralUtil.getOrLast(
-        		JojoModConfig.getCommonConfigInstance(world.isClientSide()).bloodTickDown.get(), world.getDifficulty().getId())
+                JojoModConfig.getCommonConfigInstance(world.isClientSide()).bloodTickDown.get(), world.getDifficulty().getId())
                 .floatValue();
         if (power.isUserCreative()) {
             inc = Math.max(inc, 0);
         }
         if(power.getTypeSpecificData(this).get().getEvolutionStage() == 1) {
-        	return power.getEnergy() + 0.5F * world.getDifficulty().getId()/2;
+            return power.getEnergy() + 0.5F * world.getDifficulty().getId()/2;
         }
         return power.getEnergy() + inc * power.getTypeSpecificData(this).get().getEvolutionStage();
     }
     
     @Override
     public float getMaxStaminaFactor(INonStandPower power, IStandPower standPower) {
-    	
+        
         return 1 * power.getTypeSpecificData(this).get().getEvolutionStage();
     }
     
@@ -91,33 +91,33 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
     
     @Override
     public void tickUser(LivingEntity entity, INonStandPower power) {
-    	PillarmanData pillarman = power.getTypeSpecificData(this).get();
-    	pillarman.tick();
-    	if (!entity.level.isClientSide()) {
-	    	if(power.getTypeSpecificData(this).get().isInvaded() == true) {
-	    		ServerPlayerEntity player = (ServerPlayerEntity) entity;
-	    		if(player.isShiftKeyDown() || (player.getCamera() == player)) {
-	    			player.setGameMode(GameType.SURVIVAL);
-	        		power.getTypeSpecificData(this).get().setInvaded(false);
-	    		}
-	    	}
-	    	if(pillarman.getEvolutionStage() > 1) {
-	    		if (entity instanceof PlayerEntity) {
-	    			((PlayerEntity) entity).getFoodData().setFoodLevel(17);
-	    			}
-		        entity.setAirSupply(entity.getMaxAirSupply());
-		        float energy =  power.getEnergy();
-		        if(pillarman.refreshEnergy((int) power.getEnergy())) {
-		        	for (Effect effect : EFFECTS) {
-		        		if (energy > power.getMaxEnergy()/10) {
-		                entity.addEffect(new EffectInstance(effect, Integer.MAX_VALUE, 0, false, false, true));
-		                } else {
-		                	entity.removeEffect(effect);
-		                	}
-		        	}
-		        }
-	    	}
-    	}
+        PillarmanData pillarman = power.getTypeSpecificData(this).get();
+        pillarman.tick();
+        if (!entity.level.isClientSide()) {
+            if(power.getTypeSpecificData(this).get().isInvaded() == true) {
+                ServerPlayerEntity player = (ServerPlayerEntity) entity;
+                if(player.isShiftKeyDown() || (player.getCamera() == player)) {
+                    player.setGameMode(GameType.SURVIVAL);
+                    power.getTypeSpecificData(this).get().setInvaded(false);
+                }
+            }
+            if(pillarman.getEvolutionStage() > 1) {
+                if (entity instanceof PlayerEntity) {
+                    ((PlayerEntity) entity).getFoodData().setFoodLevel(17);
+                    }
+                entity.setAirSupply(entity.getMaxAirSupply());
+                float energy =  power.getEnergy();
+                if(pillarman.refreshEnergy((int) power.getEnergy())) {
+                    for (Effect effect : EFFECTS) {
+                        if (energy > power.getMaxEnergy()/10) {
+                        entity.addEffect(new EffectInstance(effect, Integer.MAX_VALUE, 0, false, false, true));
+                        } else {
+                            entity.removeEffect(effect);
+                            }
+                    }
+                }
+            }
+        }
     }
     
     private static final Set<Effect> EFFECTS = new HashSet<>();
@@ -171,8 +171,8 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
                 power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).ifPresent(pillarman -> {
                     Effect effect = event.getPotion();
                     if (EFFECTS.contains(effect) 
-                    		&& power.getEnergy() > power.getMaxEnergy()/10 
-                    		&& power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).get().getEvolutionStage() > 1) {
+                            && power.getEnergy() > power.getMaxEnergy()/10 
+                            && power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).get().getEvolutionStage() > 1) {
                         event.setCanceled(true);
                     }
                 });
@@ -181,11 +181,11 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
     }
     
     public boolean isHighLifeForce(LivingEntity entity) {
-    	if(INonStandPower.getNonStandPowerOptional(entity).map(
+        if(INonStandPower.getNonStandPowerOptional(entity).map(
                         power -> power.getTypeSpecificData(ModPowers.PILLAR_MAN.get())
                         .map(pillarman -> pillarman.getEvolutionStage() > 1).orElse(false)).orElse(false)) {
-    		return true;
-    	}
+            return true;
+        }
         return false;
     }
 }

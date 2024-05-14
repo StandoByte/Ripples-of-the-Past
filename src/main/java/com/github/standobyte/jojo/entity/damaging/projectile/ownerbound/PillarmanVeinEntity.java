@@ -64,7 +64,7 @@ public class PillarmanVeinEntity extends OwnerBoundProjectileEntity {
     
     @Override
     protected boolean hurtTarget(Entity target, LivingEntity owner) {
-    	return DamageUtil.dealDamageAndSetOnFire(target, 
+        return DamageUtil.dealDamageAndSetOnFire(target, 
                 entity -> super.hurtTarget(entity, owner), 10, true);
     }
     
@@ -77,7 +77,7 @@ public class PillarmanVeinEntity extends OwnerBoundProjectileEntity {
     protected void afterEntityHit(EntityRayTraceResult entityRayTraceResult, boolean entityHurt) {
         if (entityHurt) {
             Entity target = entityRayTraceResult.getEntity();
-            	if (knockback > 0 && target instanceof LivingEntity) {
+                if (knockback > 0 && target instanceof LivingEntity) {
                     DamageUtil.knockback((LivingEntity) target, knockback, yRot);
                 }
                 setIsRetracting(true);

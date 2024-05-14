@@ -27,7 +27,7 @@ public class PillarmanLightFlash extends PillarmanAction {
     @Override
     public void onHoldTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
-        	PillarmanDivineSandstorm.auraEffect(user, ModParticles.HAMON_AURA_RAINBOW.get());
+            PillarmanDivineSandstorm.auraEffect(user, ModParticles.HAMON_AURA_RAINBOW.get());
         }
     }
     
@@ -39,12 +39,12 @@ public class PillarmanLightFlash extends PillarmanAction {
                     LivingEntity.class, user, range, false, entity -> 
                     entity.canSee(user) && !(entity instanceof StandEntity && user.is(((StandEntity) entity).getUser())))) {
                 if (user.distanceTo(entity) < 5) {
-                	entity.addEffect(new EffectInstance(Effects.BLINDNESS, 200, 0));
+                    entity.addEffect(new EffectInstance(Effects.BLINDNESS, 200, 0));
                 } else {
-                	entity.addEffect(new EffectInstance(Effects.BLINDNESS, 60, 0));
+                    entity.addEffect(new EffectInstance(Effects.BLINDNESS, 60, 0));
                 }
                 if(!(entity instanceof PlayerEntity)) {
-                	entity.addEffect(new EffectInstance(ModStatusEffects.STUN.get(), 200, 0));
+                    entity.addEffect(new EffectInstance(ModStatusEffects.STUN.get(), 200, 0));
                 }
             }
         }
