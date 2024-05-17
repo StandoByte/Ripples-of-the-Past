@@ -614,6 +614,8 @@
   "jojo.config.client.menacingParticles.tooltip": "Enable ゴゴゴゴゴ particles when AFK.",
   "jojo.config.client.timeStopAnimation": "Time stop animation",
   "jojo.config.client.timeStopAnimation.tooltip": "Enables the visual effect at the beginning of time stop when its duration is 5 seconds or longer.",
+  "jojo.config.client.standMotionTilt": "(WIP) Stand motion tilt",
+  "jojo.config.client.standMotionTilt.tooltip": "Enables humanoid Stand model's tilt when the Stand is moving. Early version - this will be improved in later updates.",
   "jojo.config.client.characterVoiceLines": "Character voice lines",
   "jojo.config.client.characterVoiceLines.tooltip": "Whether or not voice lines of the JoJo characters whose powers the players use are played.",
   "jojo.config.client.thirdPersonHamonAura": "Hamon aura in 3rd person",
