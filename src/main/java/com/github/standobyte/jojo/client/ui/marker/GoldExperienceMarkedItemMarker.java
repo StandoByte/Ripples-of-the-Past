@@ -1,10 +1,17 @@
-package com.github.standobyte.jojo.itemtracking.client;
+package com.github.standobyte.jojo.client.ui.marker;
 
+import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
+import org.apache.commons.lang3.tuple.Pair;
+
+import com.github.standobyte.jojo.action.stand.GoldExperienceMarkItem;
+import com.github.standobyte.jojo.action.stand.effect.GEItemMarkEffect;
+import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.ui.marker.MarkerRenderer;
-import com.github.standobyte.jojo.itemtracking.SidedItemTrackerMap;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -20,10 +27,9 @@ import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.vector.Vector3d;
 
-public class TrackedItemMarker extends MarkerRenderer {
-    public static final SidedItemTrackerMap clientTrackedItems = new SidedItemTrackerMap();
+public class GoldExperienceMarkedItemMarker extends MarkerRenderer {
     
-    public TrackedItemMarker(Minecraft mc) {
+    public GoldExperienceMarkedItemMarker(Minecraft mc) {
         super(null, mc);
     }
     
@@ -35,7 +41,7 @@ public class TrackedItemMarker extends MarkerRenderer {
     @SuppressWarnings("deprecation")
     @Override
     protected void renderIcon(MatrixStack matrixStack, MarkerInstance marker, float partialTick) {
-        ItemStack item = ((ItemMarkerInstance) marker).item;    
+        ItemStack item = ((ItemMarkerInstance) marker).item;
         if (item != null && !item.isEmpty()) {
             ItemRenderer itemRenderer = mc.getItemRenderer();
             
@@ -54,10 +60,9 @@ public class TrackedItemMarker extends MarkerRenderer {
 
             matrixStack.pushPose();
             matrixStack.translate(8, 8, 0);
-            matrixStack.scale(16, 16, 1);
+            matrixStack.scale(16, 16, 0.0625f);
             matrixStack.scale(1, -1, -1);
 
-            // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! the item model is distorted by FoV effect
             itemRenderer.render(item, ItemCameraTransforms.TransformType.GUI, false, 
                     matrixStack, buffer, ClientUtil.MAX_MODEL_LIGHT, OverlayTexture.NO_OVERLAY, itemModel);
             matrixStack.popPose();
@@ -71,10 +76,22 @@ public class TrackedItemMarker extends MarkerRenderer {
     
     @Override
     protected void updatePositions(List<MarkerInstance> list, float partialTick) {
-        clientTrackedItems.values().forEach(tracker -> {
-            Vector3d position = tracker.markerPos(mc.level, partialTick);
-            if (position != null) {
-                list.add(new ItemMarkerInstance(position, false, tracker.getItem()));
+        IStandPower.getStandPowerOptional(mc.player).ifPresent(stand -> {
+            List<Pair<GEItemMarkEffect, Vector3d>> targets = GoldExperienceMarkItem.getTargets(stand, mc.player);
+            
+            Vector3d lookAngle = mc.player.getLookAngle();
+            Vector3d eyePos = mc.player.getEyePosition(1.0F);
+            Optional<StandEffectInstance> outlined = targets.stream().max(Comparator.comparingDouble(
+                    e -> lookAngle.dot(e.getRight().subtract(eyePos).normalize())))
+                    .map(pair -> pair.getLeft());
+            
+            for (Pair<GEItemMarkEffect, Vector3d> pair : targets) {
+                GEItemMarkEffect effect = pair.getLeft();
+                Vector3d pos = pair.getRight();
+                TrackerItemStack item = effect.getItemTracker();
+                list.add(new ItemMarkerInstance(pos, 
+                        outlined.map(outlinedEffect -> pair.getLeft() == outlinedEffect).orElse(false),
+                        item.getItem()));
             }
         });
     }

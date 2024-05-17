@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrackedItemPacket;
@@ -31,29 +32,40 @@ public class TrackerItemStack {
     private UUID trackingPlayerId;
     private OptionalInt positionEntity = OptionalInt.empty();
     private BlockPos positionBlock = null;
+    // private String typeDesc;
     
     public TrackerItemStack(ItemStack itemStack) {
         this.itemStack = itemStack;
     }
     
-    public static boolean setTracked(ItemStack itemStack, ServerPlayerEntity player) {
+    public TrackerItemStack(ItemStack itemStack, UUID trackerId) {
+        this.itemStack = itemStack;
+        this.trackerUuid = trackerId;
+    }
+    
+    @Nullable
+    public static TrackerItemStack setTracked(ItemStack itemStack, ServerPlayerEntity player) {
         if (itemStack.getCount() != 1) {
             throw new IllegalArgumentException("Cannot track stacked items, only item stacks with count == 1 are supported");
         }
-        return itemStack.getCapability(TrackerItemStackProvider.CAPABILITY).map(cap -> {
+        JojoMod.LOGGER.debug(itemStack.getCapability(TrackerItemStackProvider.CAPABILITY).isPresent());
+        return itemStack.getCapability(TrackerItemStackProvider.CAPABILITY).resolve().map(cap -> {
+            JojoMod.LOGGER.debug("(1) {}", cap.trackerUuid);
             if (cap.trackerUuid == null) {
                 cap.trackerUuid = MathHelper.createInsecureUUID(RANDOM);
+                JojoMod.LOGGER.debug("(2) {}", cap.trackerUuid);
                 cap.trackingPlayerId = player.getUUID();
                 SaveFileUtilCapProvider.getSaveFileCap(player).getItemsTracker().addTracker(cap.trackerUuid, cap);
-                return true;
             }
-            return false;
-        }).orElse(false);
+            JojoMod.LOGGER.debug("(3) {}", cap.trackerUuid);
+            return cap;
+        }).orElse(null);
     }
     
     public static void updateItemAtEntity(World world, ItemStack itemStack, int entityId) {
         if (itemStack.isEmpty() || world.isClientSide()) return;
         itemStack.getCapability(TrackerItemStackProvider.CAPABILITY).ifPresent(cap -> {
+            JojoMod.LOGGER.debug("{} (entity {})", cap.isTracked(), entityId);
             if (cap.isTracked()) {
                 cap.setAtEntity(entityId);
                 cap.onUpdate((ServerWorld) world);
@@ -64,6 +76,7 @@ public class TrackerItemStack {
     public static void updateItemAtBlock(World world, ItemStack itemStack, BlockPos blockPos) {
         if (itemStack.isEmpty() || world.isClientSide()) return;
         itemStack.getCapability(TrackerItemStackProvider.CAPABILITY).ifPresent(cap -> {
+            JojoMod.LOGGER.debug("{} (block)", cap.isTracked());
             if (cap.isTracked()) {
                 cap.setAtBlockPos(blockPos);
                 cap.onUpdate((ServerWorld) world);

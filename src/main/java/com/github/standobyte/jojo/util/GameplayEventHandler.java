@@ -1173,7 +1173,7 @@ public class GameplayEventHandler {
             }
         }
     }
-
+    
     private static void sendMemeDeathMessage(ServerPlayerEntity player, ITextComponent deathMessage) {
         if (player.level.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES)) {
             Team team = player.getTeam();

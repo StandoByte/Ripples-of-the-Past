@@ -5,8 +5,8 @@ import java.util.OptionalInt;
 import java.util.UUID;
 import java.util.function.Supplier;
 
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.itemtracking.SidedItemTrackerMap;
-import com.github.standobyte.jojo.itemtracking.client.TrackedItemMarker;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
@@ -55,23 +55,24 @@ public class TrackedItemPacket {
 
         @Override
         public TrackedItemPacket decode(PacketBuffer buf) {
-            return new TrackedItemPacket(
+            TrackedItemPacket packet = new TrackedItemPacket(
                     buf.readUUID(), 
                     buf.readItem(),
                     NetworkUtil.readOptionalInt(buf, false),
                     NetworkUtil.readOptional(buf, buf::readBlockPos));
+            return packet;
         }
 
         @Override
         public void handle(TrackedItemPacket msg, Supplier<NetworkEvent.Context> ctx) {
-            SidedItemTrackerMap trackerMap = TrackedItemMarker.clientTrackedItems;
+            SidedItemTrackerMap trackerMap = ClientUtil.clientTrackedItems;
             if (msg.entityId.isPresent()) {
-                TrackerItemStack tracker = new TrackerItemStack(msg.itemStack);
+                TrackerItemStack tracker = new TrackerItemStack(msg.itemStack, msg.trackerId);
                 tracker.setAtEntity(msg.entityId.getAsInt());
                 trackerMap.addTracker(msg.trackerId, tracker);
             }
             else if (msg.blockPos.isPresent()) {
-                TrackerItemStack tracker = new TrackerItemStack(msg.itemStack);
+                TrackerItemStack tracker = new TrackerItemStack(msg.itemStack, msg.trackerId);
                 tracker.setAtBlockPos(msg.blockPos.get());
                 trackerMap.addTracker(msg.trackerId, tracker);
             }

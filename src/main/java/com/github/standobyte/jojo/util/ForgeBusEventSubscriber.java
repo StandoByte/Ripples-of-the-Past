@@ -52,7 +52,6 @@ import com.github.standobyte.jojo.init.ModStructures;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStackProvider;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStackStorage;
-import com.github.standobyte.jojo.itemtracking.tmp.TestTrackItemCommand;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCachePacket;
 import com.github.standobyte.jojo.power.IPower;
@@ -131,7 +130,6 @@ public class ForgeBusEventSubscriber {
         RockPaperScissorsCommand.register(dispatcher);
         ConfigPackCommand.register(dispatcher);
         JojoCommandsCommand.register(dispatcher);
-        TestTrackItemCommand.register(dispatcher);
     }
     
     

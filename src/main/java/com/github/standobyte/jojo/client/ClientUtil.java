@@ -19,6 +19,7 @@ import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
 import com.github.standobyte.jojo.client.ui.screen.mob.RockPaperScissorsScreen;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
+import com.github.standobyte.jojo.itemtracking.SidedItemTrackerMap;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.general.MathUtil.Matrix4ZYX;
@@ -686,4 +687,7 @@ public class ClientUtil {
             screen.renderTooltip(matrixStack, button.getMessage(), x, y);
         };
     }
+    
+    
+    public static final SidedItemTrackerMap clientTrackedItems = new SidedItemTrackerMap();
 }

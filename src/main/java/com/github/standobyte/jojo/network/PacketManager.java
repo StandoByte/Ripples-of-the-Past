@@ -335,6 +335,7 @@ public class PacketManager {
     
     
     public static void sendGloballyWithCondition(Object msg, @Nullable RegistryKey<World> dimension, Predicate<ServerPlayerEntity> condition) {
+        JojoMod.LOGGER.debug("      {}", msg.getClass().getSimpleName());
         MinecraftServer server = LogicalSidedProvider.INSTANCE.get(LogicalSide.SERVER);
         for (ServerPlayerEntity player : server.getPlayerList().getPlayers()) {
             if ((dimension == null || player.level.dimension() == dimension) && condition.test(player)) {

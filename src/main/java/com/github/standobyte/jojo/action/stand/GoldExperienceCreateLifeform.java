@@ -1,6 +1,8 @@
 package com.github.standobyte.jojo.action.stand;
 
+import java.util.Optional;
 import java.util.Stack;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -14,6 +16,8 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.GETransformationEntity;
 import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
+import com.github.standobyte.jojo.itemtracking.SidedItemTrackerMap;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -107,13 +111,15 @@ public class GoldExperienceCreateLifeform extends StandAction {
         if (user.level.isClientSide() && getChosenEntityType(ClientUtil.getClientPlayer()) == null) {
             return ActionConditionResult.NEGATIVE;
         }
-        if (target.getType() == TargetType.ENTITY) {
-            return ActionConditionResult.POSITIVE;
-        }
         
         int mobsCreated = (int) StandEffectsTracker.getEffectsOfType(power, ModStandEffects.GE_CREATED_LIFEFORM.get(), -1).count();
         if (mobsCreated >= 16) {
             return conditionMessage("ge_too_many_mobs");
+        }
+
+        if (target.getType() == TargetType.ENTITY
+                || GoldExperienceMarkItem.getTargetedMarkedItem(power, user).isPresent()) {
+            return ActionConditionResult.POSITIVE;
         }
         
         boolean hasAnItem = false;
@@ -156,9 +162,16 @@ public class GoldExperienceCreateLifeform extends StandAction {
     
     @Override
     public void clWriteExtraData(PacketBuffer buf) {
+        PlayerEntity player = ClientUtil.getClientPlayer();
         NetworkUtil.writeOptionally(buf, 
-                getChosenEntityType(ClientUtil.getClientPlayer()), 
+                getChosenEntityType(player), 
                 type -> buf.writeRegistryId(type));
+        
+        Optional<UUID> trackedItemUUID = GoldExperienceMarkItem
+                .getTargetedMarkedItem(IStandPower.getPlayerStandPower(player), player)
+                .map(TrackerItemStack::getTrackerId);
+        NetworkUtil.writeOptional(buf, 
+                trackedItemUUID, buf::writeUUID);
     }
     
     @Nullable
@@ -229,6 +242,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
         if (!world.isClientSide() && extraInput != null) {
             EntityType<?> type = (EntityType<?>) NetworkUtil.readOptional(extraInput, 
                     () -> extraInput.readRegistryIdSafe(EntityType.class)).orElse(null);
+            Optional<UUID> itemTrackerId = NetworkUtil.readOptional(extraInput, extraInput::readUUID);
             if (type != null
                     && GeneralUtil.orElseFalse(user.getCapability(PlayerUtilCapProvider.CAPABILITY), 
                             cap -> cap.didPlayerMeetEntityType(type))
@@ -316,6 +330,25 @@ public class GoldExperienceCreateLifeform extends StandAction {
                         tfTargetFound = true;
                         
                         tf.moveTo(blockPos, performer.yRot, 0);
+                    }
+                }
+                if (!tfTargetFound && itemTrackerId.isPresent()) {
+                    TrackerItemStack itemContainer = SidedItemTrackerMap.getSidedTrackers(world).getTracker(itemTrackerId.get());
+                    if (itemContainer != null) {
+                        Entity itemEntity = itemContainer.getAtEntity(world);
+                        if (itemEntity != null) {
+                            MCUtil.cloneEntity(itemEntity).ifPresent(entity -> tf.getTfSourceData().withEntitySource(entity));
+                            itemEntity.remove();
+                            tfTargetFound = true;
+                            
+                            Vector3d pos = itemEntity.position();
+                            tf.moveTo(pos.x, pos.y, pos.z, itemEntity.yRot, itemEntity.xRot);
+                            
+                            if (itemEntity.isOnFire()) {
+                                tf.setSecondsOnFire((itemEntity.getRemainingFireTicks() + 19) / 20);
+                            }
+                            tf.setDeltaMovement(itemEntity.getDeltaMovement());
+                        }
                     }
                 }
                 

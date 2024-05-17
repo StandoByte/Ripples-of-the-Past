@@ -28,7 +28,7 @@ public abstract class StandEffectInstance {
     private boolean toBeRemoved = false;
     
     protected LivingEntity user;
-    protected World world;
+    public World world;
     protected IStandPower userPower;
     
     private Entity target;

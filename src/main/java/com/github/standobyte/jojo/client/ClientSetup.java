@@ -100,6 +100,7 @@ import com.github.standobyte.jojo.client.ui.marker.CrazyDiamondAnchorMarker;
 import com.github.standobyte.jojo.client.ui.marker.CrazyDiamondBloodHomingMarker;
 import com.github.standobyte.jojo.client.ui.marker.GoldExperienceLifeformMarker;
 import com.github.standobyte.jojo.client.ui.marker.GoldExperienceLifeformRevertMarker;
+import com.github.standobyte.jojo.client.ui.marker.GoldExperienceMarkedItemMarker;
 import com.github.standobyte.jojo.client.ui.marker.HierophantGreenBarrierDetectionMarker;
 import com.github.standobyte.jojo.client.ui.marker.MarkerRenderer;
 import com.github.standobyte.jojo.client.ui.screen.walkman.WalkmanScreen;
@@ -115,7 +116,6 @@ import com.github.standobyte.jojo.item.StandArrowItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
 import com.github.standobyte.jojo.item.cassette.CassetteCap;
-import com.github.standobyte.jojo.itemtracking.client.TrackedItemMarker;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 
 import net.minecraft.client.Minecraft;
@@ -302,7 +302,7 @@ public class ClientSetup {
             MarkerRenderer.Handler.addRenderer(new CrazyDiamondBloodHomingMarker(mc));
             MarkerRenderer.Handler.addRenderer(new GoldExperienceLifeformMarker(mc));
             MarkerRenderer.Handler.addRenderer(new GoldExperienceLifeformRevertMarker(mc));
-            MarkerRenderer.Handler.addRenderer(new TrackedItemMarker(mc));
+            MarkerRenderer.Handler.addRenderer(new GoldExperienceMarkedItemMarker(mc));
             
             PlayerAnimationHandler.initAnimator();
         });
