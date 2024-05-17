@@ -6,8 +6,10 @@ import java.util.Set;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.non_stand.PillarmanAction;
+import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.pillarman.ModPillarmanActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanData.Mode;
@@ -19,7 +21,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.EffectType;
 import net.minecraft.potion.Effects;
 import net.minecraft.world.GameType;
 import net.minecraft.world.World;
@@ -187,5 +188,41 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
             return true;
         }
         return false;
+    }
+    
+    
+    @Override
+    public void clAddMissingActions(ControlScheme controlScheme, INonStandPower power) {
+        super.clAddMissingActions(controlScheme, power);
+        
+        PillarmanData pillarman = power.getTypeSpecificData(this).get();
+        
+        if (pillarman.getEvolutionStage() > 1 ) {
+            controlScheme.addIfMissing(ControlScheme.Hotbar.LEFT_CLICK, ModPillarmanActions.PILLARMAN_ABSORPTION.get());
+            controlScheme.addIfMissing(ControlScheme.Hotbar.LEFT_CLICK, ModPillarmanActions.PILLARMAN_HORN_ATTACK.get());
+            controlScheme.addIfMissing(ControlScheme.Hotbar.LEFT_CLICK, ModPillarmanActions.PILLARMAN_HIDE_IN_ENTITY.get());
+            controlScheme.addIfMissing(ControlScheme.Hotbar.RIGHT_CLICK, ModPillarmanActions.PILLARMAN_REGENERATION.get());
+            controlScheme.addIfMissing(ControlScheme.Hotbar.RIGHT_CLICK, ModPillarmanActions.PILLARMAN_ENHANCED_SENSES.get());
+            controlScheme.addIfMissing(ControlScheme.Hotbar.RIGHT_CLICK, ModPillarmanActions.PILLARMAN_UNNATURAL_AGILITY.get());
+        }
+        switch(pillarman.getMode()) {
+        case WIND:
+            controlScheme.addIfMissing(ControlScheme.Hotbar.LEFT_CLICK, ModPillarmanActions.PILLARMAN_SMALL_SANDSTORM.get());
+            controlScheme.addIfMissing(ControlScheme.Hotbar.LEFT_CLICK, ModPillarmanActions.PILLARMAN_ATMOSPHERIC_RIFT.get());
+            controlScheme.addIfMissing(ControlScheme.Hotbar.RIGHT_CLICK, ModPillarmanActions.PILLARMAN_WIND_CLOAK.get());
+            break;
+        case HEAT:
+            controlScheme.addIfMissing(ControlScheme.Hotbar.LEFT_CLICK, ModPillarmanActions.PILLARMAN_ERRATIC_BLAZE_KING.get());
+            controlScheme.addIfMissing(ControlScheme.Hotbar.LEFT_CLICK, ModPillarmanActions.PILLARMAN_GIANT_CARTHWHEEL_PRISON.get());
+            controlScheme.addIfMissing(ControlScheme.Hotbar.LEFT_CLICK, ModPillarmanActions.PILLARMAN_SELF_DETONATION.get());
+            break;
+        case LIGHT:
+            controlScheme.addIfMissing(ControlScheme.Hotbar.RIGHT_CLICK, ModPillarmanActions.PILLARMAN_LIGHT_FLASH.get());
+            controlScheme.addIfMissing(ControlScheme.Hotbar.LEFT_CLICK, ModPillarmanActions.PILLARMAN_BLADE_DASH_ATTACK.get());
+            controlScheme.addIfMissing(ControlScheme.Hotbar.LEFT_CLICK, ModPillarmanActions.PILLARMAN_BLADE_BARRAGE.get());
+            break;
+        default:
+            break;
+        }
     }
 }

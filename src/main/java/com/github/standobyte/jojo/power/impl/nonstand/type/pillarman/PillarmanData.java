@@ -93,33 +93,7 @@ public class PillarmanData extends TypeSpecificData {
 //    }
 //    
 //    public void addMoreAbilities() {
-//        if (stage > 1 ) {
-//            power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_ABSORPTION.get(), ActionsLayout.Hotbar.LEFT_CLICK);
-//            power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_HORN_ATTACK.get(), ActionsLayout.Hotbar.LEFT_CLICK);
-//            power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_HIDE_IN_ENTITY.get(), ActionsLayout.Hotbar.LEFT_CLICK);
-//            power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_REGENERATION.get(), ActionsLayout.Hotbar.RIGHT_CLICK);
-//            power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_ENHANCED_SENSES.get(), ActionsLayout.Hotbar.RIGHT_CLICK);
-//            power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_UNNATURAL_AGILITY.get(), ActionsLayout.Hotbar.RIGHT_CLICK);
-//        }
-//        switch(mode) {
-//        case WIND:
-//            power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_SMALL_SANDSTORM.get(), ActionsLayout.Hotbar.LEFT_CLICK);
-//            power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_ATMOSPHERIC_RIFT.get(), ActionsLayout.Hotbar.LEFT_CLICK);
-//            power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_WIND_CLOAK.get(), ActionsLayout.Hotbar.RIGHT_CLICK);
-//            break;
-//        case HEAT:
-//            power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_ERRATIC_BLAZE_KING.get(), ActionsLayout.Hotbar.LEFT_CLICK);
-//            power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_GIANT_CARTHWHEEL_PRISON.get(), ActionsLayout.Hotbar.LEFT_CLICK);
-//            power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_SELF_DETONATION.get(), ActionsLayout.Hotbar.LEFT_CLICK);
-//            break;
-//        case LIGHT:
-//            power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_LIGHT_FLASH.get(), ActionsLayout.Hotbar.RIGHT_CLICK);
-//            power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_BLADE_DASH_ATTACK.get(), ActionsLayout.Hotbar.LEFT_CLICK);
-//            power.getActionsHudLayout().addExtraAction(ModPillarmanActions.PILLARMAN_BLADE_BARRAGE.get(), ActionsLayout.Hotbar.LEFT_CLICK);
-//            break;
-//        default:
-//            break;
-//        }
+
 //    }
     
     public void tick() {
@@ -174,7 +148,7 @@ public class PillarmanData extends TypeSpecificData {
     
     public void setEvolutionStage(int stage) {
         this.stage = stage;
-//        addMoreAbilities();
+        power.clUpdateHud();
     }
     
     public boolean toggleStoneForm() {
@@ -220,6 +194,6 @@ public class PillarmanData extends TypeSpecificData {
         if (!user.level.isClientSide()) {
             PacketManager.sendToClientsTrackingAndSelf(new TrPillarmanFlagsPacket(user.getId(), this), user);
         }
-//        addMoreAbilities();
+        power.clUpdateHud();
     }
 }
