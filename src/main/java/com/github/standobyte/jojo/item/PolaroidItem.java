@@ -108,6 +108,9 @@ public class PolaroidItem extends Item {
                 break;
             }
         }
+        else {
+            cameraPlayer.getCooldowns().addCooldown(this, 60);
+        }
         
         return ActionResult.consume(stack);
     }
