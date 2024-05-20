@@ -125,6 +125,7 @@
   "item.jojo.mista_revolver.reference_quote": "\"オレが質問をして２秒以内にオマエが答えねえ場合はオレはオマエの２つの目玉に各一発ずつ弾丸をブチ込む…１（ウーノ）…２（ドゥーエ）…それ以上は待たない！\"",
   "item.jojo.lighter": "Lighter",
   "item.jojo.lighter.reference_quote": "\"テストというのは君の『信頼』を見る事なんだ…この『ライター』の『炎』でなッ！\"",
+  "item.jojo.mr_president_key": "Turtle Key",
   "item.jojo.stone_pendant": "Stone Pendant",
   "item.jojo.stone_pendant.reference_quote": "\"なんでも離婚した君のお父さんが娘の君が困った時に渡すようにとお母さんの言ったらしい\"",
   "item.jojo.harpoon": "Harpoon",
@@ -221,7 +222,7 @@
   "advancements.jojo.hamon_mastery.title": "The Wind Has Created a Viking!",
   "advancements.jojo.hamon_mastery.description": "Get to the maximum levels of Hamon strength and Hamon control",
   "advancements.jojo.hamon_max_training.title": "Only 1 in 10000 Has the Aptitude and Willpower",
-  "advancements.jojo.hamon_max_training.description": "Get to the maximum levels of breathing training",
+  "advancements.jojo.hamon_max_training.description": "Get to the maximum level of breathing training",
   "advancements.jojo.last_hamon.title": "It's My Last Hamon!",
   "advancements.jojo.last_hamon.description": "Receive another Hamon user's life energy",
   "advancements.jojo.abandon_hamon.title": "\"Effort\" is My Most Hated Word!",
@@ -1202,6 +1203,16 @@
   "jojo.rps.too_far": "%s is too far from you",
   "jojo.rps.game_invite.text": "%s wants to play rock-paper-scissors with you! Type %s to accept",
   "jojo.rps.game_invite.sent": "Sent a game invite to %s",
+  
+  "stand.jojo.mr_president": "Mr.President",
+  "entity.jojo.coco_jumbo_turtle": "Coco Jumbo",
+  "item.jojo.mr_president_key.named": "%s key",
+  "coco_jumbo.key.not_blank": "not_blank_key",
+  "coco_jumbo.key.blank": "blank_key",
+  "coco_jumbo.key.wrong": "wrong_key",
+  "give_mr_president_hint": "~ This turtle looks very different. Could it have potential as a Stand user...? ~",
+  "block.jojo.coco_jumbo_shell": "Turtle Shell",
+  "block.jojo.mr_president_gem": "Key Gem",
   
   "jojo.to_be_continued": "To Be Continued"
 }
