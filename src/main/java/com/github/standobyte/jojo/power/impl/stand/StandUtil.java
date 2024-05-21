@@ -128,7 +128,7 @@ public class StandUtil {
                     }
                     else {
                         Minecraft mc = Minecraft.getInstance();
-                        ClientUtil.setCameraEntityPreventShaderSwitch(mc, manualControl ? standEntity : player);
+                        ClientUtil.setCameraEntityPreventShaderSwitch(manualControl ? standEntity : player);
                         if (manualControl) {
                             mc.player.xxa = 0;
                             mc.player.zza = 0;

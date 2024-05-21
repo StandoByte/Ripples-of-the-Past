@@ -367,7 +367,7 @@ public class ClientSetup {
                 model -> new ItemISTERModelWrapper(model).setCaptureEntity());
     }
     
-    private static void registerCustomBakedModel(ResourceLocation resLoc, 
+    public static void registerCustomBakedModel(ResourceLocation resLoc, 
             Map<ResourceLocation, IBakedModel> modelRegistry, UnaryOperator<IBakedModel> newModel) {
         ModelResourceLocation modelResLoc = new ModelResourceLocation(resLoc, "inventory");
         IBakedModel existingModel = modelRegistry.get(modelResLoc);

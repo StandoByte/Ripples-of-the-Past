@@ -76,6 +76,11 @@ import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.client.gui.GuiUtils;
 
+/**
+ * Any methods from this class are only to be called on the client side
+ * (if {@link World#isClientSide()} returns true),
+ * otherwise it will crash on dedicated servers
+ */
 public class ClientUtil {
     public static final ResourceLocation ADDITIONAL_UI = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/additional.png");
     public static final int MAX_MODEL_LIGHT = LightTexture.pack(15, 15);
@@ -156,6 +161,15 @@ public class ClientUtil {
         return canHearStands;
     }
     
+    public static void setCameraEntityPreventShaderSwitch(Entity entity) {
+        Minecraft mc = Minecraft.getInstance();
+        mc.setCameraEntity(entity);
+        if (mc.gameRenderer.currentEffect() == null) {
+            ShaderEffectApplier.getInstance().updateCurrentShader();
+        }
+    }
+    
+    @Deprecated
     public static void setCameraEntityPreventShaderSwitch(Minecraft mc, Entity entity) {
         mc.setCameraEntity(entity);
         if (mc.gameRenderer.currentEffect() == null) {
