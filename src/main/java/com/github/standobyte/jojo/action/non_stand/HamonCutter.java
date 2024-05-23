@@ -13,6 +13,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.PotionItem;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
@@ -62,13 +63,22 @@ public class HamonCutter extends HamonAction {
     
     private ItemStack getUseableItem(LivingEntity entity) {
         ItemStack potionItem = entity.getMainHandItem();
-        if (potionItem.isEmpty() || !(potionItem.getItem() instanceof PotionItem) && !(potionItem.getItem() instanceof SoapItem)) {
+        if (!canUse(potionItem)) {
             potionItem = entity.getOffhandItem();
-            if (potionItem.isEmpty() || !(potionItem.getItem() instanceof PotionItem) && !(potionItem.getItem() instanceof SoapItem)) {
+            if (!canUse(potionItem)) {
                 return ItemStack.EMPTY;
             }
         }
         return potionItem;
+    }
+    
+    public static boolean canUse(ItemStack item) {
+        return !item.isEmpty() && (item.getItem() instanceof PotionItem || item.getItem() instanceof SoapItem);
+    }
+    
+    @Override
+    public boolean renderHamonAuraOnItem(ItemStack item, HandSide handSide) {
+        return canUse(item);
     }
 }
 

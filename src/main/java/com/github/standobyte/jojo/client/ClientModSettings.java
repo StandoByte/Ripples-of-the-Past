@@ -32,12 +32,17 @@ public class ClientModSettings {
         public boolean resolveShaders = true;
         public boolean menacingParticles = true;
         public boolean timeStopAnimation = true;
+        public boolean _standMotionTilt = false;
         
         public boolean characterVoiceLines = true;
         
         public boolean toggleLmbHotbar = false;
         public boolean toggleRmbHotbar = false;
         public boolean toggleDisableHotbars = false;
+        
+        public boolean thirdPersonHamonAura = true;
+        public boolean firstPersonHamonAura = true;
+        public boolean hamonAuraBlur = false;
     }
     
     

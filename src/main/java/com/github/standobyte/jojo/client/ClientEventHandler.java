@@ -28,6 +28,7 @@ import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeC
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
+import com.github.standobyte.jojo.client.particle.custom.FirstPersonHamonAura;
 import com.github.standobyte.jojo.client.polaroid.PhotosCache;
 import com.github.standobyte.jojo.client.polaroid.PolaroidHelper;
 import com.github.standobyte.jojo.client.render.block.overlay.TranslucentBlockRenderHelper;
@@ -56,6 +57,7 @@ import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.item.OilItem;
+import com.github.standobyte.jojo.modcompat.OptionalDependencyHelper;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClMetEntityTypePacket;
@@ -71,7 +73,6 @@ import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
-import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
 import com.google.common.base.MoreObjects;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -132,6 +133,7 @@ import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.GuiOpenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.DrawScreenEvent;
 import net.minecraftforge.client.event.GuiScreenEvent.InitGuiEvent;
+import net.minecraftforge.client.event.RenderArmEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
@@ -331,6 +333,8 @@ public class ClientEventHandler {
                         entity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
                         entity.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
                     });
+                    
+                    FirstPersonHamonAura.getInstance().tick();
                 }
                 
                 tickResolveEffect();
@@ -512,15 +516,16 @@ public class ClientEventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void disableFoodBar(RenderGameOverlayEvent.Pre event) {
-        if (event.getType() == FOOD && !ModInteractionUtil.isModLoaded("vampirism")
-                || event.getType() == AIR
-                || event.getType() == HEALTH) {
+        boolean isVampirismModVampire = OptionalDependencyHelper.vampirism().isEntityVampire(mc.player);
+        if (event.getType() == FOOD && !isVampirismModVampire || event.getType() == AIR) {
             INonStandPower.getNonStandPowerOptional(mc.player).ifPresent(power -> {
-                if (power.getType() == ModPowers.VAMPIRISM.get() && event.getType() != HEALTH
-                        || JojoModUtil.isDyingBody(mc.player)) {
+                if (power.getType() == ModPowers.VAMPIRISM.get()) {
                     event.setCanceled(true);
                 }
             });
+        }
+        else if (event.getType() == HEALTH && JojoModUtil.isDyingBody(mc.player)) {
+            event.setCanceled(true);
         }
         
         if (event.getType() == EXPERIENCE && mc.gameMode.hasExperience()
@@ -704,6 +709,15 @@ public class ClientEventHandler {
         case OFF_HAND:
             offHandRendered = true;
             break;
+        }
+    }
+    
+    @SubscribeEvent
+    public void onHandRenderFinal(RenderArmEvent event) {
+        Hand hand = event.getArm() == event.getPlayer().getMainArm() ? Hand.MAIN_HAND : Hand.OFF_HAND;
+        if (MCUtil.isHandFree(event.getPlayer(), hand)) {
+            Minecraft mc = Minecraft.getInstance();
+            FirstPersonHamonAura.getInstance().renderParticles(event.getPoseStack(), event.getMultiBufferSource(), event.getArm());
         }
     }
     

@@ -18,6 +18,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -96,5 +97,10 @@ public class HamonLifeMagnetism extends HamonAction {
         HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
         hamon.hamonPointsFromAction(HamonStat.CONTROL, getEnergyCost(power, ActionTarget.EMPTY));
         HamonUtil.emitHamonSparkParticles(world, null, pos.x, glider.getY(1.0F), pos.z, 0.1F);
+    }
+    
+    @Override
+    public boolean renderHamonAuraOnItem(ItemStack item, HandSide handSide) {
+        return item.getItem() instanceof BlockItem && ((BlockItem) item.getItem()).getBlock() instanceof LeavesBlock;
     }
 }

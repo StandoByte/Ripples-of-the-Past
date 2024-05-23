@@ -27,6 +27,7 @@
     "client.WorldRendererMixin",
     "client.ClientPlayNetHandlerMixin",
     "client.EntityClMixin",
-    "client.LivingEntityClMixin"
+    "client.LivingEntityClMixin",
+    "client.ItemRendererMixin"
   ]
 }

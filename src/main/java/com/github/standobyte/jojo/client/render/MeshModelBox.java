@@ -35,21 +35,6 @@ public class MeshModelBox extends ModelRenderer.ModelBox {
     }
     
     
-    /*
-     *            Vanilla cubes:
-     * 
-     *    u0   u1       u2   u3  u4   u5
-     * v0       ┌────────┬────────┐
-     *          │   U    │   D    │
-     * v1  ┌────┼────────┼────┬───┴────┐ ⎫
-     *     │    │        │    │        │ ⎪
-     *     │ E  │   N    │ W  │   S    │ ⎬ size.y
-     *     │    │        │    │        │ ⎪
-     *     │    │        │    │        │ ⎪
-     * v2  └────┴────────┴────┴────────┘ ⎭
-     *     size.z               size.x
-     */
-    
     
     public static class Builder {
         private final boolean livingEntityRenderHacks;

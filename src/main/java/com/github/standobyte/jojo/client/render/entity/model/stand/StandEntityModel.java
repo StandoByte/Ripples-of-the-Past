@@ -15,6 +15,7 @@ import org.apache.commons.lang3.mutable.MutableFloat;
 
 import com.github.standobyte.jojo.action.stand.StandEntityAction.Phase;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.render.entity.model.animnew.INamedModelParts;
 import com.github.standobyte.jojo.client.render.entity.pose.IModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose.ModelAnim;
@@ -41,9 +42,9 @@ import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 
-public abstract class StandEntityModel<T extends StandEntity> extends AgeableModel<T> implements IHasArm {
+public abstract class StandEntityModel<T extends StandEntity> extends AgeableModel<T> implements IHasArm, INamedModelParts {
     ResourceLocation modelId = null;
-    private Map<String, ModelRenderer> namedModelParts = new HashMap<>();
+    protected Map<String, ModelRenderer> namedModelParts = new HashMap<>();
     
     protected VisibilityMode visibilityMode = VisibilityMode.ALL;
     protected float yRotRad;
@@ -61,7 +62,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     private IActionAnimation<T> currentActionAnim = null;
     
     private Map<ModelRenderer, MutableFloat> secondXRotMap = new HashMap<>();
-
+    
     protected StandEntityModel(boolean scaleHead, float yHeadOffset, float zHeadOffset) {
         this(scaleHead, yHeadOffset, zHeadOffset, 2.0F, 2.0F, 24.0F);
     }
@@ -125,6 +126,9 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         headParts().forEach(part -> {
             setRotationAngle(part, 0, 0, 0);
         });
+        bodyParts().forEach(part -> {
+            setRotationAngle(part, 0, 0, 0);
+        });
 
 //        initPoses();
 //        initActionPoses();
@@ -151,6 +155,23 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     }
     
     protected void poseStand(T entity, float ticks, float yRotOffsetRad, float xRotRad, 
+            StandPose standPose, Optional<Phase> actionPhase, float phaseCompletion, HandSide swingingHand) {
+        
+//        Animation newIdleAnim = CustomResources.getStandModelAnimations().getAnim(getModelId(), "idle");
+//        if (newIdleAnim != null) {
+//            StandAnimator.animate(this, newIdleAnim, ticks - idleLoopTickStamp, 1);
+//        }
+        
+        legacyPoseStand(entity, ticks, yRotOffsetRad, xRotRad, standPose, actionPhase, phaseCompletion, swingingHand);
+    }
+    
+    public ModelRenderer getModelPart(String name) {
+        return namedModelParts.get(name);
+    }
+    
+    
+    
+    protected void legacyPoseStand(T entity, float ticks, float yRotOffsetRad, float xRotRad, 
             StandPose standPose, Optional<Phase> actionPhase, float phaseCompletion, HandSide swingingHand) {
         if (actionAnim.containsKey(standPose)) {
             idlePose.poseModel(1.0F, entity, ticks, yRotOffsetRad, xRotRad, swingingHand);
@@ -314,11 +335,18 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     
     protected void initOpposites() {}
     
+    @Override
+    public ModelRenderer putMamedModelPart(String name, ModelRenderer modelPart) {
+        namedModelParts.put(name, modelPart);
+        return modelPart;
+    }
+    
     protected final BiMap<ModelRenderer, ModelRenderer> oppositeHandside = HashBiMap.create();
     public final ModelRenderer getOppositeHandside(ModelRenderer modelRenderer) {
         return oppositeHandside.computeIfAbsent(modelRenderer, k -> oppositeHandside.inverse().getOrDefault(modelRenderer, modelRenderer));
     }
-
+    
+    
     public enum VisibilityMode {
         ALL,
         ARMS_ONLY,

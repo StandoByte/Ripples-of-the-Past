@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.reflect.FieldUtils;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.client.render.entity.model.animnew.INamedModelParts;
 import com.github.standobyte.jojo.client.render.entity.pose.XRotationModelRenderer;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 
@@ -62,6 +63,7 @@ public class BlockbenchStandModelHelper {
                 .collect(Collectors.toCollection(HashSet::new));
         List<ModelRenderer> editedParts = new ArrayList<>();
         Map<ModelRenderer, ModelRenderer> remapParents = new HashMap<>();
+        INamedModelParts putNamed = inModModel instanceof INamedModelParts ? (INamedModelParts) inModModel : null;
         
         for (Map.Entry<String, ModelRenderer> entry : source.entrySet()) {
             String name = entry.getKey();
@@ -93,6 +95,9 @@ public class BlockbenchStandModelHelper {
                     inModPartField.setAccessible(true);
                     editedParts.add(blockbenchPart);
                     inModPartField.set(inModModel, blockbenchPart);
+                    if (putNamed != null) {
+                        putNamed.putMamedModelPart(name, blockbenchPart);
+                    }
                     
                     it.remove();
                     foundModelPart = true;

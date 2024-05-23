@@ -12,6 +12,7 @@ import com.github.standobyte.jojo.util.mc.MCUtil;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.util.HandSide;
 import net.minecraft.world.World;
 
 public class HamonBubbleLauncher extends HamonAction {
@@ -90,6 +91,11 @@ public class HamonBubbleLauncher extends HamonAction {
                 world.addFreshEntity(bubbleEntity);
             }
         }        
+    }
+    
+    @Override
+    public boolean renderHamonAuraOnItem(ItemStack item, HandSide handSide) {
+        return item.getItem() == ModItems.SOAP.get();
     }
             
 }

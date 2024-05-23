@@ -41,7 +41,6 @@ public class HamonIntroTabGui extends HamonTabGui {
     private int y1;
     private int y2;
     private int y3;
-    private int tickCount = 0;
     private int bar2RenderTime = -1;
     private int bar3RenderTime = -1;
     private HideScreenPartToggleBox breathStabilityInfoToggle;
@@ -140,7 +139,7 @@ public class HamonIntroTabGui extends HamonTabGui {
     protected void drawActualContents(HamonScreen screen, MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
         RenderSystem.enableBlend();
         minecraft.textureManager.bind(ActionsOverlayGui.OVERLAY_LOCATION);
-        float ticks = tickCount + partialTick;
+        float ticks = screen.tickCount + partialTick;
         int x = intScrollX + 5;
         
         // empty energy bar
@@ -149,7 +148,7 @@ public class HamonIntroTabGui extends HamonTabGui {
         // charging energy bar
         boolean bar2InView = y2 > -7 && y2 < 199;
         if (bar2RenderTime < 0 && bar2InView) {
-            bar2RenderTime = tickCount;
+            bar2RenderTime = screen.tickCount;
         }
         if (bar2RenderTime >= 0) {
             float barTicks = (ticks - bar2RenderTime) % 100;
@@ -160,7 +159,7 @@ public class HamonIntroTabGui extends HamonTabGui {
             // energy bar with lower breath stability charging not as fast
             boolean bar3InView = y3 > -7 && y3 < 199;
             if (bar3RenderTime < 0 && bar3InView) {
-                bar3RenderTime = tickCount;
+                bar3RenderTime = screen.tickCount;
             }
             if (bar3RenderTime >= 0) {
                 float barTicks = (ticks - bar3RenderTime) % 750;
@@ -198,11 +197,6 @@ public class HamonIntroTabGui extends HamonTabGui {
         minecraft.getTextureManager().bind(actionIcon);
         blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
         HotbarRenderer.renderSlotSelection(matrixStack, minecraft, x, y, 1, false);
-    }
-    
-    @Override
-    void tick() {
-        tickCount++;
     }
 
     @Override

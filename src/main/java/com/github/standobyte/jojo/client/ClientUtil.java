@@ -537,22 +537,22 @@ public class ClientUtil {
         }
     }
     
-    public static void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
-        modelRenderer.xRot = x;
-        modelRenderer.yRot = y;
-        modelRenderer.zRot = z;
+    public static void addRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
+        modelRenderer.xRot += x;
+        modelRenderer.yRot += y;
+        modelRenderer.zRot += z;
     }
     
     public static void translateModelPart(ModelRenderer modelRenderer, Vector3f tlVec) {
         modelRenderer.x += tlVec.x();
-        modelRenderer.y += tlVec.z();
-        modelRenderer.z += tlVec.y();
+        modelRenderer.y += tlVec.y();
+        modelRenderer.z += tlVec.z();
     }
     
     public static void rotateModelPart(ModelRenderer modelRenderer, Vector3f rotVec) {
-        modelRenderer.xRot += rotVec.x();
-        modelRenderer.yRot += rotVec.z();
-        modelRenderer.zRot += rotVec.y();
+        modelRenderer.xRot = rotVec.x();
+        modelRenderer.yRot = rotVec.y();
+        modelRenderer.zRot = rotVec.z();
     }
     
     /**
@@ -560,7 +560,13 @@ public class ClientUtil {
      */
     public static void scaleModelPart(ModelRenderer modelRenderer, Vector3f scaleVec) {
     }
-
+    
+    public static void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
+        modelRenderer.xRot = x;
+        modelRenderer.yRot = y;
+        modelRenderer.zRot = z;
+    }
+    
     public static void setRotationAngleDegrees(ModelRenderer modelRenderer, float x, float y, float z) {
         setRotationAngle(modelRenderer, x * MathUtil.DEG_TO_RAD, y * MathUtil.DEG_TO_RAD, z * MathUtil.DEG_TO_RAD);
     }

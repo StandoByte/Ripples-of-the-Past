@@ -3,10 +3,13 @@ package com.github.standobyte.jojo.action.non_stand;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.damaging.projectile.HamonBubbleCutterEntity;
+import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
@@ -40,5 +43,10 @@ public class HamonBubbleCutter extends HamonAction {
             }
             HamonUtil.emitHamonSparkParticles(world, null, shootingPos.x, shootingPos.y, shootingPos.z, 0.75F);
         }
+    }
+    
+    @Override
+    public boolean renderHamonAuraOnItem(ItemStack item, HandSide handSide) {
+        return item.getItem() == ModItems.SOAP.get();
     }
 }

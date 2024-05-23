@@ -15,6 +15,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.ui.BlitFloat;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonMeditationPacket;
@@ -138,9 +139,26 @@ public class HamonStatsTabGui extends HamonTabGui {
         }
 
         // breathing training stat bar
-        pts = breathingTraining == HamonData.MAX_BREATHING_LEVEL ? 1.0F : breathingTraining - (int)breathingTraining;
-        blit(matrixStack, intScrollX + 154, breathingStatY + 1, 203, 244, (int) (50 * pts), 5);
+        boolean fullTraining = breathingTraining == HamonData.MAX_BREATHING_LEVEL;
+        pts = fullTraining ? 1.0F : breathingTraining - (int)breathingTraining;
+        blit(matrixStack, intScrollX + 154, breathingStatY + 1, 203, fullTraining ? 249 : 244, (int) (50 * pts), 5);
         blit(matrixStack, intScrollX + 153, breathingStatY, 202, 227, 52, 7);
+        if (fullTraining) {
+            float ticks = screen.tickCount + partialTick;
+            float length = 7;
+            if (ticks < length) {
+                float xMin = intScrollX + 154;
+                float xMax = xMin + 50;
+                float x0 = xMin - 17 + 67 * ticks / length;
+                float xMinus = Math.max(xMin - x0, 0);
+                float xPlus = Math.max(x0 + 17 - xMax, 0);
+                BlitFloat.blitFloat(matrixStack, 
+                        x0 + xMinus, breathingStatY + 1, 
+                        186 + xMinus, 249, 
+                        17 - xMinus - xPlus, 5, 
+                        256, 256);
+            }
+        }
 
         // exercise bars
         drawExerciseBar(this, matrixStack, intScrollX + 15, exercises1Y, screen.hamon, Exercise.MINING, 1.0F, true);
