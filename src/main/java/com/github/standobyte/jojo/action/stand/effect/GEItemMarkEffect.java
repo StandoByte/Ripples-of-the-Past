@@ -26,7 +26,10 @@ public class GEItemMarkEffect extends StandEffectInstance {
     }
     
     @Nullable
-    public TrackerItemStack getItemTracker() {
+    public TrackerItemStack getItemTracker(boolean update) {
+        if (update) {
+            itemTracker = SidedItemTrackerMap.getSidedTrackers(world).getTracker(itemTrackerId);
+        }
         return itemTracker;
     }
     
@@ -41,14 +44,17 @@ public class GEItemMarkEffect extends StandEffectInstance {
             }
             return;
         }
-        
-//        if (itemTracker == null) {
-            itemTracker = SidedItemTrackerMap.getSidedTrackers(world).getTracker(itemTrackerId);
-//        }
     }
 
     @Override
-    protected void stop() {}
+    protected void stop() {
+        if (!world.isClientSide()) {
+            TrackerItemStack tracker = getItemTracker(true);
+            if (tracker != null) {
+                tracker.clear();
+            }
+        }
+    }
 
     @Override
     protected boolean needsTarget() {
@@ -64,9 +70,9 @@ public class GEItemMarkEffect extends StandEffectInstance {
 
     @Override
     protected void readAdditionalSaveData(CompoundNBT nbt) {
-//        if (nbt.hasUUID("ItemTracker")) {
-//            itemTrackerId = nbt.getUUID("ItemTracker");
-//        }
+        if (nbt.hasUUID("ItemTracker")) {
+            itemTrackerId = nbt.getUUID("ItemTracker");
+        }
     }
 
     @Override

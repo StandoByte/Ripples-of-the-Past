@@ -69,12 +69,12 @@ public class TrackedItemPacket {
             if (msg.entityId.isPresent()) {
                 TrackerItemStack tracker = new TrackerItemStack(msg.itemStack, msg.trackerId);
                 tracker.setAtEntity(msg.entityId.getAsInt());
-                trackerMap.addTracker(msg.trackerId, tracker);
+                trackerMap.updateTracker(msg.trackerId, tracker, ClientUtil.getClientWorld());
             }
             else if (msg.blockPos.isPresent()) {
                 TrackerItemStack tracker = new TrackerItemStack(msg.itemStack, msg.trackerId);
                 tracker.setAtBlockPos(msg.blockPos.get());
-                trackerMap.addTracker(msg.trackerId, tracker);
+                trackerMap.updateTracker(msg.trackerId, tracker, ClientUtil.getClientWorld());
             }
             else {
                 trackerMap.removeTracker(msg.trackerId);

@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.client.ui.marker;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -8,7 +7,6 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.github.standobyte.jojo.action.stand.GoldExperienceMarkItem;
 import com.github.standobyte.jojo.action.stand.effect.GEItemMarkEffect;
-import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -78,17 +76,12 @@ public class GoldExperienceMarkedItemMarker extends MarkerRenderer {
     protected void updatePositions(List<MarkerInstance> list, float partialTick) {
         IStandPower.getStandPowerOptional(mc.player).ifPresent(stand -> {
             List<Pair<GEItemMarkEffect, Vector3d>> targets = GoldExperienceMarkItem.getTargets(stand, mc.player);
-            
-            Vector3d lookAngle = mc.player.getLookAngle();
-            Vector3d eyePos = mc.player.getEyePosition(1.0F);
-            Optional<StandEffectInstance> outlined = targets.stream().max(Comparator.comparingDouble(
-                    e -> lookAngle.dot(e.getRight().subtract(eyePos).normalize())))
-                    .map(pair -> pair.getLeft());
+            Optional<GEItemMarkEffect> outlined = GoldExperienceMarkItem.getTargetedEffect(targets, mc.player);
             
             for (Pair<GEItemMarkEffect, Vector3d> pair : targets) {
                 GEItemMarkEffect effect = pair.getLeft();
                 Vector3d pos = pair.getRight();
-                TrackerItemStack item = effect.getItemTracker();
+                TrackerItemStack item = effect.getItemTracker(false);
                 list.add(new ItemMarkerInstance(pos, 
                         outlined.map(outlinedEffect -> pair.getLeft() == outlinedEffect).orElse(false),
                         item.getItem()));

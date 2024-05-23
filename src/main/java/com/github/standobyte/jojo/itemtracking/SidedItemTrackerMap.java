@@ -12,7 +12,7 @@ import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
 import net.minecraft.world.World;
 
 public class SidedItemTrackerMap {
-    private final Map<UUID, TrackerItemStack> trackingMap = new HashMap<>();
+    final Map<UUID, TrackerItemStack> trackingMap = new HashMap<>();
     
     public static SidedItemTrackerMap getSidedTrackers(World world) {
         if (!world.isClientSide()) {
@@ -23,8 +23,11 @@ public class SidedItemTrackerMap {
         }
     }
     
-    public void addTracker(UUID id, TrackerItemStack itemCap) {
-        trackingMap.put(id, itemCap);
+    public void updateTracker(UUID id, TrackerItemStack itemCap, World world) {
+        TrackerItemStack prev = trackingMap.put(id, itemCap);
+        if (prev != null && prev != itemCap) {
+            prev.clear();
+        }
     }
     
     public void removeTracker(UUID id) {

@@ -170,8 +170,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
         Optional<UUID> trackedItemUUID = GoldExperienceMarkItem
                 .getTargetedMarkedItem(IStandPower.getPlayerStandPower(player), player)
                 .map(TrackerItemStack::getTrackerId);
-        NetworkUtil.writeOptional(buf, 
-                trackedItemUUID, buf::writeUUID);
+        NetworkUtil.writeOptional(buf, trackedItemUUID, buf::writeUUID);
     }
     
     @Nullable
@@ -256,7 +255,28 @@ public class GoldExperienceCreateLifeform extends StandAction {
                 
                 ITextComponent customName = null;
                 boolean tfTargetFound = false;
-                if (target.getType() == TargetType.ENTITY) {
+                // marked item
+                if (itemTrackerId.isPresent()) {
+                    TrackerItemStack itemContainer = SidedItemTrackerMap.getSidedTrackers(world).getTracker(itemTrackerId.get());
+                    if (itemContainer != null) {
+                        Entity itemEntity = itemContainer.getAtEntity(world);
+                        if (itemEntity != null) {
+                            MCUtil.cloneEntity(itemEntity).ifPresent(entity -> tf.getTfSourceData().withEntitySource(entity));
+                            itemEntity.remove();
+                            tfTargetFound = true;
+                            
+                            Vector3d pos = itemEntity.position();
+                            tf.moveTo(pos.x, pos.y, pos.z, itemEntity.yRot, itemEntity.xRot);
+                            
+                            if (itemEntity.isOnFire()) {
+                                tf.setSecondsOnFire((itemEntity.getRemainingFireTicks() + 19) / 20);
+                            }
+                            tf.setDeltaMovement(itemEntity.getDeltaMovement());
+                        }
+                    }
+                }
+                // targeted non-living entity
+                if (!tfTargetFound && target.getType() == TargetType.ENTITY) {
                     Entity targetEntity = target.getEntity();
                     MCUtil.cloneEntity(targetEntity).ifPresent(entity -> tf.getTfSourceData().withEntitySource(entity));
                     targetEntity.remove();
@@ -270,6 +290,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     }
                     tf.setDeltaMovement(targetEntity.getDeltaMovement());
                 }
+                // item held in off-hand
                 if (!tfTargetFound) {
                     ItemStack heldItem = user.getItemInHand(Hand.OFF_HAND);
                     if (!heldItem.isEmpty() && canGiveLifeTo(heldItem)) {
@@ -312,6 +333,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                         tf.moveTo(pos.x, pos.y, pos.z, performer.yRot, 0);
                     }
                 }
+                // targeted non-living block
                 if (!tfTargetFound && target.getType() == TargetType.BLOCK
                         && JojoModUtil.breakingBlocksEnabled(user.level)) {
                     BlockPos blockPos = target.getBlockPos();
@@ -330,25 +352,6 @@ public class GoldExperienceCreateLifeform extends StandAction {
                         tfTargetFound = true;
                         
                         tf.moveTo(blockPos, performer.yRot, 0);
-                    }
-                }
-                if (!tfTargetFound && itemTrackerId.isPresent()) {
-                    TrackerItemStack itemContainer = SidedItemTrackerMap.getSidedTrackers(world).getTracker(itemTrackerId.get());
-                    if (itemContainer != null) {
-                        Entity itemEntity = itemContainer.getAtEntity(world);
-                        if (itemEntity != null) {
-                            MCUtil.cloneEntity(itemEntity).ifPresent(entity -> tf.getTfSourceData().withEntitySource(entity));
-                            itemEntity.remove();
-                            tfTargetFound = true;
-                            
-                            Vector3d pos = itemEntity.position();
-                            tf.moveTo(pos.x, pos.y, pos.z, itemEntity.yRot, itemEntity.xRot);
-                            
-                            if (itemEntity.isOnFire()) {
-                                tf.setSecondsOnFire((itemEntity.getRemainingFireTicks() + 19) / 20);
-                            }
-                            tf.setDeltaMovement(itemEntity.getDeltaMovement());
-                        }
                     }
                 }
                 
