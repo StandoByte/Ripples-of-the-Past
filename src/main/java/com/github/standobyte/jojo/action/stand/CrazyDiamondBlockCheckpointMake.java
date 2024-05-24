@@ -110,7 +110,7 @@ public class CrazyDiamondBlockCheckpointMake extends StandEntityAction {
     }
 
     public static Optional<BlockPos> getBlockPosMoveTo(World world, ItemStack stack) {
-        if (stack.hasTag()) {
+        if (!stack.isEmpty() && stack.hasTag()) {
             CompoundNBT nbt = stack.getTag();
             if (nbt.contains("CDCheckpoint", MCUtil.getNbtId(CompoundNBT.class))) {
                 CompoundNBT checkpointNbt = nbt.getCompound("CDCheckpoint");
