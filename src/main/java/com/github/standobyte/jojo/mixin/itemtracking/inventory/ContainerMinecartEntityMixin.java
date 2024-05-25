@@ -31,7 +31,8 @@ public abstract class ContainerMinecartEntityMixin extends AbstractMinecartEntit
             TrackerItemStack.getItemTrackerInInventory(item, itemStacks.stream())
             .ifPresent(tracker -> {
                 tracker.setAtEntity(this.getId(), level);
-                tracker.setItemStillThereCheck(null);
+                tracker.setItemStillThereCheck(trackerId -> itemStacks.stream()
+                        .anyMatch(TrackerItemStack.trackerIdCheck(trackerId)));
             });
         }
     }

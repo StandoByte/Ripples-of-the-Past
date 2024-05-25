@@ -26,7 +26,7 @@ public abstract class MobEntityMixin extends LivingEntity {
         if (!level.isClientSide()) {
             TrackerItemStack.getItemTracker(pStack).ifPresent(tracker -> {
                 tracker.setAtEntity(this.getId(), level);
-                tracker.setItemStillThereCheck(null);
+                tracker.setItemStillThereCheck(trackerId -> TrackerItemStack.trackerIdCheck(trackerId).test(this.getItemBySlot(pSlot)));
             });
         }
     }

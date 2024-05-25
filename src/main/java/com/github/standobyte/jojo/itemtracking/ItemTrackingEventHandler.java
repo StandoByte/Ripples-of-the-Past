@@ -17,10 +17,11 @@ public class ItemTrackingEventHandler {
     public static void trackItemInItemEntity(EntityJoinWorldEvent event) {
         Entity entity = event.getEntity();
         if (!entity.level.isClientSide() && entity instanceof ItemEntity) {
-            ItemStack item = ((ItemEntity) entity).getItem();
+            ItemEntity itemEntity = ((ItemEntity) entity);
+            ItemStack item = itemEntity.getItem();
             TrackerItemStack.getItemTracker(item).ifPresent(tracker -> {
                 tracker.setAtEntity(entity.getId(), entity.level);
-                tracker.setItemStillThereCheck(null);
+                tracker.setItemStillThereCheck(trackerId -> TrackerItemStack.trackerIdCheck(trackerId).test(itemEntity.getItem()));
             });
         }
     }

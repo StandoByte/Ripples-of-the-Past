@@ -28,7 +28,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class GoldExperienceMarkItem extends StandAction {
-    public static final UUID GE_ITEM_MARK_UUID = UUID.fromString("2b0b4c28-2553-4d00-a5ee-bc14c74a5083");
+    public static final UUID GE_ITEM_MARK_UUID = UUID.fromString("2b0b4c28-2553-4d00-a5ee-bc14c74a5083"); // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! multiple people can have GE on a server you dumbass
 
     public GoldExperienceMarkItem(StandAction.Builder builder) {
         super(builder);

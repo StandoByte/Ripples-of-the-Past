@@ -32,7 +32,8 @@ public abstract class HopperTileEntityMixin extends LockableLootTileEntity {
             TrackerItemStack.getItemTrackerInInventory(item, getItems().stream())
             .ifPresent(tracker -> {
                 tracker.setAtBlockPos(this.getBlockPos(), level);
-                tracker.setItemStillThereCheck(null);
+                tracker.setItemStillThereCheck(trackerId -> getItems().stream()
+                        .anyMatch(TrackerItemStack.trackerIdCheck(trackerId)));
             });
         }
     }

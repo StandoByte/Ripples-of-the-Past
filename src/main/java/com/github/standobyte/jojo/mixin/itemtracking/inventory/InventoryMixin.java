@@ -34,7 +34,8 @@ public abstract class InventoryMixin implements IInventory {
                         TrackerItemStack.getItemTrackerInInventory(item, items.stream())
                         .ifPresent(tracker -> {
                             tracker.setAtEntity(horse.getId(), horse.level);
-                            tracker.setItemStillThereCheck(null);
+                            tracker.setItemStillThereCheck(trackerId -> items.stream()
+                                    .anyMatch(TrackerItemStack.trackerIdCheck(trackerId)));
                         });
                     }
                     break;

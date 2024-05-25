@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
 
 import net.minecraft.entity.player.PlayerEntity;
@@ -31,7 +32,19 @@ public abstract class PlayerInventoryMixin implements IInventory {
             TrackerItemStack.getItemTrackerInInventory(item, compartments.stream().flatMap(Collection::stream))
             .ifPresent(tracker -> {
                 tracker.setAtEntity(player.getId(), player.level);
-                tracker.setItemStillThereCheck(null);
+//                JojoMod.LOGGER.debug("1");
+//                tracker.setItemStillThereCheck(trackerId -> {
+//                    compartments.stream().flatMap(Collection::stream).forEach(i -> {
+//                        if (!i.isEmpty()) {
+//                            JojoMod.LOGGER.debug(i.getItem().getRegistryName());
+//                        }
+//                    });
+//                    JojoMod.LOGGER.debug("{} {}", trackerId, compartments.stream().flatMap(Collection::stream).anyMatch(TrackerItemStack.trackerIdCheck(trackerId)));
+//                    JojoMod.LOGGER.debug("");
+//                    return compartments.stream().flatMap(Collection::stream).anyMatch(TrackerItemStack.trackerIdCheck(trackerId));
+//                });
+                tracker.setItemStillThereCheck(trackerId -> compartments.stream().flatMap(Collection::stream)
+                        .anyMatch(TrackerItemStack.trackerIdCheck(trackerId)));
             });
         }
     }
@@ -42,7 +55,19 @@ public abstract class PlayerInventoryMixin implements IInventory {
             TrackerItemStack.getItemTracker(item)
             .ifPresent(tracker -> {
                 tracker.setAtEntity(player.getId(), player.level);
-                tracker.setItemStillThereCheck(null);
+//                JojoMod.LOGGER.debug("2");
+//                tracker.setItemStillThereCheck(trackerId -> {
+//                    compartments.stream().flatMap(Collection::stream).forEach(i -> {
+//                        if (!i.isEmpty()) {
+//                            JojoMod.LOGGER.debug(i.getItem().getRegistryName());
+//                        }
+//                    });
+//                    JojoMod.LOGGER.debug("{} {}", trackerId, compartments.stream().flatMap(Collection::stream).anyMatch(TrackerItemStack.trackerIdCheck(trackerId)));
+//                    JojoMod.LOGGER.debug("");
+//                    return compartments.stream().flatMap(Collection::stream).anyMatch(TrackerItemStack.trackerIdCheck(trackerId));
+//                });
+                tracker.setItemStillThereCheck(trackerId -> compartments.stream().flatMap(Collection::stream)
+                        .anyMatch(TrackerItemStack.trackerIdCheck(trackerId)));
             });
         }
     }

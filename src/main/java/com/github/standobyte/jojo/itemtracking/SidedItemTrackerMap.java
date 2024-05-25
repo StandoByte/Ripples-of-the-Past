@@ -9,8 +9,8 @@ import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
 
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
 
 public class SidedItemTrackerMap {
     final Map<UUID, TrackerItemStack> trackingMap = new HashMap<>();
@@ -24,9 +24,9 @@ public class SidedItemTrackerMap {
         }
     }
     
-    public static void tick(ServerWorld world) {
-        for (TrackerItemStack tracker : getSidedTrackers(world).trackingMap.values()) {
-            tracker.tick(world);
+    public static void tick(MinecraftServer server) {
+        for (TrackerItemStack tracker : SaveFileUtilCapProvider.getSaveFileCap(server).getItemsTracker().trackingMap.values()) {
+            tracker.tick(server);
         }
     }
     

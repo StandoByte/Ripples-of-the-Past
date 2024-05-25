@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.mixin.itemtracking;
 
+import java.util.stream.IntStream;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -29,7 +31,9 @@ public abstract class ContainerSlotMixin {
             if (!entity.level.isClientSide()) {
                 TrackerItemStack.getItemTracker(pStack).ifPresent(tracker -> {
                     tracker.setAtEntity(entity.getId(), entity.level);
-                    tracker.setItemStillThereCheck(null);
+                    tracker.setItemStillThereCheck(trackerId -> 
+                            IntStream.range(0, container.getContainerSize()).mapToObj(container::getItem)
+                            .anyMatch(TrackerItemStack.trackerIdCheck(trackerId)));
                 });
             }
         }
@@ -39,7 +43,9 @@ public abstract class ContainerSlotMixin {
             if (!world.isClientSide()) {
                 TrackerItemStack.getItemTracker(pStack).ifPresent(tracker -> {
                     tracker.setAtBlockPos(tileEntity.getBlockPos(), world);
-                    tracker.setItemStillThereCheck(null);
+                    tracker.setItemStillThereCheck(trackerId -> 
+                            IntStream.range(0, container.getContainerSize()).mapToObj(container::getItem)
+                            .anyMatch(TrackerItemStack.trackerIdCheck(trackerId)));
                 });
             }
         }
@@ -48,7 +54,9 @@ public abstract class ContainerSlotMixin {
             if (!player.level.isClientSide()) {
                 TrackerItemStack.getItemTracker(pStack).ifPresent(tracker -> {
                     tracker.setAtEntity(player.getId(), player.level);
-                    tracker.setItemStillThereCheck(null);
+                    tracker.setItemStillThereCheck(trackerId -> 
+                            IntStream.range(0, container.getContainerSize()).mapToObj(container::getItem)
+                            .anyMatch(TrackerItemStack.trackerIdCheck(trackerId)));
                 });
             }
         }

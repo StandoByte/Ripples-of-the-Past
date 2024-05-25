@@ -163,7 +163,9 @@ import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.ServerChatEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
+import net.minecraftforge.event.TickEvent.ServerTickEvent;
 import net.minecraftforge.event.TickEvent.WorldTickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
@@ -200,6 +202,7 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 //FIXME move all event handlers to their respective classes, leave the method links here
 @EventBusSubscriber(modid = JojoMod.MOD_ID)
@@ -305,9 +308,16 @@ public class GameplayEventHandler {
                     }
                 });
                 
-                SidedItemTrackerMap.tick(world);
                 break;
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onServerTick(ServerTickEvent event) {
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (event.phase == TickEvent.Phase.END) {
+            SidedItemTrackerMap.tick(server);
         }
     }
     

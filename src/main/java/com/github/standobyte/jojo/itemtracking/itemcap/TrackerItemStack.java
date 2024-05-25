@@ -9,16 +9,20 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrackedItemPacket;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
@@ -31,8 +35,10 @@ public class TrackerItemStack {
     @Nullable private UUID trackerUuid; // TODO replace UUID with int?
     private UUID trackingPlayerId;
     
+    private RegistryKey<World> positionDimension;
     private OptionalInt positionEntity = OptionalInt.empty();
     private BlockPos positionBlock = null;
+    private BlockState containerBlockState;
     private Predicate<UUID> itemStillThere;
     
     public TrackerItemStack(ItemStack itemStack) {
@@ -100,6 +106,10 @@ public class TrackerItemStack {
         this.itemStillThere = check;
     }
     
+    public static Predicate<ItemStack> trackerIdCheck(UUID trackerId) {
+        return invItem -> trackerId.equals(TrackerItemStack.getItemTracker(invItem).map(TrackerItemStack::getTrackerId).orElse(null));
+    }
+    
     public void onUpdate(ServerWorld world) {
         SaveFileUtilCapProvider.getSaveFileCap(world.getServer()).getItemsTracker().updateTracker(trackerUuid, this, world);
         if (trackingPlayerId != null) {
@@ -115,6 +125,8 @@ public class TrackerItemStack {
     public void setAtEntity(int entityId, World world) {
         this.positionEntity = OptionalInt.of(entityId);
         this.positionBlock = null;
+        this.containerBlockState = null;
+        this.positionDimension = world.dimension();
         if (!world.isClientSide()) {
             onUpdate((ServerWorld) world);
         }
@@ -123,15 +135,20 @@ public class TrackerItemStack {
     public void setAtBlockPos(BlockPos blockPos, World world) {
         this.positionEntity = OptionalInt.empty();
         this.positionBlock = blockPos;
+        this.containerBlockState = world.getBlockState(blockPos);
+        this.positionDimension = world.dimension();
         if (!world.isClientSide()) {
             onUpdate((ServerWorld) world);
         }
     }
     
     public void setDisappeared(ServerWorld world) {
-        positionEntity = OptionalInt.empty();
-        positionBlock = null;
-        itemStillThere = null;
+        this.positionEntity = OptionalInt.empty();
+        this.positionBlock = null;
+        this.containerBlockState = null;
+        this.positionDimension = null;
+        this.itemStillThere = null;
+        JojoMod.LOGGER.debug("а где");
         onUpdate(world);
     }
     
@@ -145,9 +162,26 @@ public class TrackerItemStack {
         return positionBlock;
     }
     
-    public void tick(ServerWorld world) {
-        if (itemStillThere != null && !itemStillThere.test(trackerUuid)) {
-            setDisappeared(world);
+    public void tick(MinecraftServer server) {
+        if (this.positionDimension != null) {
+            ServerWorld world = server.getLevel(positionDimension);
+            if (world != null) {
+                if (itemStillThere != null && !itemStillThere.test(trackerUuid)) {
+                    setDisappeared(world);
+                }
+                else if (positionEntity.isPresent()) {
+                    Entity entity = world.getEntity(positionEntity.getAsInt());
+                    if (entity == null || entity.removed) {
+                        setDisappeared(world);
+                    }
+                }
+                else if (positionBlock != null && containerBlockState != null) {
+                    BlockState blockState = world.getBlockState(positionBlock);
+                    if (this.containerBlockState.getBlock() != blockState.getBlock()) {
+                        setDisappeared(world);
+                    }
+                }
+            }
         }
     }
     
