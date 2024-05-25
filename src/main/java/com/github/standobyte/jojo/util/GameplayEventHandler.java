@@ -54,6 +54,7 @@ import com.github.standobyte.jojo.item.InkPastaItem;
 import com.github.standobyte.jojo.item.OilItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
+import com.github.standobyte.jojo.itemtracking.SidedItemTrackerMap;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveEffectStartPacket;
@@ -286,22 +287,25 @@ public class GameplayEventHandler {
     @SubscribeEvent
     public static void onWorldTick(WorldTickEvent event) {
         if (event.side == LogicalSide.SERVER /* actually only ticks on server but ok */) {
+            ServerWorld world = (ServerWorld) event.world;
             switch (event.phase) {
             case START:
                 break;
             case END:
-                ((ServerWorld) event.world).getAllEntities().forEach(entity -> {
+                world.getAllEntities().forEach(entity -> {
 //                    entity.getCapability(EntityUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
                     entity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
                     entity.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
                 });
 
-                ((ServerWorld) event.world).getChunkSource().chunkMap.getChunks().forEach(chunkHolder -> {
+                world.getChunkSource().chunkMap.getChunks().forEach(chunkHolder -> {
                     Chunk chunk = chunkHolder.getTickingChunk();
                     if (chunk != null) {
                         chunk.getCapability(ChunkCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
                     }
                 });
+                
+                SidedItemTrackerMap.tick(world);
                 break;
             }
         }

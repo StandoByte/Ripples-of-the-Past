@@ -27,15 +27,23 @@ public abstract class PlayerInventoryMixin implements IInventory {
     
     @Inject(method = "add(ILnet/minecraft/item/ItemStack;)Z", at = @At("RETURN"))
     public void jojoOnItemAddedToInv(int slot, ItemStack item, CallbackInfoReturnable<Boolean> ci) {
-        if (Boolean.TRUE.equals(ci.getReturnValue())) {
-            TrackerItemStack.trackedInEntityInv(item, compartments.stream().flatMap(Collection::stream), 
-                    player.level, player.getId());
+        if (!player.level.isClientSide() && Boolean.TRUE.equals(ci.getReturnValue())) {
+            TrackerItemStack.getItemTrackerInInventory(item, compartments.stream().flatMap(Collection::stream))
+            .ifPresent(tracker -> {
+                tracker.setAtEntity(player.getId(), player.level);
+                tracker.setItemStillThereCheck(null);
+            });
         }
     }
     
     @Inject(method = "setItem", at = @At("TAIL"))
     public void jojoOnItemSetToSlot(int slot, ItemStack item, CallbackInfo ci) {
-        TrackerItemStack.trackedInEntityInv(item, compartments.stream().flatMap(Collection::stream), 
-                player.level, player.getId());
+        if (!player.level.isClientSide()) {
+            TrackerItemStack.getItemTracker(item)
+            .ifPresent(tracker -> {
+                tracker.setAtEntity(player.getId(), player.level);
+                tracker.setItemStillThereCheck(null);
+            });
+        }
     }
 }

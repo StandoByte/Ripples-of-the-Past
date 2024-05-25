@@ -26,7 +26,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
 
 public class GoldExperienceMarkItem extends StandAction {
     public static final UUID GE_ITEM_MARK_UUID = UUID.fromString("2b0b4c28-2553-4d00-a5ee-bc14c74a5083");
@@ -65,8 +64,7 @@ public class GoldExperienceMarkItem extends StandAction {
                 
                 TrackerItemStack itemTracker = TrackerItemStack.setTracked(markedStack, (ServerPlayerEntity) user, GE_ITEM_MARK_UUID);
                 if (itemTracker != null) {
-                    itemTracker.setAtEntity(user.getId());
-                    itemTracker.onUpdate((ServerWorld) world);
+                    itemTracker.setAtEntity(user.getId(), world);
                     
                     GEItemMarkEffect effect = new GEItemMarkEffect(itemTracker.getTrackerId());
                     effect.withStand(power);
@@ -93,7 +91,7 @@ public class GoldExperienceMarkItem extends StandAction {
         Vector3d eyePos = player.getEyePosition(1.0F);
         Optional<GEItemMarkEffect> outlined = targets.stream()
                 .map(e -> Pair.of(e, lookAngle.dot(e.getRight().subtract(eyePos).normalize())))
-                .filter(withCos -> withCos.getValue() > 0.886)
+                .filter(withCos -> withCos.getValue() > 0.92388)
                 .max(Comparator.comparingDouble(Pair::getValue))
                 .map(Pair::getLeft)
                 .map(Pair::getLeft);
@@ -107,7 +105,7 @@ public class GoldExperienceMarkItem extends StandAction {
                 .getEffects()
                 .filter(effect -> effect.effectType == ModStandEffects.GE_ITEM_MARK.get())
                 .map(effect -> (GEItemMarkEffect) effect)
-                .filter(effect -> effect.getItemTracker(true) != null && effect.getItemTracker(false).getAtEntity(player.level) != player)
+                .filter(effect -> effect.getItemTracker(true) != null/* && effect.getItemTracker(false).getAtEntity(player.level) != player*/)
                 .map(effect -> Pair.of(effect, effect.getItemTracker(false).markerPos(player.level, ClientUtil.getPartialTick())))
                 .filter(entry -> entry.getRight() != null && entry.getRight().distanceToSqr(player.position()) < rangeSq)
                 .collect(Collectors.toList());

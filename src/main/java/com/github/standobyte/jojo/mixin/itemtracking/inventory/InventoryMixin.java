@@ -30,8 +30,13 @@ public abstract class InventoryMixin implements IInventory {
             for (IInventoryChangedListener shouldBeHorse : listeners) {
                 if (shouldBeHorse instanceof AbstractHorseEntity) {
                     AbstractHorseEntity horse = (AbstractHorseEntity) shouldBeHorse;
-                    TrackerItemStack.trackedInEntityInv(item, items.stream(), 
-                            horse.level, horse.getId());
+                    if (!horse.level.isClientSide()) {
+                        TrackerItemStack.getItemTrackerInInventory(item, items.stream())
+                        .ifPresent(tracker -> {
+                            tracker.setAtEntity(horse.getId(), horse.level);
+                            tracker.setItemStillThereCheck(null);
+                        });
+                    }
                     break;
                 }
             }

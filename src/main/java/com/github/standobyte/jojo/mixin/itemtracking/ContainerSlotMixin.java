@@ -15,6 +15,7 @@ import net.minecraft.inventory.IInventory;
 import net.minecraft.inventory.container.Slot;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.World;
 
 @Mixin(Slot.class)
 public abstract class ContainerSlotMixin {
@@ -25,15 +26,31 @@ public abstract class ContainerSlotMixin {
     public void jojoOnItemSetToSlot(ItemStack pStack, CallbackInfo ci) {
         if (container instanceof Entity) {
             Entity entity = (Entity) container;
-            TrackerItemStack.updateItemAtEntity(entity.level, pStack, entity.getId());
+            if (!entity.level.isClientSide()) {
+                TrackerItemStack.getItemTracker(pStack).ifPresent(tracker -> {
+                    tracker.setAtEntity(entity.getId(), entity.level);
+                    tracker.setItemStillThereCheck(null);
+                });
+            }
         }
         else if (container instanceof TileEntity) {
             TileEntity tileEntity = (TileEntity) container;
-            TrackerItemStack.updateItemAtBlock(tileEntity.getLevel(), pStack, tileEntity.getBlockPos());
+            World world = tileEntity.getLevel();
+            if (!world.isClientSide()) {
+                TrackerItemStack.getItemTracker(pStack).ifPresent(tracker -> {
+                    tracker.setAtBlockPos(tileEntity.getBlockPos(), world);
+                    tracker.setItemStillThereCheck(null);
+                });
+            }
         }
         else if (container instanceof PlayerInventory) {
             PlayerEntity player = ((PlayerInventory) container).player;
-            TrackerItemStack.updateItemAtEntity(player.level, pStack, player.getId());
+            if (!player.level.isClientSide()) {
+                TrackerItemStack.getItemTracker(pStack).ifPresent(tracker -> {
+                    tracker.setAtEntity(player.getId(), player.level);
+                    tracker.setItemStillThereCheck(null);
+                });
+            }
         }
     }
 }

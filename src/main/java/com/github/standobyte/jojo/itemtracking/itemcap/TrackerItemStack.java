@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Random;
 import java.util.UUID;
+import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
@@ -32,7 +33,7 @@ public class TrackerItemStack {
     
     private OptionalInt positionEntity = OptionalInt.empty();
     private BlockPos positionBlock = null;
-//    private Predicate<UUID> stillThere;
+    private Predicate<UUID> itemStillThere;
     
     public TrackerItemStack(ItemStack itemStack) {
         this.itemStack = itemStack;
@@ -63,76 +64,40 @@ public class TrackerItemStack {
         }).orElse(null);
     }
     
-    public static void updateItemAtEntity(World world, ItemStack itemStack, int entityId) {
-        if (itemStack.isEmpty() || world.isClientSide()) return;
-        itemStack.getCapability(TrackerItemStackProvider.CAPABILITY).ifPresent(cap -> {
-            if (cap.isTracked()) {
-                cap.setAtEntity(entityId);
-                cap.onUpdate((ServerWorld) world);
-//                cap.stillThere = ; // FIXME
-            }
-        });
+    public static Optional<TrackerItemStack> getItemTracker(ItemStack itemStack) {
+        return getItemTracker(itemStack, false);
     }
     
-    public static void updateItemAtBlock(World world, ItemStack itemStack, BlockPos blockPos) {
-        if (itemStack.isEmpty() || world.isClientSide()) return;
-        itemStack.getCapability(TrackerItemStackProvider.CAPABILITY).ifPresent(cap -> {
-            if (cap.isTracked()) {
-                cap.setAtBlockPos(blockPos);
-                cap.onUpdate((ServerWorld) world);
-//                cap.stillThere = ; // FIXME
-            }
-        });
-    }
-    
-    public static void updateDisappeared(World world, ItemStack itemStack) {
-        if (world.isClientSide()) return;
-        itemStack.getCapability(TrackerItemStackProvider.CAPABILITY).ifPresent(cap -> {
-            if (cap.isTracked()) {
-                cap.positionEntity = OptionalInt.empty();
-                cap.positionBlock = null;
-//                cap.stillThere = null; // FIXME
-                cap.onUpdate((ServerWorld) world);
-            }
-        });
-    }
-    
-    @Nullable
-    private static UUID getTrackerId(ItemStack item) {
-        return item.getCapability(TrackerItemStackProvider.CAPABILITY).map(cap -> cap.trackerUuid).orElse(null);
-    }
-    
-    public static void trackedInEntityInv(ItemStack setItem, Stream<ItemStack> inventoryItems, 
-            World world, int entityId) {
-        trackedInInventory(setItem, inventoryItems, world, OptionalInt.of(entityId), null);
-    }
-    
-    public static void trackedInBlockInv(ItemStack setItem, Stream<ItemStack> inventoryItems, 
-            World world, BlockPos blockPos) {
-        trackedInInventory(setItem, inventoryItems, world, OptionalInt.empty(), blockPos);
-    }
-    
-    private static void trackedInInventory(ItemStack setItem, Stream<ItemStack> inventoryItems, 
-            World world, OptionalInt entityId, BlockPos blockPos) {
-        if (!world.isClientSide()) {
-            setItem.getCapability(TrackerItemStackProvider.CAPABILITY).ifPresent(oldItemTracker -> {
-                if (oldItemTracker.isTracked()) {
-                    UUID trackerId = oldItemTracker.getTrackerId();
-                    inventoryItems.anyMatch(movedItem -> {
-                        return movedItem.getCapability(TrackerItemStackProvider.CAPABILITY).map(newTracker -> {
-                            if (trackerId.equals(newTracker.getTrackerId())) {
-                                newTracker.positionEntity = entityId;
-                                newTracker.positionBlock = blockPos;
-                                newTracker.onUpdate((ServerWorld) world);
-//                                cap.stillThere = ; // FIXME
-                                return true;
-                            }
-                            return false;
-                        }).orElse(false);
-                    });
-                }
-            });
+    public static Optional<TrackerItemStack> getItemTracker(ItemStack itemStack, boolean allowEmpty) {
+        if (!allowEmpty && itemStack.isEmpty()) {
+            return Optional.empty();
         }
+        return itemStack.getCapability(TrackerItemStackProvider.CAPABILITY).resolve().map(
+                cap -> cap.isTracked() ? cap : null);
+    }
+    
+    /* when an item is being added to inventory, the original ItemStack's count is being taken from (to split the item between slots),
+     * so we have to find the new ItemStack inside the inventory first
+     */
+    public static Optional<TrackerItemStack> getItemTrackerInInventory(ItemStack originalItemStack, Stream<ItemStack> inventoryItems) {
+        return getItemTracker(originalItemStack, true).flatMap(oldTracker -> {
+            UUID trackerId = oldTracker.getTrackerId();
+            Optional<TrackerItemStack> newTracker = inventoryItems
+                    .map(movedItem -> movedItem.getCapability(TrackerItemStackProvider.CAPABILITY).resolve().map(tracker -> {
+                        if (trackerId.equals(tracker.getTrackerId())) {
+                            return tracker;
+                        }
+                        return null;
+                    }))
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .findFirst();
+            return newTracker;
+        });
+    }
+    
+    public void setItemStillThereCheck(Predicate<UUID> check) {
+        this.itemStillThere = check;
     }
     
     public void onUpdate(ServerWorld world) {
@@ -147,14 +112,27 @@ public class TrackerItemStack {
         }
     }
     
-    public void setAtEntity(int entityId) {
+    public void setAtEntity(int entityId, World world) {
         this.positionEntity = OptionalInt.of(entityId);
         this.positionBlock = null;
+        if (!world.isClientSide()) {
+            onUpdate((ServerWorld) world);
+        }
     }
     
-    public void setAtBlockPos(BlockPos blockPos) {
+    public void setAtBlockPos(BlockPos blockPos, World world) {
         this.positionEntity = OptionalInt.empty();
         this.positionBlock = blockPos;
+        if (!world.isClientSide()) {
+            onUpdate((ServerWorld) world);
+        }
+    }
+    
+    public void setDisappeared(ServerWorld world) {
+        positionEntity = OptionalInt.empty();
+        positionBlock = null;
+        itemStillThere = null;
+        onUpdate(world);
     }
     
     @Nullable
@@ -168,7 +146,9 @@ public class TrackerItemStack {
     }
     
     public void tick(ServerWorld world) {
-        
+        if (itemStillThere != null && !itemStillThere.test(trackerUuid)) {
+            setDisappeared(world);
+        }
     }
     
     public void clear() {

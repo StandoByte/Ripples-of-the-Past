@@ -18,7 +18,10 @@ public class ItemTrackingEventHandler {
         Entity entity = event.getEntity();
         if (!entity.level.isClientSide() && entity instanceof ItemEntity) {
             ItemStack item = ((ItemEntity) entity).getItem();
-            TrackerItemStack.updateItemAtEntity(entity.level, item, entity.getId());
+            TrackerItemStack.getItemTracker(item).ifPresent(tracker -> {
+                tracker.setAtEntity(entity.getId(), entity.level);
+                tracker.setItemStillThereCheck(null);
+            });
         }
     }
     

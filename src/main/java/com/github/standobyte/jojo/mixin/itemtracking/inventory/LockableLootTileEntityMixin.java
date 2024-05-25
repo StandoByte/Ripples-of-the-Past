@@ -13,6 +13,7 @@ import net.minecraft.tileentity.LockableLootTileEntity;
 import net.minecraft.tileentity.LockableTileEntity;
 import net.minecraft.tileentity.TileEntityType;
 import net.minecraft.util.NonNullList;
+import net.minecraft.world.World;
 
 @Mixin(LockableLootTileEntity.class)
 public abstract class LockableLootTileEntityMixin extends LockableTileEntity {
@@ -26,7 +27,13 @@ public abstract class LockableLootTileEntityMixin extends LockableTileEntity {
     
     @Inject(method = "setItem", at = @At("TAIL"))
     public void jojoOnItemSetToSlot(int slot, ItemStack item, CallbackInfo ci) {
-        TrackerItemStack.trackedInBlockInv(item, getItems().stream(), 
-                level, getBlockPos());
+        World world = getLevel();
+        if (!world.isClientSide()) {
+            TrackerItemStack.getItemTrackerInInventory(item, getItems().stream())
+            .ifPresent(tracker -> {
+                tracker.setAtBlockPos(this.getBlockPos(), level);
+                tracker.setItemStillThereCheck(null);
+            });
+        }
     }
 }

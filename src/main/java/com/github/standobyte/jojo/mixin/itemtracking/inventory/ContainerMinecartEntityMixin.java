@@ -27,7 +27,12 @@ public abstract class ContainerMinecartEntityMixin extends AbstractMinecartEntit
     
     @Inject(method = "setItem", at = @At("TAIL"))
     public void jojoOnItemSetToSlot(int slot, ItemStack item, CallbackInfo ci) {
-        TrackerItemStack.trackedInEntityInv(item, itemStacks.stream(), 
-                level, getId());
+        if (!level.isClientSide()) {
+            TrackerItemStack.getItemTrackerInInventory(item, itemStacks.stream())
+            .ifPresent(tracker -> {
+                tracker.setAtEntity(this.getId(), level);
+                tracker.setItemStillThereCheck(null);
+            });
+        }
     }
 }

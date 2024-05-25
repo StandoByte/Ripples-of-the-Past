@@ -24,6 +24,11 @@ public abstract class ArmorStandEntityMixin extends LivingEntity {
     
     @Inject(method = "setItemSlot", at = @At("TAIL"))
     public void jojoOnArmorStandItemEquip(EquipmentSlotType pSlot, ItemStack pStack, CallbackInfo ci) {
-        TrackerItemStack.updateItemAtEntity(level, pStack, this.getId());
+        if (!level.isClientSide()) {
+            TrackerItemStack.getItemTracker(pStack).ifPresent(tracker -> {
+                tracker.setAtEntity(this.getId(), level);
+                tracker.setItemStillThereCheck(null);
+            });
+        }
     }
 }
