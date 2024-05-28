@@ -62,7 +62,7 @@ public class ModItems {
         public ItemStack makeIcon() {
             return new ItemStack(ModItems.STONE_MASK.get());
         }
-    }).setEnchantmentCategories(new EnchantmentType[]{ModEnchantments.STAND_ARROW});
+    }).setEnchantmentCategories(new EnchantmentType[]{ ModEnchantments.STAND_ARROW, ModEnchantments.GLOVES });
     
     
     
