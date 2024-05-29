@@ -65,7 +65,7 @@ public class ControllerSoul {
                 }
                 soulEntityWaiting = false;
                 if (playerSoulEntity != null && !playerSoulEntity.isAlive()) {
-                    ClientUtil.setCameraEntityPreventShaderSwitch(mc, mc.player);
+                    ClientUtil.setCameraEntityPreventShaderSwitch(mc.player);
                     playerSoulEntity = null;
                     mc.gui.setOverlayMessage(StringTextComponent.EMPTY, false);
                 }
@@ -79,7 +79,7 @@ public class ControllerSoul {
     
     public void onSoulSpawn(SoulEntity soulEntity) {
         if (!mc.player.isSpectator() && soulEntity.getOriginEntity() == mc.player) {
-            ClientUtil.setCameraEntityPreventShaderSwitch(mc, soulEntity);
+            ClientUtil.setCameraEntityPreventShaderSwitch(soulEntity);
             playerSoulEntity = soulEntity;
         }
     }

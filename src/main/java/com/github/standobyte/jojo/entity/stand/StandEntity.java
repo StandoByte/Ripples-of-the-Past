@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
@@ -2019,6 +2020,10 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
 
     protected boolean shouldHaveNoPhysics() {
         return standCanHaveNoPhysics() && !isManuallyControlled() && !isRemotePositionFixed();
+    }
+    
+    public ActionConditionResult canBeManuallyControlled() {
+        return ActionConditionResult.POSITIVE;
     }
 
     public void setManualControl(boolean manualControl, boolean fixRemotePosition) {
