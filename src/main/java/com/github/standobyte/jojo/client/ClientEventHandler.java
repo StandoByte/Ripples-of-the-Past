@@ -35,6 +35,7 @@ import com.github.standobyte.jojo.client.render.block.overlay.TranslucentBlockRe
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.FrozenLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.GlovesLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.HamonBurnLayer;
+import com.github.standobyte.jojo.client.render.item.InventoryItemHighlight;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.StandCrySoundHandler;
@@ -335,6 +336,7 @@ public class ClientEventHandler {
                     });
                     
                     FirstPersonHamonAura.getInstance().tick();
+                    InventoryItemHighlight.tick();
                 }
                 
                 tickResolveEffect();

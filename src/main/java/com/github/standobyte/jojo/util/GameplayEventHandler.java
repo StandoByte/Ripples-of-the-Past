@@ -34,6 +34,7 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
+import com.github.standobyte.jojo.enchantment.GlovesSpeedEnchantment;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDBloodCutterEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
@@ -162,6 +163,7 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.ForgeEventFactory;
+import net.minecraftforge.event.ItemAttributeModifierEvent;
 import net.minecraftforge.event.ServerChatEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
@@ -409,6 +411,11 @@ public class GameplayEventHandler {
         else if (ModInteractionUtil.isSquidInkPasta(event.getItem())) {
             InkPastaItem.onEaten(event.getEntityLiving());
         }
+    }
+    
+    @SubscribeEvent
+    public static void itemAttributeModifiers(ItemAttributeModifierEvent event) {
+        GlovesSpeedEnchantment.addAtrributeModifiersFromEvent(event.getItemStack(), event);
     }
     
     private static void cutOutHands(PaintingEntity painting) {

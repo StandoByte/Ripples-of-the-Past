@@ -3,10 +3,11 @@ package com.github.standobyte.jojo.client.ui.marker;
 import java.util.List;
 
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
-import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
+import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMove;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.math.vector.Vector3d;
 
 public class CrazyDiamondAnchorMarker extends MarkerRenderer {
@@ -23,11 +24,13 @@ public class CrazyDiamondAnchorMarker extends MarkerRenderer {
 
     @Override
     protected void updatePositions(List<MarkerInstance> list, float partialTick) {
-        CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(mc.level, mc.player.getMainHandItem()).ifPresent(pos -> 
-            list.add(new MarkerInstance(Vector3d.atCenterOf(pos), false)));
-        CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(mc.level, mc.player.getOffhandItem()).ifPresent(pos -> {
-            boolean showMarker = ActionsOverlayGui.getInstance().showExtraActionHud(ModStandsInit.CRAZY_DIAMOND_BLOCK_ANCHOR_MOVE.get());
-            list.add(new MarkerInstance(Vector3d.atCenterOf(pos), showMarker));
+        ItemStack itemUsed = CrazyDiamondBlockCheckpointMove.getBlockItemToUse(mc.player);
+        ItemStack mainHandItem = mc.player.getMainHandItem();
+        ItemStack offHandItem = mc.player.getOffhandItem();
+        CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(mc.level, mainHandItem).ifPresent(pos -> 
+            list.add(new MarkerInstance(Vector3d.atCenterOf(pos), mainHandItem == itemUsed)));
+        CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(mc.level, offHandItem).ifPresent(pos -> {
+            list.add(new MarkerInstance(Vector3d.atCenterOf(pos), offHandItem == itemUsed));
         });
     }
 }

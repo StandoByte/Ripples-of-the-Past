@@ -36,6 +36,7 @@ public abstract class MarkerRenderer {
     private final Action<?> iconAction;
     private final List<MarkerInstance> positions = new ArrayList<>();
     protected final Minecraft mc;
+    protected boolean renderThroughBlocks = true;
     
     @Deprecated
     /**
@@ -65,8 +66,14 @@ public abstract class MarkerRenderer {
                 
                 float[] rgb = ClientUtil.rgb(getColor());
                 positions.forEach(marker -> {
+                    if (renderThroughBlocks) {
+                        RenderSystem.disableDepthTest();
+                    } else {
+                        RenderSystem.enableDepthTest();
+                    }
                     renderAt(matrixStack, marker, camera, partialTick, rgb);
                 });
+                RenderSystem.enableDepthTest();
                 
                 matrixStack.popPose();
             }
