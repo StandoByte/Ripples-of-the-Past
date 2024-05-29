@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.itemtracking;
 
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
 
@@ -25,8 +26,15 @@ public class SidedItemTrackerMap {
     }
     
     public static void tick(MinecraftServer server) {
-        for (TrackerItemStack tracker : SaveFileUtilCapProvider.getSaveFileCap(server).getItemsTracker().trackingMap.values()) {
-            tracker.tick(server);
+        Iterator<TrackerItemStack> iter = SaveFileUtilCapProvider.getSaveFileCap(server).getItemsTracker().trackingMap.values().iterator();
+        while (iter.hasNext()) {
+            TrackerItemStack tracker = iter.next();
+            if (!tracker.isTracked()) {
+                iter.remove();
+            }
+            else {
+                tracker.tick(server);
+            }
         }
     }
     
