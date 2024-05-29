@@ -52,7 +52,7 @@ public class GoldExperienceLifeformRevertMarker extends MarkerRenderer {
             }
         });
     }
-
+    
     private static final ResourceLocation ICON_TOOTH = new ResourceLocation(JojoMod.MOD_ID, "textures/icons/tooth.png");
     
     @Override
