@@ -31,7 +31,7 @@ import net.minecraft.world.server.ServerWorld;
 public class TrackerItemStack {
     private static final Random RANDOM = new Random();
     private final ItemStack itemStack;
-    @Nullable private UUID trackerUuid; // TODO replace UUID with int?
+    @Nullable private UUID trackerUuid;
     private UUID trackingPlayerId;
     
     private RegistryKey<World> positionDimension;

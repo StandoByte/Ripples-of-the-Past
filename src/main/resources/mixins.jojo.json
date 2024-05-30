@@ -20,7 +20,8 @@
     "itemtracking.inventory.HopperTileEntityMixin",
     "itemtracking.inventory.InventoryMixin",
     "itemtracking.ContainerSlotMixin",
-    "itemtracking.projectile.BowItemMixin"
+    "itemtracking.projectile.BowItemMixin",
+    "itemtracking.projectile.ArrowEntityMixin"
   ],
   "client": [
     "client.ParticleManagerMixin",
