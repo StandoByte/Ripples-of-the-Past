@@ -1,5 +1,9 @@
 package com.github.standobyte.jojo.entity.itemprojectile;
 
+import javax.annotation.Nullable;
+
+import com.github.standobyte.jojo.itemtracking.ITrackedArrowEntity;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStackProvider;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 
 import net.minecraft.block.BlockState;
@@ -10,7 +14,9 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.INBT;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.DamageSource;
@@ -24,7 +30,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
 
-public abstract class ItemProjectileEntity extends AbstractArrowEntity implements IEntityAdditionalSpawnData {
+public abstract class ItemProjectileEntity extends AbstractArrowEntity implements IEntityAdditionalSpawnData, ITrackedArrowEntity {
     protected boolean leftOwner;
 
     protected ItemProjectileEntity(EntityType<? extends ItemProjectileEntity> type, LivingEntity thrower, World world) {
@@ -195,6 +201,25 @@ public abstract class ItemProjectileEntity extends AbstractArrowEntity implement
     public boolean isPickable() {
         return true;
     }
+    
+    
+    @Nullable private INBT itemTrackerNBT;
+    
+    @Override
+    public void saveItemTrackerNBT(INBT nbt) {
+        this.itemTrackerNBT = nbt;
+    }
+    
+    protected ItemStack withPickupItemTracking(ItemStack item) {
+        if (this.itemTrackerNBT != null && !item.isEmpty()) {
+            if (!item.isEmpty()) {
+                item.getCapability(TrackerItemStackProvider.CAPABILITY).ifPresent(tracker -> tracker.fromNBT(itemTrackerNBT));
+            }
+        }
+        return item;
+    }
+    
+    
 
     @Override
     public void readAdditionalSaveData(CompoundNBT compound) {

@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.item;
 
 import com.github.standobyte.jojo.entity.itemprojectile.BladeHatEntity;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
 
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.dispenser.DefaultDispenseItemBehavior;
@@ -54,6 +55,14 @@ public class BladeHatItem extends CustomModelArmorItem {
         if (!world.isClientSide()) {
             BladeHatEntity hat = new BladeHatEntity(world, player, stack);
             hat.shootFromRotation(player, 0.75F, 0.5F);
+            
+            TrackerItemStack.getItemTracker(stack).ifPresent(tracker -> {
+                if (tracker.isTracked()) {
+                    tracker.setAtEntity(hat.getId(), world);
+                    tracker.setItemStillThereCheck(null);
+                }
+            });
+            
             world.addFreshEntity(hat);
         }
         player.playSound(ModSounds.BLADE_HAT_THROW.get(), 1.0F, 0.75F + random.nextFloat() * 0.5F);

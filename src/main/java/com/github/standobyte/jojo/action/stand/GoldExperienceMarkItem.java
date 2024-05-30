@@ -105,7 +105,7 @@ public class GoldExperienceMarkItem extends StandAction {
         Vector3d eyePos = player.getEyePosition(1.0F);
         Optional<GEItemMarkEffect> outlined = targets.stream()
                 .map(e -> Pair.of(e, lookAngle.dot(e.getRight().subtract(eyePos).normalize())))
-                .filter(withCos -> withCos.getValue() > 0.92388)
+                .filter(withCos -> withCos.getValue() > 0.98481)
                 .max(Comparator.comparingDouble(Pair::getValue))
                 .map(Pair::getLeft)
                 .map(Pair::getLeft);
