@@ -3,7 +3,6 @@ package com.github.standobyte.jojo.action.stand;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
@@ -31,7 +30,6 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
 public class GoldExperienceMarkItem extends StandAction {
-    public static final UUID GE_ITEM_MARK_UUID = UUID.fromString("2b0b4c28-2553-4d00-a5ee-bc14c74a5083"); // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! multiple people can have GE on a server you dumbass
 
     public GoldExperienceMarkItem(StandAction.Builder builder) {
         super(builder);
@@ -78,7 +76,7 @@ public class GoldExperienceMarkItem extends StandAction {
                 .filter(effect -> effect.effectType == ModStandEffects.GE_ITEM_MARK.get())
                 .forEach(standEffects::removeEffect);
                 
-                TrackerItemStack itemTracker = TrackerItemStack.setTracked(markedStack, (ServerPlayerEntity) user, GE_ITEM_MARK_UUID);
+                TrackerItemStack itemTracker = TrackerItemStack.setTracked(markedStack, (ServerPlayerEntity) user);
                 if (itemTracker != null) {
                     itemTracker.setAtEntity(user.getId(), world);
                     
