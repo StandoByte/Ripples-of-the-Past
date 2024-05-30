@@ -5,6 +5,7 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack.KnownItemState;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
@@ -122,7 +123,7 @@ public class ClackersItem extends Item {
                 
                 TrackerItemStack.getItemTracker(itemStack).ifPresent(tracker -> {
                     if (tracker.isTracked()) {
-                        tracker.setAtEntity(clackers.getId(), world);
+                        tracker.setAtEntity(clackers.getId(), world, KnownItemState.ENTITY_IS_ITEM);
                         tracker.setItemStillThereCheck(null);
                         clackers.saveItemTrackerNBT(tracker.toNBT());
                     }

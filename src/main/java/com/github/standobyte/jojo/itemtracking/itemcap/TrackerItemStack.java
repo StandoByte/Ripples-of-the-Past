@@ -52,6 +52,7 @@ public class TrackerItemStack {
     private BlockPos positionBlock = null;
     private BlockState containerBlockState;
     private Predicate<UUID> itemStillThere;
+    private KnownItemState itemState;
     
     public TrackerItemStack(ItemStack itemStack) {
         this.itemStack = itemStack;
@@ -134,21 +135,23 @@ public class TrackerItemStack {
         }
     }
     
-    public void setAtEntity(int entityId, World world) {
+    public void setAtEntity(int entityId, World world, KnownItemState itemState) {
         this.positionEntity = OptionalInt.of(entityId);
         this.positionBlock = null;
         this.containerBlockState = null;
         this.positionDimension = world.dimension();
+        this.itemState = itemState;
         if (!world.isClientSide()) {
             onUpdate((ServerWorld) world);
         }
     }
     
-    public void setAtBlockPos(BlockPos blockPos, World world) {
+    public void setAtBlockPos(BlockPos blockPos, World world, KnownItemState itemState) {
         this.positionEntity = OptionalInt.empty();
         this.positionBlock = blockPos;
         this.containerBlockState = world.getBlockState(blockPos);
         this.positionDimension = world.dimension();
+        this.itemState = itemState;
         if (!world.isClientSide()) {
             onUpdate((ServerWorld) world);
         }
@@ -160,6 +163,7 @@ public class TrackerItemStack {
         this.containerBlockState = null;
         this.positionDimension = null;
         this.itemStillThere = null;
+        this.itemState = null;
         onUpdate(world);
     }
     
@@ -171,6 +175,11 @@ public class TrackerItemStack {
     @Nullable
     public BlockPos getAtBlockPos(World world) {
         return positionBlock;
+    }
+    
+    @Nullable
+    public KnownItemState getItemState() {
+        return itemState;
     }
     
     public void tick(MinecraftServer server) {
@@ -251,5 +260,13 @@ public class TrackerItemStack {
                 trackingPlayerId = nbt.getUUID("Player");
             }
         }
+    }
+    
+    
+    public static enum KnownItemState {
+        ENTITY_IS_ITEM,
+        ENTITY_HAS_ITEM,
+        BLOCK_IS_ITEM,
+        BLOCK_HAS_ITEM
     }
 }

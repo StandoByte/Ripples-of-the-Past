@@ -17,6 +17,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack.KnownItemState;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
@@ -25,6 +26,7 @@ import com.github.standobyte.jojo.util.mc.MCUtil;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ShootableItem;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.vector.Vector3d;
@@ -60,8 +62,18 @@ public class GoldExperienceMarkItem extends StandAction {
                 boolean give = false;
                 if (heldItem.getCount() == 1) {
                     markedStack = heldItem;
-                    user.setItemInHand(Hand.OFF_HAND, user.getItemInHand(Hand.MAIN_HAND));
-                    user.setItemInHand(Hand.MAIN_HAND, heldItem);
+                    ItemStack mainHandItem = user.getItemInHand(Hand.MAIN_HAND);
+                    // keep the bow/crossbow in main hand
+                    if (!mainHandItem.isEmpty() && 
+                            mainHandItem.getItem() instanceof ShootableItem && ((ShootableItem) mainHandItem.getItem()).getAllSupportedProjectiles().test(heldItem)) {
+                        user.setItemInHand(Hand.OFF_HAND, ItemStack.EMPTY);
+                        give = true;
+                    }
+                    // swap items
+                    else {
+                        user.setItemInHand(Hand.OFF_HAND, mainHandItem);
+                        user.setItemInHand(Hand.MAIN_HAND, heldItem);
+                    }
                 }
                 else {
                     markedStack = heldItem.split(1);
@@ -81,7 +93,7 @@ public class GoldExperienceMarkItem extends StandAction {
                 
                 TrackerItemStack itemTracker = TrackerItemStack.setTracked(markedStack, (ServerPlayerEntity) user);
                 if (itemTracker != null) {
-                    itemTracker.setAtEntity(user.getId(), world);
+                    itemTracker.setAtEntity(user.getId(), world, KnownItemState.ENTITY_HAS_ITEM);
                     
                     GEItemMarkEffect effect = new GEItemMarkEffect(itemTracker.getTrackerId());
                     effect.withStand(power);
@@ -91,6 +103,7 @@ public class GoldExperienceMarkItem extends StandAction {
                             user.getSoundSource(), 0.5f, 1.0f, StandUtil::playerCanHearStands);
                 }
                 
+                // needs to be done after the tracker NBT has been set
                 if (give) {
                     MCUtil.giveItemTo(user, markedStack, true);
                 }

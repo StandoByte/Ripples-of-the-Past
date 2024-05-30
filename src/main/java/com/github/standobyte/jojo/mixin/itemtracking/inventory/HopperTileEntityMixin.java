@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack.KnownItemState;
 
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.HopperTileEntity;
@@ -31,7 +32,7 @@ public abstract class HopperTileEntityMixin extends LockableLootTileEntity {
         if (!world.isClientSide()) {
             TrackerItemStack.getItemTrackerInInventory(item, getItems().stream())
             .ifPresent(tracker -> {
-                tracker.setAtBlockPos(this.getBlockPos(), level);
+                tracker.setAtBlockPos(this.getBlockPos(), level, KnownItemState.BLOCK_HAS_ITEM);
                 tracker.setItemStillThereCheck(trackerId -> getItems().stream()
                         .anyMatch(TrackerItemStack.trackerIdCheck(trackerId)));
             });

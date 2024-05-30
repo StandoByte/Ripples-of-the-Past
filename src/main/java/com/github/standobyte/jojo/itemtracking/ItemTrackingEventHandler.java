@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.itemtracking;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack.KnownItemState;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
@@ -20,7 +21,7 @@ public class ItemTrackingEventHandler {
             ItemEntity itemEntity = ((ItemEntity) entity);
             ItemStack item = itemEntity.getItem();
             TrackerItemStack.getItemTracker(item).ifPresent(tracker -> {
-                tracker.setAtEntity(entity.getId(), entity.level);
+                tracker.setAtEntity(entity.getId(), entity.level, KnownItemState.ENTITY_IS_ITEM);
                 tracker.setItemStillThereCheck(trackerId -> TrackerItemStack.trackerIdCheck(trackerId).test(itemEntity.getItem()));
             });
         }

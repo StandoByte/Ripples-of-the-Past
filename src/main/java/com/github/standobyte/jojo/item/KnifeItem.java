@@ -5,6 +5,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.itemtracking.ITrackedArrowEntity;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack.KnownItemState;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.GameplayEventHandler;
 import com.google.common.collect.ImmutableMultimap;
@@ -73,7 +74,7 @@ public class KnifeItem extends Item {
                 
                 TrackerItemStack.getItemTracker(handStack).ifPresent(tracker -> {
                     if (tracker.isTracked()) {
-                        tracker.setAtEntity(knifeEntity.getId(), world);
+                        tracker.setAtEntity(knifeEntity.getId(), world, KnownItemState.ENTITY_IS_ITEM);
                         tracker.setItemStillThereCheck(null);
                         knifeEntity.saveItemTrackerNBT(tracker.toNBT());
                     }

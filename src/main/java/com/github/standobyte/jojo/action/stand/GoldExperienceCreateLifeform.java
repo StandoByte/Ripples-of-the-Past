@@ -4,8 +4,10 @@ import java.util.Optional;
 import java.util.Stack;
 import java.util.UUID;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
@@ -18,12 +20,14 @@ import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.itemtracking.SidedItemTrackerMap;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack.KnownItemState;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
+import com.github.standobyte.jojo.util.general.ObjectWrapper;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
@@ -253,28 +257,69 @@ public class GoldExperienceCreateLifeform extends StandAction {
                 Entity performer = getControlledEntity(user, power);
                 GETransformationEntity tf = new GETransformationEntity(world);
                 
-                ITextComponent customName = null;
+                ObjectWrapper<ITextComponent> customName = new ObjectWrapper<>(null);
                 boolean tfTargetFound = false;
                 
-                // marked item
+                // marked item...
                 if (itemTrackerId.isPresent()) {
                     TrackerItemStack itemTracker = SidedItemTrackerMap.getSidedTrackers(world).getTracker(itemTrackerId.get());
                     if (itemTracker != null && itemTracker.checkItemIsThere((ServerWorld) world)) {
+                        // ...from entity
                         Entity itemEntity = itemTracker.getAtEntity(world);
                         if (itemEntity != null) {
-                            itemTracker.clear();
-                            
-                            MCUtil.cloneEntity(itemEntity).ifPresent(entity -> tf.getTfSourceData().withEntitySource(entity));
-                            itemEntity.remove();
-                            tfTargetFound = true;
-                            
-                            Vector3d pos = itemEntity.position();
-                            tf.moveTo(pos.x, pos.y, pos.z, itemEntity.yRot, itemEntity.xRot);
-                            
-                            if (itemEntity.isOnFire()) {
-                                tf.setSecondsOnFire((itemEntity.getRemainingFireTicks() + 19) / 20);
+                            KnownItemState itemState = itemTracker.getItemState();
+                            if (itemState != null) {
+                                tfTargetFound = true;
+                                itemTracker.clear();
+                                
+                                switch (itemState) {
+                                case ENTITY_HAS_ITEM:
+                                    mobFromInventory(tf, itemTracker.getItem(), world, 
+                                            itemEntity instanceof LivingEntity ? (LivingEntity) itemEntity : user, 
+                                            itemEntity.blockPosition(), customName);
+                                    
+                                    Vector3d pos = itemEntity.position();
+                                    tf.moveTo(pos.x, pos.y, pos.z, itemEntity.yRot, 0);
+                                    break;
+                                case ENTITY_IS_ITEM:
+                                    mobFromEntity(tf, itemEntity);
+                                    break;
+                                default:
+                                    break;
+                                }
                             }
-                            tf.setDeltaMovement(itemEntity.getDeltaMovement());
+                            else {
+                                JojoMod.getLogger().error("Failed to extract tracked item from {} entity", itemEntity.getType().getRegistryName());
+                            }
+                        }
+                        else {
+                            // ...or from block
+                            BlockPos itemPos = itemTracker.getAtBlockPos(world);
+                            if (itemPos != null) {
+                                BlockState blockState = world.getBlockState(itemPos);
+                                KnownItemState itemState = itemTracker.getItemState();
+                                if (itemState != null) {
+                                    tfTargetFound = true;
+                                    itemTracker.clear();
+                                    
+                                    switch (itemState) {
+                                    case BLOCK_HAS_ITEM:
+                                        mobFromInventory(tf, itemTracker.getItem(), world, 
+                                                user, itemPos.above(), customName);
+                                        
+                                        tf.moveTo(itemPos.getX(), itemPos.getY() + 1, itemPos.getZ(), 0, 0);
+                                        break;
+                                    case BLOCK_IS_ITEM:
+                                        tfTargetFound = false;
+                                        break;
+                                    default:
+                                        break;
+                                    }
+                                }
+                                else {
+                                    JojoMod.getLogger().error("Failed to extract tracked item from {} block at {}", blockState.getBlock().getRegistryName(), itemPos);
+                                }
+                            }
                         }
                     }
                 }
@@ -282,54 +327,17 @@ public class GoldExperienceCreateLifeform extends StandAction {
                 // targeted non-living entity
                 if (!tfTargetFound && target.getType() == TargetType.ENTITY) {
                     Entity targetEntity = target.getEntity();
-                    MCUtil.cloneEntity(targetEntity).ifPresent(entity -> tf.getTfSourceData().withEntitySource(entity));
-                    targetEntity.remove();
                     tfTargetFound = true;
-                    
-                    Vector3d pos = targetEntity.position();
-                    tf.moveTo(pos.x, pos.y, pos.z, targetEntity.yRot, targetEntity.xRot);
-                    
-                    if (targetEntity.isOnFire()) {
-                        tf.setSecondsOnFire((targetEntity.getRemainingFireTicks() + 19) / 20);
-                    }
-                    tf.setDeltaMovement(targetEntity.getDeltaMovement());
+                    mobFromEntity(tf, targetEntity);
                 }
                 
                 // item held in off-hand
                 if (!tfTargetFound) {
                     ItemStack heldItem = user.getItemInHand(Hand.OFF_HAND);
                     if (!heldItem.isEmpty() && canGiveLifeTo(heldItem)) {
-                        Entity itemEntity;
-                        ItemStack transformedItem;
-                        if (heldItem.getItem() instanceof BucketItem) {
-                            BucketItem bucketType = (BucketItem) heldItem.getItem();
-                            Fluid fluid = bucketType.getFluid();
-                            transformedItem = new ItemStack(fluid.getBucket());
-                            bucketType.checkExtraContent(world, heldItem, performer.blockPosition());
-                        }
-                        else {
-                            transformedItem = heldItem.copy();
-                        }
-                        transformedItem.setCount(1);
-                        if (heldItem.getItem() instanceof ThrowablePotionItem) {
-                            PotionEntity potionEntity = new PotionEntity(world, user);
-                            potionEntity.setItem(transformedItem);
-                            itemEntity = potionEntity;
-                        }
-                        else if (heldItem.getItem() == Items.ENDER_PEARL) {
-                            EnderPearlEntity pearlEntity = new EnderPearlEntity(world, user);
-                            itemEntity = pearlEntity;
-                        }
-                        else {
-                            itemEntity = new ItemEntity(world, 0, 0, 0, transformedItem);
-                        }
-                        if (heldItem.hasCustomHoverName()) {
-                            customName = heldItem.getHoverName();
-                        }
-                        if (!power.isUserCreative()) heldItem.shrink(1);
-                        
-                        tf.getTfSourceData().withEntitySource(itemEntity);
                         tfTargetFound = true;
+                        mobFromInventory(tf, heldItem, world, 
+                                user, performer.blockPosition(), customName);
                         
                         Vector3d pos = performer.position();
                         Vector3d lookVec = performer.getLookAngle();
@@ -346,21 +354,11 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     BlockState blockState = world.getBlockState(blockPos);
                     
                     if (!HamonOrganismInfusion.isBlockLiving(blockState)) {
-                        TileEntity tileEntity = world.getBlockEntity(blockPos);
-                        
-                        if (tileEntity instanceof IInventory) {
-                            KEEP_ITEMS.add(tileEntity);
-                        }
-                        world.removeBlock(blockPos, false);
-                        KEEP_ITEMS.remove(tileEntity);
-                        
-                        tf.getTfSourceData().withBlockSource(blockState, blockPos, tileEntity);
                         tfTargetFound = true;
-                        
+                        mobFromBlock(tf, blockPos, blockState, world);
                         tf.moveTo(blockPos, performer.yRot, 0);
                     }
                 }
-                
                 
                 if (tfTargetFound) {
                     tf.withTransformationTarget(lifeFormCreated)
@@ -374,8 +372,8 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     
                     lifeFormCreated.copyPosition(tf);
                     lifeFormCreated.setYHeadRot(lifeFormCreated.yRot);
-                    if (customName != null) {
-                        lifeFormCreated.setCustomName(customName);
+                    if (customName.get() != null) {
+                        lifeFormCreated.setCustomName(customName.get());
                     }
                     world.addFreshEntity(tf);
                     
@@ -393,6 +391,66 @@ public class GoldExperienceCreateLifeform extends StandAction {
     }
     
     public static final Stack<TileEntity> KEEP_ITEMS = new Stack<>();
+    
+    
+    private void mobFromEntity(GETransformationEntity tf, Entity entity) {
+        MCUtil.cloneEntity(entity).ifPresent(e -> tf.getTfSourceData().withEntitySource(e));
+        entity.remove();
+        
+        Vector3d pos = entity.position();
+        tf.moveTo(pos.x, pos.y, pos.z, entity.yRot, entity.xRot);
+        
+        if (entity.isOnFire()) {
+            tf.setSecondsOnFire((entity.getRemainingFireTicks() + 19) / 20);
+        }
+        tf.setDeltaMovement(entity.getDeltaMovement());
+    }
+    
+    private void mobFromInventory(GETransformationEntity tf, ItemStack item, World world, 
+            @Nonnull LivingEntity wouldBeThrower, BlockPos fishBucketPos, ObjectWrapper<ITextComponent> mobName) {
+        Entity itemEntity;
+        ItemStack transformedItem;
+        if (item.getItem() instanceof BucketItem) {
+            BucketItem bucketType = (BucketItem) item.getItem();
+            Fluid fluid = bucketType.getFluid();
+            transformedItem = new ItemStack(fluid.getBucket());
+            bucketType.checkExtraContent(world, item, fishBucketPos);
+        }
+        else {
+            transformedItem = item.copy();
+        }
+        transformedItem.setCount(1);
+        if (item.getItem() instanceof ThrowablePotionItem) {
+            PotionEntity potionEntity = new PotionEntity(world, wouldBeThrower);
+            potionEntity.setItem(transformedItem);
+            itemEntity = potionEntity;
+        }
+        else if (item.getItem() == Items.ENDER_PEARL) {
+            EnderPearlEntity pearlEntity = new EnderPearlEntity(world, wouldBeThrower);
+            itemEntity = pearlEntity;
+        }
+        else {
+            itemEntity = new ItemEntity(world, 0, 0, 0, transformedItem);
+        }
+        if (item.hasCustomHoverName()) {
+            mobName.set(item.getHoverName());
+        }
+        item.shrink(1);
+        
+        tf.getTfSourceData().withEntitySource(itemEntity);
+    }
+    
+    private void mobFromBlock(GETransformationEntity tf, BlockPos blockPos, BlockState blockState, World world) {
+        TileEntity tileEntity = world.getBlockEntity(blockPos);
+        
+        if (tileEntity instanceof IInventory) {
+            KEEP_ITEMS.add(tileEntity);
+        }
+        world.removeBlock(blockPos, false);
+        KEEP_ITEMS.remove(tileEntity);
+        
+        tf.getTfSourceData().withBlockSource(blockState, blockPos, tileEntity);
+    }
     
     
     

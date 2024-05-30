@@ -48,6 +48,10 @@ public class GEItemMarkEffect extends StandEffectInstance {
             }
             return;
         }
+        
+        if (!world.isClientSide() && !getItemTracker(true).isTracked()) {
+            remove();
+        }
     }
 
     @Override

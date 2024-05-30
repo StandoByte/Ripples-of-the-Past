@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack.KnownItemState;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -26,7 +27,7 @@ public abstract class ArmorStandEntityMixin extends LivingEntity {
     public void jojoOnArmorStandItemEquip(EquipmentSlotType pSlot, ItemStack pStack, CallbackInfo ci) {
         if (!level.isClientSide()) {
             TrackerItemStack.getItemTracker(pStack).ifPresent(tracker -> {
-                tracker.setAtEntity(this.getId(), level);
+                tracker.setAtEntity(this.getId(), level, KnownItemState.ENTITY_HAS_ITEM);
                 tracker.setItemStillThereCheck(trackerId -> TrackerItemStack.trackerIdCheck(trackerId).test(this.getItemBySlot(pSlot)));
             });
         }

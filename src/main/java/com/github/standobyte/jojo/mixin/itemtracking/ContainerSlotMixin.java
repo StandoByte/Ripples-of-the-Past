@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack.KnownItemState;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -30,7 +31,7 @@ public abstract class ContainerSlotMixin {
             Entity entity = (Entity) container;
             if (!entity.level.isClientSide()) {
                 TrackerItemStack.getItemTracker(pStack).ifPresent(tracker -> {
-                    tracker.setAtEntity(entity.getId(), entity.level);
+                    tracker.setAtEntity(entity.getId(), entity.level, KnownItemState.ENTITY_HAS_ITEM);
                     tracker.setItemStillThereCheck(trackerId -> 
                             IntStream.range(0, container.getContainerSize()).mapToObj(container::getItem)
                             .anyMatch(TrackerItemStack.trackerIdCheck(trackerId)));
@@ -42,7 +43,7 @@ public abstract class ContainerSlotMixin {
             World world = tileEntity.getLevel();
             if (!world.isClientSide()) {
                 TrackerItemStack.getItemTracker(pStack).ifPresent(tracker -> {
-                    tracker.setAtBlockPos(tileEntity.getBlockPos(), world);
+                    tracker.setAtBlockPos(tileEntity.getBlockPos(), world, KnownItemState.BLOCK_HAS_ITEM);
                     tracker.setItemStillThereCheck(trackerId -> 
                             IntStream.range(0, container.getContainerSize()).mapToObj(container::getItem)
                             .anyMatch(TrackerItemStack.trackerIdCheck(trackerId)));
@@ -53,7 +54,7 @@ public abstract class ContainerSlotMixin {
             PlayerEntity player = ((PlayerInventory) container).player;
             if (!player.level.isClientSide()) {
                 TrackerItemStack.getItemTracker(pStack).ifPresent(tracker -> {
-                    tracker.setAtEntity(player.getId(), player.level);
+                    tracker.setAtEntity(player.getId(), player.level, KnownItemState.ENTITY_HAS_ITEM);
                     tracker.setItemStillThereCheck(trackerId -> 
                             IntStream.range(0, container.getContainerSize()).mapToObj(container::getItem)
                             .anyMatch(TrackerItemStack.trackerIdCheck(trackerId)));

@@ -10,8 +10,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack.KnownItemState;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.PlayerInventory;
@@ -31,18 +31,7 @@ public abstract class PlayerInventoryMixin implements IInventory {
         if (!player.level.isClientSide() && Boolean.TRUE.equals(ci.getReturnValue())) {
             TrackerItemStack.getItemTrackerInInventory(item, compartments.stream().flatMap(Collection::stream))
             .ifPresent(tracker -> {
-                tracker.setAtEntity(player.getId(), player.level);
-//                JojoMod.LOGGER.debug("1");
-//                tracker.setItemStillThereCheck(trackerId -> {
-//                    compartments.stream().flatMap(Collection::stream).forEach(i -> {
-//                        if (!i.isEmpty()) {
-//                            JojoMod.LOGGER.debug(i.getItem().getRegistryName());
-//                        }
-//                    });
-//                    JojoMod.LOGGER.debug("{} {}", trackerId, compartments.stream().flatMap(Collection::stream).anyMatch(TrackerItemStack.trackerIdCheck(trackerId)));
-//                    JojoMod.LOGGER.debug("");
-//                    return compartments.stream().flatMap(Collection::stream).anyMatch(TrackerItemStack.trackerIdCheck(trackerId));
-//                });
+                tracker.setAtEntity(player.getId(), player.level, KnownItemState.ENTITY_HAS_ITEM);
                 tracker.setItemStillThereCheck(trackerId -> compartments.stream().flatMap(Collection::stream)
                         .anyMatch(TrackerItemStack.trackerIdCheck(trackerId)));
             });
@@ -54,18 +43,7 @@ public abstract class PlayerInventoryMixin implements IInventory {
         if (!player.level.isClientSide()) {
             TrackerItemStack.getItemTracker(item)
             .ifPresent(tracker -> {
-                tracker.setAtEntity(player.getId(), player.level);
-//                JojoMod.LOGGER.debug("2");
-//                tracker.setItemStillThereCheck(trackerId -> {
-//                    compartments.stream().flatMap(Collection::stream).forEach(i -> {
-//                        if (!i.isEmpty()) {
-//                            JojoMod.LOGGER.debug(i.getItem().getRegistryName());
-//                        }
-//                    });
-//                    JojoMod.LOGGER.debug("{} {}", trackerId, compartments.stream().flatMap(Collection::stream).anyMatch(TrackerItemStack.trackerIdCheck(trackerId)));
-//                    JojoMod.LOGGER.debug("");
-//                    return compartments.stream().flatMap(Collection::stream).anyMatch(TrackerItemStack.trackerIdCheck(trackerId));
-//                });
+                tracker.setAtEntity(player.getId(), player.level, KnownItemState.ENTITY_HAS_ITEM);
                 tracker.setItemStillThereCheck(trackerId -> compartments.stream().flatMap(Collection::stream)
                         .anyMatch(TrackerItemStack.trackerIdCheck(trackerId)));
             });

@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.item;
 import com.github.standobyte.jojo.entity.itemprojectile.BladeHatEntity;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack.KnownItemState;
 
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.dispenser.DefaultDispenseItemBehavior;
@@ -58,7 +59,7 @@ public class BladeHatItem extends CustomModelArmorItem {
             
             TrackerItemStack.getItemTracker(stack).ifPresent(tracker -> {
                 if (tracker.isTracked()) {
-                    tracker.setAtEntity(hat.getId(), world);
+                    tracker.setAtEntity(hat.getId(), world, KnownItemState.ENTITY_IS_ITEM);
                     tracker.setItemStillThereCheck(null);
                 }
             });

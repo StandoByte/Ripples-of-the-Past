@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack.KnownItemState;
 
 import net.minecraft.entity.passive.horse.AbstractHorseEntity;
 import net.minecraft.inventory.IInventory;
@@ -33,7 +34,7 @@ public abstract class InventoryMixin implements IInventory {
                     if (!horse.level.isClientSide()) {
                         TrackerItemStack.getItemTrackerInInventory(item, items.stream())
                         .ifPresent(tracker -> {
-                            tracker.setAtEntity(horse.getId(), horse.level);
+                            tracker.setAtEntity(horse.getId(), horse.level, KnownItemState.ENTITY_HAS_ITEM);
                             tracker.setItemStillThereCheck(trackerId -> items.stream()
                                     .anyMatch(TrackerItemStack.trackerIdCheck(trackerId)));
                         });

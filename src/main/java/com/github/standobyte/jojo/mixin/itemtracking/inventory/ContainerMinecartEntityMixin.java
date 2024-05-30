@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack.KnownItemState;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
@@ -30,7 +31,7 @@ public abstract class ContainerMinecartEntityMixin extends AbstractMinecartEntit
         if (!level.isClientSide()) {
             TrackerItemStack.getItemTrackerInInventory(item, itemStacks.stream())
             .ifPresent(tracker -> {
-                tracker.setAtEntity(this.getId(), level);
+                tracker.setAtEntity(this.getId(), level, KnownItemState.ENTITY_HAS_ITEM);
                 tracker.setItemStillThereCheck(trackerId -> itemStacks.stream()
                         .anyMatch(TrackerItemStack.trackerIdCheck(trackerId)));
             });

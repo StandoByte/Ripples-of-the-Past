@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 import com.github.standobyte.jojo.itemtracking.ITrackedArrowEntity;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack.KnownItemState;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
@@ -28,7 +29,7 @@ public abstract class BowItemMixin extends ShootableItem {
         AbstractArrowEntity arrowEntity = arrowItem.createArrow(world, arrowItemStack, shooter);
         TrackerItemStack.getItemTracker(arrowItemStack).ifPresent(tracker -> {
             if (tracker.isTracked()) {
-                tracker.setAtEntity(arrowEntity.getId(), world);
+                tracker.setAtEntity(arrowEntity.getId(), world, KnownItemState.ENTITY_IS_ITEM);
                 tracker.setItemStillThereCheck(null);
                 if (arrowEntity instanceof ITrackedArrowEntity) {
                     ((ITrackedArrowEntity) arrowEntity).saveItemTrackerNBT(tracker.toNBT());
