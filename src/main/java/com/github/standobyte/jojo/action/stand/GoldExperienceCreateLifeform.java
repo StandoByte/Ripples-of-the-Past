@@ -255,12 +255,15 @@ public class GoldExperienceCreateLifeform extends StandAction {
                 
                 ITextComponent customName = null;
                 boolean tfTargetFound = false;
+                
                 // marked item
                 if (itemTrackerId.isPresent()) {
-                    TrackerItemStack itemContainer = SidedItemTrackerMap.getSidedTrackers(world).getTracker(itemTrackerId.get());
-                    if (itemContainer != null && itemContainer.checkItemIsThere((ServerWorld) world)) {
-                        Entity itemEntity = itemContainer.getAtEntity(world);
+                    TrackerItemStack itemTracker = SidedItemTrackerMap.getSidedTrackers(world).getTracker(itemTrackerId.get());
+                    if (itemTracker != null && itemTracker.checkItemIsThere((ServerWorld) world)) {
+                        Entity itemEntity = itemTracker.getAtEntity(world);
                         if (itemEntity != null) {
+                            itemTracker.clear();
+                            
                             MCUtil.cloneEntity(itemEntity).ifPresent(entity -> tf.getTfSourceData().withEntitySource(entity));
                             itemEntity.remove();
                             tfTargetFound = true;
@@ -275,6 +278,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                         }
                     }
                 }
+                
                 // targeted non-living entity
                 if (!tfTargetFound && target.getType() == TargetType.ENTITY) {
                     Entity targetEntity = target.getEntity();
@@ -290,6 +294,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     }
                     tf.setDeltaMovement(targetEntity.getDeltaMovement());
                 }
+                
                 // item held in off-hand
                 if (!tfTargetFound) {
                     ItemStack heldItem = user.getItemInHand(Hand.OFF_HAND);
@@ -333,6 +338,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                         tf.moveTo(pos.x, pos.y, pos.z, performer.yRot, 0);
                     }
                 }
+                
                 // targeted non-living block
                 if (!tfTargetFound && target.getType() == TargetType.BLOCK
                         && JojoModUtil.breakingBlocksEnabled(user.level)) {

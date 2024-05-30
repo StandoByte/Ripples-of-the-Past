@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.action.stand;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -13,10 +14,12 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.stand.effect.GEItemMarkEffect;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
+import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.LivingEntity;
@@ -83,6 +86,9 @@ public class GoldExperienceMarkItem extends StandAction {
                     GEItemMarkEffect effect = new GEItemMarkEffect(itemTracker.getTrackerId());
                     effect.withStand(power);
                     standEffects.addEffect(effect);
+                    
+                    MCUtil.playSound(world, null, user, ModSounds.GOLD_EXPERIENCE_LIFE_ITEM.get(), 
+                            user.getSoundSource(), 0.5f, 1.0f, StandUtil::playerCanHearStands);
                 }
                 
                 if (give) {
@@ -105,7 +111,7 @@ public class GoldExperienceMarkItem extends StandAction {
         Vector3d eyePos = player.getEyePosition(1.0F);
         Optional<GEItemMarkEffect> outlined = targets.stream()
                 .map(e -> Pair.of(e, lookAngle.dot(e.getRight().subtract(eyePos).normalize())))
-                .filter(withCos -> withCos.getValue() > 0.98481)
+                .filter(withCos -> withCos.getValue() > 0.92388)
                 .max(Comparator.comparingDouble(Pair::getValue))
                 .map(Pair::getLeft)
                 .map(Pair::getLeft);
@@ -123,7 +129,9 @@ public class GoldExperienceMarkItem extends StandAction {
                 .map(effect -> Pair.of(effect, effect.getItemTracker(false).markerPos(player.level, ClientUtil.getPartialTick())))
                 .filter(entry -> entry.getRight() != null && entry.getRight().distanceToSqr(player.position()) < rangeSq)
                 .collect(Collectors.toList());
-        return targets;
+//        return targets;
+        // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! make sure only one marked item can exist at the same time
+        return targets.size() > 1 ? Collections.singletonList(targets.get(targets.size() - 1)) : targets;
     }
     
     @Override

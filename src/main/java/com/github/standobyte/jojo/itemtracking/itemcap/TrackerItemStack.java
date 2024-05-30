@@ -28,6 +28,19 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
+/**
+ * Currently item stacks are being tracked in:
+ *   ItemEntity
+ *   LockableLootTileEntity
+ *   Hoppers
+ *   Player inventory
+ *   Horse chest inventory
+ *   Minecart with chest inventory
+ *   Mobs equipment
+ *   Armor stands equipment
+ *   Shot arrows, knives, clackers, blade hats
+ *
+ */
 public class TrackerItemStack {
     private static final Random RANDOM = new Random();
     private final ItemStack itemStack;
