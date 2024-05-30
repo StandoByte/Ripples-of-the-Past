@@ -10,6 +10,7 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.tuple.Pair;
 
+import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.stand.effect.GEItemMarkEffect;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -25,6 +26,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.text.IFormattableTextComponent;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
 public class GoldExperienceMarkItem extends StandAction {
@@ -32,6 +35,19 @@ public class GoldExperienceMarkItem extends StandAction {
 
     public GoldExperienceMarkItem(StandAction.Builder builder) {
         super(builder);
+    }
+    
+    @Override
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
+        ItemStack item = user.getItemInHand(Hand.OFF_HAND);
+        if (item.isEmpty()) {
+            return conditionMessage("ge_lifeform_material_only_item");
+        }
+        if (!GoldExperienceCreateLifeform.canGiveLifeTo(item)) {
+            return conditionMessage("ge_lifeform_material_item");
+        }
+        
+        return ActionConditionResult.POSITIVE;
     }
     
     @Override
@@ -105,11 +121,22 @@ public class GoldExperienceMarkItem extends StandAction {
                 .getEffects()
                 .filter(effect -> effect.effectType == ModStandEffects.GE_ITEM_MARK.get())
                 .map(effect -> (GEItemMarkEffect) effect)
-                .filter(effect -> effect.getItemTracker(true) != null/* && effect.getItemTracker(false).getAtEntity(player.level) != player*/)
+                .filter(effect -> effect.getItemTracker(true) != null && effect.getItemTracker(false).getAtEntity(player.level) != player)
                 .map(effect -> Pair.of(effect, effect.getItemTracker(false).markerPos(player.level, ClientUtil.getPartialTick())))
                 .filter(entry -> entry.getRight() != null && entry.getRight().distanceToSqr(player.position()) < rangeSq)
                 .collect(Collectors.toList());
         return targets;
+    }
+    
+    @Override
+    public IFormattableTextComponent getTranslatedName(IStandPower power, String key) {
+        ItemStack item = power.getUser().getOffhandItem();
+        if (!item.isEmpty() && GoldExperienceCreateLifeform.canGiveLifeTo(item)) {
+            return new TranslationTextComponent(key + ".param", item.getDisplayName());
+        }
+        else {
+            return super.getTranslatedName(power, key);
+        }
     }
     
 }

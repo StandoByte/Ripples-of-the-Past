@@ -33,6 +33,10 @@ public class GEItemMarkEffect extends StandEffectInstance {
         return itemTracker;
     }
     
+    public UUID getItemTrackerId() {
+        return itemTrackerId;
+    }
+    
     @Override
     protected void start() {}
     

@@ -9,7 +9,6 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrackedItemPacket;
@@ -148,7 +147,6 @@ public class TrackerItemStack {
         this.containerBlockState = null;
         this.positionDimension = null;
         this.itemStillThere = null;
-        JojoMod.LOGGER.debug("а где");
         onUpdate(world);
     }
     
@@ -165,24 +163,29 @@ public class TrackerItemStack {
     public void tick(MinecraftServer server) {
         if (this.positionDimension != null) {
             ServerWorld world = server.getLevel(positionDimension);
-            if (world != null) {
-                if (itemStillThere != null && !itemStillThere.test(trackerUuid)) {
-                    setDisappeared(world);
-                }
-                else if (positionEntity.isPresent()) {
-                    Entity entity = world.getEntity(positionEntity.getAsInt());
-                    if (entity == null || entity.removed) {
-                        setDisappeared(world);
-                    }
-                }
-                else if (positionBlock != null && containerBlockState != null) {
-                    BlockState blockState = world.getBlockState(positionBlock);
-                    if (this.containerBlockState.getBlock() != blockState.getBlock()) {
-                        setDisappeared(world);
-                    }
-                }
+            if (world != null && !checkItemIsThere(world)) {
+                setDisappeared(world);
             }
         }
+    }
+    
+    public boolean checkItemIsThere(ServerWorld world) {
+        if (this.positionDimension == null) return false;
+        
+        if (positionEntity.isPresent()) {
+            Entity entity = world.getEntity(positionEntity.getAsInt());
+            if (entity == null || entity.removed) {
+                return false;
+            }
+        }
+        else if (positionBlock != null && containerBlockState != null) {
+            BlockState blockState = world.getBlockState(positionBlock);
+            if (this.containerBlockState.getBlock() != blockState.getBlock()) {
+                return false;
+            }
+        }
+        
+        return itemStillThere == null || itemStillThere.test(trackerUuid);
     }
     
     public void clear() {

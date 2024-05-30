@@ -258,7 +258,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                 // marked item
                 if (itemTrackerId.isPresent()) {
                     TrackerItemStack itemContainer = SidedItemTrackerMap.getSidedTrackers(world).getTracker(itemTrackerId.get());
-                    if (itemContainer != null) {
+                    if (itemContainer != null && itemContainer.checkItemIsThere((ServerWorld) world)) {
                         Entity itemEntity = itemContainer.getAtEntity(world);
                         if (itemEntity != null) {
                             MCUtil.cloneEntity(itemEntity).ifPresent(entity -> tf.getTfSourceData().withEntitySource(entity));
