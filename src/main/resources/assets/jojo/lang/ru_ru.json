@@ -353,12 +353,22 @@
   "jojo.key.stand_remote_control": "Дистанционное управление Стендом",
   "jojo.key.hamon_skills_window": "Окно навыков Хамона",
   
+  "key.mouse": "Кн.%1$s",
+  "key.keyboard.left.alt": "Л.Alt",
+  "key.keyboard.left.control": "Л.Ctrl",
+  "key.keyboard.left.shift": "Л.Shift",
+  "key.keyboard.left.win": "Л.Win",
+  "key.keyboard.right.alt": "П.Alt",
+  "key.keyboard.right.control": "П.Ctrl",
+  "key.keyboard.right.shift": "П.Shift",
+  "key.keyboard.right.win": "П.Win",
+  
   "key.categories.jojo.hud": "ДжоДжо - интерфейс",
   "jojo.key.stand_mode": "Режим: Стенд",
   "jojo.key.non_stand_mode": "Режим: Хамон/вампиризм",
   "jojo.key.edit_hud": "Окно настроек интерфейса",
   "jojo.key.edit_hud.power_name": "Открыть настройки интерфейса %s",
-  "jojo.key.disable_hotbars": "Удар/исп. предмета при открытом интерфейсе",
+  "jojo.key.disable_hotbars": "Отключить управление из мода",
   "jojo.key.attack_hotbar": "1-9/колесико выбирают способность ЛКМ",
   "jojo.key.ability_hotbar": "1-9/колесико выбирают способность ПКМ",
   

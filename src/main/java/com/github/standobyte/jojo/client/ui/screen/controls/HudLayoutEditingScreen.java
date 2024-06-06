@@ -100,7 +100,7 @@ public class HudLayoutEditingScreen extends Screen {
     @Override
     protected void init() {
         // reset layout
-        addButton(new CustomButton(getWindowX() + WINDOW_WIDTH - 34, getWindowY() + WINDOW_HEIGHT - 34, 24, 24, 
+        addButton(new CustomButton(getWindowX() - 26, getWindowY() + WINDOW_HEIGHT - 34, 24, 24, 
                 button -> {
                     currentControlScheme.reset(selectedPower);
                     markLayoutEdited();
@@ -123,7 +123,7 @@ public class HudLayoutEditingScreen extends Screen {
         });
         
         // vanilla controls settings
-        addButton(new CustomButton(getWindowX() + WINDOW_WIDTH - 32, getWindowY() + WINDOW_HEIGHT - 120, 22, 22, 
+        addButton(new CustomButton(getWindowX() - 24, getWindowY() + WINDOW_HEIGHT - 120, 22, 22, 
                 button -> {
                     ControlsScreen mcControlsScreen = new ControlsScreen(this, minecraft.options);
                     
@@ -154,7 +154,7 @@ public class HudLayoutEditingScreen extends Screen {
             }
         });
         
-        keybindsList = new ActionKeybindsList(minecraft, 228, 0, getWindowY() + 57, getWindowY() + 171, 22, this, selectedKey);
+        keybindsList = new ActionKeybindsList(minecraft, 254, 0, getWindowY() + 57, getWindowY() + 171, 22, this, selectedKey);
         keybindsList.setLeftPos(getWindowX() + 9);
         children.add(keybindsList);
         
@@ -899,6 +899,32 @@ public class HudLayoutEditingScreen extends Screen {
             }
         };
         
+        Widget keyHudVisibilityButton = new CustomButton(
+                -1, -1, 
+                10, 10, StringTextComponent.EMPTY, button -> {
+                    markLayoutEdited();
+                    entry.setVisibleInHud(!entry.isVisibleInHud());
+                }, 
+                (button, matrixStack, x, y) -> {
+                    renderAfterScissor = () -> {
+                        List<ITextComponent> tooltip = new ArrayList<>(2);
+                        tooltip.add(new TranslationTextComponent("jojo.keybind_mode.hud_visibility." + String.valueOf(entry.isVisibleInHud())).withStyle(TextFormatting.BOLD));
+                        renderComponentTooltip(matrixStack, tooltip, x, y);
+                    };
+                }) {
+            @Override
+            protected void renderCustomButton(MatrixStack matrixStack, int mouseX, int mouseY, float partialTick) {
+                Minecraft minecraft = Minecraft.getInstance();
+                minecraft.getTextureManager().bind(WINDOW);
+                RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+                RenderSystem.enableDepthTest();
+                int texX = entry.isVisibleInHud() ? 236 : 246;
+                blit(matrixStack, x, y, texX, 192 + getYImage(isHovered()) * height, width, height);
+            }
+        };
+        
         Widget removeButton = new CustomButton(
                 -1, -1, 
                 8, 8, StringTextComponent.EMPTY, button -> {
@@ -920,7 +946,7 @@ public class HudLayoutEditingScreen extends Screen {
         };
         
         keybindsList.addKeybindEntry(keybindsList.new KeybindUIEntry(entry, 
-                keyBindingButton, keyPressModeButton, keyActiveModeButton, removeButton));
+                keyBindingButton, keyPressModeButton, keyActiveModeButton, keyHudVisibilityButton, removeButton));
     }
     
     private Map<ActionKeybindEntry, ControlScheme> editedKeybinds = new HashMap<>();
@@ -1054,6 +1080,11 @@ public class HudLayoutEditingScreen extends Screen {
         public Optional<ActionKeybindEntry> getHoveredKeybindSlot() {
             return hoveredKeybindSlot;
         }
+
+        @Override
+        public int getRowWidth() {
+            return width;
+        }
         
         
         
@@ -1066,18 +1097,20 @@ public class HudLayoutEditingScreen extends Screen {
             private final Widget keybindButton;
             private final Widget keyPressModeButton;
             private final Widget keyActiveModeButton;
+            private final Widget hudVisibilityButton;
             private final Widget removeButton;
             private int actionSlotX;
             private int actionSlotY;
             
             public KeybindUIEntry(ActionKeybindEntry keybindEntry, 
-                    Widget keybindButton, Widget keyPressModeButton, Widget keyActiveModeButton, Widget removeButton) {
+                    Widget keybindButton, Widget keyPressModeButton, Widget keyActiveModeButton, Widget hudVisibilityButton, Widget removeButton) {
                 this.keybindEntry = keybindEntry;
                 this.keybindButton = keybindButton;
                 this.keyPressModeButton = keyPressModeButton;
                 this.keyActiveModeButton = keyActiveModeButton;
+                this.hudVisibilityButton = hudVisibilityButton;
                 this.removeButton = removeButton;
-                this.buttons = ImmutableList.of(keybindButton, keyPressModeButton, keyActiveModeButton, removeButton);
+                this.buttons = ImmutableList.of(keybindButton, keyPressModeButton, keyActiveModeButton, hudVisibilityButton, removeButton);
             }
             
             @Override
@@ -1095,7 +1128,10 @@ public class HudLayoutEditingScreen extends Screen {
                 keyActiveModeButton.x = keyPressModeButton.x + keyPressModeButton.getWidth() + 2;
                 keyActiveModeButton.y = top + 3;
                 
-                removeButton.x = keyActiveModeButton.x + keyActiveModeButton.getWidth() + 8;
+                hudVisibilityButton.x = keyActiveModeButton.x + keyActiveModeButton.getWidth() + 4;
+                hudVisibilityButton.y = top + 4;
+                
+                removeButton.x = left + width - 68;
                 removeButton.y = top + 5;
                 
                 actionSlotX = left;
@@ -1128,10 +1164,9 @@ public class HudLayoutEditingScreen extends Screen {
                             .withStyle(keyCodeModifierConflict ? TextFormatting.GOLD : TextFormatting.RED));
                 }
                 
-                keybindButton.render(matrixStack, mouseX, mouseY, partialTicks);
-                keyPressModeButton.render(matrixStack, mouseX, mouseY, partialTicks);
-                keyActiveModeButton.render(matrixStack, mouseX, mouseY, partialTicks);
-                removeButton.render(matrixStack, mouseX, mouseY, partialTicks);
+                for (Widget button : buttons) {
+                    button.render(matrixStack, mouseX, mouseY, partialTicks);
+                }
                 
                 renderActionSlot(matrixStack, mouseX, mouseY);
             }
@@ -1170,6 +1205,7 @@ public class HudLayoutEditingScreen extends Screen {
                 }
                 return false;
             }
+
         }
         
         public class AddNewKeyEntry extends ActionKeybindsList.Entry {

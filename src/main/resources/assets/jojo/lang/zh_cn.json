@@ -321,7 +321,6 @@
  "jojo.key.stand_mode": "切换模式: 『替身』",
  "jojo.key.non_stand_mode": "切换模式：『吸血鬼』/『波纹』",
  "jojo.key.edit_hud": "编辑快捷栏布局",
- "jojo.key.disable_hotbars": "(按住) 禁用热键",
  "jojo.key.attack_hotbar": "(按住+1-9/滚轮)攻击热键",
  "jojo.key.ability_hotbar": "(按住+1-9/滚轮)能力热键",
  "key.categories.jojo.hud.alternative": "JOJO面板 (控制选择)",

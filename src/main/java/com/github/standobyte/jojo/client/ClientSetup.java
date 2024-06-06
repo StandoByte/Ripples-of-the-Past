@@ -225,7 +225,7 @@ public class ClientSetup {
         
         ClientModSettings.init(mc, new File(mc.gameDirectory, "config/jojo_rotp/client_settings.json"));
         HudControlSettings.init(new File(mc.gameDirectory, "config/jojo_rotp/controls/"));
-
+        
         event.enqueueWork(() -> {
             ItemModelsProperties.register(ModItems.METEORIC_SCRAP.get(), new ResourceLocation(JojoMod.MOD_ID, "icon"), (itemStack, clientWorld, livingEntity) -> {
                 return itemStack.getOrCreateTag().getInt("Icon");

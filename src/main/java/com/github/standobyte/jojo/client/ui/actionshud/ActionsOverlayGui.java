@@ -26,11 +26,14 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.ControllerStand;
 import com.github.standobyte.jojo.client.InputHandler;
+import com.github.standobyte.jojo.client.controls.ActionKeybindEntry;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.controls.HudControlSettings;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.client.ui.BlitFloat;
+import com.github.standobyte.jojo.client.ui.ShortKeybindTextComponent;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsModeConfig.SelectedTargetIcon;
 import com.github.standobyte.jojo.client.ui.actionshud.hotbar.HotbarFold;
 import com.github.standobyte.jojo.client.ui.actionshud.hotbar.HotbarRenderer;
@@ -55,6 +58,7 @@ import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.general.ObjectWrapper;
 import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Streams;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -73,9 +77,11 @@ import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.GameType;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -250,6 +256,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 || mc.player.isDeadOrDying()) {
             return;
         }
+        RenderGameOverlayEvent.ElementType elementTypeRender = event.getType();
         
         MatrixStack matrixStack = event.getMatrixStack();
         float partialTick = event.getPartialTicks();
@@ -260,23 +267,24 @@ public class ActionsOverlayGui extends AbstractGui {
         PositionConfig barsPosConfig = ClientModSettings.getSettingsReadOnly().barsPosition;
         boolean showModeSelector = false;
         
-        Action<?> lastCustomKeybindAction = null;
-        for (PowerClassification power : PowerClassification.values()) {
-            ActionsModeConfig<?> mode = getHudMode(power);
-            if (customKeybindActionTransparency.get(power).shouldRender()) {
-                lastCustomKeybindAction = mode.lastCustomKeybindAction;
-            }
-            else {
-                mode.lastCustomKeybindAction = null;
-            }
-        }
-            
-        updateWarnings(currentMode);
-        updateElementPositions(barsPosConfig, hotbarsPosConfig, lastCustomKeybindAction != null, screenWidth, screenHeight);
-        
-        RenderGameOverlayEvent.ElementType elementTypeRender = event.getType();
         switch (elementTypeRender) {
         case ALL:
+            updateHotkeyUi();
+            
+            for (int i = 0; i < hotbarIsRendered.length; i++) {
+                hotbarIsRendered[i] = false;
+            }
+            if (hotbarWillRender(currentMode, InputHandler.ActionKey.ATTACK))       hotbarIsRendered[0] = true;
+            if (hotbarWillRender(currentMode, InputHandler.ActionKey.ABILITY))      hotbarIsRendered[1] = true;
+            if (!hotkeyInHudActions.isEmpty())                                      hotbarIsRendered[2] = true;
+            if (hotkeyRenderOffHudAction)                                           hotbarIsRendered[3] = true;
+            
+            
+            updateWarnings(currentMode);
+            updateElementPositions(barsPosConfig, hotbarsPosConfig, 
+                    hotbarIsRendered[0], hotbarIsRendered[1], hotbarIsRendered[2], hotbarIsRendered[3], 
+                    screenWidth, screenHeight);
+            
             RenderSystem.enableRescaleNormal();
             RenderSystem.enableBlend();
             RenderSystem.defaultBlendFunc();
@@ -302,7 +310,7 @@ public class ActionsOverlayGui extends AbstractGui {
                     standAlpha = ((StandEntity) stand.getStandManifestation()).getAlpha(partialTick);
                 }
             }
-            renderPowerIcon(matrixStack, hotbarsPosition, modeIcon, standAlpha);
+            renderPowerIcon(matrixStack, lmbHotbarPosition, modeIcon, standAlpha);
             renderIconBarAtCrosshair(matrixStack, screenWidth, screenHeight, partialTick);
             
             renderOutOfBreathSprite(matrixStack, partialTick, screenWidth, screenHeight);
@@ -332,8 +340,6 @@ public class ActionsOverlayGui extends AbstractGui {
             break;
         }
 
-        int hotbarsRenderedCount = 0;
-        int hotbarI = 0;
         if (currentMode != null) {
             if (currentMode.getPower() == null || !currentMode.getPower().hasPower()) {
                 JojoMod.getLogger().warn("Failed rendering {} HUD", currentMode.powerClassification);
@@ -347,21 +353,14 @@ public class ActionsOverlayGui extends AbstractGui {
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();
                 
-                for (int i = 0; i < hotbarsRendered.length; i++) {
-                    hotbarsRendered[i] = false;
+                if (hotbarIsRendered[0]) {
+                    renderActionsHotbar(matrixStack, lmbHotbarPosition, InputHandler.ActionKey.ATTACK,
+                            currentMode, getMouseTarget(), partialTick);
                 }
-                if (renderActionsHotbar(matrixStack, hotbarsPosition, InputHandler.ActionKey.ATTACK,
-                        currentMode, getMouseTarget(), hotbarsRenderedCount, partialTick)) { 
-                    hotbarsRendered[0] = true; 
-                    hotbarsRenderedCount++; 
+                if (hotbarIsRendered[1]) {
+                    renderActionsHotbar(matrixStack, rmbHotbarPosition, InputHandler.ActionKey.ABILITY,
+                            currentMode, getMouseTarget(), partialTick);
                 }
-                if (renderActionsHotbar(matrixStack, hotbarsPosition, InputHandler.ActionKey.ABILITY, 
-                        currentMode, getMouseTarget(), hotbarsRenderedCount, partialTick)) { 
-                    hotbarsRendered[1] = true; 
-                    hotbarsRenderedCount++; 
-                }
-                
-                renderWarningIcons(matrixStack, warningsPosition, warningLines);
                 
                 renderLeapIcon(matrixStack, currentMode, screenWidth, screenHeight);
                 
@@ -370,40 +369,80 @@ public class ActionsOverlayGui extends AbstractGui {
                 break;
             case TEXT:
                 int color = getPowerUiColor(currentMode.getPower());
-                drawPowerName(matrixStack, hotbarsPosition, currentMode, color, partialTick);
+                drawPowerName(matrixStack, lmbHotbarPosition, currentMode, color, partialTick);
 
-                if (hotbarsRendered[0]) drawHotbarText(matrixStack, hotbarsPosition, InputHandler.ActionKey.ATTACK, 
-                        currentMode, getMouseTarget(), color, hotbarI++, partialTick);
-                if (hotbarsRendered[1]) drawHotbarText(matrixStack, hotbarsPosition, InputHandler.ActionKey.ABILITY, currentMode, 
-                        getMouseTarget(), color, hotbarI++, partialTick);
+                if (hotbarIsRendered[0]) drawHotbarText(matrixStack, lmbHotbarPosition, InputHandler.ActionKey.ATTACK, 
+                        currentMode, getMouseTarget(), color, partialTick);
+                if (hotbarIsRendered[1]) drawHotbarText(matrixStack, rmbHotbarPosition, InputHandler.ActionKey.ABILITY, currentMode, 
+                        getMouseTarget(), color, partialTick);
+                break;
+            default:
+                break;
+            }
+        }
+
+        if (hotbarIsRendered[2]) {
+            switch (elementTypeRender) {
+            case ALL:
+                RenderSystem.enableRescaleNormal();
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
                 
-                drawWarningText(matrixStack, warningsPosition, warningLines);
+                renderInHudKeybindActionSlots(matrixStack, inHudHotkeysPosition, getMouseTarget(), partialTick);
+                
+                RenderSystem.disableRescaleNormal();
+                RenderSystem.disableBlend();
+                break;
+            case TEXT:
+                renderInHudKeybindActionNames(matrixStack, inHudHotkeysPosition);
                 break;
             default:
                 break;
             }
         }
         
-        if (lastCustomKeybindAction != null) {
-            ActionsModeConfig<?> hudMode = getHudMode(lastCustomKeybindAction.getPowerClassification());
+        if (hotbarIsRendered[3]) {
+            Action<?> action = lastHotkeyPressedAction.getAction();
+            ActionsModeConfig<?> hudMode = getHudMode(action.getPowerClassification());
             switch (elementTypeRender) {
             case ALL:
-                renderCustomKeybindActionSlot(matrixStack, 
-                        hotbarsPosition, lastCustomKeybindAction, hudMode, 
-                        getMouseTarget(), hotbarsRenderedCount, partialTick);
+                RenderSystem.enableRescaleNormal();
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
                 
+                renderOffHudKeybindActionSlot(matrixStack, 
+                        offHudHotkeyPosition, action, 
+                        getMouseTarget(), partialTick);
+                
+                RenderSystem.disableRescaleNormal();
+                RenderSystem.disableBlend();
                 break;
             case TEXT:
-                drawCustomKeybindActionText(matrixStack, hotbarsPosition, 
-                        lastCustomKeybindAction, hudMode, getMouseTarget(), 
-                        getPowerUiColor(hudMode.getPower()), hotbarI, partialTick);
+                drawCustomKeybindActionText(matrixStack, offHudHotkeyPosition, 
+                        action, hudMode, getMouseTarget(), 
+                        getPowerUiColor(hudMode.getPower()), partialTick);
                 break;
             default:
                 break;
             }
         }
+
+        switch (elementTypeRender) {
+        case ALL:
+            renderWarningIcons(matrixStack, warningsPosition, warningLines);
+            break;
+        case TEXT:
+            drawWarningText(matrixStack, warningsPosition, warningLines);
+            if (ControllerStand.getInstance().isControllingStand()) {
+                StandEntity stand = ControllerStand.getInstance().getManuallyControlledStand();
+                drawStandRemoteRange(matrixStack, stand.distanceTo(mc.player), (float) stand.getRangeEfficiency());
+            }
+            break;
+        default:
+            break;
+        }
     }
-    private boolean[] hotbarsRendered = new boolean[3];
+    private boolean[] hotbarIsRendered = new boolean[4];
     
     public ActionTarget getMouseTarget() {
         if (_target == null) {
@@ -438,13 +477,80 @@ public class ActionsOverlayGui extends AbstractGui {
         return -1;
     }
 
+    
 
+    private ActionKeybindEntry lastHotkeyPressedAction;
+    private boolean hotkeyRenderOffHudAction;
+    private List<HudHotkey> hotkeyInHudActions = new ArrayList<>();
+    private void updateHotkeyUi() {
+        hotkeyRenderOffHudAction = lastHotkeyPressedAction != null;
+        hotkeyInHudActions.clear();
+        
+        for (PowerClassification power : PowerClassification.values()) {
+            ActionsModeConfig<?> mode = getHudMode(power);
+            if (!customKeybindActionTransparency.get(power).shouldRender()) {
+                if (lastHotkeyPressedAction == mode.lastHotkeyAction) {
+                    lastHotkeyPressedAction = null;
+                    hotkeyRenderOffHudAction = false;
+                }
+                mode.lastHotkeyAction = null;
+            }
+            
+            for (ActionKeybindEntry entry : HudControlSettings.getInstance().getControlScheme(power).getCustomKeybinds()) {
+                if (entry.isVisibleInHud() && entry.getHudInteraction().canTrigger(power == getCurrentMode()) && !entry.getKeybind().isUnbound()) {
+                    IFormattableTextComponent keyName = 
+                            new StringTextComponent("[")
+                            .append(new ShortKeybindTextComponent(entry.getKeybind()))
+                            .append(new StringTextComponent("]"));
+                    hotkeyInHudActions.add(new HudHotkey(entry, keyName));
+                    if (entry == mode.lastHotkeyAction) {
+                        hotkeyRenderOffHudAction = false;
+                    }
+                }
+            }
+        }
+    }
+    
+    List<ActionKeybindEntry> heldThisTick = new ArrayList<>();
+    public void resetHeldThisTick() {
+        heldThisTick.clear();
+    }
+    
+    public void setHeldThisTick(ActionKeybindEntry action) {
+        heldThisTick.add(action);
+    }
+    
+    public void setCustomKeybindAction(PowerClassification power, ActionKeybindEntry action) {
+        ActionsModeConfig<?> hudMode = getHudMode(power);
+        if (hudMode != null) {
+            hudMode.lastHotkeyAction = action;
+            customKeybindActionTransparency.get(power).reset();
+        }
+        lastHotkeyPressedAction = action;
+    }
+    
+    private static class HudHotkey {
+        final ActionKeybindEntry actionEntry;
+        final IFormattableTextComponent keyName;
+        final int maxWidth;
+        
+        public HudHotkey(ActionKeybindEntry actionEntry, IFormattableTextComponent keyName) {
+            this.actionEntry = actionEntry;
+            this.keyName = keyName;
+            this.maxWidth = Minecraft.getInstance().font.width(keyName.copy().withStyle(TextFormatting.BOLD));
+        }
+    }
+    
+    
 
     private static final int HOTBARS_ELEMENT_HEIGHT_PX = 110;
     
     private final ElementPosition barsPosition = new ElementPosition();
     private BarsRenderer barsRenderer;
-    private final ElementPosition hotbarsPosition = new ElementPosition();
+    private final ElementPosition lmbHotbarPosition = new ElementPosition();
+    private final ElementPosition rmbHotbarPosition = new ElementPosition();
+    private final ElementPosition inHudHotkeysPosition = new ElementPosition();
+    private final ElementPosition offHudHotkeyPosition = new ElementPosition();
     private final ElementPosition warningsPosition = new ElementPosition();
     private List<ITextComponent> warningLines = new ArrayList<>();
     private final ElementPosition standStrengthPosition = new ElementPosition();
@@ -452,76 +558,106 @@ public class ActionsOverlayGui extends AbstractGui {
     private final ElementPosition hamonExerciseBarsPosition = new ElementPosition();
     
     private void updateElementPositions(PositionConfig barsConfig, PositionConfig hotbarsConfig, 
-            boolean renderCustomKeybindAction, int screenWidth, int screenHeight) {
+            boolean renderLmbHotbar, boolean renderRmbHotbar, boolean renderHudKeybinds, boolean renderOffHudKeybind, 
+            int screenWidth, int screenHeight) {
         int halfWidth = screenWidth / 2;
         int halfHeight = screenHeight / 2;
         barsRenderer = barsConfig.barsOrientation == BarsOrientation.HORIZONTAL ? horizontalBars : verticalBars;
         barsPosition.x = barsConfig.getXPos(screenWidth);
         barsPosition.y = barsConfig.getYPos(screenHeight, 
                 barsConfig.barsOrientation == BarsOrientation.HORIZONTAL ? BARS_WIDTH_PX : VerticalBarsRenderer.BAR_HEIGHT);
-        if (isActive() && (hotbarsConfig == PositionConfig.TOP_LEFT && barsConfig == PositionConfig.LEFT
-                || hotbarsConfig == PositionConfig.TOP_RIGHT && barsConfig == PositionConfig.RIGHT)) {
-            int offset = HOTBARS_ELEMENT_HEIGHT_PX + INDENT + VerticalBarsRenderer.ICON_HEIGHT;
-            if (renderCustomKeybindAction) {
-                offset += 24;
-            }
-            barsPosition.y = Math.max(hotbarsPosition.y + offset, barsPosition.y);
-        }
-        barsPosition.alignment = barsConfig.aligment;
         
-        hotbarsPosition.x = hotbarsConfig.getXPos(screenWidth);
-        hotbarsPosition.y = hotbarsConfig.getYPos(screenHeight, 
-                HOTBARS_ELEMENT_HEIGHT_PX);
+        boolean barsBelowHotbars = hotbarsConfig == PositionConfig.TOP_LEFT && barsConfig == PositionConfig.LEFT
+                || hotbarsConfig == PositionConfig.TOP_RIGHT && barsConfig == PositionConfig.RIGHT;
+        int hotbarsRendered = 0;
+        if (renderLmbHotbar)   ++hotbarsRendered;
+        if (renderRmbHotbar)   ++hotbarsRendered;
+        if (renderHudKeybinds) ++hotbarsRendered;
+        int hotbarsElementHeight = 20 + getHotbarsYDiff() * hotbarsRendered;
+        
+        if (isActive() && barsBelowHotbars) {
+            int offset = hotbarsElementHeight + INDENT + VerticalBarsRenderer.ICON_HEIGHT;
+            barsPosition.y = Math.max(lmbHotbarPosition.y + offset, barsPosition.y);
+        }
+        barsPosition.alignment = barsConfig.alignment;
+
+        boolean hotbarAboveBarsShift = false;
+        lmbHotbarPosition.x = hotbarsConfig.getXPos(screenWidth);
+        lmbHotbarPosition.y = hotbarsConfig.getYPos(screenHeight, hotbarsElementHeight);
         if (isActive()) {
             if (barsConfig == hotbarsConfig) {
                 switch (barsConfig.barsOrientation) {
                 case HORIZONTAL:
-                    hotbarsPosition.y += BARS_WIDTH_PX + INDENT;
+                    lmbHotbarPosition.y += BARS_WIDTH_PX + INDENT;
                     break;
                 case VERTICAL:
-                    hotbarsPosition.x += hotbarsConfig.aligment == Alignment.RIGHT ? -(BARS_WIDTH_PX + INDENT) : BARS_WIDTH_PX + INDENT;
+                    lmbHotbarPosition.x += hotbarsConfig.alignment == Alignment.RIGHT ? -(BARS_WIDTH_PX + INDENT) : BARS_WIDTH_PX + INDENT;
                     break;
                 }
             }
             else if (barsConfig == PositionConfig.TOP_LEFT && hotbarsConfig == PositionConfig.LEFT
                     || barsConfig == PositionConfig.TOP_RIGHT && hotbarsConfig == PositionConfig.RIGHT) {
-                hotbarsPosition.y = Math.max(barsPosition.y + BARS_WIDTH_PX + INDENT, hotbarsPosition.y);
+                lmbHotbarPosition.y = Math.max(barsPosition.y + BARS_WIDTH_PX + INDENT, lmbHotbarPosition.y);
+            }
+            if (barsConfig.barsOrientation == BarsOrientation.VERTICAL) {
+                barsPosition.y = Math.min(barsPosition.y, screenHeight - 116);
             }
         }
-        hotbarsPosition.alignment = hotbarsConfig.aligment;
+        lmbHotbarPosition.alignment = hotbarsConfig.alignment;
         
-        warningsPosition.x = hotbarsPosition.x;
-        warningsPosition.y = hotbarsPosition.y + 92;
-        if (renderCustomKeybindAction) {
-            warningsPosition.y += 34;
-        }
-        warningsPosition.alignment = hotbarsPosition.alignment;
-        if (hotbarsConfig == PositionConfig.TOP_LEFT && barsConfig == PositionConfig.LEFT) {
-            warningsPosition.x += 32;
-        }
-        else if (hotbarsConfig == PositionConfig.TOP_RIGHT && barsConfig == PositionConfig.RIGHT) {
-            warningsPosition.x -= 22;
-        }
-        if (warningsPosition.alignment == Alignment.RIGHT) {
-            warningsPosition.x -= 16;
+        rmbHotbarPosition.x = lmbHotbarPosition.x;
+        rmbHotbarPosition.y = lmbHotbarPosition.y;
+        rmbHotbarPosition.alignment = hotbarsConfig.alignment;
+        if (renderLmbHotbar) {
+            rmbHotbarPosition.y += getHotbarsYDiff();
         }
         
-        standStrengthPosition.x = hotbarsPosition.x;
-        standStrengthPosition.y = hotbarsPosition.y + 92 + warningLines.size() * 16;
-        if (renderCustomKeybindAction) {
-            standStrengthPosition.y += 34;
-        }
-        standStrengthPosition.alignment = hotbarsPosition.alignment;
-        if (hotbarsConfig == PositionConfig.TOP_LEFT && barsConfig == PositionConfig.LEFT) {
-            standStrengthPosition.x += 32;
-        }
-        else if (hotbarsConfig == PositionConfig.TOP_RIGHT && barsConfig == PositionConfig.RIGHT) {
-            standStrengthPosition.x -= 22;
+        inHudHotkeysPosition.x = rmbHotbarPosition.x;
+        inHudHotkeysPosition.y = rmbHotbarPosition.y;
+        inHudHotkeysPosition.alignment = hotbarsConfig.alignment;
+        if (renderRmbHotbar) {
+            inHudHotkeysPosition.y += getHotbarsYDiff();
+            if (barsBelowHotbars && !hotbarAboveBarsShift && barsPosition.y <= 74 + inHudHotkeysPosition.y) {
+                hotbarAboveBarsShift = true;
+                inHudHotkeysPosition.x += inHudHotkeysPosition.alignment == Alignment.RIGHT ? -24 : 24;
+            }
         }
         
-        modeSelectorPosition.x = hotbarsConfig.aligment == Alignment.LEFT ? halfWidth + 9 : halfWidth - 29;
+        offHudHotkeyPosition.x = inHudHotkeysPosition.x;
+        offHudHotkeyPosition.y = inHudHotkeysPosition.y;
+        offHudHotkeyPosition.alignment = hotbarsConfig.alignment;
+        if (renderHudKeybinds) {
+            offHudHotkeyPosition.y += getHotbarsYDiff();
+            if (barsBelowHotbars && !hotbarAboveBarsShift && barsPosition.y <= 74 + offHudHotkeyPosition.y) {
+                hotbarAboveBarsShift = true;
+                offHudHotkeyPosition.x += offHudHotkeyPosition.alignment == Alignment.RIGHT ? -24 : 24;
+            }
+        }
+        
+        warningsPosition.x = offHudHotkeyPosition.x + (warningsPosition.alignment == Alignment.RIGHT ? -16 : 16);
+        warningsPosition.y = offHudHotkeyPosition.y + 22;
+        warningsPosition.alignment = hotbarsConfig.alignment;
+        if (renderOffHudKeybind) {
+            warningsPosition.y += getHotbarsYDiff();
+            if (barsBelowHotbars && !hotbarAboveBarsShift && barsPosition.y <= 20 + warningsPosition.y) {
+                hotbarAboveBarsShift = true;
+                warningsPosition.x += warningsPosition.alignment == Alignment.RIGHT ? -24 : 24;
+            }
+        }
+        
+        standStrengthPosition.x = warningsPosition.x;
+        standStrengthPosition.y = warningsPosition.y + warningLines.size() * 16;
+        standStrengthPosition.alignment = warningsPosition.alignment;
+        if (!warningLines.isEmpty()) {
+            if (barsBelowHotbars && !hotbarAboveBarsShift && barsPosition.y <= 20 + standStrengthPosition.y) {
+                hotbarAboveBarsShift = true;
+                standStrengthPosition.x += standStrengthPosition.alignment == Alignment.RIGHT ? -24 : 24;
+            }
+        }
+        
+        modeSelectorPosition.x = hotbarsConfig.alignment == Alignment.LEFT ? halfWidth + 9 : halfWidth - 29;
         modeSelectorPosition.y = halfHeight - 31;
-        modeSelectorPosition.alignment = hotbarsConfig.aligment;
+        modeSelectorPosition.alignment = hotbarsConfig.alignment;
 
         hamonExerciseBarsPosition.x = 10;
         hamonExerciseBarsPosition.y = screenHeight - 5;
@@ -571,17 +707,22 @@ public class ActionsOverlayGui extends AbstractGui {
     }
 
     
-
-    private <P extends IPower<P, ?>> boolean renderActionsHotbar(MatrixStack matrixStack, 
-            ElementPosition position, InputHandler.ActionKey actionKey, ActionsModeConfig<P> mode, ActionTarget target, 
-            int ordinal, float partialTick) {
-        P power = mode.getPower();
+    
+    private <P extends IPower<P, ?>> boolean hotbarWillRender(ActionsModeConfig<P> powerMode, InputHandler.ActionKey hotbar) {
+        if (powerMode == null) return false;
+        P power = powerMode.getPower();
         if (!power.hasPower()) return false;
+        List<Action<?>> actions = getEnabledActions(power, hotbar);
+        return !actions.isEmpty();
+    }
+
+    private <P extends IPower<P, ?>> void renderActionsHotbar(MatrixStack matrixStack, 
+            ElementPosition position, InputHandler.ActionKey actionKey, ActionsModeConfig<P> mode, ActionTarget target, float partialTick) {
+        P power = mode.getPower();
         List<Action<?>> actions = getEnabledActions(power, actionKey);
-        if (actions.isEmpty()) return false;
 
         int x = position.x;
-        int y = position.y + getHotbarsYDiff() - 6 + getHotbarsYDiff() * ordinal;
+        int y = position.y + getHotbarsYDiff() - 6;
         int hotbarLength = actions.size() * 20 + 2;
         ControlScheme.Hotbar actionHotbar = actionKey.getHotbar();
         if (position.alignment == Alignment.RIGHT) {
@@ -715,16 +856,10 @@ public class ActionsOverlayGui extends AbstractGui {
 //        }
         
         Action<P> heldAction = power.getHeldAction();
-        int slot = -1;
+        int heldSlot = -1;
         if (heldAction != null) {
-            slot = actions.indexOf(
-                    heldAction.isShiftVariation() ? heldAction.getBaseVariation() : heldAction);
-            if (slot > -1) {
-                renderActionHoldProgress(matrixStack, power, heldAction, power.getHeldActionTicks(), partialTick, x + hotbarFold.getSlotWithIndex(slot).pos, y);
-            }
+            heldSlot = actions.indexOf(heldAction.isShiftVariation() ? heldAction.getBaseVariation() : heldAction);
         }
-        
-        
         Action<P> selectedAction;
         if (actionHotbar != null) {
             selectedAction = mode.getSelectedAction(actionHotbar, shift, getMouseTarget());
@@ -732,36 +867,114 @@ public class ActionsOverlayGui extends AbstractGui {
         else { // quick access slot
             selectedAction = resolveVisibleActionInSlot((Action<P>) actions.get(0), shift, power, target);
         }
-        if (selectedAction != null && selectedAction != heldAction) {
-            slot = selected;
-            if (slot > -1) {
-                renderActionHoldProgress(matrixStack, power, selectedAction, -1, partialTick, x + hotbarFold.getSlotWithIndex(slot).pos, y);
+        if (selectedAction != null) {
+            if (selectedAction == heldAction) {
+                if (heldSlot > -1) {
+                    renderActionHoldProgress(matrixStack, power, heldAction, power.getHeldActionTicks(), partialTick, x + hotbarFold.getSlotWithIndex(heldSlot).pos, y);
+                }
+            }
+            else {
+                if (selected > -1) {
+                    renderActionHoldProgress(matrixStack, power, selectedAction, -1, partialTick, x + hotbarFold.getSlotWithIndex(selected).pos, y);
+                }
             }
         }
-        
-        return true;
     }
 
-    private final SelectedTargetIcon skbaTargetIcon /*short for "selected keybind action"*/ = new SelectedTargetIcon();
-    private <P extends IPower<P, ?>> void renderCustomKeybindActionSlot(MatrixStack matrixStack, 
-            ElementPosition position, Action<P> action, ActionsModeConfig<?> currentMode, 
-            ActionTarget target, int ordinal, float partialTick) {
+    private <P extends IPower<P, ?>> void renderInHudKeybindActionSlots(MatrixStack matrixStack, 
+            ElementPosition position, ActionTarget target, float partialTick) {
+        int x = position.x;
+        List<HudHotkey> hotkeysIterate = position.alignment == Alignment.RIGHT ? Lists.reverse(hotkeyInHudActions) : hotkeyInHudActions;
+        for (HudHotkey hotkeySlotUi : hotkeysIterate) {
+            int nextOffset = Math.max(hotkeySlotUi.maxWidth + 6, 28);
+            int offset = Math.max((nextOffset - 28) / 2, 0);
+            if (position.alignment == Alignment.RIGHT) {
+                nextOffset = -nextOffset;
+                offset = -offset;
+            }
+            x += offset;
+            
+            float alpha = !hotbarsEnabled ? 0.25F : 1.0F;
+            ActionKeybindEntry entry = hotkeySlotUi.actionEntry;
+            Action<P> action = (Action<P>) entry.getAction();
+            renderSingleActionInSlot(matrixStack, 
+                    x, position.y, position.alignment, action, 
+                    target, alpha, partialTick, heldThisTick.contains(entry));
+            
+            x += nextOffset - offset;
+        }
+    }
+
+    private <P extends IPower<P, ?>> void renderInHudKeybindActionNames(MatrixStack matrixStack, ElementPosition position) {
+        int x = position.x + 9;
+        if (position.alignment == Alignment.RIGHT) {
+            x -= 26;
+        }
+        int y = position.y + 16 + 3;
+        List<HudHotkey> hotkeysIterate = position.alignment == Alignment.RIGHT ? Lists.reverse(hotkeyInHudActions) : hotkeyInHudActions;
+        for (HudHotkey hotkeySlotUi : hotkeysIterate) {
+            int nextOffset = Math.max(hotkeySlotUi.maxWidth + 6, 28);
+            int offset = Math.max((nextOffset - 28) / 2, 0);
+            if (position.alignment == Alignment.RIGHT) {
+                nextOffset = -nextOffset;
+                offset = -offset;
+            }
+            x += offset;
+            IFormattableTextComponent keyName = hotkeySlotUi.keyName;
+            if (heldThisTick.contains(hotkeySlotUi.actionEntry)) {
+                keyName = keyName.withStyle(TextFormatting.BOLD);
+            }
+
+            int width = mc.font.width(keyName);
+            RenderSystem.pushMatrix();
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            
+            int color = getPowerUiColor(getHudMode(hotkeySlotUi.actionEntry.getAction().getPowerClassification()).getPower());
+            float alpha = !hotbarsEnabled ? 0.25F : 1.0F;
+            
+            int textOffset = (28 - width) / 2;
+            if (position.alignment == Alignment.RIGHT) {
+                textOffset = 8 - textOffset;
+            }
+            int textX = x + textOffset;
+            drawBackdrop(matrixStack, textX, y, width, position.alignment, null, alpha, 0);
+            drawString(matrixStack, mc.font, keyName, textX, y, position.alignment, color, alpha);
+            
+            RenderSystem.disableBlend();
+            RenderSystem.popMatrix();
+            x += nextOffset - offset;
+        }
+    }
+
+    private <P extends IPower<P, ?>> void renderOffHudKeybindActionSlot(MatrixStack matrixStack, 
+            ElementPosition position, Action<P> action, 
+            ActionTarget target, float partialTick) {
+        if (action != null) {
+            ElementTransparency transparency = customKeybindActionTransparency.get(action.getPowerClassification());
+            float alpha = transparency.getAlpha(partialTick);
+            renderSingleActionInSlot(matrixStack, 
+                    position.x, position.y, position.alignment, action, 
+                    target, alpha, partialTick, true);
+        }
+    }
+    
+    private <P extends IPower<P, ?>> void renderSingleActionInSlot(MatrixStack matrixStack, 
+            int x, int y, Alignment alignment, Action<P> action, 
+            ActionTarget target, float alpha, float partialTick, boolean isSelected) {
         if (action == null) return;
-        ActionsModeConfig<P> mode = (ActionsModeConfig<P>) currentMode;
-        P power = mode.getPower();
+        ActionsModeConfig<P> hudMode = (ActionsModeConfig<P>) getHudMode(action.getPowerClassification());
+        P power = hudMode.getPower();
         if (!power.hasPower()) return;
         
-        int x = position.x;
-        int y = position.y + getHotbarsYDiff() - 6 + getHotbarsYDiff() * ordinal;
+        y += getHotbarsYDiff() - 6;
         int hotbarLength = 22;
-        if (position.alignment == Alignment.RIGHT) {
+        if (alignment == Alignment.RIGHT) {
             x -= hotbarLength;
         }
-        int selected = 0;
-        ElementTransparency transparency = customKeybindActionTransparency.get(mode.powerClassification);
-        float alpha = transparency.getAlpha(partialTick);
-
-        switch (position.alignment) {
+        int selected = isSelected ? 0 : -1;
+        
+        switch (alignment) {
         case LEFT:
             x += 12;
             break;
@@ -771,15 +984,16 @@ public class ActionsOverlayGui extends AbstractGui {
         }
         
         // hotbar
-        HotbarRenderer.renderFoldingHotbar(matrixStack, mc, x, y, HotbarFold.makeHotbarFold(1, 0, 0, position.alignment), alpha);
+        HotbarRenderer.renderFoldingHotbar(matrixStack, mc, x, y, HotbarFold.noFold(1), alpha);
 
         // action icon
         x += 3;
         y += 3;
-        renderActionIcon(matrixStack, skbaTargetIcon, mode, action, target, x, y, partialTick, true, alpha);
+        SelectedTargetIcon targetIcon = new SelectedTargetIcon();
+        renderActionIcon(matrixStack, targetIcon, hudMode, action, target, x, y, partialTick, isSelected, alpha);
         
         // target type icon
-        int[] tex = skbaTargetIcon.getIconTex();
+        int[] tex = targetIcon.getIconTex();
         if (tex != null) {
             mc.getTextureManager().bind(OVERLAY_LOCATION);
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
@@ -983,10 +1197,10 @@ public class ActionsOverlayGui extends AbstractGui {
     
     private <P extends IPower<P, ?>> void drawHotbarText(MatrixStack matrixStack, ElementPosition position, 
             InputHandler.ActionKey actionKey, @Nonnull ActionsModeConfig<P> mode, ActionTarget target, 
-            int color, int ordinal, float partialTick) {
+            int color, float partialTick) {
         P power = mode.getPower();
         int x = position.x;
-        int y = position.y + 16 + 3 + getHotbarsYDiff() * ordinal;
+        int y = position.y + 16 + 3;
         switch (position.alignment) {
         case LEFT:
             x += 12;
@@ -1040,11 +1254,11 @@ public class ActionsOverlayGui extends AbstractGui {
     
     private <P extends IPower<P, ?>> void drawCustomKeybindActionText(MatrixStack matrixStack, ElementPosition position, 
             Action<P> action, @Nonnull ActionsModeConfig<?> currentMode, ActionTarget target, 
-            int color, int ordinal, float partialTick) {
+            int color, float partialTick) {
         ActionsModeConfig<P> mode = (ActionsModeConfig<P>) currentMode;
         P power = mode.getPower();
         int x = position.x;
-        int y = position.y + 16 + 3 + getHotbarsYDiff() * ordinal;
+        int y = position.y + 16 + 3;
         switch (position.alignment) {
         case LEFT:
             x += 12;
@@ -1183,7 +1397,7 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    public void drawStandRemoteRange(MatrixStack matrixStack, float distance, float damageFactor) {
+    private void drawStandRemoteRange(MatrixStack matrixStack, float distance, float damageFactor) {
         int x = standStrengthPosition.x;
         int y = standStrengthPosition.y;
         Alignment alignment = standStrengthPosition.alignment;
@@ -1740,14 +1954,6 @@ public class ActionsOverlayGui extends AbstractGui {
         return Stream.of(ControlScheme.Hotbar.values()).map(hotbar -> currentMode.getSelectedAction(hotbar, shift, getMouseTarget()));
     }
     
-    public void setCustomKeybindAction(PowerClassification power, Action<?> action) {
-        ActionsModeConfig<?> hudMode = getHudMode(power);
-        if (hudMode != null) {
-            hudMode.lastCustomKeybindAction = action;
-            customKeybindActionTransparency.get(power).reset();
-        }
-    }
-    
     
     
     public void updatePowersCache() {
@@ -1862,14 +2068,14 @@ public class ActionsOverlayGui extends AbstractGui {
         RIGHT(Alignment.RIGHT, BarsOrientation.VERTICAL, 
                 screenWidth -> screenWidth - INDENT, (screenHeight, elementHeight) -> (screenHeight - elementHeight) / 2);
         
-        final Alignment aligment;
+        final Alignment alignment;
         final BarsOrientation barsOrientation;
         private final IntUnaryOperator xPos;
         private final IntBinaryOperator yPos;
         
         private PositionConfig(Alignment alignment, BarsOrientation barsOrientation, 
                 IntUnaryOperator xPos, IntBinaryOperator yPos) {
-            this.aligment = alignment;
+            this.alignment = alignment;
             this.barsOrientation = barsOrientation;
             this.xPos = xPos;
             this.yPos = yPos;
