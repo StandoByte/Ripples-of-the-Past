@@ -413,10 +413,11 @@
   "jojo.key.attack_hotbar": "1-9/Scroll Selects LMB Action",
   "jojo.key.ability_hotbar": "1-9/Scroll Selects RMB Action",
   
-  "key.categories.jojo.hud.alternative": "JoJo HUD (Old controls)",
+  "key.categories.jojo.hud.alternative": "JoJo | old controls & shortcuts",
   "jojo.key.scroll_mode": "Switch HUD Mode",
   "jojo.key.scroll_attack": "Select Next LMB Action",
   "jojo.key.scroll_ability": "Select Next RMB Action",
+  "jojo.key.meditation": "Hamon meditation shortcut",
   
   "key.mouse.left.shortened": "LMB",
   "key.mouse.right.shortened": "RMB",

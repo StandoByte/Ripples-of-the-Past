@@ -118,16 +118,16 @@ public class InputHandler {
     public static final String HUD_CATEGORY = new String("key.categories." + JojoMod.MOD_ID + ".hud");
     public KeyBinding nonStandMode;
     public KeyBinding standMode;
-    public KeyBinding scrollMode;
     public KeyBinding editHotbars;
     public KeyBinding disableHotbars;
-    
     public KeyBinding attackHotbar;
     public KeyBinding abilityHotbar;
-    public KeyBinding scrollAttack;
-    public KeyBinding scrollAbility;
 
     public static final String HUD_ALTERNATIVE_CATEGORY = new String("key.categories." + JojoMod.MOD_ID + ".hud.alternative");
+    public KeyBinding scrollMode;
+    public KeyBinding scrollAttack;
+    public KeyBinding scrollAbility;
+    public KeyBinding hamonMeditation;
     
     // it works because the actual map is static, not sure if that's intended or just an implementation detail
     // but hey, i'll take it
@@ -177,6 +177,7 @@ public class InputHandler {
         ClientRegistry.registerKeyBinding(scrollMode = new KeyBinding(JojoMod.MOD_ID + ".key.scroll_mode", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
         ClientRegistry.registerKeyBinding(scrollAttack = new KeyBinding(JojoMod.MOD_ID + ".key.scroll_attack", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
         ClientRegistry.registerKeyBinding(scrollAbility = new KeyBinding(JojoMod.MOD_ID + ".key.scroll_ability", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
+        ClientRegistry.registerKeyBinding(hamonMeditation = new KeyBinding(JojoMod.MOD_ID + ".key.meditation", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
     }
     
     @SubscribeEvent(priority = EventPriority.HIGH)
@@ -338,6 +339,10 @@ public class InputHandler {
                         mc.gui.handleChat(ChatType.GAME_INFO, message, Util.NIL_UUID);
                     }
                 }
+            }
+            
+            if (hamonMeditation.consumeClick()) {
+                PacketManager.sendToServer(new ClHamonMeditationPacket(true));
             }
             
             if (editHotbars.consumeClick() && (standPower.hasPower() || nonStandPower.hasPower())) {
