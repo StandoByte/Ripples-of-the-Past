@@ -40,6 +40,8 @@ public class ModSounds {
     
     public static final RegistryObject<SoundEvent> TOMMY_GUN_NO_AMMO = register("tommy_gun_no_ammo");
     
+    public static final RegistryObject<SoundEvent> MOLOTOV_THROW = register("molotov_throw");
+    
     public static final RegistryObject<SoundEvent> KNIFE_THROW = register("knife_throw");
     
     public static final RegistryObject<SoundEvent> KNIVES_THROW = register("knives_throw");

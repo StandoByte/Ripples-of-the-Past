@@ -22,19 +22,23 @@ public class HotbarRenderer {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
         
         HotbarTexPosition texPos = HotbarTexPosition.getHotbarFromSlotsCount(slots);
-        AbstractGui.blit(matrixStack, x - 14, y - 14, texPos.texX, texPos.texY, slots * 20 + 30, 50, 512, 512);
+        AbstractGui.blit(matrixStack, 
+                x - EDGE_EXTRA_WIDTH + 1, y - EDGE_EXTRA_WIDTH + 1, 
+                texPos.texX - EDGE_EXTRA_WIDTH, texPos.texY - EDGE_EXTRA_WIDTH, 
+                slots * 20 + EDGE_EXTRA_WIDTH * 2, 20 + EDGE_EXTRA_WIDTH * 2, 
+                512, 512);
         
     }
     
-    public static void renderHotbar(MatrixStack matrixStack, Minecraft mc, float x, float y, 
-            int slotsCount, float alpha) {
+    public static void renderHotbar(MatrixStack matrixStack, Minecraft mc, float x, float y, int slots, float alpha) {
         mc.getTextureManager().bind(HOTBAR_LOCATION);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
-        HotbarTexPosition texPos = HotbarTexPosition.getHotbarFromSlotsCount(slotsCount);
+        
+        HotbarTexPosition texPos = HotbarTexPosition.getHotbarFromSlotsCount(slots);
         AbstractGui.blit(matrixStack, 
-                (int) x - 14, (int) y - 14, 
-                texPos.texX, texPos.texY, 
-                20 * slotsCount + EDGE_EXTRA_WIDTH * 2, 50, 
+                (int) x - EDGE_EXTRA_WIDTH + 1, (int) y - EDGE_EXTRA_WIDTH + 1, 
+                texPos.texX - EDGE_EXTRA_WIDTH, texPos.texY - EDGE_EXTRA_WIDTH, 
+                slots * 20 + EDGE_EXTRA_WIDTH * 2, 20 + EDGE_EXTRA_WIDTH * 2, 
                 512, 512);
     }
     
@@ -50,33 +54,33 @@ public class HotbarRenderer {
             if (width > 0) {
                 BlitFloat.blitFloat(matrixStack, 
                         x + slot.getFrameRenderedLeftEdge() - EDGE_EXTRA_WIDTH + 1, y - EDGE_EXTRA_WIDTH + 1, 
-                        texPos.texX + slot.getFrameRenderedTexX(), texPos.texY, 
-                        width, 50, 
+                        texPos.texX + slot.getFrameRenderedTexX() - EDGE_EXTRA_WIDTH, texPos.texY - EDGE_EXTRA_WIDTH, 
+                        width, 20 + EDGE_EXTRA_WIDTH * 2, 
                         512, 512);
             }
         });
     }
     
     private static enum HotbarTexPosition {
-        _1(390, 50),
-        _2(370, 100),
-        _3(350, 150),
-        _4(330, 200),
-        _5(310, 250),
-        _6(290, 300),
-        _7(270, 350),
-        _8(250, 400),
-        _9(230, 450),
-        _10(0, 450),
-        _11(0, 400),
-        _12(0, 350),
-        _13(0, 300),
-        _14(0, 250),
-        _15(0, 200),
-        _16(0, 150),
-        _17(0, 100),
-        _18(0, 50),
-        _19(0, 0);
+        _1(405, 65),
+        _2(385, 115),
+        _3(365, 165),
+        _4(345, 215),
+        _5(325, 265),
+        _6(305, 315),
+        _7(285, 365),
+        _8(265, 415),
+        _9(245, 465),
+        _10(15, 465),
+        _11(15, 415),
+        _12(15, 365),
+        _13(15, 315),
+        _14(15, 265),
+        _15(15, 215),
+        _16(15, 165),
+        _17(15, 115),
+        _18(15, 65),
+        _19(15, 15);
         
         private final int texX;
         private final int texY;

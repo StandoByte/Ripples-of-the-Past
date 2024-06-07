@@ -11,7 +11,6 @@ import java.util.Random;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.StandEntityRenderer;
-import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -207,10 +206,6 @@ public class ControllerStand {
                     if (ForgeIngameGui.renderHealth) renderCameraStandHealth(matrixStack, gui, event, width, height);
                     if (ForgeIngameGui.renderArmor)  renderCameraStandArmor(matrixStack, gui, event, width, height);
                 }
-                break;
-            case TEXT:
-                ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
-                hud.drawStandRemoteRange(matrixStack, stand.distanceTo(mc.player), (float) stand.getRangeEfficiency());
                 break;
             default:
                 break;

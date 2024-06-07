@@ -14,15 +14,15 @@ public class HotbarFold {
     
     public static HotbarFold makeHotbarFold(int slotsCount, int selectedSlot, float foldProgress, Alignment alignment) {
         if (foldProgress <= 0) {
-            return createNoFold(slotsCount);
+            return noFold(slotsCount);
         }
         return new HotbarFold(slotsCount, selectedSlot, Math.min(foldProgress, 1), alignment);
     }
     
-    private static HotbarFold createNoFold(int slotsCount) {
-        if (NO_FOLD[slotsCount] == null) {
+    public static HotbarFold noFold(int slotsCount) {
+//        if (NO_FOLD[slotsCount] == null) {
             NO_FOLD[slotsCount] = new HotbarFold(slotsCount, -1, 0, Alignment.LEFT);
-        }
+//        }
         return NO_FOLD[slotsCount];
     }
     
@@ -70,7 +70,10 @@ public class HotbarFold {
             slot.slotFramePosX =    i == 0 ?    slot.pos :  slot.pos + HotbarRenderer.EDGE_EXTRA_WIDTH;
             slot.slotTexX =         i == 0 ?    0 :         i * 20 + HotbarRenderer.EDGE_EXTRA_WIDTH;
             slot.slotWidth = 20;
-            if (i == 0 || i == slotsCount - 1) {
+            if (i == 0) {
+                slot.slotWidth += HotbarRenderer.EDGE_EXTRA_WIDTH;
+            }
+            if (i == slotsCount - 1) {
                 slot.slotWidth += HotbarRenderer.EDGE_EXTRA_WIDTH;
             }
             

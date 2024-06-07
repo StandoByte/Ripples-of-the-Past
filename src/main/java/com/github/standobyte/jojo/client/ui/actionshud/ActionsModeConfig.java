@@ -8,6 +8,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.InputHandler.ActionKey;
+import com.github.standobyte.jojo.client.controls.ActionKeybindEntry;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.controls.HudControlSettings;
 import com.github.standobyte.jojo.power.IPower;
@@ -20,7 +21,7 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
     private P power;
     boolean autoOpened;
     
-    Action<?> lastCustomKeybindAction;
+    ActionKeybindEntry lastHotkeyAction;
     
     private int costOverlayTick = 0;
     
