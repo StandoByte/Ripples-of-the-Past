@@ -13,6 +13,8 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.GETransformationEntity;
 import com.github.standobyte.jojo.entity.RoadRollerEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.MolotovEntity;
+import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
@@ -279,6 +281,10 @@ public class GoldExperienceCreateLifeform extends StandAction {
                         else if (heldItem.getItem() == Items.ENDER_PEARL) {
                             EnderPearlEntity pearlEntity = new EnderPearlEntity(world, user);
                             itemEntity = pearlEntity;
+                        }
+                        else if (heldItem.getItem() == ModItems.MOLOTOV.get()) {
+                            MolotovEntity molotovEntity = new MolotovEntity(world, user);
+                            itemEntity = molotovEntity;
                         }
                         else {
                             itemEntity = new ItemEntity(world, 0, 0, 0, transformedItem);
