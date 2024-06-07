@@ -206,8 +206,8 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
             for (int y = y1; y <= y2; y++) {
                 for (int z = z1; z <= z2; z++) {
                     BlockPos blockPos = new BlockPos(x, y, z);
-                    BlockState blockState = level.getBlockState(blockPos);
                     if (level.isEmptyBlock(blockPos)) {
+                        BlockState blockState = level.getBlockState(blockPos);
                         LivingEntity user = StandUtil.getStandUser(getOwner());
                         if (user != null && user.getBoundingBox().intersects(new AxisAlignedBB(blockPos))) {
                             return;

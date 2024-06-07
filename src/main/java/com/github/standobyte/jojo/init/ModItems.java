@@ -20,6 +20,7 @@ import com.github.standobyte.jojo.item.CustomModelArmorItem;
 import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.item.KnifeItem;
 import com.github.standobyte.jojo.item.ModArmorMaterials;
+import com.github.standobyte.jojo.item.MolotovItem;
 import com.github.standobyte.jojo.item.OilItem;
 import com.github.standobyte.jojo.item.PhotoItem;
 import com.github.standobyte.jojo.item.PolaroidItem;
@@ -46,7 +47,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemTier;
-import net.minecraft.item.Items;
 import net.minecraft.item.Rarity;
 import net.minecraft.item.SpawnEggItem;
 import net.minecraftforge.common.ForgeSpawnEggItem;
@@ -127,7 +127,8 @@ public class ModItems {
     public static final RegistryObject<TommyGunItem> TOMMY_GUN = ITEMS.register("tommy_gun",
             () -> new TommyGunItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
     
-    public static final Supplier<Item> MOLOTOV = () -> Items.SNOWBALL;
+    public static final Supplier<Item> MOLOTOV = ITEMS.register("molotov",
+            () -> new MolotovItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
 
 //    public static final RegistryObject<MolotovItem> MOLOTOV = ITEMS.register("molotov",
 //            () -> new MolotovItem(new Item.Properties().tab(MAIN_TAB).stacksTo(16)));

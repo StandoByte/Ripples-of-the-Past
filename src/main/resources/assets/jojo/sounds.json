@@ -52,6 +52,10 @@
     "subtitle": "jojo.subtitle.tommy_gun_trigger",
     "sounds": [ "jojo:tommy_gun_trigger" ]
   },
+  "molotov_throw": {
+    "subtitle": "jojo.subtitle.molotov_throw",
+    "sounds": [ "minecraft:random/bow" ]
+  },
   "knife_throw": {
     "subtitle": "jojo.subtitle.knife_throw",
     "sounds": [ "jojo:knife_throw" ]
