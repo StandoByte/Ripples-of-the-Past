@@ -34,7 +34,7 @@ public class MolotovItem extends Item {
         if (!world.isClientSide) {
             MolotovEntity molotovEntity = new MolotovEntity(world, player);
             molotovEntity.setItem(item);
-            molotovEntity.shootFromRotation(player, player.xRot, player.yRot, 0.0F, 1.5F, 1.0F);
+            molotovEntity.shootFromRotation(player, player.xRot, player.yRot, 0.0F, 0.75F, 1.0F);
             world.addFreshEntity(molotovEntity);
         }
 

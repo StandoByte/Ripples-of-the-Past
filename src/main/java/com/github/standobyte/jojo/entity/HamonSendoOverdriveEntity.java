@@ -260,7 +260,7 @@ public class HamonSendoOverdriveEntity extends Entity implements IEntityAddition
     }
     
     private void givePointsToUser() {
-        if (!level.isClientSide() && (gavePoints++ < 6 || gavePoints % 4 == 0)) {
+        if (!level.isClientSide() && (gavePoints++ < 6 || gavePoints % 4 == 0) && points > 0) {
             Entity user = getUser();
             if (user instanceof LivingEntity) {
                 INonStandPower.getNonStandPowerOptional(((LivingEntity) user)).resolve().flatMap(power -> 
