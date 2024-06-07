@@ -529,7 +529,7 @@ public class MCUtil {
     
     
     public static boolean isItemWeapon(ItemStack itemStack) {
-        if (itemStack.isEmpty()) {
+        if (itemStack.isEmpty() || itemStack.getItem() instanceof GlovesItem) {
             return false;
         }
         
