@@ -15,6 +15,8 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.projectile.ProjectileItemEntity;
 import net.minecraft.item.Item;
 import net.minecraft.network.IPacket;
+import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -77,6 +79,8 @@ public class MolotovEntity extends ProjectileItemEntity implements IRendersAsIte
         super.onHitEntity(pResult);
         if (!level.isClientSide) {
             Entity entity = pResult.getEntity();
+            Entity owner = getOwner();
+            entity.hurt(owner != null ? new EntityDamageSource(DamageSource.IN_FIRE.msgId, owner) : DamageSource.IN_FIRE, 2);
             entity.setSecondsOnFire(10);
             setBlocksOnFire(this.blockPosition(), 2);
             setEntitiesOnFire(this.blockPosition(), 2);

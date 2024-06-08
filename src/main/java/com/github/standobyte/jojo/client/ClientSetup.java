@@ -68,6 +68,7 @@ import com.github.standobyte.jojo.client.render.entity.renderer.damaging.project
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.MRCrossfireHurricaneRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.MRCrossfireHurricaneSpecialRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.MRFireballRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.MolotovRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.SCRapierRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.TommyGunBulletRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.stretching.ZoomPunchRenderer;
@@ -184,7 +185,7 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SNAKE_MUFFLER.get(), SnakeMufflerRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.TOMMY_GUN_BULLET.get(), TommyGunBulletRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.KNIFE.get(), KnifeRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.MOLOTOV.get(), manager -> new SpriteRenderer<>(manager, Minecraft.getInstance().getItemRenderer(), 1.0F, false));
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.MOLOTOV.get(), manager -> new MolotovRenderer<>(manager, Minecraft.getInstance().getItemRenderer(), 1.0F, true));
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.STAND_ARROW.get(), StandArrowRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SOUL.get(), SoulRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.PILLARMAN_TEMPLE_ENGRAVING.get(), PillarmanTempleEngravingRenderer::new);
