@@ -1282,7 +1282,7 @@ public class HamonData extends TypeSpecificData {
                 energyRatio = 1;
             }
             else {
-                energyRatio = power.getEnergy() / power.getMaxEnergy();
+                energyRatio = power.getEnergy() / getMaxBreathStability();
             }
             float particlesPerTick = energyRatio * getHamonDamageMultiplier();
             boolean isUserTheCameraEntity = user == ClientUtil.getCameraEntity();

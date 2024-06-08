@@ -8,9 +8,12 @@ import java.util.UUID;
 import java.util.function.Predicate;
 
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
+import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModParticles;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -32,9 +35,11 @@ import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.EntityPredicates;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -102,6 +107,11 @@ public class HamonSendoOverdriveEntity extends Entity implements IEntityAddition
             if (tickCount % WAVE_ADD_TICK == 0 && addedWaves++ < wavesToAdd) {
                 if (!level.isClientSide()) {
                     waves.add(new Wave());
+                    Vector3d soundPos = getBoundingBox().getCenter();
+                    if (addedWaves < wavesToAdd) {
+                        level.playSound(ClientUtil.getClientPlayer(), soundPos.x, soundPos.y, soundPos.z, ModSounds.HAMON_SPARK.get(), 
+                                SoundCategory.AMBIENT, 0.25f, 1.0F + (random.nextFloat() - 0.5F) * 0.15F);
+                    }
                 }
                 else {
                     Vector3d center = getBoundingBox().getCenter();
@@ -131,6 +141,15 @@ public class HamonSendoOverdriveEntity extends Entity implements IEntityAddition
                         it.remove();
                     }
                 }
+            }
+            else {
+                AxisAlignedBB box = makeHurtHitBox(radius);
+                Vector3d cameraPos = ClientUtil.getCameraPos();
+                Vector3d soundPos = new Vector3d(
+                        MathHelper.clamp(cameraPos.x, box.minX, box.maxX),
+                        MathHelper.clamp(cameraPos.y, box.minY, box.maxY),
+                        MathHelper.clamp(cameraPos.z, box.minZ, box.maxZ));
+                HamonSparksLoopSound.playSparkSound(this, soundPos, 1.0F, true);
             }
         }
         else if (!level.isClientSide()) {

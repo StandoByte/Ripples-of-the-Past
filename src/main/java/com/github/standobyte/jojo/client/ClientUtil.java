@@ -96,6 +96,10 @@ public class ClientUtil {
         return Minecraft.getInstance().level;
     }
     
+    public static Vector3d getCameraPos() {
+        return Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
+    }
+    
     public static boolean isLocalServer() {
         return Minecraft.getInstance().isLocalServer();
     }
