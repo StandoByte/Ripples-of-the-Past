@@ -24,6 +24,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.particles.ParticleType;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
@@ -113,9 +114,10 @@ public class CustomParticlesHelper {
         }
     }
     
-    public static void addSendoHamonOverdriveParticle(World level, IParticleData pParticleData, 
+    public static void addSendoHamonOverdriveParticle(World level, IParticleData pParticleData, Direction.Axis blockAxis, 
             double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed, int lifeTime) {
-        SpriteTexturedParticle particle = new SendoHamonOverdriveParticle((ClientWorld) level, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed);
+        SpriteTexturedParticle particle = new SendoHamonOverdriveParticle(
+                (ClientWorld) level, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, blockAxis);
         particle.setLifetime(lifeTime);
         particle.pickSprite(getSavedSpriteSet(pParticleData.getType()));
         particle.setColor(1, 1, 1);

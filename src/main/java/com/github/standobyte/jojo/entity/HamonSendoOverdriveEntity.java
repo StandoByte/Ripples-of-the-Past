@@ -105,12 +105,20 @@ public class HamonSendoOverdriveEntity extends Entity implements IEntityAddition
                 }
                 else {
                     Vector3d center = getBoundingBox().getCenter();
-                    Vector3d axisVec = new Vector3d(
-                            axis == Direction.Axis.X ? 0.55 : 0,
-                            axis == Direction.Axis.Y ? 0.55 : 0,
-                            axis == Direction.Axis.Z ? 0.55 : 0);
-                    spawnSparksCircle(center.add(axisVec),           axis, radius);
-                    spawnSparksCircle(center.add(axisVec.scale(-1)), axis, radius);
+                    switch (axis) {
+                    case X:
+                        spawnSparksCircle(center.add( 0.55, 0, 0), axis, radius);
+                        spawnSparksCircle(center.add(-0.55, 0, 0), axis, radius);
+                        break;
+                    case Y:
+                        spawnSparksCircle(center.add(0,  0.55, 0), axis, radius);
+                        spawnSparksCircle(center.add(0, -0.55, 0), axis, radius);
+                        break;
+                    case Z:
+                        spawnSparksCircle(center.add(0, 0,  0.55), axis, radius);
+                        spawnSparksCircle(center.add(0, 0, -0.55), axis, radius);
+                        break;
+                    }
                 }
             }
             
@@ -288,9 +296,8 @@ public class HamonSendoOverdriveEntity extends Entity implements IEntityAddition
                     break;
                 }
                 particleVec = particleVec.scale(radius / WAVE_TICK_LENGTH);
-                CustomParticlesHelper.addSendoHamonOverdriveParticle(level, ModParticles.HAMON_SPARK.get(), 
-                        center.x, center.y, center.z, 
-                        particleVec.x, particleVec.y, particleVec.z, WAVE_TICK_LENGTH);
+                CustomParticlesHelper.addSendoHamonOverdriveParticle(level, ModParticles.HAMON_SPARK.get(), axis, 
+                        center.x, center.y, center.z, particleVec.x, particleVec.y, particleVec.z, WAVE_TICK_LENGTH);
             }
         }
     }
