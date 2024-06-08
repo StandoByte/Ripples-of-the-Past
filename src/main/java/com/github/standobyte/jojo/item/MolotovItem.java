@@ -17,9 +17,15 @@ import net.minecraft.block.AbstractFurnaceBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.CampfireBlock;
+import net.minecraft.block.DispenserBlock;
 import net.minecraft.block.TorchBlock;
 import net.minecraft.client.util.ITooltipFlag;
+import net.minecraft.dispenser.IBlockSource;
+import net.minecraft.dispenser.IDispenseItemBehavior;
+import net.minecraft.dispenser.IPosition;
+import net.minecraft.dispenser.ProjectileDispenseBehavior;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.fluid.LavaFluid;
 import net.minecraft.item.FireChargeItem;
@@ -31,7 +37,6 @@ import net.minecraft.stats.Stats;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
-import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
@@ -42,6 +47,28 @@ public class MolotovItem extends Item {
 
     public MolotovItem(Properties pProperties) {
         super(pProperties);
+
+        DispenserBlock.registerBehavior(this, new IDispenseItemBehavior() {
+            public ItemStack dispense(IBlockSource blockSource, ItemStack item) {
+                return new ProjectileDispenseBehavior() {
+                    
+                    @Override
+                    protected ProjectileEntity getProjectile(World pLevel, IPosition pPosition, ItemStack pStack) {
+                        return new MolotovEntity(pLevel, pPosition.x(), pPosition.y(), pPosition.z());
+                    }
+                    
+                    @Override
+                    protected float getUncertainty() {
+                        return super.getUncertainty() * 0.5F;
+                    }
+                    
+                    @Override
+                    protected float getPower() {
+                        return super.getPower() * 1.25F;
+                    }
+                }.dispense(blockSource, item);
+            }
+        });
     }
     
     @Override
