@@ -337,7 +337,7 @@ public class HamonData extends TypeSpecificData {
     }
     
     private float fullEnergyTicks() {
-        float ticks = 60F - (30F * breathingTrainingLevel / MAX_BREATHING_LEVEL);
+        float ticks = 80F - (50F * breathingTrainingLevel / MAX_BREATHING_LEVEL);
         if (meditationCompleted) {
             ticks -= MEDITATION_COMPLETED_ENERGY_REGEN_TIME_REDUCTION;
         }
@@ -362,7 +362,7 @@ public class HamonData extends TypeSpecificData {
     }
     
     private void updateNoEnergyDecayTicks() {
-        noEnergyDecayTicks = 20 + MathUtil.fractionRandomInc(180F * getBreathingLevel() / HamonData.MAX_BREATHING_LEVEL);
+        noEnergyDecayTicks = 50 + MathUtil.fractionRandomInc(150F * getBreathingLevel() / HamonData.MAX_BREATHING_LEVEL);
     }
     
     
@@ -547,7 +547,7 @@ public class HamonData extends TypeSpecificData {
         int oldPoints = getStatPoints(stat);
         int oldLevel = getStatLevel(stat);
         if (!ignoreTraining) {
-            int levelLimit = (int) getBreathingLevel() + JojoModConfig.getCommonConfigInstance(clientSide).breathingStatGap.get();
+            int levelLimit = getStatLevelLimit(clientSide);
             if (levelFromPoints(points) > levelLimit) {
                 points = pointsAtLevel(levelLimit + 1) - 1;
             }
@@ -585,6 +585,14 @@ public class HamonData extends TypeSpecificData {
                 }
             }
         }
+    }
+    
+    public int getStatLevelLimit(boolean clientSide) {
+        int config = JojoModConfig.getCommonConfigInstance(clientSide).breathingHamonStatGap.get();
+        if (config < 0) {
+            return Integer.MAX_VALUE;
+        }
+        return (int) getBreathingLevel() + config;
     }
     
     public static final float MAX_HAMON_STRENGTH_MULTIPLIER = dmgFormula(MAX_STAT_LEVEL); // 7

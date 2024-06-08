@@ -681,20 +681,21 @@ public class InputHandler {
                     action, shiftActionVar, power, ActionsOverlayGui.getInstance().getMouseTarget());
             
             Pair<Action<P>, Boolean> click = actionsOverlay.onActionClick(power, action, sneak);
-            if (click != null && click.getRight()) {
-                if (action != null) {
-                    result.handSwing = action.getHoldDurationMax(power) <= 0 && action.swingHand()
-                            ? HudClickResult.Behavior.FORCE : HudClickResult.Behavior.CANCEL;
-                    result.cancelVanillaInput();
-                    if (action.withUserPunch()) {
-                        mcPlayerAttack();
+            if (click != null) {
+                if (action != null && action.withUserPunch()) {
+                    mcPlayerAttack();
+                }
+                if (click.getRight()) {
+                    if (action != null) {
+                        result.handSwing = actionSwingsHand(action, power);
+                        result.cancelVanillaInput();
+                        if (action.getHoldDurationMax(power) > 0) {
+                            heldKeys.put(power, entry.getKeybind());
+                        }
                     }
-                }
-                if (action.getHoldDurationMax(power) > 0) {
-                    heldKeys.put(power, entry.getKeybind());
-                }
-                if (leftClickedBlock && leftClickBlockDelay <= 0) {
-                    leftClickBlockDelay = 4;
+                    if (leftClickedBlock && leftClickBlockDelay <= 0) {
+                        leftClickBlockDelay = 4;
+                    }
                 }
             }
             else {
@@ -758,17 +759,22 @@ public class InputHandler {
             if (!(leftClickedBlock && leftClickBlockDelay > 0)) {
                 click = actionsOverlay.onClick(power, key.getHotbar(), shiftActionVar, sneak);
             }
-            if (click != null && click.getRight()) {
+            if (click != null) {
                 Action<P> action = click.getLeft();
-                if (action != null) {
-                    result.handSwing = action.getHoldDurationMax(power) <= 0 && action.swingHand() ? HudClickResult.Behavior.FORCE : HudClickResult.Behavior.CANCEL;
-                    if (!(action.withUserPunch() && key == ActionKey.ATTACK)) result.cancelVanillaInput();
+                if (action != null && action.withUserPunch()) {
+                    mcPlayerAttack();
                 }
-                if (action.getHoldDurationMax(power) > 0) {
-                    heldKeys.put(power, key.getKey(mc, this));
-                }
-                if (leftClickedBlock && leftClickBlockDelay <= 0) {
-                    leftClickBlockDelay = 4;
+                if (click.getRight()) {
+                    if (action != null) {
+                        result.handSwing = actionSwingsHand(action, power);
+                        if (!(action.withUserPunch() && key == ActionKey.ATTACK)) result.cancelVanillaInput();
+                        if (action.getHoldDurationMax(power) > 0) {
+                            heldKeys.put(power, key.getKey(mc, this));
+                        }
+                    }
+                    if (leftClickedBlock && leftClickBlockDelay <= 0) {
+                        leftClickBlockDelay = 4;
+                    }
                 }
             }
             else {
@@ -783,6 +789,13 @@ public class InputHandler {
         }
         
         return result;
+    }
+    
+    private static <P extends IPower<P, ?>> HudClickResult.Behavior actionSwingsHand(Action<P> action, P power) {
+        if (action.getHoldDurationMax(power) <= 0 && action.swingHand()) {
+            return HudClickResult.Behavior.FORCE;
+        }
+        return HudClickResult.Behavior.CANCEL;
     }
     
     public static boolean useShiftActionVariant(Minecraft mc) {
@@ -802,6 +815,7 @@ public class InputHandler {
         }
         
         public void cancelHandSwing() {
+            JojoMod.LOGGER.debug("wqe");
             handSwing = Behavior.CANCEL;
         }
         

@@ -363,7 +363,7 @@
   "key.keyboard.right.shift.shortened": "П.Shift",
   "key.keyboard.right.win.shortened": "П.Win",
   
-  "key.categories.jojo.hud": "ДжоДжо (интерфейс)",
+  "key.categories.jojo.hud": "ДжоДжо (Интерфейс)",
   "jojo.key.stand_mode": "Режим: Стенд",
   "jojo.key.non_stand_mode": "Режим: Хамон/вампиризм",
   "jojo.key.edit_hud": "Окно настроек интерфейса",
@@ -372,7 +372,7 @@
   "jojo.key.attack_hotbar": "1-9/колесико выбирают способность ЛКМ",
   "jojo.key.ability_hotbar": "1-9/колесико выбирают способность ПКМ",
   
-  "key.categories.jojo.hud.alternative": "ДжоДжо | старые настройки и быстрые клавиши",
+  "key.categories.jojo.hud.alternative": "ДжоДжо | Старые настройки и быстрые клавиши",
   "jojo.key.scroll_mode": "Переключить режим",
   "jojo.key.scroll_attack": "Выбрать след. атаку",
   "jojo.key.scroll_ability": "Выбрать след. способность",
@@ -704,7 +704,8 @@
   "hamon.breathing_level": "Тренировка дыхания: %s/%s",
   "hamon.level_points": "Очков до следующего уровня: %s/%s",
   "hamon.max_level": "Максимальный уровень",
-  "hamon.breathing_stat.desc": "You'll need to constantly train this stat in order to make progress in learning Hamon. It increases your breathing ability as well as your physical condition.",
+  "hamon.breathing_stat.desc": "This stat increases your breathing ability as well as your physical condition.",
+  "hamon.breathing_stat.desc.gap": " You'll need to constantly train it in order to make progress in learning Hamon.",
   "hamon.breathing_stat.desc2": "To train your breathing, you have to complete these exercises daily. Complete at least 3 out of 4 of them each day for maximum results. It is also recommended to craft and wear a %s in the early stages of Hamon training.",
   "hamon.breathing_stat.desc2.mask": "маску контроля дыхания",
   "hamon.breathing_stat.desc3": "Уровень тренировки будет медленно уменьшаться, если вы перестанете выполнять упражнения!",

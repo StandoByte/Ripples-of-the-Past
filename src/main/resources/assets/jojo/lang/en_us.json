@@ -414,7 +414,7 @@
   "jojo.key.attack_hotbar": "1-9/Scroll Selects LMB Action",
   "jojo.key.ability_hotbar": "1-9/Scroll Selects RMB Action",
   
-  "key.categories.jojo.hud.alternative": "JoJo | old controls & shortcuts",
+  "key.categories.jojo.hud.alternative": "JoJo | Old controls & shortcuts",
   "jojo.key.scroll_mode": "Switch HUD Mode",
   "jojo.key.scroll_attack": "Select Next LMB Action",
   "jojo.key.scroll_ability": "Select Next RMB Action",
@@ -780,7 +780,8 @@
   "hamon.breathing_level": "Breathing Training: %s/%s",
   "hamon.level_points": "Points for next level: %s/%s",
   "hamon.max_level": "Max Level",
-  "hamon.breathing_stat.desc": "You'll need to constantly train this stat in order to make progress in learning Hamon. It increases your breathing ability as well as your physical condition.",
+  "hamon.breathing_stat.desc": "This stat increases your breathing ability as well as your physical condition.",
+  "hamon.breathing_stat.desc.gap": " You'll need to constantly train it in order to make progress in learning Hamon.",
   "hamon.breathing_stat.desc2": "To train your breathing, you have to complete these exercises daily. Complete at least 3 out of 4 of them each day for maximum results. It is also recommended to craft and wear a %s in the early stages of Hamon training.",
   "hamon.breathing_stat.desc2.mask": "breath control mask",
   "hamon.breathing_stat.desc3": "The training level will slowly decrease if you stop doing the exercises!",
