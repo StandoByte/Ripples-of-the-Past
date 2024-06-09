@@ -71,40 +71,40 @@ public class HamonBurnLayer<T extends LivingEntity, M extends EntityModel<T>> ex
 
     private static final Map<TextureSize, ResourceLocation[]> LAYER_TEXTURES = Util.make(new EnumMap<>(TextureSize.class), map -> {
         map.put(TextureSize._64x32, new ResourceLocation[] {
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/hamon_burn/t64x32/1.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/hamon_burn/t64x32/2.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/hamon_burn/t64x32/3.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/hamon_burn/t64x32/4.png")
+                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/layer/hamon_burn/t64x32/1.png"),
+                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/layer/hamon_burn/t64x32/2.png"),
+                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/layer/hamon_burn/t64x32/3.png"),
+                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/layer/hamon_burn/t64x32/4.png")
         });
         map.put(TextureSize._64x64, new ResourceLocation[] {
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/hamon_burn/t64x64/1.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/hamon_burn/t64x64/2.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/hamon_burn/t64x64/3.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/hamon_burn/t64x64/4.png")
+                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/layer/hamon_burn/t64x64/1.png"),
+                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/layer/hamon_burn/t64x64/2.png"),
+                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/layer/hamon_burn/t64x64/3.png"),
+                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/layer/hamon_burn/t64x64/4.png")
         });
         map.put(TextureSize._128x64, new ResourceLocation[] {
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/hamon_burn/t128x64/1.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/hamon_burn/t128x64/2.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/hamon_burn/t128x64/3.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/hamon_burn/t128x64/4.png")
+                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/layer/hamon_burn/t128x64/1.png"),
+                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/layer/hamon_burn/t128x64/2.png"),
+                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/layer/hamon_burn/t128x64/3.png"),
+                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/layer/hamon_burn/t128x64/4.png")
         });
         map.put(TextureSize._128x128, new ResourceLocation[] {
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/hamon_burn/t128x128/1.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/hamon_burn/t128x128/2.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/hamon_burn/t128x128/3.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/hamon_burn/t128x128/4.png")
+                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/layer/hamon_burn/t128x128/1.png"),
+                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/layer/hamon_burn/t128x128/2.png"),
+                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/layer/hamon_burn/t128x128/3.png"),
+                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/layer/hamon_burn/t128x128/4.png")
         });
         map.put(TextureSize._256x128, new ResourceLocation[] {
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/hamon_burn/t256x128/1.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/hamon_burn/t256x128/2.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/hamon_burn/t256x128/3.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/hamon_burn/t256x128/4.png")
+                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/layer/hamon_burn/t256x128/1.png"),
+                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/layer/hamon_burn/t256x128/2.png"),
+                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/layer/hamon_burn/t256x128/3.png"),
+                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/layer/hamon_burn/t256x128/4.png")
         });
         map.put(TextureSize._256x256, new ResourceLocation[] {
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/hamon_burn/t256x256/1.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/hamon_burn/t256x256/2.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/hamon_burn/t256x256/3.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/hamon_burn/t256x256/4.png")
+                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/layer/hamon_burn/t256x256/1.png"),
+                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/layer/hamon_burn/t256x256/2.png"),
+                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/layer/hamon_burn/t256x256/3.png"),
+                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/layer/hamon_burn/t256x256/4.png")
         });
     });
     

@@ -815,7 +815,6 @@ public class InputHandler {
         }
         
         public void cancelHandSwing() {
-            JojoMod.LOGGER.debug("wqe");
             handSwing = Behavior.CANCEL;
         }
         

@@ -318,9 +318,13 @@ public class ClientSetup {
     
     private static <T extends LivingEntity, M extends BipedModel<T>> void addLayersToEntities(EntityRenderer<?> renderer) {
         if (renderer instanceof LivingRenderer<?, ?>) {
-            addLivingLayers((LivingRenderer<T, ?>) renderer);
+            LivingRenderer<T, M> livingRenderer = (LivingRenderer<T, M>) renderer;
+            addLivingLayers(livingRenderer);
             if (((LivingRenderer<?, ?>) renderer).getModel() instanceof BipedModel<?>) {
-                addBipedLayers((LivingRenderer<T, M>) renderer);
+                addBipedLayers(livingRenderer);
+            }
+            else {
+                livingRenderer.addLayer(new FrozenLayer<T, M>(livingRenderer, FrozenLayer.NON_BIPED_PATH));
             }
         }
     }
@@ -330,7 +334,7 @@ public class ClientSetup {
     }
     
     private static <T extends LivingEntity, M extends BipedModel<T>> void addBipedLayers(LivingRenderer<T, M> renderer) {
-        renderer.addLayer(new FrozenLayer<>(renderer));
+        renderer.addLayer(new FrozenLayer<>(renderer, FrozenLayer.BIPED_PATH));
     }
 
     @SubscribeEvent
