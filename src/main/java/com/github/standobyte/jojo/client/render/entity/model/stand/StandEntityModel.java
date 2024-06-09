@@ -95,13 +95,17 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         modelRenderer.yRot = y;
         modelRenderer.zRot = z;
     }
-
+    
     public void setVisibility(T entity, VisibilityMode mode, boolean obstructsView) {
+        setVisibility(entity, mode, obstructsView, false);
+    }
+
+    public void setVisibility(T entity, VisibilityMode mode, boolean obstructsView, boolean invert) {
         if (obstructsView) {
             mode = entity.getStandPose().armsObstructView ? VisibilityMode.NONE : VisibilityMode.ARMS_ONLY;
         }
         this.visibilityMode = mode;
-        updatePartsVisibility(mode);
+        updatePartsVisibility(mode, invert);
         
         IStandPower standPower = entity.getUserPower();
         if (standPower != null) {
@@ -114,8 +118,11 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
             });
         }
     }
-
-    public abstract void updatePartsVisibility(VisibilityMode mode);
+    
+    public void updatePartsVisibility(VisibilityMode mode) {
+        updatePartsVisibility(mode, false);
+    }
+    public void updatePartsVisibility(VisibilityMode mode, boolean invert) {}
     protected abstract void partMissing(StandPart standPart);
     
     @Override
@@ -145,13 +152,8 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
                 pose, entity.getCurrentTaskPhase(), 
                 entity.getCurrentTaskPhaseCompletion(ticks - entity.tickCount), swingingHand);
         this.ticks = ticks;
-    }
-    
-    @Override
-    public void renderToBuffer(MatrixStack matrixStack, IVertexBuilder buffer, 
-            int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
+        
         applyXRotation();
-        super.renderToBuffer(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
     }
     
     protected void poseStand(T entity, float ticks, float yRotOffsetRad, float xRotRad, 
@@ -296,7 +298,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         secondXRotMap.forEach((modelPart, xRotMutable) -> xRotMutable.setValue(0));
     }
     
-    private void applyXRotation() {
+    public void applyXRotation() {
         secondXRotMap.forEach((modelPart, xRotMutable) -> {
             float xRot = xRotMutable.getValue();
             if (xRot != 0) {
@@ -319,6 +321,10 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
 //            currentActionAnim.renderAdditional(entity, matrixStack, buffer, 
 //                    packedLight, packedOverlay, red, green, blue, alpha);
 //        }
+    }
+    
+    public final void renderBarrageSwings(T entity, MatrixStack matrixStack, IVertexBuilder buffer, 
+            int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
         renderBarrageSwings(entity, this, matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
     }
     

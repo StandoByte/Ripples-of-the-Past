@@ -15,7 +15,7 @@ public class StandArmBarrageSwing<T extends StandEntity, M extends StandEntityMo
 
     @Override
     protected void setArmOnlyModelVisibility(T entity, M model, HandSide side) {
-        model.setVisibility(entity, side == HandSide.LEFT ? VisibilityMode.LEFT_ARM_ONLY : VisibilityMode.RIGHT_ARM_ONLY, false);
+        model.setVisibility(entity, side == HandSide.LEFT ? VisibilityMode.LEFT_ARM_ONLY : VisibilityMode.RIGHT_ARM_ONLY, false, false);
     }
 
 }

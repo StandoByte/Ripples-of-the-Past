@@ -202,36 +202,36 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
     private final Map<Supplier<ModelRenderer>, Consumer<ModelRenderer>> baseHumanoidBoxGenerators;
 
     @Override
-    public void updatePartsVisibility(VisibilityMode mode) {
+    public void updatePartsVisibility(VisibilityMode mode, boolean invert) {
         if (mode == VisibilityMode.ALL) {
-            head.visible = true;
-            torso.visible = true;
-            leftLeg.visible = true;
-            rightLeg.visible = true;
-            leftArm.visible = true;
-            rightArm.visible = true;
+            head.visible = !invert;
+            torso.visible = !invert;
+            leftLeg.visible = !invert;
+            rightLeg.visible = !invert;
+            leftArm.visible = !invert;
+            rightArm.visible = !invert;
         }
         else {
-            head.visible = false;
-            torso.visible = false;
-            leftLeg.visible = false;
-            rightLeg.visible = false;
+            head.visible = invert;
+            torso.visible = invert;
+            leftLeg.visible = invert;
+            rightLeg.visible = invert;
             switch (mode) {
             case ARMS_ONLY:
-                leftArm.visible = true;
-                rightArm.visible = true;
+                leftArm.visible = !invert;
+                rightArm.visible = !invert;
                 break;
             case LEFT_ARM_ONLY:
-                leftArm.visible = true;
-                rightArm.visible = false;
+                leftArm.visible = !invert;
+                rightArm.visible = invert;
                 break;
             case RIGHT_ARM_ONLY:
-                leftArm.visible = false;
-                rightArm.visible = true;
+                leftArm.visible = invert;
+                rightArm.visible = !invert;
                 break;
             case NONE:
-                leftArm.visible = false;
-                rightArm.visible = false;
+                leftArm.visible = invert;
+                rightArm.visible = invert;
                 
             case ALL:
                 break;

@@ -175,6 +175,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     private BarrageSwingsHolder<?, ?> barrageSwings;
     private final BarrageHitSoundHandler barrageSounds;
 
+    public float lastRenderTick = 0;
     public float lastMotionTiltTick = -1;
 //    public Vector3d motionVec = Vector3d.ZERO;
 //    public double motionDist = 0;
@@ -182,6 +183,8 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     
     public Vector3d prevTiltVec = Vector3d.ZERO;
     public Vector3d tiltVec = Vector3d.ZERO;
+    
+    public float outlineTicks = 0;
     
     public static final DataParameter<Optional<ResourceLocation>> DATA_PARAM_STAND_SKIN = EntityDataManager.defineId(StandEntity.class, 
             (IDataSerializer<Optional<ResourceLocation>>) ModDataSerializers.OPTIONAL_RES_LOC.get().getSerializer());
