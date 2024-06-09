@@ -62,6 +62,7 @@ public class HamonStatsTabGui extends HamonTabGui {
     private int exercises1Y;
     private int exercises2Y;
     private int exercisesAvgY;
+    private int exercises3Y;
 
     HamonStatsTabGui(Minecraft minecraft, HamonScreen screen, String title) {
         super(minecraft, screen, title, -1, 1);
@@ -290,6 +291,7 @@ public class HamonStatsTabGui extends HamonTabGui {
         }
         
         textY += 11;
+        exercises3Y = textY;
         for (int i = 0; i < exercisesDescLines.size(); i++) {
             textY += minecraft.font.lineHeight;
             minecraft.font.draw(matrixStack, exercisesDescLines.get(i), (float) textX, (float) textY, 0xFFFFFF);
@@ -456,7 +458,7 @@ public class HamonStatsTabGui extends HamonTabGui {
             }
         }
         
-        int exercisesDescLine = (mouseY - exercisesAvgY) / minecraft.font.lineHeight - 1;
+        int exercisesDescLine = (mouseY - exercises3Y) / minecraft.font.lineHeight - 1;
         boolean maskNameTooltip = false;
         if (exercisesDescLine >= 0 && exercisesDescLine < exercisesDescLines.size()) {
             Style style = minecraft.font.getSplitter().componentStyleAtWidth(exercisesDescLines.get(exercisesDescLine), mouseX - WINDOW_THIN_BORDER);

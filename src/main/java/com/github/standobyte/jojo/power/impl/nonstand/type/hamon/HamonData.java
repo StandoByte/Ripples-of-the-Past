@@ -593,7 +593,7 @@ public class HamonData extends TypeSpecificData {
                     break;
                 }
                 if (newLevel > oldLevel && notifyInUI && user.level.isClientSide() && user == ClientUtil.getClientPlayer()) {
-                    ActionsOverlayGui.getInstance().onHamonStatIncreased(stat == HamonStat.CONTROL ? HamonStatIncNotif.STRENGTH : HamonStatIncNotif.CONTROL);
+                    ActionsOverlayGui.getInstance().onHamonStatIncreased(stat == HamonStat.STRENGTH ? HamonStatIncNotif.STRENGTH : HamonStatIncNotif.CONTROL);
                 }
             }
         }
