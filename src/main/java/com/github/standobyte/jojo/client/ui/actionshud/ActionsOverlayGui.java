@@ -9,6 +9,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Function;
 import java.util.function.IntBinaryOperator;
 import java.util.function.IntUnaryOperator;
 import java.util.function.Predicate;
@@ -50,6 +51,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData.Exercise;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -77,10 +79,12 @@ import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3f;
+import net.minecraft.util.text.Color;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.GameType;
@@ -108,15 +112,23 @@ public class ActionsOverlayGui extends AbstractGui {
     private final ElementTransparency staminaBarTransparency = new ElementTransparency(40, 10);
     private final ElementTransparency resolveBarTransparency = new ElementTransparency(40, 10);
     private final ElementTransparency powerNameTransparency = new ElementTransparency(40, 10);
-    private final ImmutableMap<InputHandler.ActionKey, ElementTransparency> actionNameTransparency = Arrays.stream(InputHandler.ActionKey.values())
+    private final Map<InputHandler.ActionKey, ElementTransparency> actionNameTransparency = Arrays.stream(InputHandler.ActionKey.values())
             .collect(Maps.toImmutableEnumMap(hotbar -> hotbar, hotbar -> new ElementTransparency(40, 10)));
     private final Map<InputHandler.ActionKey, ITextComponent> lastActionName = new EnumMap<>(InputHandler.ActionKey.class);
-    private final ImmutableMap<ControlScheme.Hotbar, FadeOut> actionHotbarFold = Arrays.stream(ControlScheme.Hotbar.values())
+    private final Map<ControlScheme.Hotbar, FadeOut> actionHotbarFold = Arrays.stream(ControlScheme.Hotbar.values())
             .collect(Maps.toImmutableEnumMap(hotbar -> hotbar, hotbar -> new FadeOut(40, 10)));
-    private final ImmutableMap<PowerClassification, ElementTransparency> customKeybindActionTransparency = Arrays.stream(PowerClassification.values())
-            .collect(Maps.toImmutableEnumMap(ex -> ex, ex -> new ElementTransparency(40, 10)));
-    private final ImmutableMap<Exercise, ElementTransparency> exerciseBarsTransparency = Arrays.stream(Exercise.values())
-            .collect(Maps.toImmutableEnumMap(ex -> ex, ex -> new ElementTransparency(40, 10)));
+    private final Map<PowerClassification, ElementTransparency> customKeybindActionTransparency = Arrays.stream(PowerClassification.values())
+            .collect(Maps.toImmutableEnumMap(Function.identity(), __ -> new ElementTransparency(40, 10)));
+    private final Map<Exercise, ElementTransparency> exerciseBarsTransparency = Arrays.stream(Exercise.values())
+            .collect(Maps.toImmutableEnumMap(Function.identity(), __ -> new ElementTransparency(40, 10)));
+    private final Map<HamonStatIncNotif, ElementTransparency> hamonLvlIncreaseTransparency = Arrays.stream(HamonStatIncNotif.values())
+            .collect(Maps.toImmutableEnumMap(Function.identity(), __ -> new ElementTransparency(100, 20)));
+    
+    public static enum HamonStatIncNotif {
+        STRENGTH,
+        CONTROL,
+        BREATHING
+    }
     
     private final BarsRenderer verticalBars = new VerticalBarsRenderer(this, 
             energyBarTransparency, staminaBarTransparency, resolveBarTransparency);
@@ -132,7 +144,8 @@ public class ActionsOverlayGui extends AbstractGui {
             actionNameTransparency.values().stream(),
             actionHotbarFold.values().stream(),
             customKeybindActionTransparency.values().stream(),
-            exerciseBarsTransparency.values().stream())
+            exerciseBarsTransparency.values().stream(),
+            hamonLvlIncreaseTransparency.values().stream())
             .toArray(FadeOut[]::new);
     
     private boolean attackSelection;
@@ -208,6 +221,10 @@ public class ActionsOverlayGui extends AbstractGui {
     
     public void onHamonExerciseValueChanged(Exercise exercise) {
         exerciseBarsTransparency.get(exercise).reset();
+    }
+    
+    public void onHamonStatIncreased(HamonStatIncNotif hamonStat) {
+        hamonLvlIncreaseTransparency.get(hamonStat).reset();
     }
     
     public boolean isActive() {
@@ -664,6 +681,11 @@ public class ActionsOverlayGui extends AbstractGui {
         for (ElementTransparency bar : exerciseBarsTransparency.values()) {
             if (bar.shouldRender()) {
                 hamonExerciseBarsPosition.y -= 9;
+            }
+        }
+        for (ElementTransparency hamonStat : hamonLvlIncreaseTransparency.values()) {
+            if (hamonStat.shouldRender()) {
+                hamonExerciseBarsPosition.y -= 6;
             }
         }
         hamonExerciseBarsPosition.alignment = Alignment.LEFT;
@@ -1668,9 +1690,41 @@ public class ActionsOverlayGui extends AbstractGui {
     }
 
     private void renderHamonExerciseBars(MatrixStack matrixStack, ElementPosition position, HamonData hamon, float partialTick) {
-        mc.getTextureManager().bind(HamonScreen.WINDOW);
         int x = position.x;
         int y = position.y;
+        
+        for (HamonStatIncNotif hamonStat : HamonStatIncNotif.values()) {
+            ElementTransparency transparency = hamonLvlIncreaseTransparency.get(hamonStat);
+            if (transparency.shouldRender()) {
+                IFormattableTextComponent statName = new TranslationTextComponent("hamon.stat_lvl_increase." + hamonStat.name().toLowerCase());
+                int value = 0;
+                switch (hamonStat) {
+                case STRENGTH:
+                    statName.withStyle(Style.EMPTY.withColor(Color.fromRgb(0xE21100)));
+                    value = hamon.getStatLevel(HamonStat.STRENGTH);
+                    break;
+                case CONTROL:
+                    statName.withStyle(Style.EMPTY.withColor(Color.fromRgb(0x15AF00)));
+                    value = hamon.getStatLevel(HamonStat.CONTROL);
+                    break;
+                case BREATHING:
+                    statName.withStyle(Style.EMPTY.withColor(Color.fromRgb(0x0070D8)));
+                    value = (int) hamon.getBreathingLevel();
+                    break;
+                }
+                ITextComponent increaseMsg = new TranslationTextComponent("hamon.stat_lvl_increase", statName, value);
+                matrixStack.pushPose();
+                matrixStack.scale(0.5f, 0.5f, 1);
+                drawBackdrop(matrixStack, x * 2, y * 2, mc.font.width(increaseMsg), Alignment.LEFT, transparency, 0, partialTick);
+                mc.font.drawShadow(matrixStack, increaseMsg, x * 2, y * 2, transparency.makeTextColorTranclucent(0xFFFFFF, partialTick));
+                matrixStack.popPose();
+                y += 6;
+            }
+        }
+        
+        mc.getTextureManager().bind(HamonScreen.WINDOW);
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
         for (Exercise exercise : Exercise.values()) {
             ElementTransparency transparency = exerciseBarsTransparency.get(exercise);
             if (transparency.shouldRender()) {
