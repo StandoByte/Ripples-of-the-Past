@@ -767,7 +767,7 @@ public class ActionsOverlayGui extends AbstractGui {
             break;
         }
         
-        boolean foldHotbar = ClientModSettings.getSettingsReadOnly().hudHotbarsFold;
+        boolean foldHotbar = ClientModSettings.getSettingsReadOnly().hudHotbarFold;
         float foldProgress = foldHotbar && actionHotbar != null ? (1 - actionHotbarFold.get(actionHotbar).getValue(partialTick)) : 0;
         HotbarFold hotbarFold = HotbarFold.makeHotbarFold(actions.size(), selected, foldProgress, position.alignment);
         
@@ -1235,15 +1235,15 @@ public class ActionsOverlayGui extends AbstractGui {
         Action<P> selectedAction = mode.getSelectedAction(actionKey.getHotbar(), shift, getMouseTarget());
         if (selectedAction != null) {
             // action name
-            String translationKey = selectedAction.getTranslationKey(power, target);
-            ITextComponent actionName = selectedAction.getTranslatedName(power, translationKey);
-            if (selectedAction.getHoldDurationMax(power) > 0) {
-                actionName = new TranslationTextComponent("jojo.overlay.hold", actionName);
-            }
+            ITextComponent actionName = actionName(selectedAction, power, target);
             ElementTransparency transparency = actionNameTransparency.get(actionKey);
-            if (!actionName.equals(lastActionName.put(actionKey, actionName))) {
+
+            Action<P> baseAction = selectedAction.getBaseVariation();
+            ITextComponent baseActionName = baseAction != null ? actionName(baseAction, power, target) : actionName;
+            if (!baseActionName.equals(lastActionName.put(actionKey, baseActionName))) {
                 transparency.reset();
             }
+            
             if (selectedAction.hasShiftVariation()) {
                 Action<P> shiftVar = selectedAction.getShiftVariationIfPresent().getVisibleAction(power, getMouseTarget());
                 if (shiftVar != null) {
@@ -1272,6 +1272,15 @@ public class ActionsOverlayGui extends AbstractGui {
         else {
             lastActionName.remove(actionKey);
         }
+    }
+    
+    private static <P extends IPower<P, ?>> ITextComponent actionName(Action<P> action, P power, ActionTarget target) {
+        String translationKey = action.getTranslationKey(power, target);
+        ITextComponent actionName = action.getTranslatedName(power, translationKey);
+        if (action.getHoldDurationMax(power) > 0) {
+            actionName = new TranslationTextComponent("jojo.overlay.hold", actionName);
+        }
+        return actionName;
     }
     
     private <P extends IPower<P, ?>> void drawCustomKeybindActionText(MatrixStack matrixStack, ElementPosition position, 
@@ -1325,11 +1334,11 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     private float getNameAlpha(ElementTransparency transparency, float partialTick) {
-        HudNamesRender renderMode = ClientModSettings.getSettingsReadOnly().hudNamesRender;
+        HudTextRender renderMode = ClientModSettings.getSettingsReadOnly().hudTextRender;
         switch (renderMode) {
         case NEVER:
             return 0;
-        case FADE_AWAY:
+        case FADE_OUT:
             float alpha = transparency.getAlpha(partialTick);
             return alpha;
         default:
@@ -2154,9 +2163,9 @@ public class ActionsOverlayGui extends AbstractGui {
         HORIZONTAL
     }
     
-    public enum HudNamesRender {
+    public enum HudTextRender {
         ALWAYS,
-        FADE_AWAY,
+        FADE_OUT,
         NEVER
     }
 }
