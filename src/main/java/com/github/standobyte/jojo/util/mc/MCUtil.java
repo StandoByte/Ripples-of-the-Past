@@ -13,6 +13,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.network.NetworkUtil;
@@ -38,8 +39,11 @@ import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.crash.ReportedException;
 import net.minecraft.dispenser.IBlockSource;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntitySpawnPlacementRegistry;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.item.ItemEntity;
@@ -96,9 +100,12 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.GameRules;
+import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ChunkManager;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.spawner.WorldEntitySpawner;
+import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -430,6 +437,49 @@ public class MCUtil {
     
     public static Vector3d getEntityPosition(Entity entity, float partialTick) {
         return partialTick == 1.0F ? entity.position() : entity.getPosition(partialTick);
+    }
+    
+    
+    public static void trySpawnMob(IServerWorld world, EntityType<?> type, SpawnReason spawnReason, Random random) {
+//        boolean spawned = false;
+//
+//        for (int tryNum = 0; !spawned && tryNum < 4; ++tryNum) {
+//            BlockPos blockPos = WorldEntitySpawner.getTopNonCollidingPos(world, type, l, i1);
+//            if (type.canSummon() && WorldEntitySpawner.isSpawnPositionOk(EntitySpawnPlacementRegistry.getPlacementType(type), world, blockPos, type)) {
+//                float width = type.getWidth();
+//                double x = MathHelper.clamp((double)l, (double)i + (double)width, (double)i + 16.0D - (double)width);
+//                double z = MathHelper.clamp((double)i1, (double)j + (double)width, (double)j + 16.0D - (double)width);
+//                if (!world.noCollision(type.getAABB(x, (double)blockPos.getY(), z)) || !EntitySpawnPlacementRegistry.checkSpawnRules(
+//                        type, world, spawnReason, new BlockPos(x, (double)blockPos.getY(), z), world.getRandom())) {
+//                    continue;
+//                }
+//
+//                Entity entity;
+//                try {
+//                    entity = type.create(world.getLevel());
+//                } catch (Exception exception) {
+//                    JojoMod.getLogger().warn("Failed to create mob", (Throwable)exception);
+//                    continue;
+//                }
+//
+//                entity.moveTo(x, (double)blockPos.getY(), z, random.nextFloat() * 360.0F, 0.0F);
+//                if (entity instanceof MobEntity) {
+//                    MobEntity mobentity = (MobEntity)entity;
+//                    if (ForgeHooks.canEntitySpawn(mobentity, world, x, blockPos.getY(), z, null, spawnReason) == -1) continue;
+//                    if (mobentity.checkSpawnRules(world, spawnReason) && mobentity.checkSpawnObstruction(world)) {
+//                        entityData = mobentity.finalizeSpawn(world, world.getCurrentDifficultyAt(mobentity.blockPosition()), spawnReason, entityData, (CompoundNBT)null);
+//                        world.addFreshEntityWithPassengers(mobentity);
+//                        spawned = true;
+//                    }
+//                }
+//            }
+//
+//            l += random.nextInt(5) - random.nextInt(5);
+//
+//            for(i1 += random.nextInt(5) - random.nextInt(5); l < i || l >= i + 16 || i1 < j || i1 >= j + 16; i1 = k1 + random.nextInt(5) - random.nextInt(5)) {
+//                l = j1 + random.nextInt(5) - random.nextInt(5);
+//            }
+//        }
     }
     
     

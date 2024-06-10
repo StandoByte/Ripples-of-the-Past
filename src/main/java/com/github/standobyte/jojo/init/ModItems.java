@@ -20,6 +20,7 @@ import com.github.standobyte.jojo.item.CustomModelArmorItem;
 import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.item.KnifeItem;
 import com.github.standobyte.jojo.item.ModArmorMaterials;
+import com.github.standobyte.jojo.item.MrPresidentKeyItem;
 import com.github.standobyte.jojo.item.MolotovItem;
 import com.github.standobyte.jojo.item.OilItem;
 import com.github.standobyte.jojo.item.PhotoItem;
@@ -249,6 +250,15 @@ public class ModItems {
 //
 //    public static final RegistryObject<MistaRevolverItem> MISTA_REVOLVER = ITEMS.register("mista_revolver",
 //            () -> new MistaRevolverItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
+    
+    public static final RegistryObject<Item> MR_PRESIDENT_KEY = ITEMS.register("mr_president_key", 
+            () -> new MrPresidentKeyItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
+
+    public static final RegistryObject<BlockItem> COCO_JUMBO_SHELL = ITEMS.register("coco_jumbo_shell", 
+            () -> new BlockItem(ModBlocks.COCO_JUMBO_SHELL.get(), new Item.Properties()));
+
+    public static final RegistryObject<BlockItem> MR_PRESIDENT_GEM = ITEMS.register("mr_president_gem", 
+            () -> new BlockItem(ModBlocks.MR_PRESIDENT_GEM.get(), new Item.Properties()));
 //
 //    public static final RegistryObject<StonePendantItem> STONE_PENDANT = ITEMS.register("stone_pendant", 
 //            () -> new StonePendantItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));

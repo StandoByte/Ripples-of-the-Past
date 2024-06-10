@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " ng",
+    " nn",
+    "n  "
+  ],
+  "key": {
+    "n": {
+      "tag": "forge:nuggets/gold"
+    },
+    "g": {
+      "tag": "forge:glass/red"
+    }
+  },
+  "result": {
+    "item": "jojo:mr_president_key"
+  }
+}

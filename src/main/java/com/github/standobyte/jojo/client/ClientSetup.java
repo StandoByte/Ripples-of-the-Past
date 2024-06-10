@@ -37,6 +37,7 @@ import com.github.standobyte.jojo.client.render.entity.layerrenderer.LadybugBroo
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.TornadoOverdriveEffectLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.barrage.BarrageFistAfterimagesLayer;
 import com.github.standobyte.jojo.client.render.entity.renderer.AfterimageRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.CocoJumboTurtleRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.CrimsonBubbleRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.HamonBlockChargeRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.HamonProjectileShieldRenderer;
@@ -210,6 +211,7 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.FIREWORK_INSIDE.get(), manager -> new FireworkRocketRenderer(manager, Minecraft.getInstance().getItemRenderer()));
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HUNGRY_ZOMBIE.get(), HungryZombieRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HAMON_MASTER.get(), HamonMasterRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.COCO_JUMBO_TURTLE.get(), CocoJumboTurtleRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.ROCK_PAPER_SCISSORS_KID.get(), RockPaperScissorsKidRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.STAND_USER_DUMMY.get(), StandUserDummyRenderer::new);
         

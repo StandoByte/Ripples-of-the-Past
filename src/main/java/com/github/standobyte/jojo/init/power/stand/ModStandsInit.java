@@ -74,6 +74,7 @@ import com.github.standobyte.jojo.power.impl.stand.stats.ArmoredStandStats;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.power.impl.stand.type.EntityStandType;
+import com.github.standobyte.jojo.power.impl.stand.type.MrPresidentStandType;
 import com.github.standobyte.jojo.power.impl.stand.type.NoManifestationStandType;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType.StandSurvivalGameplayPool;
@@ -746,10 +747,6 @@ public class ModStandsInit {
     
     public static final RegistryObject<StandType<StandStats>> BOY_II_MAN = STAND_TYPES.register("boy_ii_man", 
             () -> 
-//                StandArrowEntity.EntityPierce.addBehavior(
-//                        () -> RockPaperScissorsKidEntity::canTurnFromArrow, 
-//                        () -> RockPaperScissorsKidEntity::turnFromArrow);
-                
                 new NoManifestationStandType.Builder<>()
                 .color(0x749FA5)
                 .storyPartName(StoryPart.DIAMOND_IS_UNBREAKABLE.getName())
@@ -762,6 +759,23 @@ public class ModStandsInit {
                         )
                 .setSurvivalGameplayPool(StandSurvivalGameplayPool.NPC_ENCOUNTER)
                 .build()
+            );
+    
+    
+    
+    public static final RegistryObject<StandType<StandStats>> MR_PRESIDENT = STAND_TYPES.register("mr_president", 
+            () -> 
+                new MrPresidentStandType<>(new NoManifestationStandType.Builder<>()
+                .color(0x00AFAF)
+                .storyPartName(StoryPart.GOLDEN_WIND.getName())
+                .defaultStats(StandStats.class, new StandStats.Builder()
+                        .power(0)
+                        .speed(0)
+                        .range(0)
+                        .durability(14)
+                        .precision(0)
+                        )
+                .setSurvivalGameplayPool(StandSurvivalGameplayPool.ANIMAL))
             );
     
     

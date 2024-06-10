@@ -6,6 +6,8 @@ import java.util.Optional;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.item.StandArrowItem;
+import com.github.standobyte.jojo.potion.StandVirusEffect;
+import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -94,6 +96,13 @@ public class StandArrowEntity extends AbstractArrowEntity {
             }
         }
         dealtDamage = true;
+        
+        if (target instanceof LivingEntity) {
+            LivingEntity targetLiving = (LivingEntity) target;
+            if (StandUtil.isEntityStandUser(targetLiving) || StandVirusEffect.mobMayGetStand(targetLiving)) {
+                damage /= 4;
+            }
+        }
         
         boolean dodge = target.getType() == EntityType.ENDERMAN;
         int prevTargetFireTimer = target.getRemainingFireTicks();

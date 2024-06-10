@@ -32,6 +32,7 @@ import com.github.standobyte.jojo.capability.entity.power.NonStandCapProvider;
 import com.github.standobyte.jojo.capability.entity.power.NonStandCapStorage;
 import com.github.standobyte.jojo.capability.entity.power.StandCapProvider;
 import com.github.standobyte.jojo.capability.entity.power.StandCapStorage;
+import com.github.standobyte.jojo.capability.world.MrPresidentWorldDataProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCap;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapStorage;
@@ -58,6 +59,8 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandPower;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
+import com.github.standobyte.jojo.world.dimension.ModDimensions;
+import com.github.standobyte.jojo.world.dimension.mr_president.MrPresidentWorldData;
 import com.mojang.brigadier.CommandDispatcher;
 
 import net.minecraft.command.CommandSource;
@@ -109,6 +112,7 @@ public class ForgeBusEventSubscriber {
     private static final ResourceLocation PROJECTILE_HAMON_CAP = new ResourceLocation(JojoMod.MOD_ID, "projectile_hamon");
     private static final ResourceLocation WORLD_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "world_util");
     private static final ResourceLocation SAVE_FILE_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "save_file_util");
+    private static final ResourceLocation MR_PRESIDENT_CAP = new ResourceLocation(JojoMod.MOD_ID, "mr_president");
     private static final ResourceLocation CHUNK_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "chunk_util");
     
     @SubscribeEvent
@@ -132,8 +136,13 @@ public class ForgeBusEventSubscriber {
     public static void onAttachCapabilitiesWorld(AttachCapabilitiesEvent<World> event) {
         World world = event.getObject();
         event.addCapability(WORLD_UTIL_CAP, new WorldUtilCapProvider(world));
-        if (!world.isClientSide() && world.dimension() == World.OVERWORLD) {
-            event.addCapability(SAVE_FILE_UTIL_CAP, new SaveFileUtilCapProvider((ServerWorld) world));
+        if (!world.isClientSide()) {
+            if (world.dimension() == World.OVERWORLD) {
+                event.addCapability(SAVE_FILE_UTIL_CAP, new SaveFileUtilCapProvider((ServerWorld) world));
+            }
+            else if (ModDimensions.MR_PRESIDENT != null && world.dimension() == ModDimensions.MR_PRESIDENT) {
+                event.addCapability(MR_PRESIDENT_CAP, new MrPresidentWorldDataProvider((ServerWorld) world));
+            }
         }
     }
     
@@ -182,6 +191,10 @@ public class ForgeBusEventSubscriber {
         
         CapabilityManager.INSTANCE.register(WorldUtilCap.class, new WorldUtilCapStorage(), () -> new WorldUtilCap(null));
         CapabilityManager.INSTANCE.register(SaveFileUtilCap.class, new SaveFileUtilCapStorage(), () -> new SaveFileUtilCap(null));
+        CapabilityManager.INSTANCE.register(MrPresidentWorldData.class, new IStorage<MrPresidentWorldData>() {
+            @Override public INBT writeNBT(Capability<MrPresidentWorldData> capability, MrPresidentWorldData instance, Direction side) { return instance.toNBT(); }
+            @Override public void readNBT(Capability<MrPresidentWorldData> capability, MrPresidentWorldData instance, Direction side, INBT nbt) { instance.fromNBT(nbt); }
+        }, () -> new MrPresidentWorldData(null));
 
         CapabilityManager.INSTANCE.register(ChunkCap.class, new ChunkCapStorage(), () -> new ChunkCap(null));
     }

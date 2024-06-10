@@ -10,11 +10,13 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.util.ForgeBusEventSubscriber;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
+import com.github.standobyte.jojo.world.gen.ConfiguredFeatureSupplier;
 import com.github.standobyte.jojo.world.gen.ConfiguredStructureSupplier;
 import com.github.standobyte.jojo.world.gen.structures.HamonTemplePieces;
 import com.github.standobyte.jojo.world.gen.structures.HamonTempleStructure;
 import com.github.standobyte.jojo.world.gen.structures.MeteoritePieces;
 import com.github.standobyte.jojo.world.gen.structures.MeteoriteStructure;
+import com.github.standobyte.jojo.world.gen.structures.MrPresidentRoomFeature;
 import com.github.standobyte.jojo.world.gen.structures.PillarmanTemplePieces;
 import com.github.standobyte.jojo.world.gen.structures.PillarmanTempleStructure;
 import com.google.common.collect.ImmutableList;
@@ -24,6 +26,8 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.util.registry.WorldGenRegistries;
 import net.minecraft.world.biome.Biome;
+import net.minecraft.world.gen.feature.ConfiguredFeature;
+import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.gen.feature.IFeatureConfig;
 import net.minecraft.world.gen.feature.NoFeatureConfig;
 import net.minecraft.world.gen.feature.StructureFeature;
@@ -41,6 +45,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 @EventBusSubscriber(modid = JojoMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public class ModStructures {
+    public static final DeferredRegister<Feature<?>> FEATURES = DeferredRegister.create(ForgeRegistries.FEATURES, JojoMod.MOD_ID);
     public static final DeferredRegister<Structure<?>> STRUCTURES = DeferredRegister.create(ForgeRegistries.STRUCTURE_FEATURES, JojoMod.MOD_ID);
     
 
@@ -59,6 +64,11 @@ public class ModStructures {
     public static final Predicate<BiomeLoadingEvent> HAMON_TEMPLE_BIOMES = biome -> biome.getCategory() == Biome.Category.EXTREME_HILLS;
     public static final Predicate<BiomeLoadingEvent> METEORITE_BIOMES = biome -> biome.getClimate().precipitation == Biome.RainType.SNOW && biome.getCategory() != Biome.Category.OCEAN;
     public static final Predicate<BiomeLoadingEvent> PILLARMAN_TEMPLE_BIOMES = biome -> biome.getCategory() == Biome.Category.JUNGLE;
+    
+
+    public static final RegistryObject<MrPresidentRoomFeature> MR_PRESIDENT_ROOM = FEATURES.register("mr_president_room", 
+            () -> (new MrPresidentRoomFeature(NoFeatureConfig.CODEC)));
+    public static final ConfiguredFeatureSupplier<?, ?> CONFIGURED_MR_PRESIDENT_ROOM = new ConfiguredFeatureSupplier<>(MR_PRESIDENT_ROOM, IFeatureConfig.NONE);
     
     
     @SubscribeEvent(priority = EventPriority.LOW)
@@ -82,6 +92,13 @@ public class ModStructures {
         registerConfiguredStructure(registry, CONFIGURED_PILLARMAN_TEMPLE.get(), 
                 new ResourceLocation(JojoMod.MOD_ID, "configured_pillarman_temple"), PILLARMAN_TEMPLE.get(), 
                 PILLARMAN_TEMPLE_BIOMES.and(b -> JojoModConfig.getCommonConfigInstance(false).pillarManTempleSpawn.get()));
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public static final void afterFeaturesRegister(RegistryEvent.Register<Structure<?>> event) {
+        Registry<ConfiguredFeature<?, ?>> registry = WorldGenRegistries.CONFIGURED_FEATURE;
+        
+        Registry.register(registry, new ResourceLocation(JojoMod.MOD_ID, "configured_mr_president_room"), CONFIGURED_MR_PRESIDENT_ROOM.get());
     }
     
     private static <F extends Structure<?>> void setupMapSpacingAndLand(

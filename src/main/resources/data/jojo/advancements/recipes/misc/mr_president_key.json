@@ -1,0 +1,36 @@
+{
+  "parent": "minecraft:recipes/root",
+  "rewards": {
+    "recipes": [
+      "jojo:mr_president_key"
+    ]
+  },
+  "criteria": {
+    "met_coco_jumbo": {
+      "trigger": "jojo:met_modded_mob",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "predicate": {
+              "type": "jojo:coco_jumbo_turtle"
+            },
+            "entity": "this"
+          }
+        ]
+      }
+    },
+    "has_the_recipe": {
+      "trigger": "minecraft:recipe_unlocked",
+      "conditions": {
+        "recipe": "jojo:mr_president_key"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "met_coco_jumbo",
+      "has_the_recipe"
+    ]
+  ]
+}
