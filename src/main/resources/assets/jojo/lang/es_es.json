@@ -578,7 +578,7 @@
   "hamon.exercise.mining.completion_buff": "+%s%% velocidad de ataque %s",
   "hamon.exercise.running.completion_buff": "+%s%% velocidad de movimiento %s",
   "hamon.exercise.swimming.completion_buff": "+%s%% recuperación de la estabilidad respiratoria %s",
-  "hamon.exercise.meditation.completion_buff": "-%s segundos para cargar por completo el Hamon %s",
+  "hamon.exercise.meditation.completion_buff": "-%s segundo para cargar por completo el Hamon %s",
   "hamon.exercise.full_completion_buff": "+%s%% eficiencia de todas las habilidades Hamon %s",
   "hamon.next_point.strength": "Siguiente punto de habilidad en el nivel %s Fuerza de Hamon",
   "hamon.next_point.control": "Siguiente punto de habilidad en el nivel %s Hamon control",

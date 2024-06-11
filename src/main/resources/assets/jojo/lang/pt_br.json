@@ -682,7 +682,7 @@
   "hamon.exercise.mining.completion_buff": "+%s%% velocidade de ataque %s",
   "hamon.exercise.running.completion_buff": "+%s%% velocidade de movimento %s",
   "hamon.exercise.swimming.completion_buff": "+%s%% energia máxima de Hamon %s",
-  "hamon.exercise.meditation.completion_buff": "-%s segundos para carga completa de Hamon %s",
+  "hamon.exercise.meditation.completion_buff": "-%s segundo para carga completa de Hamon %s",
   "hamon.exercise.full_completion_buff": "+%s%% eficiência de todas as habilidades Hamon %s",
   "hamon.exercise.completion_buff_hint2": "até o final do dia",
   "hamon.exercise.full_completion_hint3": "Se você não treinar no dia seguinte, seu nível de treinamento não diminuirá",

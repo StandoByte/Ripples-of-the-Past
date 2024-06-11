@@ -801,7 +801,7 @@
   "hamon.exercise.mining.completion_buff": "+%s%% attack speed %s",
   "hamon.exercise.running.completion_buff": "+%s%% moving speed %s",
   "hamon.exercise.swimming.completion_buff": "+%s%% maximum Hamon energy %s",
-  "hamon.exercise.meditation.completion_buff": "-%s seconds for full Hamon charge %s",
+  "hamon.exercise.meditation.completion_buff": "-%s second for full Hamon charge %s",
   "hamon.exercise.full_completion_buff": "+%s%% efficiency of all Hamon skills %s",
   "hamon.exercise.completion_buff_hint2": "until the end of the day",
   "hamon.exercise.full_completion_hint3": "If you don't train for up to 2 next days, your training level will not go down",

@@ -11,10 +11,13 @@ import com.github.standobyte.jojo.client.render.entity.pose.RotationAngle;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.PosedActionAnimation;
 import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
+import com.github.standobyte.jojo.util.general.MathUtil;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.vector.Vector3f;
 
 // Made with Blockbench 3.9.2
 
@@ -274,5 +277,23 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
                 new RotationAngle(rightArm, 0.1309F, 0.0F, 0.3054F),
                 new RotationAngle(rightForeArm, -2.3562F, 0.2618F, -1.7017F)
         });
+    }
+    
+    @Override
+    public void setupFirstPersonRotations(MatrixStack matrixStack, MagiciansRedEntity entity, float xRot, float yRot, float yBodyRot) {
+        if (standPose == MagiciansRedFlameBurst.FLAME_BURST_POSE) {
+            float xRotRad = xRot * MathUtil.DEG_TO_RAD;
+            matrixStack.mulPose(Vector3f.XP.rotation(xRotRad));
+            
+            matrixStack.translate(0, -entity.getBbHeight() * 0.25, 0.25);
+            matrixStack.mulPose(Vector3f.XP.rotation(head.xRot - xRotRad));
+            matrixStack.translate(0, entity.getBbHeight() * 0.25, -0.25);
+            
+            matrixStack.mulPose(Vector3f.YP.rotationDegrees(180 + yBodyRot));
+            matrixStack.translate(0, -entity.getEyeHeight(), 0);
+        }
+        else {
+            super.setupFirstPersonRotations(matrixStack, entity, xRot, yRot, yBodyRot);
+        }
     }
 }

@@ -780,7 +780,7 @@
   "hamon.exercise.mining.completion_buff": "+%s%% к скорости атаки %s",
   "hamon.exercise.running.completion_buff": "+%s%% к скорости %s",
   "hamon.exercise.swimming.completion_buff": "+%s%% к максимуму энергии Хамона %s",
-  "hamon.exercise.meditation.completion_buff": "-%s секунд для заполнения энергии Хамона %s",
+  "hamon.exercise.meditation.completion_buff": "-%s секунда для заполнения энергии Хамона %s",
   "hamon.exercise.full_completion_buff": "+%s%% к эффективности всех навыков Хамона %s",
   "hamon.exercise.completion_buff_hint2": "до конца дня",
   "hamon.exercise.full_completion_hint3": "Если вы пропустите упражнения в течение следующих 2 дней, уровень тренировки не снизится",

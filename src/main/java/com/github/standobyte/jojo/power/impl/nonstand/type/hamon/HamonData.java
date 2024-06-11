@@ -338,7 +338,7 @@ public class HamonData extends TypeSpecificData {
     }
     
     private float fullEnergyTicks() {
-        float ticks = 80F - (50F * breathingTrainingLevel / MAX_BREATHING_LEVEL);
+        float ticks = 80F - (40F * breathingTrainingLevel / MAX_BREATHING_LEVEL);
         if (meditationCompleted) {
             ticks -= MEDITATION_COMPLETED_ENERGY_REGEN_TIME_REDUCTION;
         }
@@ -758,7 +758,7 @@ public class HamonData extends TypeSpecificData {
     public static final AttributeModifier MINING_COMPLETED = new AttributeModifier(
             UUID.fromString("8674ea35-6eaf-4e22-98da-4ec0c5a4d20d"), "Attack speed from running exercise", 0.05D, AttributeModifier.Operation.MULTIPLY_BASE);
     public static final float SWIMMING_COMPLETED_MAX_ENERGY_MULTIPLIER = 1.1F;
-    public static final float MEDITATION_COMPLETED_ENERGY_REGEN_TIME_REDUCTION = 10;
+    public static final float MEDITATION_COMPLETED_ENERGY_REGEN_TIME_REDUCTION = 20;
     private boolean swimmingCompleted = false;
     private boolean meditationCompleted = false;
     private boolean allExercisesCompleted = false;
