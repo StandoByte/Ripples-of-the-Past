@@ -413,6 +413,8 @@ public class HamonData extends TypeSpecificData {
     
     
     
+    private static final float NO_ENERGY_EFFICIENCY = 0.5f;
+    private static final float ENERGY_STABILITY_USAGE_RATIO = 2.5F;
     float getHamonEnergyUsageEfficiency(float energyNeeded, boolean doConsume) {
         LivingEntity user = power.getUser();
         doConsume &= !user.level.isClientSide() && !power.isUserCreative();
@@ -430,7 +432,7 @@ public class HamonData extends TypeSpecificData {
             if (doConsume) {
                 power.setEnergy(0);
             }
-            return 0.25F + 0.75F * energyRatio;
+            return NO_ENERGY_EFFICIENCY + (1 - NO_ENERGY_EFFICIENCY) * energyRatio;
         }
         
         else {
@@ -455,10 +457,9 @@ public class HamonData extends TypeSpecificData {
                     reduceBreathStability((energyFromStability - energyNeeded) / ENERGY_STABILITY_USAGE_RATIO);
                 }
             }
-            return 0.25F * energyRatio;
+            return NO_ENERGY_EFFICIENCY * energyRatio;
         }
     }
-    private static final float ENERGY_STABILITY_USAGE_RATIO = 2.5F;
     
     private boolean isUserWearingBreathMask() {
         ItemStack headItem = power.getUser().getItemBySlot(EquipmentSlotType.HEAD);
