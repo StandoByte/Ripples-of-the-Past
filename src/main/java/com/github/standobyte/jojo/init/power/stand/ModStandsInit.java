@@ -26,8 +26,9 @@ import com.github.standobyte.jojo.action.stand.GoldExperienceHeal;
 import com.github.standobyte.jojo.action.stand.GoldExperienceHealOther;
 import com.github.standobyte.jojo.action.stand.GoldExperienceHealingItem;
 import com.github.standobyte.jojo.action.stand.GoldExperienceHeavyPunch;
-import com.github.standobyte.jojo.action.stand.GoldExperienceLifeshotPunch;
 import com.github.standobyte.jojo.action.stand.GoldExperienceLifeDetector;
+import com.github.standobyte.jojo.action.stand.GoldExperienceLifeshotPunch;
+import com.github.standobyte.jojo.action.stand.GoldExperienceMarkItem;
 import com.github.standobyte.jojo.action.stand.GoldExperienceRevertLifeform;
 import com.github.standobyte.jojo.action.stand.GoldExperienceToothLifeform;
 import com.github.standobyte.jojo.action.stand.HierophantGreenBarrier;
@@ -815,6 +816,10 @@ public class ModStandsInit {
             () -> new GoldExperienceRevertLifeform(new StandAction.Builder()
                     .shiftVariationOf(GOLD_EXPERIENCE_CREATE_LIFEFORM)));
     
+    public static final RegistryObject<GoldExperienceMarkItem> GOLD_EXPERIENCE_MARK_ITEM = ACTIONS.register("gold_experience_mark_item", 
+            () -> new GoldExperienceMarkItem(new StandAction.Builder()
+                    .partsRequired(StandPart.ARMS)));
+    
     public static final RegistryObject<GoldExperienceBoneMeal> GOLD_EXPERIENCE_BONE_MEAL = ACTIONS.register("gold_experience_bone_meal", 
             () -> new GoldExperienceBoneMeal(new StandEntityAction.Builder()
                     .staminaCost(2)
@@ -866,6 +871,7 @@ public class ModStandsInit {
                             GOLD_EXPERIENCE_BLOCK.get(),
                             GOLD_EXPERIENCE_CHOOSE_LIFEFORM.get(),
                             GOLD_EXPERIENCE_CREATE_LIFEFORM.get(),
+                            GOLD_EXPERIENCE_MARK_ITEM.get(),
                             GOLD_EXPERIENCE_BONE_MEAL.get(),
                             GOLD_EXPERIENCE_LIFE_DETECTOR.get(),
                             GOLD_EXPERIENCE_HEAL.get()

@@ -12,7 +12,16 @@
     "InventoryHelperMixin",
     "AbstractFurnaceTEMixin",
     "ForgeSimpleChannelMixin",
-    "TheMostUnnecessaryMixin"
+    "TheMostUnnecessaryMixin",
+    "itemtracking.equip.MobEntityMixin",
+    "itemtracking.equip.ArmorStandEntityMixin",
+    "itemtracking.inventory.PlayerInventoryMixin",
+    "itemtracking.inventory.LockableLootTileEntityMixin",
+    "itemtracking.inventory.HopperTileEntityMixin",
+    "itemtracking.inventory.InventoryMixin",
+    "itemtracking.ContainerSlotMixin",
+    "itemtracking.projectile.BowItemMixin",
+    "itemtracking.projectile.ArrowEntityMixin"
   ],
   "client": [
     "client.ParticleManagerMixin",

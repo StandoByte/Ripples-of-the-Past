@@ -17,7 +17,6 @@ import com.github.standobyte.jojo.item.CassetteBlankItem;
 import com.github.standobyte.jojo.item.CassetteRecordedItem;
 import com.github.standobyte.jojo.item.ClackersItem;
 import com.github.standobyte.jojo.item.CustomModelArmorItem;
-import com.github.standobyte.jojo.item.LadybugBroochItem;
 import com.github.standobyte.jojo.item.GEBodyTissueItem;
 import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.item.KnifeItem;

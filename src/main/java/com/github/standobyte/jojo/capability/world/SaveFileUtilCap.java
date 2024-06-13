@@ -14,6 +14,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.entity.mob.rps.RPSPvpGamesMap;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.item.polaroid.PhotosHandler;
+import com.github.standobyte.jojo.itemtracking.SidedItemTrackerMap;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.ServerIdPacket;
 import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
@@ -44,6 +45,8 @@ public class SaveFileUtilCap {
     private int cassetteId;
     
     private final PhotosHandler polaroidPhotos;
+    
+    private SidedItemTrackerMap itemsTracker = new SidedItemTrackerMap();
     
     public SaveFileUtilCap(ServerWorld overworld) {
         this.overworld = overworld;
@@ -181,6 +184,12 @@ public class SaveFileUtilCap {
     
     public PhotosHandler getPolaroidPhotos() {
         return polaroidPhotos;
+    }
+    
+    
+    
+    public SidedItemTrackerMap getItemsTracker() {
+        return itemsTracker;
     }
     
     

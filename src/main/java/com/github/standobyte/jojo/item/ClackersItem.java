@@ -4,8 +4,9 @@ import com.github.standobyte.jojo.entity.itemprojectile.ClackersEntity;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack.KnownItemState;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -119,6 +120,15 @@ public class ClackersItem extends Item {
                 clackers.setHamonDamage(hamonDmg);
                 clackers.setHamonEnergySpent(Math.min(ticksUsed, TICKS_MAX_POWER) * CHARGE_TICK_COST + Math.max(ticksUsed - TICKS_MAX_POWER, 0) * UPKEEP_TICK_COST);
                 clackers.shootFromRotation(entity, projectileSpeed, 0.5F);
+                
+                TrackerItemStack.getItemTracker(itemStack).ifPresent(tracker -> {
+                    if (tracker.isTracked()) {
+                        tracker.setAtEntity(clackers.getId(), world, KnownItemState.ENTITY_IS_ITEM);
+                        tracker.setItemStillThereCheck(null);
+                        clackers.saveItemTrackerNBT(tracker.toNBT());
+                    }
+                });
+                
                 world.addFreshEntity(clackers);
             }
         }

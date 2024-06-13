@@ -5,6 +5,7 @@ import com.github.standobyte.jojo.action.stand.effect.BoyIIManStandPartTakenEffe
 import com.github.standobyte.jojo.action.stand.effect.DriedBloodDrops;
 import com.github.standobyte.jojo.action.stand.effect.GECreatedLifeformEffect;
 import com.github.standobyte.jojo.action.stand.effect.GEHealingEffect;
+import com.github.standobyte.jojo.action.stand.effect.GEItemMarkEffect;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectType;
 
 import net.minecraftforge.fml.RegistryObject;
@@ -24,6 +25,9 @@ public class ModStandEffects {
     
     public static final RegistryObject<StandEffectType<GEHealingEffect>> GE_HEALING = STAND_EFFECTS.register("ge_healing", 
             () -> new StandEffectType<>(GEHealingEffect::new));
+    
+    public static final RegistryObject<StandEffectType<GEItemMarkEffect>> GE_ITEM_MARK = STAND_EFFECTS.register("ge_item_mark", 
+            () -> new StandEffectType<>(GEItemMarkEffect::new));
     
     public static final RegistryObject<StandEffectType<BoyIIManStandPartTakenEffect>> BOY_II_MAN_PART_TAKE = STAND_EFFECTS.register("boy_ii_man_part_take", 
             () -> new StandEffectType<>(BoyIIManStandPartTakenEffect::new));

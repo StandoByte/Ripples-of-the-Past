@@ -55,6 +55,7 @@ import com.github.standobyte.jojo.item.InkPastaItem;
 import com.github.standobyte.jojo.item.OilItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
+import com.github.standobyte.jojo.itemtracking.SidedItemTrackerMap;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveEffectStartPacket;
@@ -164,7 +165,9 @@ import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.ItemAttributeModifierEvent;
 import net.minecraftforge.event.ServerChatEvent;
+import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.event.TickEvent.PlayerTickEvent;
+import net.minecraftforge.event.TickEvent.ServerTickEvent;
 import net.minecraftforge.event.TickEvent.WorldTickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
@@ -201,6 +204,7 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
+import net.minecraftforge.fml.server.ServerLifecycleHooks;
 
 //FIXME move all event handlers to their respective classes, leave the method links here
 @EventBusSubscriber(modid = JojoMod.MOD_ID)
@@ -288,24 +292,34 @@ public class GameplayEventHandler {
     @SubscribeEvent
     public static void onWorldTick(WorldTickEvent event) {
         if (event.side == LogicalSide.SERVER /* actually only ticks on server but ok */) {
+            ServerWorld world = (ServerWorld) event.world;
             switch (event.phase) {
             case START:
                 break;
             case END:
-                ((ServerWorld) event.world).getAllEntities().forEach(entity -> {
+                world.getAllEntities().forEach(entity -> {
 //                    entity.getCapability(EntityUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
                     entity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
                     entity.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
                 });
 
-                ((ServerWorld) event.world).getChunkSource().chunkMap.getChunks().forEach(chunkHolder -> {
+                world.getChunkSource().chunkMap.getChunks().forEach(chunkHolder -> {
                     Chunk chunk = chunkHolder.getTickingChunk();
                     if (chunk != null) {
                         chunk.getCapability(ChunkCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
                     }
                 });
+                
                 break;
             }
+        }
+    }
+
+    @SubscribeEvent
+    public static void onServerTick(ServerTickEvent event) {
+        MinecraftServer server = ServerLifecycleHooks.getCurrentServer();
+        if (event.phase == TickEvent.Phase.END) {
+            SidedItemTrackerMap.tick(server);
         }
     }
     
@@ -1180,7 +1194,7 @@ public class GameplayEventHandler {
             }
         }
     }
-
+    
     private static void sendMemeDeathMessage(ServerPlayerEntity player, ITextComponent deathMessage) {
         if (player.level.getGameRules().getBoolean(GameRules.RULE_SHOWDEATHMESSAGES)) {
             Team team = player.getTeam();

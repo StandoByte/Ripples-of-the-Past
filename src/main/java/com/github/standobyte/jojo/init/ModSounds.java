@@ -476,6 +476,8 @@ public class ModSounds {
 
     public static final RegistryObject<SoundEvent> GOLD_EXPERIENCE_LIFE_REVERT = register("gold_experience_life_revert");
 
+    public static final RegistryObject<SoundEvent> GOLD_EXPERIENCE_LIFE_ITEM = register("gold_experience_life_item");
+
     public static final RegistryObject<SoundEvent> GOLD_EXPERIENCE_HEAL = register("gold_experience_heal");
     
     public static final OstSoundList GOLD_EXPERIENCE_OST = new OstSoundList(new ResourceLocation(JojoMod.MOD_ID, "gold_experience_ost"), SOUNDS);

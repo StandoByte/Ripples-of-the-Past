@@ -20,6 +20,7 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.action.stand.GoldExperienceChooseLifeform;
+import com.github.standobyte.jojo.action.stand.effect.GEItemMarkEffect;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
@@ -55,9 +56,11 @@ import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
+import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.item.OilItem;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
 import com.github.standobyte.jojo.modcompat.OptionalDependencyHelper;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -123,9 +126,11 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector3i;
+import net.minecraft.util.text.Color;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.ForgeHooksClient;
@@ -1009,23 +1014,42 @@ public class ClientEventHandler {
     @SubscribeEvent
     public void addTooltipLines(ItemTooltipEvent event) {
         PlayerEntity player = event.getPlayer();
+        ItemStack item = event.getItemStack();
+        Optional<IStandPower> powerOptional = IStandPower.getStandPowerOptional(player).resolve();
         if (player != null) {
-            CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(player.level, event.getItemStack()).ifPresent(pos -> {
-                if (IStandPower.getStandPowerOptional(player).map(power -> power.getType() == ModStands.CRAZY_DIAMOND.getStandType()).orElse(false)) {
+            CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(player.level, item).ifPresent(pos -> {
+                if (powerOptional.map(power -> power.getType() == ModStands.CRAZY_DIAMOND.getStandType()).orElse(false)) {
                     event.getToolTip().add(new TranslationTextComponent("jojo.crazy_diamond.block_checkpoint.tooltip", 
                             pos.getX(), pos.getY(), pos.getZ()).withStyle(TextFormatting.RED));
                 }
             });
             
-           OilItem.remainingOiledUses(event.getItemStack()).ifPresent(uses -> {
+            TrackerItemStack.getItemTracker(item).ifPresent(tracker -> {
+                if (tracker.isTracked()) {
+                    if (powerOptional.map(power -> power
+                                .getContinuousEffects()
+                                .getEffects()
+                                .filter(effect -> effect.effectType == ModStandEffects.GE_ITEM_MARK.get())
+                                .map(effect -> (GEItemMarkEffect) effect)
+                                .anyMatch(effect -> tracker.getTrackerId().equals(effect.getItemTrackerId())))
+                            .orElse(false)) {
+                        event.getToolTip().add(
+                                new TranslationTextComponent("jojo.ge_item_marked")
+                                .withStyle(Style.EMPTY.withColor(
+                                        Color.fromRgb(ActionsOverlayGui.getPowerUiColor(powerOptional.get())))));
+                    }
+                }
+            });
+            
+           OilItem.remainingOiledUses(item).ifPresent(uses -> {
                if (uses > 0) {
                    event.getToolTip().add(new TranslationTextComponent("item.jojo.oil.uses", uses).withStyle(TextFormatting.GOLD));
                }
            });
         }
 
-        if (event.getItemStack().getItem() instanceof EnchantedBookItem && !ModList.get().isLoaded("enchdesc")) {
-            EnchantedBookItem.getEnchantments(event.getItemStack()).forEach(nbt -> {
+        if (item.getItem() instanceof EnchantedBookItem && !ModList.get().isLoaded("enchdesc")) {
+            EnchantedBookItem.getEnchantments(item).forEach(nbt -> {
                 if (nbt.getId() == MCUtil.getNbtId(CompoundNBT.class)) {
                     CompoundNBT enchNbt = (CompoundNBT) nbt;
                     ResourceLocation enchId = ResourceLocation.tryParse(enchNbt.getString("id"));

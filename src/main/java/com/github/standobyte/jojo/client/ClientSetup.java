@@ -43,11 +43,11 @@ import com.github.standobyte.jojo.client.render.entity.renderer.HamonBlockCharge
 import com.github.standobyte.jojo.client.render.entity.renderer.HamonProjectileShieldRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.LeavesGliderRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.MRDetectorRenderer;
-import com.github.standobyte.jojo.client.render.entity.renderer.SpriteObjectEntityRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.PillarmanTempleEngravingRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.RoadRollerRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.SendoHamonOverdriveRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.SoulRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.SpriteObjectEntityRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.TurquoiseBlueOverdriveRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.MRFlameRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.SCFlameRenderer;
@@ -101,6 +101,7 @@ import com.github.standobyte.jojo.client.ui.marker.CrazyDiamondAnchorMarker;
 import com.github.standobyte.jojo.client.ui.marker.CrazyDiamondBloodHomingMarker;
 import com.github.standobyte.jojo.client.ui.marker.GoldExperienceLifeformMarker;
 import com.github.standobyte.jojo.client.ui.marker.GoldExperienceLifeformRevertMarker;
+import com.github.standobyte.jojo.client.ui.marker.GoldExperienceMarkedItemMarker;
 import com.github.standobyte.jojo.client.ui.marker.HierophantGreenBarrierDetectionMarker;
 import com.github.standobyte.jojo.client.ui.marker.MarkerRenderer;
 import com.github.standobyte.jojo.client.ui.screen.walkman.WalkmanScreen;
@@ -303,6 +304,7 @@ public class ClientSetup {
             MarkerRenderer.Handler.addRenderer(new CrazyDiamondBloodHomingMarker(mc));
             MarkerRenderer.Handler.addRenderer(new GoldExperienceLifeformMarker(mc));
             MarkerRenderer.Handler.addRenderer(new GoldExperienceLifeformRevertMarker(mc));
+            MarkerRenderer.Handler.addRenderer(new GoldExperienceMarkedItemMarker(mc));
             
             PlayerAnimationHandler.initAnimator();
         });

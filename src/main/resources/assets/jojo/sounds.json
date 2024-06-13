@@ -995,6 +995,10 @@
     "subtitle": "jojo.subtitle.life_reverted",
     "sounds": [ "jojo:stand/gold_experience_life_revert" ]
   },
+  "gold_experience_life_item": {
+    "subtitle": "jojo.subtitle.life_item",
+    "sounds": [ "jojo:stand/gold_experience_life_creation_2" ]
+  },
   "gold_experience_heal": {
     "subtitle": "jojo.subtitle.ge_heal",
     "sounds": [ "jojo:stand/gold_experience_heal" ]
