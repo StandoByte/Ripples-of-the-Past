@@ -109,7 +109,7 @@ public class GlovesLayer<T extends LivingEntity, M extends PlayerModel<T>> exten
     private ResourceLocation getTexture(GlovesItem gloves) {
         return new ResourceLocation(
                 gloves.getRegistryName().getNamespace(), 
-                "textures/entity/biped/layer/" + gloves.getRegistryName().getPath() + (slim ? "_slim" : "") + ".png");
+                "textures/entity/layer/" + gloves.getRegistryName().getPath() + (slim ? "_slim" : "") + ".png");
     }
     
     

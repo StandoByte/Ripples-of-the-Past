@@ -96,6 +96,17 @@ public class MathUtil {
         return numInt;
     }
     
+    public static int round(double value) {
+        int i = (int) value;
+        double frac = value > i ? value - i : i - value;
+        if (frac < 0.5) {
+            return i;
+        }
+        else {
+            return value > i ? i + 1 : i - 1;
+        }
+    }
+    
     public static <T> Optional<T> getRandomWeightedInt(Iterable<T> items, ToIntFunction<T> getWeight, Random random) {
         ToIntFunction<T> getWeightSafe = element -> Math.max(getWeight.applyAsInt(element), 0);
         int weightSum = StreamSupport.stream(items.spliterator(), false)

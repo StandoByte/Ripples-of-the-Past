@@ -24,6 +24,7 @@ import org.lwjgl.glfw.GLFW;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.controls.ActionKeybindEntry;
@@ -139,6 +140,7 @@ public class InputHandler {
     private int leftClickBlockDelay;
     
     public boolean hasInput;
+    private boolean wallClimbMoving;
     
     private boolean canLeap;
     
@@ -684,26 +686,27 @@ public class InputHandler {
                     action, shiftActionVar, power, ActionsOverlayGui.getInstance().getMouseTarget());
             
             ActionUseTry<P> click = actionsOverlay.onActionClick(power, action, sneak, entry.getKeybind());
-            if (click != null && click.wentOff) {
-                result.cancelVanillaInput();
-                if (action.getHoldDurationMax(power) > 0) {
-                    heldKeys.put(power, entry.getKeybind());
+            if (click != null) {
+                if (action != null && action.withUserPunch()) {
+                    mcPlayerAttack();
                 }
-                if (!click.clientOnly) {
-                    if (action != null) {
-                        result.handSwing = action.getHoldDurationMax(power) <= 0 && action.swingHand()
-                                ? HudClickResult.Behavior.FORCE : HudClickResult.Behavior.CANCEL;
-                        if (action.withUserPunch()) {
-                            mcPlayerAttack();
+                if (click.wentOff) {
+                    result.cancelVanillaInput();
+                    if (action.getHoldDurationMax(power) > 0) {
+                        heldKeys.put(power, entry.getKeybind());
+                    }
+                    if (!click.clientOnly) {
+                        if (action != null) {
+                            result.handSwing = actionSwingsHand(action, power);
+                        }
+                        if (leftClickedBlock && leftClickBlockDelay <= 0) {
+                            leftClickBlockDelay = 4;
                         }
                     }
-                    if (leftClickedBlock && leftClickBlockDelay <= 0) {
-                        leftClickBlockDelay = 4;
+                    else {
+                        result.handSwing = HudClickResult.Behavior.CANCEL;
+                        result.cancelVanillaInput();
                     }
-                }
-                else {
-                    result.handSwing = HudClickResult.Behavior.CANCEL;
-                    result.cancelVanillaInput();
                 }
             }
             else {
@@ -767,23 +770,28 @@ public class InputHandler {
             if (!(leftClickedBlock && leftClickBlockDelay > 0)) {
                 click = actionsOverlay.onClick(power, key.getHotbar(), shiftActionVar, sneak, keyBinding);
             }
-            if (click != null && click.wentOff) {
+            if (click != null) {
                 Action<P> action = click.action;
-                if (action.getHoldDurationMax(power) > 0) {
-                    heldKeys.put(power, key.getKey(mc, this));
+                if (action != null && action.withUserPunch()) {
+                    mcPlayerAttack();
                 }
-                if (!click.clientOnly) {
-                    if (action != null) {
-                        result.handSwing = action.getHoldDurationMax(power) <= 0 && action.swingHand() ? HudClickResult.Behavior.FORCE : HudClickResult.Behavior.CANCEL;
-                        if (!(action.withUserPunch() && key == ActionKey.ATTACK)) result.cancelVanillaInput();
+                if (click.wentOff) {
+                    if (action != null && action.getHoldDurationMax(power) > 0) {
+                        heldKeys.put(power, key.getKey(mc, this));
                     }
-                    if (leftClickedBlock && leftClickBlockDelay <= 0) {
-                        leftClickBlockDelay = 4;
+                    if (!click.clientOnly) {
+                        if (action != null) {
+                            result.handSwing = actionSwingsHand(action, power);
+                            if (!(action.withUserPunch() && key == ActionKey.ATTACK)) result.cancelVanillaInput();
+                        }
+                        if (leftClickedBlock && leftClickBlockDelay <= 0) {
+                            leftClickBlockDelay = 4;
+                        }
                     }
-                }
-                else {
-                    result.handSwing = HudClickResult.Behavior.CANCEL;
-                    result.cancelVanillaInput();
+                    else {
+                        result.handSwing = HudClickResult.Behavior.CANCEL;
+                        result.cancelVanillaInput();
+                    }
                 }
             }
             else {
@@ -798,6 +806,13 @@ public class InputHandler {
         }
         
         return result;
+    }
+    
+    private static <P extends IPower<P, ?>> HudClickResult.Behavior actionSwingsHand(Action<P> action, P power) {
+        if (action.getHoldDurationMax(power) <= 0 && action.swingHand()) {
+            return HudClickResult.Behavior.FORCE;
+        }
+        return HudClickResult.Behavior.CANCEL;
     }
     
     public static KeyBinding lastActionKey;
@@ -1120,6 +1135,14 @@ public class InputHandler {
         player.hasImpulse = true;
         Vector3d dash = Vector3d.directionFromRotation(0, player.yRot + yRot).scale(0.5).add(0, 0.2, 0);
         player.setDeltaMovement(player.getDeltaMovement().add(dash));
+    }
+    
+    public void wallClimbClientTick(boolean isMoving, LivingUtilCap wallClimbData) {
+        if (this.wallClimbMoving != isMoving) {
+            PacketManager.sendToServer(ClHasInputPacket.wallClimbing(isMoving));
+            this.wallClimbMoving = isMoving;
+            wallClimbData.wallClimbIsMoving = isMoving;
+        }
     }
     
     

@@ -142,7 +142,6 @@ public class ControllerStand {
     
     
 
-    // FIXME render items in hands
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void renderStandHands(RenderHandEvent event) {
         if (!isControllingStand()) {
@@ -159,7 +158,8 @@ public class ControllerStand {
         float partialTick = event.getPartialTicks();
         int light = mc.getEntityRenderDispatcher().getPackedLightCoords(stand, partialTick);
         StandEntityRenderer renderer = (StandEntityRenderer<?, ?>)mc.getEntityRenderDispatcher().<StandEntity>getRenderer(stand);
-        renderer.renderFirstPersonArms(matrixStack, buffer, light, stand, partialTick);
+//        renderer.renderFirstPersonArms(matrixStack, buffer, light, stand, partialTick);
+        renderer.renderFirstPerson(stand, partialTick, matrixStack, buffer, light);
         event.setCanceled(true);
     }
     

@@ -16,7 +16,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 
 public class InkLipsLayer<T extends PlayerEntity, M extends EntityModel<T>> extends LayerRenderer<T, M> {
-    private static final ResourceLocation TEXTURE = new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/ink_lips.png");
+    private static final ResourceLocation TEXTURE = new ResourceLocation(JojoMod.MOD_ID, "textures/entity/layer/ink_lips.png");
     public InkLipsLayer(IEntityRenderer<T, M> renderer) {
         super(renderer);
     }

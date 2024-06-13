@@ -18,11 +18,14 @@ import com.github.standobyte.jojo.entity.HamonSendoOverdriveEntity;
 import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.ai.LookAtEntityWithoutMovingGoal;
 import com.github.standobyte.jojo.init.ModStatusEffects;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrCosmeticItemsPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHamonWallClimbingPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.TrDyingBodyTimerPacket;
 import com.github.standobyte.jojo.potion.HamonSpreadEffect;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.util.general.OptionalFloat;
 import com.github.standobyte.jojo.util.mc.CollideBlocks;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
@@ -98,6 +101,12 @@ public class LivingUtilCap {
     
     private float lifeShotResist;
     private int lifeShotResistTicks;
+    
+    private boolean wallClimbing = false;
+    private OptionalFloat wallClimbBodyRot = OptionalFloat.empty();
+    public boolean wallClimbIsMoving;
+    private boolean wallClimbHamon = false;
+    private float wallClimbSpeed = 0;
     
     private DyeColor[] ladybugBroochesColored = new DyeColor[3];
     
@@ -572,6 +581,68 @@ public class LivingUtilCap {
     
     
     
+    public boolean isWallClimbing() {
+        return wallClimbing;
+    }
+    
+    public boolean isHamonWallClimbing() {
+        return wallClimbHamon;
+    }
+    
+    public float getWallClimbSpeed() {
+        if (wallClimbHamon) {
+            return (float) ModHamonActions.HAMON_WALL_CLIMBING.get().getHamonWallClimbSpeed(entity);
+        }
+        return wallClimbSpeed;
+    }
+    
+    public OptionalFloat getWallClimbYRot() {
+        return wallClimbBodyRot;
+    }
+    
+    public void setWallClimbYRot(OptionalFloat yRot) {
+        this.wallClimbBodyRot = yRot;
+    }
+    
+    public void stopWallClimbing() {
+        setWallClimbing(false, false, 0, OptionalFloat.empty());
+    }
+    
+    public void setWallClimbing(boolean value, boolean hamon, float climbSpeed, OptionalFloat yBodyRot) {
+        this.wallClimbing = value;
+        this.wallClimbHamon = hamon;
+        this.wallClimbBodyRot = yBodyRot;
+        if (!entity.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(new TrHamonWallClimbingPacket(
+                    entity.getId(), wallClimbing, hamon, climbSpeed, yBodyRot), entity);
+        }
+        else if (!value && entity instanceof PlayerEntity) {
+            PlayerEntity player = (PlayerEntity) entity;
+            if (player.isLocalPlayer()) {
+                ClientUtil.setPlayerHandsBusy(player, false);
+            }
+        }
+    }
+    
+//    public void startWallPullUp() {
+//        
+//    }
+    
+    public void climbLimitPlayerHeadRot() {
+        if (wallClimbing && wallClimbBodyRot.isPresent()) {
+            entity.yBodyRot = -wallClimbBodyRot.getAsFloat();
+            entity.yBodyRotO = entity.yBodyRot;
+            
+            float yRot = entity.yRot;
+            while (yRot <= entity.yBodyRot - 180) yRot += 360;
+            while (yRot > entity.yBodyRot + 180) yRot -= 360;
+            entity.yRot = MathHelper.clamp(yRot, entity.yBodyRot - 105, entity.yBodyRot + 105);
+            entity.yRotO = entity.yRot;
+        }
+    }
+    
+    
+    
     public void setProductEffects(List<EffectInstance> effects) {
         this.productPotions = effects.stream().map(EffectInstance::new) // makes deep copies of effect instances
                 .collect(Collectors.toList());
@@ -645,6 +716,10 @@ public class LivingUtilCap {
             PacketManager.sendToClient(TrCosmeticItemsPacket.ladybugBrooch(entity.getId(), 
                     ladybugBroochesColored), tracking);
         }
+        if (wallClimbing) {
+            PacketManager.sendToClient(new TrHamonWallClimbingPacket(
+                    entity.getId(), wallClimbing, wallClimbHamon, wallClimbSpeed, wallClimbBodyRot), tracking);
+        }
     }
     
     public void syncWithClient(ServerPlayerEntity entityAsPlayer) {
@@ -654,9 +729,14 @@ public class LivingUtilCap {
             updateDyingBodyDebuffs();
         }
         if (entity instanceof ServerPlayerEntity) {
+            ServerPlayerEntity player = (ServerPlayerEntity) entity;
             if (canConsumeBrooch()) {
                 PacketManager.sendToClient(TrCosmeticItemsPacket.ladybugBrooch(entity.getId(), 
-                        ladybugBroochesColored), (ServerPlayerEntity) entity);
+                        ladybugBroochesColored), player);
+            }
+            if (wallClimbing) {
+                PacketManager.sendToClient(new TrHamonWallClimbingPacket(
+                        player.getId(), wallClimbing, wallClimbHamon, wallClimbSpeed, wallClimbBodyRot), player);
             }
         }
     }
@@ -694,6 +774,14 @@ public class LivingUtilCap {
         nbt.putInt("DeadBody", deadBodyTimer);
         nbt.putInt("DeadBodyDuration", deadBodyDuration);
         MCUtil.nbtPutEnumArray(nbt, "Brooches", ladybugBroochesColored);
+
+        nbt.putBoolean("WallClimb", wallClimbing);
+        nbt.putBoolean("WallClimbHamon", wallClimbHamon);
+        nbt.putFloat("WallClimbSpeed", wallClimbSpeed);
+        if (wallClimbBodyRot.isPresent()) {
+            nbt.putFloat("WallClimbRot", wallClimbBodyRot.getAsFloat());
+        }
+        
         return nbt;
     }
     
@@ -724,6 +812,13 @@ public class LivingUtilCap {
         deadBodyTimer = nbt.contains("DeadBody") ? nbt.getInt("DeadBody") : -1;
         deadBodyDuration = Math.max(nbt.getInt("DeadBodyDuration"), 1);
         ladybugBroochesColored = MCUtil.nbtGetEnumArray(nbt, "Brooches", DyeColor.class);
+        
+        wallClimbing = nbt.getBoolean("WallClimb");
+        wallClimbHamon = nbt.getBoolean("WallClimbHamon");
+        wallClimbSpeed = nbt.getFloat("WallClimbSpeed");
+        if (nbt.contains("WallClimbRot")) {
+            wallClimbBodyRot = OptionalFloat.of(nbt.getFloat("WallClimbRot"));
+        }
     }
     
 }

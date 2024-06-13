@@ -36,6 +36,7 @@ import net.minecraft.client.MouseHelper;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.Screen;
@@ -117,6 +118,10 @@ public class ClientUtil {
     
     public static boolean arePlayerHandsBusy() {
         return Minecraft.getInstance().player.isHandsBusy();
+    }
+    
+    public static void setPlayerHandsBusy(PlayerEntity player, boolean handsBusy) {
+        ClientReflection.setHandsBusy((ClientPlayerEntity) player, handsBusy);
     }
 
     public static Entity getEntityById(int entityId) {

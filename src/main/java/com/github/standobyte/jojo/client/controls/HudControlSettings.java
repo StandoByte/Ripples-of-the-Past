@@ -146,7 +146,7 @@ public class HudControlSettings {
                 if (powerTypePathDirs != null) {
                     for (File pathDir : powerTypePathDirs) {
                         ResourceLocation powerId = new ResourceLocation(namespaceDir.getName(), pathDir.getName());
-                        loadControls(namespaceDir, powerId);
+                        loadControls(pathDir, powerId);
                     }
                 }
             }

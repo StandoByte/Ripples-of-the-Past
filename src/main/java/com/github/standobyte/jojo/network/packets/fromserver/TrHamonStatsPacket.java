@@ -119,13 +119,13 @@ public class TrHamonStatsPacket {
                         }
 
                         if (msg.stat == Stat.ALL || msg.stat == Stat.STRENGTH) {
-                            hamon.setHamonStatPoints(BaseHamonSkill.HamonStat.STRENGTH, msg.strength, true, true, true);
+                            hamon.setHamonStatPoints(BaseHamonSkill.HamonStat.STRENGTH, msg.strength, true, true, true, showToasts);
                         }
                         if (msg.stat == Stat.ALL || msg.stat == Stat.CONTROL) {
-                            hamon.setHamonStatPoints(BaseHamonSkill.HamonStat.CONTROL, msg.control, true, true, true);
+                            hamon.setHamonStatPoints(BaseHamonSkill.HamonStat.CONTROL, msg.control, true, true, true, showToasts);
                         }
                         if (msg.stat == Stat.ALL || msg.stat == Stat.BREATHING) {
-                            hamon.setBreathingLevel(msg.breathing);
+                            hamon.setBreathingLevel(msg.breathing, showToasts);
                         }
 
                         ToastGui toastGui = Minecraft.getInstance().getToasts();
@@ -151,7 +151,7 @@ public class TrHamonStatsPacket {
         }
     }
 
-    private enum Stat {
+    public enum Stat {
         STRENGTH,
         CONTROL,
         BREATHING,

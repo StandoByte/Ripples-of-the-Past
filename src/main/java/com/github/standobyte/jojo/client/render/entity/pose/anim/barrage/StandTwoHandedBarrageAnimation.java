@@ -4,6 +4,7 @@ import com.github.standobyte.jojo.client.render.entity.model.stand.HumanoidStand
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.render.entity.pose.IModelPose;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.HandSide;
@@ -42,5 +43,10 @@ public class StandTwoHandedBarrageAnimation<T extends StandEntity> extends TwoHa
         super.animateSwing(entity, model, loopCompletion, side, yRotOffsetRad, xRotRad, zRotOffsetRad);
         ModelRenderer arm = model.getArm(side);
         arm.zRot = arm.zRot + HumanoidStandModel.barrageHitEasing(loopCompletion) * zRotOffsetRad;
+    }
+    
+    @Override
+    public void beforeSwingAfterimageRender(MatrixStack matrixStack, StandEntityModel<T> model, float loopCompletion, HandSide side) {
+        model.applyXRotation();
     }
 }

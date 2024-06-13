@@ -569,7 +569,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     @Override
     public CompoundNBT writeNBT() {
         CompoundNBT cnbt = new CompoundNBT();
-        cnbt.putLong("LastDay", lastTickedDay);
+//        cnbt.putLong("LastDay", lastTickedDay);
         cnbt.put("Cooldowns", cooldowns.writeNBT());
         cnbt.putInt("LeapCd", leapCooldown);
         
@@ -578,7 +578,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
 
     @Override
     public void readNBT(CompoundNBT nbt) {
-        lastTickedDay = nbt.getLong("LastDay");
+//        lastTickedDay = nbt.getLong("LastDay");
         cooldowns = new ActionCooldownTracker(nbt.getCompound("Cooldowns"));
         leapCooldown = nbt.getInt("LeapCd");
     }

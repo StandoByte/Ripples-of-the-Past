@@ -41,7 +41,6 @@ public abstract class LivingEntityMixin extends Entity {
     }
     
     
-    
     @Inject(method = "playHurtSound", at = @At("HEAD"), cancellable = true)
     public void jojoCancelHurtSound(DamageSource source, CallbackInfo ci) {
         if (this.getCapability(LivingUtilCapProvider.CAPABILITY).map(cap -> cap.isDyingBody()).orElse(false)) {
@@ -49,4 +48,13 @@ public abstract class LivingEntityMixin extends Entity {
         }
     }
     
+    
+    @Inject(method = "onClimbable", at = @At("HEAD"), cancellable = true)
+    public void jojoOnClimbableFlag(CallbackInfoReturnable<Boolean> ci) {
+        if (!this.isSpectator() && this.getCapability(LivingUtilCapProvider.CAPABILITY)
+                .map(cap -> cap.isHamonWallClimbing()).orElse(false)) {
+            ci.setReturnValue(true);
+        }
+    }
+
 }

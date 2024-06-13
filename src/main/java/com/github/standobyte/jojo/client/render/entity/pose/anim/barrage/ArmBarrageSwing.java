@@ -45,7 +45,7 @@ public abstract class ArmBarrageSwing<T extends Entity, M extends EntityModel<T>
         matrixStack.pushPose();
         matrixStack.translate(offsetRot.x, offsetRot.y, -offsetRot.z);
         barrageAnim.animateSwing(entity, model, ticks / ticksMax, side, yRotOffsetRad, xRotRad, zRot);
-        barrageAnim.beforeSwingAfterimageRender(matrixStack, ticks / ticksMax, side);
+        barrageAnim.beforeSwingAfterimageRender(matrixStack, model, ticks / ticksMax, side);
         model.renderToBuffer(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha * 0.75F);
         matrixStack.popPose();
     }

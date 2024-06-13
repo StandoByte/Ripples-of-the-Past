@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.github.standobyte.jojo.client.particle.custom.FirstPersonHamonAura;
 import com.github.standobyte.jojo.client.render.item.InventoryItemHighlight;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;
@@ -38,7 +39,7 @@ public class ItemRendererMixin {
     }
     
     private static void render1stPersonHamonAura(MatrixStack matrixStack, IRenderTypeBuffer buffer, ItemStack itemStack, HandSide handSide) {
-        if (FirstPersonHamonAura.auraRendersAtItem(itemStack, handSide)) {
+        if (!MCUtil.itemHandFree(itemStack)) {
             matrixStack.pushPose();
             FirstPersonHamonAura.itemMatrixTransform(matrixStack, handSide, itemStack);
             FirstPersonHamonAura.getInstance().renderParticles(matrixStack, buffer, handSide);

@@ -83,9 +83,11 @@ public class PlayerAnimatorInstalled implements PlayerAnimationHandler.IPlayerAn
             setBarrageAnim((AbstractClientPlayerEntity) player, true);
             return true;
         }
-        else {
+        // TODO wall climb pose
+        else if (!player.onClimbable()) {
             return heldAction.setActionAnim(player, action);
         }
+        return false;
     }
     
     @Override

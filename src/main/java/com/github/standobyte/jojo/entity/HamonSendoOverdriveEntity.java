@@ -8,9 +8,12 @@ import java.util.UUID;
 import java.util.function.Predicate;
 
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
+import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModParticles;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -32,9 +35,11 @@ import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Direction;
 import net.minecraft.util.EntityPredicates;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
@@ -102,15 +107,28 @@ public class HamonSendoOverdriveEntity extends Entity implements IEntityAddition
             if (tickCount % WAVE_ADD_TICK == 0 && addedWaves++ < wavesToAdd) {
                 if (!level.isClientSide()) {
                     waves.add(new Wave());
+                    Vector3d soundPos = getBoundingBox().getCenter();
+                    if (addedWaves < wavesToAdd) {
+                        level.playSound(ClientUtil.getClientPlayer(), soundPos.x, soundPos.y, soundPos.z, ModSounds.HAMON_SPARK.get(), 
+                                SoundCategory.AMBIENT, 0.25f, 1.0F + (random.nextFloat() - 0.5F) * 0.15F);
+                    }
                 }
                 else {
                     Vector3d center = getBoundingBox().getCenter();
-                    Vector3d axisVec = new Vector3d(
-                            axis == Direction.Axis.X ? 0.55 : 0,
-                            axis == Direction.Axis.Y ? 0.55 : 0,
-                            axis == Direction.Axis.Z ? 0.55 : 0);
-                    spawnSparksCircle(center.add(axisVec),           axis, radius);
-                    spawnSparksCircle(center.add(axisVec.scale(-1)), axis, radius);
+                    switch (axis) {
+                    case X:
+                        spawnSparksCircle(center.add( 0.55, 0, 0), axis, radius);
+                        spawnSparksCircle(center.add(-0.55, 0, 0), axis, radius);
+                        break;
+                    case Y:
+                        spawnSparksCircle(center.add(0,  0.55, 0), axis, radius);
+                        spawnSparksCircle(center.add(0, -0.55, 0), axis, radius);
+                        break;
+                    case Z:
+                        spawnSparksCircle(center.add(0, 0,  0.55), axis, radius);
+                        spawnSparksCircle(center.add(0, 0, -0.55), axis, radius);
+                        break;
+                    }
                 }
             }
             
@@ -123,6 +141,15 @@ public class HamonSendoOverdriveEntity extends Entity implements IEntityAddition
                         it.remove();
                     }
                 }
+            }
+            else {
+                AxisAlignedBB box = makeHurtHitBox(radius);
+                Vector3d cameraPos = ClientUtil.getCameraPos();
+                Vector3d soundPos = new Vector3d(
+                        MathHelper.clamp(cameraPos.x, box.minX, box.maxX),
+                        MathHelper.clamp(cameraPos.y, box.minY, box.maxY),
+                        MathHelper.clamp(cameraPos.z, box.minZ, box.maxZ));
+                HamonSparksLoopSound.playSparkSound(this, soundPos, 1.0F, true);
             }
         }
         else if (!level.isClientSide()) {
@@ -260,7 +287,7 @@ public class HamonSendoOverdriveEntity extends Entity implements IEntityAddition
     }
     
     private void givePointsToUser() {
-        if (!level.isClientSide() && (gavePoints++ < 6 || gavePoints % 4 == 0)) {
+        if (!level.isClientSide() && (gavePoints++ < 6 || gavePoints % 4 == 0) && points > 0) {
             Entity user = getUser();
             if (user instanceof LivingEntity) {
                 INonStandPower.getNonStandPowerOptional(((LivingEntity) user)).resolve().flatMap(power -> 
@@ -288,9 +315,8 @@ public class HamonSendoOverdriveEntity extends Entity implements IEntityAddition
                     break;
                 }
                 particleVec = particleVec.scale(radius / WAVE_TICK_LENGTH);
-                CustomParticlesHelper.addSendoHamonOverdriveParticle(level, ModParticles.HAMON_SPARK.get(), 
-                        center.x, center.y, center.z, 
-                        particleVec.x, particleVec.y, particleVec.z, WAVE_TICK_LENGTH);
+                CustomParticlesHelper.addSendoHamonOverdriveParticle(level, ModParticles.HAMON_SPARK.get(), axis, 
+                        center.x, center.y, center.z, particleVec.x, particleVec.y, particleVec.z, WAVE_TICK_LENGTH);
             }
         }
     }

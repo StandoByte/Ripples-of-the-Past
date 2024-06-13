@@ -6,7 +6,7 @@ import java.io.File;
 import java.util.function.Consumer;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.HudNamesRender;
+import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.HudTextRender;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.PositionConfig;
 import com.github.standobyte.jojo.client.ui.screen.stand.ge.ChooseLifeformScreen;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
@@ -25,8 +25,8 @@ public class ClientModSettings {
         
         public PositionConfig barsPosition = PositionConfig.TOP_LEFT;
         public PositionConfig hotbarsPosition = PositionConfig.TOP_LEFT;
-        public HudNamesRender hudNamesRender = HudNamesRender.ALWAYS;
-        public boolean hudHotbarsFold = false;
+        public HudTextRender hudTextRender = HudTextRender.FADE_OUT;
+        public boolean hudHotbarFold = true;
         public boolean showLockedSlots = false;
         
         public boolean resolveShaders = true;
