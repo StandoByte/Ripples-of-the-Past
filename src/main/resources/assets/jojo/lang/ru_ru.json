@@ -530,6 +530,7 @@
   "jojo.message.action_condition.potion": "Вам нужно взять бутылку с жидкостью",
   "jojo.message.action_condition.soap": "Вам нужно мыло",
   "jojo.message.action_condition.gloves_no_soap": "В перчатках кончилось мыло",
+  "jojo.message.wall_climb.hint_jump": "Нажмите %s, чтобы отцепиться от стены",
   
   "multiplayer.disconnect.invalid_stand_movement": "Получен неверный пакет перемещения Стенда",
   

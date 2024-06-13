@@ -31,7 +31,7 @@ import com.github.standobyte.jojo.action.non_stand.HamonSunlightYellowOverdrive;
 import com.github.standobyte.jojo.action.non_stand.HamonSunlightYellowOverdriveBarrage;
 import com.github.standobyte.jojo.action.non_stand.HamonTornadoOverdrive;
 import com.github.standobyte.jojo.action.non_stand.HamonTurquoiseBlueOverdrive;
-import com.github.standobyte.jojo.action.non_stand.HamonWallClimbing;
+import com.github.standobyte.jojo.action.non_stand.HamonWallClimbing2;
 import com.github.standobyte.jojo.action.non_stand.HamonZoomPunch;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.init.ModSounds;
@@ -98,8 +98,8 @@ public class ModHamonActions {
             () -> new HamonHealing(new HamonAction.Builder().energyCost(750F)
                     .needsFreeMainHand().swingHand()));
     
-    public static final RegistryObject<HamonAction> HAMON_WALL_CLIMBING = ACTIONS.register("hamon_wall_climbing", 
-            () -> new HamonWallClimbing(new HamonAction.Builder().holdEnergyCost(10F)));
+    public static final RegistryObject<HamonWallClimbing2> HAMON_WALL_CLIMBING = ACTIONS.register("hamon_wall_climbing", 
+            () -> new HamonWallClimbing2(new HamonAction.Builder().holdEnergyCost(10F)));
     
     public static final RegistryObject<HamonAction> HAMON_DETECTOR = ACTIONS.register("hamon_detector", 
             () -> new HamonDetector(new HamonAction.Builder().holdEnergyCost(5F).heldWalkSpeed(0.5F)));

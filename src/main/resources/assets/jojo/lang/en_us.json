@@ -548,6 +548,7 @@
   "jojo.message.action_condition.potion": "You need to hold a bottle with a liquid",
   "jojo.message.action_condition.soap": "You need soap to perform that",
   "jojo.message.action_condition.gloves_no_soap": "Your soap gloves are empty",
+  "jojo.message.wall_climb.hint_jump": "Press %s to stop climbing",
   
   "multiplayer.disconnect.invalid_stand_movement": "Invalid move Stand packet received",
   

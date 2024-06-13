@@ -166,18 +166,21 @@ public class HamonData extends TypeSpecificData {
                     tickHamonProtection();
                 }
             }
+            
             if (isRebuffOverdriveOn) {
-                if (rebuffTick<=20) {
+                if (rebuffTick <= 20) {
                     ++rebuffTick;    
                 } else {
                     isRebuffOverdriveOn = false;
                     rebuffTick = 0;
                 }
-                
             }
+            
+            tickWallClimbing();
             tickNewPlayerLearners(user);
             if (!user.level.isClientSide()) {
                 tickAirSupply(user);
+                
                 if (tcsa && (power.isUserCreative() || getCharacterTechnique() != null)) {
                     tcsa = false;
                 }
@@ -284,7 +287,7 @@ public class HamonData extends TypeSpecificData {
             float breathMaskHandicap = MathHelper.clamp((400f - ticksMaskWithNoHamonBreath) / 200f, -1, 1);
             boolean canIndicateInHud = user.level.isClientSide() && ClientUtil.getClientPlayer() == user;
             if (canIndicateInHud && breathMaskHandicap == 0) {
-                BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).triggerRedHighlight(79);
+                BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).triggerRedHighlight(4);
             }
             // normal recovery, slowed down when not using hamon breath for too long (10s)
             if (breathMaskHandicap >= 0) {
@@ -506,7 +509,7 @@ public class HamonData extends TypeSpecificData {
     @Override
     public boolean isActionUnlocked(Action<INonStandPower> action, INonStandPower powerData) {
         return action == ModHamonActions.HAMON_OVERDRIVE.get()
-        		|| action == ModHamonActions.HAMON_BEAT.get()
+                || action == ModHamonActions.HAMON_BEAT.get()
                 || action == ModHamonActions.HAMON_HEALING.get()
                 || action == ModHamonActions.HAMON_BREATH.get()
                 || action == ModHamonActions.CAESAR_BUBBLE_CUTTER_GLIDING.get()
@@ -1536,7 +1539,7 @@ public class HamonData extends TypeSpecificData {
         return hamonProtection;
     }
    
-    public void tickHamonProtection() {
+    private void tickHamonProtection() {
         LivingEntity user = power.getUser();
         if (hamonProtection) {
             HamonSparksLoopSound.playSparkSound(user, user.getBoundingBox().getCenter(), 1.0F, 1);
@@ -1544,6 +1547,35 @@ public class HamonData extends TypeSpecificData {
                     user.getRandomX(0.5), user.getRandomY(), user.getRandomZ(0.5), 
                     (int) (MathUtil.fractionRandomInc(1) * 2));
         }
+    }
+    
+    private void tickWallClimbing() {
+        LivingEntity user = power.getUser();
+        user.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(wallClimbData -> {
+            if (wallClimbData.isHamonWallClimbing() && power.getHeldAction() != ModHamonActions.HAMON_BREATH.get()) {
+                boolean consumedEnergy = false;
+                if (isSkillLearned(ModHamonSkills.WALL_CLIMBING.get())) {
+                    boolean isMoving = false;
+                    if (user instanceof PlayerEntity) {
+                        isMoving = wallClimbData.wallClimbIsMoving;
+                    }
+                    float energyCost = ModHamonActions.HAMON_WALL_CLIMBING.get().getHeldTickEnergyCost(power);
+                    if (!isMoving) {
+                        energyCost *= 0.25f;
+                    }
+                    if (power.hasEnergy(energyCost)) {
+                        power.consumeEnergy(energyCost);
+                        consumedEnergy = true;
+                    }
+                }
+                
+                if (!consumedEnergy) {
+                    if (!user.level.isClientSide()) {
+                        wallClimbData.stopWallClimbing();
+                    }
+                }
+            }
+        });
     }
     
     public boolean getRebuffOverdrive() {

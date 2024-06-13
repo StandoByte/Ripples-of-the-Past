@@ -638,6 +638,10 @@ public class MCUtil {
         return hand == Hand.MAIN_HAND ? entity.getMainArm() : getOppositeSide(entity.getMainArm());
     }
     
+    public static Hand getHand(LivingEntity entity, HandSide handSide) {
+        return entity.getMainArm() == handSide ? Hand.MAIN_HAND : Hand.OFF_HAND;
+    }
+    
     public static HandSide getOppositeSide(HandSide side) {
         return side == HandSide.LEFT ? HandSide.RIGHT : HandSide.LEFT;
     }

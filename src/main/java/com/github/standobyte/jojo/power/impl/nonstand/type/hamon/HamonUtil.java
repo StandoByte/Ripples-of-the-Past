@@ -536,7 +536,7 @@ public class HamonUtil {
                             return true;
                         }
                         else if (player.isLocalPlayer()) {
-                            BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).triggerRedHighlight(19);
+                            BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).triggerRedHighlight(1);
                         }
                     }
                 }

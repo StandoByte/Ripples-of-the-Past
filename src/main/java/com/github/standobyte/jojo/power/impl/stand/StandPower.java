@@ -239,7 +239,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         }
         else if (user == ClientUtil.getClientPlayer()) {
             if (getStamina() < getMaxStamina() * 0.5F && !StandUtil.standIgnoresStaminaDebuff(this)) {
-                BarsRenderer.getBarEffects(BarType.STAMINA).triggerRedHighlight(user.tickCount);
+                BarsRenderer.getBarEffects(BarType.STAMINA).triggerRedHighlight(999999);
             }
             else {
                 BarsRenderer.getBarEffects(BarType.STAMINA).resetRedHighlight();

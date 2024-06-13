@@ -330,12 +330,15 @@ public abstract class BarsRenderer {
             if (redHighlightTick > 0) redHighlightTick--;
         }
         
-        public void triggerRedHighlight(int ticks) {
-            this.redHighlightTick = ticks;
+        public void triggerRedHighlight(int cycles) {
+            if (redHighlightTick % 10 > 0) cycles--;
+            redHighlightTick = redHighlightTick % 10 + cycles * 10;
         }
         
         public void resetRedHighlight() {
-            this.redHighlightTick = redHighlightTick % 20;
+            if (redHighlightTick > 10) {
+                redHighlightTick = redHighlightTick % 10;
+            }
         }
         
         private float lerpValue(float value, float partialTick) {

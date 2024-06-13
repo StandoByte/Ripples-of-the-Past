@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
 
 import net.minecraft.entity.CreatureAttribute;
@@ -35,6 +36,15 @@ public abstract class LivingEntityMixin extends Entity {
     public void jojoBarrageLessArmorBreaking(LivingEntity entity, DamageSource damageSource, float damageAmount) {
         if (!(damageSource instanceof IModdedDamageSource && ((IModdedDamageSource) damageSource).preventsDamagingArmor())) {
             hurtArmor(damageSource, damageAmount);
+        }
+    }
+    
+    
+    @Inject(method = "onClimbable", at = @At("HEAD"), cancellable = true)
+    public void jojoOnClimbableFlag(CallbackInfoReturnable<Boolean> ci) {
+        if (!this.isSpectator() && this.getCapability(LivingUtilCapProvider.CAPABILITY)
+                .map(cap -> cap.isHamonWallClimbing()).orElse(false)) {
+            ci.setReturnValue(true);
         }
     }
 

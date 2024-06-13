@@ -108,7 +108,7 @@ public class CustomParticlesHelper {
                         x = -x;
                     }
                     
-                    particles.add(new FirstPersonHamonAura.FirstPersonPseudoParticle(x, y, z, sprite, handSide));
+                    particles.add(new FirstPersonHamonAura.HamonAuraPseudoParticle(x, y, z, sprite, handSide));
                 }, particlesPerTick);
             }
         }

@@ -25,6 +25,7 @@ import org.lwjgl.glfw.GLFW;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.controls.ActionKeybindEntry;
 import com.github.standobyte.jojo.client.controls.ActionKeybindEntry.KeyActiveType;
@@ -136,6 +137,7 @@ public class InputHandler {
     private int leftClickBlockDelay;
     
     public boolean hasInput;
+    private boolean wallClimbMoving;
     
     private boolean canLeap;
     
@@ -1106,6 +1108,14 @@ public class InputHandler {
         player.hasImpulse = true;
         Vector3d dash = Vector3d.directionFromRotation(0, player.yRot + yRot).scale(0.5).add(0, 0.2, 0);
         player.setDeltaMovement(player.getDeltaMovement().add(dash));
+    }
+    
+    public void wallClimbClientTick(boolean isMoving, LivingUtilCap wallClimbData) {
+        if (this.wallClimbMoving != isMoving) {
+            PacketManager.sendToServer(ClHasInputPacket.wallClimbing(isMoving));
+            this.wallClimbMoving = isMoving;
+            wallClimbData.wallClimbIsMoving = isMoving;
+        }
     }
     
     

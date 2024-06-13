@@ -35,7 +35,7 @@ public class HamonUiEffectPacket {
         public void handle(HamonUiEffectPacket msg, Supplier<NetworkEvent.Context> ctx) {
             switch (msg.effectType) {
             case NO_ENERGY:
-                BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).triggerRedHighlight(80);
+                BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).triggerRedHighlight(4);
                 break;
             case OUT_OF_BREATH:
                 ActionsOverlayGui.getInstance().setOutOfBreath(false);
