@@ -1552,27 +1552,38 @@ public class HamonData extends TypeSpecificData {
     private void tickWallClimbing() {
         LivingEntity user = power.getUser();
         user.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(wallClimbData -> {
-            if (wallClimbData.isHamonWallClimbing() && power.getHeldAction() != ModHamonActions.HAMON_BREATH.get()) {
-                boolean consumedEnergy = false;
+            if (wallClimbData.isHamonWallClimbing()) {
                 if (isSkillLearned(ModHamonSkills.WALL_CLIMBING.get())) {
                     boolean isMoving = false;
                     if (user instanceof PlayerEntity) {
                         isMoving = wallClimbData.wallClimbIsMoving;
                     }
-                    float energyCost = ModHamonActions.HAMON_WALL_CLIMBING.get().getHeldTickEnergyCost(power);
-                    if (!isMoving) {
-                        energyCost *= 0.25f;
+
+                    if (power.getHeldAction() != ModHamonActions.HAMON_BREATH.get()) {
+                        boolean consumedEnergy = false;
+
+                        float energyCost = ModHamonActions.HAMON_WALL_CLIMBING.get().getHeldTickEnergyCost(power);
+                        if (!isMoving) {
+                            energyCost *= 0.25f;
+                        }
+                        if (power.hasEnergy(energyCost)) {
+                            power.consumeEnergy(energyCost);
+                            consumedEnergy = true;
+                        }
+                        
+                        if (!consumedEnergy) {
+                            if (!user.level.isClientSide()) {
+                                wallClimbData.stopWallClimbing();
+                            }
+                        }
                     }
-                    if (power.hasEnergy(energyCost)) {
-                        power.consumeEnergy(energyCost);
-                        consumedEnergy = true;
+                    
+                    if (user.level.isClientSide()) {
+                        HamonSparksLoopSound.playSparkSound(user, new Vector3d(user.getX(), user.getY(0.75), user.getZ()), 1.0F, true);
                     }
                 }
-                
-                if (!consumedEnergy) {
-                    if (!user.level.isClientSide()) {
-                        wallClimbData.stopWallClimbing();
-                    }
+                else if (!user.level.isClientSide()) {
+                    wallClimbData.stopWallClimbing();
                 }
             }
         });
