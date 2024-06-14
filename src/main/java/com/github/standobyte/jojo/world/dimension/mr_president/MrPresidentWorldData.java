@@ -1,25 +1,46 @@
 package com.github.standobyte.jojo.world.dimension.mr_president;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.capability.world.MrPresidentWorldDataProvider;
+import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.world.dimension.ModDimensions;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.IntNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.RegistryKey;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.registry.Registry;
+import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.common.util.LazyOptional;
 
 public class MrPresidentWorldData {
     private final BiMap<UUID, ChunkSectionPos> allocatedRooms = HashBiMap.create();
+    private final Map<UUID, MrPresidentTurtlePos> trackedTurtlePos = new HashMap<>();
 
     public MrPresidentWorldData(ServerWorld world) {}
+    
+    public static LazyOptional<MrPresidentWorldData> get(MinecraftServer server) {
+        ServerWorld world = server.getLevel(ModDimensions.MR_PRESIDENT);
+        if (world != null) {
+            return world.getCapability(MrPresidentWorldDataProvider.CAPABILITY);
+        }
+        return LazyOptional.empty();
+    }
 
     public INBT toNBT() {
         CompoundNBT nbt = new CompoundNBT();
@@ -29,6 +50,12 @@ public class MrPresidentWorldData {
             CompoundNBT roomNbt = new CompoundNBT();
             roomNbt.putUUID("Turtle", entry.getKey());
             roomNbt.put("Pos", entry.getValue().toNBT());
+            
+            MrPresidentTurtlePos turtleTracked = trackedTurtlePos.get(entry.getKey());
+            if (turtleTracked != null) {
+                turtleTracked.addToNbtEntry(roomNbt);
+            }
+            
             roomsMapNbt.add(roomNbt);
         }
         nbt.put("Rooms", roomsMapNbt);
@@ -44,7 +71,13 @@ public class MrPresidentWorldData {
             CompoundNBT roomNbt = (CompoundNBT) elem;
             ChunkSectionPos pos = ChunkSectionPos.fromNBT(roomNbt.getList("Pos", Constants.NBT.TAG_INT));
             if (pos != null && roomNbt.hasUUID("Turtle")) {
-                allocatedRooms.put(roomNbt.getUUID("Turtle"), pos);
+                UUID id = roomNbt.getUUID("Turtle");
+                allocatedRooms.put(id, pos);
+                
+                MrPresidentTurtlePos turtleTracked = MrPresidentTurtlePos.fromNbtEntry(roomNbt);
+                if (turtleTracked != null) {
+                    trackedTurtlePos.put(id, turtleTracked);
+                }
             }
         }
     }
@@ -57,6 +90,17 @@ public class MrPresidentWorldData {
     @Nullable
     public UUID getTurtleId(ChunkSectionPos roomPos) {
         return allocatedRooms.inverse().get(roomPos);
+    }
+    
+    public void rememberTurtlePosition(Entity user) {
+        MrPresidentTurtlePos pos = this.trackedTurtlePos.computeIfAbsent(user.getUUID(), id -> new MrPresidentTurtlePos());
+        pos.turtleDimension = user.level.dimension();
+        pos.turtlePos = MrPresidentBackTeleporter.posToTeleportTo(user);
+    }
+    
+    @Nullable
+    public MrPresidentTurtlePos getTurtlePosition(UUID turtleId) {
+        return trackedTurtlePos.get(turtleId);
     }
     
     // TODO algorithm for generating rooms position
@@ -79,34 +123,13 @@ public class MrPresidentWorldData {
                     x = ring - 1;
                     z = 1;
                 }
-                else if (z == ring) {
-                    z--;
-                    x = -1;
-                }
-                else if (x == -ring) {
-                    x++;
-                    z = -1;
-                }
-                else if (z == -ring) {
-                    z++;
-                    x = 1;
-                }
-                else if (x > 0 && z > 0) {
-                    x--;
-                    z++;
-                }
-                else if (x < 0 && z > 0) {
-                    x--;
-                    z--;
-                }
-                else if (x < 0 && z < 0) {
-                    x++;
-                    z--;
-                }
-                else if (x > 0 && z < 0) {
-                    x++;
-                    z++;
-                }
+                else if (z == ring)  { z--; x = -1; }
+                else if (x == -ring) { x++; z = -1; }
+                else if (z == -ring) { z++; x = 1;  }
+                else if (x > 0 && z > 0) { x--; z++; }
+                else if (x < 0 && z > 0) { x--; z--; }
+                else if (x < 0 && z < 0) { x++; z--; }
+                else if (x > 0 && z < 0) { x++; z++; }
                 else {
                     throw new RuntimeException("I'm a dumbass");
                 }
@@ -119,6 +142,45 @@ public class MrPresidentWorldData {
         return pos;
     }
     
+    
+    public static class MrPresidentTurtlePos {
+        RegistryKey<World> turtleDimension;
+        Vector3d turtlePos;
+        
+        private MrPresidentTurtlePos() {}
+        
+        MrPresidentTurtlePos(RegistryKey<World> userDimension, Vector3d userPos) {
+            this.turtleDimension = userDimension;
+            this.turtlePos = userPos;
+        }
+        
+        void addToNbtEntry(CompoundNBT nbt) {
+            if (turtleDimension != null && turtlePos != null) {
+                nbt.putString("TurtleDim", turtleDimension.location().toString());
+                MCUtil.nbtPutVec3d(nbt, "TurtlePos", turtlePos);
+            }
+        }
+        
+        @Nullable
+        static MrPresidentTurtlePos fromNbtEntry(CompoundNBT nbt) {
+            if (nbt.contains("TurtleDim", Constants.NBT.TAG_STRING)) {
+                ResourceLocation dimensionId = new ResourceLocation(nbt.getString("TurtleDim"));
+                RegistryKey<World> dimension = MCUtil.getRegistryKeyIfPresent(Registry.DIMENSION_REGISTRY, dimensionId);
+                if (dimension == null) {
+                    return null;
+                }
+                
+                Vector3d pos = MCUtil.nbtGetVec3d(nbt, "TurtlePos");
+                if (pos == null) {
+                    return null;
+                }
+                
+                return new MrPresidentTurtlePos(dimension, pos);
+            }
+            
+            return null;
+        }
+    }
     
     public static class ChunkSectionPos {
         public final int x;

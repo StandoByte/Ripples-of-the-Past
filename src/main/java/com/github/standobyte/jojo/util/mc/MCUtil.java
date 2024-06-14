@@ -13,7 +13,6 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.network.NetworkUtil;
@@ -21,6 +20,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.SpawnParticlePacket;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
+import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -39,7 +39,6 @@ import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.crash.ReportedException;
 import net.minecraft.dispenser.IBlockSource;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntitySpawnPlacementRegistry;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
@@ -82,6 +81,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.ReuseableStream;
 import net.minecraft.util.SoundCategory;
@@ -97,6 +97,7 @@ import net.minecraft.util.math.shapes.ISelectionContext;
 import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.GameRules;
@@ -104,8 +105,6 @@ import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ChunkManager;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.spawner.WorldEntitySpawner;
-import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -738,5 +737,13 @@ public class MCUtil {
     
     public static String getLanguageCode(MinecraftServer server) {
         return server.isDedicatedServer() ? "en_us" : ClientUtil.getCurrentLanguageCode();
+    }
+    
+    
+    
+    @Nullable
+    public static <T> RegistryKey<T> getRegistryKeyIfPresent(RegistryKey<? extends Registry<T>> parent, ResourceLocation location) {
+        String s = (parent.location() + ":" + location).intern();
+        return (RegistryKey<T>) CommonReflection.registryKeyValues().get(s);
     }
 }

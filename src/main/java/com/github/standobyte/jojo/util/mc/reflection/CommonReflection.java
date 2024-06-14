@@ -29,6 +29,7 @@ import net.minecraft.inventory.container.WorkbenchContainer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.tileentity.AbstractFurnaceTileEntity;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.GameRules;
@@ -92,6 +93,17 @@ public class CommonReflection {
     private static final Field FLAT_GENERATION_SETTING_STRUCTURE_FEATURES = ObfuscationReflectionHelper.findField(FlatGenerationSettings.class, "field_202247_j");
     public static Map<Structure<?>, StructureFeature<?, ?>> flatGenSettingsStructures() {
         return ReflectionUtil.getFieldValue(FLAT_GENERATION_SETTING_STRUCTURE_FEATURES, null);
+    }
+    
+    
+    
+    private static final Field REGISTRY_KEY_VALUES_FIELD = ObfuscationReflectionHelper.findField(RegistryKey.class, "field_240898_a_");
+    private static Map<String, RegistryKey<?>> REGISTRY_KEY_VALUES;
+    public static Map<String, RegistryKey<?>> registryKeyValues() {
+        if (REGISTRY_KEY_VALUES == null) {
+            REGISTRY_KEY_VALUES = ReflectionUtil.getFieldValue(REGISTRY_KEY_VALUES_FIELD, null);
+        }
+        return REGISTRY_KEY_VALUES;
     }
     
     
