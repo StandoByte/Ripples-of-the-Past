@@ -24,7 +24,7 @@ public class ActionKeybindEntry {
     
     private OnKeyPress onKeyPress = OnKeyPress.PERFORM;
     private KeyActiveType hudInteraction = KeyActiveType.INSIDE_HUD;
-    private boolean isVisibleInHud = false;
+    private boolean isVisibleInHud = true;
     
     private Action<?> action;
     private KeyBinding keybind;
