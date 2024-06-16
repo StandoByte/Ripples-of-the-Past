@@ -35,7 +35,7 @@ import net.minecraft.util.math.vector.Vector3f;
 
 @SuppressWarnings("unused")
 public class ParseGenericModel {
-    private static final Gson GSON = new GsonBuilder()
+    public static final Gson GSON = new GsonBuilder()
             .setPrettyPrinting()
             .registerTypeAdapter(ModelParsed.Element.class, ModelParsed.Element.DESERIALIZER)
             .registerTypeAdapter(ModelParsed.BlockbenchObj.class, ModelParsed.BlockbenchObj.DESERIALIZER)
@@ -51,7 +51,7 @@ public class ParseGenericModel {
     
     
     
-    private static class ModelParsed implements IParsedModel {
+    public static class ModelParsed implements IParsedModel {
         Resolution resolution;
         List<Element> elements;
         List<BlockbenchObj> outliner;
@@ -62,7 +62,7 @@ public class ParseGenericModel {
         }
         
         
-        static abstract class Element {
+        public static abstract class Element {
             String name;
             UUID uuid;
             boolean visibility;
@@ -71,8 +71,7 @@ public class ParseGenericModel {
             String render_order;
             boolean allow_mirror_modeling;
             
-            abstract void addElement(ModelRenderer parent, ModelParsed.GroupParsed parentParsed, 
-                    List<ModelRenderer.ModelBox> modelCubesCollection, int texWidth, int texHeight);
+            public abstract ModelRenderer.ModelBox makeCube(float[] parentOrigin, int texWidth, int texHeight);
             
             static final JsonDeserializer<Element> DESERIALIZER = new JsonDeserializer<Element>() {
                 
@@ -133,7 +132,7 @@ public class ParseGenericModel {
             }
         }
         
-        static class ElementMesh extends Element {
+        public static class ElementMesh extends Element {
             Map<String, float[]> vertices;
             Map<String, MeshFace> faces;
             
@@ -144,10 +143,9 @@ public class ParseGenericModel {
             }
 
             @Override
-            void addElement(ModelRenderer parent, ModelParsed.GroupParsed parentParsed, 
-                    List<ModelRenderer.ModelBox> modelCubesCollection, int texWidth, int texHeight) {
+            public ModelRenderer.ModelBox makeCube(float[] parentOrigin, int texWidth, int texHeight) {
                 if (origin == null) origin = new float[] { 0, 0, 0 };
-                float[] parentOrigin = parentParsed.origin != null ? parentParsed.origin : new float[] { 0, 0, 0 };
+                if (parentOrigin == null) parentOrigin = new float[] { 0, 0, 0 };
                 
                 MeshModelBox.Builder meshBuilder = new MeshModelBox.Builder(true, texWidth, texHeight);
                 for (Map.Entry<String, MeshFace> meshFace : faces.entrySet()) {
@@ -170,11 +168,12 @@ public class ParseGenericModel {
                         faceBuilder.createFace();
                     }
                 }
-                modelCubesCollection.add(meshBuilder.buildCube());
+                
+                return meshBuilder.buildCube();
             }
         }
         
-        static class ElementCube extends Element {
+        public static class ElementCube extends Element {
             boolean box_uv;
             boolean rescale;
             float[] from;
@@ -189,16 +188,27 @@ public class ParseGenericModel {
                 Integer texture;
             }
             
-            private ModelRenderer.ModelBox makeModelBox(float texWidth, float texHeight, GroupParsed parentParsed) {
+            private Map<Direction, BoxFace> faces() {
+                Map<Direction, BoxFace> facesPerDirection = new EnumMap<>(Direction.class);
+                for (Direction direction : Direction.values()) {
+                    if (this.faces.containsKey(direction.getName())) {
+                        facesPerDirection.put(direction, this.faces.get(direction.getName()));
+                    }
+                }
+                return facesPerDirection;
+            }
+
+            @Override
+            public ModelRenderer.ModelBox makeCube(float[] parentOrigin, int texWidth, int texHeight) {
                 float size[] = { 
                         to[0] - from[0], 
                         to[1] - from[1], 
                         to[2] - from[2] };
                 
                 Vector3f originJ = new Vector3f(
-                      -(from[0] - parentParsed.origin[0]),
-                        -(to[1] - parentParsed.origin[1]) + size[1],
-                          to[2] - parentParsed.origin[2]
+                      -(from[0] - parentOrigin[0]),
+                        -(to[1] - parentOrigin[1]) + size[1],
+                          to[2] - parentOrigin[2]
                         );
                 
                 float x0 = originJ.x() - inflate - size[0];
@@ -294,22 +304,6 @@ public class ParseGenericModel {
                 ClientReflection.setPolygons(box, polygons);
                 
                 return box;
-            }
-            
-            private Map<Direction, BoxFace> faces() {
-                Map<Direction, BoxFace> facesPerDirection = new EnumMap<>(Direction.class);
-                for (Direction direction : Direction.values()) {
-                    if (this.faces.containsKey(direction.getName())) {
-                        facesPerDirection.put(direction, this.faces.get(direction.getName()));
-                    }
-                }
-                return facesPerDirection;
-            }
-
-            @Override
-            void addElement(ModelRenderer parent, GroupParsed parentParsed, 
-                    List<ModelRenderer.ModelBox> modelCubesCollection, int texWidth, int texHeight) {
-                modelCubesCollection.add(makeModelBox(texWidth, texHeight, parentParsed));
             }
         }
         
@@ -459,7 +453,7 @@ public class ParseGenericModel {
                     addBlockbenchObjectRecursive(model, autoGenRotatedCube, null, parent, parentParsed);
                 }
                 else {
-                    element.addElement(parent, parentParsed, parentCubesCollection, model.texWidth, model.texHeight);
+                    parentCubesCollection.add(element.makeCube(parentParsed.origin, model.texWidth, model.texHeight));
                 }
             }
         }
