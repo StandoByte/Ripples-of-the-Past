@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
+import com.github.standobyte.jojo.item.MrPresidentKeyItem;
 import com.github.standobyte.jojo.potion.StandVirusEffect;
 import com.github.standobyte.jojo.potion.StandVirusEffect.MobStandGiver;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -130,7 +131,7 @@ public class CocoJumboTurtleEntity extends TurtleEntity implements IMobStandUser
     @Override
     public ActionResultType mobInteract(PlayerEntity pPlayer, Hand pHand) {
         ItemStack heldItem = pPlayer.getItemInHand(pHand);
-        if (!this.hasKey() && heldItem.getItem() == ModItems.MR_PRESIDENT_KEY.get()) {
+        if (!this.hasKey() && heldItem.getItem() instanceof MrPresidentKeyItem) {
             ActionConditionResult canPutKey = canPutKey(heldItem);
             if (canPutKey.isPositive()) {
 //                pPlayer.playSound(SoundEvents., 1.0F, 1.0F);
@@ -173,6 +174,9 @@ public class CocoJumboTurtleEntity extends TurtleEntity implements IMobStandUser
     }
     
     private ActionConditionResult canPutKey(ItemStack item) {
+        if (item.getItem() == ModItems.MR_PRESIDENT_MASTER_KEY.get()) {
+            return ActionConditionResult.POSITIVE;
+        }
         if (hasAssignedKey()) {
             CompoundNBT nbt = item.getTag();
             if (nbt == null) {

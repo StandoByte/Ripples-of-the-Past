@@ -128,7 +128,6 @@
   "item.jojo.mista_revolver.reference_quote": "\"If you don't answer within 2 seconds of me asking, I'll put a bullet in both of your eye sockets... Uno, due... I won't wait any longer.\"",
   "item.jojo.lighter": "Lighter",
   "item.jojo.lighter.reference_quote": "\"This test will evaluate your trustworthiness... through the flame of this lighter!\"",
-  "item.jojo.mr_president_key": "Turtle Key",
   "item.jojo.stone_pendant": "Stone Pendant",
   "item.jojo.stone_pendant.reference_quote": "\"I'm informed that your divorced father told your mother to give it to you if you were in trouble.\"",
   "item.jojo.harpoon": "Harpoon",
@@ -1247,7 +1246,10 @@
   
   "stand.jojo.mr_president": "Mr.President",
   "entity.jojo.coco_jumbo_turtle": "Coco Jumbo",
+  "item.jojo.mr_president_key": "Turtle Key",
   "item.jojo.mr_president_key.named": "%s key",
+  "item.jojo.mr_president_master_key": "Master Key",
+  "item.jojo.mr_president_master_key.hint": "Fits to the keyhole of every turtle, can be used to recover a lost key.",
   "coco_jumbo.key.not_blank": "not_blank_key",
   "coco_jumbo.key.blank": "blank_key",
   "coco_jumbo.key.wrong": "wrong_key",

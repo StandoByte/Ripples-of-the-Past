@@ -127,7 +127,6 @@
   "_item.jojo.mista_revolver.reference_quote": "\"If you don't answer within 2 seconds of me asking, I'll put a bullet in both of your eye sockets... Uno, due... I won't wait any longer.\"",
   "_item.jojo.lighter": "Lighter",
   "_item.jojo.lighter.reference_quote": "\"This test will evaluate your trustworthiness... through the flame of this lighter!\"",
-  "item.jojo.mr_president_key": "Ключ от черепахи",
   "_item.jojo.stone_pendant": "Stone Pendant",
   "_item.jojo.stone_pendant.reference_quote": "\"I'm informed that your divorced father told your mother to give it to you if you were in trouble.\"",
   "_item.jojo.harpoon": "Harpoon",
@@ -1227,8 +1226,11 @@
   
   "stand.jojo.mr_president": "Mr.President",
   "_entity.jojo.coco_jumbo_turtle": "Coco Jumbo",
+  "item.jojo.mr_president_key": "Ключ от черепахи",
   "item.jojo.mr_president_key.named": "Ключ от %s",
-  "_block.jojo.coco_jumbo_shell": "Turtle Shell",
+  "_item.jojo.mr_president_master_key": "Master Key",
+  "_item.jojo.mr_president_master_key.hint": "Fits to the keyhole of every turtle, can be used to recover lost keys.",
+  "block.jojo.coco_jumbo_shell": "Панцирь черепахи",
   "_block.jojo.mr_president_gem": "Key Gem",
   
   "jojo.to_be_continued": "Продолжение следует"
