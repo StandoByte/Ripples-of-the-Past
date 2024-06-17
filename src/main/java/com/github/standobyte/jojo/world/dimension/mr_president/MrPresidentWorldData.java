@@ -210,6 +210,10 @@ public class MrPresidentWorldData {
             return null;
         }
         
+        public BlockPos blockPosition(BlockPos llOffset) {
+            return llOffset.offset(this.x << 4, this.y << 4, this.z << 4);
+        }
+        
         public ListNBT toNBT() {
             ListNBT nbt = new ListNBT();
             nbt.add(IntNBT.valueOf(x));

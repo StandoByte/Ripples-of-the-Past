@@ -1,0 +1,31 @@
+{
+  "parent": "jojo:jojo/coco_jumbo",
+  "display": {
+    "icon": {
+      "item": "jojo:mr_president_key"
+    },
+    "title": {
+      "translate": "advancements.jojo.mr_president.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.mr_president.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "entered_room": {
+      "trigger": "minecraft:changed_dimension",
+      "conditions": {
+        "to": "jojo:mr_president"
+      }
+    }
+  },
+  "requirements": [
+    [
+      "entered_room"
+    ]
+  ]
+}

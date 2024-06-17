@@ -9,6 +9,7 @@
     "ServerPlayerEntityMixin",
     "ServerChunkProviderMixin",
     "FireBlockMixin",
+    "PlacedBlockTriggerMixin",
     "TheMostUnnecessaryMixin"
   ],
   "client": [

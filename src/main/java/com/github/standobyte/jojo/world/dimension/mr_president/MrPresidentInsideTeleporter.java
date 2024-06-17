@@ -40,7 +40,7 @@ public class MrPresidentInsideTeleporter implements ITeleporter {
                 ModStructures.CONFIGURED_MR_PRESIDENT_ROOM.get().place(destinationWorld, 
                         destinationWorld.getChunkSource().getGenerator(), destinationWorld.getRandom(), cornerPos);
             }
-            Vector3d pos = new Vector3d(cornerPos.getX() + 8, cornerPos.getY() + 8, cornerPos.getZ() + 8);
+            Vector3d pos = new Vector3d(cornerPos.getX() + 8, cornerPos.getY() + 6, cornerPos.getZ() + 8);
             entity.teleportTo(pos.x, pos.y, pos.z);
         }
         
