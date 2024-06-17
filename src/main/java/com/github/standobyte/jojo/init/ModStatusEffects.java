@@ -116,6 +116,7 @@ public class ModStatusEffects {
                 HAMON_SPREAD.get(), 
                 FULL_INVISIBILITY.get(), 
                 VAMPIRE_SUN_BURN.get(),
+                STAND_VIRUS.get(),
         		FREEZE.get());
     }
     

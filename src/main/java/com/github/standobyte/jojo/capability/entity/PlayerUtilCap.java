@@ -339,8 +339,7 @@ public class PlayerUtilCap {
         POWER_CONTROLS,
         HAMON_WINDOW,
         HAMON_BREATH_GUIDE,
-        HIGH_STAND_RANGE,
-        SHOOT_COCO_JUMBO;
+        HIGH_STAND_RANGE;
     }
     
     public void notificationsFromNBT(CompoundNBT nbt) {

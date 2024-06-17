@@ -109,7 +109,11 @@ public class StandArrowEntity extends AbstractArrowEntity {
         if (isOnFire() && !dodge) {
             target.setSecondsOnFire(5);
         }
-
+        
+        if (shooter != null) {
+            arrowItem.hurtAndBreak(1, (LivingEntity) shooter, entity -> remove());
+        }
+        
         if (target.hurt(damageSource, (float) damage)) {
             if (dodge) {
                 return;

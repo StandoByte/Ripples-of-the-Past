@@ -54,7 +54,7 @@ public class ItemRendererMixin {
             float partialTick = Minecraft.getInstance().getDeltaFrameTime();
             float overlayAmount = InventoryItemHighlight.getHighlightAmount(pItemStack.getItem(), partialTick);
             if (overlayAmount >= 0) {
-                int highlight = OverlayTexture.pack(OverlayTexture.u(overlayAmount * 0.6f), OverlayTexture.v(false));
+                int highlight = OverlayTexture.pack(OverlayTexture.u(overlayAmount), OverlayTexture.v(false));
                 return highlight;
             }
         }

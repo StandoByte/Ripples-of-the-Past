@@ -12,10 +12,20 @@ import net.minecraft.util.math.MathHelper;
 
 public class InventoryItemHighlight {
     private static final Map<ResourceLocation, MutableInt> HIGHLIGHT_TIMER = new HashMap<>();
+    private static final int CYCLE = 20;
     
     public static void highlightItem(Item item, int ticks) {
-        if (item != null && ticks > 0) {
-            HIGHLIGHT_TIMER.put(item.getRegistryName(), new MutableInt(ticks));
+        if (item != null && ticks >= CYCLE) {
+            ticks = ticks / CYCLE * CYCLE;
+            ResourceLocation key = item.getRegistryName();
+            MutableInt curTimer = HIGHLIGHT_TIMER.get(key);
+            if (curTimer != null) {
+                if (curTimer.intValue() % CYCLE > 0) ticks -= CYCLE;
+                curTimer.setValue(curTimer.getValue() % CYCLE + ticks);
+            }
+            else {
+                HIGHLIGHT_TIMER.put(key, new MutableInt(ticks));
+            }
         }
     }
     

@@ -3,11 +3,11 @@ package com.github.standobyte.jojo.entity.mob;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.render.item.InventoryItemHighlight;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.potion.StandVirusEffect;
 import com.github.standobyte.jojo.potion.StandVirusEffect.MobStandGiver;
@@ -84,11 +84,20 @@ public class CocoJumboTurtleEntity extends TurtleEntity implements IMobStandUser
     public void tick() {
         standPower.tick();
         super.tick();
+        
         if (!level.isClientSide()) {
             for (ServerPlayerEntity player : ((ServerWorld) level).players()) {
                 if (player.distanceToSqr(this) < 36) {
                     ModCriteriaTriggers.MEET_ENTITY.get().trigger(player, this);
                 }
+            }
+        }
+        else if (!standPower.hasPower() && !this.hasEffect(ModStatusEffects.STAND_VIRUS.get())) {
+            if (ClientUtil.getClientPlayer().distanceToSqr(this) < 36) {
+                InventoryItemHighlight.highlightItem(Items.BOW, 20);
+                InventoryItemHighlight.highlightItem(Items.CROSSBOW, 20);
+                InventoryItemHighlight.highlightItem(ModItems.STAND_ARROW.get(), 20);
+                InventoryItemHighlight.highlightItem(ModItems.STAND_ARROW_BEETLE.get(), 20);
             }
         }
     }
@@ -126,18 +135,6 @@ public class CocoJumboTurtleEntity extends TurtleEntity implements IMobStandUser
             if (canPutKey.isPositive()) {
 //                pPlayer.playSound(SoundEvents., 1.0F, 1.0F);
                 heldItem.shrink(1);
-                if (!standPower.hasPower()) {
-                    if (!level.isClientSide()) {
-                        pPlayer.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(
-                                cap -> cap.sendNotification(OneTimeNotification.SHOOT_COCO_JUMBO, new TranslationTextComponent("give_mr_president_hint")));
-                    }
-                    else {
-                        InventoryItemHighlight.highlightItem(Items.BOW, 120);
-                        InventoryItemHighlight.highlightItem(Items.CROSSBOW, 120);
-                        InventoryItemHighlight.highlightItem(ModItems.STAND_ARROW.get(), 120);
-                        InventoryItemHighlight.highlightItem(ModItems.STAND_ARROW_BEETLE.get(), 120);
-                    }
-                }
                 if (!level.isClientSide()) {
                     setHasKey(true);
                     entityData.set(ASSIGNED_KEY, true);
@@ -218,14 +215,14 @@ public class CocoJumboTurtleEntity extends TurtleEntity implements IMobStandUser
                     float spawnChancePerTurtle;
                     switch (spawnReason) {
                     case CHUNK_GENERATION:
-                        if (!hasArrowAdvancement)           spawnChancePerTurtle = 0.025f;
-                        else if (!hasTurtleAdvancement)     spawnChancePerTurtle = 0.1f;
-                        else                                spawnChancePerTurtle = 0.05f;
+                        if (!hasArrowAdvancement)           spawnChancePerTurtle = 0.0125f;
+                        else if (!hasTurtleAdvancement)     spawnChancePerTurtle = 0.05f;
+                        else                                spawnChancePerTurtle = 0.025f;
                         break;
                     default:
-                        if (!hasArrowAdvancement)           spawnChancePerTurtle = 0.005f;
-                        else if (!hasTurtleAdvancement)     spawnChancePerTurtle = 0.02f;
-                        else                                spawnChancePerTurtle = 0.01f;
+                        if (!hasArrowAdvancement)           spawnChancePerTurtle = 0.0025f;
+                        else if (!hasTurtleAdvancement)     spawnChancePerTurtle = 0.01f;
+                        else                                spawnChancePerTurtle = 0.005f;
                         break;
                     }
                     
