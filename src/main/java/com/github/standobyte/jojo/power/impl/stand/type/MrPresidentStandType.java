@@ -6,6 +6,7 @@ import java.util.UUID;
 import com.github.standobyte.jojo.entity.mob.CocoJumboTurtleEntity;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.world.dimension.ModDimensions;
 import com.github.standobyte.jojo.world.dimension.mr_president.MrPresidentInsideTeleporter;
 import com.github.standobyte.jojo.world.dimension.mr_president.MrPresidentWorldData;
@@ -47,7 +48,7 @@ public class MrPresidentStandType<T extends StandStats> extends NoManifestationS
                             if (mrPresidentWorld != null) {
                                 for (Entity entity : entities) {
                                     if (!entity.isOnGround() && entity.getDeltaMovement().y < 0 && entity.getY() > user.getY(1)
-                                            && entity.tickCount >= 20) {
+                                            && entity.tickCount >= 20 && !MCUtil.hasIndirectPassenger(entity, user)) {
                                         UUID turtleId = user.getUUID();
                                         ITeleporter teleporter = new MrPresidentInsideTeleporter(turtleId);
                                         /* can't call changeDimension right away, 

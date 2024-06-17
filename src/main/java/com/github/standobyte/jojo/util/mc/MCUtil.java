@@ -439,6 +439,21 @@ public class MCUtil {
     }
     
     
+    public static boolean hasIndirectPassenger(Entity vehicle, Entity passenger) {
+        for (Entity entity : vehicle.getPassengers()) {
+            if (entity.equals(passenger)) {
+                return true;
+            }
+            
+            if (entity.hasIndirectPassenger(passenger)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    
     public static void trySpawnMob(IServerWorld world, EntityType<?> type, SpawnReason spawnReason, Random random) {
 //        boolean spawned = false;
 //

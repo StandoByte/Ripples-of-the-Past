@@ -1229,7 +1229,7 @@
   "item.jojo.mr_president_key": "Ключ от черепахи",
   "item.jojo.mr_president_key.named": "Ключ от %s",
   "_item.jojo.mr_president_master_key": "Master Key",
-  "_item.jojo.mr_president_master_key.hint": "Fits to the keyhole of every turtle, can be used to recover lost keys.",
+  "_item.jojo.mr_president_master_key.hint": "Can be used to recover a lost key for a locked turtle.",
   "block.jojo.coco_jumbo_shell": "Панцирь черепахи",
   "_block.jojo.mr_president_gem": "Key Gem",
   
