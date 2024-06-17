@@ -8,7 +8,7 @@
   "ambient_light": 15,
   "fixed_time": 6000,
   "piglin_safe": false,
-  "bed_works": false,
+  "bed_works": true,
   "respawn_anchor_works": false,
   "has_raids": false,
   "logical_height": 256,

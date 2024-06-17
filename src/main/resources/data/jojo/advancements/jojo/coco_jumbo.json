@@ -2,7 +2,8 @@
   "parent": "jojo:jojo/stand_arrow",
   "display": {
     "icon": {
-      "item": "jojo:mr_president_key"
+      "item": "jojo:meteoric_scrap",
+      "nbt": "{Icon:14}"
     },
     "title": {
       "translate": "advancements.jojo.coco_jumbo.title"

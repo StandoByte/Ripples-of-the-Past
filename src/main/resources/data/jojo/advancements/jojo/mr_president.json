@@ -2,7 +2,7 @@
   "parent": "jojo:jojo/coco_jumbo",
   "display": {
     "icon": {
-      "item": "jojo:mr_president_key"
+      "item": "jojo:coco_jumbo_shell"
     },
     "title": {
       "translate": "advancements.jojo.mr_president.title"

@@ -1,7 +1,7 @@
 {
   "type": "minecraft:crafting_shaped",
   "pattern": [
-    " ng",
+    " nr",
     " nn",
     "n  "
   ],
@@ -9,8 +9,8 @@
     "n": {
       "tag": "forge:nuggets/gold"
     },
-    "g": {
-      "tag": "forge:glass/red"
+    "r": {
+      "tag": "forge:storage_blocks/redstone"
     }
   },
   "result": {

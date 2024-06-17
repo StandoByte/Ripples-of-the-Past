@@ -139,6 +139,7 @@ public class CocoJumboTurtleEntity extends TurtleEntity implements IMobStandUser
                 if (!level.isClientSide()) {
                     setHasKey(true);
                     entityData.set(ASSIGNED_KEY, true);
+                    ModCriteriaTriggers.COCO_JUMBO_KEY.get().trigger((ServerPlayerEntity) pPlayer);
                 }
                 return ActionResultType.SUCCESS;
             }

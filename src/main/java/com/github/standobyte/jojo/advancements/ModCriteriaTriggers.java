@@ -66,6 +66,8 @@ public class ModCriteriaTriggers {
             new CriteriaTriggerSupplier<>(() -> new SoulAscensionTrigger(new ResourceLocation(JojoMod.MOD_ID, "soul_ascension")));
     public static final CriteriaTriggerSupplier<MetEntityTrigger> MEET_ENTITY = 
             new CriteriaTriggerSupplier<>(() -> new MetEntityTrigger(new ResourceLocation(JojoMod.MOD_ID, "met_modded_mob")));
+    public static final CriteriaTriggerSupplier<UnconditionalTrigger> COCO_JUMBO_KEY = 
+            new CriteriaTriggerSupplier<>(() -> new UnconditionalTrigger(new ResourceLocation(JojoMod.MOD_ID, "coco_jumbo_key")));
     public static final CriteriaTriggerSupplier<UnconditionalTrigger> MR_PRESIDENT_ROOM_WALLS = 
             new CriteriaTriggerSupplier<>(() -> new UnconditionalTrigger(new ResourceLocation(JojoMod.MOD_ID, "mr_president_walls")));
     // FIXME (BIIM) un-hide the achievement

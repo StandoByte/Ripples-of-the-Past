@@ -2,7 +2,7 @@
   "parent": "jojo:jojo/mr_president",
   "display": {
     "icon": {
-      "item": "jojo:mr_president_key"
+      "item": "minecraft:bricks"
     },
     "title": {
       "translate": "advancements.jojo.mr_president_walls.title"
