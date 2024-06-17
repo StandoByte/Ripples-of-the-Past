@@ -211,6 +211,9 @@ public class PlayerUtilCap {
         PacketManager.sendToClient(new TrKnivesCountPacket(player.getId(), knives), player);
         PacketManager.sendToClient(new TrWalkmanEarbudsPacket(player.getId(), walkmanEarbuds), player);
         PacketManager.sendToClient(new TrPlayerVisualDetailPacket(player.getId(), ateInkPastaTicks), player);
+        if (!metEntityTypesId.isEmpty()) {
+            PacketManager.sendToClient(new MetEntityTypesPacket(metEntityTypesId), player);
+        }
     }
     
     
@@ -539,6 +542,9 @@ public class PlayerUtilCap {
         return geUIState;
     }
     
+    public boolean metEntityType(EntityType<?> entityType) {
+        return metEntityTypesId.contains(entityType.getRegistryName());
+    }
     
     
     
