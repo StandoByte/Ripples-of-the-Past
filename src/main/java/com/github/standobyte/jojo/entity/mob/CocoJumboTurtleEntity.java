@@ -196,6 +196,7 @@ public class CocoJumboTurtleEntity extends TurtleEntity implements IMobStandUser
     
 
     public static final ResourceLocation GOT_ARROW_ADVANCEMENT = new ResourceLocation(JojoMod.MOD_ID, "jojo/stand_arrow");
+    public static final ResourceLocation MET_TURTLE_ADVANCEMENT = new ResourceLocation(JojoMod.MOD_ID, "jojo/coco_jumbo");
     private static long lastSpawnTime;
     public static void onRegularTutelSpawn(LivingSpawnEvent.CheckSpawn event) {
         SpawnReason spawnReason = event.getSpawnReason();
@@ -211,24 +212,36 @@ public class CocoJumboTurtleEntity extends TurtleEntity implements IMobStandUser
                 PlayerEntity nearestPlayer = spawnRegion.getLevel().getNearestPlayer(x, y, z, -1, EntityPredicates.NO_SPECTATORS);
                 if (nearestPlayer instanceof ServerPlayerEntity) {
                     ServerPlayerEntity player = (ServerPlayerEntity) nearestPlayer;
-                    Advancement arrowAdvancement = player.server.getAdvancements().getAdvancement(GOT_ARROW_ADVANCEMENT);
-                    if (arrowAdvancement != null) {
-                        boolean hasAdvancement = player.getAdvancements().getOrStartProgress(arrowAdvancement).isDone();
-                        float spawnChancePerTurtle = spawnReason == SpawnReason.CHUNK_GENERATION ? 0.2f : 0.04f;
-                        if (hasAdvancement && player.getRandom().nextFloat() < spawnChancePerTurtle) {
-                            LivingEntity turtle = event.getEntityLiving();
-                            MobEntity extraTurtle = ModEntityTypes.COCO_JUMBO_TURTLE.get().create(spawnRegion.getLevel());
+                    boolean hasArrowAdvancement = hasAdvancement(player, GOT_ARROW_ADVANCEMENT);
+                    boolean hasTurtleAdvancement = hasAdvancement(player, MET_TURTLE_ADVANCEMENT);
+                    
+                    float spawnChancePerTurtle;
+                    switch (spawnReason) {
+                    case CHUNK_GENERATION:
+                        if (!hasArrowAdvancement)           spawnChancePerTurtle = 0.025f;
+                        else if (!hasTurtleAdvancement)     spawnChancePerTurtle = 0.1f;
+                        else                                spawnChancePerTurtle = 0.05f;
+                        break;
+                    default:
+                        if (!hasArrowAdvancement)           spawnChancePerTurtle = 0.005f;
+                        else if (!hasTurtleAdvancement)     spawnChancePerTurtle = 0.02f;
+                        else                                spawnChancePerTurtle = 0.01f;
+                        break;
+                    }
+                    
+                    if (player.getRandom().nextFloat() < spawnChancePerTurtle) {
+                        LivingEntity turtle = event.getEntityLiving();
+                        MobEntity extraTurtle = ModEntityTypes.COCO_JUMBO_TURTLE.get().create(spawnRegion.getLevel());
 
-                            extraTurtle.moveTo(x, y, z, turtle.getRandom().nextFloat() * 360.0F, 0.0F);
-                            if (ForgeHooks.canEntitySpawn(extraTurtle, spawnRegion, x, y, z, null, spawnReason) != -1
-                                    && extraTurtle.checkSpawnRules(spawnRegion, spawnReason) && extraTurtle.checkSpawnObstruction(spawnRegion)) {
-                                ILivingEntityData entityData = null;
-                                entityData = extraTurtle.finalizeSpawn(spawnRegion, 
-                                        spawnRegion.getCurrentDifficultyAt(extraTurtle.blockPosition()), 
-                                        spawnReason, entityData, null);
-                                spawnRegion.addFreshEntityWithPassengers(extraTurtle);
-                                lastSpawnTime = event.getWorld().dayTime();
-                            }
+                        extraTurtle.moveTo(x, y, z, turtle.getRandom().nextFloat() * 360.0F, 0.0F);
+                        if (ForgeHooks.canEntitySpawn(extraTurtle, spawnRegion, x, y, z, null, spawnReason) != -1
+                                && extraTurtle.checkSpawnRules(spawnRegion, spawnReason) && extraTurtle.checkSpawnObstruction(spawnRegion)) {
+                            ILivingEntityData entityData = null;
+                            entityData = extraTurtle.finalizeSpawn(spawnRegion, 
+                                    spawnRegion.getCurrentDifficultyAt(extraTurtle.blockPosition()), 
+                                    spawnReason, entityData, null);
+                            spawnRegion.addFreshEntityWithPassengers(extraTurtle);
+                            lastSpawnTime = event.getWorld().dayTime();
                         }
                     }
                 }
@@ -238,6 +251,15 @@ public class CocoJumboTurtleEntity extends TurtleEntity implements IMobStandUser
             break;
         }
         
+    }
+    
+    
+    private static boolean hasAdvancement(ServerPlayerEntity player, ResourceLocation advancementPath) {
+        Advancement advancement = player.server.getAdvancements().getAdvancement(advancementPath);
+        if (advancement != null) {
+            return player.getAdvancements().getOrStartProgress(advancement).isDone();
+        }
+        return false;
     }
 
 }
