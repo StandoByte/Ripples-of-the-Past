@@ -194,14 +194,14 @@ public class ClientModSettingsScreen extends SettingsScreen {
             addButton(timeStopAnimation.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
             
             
-            BooleanSetting standMotionTick = new BooleanSetting(settings, 
+            BooleanSetting standMotionTilt = new BooleanSetting(settings, 
                     new TranslationTextComponent("jojo.config.client.standMotionTilt"), 
                     new TranslationTextComponent("jojo.config.client.standMotionTilt.tooltip")
                     ) {
                 @Override public boolean get() { return settingsValues._standMotionTilt; }
                 @Override public void set(boolean value) { settingsValues._standMotionTilt = value; }
             };
-            addButton(standMotionTick.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
+//            addButton(standMotionTilt.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
             
             addBackButton(DialogTexts.GUI_BACK, i);
         }
