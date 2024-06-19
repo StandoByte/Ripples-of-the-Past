@@ -1181,12 +1181,11 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
+    @Deprecated
     public static <P extends IPower<P, ?>> void renderActionIcon(MatrixStack matrixStack, Action<P> action, P power, 
             float x, float y, float brightness, float alpha) {
         boolean changeColor = brightness < 1 || alpha < 1;
-        if (changeColor) {
-            RenderSystem.color4f(brightness, brightness, brightness, alpha);
-        }
+        if (changeColor) RenderSystem.color4f(brightness, brightness, brightness, alpha);
 
         Minecraft mc = Minecraft.getInstance();
         boolean specialRender = false;
@@ -1216,9 +1215,7 @@ public class ActionsOverlayGui extends AbstractGui {
             BlitFloat.blitFloat(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
         }
         
-        if (changeColor) {
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-        }
+        if (changeColor) RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
     }
     
     private <P extends IPower<P, ?>> ActionConditionResult actionAvailability(Action<P> action, ActionsModeConfig<P> mode, 

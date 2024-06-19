@@ -8,15 +8,19 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.stand.effect.GECreatedLifeformEffect;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.GETransformationEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -68,5 +72,19 @@ public class GoldExperienceRevertLifeform extends StandAction {
             GECreatedLifeformEffect effect = (GECreatedLifeformEffect) e;
             return (IFormattableTextComponent) new TranslationTextComponent(key + ".param", effect.getName());
         }).orElse(super.getTranslatedName(power, key));
+    }
+    
+    @Override
+    public void renderActionIcon(MatrixStack matrixStack, IStandPower power, float x, float y) {
+        ItemStack sourceItem = StandEffectsTracker.getTargetLookedAt((IStandPower) power, 
+                ModStandEffects.GE_CREATED_LIFEFORM.get(), GoldExperienceRevertLifeform.MARKER_DISTANCE, ClientUtil.getClientPlayer())
+                .map(effect -> ((GECreatedLifeformEffect) effect).getItemView())
+                .orElse(ItemStack.EMPTY);
+        if (!sourceItem.isEmpty()) {
+            Minecraft.getInstance().getItemRenderer().renderAndDecorateFakeItem(sourceItem, (int) x, (int) y);
+        }
+        else {
+            super.renderActionIcon(matrixStack, power, x, y);
+        }
     }
 }

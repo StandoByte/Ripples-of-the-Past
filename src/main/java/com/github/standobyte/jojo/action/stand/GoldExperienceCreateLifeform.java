@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.action.non_stand.HamonOrganismInfusion;
 import com.github.standobyte.jojo.action.stand.effect.GECreatedLifeformEffect;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.ui.screen.stand.ge.EntityTypeIcon;
 import com.github.standobyte.jojo.entity.GETransformationEntity;
 import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MolotovEntity;
@@ -32,6 +33,7 @@ import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.ObjectWrapper;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.AgeableEntity;
@@ -557,6 +559,17 @@ public class GoldExperienceCreateLifeform extends StandAction {
         }
         else {
             return super.getTranslatedName(power, key);
+        }
+    }
+    
+    @Override
+    public void renderActionIcon(MatrixStack matrixStack, IStandPower power, float x, float y) {
+        EntityType<?> selectedMob = GoldExperienceCreateLifeform.getChosenEntityType(ClientUtil.getClientPlayer());
+        if (selectedMob != null) {
+            EntityTypeIcon.renderIcon(selectedMob, matrixStack, x, y);
+        }
+        else {
+            super.renderActionIcon(matrixStack, power, x, y);
         }
     }
 }

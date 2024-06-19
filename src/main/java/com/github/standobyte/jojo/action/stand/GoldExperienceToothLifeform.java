@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.stand.effect.GECreatedLifeformEffect;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.ui.screen.stand.ge.EntityTypeIcon;
 import com.github.standobyte.jojo.entity.GETransformationEntity;
 import com.github.standobyte.jojo.entity.ObjectEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -19,6 +20,7 @@ import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -201,5 +203,16 @@ public class GoldExperienceToothLifeform extends StandEntityActionModifier {
         }
         
         return super.getTranslatedName(power, key);
+    }
+    
+    @Override
+    public void renderActionIcon(MatrixStack matrixStack, IStandPower power, float x, float y) {
+        EntityType<?> selectedMob = GoldExperienceCreateLifeform.getChosenEntityType(ClientUtil.getClientPlayer());
+        if (selectedMob != null) {
+            EntityTypeIcon.renderIcon(selectedMob, matrixStack, x, y);
+        }
+        else {
+            super.renderActionIcon(matrixStack, power, x, y);
+        }
     }
 }
