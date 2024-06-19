@@ -21,6 +21,7 @@ import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MolotovEntity;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
+import com.github.standobyte.jojo.item.MolotovItem;
 import com.github.standobyte.jojo.itemtracking.SidedItemTrackerMap;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack.KnownItemState;
@@ -339,40 +340,6 @@ public class GoldExperienceCreateLifeform extends StandAction {
                 if (!tfTargetFound) {
                     ItemStack heldItem = user.getItemInHand(Hand.OFF_HAND);
                     if (!heldItem.isEmpty() && canGiveLifeTo(heldItem)) {
-                        Entity itemEntity;
-                        ItemStack transformedItem;
-                        if (heldItem.getItem() instanceof BucketItem) {
-                            BucketItem bucketType = (BucketItem) heldItem.getItem();
-                            Fluid fluid = bucketType.getFluid();
-                            transformedItem = new ItemStack(fluid.getBucket());
-                            bucketType.checkExtraContent(world, heldItem, performer.blockPosition());
-                        }
-                        else {
-                            transformedItem = heldItem.copy();
-                        }
-                        transformedItem.setCount(1);
-                        if (heldItem.getItem() instanceof ThrowablePotionItem) {
-                            PotionEntity potionEntity = new PotionEntity(world, user);
-                            potionEntity.setItem(transformedItem);
-                            itemEntity = potionEntity;
-                        }
-                        else if (heldItem.getItem() == Items.ENDER_PEARL) {
-                            EnderPearlEntity pearlEntity = new EnderPearlEntity(world, user);
-                            itemEntity = pearlEntity;
-                        }
-                        else if (heldItem.getItem() == ModItems.MOLOTOV.get()) {
-                            MolotovEntity molotovEntity = new MolotovEntity(world, user);
-                            itemEntity = molotovEntity;
-                        }
-                        else {
-                            itemEntity = new ItemEntity(world, 0, 0, 0, transformedItem);
-                        }
-                        if (heldItem.hasCustomHoverName()) {
-                            customName.set(heldItem.getHoverName());
-                        }
-                        if (!power.isUserCreative()) heldItem.shrink(1);
-                        
-                        tf.getTfSourceData().withEntitySource(itemEntity);
                         tfTargetFound = true;
                         mobFromInventory(tf, heldItem, world, 
                                 user, performer.blockPosition(), customName);
@@ -466,6 +433,10 @@ public class GoldExperienceCreateLifeform extends StandAction {
         else if (item.getItem() == Items.ENDER_PEARL) {
             EnderPearlEntity pearlEntity = new EnderPearlEntity(world, wouldBeThrower);
             itemEntity = pearlEntity;
+        }
+        else if (item.getItem() == ModItems.MOLOTOV.get() && wouldBeThrower instanceof PlayerEntity && MolotovItem.useFire((PlayerEntity) wouldBeThrower, world)) {
+            MolotovEntity molotovEntity = new MolotovEntity(world, wouldBeThrower);
+            itemEntity = molotovEntity;
         }
         else {
             itemEntity = new ItemEntity(world, 0, 0, 0, transformedItem);
