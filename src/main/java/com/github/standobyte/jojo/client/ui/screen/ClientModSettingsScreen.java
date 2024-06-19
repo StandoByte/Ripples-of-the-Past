@@ -201,7 +201,7 @@ public class ClientModSettingsScreen extends SettingsScreen {
                 @Override public boolean get() { return settingsValues._standMotionTilt; }
                 @Override public void set(boolean value) { settingsValues._standMotionTilt = value; }
             };
-//            addButton(standMotionTilt.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
+            addButton(standMotionTilt.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
             
             addBackButton(DialogTexts.GUI_BACK, i);
         }
