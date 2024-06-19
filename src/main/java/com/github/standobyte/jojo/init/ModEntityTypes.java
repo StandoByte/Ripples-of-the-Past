@@ -52,6 +52,7 @@ import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsKidEntity;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.entity.passive.TurtleEntity;
 import net.minecraft.util.ResourceLocation;
@@ -271,7 +272,7 @@ public class ModEntityTypes {
         event.put(ModEntityTypes.HAMON_MASTER.get(), HamonMasterEntity.createAttributes().build());
         event.put(ModEntityTypes.HUNGRY_ZOMBIE.get(), HungryZombieEntity.createAttributes().build());
         event.put(ModEntityTypes.ROCK_PAPER_SCISSORS_KID.get(), VillagerEntity.createAttributes().build());
-        event.put(ModEntityTypes.COCO_JUMBO_TURTLE.get(), TurtleEntity.createAttributes().build());
+        event.put(ModEntityTypes.COCO_JUMBO_TURTLE.get(), TurtleEntity.createAttributes().add(Attributes.MAX_HEALTH, 60).add(Attributes.ARMOR, 2).build());
         event.put(ModEntityTypes.STAND_USER_DUMMY.get(), MobEntity.createMobAttributes().build());
     }
 }

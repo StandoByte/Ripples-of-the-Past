@@ -1226,12 +1226,21 @@
   
   "stand.jojo.mr_president": "Mr.President",
   "_entity.jojo.coco_jumbo_turtle": "Coco Jumbo",
+  "_item.jojo.coco_jumbo_spawn_egg": "Яйцо призыва Coco Jumbo",
   "item.jojo.mr_president_key": "Ключ от черепахи",
   "item.jojo.mr_president_key.named": "Ключ от %s",
   "_item.jojo.mr_president_master_key": "Master Key",
   "_item.jojo.mr_president_master_key.hint": "Can be used to recover a lost key for a locked turtle.",
   "block.jojo.coco_jumbo_shell": "Панцирь черепахи",
   "_block.jojo.mr_president_gem": "Key Gem",
+  "_advancements.jojo.coco_jumbo.title": "Could This Turtle Be a Stand User?",
+  "_advancements.jojo.coco_jumbo.description": "Find a turtle with a key-shaped hole in its shell",
+  "_advancements.jojo.coco_jumbo_key.title": "No Lock or Door Fits This Key!",
+  "_advancements.jojo.coco_jumbo_key.description": "Put a key into a turtle's shell, so that its Stand only activates when the key is inside.\nEach turtle can only have one key, so don't lose yours!",
+  "_advancements.jojo.mr_president.title": "Traitors Won't Find You in This Vehicle",
+  "_advancements.jojo.mr_president.description": "Enter a room created by the ability of the turtle's Stand",
+  "_advancements.jojo.mr_president_walls.title": "Even the Sofa and Furniture are Real",
+  "_advancements.jojo.mr_president_walls.description": "Decorate the room inside the turtle",
   
   "jojo.to_be_continued": "Продолжение следует"
 }

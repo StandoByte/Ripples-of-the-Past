@@ -250,6 +250,9 @@ public class ModItems {
 //
 //    public static final RegistryObject<MistaRevolverItem> MISTA_REVOLVER = ITEMS.register("mista_revolver",
 //            () -> new MistaRevolverItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
+
+    public static final RegistryObject<SpawnEggItem> COCO_JUMBO_SPAWN_EGG = ITEMS.register("coco_jumbo_spawn_egg", 
+            () -> new ForgeSpawnEggItem(ModEntityTypes.COCO_JUMBO_TURTLE, 0xE7E7E7, 0x00AFAF, new Item.Properties().tab(MAIN_TAB)));
     
     public static final RegistryObject<Item> MR_PRESIDENT_KEY = ITEMS.register("mr_president_key", 
             () -> new MrPresidentKeyItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1), false));

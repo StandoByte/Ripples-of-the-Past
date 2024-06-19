@@ -747,5 +747,12 @@
   "jojo.subtitle.crossfire_hurricane_special_name": "\"クロスファイヤーハリケーンスペシャル!\"",
   "jojo.subtitle.red_bind_name": "\"赤い荒縄（レッド・バインド）!\"",
   
+  "stand.jojo.mr_president": "ミスター・プレジデント",
+  "entity.jojo.coco_jumbo_turtle": "ココ・ジャンボ",
+  "advancements.jojo.coco_jumbo.title": "まさかこの亀『スタンド使い』⁉",
+  "advancements.jojo.coco_jumbo_key.title": "ないんだ！この鍵に合う錠とか扉なんてものは！",
+  "advancements.jojo.mr_president.title": "「裏切り者」には決して見つからずに移動できる",
+  "advancements.jojo.mr_president_walls.title": "宇宙船みてーな亀だなあー",
+  
   "jojo.to_be_continued": "To Be Continued"
 }
