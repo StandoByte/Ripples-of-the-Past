@@ -74,7 +74,34 @@ public class MolotovItem extends Item {
     @Override
     public ActionResult<ItemStack> use(World world, PlayerEntity player, Hand hand) {
         ItemStack heldItem = player.getItemInHand(hand);
-
+        
+        boolean hasFire = useFire(player, world);
+        if (!hasFire) {
+            if (!world.isClientSide()) {
+                player.displayClientMessage(new TranslationTextComponent("jojo.message.action_condition.molotov_fire"), true);
+            }
+            return ActionResult.fail(heldItem);
+        }
+        
+        if (!world.isClientSide) {
+            MolotovEntity molotovEntity = new MolotovEntity(world, player);
+            molotovEntity.setItem(heldItem);
+            molotovEntity.shootFromRotation(player, player.xRot, player.yRot, 0.0F, 0.75F, 1.0F);
+            world.addFreshEntity(molotovEntity);
+            if (!player.abilities.instabuild) {
+                heldItem.shrink(1);
+            }
+            player.awardStat(Stats.ITEM_USED.get(this));
+        }
+        
+        if (!player.isSilent()) {
+            player.playSound(ModSounds.MOLOTOV_THROW.get(), 0.5F, 0.4F / (random.nextFloat() * 0.4F + 0.8F));
+        }
+        
+        return ActionResult.sidedSuccess(heldItem, world.isClientSide());
+    }
+    
+    public static boolean useFire(PlayerEntity player, World world) {
         boolean hasFire = player.isOnFire() || IStandPower.getStandPowerOptional(player).resolve()
                 .map(stand -> stand.getType() == ModStands.MAGICIANS_RED.getStandType()).orElse(false);
         ObjectWrapper<ItemStack> flintAndSteelWr = new ObjectWrapper<>(ItemStack.EMPTY);
@@ -106,7 +133,8 @@ public class MolotovItem extends Item {
             if (!flintAndSteelWr.get().isEmpty()) {
                 hasFire = true;
                 if (!player.isSilent()) {
-                    player.playSound(SoundEvents.FLINTANDSTEEL_USE, 1, random.nextFloat() * 0.4F + 0.8F);
+                    world.playSound(null, player.getX(), player.getY(), player.getZ(), 
+                            SoundEvents.FLINTANDSTEEL_USE, player.getSoundSource(), 1, random.nextFloat() * 0.4F + 0.8F);
                 }
             }
         }
@@ -116,46 +144,29 @@ public class MolotovItem extends Item {
             if (!fireCharge.isEmpty()) {
                 hasFire = true;
                 if (!player.isSilent()) {
-                    player.playSound(SoundEvents.FIRECHARGE_USE, 1, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F);
+                    world.playSound(null, player.getX(), player.getY(), player.getZ(), 
+                            SoundEvents.FIRECHARGE_USE, player.getSoundSource(), 1, (random.nextFloat() - random.nextFloat()) * 0.2F + 1.0F);
                 }
             }
         }
-        if (!hasFire) {
-            if (!world.isClientSide()) {
-                player.displayClientMessage(new TranslationTextComponent("jojo.message.action_condition.molotov_fire"), true);
+        
+        if (hasFire) {
+            ItemStack flintAndSteel = flintAndSteelWr.get();
+            if (!flintAndSteel.isEmpty()) {
+                flintAndSteel.hurtAndBreak(1, player, entity -> {
+                    if (!entity.isSilent()) {
+                        world.playSound(null, player.getX(), player.getY(), player.getZ(), 
+                                SoundEvents.ITEM_BREAK, entity.getSoundSource(), 0.8F, 0.8F + world.random.nextFloat() * 0.4F);
+                        MCUtil.spawnItemParticles(player, flintAndSteel, 5);
+                    }
+                });
             }
-            return ActionResult.fail(heldItem);
-        }
-        
-        if (!world.isClientSide) {
-            MolotovEntity molotovEntity = new MolotovEntity(world, player);
-            molotovEntity.setItem(heldItem);
-            molotovEntity.shootFromRotation(player, player.xRot, player.yRot, 0.0F, 0.75F, 1.0F);
-            world.addFreshEntity(molotovEntity);
-            if (!player.abilities.instabuild) {
-                heldItem.shrink(1);
-                ItemStack flintAndSteel = flintAndSteelWr.get();
-                if (!flintAndSteel.isEmpty()) {
-                    flintAndSteel.hurtAndBreak(1, player, entity -> {
-                        if (!entity.isSilent()) {
-                            world.playSound(null, player.getX(), player.getY(), player.getZ(), 
-                                    SoundEvents.ITEM_BREAK, entity.getSoundSource(), 0.8F, 0.8F + world.random.nextFloat() * 0.4F);
-                            MCUtil.spawnItemParticles(player, flintAndSteel, 5);
-                        }
-                    });
-                }
-                else if (!fireCharge.isEmpty()) {
-                    fireCharge.shrink(1);
-                }
+            else if (!fireCharge.isEmpty()) {
+                fireCharge.shrink(1);
             }
-            player.awardStat(Stats.ITEM_USED.get(this));
         }
         
-        if (!player.isSilent()) {
-            player.playSound(ModSounds.MOLOTOV_THROW.get(), 0.5F, 0.4F / (random.nextFloat() * 0.4F + 0.8F));
-        }
-        
-        return ActionResult.sidedSuccess(heldItem, world.isClientSide());
+        return hasFire;
     }
     
     
