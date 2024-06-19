@@ -1120,28 +1120,41 @@ public class ActionsOverlayGui extends AbstractGui {
             float brightness;
             float alpha;
             if (!result.isQueued()) {
-                brightness = 0.2F;
-                alpha = 0.5F * hotbarAlpha;
+                brightness = 0.2f;
+                alpha = 0.5f * hotbarAlpha;
             }
             else {
-                brightness = 0.75F;
-                alpha = 0.75F * hotbarAlpha;
+                brightness = 0.75f;
+                alpha = 0.75f * hotbarAlpha;
             }
             if (cutWidth > 0) {
                 ClientUtil.enableGlScissor(x + leftCut, y, cutWidth, 16);
-                renderActionIcon(matrixStack, action, power, x, y, brightness, alpha);
+                
+                // action icon
+                boolean changeColor = brightness < 1 || alpha < 1;
+                if (changeColor) RenderSystem.color4f(brightness, brightness, brightness, alpha);
+                action.renderActionIcon(matrixStack, power, x, y);
+                if (changeColor) RenderSystem.color4f(1, 1, 1, 1);
+                
                 // cooldown
                 float ratio = power.getCooldownRatio(action, partialTick);
                 if (ratio > 0) {
                     ClientUtil.fillSingleRect(x, y + 16.0F * (1.0F - ratio), 16, 16.0F * ratio, 255, 255, 255, 127);
                 }
+                
                 ClientUtil.disableGlScissor();
             }
         }
         else {
             if (cutWidth > 0) {
                 ClientUtil.enableGlScissor(x + leftCut, y, cutWidth, 16);
-                renderActionIcon(matrixStack, action, power, x, y, 1, hotbarAlpha);
+                
+                // action icon
+                boolean changeColor = hotbarAlpha < 1;
+                if (changeColor) RenderSystem.color4f(1, 1, 1, hotbarAlpha);
+                action.renderActionIcon(matrixStack, power, x, y);
+                if (changeColor) RenderSystem.color4f(1, 1, 1, 1);
+                
                 ClientUtil.disableGlScissor();
             }
         }
