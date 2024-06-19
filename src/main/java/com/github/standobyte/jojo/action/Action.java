@@ -10,10 +10,12 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.ui.BlitFloat;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
@@ -28,8 +30,10 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.block.Blocks;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -394,14 +398,22 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return Stream.of(getRegistryName());
     }
 
-    private final LazySupplier<ResourceLocation> iconTexture = 
-            new LazySupplier<>(() -> makeIconVariant(this, ""));
+    private final LazySupplier<ResourceLocation> iconTexture = new LazySupplier<>(() -> makeIconVariant(this, ""));
+    @Nonnull
     public ResourceLocation getIconTexture(@Nullable P power) {
         return getIconTexturePath(power);
     }
     
+    @Nonnull
     protected ResourceLocation getIconTexturePath(@Nullable P power) {
         return iconTexture.get();
+    }
+    
+    public void renderActionIcon(MatrixStack matrixStack, P power, float x, float y) {
+        Minecraft mc = Minecraft.getInstance();
+        ResourceLocation icon = getIconTexture(power);
+        mc.getTextureManager().bind(icon);
+        BlitFloat.blitFloat(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
     }
     
     protected static final ResourceLocation makeIconVariant(Action<?> action, @Nullable String postfix) {

@@ -1105,42 +1105,45 @@ public class ActionsOverlayGui extends AbstractGui {
             ClientUtil.fillSingleRect(x - 2, y - 2, 20, 20, 0, 255, 0, 127);
         }
         
-        ResourceLocation icon = action.getIconTexture(power);
-        mc.getTextureManager().bind(icon);
-        
         ActionConditionResult result = actionAvailability(action, mode, targetIcon, target, isSelected);
         if (!result.isPositive()) {
+            float brightness;
+            float alpha;
             if (!result.isQueued()) {
-                RenderSystem.color4f(0.2F, 0.2F, 0.2F, 0.5F * hotbarAlpha);
+                brightness = 0.2f;
+                alpha = 0.5f * hotbarAlpha;
             }
             else {
-                RenderSystem.color4f(0.75F, 0.75F, 0.75F, 0.75F * hotbarAlpha);
+                brightness = 0.75f;
+                alpha = 0.75f * hotbarAlpha;
             }
             if (cutWidth > 0) {
                 ClientUtil.enableGlScissor(x + leftCut, y, cutWidth, 16);
+                
                 // action icon
-                BlitFloat.blitFloat(matrixStack, 
-                        x, y, 
-                        0, 0, 
-                        16, 16, 
-                        16, 16);
+                boolean changeColor = brightness < 1 || alpha < 1;
+                if (changeColor) RenderSystem.color4f(brightness, brightness, brightness, alpha);
+                action.renderActionIcon(matrixStack, power, x, y);
+                if (changeColor) RenderSystem.color4f(1, 1, 1, 1);
+                
                 // cooldown
                 float ratio = power.getCooldownRatio(action, partialTick);
                 if (ratio > 0) {
                     ClientUtil.fillSingleRect(x, y + 16.0F * (1.0F - ratio), 16, 16.0F * ratio, 255, 255, 255, 127);
                 }
+                
                 ClientUtil.disableGlScissor();
             }
         } else {
-            RenderSystem.color4f(1, 1, 1, hotbarAlpha);
             if (cutWidth > 0) {
                 ClientUtil.enableGlScissor(x + leftCut, y, cutWidth, 16);
+                
                 // action icon
-                BlitFloat.blitFloat(matrixStack, 
-                        x, y, 
-                        0, 0, 
-                        16, 16, 
-                        16, 16);
+                boolean changeColor = hotbarAlpha < 1;
+                if (changeColor) RenderSystem.color4f(1, 1, 1, hotbarAlpha);
+                action.renderActionIcon(matrixStack, power, x, y);
+                if (changeColor) RenderSystem.color4f(1, 1, 1, 1);
+                
                 ClientUtil.disableGlScissor();
             }
         }
