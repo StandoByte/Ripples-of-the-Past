@@ -188,10 +188,16 @@ public class StandCrySoundHandler<T extends Entity> {
                     
             this.allSounds = unpacked.stream().map(Pair::getValue).collect(Collectors.toList());
             
-            this.soundSubtitles = unpacked.stream().collect(Collectors.toMap(Pair::getValue, entry -> {
+//            this.soundSubtitles = unpacked.stream().collect(Collectors.toMap(Pair::getValue, entry -> {
+//                SoundEventAccessor accessor = handler.getSoundEvent(entry.getKey().getLocation());
+//                return accessor.getSubtitle();
+//            }));
+            this.soundSubtitles = new HashMap<>();
+            for (Pair<SoundEvent, Sound> entry : unpacked) {
                 SoundEventAccessor accessor = handler.getSoundEvent(entry.getKey().getLocation());
-                return accessor.getSubtitle();
-            }));
+                ITextComponent subtitle = accessor.getSubtitle();
+                soundSubtitles.put(entry.getValue(), subtitle);
+            }
             
             this.cache(soundEvents);
         }
