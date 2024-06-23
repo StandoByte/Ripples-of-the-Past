@@ -109,7 +109,7 @@ public class HamonSendoOverdriveEntity extends Entity implements IEntityAddition
                     waves.add(new Wave());
                     Vector3d soundPos = getBoundingBox().getCenter();
                     if (addedWaves < wavesToAdd) {
-                        level.playSound(ClientUtil.getClientPlayer(), soundPos.x, soundPos.y, soundPos.z, ModSounds.HAMON_SPARK.get(), 
+                        level.playSound(null, soundPos.x, soundPos.y, soundPos.z, ModSounds.HAMON_SPARK.get(), 
                                 SoundCategory.AMBIENT, 0.25f, 1.0F + (random.nextFloat() - 0.5F) * 0.15F);
                     }
                 }
