@@ -751,7 +751,7 @@ public class ActionsOverlayGui extends AbstractGui {
             x -= hotbarLength;
         }
         int selected = actionHotbar != null ? mode.getSelectedSlot(actionHotbar) : 0;
-        boolean shift = mc.player.isShiftKeyDown();
+        boolean shift = InputHandler.useShiftActionVariant(mc);
         float alpha = selected < 0 || !hotbarsEnabled ? 0.25F : 1.0F;
         // mouse button icon
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
@@ -908,6 +908,8 @@ public class ActionsOverlayGui extends AbstractGui {
         int x = position.x;
         List<HudHotkey> hotkeysIterate = position.alignment == Alignment.RIGHT ? Lists.reverse(hotkeyInHudActions) : hotkeyInHudActions;
         for (HudHotkey hotkeySlotUi : hotkeysIterate) {
+            if (hotkeySlotUi.actionEntry.getAction() == null || hotkeySlotUi.actionEntry.getKeybind().isUnbound()) continue;
+            
             int nextOffset = Math.max(hotkeySlotUi.maxWidth + 6, 28);
             int offset = Math.max((nextOffset - 28) / 2, 0);
             if (position.alignment == Alignment.RIGHT) {
@@ -935,6 +937,8 @@ public class ActionsOverlayGui extends AbstractGui {
         int y = position.y + 16 + 3;
         List<HudHotkey> hotkeysIterate = position.alignment == Alignment.RIGHT ? Lists.reverse(hotkeyInHudActions) : hotkeyInHudActions;
         for (HudHotkey hotkeySlotUi : hotkeysIterate) {
+            if (hotkeySlotUi.actionEntry.getAction() == null || hotkeySlotUi.actionEntry.getKeybind().isUnbound()) continue;
+            
             int nextOffset = Math.max(hotkeySlotUi.maxWidth + 6, 28);
             int offset = Math.max((nextOffset - 28) / 2, 0);
             if (position.alignment == Alignment.RIGHT) {
@@ -1004,6 +1008,9 @@ public class ActionsOverlayGui extends AbstractGui {
             x -= 12;
             break;
         }
+
+        boolean shift = InputHandler.useShiftActionVariant(mc);
+        action = resolveVisibleActionInSlot(action, shift, power, getMouseTarget());
         
         // hotbar
         HotbarRenderer.renderFoldingHotbar(matrixStack, mc, x, y, HotbarFold.noFold(1), alpha);
@@ -1234,7 +1241,7 @@ public class ActionsOverlayGui extends AbstractGui {
             x -= 12;
             break;
         }
-        boolean shift = mc.player.isShiftKeyDown();
+        boolean shift = InputHandler.useShiftActionVariant(mc);
         Action<P> selectedAction = mode.getSelectedAction(actionKey.getHotbar(), shift, getMouseTarget());
         if (selectedAction != null) {
             // action name
@@ -1360,7 +1367,7 @@ public class ActionsOverlayGui extends AbstractGui {
 //    }
 //    
 //    private <P extends IPower<P, ?>> int getSelectedActionHoldDuration(ActionType actionType, @Nonnull ActionsModeConfig<P> mode) {
-//        Action<P> action = mode.getSelectedAction(actionType, mc.player.isShiftKeyDown());
+//        Action<P> action = mode.getSelectedAction(actionType, InputHandler.useShiftActionVariant(mc));
 //        if (action != null) {
 //            return action.getHoldDurationMax(mode.getPower());
 //        }
