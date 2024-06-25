@@ -1157,11 +1157,13 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         }
         else {
             boolean stun = ModStatusEffects.isStunned(this);
-            currentTask.ifPresent(task -> {
-                if (!stun || task.getAction().ignoresPerformerStun()) {
-                    task.tick(userPower, this);
-                }
-            });
+            if (userPower != null) {
+                currentTask.ifPresent(task -> {
+                    if (!stun || task.getAction().ignoresPerformerStun()) {
+                        task.tick(userPower, this);
+                    }
+                });
+            }
             
             if (!stun && gradualSummonWeaknessTicks > 0) {
                 gradualSummonWeaknessTicks--;
