@@ -89,7 +89,7 @@ public interface IDataConfig {
         return generatedPack;
     }
     
-    default void genJsonFromObj(Object object, ResourceLocation resourcePath, String resourceName, MinecraftServer server) throws JsonWriteException {
+    default boolean genJsonFromObj(Object object, ResourceLocation resourcePath, String resourceName, MinecraftServer server) throws JsonWriteException {
         Path folderPath = dataPackPath(server);
         
         Path dataFolderPath = folderPath.resolve("data");
@@ -101,6 +101,7 @@ public interface IDataConfig {
         try (OutputStream outputStream = new FileOutputStream(jsonFile);
             Writer writer = new OutputStreamWriter(outputStream, Charsets.UTF_8.newEncoder())) {
             getGson().toJson(object, writer);
+            return true;
         } catch (IOException e) {
             JsonWriteException exception = new JsonWriteException(jsonFile);
             exception.initCause(e);
@@ -143,7 +144,7 @@ public interface IDataConfig {
     public static class JsonWriteException extends Exception {
         public final File jsonFilePath;
         
-        private JsonWriteException(File jsonFilePath) {
+        protected JsonWriteException(File jsonFilePath) {
             this.jsonFilePath = jsonFilePath;
         }
     }

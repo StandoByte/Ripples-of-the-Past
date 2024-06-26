@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.command;
 
 import java.util.Collection;
 
+import com.github.standobyte.jojo.command.argument.NonStandTypeArgument;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
