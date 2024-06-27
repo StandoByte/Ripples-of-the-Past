@@ -22,8 +22,6 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDirectEntityPosPacket;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
-import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
-import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.util.general.LazySupplier;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
@@ -51,7 +49,8 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
         this(builder, theWorldTimeStopBlink);
     }
 
-    public TheWorldTSHeavyAttack(StandEntityAction.Builder builder, Supplier<TimeStopInstant> theWorldTimeStopBlink) {
+    public TheWorldTSHeavyAttack(StandEntityAction.Builder builder, 
+            Supplier<TimeStopInstant> theWorldTimeStopBlink) {
         super(builder);
         this.theWorldTimeStopBlink = theWorldTimeStopBlink;
     }
@@ -152,12 +151,9 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
                             TimeStopHandler::canPlayerSeeInStoppedTime, blink.blinkSound.get(), ModSounds.THE_WORLD_TIME_STOP_UNREVEALED.get(), 
                             SoundCategory.AMBIENT, 1.0F, 1.0F);
                     standPower.consumeStamina(staminaCostTS + timeStopTicks * staminaCostTicking);
-                    if (standPower.hasPower()) {
-                        StandStats stats = standPower.getType().getStats();
-                        if (stats instanceof TimeStopperStandStats) {
-                            standPower.addLearningProgressPoints(theWorldTimeStopBlink.get().getBaseTimeStop(), 
-                                    (int) (((TimeStopperStandStats) stats).timeStopLearningPerTick * timeStopTicks));
-                        }
+                    if (timeStop != null) {
+                        standPower.addLearningProgressPoints(theWorldTimeStopBlink.get().getBaseTimeStop(), 
+                                (int) (timeStop.timeStopLearningPerTick * timeStopTicks));
                     }
                 }
             }
