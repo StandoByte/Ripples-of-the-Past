@@ -6,6 +6,7 @@ import org.apache.logging.log4j.Logger;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.command.ConfigPackCommand;
+import com.github.standobyte.jojo.command.argument.ActionArgument;
 import com.github.standobyte.jojo.command.argument.NonStandTypeArgument;
 import com.github.standobyte.jojo.command.argument.StandArgument;
 import com.github.standobyte.jojo.init.ModBlocks;
@@ -103,6 +104,7 @@ public class JojoMod {
             
             StandArgument.commonSetupRegister();
             NonStandTypeArgument.commonSetupRegister();
+            ActionArgument.commonSetupRegister();
 
             ModCriteriaTriggers.CriteriaTriggerSupplier.registerAll();
             
