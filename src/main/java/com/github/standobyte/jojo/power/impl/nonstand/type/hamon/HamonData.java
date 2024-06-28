@@ -26,6 +26,7 @@ import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
+import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.HamonStatIncNotif;
 import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer;
 import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer.BarType;
 import com.github.standobyte.jojo.entity.HamonProjectileShieldEntity;
@@ -165,18 +166,21 @@ public class HamonData extends TypeSpecificData {
                     tickHamonProtection();
                 }
             }
+            
             if (isRebuffOverdriveOn) {
-                if (rebuffTick<=20) {
+                if (rebuffTick <= 20) {
                     ++rebuffTick;    
                 } else {
                     isRebuffOverdriveOn = false;
                     rebuffTick = 0;
                 }
-                
             }
+            
+            tickWallClimbing();
             tickNewPlayerLearners(user);
             if (!user.level.isClientSide()) {
                 tickAirSupply(user);
+                
                 if (tcsa && (power.isUserCreative() || getCharacterTechnique() != null)) {
                     tcsa = false;
                 }
@@ -283,7 +287,7 @@ public class HamonData extends TypeSpecificData {
             float breathMaskHandicap = MathHelper.clamp((400f - ticksMaskWithNoHamonBreath) / 200f, -1, 1);
             boolean canIndicateInHud = user.level.isClientSide() && ClientUtil.getClientPlayer() == user;
             if (canIndicateInHud && breathMaskHandicap == 0) {
-                BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).triggerRedHighlight(79);
+                BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).triggerRedHighlight(4);
             }
             // normal recovery, slowed down when not using hamon breath for too long (10s)
             if (breathMaskHandicap >= 0) {
@@ -337,7 +341,7 @@ public class HamonData extends TypeSpecificData {
     }
     
     private float fullEnergyTicks() {
-        float ticks = 60F - (30F * breathingTrainingLevel / MAX_BREATHING_LEVEL);
+        float ticks = 80F - (40F * breathingTrainingLevel / MAX_BREATHING_LEVEL);
         if (meditationCompleted) {
             ticks -= MEDITATION_COMPLETED_ENERGY_REGEN_TIME_REDUCTION;
         }
@@ -350,7 +354,11 @@ public class HamonData extends TypeSpecificData {
     }
     
     public float getMaxBreathStability() {
-        float max = NonStandPower.BASE_MAX_ENERGY * (1F + getHamonControlLevel() * 0.1F);
+        return getMaxBreathStabilityAt(getHamonControlLevel());
+    }
+    
+    protected float getMaxBreathStabilityAt(int controlLvl) {
+        float max = NonStandPower.BASE_MAX_ENERGY * (1F + controlLvl * 0.1F);
         if (swimmingCompleted) {
             max *= SWIMMING_COMPLETED_MAX_ENERGY_MULTIPLIER;
         }
@@ -362,7 +370,7 @@ public class HamonData extends TypeSpecificData {
     }
     
     private void updateNoEnergyDecayTicks() {
-        noEnergyDecayTicks = 20 + MathUtil.fractionRandomInc(180F * getBreathingLevel() / HamonData.MAX_BREATHING_LEVEL);
+        noEnergyDecayTicks = 50 + MathUtil.fractionRandomInc(150F * getBreathingLevel() / HamonData.MAX_BREATHING_LEVEL);
     }
     
     
@@ -408,6 +416,8 @@ public class HamonData extends TypeSpecificData {
     
     
     
+    private static final float NO_ENERGY_EFFICIENCY = 0.5f;
+    private static final float ENERGY_STABILITY_USAGE_RATIO = 2.5F;
     float getHamonEnergyUsageEfficiency(float energyNeeded, boolean doConsume) {
         LivingEntity user = power.getUser();
         doConsume &= !user.level.isClientSide() && !power.isUserCreative();
@@ -425,7 +435,7 @@ public class HamonData extends TypeSpecificData {
             if (doConsume) {
                 power.setEnergy(0);
             }
-            return 0.25F + 0.75F * energyRatio;
+            return NO_ENERGY_EFFICIENCY + (1 - NO_ENERGY_EFFICIENCY) * energyRatio;
         }
         
         else {
@@ -450,10 +460,9 @@ public class HamonData extends TypeSpecificData {
                     reduceBreathStability((energyFromStability - energyNeeded) / ENERGY_STABILITY_USAGE_RATIO);
                 }
             }
-            return 0.25F * energyRatio;
+            return NO_ENERGY_EFFICIENCY * energyRatio;
         }
     }
-    private static final float ENERGY_STABILITY_USAGE_RATIO = 2.5F;
     
     private boolean isUserWearingBreathMask() {
         ItemStack headItem = power.getUser().getItemBySlot(EquipmentSlotType.HEAD);
@@ -540,14 +549,15 @@ public class HamonData extends TypeSpecificData {
     }
     
     public void setHamonStatPoints(HamonStat stat, int points, boolean ignoreTraining, boolean allowLesserValue) {
-        setHamonStatPoints(stat, points, ignoreTraining, allowLesserValue, false);
+        setHamonStatPoints(stat, points, ignoreTraining, allowLesserValue, false, false);
     }
     
-    public void setHamonStatPoints(HamonStat stat, int points, boolean ignoreTraining, boolean allowLesserValue, boolean clientSide) {
+    public void setHamonStatPoints(HamonStat stat, int points, boolean ignoreTraining, 
+            boolean allowLesserValue, boolean clientSide, boolean notifyInUI) {
         int oldPoints = getStatPoints(stat);
         int oldLevel = getStatLevel(stat);
         if (!ignoreTraining) {
-            int levelLimit = (int) getBreathingLevel() + JojoModConfig.getCommonConfigInstance(clientSide).breathingStatGap.get();
+            int levelLimit = getStatLevelLimit(clientSide);
             if (levelFromPoints(points) > levelLimit) {
                 points = pointsAtLevel(levelLimit + 1) - 1;
             }
@@ -562,7 +572,6 @@ public class HamonData extends TypeSpecificData {
             hamonStrengthLevel = levelFromPoints(newPoints);
             break;
         case CONTROL:
-            // FIXME also update energy count
             hamonControlPoints = newPoints;
             hamonControlLevel = levelFromPoints(newPoints);
             break;
@@ -575,16 +584,31 @@ public class HamonData extends TypeSpecificData {
                     ModCriteriaTriggers.HAMON_STATS.get().trigger(player, hamonStrengthLevel, hamonControlLevel, breathingTrainingLevel);
                 });
             }
-            if (oldLevel != getStatLevel(stat)) {
+            int newLevel = getStatLevel(stat);
+            if (oldLevel != newLevel) {
                 switch (stat) {
                 case STRENGTH:
                     recalcHamonDamage();
                     break;
                 case CONTROL:
+                    float energyRatio = getMaxBreathStabilityAt(newLevel) / getMaxBreathStabilityAt(oldLevel);
+                    breathStability *= energyRatio;
+                    power.setEnergy(power.getEnergy() * energyRatio);
                     break;
+                }
+                if (newLevel > oldLevel && notifyInUI && user.level.isClientSide() && user == ClientUtil.getClientPlayer()) {
+                    ActionsOverlayGui.getInstance().onHamonStatIncreased(stat == HamonStat.STRENGTH ? HamonStatIncNotif.STRENGTH : HamonStatIncNotif.CONTROL);
                 }
             }
         }
+    }
+    
+    public int getStatLevelLimit(boolean clientSide) {
+        int config = JojoModConfig.getCommonConfigInstance(clientSide).breathingHamonStatGap.get();
+        if (config < 0) {
+            return Integer.MAX_VALUE;
+        }
+        return (int) getBreathingLevel() + config;
     }
     
     public static final float MAX_HAMON_STRENGTH_MULTIPLIER = dmgFormula(MAX_STAT_LEVEL); // 7
@@ -682,6 +706,10 @@ public class HamonData extends TypeSpecificData {
     }
     
     public void setBreathingLevel(float level) {
+        setBreathingLevel(level, false);
+    }
+    
+    public void setBreathingLevel(float level, boolean notifyInUI) {
         float oldLevel = breathingTrainingLevel;
         breathingTrainingLevel = MathHelper.clamp(level, 0, MAX_BREATHING_LEVEL);
         LivingEntity user = power.getUser();
@@ -693,6 +721,11 @@ public class HamonData extends TypeSpecificData {
                     ModCriteriaTriggers.HAMON_STATS.get().trigger(player, hamonStrengthLevel, hamonControlLevel, breathingTrainingLevel);
                 });
             }
+            else {
+                if ((int) breathingTrainingLevel > (int) oldLevel && notifyInUI && user == ClientUtil.getClientPlayer()) {
+                    ActionsOverlayGui.getInstance().onHamonStatIncreased(HamonStatIncNotif.BREATHING);
+                }
+            }
         }
         if (!user.level.isClientSide()) {
             giveBreathingTrainingBuffs(user);
@@ -700,13 +733,13 @@ public class HamonData extends TypeSpecificData {
     }
     
     private static final AttributeModifier ATTACK_DAMAGE = new AttributeModifier(
-            UUID.fromString("8dcb2ad7-6067-4615-b7b6-af5256537c10"), "Attack damage from Hamon Training", 0.02D, AttributeModifier.Operation.ADDITION);
+            UUID.fromString("8dcb2ad7-6067-4615-b7b6-af5256537c10"), "Attack damage from Hamon Training", 0.03, AttributeModifier.Operation.ADDITION);
     private static final AttributeModifier ATTACK_SPEED = new AttributeModifier(
-            UUID.fromString("995b2915-9053-472c-834c-f94251e81659"), "Attack speed from Hamon Training", 0.015D, AttributeModifier.Operation.ADDITION);
+            UUID.fromString("995b2915-9053-472c-834c-f94251e81659"), "Attack speed from Hamon Training", 0.015, AttributeModifier.Operation.ADDITION);
     private static final AttributeModifier MOVEMENT_SPEED = new AttributeModifier(
-            UUID.fromString("ffa9ba4e-3811-44f7-a4a9-887ffbd47390"), "Movement speed from Hamon Training", 0.0004D, AttributeModifier.Operation.ADDITION);
+            UUID.fromString("ffa9ba4e-3811-44f7-a4a9-887ffbd47390"), "Movement speed from Hamon Training", 0.0005, AttributeModifier.Operation.ADDITION);
     private static final AttributeModifier SWIMMING_SPEED = new AttributeModifier(
-            UUID.fromString("34dcb563-6759-4a2b-9dd8-ad2dd7e70404"), "Swimming speed from Hamon Training", 0.01D, AttributeModifier.Operation.ADDITION);
+            UUID.fromString("34dcb563-6759-4a2b-9dd8-ad2dd7e70404"), "Swimming speed from Hamon Training", 0.01, AttributeModifier.Operation.ADDITION);
     
     private void giveBreathingTrainingBuffs(LivingEntity entity) {
         int lvl = (int) getBreathingLevel();
@@ -729,7 +762,7 @@ public class HamonData extends TypeSpecificData {
     public static final AttributeModifier MINING_COMPLETED = new AttributeModifier(
             UUID.fromString("8674ea35-6eaf-4e22-98da-4ec0c5a4d20d"), "Attack speed from running exercise", 0.05D, AttributeModifier.Operation.MULTIPLY_BASE);
     public static final float SWIMMING_COMPLETED_MAX_ENERGY_MULTIPLIER = 1.1F;
-    public static final float MEDITATION_COMPLETED_ENERGY_REGEN_TIME_REDUCTION = 10;
+    public static final float MEDITATION_COMPLETED_ENERGY_REGEN_TIME_REDUCTION = 20;
     private boolean swimmingCompleted = false;
     private boolean meditationCompleted = false;
     private boolean allExercisesCompleted = false;
@@ -1282,7 +1315,7 @@ public class HamonData extends TypeSpecificData {
                 energyRatio = 1;
             }
             else {
-                energyRatio = power.getEnergy() / power.getMaxEnergy();
+                energyRatio = power.getEnergy() / getMaxBreathStability();
             }
             float particlesPerTick = energyRatio * getHamonDamageMultiplier();
             boolean isUserTheCameraEntity = user == ClientUtil.getCameraEntity();
@@ -1506,7 +1539,7 @@ public class HamonData extends TypeSpecificData {
         return hamonProtection;
     }
    
-    public void tickHamonProtection() {
+    private void tickHamonProtection() {
         LivingEntity user = power.getUser();
         if (hamonProtection) {
             HamonSparksLoopSound.playSparkSound(user, user.getBoundingBox().getCenter(), 1.0F, 1);
@@ -1514,6 +1547,46 @@ public class HamonData extends TypeSpecificData {
                     user.getRandomX(0.5), user.getRandomY(), user.getRandomZ(0.5), 
                     (int) (MathUtil.fractionRandomInc(1) * 2));
         }
+    }
+    
+    private void tickWallClimbing() {
+        LivingEntity user = power.getUser();
+        user.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(wallClimbData -> {
+            if (wallClimbData.isHamonWallClimbing()) {
+                if (isSkillLearned(ModHamonSkills.WALL_CLIMBING.get())) {
+                    boolean isMoving = false;
+                    if (user instanceof PlayerEntity) {
+                        isMoving = wallClimbData.wallClimbIsMoving;
+                    }
+
+                    if (power.getHeldAction() != ModHamonActions.HAMON_BREATH.get()) {
+                        boolean consumedEnergy = false;
+
+                        float energyCost = ModHamonActions.HAMON_WALL_CLIMBING.get().getHeldTickEnergyCost(power);
+                        if (!isMoving) {
+                            energyCost *= 0.25f;
+                        }
+                        if (power.hasEnergy(energyCost)) {
+                            power.consumeEnergy(energyCost);
+                            consumedEnergy = true;
+                        }
+                        
+                        if (!consumedEnergy) {
+                            if (!user.level.isClientSide()) {
+                                wallClimbData.stopWallClimbing();
+                            }
+                        }
+                    }
+                    
+                    if (user.level.isClientSide()) {
+                        HamonSparksLoopSound.playSparkSound(user, new Vector3d(user.getX(), user.getY(0.75), user.getZ()), 1.0F, true);
+                    }
+                }
+                else if (!user.level.isClientSide()) {
+                    wallClimbData.stopWallClimbing();
+                }
+            }
+        });
     }
     
     public boolean getRebuffOverdrive() {

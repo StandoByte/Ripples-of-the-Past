@@ -239,7 +239,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         }
         else if (user == ClientUtil.getClientPlayer()) {
             if (getStamina() < getMaxStamina() * 0.5F && !StandUtil.standIgnoresStaminaDebuff(this)) {
-                BarsRenderer.getBarEffects(BarType.STAMINA).triggerRedHighlight(user.tickCount);
+                BarsRenderer.getBarEffects(BarType.STAMINA).triggerRedHighlight(999999);
             }
             else {
                 BarsRenderer.getBarEffects(BarType.STAMINA).resetRedHighlight();
@@ -756,9 +756,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         if (usesStamina()) {
             cnbt.putFloat("Stamina", stamina);
         }
-        if (usesResolve()) {
-            cnbt.put("Resolve", resolveCounter.writeNBT());
-        }
+        cnbt.put("Resolve", resolveCounter.writeNBT());
         cnbt.putBoolean("Skipped", skippedProgression);
         cnbt.put("ActionLearning", actionLearningProgressMap.toNBT());
         cnbt.put("Effects", continuousEffects.toNBT());
@@ -790,9 +788,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         if (usesStamina()) {
             stamina = nbt.getFloat("Stamina");
         }
-        if (usesResolve()) {
-            resolveCounter.readNbt(nbt.getCompound("Resolve"));
-        }
+        resolveCounter.readNbt(nbt.getCompound("Resolve"));
         skippedProgression = nbt.getBoolean("Skipped");
         if (nbt.contains("ActionLearning", MCUtil.getNbtId(CompoundNBT.class))) {
             actionLearningProgressMap.fromNBT(nbt.getCompound("ActionLearning"));

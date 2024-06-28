@@ -17,6 +17,7 @@ import com.github.standobyte.jojo.client.particle.HamonSparkParticle;
 import com.github.standobyte.jojo.client.particle.MeteoriteVirusParticle;
 import com.github.standobyte.jojo.client.particle.OneTickFlameParticle;
 import com.github.standobyte.jojo.client.particle.OnomatopoeiaParticle;
+import com.github.standobyte.jojo.client.particle.RPSPickPartile;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.particle.custom.FirstPersonHamonAura;
 import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
@@ -73,6 +74,7 @@ import com.github.standobyte.jojo.client.render.entity.renderer.damaging.project
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.MRCrossfireHurricaneRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.MRCrossfireHurricaneSpecialRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.MRFireballRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.MolotovRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.SCRapierRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.TommyGunBulletRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.stretching.ZoomPunchRenderer;
@@ -189,7 +191,7 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SNAKE_MUFFLER.get(), SnakeMufflerRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.TOMMY_GUN_BULLET.get(), TommyGunBulletRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.KNIFE.get(), KnifeRenderer::new);
-        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.MOLOTOV.get(), manager -> new SpriteRenderer<>(manager, Minecraft.getInstance().getItemRenderer(), 1.0F, true));
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.MOLOTOV.get(), manager -> new MolotovRenderer<>(manager, Minecraft.getInstance().getItemRenderer(), 1.0F, true));
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.STAND_ARROW.get(), StandArrowRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SOUL.get(), SoulRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.PILLARMAN_TEMPLE_ENGRAVING.get(), PillarmanTempleEngravingRenderer::new);
@@ -234,7 +236,7 @@ public class ClientSetup {
         
         ClientModSettings.init(mc, new File(mc.gameDirectory, "config/jojo_rotp/client_settings.json"));
         HudControlSettings.init(new File(mc.gameDirectory, "config/jojo_rotp/controls/"));
-
+        
         event.enqueueWork(() -> {
             ItemModelsProperties.register(ModItems.METEORIC_SCRAP.get(), new ResourceLocation(JojoMod.MOD_ID, "icon"), (itemStack, clientWorld, livingEntity) -> {
                 return itemStack.getOrCreateTag().getInt("Icon");
@@ -327,9 +329,13 @@ public class ClientSetup {
     
     private static <T extends LivingEntity, M extends BipedModel<T>> void addLayersToEntities(EntityRenderer<?> renderer) {
         if (renderer instanceof LivingRenderer<?, ?>) {
-            addLivingLayers((LivingRenderer<T, ?>) renderer);
+            LivingRenderer<T, M> livingRenderer = (LivingRenderer<T, M>) renderer;
+            addLivingLayers(livingRenderer);
             if (((LivingRenderer<?, ?>) renderer).getModel() instanceof BipedModel<?>) {
-                addBipedLayers((LivingRenderer<T, M>) renderer);
+                addBipedLayers(livingRenderer);
+            }
+            else {
+                livingRenderer.addLayer(new FrozenLayer<T, M>(livingRenderer, FrozenLayer.NON_BIPED_PATH));
             }
         }
     }
@@ -339,9 +345,9 @@ public class ClientSetup {
     }
     
     private static <T extends LivingEntity, M extends BipedModel<T>> void addBipedLayers(LivingRenderer<T, M> renderer) {
-          renderer.addLayer(new ZombieLayer<>(renderer));
-          renderer.addLayer(new PillarmanLayer<>(renderer));
-        renderer.addLayer(new FrozenLayer<>(renderer));
+        renderer.addLayer(new ZombieLayer<>(renderer));
+        renderer.addLayer(new PillarmanLayer<>(renderer));
+        renderer.addLayer(new FrozenLayer<>(renderer, FrozenLayer.BIPED_PATH));
     }
 
     @SubscribeEvent
@@ -379,7 +385,7 @@ public class ClientSetup {
                 model -> new ItemISTERModelWrapper(model).setCaptureEntity());
     }
     
-    private static void registerCustomBakedModel(ResourceLocation resLoc, 
+    public static void registerCustomBakedModel(ResourceLocation resLoc, 
             Map<ResourceLocation, IBakedModel> modelRegistry, UnaryOperator<IBakedModel> newModel) {
         ModelResourceLocation modelResLoc = new ModelResourceLocation(resLoc, "inventory");
         IBakedModel existingModel = modelRegistry.get(modelResLoc);
@@ -432,6 +438,9 @@ public class ClientSetup {
         mc.particleEngine.register(ModParticles.AIR_STREAM.get(),           AirStreamParticle.Factory::new);
         mc.particleEngine.register(ModParticles.FLAME_ONE_TICK.get(),       OneTickFlameParticle.Factory::new);
         mc.particleEngine.register(ModParticles.CD_RESTORATION.get(),       CDRestorationParticle.Factory::new);
+        mc.particleEngine.register(ModParticles.RPS_ROCK.get(),             RPSPickPartile.Factory::new);
+        mc.particleEngine.register(ModParticles.RPS_PAPER.get(),            RPSPickPartile.Factory::new);
+        mc.particleEngine.register(ModParticles.RPS_SCISSORS.get(),         RPSPickPartile.Factory::new);
 
         CustomParticlesHelper.saveSprites(mc);
         // yep...

@@ -18,6 +18,7 @@ public class CrazyDiamondBloodHomingMarker extends MarkerRenderer {
     
     public CrazyDiamondBloodHomingMarker(Minecraft mc) {
         super(new ResourceLocation(JojoMod.MOD_ID, "textures/icons/blood_drops.png"), mc);
+        renderThroughBlocks = false;
     }
     
     @Override

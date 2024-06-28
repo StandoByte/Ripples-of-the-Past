@@ -31,6 +31,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.Screen;
@@ -76,6 +77,11 @@ import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.client.gui.GuiUtils;
 
+/**
+ * Any methods from this class are only to be called on the client side
+ * (if {@link World#isClientSide()} returns true),
+ * otherwise it will crash on dedicated servers
+ */
 public class ClientUtil {
     public static final ResourceLocation ADDITIONAL_UI = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/additional.png");
     public static final int MAX_MODEL_LIGHT = LightTexture.pack(15, 15);
@@ -89,6 +95,10 @@ public class ClientUtil {
 
     public static World getClientWorld() {
         return Minecraft.getInstance().level;
+    }
+    
+    public static Vector3d getCameraPos() {
+        return Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
     }
     
     public static boolean isLocalServer() {
@@ -105,6 +115,10 @@ public class ClientUtil {
     
     public static boolean arePlayerHandsBusy() {
         return Minecraft.getInstance().player.isHandsBusy();
+    }
+    
+    public static void setPlayerHandsBusy(PlayerEntity player, boolean handsBusy) {
+        ClientReflection.setHandsBusy((ClientPlayerEntity) player, handsBusy);
     }
 
     public static Entity getEntityById(int entityId) {
@@ -156,6 +170,15 @@ public class ClientUtil {
         return canHearStands;
     }
     
+    public static void setCameraEntityPreventShaderSwitch(Entity entity) {
+        Minecraft mc = Minecraft.getInstance();
+        mc.setCameraEntity(entity);
+        if (mc.gameRenderer.currentEffect() == null) {
+            ShaderEffectApplier.getInstance().updateCurrentShader();
+        }
+    }
+    
+    @Deprecated
     public static void setCameraEntityPreventShaderSwitch(Minecraft mc, Entity entity) {
         mc.setCameraEntity(entity);
         if (mc.gameRenderer.currentEffect() == null) {

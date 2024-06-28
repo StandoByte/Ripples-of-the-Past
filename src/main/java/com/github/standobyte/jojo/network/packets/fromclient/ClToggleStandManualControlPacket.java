@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.network.packets.fromclient;
 
 import java.util.function.Supplier;
 
+import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -34,8 +35,15 @@ public class ClToggleStandManualControlPacket {
                     if (power.hasPower()) {
                         if (power.getType().canBeManuallyControlled()) {
                             if (power.isActive()) {
-                                boolean keepPosition = player.isShiftKeyDown();
-                                StandUtil.setManualControl(player, !((StandEntity) power.getStandManifestation()).isManuallyControlled(), keepPosition);
+                                StandEntity standEntity = (StandEntity) power.getStandManifestation();
+                                ActionConditionResult canControlEntity = standEntity.canBeManuallyControlled();
+                                if (canControlEntity.isPositive()) {
+                                    boolean keepPosition = player.isShiftKeyDown();
+                                    StandUtil.setManualControl(player, !standEntity.isManuallyControlled(), keepPosition);
+                                }
+                                else if (canControlEntity.getWarning() != null) {
+                                    player.displayClientMessage(canControlEntity.getWarning(), true);
+                                }
                             }
                         }
                         else {

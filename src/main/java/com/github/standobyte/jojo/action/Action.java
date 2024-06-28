@@ -10,10 +10,14 @@ import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.action.config.ActionConfigField;
+import com.github.standobyte.jojo.action.config.ActionConfigSerialized;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.ui.BlitFloat;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
@@ -28,8 +32,10 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.block.Blocks;
+import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -50,7 +56,7 @@ import net.minecraftforge.registries.ForgeRegistryEntry;
 public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<Action<?>> {
     private static final Map<Supplier<? extends Action<?>>, Supplier<? extends Action<?>>> SHIFT_VARIATIONS = new HashMap<>(); 
     
-    private final int holdDurationToFire;
+    @ActionConfigField private final int holdDurationToFire;
     private final int holdDurationMax;
     protected final boolean continueHolding;
     private final float heldWalkSpeed;
@@ -64,6 +70,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     private String translationKey;
     private Action<P> shiftVariation;
     private Action<P> baseVariation;
+    protected ActionConfigSerialized<?> configs;
     
     public Action(Action.AbstractBuilder<?> builder) {
         this.holdDurationMax = builder.holdDurationMax;
@@ -110,6 +117,19 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
             }
         }
     }
+    
+    
+    public final ActionConfigSerialized<?> getOrCreateConfigs() {
+        if (configs == null) {
+            configs = createActionConfigs();
+        }
+        return configs;
+    }
+    
+    protected ActionConfigSerialized<?> createActionConfigs() {
+        return new ActionConfigSerialized<>(this);
+    }
+    
     
     public ActionConditionResult checkConditions(LivingEntity user, P power, ActionTarget target) {
         ActionConditionResult itemCheck = checkHeldItems(user, power);
@@ -394,14 +414,22 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return Stream.of(getRegistryName());
     }
 
-    private final LazySupplier<ResourceLocation> iconTexture = 
-            new LazySupplier<>(() -> makeIconVariant(this, ""));
+    private final LazySupplier<ResourceLocation> iconTexture = new LazySupplier<>(() -> makeIconVariant(this, ""));
+    @Nonnull
     public ResourceLocation getIconTexture(@Nullable P power) {
         return getIconTexturePath(power);
     }
     
+    @Nonnull
     protected ResourceLocation getIconTexturePath(@Nullable P power) {
         return iconTexture.get();
+    }
+    
+    public void renderActionIcon(MatrixStack matrixStack, P power, float x, float y) {
+        Minecraft mc = Minecraft.getInstance();
+        ResourceLocation icon = getIconTexture(power);
+        mc.getTextureManager().bind(icon);
+        BlitFloat.blitFloat(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
     }
     
     protected static final ResourceLocation makeIconVariant(Action<?> action, @Nullable String postfix) {

@@ -11,7 +11,6 @@ import java.util.Random;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.StandEntityRenderer;
-import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -134,7 +133,7 @@ public class ControllerStand {
 
         ClientPlayerEntity player = mc.player;
         if (!stand.isAlive()) {
-            ClientUtil.setCameraEntityPreventShaderSwitch(mc, player);
+            ClientUtil.setCameraEntityPreventShaderSwitch(player);
         }
         else {
             player.connection.send(new CPlayerPacket.PositionRotationPacket(player.getX(), player.getY(), player.getZ(), player.yRot, player.xRot, player.isOnGround()));
@@ -143,7 +142,6 @@ public class ControllerStand {
     
     
 
-    // FIXME render items in hands
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void renderStandHands(RenderHandEvent event) {
         if (!isControllingStand()) {
@@ -160,7 +158,8 @@ public class ControllerStand {
         float partialTick = event.getPartialTicks();
         int light = mc.getEntityRenderDispatcher().getPackedLightCoords(stand, partialTick);
         StandEntityRenderer renderer = (StandEntityRenderer<?, ?>)mc.getEntityRenderDispatcher().<StandEntity>getRenderer(stand);
-        renderer.renderFirstPersonArms(matrixStack, buffer, light, stand, partialTick);
+//        renderer.renderFirstPersonArms(matrixStack, buffer, light, stand, partialTick);
+        renderer.renderFirstPerson(stand, partialTick, matrixStack, buffer, light);
         event.setCanceled(true);
     }
     
@@ -207,10 +206,6 @@ public class ControllerStand {
                     if (ForgeIngameGui.renderHealth) renderCameraStandHealth(matrixStack, gui, event, width, height);
                     if (ForgeIngameGui.renderArmor)  renderCameraStandArmor(matrixStack, gui, event, width, height);
                 }
-                break;
-            case TEXT:
-                ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
-                hud.drawStandRemoteRange(matrixStack, stand.distanceTo(mc.player), (float) stand.getRangeEfficiency());
                 break;
             default:
                 break;

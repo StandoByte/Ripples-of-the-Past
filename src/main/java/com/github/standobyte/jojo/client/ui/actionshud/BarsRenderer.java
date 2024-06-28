@@ -11,6 +11,7 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.ClientTicking;
 import com.github.standobyte.jojo.client.ClientTicking.ITicking;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.Alignment;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.BarsOrientation;
@@ -68,7 +69,7 @@ public abstract class BarsRenderer {
         float abilityCost = 0;
         // FIXME get energy/stamina costs
 //        if (currentMode != null) {
-//            boolean shift = mc.player.isShiftKeyDown();
+//            boolean shift = InputHandler.useShiftActionVariant(mc);
 //            attackCost = getActionCost(currentMode, ActionType.ATTACK, mc.player, shift);
 //            abilityCost = getActionCost(currentMode, ActionType.ABILITY, mc.player, shift);
 //            if (abilityCost < 0) {
@@ -344,12 +345,15 @@ public abstract class BarsRenderer {
             if (redHighlightTick > 0) redHighlightTick--;
         }
         
-        public void triggerRedHighlight(int ticks) {
-            this.redHighlightTick = ticks;
+        public void triggerRedHighlight(int cycles) {
+            if (redHighlightTick % 10 > 0) cycles--;
+            redHighlightTick = redHighlightTick % 10 + cycles * 10;
         }
         
         public void resetRedHighlight() {
-            this.redHighlightTick = redHighlightTick % 20;
+            if (redHighlightTick > 10) {
+                redHighlightTick = redHighlightTick % 10;
+            }
         }
         
         private float lerpValue(float value, float partialTick) {

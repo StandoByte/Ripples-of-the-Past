@@ -31,8 +31,10 @@ import com.github.standobyte.jojo.client.render.block.overlay.TranslucentBlockRe
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.FrozenLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.GlovesLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.HamonBurnLayer;
+import com.github.standobyte.jojo.client.render.item.InventoryItemHighlight;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
 import com.github.standobyte.jojo.client.resources.CustomResources;
+import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.ClientModSettingsScreen;
@@ -123,6 +125,7 @@ import net.minecraftforge.client.event.RenderGameOverlayEvent;
 import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderNameplateEvent;
+import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.common.MinecraftForge;
@@ -260,6 +263,15 @@ public class ClientEventHandler {
             });
         }
     }
+    
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public void onRenderPlayer(RenderPlayerEvent.Pre event) {
+        if (mc.player != event.getPlayer()) {
+            event.getPlayer().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                cap.climbLimitPlayerHeadRot();
+            });
+        }
+    }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onRenderTick(RenderTickEvent event) {
@@ -271,6 +283,9 @@ public class ClientEventHandler {
             if (mc.player.isAlive()) {
                 timeStopHandler.setConstantPartialTick(clientTimer);
                 
+                mc.player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                    cap.climbLimitPlayerHeadRot();
+                });
                 mc.player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                     cap.applyLockedRotation();
                 });
@@ -287,6 +302,7 @@ public class ClientEventHandler {
                 
                 if (!mc.isPaused()) {
                     ClientTicking.tickAll();
+                    ClientTickingSoundsHelper.tickBossMusic();
                     
                     mc.level.getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                         cap.tick();
@@ -299,6 +315,7 @@ public class ClientEventHandler {
                     });
                     
                     FirstPersonHamonAura.getInstance().tick();
+                    InventoryItemHighlight.tick();
                 }
                 
                 tickResolveEffect();
@@ -308,8 +325,8 @@ public class ClientEventHandler {
                 ShaderEffectApplier.getInstance().shaderTick();
                 
                 // FIXME make stand actions clickable when player hands are busy
-                if (mc.level != null && mc.player != null && mc.player.getVehicle() != null
-                        && mc.player.getVehicle().getType() == ModEntityTypes.LEAVES_GLIDER.get()) {
+                if (mc.level != null && mc.player != null && (
+                        mc.player.getVehicle() != null && mc.player.getVehicle().getType() == ModEntityTypes.LEAVES_GLIDER.get())) {
                     ClientReflection.setHandsBusy(mc.player, true);
                 }
                 break;
@@ -560,8 +577,11 @@ public class ClientEventHandler {
                 if (!player.isInvisible()) {
                     INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
                         ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
-                        if ((hud.isActionSelectedAndEnabled(ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get(), 
-                                ModHamonActions.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE_BARRAGE.get()))
+                        if ((hud.isActionSelectedAndEnabled(
+                                ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get(), 
+                                ModHamonActions.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE_BARRAGE.get(),
+                                ModHamonActions.HAMON_WALL_CLIMBING.get())
+                                || player.getCapability(LivingUtilCapProvider.CAPABILITY).map(cap -> cap.isWallClimbing()).orElse(false))
                                 && MCUtil.isHandFree(player, Hand.MAIN_HAND) && MCUtil.isHandFree(player, Hand.OFF_HAND)) {
                             renderHand(Hand.OFF_HAND, event.getMatrixStack(), event.getBuffers(), event.getLight(), 
                                     event.getPartialTicks(), event.getInterpolatedPitch(), player);
@@ -639,7 +659,6 @@ public class ClientEventHandler {
     public void onHandRenderFinal(RenderArmEvent event) {
         Hand hand = event.getArm() == event.getPlayer().getMainArm() ? Hand.MAIN_HAND : Hand.OFF_HAND;
         if (MCUtil.isHandFree(event.getPlayer(), hand)) {
-            Minecraft mc = Minecraft.getInstance();
             FirstPersonHamonAura.getInstance().renderParticles(event.getPoseStack(), event.getMultiBufferSource(), event.getArm());
         }
     }

@@ -57,7 +57,7 @@ public class JojoModConfig {
         public final ForgeConfigSpec.DoubleValue hamonPointsMultiplier;
         public final ForgeConfigSpec.DoubleValue breathingTrainingMultiplier;
         public final ForgeConfigSpec.BooleanValue breathingTrainingDeterioration;
-        public final ForgeConfigSpec.IntValue breathingStatGap;
+        public final ForgeConfigSpec.IntValue breathingHamonStatGap;
         public final ForgeConfigSpec.BooleanValue mixHamonTechniques;
         public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> techniqueSkillsRequirement;
         
@@ -160,12 +160,12 @@ public class JojoModConfig {
                             .translation("jojo.config.breathingTrainingDeterioration")
                             .define("breathingTrainingDeterioration", true);
                     
-                    breathingStatGap = builder
-                            .comment("    The maximum difference between Hamon Strength/Control and Breathing training.",
+                    breathingHamonStatGap = builder
+                            .comment("    If enabled, this number will be the maximum difference between Hamon Strength/Control and Breathing training.",
                                     "     If the Breathing training level is too low, the player won't be able to reach higher levels of the Hamon stats.",
-                                    "     Defaults to 15.")
+                                    "     By default this mechanic is disabled (the value is set to -1).")
                            .translation("jojo.config.breathingStatGap")
-                           .defineInRange("breathingStatGap", 15, 0, HamonData.MAX_STAT_LEVEL);
+                           .defineInRange("breathingHamonStatGap", -1, -1, (int) HamonData.MAX_BREATHING_LEVEL);
                     
                     mixHamonTechniques = builder
                             .comment("    Whether or not picking skills from different character-specific Hamon techniques is allowed.")
@@ -495,7 +495,7 @@ public class JojoModConfig {
 //                hamonPointsMultiplier = config.standDamageMultiplier.get();
 //                breathingTrainingMultiplier = config.breathingTrainingMultiplier.get();
                 breathingTrainingDeterioration = config.breathingTrainingDeterioration.get();
-                breathingStatGap = config.breathingStatGap.get();
+                breathingStatGap = config.breathingHamonStatGap.get();
                 mixHamonTechniques = config.mixHamonTechniques.get();
                 techniqueSkillsRequirement = config.techniqueSkillsRequirement.get().stream().mapToInt(Integer::intValue).toArray();
                 
@@ -537,7 +537,7 @@ public class JojoModConfig {
 //                COMMON_SYNCED_TO_CLIENT.hamonPointsMultiplier.set(hamonPointsMultiplier);
 //                COMMON_SYNCED_TO_CLIENT.breathingTrainingMultiplier.set(breathingTrainingMultiplier);
                 COMMON_SYNCED_TO_CLIENT.breathingTrainingDeterioration.set(breathingTrainingDeterioration);
-                COMMON_SYNCED_TO_CLIENT.breathingStatGap.set(breathingStatGap);
+                COMMON_SYNCED_TO_CLIENT.breathingHamonStatGap.set(breathingStatGap);
                 COMMON_SYNCED_TO_CLIENT.mixHamonTechniques.set(mixHamonTechniques);
                 COMMON_SYNCED_TO_CLIENT.techniqueSkillsRequirement.set(IntStream.of(techniqueSkillsRequirement).boxed().collect(Collectors.toList()));
                 
@@ -577,7 +577,7 @@ public class JojoModConfig {
 //                COMMON_SYNCED_TO_CLIENT.hamonPointsMultiplier.clearCache();
 //                COMMON_SYNCED_TO_CLIENT.breathingTrainingMultiplier.clearCache();
                 COMMON_SYNCED_TO_CLIENT.breathingTrainingDeterioration.clearCache();
-                COMMON_SYNCED_TO_CLIENT.breathingStatGap.clearCache();
+                COMMON_SYNCED_TO_CLIENT.breathingHamonStatGap.clearCache();
                 COMMON_SYNCED_TO_CLIENT.mixHamonTechniques.clearCache();
                 COMMON_SYNCED_TO_CLIENT.techniqueSkillsRequirement.clearCache();
                 

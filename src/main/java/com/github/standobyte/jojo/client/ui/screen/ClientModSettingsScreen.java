@@ -7,7 +7,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
-import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.HudNamesRender;
+import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.HudTextRender;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.PositionConfig;
 import com.github.standobyte.jojo.client.ui.screen.widgets.ImageVanillaButton;
 import com.github.standobyte.jojo.power.IPower;
@@ -111,12 +111,12 @@ public class ClientModSettingsScreen extends SettingsScreen {
             addButton(hotbarsPosition.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
             
             
-            EnumSetting<HudNamesRender> hudNamesRender = new EnumSetting<HudNamesRender>(settings, 
+            EnumSetting<HudTextRender> hudNamesRender = new EnumSetting<HudTextRender>(settings, 
                     new TranslationTextComponent("jojo.config.client.hudNamesRender"), 
                     new TranslationTextComponent("jojo.config.client.hudNamesRender.tooltip"), 
-                    HudNamesRender.class) {
-                @Override public HudNamesRender get() { return settingsValues.hudNamesRender; }
-                @Override public void set(HudNamesRender value) { settingsValues.hudNamesRender = value; }
+                    HudTextRender.class) {
+                @Override public HudTextRender get() { return settingsValues.hudTextRender; }
+                @Override public void set(HudTextRender value) { settingsValues.hudTextRender = value; }
             };
             addButton(hudNamesRender.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
             
@@ -125,9 +125,9 @@ public class ClientModSettingsScreen extends SettingsScreen {
                     new TranslationTextComponent("jojo.config.client.hudHotbarsFold"), 
                     new TranslationTextComponent("jojo.config.client.hudHotbarsFold.tooltip")
                     ) {
-                @Override public boolean get() { return settingsValues.hudHotbarsFold; }
+                @Override public boolean get() { return settingsValues.hudHotbarFold; }
                 @Override public void set(boolean value) { 
-                    settingsValues.hudHotbarsFold = value;
+                    settingsValues.hudHotbarFold = value;
                     if (minecraft.player != null) {
                         for (PowerClassification power : PowerClassification.values()) {
                             IPower.getPowerOptional(minecraft.player, power).ifPresent(IPower::clUpdateHud);
@@ -194,14 +194,14 @@ public class ClientModSettingsScreen extends SettingsScreen {
             addButton(timeStopAnimation.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
             
             
-            BooleanSetting standMotionTick = new BooleanSetting(settings, 
+            BooleanSetting standMotionTilt = new BooleanSetting(settings, 
                     new TranslationTextComponent("jojo.config.client.standMotionTilt"), 
                     new TranslationTextComponent("jojo.config.client.standMotionTilt.tooltip")
                     ) {
                 @Override public boolean get() { return settingsValues._standMotionTilt; }
                 @Override public void set(boolean value) { settingsValues._standMotionTilt = value; }
             };
-            addButton(standMotionTick.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
+//            addButton(standMotionTilt.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this));
             
             addBackButton(DialogTexts.GUI_BACK, i);
         }

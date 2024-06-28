@@ -536,7 +536,7 @@ public class HamonUtil {
                             return true;
                         }
                         else if (player.isLocalPlayer()) {
-                            BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).triggerRedHighlight(19);
+                            BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).triggerRedHighlight(1);
                         }
                     }
                 }
@@ -625,6 +625,7 @@ public class HamonUtil {
         public static final ProjectileChargeProperties SNOWBALL = new ProjectileChargeProperties(0.75F, OptionalInt.of(20), 500);
         public static final ProjectileChargeProperties EGG = new ProjectileChargeProperties(0.75F, OptionalInt.empty(), 200);
         public static final ProjectileChargeProperties WATER_BOTTLE = new ProjectileChargeProperties(1.0F, OptionalInt.of(30), 750);
+        public static final ProjectileChargeProperties MOLOTOV = new ProjectileChargeProperties(1.0F, OptionalInt.of(200), 500);
         
         private final float baseMultiplier;
         private final OptionalInt chargeTicks;
@@ -655,6 +656,9 @@ public class HamonUtil {
             }
             else if (type == EntityType.POTION && MCUtil.isPotionWaterBottle((PotionEntity) projectile)) {
                 return WATER_BOTTLE;
+            }
+            else if (type == ModEntityTypes.MOLOTOV.get()) {
+                return MOLOTOV;
             }
             return null;
         }

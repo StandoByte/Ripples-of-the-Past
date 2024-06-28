@@ -172,9 +172,9 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser,
     
     public static AttributeModifierMap.MutableAttribute createAttributes() {
         return MobEntity.createMobAttributes()
-                .add(Attributes.ATTACK_DAMAGE, 3.0D)
-                .add(Attributes.ATTACK_SPEED, 8.0D)
-                .add(Attributes.MOVEMENT_SPEED, 1.5D)
-                .add(ForgeMod.SWIM_SPEED.get(), 2.0D);
+                .add(Attributes.ATTACK_DAMAGE, 3.0)
+                .add(Attributes.ATTACK_SPEED, 8.0)
+                .add(Attributes.MOVEMENT_SPEED, 0.1)
+                .add(ForgeMod.SWIM_SPEED.get(), 2.0);
     }
 }

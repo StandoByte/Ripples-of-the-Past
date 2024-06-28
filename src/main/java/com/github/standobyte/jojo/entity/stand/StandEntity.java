@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
@@ -174,6 +175,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     private BarrageSwingsHolder<?, ?> barrageSwings;
     private final BarrageHitSoundHandler barrageSounds;
 
+    public float lastRenderTick = 0;
     public float lastMotionTiltTick = -1;
 //    public Vector3d motionVec = Vector3d.ZERO;
 //    public double motionDist = 0;
@@ -181,6 +183,8 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     
     public Vector3d prevTiltVec = Vector3d.ZERO;
     public Vector3d tiltVec = Vector3d.ZERO;
+    
+    public float outlineTicks = 0;
     
     public static final DataParameter<Optional<ResourceLocation>> DATA_PARAM_STAND_SKIN = EntityDataManager.defineId(StandEntity.class, 
             (IDataSerializer<Optional<ResourceLocation>>) ModDataSerializers.OPTIONAL_RES_LOC.get().getSerializer());
@@ -1153,11 +1157,13 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         }
         else {
             boolean stun = ModStatusEffects.isStunned(this);
-            currentTask.ifPresent(task -> {
-                if (!stun || task.getAction().ignoresPerformerStun()) {
-                    task.tick(userPower, this);
-                }
-            });
+            if (userPower != null) {
+                currentTask.ifPresent(task -> {
+                    if (!stun || task.getAction().ignoresPerformerStun()) {
+                        task.tick(userPower, this);
+                    }
+                });
+            }
             
             if (!stun && gradualSummonWeaknessTicks > 0) {
                 gradualSummonWeaknessTicks--;
@@ -2016,6 +2022,10 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
 
     protected boolean shouldHaveNoPhysics() {
         return standCanHaveNoPhysics() && !isManuallyControlled() && !isRemotePositionFixed();
+    }
+    
+    public ActionConditionResult canBeManuallyControlled() {
+        return ActionConditionResult.POSITIVE;
     }
 
     public void setManualControl(boolean manualControl, boolean fixRemotePosition) {

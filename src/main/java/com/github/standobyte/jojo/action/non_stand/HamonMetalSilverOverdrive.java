@@ -45,13 +45,13 @@ public class HamonMetalSilverOverdrive extends HamonOverdrive {
         
         for (int i = 0; i < 4; i++) {
             if (!targetEntity.getItemBySlot(EquipmentSlotType.byTypeAndIndex(EquipmentSlotType.Group.ARMOR, i)).isEmpty()) {
-                mult += 0.5F;
+                mult += 0.2F;
             }
         }
         for (Hand hand : Hand.values()) {
             ItemStack heldStack = targetEntity.getItemInHand(hand);
             if (MCUtil.isItemWeapon(heldStack)) {
-                mult += 0.5F;
+                mult += 0.2F;
                 break;
             }
         }

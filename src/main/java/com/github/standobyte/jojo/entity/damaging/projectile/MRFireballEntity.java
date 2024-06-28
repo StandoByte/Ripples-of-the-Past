@@ -63,23 +63,23 @@ public class MRFireballEntity extends ModdedProjectileEntity implements IRenders
         }
     }
 
-    @Override
-    public void tick() {
-        if (isInWaterOrRain()) {
-            clearFire();
-        }
-        else {
-            super.tick();
-        }
-    }
-    
-    @Override
-    public void clearFire() {
-        super.clearFire();
-        if (!level.isClientSide()) {
-            JojoModUtil.extinguishFieryStandEntity(this, (ServerWorld) level);
-        }
-    }
+//    @Override
+//    public void tick() {
+//        if (isInWaterOrRain()) {
+//            clearFire();
+//        }
+//        else {
+//            super.tick();
+//        }
+//    }
+//    
+//    @Override
+//    public void clearFire() {
+//        super.clearFire();
+//        if (!level.isClientSide()) {
+//            JojoModUtil.extinguishFieryStandEntity(this, (ServerWorld) level);
+//        }
+//    }
 
     @Override
     public ItemStack getItem() {

@@ -34,12 +34,55 @@ import net.minecraft.util.Util;
 
 public class FrozenLayer<T extends LivingEntity, M extends EntityModel<T>> extends LayerRenderer<T, M> {
     private static final Map<PlayerRenderer, FrozenLayer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>> RENDERER_LAYERS = new HashMap<>();
+    public static final ResourceLocation BIPED_PATH = new ResourceLocation(JojoMod.MOD_ID, "textures/entity/layer/vampire_freeze/biped");
+    public static final ResourceLocation NON_BIPED_PATH = new ResourceLocation(JojoMod.MOD_ID, "textures/entity/layer/vampire_freeze");
     
-    public FrozenLayer(IEntityRenderer<T, M> renderer) {
+    public FrozenLayer(IEntityRenderer<T, M> renderer, ResourceLocation texturesPath) {
         super(renderer);
         if (renderer instanceof PlayerRenderer) {
             RENDERER_LAYERS.put((PlayerRenderer) renderer, (FrozenLayer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>) this);
         }
+        
+        LAYER_TEXTURES_FREEZE = Util.make(new EnumMap<>(TextureSize.class), map -> {
+            String id = texturesPath.getNamespace();
+            String path = texturesPath.getPath();
+            map.put(TextureSize._64x32, new ResourceLocation[] {
+                    new ResourceLocation(id, path + "/t64x32/1.png"),
+                    new ResourceLocation(id, path + "/t64x32/2.png"),
+                    new ResourceLocation(id, path + "/t64x32/3.png"),
+                    new ResourceLocation(id, path + "/t64x32/4.png")
+            });
+            map.put(TextureSize._64x64, new ResourceLocation[] {
+                    new ResourceLocation(id, path + "/t64x64/1.png"),
+                    new ResourceLocation(id, path + "/t64x64/2.png"),
+                    new ResourceLocation(id, path + "/t64x64/3.png"),
+                    new ResourceLocation(id, path + "/t64x64/4.png")
+            });
+            map.put(TextureSize._128x64, new ResourceLocation[] {
+                    new ResourceLocation(id, path + "/t128x64/1.png"),
+                    new ResourceLocation(id, path + "/t128x64/2.png"),
+                    new ResourceLocation(id, path + "/t128x64/3.png"),
+                    new ResourceLocation(id, path + "/t128x64/4.png")
+            });
+            map.put(TextureSize._128x128, new ResourceLocation[] {
+                    new ResourceLocation(id, path + "/t128x128/1.png"),
+                    new ResourceLocation(id, path + "/t128x128/2.png"),
+                    new ResourceLocation(id, path + "/t128x128/3.png"),
+                    new ResourceLocation(id, path + "/t128x128/4.png")
+            });
+            map.put(TextureSize._256x128, new ResourceLocation[] {
+                    new ResourceLocation(id, path + "/t256x128/1.png"),
+                    new ResourceLocation(id, path + "/t256x128/2.png"),
+                    new ResourceLocation(id, path + "/t256x128/3.png"),
+                    new ResourceLocation(id, path + "/t256x128/4.png")
+            });
+            map.put(TextureSize._256x256, new ResourceLocation[] {
+                    new ResourceLocation(id, path + "/t256x256/1.png"),
+                    new ResourceLocation(id, path + "/t256x256/2.png"),
+                    new ResourceLocation(id, path + "/t256x256/3.png"),
+                    new ResourceLocation(id, path + "/t256x256/4.png")
+            });
+        });
     }
     
     @Override
@@ -68,44 +111,7 @@ public class FrozenLayer<T extends LivingEntity, M extends EntityModel<T>> exten
     }
 
 
-    private static final Map<TextureSize, ResourceLocation[]> LAYER_TEXTURES_FREEZE = Util.make(new EnumMap<>(TextureSize.class), map -> {
-        map.put(TextureSize._64x32, new ResourceLocation[] {
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/vampire_freeze/t64x32/1.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/vampire_freeze/t64x32/2.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/vampire_freeze/t64x32/3.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/vampire_freeze/t64x32/4.png")
-        });
-        map.put(TextureSize._64x64, new ResourceLocation[] {
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/vampire_freeze/t64x64/1.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/vampire_freeze/t64x64/2.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/vampire_freeze/t64x64/3.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/vampire_freeze/t64x64/4.png")
-        });
-        map.put(TextureSize._128x64, new ResourceLocation[] {
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/vampire_freeze/t128x64/1.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/vampire_freeze/t128x64/2.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/vampire_freeze/t128x64/3.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/vampire_freeze/t128x64/4.png")
-        });
-        map.put(TextureSize._128x128, new ResourceLocation[] {
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/vampire_freeze/t128x128/1.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/vampire_freeze/t128x128/2.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/vampire_freeze/t128x128/3.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/vampire_freeze/t128x128/4.png")
-        });
-        map.put(TextureSize._256x128, new ResourceLocation[] {
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/vampire_freeze/t256x128/1.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/vampire_freeze/t256x128/2.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/vampire_freeze/t256x128/3.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/vampire_freeze/t256x128/4.png")
-        });
-        map.put(TextureSize._256x256, new ResourceLocation[] {
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/vampire_freeze/t256x256/1.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/vampire_freeze/t256x256/2.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/vampire_freeze/t256x256/3.png"),
-                new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/layer/vampire_freeze/t256x256/4.png")
-        });
-    });
+    private final Map<TextureSize, ResourceLocation[]> LAYER_TEXTURES_FREEZE;
     
     
     

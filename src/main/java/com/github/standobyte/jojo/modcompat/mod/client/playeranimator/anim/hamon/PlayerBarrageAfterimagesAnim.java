@@ -74,7 +74,8 @@ public class PlayerBarrageAfterimagesAnim extends TwoHandedBarrageAnimation<Abst
     }
     
     @Override
-    public void beforeSwingAfterimageRender(MatrixStack matrixStack, float loopCompletion, HandSide side) {
+    public void beforeSwingAfterimageRender(MatrixStack matrixStack, 
+            PlayerModel<AbstractClientPlayerEntity> model, float loopCompletion, HandSide side) {
         anim.rotateBody(matrixStack, loopCompletion, side);
     }
 }

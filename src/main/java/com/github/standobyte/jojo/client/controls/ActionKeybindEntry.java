@@ -13,6 +13,7 @@ import com.google.gson.JsonObject;
 
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
+import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.settings.KeyModifier;
 
@@ -23,6 +24,7 @@ public class ActionKeybindEntry {
     
     private OnKeyPress onKeyPress = OnKeyPress.PERFORM;
     private KeyActiveType hudInteraction = KeyActiveType.INSIDE_HUD;
+    private boolean isVisibleInHud = true;
     
     private Action<?> action;
     private KeyBinding keybind;
@@ -95,6 +97,14 @@ public class ActionKeybindEntry {
         }
     }
     
+    public void setVisibleInHud(boolean visible) {
+        this.isVisibleInHud = visible;
+    }
+    
+    public boolean isVisibleInHud() {
+        return isVisibleInHud;
+    }
+    
     public void removeKeybindFromMap() {
         if (keybind != null) {
             ClientReflection.getAllKeybindingMap().remove(keybind.getName());
@@ -108,6 +118,7 @@ public class ActionKeybindEntry {
         json.addProperty("keybind", keyCode.getName() + (keyModifier != KeyModifier.NONE ? ":" + keyModifier : ""));
         json.addProperty("onKeyPress", onKeyPress.name());
         json.addProperty("withHud", hudInteraction.name());
+        json.addProperty("hudIcon", isVisibleInHud);
         return json;
     }
     
@@ -118,6 +129,7 @@ public class ActionKeybindEntry {
         ActionKeybindEntry entry = new ActionKeybindEntry(action, keySaveDesc);
         try { entry.setOnPress(Enum.valueOf(OnKeyPress.class, jsonObj.get("onKeyPress").getAsString())); } catch (Exception notSpecified) {}
         try { entry.setHudInteraction(Enum.valueOf(KeyActiveType.class, jsonObj.get("withHud").getAsString())); } catch (Exception notSpecified) {}
+        try { entry.setVisibleInHud(JSONUtils.getAsBoolean(jsonObj, "hudIcon")); } catch (Exception notSpecified) {}
         return entry;
     }
     

@@ -10,5 +10,5 @@ import net.minecraft.util.HandSide;
 public interface IBarrageAnimation<T extends Entity, M extends EntityModel<T>> extends IActionAnimation<T> {
     void addSwings(T entity, HandSide side, float ticks);
     void animateSwing(T entity, M model, float loopCompletion, HandSide side, float yRotOffsetRad, float xRotRad, float zRotOffsetRad);
-    default void beforeSwingAfterimageRender(MatrixStack matrixStack, float loopCompletion, HandSide side) {}
+    default void beforeSwingAfterimageRender(MatrixStack matrixStack, M model, float loopCompletion, HandSide side) {}
 }

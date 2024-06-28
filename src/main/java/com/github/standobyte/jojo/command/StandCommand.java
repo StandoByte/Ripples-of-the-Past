@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.command;
 
 import java.util.Collection;
 
+import com.github.standobyte.jojo.command.argument.StandArgument;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;

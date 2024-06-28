@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalInt;
 import java.util.Set;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -11,9 +12,13 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHelper;
+import net.minecraft.client.audio.AudioStreamBuffer;
+import net.minecraft.client.audio.AudioStreamManager;
 import net.minecraft.client.audio.ISoundEventAccessor;
 import net.minecraft.client.audio.Sound;
+import net.minecraft.client.audio.SoundEngine;
 import net.minecraft.client.audio.SoundEventAccessor;
+import net.minecraft.client.audio.SoundSource;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.screen.ControlsScreen;
 import net.minecraft.client.gui.screen.IngameMenuScreen;
@@ -308,4 +313,19 @@ public class ClientReflection {
         return ReflectionUtil.getLongFieldValue(NATIVE_IMAGE_PIXELS, image);
     }
     
+
+    private static final Field SOUND_SOURCE_SOURCE = ObfuscationReflectionHelper.findField(SoundSource.class, "field_216441_b");
+    public static int getSourceId(SoundSource source) {
+        return ReflectionUtil.getIntFieldValue(SOUND_SOURCE_SOURCE, source);
+    }
+
+    private static final Method AUDIO_STREAM_BUFFER_GET_AL_BUFFER = ObfuscationReflectionHelper.findMethod(AudioStreamBuffer.class, "func_216473_a");
+    public static OptionalInt getAlBuffer(AudioStreamBuffer buffer) {
+        return ReflectionUtil.invokeMethod(AUDIO_STREAM_BUFFER_GET_AL_BUFFER, buffer);
+    }
+
+    private static final Field SOUND_ENGINE_SOUND_BUFFERS = ObfuscationReflectionHelper.findField(SoundEngine.class, "field_217939_i");
+    public static AudioStreamManager getSoundBuffers(SoundEngine soundEngine) {
+        return ReflectionUtil.getFieldValue(SOUND_ENGINE_SOUND_BUFFERS, soundEngine);
+    }
 }

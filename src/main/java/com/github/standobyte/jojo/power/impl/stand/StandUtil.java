@@ -95,7 +95,8 @@ public class StandUtil {
     public static boolean canPlayerGetFromArrow(StandType<?> standType, boolean clientSide) {
         return standType.getSurvivalGameplayPool() == StandSurvivalGameplayPool.PLAYER_ARROW && 
                 (!JojoModConfig.getCommonConfigInstance(clientSide).isConfigLoaded() || // to make it work when adding items to creative search tab on client initialization, when the config isn't loaded yet
-                !JojoModConfig.getCommonConfigInstance(clientSide).isStandBanned(standType));
+                !JojoModConfig.getCommonConfigInstance(clientSide).isStandBanned(standType)) &&
+                standType.getStats().getRandomWeight() > 0;
     }
     
     public static boolean isEntityStandUser(LivingEntity entity) {
@@ -128,7 +129,7 @@ public class StandUtil {
                     }
                     else {
                         Minecraft mc = Minecraft.getInstance();
-                        ClientUtil.setCameraEntityPreventShaderSwitch(mc, manualControl ? standEntity : player);
+                        ClientUtil.setCameraEntityPreventShaderSwitch(manualControl ? standEntity : player);
                         if (manualControl) {
                             mc.player.xxa = 0;
                             mc.player.zza = 0;

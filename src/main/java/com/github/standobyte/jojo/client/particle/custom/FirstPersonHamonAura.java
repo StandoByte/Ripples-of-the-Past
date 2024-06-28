@@ -1,6 +1,8 @@
 package com.github.standobyte.jojo.client.particle.custom;
 
+import java.util.EnumMap;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Queue;
 import java.util.Random;
@@ -19,6 +21,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractH
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.google.common.collect.EvictingQueue;
+import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
 import com.google.common.collect.Streams;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -46,16 +49,15 @@ import net.minecraft.item.TridentItem;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.potion.Potions;
 import net.minecraft.util.HandSide;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 
 public class FirstPersonHamonAura {
-    private static final IParticleRenderType RENDER_TYPE = HamonAuraParticleRenderType.HAMON_AURA;
     private final Queue<FirstPersonPseudoParticle> particlesToAdd = Queues.newArrayDeque();
-    private final Queue<FirstPersonPseudoParticle> particlesLeft = EvictingQueue.create(16384);
-    private final Queue<FirstPersonPseudoParticle> particlesRight = EvictingQueue.create(16384);
+    private final Map<IParticleRenderType, Map<HandSide, Queue<FirstPersonPseudoParticle>>> particles = Maps.newIdentityHashMap();
     
     private FirstPersonHamonAura() {}
     
@@ -75,20 +77,20 @@ public class FirstPersonHamonAura {
     }
 
     public void tick() {
-        tickParticles(particlesLeft);
-        tickParticles(particlesRight);
+        for (Map<HandSide, Queue<FirstPersonPseudoParticle>> particles : this.particles.values()) {
+            tickParticles(particles.get(HandSide.LEFT));
+            tickParticles(particles.get(HandSide.RIGHT));
+        }
         
         FirstPersonPseudoParticle particle;
         if (!particlesToAdd.isEmpty()) {
             while((particle = particlesToAdd.poll()) != null) {
-                switch (particle.handSide) {
-                case LEFT:
-                    particlesLeft.add(particle);
-                    break;
-                case RIGHT:
-                    particlesRight.add(particle);
-                    break;
-                }
+                Map<HandSide, Queue<FirstPersonPseudoParticle>> particlesByRenderType = this.particles.computeIfAbsent(particle.getRenderType(), 
+                        t -> Util.make(new EnumMap<>(HandSide.class), map -> {
+                            map.put(HandSide.LEFT, EvictingQueue.create(16384));
+                            map.put(HandSide.RIGHT, EvictingQueue.create(16384));
+                        }));
+                particlesByRenderType.get(particle.handSide).add(particle);
             }
         }
 
@@ -106,7 +108,7 @@ public class FirstPersonHamonAura {
                     CrashReport crashreport = CrashReport.forThrowable(throwable, "Ticking Particle");
                     CrashReportCategory crashreportcategory = crashreport.addCategory("Particle being ticked");
                     crashreportcategory.setDetail("Particle", particle::toString);
-                    crashreportcategory.setDetail("Particle Type", RENDER_TYPE::toString);
+                    crashreportcategory.setDetail("Particle Type", particle.getRenderType()::toString);
                     throw new ReportedException(crashreport);
                 }
                 if (!particle.isAlive()) {
@@ -117,8 +119,8 @@ public class FirstPersonHamonAura {
     }
     
     public static boolean auraRendersAtItem(ItemStack itemStack, HandSide handSide) {
-        if ((handSide == HandSide.LEFT ? getInstance().particlesLeft : getInstance().particlesRight).isEmpty() || MCUtil.itemHandFree(itemStack)) {
-            return false;
+        if (MCUtil.itemHandFree(itemStack)) {
+            return true;
         }
         
         Entity cameraEntity = Minecraft.getInstance().getCameraEntity();
@@ -130,7 +132,7 @@ public class FirstPersonHamonAura {
                 Item item = itemStack.getItem();
                 return entity.getMainArm() == handSide && (hamon.isSkillLearned(ModHamonSkills.METAL_SILVER_OVERDRIVE.get()) || OilItem.remainingOiledUses(itemStack).isPresent()) && MCUtil.isItemWeapon(itemStack)
                         || hamon.isSkillLearned(ModHamonSkills.PLANT_ITEM_INFUSION.get()) && HamonUtil.isItemLivingMatter(itemStack)
-                        || hamon.isSkillLearned(ModHamonSkills.THROWABLES_INFUSION.get()) && (item == Items.EGG || item == Items.SNOWBALL || ((item == Items.SPLASH_POTION || item == Items.LINGERING_POTION) && PotionUtils.getPotion(itemStack) == Potions.WATER))
+                        || hamon.isSkillLearned(ModHamonSkills.THROWABLES_INFUSION.get()) && (item == Items.EGG || item == Items.SNOWBALL || item == ModItems.MOLOTOV.get() || ((item == Items.SPLASH_POTION || item == Items.LINGERING_POTION) && PotionUtils.getPotion(itemStack) == Potions.WATER))
                         || hamon.isSkillLearned(ModHamonSkills.ARROW_INFUSION.get()) && (item instanceof ShootableItem || item instanceof TridentItem || item == ModItems.KNIFE.get() || item == ModItems.BLADE_HAT.get())
                         || hamon.isSkillLearned(ModHamonSkills.CLACKER_VOLLEY.get()) && item == ModItems.CLACKERS.get()
                         || hamon.isSkillLearned(ModHamonSkills.AJA_STONE_KEEPER.get()) && item instanceof AjaStoneItem
@@ -159,23 +161,8 @@ public class FirstPersonHamonAura {
 
     @SuppressWarnings("deprecation")
     public void renderParticles(MatrixStack pMatrixStack, IRenderTypeBuffer pBuffer, HandSide handSide) {
-        if (!ClientModSettings.getSettingsReadOnly().firstPersonHamonAura) return;
-        
-        Queue<FirstPersonPseudoParticle> particles;
-        switch (handSide) {
-        case LEFT:
-            particles = particlesLeft;
-            break;
-        case RIGHT:
-            particles = particlesRight;
-            break;
-        default:
-            return;
-        }
-        if (particles.isEmpty()) return;
-        
-
-        LightTexture lightTexture = Minecraft.getInstance().gameRenderer.lightTexture();
+        Minecraft mc = Minecraft.getInstance();
+        LightTexture lightTexture = mc.gameRenderer.lightTexture();
         float partialTicks = ClientUtil.getPartialTick();
         
         lightTexture.turnOnLightLayer();
@@ -195,21 +182,34 @@ public class FirstPersonHamonAura {
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         Tessellator tessellator = Tessellator.getInstance();
         BufferBuilder bufferbuilder = tessellator.getBuilder();
-        RENDER_TYPE.begin(bufferbuilder, Minecraft.getInstance().textureManager);
         
-        for (FirstPersonPseudoParticle particle : particles) {
-            try {
-                particle.render(bufferbuilder, partialTicks);
-            } catch (Throwable throwable) {
-                CrashReport crashreport = CrashReport.forThrowable(throwable, "Rendering Particle");
-                CrashReportCategory crashreportcategory = crashreport.addCategory("Particle being rendered");
-                crashreportcategory.setDetail("Particle", particle::toString);
-                crashreportcategory.setDetail("Particle Type", RENDER_TYPE::toString);
-                throw new ReportedException(crashreport);
+        for (Map.Entry<IParticleRenderType, Map<HandSide, Queue<FirstPersonPseudoParticle>>> particlesByRenderType : particles.entrySet()) {
+            IParticleRenderType renderType = particlesByRenderType.getKey();
+            if (renderType == IParticleRenderType.NO_RENDER || 
+                    renderType == HamonAuraParticleRenderType.HAMON_AURA && !ClientModSettings.getSettingsReadOnly().firstPersonHamonAura) {
+                continue;
             }
+            Queue<FirstPersonPseudoParticle> particles = particlesByRenderType.getValue().get(handSide);
+            if (particles == null || particles.isEmpty() || 
+                    renderType == HamonAuraParticleRenderType.HAMON_AURA && !auraRendersAtItem(mc.player.getItemInHand(MCUtil.getHand(mc.player, handSide)), handSide)) {
+                continue;
+            }
+            renderType.begin(bufferbuilder, Minecraft.getInstance().textureManager);
+            
+            for (FirstPersonPseudoParticle particle : particles) {
+                try {
+                    particle.render(bufferbuilder, partialTicks);
+                } catch (Throwable throwable) {
+                    CrashReport crashreport = CrashReport.forThrowable(throwable, "Rendering Particle");
+                    CrashReportCategory crashreportcategory = crashreport.addCategory("Particle being rendered");
+                    crashreportcategory.setDetail("Particle", particle::toString);
+                    crashreportcategory.setDetail("Particle Type", renderType::toString);
+                    throw new ReportedException(crashreport);
+                }
+            }
+            
+            renderType.end(tessellator);
         }
-
-        RENDER_TYPE.end(tessellator);
 
         RenderSystem.popMatrix();
         RenderSystem.depthMask(true);
@@ -222,41 +222,39 @@ public class FirstPersonHamonAura {
     
     
     
-    public static class FirstPersonPseudoParticle {
-        private static final Random RANDOM = new Random();
-        private double xo;
-        private double yo;
-        private double zo;
-        private double x;
-        private double y;
-        private double z;
-        private double xd;
-        private double yd;
-        private double zd;
-        private boolean removed;
-        private int age;
-        private int lifetime;
-        private float rCol = 1.0F;
-        private float gCol = 1.0F;
-        private float bCol = 1.0F;
-        private float alpha = 1.0F;
-        private float quadSize = 0.1F * (RANDOM.nextFloat() * 0.5F + 0.5F) * 2.0F;
-        private TextureAtlasSprite sprite;
-        private final IAnimatedSprite sprites;
-        private final double fallSpeed;
-        private final int startingSpriteRandom;
-        private final HandSide handSide;
+    public static abstract class FirstPersonPseudoParticle {
+        protected static final Random RANDOM = new Random();
+        protected double xo;
+        protected double yo;
+        protected double zo;
+        protected double x;
+        protected double y;
+        protected double z;
+        protected double xd;
+        protected double yd;
+        protected double zd;
+        protected boolean removed;
+        protected int age;
+        protected int lifetime = (int)(4.0F / (RANDOM.nextFloat() * 0.9F + 0.1F));
+        protected float rCol = 1;
+        protected float gCol = 1;
+        protected float bCol = 1;
+        protected float alpha = 1;
+        protected float quadSize = 0.1F * (RANDOM.nextFloat() * 0.5F + 0.5F) * 2.0F;
+        protected TextureAtlasSprite sprite;
+        protected final IAnimatedSprite sprites;
+
+        protected Quaternion renderRot = new Quaternion(Quaternion.ONE);
+        protected final HandSide handSide;
+        protected float yRot;
+        protected float xRot;
         
-        private float yRot;
-        private float xRot;
-        private Quaternion renderRot = new Quaternion(Quaternion.ONE);
-        
-        private static final float RIGHT_Y_ROT = 57.5f * MathUtil.DEG_TO_RAD;
-        private static final float RIGHT_X_ROT = -62.5f * MathUtil.DEG_TO_RAD;
-        private static final float LEFT_Y_ROT = -RIGHT_Y_ROT;
-        private static final float LEFT_X_ROT = RIGHT_X_ROT;
-        private static final Quaternion RIGHT_ROT;
-        private static final Quaternion LEFT_ROT;
+        protected static final float RIGHT_Y_ROT = 57.5f * MathUtil.DEG_TO_RAD;
+        protected static final float RIGHT_X_ROT = -62.5f * MathUtil.DEG_TO_RAD;
+        protected static final float LEFT_Y_ROT = -RIGHT_Y_ROT;
+        protected static final float LEFT_X_ROT = RIGHT_X_ROT;
+        protected static final Quaternion RIGHT_ROT;
+        protected static final Quaternion LEFT_ROT;
         static {
             RIGHT_ROT = new Quaternion(Quaternion.ONE);
             RIGHT_ROT.mul(Vector3f.YP.rotation(RIGHT_Y_ROT));
@@ -266,43 +264,13 @@ public class FirstPersonHamonAura {
             LEFT_ROT.mul(Vector3f.XP.rotation(LEFT_X_ROT));
         }
         
-        
-        
         public FirstPersonPseudoParticle(double x, double y, double z, 
                 IAnimatedSprite sprites, HandSide handSide) {
             this.setPos(x, y, z);
             this.xo = x;
             this.yo = y;
             this.zo = z;
-            this.lifetime = (int)(4.0F / (RANDOM.nextFloat() * 0.9F + 0.1F));
-
-            this.xd = (Math.random() * 2.0 - 1.0) * 0.4;
-            this.yd = (Math.random() * 2.0 - 1.0) * 0.4;
-            this.zd = (Math.random() * 2.0 - 1.0) * 0.4;
-            double f = (Math.random() + Math.random() + 1.0) * 0.15;
-            double f1 = MathHelper.sqrt(xd * xd + yd * yd + zd * zd);
-            this.xd = xd / f1 * f * 0.4;
-            this.yd = yd / f1 * f * 0.4 + 0.1;
-            this.zd = zd / f1 * f * 0.4;
-
-            this.fallSpeed = 0.0005;
             this.sprites = sprites;
-            this.xd *= 0.05;
-            this.yd *= 0.1;
-            this.zd *= 0.05;
-            float f3 = 1.2F + 0.6F * RANDOM.nextFloat();
-            this.quadSize *= 0.75F * f3;
-            this.lifetime = (int)(8 / (RANDOM.nextDouble() * 0.8 + 0.2));
-            this.lifetime = (int)((float) lifetime * f3);
-            this.lifetime = Math.max(lifetime, 1);
-
-            this.rCol = 1;
-            this.gCol = 1;
-            this.bCol = 1;
-            lifetime = 25 + RANDOM.nextInt(10);
-            startingSpriteRandom = RANDOM.nextInt(lifetime);
-            setSpriteFromAge(sprites);
-            alpha = 0.25F;
             
             this.handSide = handSide;
             switch (handSide) {
@@ -318,40 +286,35 @@ public class FirstPersonHamonAura {
                 break;
             }
         }
-
-        private int getLightColor(float partialTick) {
-            return 0xF000F0;
+        
+        public abstract IParticleRenderType getRenderType();
+        
+        protected void remove() {
+            this.removed = true;
         }
 
-        public void tick() {
-            xo = x;
-            yo = y;
-            zo = z;
-            if (age++ >= lifetime) {
-                remove();
-            } else {
-                setSpriteFromAge(sprites);
-                yd += fallSpeed;
-                move(xd, yd, zd);
-                if (y == yo) {
-                    xd *= 1.1D;
-                    zd *= 1.1D;
-                }
+        public boolean isAlive() {
+            return !this.removed;
+        }
 
-                xd *= 0.96;
-                yd *= 0.96;
-                zd *= 0.96;
+        protected void setPos(double pX, double pY, double pZ) {
+            this.x = pX;
+            this.y = pY;
+            this.z = pZ;
+        }
 
+        protected void move(double pX, double pY, double pZ) {
+            if (pX != 0.0 || pY != 0.0 || pZ != 0.0) {
+                Vector3d moveVec = new Vector3d(pX, pY, pZ);
+                moveVec = moveVec.xRot(-xRot);
+                moveVec = moveVec.yRot(yRot);
+                this.x += moveVec.x;
+                this.y += moveVec.y;
+                this.z += moveVec.z;
             }
         }
-
-        private static final float ALPHA_MIN = 0.05F;
-        private static final float ALPHA_DIFF = 0.3F;
+        
         public void render(IVertexBuilder buffer, float partialTick) {
-            float ageF = ((float) age + partialTick) / (float) lifetime;
-            float alphaFunc = ageF <= 0.5F ? ageF * 2 : (1 - ageF) * 2;
-            this.alpha = ALPHA_MIN + alphaFunc * ALPHA_DIFF;
-
             float f = (float)(MathHelper.lerp((double)partialTick, this.xo, this.x));
             float f1 = (float)(MathHelper.lerp((double)partialTick, this.yo, this.y));
             float f2 = (float)(MathHelper.lerp((double)partialTick, this.zo, this.z));
@@ -380,46 +343,117 @@ public class FirstPersonHamonAura {
             buffer.vertex(avector3f[3].x(), avector3f[3].y(), avector3f[3].z()).uv(u0, v1).color(rCol, gCol, bCol, alpha).uv2(j).endVertex();
         }
 
-        private void setSpriteFromAge(IAnimatedSprite pSprite) {
-            setSprite(pSprite.get((age + startingSpriteRandom) % lifetime, lifetime));
+        protected float getQuadSize(float pScaleFactor) {
+            return quadSize;
         }
-
-        private void setSprite(TextureAtlasSprite pSprite) {
-            this.sprite = pSprite;
+        
+        protected int getLightColor(float partialTick) {
+            Minecraft mc = Minecraft.getInstance();
+            return mc.getEntityRenderDispatcher().getPackedLightCoords(mc.player, partialTick);
         }
-
-        private float getQuadSize(float pScaleFactor) {
-            return quadSize * MathHelper.clamp(((float)age + pScaleFactor) / (float)lifetime * 32.0F, 0.0F, 1.0F);
+        
+        public void tick() {
+            xo = x;
+            yo = y;
+            zo = z;
+            if (age++ >= lifetime) {
+                remove();
+            }
         }
-
+        
+        
         @Override
         public String toString() {
             return this.getClass().getSimpleName() + ", Pos (" + this.x + "," + this.y + "," + this.z + "), RGBA (" + this.rCol + "," + this.gCol + "," + this.bCol + "," + this.alpha + "), Age " + this.age;
         }
+    }
+    
+    
+    
+    public static class HamonAuraPseudoParticle extends FirstPersonPseudoParticle {
+        protected final double fallSpeed;
+        protected final int startingSpriteRandom;
+        
+        public HamonAuraPseudoParticle(double x, double y, double z, 
+                IAnimatedSprite sprites, HandSide handSide) {
+            super(x, y, z, sprites, handSide);
+            
+            this.lifetime = (int)(4.0F / (RANDOM.nextFloat() * 0.9F + 0.1F));
 
-        private void remove() {
-            this.removed = true;
+            this.xd = (Math.random() * 2.0 - 1.0) * 0.4;
+            this.yd = (Math.random() * 2.0 - 1.0) * 0.4;
+            this.zd = (Math.random() * 2.0 - 1.0) * 0.4;
+            double f = (Math.random() + Math.random() + 1.0) * 0.15;
+            double f1 = MathHelper.sqrt(xd * xd + yd * yd + zd * zd);
+            this.xd = xd / f1 * f * 0.4;
+            this.yd = yd / f1 * f * 0.4 + 0.1;
+            this.zd = zd / f1 * f * 0.4;
+
+            this.fallSpeed = 0.0005;
+            this.xd *= 0.05;
+            this.yd *= 0.1;
+            this.zd *= 0.05;
+            float f3 = 1.2F + 0.6F * RANDOM.nextFloat();
+            this.quadSize *= 0.75F * f3;
+//            this.lifetime = (int)(8 / (RANDOM.nextDouble() * 0.8 + 0.2));
+//            this.lifetime = (int)((float) lifetime * f3);
+//            this.lifetime = Math.max(lifetime, 1);
+
+            lifetime = 25 + RANDOM.nextInt(10);
+            startingSpriteRandom = RANDOM.nextInt(lifetime);
+            setSpriteFromAge(sprites);
+            alpha = 0.25F;
         }
-
-        public boolean isAlive() {
-            return !this.removed;
+        
+        @Override
+        public IParticleRenderType getRenderType() {
+            return HamonAuraParticleRenderType.HAMON_AURA;
         }
-
-        private void setPos(double pX, double pY, double pZ) {
-            this.x = pX;
-            this.y = pY;
-            this.z = pZ;
+        
+        @Override
+        protected int getLightColor(float partialTick) {
+            return 0xF000F0;
         }
+        
+        @Override
+        public void tick() {
+            super.tick();
+            if (!removed) {
+                setSpriteFromAge(sprites);
+                yd += fallSpeed;
+                move(xd, yd, zd);
+                if (y == yo) {
+                    xd *= 1.1D;
+                    zd *= 1.1D;
+                }
 
-        private void move(double pX, double pY, double pZ) {
-            if (pX != 0.0 || pY != 0.0 || pZ != 0.0) {
-                Vector3d moveVec = new Vector3d(pX, pY, pZ);
-                moveVec = moveVec.xRot(-xRot);
-                moveVec = moveVec.yRot(yRot);
-                this.x += moveVec.x;
-                this.y += moveVec.y;
-                this.z += moveVec.z;
+                xd *= 0.96;
+                yd *= 0.96;
+                zd *= 0.96;
             }
+        }
+
+        protected static final float ALPHA_MIN = 0.05F;
+        protected static final float ALPHA_DIFF = 0.3F;
+        @Override
+        public void render(IVertexBuilder buffer, float partialTick) {
+            float ageF = ((float) age + partialTick) / (float) lifetime;
+            float alphaFunc = ageF <= 0.5F ? ageF * 2 : (1 - ageF) * 2;
+            this.alpha = ALPHA_MIN + alphaFunc * ALPHA_DIFF;
+            super.render(buffer, partialTick);
+        }
+
+        protected void setSpriteFromAge(IAnimatedSprite pSprite) {
+            setSprite(pSprite.get((age + startingSpriteRandom) % lifetime, lifetime));
+        }
+
+        protected void setSprite(TextureAtlasSprite pSprite) {
+            this.sprite = pSprite;
+        }
+        
+        @Override
+        protected float getQuadSize(float pScaleFactor) {
+            return quadSize * MathHelper.clamp(((float)age + pScaleFactor) / (float)lifetime * 32.0F, 0.0F, 1.0F);
         }
         
     }
