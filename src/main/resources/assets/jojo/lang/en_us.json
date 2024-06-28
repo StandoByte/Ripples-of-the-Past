@@ -1249,10 +1249,6 @@
   "stand.jojo.mr_president": "Mr.President",
   "entity.jojo.coco_jumbo_turtle": "Coco Jumbo",
   "item.jojo.mr_president_key.named": "%s key",
-  "coco_jumbo.key.not_blank": "not_blank_key",
-  "coco_jumbo.key.blank": "blank_key",
-  "coco_jumbo.key.wrong": "wrong_key",
-  "give_mr_president_hint": "~ This turtle looks very different. Could it have potential as a Stand user...? ~",
   "block.jojo.coco_jumbo_shell": "Turtle Shell",
   "block.jojo.mr_president_gem": "Key Gem",
   
