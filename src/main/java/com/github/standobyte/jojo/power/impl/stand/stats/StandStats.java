@@ -49,6 +49,7 @@ public class StandStats {
         buf.writeDouble(randomWeight);
     }
     
+    @Deprecated
     public void onNewDay(LivingEntity user, IStandPower power) {}
     
     

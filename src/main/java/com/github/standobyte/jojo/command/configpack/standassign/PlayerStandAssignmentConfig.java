@@ -8,7 +8,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.command.StandArgument;
+import com.github.standobyte.jojo.command.argument.StandArgument;
 import com.github.standobyte.jojo.command.configpack.DataConfigEventHandler;
 import com.github.standobyte.jojo.command.configpack.JsonDataConfig;
 import com.github.standobyte.jojo.network.PacketManager;

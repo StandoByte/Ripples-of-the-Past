@@ -16,10 +16,8 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrNoMotionLerpPacket;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
-import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
-import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
-import com.github.standobyte.jojo.util.general.ObjectWrapper;
 import com.github.standobyte.jojo.util.general.MathUtil;
+import com.github.standobyte.jojo.util.general.ObjectWrapper;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
@@ -101,17 +99,15 @@ public class TimeStopInstant extends StandAction {
             power.consumeStamina(impliedTicks * getStaminaCostTicking(power));
             
             user.teleportTo(blinkPos.x, blinkPos.y, blinkPos.z);
-            StandStats stats = power.getType().getStats();
-            if (power.hasPower() && stats instanceof TimeStopperStandStats) {
-                TimeStopperStandStats tsStats = (TimeStopperStandStats) stats;
-//                float learning = tsStats.timeStopLearningPerTick * impliedTicks;
-//                power.addLearningProgressPoints(baseTimeStop.get(), learning);
+            
+            TimeStop timeStop = getBaseTimeStop();
+            float learning = timeStop.timeStopLearningPerTick * impliedTicks;
+            power.addLearningProgressPoints(baseTimeStop.get(), learning);
                 
-                int cooldown = (int) (TimeStopInstance.getTimeStopCooldown(power, tsStats, impliedTicks) * COOLDOWN_RATIO);
-                power.setCooldownTimer(this, cooldown);
-                if (!power.isActionOnCooldown(getBaseTimeStop())) {
-                    power.setCooldownTimer(getBaseTimeStop(), cooldown);
-                }
+            int cooldown = (int) (TimeStopInstance.getTimeStopCooldown(power, timeStop, impliedTicks) * COOLDOWN_RATIO);
+            power.setCooldownTimer(this, cooldown);
+            if (!power.isActionOnCooldown(getBaseTimeStop())) {
+                power.setCooldownTimer(getBaseTimeStop(), cooldown);
             }
         }
         
@@ -213,7 +209,7 @@ public class TimeStopInstant extends StandAction {
 
     @Override
     public float getMaxTrainingPoints(IStandPower power) {
-        return TimeStop.getMaxTimeStopTicks(power) - TimeStop.MIN_TIME_STOP_TICKS;
+        return getBaseTimeStop().getMaxTimeStopTicks(power) - TimeStop.MIN_TIME_STOP_TICKS;
     }
     
     @Override

@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.command;
 import java.util.Collection;
 import java.util.function.Function;
 
+import com.github.standobyte.jojo.command.argument.StandArgument;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;

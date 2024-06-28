@@ -192,6 +192,12 @@ public abstract class StandAction extends Action<IStandPower> {
         return autoSummonStand;
     }
     
+    public boolean staminaConsumedDifferently(IStandPower power) {
+        return false;
+    }
+    
+    public void passivelyOnNewDay(LivingEntity user, IStandPower power, long prevDay, long day) {}
+    
     @Override
     public IFormattableTextComponent getNameLocked(IStandPower power) {
         if (resolveLevelToUnlock > power.getResolveLevel()) {

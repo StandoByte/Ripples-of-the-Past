@@ -9,6 +9,8 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.config.ActionConfigField;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.TimeStopHandler;
 import com.github.standobyte.jojo.capability.world.TimeStopInstance;
@@ -18,8 +20,6 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
-import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
-import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.EffectInstance;
@@ -34,6 +34,12 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
 public class TimeStop extends StandAction {
+    @ActionConfigField private final int timeStopMaxTicks;
+    @ActionConfigField private final int timeStopMaxTicksVampire;
+    @ActionConfigField public final float timeStopLearningPerTick;
+    @ActionConfigField public final float timeStopDecayPerDay;
+    @ActionConfigField public final float timeStopCooldownPerTick;
+    
     private final Supplier<SoundEvent> voiceLineWithStandSummoned;
     private final Supplier<SoundEvent> timeStopSound;
     private final Supplier<SoundEvent> timeResumeVoiceLine;
@@ -44,6 +50,12 @@ public class TimeStop extends StandAction {
 
     public TimeStop(TimeStop.Builder builder) {
         super(builder);
+        this.timeStopMaxTicks = builder.timeStopMaxTicks;
+        this.timeStopMaxTicksVampire = builder.timeStopMaxTicksVampire;
+        this.timeStopLearningPerTick = builder.timeStopLearningPerTick;
+        this.timeStopDecayPerDay = builder.timeStopDecayPerDay;
+        this.timeStopCooldownPerTick = builder.timeStopCooldownPerTick;
+        
         this.voiceLineWithStandSummoned = builder.voiceLineWithStandSummoned;
         this.timeStopSound = builder.timeStopSound;
         this.timeResumeVoiceLine = builder.timeResumeVoiceLine;
@@ -163,6 +175,17 @@ public class TimeStop extends StandAction {
         return withAnimEffect ? shaderWithAnim : shaderOld;
     }
     
+    @Override
+    public void passivelyOnNewDay(LivingEntity user, IStandPower power, long prevDay, long day) {
+        if (!user.level.isClientSide()) {
+            LivingUtilCap cap = user.getCapability(LivingUtilCapProvider.CAPABILITY).resolve().get();
+            if (!cap.hasUsedTimeStopToday && timeStopDecayPerDay > 0) {
+                power.addLearningProgressPoints(this, -timeStopDecayPerDay);
+            }
+            cap.hasUsedTimeStopToday = false;
+        }
+    }
+    
     
     
     public static final int MIN_TIME_STOP_TICKS = 5;
@@ -170,13 +193,8 @@ public class TimeStop extends StandAction {
         return MathHelper.floor(standPower.getLearningProgressPoints(timeStopAction)) + MIN_TIME_STOP_TICKS;
     }
     
-    public static int getMaxTimeStopTicks(IStandPower standPower) {
-        StandStats stats = standPower.getType().getStats();
-        if (stats instanceof TimeStopperStandStats) {
-            return ((TimeStopperStandStats) stats).getMaxTimeStopTicks(
-                    TimeStop.vampireTimeStopDuration(standPower.getUser()));
-        }
-        return 100;
+    public int getMaxTimeStopTicks(IStandPower standPower) {
+        return TimeStop.vampireTimeStopDuration(standPower.getUser()) ? timeStopMaxTicksVampire : timeStopMaxTicks;
     }
     
     public static boolean vampireTimeStopDuration(LivingEntity entity) {
@@ -186,6 +204,12 @@ public class TimeStop extends StandAction {
     
     
     public static class Builder extends StandAction.AbstractBuilder<Builder> {
+        private int timeStopMaxTicks = 100;
+        private int timeStopMaxTicksVampire = 180;
+        private float timeStopLearningPerTick = 0.1F;
+        private float timeStopDecayPerDay = 0;
+        private float timeStopCooldownPerTick = 3;
+        
         private Supplier<SoundEvent> voiceLineWithStandSummoned = () -> null;
         private Supplier<SoundEvent> timeStopSound = () -> null;
         private Supplier<SoundEvent> timeResumeVoiceLine = () -> null;
@@ -193,6 +217,29 @@ public class TimeStop extends StandAction {
         private Supplier<SoundEvent> timeResumeSound = () -> null;
         private ResourceLocation shaderWithAnim = new ResourceLocation(JojoMod.MOD_ID, "shaders/post/time_stop_tw.json");
         private ResourceLocation shaderOld = new ResourceLocation(JojoMod.MOD_ID, "shaders/post/time_stop_tw_old.json");
+        
+        public Builder timeStopMaxTicks(int forHuman, int forVampire) {
+            forHuman = Math.max(TimeStop.MIN_TIME_STOP_TICKS, forHuman);
+            forVampire = Math.max(forHuman, forVampire);
+            this.timeStopMaxTicks = forHuman;
+            this.timeStopMaxTicksVampire = forVampire;
+            return getThis();
+        }
+        
+        public Builder timeStopLearningPerTick(float points) {
+            this.timeStopLearningPerTick = points;
+            return getThis();
+        }
+        
+        public Builder timeStopDecayPerDay(float points) {
+            this.timeStopDecayPerDay = points;
+            return getThis();
+        }
+        
+        public Builder timeStopCooldownPerTick(float ticks) {
+            this.timeStopCooldownPerTick = ticks;
+            return getThis();
+        }
         
         public Builder voiceLineWithStandSummoned(Supplier<SoundEvent> voiceLine) {
             this.voiceLineWithStandSummoned = voiceLine;

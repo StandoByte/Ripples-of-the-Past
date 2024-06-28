@@ -39,6 +39,7 @@ import com.github.standobyte.jojo.client.render.entity.layerrenderer.HamonBurnLa
 import com.github.standobyte.jojo.client.render.item.InventoryItemHighlight;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
 import com.github.standobyte.jojo.client.resources.CustomResources;
+import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.client.sound.StandCrySoundHandler;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
@@ -340,6 +341,7 @@ public class ClientEventHandler {
                 
                 if (!mc.isPaused()) {
                     ClientTicking.tickAll();
+                    ClientTickingSoundsHelper.tickBossMusic();
                     
                     StandCrySoundHandler.tickAll();
                     

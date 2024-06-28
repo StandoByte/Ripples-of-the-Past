@@ -27,22 +27,21 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.LazyOptional;
 
-// TODO implement IStandEffect
+// TODO implement IStandEffect?
 public class TimeStopInstance {
     private static int i = 0;
     private final World world;
     private final int id;
-    private final TimeStop action;
+    public final TimeStop action;
     private final int startingTicks;
     
     private int ticksLeft;
     private int ticksPassed = 0;
-    final ChunkPos centerPos;
+    public final ChunkPos centerPos;
     final int chunkRange;
-    @Nullable
-    final LivingEntity user;
+    @Nullable final LivingEntity user;
     private final LazyOptional<IStandPower> userPower;
-    private final Optional<TimeStopperStandStats> statsOptional;
+    @Deprecated private final Optional<TimeStopperStandStats> statsOptional;
     private EffectInstance statusEffectInstance;
     
     @Nullable
@@ -99,7 +98,7 @@ public class TimeStopInstance {
             
             if (userPower.map(power -> {
                 if (power.hasPower()) {
-                    if (!(power.getType().getStats() instanceof TimeStopperStandStats)) {
+                    if (!action.isUnlocked(power)) {
                         return true;
                     }
                     float staminaCost = power.getStaminaTickGain();
@@ -199,17 +198,13 @@ public class TimeStopInstance {
             if (action != null) {
                 userPower.ifPresent(power -> {
                     if (power.hasPower()) {
-                        statsOptional.ifPresent(stats -> {
-                            float cooldown = getTimeStopCooldown(power, stats, ticksPassed);
-                            power.setCooldownTimer(action, (int) cooldown);
-                            if (action.getInstantTSVariation() != null) {
-                                power.setCooldownTimer(action.getInstantTSVariation(), (int) (cooldown * TimeStopInstant.COOLDOWN_RATIO));
-                            }
+                        float cooldown = getTimeStopCooldown(power, action, ticksPassed);
+                        power.setCooldownTimer(action, (int) cooldown);
+                        if (action.getInstantTSVariation() != null) {
+                            power.setCooldownTimer(action.getInstantTSVariation(), (int) (cooldown * TimeStopInstant.COOLDOWN_RATIO));
+                        }
 
-                            if (power.getType().getStats() instanceof TimeStopperStandStats) {
-                                power.addLearningProgressPoints(action, stats.timeStopLearningPerTick * ticksPassed);
-                            }
-                        });
+                        power.addLearningProgressPoints(action, action.timeStopLearningPerTick * ticksPassed);
                     }
                 });
             }
@@ -219,13 +214,13 @@ public class TimeStopInstance {
         }
     }
     
-    public static float getTimeStopCooldown(IStandPower power, TimeStopperStandStats stats, int ticks) {
+    public static float getTimeStopCooldown(IStandPower power, TimeStop action, int ticks) {
         float cooldown;
         if (power.isUserCreative()) {
             cooldown = 0;
         }
         else {
-            cooldown = stats.timeStopCooldownPerTick * ticks;
+            cooldown = action.timeStopCooldownPerTick * ticks;
             if (power.getUser() != null && power.getUser().hasEffect(ModStatusEffects.RESOLVE.get())) {
                 cooldown /= 3F;
             }

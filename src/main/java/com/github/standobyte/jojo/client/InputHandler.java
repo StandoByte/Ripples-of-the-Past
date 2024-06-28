@@ -689,7 +689,7 @@ public class InputHandler {
 
         if (power != null) {
             boolean leftClickedBlock = false;
-            boolean sneak = mc.player.isShiftKeyDown();
+            boolean sneak = useShiftActionVariant(mc);
             boolean shiftActionVar = useShiftActionVariant(mc);
             Action<P> action = (Action<P>) entry.getAction();
             action = ActionsOverlayGui.resolveVisibleActionInSlot(
@@ -770,7 +770,7 @@ public class InputHandler {
         
         if (power != null) {
             boolean leftClickedBlock = key == ActionKey.ATTACK && mc.hitResult.getType() == Type.BLOCK;
-            boolean sneak = mc.player.isShiftKeyDown();
+            boolean sneak = useShiftActionVariant(mc);
             boolean shiftActionVar = useShiftActionVariant(mc);
             
             ActionUseTry<P> click = null;
