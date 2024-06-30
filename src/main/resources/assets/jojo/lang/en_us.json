@@ -652,6 +652,13 @@
   "jojo.config.client.firstPersonHamonAura.tooltip": "Render Hamon aura particles around the player's hand",
   "jojo.config.client.hamonAuraBlur": "Hamon aura blur",
   "jojo.config.client.hamonAuraBlur.tooltip": "Blur Hamon aura particles",
+  "jojo.config.client.option.top_left": "Top left",
+  "jojo.config.client.option.top_right": "Top right",
+  "jojo.config.client.option.left": "Left",
+  "jojo.config.client.option.right": "Right",
+  "jojo.config.client.option.always": "Always",
+  "jojo.config.client.option.fade_out": "Fade out",
+  "jojo.config.client.option.never": "Never",
   
 
   "stand.unknown": "Unknown Stand: %s",
