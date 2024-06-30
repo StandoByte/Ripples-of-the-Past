@@ -90,7 +90,7 @@ public class StandRelativeOffset {
             y = vec.y;
             z = vec.z;
         }
-        return new StandRelativeOffset(x, y, z, doYOffset, false);
+        return new StandRelativeOffset(x, y, z, true, false);
     }
     
     public StandRelativeOffset lerp(StandRelativeOffset prev, double lerp) {
