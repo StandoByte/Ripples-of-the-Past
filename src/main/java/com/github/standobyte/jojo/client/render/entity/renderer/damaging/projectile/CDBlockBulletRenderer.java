@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.client.render.entity.model.projectile.CDBlockB
 import com.github.standobyte.jojo.client.render.entity.renderer.SimpleEntityRenderer;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDBlockBulletEntity;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
@@ -36,7 +37,11 @@ public class CDBlockBulletRenderer extends SimpleEntityRenderer<CDBlockBulletEnt
     private static final Random RANDOM = new Random();
     private static final ResourceLocation GLASS_TEXTURE = new ResourceLocation("textures/block/glass.png");
     private ResourceLocation getBlockTexture(CDBlockBulletEntity entity) {
-        return getTexture(entity.getBlock().defaultBlockState(), GLASS_TEXTURE);
+        Block block = entity.getBlock();
+        if (block == null) {
+            return GLASS_TEXTURE;
+        }
+        return getTexture(block.defaultBlockState(), GLASS_TEXTURE);
     }
     
     public static ResourceLocation getTexture(BlockState blockState, ResourceLocation defaultTex) {
