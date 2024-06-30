@@ -87,7 +87,9 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     
     protected final Vector3d getPos(LivingEntity owner, float partialTick, float yRot, float xRot) {
         return owner.getEyePosition(partialTick)
-                .add(MathUtil.relativeVecToAbsolute(getOwnerRelativeOffset().add(getXRotOffset().xRot(-owner.xRot * MathUtil.DEG_TO_RAD)), yRot));
+                .add(getOwnerRelativeOffset().add(
+                        getXRotOffset().xRot(-owner.xRot * MathUtil.DEG_TO_RAD))
+                        .yRot(-yRot * MathUtil.DEG_TO_RAD));
     }
     
     protected Vector3d getOwnerRelativeOffset() {
