@@ -214,8 +214,7 @@ public class ClientEventHandler {
     private void correctHeldItemPose(LivingEntity entity, BipedModel<?> model, HandSide handSide) {
         Hand hand = entity.getMainArm() == handSide ? Hand.MAIN_HAND : Hand.OFF_HAND;
         ItemStack item = entity.getItemInHand(hand);
-        if (!item.isEmpty() && 
-                GlovesLayer.areGloves(item)) {
+        if (!item.isEmpty() && GlovesLayer.areGloves(item)) {
             switch (handSide) {
             case LEFT:
                 model.leftArmPose = BipedModel.ArmPose.EMPTY;

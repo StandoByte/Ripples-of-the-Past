@@ -46,6 +46,7 @@ import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
+import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.item.InkPastaItem;
 import com.github.standobyte.jojo.item.OilItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
@@ -150,6 +151,7 @@ import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.event.AnvilUpdateEvent;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.ItemAttributeModifierEvent;
 import net.minecraftforge.event.ServerChatEvent;
@@ -1317,5 +1319,10 @@ public class GameplayEventHandler {
             player.removeEffect(ModStatusEffects.STUN.get());
             player.removeEffect(ModStatusEffects.HAMON_SHOCK.get());
         }
+    }
+    
+    @SubscribeEvent
+    public static void anvilUnrepairableItems(AnvilUpdateEvent event) {
+        GlovesItem.combineInAnvil(event);
     }
 }
