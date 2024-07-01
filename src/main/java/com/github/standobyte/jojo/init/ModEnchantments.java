@@ -33,6 +33,6 @@ public class ModEnchantments {
             () -> new GlovesDamageEnchantment(Rarity.COMMON, GLOVES, EquipmentSlotType.MAINHAND));
     
     public static final RegistryObject<GlovesSpeedEnchantment> GLOVES_SPEED = ENCHANTMENTS.register("gloves_speed", 
-            () -> new GlovesSpeedEnchantment(Rarity.RARE, GLOVES, EquipmentSlotType.MAINHAND));
+            () -> new GlovesSpeedEnchantment(Rarity.RARE, GLOVES, EquipmentSlotType.MAINHAND, EquipmentSlotType.OFFHAND));
 
 }

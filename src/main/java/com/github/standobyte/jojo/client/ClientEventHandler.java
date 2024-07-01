@@ -214,8 +214,7 @@ public class ClientEventHandler {
     private void correctHeldItemPose(LivingEntity entity, BipedModel<?> model, HandSide handSide) {
         Hand hand = entity.getMainArm() == handSide ? Hand.MAIN_HAND : Hand.OFF_HAND;
         ItemStack item = entity.getItemInHand(hand);
-        if (!item.isEmpty() && 
-                GlovesLayer.areGloves(item)) {
+        if (!item.isEmpty() && GlovesLayer.areGloves(item)) {
             switch (handSide) {
             case LEFT:
                 model.leftArmPose = BipedModel.ArmPose.EMPTY;
@@ -587,9 +586,11 @@ public class ClientEventHandler {
                                     event.getPartialTicks(), event.getInterpolatedPitch(), player);
                         }
                     });
-                    
-                    if (GlovesLayer.areGloves(item) || item.isEmpty() && !player.isInvisible() && 
-                            (player.hasEffect(ModStatusEffects.HAMON_SPREAD.get()) || player.hasEffect(ModStatusEffects.FREEZE.get()))) {
+
+                    boolean hasGloves = GlovesLayer.areGloves(player.getItemInHand(Hand.MAIN_HAND)) || GlovesLayer.areGloves(player.getItemInHand(Hand.OFF_HAND));
+                    boolean hasEffect = player.hasEffect(ModStatusEffects.HAMON_SPREAD.get()) || player.hasEffect(ModStatusEffects.FREEZE.get());
+                    if (hasGloves && (GlovesLayer.areGloves(item) || item.isEmpty()) || 
+                            hasEffect && item.isEmpty() && !player.isInvisible()) {
                         event.setCanceled(true);
                         renderHand(Hand.MAIN_HAND, event.getMatrixStack(), event.getBuffers(), event.getLight(), 
                                 event.getPartialTicks(), event.getInterpolatedPitch(), player);

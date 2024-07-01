@@ -54,8 +54,9 @@ public class GlovesSpeedEnchantment extends Enchantment {
         if (ModEnchantments.GLOVES_SPEED.get().appliesToSlot(modifiers.getSlotType())) {
             int glovesSpeedLevel = EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.GLOVES_SPEED.get(), item);
             if (glovesSpeedLevel > 0) {
+                double multiplier = modifiers.getSlotType() == EquipmentSlotType.MAINHAND ? 0.1 : 0.025;
                 modifiers.addModifier(Attributes.ATTACK_SPEED, new AttributeModifier(
-                        ATTRIBUTE_ID, "Gloves attack speed", 0.1 * glovesSpeedLevel, AttributeModifier.Operation.MULTIPLY_TOTAL));
+                        ATTRIBUTE_ID, "Gloves attack speed", multiplier * glovesSpeedLevel, AttributeModifier.Operation.MULTIPLY_TOTAL));
             }
         }
     }

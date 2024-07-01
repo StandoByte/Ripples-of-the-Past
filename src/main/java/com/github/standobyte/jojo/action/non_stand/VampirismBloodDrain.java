@@ -8,8 +8,9 @@ import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.mob.HungryZombieEntity;
 import com.github.standobyte.jojo.init.ModCustomStats;
-import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.ModStatusEffects;
+import com.github.standobyte.jojo.init.ModTags;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismUtil;
@@ -44,13 +45,23 @@ public class VampirismBloodDrain extends VampirismAction {
         Entity entityTarget = target.getEntity();
         if (entityTarget instanceof LivingEntity) {
             LivingEntity livingTarget = (LivingEntity) entityTarget;
-            if (!JojoModUtil.canBleed(livingTarget) || JojoModUtil.isUndead(livingTarget)) {
+            if (canDrainBloodFrom(livingTarget)) {
                 return conditionMessage("blood");
 //                return livingTarget.tickCount > 20 ? conditionMessageContinueHold("blood") : ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
             }
             return ActionConditionResult.POSITIVE;
         }
         return ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
+    }
+    
+    public static boolean canDrainBloodFrom(LivingEntity entity) {
+        if (!ModTags.VAMPIRE_CANNOT_DRAIN.contains(entity.getType())) {
+            return false;
+        }
+        if (ModTags.VAMPIRE_CAN_DRAIN.contains(entity.getType())) {
+            return true;
+        }
+        return JojoModUtil.canBleed(entity) && !JojoModUtil.isUndead(entity);
     }
     
     @Override

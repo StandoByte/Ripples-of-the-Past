@@ -275,9 +275,13 @@ public class JojoModUtil {
     }
     
     public static boolean isAffectedByHamon(LivingEntity entity) {
-        return (JojoModUtil.isUndead(entity) || OptionalDependencyHelper.vampirism().isEntityVampire(entity))
-                        && !ModTags.UNDEAD_NO_HAMON_DAMAGE.contains(entity.getType())
-                || ModTags.HAMON_DAMAGE.contains(entity.getType());
+        if (!ModTags.NO_HAMON_DAMAGE.contains(entity.getType())) {
+            return false;
+        }
+        if (ModTags.HAMON_DAMAGE.contains(entity.getType())) {
+            return true;
+        }
+        return JojoModUtil.isUndead(entity) || OptionalDependencyHelper.vampirism().isEntityVampire(entity);
     }
 
     public static boolean canBleed(LivingEntity entity) {
