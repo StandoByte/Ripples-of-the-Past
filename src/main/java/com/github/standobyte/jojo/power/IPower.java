@@ -96,7 +96,7 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     ResourceLocation clGetPowerTypeIcon();
     default void clUpdateHud() {
         LivingEntity user = getUser();
-        if (user != null && user.level.isClientSide() && user == ClientUtil.getCameraEntity()) {
+        if (user != null && user.level.isClientSide() && user == ClientUtil.getClientPlayer()) {
             HudControlSettings.getInstance().refreshControls(this);
         }
     }
