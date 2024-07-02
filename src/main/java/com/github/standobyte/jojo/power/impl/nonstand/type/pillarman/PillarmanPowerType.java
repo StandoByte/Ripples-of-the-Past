@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.non_stand.PillarmanAction;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.init.ModStatusEffects;
@@ -224,5 +225,21 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
         default:
             break;
         }
+    }
+    
+    @Override
+    public boolean isActionLegalInHud(Action<INonStandPower> action, INonStandPower power) {
+        if (super.isActionLegalInHud(action, power)) {
+            return true;
+        }
+        
+        if (action instanceof PillarmanAction) {
+            PillarmanAction pmAction = (PillarmanAction) action;
+            PillarmanData pillarman = power.getTypeSpecificData(this).get();
+            return (pmAction.getPillarManStage() == -1 || pmAction.getPillarManStage() <= pillarman.getEvolutionStage())
+                    && (pmAction.getPillarManMode() == Mode.NONE || pmAction.getPillarManMode() == pillarman.getMode());
+        }
+        
+        return false;
     }
 }
