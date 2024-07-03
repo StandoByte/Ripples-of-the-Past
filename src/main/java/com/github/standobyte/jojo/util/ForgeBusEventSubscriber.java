@@ -57,6 +57,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandPower;
+import com.github.standobyte.jojo.util.mc.EntityTypeToInstance;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.mojang.brigadier.CommandDispatcher;
 
@@ -299,6 +300,7 @@ public class ForgeBusEventSubscriber {
             ServerWorld serverWorld = (ServerWorld) event.getWorld();
             addDimensionalSpacing(serverWorld);
         }
+        EntityTypeToInstance.init((World) event.getWorld());
     }
     
     private static void addDimensionalSpacing(ServerWorld serverWorld) {
