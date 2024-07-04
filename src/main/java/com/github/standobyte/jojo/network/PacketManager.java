@@ -52,6 +52,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.HamonSkillRemovePac
 import com.github.standobyte.jojo.network.packets.fromserver.HamonSyncOnLoadPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonTeachersSkillsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.HamonUiEffectPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.KnockbackResTickPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.LeapCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.MaxAchievedResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.NotificationSyncPacket;
@@ -197,6 +198,7 @@ public class PacketManager {
         packetIndex = 0;
         registerMessage(serverChannel, new ServerIdPacket.Handler(),                       Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrDoubleShiftPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(serverChannel, new KnockbackResTickPacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrTypeNonStandPowerPacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrTypeStandInstancePacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrHeldActionPacket.Handler(),                   Optional.of(NetworkDirection.PLAY_TO_CLIENT));

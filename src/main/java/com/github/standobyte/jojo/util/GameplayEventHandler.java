@@ -29,6 +29,7 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.enchantment.GlovesSpeedEnchantment;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDBloodCutterEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -87,6 +88,7 @@ import com.github.standobyte.jojo.util.mc.damage.StandLinkDamageSource;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
+import com.github.standobyte.jojo.util.mod.NoKnockbackOnBlocking;
 
 import net.minecraft.block.AbstractFurnaceBlock;
 import net.minecraft.block.Block;
@@ -202,6 +204,7 @@ public class GameplayEventHandler {
         entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
             cap.tick();
         });
+        NoKnockbackOnBlocking.tickAttribute(entity);
     }
 
     private static final int AFK_PARTICLE_SECONDS = 30;
@@ -645,6 +648,8 @@ public class GameplayEventHandler {
                     double standDurability = stand.getDurability();
                     if (standDurability > 0) {
                         event.setAmount(Math.max(event.getAmount() - (float) standDurability / 2F, 0));
+                        NoKnockbackOnBlocking.setOneTickKbRes(stand);
+                        stand.playAttackBlockSound();
                     }
                 }
             });
@@ -691,7 +696,7 @@ public class GameplayEventHandler {
 //                    (float) target.getArmorValue(), (float) target.getAttributeValue(Attributes.ARMOR_TOUGHNESS)));
 //        }
 //    }
-    
+
 
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public static void resolveOnTakingDamage(LivingDamageEvent event) {
@@ -717,12 +722,31 @@ public class GameplayEventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingDamage(LivingDamageEvent event) {
-        bleed(event.getSource(), event.getAmount(), event.getEntityLiving());
-        StandType.onHurtByStand(event.getSource(), event.getAmount(), event.getEntityLiving());
+        DamageSource dmgSource = event.getSource();
+        float dmgAmount = event.getAmount();
+        LivingEntity target = event.getEntityLiving();
+        bleed(dmgSource, dmgAmount, target);
+        
+        StandType.onHurtByStand(dmgSource, dmgAmount, target);
+        
+        if (target instanceof StandEntity) {
+            StandEntity standTarget = (StandEntity) target;
+            if (standTarget.isCurrentAttackBlocked()) {
+                NoKnockbackOnBlocking.setOneTickKbRes(standTarget);
+            }
+        }
         
         for (PowerClassification powerClassification : PowerClassification.values()) {
-            IPower.getPowerOptional(event.getEntityLiving(), powerClassification).ifPresent(power -> 
-            power.onUserGettingAttacked(event.getSource(), event.getAmount()));
+            IPower.getPowerOptional(target, powerClassification).ifPresent(power -> 
+            power.onUserGettingAttacked(dmgSource, dmgAmount));
+        }
+    }
+    
+    @SubscribeEvent
+    public static void clNoBobOnHurt(LivingAttackEvent event) {
+        LivingEntity target = event.getEntityLiving();
+        if (target.level.isClientSide() && target == ClientUtil.getClientPlayer()) {
+            NoKnockbackOnBlocking.onClientPlayerDamage(target);
         }
     }
 
