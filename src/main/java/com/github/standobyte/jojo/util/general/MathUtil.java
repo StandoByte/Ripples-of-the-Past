@@ -31,6 +31,10 @@ public class MathUtil {
         return (float) -MathHelper.atan2(vec.y, MathHelper.sqrt(vec.x * vec.x + vec.z * vec.z)) * RAD_TO_DEG;
     }
     
+    /**
+     * @deprecated Use {@link Vector3d#yRot(float)} (multiply the yRot parameter by -MathUtil.DEG_TO_RAD).
+     */
+    @Deprecated
     public static Vector3d relativeCoordsToAbsolute(double left, double up, double forward, float yAxisRot) {
         double yRotRad = yAxisRot * DEG_TO_RAD;
         return new Vector3d(
@@ -38,7 +42,11 @@ public class MathUtil {
                 up, 
                 left * Math.sin(yRotRad) + forward * Math.cos(yRotRad));
     }
-    
+
+    /**
+     * @deprecated Use {@link Vector3d#yRot(float)} (multiply the yRot parameter by -MathUtil.DEG_TO_RAD).
+     */
+    @Deprecated
     public static Vector3d relativeVecToAbsolute(Vector3d relativeVec, float yAxisRot) {
         return relativeCoordsToAbsolute(relativeVec.x, relativeVec.y, relativeVec.z, yAxisRot);
     }

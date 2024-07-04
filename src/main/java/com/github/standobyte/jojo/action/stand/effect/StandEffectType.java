@@ -13,8 +13,8 @@ public class StandEffectType<T extends StandEffectInstance> extends ForgeRegistr
         return factory.create(this);
     }
     
-
-
+    
+    
     public interface IFactory<T extends StandEffectInstance> {
         T create(StandEffectType<T> effect);
     }

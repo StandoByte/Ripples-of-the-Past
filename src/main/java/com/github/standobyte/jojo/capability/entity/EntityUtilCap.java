@@ -84,6 +84,9 @@ public class EntityUtilCap {
             this.glowingColor = color;
             this.glowColorTicks = ticks;
             ((IEntityGlowColor) entity).setGlowColor(glowingColor);
+            if (showHp && !color.isPresent()) {
+                showHp = false;
+            }
         }
     }
     
@@ -99,8 +102,17 @@ public class EntityUtilCap {
         if (glowingColor.isPresent() && glowColorTicks > 0 && --glowColorTicks == 0 && entity instanceof IEntityGlowColor) {
             IEntityGlowColor colorData = (IEntityGlowColor) entity;
             if (colorData.getGlowColor() == this.glowingColor) {
-                colorData.setGlowColor(OptionalInt.empty());
+                resetClGlowingColor();
             }
         }
+    }
+    
+    private boolean showHp = false;
+    public boolean showsHp() {
+        return showHp;
+    }
+    
+    public void setShowHp() {
+        showHp = true;
     }
 }

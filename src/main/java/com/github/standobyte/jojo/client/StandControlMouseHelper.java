@@ -34,7 +34,15 @@ public class StandControlMouseHelper extends MouseHelper {
         if (isMouseGrabbed() && minecraft.isWindowActive() && minecraft.player != null) {
             StandEntity standManual = ControllerStand.getInstance().getManuallyControlledStand();
             if (standManual != null && standManual.isAlive()) {
-                turnStand(standManual, timeDelta);
+                turnEntity(standManual, timeDelta);
+                return;
+            }
+            
+            // TODO soul rotation
+            
+            Entity splitCsns = ControllerConsciousness.getInstance().getCsnsEntity();
+            if (splitCsns != null) {
+                turnEntity(splitCsns, timeDelta);
                 return;
             }
         }
@@ -42,7 +50,7 @@ public class StandControlMouseHelper extends MouseHelper {
         super.turnPlayer();
     }
     
-    private void turnStand(Entity standEntity, double timeDelta) {
+    private void turnEntity(Entity standEntity, double timeDelta) {
         if (isMouseGrabbed() && minecraft.isWindowActive()) {
             double accumDX = getXVelocity();
             double accumDY = getYVelocity();

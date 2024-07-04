@@ -7,6 +7,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
@@ -18,6 +19,7 @@ import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.SpawnParticlePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrResetDeathTimePacket;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
@@ -39,16 +41,23 @@ import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.crash.ReportedException;
 import net.minecraft.dispenser.IBlockSource;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityPredicate;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SpawnReason;
+import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
+import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
+import net.minecraft.entity.ai.goal.PrioritizedGoal;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.PotionEntity;
+import net.minecraft.entity.projectile.ProjectileItemEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
@@ -74,6 +83,7 @@ import net.minecraft.network.play.server.SSpawnMovingSoundEffectPacket;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.particles.ItemParticleData;
 import net.minecraft.particles.ParticleTypes;
+import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.potion.Potions;
@@ -208,12 +218,7 @@ public class MCUtil {
     public static <T extends IForgeRegistryEntry<T>> Optional<T> nbtGetRegistryEntry(CompoundNBT nbt, String key, IForgeRegistry<T> registry) {
         if (nbt.contains(key, getNbtId(StringNBT.class))) {
             String idString = nbt.getString(key);
-            if (!idString.isEmpty()) {
-                ResourceLocation id = new ResourceLocation(idString);
-                if (registry.containsKey(id)) {
-                    return Optional.of(registry.getValue(id));
-                }
-            }
+            return registryEntryFromId(idString, registry);
         }
         
         return Optional.empty();
@@ -223,6 +228,26 @@ public class MCUtil {
         if (nbt.contains(key, getNbtId(CompoundNBT.class))) {
             return Optional.of(nbt.getCompound(key));
         }
+        return Optional.empty();
+    }
+    
+    public static Optional<ListNBT> nbtGetList(CompoundNBT nbt, String key, Class<? extends INBT> nbtClass) {
+        if (nbt.contains(key, getNbtId(ListNBT.class))) {
+            return Optional.of(nbt.getList(key, getNbtId(nbtClass)));
+        }
+        return Optional.empty();
+    }
+    
+    
+    
+    public static <T extends IForgeRegistryEntry<T>> Optional<T> registryEntryFromId(String idString, IForgeRegistry<T> registry) {
+        if (!idString.isEmpty()) {
+            ResourceLocation id = new ResourceLocation(idString);
+            if (registry.containsKey(id)) {
+                return Optional.of(registry.getValue(id));
+            }
+        }
+        
         return Optional.empty();
     }
     
@@ -377,6 +402,13 @@ public class MCUtil {
     }
     
 
+    
+    public static Optional<Entity> cloneEntity(Entity entity) {
+        CompoundNBT entityNbt = entity.serializeNBT();
+        return EntityType.create(entityNbt, entity.level);
+    }
+    
+    
     
     public static Vector3d collide(Entity entity, Vector3d offsetVec) {
         return collide(entity, entity.getBoundingBox(), offsetVec);
@@ -536,6 +568,19 @@ public class MCUtil {
     
     
     
+    public static void multipliedAttrModifier(LivingEntity entity, Attribute attribute, AttributeModifier modifier, float mult) {
+        ModifiableAttributeInstance attributeInstance = entity.getAttribute(attribute);
+        if (attributeInstance != null) {
+            attributeInstance.removeModifier(modifier);
+            if (mult != 0) {
+                attributeInstance.addTransientModifier(new AttributeModifier(modifier.getId(), 
+                        modifier.getName() + " " + mult, modifier.getAmount() * mult, modifier.getOperation()));
+            }
+        }
+    }
+    
+    
+    
     public static boolean isControlledThisSide(Entity entity) {
         if (entity instanceof PlayerEntity) {
             return ((PlayerEntity) entity).isLocalPlayer();
@@ -623,6 +668,11 @@ public class MCUtil {
             return entity.removeEffect(effectInstance.getEffect());
         }
         return false;
+    }
+    
+    public static int getEffectLevel(LivingEntity entity, Effect effect) {
+        EffectInstance effInstance = entity.getEffect(effect);
+        return effInstance != null ? effInstance.getAmplifier() : -1;
     }
     
     
@@ -720,12 +770,43 @@ public class MCUtil {
         }
     }
     
+    public static void makeMobNeutralTo(MobEntity mob, LivingEntity neutralTo) {
+        Class<? extends LivingEntity> clazz = neutralTo.getClass();
+        UUID userUuid = neutralTo.getUUID();
+        Set<PrioritizedGoal> goals = CommonReflection.getGoalsSet(mob.targetSelector);
+        for (PrioritizedGoal prGoal : goals) {
+            Goal goal = prGoal.getGoal();
+            if (goal instanceof NearestAttackableTargetGoal) {
+                NearestAttackableTargetGoal<?> targetGoal = (NearestAttackableTargetGoal<?>) goal;
+                Class<? extends LivingEntity> targetClass = CommonReflection.getTargetClass(targetGoal);
+                
+                if (targetClass == null || targetClass.isAssignableFrom(clazz)) {
+                    EntityPredicate selector = CommonReflection.getTargetConditions(targetGoal);
+                    if (selector != null) {
+                        Predicate<LivingEntity> oldPredicate = CommonReflection.getTargetSelector(selector);
+                        Predicate<LivingEntity> geUserPredicate = target -> !userUuid.equals(target.getUUID());
+                        CommonReflection.setTargetConditions(targetGoal, new EntityPredicate().range(CommonReflection.getTargetDistance(targetGoal)).selector(
+                                oldPredicate != null ? oldPredicate.and(geUserPredicate) : geUserPredicate));
+                    }
+                }
+            }
+        }
+    }
     
     
-    public static void onPlayerResurrect(ServerPlayerEntity player) {
-        if (!player.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY) && !player.isSpectator()) {
-            player.setExperienceLevels(0);
-            player.setExperiencePoints(0);
+    
+    public static void onEntityResurrect(LivingEntity entity) {
+        entity.deathTime = 0;
+        if (!entity.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(new TrResetDeathTimePacket(entity.getId()), entity);
+            
+            if (entity instanceof ServerPlayerEntity) {
+                ServerPlayerEntity player = (ServerPlayerEntity) entity;
+                if (!player.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY) && !player.isSpectator()) {
+                    player.setExperienceLevels(0);
+                    player.setExperiencePoints(0);
+                }
+            }
         }
     }
     
@@ -734,6 +815,11 @@ public class MCUtil {
     public static boolean isPotionWaterBottle(PotionEntity entity) {
         ItemStack potionItem = entity.getItem();
         return PotionUtils.getPotion(potionItem) == Potions.WATER && PotionUtils.getMobEffects(potionItem).isEmpty();
+    }
+    
+    public static ItemStack getItemOnServer(ProjectileItemEntity entity) {
+        ItemStack item = CommonReflection.getItemRaw(entity);
+        return item.isEmpty() ? new ItemStack(CommonReflection.getDefaultItem(entity)) : item;
     }
     
     
@@ -760,5 +846,53 @@ public class MCUtil {
     public static <T> RegistryKey<T> getRegistryKeyIfPresent(RegistryKey<? extends Registry<T>> parent, ResourceLocation location) {
         String s = (parent.location() + ":" + location).intern();
         return (RegistryKey<T>) CommonReflection.registryKeyValues().get(s);
+    }
+    
+    
+    
+    public static class EntityEvents { // TODO
+        public static final int HURT                           = 2;
+        public static final int SILVERFISH_SPAWN_PARTICLES     = 20;
+        public static final int PLAYER_PERM_LEVEL_0            = 24;
+        public static final int PLAYER_PERM_LEVEL_1            = 25;
+        public static final int PLAYER_PERM_LEVEL_2            = 26;
+        public static final int PLAYER_PERM_LEVEL_3            = 27;
+        public static final int PLAYER_PERM_LEVEL_4            = 28;
+        public static final int SHIELD_BLOCK_SOUND             = 29;
+        public static final int SHIELD_BREAK_SOUND             = 30;
+        public static final int ARMOR_STAND_HIT                = 32;
+        public static final int HURT_THORNS                    = 33;
+        public static final int HURT_DROWN                     = 36;
+        public static final int HURT_ON_FIRE                   = 37;
+        public static final int HURT_SWEET_BERRY_BUSH          = 44;
+        public static final int BREAK_MAIN_HAND_ITEM           = 47;
+        public static final int BREAK_OFF_HAND_ITEM            = 48;
+        public static final int BREAK_HEAD_ITEM                = 49;
+        public static final int BREAK_CHEST_ITEM               = 50;
+        public static final int BREAK_LEGS_ITEM                = 51;
+        public static final int BREAK_FEET_ITEM                = 52;
+        public static final int HONEY_SLIDE_PARTICLES          = 53;
+        public static final int HONEY_JUMP_PARTICLES           = 54;
+        public static final int SWAP_HAND_ITEMS                = 55;
+        /*
+         * VillagerEntity
+         * AnimalEntity
+         * AsbtractHorseEntity
+         * FoxEntity
+         * HoglinEntity
+         * OcelotEntity
+         * RabbitEntity
+         * SheepEntity
+         * TameableEntity
+         * WolfEntity
+         * IronGolemEntity
+         * RavagerEntity
+         * WitchEntity
+         * ZoglinEntity
+         * ZombieVillagerEntity
+         * DolphinEntity
+         * SquidEntity
+         * PlayerEntity
+         */
     }
 }

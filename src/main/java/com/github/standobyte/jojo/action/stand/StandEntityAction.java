@@ -51,7 +51,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     @Nullable
     protected final StandRelativeOffset userOffsetArmsOnly;
     public final boolean enablePhysics;
-    private final Map<Phase, List<StandSound>> standSounds;
+    protected final Map<Phase, List<StandSound>> standSounds;
     protected final Supplier<StandEntityMeleeBarrage> barrageVisuals;
     protected boolean friendlyFire = false;
     
@@ -83,11 +83,6 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     @Override
     public int getStandRecoveryTicks(IStandPower standPower, StandEntity standEntity) {
         return standRecoveryDuration;
-    }
-    
-    @Override
-    public LivingEntity getPerformer(LivingEntity user, IStandPower power) {
-        return power.isActive() ? (StandEntity) power.getStandManifestation() : user;
     }
     
     @Override
@@ -233,9 +228,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     }
     
     @Override
-    public boolean staminaConsumedDifferently(IStandPower power) {
-        return true;
-    }
+    protected void consumeStamina(World world, IStandPower power) {} // consumed from StandEntity's task instead
     
     @Override
     public void startedHolding(World world, LivingEntity user, IStandPower power, ActionTarget target, boolean requirementsFulfilled) {
@@ -272,7 +265,8 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     }
 
     @Override
-    protected final void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
+    protected
+    final void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
         invokeForStand(power, stand -> {
             if (stand.getCurrentTask().map(task -> {
                 if (task.getPhase() == Phase.BUTTON_HOLD) {
@@ -663,8 +657,8 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     }
     
     protected static class StandSound {
-        private final Supplier<SoundEvent> sound;
-        private final boolean playInArmsOnly;
+        public final Supplier<SoundEvent> sound;
+        public final boolean playInArmsOnly;
         
         public StandSound(Supplier<SoundEvent> sound, boolean playInArmsOnly) {
             this.sound = sound;

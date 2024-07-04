@@ -50,6 +50,9 @@ import com.github.standobyte.jojo.command.StandCommand;
 import com.github.standobyte.jojo.command.StandDiscGiveCommand;
 import com.github.standobyte.jojo.command.StandLevelCommand;
 import com.github.standobyte.jojo.init.ModStructures;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStackProvider;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStackStorage;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCachePacket;
 import com.github.standobyte.jojo.power.IPower;
@@ -58,6 +61,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandPower;
+import com.github.standobyte.jojo.util.mc.EntityTypeToInstance;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.world.dimension.ModDimensions;
 import com.github.standobyte.jojo.world.dimension.mr_president.MrPresidentWorldData;
@@ -70,6 +74,7 @@ import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.INBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
@@ -114,6 +119,7 @@ public class ForgeBusEventSubscriber {
     private static final ResourceLocation SAVE_FILE_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "save_file_util");
     private static final ResourceLocation MR_PRESIDENT_CAP = new ResourceLocation(JojoMod.MOD_ID, "mr_president");
     private static final ResourceLocation CHUNK_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "chunk_util");
+    private static final ResourceLocation ITEM_TRACK_CAP = new ResourceLocation(JojoMod.MOD_ID, "item_track");
     
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
@@ -176,6 +182,11 @@ public class ForgeBusEventSubscriber {
         }
     }
     
+    @SubscribeEvent
+    public static void onAttachCapabilitiesItem(AttachCapabilitiesEvent<ItemStack> event) {
+        event.addCapability(ITEM_TRACK_CAP, new TrackerItemStackProvider(event.getObject()));
+    }
+    
     public static void registerCapabilities() { // moved the registration here just so that it's in the same place as the attachment
         CapabilityManager.INSTANCE.register(IStandPower.class, new StandCapStorage(), () -> new StandPower(null));
         CapabilityManager.INSTANCE.register(INonStandPower.class, new NonStandCapStorage(), () -> new NonStandPower(null));
@@ -197,6 +208,8 @@ public class ForgeBusEventSubscriber {
         }, () -> new MrPresidentWorldData(null));
 
         CapabilityManager.INSTANCE.register(ChunkCap.class, new ChunkCapStorage(), () -> new ChunkCap(null));
+
+        CapabilityManager.INSTANCE.register(TrackerItemStack.class, new TrackerItemStackStorage(), () -> new TrackerItemStack(null));
     }
     
     
@@ -288,11 +301,11 @@ public class ForgeBusEventSubscriber {
     private static void syncPowerData(PlayerEntity player) {
         INonStandPower.getPlayerNonStandPower(player).syncWithUserOnly();
         IStandPower.getPlayerStandPower(player).syncWithUserOnly();
-        player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-            cap.syncWithClient();
-        });
         player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
             cap.syncWithClient();
+        });
+        player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+            cap.syncWithClient((ServerPlayerEntity) player);
         });
         PacketManager.sendToClient(new UpdateClientCapCachePacket(), (ServerPlayerEntity) player);
     }
@@ -308,10 +321,14 @@ public class ForgeBusEventSubscriber {
     
     @SubscribeEvent
     public static void onWorldLoad(WorldEvent.Load event) {
-        if (event.getWorld() instanceof ServerWorld) {
-            ServerWorld serverWorld = (ServerWorld) event.getWorld();
-            addDimensionalSpacing(serverWorld);
+        if (event.getWorld() instanceof World) {
+            if (event.getWorld() instanceof ServerWorld) {
+                ServerWorld serverWorld = (ServerWorld) event.getWorld();
+                addDimensionalSpacing(serverWorld);
+            }
+            EntityTypeToInstance.init((World) event.getWorld());
         }
+        EntityTypeToInstance.init((World) event.getWorld());
     }
     
     private static void addDimensionalSpacing(ServerWorld serverWorld) {

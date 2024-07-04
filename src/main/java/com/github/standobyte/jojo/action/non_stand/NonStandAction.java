@@ -75,8 +75,8 @@ public abstract class NonStandAction extends Action<INonStandPower> {
     }
     
     @Override
-    public void onPerform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
-        super.onPerform(world, user, power, target);
+    public void afterPerform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
+        super.afterPerform(world, user, power, target);
         if (!world.isClientSide()) {
             power.consumeEnergy(getEnergyCost(power, target));
         }

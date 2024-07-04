@@ -20,6 +20,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.NotificationSyncPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDirectEntityDataPacket;
@@ -29,6 +30,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrKnivesCountPacket
 import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerContinuousActionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerVisualDetailPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrWalkmanEarbudsPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.GESplitConsciousnessPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.MetEntityTypesPacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
@@ -84,8 +86,6 @@ public class PlayerUtilCap {
     private int ticksNoSleep;
     private long nextSleepTime;
     
-    private Set<ResourceLocation> metEntityTypesId = new HashSet<>();
-    
     private Optional<RockPaperScissorsGame> currentGame = Optional.empty();
     
     private boolean walkmanEarbuds = false;
@@ -97,11 +97,16 @@ public class PlayerUtilCap {
     private final Map<CustomVillagerTrades.MapTrade, Long> lastTradeTime = new EnumMap<>(MapTrade.class);
     private final List<PlayerStatListener<?>> statChangeListeners = new ArrayList<>();
     private final List<TimedAction> sendWhenScreenClosed = new ArrayList<>();
+
+    private Set<ResourceLocation> metEntityTypesId = new HashSet<>();
+    private final LifeformsUIState geUIState;
+    public int animalAgeCd;
     
     
     
     public PlayerUtilCap(PlayerEntity player) {
         this.player = player;
+        geUIState = new LifeformsUIState(player);
 //        if (!player.level.isClientSide()) {
 //            statChangeListeners.add(new CustomVillagerTrades.MapItemStackTradeListener((ServerPlayerEntity) player));
 //        }
@@ -117,9 +122,11 @@ public class PlayerUtilCap {
             tickNoSleepTimer();
             tickStatUpdates();
             tickQueuedOnScreenClose();
+            tickLifeshotKnockback();
             
             if (knivesThrewTicks > 0) knivesThrewTicks--;
             if (chatSpamTickCount > 0) chatSpamTickCount--;
+            if (animalAgeCd > 0) animalAgeCd--;
         }
 
         if (ateInkPastaTicks > 0) --ateInkPastaTicks;
@@ -129,6 +136,8 @@ public class PlayerUtilCap {
     
     public void onClone(PlayerUtilCap old, boolean wasDeath) {
         this.notificationsSent = old.notificationsSent;
+
+        this.metEntityTypesId = old.metEntityTypesId;
         
         this.lastBedType = old.lastBedType;
         this.ticksNoSleep = old.ticksNoSleep;
@@ -141,6 +150,8 @@ public class PlayerUtilCap {
         CompoundNBT nbt = new CompoundNBT();
         nbt.put("NotificationsSent", notificationsToNBT());
         
+        nbt.putInt("Knives", knives);
+        
         if (!metEntityTypesId.isEmpty()) {
             ListNBT metEntities = new ListNBT();
             metEntityTypesId.forEach(entityTypeId -> metEntities.add(StringNBT.valueOf(entityTypeId.toString())));
@@ -150,6 +161,9 @@ public class PlayerUtilCap {
         nbt.put("RotpVersion", JojoModVersion.getCurrentVersion().toNBT());
         
         nbt.put("TradeCD", tradeCooldownToNbt());
+        
+        nbt.put("GE_UI", geUIState.toNBT());
+        nbt.putInt("AnimalAgeCd", animalAgeCd);
         return nbt;
     }
 
@@ -161,6 +175,8 @@ public class PlayerUtilCap {
             notificationsFromNBT(notificationsMap);
         }
         
+        knives = nbt.getInt("Knives");
+        
         if (nbt.contains("MetEntityTypes", MCUtil.getNbtId(ListNBT.class))) {
             ListNBT metEntitiesId = nbt.getList("MetEntityTypes", MCUtil.getNbtId(StringNBT.class));
             metEntitiesId.forEach(idNBT -> {
@@ -171,6 +187,9 @@ public class PlayerUtilCap {
                 }
             });
         }
+        
+        MCUtil.nbtGetCompoundOptional(nbt, "GE_UI").ifPresent(geUIState::fromNBT);
+        animalAgeCd = nbt.getInt("AnimalAgeCd");
         
         MCUtil.getNbtElement(nbt, "TradeCD", CompoundNBT.class).ifPresent(this::tradeCooldownFromNbt);
     }
@@ -184,6 +203,11 @@ public class PlayerUtilCap {
     public void syncWithClient() {
         ServerPlayerEntity player = (ServerPlayerEntity) this.player;
         PacketManager.sendToClient(new NotificationSyncPacket(notificationsSent), player);
+        if (!metEntityTypesId.isEmpty()) {
+            PacketManager.sendToClient(new MetEntityTypesPacket(metEntityTypesId), player);
+        }
+        PacketManager.sendToClient(geUIState.makePacket(), player);
+        
         PacketManager.sendToClient(new TrKnivesCountPacket(player.getId(), knives), player);
         PacketManager.sendToClient(new TrWalkmanEarbudsPacket(player.getId(), walkmanEarbuds), player);
         PacketManager.sendToClient(new TrPlayerVisualDetailPacket(player.getId(), ateInkPastaTicks), player);
@@ -499,15 +523,27 @@ public class PlayerUtilCap {
     
     
     public boolean addMetEntityType(EntityType<?> entityType) {
-        return metEntityTypesId.add(entityType.getRegistryName());
+        boolean added = metEntityTypesId.add(entityType.getRegistryName());
+        if (added) {
+            geUIState.newUnseenMobs.add(entityType.getRegistryName());
+        }
+        return added;
     }
     
-    public boolean metEntityType(EntityType<?> entityType) {
+    public boolean didPlayerMeetEntityType(EntityType<?> entityType) {
         return metEntityTypesId.contains(entityType.getRegistryName());
     }
     
     public void addMetEntityTypeId(ResourceLocation id) {
         metEntityTypesId.add(id);
+    }
+    
+    public LifeformsUIState getGELifeformsUIState() {
+        return geUIState;
+    }
+    
+    public boolean metEntityType(EntityType<?> entityType) {
+        return metEntityTypesId.contains(entityType.getRegistryName());
     }
     
     
@@ -609,6 +645,19 @@ public class PlayerUtilCap {
                 return true;
             }
             return false;
+        }
+    }
+    
+    
+    
+    public void setSendLifeshotNextTick() {
+        sendLifeshotKBTicks = 2;
+    }
+    
+    private int sendLifeshotKBTicks = 0;
+    private void tickLifeshotKnockback() {
+        if (sendLifeshotKBTicks > 0 && --sendLifeshotKBTicks == 0 && player.hasEffect(ModStatusEffects.SENSORY_OVERLOAD.get())) {
+            PacketManager.sendToClient(new GESplitConsciousnessPacket(player.getDeltaMovement()), (ServerPlayerEntity) player);
         }
     }
 

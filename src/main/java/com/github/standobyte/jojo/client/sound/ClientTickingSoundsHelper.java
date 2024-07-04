@@ -4,6 +4,7 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
@@ -24,10 +25,21 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.sound.SoundEvent.SoundSourceEvent;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
+@EventBusSubscriber(modid = JojoMod.MOD_ID, value = Dist.CLIENT)
 public abstract class ClientTickingSoundsHelper {
+    
+    public static void tickBossMusic() {
+        if (tickLoopPlayer != null) {
+            tickLoopPlayer.tick();
+        }
+    }
     
     public static boolean playVoiceLine(Entity entity, SoundEvent soundEvent, SoundCategory category, float volume, float pitch, boolean interrupt) {
         Minecraft mc = Minecraft.getInstance();
@@ -85,8 +97,28 @@ public abstract class ClientTickingSoundsHelper {
         volume = event.getVolume();
         pitch = event.getPitch();
         
-        mc.getSoundManager().play(new StoppableEntityTickableSound<StandEntity>(sound, category, volume, pitch, looping, stand, e -> 
-            e.getCurrentTaskAction() == action && (phase == null || e.getCurrentTaskPhase().map(stPhase -> stPhase == phase).orElse(false))));
+        ISound soundPlayed = new StoppableEntityTickableSound<StandEntity>(sound, category, volume, pitch, looping, stand, 
+                e -> e.getCurrentTaskAction() == action && (phase == null || e.getCurrentTaskPhase().map(stPhase -> stPhase == phase).orElse(false)));
+        mc.getSoundManager().play(soundPlayed);
+    }
+    
+    public static void playEndlessStandCrySound(StandEntity stand, SoundEvent sound, 
+            StandEntityAction action, @Nullable StandEntityAction.Phase phase, float volume, float pitch) {
+        if (!stand.isVisibleForAll() && !ClientUtil.canHearStands()) {
+            return;
+        }
+        
+        SoundCategory category = stand.getSoundSource();
+        PlaySoundAtEntityEvent event = ForgeEventFactory.onPlaySoundAtEntity(stand, sound, category, volume, pitch);
+        if (event.isCanceled() || event.getSound() == null) return;
+        sound = event.getSound();
+        category = event.getCategory();
+        volume = event.getVolume();
+        pitch = event.getPitch();
+        
+        StandCrySoundHandler.create(category, volume, pitch, false, stand, 
+                e -> e.getCurrentTaskAction() == action && (phase == null || e.getCurrentTaskPhase().map(stPhase -> stPhase == phase).orElse(false)),
+                sound);
     }
     
     public static void playStandEntityUnsummonSound(StandEntity stand, SoundEvent sound, float volume, float pitch) {
@@ -179,5 +211,21 @@ public abstract class ClientTickingSoundsHelper {
     
     public static void playMagiciansRedDetectorSound(MRDetectorEntity entity) {
         Minecraft.getInstance().getSoundManager().play(new MRDetectorSound(entity));
+    }
+    
+    static SoundtrackLoopPlayer tickLoopPlayer;
+    public static void playBossEntitySoundtrack(SoundtrackLoopPlayer loopPlayer) {
+        if (tickLoopPlayer != null) {
+            tickLoopPlayer.forceStop();
+        }
+        tickLoopPlayer = loopPlayer;
+        loopPlayer.start();
+    }
+
+    @SubscribeEvent
+    public static void onSoundSourcePlayed(SoundSourceEvent event) {
+        if (tickLoopPlayer != null) {
+            tickLoopPlayer.onSoundSourceEvent(event);
+        }
     }
 }

@@ -3,6 +3,8 @@ package com.github.standobyte.jojo.client;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.AIR;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.EXPERIENCE;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.FOOD;
+import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.HEALTH;
+import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.HELMET;
 
 import java.util.List;
 import java.util.ListIterator;
@@ -17,9 +19,12 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
+import com.github.standobyte.jojo.action.stand.GoldExperienceChooseLifeform;
+import com.github.standobyte.jojo.action.stand.effect.GEItemMarkEffect;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
@@ -34,6 +39,8 @@ import com.github.standobyte.jojo.client.render.entity.layerrenderer.HamonBurnLa
 import com.github.standobyte.jojo.client.render.item.InventoryItemHighlight;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
 import com.github.standobyte.jojo.client.resources.CustomResources;
+import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
+import com.github.standobyte.jojo.client.sound.StandCrySoundHandler;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.ClientModSettingsScreen;
@@ -44,15 +51,21 @@ import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.HoldToggleKe
 import com.github.standobyte.jojo.client.ui.screen.widgets.HeightScaledSlider;
 import com.github.standobyte.jojo.client.ui.screen.widgets.ImageVanillaButton;
 import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
+import com.github.standobyte.jojo.client.ui.toasts.MetEntityTypeToast;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
+import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.item.OilItem;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
 import com.github.standobyte.jojo.modcompat.OptionalDependencyHelper;
+import com.github.standobyte.jojo.network.NetworkUtil;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromclient.ClMetEntityTypePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ServerIdPacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
@@ -64,6 +77,7 @@ import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.google.common.base.MoreObjects;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -71,6 +85,9 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
+import net.minecraft.client.audio.ISound.AttenuationType;
+import net.minecraft.client.audio.LocatableSound;
+import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
@@ -100,7 +117,9 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.Timer;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
@@ -108,9 +127,11 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector3i;
+import net.minecraft.util.text.Color;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.ForgeHooksClient;
@@ -134,6 +155,7 @@ import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.event.TickEvent.RenderTickEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
@@ -180,6 +202,24 @@ public class ClientEventHandler {
         if (ClientTimeStopHandler.getInstance().shouldCancelSound(sound)) {
             event.setResultSound(null);
         }
+        
+        if (mc.player != null && sound.getAttenuation() == AttenuationType.LINEAR && sound instanceof LocatableSound) {
+            mc.player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(player -> {
+                if (player.isDyingBody() && !mc.player.isSpectator() && !mc.player.isDeadOrDying()) {
+                    float progress = player.getDyingBodyProgress();
+                    if (progress > 0.8F) {
+                        float volumeMult;
+                        if (progress < 0.84F) {
+                            volumeMult = 20 * (1 - progress) - 3;
+                        }
+                        else {
+                            volumeMult = 1.25F * (1 - progress);
+                        }
+                        ((LocatableSound) sound).volume *= volumeMult;
+                    }
+                }
+            });
+        }
     }
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -213,8 +253,7 @@ public class ClientEventHandler {
     private void correctHeldItemPose(LivingEntity entity, BipedModel<?> model, HandSide handSide) {
         Hand hand = entity.getMainArm() == handSide ? Hand.MAIN_HAND : Hand.OFF_HAND;
         ItemStack item = entity.getItemInHand(hand);
-        if (!item.isEmpty() && 
-                GlovesLayer.areGloves(item)) {
+        if (!item.isEmpty() && GlovesLayer.areGloves(item)) {
             switch (handSide) {
             case LEFT:
                 model.leftArmPose = BipedModel.ArmPose.EMPTY;
@@ -301,6 +340,9 @@ public class ClientEventHandler {
                 
                 if (!mc.isPaused()) {
                     ClientTicking.tickAll();
+                    ClientTickingSoundsHelper.tickBossMusic();
+                    
+                    StandCrySoundHandler.tickAll();
                     
                     mc.level.getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                         cap.tick();
@@ -327,6 +369,7 @@ public class ClientEventHandler {
                         mc.player.getVehicle() != null && mc.player.getVehicle().getType() == ModEntityTypes.LEAVES_GLIDER.get())) {
                     ClientReflection.setHandsBusy(mc.player, true);
                 }
+                
                 break;
             }
         }
@@ -336,12 +379,24 @@ public class ClientEventHandler {
             
             deathScreenTick = mc.screen instanceof DeathScreen ? deathScreenTick + 1 : 0;
             standStatsTick = mc.screen instanceof IngameMenuScreen && doStandStatsRender(mc.screen) ? standStatsTick + 1 : 0;
+            
+            NetworkUtil.blockPacketsToServer = mc.player != null && mc.player.hasEffect(ModStatusEffects.SENSORY_OVERLOAD.get());
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        if (event.isCancelable() && NetworkUtil.blockPacketsToServer) {
+            event.setCanceled(true);
         }
     }
     
     public static void onMouseTargetChanged(RayTraceResult newTarget) {
-        if (newTarget instanceof EntityRayTraceResult) {
+        Minecraft mc = Minecraft.getInstance();
+        if (newTarget.getType() == RayTraceResult.Type.ENTITY) {
             Entity entity = ((EntityRayTraceResult) newTarget).getEntity();
+            
+            // Hamon learning player interaction hints
             if (entity instanceof PlayerEntity) {
                 PlayerEntity clientPlayer = Minecraft.getInstance().player;
                 PlayerEntity targetPlayer = (PlayerEntity) entity;
@@ -374,6 +429,25 @@ public class ClientEventHandler {
                     }
                 }
             }
+            
+            // learning new lifeforms for Gold Experience
+            mc.player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                EntityType<?> type = entity.getType();
+                if (cap.addMetEntityType(type)) {
+                    PacketManager.sendToServer(new ClMetEntityTypePacket(entity.getId()));
+                    
+                    if (GoldExperienceChooseLifeform.isValidLifeform(type, mc.level)) {
+                        IStandPower.getStandPowerOptional(mc.player).ifPresent(power -> {
+                            if (ModStandsInit.GOLD_EXPERIENCE_CHOOSE_LIFEFORM.get().isUnlocked(power)) {
+                                mc.getSoundManager().play(new SimpleSound(SoundEvents.UI_BUTTON_CLICK, 
+                                        SoundCategory.MASTER, 0.5F, 2.0F, 
+                                        entity.getX(), entity.getY(0.5), entity.getZ()));
+                                MetEntityTypeToast.addOrUpdate(mc.getToasts(), type);
+                            }
+                        });
+                    }
+                }
+            });
         }
     }
     
@@ -471,6 +545,9 @@ public class ClientEventHandler {
                 }
             });
         }
+        else if (event.getType() == HEALTH && JojoModUtil.isDyingBody(mc.player)) {
+            event.setCanceled(true);
+        }
         
         if (event.getType() == EXPERIENCE && mc.gameMode.hasExperience()
                 && mc.player.hasEffect(ModStatusEffects.STAND_VIRUS.get())) {
@@ -483,6 +560,13 @@ public class ClientEventHandler {
                     event.setCanceled(true);
                 }
             });
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.NORMAL)
+    public void renderUI(RenderGameOverlayEvent.Pre event) {
+        if (event.getType() == HELMET) {
+            renderLosingVision(event.getMatrixStack(), event.getPartialTicks());
         }
     }
     
@@ -584,9 +668,11 @@ public class ClientEventHandler {
                                     event.getPartialTicks(), event.getInterpolatedPitch(), player);
                         }
                     });
-                    
-                    if (GlovesLayer.areGloves(item) || item.isEmpty() && !player.isInvisible() && 
-                            (player.hasEffect(ModStatusEffects.HAMON_SPREAD.get()) || player.hasEffect(ModStatusEffects.FREEZE.get()))) {
+
+                    boolean hasGloves = GlovesLayer.areGloves(player.getItemInHand(Hand.MAIN_HAND)) || GlovesLayer.areGloves(player.getItemInHand(Hand.OFF_HAND));
+                    boolean hasEffect = player.hasEffect(ModStatusEffects.HAMON_SPREAD.get()) || player.hasEffect(ModStatusEffects.FREEZE.get());
+                    if (hasGloves && (GlovesLayer.areGloves(item) || item.isEmpty()) || 
+                            hasEffect && item.isEmpty() && !player.isInvisible()) {
                         event.setCanceled(true);
                         renderHand(Hand.MAIN_HAND, event.getMatrixStack(), event.getBuffers(), event.getLight(), 
                                 event.getPartialTicks(), event.getInterpolatedPitch(), player);
@@ -931,23 +1017,42 @@ public class ClientEventHandler {
     @SubscribeEvent
     public void addTooltipLines(ItemTooltipEvent event) {
         PlayerEntity player = event.getPlayer();
+        ItemStack item = event.getItemStack();
+        Optional<IStandPower> powerOptional = IStandPower.getStandPowerOptional(player).resolve();
         if (player != null) {
-            CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(player.level, event.getItemStack()).ifPresent(pos -> {
-                if (IStandPower.getStandPowerOptional(player).map(power -> power.getType() == ModStands.CRAZY_DIAMOND.getStandType()).orElse(false)) {
+            CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(player.level, item).ifPresent(pos -> {
+                if (powerOptional.map(power -> power.getType() == ModStands.CRAZY_DIAMOND.getStandType()).orElse(false)) {
                     event.getToolTip().add(new TranslationTextComponent("jojo.crazy_diamond.block_checkpoint.tooltip", 
                             pos.getX(), pos.getY(), pos.getZ()).withStyle(TextFormatting.RED));
                 }
             });
             
-           OilItem.remainingOiledUses(event.getItemStack()).ifPresent(uses -> {
+            TrackerItemStack.getItemTracker(item).ifPresent(tracker -> {
+                if (tracker.isTracked()) {
+                    if (powerOptional.map(power -> power
+                                .getContinuousEffects()
+                                .getEffects()
+                                .filter(effect -> effect.effectType == ModStandEffects.GE_ITEM_MARK.get())
+                                .map(effect -> (GEItemMarkEffect) effect)
+                                .anyMatch(effect -> tracker.getTrackerId().equals(effect.getItemTrackerId())))
+                            .orElse(false)) {
+                        event.getToolTip().add(
+                                new TranslationTextComponent("jojo.ge_item_marked")
+                                .withStyle(Style.EMPTY.withColor(
+                                        Color.fromRgb(ActionsOverlayGui.getPowerUiColor(powerOptional.get())))));
+                    }
+                }
+            });
+            
+           OilItem.remainingOiledUses(item).ifPresent(uses -> {
                if (uses > 0) {
                    event.getToolTip().add(new TranslationTextComponent("item.jojo.oil.uses", uses).withStyle(TextFormatting.GOLD));
                }
            });
         }
 
-        if (event.getItemStack().getItem() instanceof EnchantedBookItem && !ModList.get().isLoaded("enchdesc")) {
-            EnchantedBookItem.getEnchantments(event.getItemStack()).forEach(nbt -> {
+        if (item.getItem() instanceof EnchantedBookItem && !ModList.get().isLoaded("enchdesc")) {
+            EnchantedBookItem.getEnchantments(item).forEach(nbt -> {
                 if (nbt.getId() == MCUtil.getNbtId(CompoundNBT.class)) {
                     CompoundNBT enchNbt = (CompoundNBT) nbt;
                     ResourceLocation enchId = ResourceLocation.tryParse(enchNbt.getString("id"));
@@ -987,7 +1092,79 @@ public class ClientEventHandler {
     }
     
     
-
+    
+    private void renderLosingVision(MatrixStack matrixStack, float partialTick) {
+        if (mc.player != null) {
+            mc.player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(player -> {
+                if (player.isDyingBody() && !mc.player.isSpectator() && !mc.player.isDeadOrDying()) {
+                    int timeLeft = player.getDyingBodyTicksLeft();
+                    if (timeLeft > 0) {
+                        --timeLeft;
+                        float vignette = 0;
+                        if (timeLeft <= 60) {
+                            float vignetteTime = (60 - timeLeft) + partialTick;
+                            if (timeLeft > 20) {
+                                vignette = (MathHelper.cos(vignetteTime / 10 * (float) Math.PI) + 1) / 2;
+                            }
+                            else {
+                                vignette = (MathHelper.cos(vignetteTime / 20 * (float) Math.PI) + 1) / 2;
+                            }
+                        }
+                        else {
+                            float progress = player.getDyingBodyProgress();
+                            if (progress > 0.8F) {
+                                vignette = 1 - 5 * (1 - progress);
+                            }
+                        }
+                        
+                        if (vignette > 0) {
+                            vignette = Math.min(vignette, 1);
+                            ActionsOverlayGui.getInstance().renderVignette(matrixStack, vignette, vignette, vignette);
+                        }
+                    }
+                }
+            });
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void dyingBodyLostVision(EntityViewRenderEvent.FogDensity event) {
+        if (mc.player != null) {
+            mc.player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(player -> {
+                if (player.isDyingBody() && !mc.player.isSpectator() && !mc.player.isDeadOrDying()) {
+                    int timeLeft = player.getDyingBodyTicksLeft();
+                    if (timeLeft > 0) {
+                        --timeLeft;
+                        if (timeLeft <= 20) {
+                            float lerp = (20 - timeLeft + (float) event.getRenderPartialTicks()) / 20.0F;
+                            event.setDensity(MathHelper.lerp(lerp, event.getDensity(), 1));
+                            event.setCanceled(true);
+                        }
+                    }
+                    else {
+                        event.setDensity(1);
+                        event.setCanceled(true);
+                    }
+                }
+            });
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void dyingBodyVisionDark(EntityViewRenderEvent.FogColors event) {
+        if (mc.player != null) {
+            mc.player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(player -> {
+                if (player.isDyingBody() && !mc.player.isSpectator() && !mc.player.isDeadOrDying() && player.getDyingBodyTicksLeft() <= 21) {
+                    event.setRed(0);
+                    event.setGreen(0);
+                    event.setBlue(0);
+                }
+            });
+        }
+    }
+    
+    
+    
     private UUID serverId;
     private boolean isLoggedIn = false;
     

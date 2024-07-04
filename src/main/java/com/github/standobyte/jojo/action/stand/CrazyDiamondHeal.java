@@ -24,7 +24,6 @@ import com.github.standobyte.jojo.util.mc.MCUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.BoatEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
@@ -113,9 +112,7 @@ public class CrazyDiamondHeal extends StandEntityAction {
                         e.deathTime = toHeal.deathTime;
                         if (!clientSide && toHeal.deathTime <= 0) {
                             toHeal.setHealth(0.001F);
-                            if (toHeal instanceof ServerPlayerEntity) {
-                                MCUtil.onPlayerResurrect((ServerPlayerEntity) toHeal);
-                            }
+                            MCUtil.onEntityResurrect(toHeal);
                         }
                     }, e -> true);
         }

@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.command;
+package com.github.standobyte.jojo.command.argument;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -10,7 +10,8 @@ import java.util.stream.Stream;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
-import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
+import com.github.standobyte.jojo.power.impl.stand.StandUtil;
+import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
@@ -25,24 +26,25 @@ import net.minecraft.command.arguments.ArgumentTypes;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.ResourceLocationException;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraftforge.fml.common.thread.SidedThreadGroups;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 
-public class NonStandTypeArgument implements ArgumentType<NonStandPowerType<?>> {
-    private static final Collection<String> EXAMPLES = Arrays.asList("hamon", "vampirism");
-    public static final DynamicCommandExceptionType TYPE_UNKNOWN = new DynamicCommandExceptionType((key) -> new TranslationTextComponent("non_stand.unknown", key));
+public class StandArgument implements ArgumentType<StandType<?>> {
+    private static final Collection<String> EXAMPLES = Arrays.asList("star_platinum", "jojo:hierophant_green");
+    public static final DynamicCommandExceptionType STAND_UNKNOWN = new DynamicCommandExceptionType((key) -> new TranslationTextComponent("stand.unknown", key));
     
     public static void commonSetupRegister() {
-        ArgumentTypes.register("non_stand", NonStandTypeArgument.class, new ArgumentSerializer<>(NonStandTypeArgument::new));
+        ArgumentTypes.register("stand", StandArgument.class, new ArgumentSerializer<>(StandArgument::new));
     }
-    
+
     @Override
-    public NonStandPowerType<?> parse(StringReader reader) throws CommandSyntaxException {
+    public StandType<?> parse(StringReader reader) throws CommandSyntaxException {
         ResourceLocation resourceLocation = read(reader);
-        NonStandPowerType<?> powerType = JojoCustomRegistries.NON_STAND_POWERS.getRegistry().getValue(resourceLocation);
-        if (powerType == null) {
-            throw TYPE_UNKNOWN.create(resourceLocation);
+        StandType<?> standType = JojoCustomRegistries.STANDS.getRegistry().getValue(resourceLocation);
+        if (standType == null) {
+            throw STAND_UNKNOWN.create(resourceLocation);
         }
-        return powerType;
+        return standType;
     }
 
     private static ResourceLocation read(StringReader reader) throws CommandSyntaxException {
@@ -69,14 +71,14 @@ public class NonStandTypeArgument implements ArgumentType<NonStandPowerType<?>> 
 
     private static final SimpleCommandExceptionType INVALID_EXCEPTION = new SimpleCommandExceptionType(new TranslationTextComponent("argument.id.invalid"));
 
-    public static <S> NonStandPowerType<?> getPowerType(CommandContext<S> context, String name) {
-        return context.getArgument(name, NonStandPowerType.class);
+    public static <S> StandType<?> getStandType(CommandContext<S> context, String name) {
+        return context.getArgument(name, StandType.class);
     }
 
     @Override
     public <S> CompletableFuture<Suggestions> listSuggestions(final CommandContext<S> context, final SuggestionsBuilder builder) {
-        return suggestIterable(JojoCustomRegistries.NON_STAND_POWERS.getRegistry().getValues()
-                .stream().map(IForgeRegistryEntry::getRegistryName), builder);
+        boolean isClientSide = Thread.currentThread().getThreadGroup() == SidedThreadGroups.CLIENT;
+        return suggestIterable(StandUtil.availableStands(isClientSide).map(IForgeRegistryEntry::getRegistryName), builder);
     }
 
     private static CompletableFuture<Suggestions> suggestIterable(Stream<ResourceLocation> registryKeys, SuggestionsBuilder builder) {

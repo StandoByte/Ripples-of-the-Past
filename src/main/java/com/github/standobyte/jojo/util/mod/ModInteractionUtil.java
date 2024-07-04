@@ -1,7 +1,10 @@
 package com.github.standobyte.jojo.util.mod;
 
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 
 import com.github.standobyte.jojo.JojoMod;
@@ -72,6 +75,16 @@ public class ModInteractionUtil {
                 MUTANT_ENDERMAN_ID_3.equals(typeId);
     }
     
+    public static String getModName(ResourceLocation registryId) {
+        String modId = registryId.getNamespace();
+        if ("minecraft".equals(modId)) {
+            return "Minecraft";
+        }
+        return ModList.get().getModContainerById(modId)
+                .map(modObject -> modObject.getModInfo().getDisplayName())
+                .orElse(modId);
+    }
+    
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void onAttackFromOtherMods(LivingAttackEvent event) {
         DamageSource damageSource = event.getSource();
@@ -101,5 +114,31 @@ public class ModInteractionUtil {
     private static final ResourceLocation SQUID_INK_PASTA = new ResourceLocation("farmersdelight", "squid_ink_pasta");
     public static boolean isSquidInkPasta(ItemStack item) {
         return SQUID_INK_PASTA.equals(item.getItem().getRegistryName());
+    }
+    
+    
+    public static class ResLocSet {
+        private final Map<String, Collection<String>> resLocsByNamespace = new HashMap<>();
+        
+        public ResLocSet add(String namespace, String path) {
+            Collection<String> pathsSet = resLocsByNamespace.computeIfAbsent(namespace, key -> new HashSet<>());
+            pathsSet.add(path);
+            return this;
+        }
+        
+        public ResLocSet add(String namespace, String... paths) {
+            Collection<String> pathsSet = resLocsByNamespace.computeIfAbsent(namespace, key -> new HashSet<>());
+            Collections.addAll(pathsSet, paths);
+            return this;
+        }
+        
+        public ResLocSet add(ResourceLocation resLoc) {
+            return add(resLoc.getNamespace(), resLoc.getPath());
+        }
+        
+        public boolean contains(ResourceLocation resLoc) {
+            Collection<String> paths = resLocsByNamespace.get(resLoc.getNamespace());
+            return paths != null ? paths.contains(resLoc.getPath()) : false;
+        }
     }
 }

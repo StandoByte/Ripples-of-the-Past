@@ -2,6 +2,8 @@ package com.github.standobyte.jojo.client.ui.screen.mob;
 
 import javax.annotation.Nullable;
 
+import org.lwjgl.glfw.GLFW;
+
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
@@ -248,10 +250,10 @@ public class RockPaperScissorsScreen extends ChatScreen {
 
     @Override
     public boolean keyPressed(int p_231046_1_, int p_231046_2_, int p_231046_3_) {
-        if (p_231046_1_ == 256) {
+        if (p_231046_1_ == GLFW.GLFW_KEY_ESCAPE) {
             PacketManager.sendToServer(ClRPSGameInputPacket.quitGame());
             this.minecraft.setScreen(null);
-        } else if (p_231046_1_ == 257 || p_231046_1_ == 335) {
+        } else if (p_231046_1_ == GLFW.GLFW_KEY_ENTER || p_231046_1_ == GLFW.GLFW_KEY_KP_ENTER) {
             String s = this.input.getValue().trim();
             if (!s.isEmpty()) {
                 this.sendMessage(s);

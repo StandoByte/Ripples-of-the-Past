@@ -5,10 +5,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
+import org.lwjgl.glfw.GLFW;
 import org.lwjgl.opengl.GL11;
 
 import com.github.standobyte.jojo.JojoMod;
@@ -17,6 +19,8 @@ import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
 import com.github.standobyte.jojo.client.ui.screen.mob.RockPaperScissorsScreen;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
+import com.github.standobyte.jojo.itemtracking.SidedItemTrackerMap;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.general.MathUtil.Matrix4ZYX;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
@@ -27,7 +31,9 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.GameSettings;
+import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.MouseHelper;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
@@ -35,6 +41,7 @@ import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.LightTexture;
@@ -47,6 +54,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.client.settings.PointOfView;
+import net.minecraft.client.util.InputMappings;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -97,10 +105,6 @@ public class ClientUtil {
         return Minecraft.getInstance().level;
     }
     
-    public static Vector3d getCameraPos() {
-        return Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
-    }
-    
     public static boolean isLocalServer() {
         return Minecraft.getInstance().isLocalServer();
     }
@@ -131,6 +135,14 @@ public class ClientUtil {
     
     public static Entity getCameraEntity() {
         return Minecraft.getInstance().cameraEntity;
+    }
+    
+    public static Vector3d getCameraPos() {
+        return Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
+    }
+    
+    public static Vector3f getCameraLook() {
+        return Minecraft.getInstance().gameRenderer.getMainCamera().getLookVector();
     }
     
     public static float getPartialTick() {
@@ -168,6 +180,15 @@ public class ClientUtil {
     
     public static boolean canHearStands() {
         return canHearStands;
+    }
+    
+    private static IStandPower playerStandCached;
+    public static IStandPower getStandPowerClCached() {
+        return playerStandCached;
+    }
+    
+    public static void updatePowersCapCache() {
+        playerStandCached = IStandPower.getPlayerStandPower(Minecraft.getInstance().player);
     }
     
     public static void setCameraEntityPreventShaderSwitch(Entity entity) {
@@ -334,6 +355,32 @@ public class ClientUtil {
         Tessellator.getInstance().end();
     }
     
+    private static final int[] RED_PIXEL =   new int[] { 255, 0, 0, 63 };
+    private static final int[] GREEN_PIXEL = new int[] { 0, 255, 0, 63 };
+    public static void pixelCheckOverlay(BiPredicate<Integer, Integer> pixelCheck) {
+        MainWindow window = Minecraft.getInstance().getWindow();
+        int width = window.getGuiScaledWidth();
+        int height = window.getGuiScaledHeight();
+        RenderSystem.enableBlend();
+        RenderSystem.disableDepthTest();
+        RenderSystem.disableTexture();
+        BufferBuilder bufferBuilder = Tessellator.getInstance().getBuilder();
+        
+        for (int x = 0; x < width; x++) {
+            for (int y = 0; y < height; y++) {
+                int[] color = pixelCheck.test(x, y) ? GREEN_PIXEL : RED_PIXEL;
+                bufferBuilder.begin(6, DefaultVertexFormats.POSITION_COLOR);
+                bufferBuilder.vertex(x,   y,   0.0D).color(color[0], color[1], color[2], color[3]).endVertex();
+                bufferBuilder.vertex(x,   y+1, 0.0D).color(color[0], color[1], color[2], color[3]).endVertex();
+                bufferBuilder.vertex(x+1, y+1, 0.0D).color(color[0], color[1], color[2], color[3]).endVertex();
+                bufferBuilder.vertex(x+1, y,   0.0D).color(color[0], color[1], color[2], color[3]).endVertex();
+                Tessellator.getInstance().end();
+            }
+        }
+        RenderSystem.enableTexture();
+        RenderSystem.enableDepthTest();
+    }
+    
     public static void drawBackdrop(MatrixStack matrixStack, int x, int y, int width, float alpha) {
         Minecraft mc = Minecraft.getInstance();
         int backdropColor = mc.options.getBackgroundColor(0.0F);
@@ -476,6 +523,19 @@ public class ClientUtil {
         float coeff = maxAlpha / maxAlphaTicks;
         float alpha = ticks <= cycleTicks / 2 ? coeff * ticks : coeff * (cycleTicks - ticks);
         return Math.min(alpha, maxAlpha - minAlpha) + minAlpha;
+    }
+    
+    public static void setMousePos(int mouseX, int mouseY) {
+        Minecraft mc = Minecraft.getInstance();
+        MainWindow window = mc.getWindow();
+        
+        double xPos = mouseX * window.getScreenWidth()  / window.getGuiScaledWidth();
+        double yPos = mouseY * window.getScreenHeight() / window.getGuiScaledHeight();
+        
+        MouseHelper mouseHandler = mc.mouseHandler;
+        ClientReflection.setXPos(mouseHandler, xPos);
+        ClientReflection.setYPos(mouseHandler, yPos);
+        InputMappings.grabOrReleaseMouse(window.getWindow(), GLFW.GLFW_CURSOR_NORMAL, xPos, yPos);
     }
     
     public static DefaultPlayerSkinType getPlayerDefaultSkinType(AbstractClientPlayerEntity player) {
@@ -645,4 +705,14 @@ public class ClientUtil {
             this.isOnScreen = isOnScreen;
         }
     }
+    
+    
+    public static Button.ITooltip buttonMessageTooltip(Screen screen) {
+        return (Button button, MatrixStack matrixStack, int x, int y) -> {
+            screen.renderTooltip(matrixStack, button.getMessage(), x, y);
+        };
+    }
+    
+    
+    public static final SidedItemTrackerMap clientTrackedItems = new SidedItemTrackerMap();
 }

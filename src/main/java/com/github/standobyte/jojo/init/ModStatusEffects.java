@@ -97,6 +97,9 @@ public class ModStatusEffects {
     public static final RegistryObject<Effect> MISSHAPEN_LEGS = EFFECTS.register("misshapen_legs", 
             () -> new StatusEffect(EffectType.HARMFUL, 0x808080));
     
+    public static final RegistryObject<Effect> SENSORY_OVERLOAD = EFFECTS.register("sensory_overload", 
+            () -> new StatusEffect(EffectType.HARMFUL, 0xD88F1F).setUncurable());
+    
 //    public static final RegistryObject<Effect> STAND_SEALING = EFFECTS.register("stand_sealing", 
 //            () -> new StatusEffect(EffectType.HARMFUL, 0xCACAD8)); // TODO Stand Sealing effect
     

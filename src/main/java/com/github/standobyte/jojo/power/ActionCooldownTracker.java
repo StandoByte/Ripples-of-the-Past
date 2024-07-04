@@ -44,7 +44,16 @@ public class ActionCooldownTracker {
     }
 
     public boolean isOnCooldown(Action<?> action) {
-        return getCooldownPercent(action, 0.0F) > 0.0F;
+        return getCooldownTimer(action) > 0;
+    }
+    
+    public int getCooldownTimer(Action<?> action) {
+        ActionCooldownTracker.Cooldown cooldown = cooldowns.get(action);
+        if (cooldown != null) {
+            int cooldownValue = cooldown.endTime - tickCount;
+            return cooldownValue;
+        }
+        return 0;
     }
 
     public float getCooldownPercent(Action<?> action, float partialTick) {
@@ -75,6 +84,8 @@ public class ActionCooldownTracker {
     }
     
     public void addCooldown(Action<?> action, int ticks, int totalTicks) {
+        ticks = Math.max(ticks, 0);
+        totalTicks = Math.max(totalTicks, 0);
         cooldowns.put(action, new ActionCooldownTracker.Cooldown(tickCount + ticks - totalTicks, tickCount + ticks));
     }
 

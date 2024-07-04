@@ -57,7 +57,7 @@ public class MRDetectorEntity extends Entity implements IEntityAdditionalSpawnDa
         }
         super.tick();
         if (tickCount < 600 && owner != null && owner.isAlive()) {
-            Vector3d newPos = owner.getEyePosition(1.0F).add(MathUtil.relativeCoordsToAbsolute(-0.5, -0.5, 1.5, owner.yRot));
+            Vector3d newPos = owner.getEyePosition(1.0F).add(new Vector3d(-0.5, -0.5, 1.5).yRot(-owner.yRot * MathUtil.DEG_TO_RAD));
             setPos(newPos.x, newPos.y, newPos.z);
         }
         else {

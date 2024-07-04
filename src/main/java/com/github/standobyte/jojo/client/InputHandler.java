@@ -19,13 +19,13 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.tuple.Pair;
 import org.lwjgl.glfw.GLFW;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.controls.ActionKeybindEntry;
 import com.github.standobyte.jojo.client.controls.ActionKeybindEntry.KeyActiveType;
@@ -37,6 +37,8 @@ import com.github.standobyte.jojo.client.controls.HudControlSettings;
 import com.github.standobyte.jojo.client.standskin.StandSkin;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
+import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.ActionUseTry;
+import com.github.standobyte.jojo.client.ui.screen.WasdAllowingScreen;
 import com.github.standobyte.jojo.client.ui.screen.controls.HudLayoutEditingScreen;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.ItemProjectileEntity;
@@ -92,6 +94,7 @@ import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.event.InputEvent.ClickInputEvent;
+import net.minecraftforge.client.event.InputEvent.KeyInputEvent;
 import net.minecraftforge.client.event.InputEvent.MouseScrollEvent;
 import net.minecraftforge.client.event.InputUpdateEvent;
 import net.minecraftforge.client.settings.KeyBindingMap;
@@ -686,27 +689,33 @@ public class InputHandler {
 
         if (power != null) {
             boolean leftClickedBlock = false;
-            boolean sneak = mc.player.isShiftKeyDown();
+            boolean sneak = useShiftActionVariant(mc);
             boolean shiftActionVar = useShiftActionVariant(mc);
             Action<P> action = (Action<P>) entry.getAction();
             action = ActionsOverlayGui.resolveVisibleActionInSlot(
                     action, shiftActionVar, power, ActionsOverlayGui.getInstance().getMouseTarget());
             
-            Pair<Action<P>, Boolean> click = actionsOverlay.onActionClick(power, action, sneak);
+            ActionUseTry<P> click = actionsOverlay.onActionClick(power, action, sneak, entry.getKeybind());
             if (click != null) {
                 if (action != null && action.withUserPunch()) {
                     mcPlayerAttack();
                 }
-                if (click.getRight()) {
-                    if (action != null) {
-                        result.handSwing = actionSwingsHand(action, power);
-                        result.cancelVanillaInput();
-                        if (action.getHoldDurationMax(power) > 0) {
-                            heldKeys.put(power, entry.getKeybind());
+                if (click.wentOff) {
+                    result.cancelVanillaInput();
+                    if (action.getHoldDurationMax(power) > 0) {
+                        heldKeys.put(power, entry.getKeybind());
+                    }
+                    if (!click.clientOnly) {
+                        if (action != null) {
+                            result.handSwing = actionSwingsHand(action, power);
+                        }
+                        if (leftClickedBlock && leftClickBlockDelay <= 0) {
+                            leftClickBlockDelay = 4;
                         }
                     }
-                    if (leftClickedBlock && leftClickBlockDelay <= 0) {
-                        leftClickBlockDelay = 4;
+                    else {
+                        result.handSwing = HudClickResult.Behavior.CANCEL;
+                        result.cancelVanillaInput();
                     }
                 }
             }
@@ -761,31 +770,37 @@ public class InputHandler {
         
         if (power != null) {
             boolean leftClickedBlock = key == ActionKey.ATTACK && mc.hitResult.getType() == Type.BLOCK;
-            boolean sneak = mc.player.isShiftKeyDown();
+            boolean sneak = useShiftActionVariant(mc);
             boolean shiftActionVar = useShiftActionVariant(mc);
             
-            Pair<Action<P>, Boolean> click = null;
+            ActionUseTry<P> click = null;
 //            if (key == ActionKey.QUICK_ACCESS) {
 //                click = actionsOverlay.onQuickAccessClick(power, shiftActionVar, sneak);
 //            } else 
             if (!(leftClickedBlock && leftClickBlockDelay > 0)) {
-                click = actionsOverlay.onClick(power, key.getHotbar(), shiftActionVar, sneak);
+                click = actionsOverlay.onClick(power, key.getHotbar(), shiftActionVar, sneak, keyBinding);
             }
             if (click != null) {
-                Action<P> action = click.getLeft();
+                Action<P> action = click.action;
                 if (action != null && action.withUserPunch()) {
                     mcPlayerAttack();
                 }
-                if (click.getRight()) {
-                    if (action != null) {
-                        result.handSwing = actionSwingsHand(action, power);
-                        if (!(action.withUserPunch() && key == ActionKey.ATTACK)) result.cancelVanillaInput();
-                        if (action.getHoldDurationMax(power) > 0) {
-                            heldKeys.put(power, key.getKey(mc, this));
+                if (click.wentOff) {
+                    if (action != null && action.getHoldDurationMax(power) > 0) {
+                        heldKeys.put(power, key.getKey(mc, this));
+                    }
+                    if (!click.clientOnly) {
+                        if (action != null) {
+                            result.handSwing = actionSwingsHand(action, power);
+                            if (!(action.withUserPunch() && key == ActionKey.ATTACK)) result.cancelVanillaInput();
+                        }
+                        if (leftClickedBlock && leftClickBlockDelay <= 0) {
+                            leftClickBlockDelay = 4;
                         }
                     }
-                    if (leftClickedBlock && leftClickBlockDelay <= 0) {
-                        leftClickBlockDelay = 4;
+                    else {
+                        result.handSwing = HudClickResult.Behavior.CANCEL;
+                        result.cancelVanillaInput();
                     }
                 }
             }
@@ -809,6 +824,8 @@ public class InputHandler {
         }
         return HudClickResult.Behavior.CANCEL;
     }
+    
+    public static KeyBinding lastActionKey;
     
     public static boolean useShiftActionVariant(Minecraft mc) {
         return mc.player.isShiftKeyDown();
@@ -853,6 +870,10 @@ public class InputHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void invertMovementInput(InputUpdateEvent event) {
+        if (event.getPlayer() == mc.player && mc.screen instanceof WasdAllowingScreen) {
+            ((WasdAllowingScreen) mc.screen).tickInput(mc, mc.player, event.getMovementInput());
+        }
+        
         if (GeneralUtil.orElseFalse(INonStandPower.getNonStandPowerOptional(event.getPlayer()).resolve().flatMap(
                 power -> power.getTypeSpecificData(ModPowers.HAMON.get())), hamon -> {
                     if (hamon.isMeditating()) {
@@ -967,6 +988,12 @@ public class InputHandler {
     @SubscribeEvent(priority = EventPriority.LOW)
     public void onInputUpdate(InputUpdateEvent event) {
         MovementInput input = event.getMovementInput();
+        
+        mc.player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(player -> {
+            if (player.isDyingBody() && player.getDyingBodyTicksLeft() == 0) {
+                mc.player.setSprinting(false);
+            }
+        });
         
         boolean hasInput = input.up || input.down || input.left || input.right || input.jumping || input.shiftKeyDown;
         if (this.hasInput != hasInput) {
@@ -1125,6 +1152,16 @@ public class InputHandler {
             PacketManager.sendToServer(ClHasInputPacket.wallClimbing(isMoving));
             this.wallClimbMoving = isMoving;
             wallClimbData.wallClimbIsMoving = isMoving;
+        }
+    }
+    
+    
+    
+    @SubscribeEvent
+    public void onKeyClick(KeyInputEvent event) {
+        if (mc.screen instanceof WasdAllowingScreen) {
+            ((WasdAllowingScreen) mc.screen).clickKey(mc, event.getKey(), event.getScanCode(), 
+                    event.getAction(), event.getModifiers(), keyBindingMap);
         }
     }
     

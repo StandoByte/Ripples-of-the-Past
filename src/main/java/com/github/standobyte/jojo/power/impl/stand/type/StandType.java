@@ -273,6 +273,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     @Override
     public void onNewDay(LivingEntity user, IStandPower power, long prevDay, long day) {
         getStats().onNewDay(user, power);
+        getAllUnlockableActions().forEach(action -> action.passivelyOnNewDay(user, power, prevDay, day));
     }
     
     @Deprecated

@@ -1,13 +1,11 @@
 package com.github.standobyte.jojo.action.stand;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
@@ -19,6 +17,7 @@ import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.util.general.LazySupplier;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
@@ -33,12 +32,11 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class CrazyDiamondBlockBullet extends StandEntityAction {
     public static final StandPose BLOCK_BULLET_SHOT_POSE = new StandPose("CD_BLOCK_BULLET");
+    public static final double PLAYER_TRACKING_RANGE = 64;
     private final StandRelativeOffset userOffsetLeftArm;
 
     public CrazyDiamondBlockBullet(StandEntityAction.Builder builder) {
@@ -103,7 +101,7 @@ public class CrazyDiamondBlockBullet extends StandEntityAction {
                 item.shrink(1);
             }
             if (!JojoModUtil.useShiftVar(user)) {
-                getTarget(targets(userPower), user).ifPresent(effect -> {
+                StandEffectsTracker.getTargetLookedAt(userPower, ModStandEffects.DRIED_BLOOD_DROPS.get(), PLAYER_TRACKING_RANGE, user).ifPresent(effect -> {
                     bullet.setTarget(effect.getTarget());
                 });
             }
@@ -118,20 +116,6 @@ public class CrazyDiamondBlockBullet extends StandEntityAction {
         else {
             super.playSoundAtStand(world, standEntity, sound, standPower, phase);
         }
-    }
-    
-    public static Stream<StandEffectInstance> targets(IStandPower power) {
-        return power.getContinuousEffects().getEffects(effect -> effect.effectType == ModStandEffects.DRIED_BLOOD_DROPS.get())
-        .stream().filter(effect -> effect.getTarget() != null && effect.getTarget().distanceToSqr(power.getUser()) < 4096);
-    }
-
-    public static Optional<StandEffectInstance> getTarget(Stream<StandEffectInstance> targets, LivingEntity user) {
-        Vector3d lookAngle = user.getLookAngle();
-        return targets.max((e1, e2) -> 
-        MathHelper.floor(
-                (lookAngle.dot(e1.getTarget().getBoundingBox().getCenter().subtract(user.getEyePosition(1.0F)).normalize()) - 
-                lookAngle.dot(e2.getTarget().getBoundingBox().getCenter().subtract(user.getEyePosition(1.0F)).normalize()))
-                * 256));
     }
     
     @Override
@@ -168,7 +152,7 @@ public class CrazyDiamondBlockBullet extends StandEntityAction {
     
     private boolean isHoming(IStandPower power) {
         return power.getUser() != null && !JojoModUtil.useShiftVar(power.getUser())
-                && getTarget(targets(power), power.getUser()).isPresent();
+                && StandEffectsTracker.getTargetLookedAt(power, ModStandEffects.DRIED_BLOOD_DROPS.get(), PLAYER_TRACKING_RANGE, power.getUser()).isPresent();
     }
     
     

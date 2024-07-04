@@ -9,6 +9,8 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.InputHandler;
@@ -271,11 +273,19 @@ public class JojoModUtil {
             return powerType == ModPowers.VAMPIRISM.get();
         }).orElse(false); 
     }
-    
+
     public static boolean isAffectedByHamon(LivingEntity entity) {
-        return (JojoModUtil.isUndead(entity) || OptionalDependencyHelper.vampirism().isEntityVampire(entity))
-                        && !ModTags.UNDEAD_NO_HAMON_DAMAGE.contains(entity.getType())
-                || ModTags.HAMON_DAMAGE.contains(entity.getType());
+        if (!ModTags.NO_HAMON_DAMAGE.contains(entity.getType())) {
+            return false;
+        }
+        if (ModTags.HAMON_DAMAGE.contains(entity.getType())) {
+            return true;
+        }
+        return JojoModUtil.isUndead(entity) || OptionalDependencyHelper.vampirism().isEntityVampire(entity);
+    }
+
+    public static boolean isDyingBody(LivingEntity entity) {
+        return entity.getCapability(LivingUtilCapProvider.CAPABILITY).map(LivingUtilCap::isDyingBody).orElse(false);
     }
 
     public static boolean canBleed(LivingEntity entity) {
@@ -284,6 +294,9 @@ public class JojoModUtil {
                     || entity instanceof ZombieEntity && !(entity instanceof HuskEntity)
                     || entity instanceof ZoglinEntity
                     || entity instanceof ZombieHorseEntity;
+        }
+        if (isDyingBody(entity)) {
+            return false;
         }
         return entity instanceof PlayerEntity
                 || entity instanceof AgeableEntity
@@ -328,6 +341,10 @@ public class JojoModUtil {
     
     public static void sayVoiceLine(LivingEntity entity, SoundEvent voiceLine) {
         sayVoiceLine(entity, voiceLine, null);
+    }
+    
+    public static void sayVoiceLine(LivingEntity entity, SoundEvent voiceLine, int voiceLineDelay) {
+        sayVoiceLine(entity, voiceLine, null, 1.0F, 1.0F, voiceLineDelay, false);
     }
 
     public static void sayVoiceLine(LivingEntity entity, SoundEvent voiceLine, 

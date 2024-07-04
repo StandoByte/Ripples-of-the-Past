@@ -22,6 +22,7 @@ public class StandEntityDamageSource extends EntityDamageSource implements IStan
     protected boolean showStandUserName;
     private int barrageHits = 0;
     private int standInvulTicks = 0;
+    private boolean standCanHitSelf = false;
 
     public StandEntityDamageSource(String msgId, Entity damagingEntity, IStandPower stand) {
         super(msgId, damagingEntity);
@@ -123,6 +124,17 @@ public class StandEntityDamageSource extends EntityDamageSource implements IStan
     @Override
     public int getStandInvulTicks() {
         return standInvulTicks;
+    }
+    
+    @Override
+    public StandEntityDamageSource setStandCanHitSelf() {
+        standCanHitSelf = true;
+        return this;
+    }
+
+    @Override
+    public boolean standCanHitSelf() {
+        return standCanHitSelf;
     }
 
     public StandEntityDamageSource setShowStandUserName() {

@@ -20,7 +20,7 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.ITeleporter;
 import net.minecraftforge.common.util.LazyOptional;
 
-public class MrPresidentStandType<T extends StandStats> extends NoManifestationStandType<T> {
+public class MrPresidentStandType<T extends StandStats> extends NoSummonStandType<T> {
     
     public MrPresidentStandType(Builder<T> builder) {
         super(builder);

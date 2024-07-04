@@ -15,9 +15,12 @@ import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
+import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.ArmorStandEntity;
+import net.minecraft.entity.passive.GolemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
 
@@ -44,7 +47,10 @@ public class HamonDetector extends HamonAction {
                 double controlRatio = (double) hamon.getHamonControlLevel() / (double) HamonData.MAX_STAT_LEVEL * hamon.getActionEfficiency(getHeldTickEnergyCost(power), false);
                 double radius = (double) ticksHeld * (controlRatio * 0.8D + 0.2D);
                 double maxRadius = 8D + controlRatio * 24D;
-                List<LivingEntity> entitiesAround = MCUtil.entitiesAround(LivingEntity.class, user, Math.min(radius, maxRadius), false, null);
+                List<LivingEntity> entitiesAround = MCUtil.entitiesAround(LivingEntity.class, 
+                        user, Math.min(radius, maxRadius), false, 
+                        entity -> StandUtil.getStandUser(entity) != user &&
+                        !(entity instanceof GolemEntity || entity instanceof ArmorStandEntity));
                 
                 if (world.isClientSide()) {
                     if (user == ClientUtil.getClientPlayer()) {

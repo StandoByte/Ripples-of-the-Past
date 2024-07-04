@@ -14,16 +14,18 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.sound.WalkmanRewindSound;
 import com.github.standobyte.jojo.client.sound.WalkmanTrackSound;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.item.CassetteRecordedItem;
-import com.github.standobyte.jojo.item.WalkmanItem;
 import com.github.standobyte.jojo.item.WalkmanDataCap.PlaybackMode;
+import com.github.standobyte.jojo.item.WalkmanItem;
 import com.github.standobyte.jojo.item.cassette.CassetteCap;
-import com.github.standobyte.jojo.item.cassette.TrackSource;
 import com.github.standobyte.jojo.item.cassette.CassetteCap.TrackSourceList;
+import com.github.standobyte.jojo.item.cassette.TrackSource;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClWalkmanControlsPacket;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -442,48 +444,56 @@ public class WalkmanSoundHandler {
         }
         
         public static Stream<Track> getTracks(TrackSource singleTrackSource) {
-            SoundEvent soundEvent = singleTrackSource.getSoundEvent();
-            if (soundEvent == null) return Stream.empty();
-            SoundHandler soundManager = Minecraft.getInstance().getSoundManager();
-            SoundEventAccessor soundEventAccessor = soundManager.getSoundEvent(soundEvent.getLocation());
-            if (soundEventAccessor == null) return Stream.empty();
-            Stream<Sound> loadedSounds = unpackSounds(soundManager, soundEventAccessor);
+            Stream<Sound> loadedSounds = unpackSoundsEvent(singleTrackSource.getSoundEvent()).map(Pair::getRight);
             Stream<Track> tracks = loadedSounds
                     .map(sound -> new Track(sound, shortened -> singleTrackSource.trackName(sound.getLocation(), shortened)));
             return tracks;
         }
+    }
+    
+    
+    
+    public static Stream<Pair<SoundEvent, Sound>> unpackSoundsEvent(SoundEvent soundEvent) {
+        if (soundEvent == null) {
+            return Stream.empty();
+        }
+        SoundHandler soundManager = Minecraft.getInstance().getSoundManager();
+        SoundEventAccessor accessor = soundManager.getSoundEvent(soundEvent.getLocation());
+        if (accessor == null) Stream.empty();
         
-        private static Stream<Sound> unpackSounds(SoundHandler soundManager, ISoundEventAccessor<Sound> accessor) {
-            if (accessor == null) {
-                return Stream.of(SoundHandler.EMPTY_SOUND);
-            }
-            if (accessor instanceof SoundEventAccessor) {
-                List<ISoundEventAccessor<Sound>> list = ClientReflection.getSubAccessorsList((SoundEventAccessor) accessor);
-                return list.stream().flatMap(sound -> unpackSounds(soundManager, sound));
-            }
-            if (accessor instanceof Sound) {
-                return Stream.of(accessor.getSound());
-            }
-            
-            if ("net.minecraft.client.audio.SoundHandler$Loader$1".equals(accessor.getClass().getName())) {
-                for (Field field : accessor.getClass().getDeclaredFields()) {
-                    if (field.getType() == ResourceLocation.class) {
-                        try {
-                            field.setAccessible(true);
-                            ResourceLocation id = (ResourceLocation) field.get(accessor);
-                            SoundEventAccessor nextAccessor = soundManager.getSoundEvent(id);
-                            if (nextAccessor != null) {
-                                return unpackSounds(soundManager, nextAccessor);
-                            }
-                        } catch (IllegalArgumentException | IllegalAccessException e) {
-                            JojoMod.getLogger().error("Couldn't read track list from a cassette");
-                            e.printStackTrace();
+        return unpackSoundsRecursive(soundManager, soundEvent, accessor);
+    }
+    
+    private static Stream<Pair<SoundEvent, Sound>> unpackSoundsRecursive(SoundHandler soundManager, SoundEvent soundEvent, ISoundEventAccessor<Sound> accessor) {
+        if (accessor == null) {
+            return Stream.empty();
+        }
+        if (accessor instanceof SoundEventAccessor) {
+            List<ISoundEventAccessor<Sound>> list = ClientReflection.getSubAccessorsList((SoundEventAccessor) accessor);
+            return list.stream().flatMap(sound -> unpackSoundsRecursive(soundManager, soundEvent, sound));
+        }
+        if (accessor instanceof Sound) {
+            return Stream.of(Pair.of(soundEvent, accessor.getSound()));
+        }
+        
+        if ("net.minecraft.client.audio.SoundHandler$Loader$1".equals(accessor.getClass().getName())) {
+            for (Field field : accessor.getClass().getDeclaredFields()) {
+                if (field.getType() == ResourceLocation.class) {
+                    try {
+                        field.setAccessible(true);
+                        ResourceLocation id = (ResourceLocation) field.get(accessor);
+                        SoundEventAccessor nextAccessor = soundManager.getSoundEvent(id);
+                        if (nextAccessor != null) {
+                            return unpackSoundsRecursive(soundManager, soundEvent, nextAccessor);
                         }
+                    } catch (IllegalArgumentException | IllegalAccessException e) {
+                        JojoMod.getLogger().error("Couldn't read track list from a cassette");
+                        e.printStackTrace();
                     }
                 }
             }
-            
-            return Stream.of(accessor.getSound());
         }
+        
+        return Stream.of(Pair.of(soundEvent, accessor.getSound()));
     }
 }

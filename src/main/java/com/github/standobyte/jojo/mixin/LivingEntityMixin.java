@@ -5,10 +5,12 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
+import com.github.standobyte.jojo.util.mod.NoKnockbackOnBlocking;
 
 import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.Entity;
@@ -36,6 +38,17 @@ public abstract class LivingEntityMixin extends Entity {
     public void jojoBarrageLessArmorBreaking(LivingEntity entity, DamageSource damageSource, float damageAmount) {
         if (!(damageSource instanceof IModdedDamageSource && ((IModdedDamageSource) damageSource).preventsDamagingArmor())) {
             hurtArmor(damageSource, damageAmount);
+        }
+    }
+    
+    
+    @Inject(method = "playHurtSound", at = @At("HEAD"), cancellable = true)
+    public void jojoCancelHurtSound(DamageSource source, CallbackInfo ci) {
+        if (this.getCapability(LivingUtilCapProvider.CAPABILITY).map(cap -> cap.isDyingBody()).orElse(false)) {
+            ci.cancel();
+        }
+        else if (NoKnockbackOnBlocking.cancelHurtSound((LivingEntity) (Entity) this)) {
+            ci.cancel();
         }
     }
     

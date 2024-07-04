@@ -3,6 +3,8 @@ package com.github.standobyte.jojo.client.render.entity.renderer.damaging.projec
 import java.util.List;
 import java.util.Random;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.client.render.entity.model.projectile.CDBlockBulletModel;
 import com.github.standobyte.jojo.client.render.entity.renderer.SimpleEntityRenderer;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDBlockBulletEntity;
@@ -36,10 +38,15 @@ public class CDBlockBulletRenderer extends SimpleEntityRenderer<CDBlockBulletEnt
     private static final Random RANDOM = new Random();
     private static final ResourceLocation GLASS_TEXTURE = new ResourceLocation("textures/block/glass.png");
     private ResourceLocation getBlockTexture(CDBlockBulletEntity entity) {
-        return getTexture(entity.getBlock().defaultBlockState(), GLASS_TEXTURE);
+        if (entity.getBlock() != null) {
+            ResourceLocation texture = getBlockTexture(entity.getBlock().defaultBlockState());
+            return texture != null ? texture : GLASS_TEXTURE;
+        }
+        return GLASS_TEXTURE;
     }
     
-    public static ResourceLocation getTexture(BlockState blockState, ResourceLocation defaultTex) {
+    @Nullable
+    public static ResourceLocation getBlockTexture(BlockState blockState) {
         IBakedModel blockModel = Minecraft.getInstance().getBlockRenderer().getBlockModel(blockState);
         List<BakedQuad> quads = blockModel.getQuads(blockState, Direction.NORTH, RANDOM, EmptyModelData.INSTANCE);
         if (!quads.isEmpty()) {
@@ -51,6 +58,6 @@ public class CDBlockBulletRenderer extends SimpleEntityRenderer<CDBlockBulletEnt
                 }
             }
         }
-        return defaultTex;
+        return null;
     }
 }

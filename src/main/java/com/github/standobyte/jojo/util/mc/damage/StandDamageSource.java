@@ -6,6 +6,7 @@ import net.minecraft.util.DamageSource;
 
 public class StandDamageSource extends DamageSource implements IStandDamageSource {
     protected final IStandPower stand;
+    private boolean standCanHitSelf = false;
     
     public StandDamageSource(String msgId, IStandPower stand) {
         super(msgId);
@@ -29,5 +30,16 @@ public class StandDamageSource extends DamageSource implements IStandDamageSourc
     @Override
     public int getStandInvulTicks() {
         return 0;
+    }
+    
+    @Override
+    public StandDamageSource setStandCanHitSelf() {
+        standCanHitSelf = true;
+        return this;
+    }
+
+    @Override
+    public boolean standCanHitSelf() {
+        return standCanHitSelf;
     }
 }

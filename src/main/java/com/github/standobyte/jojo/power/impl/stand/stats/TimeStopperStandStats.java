@@ -1,13 +1,13 @@
 package com.github.standobyte.jojo.power.impl.stand.stats;
 
 import com.github.standobyte.jojo.action.stand.TimeStop;
-import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
-import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
-import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
-import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.PacketBuffer;
 
+/**
+ * @deprecated Config parameters of the time stop are now inside TimeStop action objects instead.
+ */
+@Deprecated
 public class TimeStopperStandStats extends StandStats {
     private final int timeStopMaxTicks;
     private final int timeStopMaxTicksVampire;
@@ -47,27 +47,13 @@ public class TimeStopperStandStats extends StandStats {
         buf.writeFloat(timeStopCooldownPerTick);
     }
     
-    @Override
-    public void onNewDay(LivingEntity user, IStandPower power) {
-        if (!user.level.isClientSide()) {
-            LivingUtilCap cap = user.getCapability(LivingUtilCapProvider.CAPABILITY).resolve().get();
-            if (!cap.hasUsedTimeStopToday && timeStopDecayPerDay > 0) {
-                power.getAllUnlockedActions().forEach(ability -> {
-                    if (ability instanceof TimeStop) {
-                        power.addLearningProgressPoints((TimeStop) ability, -timeStopDecayPerDay);
-                    }
-                });
-            }
-            cap.hasUsedTimeStopToday = false;
-        }
-    }
-    
     static {
         registerFactory(TimeStopperStandStats.class, TimeStopperStandStats::new);
     }
     
     
 
+    @Deprecated
     public static class Builder extends AbstractBuilder<Builder, TimeStopperStandStats> {
         private int timeStopMaxTicks = 100;
         private int timeStopMaxTicksVampire = 180;

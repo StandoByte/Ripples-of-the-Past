@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.Optional;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -14,14 +15,20 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
+import com.github.standobyte.jojo.action.stand.effect.StandEffectType;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.text.IFormattableTextComponent;
@@ -103,6 +110,22 @@ public abstract class StandAction extends Action<IStandPower> {
     }
     
     @Override
+    public LivingEntity getPerformer(LivingEntity user, IStandPower power) {
+        return power.isActive() && (power.getStandManifestation() instanceof StandEntity) ? (StandEntity) power.getStandManifestation() : user;
+    }
+    
+    public static LivingEntity getControlledEntity(LivingEntity user, IStandPower power) {
+        if (power.isActive() && power.getStandManifestation() instanceof StandEntity) {
+            StandEntity stand = (StandEntity) power.getStandManifestation();
+            if (stand.isManuallyControlled()) {
+                return stand;
+            }
+        }
+        
+        return user;
+    }
+    
+    @Override
     public ActionConditionResult checkConditions(LivingEntity user, IStandPower power, ActionTarget target) {
         for (StandPart part : partsRequired) {
             if (power.hasPower() && !power.getStandInstance().get().hasPart(part)) {
@@ -146,12 +169,17 @@ public abstract class StandAction extends Action<IStandPower> {
     }
     
     @Override
-    public void onPerform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
-        if (!world.isClientSide() && !staminaConsumedDifferently(power)) {
+    public void afterPerform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
+        super.afterPerform(world, user, power, target);
+        consumeStamina(world, power);
+    }
+    
+    protected void consumeStamina(World world, IStandPower power) {
+        if (!world.isClientSide()) {
             power.consumeStamina(getStaminaCost(power));
         }
-        super.onPerform(world, user, power, target);
     }
+    
     
     @Override
     public void onClick(World world, LivingEntity user, IStandPower power) {
@@ -167,6 +195,8 @@ public abstract class StandAction extends Action<IStandPower> {
     public boolean staminaConsumedDifferently(IStandPower power) {
         return false;
     }
+    
+    public void passivelyOnNewDay(LivingEntity user, IStandPower power, long prevDay, long day) {}
     
     @Override
     public IFormattableTextComponent getNameLocked(IStandPower power) {
@@ -186,6 +216,31 @@ public abstract class StandAction extends Action<IStandPower> {
                     .getStandSkin(power.getStandInstance().get()), path);
         }
         return path;
+    }
+    
+    
+    // TODO use this for CrazyDiamondBlockBullet (save the reference to the blood drops effect in StandEntityTask)
+    protected static void clWriteTargetedStandEffect(PacketBuffer buf, StandEffectType<?> type, double maxRange) {
+        buf.writeVarInt(clGetTargetedStandEffect(type, maxRange).map(effect -> effect.getId()).orElse(-1));
+    }
+    
+    protected static Optional<StandEffectInstance> clGetTargetedStandEffect(StandEffectType<?> type, double maxRange) {
+        PlayerEntity user = ClientUtil.getClientPlayer();
+        return IStandPower.getStandPowerOptional(user).resolve().flatMap(
+                power -> StandEffectsTracker.getTargetLookedAt(power, type, maxRange, user));
+    }
+    
+    protected static Optional<StandEffectInstance> readTargetedStandEffect(PacketBuffer buf, IStandPower power, StandEffectType<?> type) {
+        int effectId = buf.readVarInt();
+        if (effectId > 0) {
+            StandEffectInstance effect = power.getContinuousEffects().getById(effectId);
+            if (effect != null && effect.effectType == type
+                    && power.getUser() == effect.getStandUser()) {
+                return Optional.of(effect);
+            }
+        }
+        
+        return Optional.empty();
     }
     
     

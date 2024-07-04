@@ -19,12 +19,13 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.stand.GoldExperienceCreateLifeform;
+import com.github.standobyte.jojo.action.stand.GoldExperienceRevertLifeform;
+import com.github.standobyte.jojo.action.stand.effect.GECreatedLifeformEffect;
 import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ControllerStand;
@@ -38,10 +39,14 @@ import com.github.standobyte.jojo.client.ui.ShortKeybindTextComponent;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsModeConfig.SelectedTargetIcon;
 import com.github.standobyte.jojo.client.ui.actionshud.hotbar.HotbarFold;
 import com.github.standobyte.jojo.client.ui.actionshud.hotbar.HotbarRenderer;
+import com.github.standobyte.jojo.client.ui.screen.WasdAllowingScreen;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonStatsTabGui;
+import com.github.standobyte.jojo.client.ui.screen.stand.ge.EntityTypeIcon;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
+import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClClickActionPacket;
 import com.github.standobyte.jojo.power.IPower;
@@ -55,6 +60,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamon
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
@@ -67,6 +73,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
@@ -75,6 +82,9 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.settings.AttackIndicatorStatus;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.entity.EntityType;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
@@ -269,7 +279,7 @@ public class ActionsOverlayGui extends AbstractGui {
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public void render(RenderGameOverlayEvent.Pre event) {
         _target = null;
-        if (mc.gameMode.getPlayerMode() == GameType.SPECTATOR || mc.options.hideGui
+        if (mc.gameMode.getPlayerMode() == GameType.SPECTATOR || mc.options.hideGui || mc.screen instanceof WasdAllowingScreen
                 || mc.player.isDeadOrDying()) {
             return;
         }
@@ -751,7 +761,7 @@ public class ActionsOverlayGui extends AbstractGui {
             x -= hotbarLength;
         }
         int selected = actionHotbar != null ? mode.getSelectedSlot(actionHotbar) : 0;
-        boolean shift = mc.player.isShiftKeyDown();
+        boolean shift = InputHandler.useShiftActionVariant(mc);
         float alpha = selected < 0 || !hotbarsEnabled ? 0.25F : 1.0F;
         // mouse button icon
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
@@ -908,6 +918,8 @@ public class ActionsOverlayGui extends AbstractGui {
         int x = position.x;
         List<HudHotkey> hotkeysIterate = position.alignment == Alignment.RIGHT ? Lists.reverse(hotkeyInHudActions) : hotkeyInHudActions;
         for (HudHotkey hotkeySlotUi : hotkeysIterate) {
+            if (hotkeySlotUi.actionEntry.getAction() == null || hotkeySlotUi.actionEntry.getKeybind().isUnbound()) continue;
+            
             int nextOffset = Math.max(hotkeySlotUi.maxWidth + 6, 28);
             int offset = Math.max((nextOffset - 28) / 2, 0);
             if (position.alignment == Alignment.RIGHT) {
@@ -935,6 +947,8 @@ public class ActionsOverlayGui extends AbstractGui {
         int y = position.y + 16 + 3;
         List<HudHotkey> hotkeysIterate = position.alignment == Alignment.RIGHT ? Lists.reverse(hotkeyInHudActions) : hotkeyInHudActions;
         for (HudHotkey hotkeySlotUi : hotkeysIterate) {
+            if (hotkeySlotUi.actionEntry.getAction() == null || hotkeySlotUi.actionEntry.getKeybind().isUnbound()) continue;
+            
             int nextOffset = Math.max(hotkeySlotUi.maxWidth + 6, 28);
             int offset = Math.max((nextOffset - 28) / 2, 0);
             if (position.alignment == Alignment.RIGHT) {
@@ -1004,6 +1018,9 @@ public class ActionsOverlayGui extends AbstractGui {
             x -= 12;
             break;
         }
+
+        boolean shift = InputHandler.useShiftActionVariant(mc);
+        action = resolveVisibleActionInSlot(action, shift, power, getMouseTarget());
         
         // hotbar
         HotbarRenderer.renderFoldingHotbar(matrixStack, mc, x, y, HotbarFold.noFold(1), alpha);
@@ -1105,42 +1122,46 @@ public class ActionsOverlayGui extends AbstractGui {
             ClientUtil.fillSingleRect(x - 2, y - 2, 20, 20, 0, 255, 0, 127);
         }
         
-        ResourceLocation icon = action.getIconTexture(power);
-        mc.getTextureManager().bind(icon);
-        
         ActionConditionResult result = actionAvailability(action, mode, targetIcon, target, isSelected);
         if (!result.isPositive()) {
+            float brightness;
+            float alpha;
             if (!result.isQueued()) {
-                RenderSystem.color4f(0.2F, 0.2F, 0.2F, 0.5F * hotbarAlpha);
+                brightness = 0.2f;
+                alpha = 0.5f * hotbarAlpha;
             }
             else {
-                RenderSystem.color4f(0.75F, 0.75F, 0.75F, 0.75F * hotbarAlpha);
+                brightness = 0.75f;
+                alpha = 0.75f * hotbarAlpha;
             }
             if (cutWidth > 0) {
                 ClientUtil.enableGlScissor(x + leftCut, y, cutWidth, 16);
+                
                 // action icon
-                BlitFloat.blitFloat(matrixStack, 
-                        x, y, 
-                        0, 0, 
-                        16, 16, 
-                        16, 16);
+                boolean changeColor = brightness < 1 || alpha < 1;
+                if (changeColor) RenderSystem.color4f(brightness, brightness, brightness, alpha);
+                action.renderActionIcon(matrixStack, power, x, y);
+                if (changeColor) RenderSystem.color4f(1, 1, 1, 1);
+                
                 // cooldown
                 float ratio = power.getCooldownRatio(action, partialTick);
                 if (ratio > 0) {
                     ClientUtil.fillSingleRect(x, y + 16.0F * (1.0F - ratio), 16, 16.0F * ratio, 255, 255, 255, 127);
                 }
+                
                 ClientUtil.disableGlScissor();
             }
-        } else {
-            RenderSystem.color4f(1, 1, 1, hotbarAlpha);
+        }
+        else {
             if (cutWidth > 0) {
                 ClientUtil.enableGlScissor(x + leftCut, y, cutWidth, 16);
+                
                 // action icon
-                BlitFloat.blitFloat(matrixStack, 
-                        x, y, 
-                        0, 0, 
-                        16, 16, 
-                        16, 16);
+                boolean changeColor = hotbarAlpha < 1;
+                if (changeColor) RenderSystem.color4f(1, 1, 1, hotbarAlpha);
+                action.renderActionIcon(matrixStack, power, x, y);
+                if (changeColor) RenderSystem.color4f(1, 1, 1, 1);
+                
                 ClientUtil.disableGlScissor();
             }
         }
@@ -1165,6 +1186,43 @@ public class ActionsOverlayGui extends AbstractGui {
             boolean greenSelection = heldReadyToFire || action.greenSelection(power, result);
             HotbarRenderer.renderSlotSelection(matrixStack, mc, x, y, hotbarAlpha, greenSelection);
         }
+    }
+    
+    @Deprecated
+    public static <P extends IPower<P, ?>> void renderActionIcon(MatrixStack matrixStack, Action<P> action, P power, 
+            float x, float y, float brightness, float alpha) {
+        boolean changeColor = brightness < 1 || alpha < 1;
+        if (changeColor) RenderSystem.color4f(brightness, brightness, brightness, alpha);
+
+        Minecraft mc = Minecraft.getInstance();
+        boolean specialRender = false;
+        
+        if (action == ModStandsInit.GOLD_EXPERIENCE_CREATE_LIFEFORM.get()
+                || action == ModStandsInit.GOLD_EXPERIENCE_TOOTH_LIFEFORM.get()) {
+            EntityType<?> selectedMob = GoldExperienceCreateLifeform.getChosenEntityType(mc.player);
+            if (selectedMob != null) {
+                EntityTypeIcon.renderIcon(selectedMob, matrixStack, x, y);
+                specialRender = true;
+            }
+        }
+        else if (action == ModStandsInit.GOLD_EXPERIENCE_REVERT_LIFEFORM.get()) {
+            ItemStack sourceItem = StandEffectsTracker.getTargetLookedAt((IStandPower) power, 
+                    ModStandEffects.GE_CREATED_LIFEFORM.get(), GoldExperienceRevertLifeform.MARKER_DISTANCE, mc.player)
+                    .map(effect -> ((GECreatedLifeformEffect) effect).getItemView())
+                    .orElse(ItemStack.EMPTY);
+            if (!sourceItem.isEmpty()) {
+                mc.getItemRenderer().renderAndDecorateFakeItem(sourceItem, (int) x, (int) y);
+                specialRender = true;
+            }
+        }
+        
+        if (!specialRender) {
+            ResourceLocation icon = action.getIconTexture(power);
+            mc.getTextureManager().bind(icon);
+            BlitFloat.blitFloat(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
+        }
+        
+        if (changeColor) RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
     }
     
     private <P extends IPower<P, ?>> ActionConditionResult actionAvailability(Action<P> action, ActionsModeConfig<P> mode, 
@@ -1231,7 +1289,7 @@ public class ActionsOverlayGui extends AbstractGui {
             x -= 12;
             break;
         }
-        boolean shift = mc.player.isShiftKeyDown();
+        boolean shift = InputHandler.useShiftActionVariant(mc);
         Action<P> selectedAction = mode.getSelectedAction(actionKey.getHotbar(), shift, getMouseTarget());
         if (selectedAction != null) {
             // action name
@@ -1357,7 +1415,7 @@ public class ActionsOverlayGui extends AbstractGui {
 //    }
 //    
 //    private <P extends IPower<P, ?>> int getSelectedActionHoldDuration(ActionType actionType, @Nonnull ActionsModeConfig<P> mode) {
-//        Action<P> action = mode.getSelectedAction(actionType, mc.player.isShiftKeyDown());
+//        Action<P> action = mode.getSelectedAction(actionType, InputHandler.useShiftActionVariant(mc));
 //        if (action != null) {
 //            return action.getHoldDurationMax(mode.getPower());
 //        }
@@ -1464,11 +1522,16 @@ public class ActionsOverlayGui extends AbstractGui {
             if (alpha < 1) {
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
             }
-            mc.getTextureManager().bind(RADIAL_INDICATOR);
-            int deg = (int) (ratio * 360F);
-            blitFloat(matrixStack, x, y, deg % 19 * 13, deg / 19 * 13, 13, 13);
+            renderRadialIndicator(matrixStack, x - 1, y - 1, ratio);
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         }
+    }
+    
+    public static void renderRadialIndicator(MatrixStack matrixStack, float x, float y, float ratio) {
+        Minecraft.getInstance().getTextureManager().bind(RADIAL_INDICATOR);
+        int deg = (int) (ratio * 360F);
+        BlitFloat.blitFloat(matrixStack, x + 1.5F, y + 1.5F, deg % 19 * 13, deg / 19 * 13, 13, 13, 256, 256);
+        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
     }
     
     
@@ -1906,26 +1969,27 @@ public class ActionsOverlayGui extends AbstractGui {
 
 
     @Nullable
-    public <P extends IPower<P, ?>> Pair<Action<P>, Boolean> onClick(P power, ControlScheme.Hotbar mouseButton, boolean shiftVariant, boolean sneak) {
+    public <P extends IPower<P, ?>> ActionUseTry<P> onClick(
+            P power, ControlScheme.Hotbar mouseButton, boolean shiftVariant, boolean sneak, KeyBinding keyPressed) {
         if (currentMode != null) {
             int selectedIndex = currentMode.getSelectedSlot(mouseButton);
             if (selectedIndex >= 0) {
-                return onClick(power, mouseButton, shiftVariant, sneak, selectedIndex);
+                return onClick(power, mouseButton, shiftVariant, sneak, selectedIndex, keyPressed);
             }
         }
 
-        return Pair.of(null, false);
+        return new ActionUseTry<>(null, false, false);
     }
 
     @Nullable
-    public <P extends IPower<P, ?>> Pair<Action<P>, Boolean> onClick(
-            P power, ControlScheme.Hotbar hotbar, boolean shiftVariant, boolean sneak, int index) {
+    public <P extends IPower<P, ?>> ActionUseTry<P> onClick(
+            P power, ControlScheme.Hotbar hotbar, boolean shiftVariant, boolean sneak, int index, KeyBinding keyPressed) {
         Action<P> action = (Action<P>) HudControlSettings.getInstance()
                 .getControlScheme(getCurrentMode())
                 .getActionsHotbar(hotbar)
                 .getBaseActionInSlot(index);
         action = resolveVisibleActionInSlot(action, shiftVariant, power, getMouseTarget());
-        return onActionClick(power, action, sneak);
+        return onActionClick(power, action, sneak, keyPressed);
     }
     
     @Nullable
@@ -1946,22 +2010,43 @@ public class ActionsOverlayGui extends AbstractGui {
         }
         return baseAction;
     }
-    
+
+    private final PacketBuffer extraInputBuf = new PacketBuffer(Unpooled.buffer());
     // sends the packet which fires the action to the server
     @Nullable
-    public <P extends IPower<P, ?>> Pair<Action<P>, Boolean> onActionClick(P power, Action<P> action, boolean sneak) {
+    public <P extends IPower<P, ?>> ActionUseTry<P> onActionClick(
+            P power, Action<P> action, boolean sneak, KeyBinding keyPressed) {
         if (power != null && action != null) {
+            InputHandler.lastActionKey = keyPressed;
+            if (action.clientOnly()) {
+                return new ActionUseTry<>(action, true, true);
+            }
+            
             if (power.getHeldAction() != null && action.getHoldDurationMax(power) > 0) {
-                return Pair.of(action, true);
+                return new ActionUseTry<>(action, true, false);
             }
             ActionTarget mouseTarget = getMouseTarget();
             ClClickActionPacket packet = new ClClickActionPacket(
                     power.getPowerClassification(), action, mouseTarget, sneak);
             PacketManager.sendToServer(packet);
-            boolean actionWentOff = power.clickAction(action, sneak, mouseTarget);
-            return Pair.of(action, actionWentOff);
+            action.clWriteExtraData(extraInputBuf);
+            boolean actionWentOff = power.clickAction(action, sneak, mouseTarget, extraInputBuf);
+            extraInputBuf.clear();
+            return new ActionUseTry<>(action, actionWentOff, false);
         }
         return null;
+    }
+    
+    public static class ActionUseTry<P extends IPower<P, ?>> {
+        public final Action<P> action;
+        public final boolean wentOff;
+        public final boolean clientOnly;
+        
+        public ActionUseTry(Action<P> action, boolean wentOff, boolean clientOnly) {
+            this.action = action;
+            this.wentOff = wentOff;
+            this.clientOnly = clientOnly;
+        }
     }
     
     
@@ -2089,7 +2174,7 @@ public class ActionsOverlayGui extends AbstractGui {
     }
 
     private static final ResourceLocation VIGNETTE_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/vignette.png");
-    private void renderVignette(MatrixStack matrixStack, float r, float g, float b) {
+    public void renderVignette(MatrixStack matrixStack, float r, float g, float b) {
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);

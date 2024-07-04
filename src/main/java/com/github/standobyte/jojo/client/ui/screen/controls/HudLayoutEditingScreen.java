@@ -29,6 +29,7 @@ import com.github.standobyte.jojo.client.controls.ActionsHotbar;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.controls.HudControlSettings;
 import com.github.standobyte.jojo.client.controls.PowerTypeControlSchemes;
+import com.github.standobyte.jojo.client.ui.BlitFloat;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.JojoStuffScreen;
 import com.github.standobyte.jojo.client.ui.screen.widgets.CustomButton;
@@ -372,16 +373,19 @@ public class HudLayoutEditingScreen extends Screen {
                 action = action.getShiftVariationIfPresent();
             }
             
-            ResourceLocation icon = action.getIconTexture(power);
-            minecraft.getTextureManager().bind(icon);
-            
             boolean isUnlocked = action.isUnlocked(power);
             float alpha = isEnabled ? isUnlocked ? 1.0F : 0.6F : 0.2F;
-            float color = isEnabled && isUnlocked ? 1.0F : 0.0F;
+            float brightness = isEnabled && isUnlocked ? 1.0F : 0.0F;
             
-            RenderSystem.color4f(color, color, color, alpha);
-            blit(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            boolean changeColor = brightness < 1 || alpha < 1;
+            if (changeColor) RenderSystem.color4f(brightness, brightness, brightness, alpha);
+            
+            Minecraft mc = Minecraft.getInstance();
+            ResourceLocation icon = action.getIconTexture(power);
+            mc.getTextureManager().bind(icon);
+            BlitFloat.blitFloat(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
+            
+            if (changeColor) RenderSystem.color4f(1, 1, 1, 1);
         }
     }
     

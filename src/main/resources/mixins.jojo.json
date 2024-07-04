@@ -9,14 +9,29 @@
     "ServerPlayerEntityMixin",
     "ServerChunkProviderMixin",
     "FireBlockMixin",
+    "InventoryHelperMixin",
+    "AbstractFurnaceTEMixin",
+    "ForgeSimpleChannelMixin",
     "PlacedBlockTriggerMixin",
-    "TheMostUnnecessaryMixin"
+    "TheMostUnnecessaryMixin",
+    "itemtracking.equip.MobEntityMixin",
+    "itemtracking.equip.ArmorStandEntityMixin",
+    "itemtracking.inventory.PlayerInventoryMixin",
+    "itemtracking.inventory.LockableLootTileEntityMixin",
+    "itemtracking.inventory.HopperTileEntityMixin",
+    "itemtracking.inventory.InventoryMixin",
+    "itemtracking.ContainerSlotMixin",
+    "itemtracking.projectile.BowItemMixin",
+    "itemtracking.projectile.ArrowEntityMixin"
   ],
   "client": [
+    "client.GameRendererMixin",
     "client.ParticleManagerMixin",
     "client.TextureManagerMixin",
     "client.WorldRendererMixin",
+    "client.ClientPlayNetHandlerMixin",
     "client.EntityClMixin",
+    "client.LivingEntityClMixin",
     "client.ItemRendererMixin"
   ]
 }

@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
-import com.github.standobyte.jojo.command.StandArgument;
+import com.github.standobyte.jojo.command.argument.StandArgument;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.StandStatsDataPacket;
@@ -150,8 +150,9 @@ public class StandStatsConfig extends JsonDataConfig {
         for (StandType<?> standType : stands) {
             ResourceLocation key = standType.getRegistryName();
             try {
-                genJsonFromObj(standType.getDefaultStats(), key, RESOURCE_NAME, server);
-                i++;
+                if (genJsonFromObj(standType.getDefaultStats(), key, RESOURCE_NAME, server)) {
+                    i++;
+                }
             }
             catch (JsonWriteException e) {
                 IDataConfig.LOGGER.error("Couldn't save default stand stats to {}", e.jsonFilePath, e.getCause());

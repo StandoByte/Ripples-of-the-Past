@@ -5,13 +5,15 @@ import java.util.Optional;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import org.lwjgl.system.CallbackI.P;
+
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.command.JojoControlsCommand;
 import com.github.standobyte.jojo.init.ModStatusEffects;
@@ -33,6 +35,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
@@ -102,12 +105,15 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     @Override
     public void tick() {
         if (hasPower()) {
+            LivingEntity user = getUser();
+            P power = getThis();
+            
             tickHeldAction();
             tickCooldown();
             if (leapCooldown > 0) {
                 leapCooldown--;
             }
-            getType().tickUser(getUser(), getThis());
+            getType().tickUser(user, power);
             tickBowCharge();
         }
         newDayCheck();
@@ -144,6 +150,11 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
 
     @Override
+    public int getCooldownTimer(Action<?> action) {
+        return cooldowns.getCooldownTimer(action);
+    }
+
+    @Override
     public void setCooldownTimer(Action<?> action, int value) {
         updateCooldownTimer(action, value, value);
         serverPlayerUser.ifPresent(player -> {
@@ -177,14 +188,14 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     
     
     @Override
-    public final boolean clickAction(Action<P> action, boolean sneak, ActionTarget target) {
+    public final boolean clickAction(Action<P> action, boolean sneak, ActionTarget target, @Nullable PacketBuffer extraInput) {
         if (action == null) return false;
-        boolean res = onClickAction(action, sneak, target);
+        boolean res = onClickAction(action, sneak, target, extraInput);
         action.afterClick(user.level, user, getThis(), res);
         return res;
     }
     
-    private boolean onClickAction(Action<P> action, boolean sneak, ActionTarget target) {
+    private boolean onClickAction(Action<P> action, boolean sneak, ActionTarget target, @Nullable PacketBuffer extraInput) {
         if (action == null || getHeldAction() == action) return false;
         boolean wasActive = isActive();
         action.onClick(user.level, user, getThis());
@@ -216,7 +227,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                 if (!user.level.isClientSide()) {
                     action.playVoiceLine(user, getThis(), target, wasActive, sneak);
                 }
-                performAction(action, target);
+                performAction(action, target, extraInput);
                 stopHeldAction(false);
                 return true;
             }
@@ -315,14 +326,15 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         return action.isUnlocked(getThis()) ? 1 : -1;
     }
     
-    protected void performAction(Action<P> action, ActionTarget target) {
+    protected void performAction(Action<P> action, ActionTarget target, @Nullable PacketBuffer extraInput) {
         if (!action.holdOnly(getThis())) {
             World world = user.level;
             target = action.targetBeforePerform(world, user, getThis(), target);
+            action.perform(world, user, getThis(), target, extraInput);
+            action.afterPerform(world, user, getThis(), target);
             serverPlayerUser.ifPresent(player -> {
                 ModCriteriaTriggers.ACTION_PERFORM.get().trigger(player, action);
             });
-            action.onPerform(world, user, getThis(), target);
             if (!world.isClientSide()) {
                 int cooldown = action.getCooldown(getThis(), -1);
                 if (cooldown > 0) {
@@ -433,7 +445,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                 
                 if (fire) {
                     target = targetContainer.get();
-                    performAction(heldAction, target);
+                    performAction(heldAction, target, null);
                 }
             }
             heldActionData = null;

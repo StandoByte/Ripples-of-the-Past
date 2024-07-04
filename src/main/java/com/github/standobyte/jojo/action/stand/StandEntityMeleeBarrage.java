@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.action.stand;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
@@ -12,7 +13,9 @@ import com.github.standobyte.jojo.action.stand.punch.IPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandBlockPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandMissedPunch;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandPose;
@@ -30,6 +33,7 @@ import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
@@ -40,11 +44,22 @@ import net.minecraft.world.World;
 public class StandEntityMeleeBarrage extends StandEntityAction implements IHasStandPunch {
     protected final Supplier<SoundEvent> hitSound;
     protected final Supplier<SoundEvent> swingSound;
+    private Supplier<SoundEvent> standCry;
 
     public StandEntityMeleeBarrage(StandEntityMeleeBarrage.Builder builder) {
         super(builder);
         this.hitSound = builder.hitSound;
         this.swingSound = builder.swingSound;
+        
+        this.standCry = ((Supplier<Supplier<SoundEvent>>) () -> {
+            if (this.standSounds.containsKey(Phase.PERFORM)) {
+                List<StandSound> sounds = standSounds.get(Phase.PERFORM);
+                if (!sounds.isEmpty()) {
+                    return sounds.get(0).sound;
+                }
+            }
+            return () -> null;
+        }).get();
     }
 
     @Override
@@ -241,6 +256,19 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
         return user != null && user.hasEffect(ModStatusEffects.RESOLVE.get());
     }
     
+    @Override
+    protected void playSoundAtStand(World world, StandEntity standEntity, SoundEvent sound, IStandPower standPower, Phase phase) {
+        if (world.isClientSide() && sound != null && sound == standCry.get()) {
+            LivingEntity user = standPower.getUser();
+            if (user != null && user.hasEffect(ModStatusEffects.RESOLVE.get())) {
+                ClientTickingSoundsHelper.playEndlessStandCrySound(standEntity, sound, this, phase, 1.0F, 1.0F);
+                return;
+            }
+        }
+        
+        super.playSoundAtStand(world, standEntity, sound, standPower, phase);
+    }
+    
     
     
     public static class Builder extends StandEntityAction.AbstractBuilder<StandEntityMeleeBarrage.Builder> {
@@ -297,8 +325,20 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
             if (barrageHits > 0) {
                 dmgSource.setBarrageHitsCount(barrageHits);
             }
+            boolean resolve = stand.getUser() != null && stand.getUser().hasEffect(ModStatusEffects.RESOLVE.get());
+            if (resolve) {
+                reduceKnockback(0);
+            }
+            
             boolean hit = super.doHit(task);
-//            target.setDeltaMovement(target.getDeltaMovement().multiply(1, 0, 1));
+            
+            if (hit && resolve && target instanceof LivingEntity) {
+                ((LivingEntity) target).getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.setNoGravityFor(3));
+                if (target instanceof MobEntity) {
+                    MobEntity mob = ((MobEntity) target);
+                    mob.getNavigation().stop();
+                }
+            }
             return hit;
         }
 

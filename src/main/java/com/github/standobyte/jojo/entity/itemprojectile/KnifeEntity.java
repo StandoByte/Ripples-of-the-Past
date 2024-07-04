@@ -48,7 +48,7 @@ public class KnifeEntity extends ItemProjectileEntity {
     
     @Override
     protected ItemStack getPickupItem() {
-        return new ItemStack(ModItems.KNIFE.get());
+        return withPickupItemTracking(new ItemStack(ModItems.KNIFE.get()));
     }
 
     @Override

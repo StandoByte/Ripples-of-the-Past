@@ -49,12 +49,13 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     
     boolean isActionOnCooldown(Action<?> action);
     float getCooldownRatio(Action<?> action, float partialTick);
+    int getCooldownTimer(Action<?> action);
     void setCooldownTimer(Action<?> action, int value);
     void updateCooldownTimer(Action<?> action, int value, int totalCooldown);
     void resetCooldowns();
     ActionCooldownTracker getCooldowns();
     
-    boolean clickAction(Action<P> action, boolean sneak, ActionTarget target);
+    boolean clickAction(Action<P> action, boolean sneak, ActionTarget target, @Nullable PacketBuffer extraInput);
     ActionConditionResult checkRequirements(Action<P> action, ObjectWrapper<ActionTarget> targetContainer, boolean checkTargetType);
     ActionConditionResult checkTarget(Action<P> action, ObjectWrapper<ActionTarget> targetContainer);
     boolean canUsePower();
@@ -96,7 +97,7 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     ResourceLocation clGetPowerTypeIcon();
     default void clUpdateHud() {
         LivingEntity user = getUser();
-        if (user != null && user.level.isClientSide() && user == ClientUtil.getCameraEntity()) {
+        if (user != null && user.level.isClientSide() && user == ClientUtil.getClientPlayer()) {
             HudControlSettings.getInstance().refreshControls(this);
         }
     }

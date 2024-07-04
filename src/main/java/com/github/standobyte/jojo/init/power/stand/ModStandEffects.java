@@ -3,6 +3,9 @@ package com.github.standobyte.jojo.init.power.stand;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.effect.BoyIIManStandPartTakenEffect;
 import com.github.standobyte.jojo.action.stand.effect.DriedBloodDrops;
+import com.github.standobyte.jojo.action.stand.effect.GECreatedLifeformEffect;
+import com.github.standobyte.jojo.action.stand.effect.GEHealingEffect;
+import com.github.standobyte.jojo.action.stand.effect.GEItemMarkEffect;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectType;
 
 import net.minecraftforge.fml.RegistryObject;
@@ -14,10 +17,19 @@ public class ModStandEffects {
     public static final DeferredRegister<StandEffectType<?>> STAND_EFFECTS = DeferredRegister.create(
             (Class<StandEffectType<?>>) ((Class<?>) StandEffectType.class), JojoMod.MOD_ID);
     
-    public static final RegistryObject<StandEffectType<BoyIIManStandPartTakenEffect>> BOY_II_MAN_PART_TAKE = STAND_EFFECTS.register("boy_ii_man_part_take", 
-            () -> new StandEffectType<>(BoyIIManStandPartTakenEffect::new));
-    
     public static final RegistryObject<StandEffectType<DriedBloodDrops>> DRIED_BLOOD_DROPS = STAND_EFFECTS.register("dried_blood_drops", 
             () -> new StandEffectType<>(DriedBloodDrops::new));
+    
+    public static final RegistryObject<StandEffectType<GECreatedLifeformEffect>> GE_CREATED_LIFEFORM = STAND_EFFECTS.register("ge_created_lifeform", 
+            () -> new StandEffectType<>(GECreatedLifeformEffect::new));
+    
+    public static final RegistryObject<StandEffectType<GEHealingEffect>> GE_HEALING = STAND_EFFECTS.register("ge_healing", 
+            () -> new StandEffectType<>(GEHealingEffect::new));
+    
+    public static final RegistryObject<StandEffectType<GEItemMarkEffect>> GE_ITEM_MARK = STAND_EFFECTS.register("ge_item_mark", 
+            () -> new StandEffectType<>(GEItemMarkEffect::new));
+    
+    public static final RegistryObject<StandEffectType<BoyIIManStandPartTakenEffect>> BOY_II_MAN_PART_TAKE = STAND_EFFECTS.register("boy_ii_man_part_take", 
+            () -> new StandEffectType<>(BoyIIManStandPartTakenEffect::new));
     
 }
