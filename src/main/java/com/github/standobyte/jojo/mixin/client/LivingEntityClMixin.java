@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.util.mc.MCUtil.EntityEvents;
 import com.github.standobyte.jojo.util.mod.NoKnockbackOnBlocking;
 
 import net.minecraft.entity.Entity;
@@ -28,11 +29,11 @@ public abstract class LivingEntityClMixin extends Entity {
     @Inject(method = "handleEntityEvent", at = @At("HEAD"), cancellable = true)
     public void jojoOnEntityEvent(byte eventId, CallbackInfo ci) {
         switch (eventId) {
-        case 2:
-        case 33:
-        case 36:
-        case 37:
-        case 44:
+        case EntityEvents.HURT:
+        case EntityEvents.HURT_THORNS:
+        case EntityEvents.HURT_DROWN:
+        case EntityEvents.HURT_ON_FIRE:
+        case EntityEvents.HURT_SWEET_BERRY_BUSH:
             if (this.getCapability(LivingUtilCapProvider.CAPABILITY).map(cap -> cap.isDyingBody()).orElse(false)) {
                 ci.cancel();
             }
