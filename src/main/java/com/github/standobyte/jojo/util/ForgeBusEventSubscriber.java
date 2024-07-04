@@ -315,6 +315,7 @@ public class ForgeBusEventSubscriber {
             }
             EntityTypeToInstance.init((World) event.getWorld());
         }
+        EntityTypeToInstance.init((World) event.getWorld());
     }
     
     private static void addDimensionalSpacing(ServerWorld serverWorld) {

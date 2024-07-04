@@ -61,6 +61,7 @@ public class ActionConfigSerialized<A extends Action<?>> {
                 JsonElement jsonElement = entry.getValue();
                 Object value = getGson().fromJson(jsonElement, field.getType());
                 try {
+                    field.setAccessible(true);
                     field.set(action, value);
                 } catch (IllegalArgumentException | IllegalAccessException e) {
                     JojoMod.getLogger().error("Failed to apply config to field {} of action {}", fieldName, action.getRegistryName());

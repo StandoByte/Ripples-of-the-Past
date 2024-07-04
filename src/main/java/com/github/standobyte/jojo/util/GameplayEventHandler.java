@@ -34,6 +34,7 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.enchantment.GlovesSpeedEnchantment;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDBloodCutterEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -51,6 +52,7 @@ import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
+import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.item.InkPastaItem;
 import com.github.standobyte.jojo.item.OilItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
@@ -92,6 +94,7 @@ import com.github.standobyte.jojo.util.mc.damage.StandLinkDamageSource;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
+import com.github.standobyte.jojo.util.mod.NoKnockbackOnBlocking;
 
 import net.minecraft.block.AbstractFurnaceBlock;
 import net.minecraft.block.Block;
@@ -162,6 +165,7 @@ import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.ForgeHooks;
 import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.event.AnvilUpdateEvent;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.ItemAttributeModifierEvent;
 import net.minecraftforge.event.ServerChatEvent;
@@ -217,6 +221,7 @@ public class GameplayEventHandler {
         entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
             cap.tick();
         });
+        NoKnockbackOnBlocking.tickAttribute(entity);
     }
 
     private static final int AFK_PARTICLE_SECONDS = 30;
@@ -689,6 +694,8 @@ public class GameplayEventHandler {
                     double standDurability = stand.getDurability();
                     if (standDurability > 0) {
                         event.setAmount(Math.max(event.getAmount() - (float) standDurability / 2F, 0));
+                        NoKnockbackOnBlocking.setOneTickKbRes(stand);
+                        stand.playAttackBlockSound();
                     }
                 }
             });
@@ -735,7 +742,7 @@ public class GameplayEventHandler {
 //                    (float) target.getArmorValue(), (float) target.getAttributeValue(Attributes.ARMOR_TOUGHNESS)));
 //        }
 //    }
-    
+
 
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public static void resolveOnTakingDamage(LivingDamageEvent event) {
@@ -761,16 +768,31 @@ public class GameplayEventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingDamage(LivingDamageEvent event) {
-        LivingEntity entity = event.getEntityLiving();
         DamageSource dmgSource = event.getSource();
         float dmgAmount = event.getAmount();
+        LivingEntity target = event.getEntityLiving();
         
-        bleed(dmgSource, dmgAmount, entity);
-        StandType.onHurtByStand(dmgSource, dmgAmount, entity);
+        bleed(dmgSource, dmgAmount, target);
+        StandType.onHurtByStand(dmgSource, dmgAmount, target);
+        
+        if (target instanceof StandEntity) {
+            StandEntity standTarget = (StandEntity) target;
+            if (standTarget.isCurrentAttackBlocked()) {
+                NoKnockbackOnBlocking.setOneTickKbRes(standTarget);
+            }
+        }
         
         for (PowerClassification powerClassification : PowerClassification.values()) {
-            IPower.getPowerOptional(entity, powerClassification).ifPresent(power -> 
+            IPower.getPowerOptional(target, powerClassification).ifPresent(power -> 
             power.onUserGettingAttacked(dmgSource, dmgAmount));
+        }
+    }
+    
+    @SubscribeEvent
+    public static void clNoBobOnHurt(LivingAttackEvent event) {
+        LivingEntity target = event.getEntityLiving();
+        if (target.level.isClientSide() && target == ClientUtil.getClientPlayer()) {
+            NoKnockbackOnBlocking.onClientPlayerDamage(target);
         }
     }
 
@@ -917,7 +939,7 @@ public class GameplayEventHandler {
             VampirismPowerType vampirism = ModPowers.VAMPIRISM.get();
             return INonStandPower.getNonStandPowerOptional(player).map(power -> {
                 if (power.getTypeSpecificData(vampirism).map(vamp -> !vamp.isVampireAtFullPower()).orElse(false) || power.givePower(vampirism)) {
-                    entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.STONE_MASK_ACTIVATION_ENTITY.get(), entity.getSoundSource(), 1.0F, 1.0F);
+                    entity.level.playSound(null, entity, ModSounds.STONE_MASK_ACTIVATION_ENTITY.get(), entity.getSoundSource(), 1.0F, 1.0F);
                     power.getTypeSpecificData(vampirism).get().setVampireFullPower(true);
                     StoneMaskItem.setActivatedArmorTexture(headStack); // TODO light beams on stone mask activation
                     headStack.hurtAndBreak(1, entity, stack -> {});
@@ -1485,5 +1507,10 @@ public class GameplayEventHandler {
             player.removeEffect(ModStatusEffects.STUN.get());
             player.removeEffect(ModStatusEffects.HAMON_SHOCK.get());
         }
+    }
+    
+    @SubscribeEvent
+    public static void anvilUnrepairableItems(AnvilUpdateEvent event) {
+        GlovesItem.combineInAnvil(event);
     }
 }

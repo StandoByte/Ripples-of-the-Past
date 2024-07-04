@@ -21,7 +21,7 @@ import net.minecraft.util.text.StringTextComponent;
 
 public class EntityTypeIcon {
     private static final Map<EntityType<?>, ResourceLocation> ICONS_CACHE = new HashMap<>();
-    private static final ResourceLocation UNKNOWN = new ResourceLocation("textures/entity_icon/unknown.png");
+    public static final ResourceLocation UNKNOWN = new ResourceLocation("textures/entity_icon/unknown.png");
 
     public static void renderIcon(EntityType<?> entityType, MatrixStack matrixStack, float x, float y) {
         renderIcon(entityType, matrixStack, x, y, true);
@@ -88,6 +88,7 @@ public class EntityTypeIcon {
             return renderer.getTextureLocation(entity);
         }
         catch (Exception e) {
+            e.printStackTrace();
             return null;
         }
     }

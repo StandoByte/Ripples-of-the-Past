@@ -203,8 +203,10 @@ public class TimeStopInstance {
                         if (action.getInstantTSVariation() != null) {
                             power.setCooldownTimer(action.getInstantTSVariation(), (int) (cooldown * TimeStopInstant.COOLDOWN_RATIO));
                         }
-
-                        power.addLearningProgressPoints(action, action.timeStopLearningPerTick * ticksPassed);
+                        
+                        if (action.isUnlocked(power)) {
+                            power.addLearningProgressPoints(action, action.timeStopLearningPerTick * ticksPassed);
+                        }
                     }
                 });
             }

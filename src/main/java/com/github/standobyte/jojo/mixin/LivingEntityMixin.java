@@ -10,6 +10,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
+import com.github.standobyte.jojo.util.mod.NoKnockbackOnBlocking;
 
 import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.Entity;
@@ -44,6 +45,9 @@ public abstract class LivingEntityMixin extends Entity {
     @Inject(method = "playHurtSound", at = @At("HEAD"), cancellable = true)
     public void jojoCancelHurtSound(DamageSource source, CallbackInfo ci) {
         if (this.getCapability(LivingUtilCapProvider.CAPABILITY).map(cap -> cap.isDyingBody()).orElse(false)) {
+            ci.cancel();
+        }
+        else if (NoKnockbackOnBlocking.cancelHurtSound((LivingEntity) (Entity) this)) {
             ci.cancel();
         }
     }

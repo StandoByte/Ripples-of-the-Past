@@ -24,6 +24,7 @@
     "itemtracking.projectile.ArrowEntityMixin"
   ],
   "client": [
+    "client.GameRendererMixin",
     "client.ParticleManagerMixin",
     "client.TextureManagerMixin",
     "client.WorldRendererMixin",
