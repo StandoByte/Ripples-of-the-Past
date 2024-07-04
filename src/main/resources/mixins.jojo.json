@@ -12,10 +12,12 @@
     "TheMostUnnecessaryMixin"
   ],
   "client": [
+    "client.GameRendererMixin",
     "client.ParticleManagerMixin",
     "client.TextureManagerMixin",
     "client.WorldRendererMixin",
     "client.EntityClMixin",
+    "client.LivingEntityClMixin",
     "client.ItemRendererMixin"
   ]
 }
