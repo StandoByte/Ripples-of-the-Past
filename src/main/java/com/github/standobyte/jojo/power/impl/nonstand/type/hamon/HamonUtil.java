@@ -189,8 +189,7 @@ public class HamonUtil {
                     && target instanceof PlayerEntity) {
                 LivingEntity livingAttacker = (LivingEntity) attacker;
                 PlayerEntity playerTarget = (PlayerEntity) target;
-                INonStandPower power = INonStandPower.getPlayerNonStandPower(playerTarget);
-                return power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
+                return INonStandPower.getNonStandPowerOptional(playerTarget).resolve().map(power -> power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
                     if (hamon.getRebuffOverdrive()) {
                         float energyCost = 1200F;
                         if (power.hasEnergy(energyCost)) {
@@ -212,7 +211,7 @@ public class HamonUtil {
                     }
 
                     return false;
-                }).orElse(false);
+                }).orElse(false)).orElse(false);
             }
         }
         return false;
