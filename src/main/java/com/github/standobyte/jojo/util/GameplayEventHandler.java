@@ -1532,7 +1532,8 @@ public class GameplayEventHandler {
     
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onMobSpawn(LivingSpawnEvent.CheckSpawn event) {
-        if (event.getResult() != Event.Result.DENY && event.getEntityLiving().getType() == EntityType.TURTLE) {
+        if (event.getResult() != Event.Result.DENY && event.getEntityLiving().getType() == EntityType.TURTLE
+                && JojoModConfig.getCommonConfigInstance(false).spawnCocoJumboTurtle.get()) {
             CocoJumboTurtleEntity.onRegularTutelSpawn(event);
         }
     }
