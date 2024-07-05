@@ -36,6 +36,8 @@ import net.minecraft.entity.item.TNTEntity;
 import net.minecraft.entity.passive.FoxEntity;
 import net.minecraft.entity.projectile.PotionEntity;
 import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.inventory.IInventory;
+import net.minecraft.inventory.InventoryHelper;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
@@ -149,6 +151,12 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                 }
                 Block.dropResources(blockToPlace, level, blockPos, tileEntity, owner.getEntity(level), ItemStack.EMPTY);
                 // FIXME items in chest-like tile entities are lost
+                if (tileEntity != null) {
+                    if (tileEntity instanceof IInventory) {
+                        IInventory inventory = (IInventory) tileEntity;
+                        InventoryHelper.dropContents(level, blockPos, inventory);
+                    }
+                }
                 
                 blockToPlace = null;
             }
