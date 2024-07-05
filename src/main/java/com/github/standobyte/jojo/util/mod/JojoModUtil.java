@@ -43,8 +43,10 @@ import net.minecraft.entity.passive.horse.ZombieHorseEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileHelper;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.INBT;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.Effects;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
@@ -60,6 +62,9 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.Capability.IStorage;
+import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 
@@ -390,6 +395,21 @@ public class JojoModUtil {
     @Deprecated
     public static boolean useShiftVar(LivingEntity user) {
         return user.isShiftKeyDown();
+    }
+    
+    
+    public static <T extends INBTSerializable<N>, N extends INBT> IStorage<T> makeSerializableStorage() {
+        return new IStorage<T>() {
+            @Override public INBT writeNBT(Capability<T> capability, T instance, Direction side) { return instance.serializeNBT(); }
+            @Override public void readNBT(Capability<T> capability, T instance, Direction side, INBT nbt) { instance.deserializeNBT((N) nbt); }
+        };
+    }
+    
+    public static <T> IStorage<T> noStorage() {
+        return new IStorage<T>() {
+            @Override public INBT writeNBT(Capability<T> capability, T instance, Direction side) { return null; }
+            @Override public void readNBT(Capability<T> capability, T instance, Direction side, INBT nbt) {}
+        };
     }
     
     
