@@ -278,7 +278,7 @@ public class JojoModUtil {
     }
     
     public static boolean isAffectedByHamon(LivingEntity entity) {
-        if (!ModTags.NO_HAMON_DAMAGE.contains(entity.getType())) {
+        if (ModTags.NO_HAMON_DAMAGE.contains(entity.getType())) {
             return false;
         }
         if (ModTags.HAMON_DAMAGE.contains(entity.getType())) {
