@@ -55,7 +55,7 @@ public class VampirismBloodDrain extends VampirismAction {
     }
     
     public static boolean canDrainBloodFrom(LivingEntity entity) {
-        if (!ModTags.VAMPIRE_CANNOT_DRAIN.contains(entity.getType())) {
+        if (ModTags.VAMPIRE_CANNOT_DRAIN.contains(entity.getType())) {
             return false;
         }
         if (ModTags.VAMPIRE_CAN_DRAIN.contains(entity.getType())) {
