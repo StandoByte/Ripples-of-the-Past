@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.item;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
@@ -15,6 +17,7 @@ import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mod.StoryPart;
 
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.client.util.ITooltipFlag;
@@ -112,11 +115,16 @@ public class StandDiscItem extends Item {
     public void fillItemCategory(ItemGroup group, NonNullList<ItemStack> items) {
         if (this.allowdedIn(group)) {
             boolean isClientSide = Thread.currentThread().getThreadGroup() == SidedThreadGroups.CLIENT;
+            List<StandType<?>> legalStands = new ArrayList<>();
             for (StandType<?> standType : JojoCustomRegistries.STANDS.getRegistry()) {
                 if (StandUtil.canPlayerGetFromArrow(standType, isClientSide)) {
-                    items.add(withStand(new ItemStack(this), new StandInstance(standType)));
+                    legalStands.add(standType);
                 }
             }
+            
+            legalStands.stream()
+            .sorted(Comparator.comparing(StandType::getPartName, StoryPart.partNamesComparator()))
+            .forEach(stand -> items.add(withStand(new ItemStack(this), new StandInstance(stand))));
         }
     }
     

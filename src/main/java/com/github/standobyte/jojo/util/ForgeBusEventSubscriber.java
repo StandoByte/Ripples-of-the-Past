@@ -63,6 +63,7 @@ import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandPower;
 import com.github.standobyte.jojo.util.mc.EntityTypeToInstance;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.github.standobyte.jojo.world.dimension.ModDimensions;
 import com.github.standobyte.jojo.world.dimension.mr_president.MrPresidentWorldData;
 import com.mojang.brigadier.CommandDispatcher;
@@ -191,10 +192,7 @@ public class ForgeBusEventSubscriber {
         CapabilityManager.INSTANCE.register(IStandPower.class, new StandCapStorage(), () -> new StandPower(null));
         CapabilityManager.INSTANCE.register(INonStandPower.class, new NonStandCapStorage(), () -> new NonStandPower(null));
         CapabilityManager.INSTANCE.register(PlayerUtilCap.class, new PlayerUtilCapStorage(), () -> new PlayerUtilCap(null));
-        CapabilityManager.INSTANCE.register(ClientPlayerUtilCap.class, new IStorage<ClientPlayerUtilCap>() {
-            @Override public INBT writeNBT(Capability<ClientPlayerUtilCap> capability, ClientPlayerUtilCap instance, Direction side) { return null; }
-            @Override public void readNBT(Capability<ClientPlayerUtilCap> capability, ClientPlayerUtilCap instance, Direction side, INBT nbt) {}
-        }, () -> new ClientPlayerUtilCap(null));
+        CapabilityManager.INSTANCE.register(ClientPlayerUtilCap.class, JojoModUtil.noStorage(), () -> new ClientPlayerUtilCap(null));
         CapabilityManager.INSTANCE.register(LivingUtilCap.class, new LivingUtilCapStorage(), () -> new LivingUtilCap(null));
         CapabilityManager.INSTANCE.register(EntityUtilCap.class, new EntityUtilCapStorage(), () -> new EntityUtilCap(null));
         CapabilityManager.INSTANCE.register(EntityHamonChargeCap.class, new EntityHamonChargeCapStorage(), () -> new EntityHamonChargeCap(null));

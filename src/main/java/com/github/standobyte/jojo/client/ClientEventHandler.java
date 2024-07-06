@@ -203,7 +203,7 @@ public class ClientEventHandler {
             event.setResultSound(null);
         }
         
-        if (mc.player != null && sound.getAttenuation() == AttenuationType.LINEAR && sound instanceof LocatableSound) {
+        if (mc.player != null && sound instanceof LocatableSound && sound.getAttenuation() == AttenuationType.LINEAR) {
             mc.player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(player -> {
                 if (player.isDyingBody() && !mc.player.isSpectator() && !mc.player.isDeadOrDying()) {
                     float progress = player.getDyingBodyProgress();
