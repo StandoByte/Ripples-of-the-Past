@@ -185,11 +185,11 @@ public class StandStatFormulas {
     // unsummonedAttackDeflectSpeed
     
     public static float rangeStrengthFactor(double rangeEffective, double rangeMax, double distance) {
-        if (distance <= rangeEffective) {
+        if (distance <= rangeEffective || rangeEffective >= rangeMax) {
             return 1F;
         }
         float f = (float) ((rangeMax - rangeEffective) / (2 * rangeEffective - rangeMax - distance));
-        return f * f;
+        return Math.max(f * f, 0.25f);
     }
     
     public static double projectileFireRateScaling(StandEntity standEntity, IStandPower standPower) {
