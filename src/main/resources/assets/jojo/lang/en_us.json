@@ -74,6 +74,7 @@
   "item.jojo.stand_arrow_shard": "Arrow Shard",
   "item.jojo.stand_arrow_shard.reference_quote": "\"It hurts!!\"",
   "item.jojo.stand_disc": "Stand Disc",
+  "item.jojo.stand_disc.addon_author": "Addon created by: %s",
   "item.jojo.stand_remover": "Remove Stand",
   "item.jojo.stand_remover_one_time": "Remove Stand (one-time)",
   "item.jojo.stand_eject": "Eject Stand",
