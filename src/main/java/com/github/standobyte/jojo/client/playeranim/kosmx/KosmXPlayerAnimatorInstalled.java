@@ -70,6 +70,16 @@ public class KosmXPlayerAnimatorInstalled extends PlayerAnimationHandler.PlayerA
         return super.getBend(model, part);
     }
     
+    @Override
+    public void setBend(BipedModel<?> model, BendablePart part, float axis, float angle) {
+        if (Helper.isBendEnabled() && model instanceof IMutableModel) {
+            IBendHelper mutablePart = getMutablePart((IMutableModel) model, part);
+            if (mutablePart != null) {
+                mutablePart.bend(axis, angle);
+            }
+        }
+    }
+    
     private IBendHelper getMutablePart(IMutableModel model, BendablePart neededPart) {
         switch (neededPart) {
         case TORSO:

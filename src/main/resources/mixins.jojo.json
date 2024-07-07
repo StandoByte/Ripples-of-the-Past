@@ -18,6 +18,8 @@
     "client.WorldRendererMixin",
     "client.EntityClMixin",
     "client.LivingEntityClMixin",
+    "client.BipedModelMixin",
+    "client.PlayerModelAnimationMixin",
     "client.ItemRendererMixin"
   ]
 }

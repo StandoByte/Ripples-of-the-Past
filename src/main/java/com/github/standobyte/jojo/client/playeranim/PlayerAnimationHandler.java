@@ -36,7 +36,10 @@ public class PlayerAnimationHandler {
         <T> T getAnimLayer(Class<T> layerInterface, ResourceLocation id);
         
         <T extends LivingEntity, M extends BipedModel<T>> void onArmorLayerInit(LayerRenderer<T, M> layer);
+        
         float[] getBend(BipedModel<?> model, BendablePart part);
+        
+        void setBend(BipedModel<?> model, BendablePart part, float axis, float angle);
         
         <T extends LivingEntity, M extends BipedModel<T>> void heldItemLayerRender(LivingEntity livingEntity, MatrixStack matrices, HandSide arm);
         
@@ -110,7 +113,10 @@ public class PlayerAnimationHandler {
         static final float[] ZERO_BEND = new float[] {0, 0};
         @Override
         public float[] getBend(BipedModel<?> model, BendablePart part) { return ZERO_BEND; }
-
+        
+        @Override
+        public void setBend(BipedModel<?> model, BendablePart part, float axis, float angle) {}
+        
         @Override
         public <T extends LivingEntity, M extends BipedModel<T>> void heldItemLayerRender(
                 LivingEntity livingEntity, MatrixStack matrices, HandSide arm) {}
