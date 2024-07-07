@@ -25,7 +25,6 @@ import com.github.standobyte.jojo.block.WoodenCoffinBlock;
 import com.github.standobyte.jojo.capability.chunk.ChunkCapProvider;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
@@ -233,16 +232,16 @@ public class GameplayEventHandler {
                 }
             }
             
-            LazyOptional<PlayerUtilCap> liquidWalkingCap = player.getCapability(PlayerUtilCapProvider.CAPABILITY);
-            if (!player.level.isClientSide() || player.isLocalPlayer()) {
-                boolean liquidWalking = HamonUtil.liquidWalking(player);
-                liquidWalkingCap.ifPresent(cap -> {
-                    cap.setWaterWalking(liquidWalking);
-                });
-            }
-            liquidWalkingCap.ifPresent(cap -> {
-                cap.tickWaterWalking();
-            });
+//            LazyOptional<PlayerUtilCap> liquidWalkingCap = player.getCapability(PlayerUtilCapProvider.CAPABILITY);
+//            if (!player.level.isClientSide() || player.isLocalPlayer()) {
+//                boolean liquidWalking = HamonUtil.liquidWalking(player);
+//                liquidWalkingCap.ifPresent(cap -> {
+//                    cap.setWaterWalking(liquidWalking);
+//                });
+//            }
+//            liquidWalkingCap.ifPresent(cap -> {
+//                cap.tickWaterWalking();
+//            });
             
             INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
                 power.tick();
@@ -253,14 +252,12 @@ public class GameplayEventHandler {
             }); 
             break;
         case END:
-            if (player.level.isClientSide()) {
-                boolean waterWalking = GeneralUtil.orElseFalse(player.getCapability(PlayerUtilCapProvider.CAPABILITY), cap -> cap.isWaterWalking());
-                if (waterWalking) {
-                    float bob = player.bob / 0.6F;
-                    float f = Math.min(0.1F, MathHelper.sqrt(Entity.getHorizontalDistanceSqr(player.getDeltaMovement())));
-                    player.bob = bob + (f - bob) * 0.4F;
-                }
-            }
+            INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
+                power.postTick();
+            });
+            IStandPower.getStandPowerOptional(player).ifPresent(power -> {
+                power.postTick();
+            }); 
             break;
         }
     }

@@ -103,6 +103,10 @@ repositories {
         name = "Maxanier"
         url = "https://maxanier.de/maven2/"
     }
+    maven {
+        name = "Expandability"
+        url = "https://maven.florens.be/releases"
+    }
 }
 
 dependencies {
@@ -116,6 +120,8 @@ dependencies {
     compileOnly fg.deobf("mezz.jei:jei-${mc_version}:${jei_version}")
     
     compileOnly fg.deobf("de.teamlapen.vampirism:Vampirism:${mc_version}-${vampirism_version}")
+    
+    compileOnly fg.deobf("be.florens:expandability-forge:${expandability_version}")
 }
 
 jar {
