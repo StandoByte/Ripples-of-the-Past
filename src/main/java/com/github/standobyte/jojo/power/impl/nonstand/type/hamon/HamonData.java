@@ -51,6 +51,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrHamonBreathStabil
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonCharacterTechniquePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonEnergyTicksPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonFlagsPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHamonLiquidWalkingPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonMeditationPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonStatsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonSyncPlayerLearnerPacket;
@@ -150,6 +151,12 @@ public class HamonData extends TypeSpecificData {
     private boolean hamonProtection = false;
     private boolean isRebuffOverdriveOn = false;
     private int rebuffTick = 0;
+    
+    private boolean waterWalkingPrevTick = false;
+    private boolean waterWalkingThisTick = false;
+    private boolean trWaterWalking = false;
+    private boolean clLargeSpark = false;
+    private boolean clTickSpark = false;
 
     public HamonData() {
         hamonSkills = new MainHamonSkillsManager();
@@ -203,6 +210,8 @@ public class HamonData extends TypeSpecificData {
             hamonProtection = false;
             isRebuffOverdriveOn = false;
         }
+        
+        waterWalkingThisTick = false;
     }
     
     public float tickEnergy() {
@@ -1595,6 +1604,52 @@ public class HamonData extends TypeSpecificData {
             }
         });
     }
+    
+    
+    public void setWaterWalkingThisTick() {
+        waterWalkingThisTick = true;
+    }
+    
+    public void postTickWaterWalking(LivingEntity user) {
+        if (!user.level.isClientSide()) {
+            if (waterWalkingPrevTick ^ waterWalkingThisTick) {
+                PacketManager.sendToClientsTracking(new TrHamonLiquidWalkingPacket(user.getId(), waterWalkingThisTick), user);
+            }
+        }
+        else {
+            if (!waterWalkingPrevTick && waterWalkingThisTick || clLargeSpark) {
+                HamonUtil.emitHamonSparkParticles(user.level, ClientUtil.getClientPlayer(), user.position(), 0.05F);
+                CustomParticlesHelper.createHamonSparkParticles(null, user.position(), 10);
+                clTickSpark = false;
+                clLargeSpark = false;
+            }
+        }
+        waterWalkingPrevTick = waterWalkingThisTick;
+        
+        if (user.level.isClientSide() && (trWaterWalking || waterWalkingThisTick) && clTickSpark) {
+            HamonSparksLoopSound.playSparkSound(user, user.position(), 1.0F);
+            CustomParticlesHelper.createHamonSparkParticles(user, 
+                    user.getRandomX(0.5), user.getY(Math.random() * 0.1), user.getRandomZ(0.5), 
+                    1);
+        }
+        clTickSpark = true;
+    }
+    
+    public void trSetWaterWalking(boolean waterWalking, LivingEntity user) {
+        this.trWaterWalking = waterWalking;
+        if (waterWalking) {
+            clLargeSpark = true;
+        }
+    }
+    
+    public boolean isWaterWalking() {
+        return trWaterWalking || waterWalkingPrevTick;
+    }
+    
+    public float waterWalkingTickCost() {
+        return waterWalkingPrevTick ? 1 : 50;
+    }
+    
     
     public boolean getRebuffOverdrive() {
         return isRebuffOverdriveOn;

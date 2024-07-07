@@ -113,6 +113,13 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         newDayCheck();
     }
 
+    @Override
+    public void postTick() {
+        if (hasPower()) {
+            getType().postTickUser(user, getThis());
+        }
+    }
+
     private void newDayCheck() {
         if (user != null) {
             long day = user.level.getDayTime() / 24000;

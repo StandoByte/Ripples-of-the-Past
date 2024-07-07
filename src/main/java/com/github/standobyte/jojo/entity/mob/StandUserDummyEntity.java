@@ -84,6 +84,7 @@ public class StandUserDummyEntity extends MobEntity implements IMobStandUser, IE
             stand.clickAction(action, false, ActionTarget.EMPTY);
         }
         stand.tick();
+        stand.postTick();
     }
     
     @Override
