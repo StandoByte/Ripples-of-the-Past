@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.modcompat.mod.client.playeranimator.anim.mob;
+package com.github.standobyte.jojo.client.playeranim.kosmx.anim.mob;
 
 import com.github.standobyte.jojo.client.ClientTicking;
 import com.github.standobyte.jojo.client.playeranim.IEntityAnimApplier;
@@ -15,11 +15,11 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.vector.Vector3f;
 
 // TODO a more generalized way to apply animations to custom mobs
-public abstract class EntityAnimApplier<T extends LivingEntity, M extends BipedModel<T>> implements IEntityAnimApplier<T, M> {
+public abstract class KosmXEntityAnimApplier<T extends LivingEntity, M extends BipedModel<T>> implements IEntityAnimApplier<T, M> {
     protected final M model;
     protected final IMutableModel modelWithMixin;
     
-    public EntityAnimApplier(M model, IMutableModel modelWithMixin) {
+    public KosmXEntityAnimApplier(M model, IMutableModel modelWithMixin) {
         this.model = model;
         this.modelWithMixin = modelWithMixin;
         ClientTicking.addTicking(this);

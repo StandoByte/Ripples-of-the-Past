@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.modcompat.mod.client.playeranimator.anim.hamon;
+package com.github.standobyte.jojo.client.playeranim.kosmx.anim.layers.barrage;
 
 import com.github.standobyte.jojo.action.stand.StandEntityAction.Phase;
 import com.github.standobyte.jojo.client.playeranim.IPlayerBarrageAnimation;
@@ -17,12 +17,12 @@ import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.math.vector.Vector3f;
 
-public class PlayerBarrageAfterimagesAnim extends TwoHandedBarrageAnimation<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> implements IPlayerBarrageAnimation {
+public class KosmXPlayerBarrageAfterimagesAnim extends TwoHandedBarrageAnimation<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> implements IPlayerBarrageAnimation {
     private final BarrageFistAfterimagesLayer modelLayer;
-    private final PlayerBarrageAnim anim;
+    private final KosmXPlayerBarrageAnim anim;
 
-    public PlayerBarrageAfterimagesAnim(PlayerModel<AbstractClientPlayerEntity> model, 
-            PlayerBarrageAnim barrageSwing, BarrageFistAfterimagesLayer modelLayer) {
+    public KosmXPlayerBarrageAfterimagesAnim(PlayerModel<AbstractClientPlayerEntity> model, 
+            KosmXPlayerBarrageAnim barrageSwing, BarrageFistAfterimagesLayer modelLayer) {
         super(model, barrageSwing, null);
         this.modelLayer = modelLayer;
         this.anim = barrageSwing;

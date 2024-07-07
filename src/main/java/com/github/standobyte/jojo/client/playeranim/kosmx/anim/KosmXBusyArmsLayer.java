@@ -1,7 +1,7 @@
-package com.github.standobyte.jojo.modcompat.mod.client.playeranimator.anim;
+package com.github.standobyte.jojo.client.playeranim.kosmx.anim;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.modcompat.mod.client.playeranimator.PlayerAnimatorInstalled.AnimLayerHandler;
+import com.github.standobyte.jojo.client.playeranim.kosmx.KosmXPlayerAnimatorInstalled.AnimLayerHandler;
 
 import dev.kosmx.playerAnim.api.layered.IAnimation;
 import dev.kosmx.playerAnim.api.layered.ModifierLayer;
@@ -10,9 +10,9 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-public class BusyArmsLayer extends AnimLayerHandler {
+public class KosmXBusyArmsLayer extends AnimLayerHandler {
 
-    public BusyArmsLayer(ResourceLocation id) {
+    public KosmXBusyArmsLayer(ResourceLocation id) {
         super(id);
     }
 

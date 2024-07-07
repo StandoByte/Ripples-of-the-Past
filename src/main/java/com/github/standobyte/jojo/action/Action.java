@@ -292,6 +292,9 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     public void startedHolding(World world, LivingEntity user, P power, ActionTarget target, boolean requirementsFulfilled) {}
     
+    public boolean clHeldStartAnim(PlayerEntity user) { return false; }
+    public void clHeldStopAnim(PlayerEntity user) {}
+    
     public void onHoldTick(World world, LivingEntity user, P power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         holdTick(world, user, power, ticksHeld, target, requirementsFulfilled);
     }

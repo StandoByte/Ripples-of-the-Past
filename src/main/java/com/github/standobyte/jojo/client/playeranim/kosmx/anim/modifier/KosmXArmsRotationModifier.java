@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.modcompat.mod.client.playeranimator.anim.modifier;
+package com.github.standobyte.jojo.client.playeranim.kosmx.anim.modifier;
 
 import java.util.EnumSet;
 import java.util.Set;
@@ -13,11 +13,11 @@ import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.math.vector.Vector3f;
 
-public class ArmsRotationModifier extends AbstractModifier {
+public class KosmXArmsRotationModifier extends AbstractModifier {
     private final AbstractClientPlayerEntity entity;
     private final Set<HandSide> arms = EnumSet.noneOf(HandSide.class);
     
-    public ArmsRotationModifier(AbstractClientPlayerEntity entity, HandSide side, HandSide... otherSide) {
+    public KosmXArmsRotationModifier(AbstractClientPlayerEntity entity, HandSide side, HandSide... otherSide) {
         this.entity = entity;
         arms.add(side);
         for (HandSide s : otherSide) {

@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.modcompat.mod.client.playeranimator.anim.mob;
+package com.github.standobyte.jojo.client.playeranim.kosmx.anim.mob;
 
 import com.github.standobyte.jojo.client.render.entity.model.mob.HamonMasterModel;
 import com.github.standobyte.jojo.entity.mob.HamonMasterEntity;
@@ -10,7 +10,7 @@ import dev.kosmx.playerAnim.impl.IBendHelper;
 import dev.kosmx.playerAnim.impl.IMutableModel;
 import net.minecraft.util.Direction;
 
-public class HamonMasterAnimApplier extends EntityAnimApplier<HamonMasterEntity, HamonMasterModel> {
+public class KosmXHamonMasterAnimApplier extends KosmXEntityAnimApplier<HamonMasterEntity, HamonMasterModel> {
     private final AnimationProcessor animProcessor;
     
     private final IBendHelper mutatedJacket;
@@ -19,7 +19,7 @@ public class HamonMasterAnimApplier extends EntityAnimApplier<HamonMasterEntity,
     private final IBendHelper mutatedRightPantLeg;
     private final IBendHelper mutatedLeftPantLeg;
     
-    public HamonMasterAnimApplier(HamonMasterModel model, IMutableModel modelWithMixin, IAnimation sittingAnim) {
+    public KosmXHamonMasterAnimApplier(HamonMasterModel model, IMutableModel modelWithMixin, IAnimation sittingAnim) {
         super(model, modelWithMixin);
         this.animProcessor = new AnimationProcessor(sittingAnim);
         SetableSupplier<AnimationProcessor> emoteSupplier = modelWithMixin.getEmoteSupplier();
