@@ -74,6 +74,7 @@
   "_item.jojo.stand_arrow_shard": "Arrow Shard",
   "_item.jojo.stand_arrow_shard.reference_quote": "\"It hurts!!\"",
   "item.jojo.stand_disc": "Диск со Стендом",
+  "item.jojo.stand_disc.addon_author": "Автор(ы) аддона: %s",
   "item.jojo.stand_remover": "Убрать Стенд",
   "item.jojo.stand_remover_one_time": "Убрать Стенд (одноразовый)",
   "item.jojo.stand_eject": "Извлечь Стенд",

@@ -1,11 +1,11 @@
-package com.github.standobyte.jojo.modcompat.mod.client.playeranimator;
+package com.github.standobyte.jojo.client.playeranim.kosmx;
 
 import dev.kosmx.playerAnim.impl.IBendHelper;
 import dev.kosmx.playerAnim.impl.animation.BendHelper;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.Direction;
 
-public class BendyLibHelper {
+public class KosmXBendyLibHelper {
 
     static float[] getBend(IBendHelper bendablePart) {
         return BendDummy.DUMMY.getBend(bendablePart);
