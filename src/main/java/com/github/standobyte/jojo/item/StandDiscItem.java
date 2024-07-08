@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
@@ -37,7 +38,9 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.thread.SidedThreadGroups;
+import net.minecraftforge.forgespi.language.IConfigurable;
 
 public class StandDiscItem extends Item {
     private static final String STAND_TAG = "Stand";
@@ -152,6 +155,20 @@ public class StandDiscItem extends Item {
                 }
             }
         }
+        
+        String modId = getCreatorModId(stack);
+        if (!modId.equals(JojoMod.MOD_ID)) {
+            ModList.get().getModContainerById(modId)
+            .map(mod -> mod.getModInfo())
+            .flatMap(modInfo -> modInfo instanceof IConfigurable ? ((IConfigurable) modInfo).getConfigElement("authors") : Optional.empty())
+            .map(authorsString -> authorsString instanceof String ? (String) authorsString : null)
+            .ifPresent(authors -> {
+                authors = authors.replace(", StandoByte", "").replace("StandoByte, ", "");
+                tooltip.add(new TranslationTextComponent("item.jojo.stand_disc.addon_author", authors)
+                        .withStyle(TextFormatting.GRAY, TextFormatting.ITALIC));
+            });
+        }
+        
         tooltip.add(new TranslationTextComponent("item.jojo.creative_only_tooltip").withStyle(TextFormatting.DARK_GRAY));
     }
     

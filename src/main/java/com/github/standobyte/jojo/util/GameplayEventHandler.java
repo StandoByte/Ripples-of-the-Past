@@ -258,16 +258,16 @@ public class GameplayEventHandler {
                 }
             }
             
-            LazyOptional<PlayerUtilCap> liquidWalkingCap = player.getCapability(PlayerUtilCapProvider.CAPABILITY);
-            if (!player.level.isClientSide() || player.isLocalPlayer()) {
-                boolean liquidWalking = HamonUtil.liquidWalking(player);
-                liquidWalkingCap.ifPresent(cap -> {
-                    cap.setWaterWalking(liquidWalking);
-                });
-            }
-            liquidWalkingCap.ifPresent(cap -> {
-                cap.tickWaterWalking();
-            });
+//            LazyOptional<PlayerUtilCap> liquidWalkingCap = player.getCapability(PlayerUtilCapProvider.CAPABILITY);
+//            if (!player.level.isClientSide() || player.isLocalPlayer()) {
+//                boolean liquidWalking = HamonUtil.liquidWalking(player);
+//                liquidWalkingCap.ifPresent(cap -> {
+//                    cap.setWaterWalking(liquidWalking);
+//                });
+//            }
+//            liquidWalkingCap.ifPresent(cap -> {
+//                cap.tickWaterWalking();
+//            });
             
             INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
                 power.tick();
@@ -278,14 +278,12 @@ public class GameplayEventHandler {
             }); 
             break;
         case END:
-            if (player.level.isClientSide()) {
-                boolean waterWalking = GeneralUtil.orElseFalse(player.getCapability(PlayerUtilCapProvider.CAPABILITY), cap -> cap.isWaterWalking());
-                if (waterWalking) {
-                    float bob = player.bob / 0.6F;
-                    float f = Math.min(0.1F, MathHelper.sqrt(Entity.getHorizontalDistanceSqr(player.getDeltaMovement())));
-                    player.bob = bob + (f - bob) * 0.4F;
-                }
-            }
+            INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
+                power.postTick();
+            });
+            IStandPower.getStandPowerOptional(player).ifPresent(power -> {
+                power.postTick();
+            }); 
             break;
         }
     }
@@ -976,11 +974,20 @@ public class GameplayEventHandler {
     public static void onPotionApply(PotionApplicableEvent event) {
         LivingEntity entity = event.getEntityLiving();
         Effect effect = event.getPotionEffect().getEffect();
-        if ((effect == Effects.HUNGER || effect == Effects.POISON || effect == Effects.REGENERATION)
-                && (JojoModUtil.isDyingBody(entity) || entity instanceof PlayerEntity && JojoModUtil.isPlayerUndead((PlayerEntity) entity))) {
-            event.setResult(Result.DENY);
+        if (JojoModUtil.isDyingBody(entity)) {
+            if (effect == Effects.HUNGER || effect == Effects.POISON || effect == Effects.REGENERATION) {
+                event.setResult(Result.DENY);
+            }
         }
-        else if (effect instanceof IApplicableEffect && !((IApplicableEffect) effect).isApplicable(entity)) {
+        if (entity instanceof PlayerEntity && JojoModUtil.isPlayerJojoVampiric((PlayerEntity) entity)) {
+            if (effect == Effects.HUNGER/* || effect == Effects.POISON */) {
+                event.setResult(Result.DENY);
+            }
+            else if (effect == Effects.REGENERATION) {
+                event.setResult(Result.ALLOW);
+            }
+        }
+        if (effect instanceof IApplicableEffect && !((IApplicableEffect) effect).isApplicable(entity)) {
             event.setResult(Result.DENY);
         }
     }

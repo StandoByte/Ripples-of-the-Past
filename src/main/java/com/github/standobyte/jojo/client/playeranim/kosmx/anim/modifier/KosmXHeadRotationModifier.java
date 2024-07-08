@@ -1,10 +1,11 @@
-package com.github.standobyte.jojo.modcompat.mod.client.playeranimator.anim.modifier;
+package com.github.standobyte.jojo.client.playeranim.kosmx.anim.modifier;
 
 import dev.kosmx.playerAnim.api.TransformType;
 import dev.kosmx.playerAnim.api.layered.modifier.AbstractModifier;
 import dev.kosmx.playerAnim.core.util.Vec3f;
 
-public class HeadRotationModifier extends AbstractModifier {
+// FIXME sometimes the head does 360 when using Hamon Breath
+public class KosmXHeadRotationModifier extends AbstractModifier {
 
     @Override
     public Vec3f get3DTransform(String modelName, TransformType type, float tickDelta, Vec3f value0) {

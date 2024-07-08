@@ -1,15 +1,14 @@
-package com.github.standobyte.jojo.modcompat.mod.client.playeranimator.anim;
+package com.github.standobyte.jojo.client.playeranim.kosmx.anim.layers.hamon;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.client.playeranim.interfaces.BasicToggleAnim;
+import com.github.standobyte.jojo.client.playeranim.kosmx.KosmXPlayerAnimatorInstalled.AnimLayerHandler;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
-import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
-import com.github.standobyte.jojo.modcompat.mod.client.playeranimator.PlayerAnimatorInstalled.AnimLayerHandler;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterHamonTechnique;
 
@@ -24,10 +23,10 @@ import net.minecraft.util.Util;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-public class HeldActionAnimLayer extends AnimLayerHandler {
+public class KosmXHamonBreathLayer extends AnimLayerHandler implements BasicToggleAnim {
     private static final Random RANDOM = new Random();
 
-    public HeldActionAnimLayer(ResourceLocation id) {
+    public KosmXHamonBreathLayer(ResourceLocation id) {
         super(id);
     }
 
@@ -36,36 +35,29 @@ public class HeldActionAnimLayer extends AnimLayerHandler {
         return new ModifierLayer<>(null);
     }
     
-    public boolean setActionAnim(PlayerEntity player, Action<?> action) {
-        if (action != null) {
-            return setAnimFromName((AbstractClientPlayerEntity) player, getAnimPath(player, action));
+    
+    @Override
+    public boolean setAnimEnabled(PlayerEntity player, boolean enabled) {
+        if (enabled) {
+            return setAnimFromName((AbstractClientPlayerEntity) player, getAnimPath(player));
         }
         else {
             return fadeOutAnim((AbstractClientPlayerEntity) player, AbstractFadeModifier.standardFadeIn(10, Ease.OUTCUBIC), null);
         }
     }
     
-    private ResourceLocation getAnimPath(PlayerEntity player, Action<?> action) {
-        if (action == ModHamonActions.HAMON_BREATH.get()) {
-            ResourceLocation[] poses = INonStandPower.getNonStandPowerOptional(player).resolve()
-                    .flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get()))
-                    .map(hamon -> {
-                        return POSES.getOrDefault(hamon.getCharacterTechnique(), new ResourceLocation[] {});
-                    }).orElse(new ResourceLocation[] {});
-            if (poses.length == 0) {
-                return DEFAULT_POSE;
-            }
-            return poses[RANDOM.nextInt(poses.length)];
+    private ResourceLocation getAnimPath(PlayerEntity player) {
+        ResourceLocation[] poses = INonStandPower.getNonStandPowerOptional(player).resolve()
+                .flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get()))
+                .map(hamon -> {
+                    return POSES.getOrDefault(hamon.getCharacterTechnique(), new ResourceLocation[] {});
+                }).orElse(new ResourceLocation[] {});
+        if (poses.length == 0) {
+            return DEFAULT_POSE;
         }
-        
-        if (action == ModHamonActions.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE_BARRAGE.get()) {
-            return SYO_BARRAGE_START;
-        }
-        
-        return null;
+        return poses[RANDOM.nextInt(poses.length)];
     }
     
-    private static final ResourceLocation SYO_BARRAGE_START = new ResourceLocation(JojoMod.MOD_ID, "syo_barrage_start");
     private static final ResourceLocation DEFAULT_POSE = new ResourceLocation(JojoMod.MOD_ID, "breath_pose/default");
     private static final Map<CharacterHamonTechnique, ResourceLocation[]> POSES = Util.make(new HashMap<>(), map -> {
         map.put(ModHamonSkills.CHARACTER_JONATHAN.get(), new ResourceLocation[] {
@@ -89,6 +81,7 @@ public class HeldActionAnimLayer extends AnimLayerHandler {
 //                new ResourceLocation(JojoMod.MOD_ID, "breath_pose/lisa_lisa"),
         });
     });
+    
     
     @Override
     public boolean isForgeEventHandler() {
