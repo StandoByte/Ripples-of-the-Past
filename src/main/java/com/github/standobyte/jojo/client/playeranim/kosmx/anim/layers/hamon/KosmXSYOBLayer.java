@@ -11,8 +11,6 @@ import dev.kosmx.playerAnim.core.util.Ease;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.event.RenderPlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class KosmXSYOBLayer extends AnimLayerHandler implements HamonSYOBAnim {
     
@@ -44,14 +42,4 @@ public class KosmXSYOBLayer extends AnimLayerHandler implements HamonSYOBAnim {
         fadeOutAnim(player, AbstractFadeModifier.standardFadeIn(10, Ease.OUTCUBIC), null);
     }
     
-    
-    @Override
-    public boolean isForgeEventHandler() {
-        return true;
-    }
-
-    @SubscribeEvent
-    public void preRender(RenderPlayerEvent.Pre event) {
-        preventCrouch((AbstractClientPlayerEntity) event.getPlayer(), event.getRenderer());
-    }
 }

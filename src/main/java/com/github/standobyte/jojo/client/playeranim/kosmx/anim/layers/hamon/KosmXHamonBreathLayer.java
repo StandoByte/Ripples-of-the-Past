@@ -20,8 +20,6 @@ import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
-import net.minecraftforge.client.event.RenderPlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class KosmXHamonBreathLayer extends AnimLayerHandler implements BasicToggleAnim {
     private static final Random RANDOM = new Random();
@@ -82,14 +80,4 @@ public class KosmXHamonBreathLayer extends AnimLayerHandler implements BasicTogg
         });
     });
     
-    
-    @Override
-    public boolean isForgeEventHandler() {
-        return true;
-    }
-
-    @SubscribeEvent
-    public void preRender(RenderPlayerEvent.Pre event) {
-        preventCrouch((AbstractClientPlayerEntity) event.getPlayer(), event.getRenderer());
-    }
 }

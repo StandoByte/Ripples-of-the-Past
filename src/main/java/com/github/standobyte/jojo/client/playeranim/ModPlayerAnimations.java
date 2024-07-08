@@ -33,6 +33,11 @@ public class ModPlayerAnimations {
                 "com.github.standobyte.jojo.client.playeranim.kosmx.anim.layers.hamon.KosmXSYOBLayer",
                 new ResourceLocation(JojoMod.MOD_ID, "syo_barrage"), 1, 
                 HamonSYOBAnim.NoPlayerAnimator::new);
+        
+        PlayerAnimationHandler.getPlayerAnimator().registerAnimLayer(
+                "com.github.standobyte.jojo.client.playeranim.kosmx.anim.layers.KosmXTestAnimLayer",
+                new ResourceLocation(JojoMod.MOD_ID, "test_layer"), 1, 
+                Object::new);
     }
     
 //  heldAction = register(new ResourceLocation(JojoMod.MOD_ID, "hamon_breath"), 1, HeldActionAnimLayer::new);

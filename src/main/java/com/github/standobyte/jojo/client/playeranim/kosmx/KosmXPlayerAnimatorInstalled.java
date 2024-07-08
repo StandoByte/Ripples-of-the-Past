@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.client.playeranim.kosmx;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
 import javax.annotation.Nullable;
@@ -37,9 +39,17 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
+import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class KosmXPlayerAnimatorInstalled extends PlayerAnimationHandler.PlayerAnimator {
+    private static final List<AnimHandler<? extends IAnimation>> PREVENT_CROUCH = new ArrayList<>();
+    
+    public KosmXPlayerAnimatorInstalled() {
+        super();
+        MinecraftForge.EVENT_BUS.register(new KosmXPlayerAnimatorInstalled.EventHandler());
+    }
     
     @Override
     public boolean kosmXAnimatorInstalled() {
@@ -55,6 +65,25 @@ public class KosmXPlayerAnimatorInstalled extends PlayerAnimationHandler.PlayerA
         PlayerAnimationFactory.ANIMATION_DATA_FACTORY.registerFactory(id, priority, player -> animLayer.createAnimLayer(player));
         if (animLayer.isForgeEventHandler()) {
             MinecraftForge.EVENT_BUS.register(animLayer);
+        }
+        if (animLayer.preventsCrouch()) {
+            PREVENT_CROUCH.add(animLayer);
+        }
+    }
+    
+    
+    public static class EventHandler {
+        
+        @SubscribeEvent
+        public void preRender(RenderPlayerEvent.Pre event) {
+            if (event.getRenderer().getModel().crouching) {
+                AbstractClientPlayerEntity player = (AbstractClientPlayerEntity) event.getPlayer();
+                for (AnimHandler<?> animHandler : PREVENT_CROUCH) {
+                    if (animHandler.preventCrouch(player, event.getRenderer())) {
+                        break;
+                    }
+                }
+            }
         }
     }
     
@@ -170,15 +199,26 @@ public class KosmXPlayerAnimatorInstalled extends PlayerAnimationHandler.PlayerA
             return false;
         }
         
-        protected void preventCrouch(AbstractClientPlayerEntity player, PlayerRenderer renderer) {
+        public boolean preventsCrouch() {
+            return true;
+        }
+        
+        public ResourceLocation getId() {
+            return id;
+        }
+        
+        protected boolean preventCrouch(AbstractClientPlayerEntity player, PlayerRenderer renderer) {
             T animLayer = getAnimLayer(player);
             if (animLayer != null && animLayer.isActive()) {
                 renderer.getModel().crouching = false;
+                return true;
             }
+            return false;
         }
         
         @Nullable
         protected final T getAnimLayer(AbstractClientPlayerEntity player) {
+            PlayerAnimationAccess.getPlayerAnimLayer(player);
             return (T) PlayerAnimationAccess.getPlayerAssociatedData(player).get(id);
         }
     }
