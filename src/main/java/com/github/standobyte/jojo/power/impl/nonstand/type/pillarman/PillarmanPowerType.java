@@ -8,7 +8,6 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.non_stand.PillarmanAction;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
-import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.pillarman.ModPillarmanActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -125,7 +124,7 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
     private static final Set<Effect> EFFECTS = new HashSet<>();
     public static void initPillarmanEffects() {
         Collections.addAll(EFFECTS, 
-                ModStatusEffects.UNDEAD_REGENERATION.get(),
+                Effects.REGENERATION,
                 Effects.DAMAGE_RESISTANCE,
                 Effects.NIGHT_VISION);
     }
