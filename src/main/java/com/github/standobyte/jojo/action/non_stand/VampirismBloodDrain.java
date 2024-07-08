@@ -45,7 +45,7 @@ public class VampirismBloodDrain extends VampirismAction {
         Entity entityTarget = target.getEntity();
         if (entityTarget instanceof LivingEntity) {
             LivingEntity livingTarget = (LivingEntity) entityTarget;
-            if (canDrainBloodFrom(livingTarget)) {
+            if (!canDrainBloodFrom(livingTarget)) {
                 return conditionMessage("blood");
 //                return livingTarget.tickCount > 20 ? conditionMessageContinueHold("blood") : ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
             }
