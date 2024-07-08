@@ -30,6 +30,7 @@ import com.github.standobyte.jojo.block.WoodenCoffinBlock;
 import com.github.standobyte.jojo.capability.chunk.ChunkCapProvider;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
@@ -952,11 +953,20 @@ public class GameplayEventHandler {
     public static void onPotionApply(PotionApplicableEvent event) {
         LivingEntity entity = event.getEntityLiving();
         Effect effect = event.getPotionEffect().getEffect();
-        if ((effect == Effects.HUNGER || effect == Effects.POISON || effect == Effects.REGENERATION)
-                && (JojoModUtil.isDyingBody(entity) || entity instanceof PlayerEntity && JojoModUtil.isPlayerUndead((PlayerEntity) entity))) {
-            event.setResult(Result.DENY);
+        if (JojoModUtil.isDyingBody(entity)) {
+            if (effect == Effects.HUNGER || effect == Effects.POISON || effect == Effects.REGENERATION) {
+                event.setResult(Result.DENY);
+            }
         }
-        else if (effect instanceof IApplicableEffect && !((IApplicableEffect) effect).isApplicable(entity)) {
+        if (entity instanceof PlayerEntity && JojoModUtil.isPlayerJojoVampiric((PlayerEntity) entity)) {
+            if (effect == Effects.HUNGER/* || effect == Effects.POISON */) {
+                event.setResult(Result.DENY);
+            }
+            else if (effect == Effects.REGENERATION) {
+                event.setResult(Result.ALLOW);
+            }
+        }
+        if (effect instanceof IApplicableEffect && !((IApplicableEffect) effect).isApplicable(entity)) {
             event.setResult(Result.DENY);
         }
     }

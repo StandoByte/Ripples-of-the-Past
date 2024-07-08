@@ -40,7 +40,7 @@ public class VampirismDarkAura extends VampirismAction {
         if (!world.isClientSide()) {
             for (LivingEntity entity : MCUtil.entitiesAround(
                     LivingEntity.class, user, range, false, entity -> 
-                    !(JojoModUtil.isUndead(entity) || OptionalDependencyHelper.vampirism().isEntityVampire(entity))
+                    !(JojoModUtil.isUndeadOrVampiric(entity) || OptionalDependencyHelper.vampirism().isEntityVampire(entity))
                             && !(entity instanceof StandEntity && user.is(((StandEntity) entity).getUser())))) {
                 boolean passive = entity instanceof AgeableEntity;
                 int amplifier = MathHelper.floor((difficulty - 1) * 1.5);

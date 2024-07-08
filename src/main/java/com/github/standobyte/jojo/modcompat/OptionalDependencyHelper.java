@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.JojoMod;
 
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.ModList;
 
 public class OptionalDependencyHelper {
@@ -22,6 +23,13 @@ public class OptionalDependencyHelper {
                 "com.github.standobyte.jojo.modcompat.mod.vampirism.VampirismModIntergration", 
                 IVampirismModIntegration.Dummy::new, 
                 "Vampirism mod");
+        
+        Object expandabilityEventHandler = createIfModPresent("expandability", 
+                "com.github.standobyte.jojo.modcompat.mod.expandability.ExpandabilityEventHandler", 
+                "Expandability lib");
+        if (expandabilityEventHandler != null) {
+            MinecraftForge.EVENT_BUS.register(expandabilityEventHandler);
+        }
     }
     
     public static <I> I initModHandlingInterface(String modId, 
@@ -56,5 +64,37 @@ public class OptionalDependencyHelper {
         }
         
         return modAbsent.get();
+    }
+    
+    public static Object createIfModPresent(String modId, 
+            String modPresentClassName,
+            String loggingModName) {
+        if (ModList.get().isLoaded(modId)) {
+            try {
+                Class<?> objClass = Class.forName(modPresentClassName);
+                Constructor<?> constructor = objClass.getConstructor();
+                Object instance = constructor.newInstance();
+                JojoMod.getLogger().debug("{}: {} compatibility initialized.", JojoMod.MOD_ID, loggingModName);
+                return instance;
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            } catch (NoSuchMethodException e) {
+                e.printStackTrace();
+            } catch (SecurityException e) {
+                e.printStackTrace();
+            } catch (InstantiationException e) {
+                e.printStackTrace();
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+            } catch (InvocationTargetException e) {
+                e.getCause().printStackTrace();
+            }
+        }
+        else {
+            JojoMod.getLogger().debug("{}: {} not found.", JojoMod.MOD_ID, loggingModName);
+        }
+        return null;
     }
 }

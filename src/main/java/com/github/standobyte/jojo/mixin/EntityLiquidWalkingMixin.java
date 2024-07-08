@@ -19,6 +19,13 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
+/**
+ * This class was created by <b>florensie</b>. It's distributed as
+ * part of the Expandability library mod. Get the Source Code on GitHub:
+ * <a href="https://github.com/florensie/ExpandAbility">https://github.com/florensie/ExpandAbility</a>.
+ * <br>
+ * ExpandAbility is open-source and distributed under the MIT license.
+ */
 @Mixin(Entity.class)
 public class EntityLiquidWalkingMixin {
 
