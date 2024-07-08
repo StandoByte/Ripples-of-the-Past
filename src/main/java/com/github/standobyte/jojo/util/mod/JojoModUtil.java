@@ -258,19 +258,29 @@ public class JojoModUtil {
                 : player.getCapability(PlayerUtilCapProvider.CAPABILITY).map(PlayerUtilCap::hasClientInput).orElse(false);
     }
     
-    
 
+
+    @Deprecated
     public static boolean isUndead(LivingEntity entity) {
+        return isUndeadOrVampiric(entity);
+    }
+
+    @Deprecated
+    public static boolean isPlayerUndead(PlayerEntity player) {
+        return isPlayerJojoVampiric(player);
+    }
+
+    public static boolean isUndeadOrVampiric(LivingEntity entity) {
         if (entity.getMobType() == CreatureAttribute.UNDEAD) {
             return true;
         }
         if (entity instanceof PlayerEntity) {
-            return isPlayerUndead((PlayerEntity) entity);
+            return isPlayerJojoVampiric((PlayerEntity) entity);
         }
         return false;
     }
 
-    public static boolean isPlayerUndead(PlayerEntity player) {
+    public static boolean isPlayerJojoVampiric(PlayerEntity player) {
         return INonStandPower.getNonStandPowerOptional(player).map(power -> {
             NonStandPowerType<?> powerType = power.getType();
             return powerType == ModPowers.VAMPIRISM.get();
@@ -284,7 +294,7 @@ public class JojoModUtil {
         if (ModTags.HAMON_DAMAGE.contains(entity.getType())) {
             return true;
         }
-        return JojoModUtil.isUndead(entity) || OptionalDependencyHelper.vampirism().isEntityVampire(entity);
+        return JojoModUtil.isUndeadOrVampiric(entity) || OptionalDependencyHelper.vampirism().isEntityVampire(entity);
     }
 
     public static boolean canBleed(LivingEntity entity) {

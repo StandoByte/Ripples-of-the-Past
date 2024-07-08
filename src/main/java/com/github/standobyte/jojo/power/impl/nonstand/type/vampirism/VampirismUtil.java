@@ -120,7 +120,7 @@ public class VampirismUtil {
         }
         else if (mob instanceof IronGolemEntity) {
             mob.targetSelector.addGoal(3, new NearestAttackableTargetGoal<>(mob, PlayerEntity.class, 5, false, false, 
-                    target -> target instanceof PlayerEntity && JojoModUtil.isPlayerUndead((PlayerEntity) target)));
+                    target -> target instanceof PlayerEntity && JojoModUtil.isPlayerJojoVampiric((PlayerEntity) target)));
         }
     }
     

@@ -60,7 +60,7 @@ public class VampireSunBurnEffect extends StatusEffect implements IApplicableEff
 
     @Override
     public boolean isApplicable(LivingEntity entity) {
-        return JojoModUtil.isUndead(entity);
+        return JojoModUtil.isUndeadOrVampiric(entity);
     }
     
     

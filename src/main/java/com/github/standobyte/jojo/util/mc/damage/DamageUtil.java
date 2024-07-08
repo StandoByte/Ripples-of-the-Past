@@ -95,7 +95,7 @@ public class DamageUtil {
     }
 
     public static boolean dealUltravioletDamage(Entity target, float amount, @Nullable Entity srcDirect, @Nullable Entity srcIndirect, boolean sun) {
-        if (target instanceof LivingEntity && JojoModUtil.isUndead((LivingEntity) target) && !(sun && target.getType() == EntityType.WITHER)) {
+        if (target instanceof LivingEntity && JojoModUtil.isUndeadOrVampiric((LivingEntity) target) && !(sun && target.getType() == EntityType.WITHER)) {
             DamageSource dmgSource = srcDirect == null ? ULTRAVIOLET : 
                 srcIndirect == null ? new EntityDamageSource(ULTRAVIOLET.getMsgId() + ".entity", srcDirect).bypassArmor().bypassMagic() : 
                 new IndirectEntityDamageSource(ULTRAVIOLET.getMsgId() + ".entity", srcDirect, srcIndirect).bypassArmor().bypassMagic();
@@ -365,7 +365,7 @@ public class DamageUtil {
     }
     
     public static void suffocateTick(LivingEntity entity, float speed) {
-        if (entity.canBreatheUnderwater() || entity instanceof PlayerEntity && JojoModUtil.isPlayerUndead((PlayerEntity) entity)
+        if (entity.canBreatheUnderwater() || entity instanceof PlayerEntity && JojoModUtil.isPlayerJojoVampiric((PlayerEntity) entity)
                 || entity instanceof IronGolemEntity) return;
         
         if (entity.getAirSupply() > 0) {
