@@ -21,6 +21,7 @@ public interface IPowerType<P extends IPower<P, T>, T extends IPowerType<P, T>> 
     boolean keepOnDeath(P power);
     
     void tickUser(LivingEntity entity, P power);
+    default void postTickUser(LivingEntity entity, P power) {}
     default void onNewDay(LivingEntity user, P power, long prevDay, long day) {}
     default RayTraceResult clientHitResult(P power, Entity cameraEntity, RayTraceResult vanillaHitResult) {
         return vanillaHitResult;

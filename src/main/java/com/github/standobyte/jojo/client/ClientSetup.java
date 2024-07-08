@@ -20,6 +20,7 @@ import com.github.standobyte.jojo.client.particle.OnomatopoeiaParticle;
 import com.github.standobyte.jojo.client.particle.RPSPickPartile;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.particle.custom.FirstPersonHamonAura;
+import com.github.standobyte.jojo.client.playeranim.ModPlayerAnimations;
 import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
 import com.github.standobyte.jojo.client.render.armor.ArmorModelRegistry;
 import com.github.standobyte.jojo.client.render.armor.model.BladeHatArmorModel;
@@ -307,6 +308,8 @@ public class ClientSetup {
     public static void loadCustomArmorModels(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
             ArmorModelRegistry.loadArmorModels();
+            
+            ModPlayerAnimations.init();
         });
     }
     

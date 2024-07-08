@@ -1,10 +1,13 @@
 package com.github.standobyte.jojo.item;
 
+import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
@@ -15,6 +18,7 @@ import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mod.StoryPart;
 
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.client.util.ITooltipFlag;
@@ -34,7 +38,9 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.fml.ModList;
 import net.minecraftforge.fml.common.thread.SidedThreadGroups;
+import net.minecraftforge.forgespi.language.IConfigurable;
 
 public class StandDiscItem extends Item {
     private static final String STAND_TAG = "Stand";
@@ -112,11 +118,16 @@ public class StandDiscItem extends Item {
     public void fillItemCategory(ItemGroup group, NonNullList<ItemStack> items) {
         if (this.allowdedIn(group)) {
             boolean isClientSide = Thread.currentThread().getThreadGroup() == SidedThreadGroups.CLIENT;
+            List<StandType<?>> legalStands = new ArrayList<>();
             for (StandType<?> standType : JojoCustomRegistries.STANDS.getRegistry()) {
                 if (StandUtil.canPlayerGetFromArrow(standType, isClientSide)) {
-                    items.add(withStand(new ItemStack(this), new StandInstance(standType)));
+                    legalStands.add(standType);
                 }
             }
+            
+            legalStands.stream()
+            .sorted(Comparator.comparing(StandType::getPartName, StoryPart.partNamesComparator()))
+            .forEach(stand -> items.add(withStand(new ItemStack(this), new StandInstance(stand))));
         }
     }
     
@@ -144,6 +155,20 @@ public class StandDiscItem extends Item {
                 }
             }
         }
+        
+        String modId = getCreatorModId(stack);
+        if (!modId.equals(JojoMod.MOD_ID)) {
+            ModList.get().getModContainerById(modId)
+            .map(mod -> mod.getModInfo())
+            .flatMap(modInfo -> modInfo instanceof IConfigurable ? ((IConfigurable) modInfo).getConfigElement("authors") : Optional.empty())
+            .map(authorsString -> authorsString instanceof String ? (String) authorsString : null)
+            .ifPresent(authors -> {
+                authors = authors.replace(", StandoByte", "").replace("StandoByte, ", "");
+                tooltip.add(new TranslationTextComponent("item.jojo.stand_disc.addon_author", authors)
+                        .withStyle(TextFormatting.GRAY, TextFormatting.ITALIC));
+            });
+        }
+        
         tooltip.add(new TranslationTextComponent("item.jojo.creative_only_tooltip").withStyle(TextFormatting.DARK_GRAY));
     }
     

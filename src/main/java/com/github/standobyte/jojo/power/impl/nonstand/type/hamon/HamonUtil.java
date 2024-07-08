@@ -189,8 +189,7 @@ public class HamonUtil {
                     && target instanceof PlayerEntity) {
                 LivingEntity livingAttacker = (LivingEntity) attacker;
                 PlayerEntity playerTarget = (PlayerEntity) target;
-                INonStandPower power = INonStandPower.getPlayerNonStandPower(playerTarget);
-                return power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
+                return INonStandPower.getNonStandPowerOptional(playerTarget).resolve().map(power -> power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
                     if (hamon.getRebuffOverdrive()) {
                         float energyCost = 1200F;
                         if (power.hasEnergy(energyCost)) {
@@ -212,7 +211,7 @@ public class HamonUtil {
                     }
 
                     return false;
-                }).orElse(false);
+                }).orElse(false)).orElse(false);
             }
         }
         return false;
@@ -489,53 +488,45 @@ public class HamonUtil {
     
     
     
-    // TODO fix not being able to walk on liquid on shift (PlayerEntity#maybeBackOffFromEdge (989))
-    public static boolean liquidWalking(PlayerEntity player) {
-        World world = player.level;
-        if (player.abilities.flying || player.isInWater() || player.isPassenger()) {
-            return false;
+    public static boolean onLiquidWalkingEvent(LivingEntity entity, FluidState fluidState) {
+        boolean liquidWalking = isLiquidWalking(entity, fluidState);
+        
+        if (liquidWalking && entity.isEffectiveAi()) {
+            INonStandPower.getNonStandPowerOptional((LivingEntity) entity).resolve()
+            .flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get()))
+            .ifPresent(hamon -> {
+                hamon.setWaterWalkingThisTick();
+            });
         }
-        boolean doubleShift = player.isShiftKeyDown() && player.getCapability(PlayerUtilCapProvider.CAPABILITY).map(
+        
+        return liquidWalking;
+    }
+    
+    private static boolean isLiquidWalking(LivingEntity entity, FluidState fluidState) {
+        boolean doubleShift = entity.isShiftKeyDown() && entity.getCapability(PlayerUtilCapProvider.CAPABILITY).map(
                 cap -> cap.getDoubleShiftPress()).orElse(false);
         if (doubleShift) {
             return false;
         }
-        
-        return INonStandPower.getNonStandPowerOptional(player).map(power -> {
+
+        return INonStandPower.getNonStandPowerOptional(entity).map(power -> {
             return power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
                 boolean liquidWalking = hamon.isSkillLearned(ModHamonSkills.LIQUID_WALKING.get());
                 if (liquidWalking) {
-                    BlockPos blockPos = new BlockPos(player.position().add(0, -0.3, 0));
-                    FluidState fluidBelow = world.getBlockState(blockPos).getFluidState();
-                    Fluid fluidType = fluidBelow.getType();
-                    if (!fluidBelow.isEmpty() && 
-                            !(fluidType.is(FluidTags.WATER) && player.isOnFire())) {
+                    Fluid fluidType = fluidState.getType();
+                    if (!(fluidType.is(FluidTags.WATER) && entity.isOnFire())) {
                         if (power.getEnergy() > 0) {
-                            player.setOnGround(true);
-                            if (!world.isClientSide() || player.isLocalPlayer()) {
-                                Vector3d deltaMovement = player.getDeltaMovement();
-                                if (player.isShiftKeyDown()) {
-                                    deltaMovement = new Vector3d(deltaMovement.x, 0, deltaMovement.z);
-                                }
-                                else {
-                                    deltaMovement = new Vector3d(deltaMovement.x, Math.max(deltaMovement.y, 0), deltaMovement.z);
-                                }
-                                player.setDeltaMovement(deltaMovement);
-                                player.fallDistance = 0;
-                            }
-    
-                            if (!player.level.isClientSide()) {
+                            entity.setOnGround(true);
+                            if (!entity.level.isClientSide()) {
                                 if (fluidType.is(FluidTags.LAVA) 
-                                        && !player.fireImmune() && !EnchantmentHelper.hasFrostWalker(player)) {
-                                    player.hurt(DamageSource.HOT_FLOOR, 1.0F);
+                                        && !entity.fireImmune() && !EnchantmentHelper.hasFrostWalker(entity)) {
+                                    entity.hurt(DamageSource.HOT_FLOOR, 1.0F);
                                 }
-                                boolean wasWaterWalking = player.getCapability(PlayerUtilCapProvider.CAPABILITY)
-                                        .map(cap -> cap.isWaterWalking()).orElse(false);
-                                power.consumeEnergy(wasWaterWalking ? 1.0F : 50.0F);
+                                power.consumeEnergy(hamon.waterWalkingTickCost());
                             }
                             return true;
                         }
-                        else if (player.isLocalPlayer()) {
+                        else if (entity == ClientUtil.getClientPlayer()) {
                             BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).triggerRedHighlight(1);
                         }
                     }
@@ -543,6 +534,7 @@ public class HamonUtil {
                 return false;
             }).orElse(false);
         }).orElse(false);
+        
     }
     
     

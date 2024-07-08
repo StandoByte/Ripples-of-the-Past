@@ -689,4 +689,52 @@ public class MCUtil {
     public static String getLanguageCode(MinecraftServer server) {
         return server.isDedicatedServer() ? "en_us" : ClientUtil.getCurrentLanguageCode();
     }
+    
+    
+    
+    public static class EntityEvents { // TODO
+        public static final int HURT                           = 2;
+        public static final int SILVERFISH_SPAWN_PARTICLES     = 20;
+        public static final int PLAYER_PERM_LEVEL_0            = 24;
+        public static final int PLAYER_PERM_LEVEL_1            = 25;
+        public static final int PLAYER_PERM_LEVEL_2            = 26;
+        public static final int PLAYER_PERM_LEVEL_3            = 27;
+        public static final int PLAYER_PERM_LEVEL_4            = 28;
+        public static final int SHIELD_BLOCK_SOUND             = 29;
+        public static final int SHIELD_BREAK_SOUND             = 30;
+        public static final int ARMOR_STAND_HIT                = 32;
+        public static final int HURT_THORNS                    = 33;
+        public static final int HURT_DROWN                     = 36;
+        public static final int HURT_ON_FIRE                   = 37;
+        public static final int HURT_SWEET_BERRY_BUSH          = 44;
+        public static final int BREAK_MAIN_HAND_ITEM           = 47;
+        public static final int BREAK_OFF_HAND_ITEM            = 48;
+        public static final int BREAK_HEAD_ITEM                = 49;
+        public static final int BREAK_CHEST_ITEM               = 50;
+        public static final int BREAK_LEGS_ITEM                = 51;
+        public static final int BREAK_FEET_ITEM                = 52;
+        public static final int HONEY_SLIDE_PARTICLES          = 53;
+        public static final int HONEY_JUMP_PARTICLES           = 54;
+        public static final int SWAP_HAND_ITEMS                = 55;
+        /*
+         * VillagerEntity
+         * AnimalEntity
+         * AsbtractHorseEntity
+         * FoxEntity
+         * HoglinEntity
+         * OcelotEntity
+         * RabbitEntity
+         * SheepEntity
+         * TameableEntity
+         * WolfEntity
+         * IronGolemEntity
+         * RavagerEntity
+         * WitchEntity
+         * ZoglinEntity
+         * ZombieVillagerEntity
+         * DolphinEntity
+         * SquidEntity
+         * PlayerEntity
+         */
+    }
 }

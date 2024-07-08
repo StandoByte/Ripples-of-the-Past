@@ -247,6 +247,12 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     }
     
     @Override
+    public void postTickUser(LivingEntity entity, INonStandPower power) {
+        HamonData hamon = power.getTypeSpecificData(this).get();
+        hamon.postTickWaterWalking(entity);
+    }
+    
+    @Override
     public void onNewDay(LivingEntity user, INonStandPower power, long prevDay, long day) {
         if (user instanceof PlayerEntity) {
             HamonData hamon = power.getTypeSpecificData(this).get();

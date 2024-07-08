@@ -95,7 +95,7 @@ public class FrozenLayer<T extends LivingEntity, M extends EntityModel<T>> exten
             if (texture == null) return;
             
             IVertexBuilder vertexBuilder = buffer.getBuffer(RenderType.entityTranslucent(texture));
-            model.renderToBuffer(matrixStack, vertexBuilder, ClientUtil.MAX_MODEL_LIGHT, LivingRenderer.getOverlayCoords(entity, 0.0F), 1.0F, 1.0F, 1.0F, 1.0F);
+            model.renderToBuffer(matrixStack, vertexBuilder, packedLight, LivingRenderer.getOverlayCoords(entity, 0.0F), 1.0F, 1.0F, 1.0F, 1.0F);
         }
     }
     

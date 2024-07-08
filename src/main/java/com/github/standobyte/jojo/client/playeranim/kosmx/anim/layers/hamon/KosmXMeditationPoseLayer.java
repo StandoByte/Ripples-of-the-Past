@@ -1,7 +1,12 @@
-package com.github.standobyte.jojo.modcompat.mod.client.playeranimator.anim.hamon;
+package com.github.standobyte.jojo.client.playeranim.kosmx.anim.layers.hamon;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.modcompat.mod.client.playeranimator.PlayerAnimatorInstalled.AnimLayerHandler;
+import com.github.standobyte.jojo.client.playeranim.IEntityAnimApplier;
+import com.github.standobyte.jojo.client.playeranim.interfaces.HamonMeditationPoseAnim;
+import com.github.standobyte.jojo.client.playeranim.kosmx.KosmXPlayerAnimatorInstalled.AnimLayerHandler;
+import com.github.standobyte.jojo.client.playeranim.kosmx.anim.mob.KosmXHamonMasterAnimApplier;
+import com.github.standobyte.jojo.client.render.entity.model.mob.HamonMasterModel;
+import com.github.standobyte.jojo.entity.mob.HamonMasterEntity;
 
 import dev.kosmx.playerAnim.api.layered.IAnimation;
 import dev.kosmx.playerAnim.api.layered.KeyframeAnimationPlayer;
@@ -10,15 +15,17 @@ import dev.kosmx.playerAnim.api.layered.modifier.AbstractFadeModifier;
 import dev.kosmx.playerAnim.api.layered.modifier.SpeedModifier;
 import dev.kosmx.playerAnim.core.data.KeyframeAnimation;
 import dev.kosmx.playerAnim.core.util.Ease;
+import dev.kosmx.playerAnim.impl.IMutableModel;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationRegistry;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-public class MeditationPoseLayer extends AnimLayerHandler {
+public class KosmXMeditationPoseLayer extends AnimLayerHandler implements HamonMeditationPoseAnim {
 
-    public MeditationPoseLayer(ResourceLocation id) {
+    public KosmXMeditationPoseLayer(ResourceLocation id) {
         super(id);
     }
 
@@ -26,20 +33,34 @@ public class MeditationPoseLayer extends AnimLayerHandler {
     protected ModifierLayer<IAnimation> createAnimLayer(AbstractClientPlayerEntity player) {
         return new ModifierLayer<>(null);
     }
-
+    
+    
     private static final ResourceLocation SIT_DOWN_PATH = new ResourceLocation(JojoMod.MOD_ID, "meditation");
 //    private static final ResourceLocation STAND_UP_PATH = new ResourceLocation(JojoMod.MOD_ID, "meditation_stand_up");
-    public void setAnimEnabled(AbstractClientPlayerEntity player, boolean enabled) {
+    @Override
+    public boolean setAnimEnabled(PlayerEntity player, boolean enabled) {
         if (enabled) {
-            setAnimFromName(player, SIT_DOWN_PATH);
+            return setAnimFromName(player, SIT_DOWN_PATH);
         }
         else {
 //            setAnimFromName(player, STAND_UP_PATH);
-            fadeOutAnim(player, AbstractFadeModifier.standardFadeIn(4, Ease.OUTCUBIC), null);
+            return fadeOutAnim(player, AbstractFadeModifier.standardFadeIn(4, Ease.OUTCUBIC), null);
         }
     }
     
-    public IAnimation getHamonMasterAnim() {
+    @Override
+    public IEntityAnimApplier<HamonMasterEntity, HamonMasterModel> initHamonMasterPose(HamonMasterModel model) {
+        if (model instanceof IMutableModel) {
+            IMutableModel modelWithMixin = ((IMutableModel) model);
+            IEntityAnimApplier<HamonMasterEntity, HamonMasterModel> animApplier;
+            animApplier = new KosmXHamonMasterAnimApplier(model, modelWithMixin, getHamonMasterAnim());
+            animApplier.onInit();
+            return animApplier;
+        }
+        return HamonMeditationPoseAnim.super.initHamonMasterPose(model);
+    }
+    
+    protected IAnimation getHamonMasterAnim() {
         KeyframeAnimation keyframes = PlayerAnimationRegistry.getAnimation(SIT_DOWN_PATH);
         if (keyframes != null) {
             ModifierLayer<IAnimation> anim = new ModifierLayer<>(new KeyframeAnimationPlayer(keyframes, keyframes.returnToTick));
@@ -48,7 +69,8 @@ public class MeditationPoseLayer extends AnimLayerHandler {
         }
         return null;
     }
-
+    
+    
     @Override
     public boolean isForgeEventHandler() {
         return true;

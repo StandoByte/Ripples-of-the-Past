@@ -43,8 +43,10 @@ import net.minecraft.entity.passive.horse.ZombieHorseEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.ProjectileHelper;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.INBT;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.Effects;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
@@ -60,6 +62,9 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.ForgeMod;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.Capability.IStorage;
+import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 
@@ -253,19 +258,29 @@ public class JojoModUtil {
                 : player.getCapability(PlayerUtilCapProvider.CAPABILITY).map(PlayerUtilCap::hasClientInput).orElse(false);
     }
     
-    
 
+
+    @Deprecated
     public static boolean isUndead(LivingEntity entity) {
+        return isUndeadOrVampiric(entity);
+    }
+
+    @Deprecated
+    public static boolean isPlayerUndead(PlayerEntity player) {
+        return isPlayerJojoVampiric(player);
+    }
+
+    public static boolean isUndeadOrVampiric(LivingEntity entity) {
         if (entity.getMobType() == CreatureAttribute.UNDEAD) {
             return true;
         }
         if (entity instanceof PlayerEntity) {
-            return isPlayerUndead((PlayerEntity) entity);
+            return isPlayerJojoVampiric((PlayerEntity) entity);
         }
         return false;
     }
 
-    public static boolean isPlayerUndead(PlayerEntity player) {
+    public static boolean isPlayerJojoVampiric(PlayerEntity player) {
         return INonStandPower.getNonStandPowerOptional(player).map(power -> {
             NonStandPowerType<?> powerType = power.getType();
             return powerType == ModPowers.VAMPIRISM.get()     || 
@@ -275,13 +290,13 @@ public class JojoModUtil {
     }
     
     public static boolean isAffectedByHamon(LivingEntity entity) {
-        if (!ModTags.NO_HAMON_DAMAGE.contains(entity.getType())) {
+        if (ModTags.NO_HAMON_DAMAGE.contains(entity.getType())) {
             return false;
         }
         if (ModTags.HAMON_DAMAGE.contains(entity.getType())) {
             return true;
         }
-        return JojoModUtil.isUndead(entity) || OptionalDependencyHelper.vampirism().isEntityVampire(entity);
+        return JojoModUtil.isUndeadOrVampiric(entity) || OptionalDependencyHelper.vampirism().isEntityVampire(entity);
     }
 
     public static boolean canBleed(LivingEntity entity) {
@@ -392,6 +407,21 @@ public class JojoModUtil {
     @Deprecated
     public static boolean useShiftVar(LivingEntity user) {
         return user.isShiftKeyDown();
+    }
+    
+    
+    public static <T extends INBTSerializable<N>, N extends INBT> IStorage<T> makeSerializableStorage() {
+        return new IStorage<T>() {
+            @Override public INBT writeNBT(Capability<T> capability, T instance, Direction side) { return instance.serializeNBT(); }
+            @Override public void readNBT(Capability<T> capability, T instance, Direction side, INBT nbt) { instance.deserializeNBT((N) nbt); }
+        };
+    }
+    
+    public static <T> IStorage<T> noStorage() {
+        return new IStorage<T>() {
+            @Override public INBT writeNBT(Capability<T> capability, T instance, Direction side) { return null; }
+            @Override public void readNBT(Capability<T> capability, T instance, Direction side, INBT nbt) {}
+        };
     }
     
     

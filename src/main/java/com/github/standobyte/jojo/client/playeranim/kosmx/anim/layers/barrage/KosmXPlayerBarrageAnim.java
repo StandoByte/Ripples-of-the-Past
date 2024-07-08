@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.modcompat.mod.client.playeranimator.anim.hamon;
+package com.github.standobyte.jojo.client.playeranim.kosmx.anim.layers.barrage;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -31,7 +31,7 @@ import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
 
-public class PlayerBarrageAnim implements IAnimation, IModelPose<AbstractClientPlayerEntity> {
+public class KosmXPlayerBarrageAnim implements IAnimation, IModelPose<AbstractClientPlayerEntity> {
     private final KeyframeAnimation data;
     private boolean isRunning = true;
     private int currentTick;
@@ -43,7 +43,7 @@ public class PlayerBarrageAnim implements IAnimation, IModelPose<AbstractClientP
     private final Map<String, IBendHelper> sameModelPartsBendable;
     private final PlayerModel<AbstractClientPlayerEntity> model;
 
-    public PlayerBarrageAnim(PlayerModel<AbstractClientPlayerEntity> model) {
+    public KosmXPlayerBarrageAnim(PlayerModel<AbstractClientPlayerEntity> model) {
         KeyframeAnimation emote = PlayerAnimationRegistry.getAnimation(new ResourceLocation(JojoMod.MOD_ID, "punch_barrage"));
         this.data = emote;
         this.bodyParts = new HashMap<>(emote.getBodyParts().size());
