@@ -17,9 +17,11 @@ import net.minecraft.util.Direction;
 @SuppressWarnings("deprecation")
 public class StandDiscISTERModel implements IBakedModel {
     private IBakedModel existingModel;
+    private ItemOverrideList standOverrides;
 
     public StandDiscISTERModel(IBakedModel existingModel) {
         this.existingModel = existingModel;
+        this.standOverrides = new StandDiscOverrideList(existingModel.getOverrides());
     }
 
     @Override
@@ -59,6 +61,6 @@ public class StandDiscISTERModel implements IBakedModel {
 
     @Override
     public ItemOverrideList getOverrides() {
-        return this.existingModel.getOverrides();
+        return standOverrides;
     }
 }
