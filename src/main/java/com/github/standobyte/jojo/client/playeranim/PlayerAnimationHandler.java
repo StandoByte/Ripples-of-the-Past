@@ -57,7 +57,7 @@ public class PlayerAnimationHandler {
 
         @Override
         public BasicToggleAnim registerBasicAnimLayer(String classNameWithKosmXMod, ResourceLocation id, int priority) {
-            return registerAnimLayer(classNameWithKosmXMod, id, priority, BasicToggleAnim.NoPlayerAnimator::new);
+            return registerAnimLayer(classNameWithKosmXMod, id, priority, () -> BasicToggleAnim.NoPlayerAnimator.DUMMY);
         }
 
         @Override
