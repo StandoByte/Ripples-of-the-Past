@@ -526,7 +526,7 @@ public class HamonUtil {
                             }
                             return true;
                         }
-                        else if (entity == ClientUtil.getClientPlayer()) {
+                        else if (entity.level.isClientSide() && entity == ClientUtil.getClientPlayer()) {
                             BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).triggerRedHighlight(1);
                         }
                     }
