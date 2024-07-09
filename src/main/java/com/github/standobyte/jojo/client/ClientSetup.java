@@ -96,6 +96,7 @@ import com.github.standobyte.jojo.client.render.entity.renderer.stand.TheWorldRe
 import com.github.standobyte.jojo.client.render.item.RoadRollerBakedModel;
 import com.github.standobyte.jojo.client.render.item.generic.ItemISTERModelWrapper;
 import com.github.standobyte.jojo.client.render.item.standdisc.StandDiscISTERModel;
+import com.github.standobyte.jojo.client.render.item.standdisc.StandDiscOverrideList;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.loopplayer.LoopPlayerHandler;
@@ -120,6 +121,7 @@ import com.github.standobyte.jojo.item.StandArrowItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
 import com.github.standobyte.jojo.item.cassette.CassetteCap;
+import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 
 import net.minecraft.client.Minecraft;
@@ -157,6 +159,7 @@ import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
+import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
@@ -417,6 +420,10 @@ public class ClientSetup {
         if (!spritesAdded) {
             addUnreferencedBlockModels(MagiciansRedRenderer.MR_FIRE_0, MagiciansRedRenderer.MR_FIRE_1);
             spritesAdded = true;
+        }
+        
+        for (StandType<?> standType : JojoCustomRegistries.STANDS.getRegistry().getValues()) {
+            ModelLoader.addSpecialModel(StandDiscOverrideList.makeStandSpecificModelPath(standType));
         }
     }
     
