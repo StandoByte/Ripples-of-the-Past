@@ -13,8 +13,10 @@ import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
 import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler.BendablePart;
 import com.github.standobyte.jojo.init.ModParticles;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -57,6 +59,7 @@ public class EnergyRippleLayer<T extends LivingEntity, M extends BipedModel<T>> 
         
         M model = getParentModel();
         sparksHandler.updateSparks(ticks, model);
+//        sparksHandler.addHandSparks(HandSide.LEFT, ticks, model, 4, ModParticles.HAMON_SPARK.get(), entity);
         
         Minecraft mc = Minecraft.getInstance();
         ActiveRenderInfo camera = mc.gameRenderer.getMainCamera();
@@ -89,6 +92,7 @@ public class EnergyRippleLayer<T extends LivingEntity, M extends BipedModel<T>> 
         }
         
         sparksHandler.render(matrixStack, bufferBuilder, avector3f, model);
+        sparksHandler.afterFrameRender(ticks);
         
         particleRenderType.end(tessellator);
         RenderSystem.depthMask(true);
@@ -127,7 +131,6 @@ public class EnergyRippleLayer<T extends LivingEntity, M extends BipedModel<T>> 
         public void updateSparks(float time, BipedModel<?> model) {
             if (Minecraft.getInstance().isPaused()) return;
             float delta = time - ticksPrev;
-            ticksPrev = time;
             if (delta < 0) return;
             
             Iterator<SparkWave> wIt = sparkWaves.iterator();
@@ -138,14 +141,6 @@ public class EnergyRippleLayer<T extends LivingEntity, M extends BipedModel<T>> 
                 }
             }
             
-            Iterator<SparkPseudoParticle> spIt = sparks.iterator();
-            while (spIt.hasNext()) {
-                SparkPseudoParticle spark = spIt.next();
-                if (spark.addTimeDelta(delta)) {
-                    spIt.remove();
-                }
-            }
-            
             ParticleType<?> particle = sparkForCurrentWave();
             if (particle != null) {
                 int t1 = (int) (time / WAVES_GAP);
@@ -153,6 +148,38 @@ public class EnergyRippleLayer<T extends LivingEntity, M extends BipedModel<T>> 
                 int waves = t1 - t2;
                 for (int i = 0; i < waves; i++) {
                     sparkWaves.add(new SparkWave(time - WAVES_GAP * (t2 + i + 1), particle));
+                }
+            }
+        }
+        
+        public void addHandSparks(HandSide hand, float time, BipedModel<?> model, 
+                float intensity, ParticleType<?> particleType, LivingEntity hamonUser) {
+            if (Minecraft.getInstance().isPaused()) return;
+            float delta = time - ticksPrev;
+            if (delta < 0) return;
+            int particles = MathUtil.fractionRandomInc(intensity * delta);
+            int controlLevel = INonStandPower.getNonStandPowerOptional(entity).resolve()
+                    .flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get()))
+                    .map(hamon -> hamon.getHamonControlLevel())
+                    .orElse(0);
+            for (int i = 0; i < particles; i++) {
+                Vector3d offset = new Vector3d(
+                        (RANDOM.nextDouble() - 0.5) * 0.4,
+                        RANDOM.nextDouble() * (0.5 - 0.4 * controlLevel / HamonData.MAX_STAT_LEVEL) - 0.65,
+                        (RANDOM.nextDouble() - 0.5) * 0.4);
+                sparks.add(SparkPseudoParticle.armSpark(model, hand == HandSide.RIGHT, particleType, offset));
+            }
+        }
+        
+        public void afterFrameRender(float time) {
+            float delta = time - ticksPrev;
+            ticksPrev = time;
+            
+            Iterator<SparkPseudoParticle> spIt = sparks.iterator();
+            while (spIt.hasNext()) {
+                SparkPseudoParticle spark = spIt.next();
+                if (spark.addTimeDelta(delta)) {
+                    spIt.remove();
                 }
             }
         }
@@ -185,14 +212,18 @@ public class EnergyRippleLayer<T extends LivingEntity, M extends BipedModel<T>> 
                 for (int i = 0; i < sparkCountInt; i++) {
                     if (progress <= 0.25F) {
                         double y = (progress / 0.25F - 1) * 0.75;
-                        sparksList.add(legSpark(y, model, RANDOM.nextBoolean()));
+                        sparksList.add(SparkPseudoParticle.legSpark(model, RANDOM.nextBoolean(), 
+                                particleType, randomSideOffset(0.25, y, 0.25)));
                     }
                     else if (/*0.25F < */ progress <= 0.5F) {
                         double y = ((progress - 0.25F) / (0.5F - 0.25F) - 1) * 0.75;
-                        sparksList.add(torsoSpark(y, model));
-                        sparksList.add(armSpark(y + 0.15, model, entity.getMainArm() == HandSide.LEFT));
+                        sparksList.add(SparkPseudoParticle.torsoSpark(model, 
+                                particleType, randomSideOffset(0.5, y, 0.25)));
+                        sparksList.add(SparkPseudoParticle.armSpark(model, entity.getMainArm() == HandSide.LEFT, 
+                                particleType, randomSideOffset(0.25, y + 0.15, 0.25)));
                         if (0.3333F <= progress) {
-                            sparksList.add(headSpark(-y, model));
+                            sparksList.add(SparkPseudoParticle.headSpark(model, 
+                                    particleType, randomSideOffset(0.5, y, 0.5)));
                         }
                     }
                     else /*if (0.5F < progress)*/ {
@@ -200,39 +231,11 @@ public class EnergyRippleLayer<T extends LivingEntity, M extends BipedModel<T>> 
                         double y = r * -0.75 + 0.15 + (RANDOM.nextDouble() - 0.5) * 0.375 * r;
                         y = Math.max(y, -0.625);
 
-                        sparksList.add(armSpark(y, model, entity.getMainArm() == HandSide.RIGHT));
+                        sparksList.add(SparkPseudoParticle.armSpark(model, entity.getMainArm() == HandSide.RIGHT, 
+                                particleType, randomSideOffset(0.25, y, 0.25)));
                     }
                 }
                 return (progress += timeDelta / WAVE_DURATION) >= 1;
-            }
-            
-            private SparkPseudoParticle legSpark(double y, BipedModel<?> model, boolean right) {
-                ModelRenderer modelPart = right ? model.rightLeg : model.leftLeg;
-                Vector3d offset = randomSideOffset(0.25, y, 0.25);
-                offset = bendOffset(offset, model, 
-                        right ? BendablePart.RIGHT_LEG : BendablePart.LEFT_LEG, -0.375);
-                return new SparkPseudoParticle(particleType, modelPart, offset);
-            }
-
-            private SparkPseudoParticle armSpark(double y, BipedModel<?> model, boolean right) {
-                ModelRenderer modelPart = right ? model.rightArm : model.leftArm;
-                double xPivot = right ? -0.0625 : 0.0625;
-                Vector3d offset = randomSideOffset(0.25, y, 0.25);
-                offset = bendOffset(offset, model, 
-                        right ? BendablePart.RIGHT_ARM : BendablePart.LEFT_ARM, -0.225);
-                return new SparkPseudoParticle(particleType, modelPart, offset.add(xPivot, 0, 0));
-            }
-            
-            private SparkPseudoParticle torsoSpark(double y, BipedModel<?> model) {
-                Vector3d offset = randomSideOffset(0.5, y, 0.25);
-                offset = bendOffset(offset, model, 
-                        BendablePart.TORSO, -0.375);
-                return new SparkPseudoParticle(particleType, model.body, offset);
-            }
-            
-            private SparkPseudoParticle headSpark(double y, BipedModel<?> model) {
-                Vector3d offset = randomSideOffset(0.5, y, 0.5);
-                return new SparkPseudoParticle(particleType, model.head, offset);
             }
         }
         
@@ -303,6 +306,31 @@ public class EnergyRippleLayer<T extends LivingEntity, M extends BipedModel<T>> 
                 this.y = pos.y;
                 this.z = pos.z;
                 this.scale = 0.04F + RANDOM.nextFloat() * 0.02F;
+            }
+            
+            static SparkPseudoParticle legSpark(BipedModel<?> model, boolean right, ParticleType<?> particleType, Vector3d offset) {
+                ModelRenderer modelPart = right ? model.rightLeg : model.leftLeg;
+                offset = bendOffset(offset, model, 
+                        right ? BendablePart.RIGHT_LEG : BendablePart.LEFT_LEG, -0.375);
+                return new SparkPseudoParticle(particleType, modelPart, offset);
+            }
+
+            static SparkPseudoParticle armSpark(BipedModel<?> model, boolean right, ParticleType<?> particleType, Vector3d offset) {
+                ModelRenderer modelPart = right ? model.rightArm : model.leftArm;
+                double xPivot = right ? -0.0625 : 0.0625;
+                offset = bendOffset(offset, model, 
+                        right ? BendablePart.RIGHT_ARM : BendablePart.LEFT_ARM, -0.225);
+                return new SparkPseudoParticle(particleType, modelPart, offset.add(xPivot, 0, 0));
+            }
+            
+            static SparkPseudoParticle torsoSpark(BipedModel<?> model, ParticleType<?> particleType, Vector3d offset) {
+                offset = bendOffset(offset, model, 
+                        BendablePart.TORSO, -0.375);
+                return new SparkPseudoParticle(particleType, model.body, offset);
+            }
+            
+            static SparkPseudoParticle headSpark(BipedModel<?> model, ParticleType<?> particleType, Vector3d offset) {
+                return new SparkPseudoParticle(particleType, model.head, offset);
             }
             
             private boolean addTimeDelta(float delta) {

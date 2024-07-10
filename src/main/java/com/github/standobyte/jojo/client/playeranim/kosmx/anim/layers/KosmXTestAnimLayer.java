@@ -5,6 +5,7 @@ import com.github.standobyte.jojo.client.playeranim.kosmx.KosmXPlayerAnimatorIns
 import dev.kosmx.playerAnim.api.layered.IAnimation;
 import dev.kosmx.playerAnim.api.layered.ModifierLayer;
 import dev.kosmx.playerAnim.api.layered.modifier.AbstractFadeModifier;
+import dev.kosmx.playerAnim.api.layered.modifier.SpeedModifier;
 import dev.kosmx.playerAnim.core.util.Ease;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
@@ -13,6 +14,7 @@ import net.minecraftforge.client.event.ClientChatEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class KosmXTestAnimLayer extends AnimLayerHandler {
+    private SpeedModifier animSpeed = new SpeedModifier(1);
 
     public KosmXTestAnimLayer(ResourceLocation id) {
         super(id);
@@ -20,7 +22,9 @@ public class KosmXTestAnimLayer extends AnimLayerHandler {
 
     @Override
     public ModifierLayer<IAnimation> createAnimLayer(AbstractClientPlayerEntity player) {
-        return new ModifierLayer<>(null);
+        ModifierLayer<IAnimation> layer = new ModifierLayer<>(null);
+        layer.addModifierLast(animSpeed);
+        return layer;
     }
     
     @Override
@@ -33,20 +37,40 @@ public class KosmXTestAnimLayer extends AnimLayerHandler {
         String[] msg = event.getMessage().split(" ");
         if (msg.length > 0 && "/animtest".equals(msg[0])) {
             AbstractClientPlayerEntity player = Minecraft.getInstance().player;
-            if (msg.length == 2) {
+            ResourceLocation animName = null;
+            int fadeOutTicks = -1;
+            float speedModifier = -1;
+            switch (msg.length) {
+            case 3:
+                animName = new ResourceLocation(msg[1]);
                 try {
-                    int fadeOut = Integer.parseInt(msg[1]);
-                    if (fadeOut > 0) {
-                        fadeOutAnim(player, AbstractFadeModifier.standardFadeIn(10, Ease.OUTCUBIC), null);
-                    }
+                    speedModifier = Float.parseFloat(msg[2]);
+                }
+                catch (NumberFormatException e) {}
+                break;
+            case 2:
+                try {
+                    fadeOutTicks = Integer.parseInt(msg[1]);
                 }
                 catch (NumberFormatException e) {
-                    ResourceLocation animPath = new ResourceLocation(msg[1]);
-                    setAnimFromName(player, animPath);
+                    animName = new ResourceLocation(msg[1]);
+                }
+                break;
+            case 1:
+                break;
+            }
+            
+            if (animName != null) {
+                setAnimFromName(player, animName);
+                if (speedModifier > 0) {
+                    animSpeed.speed = speedModifier;
                 }
             }
-            else if (msg.length == 1) {
-                getAnimLayer(player).setAnimation(null);
+            else if (fadeOutTicks > 0) {
+                fadeOutAnim(player, AbstractFadeModifier.standardFadeIn(fadeOutTicks, Ease.OUTCUBIC), null);
+            }
+            else {
+                setAnim(player, null);
             }
             event.setCanceled(true);
         }

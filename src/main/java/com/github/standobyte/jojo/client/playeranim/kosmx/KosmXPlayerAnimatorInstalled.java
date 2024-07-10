@@ -91,9 +91,13 @@ public class KosmXPlayerAnimatorInstalled extends PlayerAnimationHandler.PlayerA
     @Override
     public float[] getBend(BipedModel<?> model, BendablePart part) {
         if (Helper.isBendEnabled() && model instanceof IMutableModel) {
-            IBendHelper mutablePart = getMutablePart((IMutableModel) model, part);
-            if (mutablePart != null) {
-                return KosmXBendyLibHelper.getBend(mutablePart);
+            IMutableModel bendyModel = (IMutableModel) model;
+            AnimationProcessor anim = bendyModel.getEmoteSupplier().get();
+            if (anim != null && anim.isActive()) {
+                IBendHelper mutablePart = getMutablePart(bendyModel, part);
+                if (mutablePart != null) {
+                    return KosmXBendyLibHelper.getBend(mutablePart);
+                }
             }
         }
         return super.getBend(model, part);
