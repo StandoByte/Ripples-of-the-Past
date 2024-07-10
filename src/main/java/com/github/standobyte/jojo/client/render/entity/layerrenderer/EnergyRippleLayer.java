@@ -3,11 +3,13 @@ package com.github.standobyte.jojo.client.render.entity.layerrenderer;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.Optional;
 import java.util.Random;
 
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
@@ -49,17 +51,40 @@ public class EnergyRippleLayer<T extends LivingEntity, M extends BipedModel<T>> 
         super(renderer);
     }
     
-
+    @Nullable
+    public static ParticleType<?> addHamonSparksWave(LivingEntity entity) {
+        if (GeneralUtil.orElseFalse(INonStandPower.getNonStandPowerOptional(entity), 
+                power -> power.getHeldAction() == ModHamonActions.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE_BARRAGE.get()) || 
+            GeneralUtil.orElseFalse(entity.getCapability(PlayerUtilCapProvider.CAPABILITY), 
+                cap -> cap.getContinuousActionIfItIs(ModHamonActions.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE_BARRAGE.get()).isPresent())) {
+            return ModParticles.HAMON_SPARK_YELLOW.get();
+        }
+        return null;
+    }
+    
+    @Nullable
+    public static ParticleType<?> addHandHamonSparks(LivingEntity entity, HandSide hand) {
+        if (entity.getCapability(LivingUtilCapProvider.CAPABILITY).map(
+                entityData -> entityData.isHamonWallClimbing()).orElse(false)) {
+            return ModParticles.HAMON_SPARK.get();
+        }
+        return null;
+    }
+    
+    
+    @SuppressWarnings("deprecation")
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, 
             T entity, float walkAnimPos, float walkAnimSpeed, float partialTick, 
             float ticks, float headYRotation, float headXRotation) {
         HamonEnergyRippleHandler sparksHandler = getSparksHandler(entity);
         if (sparksHandler == null) return;
+        Optional<HamonData> hamon = INonStandPower.getNonStandPowerOptional(entity).resolve()
+                .flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get()));
+        if (!hamon.isPresent()) return;
         
         M model = getParentModel();
-        sparksHandler.updateSparks(ticks, model);
-//        sparksHandler.addHandSparks(HandSide.LEFT, ticks, model, 4, ModParticles.HAMON_SPARK.get(), entity);
+        sparksHandler.updateSparks(ticks, model, hamon.get());
         
         Minecraft mc = Minecraft.getInstance();
         ActiveRenderInfo camera = mc.gameRenderer.getMainCamera();
@@ -117,18 +142,7 @@ public class EnergyRippleLayer<T extends LivingEntity, M extends BipedModel<T>> 
             this.entity = entity;
         }
         
-        @Nullable
-        private ParticleType<?> sparkForCurrentWave() {
-            if (GeneralUtil.orElseFalse(INonStandPower.getNonStandPowerOptional(entity), 
-                    power -> power.getHeldAction() == ModHamonActions.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE_BARRAGE.get()) || 
-                GeneralUtil.orElseFalse(entity.getCapability(PlayerUtilCapProvider.CAPABILITY), 
-                    cap -> cap.getContinuousActionIfItIs(ModHamonActions.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE_BARRAGE.get()).isPresent())) {
-                return ModParticles.HAMON_SPARK_YELLOW.get();
-            }
-            return null;
-        }
-
-        public void updateSparks(float time, BipedModel<?> model) {
+        public void updateSparks(float time, BipedModel<?> model, HamonData entityHamon) {
             if (Minecraft.getInstance().isPaused()) return;
             float delta = time - ticksPrev;
             if (delta < 0) return;
@@ -141,33 +155,36 @@ public class EnergyRippleLayer<T extends LivingEntity, M extends BipedModel<T>> 
                 }
             }
             
-            ParticleType<?> particle = sparkForCurrentWave();
-            if (particle != null) {
-                int t1 = (int) (time / WAVES_GAP);
-                int t2 = (int) ((time - delta) / WAVES_GAP);
-                int waves = t1 - t2;
-                for (int i = 0; i < waves; i++) {
-                    sparkWaves.add(new SparkWave(time - WAVES_GAP * (t2 + i + 1), particle));
+            // spark waves (Sunlight Yellow Overdrive Barrage charge)
+            int t1 = (int) (time / WAVES_GAP);
+            int t2 = (int) ((time - delta) / WAVES_GAP);
+            int waves = t1 - t2;
+            if (waves > 0) {
+                ParticleType<?> particle = addHamonSparksWave(entity);
+                if (particle != null) {
+                    for (int i = 0; i < waves; i++) {
+                        sparkWaves.add(new SparkWave(time - WAVES_GAP * (t2 + i + 1), particle));
+                    }
                 }
             }
-        }
-        
-        public void addHandSparks(HandSide hand, float time, BipedModel<?> model, 
-                float intensity, ParticleType<?> particleType, LivingEntity hamonUser) {
-            if (Minecraft.getInstance().isPaused()) return;
-            float delta = time - ticksPrev;
-            if (delta < 0) return;
-            int particles = MathUtil.fractionRandomInc(intensity * delta);
-            int controlLevel = INonStandPower.getNonStandPowerOptional(entity).resolve()
-                    .flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get()))
-                    .map(hamon -> hamon.getHamonControlLevel())
-                    .orElse(0);
-            for (int i = 0; i < particles; i++) {
-                Vector3d offset = new Vector3d(
-                        (RANDOM.nextDouble() - 0.5) * 0.4,
-                        RANDOM.nextDouble() * (0.5 - 0.4 * controlLevel / HamonData.MAX_STAT_LEVEL) - 0.65,
-                        (RANDOM.nextDouble() - 0.5) * 0.4);
-                sparks.add(SparkPseudoParticle.armSpark(model, hand == HandSide.RIGHT, particleType, offset));
+            
+            // hand sparks (wall climbing)
+            float handSparkIntensity = 4;
+            int particles = MathUtil.fractionRandomInc(handSparkIntensity * delta);
+            if (particles > 0) {
+                for (HandSide hand : HandSide.values()) {
+                    ParticleType<?> particle = addHandHamonSparks(entity, hand);
+                    if (particle != null) {
+                        int controlLevel = entityHamon.getHamonControlLevel();
+                        for (int i = 0; i < particles; i++) {
+                            Vector3d offset = new Vector3d(
+                                    (RANDOM.nextDouble() - 0.5) * 0.4,
+                                    RANDOM.nextDouble() * (0.5 - 0.4 * controlLevel / HamonData.MAX_STAT_LEVEL) - 0.65,
+                                    (RANDOM.nextDouble() - 0.5) * 0.4);
+                            sparks.add(SparkPseudoParticle.armSpark(model, hand == HandSide.RIGHT, particle, offset));
+                        }
+                    }
+                }
             }
         }
         

@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
+import com.github.standobyte.jojo.client.playeranim.ModPlayerAnimations;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClStopWallClimbPacket;
@@ -77,6 +78,12 @@ public class HamonWallClimbing2 extends HamonAction {
                     Direction face = target.getFace();
                     float yRot = 180 - face.toYRot();
                     if (!cap.isWallClimbing() || cap.getWallClimbYRot().orElseGet(() -> yRot) != yRot) {
+                        Vector3d vecToBlock = Vector3d.atLowerCornerOf(face.getOpposite().getNormal()).scale(MAX_WALL_DISTANCE);
+                        Vector3d collide = MCUtil.collide(user, vecToBlock);
+                        double distanceFromWall = user.getBbWidth() * 0.25;
+                        Vector3d moveTo = user.position().add(collide).add(Vector3d.atLowerCornerOf(face.getNormal()).scale(distanceFromWall));
+                        user.teleportTo(moveTo.x, moveTo.y, moveTo.z);
+                        
                         cap.setWallClimbing(true, true, -1, OptionalFloat.of(yRot));
                         if (user instanceof PlayerEntity) {
                             ((PlayerEntity) user).displayClientMessage(new TranslationTextComponent(
@@ -119,6 +126,9 @@ public class HamonWallClimbing2 extends HamonAction {
                 boolean canPullUp = false;
 
                 Vector3d movement = new Vector3d(inputVec.x * 0.75, inputVec.z, 0);
+                if (inputVec.x != 0 && inputVec.z != 0) {
+                    movement = movement.scale(0.8);
+                }
                 if (movement.lengthSqr() > 1) {
                     movement = movement.normalize();
                 }
@@ -186,6 +196,8 @@ public class HamonWallClimbing2 extends HamonAction {
                 movement = player.getDeltaMovement();
                 
                 player.calculateEntityAnimation(player, false);
+                
+                ModPlayerAnimations.wallClimbing.setAnimSpeed(player, (float) climbSpeed / MIN_MOVEMENT_SPEED);
 
 //                player.checkMovementStatistics(player.getX() - xPrev, player.getY() - yPrev, player.getZ() - zPrev); // doesn't do anything anyway
                 return true;
@@ -193,6 +205,7 @@ public class HamonWallClimbing2 extends HamonAction {
         }
         return false;
     }
+    private static final float MIN_MOVEMENT_SPEED = 0.06f;
     
     private static void stopWallClimbing(PlayerEntity player, LivingUtilCap wallClimbing) {
         if (!player.level.isClientSide()) {

@@ -5,6 +5,7 @@ import com.github.standobyte.jojo.client.playeranim.interfaces.BasicToggleAnim;
 import com.github.standobyte.jojo.client.playeranim.interfaces.HamonMeditationPoseAnim;
 import com.github.standobyte.jojo.client.playeranim.interfaces.HamonSYOBAnim;
 import com.github.standobyte.jojo.client.playeranim.interfaces.PlayerBarrageAnim;
+import com.github.standobyte.jojo.client.playeranim.interfaces.WallClimbAnim;
 
 import net.minecraft.util.ResourceLocation;
 
@@ -12,6 +13,7 @@ public class ModPlayerAnimations {
     public static HamonMeditationPoseAnim meditationPoseAnim;
     public static PlayerBarrageAnim playerBarrageAnim;
     public static BasicToggleAnim hamonBreath;
+    public static WallClimbAnim wallClimbing;
     public static HamonSYOBAnim syoBarrage;
     
     public static void init() {
@@ -33,6 +35,11 @@ public class ModPlayerAnimations {
                 "com.github.standobyte.jojo.client.playeranim.kosmx.anim.layers.hamon.KosmXSYOBLayer",
                 new ResourceLocation(JojoMod.MOD_ID, "syo_barrage"), 1, 
                 HamonSYOBAnim.NoPlayerAnimator::new);
+        
+        wallClimbing = PlayerAnimationHandler.getPlayerAnimator().registerAnimLayer(
+                "com.github.standobyte.jojo.client.playeranim.kosmx.anim.layers.hamon.KosmXWallClimbLayer",
+                new ResourceLocation(JojoMod.MOD_ID, "wall_climb"), 1, 
+                WallClimbAnim.NoPlayerAnimator::new);
         
         PlayerAnimationHandler.getPlayerAnimator().registerAnimLayer(
                 "com.github.standobyte.jojo.client.playeranim.kosmx.anim.layers.KosmXTestAnimLayer",
