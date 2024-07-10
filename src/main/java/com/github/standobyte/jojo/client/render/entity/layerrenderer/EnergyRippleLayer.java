@@ -383,4 +383,45 @@ public class EnergyRippleLayer<T extends LivingEntity, M extends BipedModel<T>> 
             }
         }
     }
+    
+    
+    public static Vector3d handTipPos(BipedModel<?> posedModel, HandSide hand, Vector3d offset, float yBodyRot) {
+        double scale = 0.9375;
+        boolean right = hand == HandSide.RIGHT;
+        offset = offset.add(0, -0.65, 0);
+        
+        ModelRenderer modelPart = right ? posedModel.rightArm : posedModel.leftArm;
+        double xPivot = right ? -0.0625 : 0.0625;
+        offset = HamonEnergyRippleHandler.bendOffset(offset, posedModel, 
+                right ? BendablePart.RIGHT_ARM : BendablePart.LEFT_ARM, -0.225);
+        offset = offset.add(xPivot, 0, 0);
+        
+        
+        Vector3d pos = new Vector3d(modelPart.x / 16, 1.5 - modelPart.y / 16, modelPart.z / 16);
+        if (modelPart.zRot != 0.0F) {
+            pos = pos.zRot(-modelPart.zRot);
+        }
+        if (modelPart.yRot != 0.0F) {
+            pos = pos.yRot(modelPart.yRot);
+        }
+        if (modelPart.xRot != 0.0F) {
+            pos = pos.xRot(modelPart.xRot);
+        }
+        
+        pos = pos.add(offset.x, offset.y, offset.z);
+        if (modelPart.xRot != 0.0F) {
+            pos = pos.xRot(-modelPart.xRot);
+        }
+        if (modelPart.yRot != 0.0F) {
+            pos = pos.yRot(-modelPart.yRot);
+        }
+        if (modelPart.zRot != 0.0F) {
+            pos = pos.zRot(modelPart.zRot);
+        }
+        
+        pos = pos.yRot(-yBodyRot * MathUtil.DEG_TO_RAD);
+        pos = pos.scale(scale);
+        
+        return pos;
+    }
 }
