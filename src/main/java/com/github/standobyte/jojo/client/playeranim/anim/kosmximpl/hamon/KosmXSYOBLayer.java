@@ -1,7 +1,7 @@
-package com.github.standobyte.jojo.client.playeranim.kosmx.anim.layers.hamon;
+package com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.hamon;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.client.playeranim.interfaces.HamonSYOBAnim;
+import com.github.standobyte.jojo.client.playeranim.anim.interfaces.HamonSYOBAnim;
 import com.github.standobyte.jojo.client.playeranim.kosmx.KosmXPlayerAnimatorInstalled.AnimLayerHandler;
 
 import dev.kosmx.playerAnim.api.layered.IAnimation;

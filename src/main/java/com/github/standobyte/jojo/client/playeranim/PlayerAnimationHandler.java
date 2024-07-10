@@ -7,7 +7,7 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.client.playeranim.interfaces.BasicToggleAnim;
+import com.github.standobyte.jojo.client.playeranim.anim.interfaces.BasicToggleAnim;
 import com.github.standobyte.jojo.modcompat.OptionalDependencyHelper;
 import com.mojang.blaze3d.matrix.MatrixStack;
 

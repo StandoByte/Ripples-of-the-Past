@@ -1,9 +1,9 @@
-package com.github.standobyte.jojo.client.playeranim.kosmx.anim.layers.hamon;
+package com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.hamon;
 
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.playeranim.interfaces.WallClimbAnim;
+import com.github.standobyte.jojo.client.playeranim.anim.interfaces.WallClimbAnim;
 import com.github.standobyte.jojo.client.playeranim.kosmx.KosmXPlayerAnimatorInstalled.AnimLayerHandler;
 import com.github.standobyte.jojo.client.playeranim.kosmx.anim.modifier.KosmXHeadRotationModifier;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.EnergyRippleLayer;

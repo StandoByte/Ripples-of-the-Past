@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.playeranim.kosmx.anim.layers;
+package com.github.standobyte.jojo.client.playeranim.anim.kosmximpl;
 
 import com.github.standobyte.jojo.client.playeranim.kosmx.KosmXPlayerAnimatorInstalled.AnimLayerHandler;
 
