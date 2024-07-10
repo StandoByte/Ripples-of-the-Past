@@ -24,7 +24,7 @@ public class ClientPlayerUtilCap {
     
     private final BarrageSwingsHolder<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> barrageSwings;
     private boolean isBarraging;
-    private final HamonEnergyRippleHandler hamonSparkWaves;
+    private HamonEnergyRippleHandler hamonSparkWaves;
     
     @Nullable private EntityType<?> vehicleType;
     
@@ -37,7 +37,6 @@ public class ClientPlayerUtilCap {
         this.player = player;
         this.soundManager = Minecraft.getInstance().getSoundManager();
         this.barrageSwings = new BarrageSwingsHolder<>();
-        this.hamonSparkWaves = new HamonEnergyRippleHandler(player);
     }
     
     
@@ -67,6 +66,9 @@ public class ClientPlayerUtilCap {
     }
     
     public HamonEnergyRippleHandler getHamonSparkWaves() {
+        if (hamonSparkWaves == null) {
+            hamonSparkWaves = new HamonEnergyRippleHandler(player);
+        }
         return hamonSparkWaves;
     }
     
