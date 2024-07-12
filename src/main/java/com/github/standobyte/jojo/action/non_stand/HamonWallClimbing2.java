@@ -11,11 +11,15 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.playeranim.ModPlayerAnimations;
+import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClStopWallClimbPacket;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.general.OptionalFloat;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -230,9 +234,50 @@ public class HamonWallClimbing2 extends HamonAction {
     public float getTickEnergyCost(INonStandPower power, boolean isMoving) {
         float cost = getHeldTickEnergyCost(power);
         if (!isMoving) {
-            cost *= 4;
+            cost *= 0.25f;
         }
         return cost;
+    }
+    
+    
+    public static void tickWallClimbing(INonStandPower power, HamonData hamon, LivingEntity user) {
+        user.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(wallClimbData -> {
+            if (wallClimbData.isHamonWallClimbing()) {
+                if (hamon.isSkillLearned(ModHamonSkills.WALL_CLIMBING.get())) {
+                    boolean isMoving = false;
+                    if (user instanceof PlayerEntity) {
+                        isMoving = wallClimbData.wallClimbIsMoving;
+                    }
+
+                    if (power.getHeldAction() != ModHamonActions.HAMON_BREATH.get()) {
+                        boolean consumedEnergy = false;
+
+                        float energyCost = ModHamonActions.HAMON_WALL_CLIMBING.get().getTickEnergyCost(power, isMoving);
+                        float points = Math.min(energyCost, power.getEnergy() * hamon.getActionEfficiency(energyCost, false));
+                        if (power.hasEnergy(energyCost)) {
+                            power.consumeEnergy(energyCost);
+                            consumedEnergy = true;
+                            if (!user.level.isClientSide()) {
+                                hamon.hamonPointsFromAction(HamonStat.CONTROL, points);
+                            }
+                        }
+                        
+                        if (!consumedEnergy) {
+                            if (!user.level.isClientSide()) {
+                                wallClimbData.stopWallClimbing();
+                            }
+                        }
+                    }
+                    
+                    if (user.level.isClientSide()) {
+                        HamonSparksLoopSound.playSparkSound(user, new Vector3d(user.getX(), user.getY(0.75), user.getZ()), 1.0F, true);
+                    }
+                }
+                else if (!user.level.isClientSide()) {
+                    wallClimbData.stopWallClimbing();
+                }
+            }
+        });
     }
     
 }
