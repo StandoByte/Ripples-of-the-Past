@@ -41,24 +41,31 @@ public class KosmXWallClimbLayer extends AnimLayerHandler implements WallClimbAn
     
     
     private static final ResourceLocation CLIMB_UP = new ResourceLocation("jojo", "wall_climb_up");
+    private static final ResourceLocation CLIMB_DOWN = new ResourceLocation("jojo", "wall_climb_down");
+    private static final ResourceLocation CLIMB_LEFT = new ResourceLocation("jojo", "wall_climb_left");
+    private static final ResourceLocation CLIMB_RIGHT = new ResourceLocation("jojo", "wall_climb_right");
     @Override
     public boolean setAnimEnabled(PlayerEntity player, boolean enabled) {
+        PlayerAnimStuff playerAnimProperties = getOrCreateAnimStuff(player);
         if (enabled) {
             KeyframeAnimation keyframes = PlayerAnimationRegistry.getAnimation(CLIMB_UP);
             if (keyframes == null) return false;
             KeyframeAnimationPlayer keyframePlayer = new KeyframeAnimationPlayer(keyframes);
-            getOrCreateAnimStuff(player).keyframePlayer = keyframePlayer;
+            playerAnimProperties.keyframePlayer = keyframePlayer;
+            playerAnimProperties.onWallClimbUpdated(enabled);
             return setAnim(player, keyframePlayer);
         }
         else {
-            getOrCreateAnimStuff(player).keyframePlayer = null;
+            playerAnimProperties.keyframePlayer = null;
+            playerAnimProperties.onWallClimbUpdated(enabled);
             return setAnim(player, null);
         }
     }
 
     @Override
-    public void setAnimSpeed(PlayerEntity player, float speed) {
-        getOrCreateAnimStuff(player).speedModifier.speed = Math.min(speed, 2.5f);
+    public void tickAnimProperties(PlayerEntity player, boolean isMoving, 
+            double movementUp, double movementLeft, float speed) {
+        getOrCreateAnimStuff(player).tickProperties(isMoving, movementUp, movementLeft, speed);
     }
     
     
@@ -73,6 +80,7 @@ public class KosmXWallClimbLayer extends AnimLayerHandler implements WallClimbAn
         PlayerEntity player = event.getPlayer();
         PlayerAnimStuff animStuff = getAnimStuff(player);
         if (animStuff != null && animStuff.keyframePlayer != null) {
+            animStuff.onRender();
             HandSide handTouch = animStuff.handTouchFrame(animStuff.keyframePlayer.getTick());
             if (handTouch != null) {
                 Vector3d particlesPos = player.position().add(EnergyRippleLayer.handTipPos(event.getRenderer().getModel(), handTouch, Vector3d.ZERO, player.yBodyRot));
@@ -103,8 +111,48 @@ public class KosmXWallClimbLayer extends AnimLayerHandler implements WallClimbAn
         private boolean leftHandTouch = false;
         private boolean rightHandTouch = false;
         
+        private boolean isPlayerMoving;
+        private boolean setStoppedMovingTick = false;
+        private int stoppedMovingTick;
+        private boolean stoppedAnim = false;
+        
         PlayerAnimStuff(AbstractClientPlayerEntity player) {
             KosmXWallClimbLayer.this.getAnimLayer(player).addModifierLast(speedModifier);
+        }
+        
+        void onWallClimbUpdated(boolean isEnabled) {
+            leftHandTouch = false;
+            rightHandTouch = false;
+            isPlayerMoving = false;
+            setStoppedMovingTick = false;
+            stoppedAnim = false;
+            speedModifier.speed = 1;
+        }
+        
+        void tickProperties(boolean isMoving, double movementUp, double movementLeft, float speed) {
+            if (isMoving) {
+                if (Math.abs(movementUp) > 1E-7) 
+                    speedModifier.speed = speed;{
+                }
+                
+                stoppedAnim = false;
+                setStoppedMovingTick = false;
+            }
+            this.isPlayerMoving = isMoving;
+        }
+        
+        void onRender() {
+            if (!isPlayerMoving && !stoppedAnim) {
+                int tick = keyframePlayer.getTick() % 24;
+                if (!setStoppedMovingTick) {
+                    stoppedMovingTick = tick;
+                    setStoppedMovingTick = true;
+                }
+                if (!(stoppedMovingTick < 12 ^ tick >= 12)) {
+                    speedModifier.speed = 0;
+                    stoppedAnim = true;
+                }
+            }
         }
         
         @Nullable HandSide handTouchFrame(int tick) {
