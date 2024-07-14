@@ -410,7 +410,7 @@ public class ClientEventHandler {
             ost = null;
             IStandPower.getStandPowerOptional(mc.player).ifPresent(stand -> {
                 if (stand.hasPower()) {
-                    OstSoundList ostList = stand.getType().getOst();
+                    OstSoundList ostList = stand.getType().getOst(mc.player);
                     if (ostList != null) {
                         SoundEvent ostSound = ostList.get(level);
                         if (ostSound != null) {

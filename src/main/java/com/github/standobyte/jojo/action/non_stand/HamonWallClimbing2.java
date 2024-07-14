@@ -144,8 +144,7 @@ public class HamonWallClimbing2 extends HamonAction {
                 Vector3d horizontalMovementOnly = new Vector3d(movement.x, 0, movement.z);
                 Vector3d collideAfterMove;
                 AxisAlignedBB gripBox = player.getBoundingBox()
-                        .contract(0, -player.getBbHeight() * 0.5, 0)
-                        .move(0, -player.getBbHeight() * 0.5, 0);
+                        .contract(0, -player.getBbHeight() * 0.5, 0);
                 if (movement.y < 0) {
                     // stop climbing if standing on a solid block
                     if (player.isOnGround()) {
@@ -155,7 +154,7 @@ public class HamonWallClimbing2 extends HamonAction {
                     else {
                         // make sure the player doesn't fall down
                         collideAfterMove = MCUtil.collide(player, 
-                                gripBox.move(0, movement.y, 0), 
+                                gripBox.move(0, -gripBox.getYsize() + movement.y, 0), 
                                 gripVec);
                         if (collideAfterMove.subtract(gripVec).lengthSqr() < 1E-7) {
                             movement = horizontalMovementOnly;
@@ -164,7 +163,7 @@ public class HamonWallClimbing2 extends HamonAction {
                 }
                 
                 // check if the player is at the top of a wall
-                collideAfterMove = MCUtil.collide(player, gripBox.move(0, player.getBbHeight(), 0), gripVec);
+                collideAfterMove = MCUtil.collide(player, gripBox.move(0, gripBox.getYsize(), 0), gripVec);
                 if (collideAfterMove.subtract(gripVec).lengthSqr() < 1E-7) {
                     if (movement.y > 0) {
                         movement = horizontalMovementOnly;
