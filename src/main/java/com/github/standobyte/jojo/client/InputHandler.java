@@ -979,7 +979,7 @@ public class InputHandler {
             slowedDown = actionsOverlay.isPlayerOutOfBreath() && slowDown(mc.player, input, 0.8F) || slowedDown;
 
             canLeap = false;
-//            if (!mc.player.isPassenger()) {
+            if (!mc.player.isFallFlying()) {
                 IPower<?, ?> power = actionsOverlay.getCurrentPower();
                 if (power != null) {
                     if (power.canLeap() && !slowedDown) {
@@ -1027,7 +1027,7 @@ public class InputHandler {
                         canLeap = onGround || atWall;
                     }
                 }
-//            }
+            }
 //        }
         
         Entity vehicle = mc.player.getVehicle();
