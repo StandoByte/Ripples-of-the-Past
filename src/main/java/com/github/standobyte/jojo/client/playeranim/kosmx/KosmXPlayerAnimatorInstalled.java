@@ -222,7 +222,6 @@ public class KosmXPlayerAnimatorInstalled extends PlayerAnimationHandler.PlayerA
         
         @Nullable
         protected final T getAnimLayer(AbstractClientPlayerEntity player) {
-            PlayerAnimationAccess.getPlayerAnimLayer(player);
             return (T) PlayerAnimationAccess.getPlayerAssociatedData(player).get(id);
         }
     }

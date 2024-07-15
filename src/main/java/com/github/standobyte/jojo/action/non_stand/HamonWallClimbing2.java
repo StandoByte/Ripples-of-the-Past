@@ -56,7 +56,12 @@ public class HamonWallClimbing2 extends HamonAction {
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
         return user.getCapability(PlayerUtilCapProvider.CAPABILITY).map(cap -> {
             if (target.getType() == TargetType.BLOCK && target.getFace() != null && target.getFace().getAxis() != Direction.Axis.Y) {
-                Vector3d vecToBlock = Vector3d.atLowerCornerOf(target.getFace().getOpposite().getNormal()).scale(MAX_WALL_DISTANCE);
+                Direction blockFace = target.getFace();
+//                BlockPos standingOn = user.blockPosition().below().offset(blockFace.getOpposite().getNormal());
+//                if (user.isOnGround() && standingOn.equals(target.getBlockPos())) {
+//                    return ActionConditionResult.POSITIVE;
+//                }
+                Vector3d vecToBlock = Vector3d.atLowerCornerOf(blockFace.getOpposite().getNormal()).scale(MAX_WALL_DISTANCE);
                 Vector3d collide = MCUtil.collide(user, vecToBlock);
                 if (!collide.equals(vecToBlock)) {
                     return ActionConditionResult.POSITIVE;

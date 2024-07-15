@@ -8,25 +8,29 @@ import com.github.standobyte.jojo.client.playeranim.kosmx.KosmXPlayerAnimatorIns
 import com.github.standobyte.jojo.client.playeranim.kosmx.anim.modifier.KosmXHeadRotationModifier;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.EnergyRippleLayer;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
+import com.github.standobyte.jojo.util.general.MathUtil;
 
 import dev.kosmx.playerAnim.api.layered.IAnimation;
-import dev.kosmx.playerAnim.api.layered.KeyframeAnimationPlayer;
 import dev.kosmx.playerAnim.api.layered.ModifierLayer;
 import dev.kosmx.playerAnim.api.layered.modifier.SpeedModifier;
 import dev.kosmx.playerAnim.core.data.KeyframeAnimation;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationRegistry;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
+import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.client.event.RenderPlayerEvent;
+import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class KosmXWallClimbLayer extends AnimLayerHandler implements WallClimbAnim {
     // FIXME the AnimLayerHandler object is effectively a singleton, 
     //       while ModifierLayer objects are created for every player (so modifiers are too)
-    PlayerAnimStuff animStuff;
+    KosmXWallClimbAnimPlayer animStuff;
+    SpeedModifier speedModifier;
     
     public KosmXWallClimbLayer(ResourceLocation id) {
         super(id);
@@ -36,6 +40,7 @@ public class KosmXWallClimbLayer extends AnimLayerHandler implements WallClimbAn
     protected ModifierLayer<IAnimation> createAnimLayer(AbstractClientPlayerEntity player) {
         ModifierLayer<IAnimation> anim = new ModifierLayer<>(null);
         anim.addModifierLast(new KosmXHeadRotationModifier());
+        anim.addModifierLast(getOrCreateSpeedModifier(player));
         return anim;
     }
     
@@ -46,18 +51,21 @@ public class KosmXWallClimbLayer extends AnimLayerHandler implements WallClimbAn
     private static final ResourceLocation CLIMB_RIGHT = new ResourceLocation("jojo", "wall_climb_right");
     @Override
     public boolean setAnimEnabled(PlayerEntity player, boolean enabled) {
-        PlayerAnimStuff playerAnimProperties = getOrCreateAnimStuff(player);
         if (enabled) {
-            KeyframeAnimation keyframes = PlayerAnimationRegistry.getAnimation(CLIMB_UP);
-            if (keyframes == null) return false;
-            KeyframeAnimationPlayer keyframePlayer = new KeyframeAnimationPlayer(keyframes);
-            playerAnimProperties.keyframePlayer = keyframePlayer;
-            playerAnimProperties.onWallClimbUpdated(enabled);
+            KeyframeAnimation up = PlayerAnimationRegistry.getAnimation(CLIMB_UP);
+            KeyframeAnimation down = PlayerAnimationRegistry.getAnimation(CLIMB_DOWN);
+            KeyframeAnimation left = PlayerAnimationRegistry.getAnimation(CLIMB_LEFT);
+            KeyframeAnimation right = PlayerAnimationRegistry.getAnimation(CLIMB_RIGHT);
+            if (up == null || down == null || left == null || right == null) return false;
+            
+            KosmXWallClimbAnimPlayer keyframePlayer = new KosmXWallClimbAnimPlayer(up, down, left, right);
+            animStuff = keyframePlayer;
+            ModifierLayer<?> modifierLayer = getAnimLayer((AbstractClientPlayerEntity) player);
+            animStuff.onInit(player, modifierLayer, getOrCreateSpeedModifier(player));
             return setAnim(player, keyframePlayer);
         }
         else {
-            playerAnimProperties.keyframePlayer = null;
-            playerAnimProperties.onWallClimbUpdated(enabled);
+            animStuff = null;
             return setAnim(player, null);
         }
     }
@@ -65,7 +73,19 @@ public class KosmXWallClimbLayer extends AnimLayerHandler implements WallClimbAn
     @Override
     public void tickAnimProperties(PlayerEntity player, boolean isMoving, 
             double movementUp, double movementLeft, float speed) {
-        getOrCreateAnimStuff(player).tickProperties(isMoving, movementUp, movementLeft, speed);
+        getWallClimbAnimPlayer(player).tickProperties(isMoving, movementUp, movementLeft, speed);
+    }
+    
+    @Nullable
+    private KosmXWallClimbAnimPlayer getWallClimbAnimPlayer(PlayerEntity player) {
+        return animStuff;
+    }
+    
+    private SpeedModifier getOrCreateSpeedModifier(PlayerEntity player) {
+        if (speedModifier == null) {
+            speedModifier = new SpeedModifier(1);
+        }
+        return speedModifier;
     }
     
     
@@ -75,103 +95,41 @@ public class KosmXWallClimbLayer extends AnimLayerHandler implements WallClimbAn
     }
     
     @SubscribeEvent
-    public void onRender(RenderPlayerEvent.Post event) {
-        // FIXME do this logic in 1st person too
+    public void onEntityRender(RenderPlayerEvent.Post event) {
         PlayerEntity player = event.getPlayer();
-        PlayerAnimStuff animStuff = getAnimStuff(player);
-        if (animStuff != null && animStuff.keyframePlayer != null) {
+        KosmXWallClimbAnimPlayer animStuff = getWallClimbAnimPlayer(player);
+        if (animStuff != null && animStuff.isActive()) {
             animStuff.onRender();
-            HandSide handTouch = animStuff.handTouchFrame(animStuff.keyframePlayer.getTick());
+            
+            HandSide handTouch = animStuff.handTouchFrame();
             if (handTouch != null) {
-                Vector3d particlesPos = player.position().add(EnergyRippleLayer.handTipPos(event.getRenderer().getModel(), handTouch, Vector3d.ZERO, player.yBodyRot));
+                Vector3d particlesOffset = EnergyRippleLayer.handTipPos(event.getRenderer().getModel(), handTouch, Vector3d.ZERO, player.yBodyRot);
+                Vector3d particlesPos = player.position().add(particlesOffset);
                 HamonUtil.emitHamonSparkParticles(player.level, ClientUtil.getClientPlayer(), 
-                        particlesPos.x, particlesPos.y, particlesPos.z, 0.25f, 0.5f);
+                        particlesPos.x, particlesPos.y, particlesPos.z, 0.25f, 0.125f);
             }
         }
     }
-
     
-    @Nullable
-    private PlayerAnimStuff getAnimStuff(PlayerEntity player) {
-        return animStuff;
-    }
-    
-    private PlayerAnimStuff getOrCreateAnimStuff(PlayerEntity player) {
-        if (animStuff == null) {
-            animStuff = new PlayerAnimStuff((AbstractClientPlayerEntity) player);
-        }
-        return animStuff;
-    }
-    
-    private class PlayerAnimStuff {
-        final SpeedModifier speedModifier = new SpeedModifier(1);
-        @Nullable KeyframeAnimationPlayer keyframePlayer;
-        
-        private int lastTick = 0;
-        private boolean leftHandTouch = false;
-        private boolean rightHandTouch = false;
-        
-        private boolean isPlayerMoving;
-        private boolean setStoppedMovingTick = false;
-        private int stoppedMovingTick;
-        private boolean stoppedAnim = false;
-        
-        PlayerAnimStuff(AbstractClientPlayerEntity player) {
-            KosmXWallClimbLayer.this.getAnimLayer(player).addModifierLast(speedModifier);
-        }
-        
-        void onWallClimbUpdated(boolean isEnabled) {
-            leftHandTouch = false;
-            rightHandTouch = false;
-            isPlayerMoving = false;
-            setStoppedMovingTick = false;
-            stoppedAnim = false;
-            speedModifier.speed = 1;
-        }
-        
-        void tickProperties(boolean isMoving, double movementUp, double movementLeft, float speed) {
-            if (isMoving) {
-                if (Math.abs(movementUp) > 1E-7) 
-                    speedModifier.speed = speed;{
-                }
+    @SubscribeEvent
+    public void onRenderFirstPerson(RenderWorldLastEvent event) {
+        Minecraft mc = Minecraft.getInstance();
+        if (mc.options.getCameraType().isFirstPerson()) {
+            PlayerEntity player = mc.player;
+            KosmXWallClimbAnimPlayer animStuff = getWallClimbAnimPlayer(player);
+            if (animStuff != null && animStuff.isActive()) {
+                animStuff.onRender();
                 
-                stoppedAnim = false;
-                setStoppedMovingTick = false;
-            }
-            this.isPlayerMoving = isMoving;
-        }
-        
-        void onRender() {
-            if (!isPlayerMoving && !stoppedAnim) {
-                int tick = keyframePlayer.getTick() % 24;
-                if (!setStoppedMovingTick) {
-                    stoppedMovingTick = tick;
-                    setStoppedMovingTick = true;
-                }
-                if (!(stoppedMovingTick < 12 ^ tick >= 12)) {
-                    speedModifier.speed = 0;
-                    stoppedAnim = true;
+                HandSide handTouch = animStuff.handTouchFrame();
+                if (handTouch != null) {
+                    ActiveRenderInfo camera = mc.gameRenderer.getMainCamera();
+                    Vector3d particlesOffset = new Vector3d(handTouch == HandSide.LEFT ? 0.25 : -0.25, 0, 0.25)
+                            .yRot((180 + mc.player.yBodyRot) * MathUtil.DEG_TO_RAD);
+                    Vector3d particlesPos = camera.getPosition().add(particlesOffset);
+                    HamonUtil.emitHamonSparkParticles(player.level, ClientUtil.getClientPlayer(), 
+                            particlesPos.x, particlesPos.y, particlesPos.z, 0.25f, 0.125f);
                 }
             }
-        }
-        
-        @Nullable HandSide handTouchFrame(int tick) {
-            tick = (tick + 3) % 24;
-            int lastTick = this.lastTick;
-            this.lastTick = tick;
-            
-            if (!rightHandTouch && lastTick < 12 && tick >= 12) {
-                leftHandTouch = false;
-                rightHandTouch = true;
-                return HandSide.RIGHT;
-            }
-            if (!leftHandTouch && lastTick >= 12 && tick < 12) {
-                leftHandTouch = true;
-                rightHandTouch = false;
-                return HandSide.LEFT;
-            }
-            
-            return null;
         }
     }
     
