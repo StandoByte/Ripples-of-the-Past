@@ -121,6 +121,7 @@ import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.Timer;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
@@ -445,6 +446,11 @@ public class ClientEventHandler {
                                 MetEntityTypeToast.addOrUpdate(mc.getToasts(), type);
                             }
                         });
+                    }
+                    
+                    // TODO subtypes for a turtle with and without a stand
+                    if (type == ModEntityTypes.COCO_JUMBO_TURTLE.get()) {
+                        mc.player.displayClientMessage(new TranslationTextComponent("coco_jumbo.stand_arrow_hint").withStyle(TextFormatting.ITALIC), false);
                     }
                 }
             });

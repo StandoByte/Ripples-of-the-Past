@@ -1335,6 +1335,7 @@
   "item.jojo.mr_president_master_key.hint": "Can be used to recover a lost key for a locked turtle.",
   "block.jojo.coco_jumbo_shell": "Turtle Shell",
   "block.jojo.mr_president_gem": "Key Gem",
+  "coco_jumbo.stand_arrow_hint": "~ This turtle looks special. Does it have the potential to become a Stand user? ~",
   "advancements.jojo.coco_jumbo.title": "Could This Turtle Be a Stand User?",
   "advancements.jojo.coco_jumbo.description": "Find a turtle with a key-shaped hole in its shell",
   "advancements.jojo.coco_jumbo_key.title": "No Lock or Door Fits This Key!",

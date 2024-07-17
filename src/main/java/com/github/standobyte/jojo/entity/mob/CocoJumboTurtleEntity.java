@@ -180,6 +180,9 @@ public class CocoJumboTurtleEntity extends TurtleEntity implements IMobStandUser
         if (item.getItem() == ModItems.MR_PRESIDENT_MASTER_KEY.get()) {
             return ActionConditionResult.POSITIVE;
         }
+        if (!getStandPower().hasPower()) {
+            return ActionConditionResult.createNegative(new TranslationTextComponent("coco_jumbo.key.no_stand"));
+        }
         if (hasAssignedKey()) {
             CompoundNBT nbt = item.getTag();
             if (nbt == null) {

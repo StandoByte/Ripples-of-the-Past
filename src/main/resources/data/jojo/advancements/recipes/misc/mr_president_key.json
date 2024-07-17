@@ -6,10 +6,18 @@
     ]
   },
   "criteria": {
-    "met_coco_jumbo": {
-      "trigger": "jojo:met_modded_mob",
+    "gave_mr_president": {
+      "trigger": "jojo:stand_arrow_hit",
       "conditions": {
-        "entity": [
+        "arrow_hit": {
+          "gave_stand": true,
+          "shot_self": false,
+          "target_stand": {
+            "classification": "stand",
+            "type": "jojo:mr_president"
+          }
+        },
+        "target": [
           {
             "condition": "minecraft:entity_properties",
             "predicate": {
@@ -29,7 +37,7 @@
   },
   "requirements": [
     [
-      "met_coco_jumbo",
+      "gave_mr_president",
       "has_the_recipe"
     ]
   ]

@@ -262,7 +262,7 @@ public class ModItems {
             () -> new MrPresidentKeyItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1), false));
     
     public static final RegistryObject<Item> MR_PRESIDENT_MASTER_KEY = ITEMS.register("mr_president_master_key", 
-            () -> new MrPresidentKeyItem(new Item.Properties().stacksTo(1), true));
+            () -> new MrPresidentKeyItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1), true));
 
     public static final RegistryObject<BlockItem> COCO_JUMBO_SHELL = ITEMS.register("coco_jumbo_shell", 
             () -> new BlockItem(ModBlocks.COCO_JUMBO_SHELL.get(), new Item.Properties()));
