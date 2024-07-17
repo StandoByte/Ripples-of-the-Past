@@ -157,38 +157,41 @@ public class GETransformationRenderer<T extends GETransformationEntity> extends 
 
         targetModel.prepareMobModel(living, 0, 0, partialTick);
         targetModel.setupAnim(living, 0, 0, ticks, f2, xRotation);
-        RenderType rendertype = targetModel.renderType(renderer.getTextureLocation(living));
-        if (rendertype != null) {
-            this.shadowRadius = ClientReflection.getShadowRadius(renderer) * progress; // cache this?
-            
-            ModelStateEntry modelState = getModelState(targetModel);
-            modelState.saveState();
-            modelState.lerp(progress);
-            
-            IVertexBuilder ivertexbuilder = buffer.getBuffer(rendertype);
-            int overlay = OverlayTexture.NO_OVERLAY;
-            
-            
-            float color = 0.25F + progress * 0.75F;
-            targetModel.renderToBuffer(matrixStack, ivertexbuilder, packedLight, overlay, color, color, color, 1.0F);
-//            for (LayerRenderer<E, M> layerrenderer : ClientReflection.getLayers(renderer)) {
-//                layerrenderer.render(matrixStack, buffer, packedLight, living, 0, 0, partialTick, ticks, f2, xRotation);
-//            }
-            
-            float blockOverlayAlpha = 1.0F - progress;
-            if (blockOverlayAlpha > 0) {
-                ResourceLocation blockSprite = getBlockOverlaySprite(transformationEntity);
-                if (blockSprite != null) {
-                    RenderType renderTypeItem = CustomRenderType.goldExperienceLifeformOverlay(
-                            blockSprite, targetModel.texWidth / 16F, targetModel.texHeight / 16F);
-                    if (renderTypeItem != null) {
-                        IVertexBuilder vertexBuilderItem = buffer.getBuffer(renderTypeItem);
-                        targetModel.renderToBuffer(matrixStack, vertexBuilderItem, packedLight, overlay, 1.0F, 1.0F, 1.0F, blockOverlayAlpha);
+        ResourceLocation texture = renderer.getTextureLocation(living);
+        if (texture != null) {
+            RenderType rendertype = targetModel.renderType(texture);
+            if (rendertype != null) {
+                this.shadowRadius = ClientReflection.getShadowRadius(renderer) * progress; // cache this?
+                
+                ModelStateEntry modelState = getModelState(targetModel);
+                modelState.saveState();
+                modelState.lerp(progress);
+                
+                IVertexBuilder ivertexbuilder = buffer.getBuffer(rendertype);
+                int overlay = OverlayTexture.NO_OVERLAY;
+                
+                
+                float color = 0.25F + progress * 0.75F;
+                targetModel.renderToBuffer(matrixStack, ivertexbuilder, packedLight, overlay, color, color, color, 1.0F);
+//                for (LayerRenderer<E, M> layerrenderer : ClientReflection.getLayers(renderer)) {
+//                    layerrenderer.render(matrixStack, buffer, packedLight, living, 0, 0, partialTick, ticks, f2, xRotation);
+//                }
+                
+                float blockOverlayAlpha = 1.0F - progress;
+                if (blockOverlayAlpha > 0) {
+                    ResourceLocation blockSprite = getBlockOverlaySprite(transformationEntity);
+                    if (blockSprite != null) {
+                        RenderType renderTypeItem = CustomRenderType.goldExperienceLifeformOverlay(
+                                blockSprite, targetModel.texWidth / 16F, targetModel.texHeight / 16F);
+                        if (renderTypeItem != null) {
+                            IVertexBuilder vertexBuilderItem = buffer.getBuffer(renderTypeItem);
+                            targetModel.renderToBuffer(matrixStack, vertexBuilderItem, packedLight, overlay, 1.0F, 1.0F, 1.0F, blockOverlayAlpha);
+                        }
                     }
                 }
+                
+                modelState.restoreState();
             }
-            
-            modelState.restoreState();
         }
 
         matrixStack.popPose();
