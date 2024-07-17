@@ -41,7 +41,7 @@ public abstract class ContainerSlotMixin {
         else if (container instanceof TileEntity) {
             TileEntity tileEntity = (TileEntity) container;
             World world = tileEntity.getLevel();
-            if (!world.isClientSide()) {
+            if (world != null && !world.isClientSide()) {
                 TrackerItemStack.getItemTracker(pStack).ifPresent(tracker -> {
                     tracker.setAtBlockPos(tileEntity.getBlockPos(), world, KnownItemState.BLOCK_HAS_ITEM);
                     tracker.setItemStillThereCheck(trackerId -> 
