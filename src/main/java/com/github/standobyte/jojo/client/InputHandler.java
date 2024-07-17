@@ -323,9 +323,11 @@ public class InputHandler {
                     boolean askedForHamonTraining = false;
                     if (mouseTarget instanceof EntityRayTraceResult) {
                         Entity mouseTargetEntity = ((EntityRayTraceResult) mouseTarget).getEntity();
-                        askedForHamonTraining = HamonUtil.interactWithHamonTeacher(mc.level, mc.player, (LivingEntity) mouseTargetEntity);
-                        if (askedForHamonTraining) {
-                            PacketManager.sendToServer(new ClHamonInteractAskTeacherPacket(mouseTargetEntity.getId()));
+                        if (mouseTargetEntity instanceof LivingEntity) {
+                            askedForHamonTraining = HamonUtil.interactWithHamonTeacher(mc.level, mc.player, (LivingEntity) mouseTargetEntity);
+                            if (askedForHamonTraining) {
+                                PacketManager.sendToServer(new ClHamonInteractAskTeacherPacket(mouseTargetEntity.getId()));
+                            }
                         }
                     }
                     if (!askedForHamonTraining) {
