@@ -46,19 +46,20 @@ public class KosmXWallClimbLayer extends AnimLayerHandler implements WallClimbAn
     
     
     private static final ResourceLocation CLIMB_UP = new ResourceLocation("jojo", "wall_climb_up");
-    private static final ResourceLocation CLIMB_DOWN = new ResourceLocation("jojo", "wall_climb_down");
-    private static final ResourceLocation CLIMB_LEFT = new ResourceLocation("jojo", "wall_climb_left");
-    private static final ResourceLocation CLIMB_RIGHT = new ResourceLocation("jojo", "wall_climb_right");
+//    private static final ResourceLocation CLIMB_DOWN = new ResourceLocation("jojo", "wall_climb_down");
+//    private static final ResourceLocation CLIMB_LEFT = new ResourceLocation("jojo", "wall_climb_left");
+//    private static final ResourceLocation CLIMB_RIGHT = new ResourceLocation("jojo", "wall_climb_right");
     @Override
     public boolean setAnimEnabled(PlayerEntity player, boolean enabled) {
         if (enabled) {
             KeyframeAnimation up = PlayerAnimationRegistry.getAnimation(CLIMB_UP);
-            KeyframeAnimation down = PlayerAnimationRegistry.getAnimation(CLIMB_DOWN);
-            KeyframeAnimation left = PlayerAnimationRegistry.getAnimation(CLIMB_LEFT);
-            KeyframeAnimation right = PlayerAnimationRegistry.getAnimation(CLIMB_RIGHT);
-            if (up == null || down == null || left == null || right == null) return false;
+//            KeyframeAnimation down = PlayerAnimationRegistry.getAnimation(CLIMB_DOWN);
+//            KeyframeAnimation left = PlayerAnimationRegistry.getAnimation(CLIMB_LEFT);
+//            KeyframeAnimation right = PlayerAnimationRegistry.getAnimation(CLIMB_RIGHT);
+//            if (up == null || down == null || left == null || right == null) return false;
+            if (up == null) return false;
             
-            KosmXWallClimbAnimPlayer keyframePlayer = new KosmXWallClimbAnimPlayer(up, down, left, right);
+            KosmXWallClimbAnimPlayer keyframePlayer = new KosmXWallClimbAnimPlayer(up, up, up, up);
             animStuff = keyframePlayer;
             ModifierLayer<?> modifierLayer = getAnimLayer((AbstractClientPlayerEntity) player);
             animStuff.onInit(player, modifierLayer, getOrCreateSpeedModifier(player));
