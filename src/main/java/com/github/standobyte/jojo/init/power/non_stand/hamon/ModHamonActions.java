@@ -146,7 +146,7 @@ public class ModHamonActions {
                             HAMON_SHOCK.get()
                             },
                     HAMON_BREATH.get()
-                    ));
+                    ).withColor(HamonPowerType.COLOR));
     
     
     

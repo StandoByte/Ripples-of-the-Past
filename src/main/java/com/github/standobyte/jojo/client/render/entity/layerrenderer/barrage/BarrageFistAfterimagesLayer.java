@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.client.render.entity.layerrenderer.barrage;
 
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.playeranim.IPlayerBarrageAnimation;
-import com.github.standobyte.jojo.client.playeranim.ModPlayerAnimations;
+import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.barrage.BarrageSwingsHolder;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;

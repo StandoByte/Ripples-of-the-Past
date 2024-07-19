@@ -1,5 +1,10 @@
 package com.github.standobyte.jojo.action.non_stand;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
@@ -23,14 +28,23 @@ import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class HamonHealing extends HamonAction {
+    public static final Set<ResourceLocation> VENOM_EFFECTS_INIT = Util.make(new HashSet<>(), set -> {
+        set.add(Effects.POISON.getRegistryName());
+        set.add(Effects.WITHER.getRegistryName());
+        set.add(Effects.HUNGER.getRegistryName());
+        set.add(Effects.CONFUSION.getRegistryName());
+    });
 
     public HamonHealing(HamonAction.Builder builder) {
         super(builder);
@@ -54,10 +68,12 @@ public class HamonHealing extends HamonAction {
             entityToHeal.addEffect(new EffectInstance(Effects.REGENERATION, 
                     updateRegenEffect(entityToHeal, regenDuration, regenLvl, Effects.REGENERATION), regenLvl));
             if (hamon.isSkillLearned(ModHamonSkills.EXPEL_VENOM.get())) {
-                entityToHeal.removeEffect(Effects.POISON);
-                entityToHeal.removeEffect(Effects.WITHER);
-                entityToHeal.removeEffect(Effects.HUNGER);
-                entityToHeal.removeEffect(Effects.CONFUSION);
+                if (VENOM_EFFECTS == null) {
+                    lazyInitVenomEffects();
+                }
+                for (Effect effect : VENOM_EFFECTS) {
+                    entityToHeal.removeEffect(effect);
+                }
             }
             if (hamon.isSkillLearned(ModHamonSkills.PLANTS_GROWTH.get()) && user instanceof PlayerEntity && target.getType() == TargetType.BLOCK) {
                 Direction face = target.getType() == TargetType.BLOCK ? target.getFace() : Direction.UP;
@@ -66,6 +82,14 @@ public class HamonHealing extends HamonAction {
             Vector3d sparksPos = new Vector3d(entityToHeal.getX(), entityToHeal.getY(0.5), entityToHeal.getZ());
             HamonUtil.emitHamonSparkParticles(world, null, sparksPos, Math.max(0.5F * hamonControl * hamonEfficiency, 0.1F));
         }
+    }
+    
+    private static List<Effect> VENOM_EFFECTS;
+    private static void lazyInitVenomEffects() {
+        VENOM_EFFECTS = VENOM_EFFECTS_INIT.stream()
+                .map(id -> ForgeRegistries.POTIONS.containsKey(id) ? ForgeRegistries.POTIONS.getValue(id) : null)
+                .filter(id -> id != null)
+                .collect(Collectors.toList());
     }
     
     // prevents the health regeneration being faster or slower when spamming the ability

@@ -29,7 +29,7 @@ public abstract class LockableLootTileEntityMixin extends LockableTileEntity {
     @Inject(method = "setItem", at = @At("TAIL"))
     public void jojoOnItemSetToSlot(int slot, ItemStack item, CallbackInfo ci) {
         World world = getLevel();
-        if (!world.isClientSide()) {
+        if (world != null && !world.isClientSide()) {
             TrackerItemStack.getItemTrackerInInventory(item, getItems().stream())
             .ifPresent(tracker -> {
                 tracker.setAtBlockPos(this.getBlockPos(), level, KnownItemState.BLOCK_HAS_ITEM);

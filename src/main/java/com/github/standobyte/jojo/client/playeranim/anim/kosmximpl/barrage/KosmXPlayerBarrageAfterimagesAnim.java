@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.playeranim.kosmx.anim.layers.barrage;
+package com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.barrage;
 
 import com.github.standobyte.jojo.action.stand.StandEntityAction.Phase;
 import com.github.standobyte.jojo.client.playeranim.IPlayerBarrageAnimation;

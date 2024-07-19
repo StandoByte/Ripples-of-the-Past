@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.playeranim.interfaces;
+package com.github.standobyte.jojo.client.playeranim.anim.interfaces;
 
 import net.minecraft.entity.player.PlayerEntity;
 
