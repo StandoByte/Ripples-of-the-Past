@@ -177,7 +177,11 @@ public class ControlScheme {
                 DefaultKey... keyBindings) {
             this.hotbars.put(Hotbar.LEFT_CLICK, leftClickActions);
             this.hotbars.put(Hotbar.RIGHT_CLICK, rightClickActions);
-            Collections.addAll(this.keyBindings, keyBindings);
+            for (DefaultKey defaultKey : keyBindings) {
+                if (defaultKey != null && defaultKey.action != null) {
+                    this.keyBindings.add(defaultKey);
+                }
+            }
         }
         
         public void addKey(DefaultKey key) {
