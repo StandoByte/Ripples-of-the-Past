@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.playeranim.interfaces;
+package com.github.standobyte.jojo.client.playeranim.anim.interfaces;
 
 import com.github.standobyte.jojo.client.playeranim.IPlayerBarrageAnimation;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.barrage.BarrageFistAfterimagesLayer;

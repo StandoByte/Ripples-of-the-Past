@@ -29,7 +29,7 @@ public class ParseAnims {
         boolean loop = false;
         boolean holdOnLastFrame = false; // TODO
         JsonElement loopJson = animJson.get("loop");
-        if (loopJson.isJsonPrimitive()) {
+        if (loopJson != null && loopJson.isJsonPrimitive()) {
             String loopMode = loopJson.getAsString();
             if ("hold_on_last_frame".equals(loopMode)) {
                 holdOnLastFrame = true;
@@ -43,9 +43,11 @@ public class ParseAnims {
         }
         
         JsonObject boneAnims = animJson.getAsJsonObject("bones");
-        for (Map.Entry<String, JsonElement> bone : boneAnims.entrySet()) {
-            JsonObject tfJson = bone.getValue().getAsJsonObject();
-            parseKeyframes(builder, tfJson, "rotation", Transformation.Targets.ROTATE, bone.getKey());
+        if (boneAnims != null) {
+            for (Map.Entry<String, JsonElement> bone : boneAnims.entrySet()) {
+                JsonObject tfJson = bone.getValue().getAsJsonObject();
+                parseKeyframes(builder, tfJson, "rotation", Transformation.Targets.ROTATE, bone.getKey());
+            }
         }
         
         return builder.build();
