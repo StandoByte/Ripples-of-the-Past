@@ -1,8 +1,8 @@
-package com.github.standobyte.jojo.client.playeranim.kosmx.anim.layers.hamon;
+package com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.hamon;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.playeranim.IEntityAnimApplier;
-import com.github.standobyte.jojo.client.playeranim.interfaces.HamonMeditationPoseAnim;
+import com.github.standobyte.jojo.client.playeranim.anim.interfaces.HamonMeditationPoseAnim;
 import com.github.standobyte.jojo.client.playeranim.kosmx.KosmXPlayerAnimatorInstalled.AnimLayerHandler;
 import com.github.standobyte.jojo.client.playeranim.kosmx.anim.mob.KosmXHamonMasterAnimApplier;
 import com.github.standobyte.jojo.client.render.entity.model.mob.HamonMasterModel;
@@ -20,8 +20,6 @@ import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationRegistry;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.event.RenderPlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class KosmXMeditationPoseLayer extends AnimLayerHandler implements HamonMeditationPoseAnim {
 
@@ -70,15 +68,4 @@ public class KosmXMeditationPoseLayer extends AnimLayerHandler implements HamonM
         return null;
     }
     
-    
-    @Override
-    public boolean isForgeEventHandler() {
-        return true;
-    }
-
-    @SubscribeEvent
-    public void preRender(RenderPlayerEvent.Pre event) {
-        preventCrouch((AbstractClientPlayerEntity) event.getPlayer(), event.getRenderer());
-    }
-
 }

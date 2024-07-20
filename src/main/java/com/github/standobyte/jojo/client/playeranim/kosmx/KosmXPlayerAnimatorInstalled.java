@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.client.playeranim.kosmx;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Function;
 
 import javax.annotation.Nullable;
@@ -37,9 +39,17 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3f;
+import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class KosmXPlayerAnimatorInstalled extends PlayerAnimationHandler.PlayerAnimator {
+    private static final List<AnimHandler<? extends IAnimation>> PREVENT_CROUCH = new ArrayList<>();
+    
+    public KosmXPlayerAnimatorInstalled() {
+        super();
+        MinecraftForge.EVENT_BUS.register(new KosmXPlayerAnimatorInstalled.EventHandler());
+    }
     
     @Override
     public boolean kosmXAnimatorInstalled() {
@@ -56,15 +66,38 @@ public class KosmXPlayerAnimatorInstalled extends PlayerAnimationHandler.PlayerA
         if (animLayer.isForgeEventHandler()) {
             MinecraftForge.EVENT_BUS.register(animLayer);
         }
+        if (animLayer.preventsCrouch()) {
+            PREVENT_CROUCH.add(animLayer);
+        }
+    }
+    
+    
+    public static class EventHandler {
+        
+        @SubscribeEvent
+        public void preRender(RenderPlayerEvent.Pre event) {
+            if (event.getRenderer().getModel().crouching) {
+                AbstractClientPlayerEntity player = (AbstractClientPlayerEntity) event.getPlayer();
+                for (AnimHandler<?> animHandler : PREVENT_CROUCH) {
+                    if (animHandler.preventCrouch(player, event.getRenderer())) {
+                        break;
+                    }
+                }
+            }
+        }
     }
     
     
     @Override
     public float[] getBend(BipedModel<?> model, BendablePart part) {
         if (Helper.isBendEnabled() && model instanceof IMutableModel) {
-            IBendHelper mutablePart = getMutablePart((IMutableModel) model, part);
-            if (mutablePart != null) {
-                return KosmXBendyLibHelper.getBend(mutablePart);
+            IMutableModel bendyModel = (IMutableModel) model;
+            AnimationProcessor anim = bendyModel.getEmoteSupplier().get();
+            if (anim != null && anim.isActive()) {
+                IBendHelper mutablePart = getMutablePart(bendyModel, part);
+                if (mutablePart != null) {
+                    return KosmXBendyLibHelper.getBend(mutablePart);
+                }
             }
         }
         return super.getBend(model, part);
@@ -170,11 +203,21 @@ public class KosmXPlayerAnimatorInstalled extends PlayerAnimationHandler.PlayerA
             return false;
         }
         
-        protected void preventCrouch(AbstractClientPlayerEntity player, PlayerRenderer renderer) {
+        public boolean preventsCrouch() {
+            return true;
+        }
+        
+        public ResourceLocation getId() {
+            return id;
+        }
+        
+        protected boolean preventCrouch(AbstractClientPlayerEntity player, PlayerRenderer renderer) {
             T animLayer = getAnimLayer(player);
             if (animLayer != null && animLayer.isActive()) {
                 renderer.getModel().crouching = false;
+                return true;
             }
+            return false;
         }
         
         @Nullable

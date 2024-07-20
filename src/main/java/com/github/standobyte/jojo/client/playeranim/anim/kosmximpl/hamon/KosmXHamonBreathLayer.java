@@ -1,11 +1,12 @@
-package com.github.standobyte.jojo.client.playeranim.kosmx.anim.layers.hamon;
+package com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.hamon;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.client.playeranim.interfaces.BasicToggleAnim;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.client.playeranim.anim.interfaces.BasicToggleAnim;
 import com.github.standobyte.jojo.client.playeranim.kosmx.KosmXPlayerAnimatorInstalled.AnimLayerHandler;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
@@ -20,8 +21,6 @@ import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
-import net.minecraftforge.client.event.RenderPlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class KosmXHamonBreathLayer extends AnimLayerHandler implements BasicToggleAnim {
     private static final Random RANDOM = new Random();
@@ -38,6 +37,7 @@ public class KosmXHamonBreathLayer extends AnimLayerHandler implements BasicTogg
     
     @Override
     public boolean setAnimEnabled(PlayerEntity player, boolean enabled) {
+        enabled &= !player.isPassenger() && !player.getCapability(LivingUtilCapProvider.CAPABILITY).map(wallClimb -> wallClimb.isWallClimbing()).orElse(false);
         if (enabled) {
             return setAnimFromName((AbstractClientPlayerEntity) player, getAnimPath(player));
         }
@@ -58,38 +58,28 @@ public class KosmXHamonBreathLayer extends AnimLayerHandler implements BasicTogg
         return poses[RANDOM.nextInt(poses.length)];
     }
     
-    private static final ResourceLocation DEFAULT_POSE = new ResourceLocation(JojoMod.MOD_ID, "breath_pose/default");
+    private static final ResourceLocation DEFAULT_POSE = new ResourceLocation(JojoMod.MOD_ID, "breath_default");
     private static final Map<CharacterHamonTechnique, ResourceLocation[]> POSES = Util.make(new HashMap<>(), map -> {
         map.put(ModHamonSkills.CHARACTER_JONATHAN.get(), new ResourceLocation[] {
                 DEFAULT_POSE,
-//                new ResourceLocation(JojoMod.MOD_ID, "breath_pose/jonathan"),
+//                new ResourceLocation(JojoMod.MOD_ID, "breath_jonathan"),
         });
         map.put(ModHamonSkills.CHARACTER_ZEPPELI.get(), new ResourceLocation[] {
                 DEFAULT_POSE,
-//                new ResourceLocation(JojoMod.MOD_ID, "breath_pose/zeppeli"),
+//                new ResourceLocation(JojoMod.MOD_ID, "breath_zeppeli"),
         });
         map.put(ModHamonSkills.CHARACTER_JOSEPH.get(), new ResourceLocation[] {
                 DEFAULT_POSE,
-//                new ResourceLocation(JojoMod.MOD_ID, "breath_pose/joseph"),
+//                new ResourceLocation(JojoMod.MOD_ID, "breath_joseph"),
         });
         map.put(ModHamonSkills.CHARACTER_CAESAR.get(), new ResourceLocation[] {
                 DEFAULT_POSE,
-//                new ResourceLocation(JojoMod.MOD_ID, "breath_pose/caesar"),
+//                new ResourceLocation(JojoMod.MOD_ID, "breath_caesar"),
         });
         map.put(ModHamonSkills.CHARACTER_LISA_LISA.get(), new ResourceLocation[] {
                 DEFAULT_POSE,
-//                new ResourceLocation(JojoMod.MOD_ID, "breath_pose/lisa_lisa"),
+//                new ResourceLocation(JojoMod.MOD_ID, "breath_lisa_lisa"),
         });
     });
     
-    
-    @Override
-    public boolean isForgeEventHandler() {
-        return true;
-    }
-
-    @SubscribeEvent
-    public void preRender(RenderPlayerEvent.Pre event) {
-        preventCrouch((AbstractClientPlayerEntity) event.getPlayer(), event.getRenderer());
-    }
 }

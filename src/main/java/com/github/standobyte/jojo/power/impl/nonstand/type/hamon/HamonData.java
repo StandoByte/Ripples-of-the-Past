@@ -19,6 +19,7 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
+import com.github.standobyte.jojo.action.non_stand.HamonWallClimbing2;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
@@ -184,7 +185,7 @@ public class HamonData extends TypeSpecificData {
                 }
             }
             
-            tickWallClimbing();
+            HamonWallClimbing2.tickWallClimbing(power, this, user);
             tickNewPlayerLearners(user);
             if (!user.level.isClientSide()) {
                 tickAirSupply(user);
@@ -1563,46 +1564,6 @@ public class HamonData extends TypeSpecificData {
                     user.getRandomX(0.5), user.getRandomY(), user.getRandomZ(0.5), 
                     (int) (MathUtil.fractionRandomInc(1) * 2));
         }
-    }
-    
-    private void tickWallClimbing() {
-        LivingEntity user = power.getUser();
-        user.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(wallClimbData -> {
-            if (wallClimbData.isHamonWallClimbing()) {
-                if (isSkillLearned(ModHamonSkills.WALL_CLIMBING.get())) {
-                    boolean isMoving = false;
-                    if (user instanceof PlayerEntity) {
-                        isMoving = wallClimbData.wallClimbIsMoving;
-                    }
-
-                    if (power.getHeldAction() != ModHamonActions.HAMON_BREATH.get()) {
-                        boolean consumedEnergy = false;
-
-                        float energyCost = ModHamonActions.HAMON_WALL_CLIMBING.get().getHeldTickEnergyCost(power);
-                        if (!isMoving) {
-                            energyCost *= 0.25f;
-                        }
-                        if (power.hasEnergy(energyCost)) {
-                            power.consumeEnergy(energyCost);
-                            consumedEnergy = true;
-                        }
-                        
-                        if (!consumedEnergy) {
-                            if (!user.level.isClientSide()) {
-                                wallClimbData.stopWallClimbing();
-                            }
-                        }
-                    }
-                    
-                    if (user.level.isClientSide()) {
-                        HamonSparksLoopSound.playSparkSound(user, new Vector3d(user.getX(), user.getY(0.75), user.getZ()), 1.0F, true);
-                    }
-                }
-                else if (!user.level.isClientSide()) {
-                    wallClimbData.stopWallClimbing();
-                }
-            }
-        });
     }
     
     

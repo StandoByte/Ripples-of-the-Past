@@ -36,6 +36,7 @@ public class ModZombieActions {
                     new ZombieAction[] {
                             ZOMBIE_DISGUISE.get()},
                     ZOMBIE_DEVOUR.get()
-                    ));
+                    )
+            .withColor(ZombiePowerType.COLOR));
 
 }

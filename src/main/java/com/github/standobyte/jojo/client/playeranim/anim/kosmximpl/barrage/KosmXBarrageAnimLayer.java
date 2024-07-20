@@ -1,7 +1,7 @@
-package com.github.standobyte.jojo.client.playeranim.kosmx.anim.layers.barrage;
+package com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.barrage;
 
 import com.github.standobyte.jojo.client.playeranim.IPlayerBarrageAnimation;
-import com.github.standobyte.jojo.client.playeranim.interfaces.PlayerBarrageAnim;
+import com.github.standobyte.jojo.client.playeranim.anim.interfaces.PlayerBarrageAnim;
 import com.github.standobyte.jojo.client.playeranim.kosmx.KosmXPlayerAnimatorInstalled.AnimLayerHandler;
 import com.github.standobyte.jojo.client.playeranim.kosmx.anim.modifier.KosmXArmsRotationModifier;
 import com.github.standobyte.jojo.client.playeranim.kosmx.anim.modifier.KosmXHeadRotationModifier;
@@ -16,8 +16,6 @@ import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.client.event.RenderPlayerEvent;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 public class KosmXBarrageAnimLayer extends AnimLayerHandler implements PlayerBarrageAnim {
 
@@ -55,14 +53,4 @@ public class KosmXBarrageAnimLayer extends AnimLayerHandler implements PlayerBar
         return new KosmXPlayerBarrageAnim(model);
     }
     
-    
-    @Override
-    public boolean isForgeEventHandler() {
-        return true;
-    }
-
-    @SubscribeEvent
-    public void preRender(RenderPlayerEvent.Pre event) {
-        preventCrouch((AbstractClientPlayerEntity) event.getPlayer(), event.getRenderer());
-    }
 }

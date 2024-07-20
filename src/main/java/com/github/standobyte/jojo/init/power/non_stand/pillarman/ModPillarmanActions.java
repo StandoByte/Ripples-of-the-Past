@@ -3,8 +3,6 @@ package com.github.standobyte.jojo.init.power.non_stand.pillarman;
 import static com.github.standobyte.jojo.init.power.ModCommonRegisters.ACTIONS;
 import static com.github.standobyte.jojo.init.power.ModCommonRegisters.NON_STAND_POWERS;
 
-import com.github.standobyte.jojo.action.non_stand.HamonAction;
-import com.github.standobyte.jojo.action.non_stand.HamonOverdriveBarrage;
 import com.github.standobyte.jojo.action.non_stand.NonStandAction;
 import com.github.standobyte.jojo.action.non_stand.PillarmanAbsorption;
 import com.github.standobyte.jojo.action.non_stand.PillarmanAction;
@@ -25,7 +23,6 @@ import com.github.standobyte.jojo.action.non_stand.PillarmanSmallSandstorm;
 import com.github.standobyte.jojo.action.non_stand.PillarmanStoneForm;
 import com.github.standobyte.jojo.action.non_stand.PillarmanUnnaturalAgility;
 import com.github.standobyte.jojo.action.non_stand.PillarmanWindCloak;
-import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanPowerType;
 
 import net.minecraftforge.fml.RegistryObject;
@@ -102,5 +99,6 @@ public static final RegistryObject<PillarmanAction> PILLARMAN_BLADE_BARRAGE = AC
                             PILLARMAN_STONE_FORM.get()
                     },
                     PILLARMAN_ABSORPTION.get()
-                    ));
+                    )
+            .withColor(PillarmanPowerType.COLOR));
 }

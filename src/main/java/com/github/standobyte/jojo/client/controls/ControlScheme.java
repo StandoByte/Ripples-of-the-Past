@@ -23,7 +23,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 
 public class ControlScheme {
-    public static final ControlScheme EMPTY = new ControlScheme();
+    public static final ControlScheme EMPTY = new ControlSchemeEmpty();
     
     public static final int ARBITRARY_MAX_HOTBAR_LENGTH = 19;
     
@@ -41,7 +41,7 @@ public class ControlScheme {
         }
     });
     
-    private ControlScheme() {}
+    protected ControlScheme() {}
     
     private ControlScheme(IPowerType<?, ?> powerType) {
         if (powerType != null) {
@@ -177,7 +177,11 @@ public class ControlScheme {
                 DefaultKey... keyBindings) {
             this.hotbars.put(Hotbar.LEFT_CLICK, leftClickActions);
             this.hotbars.put(Hotbar.RIGHT_CLICK, rightClickActions);
-            Collections.addAll(this.keyBindings, keyBindings);
+            for (DefaultKey defaultKey : keyBindings) {
+                if (defaultKey != null && defaultKey.action != null) {
+                    this.keyBindings.add(defaultKey);
+                }
+            }
         }
         
         public void addKey(DefaultKey key) {
@@ -221,7 +225,7 @@ public class ControlScheme {
         return addKeybindEntry(new ActionKeybindEntry(action, inputType, key));
     }
     
-    private ActionKeybindEntry addKeybindEntry(ActionKeybindEntry keybind) {
+    protected ActionKeybindEntry addKeybindEntry(ActionKeybindEntry keybind) {
         legalKeybinds.add(keybind);
         serializedKeybinds.add(keybind);
         return keybind;

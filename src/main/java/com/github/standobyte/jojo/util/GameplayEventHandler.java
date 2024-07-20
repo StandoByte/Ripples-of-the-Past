@@ -786,7 +786,7 @@ public class GameplayEventHandler {
         }
     }
 
-    private static void bleed(DamageSource dmgSource, float dmgAmount, LivingEntity target) {
+    public static void bleed(DamageSource dmgSource, float dmgAmount, LivingEntity target) {
         if (dmgSource instanceof StandLinkDamageSource) {
             dmgSource = ((StandLinkDamageSource) dmgSource).getOriginalDamageSource();
         }

@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.playeranim.kosmx.anim.layers.barrage;
+package com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.barrage;
 
 import java.util.HashMap;
 import java.util.Map;

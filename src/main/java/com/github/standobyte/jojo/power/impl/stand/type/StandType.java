@@ -421,7 +421,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     @Nullable
-    public OstSoundList getOst() {
+    public OstSoundList getOst(@Nullable LivingEntity user) {
         return ostSupplier;
     }
     

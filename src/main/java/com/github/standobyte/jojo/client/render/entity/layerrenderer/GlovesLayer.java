@@ -30,7 +30,6 @@ public class GlovesLayer<T extends LivingEntity, M extends PlayerModel<T>> exten
     private static final Map<PlayerRenderer, GlovesLayer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>> RENDERER_LAYERS = new HashMap<>();
     private final M glovesModel;
     private final boolean slim;
-    private boolean playerAnimHandled = false;
     
     public GlovesLayer(IEntityRenderer<T, M> renderer, M glovesModel, boolean slim) {
         super(renderer);
@@ -39,16 +38,12 @@ public class GlovesLayer<T extends LivingEntity, M extends PlayerModel<T>> exten
         }
         this.glovesModel = glovesModel;
         this.slim = slim;
+        PlayerAnimationHandler.getPlayerAnimator().onArmorLayerInit(this);
     }
 
     @Override
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, T entity, 
             float limbSwing, float limbSwingAmount, float partialTick, float ticks, float yRot, float xRot) {
-        if (!playerAnimHandled) {
-            PlayerAnimationHandler.getPlayerAnimator().onArmorLayerInit(this);
-            playerAnimHandled = true;
-        }
-
         ItemStack glovesItemStack = getRenderedGlovesItem(entity);
         if (!glovesItemStack.isEmpty()) {
             GlovesItem gloves = (GlovesItem) glovesItemStack.getItem();

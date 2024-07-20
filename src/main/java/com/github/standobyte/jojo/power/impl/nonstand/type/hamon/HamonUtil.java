@@ -526,7 +526,7 @@ public class HamonUtil {
                             }
                             return true;
                         }
-                        else if (entity == ClientUtil.getClientPlayer()) {
+                        else if (entity.level.isClientSide() && entity == ClientUtil.getClientPlayer()) {
                             BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).triggerRedHighlight(1);
                         }
                     }
@@ -737,7 +737,7 @@ public class HamonUtil {
     
     // one-time particle emit (like crit particles) + 'generic electricity sound'
     public static void emitHamonSparkParticles(World world, @Nullable PlayerEntity clientHandled, 
-            double x, double y, double z, float intensity, @Nullable SoundEvent hamonSound) {
+            double x, double y, double z, float intensity, float volumeMult, @Nullable SoundEvent hamonSound) {
         if (intensity > 0) {
             intensity = Math.min(intensity, 4F);
             int count = Math.max((int) (intensity * 16.5F), 1);
@@ -748,15 +748,19 @@ public class HamonUtil {
                 CustomParticlesHelper.createHamonSparkParticles(null, x, y, z, count);
             }
             if (hamonSound != null) {
-                float volume = Math.min(intensity * 2, 1.0F);
+                float volume = Math.min(intensity * 2, 1.0F) * volumeMult;
                 world.playSound(clientHandled, x, y, z, hamonSound, 
                         SoundCategory.AMBIENT, volume, 1.0F + (world.random.nextFloat() - 0.5F) * 0.15F);
             }
         }
     }
     
+    public static void emitHamonSparkParticles(World world, @Nullable PlayerEntity clientHandled, double x, double y, double z, float intensity, float volumeMult) {
+        emitHamonSparkParticles(world, clientHandled, x, y, z, intensity, volumeMult, ModSounds.HAMON_SPARK.get());
+    }
+    
     public static void emitHamonSparkParticles(World world, @Nullable PlayerEntity clientHandled, double x, double y, double z, float intensity) {
-        emitHamonSparkParticles(world, clientHandled, x, y, z, intensity, ModSounds.HAMON_SPARK.get());
+        emitHamonSparkParticles(world, clientHandled, x, y, z, intensity, 1);
     }
     
     public static void emitHamonSparkParticles(World world, @Nullable PlayerEntity clientHandled, Vector3d vec, float intensity) {
@@ -764,7 +768,7 @@ public class HamonUtil {
     }
     
     public static void emitHamonSparkParticles(World world, @Nullable PlayerEntity clientHandled, Vector3d vec, float intensity, @Nullable SoundEvent hamonSound) {
-        emitHamonSparkParticles(world, clientHandled, vec.x, vec.y, vec.z, intensity, hamonSound);
+        emitHamonSparkParticles(world, clientHandled, vec.x, vec.y, vec.z, intensity, 1, hamonSound);
     }
     
     

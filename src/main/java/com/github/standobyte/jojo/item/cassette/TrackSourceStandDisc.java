@@ -38,7 +38,7 @@ public class TrackSourceStandDisc extends TrackSource {
 
     @Override
     public SoundEvent getSoundEvent() {
-        OstSoundList ost = standType.getOst();
+        OstSoundList ost = standType.getOst(null);
         return ost != null ? ost.getForCassette() : null;
     }
 

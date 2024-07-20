@@ -185,7 +185,12 @@
   
   "hamon_concentration": {
     "subtitle": "jojo.subtitle.hamon_concentration",
-    "sounds": [ "jojo:hamon_concentration" ]
+    "sounds": [
+      {
+        "name": "jojo:hamon_concentration",
+        "volume": 0.5
+      }
+    ]
   },
   
   "hamon_breath": {

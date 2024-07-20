@@ -1,13 +1,17 @@
 package com.github.standobyte.jojo.util.mc;
 
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -42,6 +46,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -550,6 +555,32 @@ public class MCUtil {
         // TODO compatibility with Tinkers Construct
         
         return false;
+    }
+    
+    public static double calcValueWithoutModifiers(ModifiableAttributeInstance entityAttribute, UUID... modifierIds) {
+        return calcValueWithoutModifiers(entityAttribute, Arrays.stream(modifierIds));
+    }
+    
+    public static double calcValueWithoutModifiers(ModifiableAttributeInstance entityAttribute, Stream<UUID> modifierIds) {
+        Collection<UUID> exclude = modifierIds.collect(Collectors.toCollection(HashSet::new));
+        if (exclude.isEmpty()) return entityAttribute.getValue();
+        
+        double valueBase = entityAttribute.getBaseValue();
+        
+        for (AttributeModifier modifier : entityAttribute.getModifiers(AttributeModifier.Operation.ADDITION)) {
+            if (!exclude.contains(modifier.getId())) valueBase += modifier.getAmount();
+        }
+        
+        double value = valueBase;
+        for (AttributeModifier modifier : entityAttribute.getModifiers(AttributeModifier.Operation.MULTIPLY_BASE)) {
+            if (!exclude.contains(modifier.getId())) value += valueBase * modifier.getAmount();
+        }
+        
+        for (AttributeModifier modifier : entityAttribute.getModifiers(AttributeModifier.Operation.MULTIPLY_TOTAL)) {
+            if (!exclude.contains(modifier.getId())) value *= 1.0D + modifier.getAmount();
+        }
+
+        return entityAttribute.getAttribute().sanitizeValue(value);
     }
     
     
