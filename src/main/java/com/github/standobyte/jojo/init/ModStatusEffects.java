@@ -6,6 +6,7 @@ import java.util.Set;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.potion.BleedingEffect;
 import com.github.standobyte.jojo.potion.FreezeEffect;
 import com.github.standobyte.jojo.potion.HamonShockEffect;
 import com.github.standobyte.jojo.potion.HamonSpreadEffect;
@@ -42,6 +43,9 @@ public class ModStatusEffects {
     
     public static final RegistryObject<FreezeEffect> FREEZE = EFFECTS.register("freeze", 
             () -> new FreezeEffect(EffectType.HARMFUL, 0xD6D6FF));
+    
+    public static final RegistryObject<BleedingEffect> BLEEDING = EFFECTS.register("bleeding", 
+            () -> new BleedingEffect(EffectType.HARMFUL, 0x990000));
     
     public static final RegistryObject<UndeadRegenerationEffect> UNDEAD_REGENERATION = EFFECTS.register("undead_regeneration", 
             () -> new UndeadRegenerationEffect(EffectType.BENEFICIAL, Effects.REGENERATION.getColor()));
@@ -116,7 +120,8 @@ public class ModStatusEffects {
                 HAMON_SPREAD.get(), 
                 FULL_INVISIBILITY.get(), 
                 VAMPIRE_SUN_BURN.get(),
-        		FREEZE.get());
+        		FREEZE.get(),
+                BLEEDING.get());
     }
     
     // Makes it so that the effect is also sent to the surrounding players, in case it is needed for visuals

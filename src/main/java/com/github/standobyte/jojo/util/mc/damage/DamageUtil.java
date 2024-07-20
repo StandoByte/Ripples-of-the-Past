@@ -25,6 +25,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.google.common.collect.Multimap;
 
@@ -394,10 +395,10 @@ public class DamageUtil {
             if (itemModifiers.containsKey(Attributes.ATTACK_DAMAGE)) {
                 ModifiableAttributeInstance attackDamageAttribute = entity.getAttribute(Attributes.ATTACK_DAMAGE);
                 Collection<AttributeModifier> attackDamageModifiers = itemModifiers.get(Attributes.ATTACK_DAMAGE);
-                attackDamageModifiers.forEach(attackDamageAttribute::removeModifier);
-                float damage = (float) attackDamageAttribute.getValue();
-                attackDamageModifiers.forEach(attackDamageAttribute::addTransientModifier);
-                return damage;
+                
+                double damage = MCUtil.calcValueWithoutModifiers(attackDamageAttribute, 
+                        attackDamageModifiers.stream().map(AttributeModifier::getId));
+                return (float) damage;
             }
         }
         return (float) entity.getAttributeValue(Attributes.ATTACK_DAMAGE);
