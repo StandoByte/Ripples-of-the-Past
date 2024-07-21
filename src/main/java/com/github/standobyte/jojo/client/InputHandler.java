@@ -1071,8 +1071,7 @@ public class InputHandler {
     }
     
     private boolean slowDownFromContinuousAction(PlayerEntity player, MovementInput input) {
-        Optional<ContinuousActionInstance<?, ?>> action = player.getCapability(PlayerUtilCapProvider.CAPABILITY)
-                .resolve().flatMap(cap -> cap.getContinuousAction());
+        Optional<ContinuousActionInstance<?, ?>> action = ContinuousActionInstance.getCurrentAction(player);
         if (action.isPresent()) {
             float speed = action.get().getWalkSpeed();
             return slowDown(player, input, speed);

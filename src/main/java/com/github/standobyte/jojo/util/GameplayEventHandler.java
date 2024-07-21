@@ -13,8 +13,8 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.JojoModConfig.Common;
-import com.github.standobyte.jojo.action.non_stand.HamonSendoWaveKick;
 import com.github.standobyte.jojo.action.non_stand.VampirismFreeze;
+import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.action.stand.effect.BoyIIManStandPartTakenEffect;
@@ -548,10 +548,15 @@ public class GameplayEventHandler {
     
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void cancelLivingAttack(LivingAttackEvent event) {
-        if (HamonSendoWaveKick.protectFromMeleeAttackInKick(event.getEntityLiving(), event.getSource(), event.getAmount())
-                || HamonUtil.snakeMuffler(event.getEntityLiving(), event.getSource(), event.getAmount()) 
-                || HamonUtil.rebuffOverdrive(event.getEntityLiving(), event.getSource(), event.getAmount())) 
+        LivingEntity entity = event.getEntityLiving();
+        DamageSource dmgSource = event.getSource();
+        float dmgAmount = event.getAmount();
+        if (GeneralUtil.orElseFalse(ContinuousActionInstance.getCurrentAction(entity), 
+                action -> action.cancelIncomingDamage(dmgSource, dmgAmount))
+                || HamonUtil.snakeMuffler(entity, dmgSource, dmgAmount) 
+                || HamonUtil.rebuffOverdrive(entity, dmgSource, dmgAmount)) {
             event.setCanceled(true);
+        }
     }
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
