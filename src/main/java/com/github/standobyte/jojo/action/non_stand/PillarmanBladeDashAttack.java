@@ -126,6 +126,11 @@ public class PillarmanBladeDashAttack extends PillarmanAction implements IPlayer
         public float getInitialYRot() {
             return initialYRot;
         }
+        
+        @Override
+        public boolean cancelIncomingDamage(DamageSource dmgSource, float dmgAmount) {
+            return isMeleeAttack(dmgSource);
+        }
     }
 }
 

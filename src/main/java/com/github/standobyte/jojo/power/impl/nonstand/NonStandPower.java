@@ -10,7 +10,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PreviousPowerTypesPacket;
@@ -138,8 +138,8 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
     
     @Override
     public boolean isTargetUpdateTick() {
-        return super.isTargetUpdateTick() || GeneralUtil.orElseFalse(getUser().getCapability(PlayerUtilCapProvider.CAPABILITY), 
-                player -> player.getContinuousAction().map(action -> action.updateTarget()).orElse(false));
+        return super.isTargetUpdateTick() || GeneralUtil.orElseFalse(ContinuousActionInstance.getCurrentAction(getUser()), 
+                ContinuousActionInstance::updateTarget);
     }
     
     @Override

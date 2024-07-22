@@ -20,9 +20,9 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.non_stand.HamonWallClimbing2;
+import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
@@ -1349,7 +1349,7 @@ public class HamonData extends TypeSpecificData {
                 || power.getHeldAction() == ModHamonActions.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE_BARRAGE.get()) {
             return HamonAuraColor.YELLOW;
         }
-        if (user.getCapability(PlayerUtilCapProvider.CAPABILITY).resolve().flatMap(player -> player.getContinuousAction())
+        if (ContinuousActionInstance.getCurrentAction(user)
                 .map(action -> action.getAction() == ModHamonActions.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE_BARRAGE.get())
                 .orElse(false)) {
             return HamonAuraColor.YELLOW;

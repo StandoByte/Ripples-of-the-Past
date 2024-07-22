@@ -7,10 +7,7 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.player.IPlayerAction;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
-import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
-import com.github.standobyte.jojo.init.power.non_stand.pillarman.ModPillarmanActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.general.MathUtil;
@@ -119,14 +116,6 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
                 DamageUtil.getDamageWithoutHeldItem(user));
     }
     
-    public static boolean protectFromMeleeAttackInKick(LivingEntity user, DamageSource dmgSource, float dmgAmount) {
-        return user.getCapability(PlayerUtilCapProvider.CAPABILITY).map(cap -> {
-            return (cap.getContinuousAction().map(action -> action.getAction() == ModHamonActions.ZEPPELI_SENDO_WAVE_KICK.get()).orElse(false) 
-                    || cap.getContinuousAction().map(action -> action.getAction() == ModPillarmanActions.PILLARMAN_BLADE_DASH_ATTACK.get()).orElse(false)) && 
-                    dmgSource.getEntity() != null && dmgSource.getDirectEntity() != null && dmgSource.getEntity().is(dmgSource.getDirectEntity());
-        }).orElse(false);
-    }
-    
     public static AxisAlignedBB kickHitbox(LivingEntity user) {
         float xzAngle = -user.yRot * MathUtil.DEG_TO_RAD;
         Vector3d lookVec = new Vector3d(Math.sin(xzAngle), 0, Math.cos(xzAngle));
@@ -168,6 +157,11 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
         
         public float getInitialYRot() {
             return initialYRot;
+        }
+        
+        @Override
+        public boolean cancelIncomingDamage(DamageSource dmgSource, float dmgAmount) {
+            return isMeleeAttack(dmgSource);
         }
     }
 }
