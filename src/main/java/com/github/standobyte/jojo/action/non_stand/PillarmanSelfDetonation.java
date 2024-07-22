@@ -27,8 +27,8 @@ public class PillarmanSelfDetonation extends PillarmanAction {
     @Override
     public void onHoldTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
-            PillarmanDivineSandstorm.auraEffect(user, ModParticles.HAMON_AURA_RED.get());
-            PillarmanDivineSandstorm.auraEffect(user, ModParticles.BLOOD.get());
+            PillarmanDivineSandstorm.auraEffect(user, ModParticles.HAMON_AURA_RED.get(), 12);
+            PillarmanDivineSandstorm.auraEffect(user, ModParticles.BOILING_BLOOD_POP.get(), 1);
         }
     }
     

@@ -1,0 +1,38 @@
+{
+  "parent": "jojo:jojo/root",
+  "display": {
+    "icon": {
+      "item": "jojo:meteoric_scrap",
+      "nbt": "{Icon:21}"
+    },
+    "title": {
+      "translate": "advancements.jojo.kill_pillarman.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.kill_pillarman.description"
+    },
+    "frame": "challenge",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": true
+  },
+  "criteria": {
+    "pillarman_killed": {
+      "trigger": "jojo:kill_pillarman",
+      "conditions": {
+        "killed_power": {
+          "classification": "non_stand",
+          "type": "jojo:pillarman",
+          "pillarman_stage": {
+            "min": 3
+          }
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "pillarman_killed"
+    ]
+  ]
+}

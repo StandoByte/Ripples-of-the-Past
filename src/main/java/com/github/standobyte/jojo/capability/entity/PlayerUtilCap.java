@@ -16,17 +16,22 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.player.IPlayerAction;
+import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
+import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.NotificationSyncPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDirectEntityDataPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDoubleShiftPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHamonLiquidWalkingPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrKnivesCountPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerContinuousActionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerVisualDetailPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrWalkmanEarbudsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.MetEntityTypesPacket;
 import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.CustomVillagerTrades;
 import com.github.standobyte.jojo.util.mc.CustomVillagerTrades.MapTrade;
@@ -62,6 +67,8 @@ public class PlayerUtilCap {
     
     private boolean doubleShiftPress = false;
     private boolean shiftSynced = false;
+    private boolean isWalkingOnLiquid = false;
+    private boolean clTickSpark;
     
     private Set<OneTimeNotification> notificationsSent = EnumSet.noneOf(OneTimeNotification.class);
     
@@ -273,6 +280,34 @@ public class PlayerUtilCap {
     
     public boolean getDoubleShiftPress() {
         return doubleShiftPress;
+    }
+    
+    public void setWaterWalking(boolean waterWalking) {
+        if (this.isWalkingOnLiquid ^ waterWalking) {
+            if (!player.level.isClientSide()) {
+                PacketManager.sendToClientsTracking(new TrHamonLiquidWalkingPacket(player.getId(), waterWalking), player);
+            }
+            else if (waterWalking) {
+                HamonUtil.emitHamonSparkParticles(player.level, ClientUtil.getClientPlayer(), player.position(), 0.05F);
+                CustomParticlesHelper.createHamonSparkParticles(null, player.position(), 10);
+                this.clTickSpark = false;
+            }
+            this.isWalkingOnLiquid = waterWalking;
+        }
+    }
+    
+    public boolean isWaterWalking() {
+        return isWalkingOnLiquid;
+    }
+    
+    public void tickWaterWalking() {
+        if (player.level.isClientSide() && isWalkingOnLiquid && clTickSpark) {
+            HamonSparksLoopSound.playSparkSound(player, player.position(), 1.0F);
+            CustomParticlesHelper.createHamonSparkParticles(player, 
+                    player.getRandomX(0.5), player.getY(Math.random() * 0.1), player.getRandomZ(0.5), 
+                    1);
+        }
+        clTickSpark = true;
     }
     
     

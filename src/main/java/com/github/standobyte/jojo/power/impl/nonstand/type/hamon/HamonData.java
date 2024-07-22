@@ -19,7 +19,6 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
-import com.github.standobyte.jojo.action.non_stand.HamonWallClimbing2;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
@@ -52,7 +51,6 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrHamonBreathStabil
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonCharacterTechniquePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonEnergyTicksPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonFlagsPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrHamonLiquidWalkingPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonMeditationPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonStatsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonSyncPlayerLearnerPacket;
@@ -152,12 +150,6 @@ public class HamonData extends TypeSpecificData {
     private boolean hamonProtection = false;
     private boolean isRebuffOverdriveOn = false;
     private int rebuffTick = 0;
-    
-    private boolean waterWalkingPrevTick = false;
-    private boolean waterWalkingThisTick = false;
-    private boolean trWaterWalking = false;
-    private boolean clLargeSpark = false;
-    private boolean clTickSpark = false;
 
     public HamonData() {
         hamonSkills = new MainHamonSkillsManager();
@@ -185,7 +177,7 @@ public class HamonData extends TypeSpecificData {
                 }
             }
             
-            HamonWallClimbing2.tickWallClimbing(power, this, user);
+            tickWallClimbing();
             tickNewPlayerLearners(user);
             if (!user.level.isClientSide()) {
                 tickAirSupply(user);
@@ -211,8 +203,6 @@ public class HamonData extends TypeSpecificData {
             hamonProtection = false;
             isRebuffOverdriveOn = false;
         }
-        
-        waterWalkingThisTick = false;
     }
     
     public float tickEnergy() {
@@ -1566,51 +1556,45 @@ public class HamonData extends TypeSpecificData {
         }
     }
     
-    
-    public void setWaterWalkingThisTick() {
-        waterWalkingThisTick = true;
-    }
-    
-    public void postTickWaterWalking(LivingEntity user) {
-        if (!user.level.isClientSide()) {
-            if (waterWalkingPrevTick ^ waterWalkingThisTick) {
-                PacketManager.sendToClientsTracking(new TrHamonLiquidWalkingPacket(user.getId(), waterWalkingThisTick), user);
+    private void tickWallClimbing() {
+        LivingEntity user = power.getUser();
+        user.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(wallClimbData -> {
+            if (wallClimbData.isHamonWallClimbing()) {
+                if (isSkillLearned(ModHamonSkills.WALL_CLIMBING.get())) {
+                    boolean isMoving = false;
+                    if (user instanceof PlayerEntity) {
+                        isMoving = wallClimbData.wallClimbIsMoving;
+                    }
+
+                    if (power.getHeldAction() != ModHamonActions.HAMON_BREATH.get()) {
+                        boolean consumedEnergy = false;
+
+                        float energyCost = ModHamonActions.HAMON_WALL_CLIMBING.get().getHeldTickEnergyCost(power);
+                        if (!isMoving) {
+                            energyCost *= 0.25f;
+                        }
+                        if (power.hasEnergy(energyCost)) {
+                            power.consumeEnergy(energyCost);
+                            consumedEnergy = true;
+                        }
+                        
+                        if (!consumedEnergy) {
+                            if (!user.level.isClientSide()) {
+                                wallClimbData.stopWallClimbing();
+                            }
+                        }
+                    }
+                    
+                    if (user.level.isClientSide()) {
+                        HamonSparksLoopSound.playSparkSound(user, new Vector3d(user.getX(), user.getY(0.75), user.getZ()), 1.0F, true);
+                    }
+                }
+                else if (!user.level.isClientSide()) {
+                    wallClimbData.stopWallClimbing();
+                }
             }
-        }
-        else {
-            if (!waterWalkingPrevTick && waterWalkingThisTick || clLargeSpark) {
-                HamonUtil.emitHamonSparkParticles(user.level, ClientUtil.getClientPlayer(), user.position(), 0.05F);
-                CustomParticlesHelper.createHamonSparkParticles(null, user.position(), 10);
-                clTickSpark = false;
-                clLargeSpark = false;
-            }
-        }
-        waterWalkingPrevTick = waterWalkingThisTick;
-        
-        if (user.level.isClientSide() && (trWaterWalking || waterWalkingThisTick) && clTickSpark) {
-            HamonSparksLoopSound.playSparkSound(user, user.position(), 1.0F);
-            CustomParticlesHelper.createHamonSparkParticles(user, 
-                    user.getRandomX(0.5), user.getY(Math.random() * 0.1), user.getRandomZ(0.5), 
-                    1);
-        }
-        clTickSpark = true;
+        });
     }
-    
-    public void trSetWaterWalking(boolean waterWalking, LivingEntity user) {
-        this.trWaterWalking = waterWalking;
-        if (waterWalking) {
-            clLargeSpark = true;
-        }
-    }
-    
-    public boolean isWaterWalking() {
-        return trWaterWalking || waterWalkingPrevTick;
-    }
-    
-    public float waterWalkingTickCost() {
-        return waterWalkingPrevTick ? 1 : 50;
-    }
-    
     
     public boolean getRebuffOverdrive() {
         return isRebuffOverdriveOn;

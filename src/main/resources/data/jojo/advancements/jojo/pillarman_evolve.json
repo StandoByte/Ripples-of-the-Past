@@ -1,0 +1,31 @@
+{
+  "parent": "jojo:jojo/get_pillarman",
+  "display": {
+    "icon": {
+      "item": "jojo:stone_mask",
+      "nbt": "{Activated:1}"
+    },
+    "title": {
+      "translate": "advancements.jojo.pillarman_evolve.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.pillarman_evolve.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "pillarman_evolve": {
+      "trigger": "jojo:pillarman_evolve",
+      "conditions": {
+      }
+    }
+  },
+  "requirements": [
+    [
+      "pillarman_evolve"
+    ]
+  ]
+}

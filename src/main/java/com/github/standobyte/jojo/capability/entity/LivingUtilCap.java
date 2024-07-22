@@ -11,7 +11,6 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
 import com.github.standobyte.jojo.entity.AfterimageEntity;
 import com.github.standobyte.jojo.entity.HamonSendoOverdriveEntity;
 import com.github.standobyte.jojo.entity.ai.LookAtEntityWithoutMovingGoal;
@@ -458,14 +457,11 @@ public class LivingUtilCap {
             PacketManager.sendToClientsTrackingAndSelf(new TrHamonWallClimbingPacket(
                     entity.getId(), wallClimbing, hamon, climbSpeed, yBodyRot), entity);
         }
-        else if (entity instanceof PlayerEntity) {
+        else if (!value && entity instanceof PlayerEntity) {
             PlayerEntity player = (PlayerEntity) entity;
-            if (!value) {
-                if (player.isLocalPlayer()) {
-                    ClientUtil.setPlayerHandsBusy(player, false);
-                }
+            if (player.isLocalPlayer()) {
+                ClientUtil.setPlayerHandsBusy(player, false);
             }
-            ModPlayerAnimations.wallClimbing.setAnimEnabled(player, value);
         }
     }
     
@@ -481,7 +477,7 @@ public class LivingUtilCap {
             float yRot = entity.yRot;
             while (yRot <= entity.yBodyRot - 180) yRot += 360;
             while (yRot > entity.yBodyRot + 180) yRot -= 360;
-            entity.yRot = MathHelper.clamp(yRot, entity.yBodyRot - 75, entity.yBodyRot + 75);
+            entity.yRot = MathHelper.clamp(yRot, entity.yBodyRot - 105, entity.yBodyRot + 105);
             entity.yRotO = entity.yRot;
         }
     }

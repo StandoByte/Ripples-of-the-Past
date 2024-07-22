@@ -12,6 +12,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanDa
 
 import net.minecraft.client.particle.Particle;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.UseAction;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -46,11 +47,11 @@ public class PillarmanDivineSandstorm extends PillarmanAction {
     @Override
     public void onHoldTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
-            auraEffect(user, ModParticles.HAMON_AURA_GREEN.get());
+            auraEffect(user, ModParticles.HAMON_AURA_GREEN.get(), 12);
         }
         super.onHoldTick(world, user, power, ticksHeld, target, requirementsFulfilled);
     }
-    
+
     @Override
     protected void holdTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (!world.isClientSide()) {
@@ -66,8 +67,8 @@ public class PillarmanDivineSandstorm extends PillarmanAction {
         }
     }
     
-    public static void auraEffect(LivingEntity user, IParticleData particles) {
-        for (int i = 0; i < 12; i++) {
+    public static void auraEffect(LivingEntity user, IParticleData particles, int intensity) {
+        for (int i = 0; i < intensity; i++) {
             Vector3d particlePos = user.position().add(
                     (Math.random() - 0.5) * (user.getBbWidth() + 0.5), 
                     Math.random() * (user.getBbHeight()), 

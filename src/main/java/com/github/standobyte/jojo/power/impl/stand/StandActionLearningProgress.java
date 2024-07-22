@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.power.impl.stand;
 
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -40,12 +39,8 @@ public class StandActionLearningProgress {
         if (currentType == null) {
             return EMPTY;
         }
-        Map<ResourceLocation, StandActionLearningEntry> standActions = map._mapOfMaps
-                .get(currentType.getRegistryName());
-        if (standActions == null) {
-            return Collections.emptyList();
-        }
-        return standActions
+        return map._mapOfMaps
+                .get(currentType.getRegistryName())
                 .values()
                 .stream()
                 .map(entry -> entry.action)

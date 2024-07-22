@@ -10,16 +10,11 @@ import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
-import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
-import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
-import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
-import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClStopWallClimbPacket;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.general.OptionalFloat;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -56,12 +51,7 @@ public class HamonWallClimbing2 extends HamonAction {
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
         return user.getCapability(PlayerUtilCapProvider.CAPABILITY).map(cap -> {
             if (target.getType() == TargetType.BLOCK && target.getFace() != null && target.getFace().getAxis() != Direction.Axis.Y) {
-                Direction blockFace = target.getFace();
-//                BlockPos standingOn = user.blockPosition().below().offset(blockFace.getOpposite().getNormal());
-//                if (user.isOnGround() && standingOn.equals(target.getBlockPos())) {
-//                    return ActionConditionResult.POSITIVE;
-//                }
-                Vector3d vecToBlock = Vector3d.atLowerCornerOf(blockFace.getOpposite().getNormal()).scale(MAX_WALL_DISTANCE);
+                Vector3d vecToBlock = Vector3d.atLowerCornerOf(target.getFace().getOpposite().getNormal()).scale(MAX_WALL_DISTANCE);
                 Vector3d collide = MCUtil.collide(user, vecToBlock);
                 if (!collide.equals(vecToBlock)) {
                     return ActionConditionResult.POSITIVE;
@@ -87,12 +77,6 @@ public class HamonWallClimbing2 extends HamonAction {
                     Direction face = target.getFace();
                     float yRot = 180 - face.toYRot();
                     if (!cap.isWallClimbing() || cap.getWallClimbYRot().orElseGet(() -> yRot) != yRot) {
-                        Vector3d vecToBlock = Vector3d.atLowerCornerOf(face.getOpposite().getNormal()).scale(MAX_WALL_DISTANCE);
-                        Vector3d collide = MCUtil.collide(user, vecToBlock);
-                        double distanceFromWall = user.getBbWidth() * 0.15;
-                        Vector3d moveTo = user.position().add(collide).add(Vector3d.atLowerCornerOf(face.getNormal()).scale(distanceFromWall));
-                        user.teleportTo(moveTo.x, moveTo.y, moveTo.z);
-                        
                         cap.setWallClimbing(true, true, -1, OptionalFloat.of(yRot));
                         if (user instanceof PlayerEntity) {
                             ((PlayerEntity) user).displayClientMessage(new TranslationTextComponent(
@@ -134,10 +118,7 @@ public class HamonWallClimbing2 extends HamonAction {
                 double climbSpeed = wallClimbData.getWallClimbSpeed() * player.getAttributeValue(Attributes.MOVEMENT_SPEED);
                 boolean canPullUp = false;
 
-                Vector3d movement = new Vector3d(inputVec.x * 0.75, inputVec.z > 0 ? inputVec.z : inputVec.z * 0.75, 0);
-                if (inputVec.x != 0 && inputVec.z != 0) {
-                    movement = movement.scale(0.8); // 1/sqrt(1^2+0.75^2)
-                }
+                Vector3d movement = new Vector3d(inputVec.x * 0.75, inputVec.z, 0);
                 if (movement.lengthSqr() > 1) {
                     movement = movement.normalize();
                 }
@@ -145,11 +126,9 @@ public class HamonWallClimbing2 extends HamonAction {
                 if (climbYRot != 0) {
                     movement = movement.yRot(climbYRot);
                 }
-
-                Vector3d horizontalMovementOnly = new Vector3d(movement.x, 0, movement.z);
+                
                 Vector3d collideAfterMove;
-                AxisAlignedBB gripBox = player.getBoundingBox()
-                        .contract(0, -player.getBbHeight() * 0.5, 0);
+                AxisAlignedBB gripBox = player.getBoundingBox().contract(0, -player.getBbHeight() * 0.75, 0).move(0, -player.getBbHeight() * 0.25, 0);
                 if (movement.y < 0) {
                     // stop climbing if standing on a solid block
                     if (player.isOnGround()) {
@@ -159,27 +138,26 @@ public class HamonWallClimbing2 extends HamonAction {
                     else {
                         // make sure the player doesn't fall down
                         collideAfterMove = MCUtil.collide(player, 
-                                gripBox.move(0, -gripBox.getYsize() + movement.y, 0), 
+                                gripBox.move(0, movement.y, 0), 
                                 gripVec);
                         if (collideAfterMove.subtract(gripVec).lengthSqr() < 1E-7) {
-                            movement = horizontalMovementOnly;
+                            movement = new Vector3d(movement.x, 0, movement.z);
                         }
                     }
                 }
                 
                 // check if the player is at the top of a wall
-                collideAfterMove = MCUtil.collide(player, gripBox.move(0, gripBox.getYsize(), 0), gripVec);
+                collideAfterMove = MCUtil.collide(player, gripBox.move(0, player.getBbHeight() * 0.25, 0), gripVec);
                 if (collideAfterMove.subtract(gripVec).lengthSqr() < 1E-7) {
                     if (movement.y > 0) {
-                        movement = horizontalMovementOnly;
+                        movement = new Vector3d(movement.x, 0, movement.z);
                     }
                     canPullUp = true;
                 }
                 
                 // make sure the player doesn't fall while moving to the left/right if a horizontal end of a wall is reached
                 collideAfterMove = MCUtil.collide(player, 
-                        gripBox.move(horizontalMovementOnly.normalize()
-                                .scale(horizontalMovementOnly.length() + player.getBbWidth() + 0.1)),
+                        gripBox.move(movement.normalize().scale(movement.length() + player.getBbWidth())),
                         gripVec);
                 if (collideAfterMove.subtract(gripVec).lengthSqr() < 1E-7) {
                     movement = new Vector3d(0, movement.y, 0);
@@ -192,21 +170,15 @@ public class HamonWallClimbing2 extends HamonAction {
                         stopWallClimbing(player, wallClimbData);
                         if (canPullUp) {
                             // TODO pulling up animation
-                            player.move(MoverType.SELF, new Vector3d(0, player.getBbHeight(), 0));
-//                            Vector3d pullUpMovement = new Vector3d(0, player.getBbHeight() + 0.1, 0);
-//                            player.setDeltaMovement(pullUpMovement);
-                            player.setDeltaMovement(new Vector3d(0, 0, 0.1).yRot(climbYRot));
+                            Vector3d pullUpMovement = new Vector3d(0, player.getBbHeight() * 0.75 + 0.1, 0);
+                            player.setDeltaMovement(pullUpMovement);
                         }
                         return false;
                     }
                     
                     boolean isMoving = movement.lengthSqr() > 1E-7;
                     ClientUtil.setPlayerHandsBusy(player, isMoving);
-                    double up = movement.y;
-                    double left = movement.yRot(-climbYRot).x;
                     InputHandler.getInstance().wallClimbClientTick(isMoving, wallClimbData);
-                    ModPlayerAnimations.wallClimbing.tickAnimProperties(player, isMoving, 
-                            up, left, (float) climbSpeed / MIN_MOVEMENT_SPEED);
 //                }
                 
                 player.setDeltaMovement(movement);
@@ -221,7 +193,6 @@ public class HamonWallClimbing2 extends HamonAction {
         }
         return false;
     }
-    private static final float MIN_MOVEMENT_SPEED = 0.06f;
     
     private static void stopWallClimbing(PlayerEntity player, LivingUtilCap wallClimbing) {
         if (!player.level.isClientSide()) {
@@ -246,50 +217,9 @@ public class HamonWallClimbing2 extends HamonAction {
     public float getTickEnergyCost(INonStandPower power, boolean isMoving) {
         float cost = getHeldTickEnergyCost(power);
         if (!isMoving) {
-            cost *= 0.25f;
+            cost *= 4;
         }
         return cost;
-    }
-    
-    
-    public static void tickWallClimbing(INonStandPower power, HamonData hamon, LivingEntity user) {
-        user.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(wallClimbData -> {
-            if (wallClimbData.isHamonWallClimbing()) {
-                if (hamon.isSkillLearned(ModHamonSkills.WALL_CLIMBING.get())) {
-                    boolean isMoving = false;
-                    if (user instanceof PlayerEntity) {
-                        isMoving = wallClimbData.wallClimbIsMoving;
-                    }
-
-                    if (power.getHeldAction() != ModHamonActions.HAMON_BREATH.get()) {
-                        boolean consumedEnergy = false;
-
-                        float energyCost = ModHamonActions.HAMON_WALL_CLIMBING.get().getTickEnergyCost(power, isMoving);
-                        float points = Math.min(energyCost, power.getEnergy() * hamon.getActionEfficiency(energyCost, false));
-                        if (power.hasEnergy(energyCost)) {
-                            power.consumeEnergy(energyCost);
-                            consumedEnergy = true;
-                            if (isMoving && !user.level.isClientSide()) {
-                                hamon.hamonPointsFromAction(HamonStat.CONTROL, points);
-                            }
-                        }
-                        
-                        if (!consumedEnergy) {
-                            if (!user.level.isClientSide()) {
-                                wallClimbData.stopWallClimbing();
-                            }
-                        }
-                    }
-                    
-                    if (user.level.isClientSide()) {
-                        HamonSparksLoopSound.playSparkSound(user, new Vector3d(user.getX(), user.getY(0.75), user.getZ()), 1.0F, true);
-                    }
-                }
-                else if (!user.level.isClientSide()) {
-                    wallClimbData.stopWallClimbing();
-                }
-            }
-        });
     }
     
 }

@@ -41,6 +41,7 @@ import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGGrappl
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGStringEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.MRRedBindEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.PillarmanHornEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.PillarmanRibEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.PillarmanVeinEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.SPStarFingerEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.SatiporojaScarfBindingEntity;
@@ -285,6 +286,10 @@ public class ModEntityTypes {
     public static final RegistryObject<EntityType<PillarmanVeinEntity>> PILLARMAN_VEINS = ENTITIES.register("pillarman_veins", 
             () -> EntityType.Builder.<PillarmanVeinEntity>of(PillarmanVeinEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().noSave().setUpdateInterval(20)
             .build(new ResourceLocation(JojoMod.MOD_ID, "pillarman_veins").toString()));
+    
+    public static final RegistryObject<EntityType<PillarmanRibEntity>> PILLARMAN_RIBS = ENTITIES.register("pillarman_ribs", 
+            () -> EntityType.Builder.<PillarmanRibEntity>of(PillarmanRibEntity::new, EntityClassification.MISC).sized(0.35F, 0.35F).noSummon().noSave().setUpdateInterval(20)
+            .build(new ResourceLocation(JojoMod.MOD_ID, "pillarman_ribs").toString()));
     
 
     private static <T extends LivingEntity> void withLivingAttributes(RegistryObject<EntityType<T>> regObject, Supplier<AttributeModifierMap> attributes) {

@@ -43,6 +43,8 @@ public class ActionFieldsConfig extends JsonDataConfig {
     private static ActionFieldsConfig instance;
     private static final String RESOURCE_NAME = "ability_config";
     
+//    private Map<StandType<?>, StandStats> overridenStats = new HashMap<>();
+    
     public static ActionFieldsConfig init(IEventBus forgeEventBus) {
         if (instance == null) {
             instance = new ActionFieldsConfig();
@@ -62,10 +64,8 @@ public class ActionFieldsConfig extends JsonDataConfig {
     @Override
     public LiteralArgumentBuilder<CommandSource> commandRegister(LiteralArgumentBuilder<CommandSource> builder, String literal) {
         return builder.then(Commands.literal(literal)
-                .then(Commands.literal("stand").then(Commands.argument("stand_type", new StandArgument())
-                        .executes(ctx -> genStandActionsConfig(ctx.getSource(), StandArgument.getStandType(ctx, "stand_type")))))
-                .then(Commands.literal("single").then(Commands.argument("ability", new ActionArgument())
-                        .executes(ctx -> genActionConfig(ctx.getSource(), ActionArgument.getAction(ctx, "ability")))))
+                .then(Commands.argument("stand", new StandArgument()).executes(ctx -> genStandActionsConfig(ctx.getSource(), StandArgument.getStandType(ctx, "stand"))))
+                .then(Commands.argument("action", new ActionArgument()).executes(ctx -> genActionConfig(ctx.getSource(), ActionArgument.getAction(ctx, "action"))))
                 );
     }
     

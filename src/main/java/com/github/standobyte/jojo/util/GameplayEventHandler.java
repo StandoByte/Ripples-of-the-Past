@@ -26,10 +26,10 @@ import com.github.standobyte.jojo.block.WoodenCoffinBlock;
 import com.github.standobyte.jojo.capability.chunk.ChunkCapProvider;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
-import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.enchantment.GlovesSpeedEnchantment;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDBloodCutterEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -91,7 +91,6 @@ import com.github.standobyte.jojo.util.mc.damage.StandLinkDamageSource;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
-import com.github.standobyte.jojo.util.mod.NoKnockbackOnBlocking;
 
 import net.minecraft.block.AbstractFurnaceBlock;
 import net.minecraft.block.Block;
@@ -207,7 +206,6 @@ public class GameplayEventHandler {
         entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
             cap.tick();
         });
-        NoKnockbackOnBlocking.tickAttribute(entity);
     }
 
     private static final int AFK_PARTICLE_SECONDS = 30;
@@ -236,16 +234,16 @@ public class GameplayEventHandler {
                 }
             }
             
-//            LazyOptional<PlayerUtilCap> liquidWalkingCap = player.getCapability(PlayerUtilCapProvider.CAPABILITY);
-//            if (!player.level.isClientSide() || player.isLocalPlayer()) {
-//                boolean liquidWalking = HamonUtil.liquidWalking(player);
-//                liquidWalkingCap.ifPresent(cap -> {
-//                    cap.setWaterWalking(liquidWalking);
-//                });
-//            }
-//            liquidWalkingCap.ifPresent(cap -> {
-//                cap.tickWaterWalking();
-//            });
+            LazyOptional<PlayerUtilCap> liquidWalkingCap = player.getCapability(PlayerUtilCapProvider.CAPABILITY);
+            if (!player.level.isClientSide() || player.isLocalPlayer()) {
+                boolean liquidWalking = HamonUtil.liquidWalking(player);
+                liquidWalkingCap.ifPresent(cap -> {
+                    cap.setWaterWalking(liquidWalking);
+                });
+            }
+            liquidWalkingCap.ifPresent(cap -> {
+                cap.tickWaterWalking();
+            });
             
             INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
                 power.tick();
@@ -256,12 +254,14 @@ public class GameplayEventHandler {
             }); 
             break;
         case END:
-            INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
-                power.postTick();
-            });
-            IStandPower.getStandPowerOptional(player).ifPresent(power -> {
-                power.postTick();
-            }); 
+            if (player.level.isClientSide()) {
+                boolean waterWalking = GeneralUtil.orElseFalse(player.getCapability(PlayerUtilCapProvider.CAPABILITY), cap -> cap.isWaterWalking());
+                if (waterWalking) {
+                    float bob = player.bob / 0.6F;
+                    float f = Math.min(0.1F, MathHelper.sqrt(Entity.getHorizontalDistanceSqr(player.getDeltaMovement())));
+                    player.bob = bob + (f - bob) * 0.4F;
+                }
+            }
             break;
         }
     }
@@ -390,6 +390,18 @@ public class GameplayEventHandler {
         else if (ModInteractionUtil.isSquidInkPasta(event.getItem())) {
             InkPastaItem.onEaten(event.getEntityLiving());
         }
+        PillarmanPowerType pillarman = ModPowers.PILLAR_MAN.get();
+        PlayerEntity player = (PlayerEntity) event.getEntity();
+        INonStandPower.getNonStandPowerOptional(player).map(power -> {
+        	if(event.getItem().getItem().isEdible()) {
+        		float nutritionValue = event.getItem().getItem().getFoodProperties().getNutrition();
+	            if (power.getType() == pillarman || nutritionValue > 0) {
+	                power.addEnergy(20 * nutritionValue);
+	                return true;
+	            }
+        	}
+        	return false;
+        });
     }
     
     @SubscribeEvent
@@ -657,8 +669,6 @@ public class GameplayEventHandler {
                     double standDurability = stand.getDurability();
                     if (standDurability > 0) {
                         event.setAmount(Math.max(event.getAmount() - (float) standDurability / 2F, 0));
-                        NoKnockbackOnBlocking.setOneTickKbRes(stand);
-                        stand.playAttackBlockSound();
                     }
                 }
             });
@@ -705,7 +715,7 @@ public class GameplayEventHandler {
 //                    (float) target.getArmorValue(), (float) target.getAttributeValue(Attributes.ARMOR_TOUGHNESS)));
 //        }
 //    }
-
+    
 
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public static void resolveOnTakingDamage(LivingDamageEvent event) {
@@ -731,31 +741,12 @@ public class GameplayEventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingDamage(LivingDamageEvent event) {
-        DamageSource dmgSource = event.getSource();
-        float dmgAmount = event.getAmount();
-        LivingEntity target = event.getEntityLiving();
-        bleed(dmgSource, dmgAmount, target);
-        
-        StandType.onHurtByStand(dmgSource, dmgAmount, target);
-        
-        if (target instanceof StandEntity) {
-            StandEntity standTarget = (StandEntity) target;
-            if (standTarget.isCurrentAttackBlocked()) {
-                NoKnockbackOnBlocking.setOneTickKbRes(standTarget);
-            }
-        }
+        bleed(event.getSource(), event.getAmount(), event.getEntityLiving());
+        StandType.onHurtByStand(event.getSource(), event.getAmount(), event.getEntityLiving());
         
         for (PowerClassification powerClassification : PowerClassification.values()) {
-            IPower.getPowerOptional(target, powerClassification).ifPresent(power -> 
-            power.onUserGettingAttacked(dmgSource, dmgAmount));
-        }
-    }
-    
-    @SubscribeEvent
-    public static void clNoBobOnHurt(LivingAttackEvent event) {
-        LivingEntity target = event.getEntityLiving();
-        if (target.level.isClientSide() && target == ClientUtil.getClientPlayer()) {
-            NoKnockbackOnBlocking.onClientPlayerDamage(target);
+            IPower.getPowerOptional(event.getEntityLiving(), powerClassification).ifPresent(power -> 
+            power.onUserGettingAttacked(event.getSource(), event.getAmount()));
         }
     }
 
@@ -791,7 +782,7 @@ public class GameplayEventHandler {
         }
     }
 
-    public static void bleed(DamageSource dmgSource, float dmgAmount, LivingEntity target) {
+    private static void bleed(DamageSource dmgSource, float dmgAmount, LivingEntity target) {
         if (dmgSource instanceof StandLinkDamageSource) {
             dmgSource = ((StandLinkDamageSource) dmgSource).getOriginalDamageSource();
         }
@@ -905,7 +896,10 @@ public class GameplayEventHandler {
                 //Prevents aja-stone mask to work on non pillar men
                 if(headStack.getItem() == ModItems.AJA_STONE_MASK.get()) {
                     if(power.getType() != pillarman) {
-                        entity.kill();
+                    	if (entity instanceof ServerPlayerEntity) {
+                    		ModCriteriaTriggers.MASK_SUICIDE.get().trigger((ServerPlayerEntity) entity);
+                    	}
+                        entity.hurt(DamageUtil.STONE_MASK, 1000);
                         return false;
                     } else {
                         if(power.getTypeSpecificData(pillarman).get().getEvolutionStage() < 3) {
@@ -916,17 +910,17 @@ public class GameplayEventHandler {
                             if(randomMode > 0 && randomMode < 0.33F) {
                                 power.getTypeSpecificData(pillarman).get().setMode(Mode.WIND);
                                 if(randomMode < 0.06F) {
-                                    entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.PILLAR_MAN_WIND_MODE2.get(), entity.getSoundSource(), 1F, 1.0F);
+                                	entity.level.playSound(null, entity, ModSounds.PILLAR_MAN_WIND_MODE2.get(), entity.getSoundSource(), 1.0F, 1.0F);
                                 } else {
-                                    entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.PILLAR_MAN_WIND_MODE.get(), entity.getSoundSource(), 1F, 1.0F);
+                                	entity.level.playSound(null, entity, ModSounds.PILLAR_MAN_WIND_MODE.get(), entity.getSoundSource(), 1.0F, 1.0F);
                                 }
                                 
                             } else if(randomMode > 0.33 && randomMode < 0.66F) {
                                 power.getTypeSpecificData(pillarman).get().setMode(Mode.HEAT);
-                                entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.PILLAR_MAN_HEAT_MODE.get(), entity.getSoundSource(), 1.0F, 1.0F);
+                                entity.level.playSound(null, entity, ModSounds.PILLAR_MAN_HEAT_MODE.get(), entity.getSoundSource(), 1.0F, 1.0F);
                             } else {
                                 power.getTypeSpecificData(pillarman).get().setMode(Mode.LIGHT);
-                                entity.level.playSound(null, entity.getX(), entity.getY(), entity.getZ(), ModSounds.PILLAR_MAN_AWAKENING.get(), entity.getSoundSource(), 1.0F, 1.0F);
+                                entity.level.playSound(null, entity, ModSounds.MAP_BOUGHT_PILLAR_MAN_TEMPLE.get(), entity.getSoundSource(), 1.0F, 1.0F);
                             }
                             applyMaskEffect(entity, headStack);
                             return true;
@@ -965,15 +959,11 @@ public class GameplayEventHandler {
     public static void onPotionApply(PotionApplicableEvent event) {
         LivingEntity entity = event.getEntityLiving();
         Effect effect = event.getPotionEffect().getEffect();
-        if (entity instanceof PlayerEntity && JojoModUtil.isPlayerJojoVampiric((PlayerEntity) entity)) {
-            if (effect == Effects.HUNGER/* || effect == Effects.POISON */) {
-                event.setResult(Result.DENY);
-            }
-            else if (effect == Effects.REGENERATION) {
-                event.setResult(Result.ALLOW);
-            }
+        if ((effect == Effects.HUNGER/* || effect == Effects.POISON || effect == Effects.REGENERATION*/)
+                && entity instanceof PlayerEntity && JojoModUtil.isPlayerUndead((PlayerEntity) entity)) {
+            event.setResult(Result.DENY);
         }
-        if (effect instanceof IApplicableEffect && !((IApplicableEffect) effect).isApplicable(entity)) {
+        else if (effect instanceof IApplicableEffect && !((IApplicableEffect) effect).isApplicable(entity)) {
             event.setResult(Result.DENY);
         }
     }
@@ -1149,6 +1139,7 @@ public class GameplayEventHandler {
             if (!dead.is(killer)) {
                 if (killer instanceof ServerPlayerEntity) {
                     ModCriteriaTriggers.PLAYER_KILLED_ENTITY.get().trigger((ServerPlayerEntity) killer, dead, dmgSource);
+                    ModCriteriaTriggers.PLAYER_KILLED_PILLAR_MAN.get().trigger((ServerPlayerEntity) killer, dead, dmgSource);
                 }
                 if (dead instanceof ServerPlayerEntity && killer != null) {
                     ModCriteriaTriggers.ENTITY_KILLED_PLAYER.get().trigger((ServerPlayerEntity) dead, killer, dmgSource);

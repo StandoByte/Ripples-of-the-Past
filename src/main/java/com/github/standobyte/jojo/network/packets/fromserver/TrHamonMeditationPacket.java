@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
+import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -48,7 +48,7 @@ public class TrHamonMeditationPacket {
                         hamon.setIsMeditating(userLiving, msg.meditation);
                         if (userLiving instanceof PlayerEntity) {
                             PlayerEntity userPlayer = (PlayerEntity) userLiving;
-                            ModPlayerAnimations.meditationPoseAnim.setAnimEnabled(userPlayer, msg.meditation);
+                            PlayerAnimationHandler.getPlayerAnimator().onMeditationSet(userPlayer, msg.meditation);
                             if (msg.meditation && userPlayer == ClientUtil.getClientPlayer()) {
                                 ClientUtil.setThirdPerson();
                             }

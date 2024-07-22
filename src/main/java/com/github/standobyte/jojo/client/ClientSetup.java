@@ -21,7 +21,6 @@ import com.github.standobyte.jojo.client.particle.RPSPickPartile;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.particle.custom.FirstPersonHamonAura;
 import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
-import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
 import com.github.standobyte.jojo.client.render.armor.ArmorModelRegistry;
 import com.github.standobyte.jojo.client.render.armor.model.BladeHatArmorModel;
 import com.github.standobyte.jojo.client.render.armor.model.BreathControlMaskModel;
@@ -60,6 +59,7 @@ import com.github.standobyte.jojo.client.render.entity.renderer.damaging.extendi
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.extending.HGStringRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.extending.MRRedBindRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.extending.PillarmanHornRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.damaging.extending.PillarmanRibRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.extending.PillarmanVeinRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.extending.SPStarFingerRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.extending.SatiporojaScarfBindingRenderer;
@@ -96,7 +96,6 @@ import com.github.standobyte.jojo.client.render.entity.renderer.stand.TheWorldRe
 import com.github.standobyte.jojo.client.render.item.RoadRollerBakedModel;
 import com.github.standobyte.jojo.client.render.item.generic.ItemISTERModelWrapper;
 import com.github.standobyte.jojo.client.render.item.standdisc.StandDiscISTERModel;
-import com.github.standobyte.jojo.client.render.item.standdisc.StandDiscOverrideList;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.loopplayer.LoopPlayerHandler;
@@ -118,7 +117,6 @@ import com.github.standobyte.jojo.item.StandArrowItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
 import com.github.standobyte.jojo.item.cassette.CassetteCap;
-import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 
 import net.minecraft.client.Minecraft;
@@ -156,7 +154,6 @@ import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
-import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
@@ -224,6 +221,7 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.PILLARMAN_HORN.get(), PillarmanHornRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.PILLARMAN_DIVINE_SANDSTORM.get(), PillarmanDivineSandstormRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.PILLARMAN_VEINS.get(), PillarmanVeinRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.PILLARMAN_RIBS.get(), PillarmanRibRenderer::new);
         
         RenderingRegistry.registerEntityRenderingHandler(ModStands.STAR_PLATINUM.getEntityType(), StarPlatinumRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModStands.THE_WORLD.getEntityType(), TheWorldRenderer::new);
@@ -231,8 +229,6 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModStands.SILVER_CHARIOT.getEntityType(), SilverChariotRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModStands.MAGICIANS_RED.getEntityType(), MagiciansRedRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModStands.CRAZY_DIAMOND.getEntityType(), CrazyDiamondRenderer::new);
-        
-        PlayerAnimationHandler.initAnimator();
         
         ArmorModelRegistry.registerArmorModel(StoneMaskModel::new, ModItems.STONE_MASK.get());
         ArmorModelRegistry.registerArmorModel(StoneMaskModel::new, ModItems.AJA_STONE_MASK.get());
@@ -304,6 +300,8 @@ public class ClientSetup {
             MarkerRenderer.Handler.addRenderer(new HierophantGreenBarrierDetectionMarker(mc));
             MarkerRenderer.Handler.addRenderer(new CrazyDiamondAnchorMarker(mc));
             MarkerRenderer.Handler.addRenderer(new CrazyDiamondBloodHomingMarker(mc));
+            
+            PlayerAnimationHandler.initAnimator();
         });
     }
 
@@ -311,8 +309,6 @@ public class ClientSetup {
     public static void loadCustomArmorModels(FMLClientSetupEvent event) {
         event.enqueueWork(() -> {
             ArmorModelRegistry.loadArmorModels();
-            
-            ModPlayerAnimations.init();
         });
     }
     
@@ -412,10 +408,6 @@ public class ClientSetup {
         if (!spritesAdded) {
             addUnreferencedBlockModels(MagiciansRedRenderer.MR_FIRE_0, MagiciansRedRenderer.MR_FIRE_1);
             spritesAdded = true;
-        }
-        
-        for (StandType<?> standType : JojoCustomRegistries.STANDS.getRegistry().getValues()) {
-            ModelLoader.addSpecialModel(StandDiscOverrideList.makeStandSpecificModelPath(standType));
         }
     }
     

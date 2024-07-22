@@ -3,6 +3,8 @@ package com.github.standobyte.jojo.init.power.non_stand.pillarman;
 import static com.github.standobyte.jojo.init.power.ModCommonRegisters.ACTIONS;
 import static com.github.standobyte.jojo.init.power.ModCommonRegisters.NON_STAND_POWERS;
 
+import com.github.standobyte.jojo.action.non_stand.HamonAction;
+import com.github.standobyte.jojo.action.non_stand.HamonOverdriveBarrage;
 import com.github.standobyte.jojo.action.non_stand.NonStandAction;
 import com.github.standobyte.jojo.action.non_stand.PillarmanAbsorption;
 import com.github.standobyte.jojo.action.non_stand.PillarmanAction;
@@ -18,11 +20,13 @@ import com.github.standobyte.jojo.action.non_stand.PillarmanHideInEntity;
 import com.github.standobyte.jojo.action.non_stand.PillarmanHornAttack;
 import com.github.standobyte.jojo.action.non_stand.PillarmanLightFlash;
 import com.github.standobyte.jojo.action.non_stand.PillarmanRegeneration;
+import com.github.standobyte.jojo.action.non_stand.PillarmanRibsBlades;
 import com.github.standobyte.jojo.action.non_stand.PillarmanSelfDetonation;
 import com.github.standobyte.jojo.action.non_stand.PillarmanSmallSandstorm;
 import com.github.standobyte.jojo.action.non_stand.PillarmanStoneForm;
 import com.github.standobyte.jojo.action.non_stand.PillarmanUnnaturalAgility;
 import com.github.standobyte.jojo.action.non_stand.PillarmanWindCloak;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanPowerType;
 
 import net.minecraftforge.fml.RegistryObject;
@@ -35,22 +39,25 @@ public static final RegistryObject<PillarmanAction> PILLARMAN_HEAVY_PUNCH = ACTI
         () -> new PillarmanHeavyPunch(new NonStandAction.Builder().needsFreeMainHand().swingHand().energyCost(10F).cooldown(40)));
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_ABSORPTION = ACTIONS.register("pillarman_absorption", 
-        () -> new PillarmanAbsorption(new NonStandAction.Builder().needsFreeMainHand()));
+        () -> new PillarmanAbsorption(new NonStandAction.Builder().needsFreeMainHand().ignoresPerformerStun()));
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_HORN_ATTACK = ACTIONS.register("pillarman_horn_attack", 
-        () -> new PillarmanHornAttack(new NonStandAction.Builder().energyCost(15F).cooldown(60)));
+        () -> new PillarmanHornAttack(new NonStandAction.Builder().energyCost(15F).cooldown(60).ignoresPerformerStun()));
 
-public static final RegistryObject<PillarmanAction> PILLARMAN_HIDE_IN_ENTITY = ACTIONS.register("pillarman_hide_in_entity", 
-        () -> new PillarmanHideInEntity(new NonStandAction.Builder().holdToFire(20, false).heldWalkSpeed(0.5F)));
+public static final RegistryObject<PillarmanAction> PILLARMAN_RIBS_BLADES = ACTIONS.register("pillarman_ribs_blades", 
+        () -> new PillarmanRibsBlades(new NonStandAction.Builder().energyCost(60F).cooldown(80, 0)));
+
+/*public static final RegistryObject<PillarmanAction> PILLARMAN_HIDE_IN_ENTITY = ACTIONS.register("pillarman_hide_in_entity", 
+        () -> new PillarmanHideInEntity(new NonStandAction.Builder().holdToFire(20, false).heldWalkSpeed(0.5F)));*/
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_STONE_FORM = ACTIONS.register("pillarman_stone_form", 
-        () -> new PillarmanStoneForm(new NonStandAction.Builder().holdToFire(40, false).heldWalkSpeed(0.5F)));
+        () -> new PillarmanStoneForm(new NonStandAction.Builder().holdToFire(40, false).heldWalkSpeed(0.5F).ignoresPerformerStun()));
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_REGENERATION = ACTIONS.register("pillarman_regeneration", 
-        () -> new PillarmanRegeneration(new NonStandAction.Builder().energyCost(40F).cooldown(20)));
+        () -> new PillarmanRegeneration(new NonStandAction.Builder().energyCost(40F).cooldown(20).ignoresPerformerStun()));
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_ENHANCED_SENSES = ACTIONS.register("pillarman_enhanced_senses", 
-        () -> new PillarmanEnhancedSenses(new NonStandAction.Builder().holdEnergyCost(0.05F).heldWalkSpeed(0.5F)));
+        () -> new PillarmanEnhancedSenses(new NonStandAction.Builder().holdEnergyCost(0.05F).heldWalkSpeed(0.5F).ignoresPerformerStun()));
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_UNNATURAL_AGILITY = ACTIONS.register("pillarman_unnatural_agility", 
         () -> new PillarmanUnnaturalAgility(new NonStandAction.Builder().holdEnergyCost(1F).heldWalkSpeed(0.5F)));
@@ -74,10 +81,10 @@ public static final RegistryObject<PillarmanAction> PILLARMAN_ERRATIC_BLAZE_KING
         () -> new PillarmanErraticBlazeKing(new NonStandAction.Builder().energyCost(20F).cooldown(20, 0)));
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_GIANT_CARTHWHEEL_PRISON = ACTIONS.register("pillarman_giant_carthwheel_prison", 
-        () -> new PillarmanGiantCarthwheelPrison(new NonStandAction.Builder().energyCost(125F).cooldown(100).holdToFire(60, false)));
+        () -> new PillarmanGiantCarthwheelPrison(new NonStandAction.Builder().energyCost(125F).holdToFire(60, false)));
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_SELF_DETONATION = ACTIONS.register("pillarman_self_detonation", 
-        () -> new PillarmanSelfDetonation(new NonStandAction.Builder().energyCost(150F).cooldown(200, 0).holdToFire(80, false)));
+        () -> new PillarmanSelfDetonation(new NonStandAction.Builder().energyCost(150F).holdToFire(80, false)));
 
 public static final RegistryObject<PillarmanAction> PILLARMAN_LIGHT_FLASH = ACTIONS.register("pillarman_light_flash", 
         () -> new PillarmanLightFlash(new NonStandAction.Builder().energyCost(25F).cooldown(80).holdToFire(60, false)));
@@ -99,6 +106,5 @@ public static final RegistryObject<PillarmanAction> PILLARMAN_BLADE_BARRAGE = AC
                             PILLARMAN_STONE_FORM.get()
                     },
                     PILLARMAN_ABSORPTION.get()
-                    )
-            .withColor(PillarmanPowerType.COLOR));
+                    ));
 }

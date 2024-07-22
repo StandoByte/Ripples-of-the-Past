@@ -55,7 +55,7 @@ public class PillarmanDivineSandstormEntity extends ModdedProjectileEntity {
     
     public PillarmanDivineSandstormEntity setRadius(float radius) {
         this.radius = radius;
-        this.sparksCount = radius * 4;
+        this.sparksCount = radius * 2;
         Vector3d pos = getBoundingBox().getCenter();
         refreshDimensions();
         setBoundingBox(new AxisAlignedBB(pos, pos).inflate(radius));
@@ -90,11 +90,11 @@ public class PillarmanDivineSandstormEntity extends ModdedProjectileEntity {
             int sparksCount = Math.max((int) (this.sparksCount * damageWearOffMultiplier()), 1);
             for (int i = 0; i < sparksCount; i++) {
                 Vector3d sparkVec = center.add(new Vector3d(
-                        (random.nextDouble() - 0.5), 
-                        (random.nextDouble() - 0.5),
-                        (random.nextDouble() - 0.5))
+                        (random.nextDouble() - 1.0), 
+                        (random.nextDouble() - 1.0),
+                        (random.nextDouble() - 1.0))
                         .normalize().scale(random.nextDouble() * radius));
-                level.addParticle(ParticleTypes.CLOUD, false, sparkVec.x, sparkVec.y, sparkVec.z, 0, 0, 0);
+                level.addParticle(ParticleTypes.EXPLOSION, false, sparkVec.x, sparkVec.y, sparkVec.z, 0, 0, 0);
                 
             }
             level.playSound(ClientUtil.getClientPlayer(), center.x, center.y, center.z, ModSounds.MAGICIANS_RED_FIRE_BLAST.get(), 

@@ -2,13 +2,12 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 
 import java.util.function.Supplier;
 
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
-import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
@@ -39,12 +38,9 @@ public class TrHamonLiquidWalkingPacket {
         @Override
         public void handle(TrHamonLiquidWalkingPacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity entity = ClientUtil.getEntityById(msg.userId);
-            if (entity instanceof LivingEntity) {
-                LivingEntity living = (LivingEntity) entity;
-                INonStandPower.getNonStandPowerOptional(living).resolve()
-                .flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get()))
-                .ifPresent(hamon -> {
-                    hamon.trSetWaterWalking(msg.liquidWalking, living);
+            if (entity instanceof PlayerEntity) {
+                entity.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                    cap.setWaterWalking(msg.liquidWalking);
                 });
             }
         }
