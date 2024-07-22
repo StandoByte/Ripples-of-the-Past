@@ -62,7 +62,9 @@ public class LightBeamEntity extends DamagingEntity {
         if (!level.isClientSide()) {
             Entity target = entityRayTraceResult.getEntity();
             target.setSecondsOnFire((int) damage / 2);
-            DamageUtil.dealUltravioletDamage(target, damage, this, getOwner(), false);
+            if (DamageUtil.entityTakesUVDamage(target, false)) {
+                DamageUtil.dealUltravioletDamage(target, damage, this, getOwner(), false);
+            }
         }
     }
 

@@ -27,7 +27,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin {
     @Override
     public void jojoPlayerUndeadCreature(CallbackInfoReturnable<CreatureAttribute> ci) {
         if (this.getCapability(NonStandCapProvider.NON_STAND_CAP).map(power -> 
-        power.getType() == ModPowers.VAMPIRISM.get()).orElse(false)) {
+        power.getType() == ModPowers.VAMPIRISM.get() || power.getType() == ModPowers.ZOMBIE.get()).orElse(false)) {
             ci.setReturnValue(CreatureAttribute.UNDEAD);
         }
     }

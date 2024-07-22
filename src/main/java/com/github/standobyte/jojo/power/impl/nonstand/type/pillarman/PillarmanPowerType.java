@@ -182,9 +182,8 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
     }
     
     public boolean isHighLifeForce(LivingEntity entity) {
-        if(INonStandPower.getNonStandPowerOptional(entity).map(
-                        power -> power.getTypeSpecificData(ModPowers.PILLAR_MAN.get())
-                        .map(pillarman -> pillarman.getEvolutionStage() > 1).orElse(false)).orElse(false)) {
+        if (INonStandPower.getNonStandPowerOptional(entity).resolve().flatMap(power -> power.getTypeSpecificData(this)).map(
+                pillarman -> pillarman.getEvolutionStage() > 1).orElse(false)) {
             return true;
         }
         return false;

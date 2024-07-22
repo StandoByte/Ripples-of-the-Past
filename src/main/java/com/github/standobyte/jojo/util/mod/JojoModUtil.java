@@ -284,7 +284,7 @@ public class JojoModUtil {
         return INonStandPower.getNonStandPowerOptional(player).map(power -> {
             NonStandPowerType<?> powerType = power.getType();
             return powerType == ModPowers.VAMPIRISM.get()     || 
-                   powerType == ModPowers.ZOMBIE.get()         || 
+                   powerType == ModPowers.ZOMBIE.get()        || 
                    powerType == ModPowers.PILLAR_MAN.get();
         }).orElse(false); 
     }

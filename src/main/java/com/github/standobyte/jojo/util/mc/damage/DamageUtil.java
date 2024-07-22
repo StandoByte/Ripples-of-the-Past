@@ -9,7 +9,9 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
+import com.github.standobyte.jojo.block.WoodenCoffinBlock;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCap;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
@@ -18,6 +20,7 @@ import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModParticles;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
@@ -76,11 +79,12 @@ public class DamageUtil {
             return moddedSrc.getKnockbackFactor();
         }
         if (source instanceof EntityDamageSource) {
-            if (source.getDirectEntity() instanceof LivingEntity && 
-                    (INonStandPower.getNonStandPowerOptional((LivingEntity) source.getDirectEntity())
-                    .map(power -> power.getHeldAction() == ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get()).orElse(false) || 
-                    INonStandPower.getNonStandPowerOptional((LivingEntity) source.getDirectEntity())
-                    .map(power -> power.getHeldAction() == ModPillarmanActions.PILLARMAN_BLADE_BARRAGE.get()).orElse(false))) {
+            if (source.getDirectEntity() instanceof LivingEntity && (INonStandPower.getNonStandPowerOptional((LivingEntity) source.getDirectEntity())
+                    .map(power -> {
+                        Action<?> heldAction = power.getHeldAction();
+                        return heldAction == ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get()
+                                || heldAction == ModPillarmanActions.PILLARMAN_BLADE_BARRAGE.get();
+                    }).orElse(false))) {
                 return 0.05F;
             }
             String msgId = source.getMsgId();
@@ -97,15 +101,35 @@ public class DamageUtil {
     public static DamageSource bloodDrainDamage(Entity srcDirect) {
         return new EntityDamageSource(BLOOD_DRAIN_MSG, srcDirect).bypassArmor();
     }
+    
+    public static boolean entityTakesUVDamage(Entity target, boolean sun) {
+        if (target instanceof LivingEntity) {
+            LivingEntity living = (LivingEntity) target;
+            
+            if (JojoModUtil.isUndeadOrVampiric(living)
+                    && !WoodenCoffinBlock.isSleepingInCoffin(living)
+                    && INonStandPower.getNonStandPowerOptional(living).resolve().flatMap(
+                            power -> power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()))
+                    .map(pillarman -> !pillarman.isStoneFormEnabled()).orElse(true)) {
+                
+                if (sun) {
+                    return !(living instanceof PlayerEntity || JojoModConfig.getCommonConfigInstance(false).undeadMobsSunDamage.get())
+                            && target.getType() != EntityType.WITHER
+                            && !living.hasEffect(ModStatusEffects.SUN_RESISTANCE.get());
+                }
+                
+                return true;
+            }
+        }
+        
+        return false;
+    }
 
     public static boolean dealUltravioletDamage(Entity target, float amount, @Nullable Entity srcDirect, @Nullable Entity srcIndirect, boolean sun) {
-        if (target instanceof LivingEntity && JojoModUtil.isUndeadOrVampiric((LivingEntity) target) && !(sun && target.getType() == EntityType.WITHER)) {
-            DamageSource dmgSource = srcDirect == null ? ULTRAVIOLET : 
-                srcIndirect == null ? new EntityDamageSource(ULTRAVIOLET.getMsgId() + ".entity", srcDirect).bypassArmor().bypassMagic() : 
-                new IndirectEntityDamageSource(ULTRAVIOLET.getMsgId() + ".entity", srcDirect, srcIndirect).bypassArmor().bypassMagic();
-            return target.hurt(dmgSource, amount);
-        }
-        return false;
+        DamageSource dmgSource = srcDirect == null ? ULTRAVIOLET : 
+            srcIndirect == null ? new EntityDamageSource(ULTRAVIOLET.getMsgId() + ".entity", srcDirect).bypassArmor().bypassMagic() : 
+            new IndirectEntityDamageSource(ULTRAVIOLET.getMsgId() + ".entity", srcDirect, srcIndirect).bypassArmor().bypassMagic();
+        return target.hurt(dmgSource, amount);
     }
     
     public static boolean isImmuneToCold(Entity target) {
@@ -153,10 +177,17 @@ public class DamageUtil {
                 return false;
             }
             
+            Optional<INonStandPower> targetPower = INonStandPower.getNonStandPowerOptional(livingTarget).resolve();
+            
+            if (INonStandPower.getNonStandPowerOptional(livingTarget).map(
+                    power -> power.getTypeSpecificData(ModPowers.PILLAR_MAN.get())
+                    .map(pillarman -> pillarman.isStoneFormEnabled()).orElse(false)).orElse(false)) {
+                return false;
+            }
+            
             boolean scarf = livingTarget.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.SATIPOROJA_SCARF.get();
             if (scarf) {
-                if (INonStandPower.getNonStandPowerOptional(livingTarget)
-                        .map(power -> power.getType() == ModPowers.HAMON.get()).orElse(false)) {
+                if (targetPower.map(power -> power.getType() == ModPowers.HAMON.get()).orElse(false)) {
                     return false;
                 }
                 amount *= 0.25F;
@@ -173,11 +204,6 @@ public class DamageUtil {
             if (INonStandPower.getNonStandPowerOptional(livingTarget)
                     .map(power -> power.getType() == ModPowers.PILLAR_MAN.get()).orElse(false)) {
                 amount *= 0.5F;
-            }
-            if (INonStandPower.getNonStandPowerOptional(livingTarget).map(
-                    power -> power.getTypeSpecificData(ModPowers.PILLAR_MAN.get())
-                    .map(pillarman -> pillarman.isStoneFormEnabled()).orElse(false)).orElse(false)) {
-                return false;
             }
             
             final float dmgAmount = amount;
