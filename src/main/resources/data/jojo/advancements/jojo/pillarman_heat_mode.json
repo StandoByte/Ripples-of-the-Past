@@ -1,0 +1,31 @@
+{
+  "parent": "jojo:jojo/pillarman_evolve_aja",
+  "display": {
+    "icon": {
+      "item": "jojo:meteoric_scrap",
+      "nbt": "{Icon:16}"
+    },
+    "title": {
+      "translate": "advancements.jojo.pillarman_heat_mode.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.pillarman_heat_mode.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "pillarman_heat_mode": {
+      "trigger": "jojo:pillarman_heat_mode",
+      "conditions": {
+      }
+    }
+  },
+  "requirements": [
+    [
+      "pillarman_heat_mode"
+    ]
+  ]
+}

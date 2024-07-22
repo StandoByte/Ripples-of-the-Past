@@ -140,7 +140,7 @@ public class StandEntityTask {
 
             if (action.standCanTickPerform(standEntity.level, standEntity, standPower, this)) {
                 action.standTickPerform(standEntity.level, standEntity, standPower, this);
-                if (!standEntity.level.isClientSide() || standPower.getUser() == ClientUtil.getClientPlayer()) {
+                if (!standEntity.level.isClientSide() || standEntity.getUser() == ClientUtil.getClientPlayer()) {
                     standPower.consumeStamina(action.getStaminaCostTicking(standPower), true);
                 }
             }

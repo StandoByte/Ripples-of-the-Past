@@ -8,8 +8,9 @@ import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.mob.HungryZombieEntity;
 import com.github.standobyte.jojo.init.ModCustomStats;
-import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.ModStatusEffects;
+import com.github.standobyte.jojo.init.ModTags;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismUtil;
@@ -44,13 +45,23 @@ public class VampirismBloodDrain extends VampirismAction {
         Entity entityTarget = target.getEntity();
         if (entityTarget instanceof LivingEntity) {
             LivingEntity livingTarget = (LivingEntity) entityTarget;
-            if (!JojoModUtil.canBleed(livingTarget) || JojoModUtil.isUndead(livingTarget)) {
+            if (!canDrainBloodFrom(livingTarget)) {
                 return conditionMessage("blood");
 //                return livingTarget.tickCount > 20 ? conditionMessageContinueHold("blood") : ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
             }
             return ActionConditionResult.POSITIVE;
         }
         return ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
+    }
+    
+    public static boolean canDrainBloodFrom(LivingEntity entity) {
+        if (!ModTags.VAMPIRE_CANNOT_DRAIN.contains(entity.getType())) {
+            return false;
+        }
+        if (ModTags.VAMPIRE_CAN_DRAIN.contains(entity.getType())) {
+            return true;
+        }
+        return JojoModUtil.canBleed(entity) && !JojoModUtil.isUndead(entity);
     }
     
     @Override
@@ -72,23 +83,23 @@ public class VampirismBloodDrain extends VampirismAction {
                             world.getDifficulty().getId()).floatValue();
                     boolean isHuman = false;
                     if (targetEntity instanceof PlayerEntity) {
-                        bloodAndHealModifier *= 1.5F;
+                        bloodAndHealModifier *= 5F;
                         isHuman = true;
                     }
                     else if (targetEntity instanceof INPC || targetEntity instanceof AbstractIllagerEntity) {
-                        bloodAndHealModifier *= 1F;
+                        bloodAndHealModifier *= 4F;
                         isHuman = true;
                     }
                     if (INonStandPower.getNonStandPowerOptional(targetEntity).map(
                             p -> p.getType() == ModPowers.HAMON.get()).orElse(false)) {
-                        bloodAndHealModifier *= 2F;
+                        bloodAndHealModifier *= 1.5F;
                     }
                     EffectInstance freeze = targetEntity.getEffect(ModStatusEffects.FREEZE.get());
                     if (freeze != null) {
                         bloodAndHealModifier *= 1 - Math.min((freeze.getAmplifier() + 1) * 0.2F, 1);
                     }
                     power.addEnergy(bloodAndHealModifier);
-                    if (drainBlood(user, targetEntity, 1)) {
+                    if (drainBlood(user, targetEntity, 2)) {
                         if (power.getTypeSpecificData(ModPowers.VAMPIRISM.get()).map(
                                 vampirism -> vampirism.isBeingCured() && vampirism.getCuringStage() >= 3).orElse(false)) {
                             user.hurt(new DamageSource("curedVampireBlood"), Math.min(bloodAndHealModifier * 0.5F, user.getHealth() - 1));

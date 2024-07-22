@@ -147,8 +147,6 @@ public class ActionsHotbar {
             ActionVisibilitySwitch actionSwitch = new ActionVisibilitySwitch(this, actionId, isEnabled);
             serializedSwitches.add(actionSwitch);
         }
-        
-        selectedSlot = json.has("selectedSlot") ? json.get("selectedSlot").getAsInt() : 0;
     }
     
     JsonElement toJson() {
@@ -162,8 +160,6 @@ public class ActionsHotbar {
             entry.addProperty("enabled", actionSwitch.isEnabled());
             actionsJson.add(entry);
         }
-        
-        json.addProperty("selectedSlot", selectedSlot);
         return json;
     }
 }

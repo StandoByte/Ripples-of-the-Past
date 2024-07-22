@@ -273,6 +273,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     @Override
     public void onNewDay(LivingEntity user, IStandPower power, long prevDay, long day) {
         getStats().onNewDay(user, power);
+        getAllUnlockableActions().forEach(action -> action.passivelyOnNewDay(user, power, prevDay, day));
     }
     
     @Deprecated
@@ -500,6 +501,9 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     
     public static enum StandSurvivalGameplayPool {
         PLAYER_ARROW,
-        NPC_ENCOUNTER
+        NON_ARROW, // Requiems, C-Moon, Made in Heaven, Acts depending on their implementation, etc.
+        NPC_ENCOUNTER,
+        ANIMAL,
+        OTHER
     }
 }

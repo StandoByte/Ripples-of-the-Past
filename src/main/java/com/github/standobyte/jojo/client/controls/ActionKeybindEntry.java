@@ -13,22 +13,25 @@ import com.google.gson.JsonObject;
 
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
+import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.settings.KeyModifier;
 
 public class ActionKeybindEntry {
-    private PressActionType type;
     private ResourceLocation actionId;
     private KeyModifier keyModifier;
     private InputMappings.Input keyCode;
+    
+    private OnKeyPress onKeyPress = OnKeyPress.PERFORM;
+    private KeyActiveType hudInteraction = KeyActiveType.INSIDE_HUD;
+    private boolean isVisibleInHud = true;
     
     private Action<?> action;
     private KeyBinding keybind;
     
     public transient int delay;
     
-    ActionKeybindEntry(PressActionType type, ResourceLocation actionId, String keySaveDesc) {
-        this.type = type;
+    ActionKeybindEntry(ResourceLocation actionId, String keySaveDesc) {
         this.actionId = actionId;
         this.action = null;
         if (keySaveDesc.indexOf(':') != -1) {
@@ -41,8 +44,7 @@ public class ActionKeybindEntry {
         }
     }
     
-    ActionKeybindEntry(PressActionType type, Action<?> action, InputMappings.Type inputType, int key) {
-        this.type = type;
+    ActionKeybindEntry(Action<?> action, InputMappings.Type inputType, int key) {
         this.actionId = action.getRegistryName();
         this.action = action;
         this.keyModifier = KeyModifier.NONE;
@@ -50,8 +52,7 @@ public class ActionKeybindEntry {
         this.keybind = createNewKey(keyModifier, keyCode);
     }
     
-    ActionKeybindEntry(PressActionType type, ResourceLocation actionId, InputMappings.Type inputType, int key) {
-        this.type = type;
+    ActionKeybindEntry(ResourceLocation actionId, InputMappings.Type inputType, int key) {
         this.actionId = actionId;
         this.action = null;
         this.keyModifier = KeyModifier.NONE;
@@ -84,6 +85,26 @@ public class ActionKeybindEntry {
         this.keybind = createNewKey(keyModifier, keyCode);
     }
     
+    public void setOnPress(OnKeyPress onKeyPress) {
+        if (onKeyPress != null) {
+            this.onKeyPress = onKeyPress;
+        }
+    }
+    
+    public void setHudInteraction(KeyActiveType hudInteraction) {
+        if (hudInteraction != null) {
+            this.hudInteraction = hudInteraction;
+        }
+    }
+    
+    public void setVisibleInHud(boolean visible) {
+        this.isVisibleInHud = visible;
+    }
+    
+    public boolean isVisibleInHud() {
+        return isVisibleInHud;
+    }
+    
     public void removeKeybindFromMap() {
         if (keybind != null) {
             ClientReflection.getAllKeybindingMap().remove(keybind.getName());
@@ -93,18 +114,23 @@ public class ActionKeybindEntry {
     
     public JsonElement toJson() {
         JsonObject json = new JsonObject();
-        json.addProperty("type", type.name());
         json.addProperty("action", actionId.toString());
         json.addProperty("keybind", keyCode.getName() + (keyModifier != KeyModifier.NONE ? ":" + keyModifier : ""));
+        json.addProperty("onKeyPress", onKeyPress.name());
+        json.addProperty("withHud", hudInteraction.name());
+        json.addProperty("hudIcon", isVisibleInHud);
         return json;
     }
     
     public static ActionKeybindEntry fromJson(JsonElement json) {
         JsonObject jsonObj = json.getAsJsonObject();
-        PressActionType type = Enum.valueOf(PressActionType.class, jsonObj.get("type").getAsString());
         ResourceLocation action = new ResourceLocation(jsonObj.get("action").getAsString());
         String keySaveDesc = jsonObj.get("keybind").getAsString();
-        return new ActionKeybindEntry(type, action, keySaveDesc);
+        ActionKeybindEntry entry = new ActionKeybindEntry(action, keySaveDesc);
+        try { entry.setOnPress(Enum.valueOf(OnKeyPress.class, jsonObj.get("onKeyPress").getAsString())); } catch (Exception notSpecified) {}
+        try { entry.setHudInteraction(Enum.valueOf(KeyActiveType.class, jsonObj.get("withHud").getAsString())); } catch (Exception notSpecified) {}
+        try { entry.setVisibleInHud(JSONUtils.getAsBoolean(jsonObj, "hudIcon")); } catch (Exception notSpecified) {}
+        return entry;
     }
     
     public Action<?> getAction() {
@@ -125,13 +151,25 @@ public class ActionKeybindEntry {
         keybind.setKeyModifierAndCode(keyModifier, keyCode);
     }
     
-    public PressActionType getType() {
-        return type;
+    public OnKeyPress getOnKeyPress() {
+        return onKeyPress;
     }
     
-    public enum PressActionType {
-        SELECT,
-        CLICK
+    public KeyActiveType getHudInteraction() {
+        return hudInteraction;
+    }
+    
+    public enum OnKeyPress {
+        PERFORM,
+        SELECT
+    }
+    
+    public enum KeyActiveType {
+        INSIDE_HUD  { @Override public boolean canTrigger(boolean isHudActive) { return isHudActive; }},
+        OUTSIDE_HUD { @Override public boolean canTrigger(boolean isHudActive) { return !isHudActive; }},
+        ALWAYS      { @Override public boolean canTrigger(boolean isHudActive) { return true; }};
+        
+        public abstract boolean canTrigger(boolean isHudActive);
     }
     
     

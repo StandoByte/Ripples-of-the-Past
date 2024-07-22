@@ -1,8 +1,11 @@
 package com.github.standobyte.jojo.util.mc;
 
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.Random;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -15,6 +18,7 @@ import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.SpawnParticlePacket;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonDeserializationContext;
@@ -36,12 +40,16 @@ import net.minecraft.dispenser.IBlockSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.PotionEntity;
+import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.TieredItem;
 import net.minecraft.nbt.ByteArrayNBT;
 import net.minecraft.nbt.ByteNBT;
 import net.minecraft.nbt.CompoundNBT;
@@ -61,6 +69,8 @@ import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.play.server.SPlaySoundEffectPacket;
 import net.minecraft.network.play.server.SSpawnMovingSoundEffectPacket;
 import net.minecraft.particles.IParticleData;
+import net.minecraft.particles.ItemParticleData;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.potion.Potions;
@@ -218,6 +228,33 @@ public class MCUtil {
             list.add(DoubleNBT.valueOf(vec.z));
             nbt.put(key, list);
         }
+    }
+    
+    public static void nbtPutOptionalIntArr(CompoundNBT nbt, String key, OptionalInt[] array, int emptyVal) {
+        int[] value = new int[array.length];
+        for (int i = 0; i < array.length; i++) {
+            value[i] = array[i].orElse(emptyVal);
+        }
+        nbt.putIntArray(key, value);
+    }
+    
+    public static OptionalInt[] nbtGetOptionalIntArr(CompoundNBT nbt, String key, int emptyVal) {
+        int[] value = nbt.getIntArray(key);
+        OptionalInt[] array = new OptionalInt[value.length];
+        for (int i = 0; i < array.length; i++) {
+            int num = value[i];
+            array[i] = num != emptyVal ? OptionalInt.of(num) : OptionalInt.empty();
+        }
+        return array;
+    }
+    
+    public static <T extends Enum<T>> void nbtPutEnumArray(CompoundNBT nbt, String key, T[] array) {
+        nbt.putIntArray(key, GeneralUtil.toOrdinals(array));
+    }
+    
+    public static <T extends Enum<T>> T[] nbtGetEnumArray(CompoundNBT nbt, String key, Class<T> enumClass) {
+        int[] nbtArray = nbt.getIntArray(key);
+        return GeneralUtil.fromOrdinals(nbtArray, enumClass);
     }
     
     @Nullable
@@ -494,6 +531,29 @@ public class MCUtil {
     
     
     
+    public static boolean isItemWeapon(ItemStack itemStack) {
+        if (itemStack.isEmpty() || itemStack.getItem() instanceof GlovesItem) {
+            return false;
+        }
+        
+        if (itemStack.getItem() instanceof TieredItem) {
+            return true;
+        }
+        
+        // other items dealing extra damage (trident, knife, potentially unique modded weapons)
+        Collection<AttributeModifier> damageModifiers = itemStack
+                .getItem().getAttributeModifiers(EquipmentSlotType.MAINHAND, itemStack).get(Attributes.ATTACK_DAMAGE);
+        if (damageModifiers != null) {
+            return damageModifiers.stream().anyMatch(modifier -> modifier.getOperation() == AttributeModifier.Operation.ADDITION && modifier.getAmount() > 0);
+        }
+        
+        // TODO compatibility with Tinkers Construct
+        
+        return false;
+    }
+    
+    
+    
     public static boolean removeEffectInstance(LivingEntity entity, EffectInstance effectInstance) {
         if (entity.getActiveEffectsMap().get(effectInstance.getEffect()) == effectInstance) {
             return entity.removeEffect(effectInstance.getEffect());
@@ -532,14 +592,39 @@ public class MCUtil {
         }
     }
     
+    // i sure love copy-pasting private methods
+    public static void spawnItemParticles(LivingEntity entity, ItemStack item, int particlesCount) {
+        Random random = entity.getRandom();
+        for (int i = 0; i < particlesCount; ++i) {
+            Vector3d motion = new Vector3d((random.nextFloat() - 0.5) * 0.1, Math.random() * 0.1 + 0.1, 0);
+            motion = motion.xRot(-entity.xRot * ((float) Math.PI / 180F));
+            motion = motion.yRot(-entity.yRot * ((float) Math.PI / 180F));
+            double d0 = -random.nextFloat() * 0.6 - 0.3;
+            Vector3d pos = new Vector3d(((random.nextFloat() - 0.5)) * 0.3, d0, 0.6);
+            pos = pos.xRot(-entity.xRot * ((float) Math.PI / 180F));
+            pos = pos.yRot(-entity.yRot * ((float) Math.PI / 180F));
+            pos = pos.add(entity.getX(), entity.getEyeY(), entity.getZ());
+            if (entity.level instanceof ServerWorld) { //Forge: Fix MC-2518 spawnParticle is nooped on server, need to use server specific variant
+                ((ServerWorld)entity.level).sendParticles(new ItemParticleData(ParticleTypes.ITEM, item), 
+                        pos.x, pos.y, pos.z, 1, motion.x, motion.y + 0.05D, motion.z, 0.0D);
+            }
+            else {
+                entity.level.addParticle(new ItemParticleData(ParticleTypes.ITEM, item), 
+                        pos.x, pos.y, pos.z, motion.x, motion.y + 0.05D, motion.z);
+            }
+        }
+    }
+    
     
     
     public static boolean isHandFree(LivingEntity entity, Hand hand) {
         if (entity.level.isClientSide() && entity.is(ClientUtil.getClientPlayer()) && ClientUtil.arePlayerHandsBusy()) {
             return false;
         }
-        
-        ItemStack item = entity.getItemInHand(hand);
+        return itemHandFree(entity.getItemInHand(hand));
+    }
+    
+    public static boolean itemHandFree(ItemStack item) {
         if (item.isEmpty()) {
             return true;
         }
@@ -551,6 +636,10 @@ public class MCUtil {
     
     public static HandSide getHandSide(LivingEntity entity, Hand hand) {
         return hand == Hand.MAIN_HAND ? entity.getMainArm() : getOppositeSide(entity.getMainArm());
+    }
+    
+    public static Hand getHand(LivingEntity entity, HandSide handSide) {
+        return entity.getMainArm() == handSide ? Hand.MAIN_HAND : Hand.OFF_HAND;
     }
     
     public static HandSide getOppositeSide(HandSide side) {

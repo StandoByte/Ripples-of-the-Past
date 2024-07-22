@@ -12,6 +12,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
@@ -133,6 +134,11 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     private IStandPower userPower;
     private StandRelativeOffset offsetDefault = StandRelativeOffset.withYOffset(-0.75, 0.2, -0.75);
     private StandRelativeOffset offsetDefaultArmsOnly = StandRelativeOffset.withYOffset(0, 0, 0.15);
+    protected StandRelativeOffset prevOffset;
+    protected StandRelativeOffset prevOffsetSnapshot;
+    protected StandRelativeOffset curOffset;
+    protected int offsetLerpTicks;
+    protected int offsetLerpMaxTicks;
 
     private static final DataParameter<Boolean> SWING_OFF_HAND = EntityDataManager.defineId(StandEntity.class, DataSerializers.BOOLEAN);
     private boolean alternateAdditionalSwing;
@@ -173,12 +179,17 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     private IPunch lastPunch;
     private BarrageSwingsHolder<?, ?> barrageSwings;
     private final BarrageHitSoundHandler barrageSounds;
-    
-    public Vector3d motionVec = Vector3d.ZERO;
-    public double motionDist = 0;
-    public double prevMotionDist = 0;
-    public Vector3d lastTiltVec = Vector3d.ZERO;
+
+    public float lastRenderTick = 0;
     public float lastMotionTiltTick = -1;
+//    public Vector3d motionVec = Vector3d.ZERO;
+//    public double motionDist = 0;
+//    public double prevMotionDist = 0;
+    
+    public Vector3d prevTiltVec = Vector3d.ZERO;
+    public Vector3d tiltVec = Vector3d.ZERO;
+    
+    public float outlineTicks = 0;
     
     public static final DataParameter<Optional<ResourceLocation>> DATA_PARAM_STAND_SKIN = EntityDataManager.defineId(StandEntity.class, 
             (IDataSerializer<Optional<ResourceLocation>>) ModDataSerializers.OPTIONAL_RES_LOC.get().getSerializer());
@@ -257,6 +268,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             
             lastTask.ifPresent(task -> task.getAction().taskStopped(level, this, userPower, task, taskOptional.map(StandEntityTask::getAction).orElse(null)));
             lastTask = taskOptional;
+            actionOffsetChanged();
             
             taskOptional.ifPresent(task -> {
                 task.phaseTransition(this, userPower, null, task.getPhase(), task.getTicksLeft());
@@ -406,7 +418,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     
     public double getDurability() {
         double durability = getAttributeValue(ModEntityAttributes.STAND_DURABILITY.get());
-        if (ModPowers.VAMPIRISM.get().isHighOnBlood(getUser())) {
+        if (ModPowers.VAMPIRISM.get().isHighOnBlood(getUser()) || ModPowers.PILLAR_MAN.get().isHighLifeForce(getUser())) {
             durability *= 2;
         }
         return durability * getStandEfficiency();
@@ -534,6 +546,21 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
     
     protected void addSummonParticles() {}
+    
+    public int getUnsummonDuration() {
+        LivingEntity user = getUser();
+        boolean resolve = user != null && user.hasEffect(ModStatusEffects.RESOLVE.get());
+        if (resolve) {
+            return isArmsOnlyMode() ? 3 : 5;
+        }
+        else {
+            int ticks = isArmsOnlyMode() ? 7 : 10;
+            double staminaDebuff = getStaminaCondition();  // 0.25 ~ 1
+            staminaDebuff = (staminaDebuff * 2 + 1) / 3.0; // 0.5  ~ 1
+            if (staminaDebuff < 1) ticks = MathHelper.ceil((double) ticks / staminaDebuff);
+            return ticks;
+        }
+    }
 
 
 
@@ -668,7 +695,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     
     @Override
     public boolean isInvisibleTo(PlayerEntity player) {
-        return !player.isSpectator() && (!isVisibleForAll() && !StandUtil.playerCanSeeStands(player) || underInvisibilityEffect());
+        return !isVisibleForAll() && !StandUtil.clStandEntityVisibleTo(player) || !player.isSpectator() && underInvisibilityEffect();
     }
 
     @Override
@@ -1136,11 +1163,13 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         }
         else {
             boolean stun = ModStatusEffects.isStunned(this);
-            currentTask.ifPresent(task -> {
-                if (!stun || task.getAction().ignoresPerformerStun()) {
-                    task.tick(userPower, this);
-                }
-            });
+            if (userPower != null) {
+                currentTask.ifPresent(task -> {
+                    if (!stun || task.getAction().ignoresPerformerStun()) {
+                        task.tick(userPower, this);
+                    }
+                });
+            }
             
             if (!stun && gradualSummonWeaknessTicks > 0) {
                 gradualSummonWeaknessTicks--;
@@ -1170,6 +1199,10 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             }
             
             overlayTickCount++;
+        }
+        
+        if (level.isClientSide() && offsetLerpTicks < offsetLerpMaxTicks) {
+            offsetLerpTicks++;
         }
         
         if (user != null) {
@@ -1239,6 +1272,51 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         return position().add(MCUtil.collide(this, collisionBox, pos.subtract(position())));
     }
     
+    
+    protected boolean doOffsetLerp = true;
+    @Nullable
+    public StandRelativeOffset getOffsetFromUser() {
+        if (Optional.ofNullable(getCurrentTaskAction()).map(action -> action.noAdheringToUserOffset(userPower, this)).orElse(false)) {
+            return null;
+        }
+        
+        StandRelativeOffset defaultOffset = getDefaultOffsetFromUser();
+        StandRelativeOffset offset = getCurrentTask().map(task -> {
+            StandRelativeOffset taskOffset = task.getOffsetFromUser(userPower, this);
+            if (taskOffset != null) return taskOffset;
+            
+            return defaultOffset;
+        }).orElse(defaultOffset);
+
+        if (level.isClientSide() && doOffsetLerp) {
+            if (prevOffsetSnapshot != null && offsetLerpTicks < offsetLerpMaxTicks) {
+                offset = offset.lerp(prevOffsetSnapshot, (double) offsetLerpTicks / (double) offsetLerpMaxTicks);
+            }
+        }
+        
+        return offset;
+    }
+    
+    protected void actionOffsetChanged() {
+        StandRelativeOffset defaultOffset = getDefaultOffsetFromUser();
+        StandRelativeOffset offset = lastTask.map(task -> {
+            StandRelativeOffset taskOffset = task.getOffsetFromUser(userPower, this);
+            if (taskOffset != null) return taskOffset;
+            
+            return defaultOffset;
+        }).orElse(defaultOffset);
+        
+        if (level.isClientSide() && doOffsetLerp) {
+            if (offset != this.curOffset) {
+                this.prevOffset = this.curOffset;
+                this.prevOffsetSnapshot = prevOffset != null ? prevOffset.makeSnapshot(defaultOffset.y, xRot) : null;
+                this.curOffset = offset;
+                this.offsetLerpTicks = 1;
+                this.offsetLerpMaxTicks = 3;
+            }
+        }
+    }
+    
     private Vector3d taskOffset(LivingEntity user, StandRelativeOffset relativeOffset, Optional<StandEntityTask> currentTask) {
         ActionTarget target = currentTask.map(StandEntityTask::getTarget).orElse(ActionTarget.EMPTY);
         float yRot;
@@ -1254,7 +1332,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             xRot = user.xRot;
         }
             
-        Vector3d offset = relativeOffset.getAbsoluteVec(getDefaultOffsetFromUser(), yRot, xRot, this, user);
+        Vector3d offset = relativeOffset.getAbsoluteVec(yRot, xRot, this, user, getDefaultOffsetFromUser().y);
         if (user.isShiftKeyDown()) {
             offset = new Vector3d(offset.x, 0, offset.z);
         }
@@ -1262,19 +1340,6 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         return offset;
     }
     
-    @Nullable
-    public StandRelativeOffset getOffsetFromUser() {
-        if (Optional.ofNullable(getCurrentTaskAction()).map(action -> action.noAdheringToUserOffset(userPower, this)).orElse(false)) {
-            return null;
-        }
-        return getCurrentTask().map(task -> {
-            StandRelativeOffset taskOffset = task.getOffsetFromUser(userPower, this);
-            if (taskOffset != null) {
-                return taskOffset;
-            }
-            return getDefaultOffsetFromUser();
-        }).orElse(getDefaultOffsetFromUser());
-    }
     
     public StandRelativeOffset getDefaultOffsetFromUser() {
         return isArmsOnlyMode() ? offsetDefaultArmsOnly : offsetDefault;
@@ -1912,7 +1977,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     public void addProjectile(DamagingEntity projectile) {
         if (!level.isClientSide() && !projectile.isAddedToWorld()) {
             projectile.setDamageFactor(projectile.getDamageFactor() * (float) getAttackDamage() / 8);
-            projectile.setSpeedFactor(projectile.getSpeedFactor() * (float) getAttackSpeed() / 8);
+            projectile.setSpeedFactor(projectile.getSpeedFactor() * getAttackSpeed() / 8);
             level.addFreshEntity(projectile);
         }
     }
@@ -1990,7 +2055,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
 
     public boolean isCloseToUser() {
         LivingEntity user = getUser();
-        return user != null ? distanceToSqr(user) < 2.25 : false;
+        return user != null ? distanceToSqr(user) < 4 : false;
     }
 
     public boolean isFollowingUser() {
@@ -1999,6 +2064,10 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
 
     protected boolean shouldHaveNoPhysics() {
         return standCanHaveNoPhysics() && !isManuallyControlled() && !isRemotePositionFixed();
+    }
+    
+    public ActionConditionResult canBeManuallyControlled() {
+        return ActionConditionResult.POSITIVE;
     }
 
     public void setManualControl(boolean manualControl, boolean fixRemotePosition) {

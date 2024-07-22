@@ -33,10 +33,8 @@ public class CrazyDiamondHeavyPunch extends StandEntityHeavyAttack {
             LivingEntity user = standPower.getUser();
             ItemStack item = user.getOffhandItem();
             if (user != null && !item.isEmpty() && CrazyDiamondLeaveObject.canUseItem(item)) {
-                ItemStack itemForStand = item.copy();
-                itemForStand.setCount(1);
+                ItemStack itemForStand = item.split(1);
                 standEntity.takeItem(standEntity.handItemSlot(Hand.MAIN_HAND), itemForStand, true, user);
-                item.shrink(1);
             }
         }
     }

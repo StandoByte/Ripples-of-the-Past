@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
+import com.github.standobyte.jojo.entity.damaging.projectile.MolotovEntity;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
@@ -151,6 +152,9 @@ public class ProjectileHamonChargeCap {
             // memorize charged egg entity to potentially charge the chicken(s) coming out of it
             if (projectile instanceof EggEntity) {
                 world.getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.addChargedEggEntity((EggEntity) projectile));
+            }
+            else if (projectile instanceof MolotovEntity) {
+                ((MolotovEntity) projectile).onHitWithHamonCharge(target, this);
             }
         }
     }

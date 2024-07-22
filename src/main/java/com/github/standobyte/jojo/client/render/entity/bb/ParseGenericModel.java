@@ -9,7 +9,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
 
@@ -88,13 +87,19 @@ public class ParseGenericModel {
                                 JsonPrimitive typePrim = typeElem.getAsJsonPrimitive();
                                 if (typePrim.isString()) {
                                     String type = typePrim.getAsString();
-                                    switch (type) {
-                                    case "cube":
-                                        return context.deserialize(json, ElementCube.class);
-                                    case "mesh":
-                                        return context.deserialize(json, ElementMesh.class);
-                                    default:
-                                        throw new JsonParseException("Unknown element type: \"" + type + "\"");
+                                    try {
+                                        switch (type) {
+                                        case "cube":
+                                            return context.deserialize(json, ElementCube.class);
+                                        case "mesh":
+                                            return context.deserialize(json, ElementMesh.class);
+                                        default:
+                                            throw new JsonParseException("Unknown element type: \"" + type + "\"");
+                                        }
+                                    }
+                                    catch (Exception e) {
+                                        e.printStackTrace();
+                                        throw e;
                                     }
                                 }
                             }
@@ -181,7 +186,7 @@ public class ParseGenericModel {
             
             class BoxFace {
                 float[] uv;
-                int texture;
+                Integer texture;
             }
             
             private ModelRenderer.ModelBox makeModelBox(float texWidth, float texHeight, GroupParsed parentParsed) {
@@ -260,45 +265,33 @@ public class ParseGenericModel {
                     Direction uvPart = direction.getAxis() == Axis.Z ? direction : direction.getOpposite();
                     if (perFaceUv.containsKey(uvPart)) {
                         BoxFace uv = perFaceUv.get(uvPart);
-                        float u0;
-                        float v0;
-                        float u1;
-                        float v1;
-                        if (direction.getAxis() == Axis.Y) {
-                            u0 = uv.uv[2];
-                            v0 = uv.uv[3];
-                            u1 = uv.uv[0];
-                            v1 = uv.uv[1];
-                        }
-                        else {
-                            u0 = uv.uv[0];
-                            v0 = uv.uv[1];
-                            u1 = uv.uv[2];
-                            v1 = uv.uv[3];
-                        }
-                        polygons[polygonsCount++] = new ModelRenderer.TexturedQuad(faceVertices.get(direction), 
-                                u0, v0, u1, v1, 
-                                texWidth, texHeight, false, direction);
+//                        if (uv.texture != null) {
+                            float u0;
+                            float v0;
+                            float u1;
+                            float v1;
+                            if (direction.getAxis() == Axis.Y) {
+                                u0 = uv.uv[2];
+                                v0 = uv.uv[3];
+                                u1 = uv.uv[0];
+                                v1 = uv.uv[1];
+                            }
+                            else {
+                                u0 = uv.uv[0];
+                                v0 = uv.uv[1];
+                                u1 = uv.uv[2];
+                                v1 = uv.uv[3];
+                            }
+                            polygons[polygonsCount++] = new ModelRenderer.TexturedQuad(faceVertices.get(direction), 
+                                    u0, v0, u1, v1, 
+                                    texWidth, texHeight, false, direction);
+//                        }
                     }
                 }
                 if (polygonsCount < polygons.length) {
                     polygons = Arrays.copyOf(polygons, polygonsCount);
                 }
                 ClientReflection.setPolygons(box, polygons);
-                
-                
-                /*
-                 *    u0   u1       u2   u3  u4   u5
-                 * v0       ┌────────┬────────┐
-                 *          │   U    │   D    │
-                 * v1  ┌────┼────────┼────┬───┴────┐ ⎫
-                 *     │    │        │    │        │ ⎪
-                 *     │ E  │   N    │ W  │   S    │ ⎬ size.y
-                 *     │    │        │    │        │ ⎪
-                 *     │    │        │    │        │ ⎪
-                 * v2  └────┴────────┴────┴────────┘ ⎭
-                 *     size.z               size.x
-                 */
                 
                 return box;
             }

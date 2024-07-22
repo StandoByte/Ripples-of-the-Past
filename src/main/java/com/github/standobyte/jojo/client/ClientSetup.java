@@ -17,7 +17,9 @@ import com.github.standobyte.jojo.client.particle.HamonSparkParticle;
 import com.github.standobyte.jojo.client.particle.MeteoriteVirusParticle;
 import com.github.standobyte.jojo.client.particle.OneTickFlameParticle;
 import com.github.standobyte.jojo.client.particle.OnomatopoeiaParticle;
+import com.github.standobyte.jojo.client.particle.RPSPickPartile;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
+import com.github.standobyte.jojo.client.particle.custom.FirstPersonHamonAura;
 import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
 import com.github.standobyte.jojo.client.render.armor.ArmorModelRegistry;
 import com.github.standobyte.jojo.client.render.armor.model.BladeHatArmorModel;
@@ -26,10 +28,13 @@ import com.github.standobyte.jojo.client.render.armor.model.GlovesModel;
 import com.github.standobyte.jojo.client.render.armor.model.SatiporojaScarfArmorModel;
 import com.github.standobyte.jojo.client.render.armor.model.StoneMaskModel;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.EnergyRippleLayer;
+import com.github.standobyte.jojo.client.render.entity.layerrenderer.FrozenLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.GlovesLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.HamonBurnLayer;
+import com.github.standobyte.jojo.client.render.entity.layerrenderer.InkLipsLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.KnifeLayer;
-import com.github.standobyte.jojo.client.render.entity.layerrenderer.SpecialHeldItemLayer;
+import com.github.standobyte.jojo.client.render.entity.layerrenderer.LadybugBroochLayer;
+import com.github.standobyte.jojo.client.render.entity.layerrenderer.PillarmanLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.TornadoOverdriveEffectLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.ZombieLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.barrage.BarrageFistAfterimagesLayer;
@@ -39,6 +44,7 @@ import com.github.standobyte.jojo.client.render.entity.renderer.HamonBlockCharge
 import com.github.standobyte.jojo.client.render.entity.renderer.HamonProjectileShieldRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.LeavesGliderRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.MRDetectorRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.PillarmanDivineSandstormRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.PillarmanTempleEngravingRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.RoadRollerRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.SendoHamonOverdriveRenderer;
@@ -52,6 +58,9 @@ import com.github.standobyte.jojo.client.render.entity.renderer.damaging.extendi
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.extending.HGGrapplingStringRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.extending.HGStringRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.extending.MRRedBindRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.damaging.extending.PillarmanHornRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.damaging.extending.PillarmanRibRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.damaging.extending.PillarmanVeinRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.extending.SPStarFingerRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.extending.SatiporojaScarfBindingRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.extending.SatiporojaScarfRenderer;
@@ -66,6 +75,7 @@ import com.github.standobyte.jojo.client.render.entity.renderer.damaging.project
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.MRCrossfireHurricaneRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.MRCrossfireHurricaneSpecialRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.MRFireballRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.MolotovRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.SCRapierRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.TommyGunBulletRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.stretching.ZoomPunchRenderer;
@@ -84,6 +94,7 @@ import com.github.standobyte.jojo.client.render.entity.renderer.stand.SilverChar
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.StarPlatinumRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.TheWorldRenderer;
 import com.github.standobyte.jojo.client.render.item.RoadRollerBakedModel;
+import com.github.standobyte.jojo.client.render.item.generic.ItemISTERModelWrapper;
 import com.github.standobyte.jojo.client.render.item.standdisc.StandDiscISTERModel;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
 import com.github.standobyte.jojo.client.resources.CustomResources;
@@ -112,6 +123,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScreenManager;
 import net.minecraft.client.particle.CloudParticle;
 import net.minecraft.client.particle.IAnimatedSprite;
+import net.minecraft.client.particle.LavaParticle;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.RenderTypeLookup;
@@ -134,6 +146,7 @@ import net.minecraft.item.IItemPropertyGetter;
 import net.minecraft.item.ItemModelsProperties;
 import net.minecraft.item.Items;
 import net.minecraft.particles.BasicParticleType;
+import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.api.distmarker.Dist;
@@ -150,7 +163,7 @@ import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 @EventBusSubscriber(modid = JojoMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD, value = Dist.CLIENT)
 public class ClientSetup {
 
-    private static final IItemPropertyGetter STAND_ITEM_INVISIBLE = (itemStack, clientWorld, livingEntity) -> {
+    public static final IItemPropertyGetter STAND_ITEM_INVISIBLE = (itemStack, clientWorld, livingEntity) -> {
         return !ClientUtil.canSeeStands() ? 1 : 0;
     };
     
@@ -179,6 +192,7 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SNAKE_MUFFLER.get(), SnakeMufflerRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.TOMMY_GUN_BULLET.get(), TommyGunBulletRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.KNIFE.get(), KnifeRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.MOLOTOV.get(), manager -> new MolotovRenderer<>(manager, Minecraft.getInstance().getItemRenderer(), 1.0F, true));
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.STAND_ARROW.get(), StandArrowRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SOUL.get(), SoulRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.PILLARMAN_TEMPLE_ENGRAVING.get(), PillarmanTempleEngravingRenderer::new);
@@ -204,6 +218,10 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HAMON_MASTER.get(), HamonMasterRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.ROCK_PAPER_SCISSORS_KID.get(), RockPaperScissorsKidRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.STAND_USER_DUMMY.get(), StandUserDummyRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.PILLARMAN_HORN.get(), PillarmanHornRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.PILLARMAN_DIVINE_SANDSTORM.get(), PillarmanDivineSandstormRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.PILLARMAN_VEINS.get(), PillarmanVeinRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.PILLARMAN_RIBS.get(), PillarmanRibRenderer::new);
         
         RenderingRegistry.registerEntityRenderingHandler(ModStands.STAR_PLATINUM.getEntityType(), StarPlatinumRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModStands.THE_WORLD.getEntityType(), TheWorldRenderer::new);
@@ -213,13 +231,14 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModStands.CRAZY_DIAMOND.getEntityType(), CrazyDiamondRenderer::new);
         
         ArmorModelRegistry.registerArmorModel(StoneMaskModel::new, ModItems.STONE_MASK.get());
+        ArmorModelRegistry.registerArmorModel(StoneMaskModel::new, ModItems.AJA_STONE_MASK.get());
         ArmorModelRegistry.registerArmorModel(BladeHatArmorModel::new, ModItems.BLADE_HAT.get());
         ArmorModelRegistry.registerArmorModel(BreathControlMaskModel::new, ModItems.BREATH_CONTROL_MASK.get());
         ArmorModelRegistry.registerArmorModel(SatiporojaScarfArmorModel::new, ModItems.SATIPOROJA_SCARF.get());
         
         ClientModSettings.init(mc, new File(mc.gameDirectory, "config/jojo_rotp/client_settings.json"));
         HudControlSettings.init(new File(mc.gameDirectory, "config/jojo_rotp/controls/"));
-
+        
         event.enqueueWork(() -> {
             ItemModelsProperties.register(ModItems.METEORIC_SCRAP.get(), new ResourceLocation(JojoMod.MOD_ID, "icon"), (itemStack, clientWorld, livingEntity) -> {
                 return itemStack.getOrCreateTag().getInt("Icon");
@@ -243,7 +262,7 @@ public class ClientSetup {
                         CrossbowItem.containsChargedProjectile(itemStack, ModItems.STAND_ARROW_BEETLE.get())) ? 1 : 0;
             });
             ItemModelsProperties.register(ModItems.STAND_DISC.get(), new ResourceLocation(JojoMod.MOD_ID, "stand_id"), (itemStack, clientWorld, livingEntity) -> {
-                return StandDiscItem.validStandDisc(itemStack, true) ? JojoCustomRegistries.STANDS.getNumericId(StandDiscItem.getStandFromStack(itemStack, true).getType().getRegistryName()) : -1;
+                return StandDiscItem.validStandDisc(itemStack, true) ? JojoCustomRegistries.STANDS.getNumericId(StandDiscItem.getStandFromStack(itemStack).getType().getRegistryName()) : -1;
             });
             ItemModelsProperties.register(ModItems.CASSETTE_RECORDED.get(), new ResourceLocation(JojoMod.MOD_ID, "cassette_distortion"), (itemStack, clientWorld, livingEntity) -> {
                 return CassetteRecordedItem.getCassetteData(itemStack)
@@ -251,8 +270,12 @@ public class ClientSetup {
                         .orElse(0).floatValue();
             });
 //            ItemModelsProperties.register(ModItems.EMPEROR.get(), new ResourceLocation(JojoMod.MOD_ID, "stand_invisible"), STAND_ITEM_INVISIBLE);
+            ItemModelsProperties.register(ModItems.POLAROID.get(), new ResourceLocation(JojoMod.MOD_ID, "is_held"), (itemStack, clientWorld, livingEntity) -> {
+                return livingEntity != null && (livingEntity.getItemInHand(Hand.MAIN_HAND) == itemStack || livingEntity.getItemInHand(Hand.OFF_HAND) == itemStack) ? 1 : 0;
+            });
 
             RenderTypeLookup.setRenderLayer(ModBlocks.STONE_MASK.get(), RenderType.cutoutMipped());
+            RenderTypeLookup.setRenderLayer(ModBlocks.AJA_STONE_MASK.get(), RenderType.cutoutMipped());
             RenderTypeLookup.setRenderLayer(ModBlocks.SLUMBERING_PILLARMAN.get(), RenderType.cutoutMipped());
             RenderTypeLookup.setRenderLayer(ModBlocks.MAGICIANS_RED_FIRE.get(), RenderType.cutout());
             
@@ -267,6 +290,7 @@ public class ClientSetup {
             LoopPlayerHandler.init();
             ClientTimeStopHandler.init(mc);
             ShaderEffectApplier.init(mc);
+            FirstPersonHamonAura.init();
             
             Map<String, PlayerRenderer> skinMap = mc.getEntityRenderDispatcher().getSkinMap();
             addLayers(skinMap.get("default"), false);
@@ -298,17 +322,22 @@ public class ClientSetup {
         renderer.addLayer(new TornadoOverdriveEffectLayer<>(renderer));
         renderer.addLayer(new BarrageFistAfterimagesLayer(renderer));
         renderer.addLayer(new EnergyRippleLayer<>(renderer));
-        renderer.addLayer(new SpecialHeldItemLayer<>(renderer));
         renderer.addLayer(new GlovesLayer<>(renderer, new GlovesModel<>(0.3F, slim), slim));
+        renderer.addLayer(new LadybugBroochLayer<>(renderer));
+        renderer.addLayer(new InkLipsLayer<>(renderer));
         addLivingLayers(renderer);
         addBipedLayers(renderer);
     }
     
     private static <T extends LivingEntity, M extends BipedModel<T>> void addLayersToEntities(EntityRenderer<?> renderer) {
         if (renderer instanceof LivingRenderer<?, ?>) {
-            addLivingLayers((LivingRenderer<T, ?>) renderer);
+            LivingRenderer<T, M> livingRenderer = (LivingRenderer<T, M>) renderer;
+            addLivingLayers(livingRenderer);
             if (((LivingRenderer<?, ?>) renderer).getModel() instanceof BipedModel<?>) {
-                addBipedLayers((LivingRenderer<T, M>) renderer);
+                addBipedLayers(livingRenderer);
+            }
+            else {
+                livingRenderer.addLayer(new FrozenLayer<T, M>(livingRenderer, FrozenLayer.NON_BIPED_PATH));
             }
         }
     }
@@ -318,7 +347,9 @@ public class ClientSetup {
     }
     
     private static <T extends LivingEntity, M extends BipedModel<T>> void addBipedLayers(LivingRenderer<T, M> renderer) {
-    	renderer.addLayer(new ZombieLayer<>(renderer));
+        renderer.addLayer(new ZombieLayer<>(renderer));
+        renderer.addLayer(new PillarmanLayer<>(renderer));
+        renderer.addLayer(new FrozenLayer<>(renderer, FrozenLayer.BIPED_PATH));
     }
 
     @SubscribeEvent
@@ -350,9 +381,13 @@ public class ClientSetup {
                 model -> new RoadRollerBakedModel(model));
         registerCustomBakedModel(ModItems.STAND_DISC.get().getRegistryName(), event.getModelRegistry(), 
                 model -> new StandDiscISTERModel(model));
+        registerCustomBakedModel(ModItems.POLAROID.get().getRegistryName(), event.getModelRegistry(), 
+                model -> new ItemISTERModelWrapper(model).setCaptureEntity());
+        registerCustomBakedModel(ModItems.CLACKERS.get().getRegistryName(), event.getModelRegistry(), 
+                model -> new ItemISTERModelWrapper(model).setCaptureEntity());
     }
     
-    private static void registerCustomBakedModel(ResourceLocation resLoc, 
+    public static void registerCustomBakedModel(ResourceLocation resLoc, 
             Map<ResourceLocation, IBakedModel> modelRegistry, UnaryOperator<IBakedModel> newModel) {
         ModelResourceLocation modelResLoc = new ModelResourceLocation(resLoc, "inventory");
         IBakedModel existingModel = modelRegistry.get(modelResLoc);
@@ -395,6 +430,9 @@ public class ClientSetup {
         mc.particleEngine.register(ModParticles.HAMON_AURA_YELLOW.get(),    HamonAuraParticle.Factory::new);
         mc.particleEngine.register(ModParticles.HAMON_AURA_RED.get(),       HamonAuraParticle.Factory::new);
         mc.particleEngine.register(ModParticles.HAMON_AURA_SILVER.get(),    HamonAuraParticle.Factory::new);
+        mc.particleEngine.register(ModParticles.HAMON_AURA_GREEN.get(),     HamonAuraParticle.Factory::new);
+        mc.particleEngine.register(ModParticles.HAMON_AURA_RAINBOW.get(),   HamonAuraParticle.Factory::new);
+        mc.particleEngine.register(ModParticles.BOILING_BLOOD_POP.get(),    LavaParticle.Factory::new);
         mc.particleEngine.register(ModParticles.METEORITE_VIRUS.get(),      MeteoriteVirusParticle.Factory::new);
         mc.particleEngine.register(ModParticles.MENACING.get(),             OnomatopoeiaParticle.GoFactory::new);
         mc.particleEngine.register(ModParticles.RESOLVE.get(),              OnomatopoeiaParticle.DoFactory::new);
@@ -402,6 +440,9 @@ public class ClientSetup {
         mc.particleEngine.register(ModParticles.AIR_STREAM.get(),           AirStreamParticle.Factory::new);
         mc.particleEngine.register(ModParticles.FLAME_ONE_TICK.get(),       OneTickFlameParticle.Factory::new);
         mc.particleEngine.register(ModParticles.CD_RESTORATION.get(),       CDRestorationParticle.Factory::new);
+        mc.particleEngine.register(ModParticles.RPS_ROCK.get(),             RPSPickPartile.Factory::new);
+        mc.particleEngine.register(ModParticles.RPS_PAPER.get(),            RPSPickPartile.Factory::new);
+        mc.particleEngine.register(ModParticles.RPS_SCISSORS.get(),         RPSPickPartile.Factory::new);
 
         CustomParticlesHelper.saveSprites(mc);
         // yep...

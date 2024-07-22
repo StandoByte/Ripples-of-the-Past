@@ -52,7 +52,7 @@ public class SilverChariotDashAttack extends StandEntityHeavyAttack {
             if (standEntity.isFollowingUser() && standEntity.getAttackSpeed() < 24) {
                 LivingEntity user = standEntity.getUser();
                 if (user != null) {
-                    Vector3d vec = MathUtil.relativeCoordsToAbsolute(0, 0, 1.0, user.yRot);
+                    Vector3d vec = new Vector3d(0, 0, 1).yRot(-user.yRot * MathUtil.DEG_TO_RAD);
                     standEntity.setPos(user.getX() + vec.x, 
                             standEntity.getY(), 
                             user.getZ() + vec.z);

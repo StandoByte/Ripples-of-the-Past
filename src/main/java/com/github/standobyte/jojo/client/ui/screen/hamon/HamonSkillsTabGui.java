@@ -265,6 +265,7 @@ public abstract class HamonSkillsTabGui extends HamonTabGui {
     
     @Override
     void tick() {
+        super.tick();
         lastClickDelay++;
     }
 

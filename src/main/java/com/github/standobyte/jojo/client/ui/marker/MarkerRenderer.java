@@ -30,6 +30,7 @@ public abstract class MarkerRenderer {
     private final Action<?> iconAction;
     private final List<MarkerInstance> positions = new ArrayList<>();
     protected final Minecraft mc;
+    protected boolean renderThroughBlocks = true;
     
     @Deprecated
     /**
@@ -59,14 +60,21 @@ public abstract class MarkerRenderer {
                 
                 float[] rgb = ClientUtil.rgb(getColor());
                 positions.forEach(marker -> {
+                    if (renderThroughBlocks) {
+                        RenderSystem.disableDepthTest();
+                    } else {
+                        RenderSystem.enableDepthTest();
+                    }
                     renderAt(marker.getPos(), matrixStack, camera, partialTick, rgb, marker.isOutlined());
                 });
+                RenderSystem.enableDepthTest();
                 
                 matrixStack.popPose();
             }
         }
     }
 
+    @SuppressWarnings("deprecation")
     protected void renderAt(Vector3d worldPos, MatrixStack matrixStack, ActiveRenderInfo camera, float partialTick, float[] rgb, boolean outline) {
         matrixStack.pushPose();
         Vector3d diff = worldPos.subtract(camera.getPosition())
@@ -92,6 +100,10 @@ public abstract class MarkerRenderer {
         if (outline) {
             AbstractGui.blit(matrixStack, -16, -32, 32, 0, 64, 32, 256, 256);
         }
+
+        matrixStack.pushPose();
+        matrixStack.translate(-8, -28, 0);
+        matrixStack.popPose();
 
         matrixStack.popPose();
     }

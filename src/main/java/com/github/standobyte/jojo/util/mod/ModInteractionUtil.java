@@ -12,6 +12,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.monster.EndermanEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.IndirectEntityDamageSource;
 import net.minecraft.util.ResourceLocation;
@@ -38,12 +39,14 @@ public class ModInteractionUtil {
     
     private static final ResourceLocation MOWZIES_FROZEN_EFFECT = new ResourceLocation("mowziesmobs", "frozen");
     private static final ResourceLocation TWILIGHT_FOREST_FROSTED_EFFECT = new ResourceLocation("twilightforest", "frosted");
+    private static final ResourceLocation VAMPIRISM_FREEZE = new ResourceLocation("vampirism", "freeze");
     public static float getEntityFreeze(LivingEntity entity) {
         return Math.min(entity.getActiveEffectsMap().entrySet().stream().map(entry -> {
-            if (MOWZIES_FROZEN_EFFECT.equals(entry.getKey().getRegistryName())) {
+            ResourceLocation effectId = entry.getKey().getRegistryName();
+            if (MOWZIES_FROZEN_EFFECT.equals(effectId) || VAMPIRISM_FREEZE.equals(effectId)) {
                 return 1F;
             }
-            if (TWILIGHT_FOREST_FROSTED_EFFECT.equals(entry.getKey().getRegistryName())) {
+            if (TWILIGHT_FOREST_FROSTED_EFFECT.equals(effectId)) {
                 return Math.min((entry.getValue().getAmplifier() + 1) * 0.25F, 1);
             }
             return 0F;
@@ -93,5 +96,10 @@ public class ModInteractionUtil {
                 }
             }
         }
+    }
+
+    private static final ResourceLocation SQUID_INK_PASTA = new ResourceLocation("farmersdelight", "squid_ink_pasta");
+    public static boolean isSquidInkPasta(ItemStack item) {
+        return SQUID_INK_PASTA.equals(item.getItem().getRegistryName());
     }
 }

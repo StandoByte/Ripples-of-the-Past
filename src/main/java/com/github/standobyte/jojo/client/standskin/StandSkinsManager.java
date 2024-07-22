@@ -27,6 +27,9 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.resources.models.StandModelOverrides;
+import com.github.standobyte.jojo.client.resources.models.StandModelOverrides.CustomModelPrepared;
+import com.github.standobyte.jojo.client.resources.models.StandModelOverrides.Format;
+import com.github.standobyte.jojo.client.resources.models.StandModelOverrides.ModelPathInfo;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
@@ -141,21 +144,9 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
                             
                             skin.resourcePrepare = new SkinResourcePrepare();
                             
-                            // stand models
-                            Collection<ResourceLocation> modelResources = listResources(resourceManager, skinId, standTypeId, 
-                                    "geo", fileName -> fileName.endsWith(".json"));
-                            for (ResourceLocation modelFilePath : modelResources) {
-                                ResourceLocation modelResLoc = StandSkin.remapBack(skinId, modelFilePath);
-                                modelResLoc = new ResourceLocation(modelResLoc.getNamespace(), 
-                                        modelResLoc.getPath().replace("geo/", "").replace(".json", ""));
-                                try (
-                                        IResource resource = resourceManager.getResource(modelFilePath);
-                                        InputStream modelInputStream = resource.getInputStream();
-                                        Reader modelReader = new BufferedReader(new InputStreamReader(modelInputStream, StandardCharsets.UTF_8));
-                                        ) {
-                                    JsonElement json = PARSER.parse(modelReader);
-                                    skin.resourcePrepare.prepareCustomModelData(modelResLoc, json);
-                                }
+                            for (ModelPathInfo path : StandModelOverrides.FILE_PATHS) {
+                                prepareModels(skin, standTypeId, skinId, path.directory, 
+                                        path.filePostfix, resourceManager, path.format);
                             }
                         }
                         
@@ -182,22 +173,43 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
         return skinsMap;
     }
     
+    protected void prepareModels(StandSkin skin, ResourceLocation standTypeId, ResourceLocation skinId,
+            String directory, String pathSuffix, IResourceManager resourceManager, Format format) throws IOException {
+        Collection<ResourceLocation> geckoModelResources = listResources(resourceManager, skinId, standTypeId, 
+                directory, fileName -> fileName.endsWith(pathSuffix));
+        for (ResourceLocation modelFilePath : geckoModelResources) {
+            ResourceLocation modelResLoc = StandSkin.remapBack(skinId, modelFilePath);
+            String fileName = modelResLoc.getPath();
+            fileName = fileName.substring(directory.length() + 1, fileName.length() - pathSuffix.length());
+            modelResLoc = new ResourceLocation(modelResLoc.getNamespace(), fileName);
+            
+            try (
+                    IResource resource = resourceManager.getResource(modelFilePath);
+                    InputStream modelInputStream = resource.getInputStream();
+                    Reader modelReader = new BufferedReader(new InputStreamReader(modelInputStream, StandardCharsets.UTF_8));
+                    ) {
+                JsonElement json = PARSER.parse(modelReader);
+                skin.resourcePrepare.prepareCustomModelData(modelResLoc, json, format);
+            }
+        }
+    }
+    
     public static class SkinResourcePrepare {
-        List<Pair<ResourceLocation, JsonElement>> customModels;
+        List<Pair<ResourceLocation, CustomModelPrepared>> customModels;
         
-        void prepareCustomModelData(ResourceLocation modelResLoc, JsonElement modelJson) {
+        void prepareCustomModelData(ResourceLocation modelResLoc, JsonElement modelJson, StandModelOverrides.Format format) {
             if (customModels == null) {
                 customModels = new ArrayList<>();
             }
-            customModels.add(Pair.of(modelResLoc, modelJson));
+            customModels.add(Pair.of(modelResLoc, new CustomModelPrepared(modelJson, format)));
         }
         
         void apply(StandSkin skin) {
             if (customModels != null) {
-                for (Pair<ResourceLocation, JsonElement> customModelData : customModels) {
-                    ResourceLocation modelResLoc = customModelData.getLeft();
-                    JsonElement modelJson = customModelData.getRight();
-                    StandModelOverrides.createModelFromJson(modelResLoc, modelJson).ifPresent(model -> {
+                for (Pair<ResourceLocation, CustomModelPrepared> customModelData : customModels) {
+                    ResourceLocation modelResLoc = StandModelOverrides.clearFormatExtension(customModelData.getLeft());
+                    CustomModelPrepared modelJson = customModelData.getRight();
+                    StandModelOverrides.createStandModelFromJson(modelResLoc, modelJson).ifPresent(model -> {
                         skin.standModels.cacheValue(model.getKey(), model.getValue());
                     });
                 }

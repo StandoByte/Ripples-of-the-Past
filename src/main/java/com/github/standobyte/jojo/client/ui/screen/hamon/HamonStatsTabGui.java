@@ -15,6 +15,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.ui.BlitFloat;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonMeditationPacket;
@@ -61,13 +62,18 @@ public class HamonStatsTabGui extends HamonTabGui {
     private int exercises1Y;
     private int exercises2Y;
     private int exercisesAvgY;
+    private int exercises3Y;
 
     HamonStatsTabGui(Minecraft minecraft, HamonScreen screen, String title) {
         super(minecraft, screen, title, -1, 1);
         int textWidth = WINDOW_WIDTH - 30;
         strengthDescLines = minecraft.font.split(new TranslationTextComponent("hamon.strength_stat.desc"), textWidth);
         controlDescLines = minecraft.font.split(new TranslationTextComponent("hamon.control_stat.desc"), textWidth);
-        breathingDescLines = minecraft.font.split(new TranslationTextComponent("hamon.breathing_stat.desc"), textWidth);
+        IFormattableTextComponent breathingDesc = new TranslationTextComponent("hamon.breathing_stat.desc");
+        if (JojoModConfig.getCommonConfigInstance(true).breathingHamonStatGap.get() >= 0) {
+            breathingDesc.append(new TranslationTextComponent("hamon.breathing_stat.desc.gap"));
+        }
+        breathingDescLines = minecraft.font.split(breathingDesc, textWidth);
         breathMaskHoverable = new TranslationTextComponent("hamon.breathing_stat.desc2.mask")
                 .withStyle(TextFormatting.UNDERLINE)
                 .withStyle(style -> {
@@ -77,7 +83,7 @@ public class HamonStatsTabGui extends HamonTabGui {
                 });
         exercisesDescLines = minecraft.font.split(new TranslationTextComponent("hamon.breathing_stat.desc2", breathMaskHoverable), textWidth);
         breathingDeteriorationLines = minecraft.font.split(new TranslationTextComponent("hamon.breathing_stat.desc3"), textWidth);
-        breathingStatGapLines = minecraft.font.split(new TranslationTextComponent("hamon.breathing_stat.desc4", JojoModConfig.getCommonConfigInstance(true).breathingStatGap.get()), textWidth);
+        breathingStatGapLines = minecraft.font.split(new TranslationTextComponent("hamon.breathing_stat.desc4", JojoModConfig.getCommonConfigInstance(true).breathingHamonStatGap.get()), textWidth);
         statLimitTooltip = minecraft.font.split(new TranslationTextComponent("hamon.stat_limited"), 150);
         meditationTooltip = Streams.concat(
                 minecraft.font.split(new TranslationTextComponent("hamon.meditation_button", new KeybindTextComponent("key.sneak"), new KeybindTextComponent("jojo.key.hamon_skills_window")),
@@ -117,7 +123,7 @@ public class HamonStatsTabGui extends HamonTabGui {
         blit(matrixStack, intScrollX + 154, strengthStatY + 1, 203, 234, (int) (50 * pts), 5);
         blit(matrixStack, intScrollX + 153, strengthStatY, 202, 227, 52, 7);
         if (hamonStrengthLimited = level < HamonData.MAX_STAT_LEVEL
-                && level >= (int) breathingTraining + JojoModConfig.getCommonConfigInstance(true).breathingStatGap.get()) {
+                && level >= screen.hamon.getStatLevelLimit(true)) {
             blit(matrixStack, intScrollX + 142, strengthStatY, 230, 206, 8, 8);
         }
 
@@ -133,14 +139,31 @@ public class HamonStatsTabGui extends HamonTabGui {
         blit(matrixStack, intScrollX + 154, controlStatY + 1, 203, 239, (int) (50 * pts), 5);
         blit(matrixStack, intScrollX + 153, controlStatY, 202, 227, 52, 7);
         if (hamonControlLimited = level < HamonData.MAX_STAT_LEVEL
-                && level >= (int) breathingTraining + JojoModConfig.getCommonConfigInstance(true).breathingStatGap.get()) {
+                && level >= screen.hamon.getStatLevelLimit(true)) {
             blit(matrixStack, intScrollX + 142, controlStatY, 230, 206, 8, 8);
         }
 
         // breathing training stat bar
-        pts = breathingTraining == HamonData.MAX_BREATHING_LEVEL ? 1.0F : breathingTraining - (int)breathingTraining;
-        blit(matrixStack, intScrollX + 154, breathingStatY + 1, 203, 244, (int) (50 * pts), 5);
+        boolean fullTraining = breathingTraining == HamonData.MAX_BREATHING_LEVEL;
+        pts = fullTraining ? 1.0F : breathingTraining - (int)breathingTraining;
+        blit(matrixStack, intScrollX + 154, breathingStatY + 1, 203, fullTraining ? 249 : 244, (int) (50 * pts), 5);
         blit(matrixStack, intScrollX + 153, breathingStatY, 202, 227, 52, 7);
+        if (fullTraining) {
+            float ticks = screen.tickCount + partialTick;
+            float length = 7;
+            if (ticks < length) {
+                float xMin = intScrollX + 154;
+                float xMax = xMin + 50;
+                float x0 = xMin - 17 + 67 * ticks / length;
+                float xMinus = Math.max(xMin - x0, 0);
+                float xPlus = Math.max(x0 + 17 - xMax, 0);
+                BlitFloat.blitFloat(matrixStack, 
+                        x0 + xMinus, breathingStatY + 1, 
+                        186 + xMinus, 249, 
+                        17 - xMinus - xPlus, 5, 
+                        256, 256);
+            }
+        }
 
         // exercise bars
         drawExerciseBar(this, matrixStack, intScrollX + 15, exercises1Y, screen.hamon, Exercise.MINING, 1.0F, true);
@@ -252,21 +275,40 @@ public class HamonStatsTabGui extends HamonTabGui {
         
         textY += 11;
         exercisesAvgY = textY;
+        
+        float breathingIncrease = screen.hamon.getBreathingIncrease(minecraft.player, false);
+        if (breathingIncrease != 0) {
+            DecimalFormat decimalFormat = new DecimalFormat("+#.##;-#");
+            IFormattableTextComponent breathingIncreaseLine = new StringTextComponent(decimalFormat.format(breathingIncrease));
+            if (breathingIncrease < 0) {
+                breathingIncreaseLine.withStyle(TextFormatting.RED);
+            }
+            else if (breathingIncrease > 0) {
+                breathingIncreaseLine.withStyle(TextFormatting.GREEN);
+            }
+            float middleX = textX + (float) (HamonScreen.WINDOW_WIDTH - HamonScreen.WINDOW_THIN_BORDER * 2 - minecraft.font.width(breathingIncreaseLine)) / 2;
+            minecraft.font.drawShadow(matrixStack, breathingIncreaseLine, middleX, (float) textY + 8, 0xFFFFFF);
+        }
+        
+        textY += 11;
+        exercises3Y = textY;
         for (int i = 0; i < exercisesDescLines.size(); i++) {
             textY += minecraft.font.lineHeight;
             minecraft.font.draw(matrixStack, exercisesDescLines.get(i), (float) textX, (float) textY, 0xFFFFFF);
         }
         
         textY += 4;
-        if (JojoModConfig.getCommonConfigInstance(true).breathingTrainingDeterioration.get()) {
+        if (screen.hamon.breathingCanGoDown(minecraft.player)) {
             for (int i = 0; i < this.breathingDeteriorationLines.size(); i++) {
                 textY += minecraft.font.lineHeight;
                 minecraft.font.draw(matrixStack, breathingDeteriorationLines.get(i), (float) textX, (float) textY, 0xFFFFFF);
             }
         }
-        for (int i = 0; i < this.breathingStatGapLines.size(); i++) {
-            textY += minecraft.font.lineHeight;
-            minecraft.font.draw(matrixStack, breathingStatGapLines.get(i), (float) textX, (float) textY, 0xFFFFFF);
+        if (JojoModConfig.getCommonConfigInstance(true).breathingHamonStatGap.get() >= 0) {
+            for (int i = 0; i < this.breathingStatGapLines.size(); i++) {
+                textY += minecraft.font.lineHeight;
+                minecraft.font.draw(matrixStack, breathingStatGapLines.get(i), (float) textX, (float) textY, 0xFFFFFF);
+            }
         }
         
         setMaxY(textY + 39 - intScrollY);
@@ -387,6 +429,11 @@ public class HamonStatsTabGui extends HamonTabGui {
                 totalExercises2 = new TranslationTextComponent("hamon.exercise.all.day_end_decrease", 
                         new TranslationTextComponent("hamon.exercise.all.tooltip_red").withStyle(TextFormatting.RED), decimalFormat.format(-breathingIncrease));
             }
+            else {
+                if (screen.hamon.getCanSkipTrainingDays() > 0 && screen.hamon.breathingCanGoDown(minecraft.player)) {
+                    totalExercises2 = new TranslationTextComponent("hamon.exercise.can_skip", screen.hamon.getCanSkipTrainingDays());
+                }
+            }
             
             List<IReorderingProcessor> totalExercisesTooltip = new ArrayList<>(minecraft.font.split(totalExercises1, 120));
             if (totalExercises2 != null) {
@@ -411,7 +458,7 @@ public class HamonStatsTabGui extends HamonTabGui {
             }
         }
         
-        int exercisesDescLine = (mouseY - exercisesAvgY) / minecraft.font.lineHeight - 1;
+        int exercisesDescLine = (mouseY - exercises3Y) / minecraft.font.lineHeight - 1;
         boolean maskNameTooltip = false;
         if (exercisesDescLine >= 0 && exercisesDescLine < exercisesDescLines.size()) {
             Style style = minecraft.font.getSplitter().componentStyleAtWidth(exercisesDescLines.get(exercisesDescLine), mouseX - WINDOW_THIN_BORDER);

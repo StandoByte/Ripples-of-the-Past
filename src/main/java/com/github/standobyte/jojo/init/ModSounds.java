@@ -30,6 +30,12 @@ public class ModSounds {
     
     public static final RegistryObject<SoundEvent> PILLAR_MAN_AWAKENING = register("pillar_man_awakening");
     
+    public static final RegistryObject<SoundEvent> PILLAR_MAN_HEAT_MODE = register("pillar_man_heat_mode");
+    
+    public static final RegistryObject<SoundEvent> PILLAR_MAN_WIND_MODE = register("pillar_man_wind_mode");
+    
+    public static final RegistryObject<SoundEvent> PILLAR_MAN_WIND_MODE2 = register("pillar_man_wind_mode2");
+    
     public static final RegistryObject<SoundEvent> AJA_STONE_CHARGING = register("aja_stone_charging");
     
     public static final RegistryObject<SoundEvent> AJA_STONE_BEAM = register("aja_stone_beam");
@@ -39,6 +45,8 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> TOMMY_GUN_SHOT = register("tommy_gun_shot");
     
     public static final RegistryObject<SoundEvent> TOMMY_GUN_NO_AMMO = register("tommy_gun_no_ammo");
+    
+    public static final RegistryObject<SoundEvent> MOLOTOV_THROW = register("molotov_throw");
     
     public static final RegistryObject<SoundEvent> KNIFE_THROW = register("knife_throw");
     

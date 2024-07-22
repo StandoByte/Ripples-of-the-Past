@@ -1,5 +1,11 @@
 package com.github.standobyte.jojo.init;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
+
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.entity.AfterimageEntity;
 import com.github.standobyte.jojo.entity.CrimsonBubbleEntity;
@@ -25,6 +31,8 @@ import com.github.standobyte.jojo.entity.damaging.projectile.HamonTurquoiseBlueO
 import com.github.standobyte.jojo.entity.damaging.projectile.MRCrossfireHurricaneEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRFireballEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRFlameEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.PillarmanDivineSandstormEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.MolotovEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.SCFlameSwingEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.TommyGunBulletEntity;
@@ -32,6 +40,9 @@ import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGBarrie
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGGrapplingStringEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.HGStringEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.MRRedBindEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.PillarmanHornEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.PillarmanRibEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.PillarmanVeinEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.SPStarFingerEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.SatiporojaScarfBindingEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.SatiporojaScarfEntity;
@@ -49,7 +60,9 @@ import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsKidEntity;
 
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.attributes.AttributeModifierMap;
 import net.minecraft.entity.merchant.villager.VillagerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
@@ -62,6 +75,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 @EventBusSubscriber(modid = JojoMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public class ModEntityTypes {
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(ForgeRegistries.ENTITIES, JojoMod.MOD_ID);
+    private static final List<Pair<? extends Supplier<? extends EntityType<? extends LivingEntity>>, Supplier<AttributeModifierMap>>> livingAttributesSupplier = new ArrayList<>();
     
 //  public static final RegistryObject<EntityType<___Entity>> ___ = ENTITIES.register("___", 
 //          () -> EntityType.Builder.<___Entity>of(___Entity::new, EntityClassification.MISC).sized(, )//.noSummon().noSave()
@@ -70,14 +84,17 @@ public class ModEntityTypes {
     public static final RegistryObject<EntityType<HungryZombieEntity>> HUNGRY_ZOMBIE = ENTITIES.register("hungry_zombie", 
             () -> EntityType.Builder.<HungryZombieEntity>of(HungryZombieEntity::new, EntityClassification.MONSTER).sized(0.6F, 1.95F)
             .build(new ResourceLocation(JojoMod.MOD_ID, "hungry_zombie").toString()));
+    static { withLivingAttributes(HUNGRY_ZOMBIE, () -> HungryZombieEntity.createAttributes().build()); }
     
     public static final RegistryObject<EntityType<HamonMasterEntity>> HAMON_MASTER = ENTITIES.register("hamon_master", 
             () -> EntityType.Builder.<HamonMasterEntity>of(HamonMasterEntity::new, EntityClassification.MISC).sized(0.6F, /*1.35F*/1.95F)
             .build(new ResourceLocation(JojoMod.MOD_ID, "hamon_teacher").toString()));
+    static { withLivingAttributes(HAMON_MASTER, () -> HamonMasterEntity.createAttributes().build()); }
     
     public static final RegistryObject<EntityType<RockPaperScissorsKidEntity>> ROCK_PAPER_SCISSORS_KID = ENTITIES.register("rps_kid", 
             () -> EntityType.Builder.<RockPaperScissorsKidEntity>of(RockPaperScissorsKidEntity::new, EntityClassification.MISC).sized(0.6F, 1.95F)
             .build(new ResourceLocation(JojoMod.MOD_ID, "rps_kid").toString()));
+    static { withLivingAttributes(ROCK_PAPER_SCISSORS_KID, () -> VillagerEntity.createAttributes().build()); }
 
     public static final RegistryObject<EntityType<BladeHatEntity>> BLADE_HAT = ENTITIES.register("blade_hat", 
             () -> EntityType.Builder.<BladeHatEntity>of(BladeHatEntity::new, EntityClassification.MISC).sized(0.6F, 0.375F).setUpdateInterval(20)
@@ -159,6 +176,10 @@ public class ModEntityTypes {
             () -> EntityType.Builder.<TommyGunBulletEntity>of(TommyGunBulletEntity::new, EntityClassification.MISC).sized(0.0625F, 0.0625F).clientTrackingRange(4).setUpdateInterval(20).fireImmune()
             .build(new ResourceLocation(JojoMod.MOD_ID, "tommy_gun_bullet").toString()));
     
+    public static final RegistryObject<EntityType<MolotovEntity>> MOLOTOV = ENTITIES.register("molotov", 
+            () -> EntityType.Builder.<MolotovEntity>of(MolotovEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).setUpdateInterval(10)
+            .build(new ResourceLocation(JojoMod.MOD_ID, "molotov").toString()));
+    
     public static final RegistryObject<EntityType<KnifeEntity>> KNIFE = ENTITIES.register("knife", 
             () -> EntityType.Builder.<KnifeEntity>of(KnifeEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).setUpdateInterval(20)
             .build(new ResourceLocation(JojoMod.MOD_ID, "knife").toString()));
@@ -174,6 +195,7 @@ public class ModEntityTypes {
     public static final RegistryObject<EntityType<StandUserDummyEntity>> STAND_USER_DUMMY = ENTITIES.register("dummy", 
             () -> EntityType.Builder.<StandUserDummyEntity>of(StandUserDummyEntity::new, EntityClassification.MISC).sized(0.6F, 1.95F)
             .build(new ResourceLocation(JojoMod.MOD_ID, "dummy").toString()));
+    static { withLivingAttributes(STAND_USER_DUMMY, () -> MobEntity.createMobAttributes().build()); }
     
     
     
@@ -184,7 +206,7 @@ public class ModEntityTypes {
     public static final RegistryObject<EntityType<SPStarFingerEntity>> SP_STAR_FINGER = ENTITIES.register("sp_star_finger", 
             () -> EntityType.Builder.<SPStarFingerEntity>of(SPStarFingerEntity::new, EntityClassification.MISC).sized(0.125F, 0.125F).noSummon().noSave().setUpdateInterval(20)
             .build(new ResourceLocation(JojoMod.MOD_ID, "sp_star_finger").toString()));
-    
+
     public static final RegistryObject<EntityType<HGStringEntity>> HG_STRING = ENTITIES.register("hg_string", 
             () -> EntityType.Builder.<HGStringEntity>of(HGStringEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().noSave().setUpdateInterval(20)
             .build(new ResourceLocation(JojoMod.MOD_ID, "hg_string").toString()));
@@ -252,14 +274,32 @@ public class ModEntityTypes {
     public static final RegistryObject<EntityType<FireworkInsideEntity>> FIREWORK_INSIDE = ENTITIES.register("firework_inside", 
             () -> EntityType.Builder.<FireworkInsideEntity>of(FireworkInsideEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10)
             .build(new ResourceLocation(JojoMod.MOD_ID, "firework_inside").toString()));
+    
+    public static final RegistryObject<EntityType<PillarmanDivineSandstormEntity>> PILLARMAN_DIVINE_SANDSTORM = ENTITIES.register("pillarman_divine_sandstorm", 
+            () -> EntityType.Builder.<PillarmanDivineSandstormEntity>of(PillarmanDivineSandstormEntity::new, EntityClassification.MISC).sized(4F, 2F).noSummon().setUpdateInterval(20).fireImmune()
+            .build(new ResourceLocation(JojoMod.MOD_ID, "pillarman_divine_sandstorm").toString()));
+    
+    public static final RegistryObject<EntityType<PillarmanHornEntity>> PILLARMAN_HORN = ENTITIES.register("pm_horn", 
+            () -> EntityType.Builder.<PillarmanHornEntity>of(PillarmanHornEntity::new, EntityClassification.MISC).sized(0.125F, 0.125F).noSummon().noSave().setUpdateInterval(20)
+            .build(new ResourceLocation(JojoMod.MOD_ID, "pm_horn").toString()));
+    
+    public static final RegistryObject<EntityType<PillarmanVeinEntity>> PILLARMAN_VEINS = ENTITIES.register("pillarman_veins", 
+            () -> EntityType.Builder.<PillarmanVeinEntity>of(PillarmanVeinEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().noSave().setUpdateInterval(20)
+            .build(new ResourceLocation(JojoMod.MOD_ID, "pillarman_veins").toString()));
+    
+    public static final RegistryObject<EntityType<PillarmanRibEntity>> PILLARMAN_RIBS = ENTITIES.register("pillarman_ribs", 
+            () -> EntityType.Builder.<PillarmanRibEntity>of(PillarmanRibEntity::new, EntityClassification.MISC).sized(0.35F, 0.35F).noSummon().noSave().setUpdateInterval(20)
+            .build(new ResourceLocation(JojoMod.MOD_ID, "pillarman_ribs").toString()));
+    
 
-    
-    
+    private static <T extends LivingEntity> void withLivingAttributes(RegistryObject<EntityType<T>> regObject, Supplier<AttributeModifierMap> attributes) {
+        livingAttributesSupplier.add(Pair.of(regObject, attributes));
+    }
+
     @SubscribeEvent
     public static void onEntityAttributeCreation(EntityAttributeCreationEvent event) {
-        event.put(ModEntityTypes.HAMON_MASTER.get(), HamonMasterEntity.createAttributes().build());
-        event.put(ModEntityTypes.HUNGRY_ZOMBIE.get(), HungryZombieEntity.createAttributes().build());
-        event.put(ModEntityTypes.ROCK_PAPER_SCISSORS_KID.get(), VillagerEntity.createAttributes().build());
-        event.put(ModEntityTypes.STAND_USER_DUMMY.get(), MobEntity.createMobAttributes().build());
+        for (Pair<? extends Supplier<? extends EntityType<? extends LivingEntity>>, Supplier<AttributeModifierMap>> entry : livingAttributesSupplier) {
+            event.put(entry.getKey().get(), entry.getValue().get());
+        }
     }
 }

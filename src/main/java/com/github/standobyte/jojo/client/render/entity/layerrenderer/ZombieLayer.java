@@ -50,13 +50,13 @@ public class ZombieLayer<T extends LivingEntity, M extends EntityModel<T>> exten
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, 
             T entity, float walkAnimPos, float walkAnimSpeed, float partialTick, 
             float ticks, float headYRotation, float headXRotation) {
-	        if (!entity.isInvisible()) {
-		        M model = getParentModel();
-		        ResourceLocation texture = getTexture(model, entity);
-		        if (texture == null) return;
-		        IVertexBuilder vertexBuilder = buffer.getBuffer(RenderType.entityTranslucent(texture));
-		        model.renderToBuffer(matrixStack, vertexBuilder, packedLight, LivingRenderer.getOverlayCoords(entity, 0.0F), 1.0F, 1.0F, 1.0F, 1.0F);
-	        }
+            if (!entity.isInvisible()) {
+                M model = getParentModel();
+                ResourceLocation texture = getTexture(model, entity);
+                if (texture == null) return;
+                IVertexBuilder vertexBuilder = buffer.getBuffer(RenderType.entityTranslucent(texture));
+                model.renderToBuffer(matrixStack, vertexBuilder, packedLight, LivingRenderer.getOverlayCoords(entity, 0.0F), 1.0F, 1.0F, 1.0F, 1.0F);
+            }
     }
     
     @Nullable

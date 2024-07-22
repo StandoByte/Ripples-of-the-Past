@@ -86,51 +86,51 @@ vec3 desaturate(vec3 rgb) { // copied desaturate shader
 void main() {
     vec3 rgb = texture2D(DiffuseSampler, texCoord).rgb;
     if (TSEffectLength > 0.0) {
-	    float TSEffectTiming = TSTicks / TSEffectLength;
-	    if (TSLength < 0.0 || TSEffectTiming <= 0.0) {
-	        gl_FragColor = vec4(rgb, 1.0);
-	    }
-	    else if (TSLength >= 100.0 && TSEffectTiming < 1.0) { // the circle
-	        float effectRadiusWorld;
-	        if (TSEffectTiming < 0.8) {
-	            effectRadiusWorld = TSEffectTiming * 1.25;
-	        }
-	        else {
-	            effectRadiusWorld = (1.0 - TSEffectTiming) * 5.0;
-	        }
-	        
-	        float sizeMax = max(InSize.x, InSize.y) * 2.0;
-	        vec2 sizeCorr = InSize / sizeMax;
-	        vec2 texCoordCorr = texCoord * sizeCorr;
-	        vec2 centerCoord = CenterScreenCoord * sizeCorr;
-	        
-	        float distFromCenter = distance(texCoordCorr, centerCoord);
-	        if (distFromCenter < effectRadiusWorld) {
-	            float distortionAmount = 1.0;
-	            float f = 1.0 - distortionAmount * distFromCenter / effectRadiusWorld;
-	            vec2 newCoord = CenterScreenCoord + (texCoordCorr - centerCoord) * f / sizeCorr;
-	            vec3 rgbNew = texture2D(DiffuseSampler, newCoord).rgb;
-	            
-	            vec3 hsv = RGBtoHSV(rgbNew);
-	            
-	            hsv.x = fract(hsv.x + TSEffectTiming * 0.5 + 0.25);
-	            hsv.z = 0.4 + 0.4 * (1.0 - hsv.z);
-	            
-	            gl_FragColor = vec4(HSVtoRGB(hsv), 1.0);
-	        }
-	        
-	        else {
-	            if (TSEffectTiming < 0.8) {
-	                gl_FragColor = vec4(rgb, 1.0);
-	            }
-	            else {
-	                gl_FragColor = vec4(desaturate(rgb), 1.0);
-	            }
-	        }
-	    }
-	    else {
-	        gl_FragColor = vec4(desaturate(rgb), 1.0);
-	    }
+        float TSEffectTiming = TSTicks / TSEffectLength;
+        if (TSLength < 0.0 || TSEffectTiming <= 0.0) {
+            gl_FragColor = vec4(rgb, 1.0);
+        }
+        else if (TSLength >= 100.0 && TSEffectTiming < 1.0) { // the circle
+            float effectRadiusWorld;
+            if (TSEffectTiming < 0.8) {
+                effectRadiusWorld = TSEffectTiming * 1.25;
+            }
+            else {
+                effectRadiusWorld = (1.0 - TSEffectTiming) * 5.0;
+            }
+            
+            float sizeMax = max(InSize.x, InSize.y) * 2.0;
+            vec2 sizeCorr = InSize / sizeMax;
+            vec2 texCoordCorr = texCoord * sizeCorr;
+            vec2 centerCoord = CenterScreenCoord * sizeCorr;
+            
+            float distFromCenter = distance(texCoordCorr, centerCoord);
+            if (distFromCenter < effectRadiusWorld) {
+                float distortionAmount = 1.0;
+                float f = 1.0 - distortionAmount * distFromCenter / effectRadiusWorld;
+                vec2 newCoord = CenterScreenCoord + (texCoordCorr - centerCoord) * f / sizeCorr;
+                vec3 rgbNew = texture2D(DiffuseSampler, newCoord).rgb;
+                
+                vec3 hsv = RGBtoHSV(rgbNew);
+                
+                hsv.x = fract(hsv.x + TSEffectTiming * 0.5 + 0.25);
+                hsv.z = 0.4 + 0.4 * (1.0 - hsv.z);
+                
+                gl_FragColor = vec4(HSVtoRGB(hsv), 1.0);
+            }
+            
+            else {
+                if (TSEffectTiming < 0.8) {
+                    gl_FragColor = vec4(rgb, 1.0);
+                }
+                else {
+                    gl_FragColor = vec4(desaturate(rgb), 1.0);
+                }
+            }
+        }
+        else {
+            gl_FragColor = vec4(desaturate(rgb), 1.0);
+        }
     }
     else {
         gl_FragColor = vec4(desaturate(rgb), 1.0);

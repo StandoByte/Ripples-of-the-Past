@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.command;
 
 import java.util.Collection;
 
+import com.github.standobyte.jojo.command.argument.NonStandTypeArgument;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
@@ -28,10 +29,6 @@ public class JojoPowerCommand {
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
         dispatcher.register(Commands.literal("jojopower").requires(ctx -> ctx.hasPermission(2))
                 .then(Commands.literal("give").then(Commands.argument("targets", EntityArgument.players())
-
-                        .then(Commands.literal("hamon").executes(ctx -> giveNonStandPowers(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), ModPowers.HAMON.get())))
-                        .then(Commands.literal("vampirism").executes(ctx -> giveNonStandPowers(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), ModPowers.VAMPIRISM.get())))
-                        .then(Commands.literal("zombie").executes(ctx -> giveNonStandPowers(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), ModPowers.ZOMBIE.get())))
                         .then(Commands.argument("type", new NonStandTypeArgument())
                                 .executes(ctx -> giveNonStandPowers(ctx.getSource(), EntityArgument.getPlayers(ctx, "targets"), NonStandTypeArgument.getPowerType(ctx, "type"))))))
                 .then(Commands.literal("clear").then(Commands.argument("targets", EntityArgument.players())

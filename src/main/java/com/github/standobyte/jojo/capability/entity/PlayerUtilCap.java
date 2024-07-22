@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
@@ -26,7 +27,9 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrDoubleShiftPacket
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonLiquidWalkingPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrKnivesCountPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerContinuousActionPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerVisualDetailPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrWalkmanEarbudsPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.MetEntityTypesPacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
@@ -37,12 +40,16 @@ import com.github.standobyte.jojo.util.mc.PlayerStatListener;
 import com.github.standobyte.jojo.util.mod.JojoModVersion;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
@@ -68,12 +75,16 @@ public class PlayerUtilCap {
     private int knives;
     private int removeKnifeTime;
     
+    private int ateInkPastaTicks = 0;
+    
     private boolean hasClientInput;
     private int noClientInputTimer;
     
     private BedType lastBedType;
     private int ticksNoSleep;
     private long nextSleepTime;
+    
+    private Set<ResourceLocation> metEntityTypesId = new HashSet<>();
     
     private Optional<RockPaperScissorsGame> currentGame = Optional.empty();
     
@@ -110,7 +121,8 @@ public class PlayerUtilCap {
             if (knivesThrewTicks > 0) knivesThrewTicks--;
             if (chatSpamTickCount > 0) chatSpamTickCount--;
         }
-        
+
+        if (ateInkPastaTicks > 0) --ateInkPastaTicks;
         tickContinuousAction();
         tickDoubleShift();
     }
@@ -128,6 +140,13 @@ public class PlayerUtilCap {
     public CompoundNBT toNBT() {
         CompoundNBT nbt = new CompoundNBT();
         nbt.put("NotificationsSent", notificationsToNBT());
+        
+        if (!metEntityTypesId.isEmpty()) {
+            ListNBT metEntities = new ListNBT();
+            metEntityTypesId.forEach(entityTypeId -> metEntities.add(StringNBT.valueOf(entityTypeId.toString())));
+            nbt.put("MetEntityTypes", metEntities);
+        }
+        
         nbt.put("RotpVersion", JojoModVersion.getCurrentVersion().toNBT());
         
         nbt.put("TradeCD", tradeCooldownToNbt());
@@ -142,12 +161,24 @@ public class PlayerUtilCap {
             notificationsFromNBT(notificationsMap);
         }
         
+        if (nbt.contains("MetEntityTypes", MCUtil.getNbtId(ListNBT.class))) {
+            ListNBT metEntitiesId = nbt.getList("MetEntityTypes", MCUtil.getNbtId(StringNBT.class));
+            metEntitiesId.forEach(idNBT -> {
+                String idString = ((StringNBT) idNBT).getAsString(); 
+                if (!idString.isEmpty()) {
+                    ResourceLocation registryName = new ResourceLocation(idString);
+                    metEntityTypesId.add(registryName);
+                }
+            });
+        }
+        
         MCUtil.getNbtElement(nbt, "TradeCD", CompoundNBT.class).ifPresent(this::tradeCooldownFromNbt);
     }
     
     public void onTracking(ServerPlayerEntity tracking) {
         PacketManager.sendToClient(new TrKnivesCountPacket(player.getId(), knives), tracking);
         PacketManager.sendToClient(new TrWalkmanEarbudsPacket(player.getId(), walkmanEarbuds), tracking);
+        PacketManager.sendToClient(new TrPlayerVisualDetailPacket(player.getId(), ateInkPastaTicks), tracking);
     }
     
     public void syncWithClient() {
@@ -155,6 +186,10 @@ public class PlayerUtilCap {
         PacketManager.sendToClient(new NotificationSyncPacket(notificationsSent), player);
         PacketManager.sendToClient(new TrKnivesCountPacket(player.getId(), knives), player);
         PacketManager.sendToClient(new TrWalkmanEarbudsPacket(player.getId(), walkmanEarbuds), player);
+        PacketManager.sendToClient(new TrPlayerVisualDetailPacket(player.getId(), ateInkPastaTicks), player);
+        if (!metEntityTypesId.isEmpty()) {
+            PacketManager.sendToClient(new MetEntityTypesPacket(metEntityTypesId), player);
+        }
     }
     
     
@@ -356,6 +391,23 @@ public class PlayerUtilCap {
         }
     }
     
+
+    
+    public int getInkPastaVisuals() {
+        return ateInkPastaTicks;
+    }
+    
+    public void setInkPastaVisuals() {
+        setInkPastaVisuals(600);
+    }
+    
+    public void setInkPastaVisuals(int ticks) {
+        this.ateInkPastaTicks = ticks;
+        if (!player.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(new TrPlayerVisualDetailPacket(player.getId(), ateInkPastaTicks), player);
+        }
+    }
+    
     
     
     public void setHasClientInput(boolean hasInput) {
@@ -442,6 +494,20 @@ public class PlayerUtilCap {
         if (chatSpamTickCount > 200 && !server.getPlayerList().isOp(player.getGameProfile())) {
             serverPlayer.connection.disconnect(new TranslationTextComponent("disconnect.spam"));
         }
+    }
+    
+    
+    
+    public boolean addMetEntityType(EntityType<?> entityType) {
+        return metEntityTypesId.add(entityType.getRegistryName());
+    }
+    
+    public boolean metEntityType(EntityType<?> entityType) {
+        return metEntityTypesId.contains(entityType.getRegistryName());
+    }
+    
+    public void addMetEntityTypeId(ResourceLocation id) {
+        metEntityTypesId.add(id);
     }
     
     

@@ -31,6 +31,10 @@ public class MathUtil {
         return (float) -MathHelper.atan2(vec.y, MathHelper.sqrt(vec.x * vec.x + vec.z * vec.z)) * RAD_TO_DEG;
     }
     
+    /**
+     * @deprecated Use {@link Vector3d#yRot(float)} (multiply the yRot parameter by -MathUtil.DEG_TO_RAD).
+     */
+    @Deprecated
     public static Vector3d relativeCoordsToAbsolute(double left, double up, double forward, float yAxisRot) {
         double yRotRad = yAxisRot * DEG_TO_RAD;
         return new Vector3d(
@@ -38,7 +42,11 @@ public class MathUtil {
                 up, 
                 left * Math.sin(yRotRad) + forward * Math.cos(yRotRad));
     }
-    
+
+    /**
+     * @deprecated Use {@link Vector3d#yRot(float)} (multiply the yRot parameter by -MathUtil.DEG_TO_RAD).
+     */
+    @Deprecated
     public static Vector3d relativeVecToAbsolute(Vector3d relativeVec, float yAxisRot) {
         return relativeCoordsToAbsolute(relativeVec.x, relativeVec.y, relativeVec.z, yAxisRot);
     }
@@ -96,6 +104,17 @@ public class MathUtil {
         return numInt;
     }
     
+    public static int round(double value) {
+        int i = (int) value;
+        double frac = value > i ? value - i : i - value;
+        if (frac < 0.5) {
+            return i;
+        }
+        else {
+            return value > i ? i + 1 : i - 1;
+        }
+    }
+    
     public static <T> Optional<T> getRandomWeightedInt(Iterable<T> items, ToIntFunction<T> getWeight, Random random) {
         ToIntFunction<T> getWeightSafe = element -> Math.max(getWeight.applyAsInt(element), 0);
         int weightSum = StreamSupport.stream(items.spliterator(), false)
@@ -136,6 +155,27 @@ public class MathUtil {
         if (fractionUntilFadeOut >= 1) return 1;
         float f = 1 / (1 - fractionUntilFadeOut);
         return MathHelper.clamp(time * -f / maxTime + f, 0, 1);
+    }
+    
+    
+    /**
+     * Interpolates a point on a Catmull-Rom Spline. This spline has a property that if there are two
+     * splines with arguments {@code p0, p1, p2, p3} and {@code p1, p2, p3, p4}, the resulting curve
+     * will have a continuous first derivative at {@code p2}, where the two input curves connect. For
+     * higher-dimensional curves, the interpolation on the curve is done component-wise: for
+     * inputs {@code delta, (p0x, p0y), (p1x, p1y), (p2x, p2y), (p3x, p3y)}, the output is
+     * {@code (catmullRom(delta, p0x, p1x, p2x, p3x), catmullRom(delta, p0y, p1y, p2y, p3y))}.
+     * 
+     * @see <a href="https://en.wikipedia.org/wiki/Cubic_Hermite_spline#Catmull%E2%80%93Rom_spline">Cubic Hermite spline (Catmull\u2013Rom spline)</a>
+     * 
+     * @param delta the progress along the interpolation
+     * @param p0 the previous data point to assist in curve-smoothing
+     * @param p1 the output if {@code delta} is 0
+     * @param p2 the output if {@code delta} is 1
+     * @param p3 the next data point to assist in curve-smoothing
+     */
+    public static float catmullRom(float delta, float p0, float p1, float p2, float p3) {
+        return 0.5f * (2.0f * p1 + (p2 - p0) * delta + (2.0f * p0 - 5.0f * p1 + 4.0f * p2 - p3) * delta * delta + (3.0f * p1 - p0 - 3.0f * p2 + p3) * delta * delta * delta);
     }
     
     

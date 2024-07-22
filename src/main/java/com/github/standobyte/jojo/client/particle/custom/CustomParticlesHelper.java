@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.HamonAuraParticle;
 import com.github.standobyte.jojo.client.particle.SendoHamonOverdriveParticle;
 import com.github.standobyte.jojo.init.ModParticles;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 
 import net.minecraft.client.Minecraft;
@@ -23,7 +24,9 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.particles.ParticleType;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -46,6 +49,8 @@ public class CustomParticlesHelper {
         CustomParticlesHelper.saveSprites(spritesMap, ModParticles.HAMON_AURA_YELLOW.get());
         CustomParticlesHelper.saveSprites(spritesMap, ModParticles.HAMON_AURA_RED.get());
         CustomParticlesHelper.saveSprites(spritesMap, ModParticles.HAMON_AURA_SILVER.get());
+        CustomParticlesHelper.saveSprites(spritesMap, ModParticles.HAMON_AURA_GREEN.get());
+        CustomParticlesHelper.saveSprites(spritesMap, ModParticles.HAMON_AURA_RAINBOW.get());
     }
     
     public static IAnimatedSprite getSavedSpriteSet(ParticleType<?> particleType) {
@@ -88,20 +93,33 @@ public class CustomParticlesHelper {
     
     // FIXME !!!!!! particles at arms in 1st person
     public static void summonHamonAuraParticlesFirstPerson(IParticleData type, LivingEntity user, float particlesPerTick) {
-//        IAnimatedSprite sprite = getSavedSpriteSet(type.getType());
-//        if (sprite != null) {
-//            Minecraft mc = Minecraft.getInstance();
-//            
-//            GeneralUtil.doFractionTimes(() -> {
-//                addFirstPersonParticle(HamonAura1PersonParticle.firstPersonHandParticle(sprite, mc.level, HandSide.RIGHT), false, false);
-//                addFirstPersonParticle(HamonAura1PersonParticle.firstPersonHandParticle(sprite, mc.level, HandSide.LEFT), false, false);
-//            }, particlesPerTick);
-//        }
+        IAnimatedSprite sprite = getSavedSpriteSet(type.getType());
+        if (sprite != null) {
+            Random random = user.getRandom();
+            FirstPersonHamonAura particles = FirstPersonHamonAura.getInstance();
+            
+            for (HandSide handSide : HandSide.values()) {
+                GeneralUtil.doFractionTimes(() -> {
+//                    double x = random.nextDouble() * 0.25 - 0.5;   // -0.5 - -0.25
+//                    double y = random.nextDouble() * 0.75 + 0.125; // 0.125 - 0.875
+//                    double z = random.nextDouble() * 0.25 - 0.125; // -0.125 - 0.125
+                    double x = random.nextDouble() * 0.5 - 0.625;
+                    double y = random.nextDouble();
+                    double z = random.nextDouble() * 0.5 - 0.25;
+                    if (handSide == HandSide.LEFT) {
+                        x = -x;
+                    }
+                    
+                    particles.add(new FirstPersonHamonAura.HamonAuraPseudoParticle(x, y, z, sprite, handSide));
+                }, particlesPerTick);
+            }
+        }
     }
     
-    public static void addSendoHamonOverdriveParticle(World level, IParticleData pParticleData, 
+    public static void addSendoHamonOverdriveParticle(World level, IParticleData pParticleData, Direction.Axis blockAxis, 
             double pX, double pY, double pZ, double pXSpeed, double pYSpeed, double pZSpeed, int lifeTime) {
-        SpriteTexturedParticle particle = new SendoHamonOverdriveParticle((ClientWorld) level, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed);
+        SpriteTexturedParticle particle = new SendoHamonOverdriveParticle(
+                (ClientWorld) level, pX, pY, pZ, pXSpeed, pYSpeed, pZSpeed, blockAxis);
         particle.setLifetime(lifeTime);
         particle.pickSprite(getSavedSpriteSet(pParticleData.getType()));
         particle.setColor(1, 1, 1);

@@ -14,6 +14,7 @@ import com.github.standobyte.jojo.action.non_stand.HamonHealing;
 import com.github.standobyte.jojo.action.non_stand.HamonHypnosis;
 import com.github.standobyte.jojo.action.non_stand.HamonLifeMagnetism;
 import com.github.standobyte.jojo.action.non_stand.HamonMetalSilverOverdrive;
+import com.github.standobyte.jojo.action.non_stand.HamonMetalSilverOverdriveWeapon;
 import com.github.standobyte.jojo.action.non_stand.HamonOrganismInfusion;
 import com.github.standobyte.jojo.action.non_stand.HamonOverdrive;
 import com.github.standobyte.jojo.action.non_stand.HamonOverdriveBarrage;
@@ -30,7 +31,7 @@ import com.github.standobyte.jojo.action.non_stand.HamonSunlightYellowOverdrive;
 import com.github.standobyte.jojo.action.non_stand.HamonSunlightYellowOverdriveBarrage;
 import com.github.standobyte.jojo.action.non_stand.HamonTornadoOverdrive;
 import com.github.standobyte.jojo.action.non_stand.HamonTurquoiseBlueOverdrive;
-import com.github.standobyte.jojo.action.non_stand.HamonWallClimbing;
+import com.github.standobyte.jojo.action.non_stand.HamonWallClimbing2;
 import com.github.standobyte.jojo.action.non_stand.HamonZoomPunch;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.init.ModSounds;
@@ -43,12 +44,13 @@ public class ModHamonActions {
     public static void loadRegistryObjects() {}
 
     public static final RegistryObject<HamonAction> HAMON_OVERDRIVE = ACTIONS.register("hamon_overdrive", 
-            () -> new HamonOverdrive(new HamonAction.Builder().energyCost(750F)
+            () -> new HamonOverdrive(new HamonAction.Builder().energyCost(600F)
                     .needsFreeMainHand().swingHand()));
     
     public static final RegistryObject<HamonAction> HAMON_BEAT = ACTIONS.register("hamon_overdrive_beat", 
             () -> new HamonOverdrive(new HamonAction.Builder().energyCost(1500F)
-                    .needsFreeMainHand().swingHand().shiftVariationOf(HAMON_OVERDRIVE).cooldown(60)));
+                    .needsFreeMainHand().swingHand().shiftVariationOf(HAMON_OVERDRIVE))
+            .setIsStrongVersion());
    
    public static final RegistryObject<HamonAction> HAMON_SENDO_OVERDRIVE = ACTIONS.register("hamon_sendo_overdrive", 
            () -> new HamonSendoOverdrive(new HamonAction.Builder().energyCost(900F)
@@ -60,7 +62,7 @@ public class ModHamonActions {
                     .needsFreeMainHand().swingHand()));
     
    public static final RegistryObject<HamonAction> HAMON_SUNLIGHT_YELLOW_OVERDRIVE = ACTIONS.register("hamon_sunlight_yellow_overdrive", 
-           () -> new HamonSunlightYellowOverdrive(new HamonAction.Builder().holdToFire(80, true).holdType(160).swingHand()
+           () -> new HamonSunlightYellowOverdrive(new HamonAction.Builder().holdToFire(30, true).holdType(160).swingHand()
                    .shout(ModHamonSkills.CHARACTER_JONATHAN, ModSounds.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE)
                    .shout(ModHamonSkills.CHARACTER_ZEPPELI, ModSounds.ZEPPELI_SUNLIGHT_YELLOW_OVERDRIVE)
                    .shout(ModHamonSkills.CHARACTER_JOSEPH, ModSounds.JOSEPH_SUNLIGHT_YELLOW_OVERDRIVE)
@@ -96,8 +98,8 @@ public class ModHamonActions {
             () -> new HamonHealing(new HamonAction.Builder().energyCost(750F)
                     .needsFreeMainHand().swingHand()));
     
-    public static final RegistryObject<HamonAction> HAMON_WALL_CLIMBING = ACTIONS.register("hamon_wall_climbing", 
-            () -> new HamonWallClimbing(new HamonAction.Builder().holdEnergyCost(10F)));
+    public static final RegistryObject<HamonWallClimbing2> HAMON_WALL_CLIMBING = ACTIONS.register("hamon_wall_climbing", 
+            () -> new HamonWallClimbing2(new HamonAction.Builder().holdEnergyCost(10F)));
     
     public static final RegistryObject<HamonAction> HAMON_DETECTOR = ACTIONS.register("hamon_detector", 
             () -> new HamonDetector(new HamonAction.Builder().holdEnergyCost(5F).heldWalkSpeed(0.5F)));
@@ -150,10 +152,14 @@ public class ModHamonActions {
     
     public static final RegistryObject<HamonAction> JONATHAN_SCARLET_OVERDRIVE = ACTIONS.register("jonathan_scarlet_overdrive", 
             () -> new HamonScarletOverdrive(new HamonAction.Builder().needsFreeMainHand()
-                    .holdToFire(40, true).holdType(100).swingHand().shout(ModSounds.JONATHAN_SCARLET_OVERDRIVE)));
+                    .holdToFire(20, true).holdType(100).swingHand().shout(ModSounds.JONATHAN_SCARLET_OVERDRIVE)));
     
     public static final RegistryObject<HamonAction> JONATHAN_METAL_SILVER_OVERDRIVE = ACTIONS.register("jonathan_metal_silver_overdrive", 
-            () -> new HamonMetalSilverOverdrive(new HamonAction.Builder().energyCost(1000).swingHand().cooldown(10).needsFreeMainHand()));
+            () -> new HamonMetalSilverOverdrive(new HamonAction.Builder().energyCost(1000).swingHand().needsFreeMainHand()
+                    .addShiftVariation(HAMON_BEAT)));
+    
+    public static final RegistryObject<HamonAction> JONATHAN_METAL_SILVER_OVERDRIVE_WEAPON = ACTIONS.register("jonathan_metal_silver_overdrive_weapon", 
+            () -> new HamonMetalSilverOverdriveWeapon(new HamonAction.Builder().energyCost(750).swingHand()));
     
     public static final RegistryObject<HamonAction> JONATHAN_OVERDRIVE_BARRAGE = ACTIONS.register("jonathan_overdrive_barrage", 
             () -> new HamonOverdriveBarrage(new HamonAction.Builder().holdEnergyCost(70F).heldWalkSpeed(0.5F).shout(ModSounds.JONATHAN_OVERDRIVE_BARRAGE)));

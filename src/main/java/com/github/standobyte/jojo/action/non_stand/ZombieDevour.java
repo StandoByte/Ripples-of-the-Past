@@ -41,8 +41,8 @@ public class ZombieDevour extends ZombieAction {
    
     @Override
     public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, INonStandPower power) {
-    	if(power.getTypeSpecificData(ModPowers.ZOMBIE.get()).get().isDisguiseEnabled()) {
-    		Entity entityTarget = target.getEntity();
+        if(power.getTypeSpecificData(ModPowers.ZOMBIE.get()).get().isDisguiseEnabled()) {
+            Entity entityTarget = target.getEntity();
             if (entityTarget instanceof LivingEntity) {
                 LivingEntity livingTarget = (LivingEntity) entityTarget;
                 if (!JojoModUtil.canBleed(livingTarget) || JojoModUtil.isUndead(livingTarget)) {
@@ -51,8 +51,8 @@ public class ZombieDevour extends ZombieAction {
                 return ActionConditionResult.POSITIVE;
             }
             return ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
-    	}
-    	return conditionMessage("disguise");
+        }
+        return conditionMessage("disguise");
     }
     
     @Override

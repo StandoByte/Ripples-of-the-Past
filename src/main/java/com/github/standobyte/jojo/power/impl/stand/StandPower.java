@@ -20,6 +20,7 @@ import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.modcompat.OptionalDependencyHelper;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtStandEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SkippedStandProgressionPacket;
@@ -238,7 +239,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         }
         else if (user == ClientUtil.getClientPlayer()) {
             if (getStamina() < getMaxStamina() * 0.5F && !StandUtil.standIgnoresStaminaDebuff(this)) {
-                BarsRenderer.getBarEffects(BarType.STAMINA).triggerRedHighlight(user.tickCount);
+                BarsRenderer.getBarEffects(BarType.STAMINA).triggerRedHighlight(999999);
             }
             else {
                 BarsRenderer.getBarEffects(BarType.STAMINA).resetRedHighlight();
@@ -459,7 +460,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                     usesResolve() && 
                     getResolveLevel() > 0 &&
                     JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).soulAscension.get() &&
-                    !JojoModUtil.isUndead(user) &&
+                    !(JojoModUtil.isUndead(user) || OptionalDependencyHelper.vampirism().isEntityVampire(user)) &&
                     !(user instanceof PlayerEntity && user.level.getGameRules().getBoolean(GameRules.RULE_DO_IMMEDIATE_RESPAWN));
             if (this.willSoulSpawn != soulCanSpawn) {
                 this.willSoulSpawn = soulCanSpawn;
@@ -755,9 +756,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         if (usesStamina()) {
             cnbt.putFloat("Stamina", stamina);
         }
-        if (usesResolve()) {
-            cnbt.put("Resolve", resolveCounter.writeNBT());
-        }
+        cnbt.put("Resolve", resolveCounter.writeNBT());
         cnbt.putBoolean("Skipped", skippedProgression);
         cnbt.put("ActionLearning", actionLearningProgressMap.toNBT());
         cnbt.put("Effects", continuousEffects.toNBT());
@@ -789,9 +788,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         if (usesStamina()) {
             stamina = nbt.getFloat("Stamina");
         }
-        if (usesResolve()) {
-            resolveCounter.readNbt(nbt.getCompound("Resolve"));
-        }
+        resolveCounter.readNbt(nbt.getCompound("Resolve"));
         skippedProgression = nbt.getBoolean("Skipped");
         if (nbt.contains("ActionLearning", MCUtil.getNbtId(CompoundNBT.class))) {
             actionLearningProgressMap.fromNBT(nbt.getCompound("ActionLearning"));

@@ -31,18 +31,28 @@ public class CrazyDiamondBlockCheckpointMove extends StandEntityAction {
     
     @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
-        ItemStack blockItem = user.getOffhandItem();
-        if (blockItem == null || !CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(user.level, blockItem).isPresent()) {
+        if (getBlockItemToUse(user).isEmpty()) {
             return conditionMessage("item_block_origin");
         }
         return super.checkSpecificConditions(user, power, target);
+    }
+    
+    public static ItemStack getBlockItemToUse(LivingEntity user) {
+        ItemStack blockItem = user.getOffhandItem();
+        if (!CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(user.level, blockItem).isPresent()) {
+            blockItem = user.getMainHandItem();
+        }
+        if (!CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(user.level, blockItem).isPresent()) {
+            return ItemStack.EMPTY;
+        }
+        return blockItem;
     }
 
     @Override
     public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         LivingEntity user = userPower.getUser();
         if (user != null) {
-            ItemStack heldItem = user.getOffhandItem();
+            ItemStack heldItem = getBlockItemToUse(user);
             CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(world, heldItem).ifPresent(pos -> {
                 Vector3d posD = Vector3d.atCenterOf(pos);
                 Entity entity = user.getRootVehicle();
@@ -74,7 +84,7 @@ public class CrazyDiamondBlockCheckpointMove extends StandEntityAction {
                     }
                 }
                 if (world.isClientSide() && ClientUtil.canSeeStands()) {
-                    CustomParticlesHelper.createCDRestorationParticle(user, Hand.OFF_HAND);
+                    CustomParticlesHelper.createCDRestorationParticle(user, user.getMainHandItem() == heldItem ? Hand.MAIN_HAND : Hand.OFF_HAND);
                 }
             });
         }
@@ -95,8 +105,8 @@ public class CrazyDiamondBlockCheckpointMove extends StandEntityAction {
     public String getTranslationKey(IStandPower power, ActionTarget target) {
         String key = super.getTranslationKey(power, target);
         LivingEntity user = power.getUser();
-        ItemStack blockItem = user.getOffhandItem();
-        if (blockItem == null || !CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(user.level, blockItem).isPresent()) {
+        ItemStack blockItem = getBlockItemToUse(user);
+        if (!CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(user.level, blockItem).isPresent()) {
             return key + ".empty";
         }
         return key + ".pos";
@@ -104,7 +114,7 @@ public class CrazyDiamondBlockCheckpointMove extends StandEntityAction {
 
     @Override
     public IFormattableTextComponent getTranslatedName(IStandPower power, String key) {
-        return CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(power.getUser().level, power.getUser().getOffhandItem()).map(pos -> 
+        return CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(power.getUser().level, getBlockItemToUse(power.getUser())).map(pos -> 
         (IFormattableTextComponent) new TranslationTextComponent(key, pos.getX(), pos.getY(), pos.getZ()))
                 .orElse(super.getTranslatedName(power, key));
     }

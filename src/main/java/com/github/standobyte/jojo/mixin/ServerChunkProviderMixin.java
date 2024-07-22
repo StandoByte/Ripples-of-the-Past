@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.github.standobyte.jojo.capability.world.TimeStopHandler;
 
+import net.minecraft.block.CommandBlockBlock;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
@@ -21,7 +22,8 @@ public class ServerChunkProviderMixin {
 
     @Inject(method = "isTickingChunk", at = @At("HEAD"), cancellable = true)
     public void jojoTsCancelBlockTick(BlockPos blockPos, CallbackInfoReturnable<Boolean> ci) {
-        if (TimeStopHandler.isTimeStopped(level, blockPos)) {
+        if (TimeStopHandler.isTimeStopped(level, blockPos)
+                && (/*cancelCommandBlocks || */ !(level.getBlockState(blockPos).getBlock() instanceof CommandBlockBlock))) {
             ci.setReturnValue(false);
         }
     }

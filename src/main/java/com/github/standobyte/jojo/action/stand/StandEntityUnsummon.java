@@ -8,12 +8,10 @@ import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
-import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
@@ -27,7 +25,7 @@ public final class StandEntityUnsummon extends StandEntityAction {
     public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         LivingEntity user = standEntity.getUser();
         if (user != null && (standEntity.isCloseToUser() || standEntity.isFollowingUser() || standEntity.unsummonTicks > 0)) {
-            int maxTicks = getUnsummonDuration(standEntity);
+            int maxTicks = standEntity.getUnsummonDuration();
             if (standEntity.unsummonTicks >= maxTicks) {
                 if (!world.isClientSide()) {
                     userPower.getType().forceUnsummon(user, userPower);
@@ -48,7 +46,7 @@ public final class StandEntityUnsummon extends StandEntityAction {
     @Override
     public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
         if (!standEntity.isArmsOnlyMode()) {
-            int unsummonDuration = getUnsummonDuration(standEntity);
+            int unsummonDuration = standEntity.getUnsummonDuration();
             if (unsummonDuration == 0) return super.getOffsetFromUser(standPower, standEntity, task);
             
             Vector3d offsetVec = standEntity.unsummonOffset.toRelativeVec();
@@ -68,21 +66,6 @@ public final class StandEntityUnsummon extends StandEntityAction {
         return true;
     }
     
-    public int getUnsummonDuration(StandEntity standEntity) {
-        LivingEntity user = standEntity.getUser();
-        boolean resolve = user != null && user.hasEffect(ModStatusEffects.RESOLVE.get());
-        if (resolve) {
-            return standEntity.isArmsOnlyMode() ? 3 : 5;
-        }
-        else {
-            int ticks = standEntity.isArmsOnlyMode() ? 7 : 10;
-            double staminaDebuff = standEntity.getStaminaCondition(); // 0.25 ~ 1
-            staminaDebuff = (staminaDebuff * 2 + 1) / 3.0;            // 0.5  ~ 1
-            if (staminaDebuff < 1) ticks = MathHelper.ceil((double) ticks / staminaDebuff);
-            return ticks;
-        }
-    }
-    
     @Override
     protected void onTaskStopped(World world, StandEntity standEntity, IStandPower standPower, StandEntityTask task, @Nullable StandEntityAction newAction) {
         standEntity.unsummonTicks = 0;
@@ -91,7 +74,7 @@ public final class StandEntityUnsummon extends StandEntityAction {
     
     @Override
     public float getStandAlpha(StandEntity standEntity, int ticksLeft, float partialTick) {
-        int maxTicks = getUnsummonDuration(standEntity);
+        int maxTicks = standEntity.getUnsummonDuration();
         return (float) (maxTicks - standEntity.unsummonTicks) / (float) maxTicks;
     }
     

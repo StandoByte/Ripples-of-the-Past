@@ -24,7 +24,11 @@ public class ModParticles {
     public static final RegistryObject<BasicParticleType> HAMON_AURA_YELLOW = PARTICLES.register("hamon_aura_yellow", () -> new BasicParticleType(false));
     public static final RegistryObject<BasicParticleType> HAMON_AURA_RED = PARTICLES.register("hamon_aura_red", () -> new BasicParticleType(false));
     public static final RegistryObject<BasicParticleType> HAMON_AURA_SILVER = PARTICLES.register("hamon_aura_silver", () -> new BasicParticleType(false));
+    public static final RegistryObject<BasicParticleType> HAMON_AURA_GREEN = PARTICLES.register("hamon_aura_green", () -> new BasicParticleType(false));
+    public static final RegistryObject<BasicParticleType> HAMON_AURA_RAINBOW = PARTICLES.register("hamon_aura_rainbow", () -> new BasicParticleType(false));
     
+    public static final RegistryObject<BasicParticleType> BOILING_BLOOD_POP = PARTICLES.register("boiling_blood", () -> new BasicParticleType(false));
+
     public static final RegistryObject<BasicParticleType> METEORITE_VIRUS = PARTICLES.register("meteorite_virus", () -> new BasicParticleType(false));
     
     public static final RegistryObject<BasicParticleType> MENACING = PARTICLES.register("menacing", () -> new BasicParticleType(false));
@@ -38,4 +42,8 @@ public class ModParticles {
     public static final RegistryObject<BasicParticleType> FLAME_ONE_TICK = PARTICLES.register("flame", () -> new BasicParticleType(false));
     
     public static final RegistryObject<BasicParticleType> CD_RESTORATION = PARTICLES.register("cd_restoration", () -> new BasicParticleType(false));
+    
+    public static final RegistryObject<BasicParticleType> RPS_ROCK = PARTICLES.register("rps_rock", () -> new BasicParticleType(false));
+    public static final RegistryObject<BasicParticleType> RPS_PAPER = PARTICLES.register("rps_paper", () -> new BasicParticleType(false));
+    public static final RegistryObject<BasicParticleType> RPS_SCISSORS = PARTICLES.register("rps_scissors", () -> new BasicParticleType(false));
 }

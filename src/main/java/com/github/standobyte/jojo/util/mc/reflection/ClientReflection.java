@@ -4,6 +4,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
+import java.util.OptionalInt;
 import java.util.Set;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -11,9 +12,13 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.MouseHelper;
+import net.minecraft.client.audio.AudioStreamBuffer;
+import net.minecraft.client.audio.AudioStreamManager;
 import net.minecraft.client.audio.ISoundEventAccessor;
 import net.minecraft.client.audio.Sound;
+import net.minecraft.client.audio.SoundEngine;
 import net.minecraft.client.audio.SoundEventAccessor;
+import net.minecraft.client.audio.SoundSource;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.screen.ControlsScreen;
 import net.minecraft.client.gui.screen.IngameMenuScreen;
@@ -22,6 +27,7 @@ import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.gui.widget.list.KeyBindingList;
 import net.minecraft.client.particle.IAnimatedSprite;
 import net.minecraft.client.particle.ParticleManager;
+import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.FirstPersonRenderer;
 import net.minecraft.client.renderer.GameRenderer;
@@ -35,13 +41,16 @@ import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.model.ModelBakery;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.model.RenderMaterial;
+import net.minecraft.client.renderer.texture.NativeImage;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.client.shader.Shader;
 import net.minecraft.client.shader.ShaderGroup;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Timer;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
@@ -270,5 +279,53 @@ public class ClientReflection {
     private static final Method ABSTRACT_LIST_GET_ROW_TOP = ObfuscationReflectionHelper.findMethod(net.minecraft.client.gui.widget.list.AbstractList.class, "func_230962_i_", int.class);
     public static int getRowTop(net.minecraft.client.gui.widget.list.AbstractList<?> uiList, int rowIndex) {
         return ReflectionUtil.invokeMethod(ABSTRACT_LIST_GET_ROW_TOP, uiList, rowIndex);
+    }
+    
+    
+    private static final Field MINECRAFT_PAUSE_PARTIAL_TICK = ObfuscationReflectionHelper.findField(Minecraft.class, "field_193996_ah");
+    public static float getPausePartialTick(Minecraft mc) {
+        return ReflectionUtil.getFloatFieldValue(MINECRAFT_PAUSE_PARTIAL_TICK, mc);
+    }
+    
+    private static final Field MINECRAFT_MAIN_RENDER_TARGET = ObfuscationReflectionHelper.findField(Minecraft.class, "field_147124_at");
+    public static void setMainRenderTarget(Minecraft mc, Framebuffer buffer) {
+        ReflectionUtil.setFieldValue(MINECRAFT_MAIN_RENDER_TARGET, mc, buffer);
+    }
+    
+    private static final Method ACTIVE_RENDER_INFO_SET_POSITION = ObfuscationReflectionHelper.findMethod(ActiveRenderInfo.class, "func_216774_a", Vector3d.class);
+    public static void setPosition(ActiveRenderInfo camera, Vector3d position) {
+        ReflectionUtil.invokeMethod(ACTIVE_RENDER_INFO_SET_POSITION, camera, position);
+    }
+    
+    private static final Field ACTIVE_RENDER_INFO_DETACHED = ObfuscationReflectionHelper.findField(ActiveRenderInfo.class, "field_216799_k");
+    public static void setIsDetached(ActiveRenderInfo camera, boolean detached) {
+        ReflectionUtil.setBooleanFieldValue(ACTIVE_RENDER_INFO_DETACHED, camera, detached);
+    }
+    
+    private static final Field ACTIVE_RENDER_INFO_MIRROR = ObfuscationReflectionHelper.findField(ActiveRenderInfo.class, "field_216800_l");
+    public static void setMirror(ActiveRenderInfo camera, boolean mirror) {
+        ReflectionUtil.setBooleanFieldValue(ACTIVE_RENDER_INFO_MIRROR, camera, mirror);
+    }
+    
+    
+    private static final Field NATIVE_IMAGE_PIXELS = ObfuscationReflectionHelper.findField(NativeImage.class, "field_195722_d");
+    public static long getPixelsAddress(NativeImage image) {
+        return ReflectionUtil.getLongFieldValue(NATIVE_IMAGE_PIXELS, image);
+    }
+    
+
+    private static final Field SOUND_SOURCE_SOURCE = ObfuscationReflectionHelper.findField(SoundSource.class, "field_216441_b");
+    public static int getSourceId(SoundSource source) {
+        return ReflectionUtil.getIntFieldValue(SOUND_SOURCE_SOURCE, source);
+    }
+
+    private static final Method AUDIO_STREAM_BUFFER_GET_AL_BUFFER = ObfuscationReflectionHelper.findMethod(AudioStreamBuffer.class, "func_216473_a");
+    public static OptionalInt getAlBuffer(AudioStreamBuffer buffer) {
+        return ReflectionUtil.invokeMethod(AUDIO_STREAM_BUFFER_GET_AL_BUFFER, buffer);
+    }
+
+    private static final Field SOUND_ENGINE_SOUND_BUFFERS = ObfuscationReflectionHelper.findField(SoundEngine.class, "field_217939_i");
+    public static AudioStreamManager getSoundBuffers(SoundEngine soundEngine) {
+        return ReflectionUtil.getFieldValue(SOUND_ENGINE_SOUND_BUFFERS, soundEngine);
     }
 }

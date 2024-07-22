@@ -11,6 +11,7 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.ClientTicking;
 import com.github.standobyte.jojo.client.ClientTicking.ITicking;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.Alignment;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.BarsOrientation;
@@ -47,6 +48,7 @@ public abstract class BarsRenderer {
         barTransparencies.put(BarType.ENERGY_HAMON, energy);
         barTransparencies.put(BarType.ENERGY_VAMPIRE, energy);
         barTransparencies.put(BarType.ENERGY_ZOMBIE, energy);
+        barTransparencies.put(BarType.ENERGY_PILLARMAN, energy);
         barTransparencies.put(BarType.ENERGY_OTHER, energy);
         barTransparencies.put(BarType.STAMINA, stamina);
         barTransparencies.put(BarType.RESOLVE, resolve);
@@ -67,7 +69,7 @@ public abstract class BarsRenderer {
         float abilityCost = 0;
         // FIXME get energy/stamina costs
 //        if (currentMode != null) {
-//            boolean shift = mc.player.isShiftKeyDown();
+//            boolean shift = InputHandler.useShiftActionVariant(mc);
 //            attackCost = getActionCost(currentMode, ActionType.ATTACK, mc.player, shift);
 //            abilityCost = getActionCost(currentMode, ActionType.ABILITY, mc.player, shift);
 //            if (abilityCost < 0) {
@@ -102,10 +104,12 @@ public abstract class BarsRenderer {
             }
             else if (nonStandPower.getType() == ModPowers.ZOMBIE.get()) {
                 type = BarType.ENERGY_ZOMBIE;
-    }
+            }
+            else if (nonStandPower.getType() == ModPowers.PILLAR_MAN.get()) {
+                type = BarType.ENERGY_PILLARMAN;
+            }
             else {
                 type = BarType.ENERGY_OTHER;
-
             }
             
             if (type != null) {
@@ -195,6 +199,7 @@ public abstract class BarsRenderer {
             float translucentBarValue, 
             float alpha, int ticks, float partialTick);
     
+    @SuppressWarnings("deprecation")
     protected final void renderBar(MatrixStack matrixStack, int x, int y, Alignment alignment, 
             int texX, int texY, int width, int length, int fill, int barColor, float barAlpha, 
             int borderTexX, int borderTexY, int scaleTexX, int scaleTexY, 
@@ -281,6 +286,8 @@ public abstract class BarsRenderer {
             return new int[] {240, 0, ICON_WIDTH, ICON_HEIGHT, 1, 0, -3};
         case ENERGY_ZOMBIE:
             return new int[] {240, 0, ICON_WIDTH, ICON_HEIGHT, 1, 0, -3};
+        case ENERGY_PILLARMAN:
+            return new int[] {240, 52, ICON_WIDTH, ICON_HEIGHT, 1, 0, -3};
         default:
             return new int[] {240, 160, ICON_WIDTH, ICON_HEIGHT, 1, 0, 0};
         }
@@ -304,6 +311,7 @@ public abstract class BarsRenderer {
         ENERGY_HAMON,
         ENERGY_VAMPIRE,
         ENERGY_ZOMBIE,
+        ENERGY_PILLARMAN,
         ENERGY_OTHER,
         STAMINA,
         RESOLVE
@@ -337,12 +345,15 @@ public abstract class BarsRenderer {
             if (redHighlightTick > 0) redHighlightTick--;
         }
         
-        public void triggerRedHighlight(int ticks) {
-            this.redHighlightTick = ticks;
+        public void triggerRedHighlight(int cycles) {
+            if (redHighlightTick % 10 > 0) cycles--;
+            redHighlightTick = redHighlightTick % 10 + cycles * 10;
         }
         
         public void resetRedHighlight() {
-            this.redHighlightTick = redHighlightTick % 20;
+            if (redHighlightTick > 10) {
+                redHighlightTick = redHighlightTick % 10;
+            }
         }
         
         private float lerpValue(float value, float partialTick) {

@@ -73,7 +73,7 @@ public class StandUtil {
         LEAST_TAKEN {
             @Override
             public List<StandType<?>> limitStandPool(ServerWorld world, List<StandType<?>> availableStands) {
-                return SaveFileUtilCapProvider.getSaveFileCap(world.getServer()).getNotTakenStands(availableStands);
+                return SaveFileUtilCapProvider.getSaveFileCap(world.getServer()).getLeastTakenStands(availableStands);
             }
         },
         NOT_TAKEN {
@@ -95,15 +95,23 @@ public class StandUtil {
     public static boolean canPlayerGetFromArrow(StandType<?> standType, boolean clientSide) {
         return standType.getSurvivalGameplayPool() == StandSurvivalGameplayPool.PLAYER_ARROW && 
                 (!JojoModConfig.getCommonConfigInstance(clientSide).isConfigLoaded() || // to make it work when adding items to creative search tab on client initialization, when the config isn't loaded yet
-                !JojoModConfig.getCommonConfigInstance(clientSide).isStandBanned(standType));
+                !JojoModConfig.getCommonConfigInstance(clientSide).isStandBanned(standType)) &&
+                standType.getStats().getRandomWeight() > 0;
     }
     
     public static boolean isEntityStandUser(LivingEntity entity) {
         return entity.getCapability(StandCapProvider.STAND_CAP).map(cap -> cap.hasPower()).orElse(false);
     }
     
+    public static boolean clStandEntityVisibleTo(PlayerEntity player) {
+        if (player == ClientUtil.getClientPlayer()) {
+            return ClientUtil.canSeeStands();
+        }
+        return playerCanSeeStands(player);
+    }
+    
     public static boolean playerCanSeeStands(PlayerEntity player) {
-        return isEntityStandUser(player) || player.hasEffect(ModStatusEffects.SPIRIT_VISION.get());
+        return player.isSpectator() || isEntityStandUser(player) || player.hasEffect(ModStatusEffects.SPIRIT_VISION.get());
     }
     
     public static boolean playerCanHearStands(PlayerEntity player) {
@@ -121,7 +129,7 @@ public class StandUtil {
                     }
                     else {
                         Minecraft mc = Minecraft.getInstance();
-                        ClientUtil.setCameraEntityPreventShaderSwitch(mc, manualControl ? standEntity : player);
+                        ClientUtil.setCameraEntityPreventShaderSwitch(manualControl ? standEntity : player);
                         if (manualControl) {
                             mc.player.xxa = 0;
                             mc.player.zza = 0;

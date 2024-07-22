@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.function.Consumer;
 
 import javax.annotation.Nullable;
@@ -30,6 +31,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
 import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
+import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.Screen;
@@ -75,10 +77,16 @@ import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.client.gui.GuiUtils;
 
+/**
+ * Any methods from this class are only to be called on the client side
+ * (if {@link World#isClientSide()} returns true),
+ * otherwise it will crash on dedicated servers
+ */
 public class ClientUtil {
     public static final ResourceLocation ADDITIONAL_UI = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/additional.png");
     public static final int MAX_MODEL_LIGHT = LightTexture.pack(15, 15);
     static boolean canSeeStands;
+    public static Boolean forcedCanSeeStands;
     static boolean canHearStands;
 
     public static PlayerEntity getClientPlayer() {
@@ -87,6 +95,10 @@ public class ClientUtil {
 
     public static World getClientWorld() {
         return Minecraft.getInstance().level;
+    }
+    
+    public static Vector3d getCameraPos() {
+        return Minecraft.getInstance().gameRenderer.getMainCamera().getPosition();
     }
     
     public static boolean isLocalServer() {
@@ -103,6 +115,10 @@ public class ClientUtil {
     
     public static boolean arePlayerHandsBusy() {
         return Minecraft.getInstance().player.isHandsBusy();
+    }
+    
+    public static void setPlayerHandsBusy(PlayerEntity player, boolean handsBusy) {
+        ClientReflection.setHandsBusy((ClientPlayerEntity) player, handsBusy);
     }
 
     public static Entity getEntityById(int entityId) {
@@ -130,11 +146,23 @@ public class ClientUtil {
         return mc.hasSingleplayerServer() && !mc.getSingleplayerServer().isPublished();
     }
     
+    public static boolean hasOtherPlayers() {
+        Minecraft mc = Minecraft.getInstance();
+        return mc.isLocalServer() && mc.player.connection.getOnlinePlayers().size() <= 1;
+    }
+    
+    public static UUID getServerUUID() {
+        return ClientEventHandler.getInstance().getServerId();
+    }
+    
     public static boolean useActionShiftVar(PlayerEntity player) {
         return player.isShiftKeyDown();
     }
     
     public static boolean canSeeStands() {
+        if (forcedCanSeeStands != null) {
+            return forcedCanSeeStands;
+        }
         return canSeeStands;
     }
     
@@ -142,6 +170,15 @@ public class ClientUtil {
         return canHearStands;
     }
     
+    public static void setCameraEntityPreventShaderSwitch(Entity entity) {
+        Minecraft mc = Minecraft.getInstance();
+        mc.setCameraEntity(entity);
+        if (mc.gameRenderer.currentEffect() == null) {
+            ShaderEffectApplier.getInstance().updateCurrentShader();
+        }
+    }
+    
+    @Deprecated
     public static void setCameraEntityPreventShaderSwitch(Minecraft mc, Entity entity) {
         mc.setCameraEntity(entity);
         if (mc.gameRenderer.currentEffect() == null) {
@@ -327,9 +364,9 @@ public class ClientUtil {
         GL11.glDisable(GL11.GL_SCISSOR_TEST);
     }
     
-    public static void reenableGlScissor() {
-        GL11.glScissor(latestScissorX, latestScissorY, latestScissorWidth, latestScissorHeight);
-    }
+//    public static void reenableGlScissor() {
+//        GL11.glScissor(latestScissorX, latestScissorY, latestScissorWidth, latestScissorHeight);
+//    }
     
     public static String getShortenedTranslationKey(String originalKey) {
         String shortenedKey = originalKey + ".shortened";
@@ -459,12 +496,36 @@ public class ClientUtil {
         }
     }
     
+    public static void addRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
+        modelRenderer.xRot += x;
+        modelRenderer.yRot += y;
+        modelRenderer.zRot += z;
+    }
+    
+    public static void translateModelPart(ModelRenderer modelRenderer, Vector3f tlVec) {
+        modelRenderer.x += tlVec.x();
+        modelRenderer.y += tlVec.y();
+        modelRenderer.z += tlVec.z();
+    }
+    
+    public static void rotateModelPart(ModelRenderer modelRenderer, Vector3f rotVec) {
+        modelRenderer.xRot = rotVec.x();
+        modelRenderer.yRot = rotVec.y();
+        modelRenderer.zRot = rotVec.z();
+    }
+    
+    /**
+     * Placeholder - 1.16's ModelRenderers do not have scale fields
+     */
+    public static void scaleModelPart(ModelRenderer modelRenderer, Vector3f scaleVec) {
+    }
+    
     public static void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
         modelRenderer.xRot = x;
         modelRenderer.yRot = y;
         modelRenderer.zRot = z;
     }
-
+    
     public static void setRotationAngleDegrees(ModelRenderer modelRenderer, float x, float y, float z) {
         setRotationAngle(modelRenderer, x * MathUtil.DEG_TO_RAD, y * MathUtil.DEG_TO_RAD, z * MathUtil.DEG_TO_RAD);
     }
@@ -545,9 +606,13 @@ public class ClientUtil {
     }
     
     public static void addItemReferenceQuote(List<ITextComponent> tooltip, Item item) {
-        tooltip.add(new StringTextComponent(" "));
         ResourceLocation itemId = item.getRegistryName();
-        tooltip.add(new TranslationTextComponent("item." + itemId.getNamespace() + "." + itemId.getPath() + ".reference_quote").withStyle(TextFormatting.ITALIC, TextFormatting.DARK_GRAY));
+        addItemReferenceQuote(tooltip, item, itemId.getNamespace() + "." + itemId.getPath());
+    }
+    
+    public static void addItemReferenceQuote(List<ITextComponent> tooltip, Item item, String itemName) {
+        tooltip.add(new StringTextComponent(" "));
+        tooltip.add(new TranslationTextComponent("item." + itemName + ".reference_quote").withStyle(TextFormatting.ITALIC, TextFormatting.DARK_GRAY));
     }
     
     public static ITextComponent donoItemTooltip(String donoUsername) {

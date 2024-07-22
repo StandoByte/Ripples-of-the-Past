@@ -7,6 +7,7 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
@@ -20,6 +21,7 @@ import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
+import com.github.standobyte.jojo.init.power.non_stand.pillarman.ModPillarmanActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
@@ -63,6 +65,7 @@ public class DamageUtil {
     public static final DamageSource SUFFOCATION = new DamageSource("suffocation").bypassArmor();
     public static final DamageSource EYE_OF_ENDER_SHARDS = new DamageSource("eyeOfEnderShards").bypassArmor();
     public static final String ROAD_ROLLER_MSG = "roadRoller";
+    public static final DamageSource STONE_MASK = new DamageSource("stoneMask").bypassArmor();
     
     public static float knockbackReduction(DamageSource source) {
         if (source instanceof StandLinkDamageSource || ROAD_ROLLER_MSG.equals(source.msgId)) {
@@ -74,8 +77,10 @@ public class DamageUtil {
         }
         if (source instanceof EntityDamageSource) {
             if (source.getDirectEntity() instanceof LivingEntity && 
+                    (INonStandPower.getNonStandPowerOptional((LivingEntity) source.getDirectEntity())
+                    .map(power -> power.getHeldAction() == ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get()).orElse(false) || 
                     INonStandPower.getNonStandPowerOptional((LivingEntity) source.getDirectEntity())
-                    .map(power -> power.getHeldAction() == ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get()).orElse(false)) {
+                    .map(power -> power.getHeldAction() == ModPillarmanActions.PILLARMAN_BLADE_BARRAGE.get()).orElse(false))) {
                 return 0.05F;
             }
             String msgId = source.getMsgId();
@@ -161,9 +166,18 @@ public class DamageUtil {
                     srcIndirect == null ? new EntityDamageSource(HAMON.getMsgId() + ".entity", srcDirect).bypassArmor() : 
                     new IndirectEntityDamageSource(HAMON.getMsgId() + ".entity", srcDirect, srcIndirect).bypassArmor();
                     
-            boolean undeadTarget = JojoModUtil.isUndead(livingTarget);
+            boolean undeadTarget = JojoModUtil.isAffectedByHamon(livingTarget);
             if (!undeadTarget) {
                 amount *= 0.2F;
+            }
+            if (INonStandPower.getNonStandPowerOptional(livingTarget)
+                    .map(power -> power.getType() == ModPowers.PILLAR_MAN.get()).orElse(false)) {
+                amount *= 0.5F;
+            }
+            if (INonStandPower.getNonStandPowerOptional(livingTarget).map(
+                    power -> power.getTypeSpecificData(ModPowers.PILLAR_MAN.get())
+                    .map(pillarman -> pillarman.isStoneFormEnabled()).orElse(false)).orElse(false)) {
+                return false;
             }
             
             final float dmgAmount = amount;
@@ -181,6 +195,8 @@ public class DamageUtil {
                 amount *= hamonMultiplier;
             }
             amount *= JojoModConfig.getCommonConfigInstance(false).hamonDamageMultiplier.get().floatValue();
+            
+            JojoMod.LOGGER.debug(amount);
             
             if (hurtThroughInvulTicks(target, dmgSource, amount)) {
                 HamonUtil.createHamonSparkParticlesEmitter(target, amount / (HamonData.MAX_HAMON_STRENGTH_MULTIPLIER * 5), attack.soundVolumeMultiplier, attack.hamonParticle);
@@ -216,10 +232,10 @@ public class DamageUtil {
     
     public static boolean dealPillarmanAbsorptionDamage(Entity target, float amount, @Nullable Entity src) {
         if (target instanceof LivingEntity) {
-            LivingEntity livingTarget = (LivingEntity) target;
+            /*LivingEntity livingTarget = (LivingEntity) target;
             if (!JojoModUtil.canBleed(livingTarget)) {
                 return false;
-            }
+            }*/
             DamageSource dmgSource = 
                     src == null ? PILLAR_MAN_ABSORPTION : new EntityDamageSource(PILLAR_MAN_ABSORPTION.getMsgId() + ".entity", src);
             return target.hurt(dmgSource, amount);

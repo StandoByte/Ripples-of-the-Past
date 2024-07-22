@@ -8,11 +8,14 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import it.unimi.dsi.fastutil.objects.ObjectList;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelBakery;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.Direction;
+import net.minecraft.util.math.vector.Matrix3f;
 import net.minecraft.util.math.vector.Vector3f;
 
 public class FlameModelRenderer extends ModelRenderer {
@@ -59,29 +62,43 @@ public class FlameModelRenderer extends ModelRenderer {
         }
     }
 
+    public static boolean renderingUI = false;
     private void renderFlame(MatrixStack matrixStack, IVertexBuilder vertexBuilder, 
             int packedLight, int packedOverlay, float red, float green, float blue, float alpha, 
             float width, float height, 
             double xOffset, double yOffset, double zOffset, Direction flameDirection) {
         matrixStack.pushPose();
         matrixStack.translate(xOffset, yOffset, zOffset);
+        Matrix3f lightNormal = matrixStack.last().normal();
+        lightNormal.setIdentity();
+        if (!renderingUI) {
+            ActiveRenderInfo camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+            float cameraXRot = camera.getXRot();
+            lightNormal.mul(-1);
+            lightNormal.mul(Vector3f.XP.rotationDegrees(cameraXRot));
+        }
         switch (flameDirection) {
         case UP:
             matrixStack.mulPose(Vector3f.XP.rotationDegrees(180));
             break;
         case DOWN:
+            lightNormal.mul(Vector3f.XP.rotationDegrees(180));
             break;
         case NORTH:
             matrixStack.mulPose(Vector3f.XN.rotationDegrees(90));
+            lightNormal.mul(Vector3f.XN.rotationDegrees(90));
             break;
         case EAST:
             matrixStack.mulPose(Vector3f.ZP.rotationDegrees(90));
+            lightNormal.mul(Vector3f.ZP.rotationDegrees(90));
             break;
         case SOUTH:
             matrixStack.mulPose(Vector3f.XP.rotationDegrees(90));
+            lightNormal.mul(Vector3f.XP.rotationDegrees(90));
             break;
         case WEST:
             matrixStack.mulPose(Vector3f.ZN.rotationDegrees(90));
+            lightNormal.mul(Vector3f.ZN.rotationDegrees(90));
             break;
         }
         

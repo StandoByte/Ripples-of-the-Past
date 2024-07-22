@@ -3,8 +3,11 @@ package com.github.standobyte.jojo.client.controls;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+
+import org.apache.commons.io.FileUtils;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.power.IPower;
@@ -107,7 +110,7 @@ public class HudControlSettings {
     }
     
     private void save(ResourceLocation entryKey, PowerTypeControlSchemes entryValue) {
-        File powerTypeDir = new File(saveDir, entryKey.toString().replace(":", ","));
+        File powerTypeDir = new File(saveDir + "/" + entryKey.getNamespace(), entryKey.getPath());
         File ctrlSchemeFile = new File(powerTypeDir, "current.json");
         try (BufferedWriter writer = GeneralUtil.newWriterMkDir(ctrlSchemeFile, Charsets.UTF_8)) {
             JsonElement json = entryValue.currentControlScheme.toJson();
@@ -124,20 +127,47 @@ public class HudControlSettings {
         File[] subDirs = saveDir.listFiles(File::isDirectory);
         if (subDirs == null) return;
         
-        for (File powerTypeDir : subDirs) {
-            ResourceLocation powerId = new ResourceLocation(powerTypeDir.getName().replace(",", ":"));
-            File ctrlSchemeFile = new File(powerTypeDir, "current.json");
-            if (ctrlSchemeFile.exists()) {
-                try (BufferedReader reader = Files.newReader(ctrlSchemeFile, Charsets.UTF_8)) {
-                    JsonElement jsonRead = jsonParser.parse(reader);
-                    ControlScheme currentCtrlScheme = ControlScheme.fromJson(jsonRead, powerId);
-                    PowerTypeControlSchemes savedState = new PowerTypeControlSchemes(powerId, currentCtrlScheme);
-                    fullStateMap.put(powerId, savedState);
+        for (File namespaceDir : subDirs) {
+            // TODO remove beta legacy controls loading
+            if (namespaceDir.getName().contains(",")) {
+                ResourceLocation powerId = new ResourceLocation(namespaceDir.getName().replace(",", ":"));
+                loadControls(namespaceDir, powerId);
+                try {
+                    saveForPowerType(powerId);
+                    FileUtils.deleteDirectory(namespaceDir);
+                } catch (IOException e) {
+                    JojoMod.getLogger().error("Failed to delete legacy controls folder");
+                    e.printStackTrace();
                 }
-                catch (Exception exception) {
-                    JojoMod.getLogger().error("Failed to load mod control settings from {}", ctrlSchemeFile, exception);
+            }
+            //
+            else {
+                File[] powerTypePathDirs = namespaceDir.listFiles(File::isDirectory);
+                if (powerTypePathDirs != null) {
+                    for (File pathDir : powerTypePathDirs) {
+                        ResourceLocation powerId = new ResourceLocation(namespaceDir.getName(), pathDir.getName());
+                        loadControls(pathDir, powerId);
+                    }
                 }
             }
         }
+    }
+    
+    private boolean loadControls(File directory, ResourceLocation powerId) {
+        File ctrlSchemeFile = new File(directory, "current.json");
+        if (ctrlSchemeFile.exists()) {
+            try (BufferedReader reader = Files.newReader(ctrlSchemeFile, Charsets.UTF_8)) {
+                JsonElement jsonRead = jsonParser.parse(reader);
+                ControlScheme currentCtrlScheme = ControlScheme.fromJson(jsonRead, powerId);
+                PowerTypeControlSchemes savedState = new PowerTypeControlSchemes(powerId, currentCtrlScheme);
+                fullStateMap.put(powerId, savedState);
+                return true;
+            }
+            catch (Exception exception) {
+                JojoMod.getLogger().error("Failed to load mod control settings from {}", ctrlSchemeFile, exception);
+            }
+        }
+        
+        return false;
     }
 }

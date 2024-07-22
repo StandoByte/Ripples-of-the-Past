@@ -18,7 +18,9 @@ import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.google.common.base.Preconditions;
+import com.google.common.collect.ObjectArrays;
 
 import io.netty.handler.codec.DecoderException;
 import net.minecraft.client.network.play.IClientPlayNetHandler;
@@ -157,6 +159,37 @@ public class NetworkUtil {
 
             return arr;
         }
+    }
+    
+    /**
+     * Supports enums with up to 255 elements
+     */
+    public static <T extends Enum<T>> PacketBuffer writeSmallEnumArray(PacketBuffer buf, T[] input) {
+        int[] ordinals = GeneralUtil.toOrdinals(input);
+        buf.writeVarInt(input.length);
+        for (int i = 0; i < input.length; i++) {
+            int ordinal = ordinals[i];
+            if (ordinal >= 0 && ordinal < 255) {
+                buf.writeByte(ordinal);
+            }
+            else {
+                buf.writeByte(255);
+            }
+        }
+        return buf;
+    }
+    
+    public static <T extends Enum<T>> T[] readSmallEnumArray(PacketBuffer buf, Class<T> enumClass) {
+        int length = buf.readVarInt();
+        T[] enumValues = enumClass.getEnumConstants();
+        T[] ret = ObjectArrays.newArray(enumClass, length);
+        for (int i = 0; i < length; i++) {
+            int ordinal = 0xFF & buf.readByte();
+            if (ordinal >= 0 && ordinal < 255 && ordinal < enumValues.length) {
+                ret[i] = enumValues[ordinal];
+            }
+        }
+        return ret;
     }
     
     public static void writeVecApproximate(PacketBuffer buf, Vector3d vec) {

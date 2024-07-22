@@ -57,7 +57,7 @@ public class JojoModConfig {
         public final ForgeConfigSpec.DoubleValue hamonPointsMultiplier;
         public final ForgeConfigSpec.DoubleValue breathingTrainingMultiplier;
         public final ForgeConfigSpec.BooleanValue breathingTrainingDeterioration;
-        public final ForgeConfigSpec.IntValue breathingStatGap;
+        public final ForgeConfigSpec.IntValue breathingHamonStatGap;
         public final ForgeConfigSpec.BooleanValue mixHamonTechniques;
         public final ForgeConfigSpec.ConfigValue<List<? extends Integer>> techniqueSkillsRequirement;
         
@@ -76,7 +76,7 @@ public class JojoModConfig {
         private List<StandType<?>> bannedStandsSynced = null;
         private List<ResourceLocation> bannedStandsResLocs;
 
-        public final ForgeConfigSpec.BooleanValue abilitiesBreakBlocks;
+//        public final ForgeConfigSpec.BooleanValue abilitiesBreakBlocks;
         public final ForgeConfigSpec.DoubleValue standDamageMultiplier;
         public final ForgeConfigSpec.DoubleValue standResistanceMultiplier;
         public final ForgeConfigSpec.BooleanValue skipStandProgression;
@@ -160,12 +160,12 @@ public class JojoModConfig {
                             .translation("jojo.config.breathingTrainingDeterioration")
                             .define("breathingTrainingDeterioration", true);
                     
-                    breathingStatGap = builder
-                            .comment("    The maximum difference between Hamon Strength/Control and Breathing training.",
+                    breathingHamonStatGap = builder
+                            .comment("    If enabled, this number will be the maximum difference between Hamon Strength/Control and Breathing training.",
                                     "     If the Breathing training level is too low, the player won't be able to reach higher levels of the Hamon stats.",
-                                    "     Defaults to 15.")
+                                    "     By default this mechanic is disabled (the value is set to -1).")
                            .translation("jojo.config.breathingStatGap")
-                           .defineInRange("breathingStatGap", 15, 0, HamonData.MAX_STAT_LEVEL);
+                           .defineInRange("breathingHamonStatGap", -1, -1, (int) HamonData.MAX_BREATHING_LEVEL);
                     
                     mixHamonTechniques = builder
                             .comment("    Whether or not picking skills from different character-specific Hamon techniques is allowed.")
@@ -278,10 +278,10 @@ public class JojoModConfig {
                             .defineInRange("timeStopDamageMultiplier", 1.0, 0.0, 1.0);
                 builder.pop();
                 
-                abilitiesBreakBlocks = builder
-                        .comment("    Whether or not Stands and abilities can break blocks.")
-                        .translation("jojo.config.abilitiesBreakBlocks")
-                        .define("abilitiesBreakBlocks", true);
+//                abilitiesBreakBlocks = builder
+//                        .comment("    Whether or not Stands and abilities can break blocks.")
+//                        .translation("jojo.config.abilitiesBreakBlocks")
+//                        .define("abilitiesBreakBlocks", true);
             
                 standDamageMultiplier = builder
                         .comment("    Damage multiplier applied to all Stands.")
@@ -390,7 +390,7 @@ public class JojoModConfig {
             private final StandUtil.StandRandomPoolFilter standRandomPoolMode;
             private final List<StandType<?>> bannedStands;
             
-            private final boolean abilitiesBreakBlocks;
+//            private final boolean abilitiesBreakBlocks;
 //            private final double standDamageMultiplier;
             private final boolean skipStandProgression;
             private final boolean standStamina;
@@ -431,7 +431,7 @@ public class JojoModConfig {
                 breathingTrainingDeterioration =    (flags[0] & 64) > 0;
 //                _ =                      (flags[0] & 128) > 0;
                 
-                abilitiesBreakBlocks =              (flags[1] & 1) > 0;
+//                abilitiesBreakBlocks =              (flags[1] & 1) > 0;
                 skipStandProgression =              (flags[1] & 2) > 0;
                 standStamina =                      (flags[1] & 4) > 0;
                 dropStandDisc =                     (flags[1] & 8) > 0;
@@ -470,7 +470,7 @@ public class JojoModConfig {
                 if (breathingTrainingDeterioration)     flags[0] |= 64;
 //                if (_)                       flags[0] |= 128;
                 
-                if (abilitiesBreakBlocks)               flags[1] |= 1;
+//                if (abilitiesBreakBlocks)               flags[1] |= 1;
                 if (skipStandProgression)               flags[1] |= 2;
                 if (standStamina)                       flags[1] |= 4;
                 if (dropStandDisc)                      flags[1] |= 8;
@@ -495,7 +495,7 @@ public class JojoModConfig {
 //                hamonPointsMultiplier = config.standDamageMultiplier.get();
 //                breathingTrainingMultiplier = config.breathingTrainingMultiplier.get();
                 breathingTrainingDeterioration = config.breathingTrainingDeterioration.get();
-                breathingStatGap = config.breathingStatGap.get();
+                breathingStatGap = config.breathingHamonStatGap.get();
                 mixHamonTechniques = config.mixHamonTechniques.get();
                 techniqueSkillsRequirement = config.techniqueSkillsRequirement.get().stream().mapToInt(Integer::intValue).toArray();
                 
@@ -513,7 +513,7 @@ public class JojoModConfig {
                         .map(key -> JojoCustomRegistries.STANDS.getRegistry().getValue(key))
                         .collect(Collectors.toList());
                 
-                abilitiesBreakBlocks = config.abilitiesBreakBlocks.get();
+//                abilitiesBreakBlocks = config.abilitiesBreakBlocks.get();
 //                standDamageMultiplier = config.standDamageMultiplier.get()
                 skipStandProgression = config.skipStandProgression.get();
                 standStamina = config.standStamina.get();
@@ -537,7 +537,7 @@ public class JojoModConfig {
 //                COMMON_SYNCED_TO_CLIENT.hamonPointsMultiplier.set(hamonPointsMultiplier);
 //                COMMON_SYNCED_TO_CLIENT.breathingTrainingMultiplier.set(breathingTrainingMultiplier);
                 COMMON_SYNCED_TO_CLIENT.breathingTrainingDeterioration.set(breathingTrainingDeterioration);
-                COMMON_SYNCED_TO_CLIENT.breathingStatGap.set(breathingStatGap);
+                COMMON_SYNCED_TO_CLIENT.breathingHamonStatGap.set(breathingStatGap);
                 COMMON_SYNCED_TO_CLIENT.mixHamonTechniques.set(mixHamonTechniques);
                 COMMON_SYNCED_TO_CLIENT.techniqueSkillsRequirement.set(IntStream.of(techniqueSkillsRequirement).boxed().collect(Collectors.toList()));
                 
@@ -551,7 +551,7 @@ public class JojoModConfig {
                 COMMON_SYNCED_TO_CLIENT.standRandomPoolFilter.set(standRandomPoolMode);
                 COMMON_SYNCED_TO_CLIENT.bannedStandsSynced = bannedStands;
                 
-                COMMON_SYNCED_TO_CLIENT.abilitiesBreakBlocks.set(abilitiesBreakBlocks);
+//                COMMON_SYNCED_TO_CLIENT.abilitiesBreakBlocks.set(abilitiesBreakBlocks);
 //                COMMON_SYNCED_TO_CLIENT.standDamageMultiplier.set(standDamageMultiplier);
                 COMMON_SYNCED_TO_CLIENT.skipStandProgression.set(skipStandProgression);
                 COMMON_SYNCED_TO_CLIENT.standStamina.set(standStamina);
@@ -577,7 +577,7 @@ public class JojoModConfig {
 //                COMMON_SYNCED_TO_CLIENT.hamonPointsMultiplier.clearCache();
 //                COMMON_SYNCED_TO_CLIENT.breathingTrainingMultiplier.clearCache();
                 COMMON_SYNCED_TO_CLIENT.breathingTrainingDeterioration.clearCache();
-                COMMON_SYNCED_TO_CLIENT.breathingStatGap.clearCache();
+                COMMON_SYNCED_TO_CLIENT.breathingHamonStatGap.clearCache();
                 COMMON_SYNCED_TO_CLIENT.mixHamonTechniques.clearCache();
                 COMMON_SYNCED_TO_CLIENT.techniqueSkillsRequirement.clearCache();
                 
@@ -591,7 +591,7 @@ public class JojoModConfig {
                 COMMON_SYNCED_TO_CLIENT.standRandomPoolFilter.clearCache();
                 COMMON_SYNCED_TO_CLIENT.bannedStandsSynced = null;
                 
-                COMMON_SYNCED_TO_CLIENT.abilitiesBreakBlocks.clearCache();
+//                COMMON_SYNCED_TO_CLIENT.abilitiesBreakBlocks.clearCache();
 //                COMMON_SYNCED_TO_CLIENT.standDamageMultiplier.clearCache();
                 COMMON_SYNCED_TO_CLIENT.skipStandProgression.clearCache();
                 COMMON_SYNCED_TO_CLIENT.standStamina.clearCache();

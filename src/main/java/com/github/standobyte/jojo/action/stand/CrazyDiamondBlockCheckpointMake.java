@@ -6,7 +6,6 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
@@ -14,6 +13,7 @@ import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -51,7 +51,7 @@ public class CrazyDiamondBlockCheckpointMake extends StandEntityAction {
         if (!world.isClientSide()) {
             BlockPos pos = task.getTarget().getBlockPos();
             if (pos != null) {
-                if (JojoModConfig.getCommonConfigInstance(false).abilitiesBreakBlocks.get()) {
+                if (JojoModUtil.breakingBlocksEnabled(world)) {
                     BlockState blockState = world.getBlockState(pos);
                     List<ItemStack> drops = Block.getDrops(blockState, (ServerWorld) world, pos, 
                             blockState.hasTileEntity() ? world.getBlockEntity(pos) : null);
@@ -110,7 +110,7 @@ public class CrazyDiamondBlockCheckpointMake extends StandEntityAction {
     }
 
     public static Optional<BlockPos> getBlockPosMoveTo(World world, ItemStack stack) {
-        if (stack.hasTag()) {
+        if (!stack.isEmpty() && stack.hasTag()) {
             CompoundNBT nbt = stack.getTag();
             if (nbt.contains("CDCheckpoint", MCUtil.getNbtId(CompoundNBT.class))) {
                 CompoundNBT checkpointNbt = nbt.getCompound("CDCheckpoint");

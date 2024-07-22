@@ -25,9 +25,14 @@ import org.lwjgl.glfw.GLFW;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.controls.ActionKeybindEntry;
+import com.github.standobyte.jojo.client.controls.ActionKeybindEntry.KeyActiveType;
+import com.github.standobyte.jojo.client.controls.ActionKeybindEntry.OnKeyPress;
+import com.github.standobyte.jojo.client.controls.ActionsHotbar;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
+import com.github.standobyte.jojo.client.controls.ControlScheme.Hotbar;
 import com.github.standobyte.jojo.client.controls.HudControlSettings;
 import com.github.standobyte.jojo.client.standskin.StandSkin;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
@@ -46,6 +51,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClHamonInteractTeac
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonMeditationPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHasInputPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHeldActionTargetPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClMetEntityTypePacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnLeapPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClOnStandDashPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClSetStandSkinPacket;
@@ -57,6 +63,8 @@ import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
+import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanData;
+import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
@@ -68,6 +76,8 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.renderer.entity.model.PlayerModel;
+import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.entity.Entity;
@@ -114,16 +124,16 @@ public class InputHandler {
     public static final String HUD_CATEGORY = new String("key.categories." + JojoMod.MOD_ID + ".hud");
     public KeyBinding nonStandMode;
     public KeyBinding standMode;
-    public KeyBinding scrollMode;
     public KeyBinding editHotbars;
     public KeyBinding disableHotbars;
-    
     public KeyBinding attackHotbar;
     public KeyBinding abilityHotbar;
-    public KeyBinding scrollAttack;
-    public KeyBinding scrollAbility;
 
     public static final String HUD_ALTERNATIVE_CATEGORY = new String("key.categories." + JojoMod.MOD_ID + ".hud.alternative");
+    public KeyBinding scrollMode;
+    public KeyBinding scrollAttack;
+    public KeyBinding scrollAbility;
+    public KeyBinding hamonMeditation;
     
     // it works because the actual map is static, not sure if that's intended or just an implementation detail
     // but hey, i'll take it
@@ -132,6 +142,7 @@ public class InputHandler {
     private int leftClickBlockDelay;
     
     public boolean hasInput;
+    private boolean wallClimbMoving;
     
     private boolean canLeap;
     
@@ -173,6 +184,7 @@ public class InputHandler {
         ClientRegistry.registerKeyBinding(scrollMode = new KeyBinding(JojoMod.MOD_ID + ".key.scroll_mode", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
         ClientRegistry.registerKeyBinding(scrollAttack = new KeyBinding(JojoMod.MOD_ID + ".key.scroll_attack", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
         ClientRegistry.registerKeyBinding(scrollAbility = new KeyBinding(JojoMod.MOD_ID + ".key.scroll_ability", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
+        ClientRegistry.registerKeyBinding(hamonMeditation = new KeyBinding(JojoMod.MOD_ID + ".key.meditation", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
     }
     
     @SubscribeEvent(priority = EventPriority.HIGH)
@@ -205,11 +217,15 @@ public class InputHandler {
         }
         
         if (event.phase == TickEvent.Phase.START) {
+            if (ClientModSettings.getSettingsReadOnly().toggleDisableHotbars && disableHotbars.consumeClick()) {
+                setToggleHotbarsDisabled(!toggledHotbarsDisabled);
+            }
+            actionsOverlay.setHotbarsEnabled(!areHotbarsDisabled());
+            
             if (actionsOverlay.isActive()) {
                 boolean chooseAttack = controlsAreOnHotbar(ControlScheme.Hotbar.LEFT_CLICK);
                 boolean chooseAbility = controlsAreOnHotbar(ControlScheme.Hotbar.RIGHT_CLICK);
                 actionsOverlay.setHotbarButtonsDows(chooseAttack, chooseAbility);
-                actionsOverlay.setHotbarsEnabled(!areHotbarsDisabled());
                 if (chooseAttack || chooseAbility) {
                     for (int i = 0; i < 9; i++) {
                         if (mc.options.keyHotbarSlots[i].consumeClick()) {
@@ -222,22 +238,6 @@ public class InputHandler {
                         }
                     }
                 }
-//                else {
-//                    if (attackSlots != null) {
-//                        for (int i = 0; i < 9; i++) {
-//                            if (attackSlots[i].consumeClick()) {
-//                                actionsOverlay.selectAction(ControlScheme.Hotbar.LEFT_CLICK, i);
-//                            }
-//                        }
-//                    }
-//                    if (abilitySlots != null) {
-//                        for (int i = 0; i < 9; i++) {
-//                            if (abilitySlots[i].consumeClick()) {
-//                                actionsOverlay.selectAction(ControlScheme.Hotbar.RIGHT_CLICK, i);
-//                            }
-//                        }
-//                    }
-//                }
                 
                 if (scrollAttack.consumeClick()) {
                     actionsOverlay.scrollAction(ControlScheme.Hotbar.LEFT_CLICK, mc.player.isShiftKeyDown());
@@ -254,12 +254,9 @@ public class InputHandler {
                 if (ClientModSettings.getSettingsReadOnly().toggleRmbHotbar && abilityHotbar.consumeClick()) {
                     switchToggledHotbarControls(ControlScheme.Hotbar.RIGHT_CLICK);
                 }
-                
-                if (ClientModSettings.getSettingsReadOnly().toggleDisableHotbars && disableHotbars.consumeClick()) {
-                    setToggleHotbarsDisabled(!toggledHotbarsDisabled);
-                }
             }
-            
+
+            actionsOverlay.resetHeldThisTick();
             if (nonStandPower.hasPower()) {
                 tickCustomKeybinds(nonStandPower, actionsOverlay.getCurrentMode() == PowerClassification.NON_STAND);
             }
@@ -281,11 +278,11 @@ public class InputHandler {
             }
             
             if (standMode.consumeClick()) {
-                actionsOverlay.setMode(PowerClassification.STAND);
+                actionsOverlay.switchMode(PowerClassification.STAND);
             }
             
             if (nonStandMode.consumeClick()) {
-                actionsOverlay.setMode(PowerClassification.NON_STAND);
+                actionsOverlay.switchMode(PowerClassification.NON_STAND);
             }
             
             if (scrollMode.consumeClick()) {
@@ -337,8 +334,7 @@ public class InputHandler {
                     }
                     if (!askedForHamonTraining) {
                         ITextComponent message;
-                        if (nonStandPower.getTypeSpecificData(ModPowers.VAMPIRISM.get())
-                                .map(vampirism -> vampirism.isVampireHamonUser()).orElse(false)) {
+                        if (nonStandPower.getType() == ModPowers.VAMPIRISM.get()) {
                             message = new TranslationTextComponent("jojo.chat.message.no_hamon_vampire");
                         }
                         else if (nonStandPower.hadPowerBefore(ModPowers.HAMON.get())) {
@@ -350,6 +346,10 @@ public class InputHandler {
                         mc.gui.handleChat(ChatType.GAME_INFO, message, Util.NIL_UUID);
                     }
                 }
+            }
+            
+            if (hamonMeditation.consumeClick()) {
+                PacketManager.sendToServer(new ClHamonMeditationPacket(true));
             }
             
             if (editHotbars.consumeClick() && (standPower.hasPower() || nonStandPower.hasPower())) {
@@ -366,30 +366,72 @@ public class InputHandler {
             
             if (targetChanged) {
                 ClientEventHandler.onMouseTargetChanged(mouseTarget);
+                
+                if (mouseTarget.getType() == RayTraceResult.Type.ENTITY) {
+                    Entity entity = ((EntityRayTraceResult) mouseTarget).getEntity();
+                    mc.player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                        if (cap.addMetEntityType(entity.getType())) {
+                            PacketManager.sendToServer(new ClMetEntityTypePacket(entity.getId()));
+                        }
+                    });
+                }
             }
         }
     }
     
-    private <P extends IPower<P, T>, T extends IPowerType<P, T>> void tickCustomKeybinds(P power, boolean isHudOpen) {
+    private <P extends IPower<P, T>, T extends IPowerType<P, T>> void tickCustomKeybinds(P power, boolean isHudActive) {
         for (ActionKeybindEntry keybindEntry : HudControlSettings.getInstance()
                 .getControlScheme(power)
                 .getCustomKeybinds()) {
             KeyBinding keybind = keybindEntry.getKeybind();
-            boolean needsOpenHud = true;
+            OnKeyPress onPress = keybindEntry.getOnKeyPress();
+            KeyActiveType needsOpenHud = keybindEntry.getHudInteraction();
             
-            if (keybind.isDown() && keybindEntry.delay <= 0 && 
-                    (!needsOpenHud || isHudOpen && !areHotbarsDisabled())) {
-                HudClickResult result = handleCustomKeybind(keybindEntry.getAction(), keybind);
-                if (result.vanillaInput == HudClickResult.Behavior.CANCEL) {
-                    KeyBinding keybinding = keyBindingMap.lookupActive(keybind.getKey());
-                    if (keybinding != null) {
-                        while (keybinding.consumeClick());
+            if (keybind.isDown() && needsOpenHud.canTrigger(isHudActive)) {
+                actionsOverlay.setHeldThisTick(keybindEntry);
+                if (keybindEntry.delay <= 0) {
+                    switch (onPress) {
+                    case PERFORM:
+                        HudClickResult result = handleCustomKeybind(keybindEntry, power);
+                        if (result.vanillaInput == HudClickResult.Behavior.CANCEL) {
+                            KeyBinding keybinding = keyBindingMap.lookupActive(keybind.getKey());
+                            if (keybinding != null) {
+                                while (keybinding.consumeClick());
+                            }
+                        }
+                        if (result.handSwing == HudClickResult.Behavior.FORCE) {
+                            mc.player.swing(Hand.MAIN_HAND);
+                        }
+                        keybindEntry.delay = 4;
+                        break;
+                    case SELECT:
+                        ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
+                        ControlScheme controls = HudControlSettings.getInstance().getControlScheme(power.getPowerClassification());
+                        
+                        Hotbar foundHotbar = null;
+                        int foundIndex = -1;
+                        for (Hotbar hotbarType : Hotbar.values()) {
+                            ActionsHotbar hotbar = controls.getActionsHotbar(hotbarType);
+                            List<Action<?>> actions = hotbar.getEnabledActions();
+                            for (int i = 0; i < actions.size() && foundIndex < 0; i++) {
+                                Action<?> action = actions.get(i);
+                                if (action == keybindEntry.getAction() || action.getShiftVariationIfPresent() == keybindEntry.getAction()) {
+                                    foundIndex = i;
+                                    foundHotbar = hotbarType;
+                                }
+                            }
+                            if (foundHotbar != null) break;
+                        }
+                        
+                        if (foundHotbar != null && foundIndex >= 0) {
+                            hud.setMode(power.getPowerClassification());
+                            hud.selectAction(foundHotbar, foundIndex);
+                        }
+                        break;
+                    default:
+                        break;
                     }
                 }
-                if (result.handSwing == HudClickResult.Behavior.FORCE) {
-                    mc.player.swing(Hand.MAIN_HAND);
-                }
-                keybindEntry.delay = 4;
             }
             
             if (!keybind.isDown()) {
@@ -512,7 +554,7 @@ public class InputHandler {
             PacketManager.sendToServer(new ClSetStandSkinPacket(standSkin.map(skin -> skin.resLoc), standId));
         }
     }
-    
+
     private boolean pickMouseTarget() {
         RayTraceResult target = mc.hitResult;
         if (actionsOverlay != null && actionsOverlay.getCurrentPower() != null) {
@@ -597,6 +639,11 @@ public class InputHandler {
                     event.setSwingHand(false);
                 }
             });
+            nonStandPower.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).ifPresent(pillarman -> {
+            	if (pillarman.isStoneFormEnabled()) {
+            		event.setSwingHand(false);
+            	}
+            });
         }
     }
     
@@ -642,37 +689,38 @@ public class InputHandler {
         }
     }
     
-    private <P extends IPower<P, ?>> HudClickResult handleCustomKeybind(Action<P> action, KeyBinding keyBinding) {
+    private <P extends IPower<P, ?>> HudClickResult handleCustomKeybind(ActionKeybindEntry entry, P power) {
         HudClickResult result = new HudClickResult();
-        if (action == null) return result;
-        P power = (P) actionsOverlay.getCurrentPower();
+        if (entry.getAction() == null) return result;
 
         if (power != null) {
             boolean leftClickedBlock = false;
-            boolean sneak = mc.player.isShiftKeyDown();
+            boolean sneak = useShiftActionVariant(mc);
             boolean shiftActionVar = useShiftActionVariant(mc);
+            Action<P> action = (Action<P>) entry.getAction();
             action = ActionsOverlayGui.resolveVisibleActionInSlot(
                     action, shiftActionVar, power, ActionsOverlayGui.getInstance().getMouseTarget());
             
             Pair<Action<P>, Boolean> click = actionsOverlay.onActionClick(power, action, sneak);
-            if (click != null && click.getRight()) {
-                if (action != null) {
-                    result.handSwing = action.getHoldDurationMax(power) <= 0 && action.swingHand()
-                            ? HudClickResult.Behavior.FORCE : HudClickResult.Behavior.CANCEL;
-                    result.cancelVanillaInput();
-                    if (action.withUserPunch()) {
-                        mcPlayerAttack();
+            if (click != null) {
+                if (action != null && action.withUserPunch()) {
+                    mcPlayerAttack();
+                }
+                if (click.getRight()) {
+                    if (action != null) {
+                        result.handSwing = actionSwingsHand(action, power);
+                        result.cancelVanillaInput();
+                        if (action.getHoldDurationMax(power) > 0) {
+                            heldKeys.put(power, entry.getKeybind());
+                        }
                     }
-                }
-                if (action.getHoldDurationMax(power) > 0) {
-                    heldKeys.put(power, keyBinding);
-                }
-                if (leftClickedBlock && leftClickBlockDelay <= 0) {
-                    leftClickBlockDelay = 4;
+                    if (leftClickedBlock && leftClickBlockDelay <= 0) {
+                        leftClickBlockDelay = 4;
+                    }
                 }
             }
             else {
-                if (heldKeys.get(power) == keyBinding) {
+                if (heldKeys.get(power) == entry.getKeybind()) {
                     result.cancelHandSwing();
                     result.cancelVanillaInput();
                 }
@@ -680,7 +728,7 @@ public class InputHandler {
                     result.cancelHandSwing();
                 }
             }
-            actionsOverlay.setCustomKeybindAction(power.getPowerClassification(), action);
+            actionsOverlay.setCustomKeybindAction(power.getPowerClassification(), entry);
         }
         
         return result;
@@ -722,27 +770,29 @@ public class InputHandler {
         
         if (power != null) {
             boolean leftClickedBlock = key == ActionKey.ATTACK && mc.hitResult.getType() == Type.BLOCK;
-            boolean sneak = mc.player.isShiftKeyDown();
+            boolean sneak = useShiftActionVariant(mc);
             boolean shiftActionVar = useShiftActionVariant(mc);
             
             Pair<Action<P>, Boolean> click = null;
-//            if (key == ActionKey.QUICK_ACCESS) {
-//                click = actionsOverlay.onQuickAccessClick(power, shiftActionVar, sneak);
-//            } else 
             if (!(leftClickedBlock && leftClickBlockDelay > 0)) {
                 click = actionsOverlay.onClick(power, key.getHotbar(), shiftActionVar, sneak);
             }
-            if (click != null && click.getRight()) {
+            if (click != null) {
                 Action<P> action = click.getLeft();
-                if (action != null) {
-                    result.handSwing = action.getHoldDurationMax(power) <= 0 && action.swingHand() ? HudClickResult.Behavior.FORCE : HudClickResult.Behavior.CANCEL;
-                    if (!(action.withUserPunch() && key == ActionKey.ATTACK)) result.cancelVanillaInput();
+                if (action != null && action.withUserPunch()) {
+                    mcPlayerAttack();
                 }
-                if (action.getHoldDurationMax(power) > 0) {
-                    heldKeys.put(power, key.getKey(mc, this));
-                }
-                if (leftClickedBlock && leftClickBlockDelay <= 0) {
-                    leftClickBlockDelay = 4;
+                if (click.getRight()) {
+                    if (action != null) {
+                        result.handSwing = actionSwingsHand(action, power);
+                        if (!(action.withUserPunch() && key == ActionKey.ATTACK)) result.cancelVanillaInput();
+                        if (action.getHoldDurationMax(power) > 0) {
+                            heldKeys.put(power, key.getKey(mc, this));
+                        }
+                    }
+                    if (leftClickedBlock && leftClickBlockDelay <= 0) {
+                        leftClickBlockDelay = 4;
+                    }
                 }
             }
             else {
@@ -757,6 +807,13 @@ public class InputHandler {
         }
         
         return result;
+    }
+    
+    private static <P extends IPower<P, ?>> HudClickResult.Behavior actionSwingsHand(Action<P> action, P power) {
+        if (action.getHoldDurationMax(power) <= 0 && action.swingHand()) {
+            return HudClickResult.Behavior.FORCE;
+        }
+        return HudClickResult.Behavior.CANCEL;
     }
     
     public static boolean useShiftActionVariant(Minecraft mc) {
@@ -916,6 +973,13 @@ public class InputHandler {
     @SubscribeEvent(priority = EventPriority.LOW)
     public void onInputUpdate(InputUpdateEvent event) {
         MovementInput input = event.getMovementInput();
+
+        PlayerEntity player = (PlayerEntity) event.getEntity();
+        if(INonStandPower.getNonStandPowerOptional(player).resolve()
+        		.flatMap(power -> power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()))
+        		.map(PillarmanData::isStoneFormEnabled).orElse(false)) {
+        	input.shiftKeyDown = false;
+        }
         
         boolean hasInput = input.up || input.down || input.left || input.right || input.jumping || input.shiftKeyDown;
         if (this.hasInput != hasInput) {
@@ -1067,6 +1131,14 @@ public class InputHandler {
         player.hasImpulse = true;
         Vector3d dash = Vector3d.directionFromRotation(0, player.yRot + yRot).scale(0.5).add(0, 0.2, 0);
         player.setDeltaMovement(player.getDeltaMovement().add(dash));
+    }
+    
+    public void wallClimbClientTick(boolean isMoving, LivingUtilCap wallClimbData) {
+        if (this.wallClimbMoving != isMoving) {
+            PacketManager.sendToServer(ClHasInputPacket.wallClimbing(isMoving));
+            this.wallClimbMoving = isMoving;
+            wallClimbData.wallClimbIsMoving = isMoving;
+        }
     }
     
     

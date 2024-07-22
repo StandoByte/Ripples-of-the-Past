@@ -4,6 +4,7 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
@@ -24,10 +25,21 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.client.event.sound.SoundEvent.SoundSourceEvent;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
+@EventBusSubscriber(modid = JojoMod.MOD_ID, value = Dist.CLIENT)
 public abstract class ClientTickingSoundsHelper {
+    
+    public static void tickBossMusic() {
+        if (tickLoopPlayer != null) {
+            tickLoopPlayer.tick();
+        }
+    }
     
     public static boolean playVoiceLine(Entity entity, SoundEvent soundEvent, SoundCategory category, float volume, float pitch, boolean interrupt) {
         Minecraft mc = Minecraft.getInstance();
@@ -179,5 +191,21 @@ public abstract class ClientTickingSoundsHelper {
     
     public static void playMagiciansRedDetectorSound(MRDetectorEntity entity) {
         Minecraft.getInstance().getSoundManager().play(new MRDetectorSound(entity));
+    }
+    
+    static SoundtrackLoopPlayer tickLoopPlayer;
+    public static void playBossEntitySoundtrack(SoundtrackLoopPlayer loopPlayer) {
+        if (tickLoopPlayer != null) {
+            tickLoopPlayer.forceStop();
+        }
+        tickLoopPlayer = loopPlayer;
+        loopPlayer.start();
+    }
+
+    @SubscribeEvent
+    public static void onSoundSourcePlayed(SoundSourceEvent event) {
+        if (tickLoopPlayer != null) {
+            tickLoopPlayer.onSoundSourceEvent(event);
+        }
     }
 }

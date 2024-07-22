@@ -17,6 +17,8 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamon
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterHamonTechnique;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -100,6 +102,10 @@ public abstract class HamonAction extends NonStandAction {
     @Nullable
     public AbstractHamonSkill getUnlockingSkill() {
         return unlockingSkill;
+    }
+    
+    public boolean renderHamonAuraOnItem(ItemStack item, HandSide handSide) {
+        return false;
     }
     
     

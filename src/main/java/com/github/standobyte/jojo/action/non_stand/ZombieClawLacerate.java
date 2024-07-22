@@ -29,23 +29,23 @@ public class ZombieClawLacerate extends ZombieAction {
 
     @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
-    	if(power.getTypeSpecificData(ModPowers.ZOMBIE.get()).get().isDisguiseEnabled()) {
-    		switch (target.getType()) {
-        	case BLOCK:
-        		return ActionConditionResult.POSITIVE;
-        	case ENTITY:
-        		return ActionConditionResult.POSITIVE;
-        	default:
-        		return ActionConditionResult.NEGATIVE;
-        	}
-    	}
-    	return conditionMessage("disguise");
+        if(power.getTypeSpecificData(ModPowers.ZOMBIE.get()).get().isDisguiseEnabled()) {
+            switch (target.getType()) {
+            case BLOCK:
+                return ActionConditionResult.POSITIVE;
+            case ENTITY:
+                return ActionConditionResult.POSITIVE;
+            default:
+                return ActionConditionResult.NEGATIVE;
+            }
+        }
+        return conditionMessage("disguise");
     }
  
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
-    	switch (target.getType()) {
-    	case BLOCK:
+        switch (target.getType()) {
+        case BLOCK:
             BlockPos pos = target.getBlockPos();
             if (!world.isClientSide() && JojoModUtil.canEntityDestroy((ServerWorld) world, pos, world.getBlockState(pos), user)) {
                 if (!world.isEmptyBlock(pos)) {
@@ -76,18 +76,18 @@ public class ZombieClawLacerate extends ZombieAction {
             }
             break;
         case ENTITY:
-        	if (!world.isClientSide() && target.getType() == TargetType.ENTITY) {
+            if (!world.isClientSide() && target.getType() == TargetType.ENTITY) {
                 Entity entity = target.getEntity();
                 if (entity instanceof LivingEntity) {
                     LivingEntity targetEntity = (LivingEntity) entity;
                     PlayerEntity pEntity = (PlayerEntity) user;
                     if (entity.hurt(EntityDamageSource.playerAttack(pEntity), getDamage(world))) {
-                    	world.playSound(null, targetEntity.getX(), targetEntity.getEyeY(), targetEntity.getZ(), ModSounds.THE_WORLD_PUNCH_HEAVY_ENTITY.get(), targetEntity.getSoundSource(), 1.2F, 0.8F);
-                    	targetEntity.knockback(1.5F, user.getX()-targetEntity.getX(), user.getZ()-targetEntity.getZ());
+                        world.playSound(null, targetEntity.getX(), targetEntity.getEyeY(), targetEntity.getZ(), ModSounds.THE_WORLD_PUNCH_HEAVY_ENTITY.get(), targetEntity.getSoundSource(), 1.2F, 0.8F);
+                        targetEntity.knockback(1.5F, user.getX()-targetEntity.getX(), user.getZ()-targetEntity.getZ());
                     }
                 }
             }
-        	break;
+            break;
         default:
             break;
     }

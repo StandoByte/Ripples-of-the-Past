@@ -44,8 +44,8 @@ public class SpaceRipperStingyEyesEntity extends OwnerBoundProjectileEntity {
         if (!isBoundToOwner()) {
             detachedOriginPos = detachedOriginPos.add(position().subtract(xOld, yOld, zOld));
         }
-        if (!level.isClientSide()) {
-            if (isBoundToOwner() && (ownerPower == null || ownerPower.getHeldAction() != ModVampirismActions.VAMPIRISM_SPACE_RIPPER_STINGY_EYES.get())) {
+        if (isBoundToOwner() && (ownerPower == null || ownerPower.getHeldAction() != ModVampirismActions.VAMPIRISM_SPACE_RIPPER_STINGY_EYES.get())) {
+            if (!level.isClientSide()) {
                 setBoundToOwner(false);
                 setDeltaMovement(position().subtract(getOriginPoint()).normalize().scale(movementSpeed()));
             }
@@ -129,7 +129,7 @@ public class SpaceRipperStingyEyesEntity extends OwnerBoundProjectileEntity {
     
     @Override
     public float getBaseDamage() {
-        return 0.05F + (level.getDifficulty().getId()/2);
+        return 1.0F + level.getDifficulty().getId();
     }
     
     @Override
