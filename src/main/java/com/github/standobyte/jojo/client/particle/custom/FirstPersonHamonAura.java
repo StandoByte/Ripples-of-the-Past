@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.client.particle.custom;
 
-import java.util.Collection;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -10,8 +9,6 @@ import java.util.Random;
 
 import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.render.entity.layerrenderer.EnergyRippleLayer;
-import com.github.standobyte.jojo.client.render.entity.layerrenderer.EnergyRippleLayer.HamonEnergyRippleHandler;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
@@ -54,7 +51,6 @@ import net.minecraft.potion.Potions;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
@@ -167,7 +163,7 @@ public class FirstPersonHamonAura {
     public void renderParticles(MatrixStack pMatrixStack, IRenderTypeBuffer pBuffer, HandSide handSide) {
         Minecraft mc = Minecraft.getInstance();
         LightTexture lightTexture = mc.gameRenderer.lightTexture();
-        float partialTick = ClientUtil.getPartialTick();
+        float partialTicks = ClientUtil.getPartialTick();
         
         lightTexture.turnOnLightLayer();
         Runnable enable = () -> {
@@ -202,13 +198,7 @@ public class FirstPersonHamonAura {
             
             for (FirstPersonPseudoParticle particle : particles) {
                 try {
-                    float x = MathHelper.lerp(partialTick, (float) particle.xo, (float) particle.x);
-                    float y = MathHelper.lerp(partialTick, (float) particle.yo, (float) particle.y);
-                    float z = MathHelper.lerp(partialTick, (float) particle.zo, (float) particle.z);
-                    float scale = particle.getQuadSize(partialTick);
-                    int light = particle.getLightColor(partialTick);
-                    renderParticle(particle, bufferbuilder, x, y, z, 
-                            scale, light, partialTick, particle.renderRot);
+                    particle.render(bufferbuilder, partialTicks);
                 } catch (Throwable throwable) {
                     CrashReport crashreport = CrashReport.forThrowable(throwable, "Rendering Particle");
                     CrashReportCategory crashreportcategory = crashreport.addCategory("Particle being rendered");
@@ -220,33 +210,7 @@ public class FirstPersonHamonAura {
             
             renderType.end(tessellator);
         }
-        
-        Collection<HamonEnergyRippleHandler.SparkPseudoParticle> hamonSparks = EnergyRippleLayer.getSparksToRenderFirstPerson(mc.player, handSide);
-        if (hamonSparks != null && !hamonSparks.isEmpty()) {
-            IParticleRenderType renderType = HamonEnergyRippleHandler.SparkPseudoParticle.RENDER_TYPE;
-            renderType.begin(bufferbuilder, Minecraft.getInstance().textureManager);
 
-            float xOffset = handSide == HandSide.LEFT ? 0.35f : -0.35f;
-            for (HamonEnergyRippleHandler.SparkPseudoParticle particle : hamonSparks) {
-                try {
-                    float x = (float) particle.x + xOffset;
-                    float y = (float) -particle.y + 0.125f;
-                    float z = (float) particle.z;
-                    Quaternion renderRot = handSide == HandSide.LEFT ? FirstPersonPseudoParticle.LEFT_ROT : FirstPersonPseudoParticle.RIGHT_ROT;
-                    renderParticle(particle, bufferbuilder, x, y, z, 
-                            particle.scale, HamonEnergyRippleHandler.SparkPseudoParticle.PARTICLE_LIGHT, partialTick, renderRot);
-                } catch (Throwable throwable) {
-                    CrashReport crashreport = CrashReport.forThrowable(throwable, "Rendering Particle");
-                    CrashReportCategory crashreportcategory = crashreport.addCategory("Particle being rendered");
-                    crashreportcategory.setDetail("Particle", particle::toString);
-                    crashreportcategory.setDetail("Particle Type", renderType::toString);
-                    throw new ReportedException(crashreport);
-                }
-            }
-            
-            renderType.end(tessellator);
-        }
-        
         RenderSystem.popMatrix();
         RenderSystem.depthMask(true);
         RenderSystem.depthFunc(515);
@@ -256,31 +220,9 @@ public class FirstPersonHamonAura {
         RenderSystem.disableFog();
     }
     
-    private static void renderParticle(IFirstPersonParticle particle, IVertexBuilder buffer, 
-            float x, float y, float z, float scale, int light, float partialTick, Quaternion renderRot) {
-//        Vector3f vector3f1 = new Vector3f(-1.0F, -1.0F, 0.0F);
-//        vector3f1.transform(renderRot);
-        
-        Vector3f[] avector3f = new Vector3f[]{
-                new Vector3f(-1.0F, -1.0F, 0.0F), 
-                new Vector3f(-1.0F, 1.0F, 0.0F), 
-                new Vector3f(1.0F, 1.0F, 0.0F), 
-                new Vector3f(1.0F, -1.0F, 0.0F)};
-
-        for(int i = 0; i < 4; ++i) {
-            Vector3f vector3f = avector3f[i];
-            vector3f.transform(renderRot);
-            vector3f.mul(scale);
-            vector3f.add(x, y, z);
-        }
-        
-        particle.renderSprite(IDENTITY_MATRIX, buffer, light, partialTick, avector3f);
-    }
-    private static final Matrix4f IDENTITY_MATRIX = Util.make(new Matrix4f(), Matrix4f::setIdentity);
     
     
-    
-    public static abstract class FirstPersonPseudoParticle implements IFirstPersonParticle {
+    public static abstract class FirstPersonPseudoParticle {
         protected static final Random RANDOM = new Random();
         protected double xo;
         protected double yo;
@@ -372,46 +314,33 @@ public class FirstPersonHamonAura {
             }
         }
         
-//        public void render(IVertexBuilder buffer, float partialTick) {
-//            float x = (float)(MathHelper.lerp((double)partialTick, this.xo, this.x));
-//            float y = (float)(MathHelper.lerp((double)partialTick, this.yo, this.y));
-//            float z = (float)(MathHelper.lerp((double)partialTick, this.zo, this.z));
-//            Quaternion quaternion = renderRot;
-//
-////            Vector3f vector3f1 = new Vector3f(-1.0F, -1.0F, 0.0F);
-////            vector3f1.transform(quaternion);
-//            float scale = this.getQuadSize(partialTick);
-//            
-//            Vector3f[] avector3f = new Vector3f[]{
-//                    new Vector3f(-1.0F, -1.0F, 0.0F), 
-//                    new Vector3f(-1.0F, 1.0F, 0.0F), 
-//                    new Vector3f(1.0F, 1.0F, 0.0F), 
-//                    new Vector3f(1.0F, -1.0F, 0.0F)};
-//
-//            for(int i = 0; i < 4; ++i) {
-//                Vector3f vector3f = avector3f[i];
-//                vector3f.transform(quaternion);
-//                vector3f.mul(scale);
-//                vector3f.add(x, y, z);
-//            }
-//            
-//            renderSprite(IDENTITY, buffer, partialTick, avector3f);
-//        }
-        
-        @Override
-        public void renderSprite(Matrix4f matrixEntry, IVertexBuilder buffer, int light, float partialTick, Vector3f[] avector3f) {
+        public void render(IVertexBuilder buffer, float partialTick) {
+            float f = (float)(MathHelper.lerp((double)partialTick, this.xo, this.x));
+            float f1 = (float)(MathHelper.lerp((double)partialTick, this.yo, this.y));
+            float f2 = (float)(MathHelper.lerp((double)partialTick, this.zo, this.z));
+            Quaternion quaternion = renderRot;
+
+            Vector3f vector3f1 = new Vector3f(-1.0F, -1.0F, 0.0F);
+            vector3f1.transform(quaternion);
+            Vector3f[] avector3f = new Vector3f[]{new Vector3f(-1.0F, -1.0F, 0.0F), new Vector3f(-1.0F, 1.0F, 0.0F), new Vector3f(1.0F, 1.0F, 0.0F), new Vector3f(1.0F, -1.0F, 0.0F)};
+            float f4 = this.getQuadSize(partialTick);
+
+            for(int i = 0; i < 4; ++i) {
+                Vector3f vector3f = avector3f[i];
+                vector3f.transform(quaternion);
+                vector3f.mul(f4);
+                vector3f.add(f, f1, f2);
+            }
+
             float u0 = sprite.getU0();
             float u1 = sprite.getU1();
             float v0 = sprite.getV0();
             float v1 = sprite.getV1();
-            buffer.vertex(avector3f[0].x(), avector3f[0].y(), avector3f[0].z())
-            .uv(u1, v1).color(rCol, gCol, bCol, alpha).uv2(light).endVertex();
-            buffer.vertex(avector3f[1].x(), avector3f[1].y(), avector3f[1].z())
-            .uv(u1, v0).color(rCol, gCol, bCol, alpha).uv2(light).endVertex();
-            buffer.vertex(avector3f[2].x(), avector3f[2].y(), avector3f[2].z())
-            .uv(u0, v0).color(rCol, gCol, bCol, alpha).uv2(light).endVertex();
-            buffer.vertex(avector3f[3].x(), avector3f[3].y(), avector3f[3].z())
-            .uv(u0, v1).color(rCol, gCol, bCol, alpha).uv2(light).endVertex();
+            int j = getLightColor(partialTick);
+            buffer.vertex(avector3f[0].x(), avector3f[0].y(), avector3f[0].z()).uv(u1, v1).color(rCol, gCol, bCol, alpha).uv2(j).endVertex();
+            buffer.vertex(avector3f[1].x(), avector3f[1].y(), avector3f[1].z()).uv(u1, v0).color(rCol, gCol, bCol, alpha).uv2(j).endVertex();
+            buffer.vertex(avector3f[2].x(), avector3f[2].y(), avector3f[2].z()).uv(u0, v0).color(rCol, gCol, bCol, alpha).uv2(j).endVertex();
+            buffer.vertex(avector3f[3].x(), avector3f[3].y(), avector3f[3].z()).uv(u0, v1).color(rCol, gCol, bCol, alpha).uv2(j).endVertex();
         }
 
         protected float getQuadSize(float pScaleFactor) {
@@ -507,11 +436,11 @@ public class FirstPersonHamonAura {
         protected static final float ALPHA_MIN = 0.05F;
         protected static final float ALPHA_DIFF = 0.3F;
         @Override
-        public void renderSprite(Matrix4f matrixEntry, IVertexBuilder buffer, int light, float partialTick, Vector3f[] avector3f) {
+        public void render(IVertexBuilder buffer, float partialTick) {
             float ageF = ((float) age + partialTick) / (float) lifetime;
             float alphaFunc = ageF <= 0.5F ? ageF * 2 : (1 - ageF) * 2;
             this.alpha = ALPHA_MIN + alphaFunc * ALPHA_DIFF;
-            super.renderSprite(matrixEntry, buffer, light, partialTick, avector3f);
+            super.render(buffer, partialTick);
         }
 
         protected void setSpriteFromAge(IAnimatedSprite pSprite) {

@@ -81,6 +81,8 @@ import com.github.standobyte.jojo.util.mod.StoryPart;
 
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.TextFormatting;
+import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fml.RegistryObject;
 import net.minecraftforge.registries.DeferredRegister;
 
@@ -95,13 +97,14 @@ import net.minecraftforge.registries.DeferredRegister;
  *
  */
 public class ModStandsInit {
-    public static final ITextComponent PART_3_NAME = StoryPart.STARDUST_CRUSADERS.getName();
-    public static final ITextComponent PART_4_NAME = StoryPart.DIAMOND_IS_UNBREAKABLE.getName();
-    public static final ITextComponent PART_5_NAME = StoryPart.GOLDEN_WIND.getName();
-    public static final ITextComponent PART_6_NAME = StoryPart.STONE_OCEAN.getName();
-    public static final ITextComponent PART_7_NAME = StoryPart.STEEL_BALL_RUN.getName();
-    public static final ITextComponent PART_8_NAME = StoryPart.JOJOLION.getName();
-    public static final ITextComponent PART_9_NAME = StoryPart.THE_JOJOLANDS.getName();
+    @Deprecated public static final ITextComponent PART_3_NAME = new TranslationTextComponent("jojo.story_part.3").withStyle(TextFormatting.DARK_PURPLE);
+    @Deprecated public static final ITextComponent PART_4_NAME = new TranslationTextComponent("jojo.story_part.4").withStyle(TextFormatting.RED);
+    @Deprecated public static final ITextComponent PART_5_NAME = new TranslationTextComponent("jojo.story_part.5").withStyle(TextFormatting.GOLD);
+    @Deprecated public static final ITextComponent PART_6_NAME = new TranslationTextComponent("jojo.story_part.6").withStyle(TextFormatting.AQUA);
+    
+    @Deprecated public static final ITextComponent PART_7_NAME = new TranslationTextComponent("jojo.story_part.7").withStyle(TextFormatting.LIGHT_PURPLE);
+    @Deprecated public static final ITextComponent PART_8_NAME = new TranslationTextComponent("jojo.story_part.8").withStyle(TextFormatting.WHITE);
+    @Deprecated public static final ITextComponent PART_9_NAME = new TranslationTextComponent("jojo.story_part.9").withStyle(TextFormatting.BLUE);
 
     public static final DeferredRegister<StandType<?>> STAND_TYPES = DeferredRegister.create(
             (Class<StandType<?>>) ((Class<?>) StandType.class), JojoMod.MOD_ID);

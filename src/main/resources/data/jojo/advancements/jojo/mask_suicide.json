@@ -1,0 +1,31 @@
+{
+  "parent": "jojo:jojo/stone_mask",
+  "display": {
+    "icon": {
+      "item": "jojo:aja_stone_mask",
+      "nbt": "{Activated:1}"
+    },
+    "title": {
+      "translate": "advancements.jojo.mask_suicide.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.mask_suicide.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": true
+  },
+  "criteria": {
+    "mask_suicide": {
+      "trigger": "jojo:mask_suicide",
+      "conditions": {
+      }
+    }
+  },
+  "requirements": [
+    [
+      "mask_suicide"
+    ]
+  ]
+}

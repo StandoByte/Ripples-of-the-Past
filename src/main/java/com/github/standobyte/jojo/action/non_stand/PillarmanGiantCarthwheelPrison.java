@@ -21,29 +21,23 @@ public class PillarmanGiantCarthwheelPrison extends PillarmanErraticBlazeKing {
     @Override
     public void onHoldTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
-            PillarmanDivineSandstorm.auraEffect(user, ModParticles.HAMON_AURA_RED.get());
+            PillarmanDivineSandstorm.auraEffect(user, ModParticles.HAMON_AURA_RED.get(), 12);
         }
     }
     
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
-        if (!world.isClientSide()) {
-            int n = 20;
+    	if (!world.isClientSide()) {
+            int n = 6;
             for (int i = 0; i < n; i++) {
-                Vector2f rotOffsets = MathUtil.xRotYRotOffsets((double) i / (double) n * Math.PI * 2, 5);
-                addVeinProjectile(world, power, user, rotOffsets.y, rotOffsets.x);
+                Vector2f rotOffsets2 = MathUtil.xRotYRotOffsets((double) i / (double) n * Math.PI * 2, 2);
+                addVeinProjectile(world, power, user, rotOffsets2.x, rotOffsets2.y, 0, -0.5D);
+                addVeinProjectile(world, power, user, rotOffsets2.x, rotOffsets2.y + 180, 0, -0.5D);
+                addVeinProjectile(world, power, user, rotOffsets2.x, rotOffsets2.y + 90, 0, -0.5D);
+                addVeinProjectile(world, power, user, rotOffsets2.x, rotOffsets2.y - 90, 0, -0.5D);
+                }
             }
-            for (int i = 0; i < n; i++) {
-                Vector2f rotOffsets = MathUtil.xRotYRotOffsets((double) i / (double) n * Math.PI * 2, 1);
-                addVeinProjectile(world, power, user, rotOffsets.y, rotOffsets.x);
-            }
-            for (int i = 0; i < n; i++) {
-                Vector2f rotOffsets = MathUtil.xRotYRotOffsets((double) i / (double) n * Math.PI * 2, 0.1);
-                addVeinProjectile(world, power, user, rotOffsets.y, rotOffsets.x);
-            }
-            addVeinProjectile(world, power, user, 0, 0);
-            }
-        }
+    	}
     
     @Override
     public boolean isHeldSentToTracking() {

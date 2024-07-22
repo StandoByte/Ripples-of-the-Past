@@ -943,10 +943,6 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         }
     }
 
-    public boolean isCurrentAttackBlocked() {
-        return wasDamageBlocked;
-    }
-    
 
 
     public boolean canStartBlocking() {
@@ -994,6 +990,16 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         return super.getHurtSound(damageSrc);
     }
 
+    @Override
+    public float getSoundVolume() {
+        return super.getSoundVolume();
+    }
+
+    @Override
+    public float getVoicePitch() {
+        return super.getVoicePitch();
+    }
+    
     protected float getPhysicalResistance(float blockedRatio, float damageDealt) {
         return StandStatFormulas.getPhysicalResistance(getDurability(), getAttackDamage(), blockedRatio, damageDealt);
     }
@@ -1007,7 +1013,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         }
         Vector3d viewVec = getViewVector(1.0F);
         Vector3d diffVec = dmgPosition.subtract(position()).normalize();
-        return diffVec.dot(viewVec) > 0.5;
+        return diffVec.dot(viewVec) > 0.7071D;
     }
     
 
@@ -1747,13 +1753,6 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     
     protected SoundEvent getAttackBlockSound() {
         return ModSounds.STAND_DAMAGE_BLOCK.get();
-    }
-    
-    public void playAttackBlockSound() {
-        SoundEvent blockSound = getAttackBlockSound();
-        if (blockSound != null) {
-            playSound(blockSound, getSoundVolume(), getVoicePitch());
-        }
     }
     
     public double getDistanceToTarget(ActionTarget target) {

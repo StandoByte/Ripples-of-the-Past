@@ -66,7 +66,7 @@ public class HGGrapplingStringEntity extends OwnerBoundProjectileEntity {
                     remove();
                 }
             }
-            else if (owner != null) {
+            else {
                 Vector3d vecToOwner = owner.position().subtract(bound.position());
                 double length = vecToOwner.length();
                 if (length < 2) {

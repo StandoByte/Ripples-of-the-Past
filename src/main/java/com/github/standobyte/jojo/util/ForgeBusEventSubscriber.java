@@ -44,6 +44,7 @@ import com.github.standobyte.jojo.command.JojoCommandsCommand;
 import com.github.standobyte.jojo.command.JojoControlsCommand;
 import com.github.standobyte.jojo.command.JojoEnergyCommand;
 import com.github.standobyte.jojo.command.JojoPowerCommand;
+import com.github.standobyte.jojo.command.PillarmanModeCommand;
 import com.github.standobyte.jojo.command.RockPaperScissorsCommand;
 import com.github.standobyte.jojo.command.StandCommand;
 import com.github.standobyte.jojo.command.StandDiscGiveCommand;
@@ -57,9 +58,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandPower;
-import com.github.standobyte.jojo.util.mc.EntityTypeToInstance;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
-import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.mojang.brigadier.CommandDispatcher;
 
 import net.minecraft.command.CommandSource;
@@ -69,6 +68,8 @@ import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.nbt.INBT;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
@@ -79,6 +80,8 @@ import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.gen.settings.DimensionStructuresSettings;
 import net.minecraft.world.gen.settings.StructureSeparationSettings;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.Capability.IStorage;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
@@ -122,6 +125,7 @@ public class ForgeBusEventSubscriber {
         RockPaperScissorsCommand.register(dispatcher);
         ConfigPackCommand.register(dispatcher);
         JojoCommandsCommand.register(dispatcher);
+        PillarmanModeCommand.register(dispatcher);
     }
     
     
@@ -169,7 +173,10 @@ public class ForgeBusEventSubscriber {
         CapabilityManager.INSTANCE.register(IStandPower.class, new StandCapStorage(), () -> new StandPower(null));
         CapabilityManager.INSTANCE.register(INonStandPower.class, new NonStandCapStorage(), () -> new NonStandPower(null));
         CapabilityManager.INSTANCE.register(PlayerUtilCap.class, new PlayerUtilCapStorage(), () -> new PlayerUtilCap(null));
-        CapabilityManager.INSTANCE.register(ClientPlayerUtilCap.class, JojoModUtil.noStorage(), () -> new ClientPlayerUtilCap(null));
+        CapabilityManager.INSTANCE.register(ClientPlayerUtilCap.class, new IStorage<ClientPlayerUtilCap>() {
+            @Override public INBT writeNBT(Capability<ClientPlayerUtilCap> capability, ClientPlayerUtilCap instance, Direction side) { return null; }
+            @Override public void readNBT(Capability<ClientPlayerUtilCap> capability, ClientPlayerUtilCap instance, Direction side, INBT nbt) {}
+        }, () -> new ClientPlayerUtilCap(null));
         CapabilityManager.INSTANCE.register(LivingUtilCap.class, new LivingUtilCapStorage(), () -> new LivingUtilCap(null));
         CapabilityManager.INSTANCE.register(EntityUtilCap.class, new EntityUtilCapStorage(), () -> new EntityUtilCap(null));
         CapabilityManager.INSTANCE.register(EntityHamonChargeCap.class, new EntityHamonChargeCapStorage(), () -> new EntityHamonChargeCap(null));
@@ -294,7 +301,6 @@ public class ForgeBusEventSubscriber {
             ServerWorld serverWorld = (ServerWorld) event.getWorld();
             addDimensionalSpacing(serverWorld);
         }
-        EntityTypeToInstance.init((World) event.getWorld());
     }
     
     private static void addDimensionalSpacing(ServerWorld serverWorld) {

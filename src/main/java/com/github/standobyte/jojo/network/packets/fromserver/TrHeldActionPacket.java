@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
+import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.IPower;
@@ -63,17 +64,17 @@ public class TrHeldActionPacket {
 
         @Override
         public void handle(TrHeldActionPacket msg, Supplier<NetworkEvent.Context> ctx) {
-            Entity entity = ClientUtil.getEntityById(msg.userId);
-            if (entity instanceof LivingEntity) {
-                LivingEntity user = (LivingEntity) entity;
-                IPower.getPowerOptional(user, msg.classification).ifPresent(power -> {
-                    boolean isClientPlayer = user == ClientUtil.getClientPlayer();
+            Entity user = ClientUtil.getEntityById(msg.userId);
+            if (user instanceof LivingEntity) {
+                IPower.getPowerOptional((LivingEntity) user, msg.classification).ifPresent(power -> {
+                    boolean isClientPlayer = user.is(ClientUtil.getClientPlayer());
                     if (msg.action != null) {
                         if (power.getHeldAction() != msg.action) {
                             setHeldAction(power, msg.action);
                         }
                         power.refreshHeldActionTickState(msg.requirementsFulfilled);
-                        if (user instanceof PlayerEntity && msg.action.clHeldStartAnim((PlayerEntity) user)) {
+                        if (user instanceof PlayerEntity && 
+                                PlayerAnimationHandler.getPlayerAnimator().actionStartedHolding((PlayerEntity) user, msg.action)) {
                             user.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                                 cap.setHeldActionWithAnim(msg.action);
                             });
@@ -87,7 +88,7 @@ public class TrHeldActionPacket {
                         if (user instanceof PlayerEntity) {
                             user.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                                 cap.getHeldActionWithAnim().ifPresent(action -> {
-                                    action.clHeldStopAnim((PlayerEntity) user);
+                                    PlayerAnimationHandler.getPlayerAnimator().actionStoppedHolding((PlayerEntity) user, action);
                                 });
                             });
                         }

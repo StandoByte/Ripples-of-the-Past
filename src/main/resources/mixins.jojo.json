@@ -3,25 +3,19 @@
   "package": "com.github.standobyte.jojo.mixin",
   "refmap": "mixins.jojo.refmap.json",
   "minVersion": "0.8",
-  "plugin": "com.github.standobyte.jojo.modcompat.JojoMixinConfigPlugin",
   "mixins": [
     "LivingEntityMixin",
     "PlayerEntityMixin",
     "ServerPlayerEntityMixin",
-    "EntityLiquidWalkingMixin",
     "ServerChunkProviderMixin",
     "FireBlockMixin",
     "TheMostUnnecessaryMixin"
   ],
   "client": [
-    "client.GameRendererMixin",
     "client.ParticleManagerMixin",
     "client.TextureManagerMixin",
     "client.WorldRendererMixin",
     "client.EntityClMixin",
-    "client.LivingEntityClMixin",
-    "client.BipedModelMixin",
-    "client.PlayerModelAnimationMixin",
     "client.ItemRendererMixin"
   ]
 }

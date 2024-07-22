@@ -55,13 +55,13 @@ public class VampirismBloodDrain extends VampirismAction {
     }
     
     public static boolean canDrainBloodFrom(LivingEntity entity) {
-        if (ModTags.VAMPIRE_CANNOT_DRAIN.contains(entity.getType())) {
+        if (!ModTags.VAMPIRE_CANNOT_DRAIN.contains(entity.getType())) {
             return false;
         }
         if (ModTags.VAMPIRE_CAN_DRAIN.contains(entity.getType())) {
             return true;
         }
-        return JojoModUtil.canBleed(entity) && !JojoModUtil.isUndeadOrVampiric(entity);
+        return JojoModUtil.canBleed(entity) && !JojoModUtil.isUndead(entity);
     }
     
     @Override

@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.non_stand.PillarmanAction;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.pillarman.ModPillarmanActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -47,13 +48,18 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
         power.getTypeSpecificData(this).get().setEvolutionStage(0);
         power.getTypeSpecificData(this).get().setMode(Mode.NONE);
         power.getTypeSpecificData(this).get().setPillarmanBuffs(power.getUser(), 0);
-        LivingEntity user = power.getUser();
+        effectsCheck(power);
+        }
+    
+    public static void effectsCheck(INonStandPower power) {
+    	LivingEntity user = power.getUser();
         for (Effect effect : EFFECTS) {
             EffectInstance effectInstance = user.getEffect(effect);
             if (effectInstance != null) {
                 user.removeEffect(effectInstance.getEffect());
             }
         }
+
     }
     
     @Override
@@ -73,15 +79,11 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
         if (power.isUserCreative()) {
             inc = Math.max(inc, 0);
         }
-        if(power.getTypeSpecificData(this).get().getEvolutionStage() == 1) {
-            return power.getEnergy() + 0.5F * world.getDifficulty().getId()/2;
-        }
         return power.getEnergy() + inc * power.getTypeSpecificData(this).get().getEvolutionStage();
     }
     
     @Override
     public float getMaxStaminaFactor(INonStandPower power, IStandPower standPower) {
-        
         return 1 * power.getTypeSpecificData(this).get().getEvolutionStage();
     }
     
@@ -124,7 +126,7 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
     private static final Set<Effect> EFFECTS = new HashSet<>();
     public static void initPillarmanEffects() {
         Collections.addAll(EFFECTS, 
-                Effects.REGENERATION,
+                ModStatusEffects.UNDEAD_REGENERATION.get(),
                 Effects.DAMAGE_RESISTANCE,
                 Effects.NIGHT_VISION);
     }
@@ -200,7 +202,7 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
         if (pillarman.getEvolutionStage() > 1 ) {
             controlScheme.addIfMissing(ControlScheme.Hotbar.LEFT_CLICK, ModPillarmanActions.PILLARMAN_ABSORPTION.get());
             controlScheme.addIfMissing(ControlScheme.Hotbar.LEFT_CLICK, ModPillarmanActions.PILLARMAN_HORN_ATTACK.get());
-            controlScheme.addIfMissing(ControlScheme.Hotbar.LEFT_CLICK, ModPillarmanActions.PILLARMAN_HIDE_IN_ENTITY.get());
+            controlScheme.addIfMissing(ControlScheme.Hotbar.LEFT_CLICK, ModPillarmanActions.PILLARMAN_RIBS_BLADES.get());
             controlScheme.addIfMissing(ControlScheme.Hotbar.RIGHT_CLICK, ModPillarmanActions.PILLARMAN_REGENERATION.get());
             controlScheme.addIfMissing(ControlScheme.Hotbar.RIGHT_CLICK, ModPillarmanActions.PILLARMAN_ENHANCED_SENSES.get());
             controlScheme.addIfMissing(ControlScheme.Hotbar.RIGHT_CLICK, ModPillarmanActions.PILLARMAN_UNNATURAL_AGILITY.get());

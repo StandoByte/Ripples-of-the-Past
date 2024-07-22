@@ -639,13 +639,7 @@ public class HudLayoutEditingScreen extends Screen {
             
             clearInvalidKeybinds();
             currentControlsScreen = HudControlSettings.getInstance().getCachedControls(selectedTab);
-            if (currentControlsScreen != null) {
-                currentControlScheme = currentControlsScreen.getCurrentCtrlScheme();
-            }
-            else {
-                JojoMod.getLogger().error("Cached controls are null!");
-                currentControlScheme = ControlScheme.EMPTY;
-            }
+            currentControlScheme = currentControlsScreen.getCurrentCtrlScheme();
             refreshCustomKeybindEntries();
         }
     }

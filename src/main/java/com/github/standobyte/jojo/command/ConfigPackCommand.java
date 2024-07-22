@@ -20,10 +20,10 @@ public class ConfigPackCommand {
     }
     
     public static void register(CommandDispatcher<CommandSource> dispatcher) {
-        LiteralArgumentBuilder<CommandSource> command = Commands.literal("jojoconfig").requires(ctx -> ctx.hasPermission(2));
+        LiteralArgumentBuilder<CommandSource> command = Commands.literal("jojoconfigpack").requires(ctx -> ctx.hasPermission(2));
         
         StandStatsConfig.getInstance().commandRegister(command, "stand_stats");
-        ActionFieldsConfig.getInstance().commandRegister(command, "abilities");
+        ActionFieldsConfig.getInstance().commandRegister(command, "ability_config");
         PlayerStandAssignmentConfig.getInstance().commandRegister(command, "assign_stand");
         
         ConfigFolderLink.init().commandRegister(command, "folder_link");

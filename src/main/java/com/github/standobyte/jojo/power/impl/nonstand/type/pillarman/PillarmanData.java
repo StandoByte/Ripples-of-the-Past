@@ -2,6 +2,8 @@ package com.github.standobyte.jojo.power.impl.nonstand.type.pillarman;
 
 import java.util.UUID;
 
+import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrPillarmanFlagsPacket;
@@ -15,6 +17,7 @@ import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.EffectInstance;
@@ -23,6 +26,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeMod;
 
 public class PillarmanData extends TypeSpecificData {
+	public static final int MAX_STAGE_LEVEL = 3;
     private int stage = 1;
     private boolean stoneForm = false;
     private boolean invaded = false;
@@ -57,7 +61,7 @@ public class PillarmanData extends TypeSpecificData {
         applyAttributeModifier(entity, Attributes.MOVEMENT_SPEED, MOVEMENT_SPEED, lvl);
         applyAttributeModifier(entity, ForgeMod.SWIM_SPEED.get(), SWIMMING_SPEED, lvl);
         applyAttributeModifier(entity, Attributes.MAX_HEALTH, MAX_HEALTH, lvl);
-        if(stage > 1) {
+        if(stage > 0) {
             ServerPlayerEntity user = (ServerPlayerEntity) entity;
             PacketManager.sendToClient(new TrPillarmanFlagsPacket(entity.getId(), this), user);
         }
@@ -78,7 +82,7 @@ public class PillarmanData extends TypeSpecificData {
             power.addEnergy(1000);
         }
         setPillarmanBuffs(user, 1);
-        
+        user.level.playSound(null, user, ModSounds.PILLAR_MAN_AWAKENING.get(), user.getSoundSource(), 1.0F, 1.0F);
         IStandPower.getStandPowerOptional(user).ifPresent(stand -> {
             if (stand.hasPower() && stand.wasProgressionSkipped()) {
                 stand.skipProgression();
@@ -102,8 +106,8 @@ public class PillarmanData extends TypeSpecificData {
             stoneForm = false;
         }
         if(isStoneFormEnabled()) {
-            user.addEffect(new EffectInstance(ModStatusEffects.IMMOBILIZE.get(), 20, 0, false, false, true));
-            user.addEffect(new EffectInstance(Effects.DAMAGE_RESISTANCE, 40, 2, false, false, true));
+            user.addEffect(new EffectInstance(ModStatusEffects.STUN.get(), 20, 0, false, false, true));
+            user.addEffect(new EffectInstance(Effects.DAMAGE_RESISTANCE, 40, 3, false, false, true));
             user.addEffect(new EffectInstance(Effects.BLINDNESS, 40, 0, false, false, true));
             user.addEffect(new EffectInstance(Effects.FIRE_RESISTANCE, 40, 0, false, false, true));
         }
@@ -148,7 +152,21 @@ public class PillarmanData extends TypeSpecificData {
     
     public void setEvolutionStage(int stage) {
         this.stage = stage;
+        LivingEntity user = power.getUser();
+        if (!user.level.isClientSide()) {
+        	if(user instanceof PlayerEntity) {
+        		ServerPlayerEntity player = (ServerPlayerEntity) user;
+        		if(stage == 2) {
+                	ModCriteriaTriggers.EVOLVE_PILLARMAN.get().trigger(player);
+                } else if(stage == 3) {
+                	ModCriteriaTriggers.EVOLVE_PILLARMAN.get().trigger(player);
+                	ModCriteriaTriggers.EVOLVE_PILLARMAN_AJA.get().trigger(player);
+                }
+        	}
+            PacketManager.sendToClientsTrackingAndSelf(new TrPillarmanFlagsPacket(user.getId(), this), user);
+        }
         power.clUpdateHud();
+        
     }
     
     public boolean toggleStoneForm() {
@@ -192,6 +210,16 @@ public class PillarmanData extends TypeSpecificData {
         this.mode = mode;
         LivingEntity user = power.getUser();
         if (!user.level.isClientSide()) {
+        	if(user instanceof PlayerEntity) {
+        		ServerPlayerEntity player = (ServerPlayerEntity) user;
+        		if(mode == mode.WIND) {
+                	ModCriteriaTriggers.PILLARMAN_WIND_MODE.get().trigger(player);
+                } else if(mode == mode.HEAT) {
+                	ModCriteriaTriggers.PILLARMAN_HEAT_MODE.get().trigger(player);
+                } else if(mode == mode.LIGHT) {
+                	ModCriteriaTriggers.PILLARMAN_LIGHT_MODE.get().trigger(player);
+                }
+        	}
             PacketManager.sendToClientsTrackingAndSelf(new TrPillarmanFlagsPacket(user.getId(), this), user);
         }
         power.clUpdateHud();
