@@ -6,7 +6,7 @@ import com.github.standobyte.jojo.action.non_stand.HamonSunlightYellowOverdriveB
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.player.IPlayerAction;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
-import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
+import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStatusEffects;
@@ -157,20 +157,10 @@ public class HamonSunlightYellowOverdriveBarrage extends HamonAction implements 
     }
     
     @Override
-    public boolean clHeldStartAnim(PlayerEntity user) {
-        return ModPlayerAnimations.syoBarrage.setStartingAnim(user);
-    }
-    
-    @Override
-    public void clHeldStopAnim(PlayerEntity user) {
-        ModPlayerAnimations.syoBarrage.stopAnim(user);
-    }
-    
-    @Override
     public SunlightYellowOverdriveInstance createContinuousActionInstance(
             LivingEntity user, PlayerUtilCap userCap, INonStandPower power) {
         if (user.level.isClientSide() && user instanceof PlayerEntity) {
-            ModPlayerAnimations.playerBarrageAnim.setAnimEnabled((PlayerEntity) user, true);
+            PlayerAnimationHandler.getPlayerAnimator().setBarrageAnim((PlayerEntity) user, true);
         }
         return new SunlightYellowOverdriveInstance(user, userCap, power, this);
     }
@@ -242,8 +232,8 @@ public class HamonSunlightYellowOverdriveBarrage extends HamonAction implements 
                 }
                 else if (user instanceof PlayerEntity) {
                     PlayerEntity player = (PlayerEntity) user;
-                    ModPlayerAnimations.playerBarrageAnim.setAnimEnabled(player, false);
-                    ModPlayerAnimations.syoBarrage.setFinisherAnim(player);
+                    PlayerAnimationHandler.getPlayerAnimator().setBarrageAnim(player, false);
+                    PlayerAnimationHandler.getPlayerAnimator().syoBarrageFinisherAnim(player);
                 }
             }
         }

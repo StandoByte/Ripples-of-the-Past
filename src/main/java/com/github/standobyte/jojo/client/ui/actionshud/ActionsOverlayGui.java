@@ -50,7 +50,11 @@ import com.github.standobyte.jojo.power.bowcharge.BowChargeEffectInstance;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData.Exercise;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
+import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.zombie.ZombiePowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
@@ -474,8 +478,20 @@ public class ActionsOverlayGui extends AbstractGui {
     public static int getPowerUiColor(IPower<?, ?> power) {
         switch (power.getPowerClassification()) {
         case NON_STAND:
-            if (power.hasPower()) {
-                return ((INonStandPower) power).getType().getColor().orElse(-1);
+            if (power.getType() == ModPowers.HAMON.get()) {
+                return HamonPowerType.COLOR;
+            }
+            else if (power.getType() == ModPowers.VAMPIRISM.get()) {
+                return VampirismPowerType.COLOR;
+            }
+            else if (power.getType() == ModPowers.ZOMBIE.get()) {
+                return ZombiePowerType.COLOR;
+            }
+            else if (power.getType() == ModPowers.PILLAR_MAN.get()) {
+                return PillarmanPowerType.COLOR;
+            }
+            else {
+                return -1;
             }
         case STAND:
             return ((IStandPower) power).getStandInstance()

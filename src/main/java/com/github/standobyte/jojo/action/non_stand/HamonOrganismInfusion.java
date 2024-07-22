@@ -54,7 +54,7 @@ public class HamonOrganismInfusion extends HamonAction {
                 LivingEntity targetLiving = (LivingEntity) entity;
                 // not the best way to determine living mobs in other mods
                 isLiving = !(targetLiving instanceof StandEntity || targetLiving instanceof ArmorStandEntity || targetLiving instanceof GolemEntity)
-                        && !JojoModUtil.isUndeadOrVampiric(targetLiving);
+                        && !JojoModUtil.isUndead(targetLiving);
             }
             else {
                 isLiving = false;

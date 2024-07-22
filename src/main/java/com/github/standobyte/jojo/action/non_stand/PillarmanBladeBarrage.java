@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.non_stand;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -17,6 +18,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
@@ -43,6 +45,7 @@ public class PillarmanBladeBarrage extends PillarmanAction {
     @Override
     protected void holdTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
+        	Entity targetEntity = target.getEntity();
             switch (target.getType()) {
             case BLOCK:
                 BlockPos pos = target.getBlockPos();
@@ -74,21 +77,23 @@ public class PillarmanBladeBarrage extends PillarmanAction {
                 }
                 break;
             case ENTITY:
-                Entity targetEntity = target.getEntity();
-                LivingEntity targetLiving = (LivingEntity) targetEntity;
-                if (user instanceof PlayerEntity) {
-                    int invulTicks = targetEntity.invulnerableTime;
-                    targetEntity.invulnerableTime = invulTicks;
-                }
-                if (!world.isClientSide()) {
-                    DamageUtil.hurtThroughInvulTicks(targetLiving, EntityDamageSource.playerAttack((PlayerEntity) user), 
-                            (DamageUtil.getDamageWithoutHeldItem(user)*0.2F));
-                }
+            	if(targetEntity instanceof LivingEntity) {
+            		LivingEntity targetLiving = (LivingEntity) targetEntity;
+	                if (user instanceof PlayerEntity) {
+	                    int invulTicks = targetEntity.invulnerableTime;
+	                    targetEntity.invulnerableTime = invulTicks;
+	                }
+	                if (!world.isClientSide()) {
+	                    DamageUtil.hurtThroughInvulTicks(targetLiving, EntityDamageSource.playerAttack((PlayerEntity) user), 
+	                            (DamageUtil.getDamageWithoutHeldItem(user)*0.2F));
+	                }
+            	}
                 break;
             default:
                 break;
             }
             world.playSound(null, user.getX(), user.getY(), user.getZ(), ModSounds.SILVER_CHARIOT_BARRAGE_SWIPE.get(), user.getSoundSource(), 1.0F, 1.0F);
+            PillarmanDivineSandstorm.auraEffect(user, ParticleTypes.SWEEP_ATTACK, 1);
         }
     }
     

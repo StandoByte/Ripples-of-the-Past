@@ -63,6 +63,8 @@ import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
+import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanData;
+import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
@@ -74,6 +76,8 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.renderer.entity.model.PlayerModel;
+import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.entity.Entity;
@@ -323,11 +327,9 @@ public class InputHandler {
                     boolean askedForHamonTraining = false;
                     if (mouseTarget instanceof EntityRayTraceResult) {
                         Entity mouseTargetEntity = ((EntityRayTraceResult) mouseTarget).getEntity();
-                        if (mouseTargetEntity instanceof LivingEntity) {
-                            askedForHamonTraining = HamonUtil.interactWithHamonTeacher(mc.level, mc.player, (LivingEntity) mouseTargetEntity);
-                            if (askedForHamonTraining) {
-                                PacketManager.sendToServer(new ClHamonInteractAskTeacherPacket(mouseTargetEntity.getId()));
-                            }
+                        askedForHamonTraining = HamonUtil.interactWithHamonTeacher(mc.level, mc.player, (LivingEntity) mouseTargetEntity);
+                        if (askedForHamonTraining) {
+                            PacketManager.sendToServer(new ClHamonInteractAskTeacherPacket(mouseTargetEntity.getId()));
                         }
                     }
                     if (!askedForHamonTraining) {
@@ -636,6 +638,11 @@ public class InputHandler {
                     event.setCanceled(true);
                     event.setSwingHand(false);
                 }
+            });
+            nonStandPower.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).ifPresent(pillarman -> {
+            	if (pillarman.isStoneFormEnabled()) {
+            		event.setSwingHand(false);
+            	}
             });
         }
     }
@@ -966,6 +973,13 @@ public class InputHandler {
     @SubscribeEvent(priority = EventPriority.LOW)
     public void onInputUpdate(InputUpdateEvent event) {
         MovementInput input = event.getMovementInput();
+
+        PlayerEntity player = (PlayerEntity) event.getEntity();
+        if(INonStandPower.getNonStandPowerOptional(player).resolve()
+        		.flatMap(power -> power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()))
+        		.map(PillarmanData::isStoneFormEnabled).orElse(false)) {
+        	input.shiftKeyDown = false;
+        }
         
         boolean hasInput = input.up || input.down || input.left || input.right || input.jumping || input.shiftKeyDown;
         if (this.hasInput != hasInput) {
@@ -981,7 +995,7 @@ public class InputHandler {
             slowedDown = actionsOverlay.isPlayerOutOfBreath() && slowDown(mc.player, input, 0.8F) || slowedDown;
 
             canLeap = false;
-            if (!mc.player.isFallFlying()) {
+//            if (!mc.player.isPassenger()) {
                 IPower<?, ?> power = actionsOverlay.getCurrentPower();
                 if (power != null) {
                     if (power.canLeap() && !slowedDown) {
@@ -1029,7 +1043,7 @@ public class InputHandler {
                         canLeap = onGround || atWall;
                     }
                 }
-            }
+//            }
 //        }
         
         Entity vehicle = mc.player.getVehicle();

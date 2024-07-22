@@ -5,6 +5,7 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.EnergyRippleLayer.HamonEnergyRippleHandler;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.barrage.BarrageSwingsHolder;
 import com.github.standobyte.jojo.util.general.OptionalFloat;
@@ -24,7 +25,7 @@ public class ClientPlayerUtilCap {
     
     private final BarrageSwingsHolder<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> barrageSwings;
     private boolean isBarraging;
-    private HamonEnergyRippleHandler hamonSparkWaves;
+    private final HamonEnergyRippleHandler hamonSparkWaves;
     
     @Nullable private EntityType<?> vehicleType;
     
@@ -37,6 +38,7 @@ public class ClientPlayerUtilCap {
         this.player = player;
         this.soundManager = Minecraft.getInstance().getSoundManager();
         this.barrageSwings = new BarrageSwingsHolder<>();
+        this.hamonSparkWaves = new HamonEnergyRippleHandler(player);
     }
     
     
@@ -66,9 +68,6 @@ public class ClientPlayerUtilCap {
     }
     
     public HamonEnergyRippleHandler getHamonSparkWaves() {
-        if (hamonSparkWaves == null) {
-            hamonSparkWaves = new HamonEnergyRippleHandler(player);
-        }
         return hamonSparkWaves;
     }
     
@@ -84,7 +83,7 @@ public class ClientPlayerUtilCap {
     
     public void setVehicleType(@Nullable EntityType<?> vehicleType) {
         this.vehicleType = vehicleType;
-//        PlayerAnimationHandler.getPlayerAnimator().onVehicleMount(player, vehicleType);
+        PlayerAnimationHandler.getPlayerAnimator().onVehicleMount(player, vehicleType);
     }
     
     

@@ -32,6 +32,7 @@ import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.stats.Stats;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.EntityDamageSource;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.Difficulty;
@@ -78,7 +79,7 @@ public class PillarmanAbsorption extends PillarmanAction {
                         power.addEnergy(bloodAndHealModifier * 4F);
                         canAbsorb = true;
                     } else { canAbsorb = false; }
-                    if(absorb(user, targetEntity, 2)) {}
+                    if(absorb(world, user, targetEntity, 2)) {}
                 }
             }
         }
@@ -90,15 +91,16 @@ public class PillarmanAbsorption extends PillarmanAction {
             Effects.WEAKNESS,
             Effects.CONFUSION
     };
-    public static boolean absorb(LivingEntity attacker, LivingEntity target, float absorbDamage) {
+    public static boolean absorb(World world, LivingEntity attacker, LivingEntity target, float absorbDamage) {
         boolean hurt = false;
-        if(HamonUtil.preventBlockDamage(target, attacker.level, null, null, DamageUtil.PILLAR_MAN_ABSORPTION, 2)){
+        if(HamonUtil.preventBlockDamage(target, attacker.level, null, null, new EntityDamageSource(DamageUtil.PILLAR_MAN_ABSORPTION.getMsgId(), attacker), 2)){
             Vector3d userPos = attacker.getEyePosition(1.0F);
             double distanceToTarget = JojoModUtil.getDistance(attacker, target.getEntity().getBoundingBox());
             Vector3d targetPos = attacker.getEyePosition(1.0F).add(attacker.getLookAngle().scale(distanceToTarget));
             Vector3d particlesPos = userPos.add(targetPos.subtract(userPos).scale(0.5));
-            //The sound doesn't seem to work :(
-            HamonSparksLoopSound.playSparkSound(attacker, particlesPos, 1.0F, true);
+            if(world.isClientSide()) {
+            	HamonSparksLoopSound.playSparkSound(attacker, particlesPos, 1.0F, true);
+            }
             CustomParticlesHelper.createHamonSparkParticles(null, particlesPos, 1);
         } else {
             hurt = DamageUtil.dealPillarmanAbsorptionDamage(target, absorbDamage, null);

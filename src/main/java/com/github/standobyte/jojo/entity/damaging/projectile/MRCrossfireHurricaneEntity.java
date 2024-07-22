@@ -336,7 +336,7 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
                 for (BlockPos pos : getToBlow()) {
                     if (level.isEmptyBlock(pos)) {
                         if(Math.random() < 0.01F) {
-                            level.setBlockAndUpdate(pos, Blocks.LAVA.defaultBlockState());
+                            level.setBlockAndUpdate(pos, ModBlocks.BOILING_BLOOD.get().defaultBlockState());
                         } else {
                             level.setBlockAndUpdate(pos, ModBlocks.MAGICIANS_RED_FIRE.get().getStateForPlacement(level, pos));
                         }

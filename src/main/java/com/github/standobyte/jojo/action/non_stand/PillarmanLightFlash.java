@@ -12,6 +12,7 @@ import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.math.vector.Vector3d;
@@ -27,7 +28,7 @@ public class PillarmanLightFlash extends PillarmanAction {
     @Override
     public void onHoldTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
-            PillarmanDivineSandstorm.auraEffect(user, ModParticles.HAMON_AURA_RAINBOW.get());
+            PillarmanDivineSandstorm.auraEffect(user, ModParticles.HAMON_AURA_RAINBOW.get(), 12);
         }
     }
     
@@ -49,11 +50,7 @@ public class PillarmanLightFlash extends PillarmanAction {
             }
         }
         user.playSound(ModSounds.AJA_STONE_BEAM.get(), (float) (range + 16) / 16F, 1.0F); // Need to replace
-        HamonUtil.createHamonSparkParticlesEmitter(user, 1F, 0F, ModParticles.HAMON_SPARK_RED.get());
-        HamonUtil.createHamonSparkParticlesEmitter(user, 1F, 0F, ModParticles.HAMON_SPARK.get());
-        HamonUtil.createHamonSparkParticlesEmitter(user, 1F, 0F, ModParticles.HAMON_SPARK_YELLOW.get());
-        HamonUtil.createHamonSparkParticlesEmitter(user, 1F, 0F, ModParticles.HAMON_SPARK_BLUE.get());
-        HamonUtil.createHamonSparkParticlesEmitter(user, 1F, 0F, ModParticles.HAMON_SPARK_SILVER.get());
+        HamonUtil.createHamonSparkParticlesEmitter(user, 2F, 0, ParticleTypes.FLASH);
         
     }
 

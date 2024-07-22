@@ -2,12 +2,10 @@ package com.github.standobyte.jojo.action.non_stand;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.SoundEvent;
 
 public class HamonBreath extends HamonAction {
@@ -47,15 +45,5 @@ public class HamonBreath extends HamonAction {
     @Override
     public boolean enabledInHudDefault() {
         return false;
-    }
-
-    @Override
-    public boolean clHeldStartAnim(PlayerEntity user) {
-        return ModPlayerAnimations.hamonBreath.setAnimEnabled(user, true);
-    }
-    
-    @Override
-    public void clHeldStopAnim(PlayerEntity user) {
-        ModPlayerAnimations.hamonBreath.setAnimEnabled(user, false);
     }
 }

@@ -45,7 +45,7 @@ public class HamonShock extends HamonAction {
             }
             // not the best way to determine living mobs in other mods
             isLiving = !(targetLiving instanceof StandEntity || targetLiving instanceof ArmorStandEntity || targetLiving instanceof GolemEntity)
-                    && !JojoModUtil.isUndeadOrVampiric(targetLiving);
+                    && !JojoModUtil.isUndead(targetLiving);
         }
         else {
             isLiving = false;

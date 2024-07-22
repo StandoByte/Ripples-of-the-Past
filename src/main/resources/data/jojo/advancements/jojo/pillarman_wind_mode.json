@@ -1,0 +1,31 @@
+{
+  "parent": "jojo:jojo/pillarman_evolve_aja",
+  "display": {
+    "icon": {
+      "item": "jojo:meteoric_scrap",
+      "nbt": "{Icon:15}"
+    },
+    "title": {
+      "translate": "advancements.jojo.pillarman_wind_mode.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.pillarman_wind_mode.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "pillarman_wind_mode": {
+      "trigger": "jojo:pillarman_wind_mode",
+      "conditions": {
+      }
+    }
+  },
+  "requirements": [
+    [
+      "pillarman_wind_mode"
+    ]
+  ]
+}

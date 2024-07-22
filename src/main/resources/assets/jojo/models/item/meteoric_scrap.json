@@ -81,6 +81,54 @@
         "jojo:icon": 13
       },
       "model": "jojo:item/item_icon_steve_muscle"
+    },
+    {
+      "predicate": {
+        "jojo:icon": 14
+      },
+      "model": "jojo:item/item_icon_awaken"
+    },
+    {
+      "predicate": {
+        "jojo:icon": 15
+      },
+      "model": "jojo:item/item_icon_wind_mode"
+    },
+    {
+      "predicate": {
+        "jojo:icon": 16
+      },
+      "model": "jojo:item/item_icon_heat_mode"
+    },
+    {
+      "predicate": {
+        "jojo:icon": 17
+      },
+      "model": "jojo:item/item_icon_light_mode"
+    },
+    {
+      "predicate": {
+        "jojo:icon": 18
+      },
+      "model": "jojo:item/item_icon_pillarman_punch"
+    },
+    {
+      "predicate": {
+        "jojo:icon": 19
+      },
+      "model": "jojo:item/item_icon_vampirism_punch"
+    },
+    {
+      "predicate": {
+        "jojo:icon": 20
+      },
+      "model": "jojo:item/item_icon_hamon_punch"
+    },
+    {
+      "predicate": {
+        "jojo:icon": 21
+      },
+      "model": "jojo:item/item_icon_pillarman_explode"
     }
   ]
 }

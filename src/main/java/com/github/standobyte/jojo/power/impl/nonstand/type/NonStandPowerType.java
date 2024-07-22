@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.power.impl.nonstand.type;
 
-import java.util.OptionalInt;
 import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
@@ -27,7 +26,6 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
     protected final Action<INonStandPower> defaultQuickAccess;
     private String translationKey;
     private ResourceLocation iconTexture;
-    private OptionalInt color = OptionalInt.empty();
     
     private final Supplier<T> dataFactory;
 
@@ -37,11 +35,6 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
         this.abilities = startingAbilities;
         this.defaultQuickAccess = defaultQuickAccess;
         this.dataFactory = dataFactory;
-    }
-    
-    public <PT extends NonStandPowerType<T>> PT withColor(int color) {
-        this.color = OptionalInt.of(color);
-        return (PT) this;
     }
     
     public void onClear(INonStandPower power) {}
@@ -120,10 +113,6 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
 
     public TypeSpecificData newSpecificDataInstance() {
         return dataFactory.get();
-    }
-    
-    public OptionalInt getColor() {
-        return color;
     }
     
     @Override

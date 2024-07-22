@@ -20,12 +20,16 @@ import net.minecraft.world.World;
 public class PillarmanVeinEntity extends OwnerBoundProjectileEntity {
     private float yRotOffset;
     private float xRotOffset;
-    private float knockback = 0;
+    protected float knockback = 0;
+    private double yOriginOffset;
+    private double xOriginOffset;
 
-    public PillarmanVeinEntity(World world, LivingEntity entity, float angleXZ, float angleYZ) {
+    public PillarmanVeinEntity(World world, LivingEntity entity, float angleXZ, float angleYZ, double offsetX, double offsetY) {
         super(ModEntityTypes.PILLARMAN_VEINS.get(), entity, world);
-        this.yRotOffset = angleXZ;
-        this.xRotOffset = angleYZ;
+        this.xRotOffset = angleXZ;
+        this.yRotOffset = angleYZ;
+        this.xOriginOffset = offsetX;
+        this.yOriginOffset = offsetY;
     }
     
     public PillarmanVeinEntity(EntityType<? extends PillarmanVeinEntity> entityType, World world) {
@@ -42,7 +46,7 @@ public class PillarmanVeinEntity extends OwnerBoundProjectileEntity {
         super.tick();
         if (level.isClientSide()) {
             Vector3d center = getBoundingBox().getCenter();
-            for (int i = 0; i < 2; i++) {
+            for (int i = 0; i < 1; i++) {
                 Vector3d sparkVec = center.add(new Vector3d(
                         (random.nextDouble() - 0.5), 
                         (random.nextDouble() - 0.5),
@@ -55,7 +59,7 @@ public class PillarmanVeinEntity extends OwnerBoundProjectileEntity {
     
     @Override
     public float getBaseDamage() {
-        return 0.5F;
+        return 1F;
     }
     
     public void addKnockback(float knockback) {
@@ -110,10 +114,9 @@ public class PillarmanVeinEntity extends OwnerBoundProjectileEntity {
         return true;
     }
     
-    private static final Vector3d FRONT_OFFSET = new Vector3d(0.0D, 0.0D, 0.0D);
     @Override
-    protected Vector3d getXRotOffset() {
-        return FRONT_OFFSET;
+    protected Vector3d getOwnerRelativeOffset() {
+        return new Vector3d(xOriginOffset, yOriginOffset, 0);
     }
 
     @Override
@@ -126,6 +129,8 @@ public class PillarmanVeinEntity extends OwnerBoundProjectileEntity {
         super.writeSpawnData(buffer);
         buffer.writeFloat(yRotOffset);
         buffer.writeFloat(xRotOffset);
+        buffer.writeDouble(xOriginOffset);
+        buffer.writeDouble(yOriginOffset);
     }
 
     @Override
@@ -133,5 +138,7 @@ public class PillarmanVeinEntity extends OwnerBoundProjectileEntity {
         super.readSpawnData(additionalData);
         this.yRotOffset = additionalData.readFloat();
         this.xRotOffset = additionalData.readFloat();
+        this.xOriginOffset = additionalData.readDouble();
+        this.yOriginOffset = additionalData.readDouble();
     }
 }

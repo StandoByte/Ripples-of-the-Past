@@ -41,7 +41,6 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     LivingEntity getUser();
     boolean isUserCreative();
     void tick();
-    void postTick();
     boolean isActive();
     
     default ITextComponent getName() {

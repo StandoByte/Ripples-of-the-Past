@@ -2,9 +2,7 @@ package com.github.standobyte.jojo.potion;
 
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
-import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectType;
 
@@ -34,6 +32,6 @@ public class UndeadRegenerationEffect extends Effect implements IApplicableEffec
 
     @Override
     public boolean isApplicable(LivingEntity entity) {
-        return !(entity instanceof PlayerEntity && JojoModUtil.isPlayerJojoVampiric((PlayerEntity) entity)) && entity.getMobType() == CreatureAttribute.UNDEAD;
+        return JojoModUtil.isUndead(entity);
     }
 }

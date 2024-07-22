@@ -35,8 +35,8 @@ public class PillarmanWindCloak extends PillarmanAction {
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
-            user.addEffect(new EffectInstance(Effects.INVISIBILITY, 200, 0));
-            user.addEffect(new EffectInstance(ModStatusEffects.SUN_RESISTANCE.get(), 200, 0));
+            user.addEffect(new EffectInstance(Effects.INVISIBILITY, 200, 0, false, false));
+            user.addEffect(new EffectInstance(ModStatusEffects.SUN_RESISTANCE.get(), 200, 0, false, false));
         }
     }
 

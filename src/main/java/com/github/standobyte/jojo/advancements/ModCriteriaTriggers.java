@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.advancements.criterion.ActionPerformTrigger;
 import com.github.standobyte.jojo.advancements.criterion.GetPowerTrigger;
 import com.github.standobyte.jojo.advancements.criterion.HamonChargeKillTrigger;
 import com.github.standobyte.jojo.advancements.criterion.HamonStatsTrigger;
+import com.github.standobyte.jojo.advancements.criterion.KilledPillarManUserTrigger;
 import com.github.standobyte.jojo.advancements.criterion.KilledPowerUserTrigger;
 import com.github.standobyte.jojo.advancements.criterion.LastHamonTrigger;
 import com.github.standobyte.jojo.advancements.criterion.PeopleDrainedTrigger;
@@ -66,6 +67,20 @@ public class ModCriteriaTriggers {
     // FIXME (BIIM) un-hide the achievement
     public static final CriteriaTriggerSupplier<RPSGameTrigger> ROCK_PAPER_SCISSORS_GAME = 
             new CriteriaTriggerSupplier<>(() -> new RPSGameTrigger(new ResourceLocation(JojoMod.MOD_ID, "rps_game")));
+    public static final CriteriaTriggerSupplier<UnconditionalTrigger> EVOLVE_PILLARMAN = 
+            new CriteriaTriggerSupplier<>(() -> new UnconditionalTrigger(new ResourceLocation(JojoMod.MOD_ID, "pillarman_evolve")));
+    public static final CriteriaTriggerSupplier<UnconditionalTrigger> EVOLVE_PILLARMAN_AJA = 
+            new CriteriaTriggerSupplier<>(() -> new UnconditionalTrigger(new ResourceLocation(JojoMod.MOD_ID, "pillarman_evolve_aja")));
+    public static final CriteriaTriggerSupplier<UnconditionalTrigger> MASK_SUICIDE = 
+            new CriteriaTriggerSupplier<>(() -> new UnconditionalTrigger(new ResourceLocation(JojoMod.MOD_ID, "mask_suicide")));
+    public static final CriteriaTriggerSupplier<KilledPillarManUserTrigger> PLAYER_KILLED_PILLAR_MAN = 
+            new CriteriaTriggerSupplier<>(() -> new KilledPillarManUserTrigger(new ResourceLocation(JojoMod.MOD_ID, "kill_pillarman"), false));
+    public static final CriteriaTriggerSupplier<UnconditionalTrigger> PILLARMAN_WIND_MODE = 
+            new CriteriaTriggerSupplier<>(() -> new UnconditionalTrigger(new ResourceLocation(JojoMod.MOD_ID, "pillarman_wind_mode")));
+    public static final CriteriaTriggerSupplier<UnconditionalTrigger> PILLARMAN_HEAT_MODE = 
+            new CriteriaTriggerSupplier<>(() -> new UnconditionalTrigger(new ResourceLocation(JojoMod.MOD_ID, "pillarman_heat_mode")));
+    public static final CriteriaTriggerSupplier<UnconditionalTrigger> PILLARMAN_LIGHT_MODE = 
+            new CriteriaTriggerSupplier<>(() -> new UnconditionalTrigger(new ResourceLocation(JojoMod.MOD_ID, "pillarman_light_mode")));
     
     
     

@@ -88,7 +88,6 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser,
                 }
             }
         }
-        getPower().postTick();
     }
 
     // FIXME !!!!!! (hamon) npc liquid walking
