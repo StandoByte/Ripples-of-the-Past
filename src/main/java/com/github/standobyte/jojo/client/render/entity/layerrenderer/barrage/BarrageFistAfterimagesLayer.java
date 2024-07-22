@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.client.render.entity.layerrenderer.barrage;
 
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.playeranim.IPlayerBarrageAnimation;
-import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
+import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.barrage.BarrageSwingsHolder;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -17,6 +17,7 @@ import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 
@@ -87,7 +88,7 @@ public class BarrageFistAfterimagesLayer extends LayerRenderer<AbstractClientPla
     
     private IPlayerBarrageAnimation lazyInitBarrageAnim() {
         if (barrageAnim == null) {
-            barrageAnim = PlayerAnimationHandler.getPlayerAnimator().createBarrageAfterimagesAnim(model, this);
+            barrageAnim = ModPlayerAnimations.playerBarrageAnim.createBarrageAfterimagesAnim(model, this);
         }
         return barrageAnim;
     }
@@ -116,11 +117,11 @@ public class BarrageFistAfterimagesLayer extends LayerRenderer<AbstractClientPla
         return player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).map(cap -> cap.getBarrageSwings()).orElse(null);
     }
     
-    public static void setIsBarraging(AbstractClientPlayerEntity player, boolean isBarraging) {
+    public static void setIsBarraging(PlayerEntity player, boolean isBarraging) {
         player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.setIsBarraging(isBarraging));
     }
     
-    private static boolean isBarraging(AbstractClientPlayerEntity player) {
+    private static boolean isBarraging(PlayerEntity player) {
         return player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).map(cap -> cap.isBarraging()).orElse(false);
     }
 

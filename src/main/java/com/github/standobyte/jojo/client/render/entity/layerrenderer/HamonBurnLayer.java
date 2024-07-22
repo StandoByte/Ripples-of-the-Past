@@ -35,6 +35,7 @@ import net.minecraft.util.math.MathHelper;
 
 public class HamonBurnLayer<T extends LivingEntity, M extends EntityModel<T>> extends LayerRenderer<T, M> {
     private static final Map<PlayerRenderer, HamonBurnLayer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>> RENDERER_LAYERS = new HashMap<>();
+    
     public HamonBurnLayer(IEntityRenderer<T, M> renderer) {
         super(renderer);
         if (renderer instanceof PlayerRenderer) {

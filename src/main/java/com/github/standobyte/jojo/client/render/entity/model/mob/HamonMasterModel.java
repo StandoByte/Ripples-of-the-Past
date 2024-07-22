@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.client.render.entity.model.mob;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.playeranim.IEntityAnimApplier;
 import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
+import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
 import com.github.standobyte.jojo.entity.mob.HamonMasterEntity;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
@@ -146,7 +147,7 @@ public class HamonMasterModel extends BipedModel<HamonMasterEntity> {
     
     public void initPose() {
         if (!animInit) {
-            sittingAnim = PlayerAnimationHandler.getPlayerAnimator().initHamonMasterPose(this);
+            sittingAnim = ModPlayerAnimations.meditationPoseAnim.initHamonMasterPose(this);
             animInit = true;
         }
     }

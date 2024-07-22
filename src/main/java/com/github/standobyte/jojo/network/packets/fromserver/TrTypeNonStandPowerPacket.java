@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
+import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
@@ -64,7 +64,7 @@ public class TrTypeNonStandPowerPacket {
                         }
                         power.clear();
                         if (entity instanceof PlayerEntity) {
-                            PlayerAnimationHandler.getPlayerAnimator().onMeditationSet((PlayerEntity) entity, false);
+                            ModPlayerAnimations.meditationPoseAnim.setAnimEnabled((PlayerEntity) entity, false);
                         }
                     }
                     else {

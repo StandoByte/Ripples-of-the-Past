@@ -29,6 +29,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.google.common.collect.Multimap;
 
@@ -126,7 +127,7 @@ public class DamageUtil {
     }
 
     public static boolean dealUltravioletDamage(Entity target, float amount, @Nullable Entity srcDirect, @Nullable Entity srcIndirect, boolean sun) {
-        if (target instanceof LivingEntity && JojoModUtil.isUndead((LivingEntity) target) && !(sun && target.getType() == EntityType.WITHER)) {
+        if (target instanceof LivingEntity && JojoModUtil.isUndeadOrVampiric((LivingEntity) target) && !(sun && target.getType() == EntityType.WITHER)) {
             DamageSource dmgSource = srcDirect == null ? ULTRAVIOLET : 
                 srcIndirect == null ? new EntityDamageSource(ULTRAVIOLET.getMsgId() + ".entity", srcDirect).bypassArmor().bypassMagic() : 
                 new IndirectEntityDamageSource(ULTRAVIOLET.getMsgId() + ".entity", srcDirect, srcIndirect).bypassArmor().bypassMagic();
@@ -407,7 +408,7 @@ public class DamageUtil {
     }
     
     public static void suffocateTick(LivingEntity entity, float speed) {
-        if (entity.canBreatheUnderwater() || entity instanceof PlayerEntity && JojoModUtil.isPlayerUndead((PlayerEntity) entity)
+        if (entity.canBreatheUnderwater() || entity instanceof PlayerEntity && JojoModUtil.isUndeadOrVampiric((PlayerEntity) entity)
                 || entity instanceof IronGolemEntity) return;
         
         if (entity.getAirSupply() > 0) {
@@ -436,10 +437,10 @@ public class DamageUtil {
             if (itemModifiers.containsKey(Attributes.ATTACK_DAMAGE)) {
                 ModifiableAttributeInstance attackDamageAttribute = entity.getAttribute(Attributes.ATTACK_DAMAGE);
                 Collection<AttributeModifier> attackDamageModifiers = itemModifiers.get(Attributes.ATTACK_DAMAGE);
-                attackDamageModifiers.forEach(attackDamageAttribute::removeModifier);
-                float damage = (float) attackDamageAttribute.getValue();
-                attackDamageModifiers.forEach(attackDamageAttribute::addTransientModifier);
-                return damage;
+
+                double damage = MCUtil.calcValueWithoutModifiers(attackDamageAttribute, 
+                        attackDamageModifiers.stream().map(AttributeModifier::getId));
+                return (float) damage;
             }
         }
         return (float) entity.getAttributeValue(Attributes.ATTACK_DAMAGE);

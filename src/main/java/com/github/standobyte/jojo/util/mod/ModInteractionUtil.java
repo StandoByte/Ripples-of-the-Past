@@ -85,7 +85,7 @@ public class ModInteractionUtil {
                 if (    entityName.equals("sunstrike") || 
                         entityName.equals("solar_beam") || 
                         entityName.equals("super_nova")) {
-                    boolean targetIsVampire = target instanceof PlayerEntity && JojoModUtil.isPlayerUndead((PlayerEntity) target);
+                    boolean targetIsVampire = target instanceof PlayerEntity && JojoModUtil.isPlayerJojoVampiric((PlayerEntity) target);
                     if (targetIsVampire) {
                         DamageSource extraDmgSource = new IndirectEntityDamageSource("mowzie_sun", entity, damageSource.getEntity())
                                 .bypassArmor().bypassMagic().setIsFire();

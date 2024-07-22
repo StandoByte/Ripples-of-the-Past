@@ -1,13 +1,17 @@
 package com.github.standobyte.jojo.util.mc;
 
 import java.lang.reflect.Type;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -42,6 +46,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -552,6 +557,32 @@ public class MCUtil {
         return false;
     }
     
+    public static double calcValueWithoutModifiers(ModifiableAttributeInstance entityAttribute, UUID... modifierIds) {
+        return calcValueWithoutModifiers(entityAttribute, Arrays.stream(modifierIds));
+    }
+    
+    public static double calcValueWithoutModifiers(ModifiableAttributeInstance entityAttribute, Stream<UUID> modifierIds) {
+        Collection<UUID> exclude = modifierIds.collect(Collectors.toCollection(HashSet::new));
+        if (exclude.isEmpty()) return entityAttribute.getValue();
+        
+        double valueBase = entityAttribute.getBaseValue();
+        
+        for (AttributeModifier modifier : entityAttribute.getModifiers(AttributeModifier.Operation.ADDITION)) {
+            if (!exclude.contains(modifier.getId())) valueBase += modifier.getAmount();
+        }
+        
+        double value = valueBase;
+        for (AttributeModifier modifier : entityAttribute.getModifiers(AttributeModifier.Operation.MULTIPLY_BASE)) {
+            if (!exclude.contains(modifier.getId())) value += valueBase * modifier.getAmount();
+        }
+        
+        for (AttributeModifier modifier : entityAttribute.getModifiers(AttributeModifier.Operation.MULTIPLY_TOTAL)) {
+            if (!exclude.contains(modifier.getId())) value *= 1.0D + modifier.getAmount();
+        }
+
+        return entityAttribute.getAttribute().sanitizeValue(value);
+    }
+    
     
     
     public static boolean removeEffectInstance(LivingEntity entity, EffectInstance effectInstance) {
@@ -688,5 +719,53 @@ public class MCUtil {
     
     public static String getLanguageCode(MinecraftServer server) {
         return server.isDedicatedServer() ? "en_us" : ClientUtil.getCurrentLanguageCode();
+    }
+    
+    
+    
+    public static class EntityEvents { // TODO
+        public static final int HURT                           = 2;
+        public static final int SILVERFISH_SPAWN_PARTICLES     = 20;
+        public static final int PLAYER_PERM_LEVEL_0            = 24;
+        public static final int PLAYER_PERM_LEVEL_1            = 25;
+        public static final int PLAYER_PERM_LEVEL_2            = 26;
+        public static final int PLAYER_PERM_LEVEL_3            = 27;
+        public static final int PLAYER_PERM_LEVEL_4            = 28;
+        public static final int SHIELD_BLOCK_SOUND             = 29;
+        public static final int SHIELD_BREAK_SOUND             = 30;
+        public static final int ARMOR_STAND_HIT                = 32;
+        public static final int HURT_THORNS                    = 33;
+        public static final int HURT_DROWN                     = 36;
+        public static final int HURT_ON_FIRE                   = 37;
+        public static final int HURT_SWEET_BERRY_BUSH          = 44;
+        public static final int BREAK_MAIN_HAND_ITEM           = 47;
+        public static final int BREAK_OFF_HAND_ITEM            = 48;
+        public static final int BREAK_HEAD_ITEM                = 49;
+        public static final int BREAK_CHEST_ITEM               = 50;
+        public static final int BREAK_LEGS_ITEM                = 51;
+        public static final int BREAK_FEET_ITEM                = 52;
+        public static final int HONEY_SLIDE_PARTICLES          = 53;
+        public static final int HONEY_JUMP_PARTICLES           = 54;
+        public static final int SWAP_HAND_ITEMS                = 55;
+        /*
+         * VillagerEntity
+         * AnimalEntity
+         * AsbtractHorseEntity
+         * FoxEntity
+         * HoglinEntity
+         * OcelotEntity
+         * RabbitEntity
+         * SheepEntity
+         * TameableEntity
+         * WolfEntity
+         * IronGolemEntity
+         * RavagerEntity
+         * WitchEntity
+         * ZoglinEntity
+         * ZombieVillagerEntity
+         * DolphinEntity
+         * SquidEntity
+         * PlayerEntity
+         */
     }
 }

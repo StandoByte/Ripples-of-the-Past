@@ -106,5 +106,5 @@ public static final RegistryObject<PillarmanAction> PILLARMAN_BLADE_BARRAGE = AC
                             PILLARMAN_STONE_FORM.get()
                     },
                     PILLARMAN_ABSORPTION.get()
-                    ));
+                    ).withColor(PillarmanPowerType.COLOR));
 }

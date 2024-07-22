@@ -80,10 +80,11 @@ public class StandUserDummyEntity extends MobEntity implements IMobStandUser, IE
     @Override
     public void tick() {
         super.tick();
-        if (!level.isClientSide() && stand.hasPower() && action != null && useAction) {
+        if (!level.isClientSide() && this.isAlive() && stand.hasPower() && action != null && useAction) {
             stand.clickAction(action, false, ActionTarget.EMPTY);
         }
         stand.tick();
+        stand.postTick();
     }
     
     @Override

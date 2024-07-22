@@ -327,9 +327,11 @@ public class InputHandler {
                     boolean askedForHamonTraining = false;
                     if (mouseTarget instanceof EntityRayTraceResult) {
                         Entity mouseTargetEntity = ((EntityRayTraceResult) mouseTarget).getEntity();
-                        askedForHamonTraining = HamonUtil.interactWithHamonTeacher(mc.level, mc.player, (LivingEntity) mouseTargetEntity);
-                        if (askedForHamonTraining) {
-                            PacketManager.sendToServer(new ClHamonInteractAskTeacherPacket(mouseTargetEntity.getId()));
+                        if (mouseTargetEntity instanceof LivingEntity) {
+                            askedForHamonTraining = HamonUtil.interactWithHamonTeacher(mc.level, mc.player, (LivingEntity) mouseTargetEntity);
+                            if (askedForHamonTraining) {
+                                PacketManager.sendToServer(new ClHamonInteractAskTeacherPacket(mouseTargetEntity.getId()));
+                            }
                         }
                     }
                     if (!askedForHamonTraining) {
@@ -995,7 +997,7 @@ public class InputHandler {
             slowedDown = actionsOverlay.isPlayerOutOfBreath() && slowDown(mc.player, input, 0.8F) || slowedDown;
 
             canLeap = false;
-//            if (!mc.player.isPassenger()) {
+            if (!mc.player.isFallFlying()) {
                 IPower<?, ?> power = actionsOverlay.getCurrentPower();
                 if (power != null) {
                     if (power.canLeap() && !slowedDown) {
@@ -1043,7 +1045,7 @@ public class InputHandler {
                         canLeap = onGround || atWall;
                     }
                 }
-//            }
+            }
 //        }
         
         Entity vehicle = mc.player.getVehicle();

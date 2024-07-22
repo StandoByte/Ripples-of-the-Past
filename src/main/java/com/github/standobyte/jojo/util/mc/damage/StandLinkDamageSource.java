@@ -9,12 +9,12 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 
 public class StandLinkDamageSource extends DamageSource {
-//    private final Entity standEntity;
+    private final Entity standEntity;
     private final DamageSource actualSource;
 
     public StandLinkDamageSource(Entity standEntity, DamageSource actualSource) {
         super("healthLink");
-//        this.standEntity = standEntity;
+        this.standEntity = standEntity;
         this.actualSource = actualSource;
         bypassArmor();
         bypassMagic();
@@ -107,5 +107,9 @@ public class StandLinkDamageSource extends DamageSource {
     @Nullable
     public Vector3d getSourcePosition() {
         return null;
+    }
+    
+    public Entity getStandEntity() {
+        return standEntity;
     }
 }
