@@ -10,6 +10,7 @@ import java.util.Set;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.action.non_stand.PillarmanSelfDetonation;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRCrossfireHurricaneEntity;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.CustomExplosionPacket;
@@ -345,7 +346,7 @@ public abstract class CustomExplosion extends Explosion {
         
         PILLAR_MAN_DETONATION {
             @Override public CustomExplosionSupplier explosionSupplier() {
-                return MRCrossfireHurricaneEntity.PillarmanExplosion::new;
+                return PillarmanSelfDetonation.PillarmanExplosion::new;
             }
         },
         
