@@ -22,7 +22,6 @@ import com.github.standobyte.jojo.util.mc.damage.explosion.CustomExplosion.Custo
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.EntityType;
@@ -310,40 +309,6 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
 //                                level.setBlockAndUpdate(pos, Blocks.LAVA.defaultBlockState());
 //                                level.neighborChanged(pos, Blocks.LAVA, pos);
 //                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
-    
-    public static class PillarmanExplosion extends CrossfireHurricaneExplosion {
-
-        private final MRCrossfireHurricaneEntity sourceProjectile;
-        
-        public PillarmanExplosion(World pLevel, @Nullable Entity pSource, 
-                @Nullable DamageSource pDamageSource, @Nullable ExplosionContext pDamageCalculator, 
-                double pToBlowX, double pToBlowY, double pToBlowZ, 
-                float pRadius, boolean pFire, Explosion.Mode pBlockInteraction) {
-            super(pLevel, pSource, pDamageSource, pDamageCalculator, pToBlowX, pToBlowY, pToBlowZ, pRadius, pFire, pBlockInteraction);
-            this.sourceProjectile = pSource instanceof MRCrossfireHurricaneEntity ? (MRCrossfireHurricaneEntity) pSource : null;
-        }
-        
-        @Override
-        protected void spawnFire() {
-            LivingEntity magiciansRed = sourceProjectile != null ? sourceProjectile.getOwner() : null;
-            if (magiciansRed == null || ForgeEventFactory.getMobGriefingEvent(level, magiciansRed)) {
-                for (BlockPos pos : getToBlow()) {
-                    if (level.isEmptyBlock(pos)) {
-                        if(Math.random() < 0.01F) {
-                            level.setBlockAndUpdate(pos, ModBlocks.BOILING_BLOOD.get().defaultBlockState());
-                        } else {
-                            level.setBlockAndUpdate(pos, ModBlocks.MAGICIANS_RED_FIRE.get().getStateForPlacement(level, pos));
-                        }
-                    }
-                    else if (sourceProjectile == null || !sourceProjectile.small) {
-                        BlockState blockState = level.getBlockState(pos);
-                        if (!MRFlameEntity.meltIceAndSnow(level, blockState, pos) && random.nextFloat() <= 0.25F) {
                         }
                     }
                 }

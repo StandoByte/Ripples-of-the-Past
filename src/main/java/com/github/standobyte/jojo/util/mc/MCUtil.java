@@ -79,6 +79,7 @@ import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.potion.Potions;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Hand;
@@ -482,6 +483,18 @@ public class MCUtil {
             return ((PlayerEntity) entity).isLocalPlayer();
         }
         return !entity.level.isClientSide() || entity.isControlledByLocalInstance();
+    }
+    
+    
+    
+    public static boolean canHarm(LivingEntity attacker, Entity target) {
+        Team team = attacker.getTeam();
+        Team team1 = target.getTeam();
+        if (team == null) {
+            return true;
+        } else {
+            return !team.isAlliedTo(team1) ? true : team.isAllowFriendlyFire();
+        }
     }
     
     
