@@ -4,6 +4,7 @@ import javax.annotation.Nonnull;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
+import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
@@ -154,7 +155,8 @@ public class HamonProjectileShieldEntity extends Entity implements IEntityAdditi
     }
     
     private void deflectProjectile(ProjectileEntity projectile, Vector3d intersectionPoint) {
-        if (projectile == null) return;
+        if (projectile == null || projectile instanceof ModdedProjectileEntity && !((ModdedProjectileEntity) projectile).canBeDeflected(this)) return;
+        
         float speed = (float) projectile.getDeltaMovement().length();
         if (power != null && hamon != null) {
             float energyCost = speed * 20;

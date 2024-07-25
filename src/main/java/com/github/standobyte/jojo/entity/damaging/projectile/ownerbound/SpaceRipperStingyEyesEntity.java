@@ -148,6 +148,11 @@ public class SpaceRipperStingyEyesEntity extends OwnerBoundProjectileEntity {
     }
     
     @Override
+    public boolean canBeDeflected(Entity context) {
+        return context != null && context.getType() == ModEntityTypes.HAMON_PROJECTILE_SHIELD.get();
+    }
+    
+    @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
         entityData.define(LENGTH, 0F);
