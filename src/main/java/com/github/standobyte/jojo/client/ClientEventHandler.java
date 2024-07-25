@@ -54,6 +54,7 @@ import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.item.OilItem;
+import com.github.standobyte.jojo.modcompat.ModInteractionUtil;
 import com.github.standobyte.jojo.modcompat.OptionalDependencyHelper;
 import com.github.standobyte.jojo.network.packets.fromserver.ServerIdPacket;
 import com.github.standobyte.jojo.potion.BleedingEffect;
@@ -497,6 +498,8 @@ public class ClientEventHandler {
     
     @SubscribeEvent(priority = EventPriority.LOW)
     public void renderHpWithBleeding(RenderGameOverlayEvent.Pre event) {
+        if (ModInteractionUtil.isModLoaded("healthoverlay")) return;
+        
         switch (event.getType()) {
         case HEALTH:
         case HEALTHMOUNT:
