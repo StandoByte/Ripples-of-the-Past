@@ -235,7 +235,7 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModStands.CRAZY_DIAMOND.getEntityType(), CrazyDiamondRenderer::new);
         
         PlayerAnimationHandler.initAnimator();
-
+        
         ArmorModelRegistry.registerArmorModel(StoneMaskModel::new, ModItems.STONE_MASK.get());
         ArmorModelRegistry.registerArmorModel(StoneMaskModel::new, ModItems.AJA_STONE_MASK.get());
         ArmorModelRegistry.registerArmorModel(BladeHatArmorModel::new, ModItems.BLADE_HAT.get());
@@ -415,7 +415,7 @@ public class ClientSetup {
             addUnreferencedBlockModels(MagiciansRedRenderer.MR_FIRE_0, MagiciansRedRenderer.MR_FIRE_1);
             spritesAdded = true;
         }
-
+        
         for (StandType<?> standType : JojoCustomRegistries.STANDS.getRegistry().getValues()) {
             ModelLoader.addSpecialModel(StandDiscOverrideList.makeStandSpecificModelPath(standType));
         }

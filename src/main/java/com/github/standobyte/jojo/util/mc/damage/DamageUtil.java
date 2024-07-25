@@ -437,7 +437,7 @@ public class DamageUtil {
             if (itemModifiers.containsKey(Attributes.ATTACK_DAMAGE)) {
                 ModifiableAttributeInstance attackDamageAttribute = entity.getAttribute(Attributes.ATTACK_DAMAGE);
                 Collection<AttributeModifier> attackDamageModifiers = itemModifiers.get(Attributes.ATTACK_DAMAGE);
-
+                
                 double damage = MCUtil.calcValueWithoutModifiers(attackDamageAttribute, 
                         attackDamageModifiers.stream().map(AttributeModifier::getId));
                 return (float) damage;
