@@ -1,17 +1,21 @@
 package com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.hamon;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.UUID;
+
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.playeranim.anim.interfaces.WallClimbAnim;
 import com.github.standobyte.jojo.client.playeranim.kosmx.KosmXPlayerAnimatorInstalled.AnimLayerHandler;
+import com.github.standobyte.jojo.client.playeranim.kosmx.anim.KosmXModifierSpeedLayer;
 import com.github.standobyte.jojo.client.playeranim.kosmx.anim.modifier.KosmXHeadRotationModifier;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.EnergyRippleLayer;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 
 import dev.kosmx.playerAnim.api.layered.IAnimation;
-import dev.kosmx.playerAnim.api.layered.ModifierLayer;
 import dev.kosmx.playerAnim.api.layered.modifier.SpeedModifier;
 import dev.kosmx.playerAnim.core.data.KeyframeAnimation;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationRegistry;
@@ -26,21 +30,17 @@ import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-public class KosmXWallClimbLayer extends AnimLayerHandler implements WallClimbAnim {
-    // FIXME the AnimLayerHandler object is effectively a singleton, 
-    //       while ModifierLayer objects are created for every player (so modifiers are too)
-    KosmXWallClimbAnimPlayer animStuff;
-    SpeedModifier speedModifier;
+public class KosmXWallClimbLayer extends AnimLayerHandler<KosmXModifierSpeedLayer<IAnimation>> implements WallClimbAnim {
+    private Map<UUID, KosmXWallClimbAnimPlayer> animStuff = new HashMap<>();
     
     public KosmXWallClimbLayer(ResourceLocation id) {
         super(id);
     }
 
     @Override
-    protected ModifierLayer<IAnimation> createAnimLayer(AbstractClientPlayerEntity player) {
-        ModifierLayer<IAnimation> anim = new ModifierLayer<>(null);
+    protected KosmXModifierSpeedLayer<IAnimation> createAnimLayer(AbstractClientPlayerEntity player) {
+        KosmXModifierSpeedLayer<IAnimation> anim = new KosmXModifierSpeedLayer<>(new SpeedModifier(1));
         anim.addModifierLast(new KosmXHeadRotationModifier());
-        anim.addModifierLast(getOrCreateSpeedModifier(player));
         return anim;
     }
     
@@ -60,13 +60,13 @@ public class KosmXWallClimbLayer extends AnimLayerHandler implements WallClimbAn
             if (up == null) return false;
             
             KosmXWallClimbAnimPlayer keyframePlayer = new KosmXWallClimbAnimPlayer(up, up, up, up);
-            animStuff = keyframePlayer;
-            ModifierLayer<?> modifierLayer = getAnimLayer((AbstractClientPlayerEntity) player);
-            animStuff.onInit(player, modifierLayer, getOrCreateSpeedModifier(player));
+            animStuff.put(player.getUUID(), keyframePlayer);
+            KosmXModifierSpeedLayer<?> modifierLayer = getAnimLayer((AbstractClientPlayerEntity) player);
+            keyframePlayer.onInit(player, modifierLayer, modifierLayer.speed);
             return setAnim(player, keyframePlayer);
         }
         else {
-            animStuff = null;
+            animStuff.put(player.getUUID(), null);
             return setAnim(player, null);
         }
     }
@@ -79,14 +79,7 @@ public class KosmXWallClimbLayer extends AnimLayerHandler implements WallClimbAn
     
     @Nullable
     private KosmXWallClimbAnimPlayer getWallClimbAnimPlayer(PlayerEntity player) {
-        return animStuff;
-    }
-    
-    private SpeedModifier getOrCreateSpeedModifier(PlayerEntity player) {
-        if (speedModifier == null) {
-            speedModifier = new SpeedModifier(1);
-        }
-        return speedModifier;
+        return animStuff.get(player.getUUID());
     }
     
     

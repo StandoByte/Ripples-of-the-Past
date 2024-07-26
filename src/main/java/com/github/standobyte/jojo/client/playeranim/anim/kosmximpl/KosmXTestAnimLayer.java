@@ -13,7 +13,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ClientChatEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-public class KosmXTestAnimLayer extends AnimLayerHandler {
+public class KosmXTestAnimLayer extends AnimLayerHandler<ModifierLayer<IAnimation>> {
     private SpeedModifier animSpeed = new SpeedModifier(1);
 
     public KosmXTestAnimLayer(ResourceLocation id) {

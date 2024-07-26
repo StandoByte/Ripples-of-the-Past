@@ -17,7 +17,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 
-public class KosmXBarrageAnimLayer extends AnimLayerHandler implements PlayerBarrageAnim {
+public class KosmXBarrageAnimLayer extends AnimLayerHandler<ModifierLayer<IAnimation>> implements PlayerBarrageAnim {
 
     public KosmXBarrageAnimLayer(ResourceLocation id) {
         super(id);

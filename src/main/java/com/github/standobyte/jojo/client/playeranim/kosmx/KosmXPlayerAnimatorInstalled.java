@@ -226,7 +226,7 @@ public class KosmXPlayerAnimatorInstalled extends PlayerAnimationHandler.PlayerA
         }
     }
     
-    public static abstract class AnimLayerHandler extends AnimHandler<ModifierLayer<IAnimation>> {
+    public static abstract class AnimLayerHandler<T extends ModifierLayer<IAnimation>> extends AnimHandler<T> {
 
         public AnimLayerHandler(ResourceLocation id) {
             super(id);

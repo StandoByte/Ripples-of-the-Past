@@ -22,7 +22,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 
-public class KosmXHamonBreathLayer extends AnimLayerHandler implements BasicToggleAnim {
+public class KosmXHamonBreathLayer extends AnimLayerHandler<ModifierLayer<IAnimation>> implements BasicToggleAnim {
     private static final Random RANDOM = new Random();
 
     public KosmXHamonBreathLayer(ResourceLocation id) {
