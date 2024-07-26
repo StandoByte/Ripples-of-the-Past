@@ -12,6 +12,8 @@ import com.github.standobyte.jojo.client.playeranim.kosmx.KosmXPlayerAnimatorIns
 import com.github.standobyte.jojo.client.playeranim.kosmx.anim.KosmXModifierSpeedLayer;
 import com.github.standobyte.jojo.client.playeranim.kosmx.anim.modifier.KosmXHeadRotationModifier;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.EnergyRippleLayer;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromclient.ClSyncMotionAnimPacket;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 
@@ -75,6 +77,9 @@ public class KosmXWallClimbLayer extends AnimLayerHandler<KosmXModifierSpeedLaye
     public void tickAnimProperties(PlayerEntity player, boolean isMoving, 
             double movementUp, double movementLeft, float speed) {
         getWallClimbAnimPlayer(player).tickProperties(isMoving, movementUp, movementLeft, speed);
+        if (player == Minecraft.getInstance().player) {
+            PacketManager.sendToServer(new ClSyncMotionAnimPacket(isMoving, movementUp, movementLeft, speed));
+        }
     }
     
     @Nullable

@@ -36,6 +36,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClSoulRotationPacke
 import com.github.standobyte.jojo.network.packets.fromclient.ClStandManualMovementPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClStopHeldActionPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClStopWallClimbPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClSyncMotionAnimPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandManualControlPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandSummonPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClWalkmanControlsPacket;
@@ -55,6 +56,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.HamonUiEffectPacket
 import com.github.standobyte.jojo.network.packets.fromserver.KnockbackResTickPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.LeapCooldownPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.MaxAchievedResolvePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.SyncMotionAnimStatePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.NotificationSyncPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.PhotoDataPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.PhotoForOtherPlayerPacket;
@@ -188,6 +190,7 @@ public class PacketManager {
         registerMessage(clientChannel, new ClRemovePlayerSoulEntityPacket.Handler(),       Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClWalkmanControlsPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClReadHamonBreathTabPacket.Handler(),           Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        registerMessage(clientChannel, new ClSyncMotionAnimPacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClPhotoAssignIdPacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClPhotoSaveDataPacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClPhotoRequestPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_SERVER));
@@ -223,6 +226,7 @@ public class PacketManager {
         registerMessage(serverChannel, new TrHamonFlagsPacket.Handler(),                   Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new HamonUiEffectPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new HamonSyncOnLoadPacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(serverChannel, new SyncMotionAnimStatePacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrVampirismDataPacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrStaminaPacket.Handler(),                      Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new ArrowXpLevelsDataPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_CLIENT));

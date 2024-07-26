@@ -205,8 +205,10 @@ public class HamonWallClimbing2 extends HamonAction {
                     double up = movement.y;
                     double left = movement.yRot(-climbYRot).x;
                     InputHandler.getInstance().wallClimbClientTick(isMoving, wallClimbData);
+                    
+                    float animSpeed = (float) climbSpeed / MIN_MOVEMENT_SPEED;
                     ModPlayerAnimations.wallClimbing.tickAnimProperties(player, isMoving, 
-                            up, left, (float) climbSpeed / MIN_MOVEMENT_SPEED);
+                            up, left, animSpeed);
 //                }
                 
                 player.setDeltaMovement(movement);
