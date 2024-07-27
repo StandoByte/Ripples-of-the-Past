@@ -27,7 +27,7 @@ public class ParseAnims {
         Animation.Builder builder = Animation.Builder.create(lengthSecs);
 
         boolean loop = false;
-        boolean holdOnLastFrame = false; // TODO
+        boolean holdOnLastFrame = false; // TODO gecko animation parsing
         JsonElement loopJson = animJson.get("loop");
         if (loopJson != null && loopJson.isJsonPrimitive()) {
             String loopMode = loopJson.getAsString();

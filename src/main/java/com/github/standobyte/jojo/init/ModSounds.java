@@ -82,6 +82,12 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> VAMPIRE_CURE_START = register("vampire_cure_start");
 
     public static final RegistryObject<SoundEvent> VAMPIRE_CURE_END = register("vampire_cure_end");
+    
+    
+    public static final RegistryObject<SoundEvent> BUCKET_FILL_BOILING_BLOOD = register("bucket_fill_boiling_blood");
+    public static final RegistryObject<SoundEvent> BUCKET_EMPTY_BOILING_BLOOD = register("bucket_empty_boiling_blood");
+    public static final RegistryObject<SoundEvent> BOILING_BLOOD_POP = register("boiling_blood_pop");
+    public static final RegistryObject<SoundEvent> BOILING_BLOOD_AMBIENT = register("boiling_blood_ambient");
 
 
     public static final RegistryObject<SoundEvent> HAMON_PICK_JONATHAN = register("hamon_pick_jonathan");

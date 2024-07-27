@@ -45,7 +45,6 @@ public class HamonWallClimbing extends HamonAction {
         }
         if (ticksHeld % 4 == 0) {
             Vector3d sparkVec = user.getLookAngle().scale(0.25).add(user.getX(), user.getY(1.0), user.getZ());
-            // FIXME !!!!!!!!!!!!!!!!!! sfx
             HamonUtil.emitHamonSparkParticles(world, user instanceof PlayerEntity ? (PlayerEntity) user : null, sparkVec, 0.1F);
         }
     }

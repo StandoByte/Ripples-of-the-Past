@@ -442,7 +442,6 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         return StandStatFormulas.getLeapStrength(leapBaseStrength() * getStandEfficiency());
     }
     
-    // FIXME ATTACK_DAMAGE is not syncable, therefore the client doesn't know about the strength stat lvling
     protected double leapBaseStrength() {
         return getAttributeValue(Attributes.ATTACK_DAMAGE);
     }

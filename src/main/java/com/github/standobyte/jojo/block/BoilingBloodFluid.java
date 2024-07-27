@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModFluids;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModParticles;
+import com.github.standobyte.jojo.init.ModSounds;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.FlowingFluidBlock;
@@ -19,13 +20,12 @@ import net.minecraft.particles.ParticleTypes;
 import net.minecraft.state.StateContainer;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
-import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.IWorld;
 import net.minecraft.world.World;
 import net.minecraftforge.fluids.FluidAttributes;
 
-public abstract class BoilingBloodFluid extends LavaFluid { // TODO separate sounds to make subtitles mention "boiling blood" instead of "lava"
+public abstract class BoilingBloodFluid extends LavaFluid {
 
     @Override
     public Fluid getFlowing() {
@@ -49,7 +49,7 @@ public abstract class BoilingBloodFluid extends LavaFluid { // TODO separate sou
                new ResourceLocation(JojoMod.MOD_ID, "block/boiling_blood_flow"))
                .translationKey("block.jojo.boiling_blood")
                .luminosity(15).density(3000).viscosity(6000).temperature(1300)
-               .sound(SoundEvents.BUCKET_FILL_LAVA, SoundEvents.BUCKET_EMPTY_LAVA)
+               .sound(ModSounds.BUCKET_FILL_BOILING_BLOOD.get(), ModSounds.BUCKET_EMPTY_BOILING_BLOOD.get())
                .build(this);
     }
 
@@ -62,11 +62,11 @@ public abstract class BoilingBloodFluid extends LavaFluid { // TODO separate sou
                 double d1 = (double)pPos.getY() + 1.0D;
                 double d2 = (double)pPos.getZ() + pRandom.nextDouble();
                 pLevel.addParticle(ModParticles.BOILING_BLOOD_POP.get(), d0, d1, d2, 0.0D, 0.0D, 0.0D);
-                pLevel.playLocalSound(d0, d1, d2, SoundEvents.LAVA_POP, SoundCategory.BLOCKS, 0.2F + pRandom.nextFloat() * 0.2F, 0.9F + pRandom.nextFloat() * 0.15F, false);
+                pLevel.playLocalSound(d0, d1, d2, ModSounds.BOILING_BLOOD_POP.get(), SoundCategory.BLOCKS, 0.2F + pRandom.nextFloat() * 0.2F, 0.9F + pRandom.nextFloat() * 0.15F, false);
             }
 
             if (pRandom.nextInt(200) == 0) {
-                pLevel.playLocalSound((double)pPos.getX(), (double)pPos.getY(), (double)pPos.getZ(), SoundEvents.LAVA_AMBIENT, SoundCategory.BLOCKS, 0.2F + pRandom.nextFloat() * 0.2F, 0.9F + pRandom.nextFloat() * 0.15F, false);
+                pLevel.playLocalSound((double)pPos.getX(), (double)pPos.getY(), (double)pPos.getZ(), ModSounds.BOILING_BLOOD_AMBIENT.get(), SoundCategory.BLOCKS, 0.2F + pRandom.nextFloat() * 0.2F, 0.9F + pRandom.nextFloat() * 0.15F, false);
             }
         }
 

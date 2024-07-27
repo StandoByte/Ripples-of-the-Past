@@ -5,7 +5,6 @@ import java.util.Map;
 import com.github.standobyte.jojo.client.render.entity.bb.EntityModelUnbaked;
 
 import net.minecraft.client.renderer.entity.model.EntityModel;
-import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
 
 /**

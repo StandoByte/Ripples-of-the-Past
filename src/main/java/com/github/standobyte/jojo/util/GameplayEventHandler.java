@@ -897,7 +897,7 @@ public class GameplayEventHandler {
                 if (power.getTypeSpecificData(vampirism).map(vamp -> !vamp.isVampireAtFullPower()).orElse(false) || power.givePower(vampirism)) {
                     entity.level.playSound(null, entity, ModSounds.STONE_MASK_ACTIVATION_ENTITY.get(), entity.getSoundSource(), 1.0F, 1.0F);
                     power.getTypeSpecificData(vampirism).get().setVampireFullPower(true);
-                    StoneMaskItem.setActivatedArmorTexture(headStack); // TODO light beams on stone mask activation
+                    StoneMaskItem.setActivatedArmorTexture(headStack); // TODO light beams on stone mask activation?
                     headStack.hurtAndBreak(1, entity, stack -> {});
                     return true;
                 }

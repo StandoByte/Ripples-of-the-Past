@@ -180,7 +180,6 @@ public class ShaderEffectApplier {
     }
     
     private boolean tsShaderStarted;
-    // TODO determine the position of the time stopper entity on the screen
     private Entity timeStopper;
     private TimeStop timeStopAction;
     @Nullable private ClientUtil.PosOnScreen tsPosOnScreen;

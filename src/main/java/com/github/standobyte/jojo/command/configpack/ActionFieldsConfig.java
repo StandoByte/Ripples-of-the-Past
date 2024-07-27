@@ -78,7 +78,7 @@ public class ActionFieldsConfig extends JsonDataConfig {
             // generate the .json files
             int count = writeDefaultActionConfig(source.getServer(), standType.getAllUnlockableActions());
             
-            // TODO chat message
+            // FIXME chat message
 //            source.sendSuccess(new TranslationTextComponent("commands.jojoconfigpack.standstats.all", 
 //                    // clickable link to the files (in "jojo" namespace)
 //                    new TranslationTextComponent("commands.jojoconfigpack.standstats.all.link_name").withStyle(TextFormatting.UNDERLINE).withStyle((style) -> {
@@ -105,7 +105,7 @@ public class ActionFieldsConfig extends JsonDataConfig {
             
             int count = writeDefaultActionConfig(source.getServer(), Collections.singletonList(action));
 
-            // TODO chat message
+            // FIXME chat message
 //            source.sendSuccess(new TranslationTextComponent("commands.jojoconfigpack.standstats.single", 
 //                    new TranslationTextComponent("commands.jojoconfigpack.standstats.single.link_name").withStyle(TextFormatting.UNDERLINE).withStyle((style) -> {
 //                        return style
