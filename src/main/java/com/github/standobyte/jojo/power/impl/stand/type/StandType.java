@@ -60,7 +60,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     private final ITextComponent partName;
     private final T defaultStats;
     private final Class<T> statsClass;
-    private final StandSurvivalGameplayPool survivalGameplayPool;
+    private final IStandPool survivalGameplayPool;
     private final Supplier<SoundEvent> summonShoutSupplier;
     private final OstSoundList ostSupplier;
     private final Map<Integer, List<ItemStack>> resolveLevelItems;
@@ -180,7 +180,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
             return getThis();
         }
         
-        public B setSurvivalGameplayPool(StandSurvivalGameplayPool survivalGameplayPool) {
+        public B setSurvivalGameplayPool(IStandPool survivalGameplayPool) {
             getOptionals().survivalGameplayPool = survivalGameplayPool;
             return getThis();
         }
@@ -259,7 +259,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         return false;
     }
     
-    public StandSurvivalGameplayPool getSurvivalGameplayPool() {
+    public IStandPool getSurvivalGameplayPool() {
         return survivalGameplayPool;
     }
 
@@ -470,7 +470,7 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     
     @Deprecated
     public static class StandTypeOptionals {
-        private StandSurvivalGameplayPool survivalGameplayPool = StandSurvivalGameplayPool.PLAYER_ARROW; 
+        private IStandPool survivalGameplayPool = StandSurvivalGameplayPool.PLAYER_ARROW; 
         private Supplier<SoundEvent> summonShoutSupplier = () -> null;
         private OstSoundList ostSupplier = null;
         private Map<Integer, List<ItemStack>> resolveLevelItems = new HashMap<>();
@@ -499,7 +499,10 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     }
     
     
-    public static enum StandSurvivalGameplayPool {
+    
+    public static interface IStandPool {}
+    
+    public static enum StandSurvivalGameplayPool implements IStandPool {
         PLAYER_ARROW,
         NON_ARROW, // Requiems, C-Moon, Made in Heaven, Acts depending on their implementation, etc.
         NPC_ENCOUNTER,
