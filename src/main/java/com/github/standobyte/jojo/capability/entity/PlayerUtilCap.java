@@ -102,9 +102,6 @@ public class PlayerUtilCap {
     
     public PlayerUtilCap(PlayerEntity player) {
         this.player = player;
-//        if (!player.level.isClientSide()) {
-//            statChangeListeners.add(new CustomVillagerTrades.MapItemStackTradeListener((ServerPlayerEntity) player));
-//        }
     }
     
     
@@ -315,7 +312,10 @@ public class PlayerUtilCap {
         POWER_CONTROLS,
         HAMON_WINDOW,
         HAMON_BREATH_GUIDE,
-        HIGH_STAND_RANGE;
+        HIGH_STAND_RANGE,
+        BOUGHT_METEORITE_MAP,
+        BOUGHT_HAMON_TEMPLE_MAP,
+        BOUGHT_PILLAR_MAN_TEMPLE_MAP;
     }
     
     public void notificationsFromNBT(CompoundNBT nbt) {

@@ -5,6 +5,7 @@ import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalInt;
+import java.util.Queue;
 import java.util.Set;
 
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -25,6 +26,7 @@ import net.minecraft.client.gui.screen.IngameMenuScreen;
 import net.minecraft.client.gui.screen.MainMenuScreen;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.gui.widget.list.KeyBindingList;
+import net.minecraft.client.particle.EmitterParticle;
 import net.minecraft.client.particle.IAnimatedSprite;
 import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.renderer.ActiveRenderInfo;
@@ -200,6 +202,11 @@ public class ClientReflection {
     private static final Field PARTICLE_MANAGER_SPRITE_SETS = ObfuscationReflectionHelper.findField(ParticleManager.class, "field_215242_i");
     public static Map<ResourceLocation, ? extends IAnimatedSprite> getSpriteSets(ParticleManager particleManager) {
         return ReflectionUtil.getFieldValue(PARTICLE_MANAGER_SPRITE_SETS, particleManager);
+    }
+    
+    private static final Field PARTICLE_MANAGER_TRACKING_EMITTERS = ObfuscationReflectionHelper.findField(ParticleManager.class, "field_178933_d");
+    public static Queue<EmitterParticle> getTrackingEmitters(ParticleManager particleManager) {
+        return ReflectionUtil.getFieldValue(PARTICLE_MANAGER_TRACKING_EMITTERS, particleManager);
     }
     
     

@@ -1,13 +1,11 @@
 package com.github.standobyte.jojo.util.mc;
 
 import java.util.Arrays;
-import java.util.List;
 import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -31,17 +29,13 @@ import net.minecraft.entity.merchant.villager.VillagerProfession;
 import net.minecraft.entity.merchant.villager.VillagerTrades;
 import net.minecraft.entity.merchant.villager.VillagerTrades.ITrade;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.villager.VillagerType;
-import net.minecraft.inventory.container.MerchantContainer;
-import net.minecraft.inventory.container.Slot;
+import net.minecraft.inventory.MerchantInventory;
 import net.minecraft.item.FilledMapItem;
-import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.MerchantOffer;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.stats.Stats;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -174,7 +168,7 @@ public class CustomVillagerTrades {
             if (playerHasHamon || playerHasVampirism)   pillarManTempleMapChance = 0;
             else if (playerHasStand)                    pillarManTempleMapChance = 0.0125;
             else switch (MapTrade.PILLARMAN_MAP.villagerFamiliarWith(villagerData.getType())) {
-            case /*FamiliarWith.*/THIS_BIOME:           pillarManTempleMapChance = 0.5;
+            case /*FamiliarWith.*/THIS_BIOME:           pillarManTempleMapChance = 0.5 * 2;
                 break;
             case /*FamiliarWith.*/OTHER_BIOME:          pillarManTempleMapChance = 0;
                 break;
@@ -263,72 +257,54 @@ public class CustomVillagerTrades {
         }
     }
     
-    // the initialization is temporarily commented out in PlayerUtilCap's constructor
-    public static class MapItemStackTradeListener extends PlayerStatListener<Item> { // TODO make tracking bought items ItemStack sensitive
-
-        private static final ITextComponent[] MAP_NAMES = {
-                new TranslationTextComponent("filled_map.jojo:meteorite"),
-                new TranslationTextComponent("filled_map.jojo:hamon_temple"),
-                new TranslationTextComponent("filled_map.jojo:pillarman_temple")
-        };
-        private static final TrEntitySpecialEffectPacket.Type[] VISUALS_TYPE = {
-                TrEntitySpecialEffectPacket.Type.SOLD_METEORITE_MAP,
-                TrEntitySpecialEffectPacket.Type.SOLD_HAMON_TEMPLE_MAP,
-                TrEntitySpecialEffectPacket.Type.SOLD_PILLAR_MAN_TEMPLE_MAP
-        };
+    
+    
+    public static void onTrade(PlayerEntity player, ItemStack stack, 
+            MerchantInventory slots, MerchantOffer offer) {
+        if (stack.isEmpty()) return;
         
-        public MapItemStackTradeListener(ServerPlayerEntity player) {
-            super(Stats.ITEM_CRAFTED.get(Items.FILLED_MAP), player);
-        }
-
-        @Override
-        protected void handleChanged(Item map, ServerPlayerEntity player, long oldVal, long newVal) {
-//            List<ItemStack> mapItems = player.inventory.items.stream() // FIXME the item is not in the inventory by this time yet, so it doesn't actually work
-//                    .filter(item -> !item.isEmpty() && item.getItem() == map).collect(Collectors.toList())
-            List<ItemStack> mapItems = player.inventoryMenu.slots.stream()
-                    .map(Slot::getItem)
-                    .filter(item -> !item.isEmpty() && item.getItem() == map).collect(Collectors.toList()); // FIXME nope, doesn't work either
-            for (ItemStack mapItem : mapItems) {
-                for (int i = 0; i < MAP_NAMES.length; i++) {
-                    ITextComponent mapName = MAP_NAMES[i];
-                    if (mapName.equals(mapItem.getHoverName())) {
-                        Optional<Entity> trader = getNpcTradingWith(player);
-                        if (trader.isPresent()) {
-                            Entity traderEntity = trader.get();
+        if (stack.getItem() == Items.FILLED_MAP && stack.hasCustomHoverName()) {
+            for (int i = 0; i < MAP_NAMES.length; i++) {
+                ITextComponent mapName = MAP_NAMES[i];
+                if (mapName.equals(stack.getHoverName())) {
+                    PlayerUtilCap.OneTimeNotification notification = PLAYER_NOTIFICATION[i];
+                    Optional<PlayerUtilCap> playerNotifications = player.getCapability(PlayerUtilCapProvider.CAPABILITY).resolve();
+                    if (playerNotifications.map(notif -> !notif.sentNotification(notification)).orElse(false)) {
+                        playerNotifications.get().setSentNotification(notification, true);
+                        
+                        IMerchant merchant = CommonReflection.getMerchant(slots);
+                        if (merchant instanceof Entity) {
+                            Entity merchantEntity = (Entity) merchant;
                             TrEntitySpecialEffectPacket.Type visualsType = VISUALS_TYPE[i];
-                            
                             player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                                 cap.doWhen(
                                         () -> PacketManager.sendToClientsTrackingAndSelf(new TrEntitySpecialEffectPacket(
-                                                traderEntity.getId(), visualsType, player.getId()), traderEntity), 
+                                                merchantEntity.getId(), visualsType, player.getId()), merchantEntity), 
                                         () -> player.containerMenu == player.inventoryMenu);
                             });
-                            
-                            // TODO add the visuals and the sound after the player closes the screen (packet handler)
-                            // TODO add as notification (to trigger it only once per game)
-                        }
-                        else {
-                            return;
                         }
                     }
+                    
+                    break;
                 }
             }
         }
     }
     
+    private static final ITextComponent[] MAP_NAMES = {
+            new TranslationTextComponent("filled_map.jojo:meteorite"),
+            new TranslationTextComponent("filled_map.jojo:hamon_temple"),
+            new TranslationTextComponent("filled_map.jojo:pillarman_temple")
+    };
+    private static final TrEntitySpecialEffectPacket.Type[] VISUALS_TYPE = {
+            TrEntitySpecialEffectPacket.Type.SOLD_METEORITE_MAP,
+            TrEntitySpecialEffectPacket.Type.SOLD_HAMON_TEMPLE_MAP,
+            TrEntitySpecialEffectPacket.Type.SOLD_PILLAR_MAN_TEMPLE_MAP
+    };
+    private static final PlayerUtilCap.OneTimeNotification[] PLAYER_NOTIFICATION = {
+            PlayerUtilCap.OneTimeNotification.BOUGHT_METEORITE_MAP,
+            PlayerUtilCap.OneTimeNotification.BOUGHT_HAMON_TEMPLE_MAP,
+            PlayerUtilCap.OneTimeNotification.BOUGHT_PILLAR_MAN_TEMPLE_MAP
+    };
     
-    
-    public static Optional<Entity> getNpcTradingWith(ServerPlayerEntity player) {
-        if (player.containerMenu instanceof MerchantContainer) {
-            MerchantContainer tradingMenu = (MerchantContainer) player.containerMenu;
-            if (tradingMenu.stillValid(player)) {
-                IMerchant trader = CommonReflection.getTrader(tradingMenu);
-                if (trader instanceof Entity) {
-                    return Optional.of((Entity) trader);
-                }
-            }
-        }
-        
-        return Optional.empty();
-    }
 }
