@@ -1320,14 +1320,20 @@ public class GameplayEventHandler {
     
     @SubscribeEvent
     public static void onWakeUp(PlayerWakeUpEvent event) {
+        PlayerEntity player = event.getPlayer();
+        
         if (!event.wakeImmediately() && !event.updateWorld()) {
-            IStandPower.getStandPowerOptional(event.getPlayer()).ifPresent(stand -> {
+            IStandPower.getStandPowerOptional(player).ifPresent(stand -> {
                 if (stand.hasPower()) {
                     stand.setStamina(stand.getMaxStamina());
                 }
             });
         }
-        VampirismData.finishCuringOnWakingUp(event.getPlayer());
+        
+        VampirismData.finishCuringOnWakingUp(player);
+        
+        player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(
+                playerData -> playerData.onWakeUp());
     }
     
     @SubscribeEvent(priority = EventPriority.LOWEST)

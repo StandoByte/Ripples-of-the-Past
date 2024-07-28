@@ -18,6 +18,7 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.util.GameplayEventHandler;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
+import com.mojang.datafixers.util.Either;
 
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.block.AbstractBlock;
@@ -47,6 +48,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Hand;
+import net.minecraft.util.Unit;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -71,7 +73,6 @@ import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
-@EventBusSubscriber(modid = JojoMod.MOD_ID)
 public class WoodenCoffinBlock extends HorizontalBlock {
     public static final BooleanProperty CLOSED = BooleanProperty.create("coffin_lid_closed");
     private final DyeColor color;
@@ -130,33 +131,39 @@ public class WoodenCoffinBlock extends HorizontalBlock {
                 
                 return ActionResultType.SUCCESS;
             } else {
-                boolean occupied = blockState.getValue(OCCUPIED);
-                if (player.isShiftKeyDown() || occupied) {
-                    world.setBlock(blockPos, blockState.setValue(CLOSED, !blockState.getValue(CLOSED)), 3);
-                    if (occupied) {
-                        player.displayClientMessage(new TranslationTextComponent("block.minecraft.bed.occupied"), true);
-                    }
-                    return ActionResultType.SUCCESS;
-                } else {
-                    BlockPos coffinPos = blockPos;
-                    player.startSleepInBed(blockPos)
-                    .ifLeft(failed -> {
-                        if (failed != null) {
-                            if (!world.isClientSide() && failed == PlayerEntity.SleepResult.NOT_SAFE) {
-                                forseSleep((ServerPlayerEntity) player, coffinPos);
-                            }
-                            else {
-                                player.displayClientMessage(failed.getMessage(), true);
-                            }
-                        }
-                    });
-                    return ActionResultType.SUCCESS;
-                }
+                sleepInsideCoffin(player, world, blockPos, blockState, false);
+                return ActionResultType.SUCCESS;
             }
         }
     }
     
-    private void forseSleep(ServerPlayerEntity player, BlockPos blockPos) {
+    private static void sleepInsideCoffin(PlayerEntity player, World world, 
+            BlockPos blockPos, BlockState blockState, boolean vampireRespawn) {
+        boolean occupied = blockState.getValue(OCCUPIED);
+        if (player.isShiftKeyDown() || occupied) {
+            world.setBlock(blockPos, blockState.setValue(CLOSED, !blockState.getValue(CLOSED)), 3);
+            if (occupied) {
+                player.displayClientMessage(new TranslationTextComponent("block.minecraft.bed.occupied"), true);
+            }
+        } else {
+            player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(
+                    playerData -> playerData.onSleepingInCoffin(vampireRespawn));
+            BlockPos coffinPos = blockPos;
+            Either<PlayerEntity.SleepResult, Unit> sleepResult = player.startSleepInBed(blockPos);
+            sleepResult.ifLeft(failed -> {
+                if (failed != null) {
+                    if (!world.isClientSide() && failed == PlayerEntity.SleepResult.NOT_SAFE) {
+                        forseSleep((ServerPlayerEntity) player, coffinPos);
+                    }
+                    else {
+                        player.displayClientMessage(failed.getMessage(), true);
+                    }
+                }
+            });
+        }
+    }
+    
+    private static void forseSleep(ServerPlayerEntity player, BlockPos blockPos) {
         player.startSleeping(blockPos);
         CommonReflection.setSleepCounter(player, 0);
         player.awardStat(Stats.SLEEP_IN_BED);
@@ -170,85 +177,102 @@ public class WoodenCoffinBlock extends HorizontalBlock {
         world.setBlock(pos, state.setValue(OCCUPIED, occupied).setValue(CLOSED, occupied), 3);
     }
     
-    @SubscribeEvent
-    public static void setRespawnLocation(PlayerSetSpawnEvent event) {
-        if (isBlockCoffin(event.getEntityLiving().level, Optional.ofNullable(event.getNewSpawn()))
-                && !isEntityVampire(event.getPlayer())) {
-            event.setCanceled(true);
-        }
-    }
+
+    @EventBusSubscriber(modid = JojoMod.MOD_ID)
+    public static class EventHandler {
     
-    @SubscribeEvent(priority = EventPriority.HIGH)
-    public static void preventBedCoffinAlternating(PlayerSleepInBedEvent event) {
-        PlayerEntity player = event.getPlayer();
-        boolean isCoffin = isBlockCoffin(player.level, event.getOptionalPos());
-        boolean canSleep = player.getCapability(PlayerUtilCapProvider.CAPABILITY)
-                .map(cap -> cap.canGoToSleep(isCoffin)).orElse(true);
-        if (!canSleep) {
-            event.setResult(SleepResult.OTHER_PROBLEM);
-            player.displayClientMessage(new TranslationTextComponent("block.jojo.wooden_coffin.full_time_skip_fix"), true);
-        }
-    }
-    
-    @SubscribeEvent
-    public static void canSleepAtTime(SleepingTimeCheckEvent event) {
-        if (isBlockCoffin(event.getEntityLiving().level, event.getSleepingLocation())) {
-            event.setResult(Result.ALLOW);
-        }
-    }
-    
-    @SubscribeEvent
-    public static void setCoffinTime(SleepFinishedTimeEvent event) {
-        if (event.getWorld() instanceof ServerWorld) {
-            ServerWorld world = (ServerWorld) event.getWorld();
-            int playersCount = world.players().size();
-            if (world.players().stream()
-                    .filter(player -> player.isSleeping() && isBlockCoffin(player.level, Optional.of(player.blockPosition())))
-                    .count() >= (playersCount + 1) / 2) {
-                long time = world.getDayTime();
-                long timeAdded = (24000L - time % 24000L + 12600L) % 24000L;
-                event.setTimeAddition(time + timeAdded);
+        @SubscribeEvent
+        public static void setRespawnLocation(PlayerSetSpawnEvent event) {
+            if (isBlockCoffin(event.getEntityLiving().level, Optional.ofNullable(event.getNewSpawn()))
+                    && !isEntityVampire(event.getPlayer())) {
+                event.setCanceled(true);
             }
         }
-    }
-    
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void skippedToNight(SleepFinishedTimeEvent event) {
-        int time = (int) (event.getNewTime() % 24000L);
-        if (event.getWorld() instanceof ServerWorld) {
-            ServerWorld world = (ServerWorld) event.getWorld();
-            world.players().stream()
-            .filter(player -> player.isSleeping())
-            .forEach(player -> {
-                boolean isCoffin = isBlockCoffin(player.level, Optional.of(player.blockPosition()));
-                
-                if (isCoffin) {
-                    if (player.hasEffect(ModStatusEffects.VAMPIRE_SUN_BURN.get())) {
-                        player.removeEffect(ModStatusEffects.VAMPIRE_SUN_BURN.get());
-                        player.removeEffect(Effects.WEAKNESS);
-                    }
-                    if (time >= 12600 && time < 23500) {
-                        ModCriteriaTriggers.SLEPT_IN_COFFIN.get().trigger(player);
-                    }
+        
+        @SubscribeEvent(priority = EventPriority.HIGH)
+        public static void preventBedCoffinAlternating(PlayerSleepInBedEvent event) {
+            PlayerEntity player = event.getPlayer();
+            boolean isCoffin = isBlockCoffin(player.level, event.getOptionalPos());
+            boolean preventingDayTimeSkip = isCoffin && player.getCapability(PlayerUtilCapProvider.CAPABILITY)
+                    .map(playerData -> playerData.coffinPreventDayTimeSkip).orElse(false);
+            if (!preventingDayTimeSkip) {
+                boolean canSleep = player.getCapability(PlayerUtilCapProvider.CAPABILITY)
+                        .map(cap -> cap.canGoToSleep(isCoffin)).orElse(true);
+                if (!canSleep) {
+                    event.setResult(SleepResult.OTHER_PROBLEM);
+                    player.displayClientMessage(new TranslationTextComponent("block.jojo.wooden_coffin.full_time_skip_fix"), true);
                 }
-
-                long oldTime = event.getWorld().dayTime();
-                int timeAdded = (int) Math.max(event.getNewTime() - oldTime, 0);
-                player.getCapability(PlayerUtilCapProvider.CAPABILITY)
-                        .ifPresent(cap -> cap.onSleep(isCoffin, timeAdded));
-            });
+            }
         }
-    }
+        
+        @SubscribeEvent
+        public static void canSleepAtTime(SleepingTimeCheckEvent event) {
+            if (isBlockCoffin(event.getEntityLiving().level, event.getSleepingLocation())) {
+                event.setResult(Result.ALLOW);
+            }
+        }
+        
+        @SubscribeEvent
+        public static void setCoffinTime(SleepFinishedTimeEvent event) {
+            if (event.getWorld() instanceof ServerWorld) {
+                ServerWorld world = (ServerWorld) event.getWorld();
+                int playersCount = world.players().size();
+                if (world.players().stream()
+                        .filter(player -> player.isSleeping() && isBlockCoffin(player.level, Optional.of(player.blockPosition())))
+                        .count() >= (playersCount + 1) / 2) {
+                    long time = world.getDayTime();
+                    long timeAdded = (24000L - time % 24000L + 12600L) % 24000L;
+                    event.setTimeAddition(time + timeAdded);
+                }
+            }
+        }
+        
+        @SubscribeEvent(priority = EventPriority.LOWEST)
+        public static void skippedToNight(SleepFinishedTimeEvent event) {
+            int time = (int) (event.getNewTime() % 24000L);
+            if (event.getWorld() instanceof ServerWorld) {
+                ServerWorld world = (ServerWorld) event.getWorld();
+                world.players().stream()
+                .filter(player -> player.isSleeping())
+                .forEach(player -> {
+                    boolean isCoffin = isBlockCoffin(player.level, Optional.of(player.blockPosition()));
+                    
+                    if (isCoffin) {
+                        if (player.hasEffect(ModStatusEffects.VAMPIRE_SUN_BURN.get())) {
+                            player.removeEffect(ModStatusEffects.VAMPIRE_SUN_BURN.get());
+                            player.removeEffect(Effects.WEAKNESS);
+                        }
+                        if (time >= 12600 && time < 23500) {
+                            ModCriteriaTriggers.SLEPT_IN_COFFIN.get().trigger(player);
+                        }
+                    }
     
-    @SubscribeEvent
-    public static void respawnInsideCoffin(PlayerRespawnEvent event) {
-        PlayerEntity player = event.getPlayer();
-        if (player.level.isDay() && isEntityVampire(player) && player instanceof ServerPlayerEntity) {
-            BlockPos pos = ((ServerPlayerEntity) player).getRespawnPosition();
-            if (pos != null) {
-                BlockState blockState = player.level.getBlockState(pos);
+                    long oldTime = event.getWorld().dayTime();
+                    int timeAdded = (int) Math.max(event.getNewTime() - oldTime, 0);
+                    player.getCapability(PlayerUtilCapProvider.CAPABILITY)
+                            .ifPresent(cap -> cap.onSleep(isCoffin, timeAdded));
+                });
+            }
+        }
+        
+        @SubscribeEvent
+        public static void onServerPlayerRespawn(PlayerRespawnEvent event) {
+            ServerPlayerEntity player = (ServerPlayerEntity) event.getPlayer();
+            respawnInsideCoffin(player, player.getRespawnPosition());
+        }
+        
+        public static void respawnInsideCoffin(PlayerEntity player, BlockPos respawnPos) {
+            if (isEntityVampire(player) && respawnPos != null) {
+                BlockState blockState = player.level.getBlockState(respawnPos);
                 if (blockState.getBlock() instanceof WoodenCoffinBlock) {
-                    // FIXME (vampire\coffin) spawn inside the coffin?
+                    if (!player.level.isClientSide()) {
+                        sleepInsideCoffin(player, player.level, respawnPos, blockState, true);
+                        Vector3d sleepingPos = new Vector3d(
+                                respawnPos.getX() + 0.5, 
+                                respawnPos.getY() + 0.6875, 
+                                respawnPos.getZ() + 0.5);
+                        player.teleportTo(sleepingPos.x, sleepingPos.y, sleepingPos.z);
+                    }
                 }
             }
         }
