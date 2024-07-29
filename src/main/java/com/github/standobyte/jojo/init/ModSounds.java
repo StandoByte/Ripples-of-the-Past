@@ -36,6 +36,8 @@ public class ModSounds {
     
     public static final RegistryObject<SoundEvent> PILLAR_MAN_WIND_MODE2 = register("pillar_man_wind_mode2");
     
+    public static final RegistryObject<SoundEvent> PILLAR_MAN_LIGHT_MODE = register("pillar_man_light_mode");
+    
     public static final RegistryObject<SoundEvent> AJA_STONE_CHARGING = register("aja_stone_charging");
     
     public static final RegistryObject<SoundEvent> AJA_STONE_BEAM = register("aja_stone_beam");

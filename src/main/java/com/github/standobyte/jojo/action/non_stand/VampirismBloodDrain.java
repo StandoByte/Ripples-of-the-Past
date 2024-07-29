@@ -74,7 +74,11 @@ public class VampirismBloodDrain extends VampirismAction {
     
     @Override
     protected void holdTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
-        if (requirementsFulfilled) {
+        drainPerform(world, user, power, ticksHeld, target, requirementsFulfilled, 0);
+    }
+    
+    public static void drainPerform(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled, float healMult) {
+    	if (requirementsFulfilled) {
             if (!world.isClientSide() && target.getEntity() instanceof LivingEntity) {
                 LivingEntity targetEntity = (LivingEntity) target.getEntity();
                 if (!targetEntity.isDeadOrDying()) {
@@ -106,7 +110,7 @@ public class VampirismBloodDrain extends VampirismAction {
                         }
                         else {
                             float healed = user.getHealth();
-                          //user.heal(bloodAndHealModifier * 0.5F);
+                          user.heal(bloodAndHealModifier * healMult);
                             healed = user.getHealth() - healed;
                             if (healed > 0) {
                                 power.addEnergy(healed * VampirismUtil.healCost(world));
@@ -130,6 +134,7 @@ public class VampirismBloodDrain extends VampirismAction {
             }
         }
     }
+    
 
     private static final Effect[] BLOOD_DRAIN_EFFECTS = {
             Effects.MOVEMENT_SLOWDOWN,
