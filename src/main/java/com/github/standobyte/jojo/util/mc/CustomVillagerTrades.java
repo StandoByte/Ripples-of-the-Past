@@ -51,13 +51,14 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 @EventBusSubscriber(modid = JojoMod.MOD_ID)
 public class CustomVillagerTrades {
     private static final String ALREADY_GAVE_TRADE_TAG = "JojoUniqueTrade";
+    private static final boolean DEBUG = false;
     
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onVillagerInteract(PlayerInteractEvent.EntityInteract event) {
         Entity target = event.getTarget();
         if (target instanceof VillagerEntity
                 && !target.level.isClientSide()
-                && !target.getTags().contains(ALREADY_GAVE_TRADE_TAG)
+                && (DEBUG || !target.getTags().contains(ALREADY_GAVE_TRADE_TAG))
                 && giveTradeManually((VillagerEntity) target, event.getPlayer())) {
             target.addTag(ALREADY_GAVE_TRADE_TAG);
         }
@@ -82,8 +83,9 @@ public class CustomVillagerTrades {
         public final long tradeCooldownTicks;
         final VillagerType villagerFamiliar;
         
-        private MapTrade(ITrade trade, long cooldownTicks, VillagerType villagerFamiliar) {
+        private MapTrade(EmeraldForMapTrade trade, long cooldownTicks, VillagerType villagerFamiliar) {
             this.trade = trade;
+            trade.destinationType = this;
             this.tradeCooldownTicks = cooldownTicks;
             this.villagerFamiliar = villagerFamiliar;
         }
@@ -147,7 +149,7 @@ public class CustomVillagerTrades {
             if (playerHasHamon || playerHasVampirism)   hamonTempleMapChance = 0;
             else if (playerHasStand)                    hamonTempleMapChance = 0.0625;
             else switch (MapTrade.HAMON_MAP.villagerFamiliarWith(villagerData.getType())) {
-            case /*FamiliarWith.*/THIS_BIOME:           hamonTempleMapChance = 0.75;
+            case /*FamiliarWith.*/THIS_BIOME:           hamonTempleMapChance = 1;
                 break;
             case /*FamiliarWith.*/OTHER_BIOME:          hamonTempleMapChance = 0;
                 break;
@@ -168,7 +170,7 @@ public class CustomVillagerTrades {
             if (playerHasHamon || playerHasVampirism)   pillarManTempleMapChance = 0;
             else if (playerHasStand)                    pillarManTempleMapChance = 0.0125;
             else switch (MapTrade.PILLARMAN_MAP.villagerFamiliarWith(villagerData.getType())) {
-            case /*FamiliarWith.*/THIS_BIOME:           pillarManTempleMapChance = 0.5;
+            case /*FamiliarWith.*/THIS_BIOME:           pillarManTempleMapChance = 1;
                 break;
             case /*FamiliarWith.*/OTHER_BIOME:          pillarManTempleMapChance = 0;
                 break;
@@ -196,7 +198,7 @@ public class CustomVillagerTrades {
             return false;
         }
         
-        if (cooldownsCap.canTradeNow(tradeType, trader.level)) {
+        if (DEBUG || cooldownsCap.canTradeNow(tradeType, trader.level)) {
             if (player.getRandom().nextDouble() < randomChance) {
                 MerchantOffer offer = tradeType.trade.getOffer(trader, trader.getRandom());
                 if (offer != null) {
@@ -217,16 +219,17 @@ public class CustomVillagerTrades {
     static class EmeraldForMapTrade implements VillagerTrades.ITrade {
         private final int emeraldCost;
         private final Supplier<? extends Structure<?>> destination;
-        private final MapDecoration.Type destinationType;
+        private final MapDecoration.Type destinationIcon;
         private final int customColor;
         private final int maxUses;
         private final int villagerXp;
+        private MapTrade destinationType;
 
         public EmeraldForMapTrade(int pEmeraldCost, Supplier<? extends Structure<?>> pDestination, 
                 MapDecoration.Type pDestinationType, int customColor, int pMaxUses, int pVillagerXp) {
             this.emeraldCost = pEmeraldCost;
             this.destination = pDestination;
-            this.destinationType = pDestinationType;
+            this.destinationIcon = pDestinationType;
             this.customColor = customColor;
             this.maxUses = pMaxUses;
             this.villagerXp = pVillagerXp;
@@ -243,12 +246,13 @@ public class CustomVillagerTrades {
                 if (blockpos != null) {
                     ItemStack itemstack = FilledMapItem.create(serverworld, blockpos.getX(), blockpos.getZ(), (byte)2, true, true);
                     FilledMapItem.renderBiomePreviewMap(serverworld, itemstack);
-                    MapData.addTargetDecoration(itemstack, blockpos, "+", this.destinationType);
+                    MapData.addTargetDecoration(itemstack, blockpos, "+", this.destinationIcon);
                     if (customColor > 0) {
                         CompoundNBT compoundnbt1 = itemstack.getOrCreateTagElement("display");
                         compoundnbt1.putInt("MapColor", customColor);
                     }
                     itemstack.setHoverName(new TranslationTextComponent("filled_map." + structure.getFeatureName().toLowerCase(Locale.ROOT)));
+                    itemstack.getTag().putString("JojoStructure", destinationType.name().toLowerCase()); // no fucking clue why the advancement criteria doesn't work with the custom item name
                     return new MerchantOffer(new ItemStack(Items.EMERALD, this.emeraldCost), new ItemStack(Items.COMPASS), itemstack, this.maxUses, this.villagerXp, 0.2F);
                 } else {
                     return null;
@@ -269,7 +273,7 @@ public class CustomVillagerTrades {
                 if (mapName.equals(stack.getHoverName())) {
                     PlayerUtilCap.OneTimeNotification notification = PLAYER_NOTIFICATION[i];
                     Optional<PlayerUtilCap> playerNotifications = player.getCapability(PlayerUtilCapProvider.CAPABILITY).resolve();
-                    if (playerNotifications.map(notif -> !notif.sentNotification(notification)).orElse(false)) {
+                    if (DEBUG || playerNotifications.map(notif -> !notif.sentNotification(notification)).orElse(false)) {
                         playerNotifications.get().setSentNotification(notification, true);
                         
                         IMerchant merchant = CommonReflection.getMerchant(slots);

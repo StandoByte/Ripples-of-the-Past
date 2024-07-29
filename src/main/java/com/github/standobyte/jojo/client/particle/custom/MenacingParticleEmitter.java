@@ -32,7 +32,7 @@ public class MenacingParticleEmitter extends EmitterParticle {
         this.particleType = particleType;
         
         Vector3d vecFromPlayer = entity.position().subtract(player.position());
-        float yRot = MathUtil.yRotDegFromVec(vecFromPlayer) * MathUtil.DEG_TO_RAD;
+        float yRot = (90 - MathUtil.yRotDegFromVec(vecFromPlayer)) * MathUtil.DEG_TO_RAD;
         this.offset1 = new Vector3d(0, 0, entity.getBbWidth()).yRot(yRot);
         this.offset2 = new Vector3d(0, 0, -(entity.getBbWidth())).yRot(yRot);
         
