@@ -45,7 +45,7 @@ public class ZombieDevour extends ZombieAction {
             Entity entityTarget = target.getEntity();
             if (entityTarget instanceof LivingEntity) {
                 LivingEntity livingTarget = (LivingEntity) entityTarget;
-                if (!JojoModUtil.canBleed(livingTarget) || JojoModUtil.isUndead(livingTarget)) {
+                if (!JojoModUtil.canBleed(livingTarget) || JojoModUtil.isUndeadOrVampiric(livingTarget)) {
                     return conditionMessage("blood");
                 }
                 return ActionConditionResult.POSITIVE;

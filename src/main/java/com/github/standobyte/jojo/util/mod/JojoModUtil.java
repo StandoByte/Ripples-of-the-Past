@@ -279,11 +279,14 @@ public class JojoModUtil {
         }
         return false;
     }
-
+    
+    /**
+     * Is treated differently from the conventional vanilla "undead"
+     */
     public static boolean isPlayerJojoVampiric(PlayerEntity player) {
         return INonStandPower.getNonStandPowerOptional(player).map(power -> {
             NonStandPowerType<?> powerType = power.getType();
-            return powerType == ModPowers.VAMPIRISM.get();
+            return powerType == ModPowers.VAMPIRISM.get() || powerType == ModPowers.PILLAR_MAN.get();
         }).orElse(false); 
     }
     

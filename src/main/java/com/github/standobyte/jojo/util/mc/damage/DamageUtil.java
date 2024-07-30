@@ -183,9 +183,9 @@ public class DamageUtil {
             
             Optional<INonStandPower> targetPower = INonStandPower.getNonStandPowerOptional(livingTarget).resolve();
             
-            if (INonStandPower.getNonStandPowerOptional(livingTarget).map(
+            if (INonStandPower.getNonStandPowerOptional(livingTarget).resolve().flatMap(
                     power -> power.getTypeSpecificData(ModPowers.PILLAR_MAN.get())
-                    .map(pillarman -> pillarman.isStoneFormEnabled()).orElse(false)).orElse(false)) {
+                    .map(pillarman -> pillarman.isStoneFormEnabled())).orElse(false)) {
                 return false;
             }
             
@@ -226,7 +226,7 @@ public class DamageUtil {
             }
             amount *= JojoModConfig.getCommonConfigInstance(false).hamonDamageMultiplier.get().floatValue();
             
-            JojoMod.LOGGER.debug(amount);
+//            JojoMod.LOGGER.debug(amount);
             
             if (hurtThroughInvulTicks(target, dmgSource, amount)) {
                 HamonUtil.createHamonSparkParticlesEmitter(target, amount / (HamonData.MAX_HAMON_STRENGTH_MULTIPLIER * 5), attack.soundVolumeMultiplier, attack.hamonParticle);
