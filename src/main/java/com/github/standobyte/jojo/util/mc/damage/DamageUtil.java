@@ -114,7 +114,7 @@ public class DamageUtil {
                     .map(pillarman -> !pillarman.isStoneFormEnabled()).orElse(true)) {
                 
                 if (sun) {
-                    return !(living instanceof PlayerEntity || JojoModConfig.getCommonConfigInstance(false).undeadMobsSunDamage.get())
+                    return (living instanceof PlayerEntity || JojoModConfig.getCommonConfigInstance(false).undeadMobsSunDamage.get())
                             && target.getType() != EntityType.WITHER
                             && !living.hasEffect(ModStatusEffects.SUN_RESISTANCE.get());
                 }
@@ -127,7 +127,7 @@ public class DamageUtil {
     }
 
     public static boolean dealUltravioletDamage(Entity target, float amount, @Nullable Entity srcDirect, @Nullable Entity srcIndirect, boolean sun) {
-        if (target instanceof LivingEntity && JojoModUtil.isUndeadOrVampiric((LivingEntity) target) && !(sun && target.getType() == EntityType.WITHER)) {
+        if (target instanceof LivingEntity) {
             DamageSource dmgSource = srcDirect == null ? ULTRAVIOLET : 
                 srcIndirect == null ? new EntityDamageSource(ULTRAVIOLET.getMsgId() + ".entity", srcDirect).bypassArmor().bypassMagic() : 
                 new IndirectEntityDamageSource(ULTRAVIOLET.getMsgId() + ".entity", srcDirect, srcIndirect).bypassArmor().bypassMagic();
