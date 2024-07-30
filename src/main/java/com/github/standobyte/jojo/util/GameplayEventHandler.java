@@ -390,6 +390,22 @@ public class GameplayEventHandler {
         else if (ModInteractionUtil.isSquidInkPasta(event.getItem())) {
             InkPastaItem.onEaten(event.getEntityLiving());
         }
+        PlayerEntity player = (PlayerEntity) event.getEntity();
+        INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
+            power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).ifPresent(pillarman -> {
+            	if(event.getItem().isEdible()) {
+            		power.addEnergy(event.getItem().getItem().getFoodProperties().getNutrition() * 10);
+            	}        
+            });
+        });
+        INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
+            power.getTypeSpecificData(ModPowers.ZOMBIE.get()).ifPresent(zombie -> {
+            	if(event.getItem().isEdible() && event.getItem().getItem().getFoodProperties().isMeat()) {
+            		power.addEnergy(event.getItem().getItem().getFoodProperties().getNutrition() * 10); 
+                	player.heal(event.getItem().getItem().getFoodProperties().getNutrition());
+            	}
+            });
+        });
     }
     
     @SubscribeEvent
@@ -927,9 +943,9 @@ public class GameplayEventHandler {
                             } else if(randomMode > 0.33 && randomMode < 0.66F) {
                                 power.getTypeSpecificData(pillarman).get().setMode(Mode.HEAT);
                                 entity.level.playSound(null, entity, ModSounds.PILLAR_MAN_HEAT_MODE.get(), entity.getSoundSource(), 1.0F, 1.0F);
-                            } else {
+                            } else if(randomMode > 0.66 && randomMode < 1) {
                                 power.getTypeSpecificData(pillarman).get().setMode(Mode.LIGHT);
-                                entity.level.playSound(null, entity, ModSounds.MAP_BOUGHT_PILLAR_MAN_TEMPLE.get(), entity.getSoundSource(), 1.0F, 1.0F);
+                                entity.level.playSound(null, entity, ModSounds.PILLAR_MAN_LIGHT_MODE.get(), entity.getSoundSource(), 1.0F, 1.0F);
                             }
                             applyMaskEffect(entity, headStack);
                             return true;

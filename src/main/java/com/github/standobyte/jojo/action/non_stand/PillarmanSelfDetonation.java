@@ -95,7 +95,7 @@ public class PillarmanSelfDetonation extends PillarmanAction {
             if (acdc == null || ForgeEventFactory.getMobGriefingEvent(level, acdc)) {
                 for (BlockPos pos : getToBlow()) {
                     if (level.isEmptyBlock(pos)) {
-                        if (Math.random() < 0.01F) { // if (!level.isEmptyBlock(pos.below()) && Math.random() < 0.05f) // мб их спавнить только на земле? и шанс тогда побольше поставить
+                        if (!level.isEmptyBlock(pos.below()) && Math.random() < 0.05f) {
                             level.setBlockAndUpdate(pos, ModBlocks.BOILING_BLOOD.get().defaultBlockState());
                         } else {
                             level.setBlockAndUpdate(pos, AbstractFireBlock.getState(level, pos));

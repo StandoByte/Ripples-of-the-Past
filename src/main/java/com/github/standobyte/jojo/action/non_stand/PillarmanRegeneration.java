@@ -22,7 +22,7 @@ public class PillarmanRegeneration extends PillarmanAction {
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         
         if (!world.isClientSide()) {
-            HamonHealing.updateRegenEffect(user, 80, 3, user.getEffect(ModStatusEffects.UNDEAD_REGENERATION.get()), ModStatusEffects.UNDEAD_REGENERATION.get());
+            HamonHealing.updateRegenEffect(user, 80, 3, user.getEffect(Effects.REGENERATION), Effects.REGENERATION);
             world.playSound(null, user.getX(), user.getEyeY(), user.getZ(), ModSounds.VAMPIRE_BLOOD_DRAIN.get(), user.getSoundSource(), 1.5F, 1.2F);
         }
     }

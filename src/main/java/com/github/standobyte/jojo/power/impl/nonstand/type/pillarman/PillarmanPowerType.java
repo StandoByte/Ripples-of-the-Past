@@ -126,7 +126,7 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
     private static final Set<Effect> EFFECTS = new HashSet<>();
     public static void initPillarmanEffects() {
         Collections.addAll(EFFECTS, 
-                ModStatusEffects.UNDEAD_REGENERATION.get(),
+                Effects.REGENERATION,
                 Effects.DAMAGE_RESISTANCE,
                 Effects.NIGHT_VISION);
     }
