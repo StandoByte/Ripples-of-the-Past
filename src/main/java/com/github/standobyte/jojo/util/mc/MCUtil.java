@@ -736,7 +736,7 @@ public class MCUtil {
     
     
     
-    public static class EntityEvents { // TODO
+    public static class EntityEvents { // TODO entity event constants
         public static final int HURT                           = 2;
         public static final int SILVERFISH_SPAWN_PARTICLES     = 20;
         public static final int PLAYER_PERM_LEVEL_0            = 24;

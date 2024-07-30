@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.util.mod;
+package com.github.standobyte.jojo.modcompat;
 
 import java.util.Comparator;
 import java.util.HashMap;
@@ -6,6 +6,7 @@ import java.util.Map;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismUtil;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;

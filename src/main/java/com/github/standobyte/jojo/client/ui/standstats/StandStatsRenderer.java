@@ -30,6 +30,7 @@ public class StandStatsRenderer {
     public static final ResourceLocation STAND_STATS_UI = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/stand_stats.png");
     private static final ResourceLocation STAND_STATS_BG = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/stand_stats_bg.png");
     
+    private static final double LN_2 = Math.log(2);
     @SuppressWarnings("deprecation")
     public static void renderStandStats(MatrixStack matrixStack, Minecraft mc, 
             int x, int y, int screenWidth, int screenHeight, 
@@ -53,7 +54,7 @@ public class StandStatsRenderer {
                 if (statVal[1] > 0) statVal[1] = (statVal[1] + 1) / 3;
 
                 statVal[2] = stats.getEffectiveRange() + (stats.getMaxRange() - stats.getEffectiveRange()) * 0.5;
-                if (statVal[2] > 0) statVal[2] = Math.log(statVal[2] / 1.5) / Math.log(2) + 1; // log2(val / 1.5)
+                if (statVal[2] > 0) statVal[2] = Math.log(statVal[2] / 1.5) / LN_2 /* log2(val / 1.5) */ + 1; 
 
                 statVal[3] = stats.getBaseDurability() + stats.getDevDurability(statLeveling);
                 if (statVal[3] > 0) statVal[3] = (statVal[3] + 1) / 3;

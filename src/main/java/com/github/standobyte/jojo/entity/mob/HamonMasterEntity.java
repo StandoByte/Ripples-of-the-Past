@@ -42,7 +42,7 @@ import net.minecraftforge.fml.network.NetworkHooks;
 public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser, IEntityAdditionalSpawnData {
     private final INonStandPower hamonPower = new NonStandPower(this);
     @Deprecated
-    private boolean reAddBaseHamon; // TODO remove in later versions
+    private boolean reAddBaseHamon; // TODO remove in v0.2.3
     
     public HamonMasterEntity(EntityType<? extends HamonMasterEntity> type, World world) {
         super(type, world);

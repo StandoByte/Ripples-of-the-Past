@@ -22,6 +22,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.FireworkRocketEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.inventory.CraftingInventory;
+import net.minecraft.inventory.MerchantInventory;
 import net.minecraft.inventory.container.Container;
 import net.minecraft.inventory.container.MerchantContainer;
 import net.minecraft.inventory.container.PlayerContainer;
@@ -189,8 +190,13 @@ public class CommonReflection {
     
 
     private static final Field MERCHANT_CONTAINER_TRADER = ObfuscationReflectionHelper.findField(MerchantContainer.class, "field_75178_e");
-    public static IMerchant getTrader(MerchantContainer merchantContainer) {
+    public static IMerchant getMerchant(MerchantContainer merchantContainer) {
         return ReflectionUtil.getFieldValue(MERCHANT_CONTAINER_TRADER, merchantContainer);
+    }
+    
+    private static final Field MERCHANT_INVENTORY_MERCHANT = ObfuscationReflectionHelper.findField(MerchantInventory.class, "field_70476_a");
+    public static IMerchant getMerchant(MerchantInventory merchantContainer) {
+        return ReflectionUtil.getFieldValue(MERCHANT_INVENTORY_MERCHANT, merchantContainer);
     }
     
     

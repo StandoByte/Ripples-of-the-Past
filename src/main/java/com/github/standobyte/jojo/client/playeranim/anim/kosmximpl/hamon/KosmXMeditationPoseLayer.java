@@ -21,7 +21,7 @@ import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 
-public class KosmXMeditationPoseLayer extends AnimLayerHandler implements HamonMeditationPoseAnim {
+public class KosmXMeditationPoseLayer extends AnimLayerHandler<ModifierLayer<IAnimation>> implements HamonMeditationPoseAnim {
 
     public KosmXMeditationPoseLayer(ResourceLocation id) {
         super(id);

@@ -123,6 +123,42 @@
     "subtitle": "jojo.subtitle.devouring",
     "sounds": [ "jojo:zombie_devour" ]
   },
+  "bucket_fill_boiling_blood": {
+    "subtitle": "subtitles.item.bucket.fill",
+    "sounds": [ 
+      {
+        "name": "minecraft:item.bucket.fill_lava",
+        "type": "event"
+      }
+    ]
+  },
+  "bucket_empty_boiling_blood": {
+    "subtitle": "subtitles.item.bucket.empty",
+    "sounds": [ 
+      {
+        "name": "minecraft:item.bucket.empty_lava",
+        "type": "event"
+      }
+    ]
+  },
+  "boiling_blood_pop": {
+    "subtitle": "jojo.subtitle.block.boiling_blood.ambient",
+    "sounds": [ 
+      {
+        "name": "minecraft:block.lava.pop",
+        "type": "event"
+      }
+    ]
+  },
+  "boiling_blood_ambient": {
+    "subtitle": "jojo.subtitle.block.boiling_blood.ambient",
+    "sounds": [ 
+      {
+        "name": "minecraft:block.lava.ambient",
+        "type": "event"
+      }
+    ]
+  },
   "hamon_pick_jonathan": {
     "sounds": [ "jojo:hamon_pick_jonathan" ]
   },

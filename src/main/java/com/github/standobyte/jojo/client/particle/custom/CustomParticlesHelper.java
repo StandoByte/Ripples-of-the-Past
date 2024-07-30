@@ -22,6 +22,7 @@ import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.particles.BasicParticleType;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.particles.ParticleType;
 import net.minecraft.util.Direction;
@@ -32,12 +33,13 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistries;
 
-public class CustomParticlesHelper {
+public abstract class CustomParticlesHelper {
     
     private static final Map<ResourceLocation, IAnimatedSprite> SPRITE_SETS = new HashMap<>();
     
     public static void saveSprites(Minecraft mc) {
         Map<ResourceLocation, ? extends IAnimatedSprite> spritesMap = ClientReflection.getSpriteSets(mc.particleEngine);
+        CustomParticlesHelper.saveSprites(spritesMap, ModParticles.MENACING.get());
         CustomParticlesHelper.saveSprites(spritesMap, ModParticles.CD_RESTORATION.get());
         CustomParticlesHelper.saveSprites(spritesMap, ModParticles.HAMON_SPARK.get());
         CustomParticlesHelper.saveSprites(spritesMap, ModParticles.HAMON_SPARK_BLUE.get());
@@ -63,6 +65,12 @@ public class CustomParticlesHelper {
     }
     
     
+    
+    public static void addMenacingParticleEmitter(Entity entity, BasicParticleType particle) {
+        Minecraft mc = Minecraft.getInstance();
+        ClientReflection.getTrackingEmitters(Minecraft.getInstance().particleEngine).add(
+                new MenacingParticleEmitter(mc.level, entity, particle, mc.player));
+    }
     
     public static boolean createCDRestorationParticle(LivingEntity entity, Hand hand) {
         if (!ClientUtil.canSeeStands()) return false;

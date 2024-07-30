@@ -149,7 +149,6 @@ public class PhotosCache {
             try {
                 byte[] data = photo.asByteArray();
                 this.photoSender = new ClPhotoSender(data, serverId, photoId);
-                // TODO send the HQ version too
             } catch (IOException e) {
                 e.printStackTrace();
             }

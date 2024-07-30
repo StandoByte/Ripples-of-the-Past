@@ -477,6 +477,7 @@ public class ActionsOverlayGui extends AbstractGui {
             if (power.hasPower()) {
                 return ((INonStandPower) power).getType().getColor().orElse(-1);
             }
+            break;
         case STAND:
             return ((IStandPower) power).getStandInstance()
                     .flatMap(StandSkinsManager.getInstance()::getStandSkin)

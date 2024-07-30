@@ -295,7 +295,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
             }
         }
         
-        energy = nbt.contains("Mana", 5) ? // TODO remove in a later version
+        energy = nbt.contains("Mana", 5) ? // TODO remove in v0.2.3
                 nbt.getFloat("Mana")
                 : nbt.getFloat("Energy");
         super.readNBT(nbt);

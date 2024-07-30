@@ -56,8 +56,7 @@ public class ClientModSettings {
     
     
     public void load() {
-        boolean fromOldPath = BETA_LEGACY_PATH.exists();
-        File path = fromOldPath ? BETA_LEGACY_PATH : optionsFile;
+        File path = optionsFile;
         if (!path.exists()) {
             return;
         }
@@ -68,10 +67,6 @@ public class ClientModSettings {
         }
         catch (Exception exception) {
             JojoMod.getLogger().error("Failed to load mod client settings", (Throwable) exception);
-        }
-        
-        if (fromOldPath) {
-            BETA_LEGACY_PATH.delete();
         }
     }
     
@@ -89,7 +84,6 @@ public class ClientModSettings {
     private static ClientModSettings instance;
     private final Minecraft mc;
     private final File optionsFile;
-    private final File BETA_LEGACY_PATH; // TODO remove in v0.2.3
     private final Gson gson;
     private Settings settings = new Settings();
     
@@ -102,7 +96,6 @@ public class ClientModSettings {
     private ClientModSettings(Minecraft mc, File optionsFile) {
         this.mc = mc;
         this.optionsFile = optionsFile;
-        BETA_LEGACY_PATH = new File(mc.gameDirectory, "jojo_rotp_settings.json");
         this.gson = new GsonBuilder().setPrettyPrinting().create();
         load();
     }

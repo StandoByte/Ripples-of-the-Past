@@ -11,7 +11,6 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.ClientTicking;
 import com.github.standobyte.jojo.client.ClientTicking.ITicking;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.Alignment;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.BarsOrientation;
@@ -113,7 +112,6 @@ public abstract class BarsRenderer {
             }
             
             if (type != null) {
-                // FIXME ! (hamon 2) bar render effect
                 renderBarStart(matrixStack, type, 
                         currentModeType == PowerClassification.NON_STAND, ActionsOverlayGui.getPowerUiColor(nonStandPower), 1, 
                         energy, maxEnergy, 
@@ -214,9 +212,6 @@ public abstract class BarsRenderer {
             RenderSystem.color4f(rgb[0], rgb[1], rgb[2], barAlpha);
             if (fill > 0) {
                 barFill(matrixStack, x, y, alignment, texX, texY, width, length, fill);
-                if (fillEffect /*&& Minecraft.getInstance().options.graphicsMode != GraphicsFanciness.FAST*/) {
-                    barFillEffect(matrixStack, x, y, alignment, width, length, fill, barType);
-                }
             }
             // border
             drawBarElement(matrixStack, x, y, borderTexX, borderTexY, width, length + 2);
@@ -248,9 +243,6 @@ public abstract class BarsRenderer {
     
     protected abstract void barFill(MatrixStack matrixStack, int x, int y, Alignment alignment, 
             int texX, int texY, int width, int length, int fill);
-    
-    protected void barFillEffect(MatrixStack matrixStack, int x, int y, Alignment alignment, 
-            int width, int length, int fill, BarType barType) {}
     
     protected void drawBarElement(MatrixStack matrixStack, int x, int y, int texX, int texY, int width, int length) {
         gui.blit(matrixStack, x, y, texX, texY, width, length);

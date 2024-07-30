@@ -11,6 +11,7 @@
     "EntityLiquidWalkingMixin",
     "ServerChunkProviderMixin",
     "FireBlockMixin",
+    "MerchantResultSlotMixin",
     "TheMostUnnecessaryMixin"
   ],
   "client": [
