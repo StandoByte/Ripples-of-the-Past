@@ -65,87 +65,9 @@ public class ZombieDevour extends ZombieAction {
     
     @Override
     protected void holdTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
-        if (requirementsFulfilled) {
-            if (!world.isClientSide() && target.getEntity() instanceof LivingEntity) {
-                LivingEntity targetEntity = (LivingEntity) target.getEntity();
-                if (!targetEntity.isDeadOrDying()) {
-                    float bloodAndHealModifier = GeneralUtil.getOrLast(
-                            JojoModConfig.getCommonConfigInstance(false).bloodDrainMultiplier.get(), 
-                            world.getDifficulty().getId()).floatValue();
-                    boolean isHuman = false;
-                    if (targetEntity instanceof PlayerEntity) {
-                        bloodAndHealModifier *= 1.5F;
-                        isHuman = true;
-                    }
-                    else if (targetEntity instanceof INPC || targetEntity instanceof AbstractIllagerEntity) {
-                        bloodAndHealModifier *= 1F;
-                        isHuman = true;
-                    }
-                    if (INonStandPower.getNonStandPowerOptional(targetEntity).map(
-                            p -> p.getType() == ModPowers.HAMON.get()).orElse(false)) {
-                        bloodAndHealModifier *= 2F;
-                    }
-                    EffectInstance freeze = targetEntity.getEffect(ModStatusEffects.FREEZE.get());
-                    if (freeze != null) {
-                        bloodAndHealModifier *= 1 - Math.min((freeze.getAmplifier() + 1) * 0.2F, 1);
-                    }
-                    power.addEnergy(bloodAndHealModifier);
-                    if (drainBlood(user, targetEntity, 2)) {
-                        if (power.getTypeSpecificData(ModPowers.VAMPIRISM.get()).map(
-                                vampirism -> vampirism.isBeingCured() && vampirism.getCuringStage() >= 3).orElse(false)) {
-                            user.hurt(new DamageSource("curedVampireBlood"), Math.min(bloodAndHealModifier * 0.5F, user.getHealth() - 1));
-                        }
-                        else {
-                            float healed = user.getHealth();
-                            user.heal(bloodAndHealModifier * 0.5F);
-                            healed = user.getHealth() - healed;
-                            if (healed > 0) {
-                                power.addEnergy(healed * VampirismUtil.healCost(world));
-                            }
-                        }
-                        if (targetEntity.isDeadOrDying()) {
-                            boolean zombieCreated = HungryZombieEntity.createZombie((ServerWorld) world, user, targetEntity, false);
-                            if (user instanceof ServerPlayerEntity) {
-                                ServerPlayerEntity player = (ServerPlayerEntity) user;
-                                player.awardStat(isHuman ? ModCustomStats.VAMPIRE_PEOPLE_DRAINED : ModCustomStats.VAMPIRE_ANIMALS_DRAINED);
-                                if (zombieCreated) {
-                                    player.awardStat(ModCustomStats.VAMPIRE_ZOMBIES_CREATED);
-                                }
-                                ModCriteriaTriggers.VAMPIRE_PEOPLE_DRAINED.get().trigger(player, 
-                                        player.getStats().getValue(Stats.CUSTOM.get(ModCustomStats.VAMPIRE_PEOPLE_DRAINED)), 
-                                        player.getStats().getValue(Stats.CUSTOM.get(ModCustomStats.VAMPIRE_ZOMBIES_CREATED)));
-                            }
-                        }
-                    }
-                }
-            }
-        }
+    	VampirismBloodDrain.drainPerform(world, user, power, ticksHeld, target, requirementsFulfilled, 0.5F);
     }
 
-    private static final Effect[] BLOOD_DRAIN_EFFECTS = {
-            Effects.MOVEMENT_SLOWDOWN,
-            Effects.DIG_SLOWDOWN,
-            Effects.WEAKNESS,
-            Effects.CONFUSION
-    };
-    public static boolean drainBlood(LivingEntity attacker, LivingEntity target, float bloodDrainDamage) {
-        boolean hurt = target.hurt(DamageUtil.bloodDrainDamage(attacker), bloodDrainDamage);
-        if (hurt) {
-            int effectsLvl = attacker.level.getDifficulty().getId() - 1;
-            if (effectsLvl >= 0) {
-                for (Effect effect : BLOOD_DRAIN_EFFECTS) {
-                    int duration = MathHelper.floor(20F * bloodDrainDamage);
-                    EffectInstance effectInstance = target.getEffect(effect);
-                    EffectInstance newInstance = effectInstance == null ? 
-                            new EffectInstance(effect, duration, effectsLvl)
-                            : new EffectInstance(effect, effectInstance.getDuration() + duration, effectsLvl);
-                    target.addEffect(newInstance);
-                }
-            }
-        }
-        return hurt;
-    }
-    
     @Override
     public TargetRequirement getTargetRequirement() {
         return TargetRequirement.ENTITY;

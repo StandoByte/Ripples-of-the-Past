@@ -4,6 +4,8 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModBlocks;
@@ -167,6 +169,11 @@ public class PillarmanDivineSandstormEntity extends ModdedProjectileEntity {
     @Override
     protected float getMaxHardnessBreakable() {
         return 5.0F;
+    }
+    
+    @Override
+    public boolean canBeDeflected(@Nullable Entity context) {
+        return false;
     }
 
     @Override
