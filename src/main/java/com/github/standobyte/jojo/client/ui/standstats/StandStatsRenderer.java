@@ -6,6 +6,7 @@ import java.util.List;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
+import com.github.standobyte.jojo.client.ui.BlitFloat;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -165,9 +166,18 @@ public class StandStatsRenderer {
                 for (int i = 0; i < statRank.length; i++) {
                     float statX = xCenter + STAT_RANK_NAME_OFFSETS[i][0];
                     float statY = yCenter + STAT_RANK_NAME_OFFSETS[i][1];
-                    ITextComponent rank = new StringTextComponent(statRank[i]).withStyle(TextFormatting.BOLD);
-                    ClientUtil.drawCenteredStringNoShadow(matrixStack, mc.font, rank, statX, statY, 0x000000);
+                    String statRankLetter = statRank[i];
+                    ITextComponent rank = new StringTextComponent(statRankLetter).withStyle(TextFormatting.BOLD);
                     int letterWidth = mc.font.width(rank);
+                    
+                    if ("∅".equals(statRankLetter)) {
+                        mc.textureManager.bind(STAND_STATS_UI);
+                        BlitFloat.blitFloat(matrixStack, statX - letterWidth / 2, statY, 0, 248, 8, 7, 256, 256);
+                    }
+                    else {
+                        ClientUtil.drawCenteredStringNoShadow(matrixStack, mc.font, rank, statX, statY, 0x000000);
+                    }
+                    
                     if (mouseX >= statX - letterWidth / 2 && mouseX <= statX + letterWidth / 2 && mouseY >= statY && mouseY <= statY + mc.font.lineHeight) {
                         GuiUtils.drawHoveringText(matrixStack, Arrays.asList(new TranslationTextComponent(STAT_NAME_KEYS[i])), 
                                 mouseX, mouseY, screenWidth, screenHeight, -1, mc.font);
