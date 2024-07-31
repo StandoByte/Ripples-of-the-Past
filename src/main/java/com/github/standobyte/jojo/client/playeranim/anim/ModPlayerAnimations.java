@@ -16,6 +16,8 @@ public class ModPlayerAnimations {
     public static BasicToggleAnim hamonBreath;
     public static WallClimbAnim wallClimbing;
     public static HamonSYOBAnim syoBarrage;
+    public static BasicToggleAnim sendoWaveKick;
+    public static BasicToggleAnim rebuffOverdrive;
 
     /** 
      * This string must match the full name of the class and the package it's in.<br>
@@ -54,6 +56,16 @@ public class ModPlayerAnimations {
                 "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.hamon.KosmXWallClimbLayer",
                 new ResourceLocation(JojoMod.MOD_ID, "wall_climb"), 1, 
                 WallClimbAnim.NoPlayerAnimator::new);
+        
+        sendoWaveKick = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.hamon.KosmXSendoWaveKickLayer",
+                new ResourceLocation(JojoMod.MOD_ID, "sendo_wave_kick"), 1);
+        
+        rebuffOverdrive = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.hamon.KosmXRebuffOverdriveLayer",
+                new ResourceLocation(JojoMod.MOD_ID, "rebuff_overdrive"), 1);
+        
+        
         
         PlayerAnimationHandler.getPlayerAnimator().registerAnimLayer(
                 "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.KosmXTestAnimLayer",

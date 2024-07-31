@@ -184,7 +184,7 @@ public class DamageUtil {
             }
             amount *= JojoModConfig.getCommonConfigInstance(false).hamonDamageMultiplier.get().floatValue();
             
-            JojoMod.LOGGER.debug(amount);
+//            JojoMod.LOGGER.debug(amount);
             
             if (hurtThroughInvulTicks(target, dmgSource, amount)) {
                 HamonUtil.createHamonSparkParticlesEmitter(target, amount / (HamonData.MAX_HAMON_STRENGTH_MULTIPLIER * 5), attack.soundVolumeMultiplier, attack.hamonParticle);

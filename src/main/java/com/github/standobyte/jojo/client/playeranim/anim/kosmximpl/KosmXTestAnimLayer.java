@@ -32,6 +32,11 @@ public class KosmXTestAnimLayer extends AnimLayerHandler<ModifierLayer<IAnimatio
         return true;
     }
     
+    /* 
+     *   /animtest <name>
+     *   /animtest <name> <speed>
+     *   /animtest <fadeOutTicks>
+     */
     @SubscribeEvent
     public void onChat(ClientChatEvent event) {
         String[] msg = event.getMessage().split(" ");
@@ -73,6 +78,7 @@ public class KosmXTestAnimLayer extends AnimLayerHandler<ModifierLayer<IAnimatio
                 setAnim(player, null);
             }
             event.setCanceled(true);
+            Minecraft.getInstance().gui.getChat().addRecentChat(event.getMessage());
         }
     }
     
