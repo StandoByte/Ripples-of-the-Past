@@ -226,7 +226,7 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     public boolean isActive() {
-        return currentMode != null;
+        return currentMode != null && currentMode.getControlScheme().hotbarsEnabled;
     }
     
     public boolean noActionSelected(ControlScheme.Hotbar actionType) {
@@ -585,7 +585,7 @@ public class ActionsOverlayGui extends AbstractGui {
         if (renderHudKeybinds) ++hotbarsRendered;
         int hotbarsElementHeight = 20 + getHotbarsYDiff() * hotbarsRendered;
         
-        if (isActive() && barsBelowHotbars) {
+        if (currentMode != null && barsBelowHotbars) {
             int offset = hotbarsElementHeight + INDENT + VerticalBarsRenderer.ICON_HEIGHT;
             barsPosition.y = Math.max(lmbHotbarPosition.y + offset, barsPosition.y);
         }
@@ -594,7 +594,7 @@ public class ActionsOverlayGui extends AbstractGui {
         boolean hotbarAboveBarsShift = false;
         lmbHotbarPosition.x = hotbarsConfig.getXPos(screenWidth);
         lmbHotbarPosition.y = hotbarsConfig.getYPos(screenHeight, hotbarsElementHeight);
-        if (isActive()) {
+        if (currentMode != null) {
             if (barsConfig == hotbarsConfig) {
                 switch (barsConfig.barsOrientation) {
                 case HORIZONTAL:
@@ -1046,16 +1046,11 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     private <P extends IPower<P, ?>> List<Action<?>> getEnabledActions(P power, InputHandler.ActionKey actionKey) {
-        switch (actionKey) {
-        case ATTACK:
-        case ABILITY:
-            return HudControlSettings.getInstance()
-                    .getControlScheme(power)
-                    .getActionsHotbar(actionKey.getHotbar())
-                    .getEnabledActions();
-        default:
+        ControlScheme controlScheme = HudControlSettings.getInstance().getControlScheme(power);
+        if (!controlScheme.hotbarsEnabled) {
             return Collections.emptyList();
         }
+        return controlScheme.getActionsHotbar(actionKey.getHotbar()).getEnabledActions();
     }
     
     private void renderMouseIcon(MatrixStack matrixStack, int x, int y, InputHandler.ActionKey actionKey) {
@@ -1888,9 +1883,12 @@ public class ActionsOverlayGui extends AbstractGui {
     private static final IntBinaryOperator DEC = (i, n) -> (i + n + 1) % (n + 1) - 1;
     private <P extends IPower<P, ?>> void scrollAction(ActionsModeConfig<P> mode, ControlScheme.Hotbar hotbar, boolean backwards) {
         P power = mode.getPower();
-        List<Action<?>> actions = HudControlSettings.getInstance()
-                .getControlScheme(power)
-                .getActionsHotbar(hotbar).getEnabledActions();
+        ControlScheme controlScheme = HudControlSettings.getInstance().getControlScheme(power);
+        // FIXME qweqweqwe
+//        if (!controlScheme.hotbarsEnabled) {
+//            return;
+//        }
+        List<Action<?>> actions = controlScheme.getActionsHotbar(hotbar).getEnabledActions();
         if (actions.size() == 0) {
             return;
         }
@@ -1923,10 +1921,12 @@ public class ActionsOverlayGui extends AbstractGui {
     @Nullable
     public <P extends IPower<P, ?>> Pair<Action<P>, Boolean> onClick(
             P power, ControlScheme.Hotbar hotbar, boolean shiftVariant, boolean sneak, int index) {
-        Action<P> action = (Action<P>) HudControlSettings.getInstance()
-                .getControlScheme(getCurrentMode())
-                .getActionsHotbar(hotbar)
-                .getBaseActionInSlot(index);
+        ControlScheme controlScheme = HudControlSettings.getInstance().getControlScheme(getCurrentMode());
+        // FIXME qweqweqwe
+//        if (!controlScheme.hotbarsEnabled) {
+//            return null;
+//        }
+        Action<P> action = (Action<P>) controlScheme.getActionsHotbar(hotbar).getBaseActionInSlot(index);
         action = resolveVisibleActionInSlot(action, shiftVariant, power, getMouseTarget());
         return onActionClick(power, action, sneak);
     }

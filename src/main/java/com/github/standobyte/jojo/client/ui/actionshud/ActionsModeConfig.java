@@ -42,29 +42,25 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
     public P getPower() {
         return power;
     }
-    
-    int getSelectedSlot(ControlScheme.Hotbar hotbar) {
-        return HudControlSettings.getInstance()
-                .getControlScheme(powerClassification)
-                .getActionsHotbar(hotbar)
-                .getSelectedSlot();
+
+    ControlScheme getControlScheme() {
+        return HudControlSettings.getInstance().getControlScheme(powerClassification);
     }
-    
+
+    // FIXME qweqwe
+    int getSelectedSlot(ControlScheme.Hotbar hotbar) {
+        return getControlScheme().getActionsHotbar(hotbar).getSelectedSlot();
+    }
+
     void setSelectedSlot(ControlScheme.Hotbar hotbar, int slot, ActionTarget target) {
-        HudControlSettings.getInstance()
-        .getControlScheme(powerClassification)
-        .getActionsHotbar(hotbar)
-        .setSelectedSlot(slot, power, target);
-        
+        getControlScheme().getActionsHotbar(hotbar).setSelectedSlot(slot, power, target);
         resetSelectedTick();
     }
     
+    // FIXME qweqwe
     @Nullable
     Action<P> getSelectedAction(ControlScheme.Hotbar hotbar, boolean shiftVariation, ActionTarget target) {
-        return HudControlSettings.getInstance()
-                .getControlScheme(powerClassification)
-                .getActionsHotbar(hotbar)
-                .getSelectedAction(power, shiftVariation, target);
+        return getControlScheme().getActionsHotbar(hotbar).getSelectedAction(power, shiftVariation, target);
     }
     
     void tick() {
