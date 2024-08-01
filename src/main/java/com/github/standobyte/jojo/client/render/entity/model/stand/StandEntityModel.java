@@ -99,15 +99,20 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     }
     
     public void setVisibility(T entity, VisibilityMode mode, boolean obstructsView) {
-        setVisibility(entity, mode, obstructsView, false, false);
+        setVisibility(entity, mode, obstructsView, false);
     }
 
-    public void setVisibility(T entity, VisibilityMode mode, boolean obstructsView, boolean invert, boolean firstPersonRender) {
-        if (obstructsView || firstPersonRender) {
-            mode = entity.getStandPose().armsObstructView && !firstPersonRender ? VisibilityMode.NONE : VisibilityMode.ARMS_ONLY;
+    public void setVisibility(T entity, VisibilityMode mode, boolean obstructsView, boolean standFirstPersonRender) {
+        if (obstructsView || standFirstPersonRender) {
+            if (entity.getStandPose().armsObstructView && !standFirstPersonRender) {
+                mode = mode.reduceTo(VisibilityMode.NONE);
+            }
+            else {
+                mode = mode.reduceTo(VisibilityMode.ARMS_ONLY);
+            }
         }
         this.visibilityMode = mode;
-        updatePartsVisibility(mode, invert);
+        updatePartsVisibility(mode);
         
         IStandPower standPower = entity.getUserPower();
         if (standPower != null) {
@@ -121,10 +126,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         }
     }
     
-    public void updatePartsVisibility(VisibilityMode mode) {
-        updatePartsVisibility(mode, false);
-    }
-    public void updatePartsVisibility(VisibilityMode mode, boolean invert) {}
+    public void updatePartsVisibility(VisibilityMode mode) {}
     protected abstract void partMissing(StandPart standPart);
     
     @Override
@@ -368,6 +370,66 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         ARMS_ONLY,
         LEFT_ARM_ONLY,
         RIGHT_ARM_ONLY,
-        NONE
+        BODY_WITHOUT_ARMS(ARMS_ONLY),
+        BODY_WITH_LEFT_ARM(RIGHT_ARM_ONLY),
+        BODY_WITH_RIGHT_ARM(LEFT_ARM_ONLY),
+        NONE(ALL);
+        
+        public final VisibilityMode baseMode;
+        private VisibilityMode inverse;
+        public final boolean isInverted;
+        
+        private VisibilityMode() {
+            this.baseMode = this;
+            this.isInverted = false;
+        }
+        
+        private VisibilityMode(VisibilityMode inverting) {
+            this.baseMode = inverting;
+            this.isInverted = true;
+            this.inverse = inverting;
+            inverting.inverse = this;
+        }
+        
+        public VisibilityMode invert() {
+            return inverse;
+        }
+        
+        public VisibilityMode invert(boolean doInvert) {
+            return doInvert ? invert() : this;
+        }
+        
+        public VisibilityMode reduceTo(VisibilityMode targetBaseMode) {
+            if (targetBaseMode.isInverted && targetBaseMode != VisibilityMode.NONE) {
+                throw new IllegalArgumentException();
+            }
+            if (targetBaseMode == VisibilityMode.ALL || targetBaseMode == this.baseMode) {
+                return this;
+            }
+            
+            switch (this.baseMode) {
+            case NONE:
+                return this;
+            case ALL:
+                break;
+            case LEFT_ARM_ONLY:
+                if (targetBaseMode == RIGHT_ARM_ONLY) {
+                    targetBaseMode = VisibilityMode.NONE;
+                }
+                break;
+            case RIGHT_ARM_ONLY:
+                if (targetBaseMode == LEFT_ARM_ONLY) {
+                    targetBaseMode = VisibilityMode.NONE;
+                }
+                break;
+            default:
+                throw new IllegalStateException();
+            }
+            
+            if (this.isInverted) {
+                targetBaseMode = targetBaseMode.inverse;
+            }
+            return targetBaseMode;
+        }
     }
 }

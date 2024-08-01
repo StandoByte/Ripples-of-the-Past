@@ -3,6 +3,8 @@ package com.github.standobyte.jojo.client.render.entity.renderer.stand;
 import java.util.Optional;
 import java.util.OptionalInt;
 
+import com.github.standobyte.jojo.capability.entity.EntityUtilCap;
+import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientEventHandler;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.IEntityGlowColor;
@@ -16,12 +18,14 @@ import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandPose;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
+import net.minecraft.client.renderer.culling.ClippingHelper;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.client.renderer.entity.layers.HeldItemLayer;
@@ -133,7 +137,7 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
             Entity user = entity.getUser();
             if (mc.cameraEntity != null && mc.cameraEntity.is(user)) {
                 if (ClientEventHandler.getInstance().isZooming) {
-                    return ViewObstructionPrevention.ARMS_ONLY;
+                    return ViewObstructionPrevention.ARMS_ONLY_OUTLINE;
                 }
                 if (entity.isFollowingUser() && !entity.isArmsOnlyMode()) {
                     Vector3d diffVec = entity.getPosition(partialTick).subtract(user.getPosition(partialTick));
@@ -143,7 +147,7 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
                     lookVec = new Vector3d(lookVec.x, 0, lookVec.z);
                     double distanceSqr = diffVec.lengthSqr();
                     if (distanceSqr < 0.25 || distanceSqr < 1 && lookVec.dot(diffVec) > distanceSqr / 2) {
-                        return ViewObstructionPrevention.ARMS_ONLY;
+                        return ViewObstructionPrevention.ARMS_ONLY_OUTLINE;
                     }
                 }
             }
@@ -182,6 +186,33 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
     protected float getWhiteOverlayProgress(StandEntity entity, float partialTick) {
         return entity.isArmsOnlyMode() || entity.overlayTickCount > OVERLAY_TICKS ? 0 : 
             (OVERLAY_TICKS - MathHelper.clamp(entity.overlayTickCount + partialTick, 0.0F, OVERLAY_TICKS)) / OVERLAY_TICKS;
+    }
+    
+    // pre-pre-render
+    @Override
+    public boolean shouldRender(T entity, ClippingHelper pCamera, double pCamX, double pCamY, double pCamZ) {
+        if (super.shouldRender(entity, pCamera, pCamX, pCamY, pCamZ)) {
+            viewObstructionPrevention = obstructsView(entity, ClientUtil.getPartialTick());
+            
+            if (entity instanceof IEntityGlowColor) {
+                IEntityGlowColor entityColor = (IEntityGlowColor) entity;
+                if (viewObstructionPrevention.outline) {
+                    IStandPower standPower = entity.getUserPower();
+                    if (standPower != null) {
+                        entityColor.setGlowColor(OptionalInt.of(ActionsOverlayGui.getPowerUiColor(standPower)));
+                        entity.refreshGlowing = true;
+                    }
+                }
+                else if (entity.refreshGlowing) {
+                    entity.refreshGlowing = false;
+                    entity.getCapability(EntityUtilCapProvider.CAPABILITY).ifPresent(EntityUtilCap::refreshClEntityGlowing);
+                }
+            }
+            
+            return true;
+        }
+        
+        return false;
     }
 
     public boolean firstPersonRender = false;
@@ -252,42 +283,33 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
         
         idlePoseSwaying(entity, ticks, matrixStack);
 
-        viewObstructionPrevention = obstructsView(entity, partialTick);
         if (viewObstructionPrevention != ViewObstructionPrevention.NONE) {
             entity.setNoFireAnimFrame();
         }
         ResourceLocation texture = getTextureLocation(entity);
         
         
-        isVisibilityInverted = false;
         if (viewObstructionPrevention.outline) {
             isVisibilityInverted = true;
-            model.setVisibility(entity, visibilityMode(entity), viewObstructionPrevention.armsOnly, true, firstPersonRender);
-            alpha = Math.min(entity.outlineTicks / 100, 0.25f);
+            model.setVisibility(entity, visibilityMode(entity).invert(isVisibilityInverted), viewObstructionPrevention.armsOnly, firstPersonRender);
+            IVertexBuilder vertexBuilder = buffer.getBuffer(RenderType.outline(texture));
             
-            IEntityGlowColor entityColor = (IEntityGlowColor) entity;
-            OptionalInt prevColor = entityColor.getGlowColor();
-            entityColor.setGlowColor(OptionalInt.of(ActionsOverlayGui.getPowerUiColor(entity.getUserPower())));
-            RenderType renderType = RenderType.outline(texture);
-            IVertexBuilder vertexBuilder = buffer.getBuffer(renderType);
-            model.render(entity, matrixStack, vertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, alpha);
-            entityColor.setGlowColor(prevColor);
-            entityColor.setGlowColor(OptionalInt.empty());
-            
+            model.render(entity, matrixStack, vertexBuilder, packedLight, packedOverlay, 1, 1, 1, 1);
             if (!entity.isSpectator()) {
                 for (LayerRenderer<T, M> layerRenderer : this.layers) {
-                    layerRenderer.render(matrixStack, buffer, packedLight, entity, 
-                            walkAnimPos, walkAnimSpeed, partialTick, ticks, yRotationOffset, xRotation);
+                    if (layerRenderer instanceof StandModelLayerRenderer) {
+                        StandModelLayerRenderer<T, M> standLayerRenderer = (StandModelLayerRenderer<T, M>) layerRenderer;
+                        RenderType renderType = standLayerRenderer.getRenderType(entity, RenderType::outline);
+                        standLayerRenderer.render(matrixStack, buffer, renderType, packedLight, entity, 
+                                walkAnimPos, walkAnimSpeed, partialTick, ticks, yRotationOffset, xRotation);
+                    }
                 }
             }
-            entity.outlineTicks += ticks - entity.lastRenderTick;
         }
-        else {
-            entity.outlineTicks = 0;
-        }
+        isVisibilityInverted = false;
         
         
-        model.setVisibility(entity, visibilityMode(entity), viewObstructionPrevention.armsOnly, false, firstPersonRender);
+        model.setVisibility(entity, visibilityMode(entity), viewObstructionPrevention.armsOnly, firstPersonRender);
         alpha = calcAlpha(entity, partialTick);
         
         RenderType renderType = getRenderType(entity, texture);
@@ -296,7 +318,6 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
             model.render(entity, matrixStack, vertexBuilder, packedLight, packedOverlay, 1, 1, 1, alpha);
             model.renderBarrageSwings(entity, matrixStack, vertexBuilder, packedLight, packedOverlay, 1, 1, 1, alpha);
         }
-        
         if (!entity.isSpectator()) {
             for (LayerRenderer<T, M> layerRenderer : this.layers) {
                 layerRenderer.render(matrixStack, buffer, packedLight, entity, 
@@ -320,7 +341,7 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
             T entity, float walkAnimSpeed, float walkAnimPos, float partialTick,
             float ticks, float yRotationOffset, float xRotation, M model) {
         getModel(entity).copyPropertiesTo(model);
-        model.setVisibility(entity, visibilityMode(entity), viewObstructionPrevention.armsOnly, isVisibilityInverted, firstPersonRender);
+        model.setVisibility(entity, visibilityMode(entity).invert(isVisibilityInverted), viewObstructionPrevention.armsOnly, firstPersonRender);
         // TODO get rid of these two method calls?
         model.prepareMobModel(entity, walkAnimSpeed, walkAnimPos, partialTick);
         model.setupAnim(entity, walkAnimSpeed, walkAnimPos, ticks, yRotationOffset, xRotation);
@@ -375,7 +396,7 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
     public void renderFirstPersonArms(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, T entity, float partialTick) {
         if (entity.getStandPose().armsObstructView) return;
         
-        getModel(entity).setVisibility(entity, VisibilityMode.ARMS_ONLY, false, false, false);
+        getModel(entity).setVisibility(entity, VisibilityMode.ARMS_ONLY, false, false);
         renderFirstPersonArm(HandSide.LEFT, matrixStack, buffer, packedLight, entity, partialTick);
         renderFirstPersonArm(HandSide.RIGHT, matrixStack, buffer, packedLight, entity, partialTick);
     }

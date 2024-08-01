@@ -24,6 +24,7 @@ import com.google.common.collect.ObjectArrays;
 
 import io.netty.handler.codec.DecoderException;
 import net.minecraft.client.network.play.IClientPlayNetHandler;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.IPacket;
@@ -286,5 +287,23 @@ public class NetworkUtil {
         default:
             throw new IllegalArgumentException();
         }
+    }
+    
+    
+    public static void writeEntity(PacketBuffer buf, @Nullable Entity entity) {
+        buf.writeBoolean(entity != null);
+        if (entity != null) {
+            buf.writeInt(entity.getId());
+        }
+    }
+    
+    @Nullable
+    public static Entity readEntity(PacketBuffer buf, World world) {
+        boolean hasEntity = buf.readBoolean();
+        if (hasEntity) {
+            int entityId = buf.readInt();
+            return world.getEntity(entityId);
+        }
+        return null;
     }
 }

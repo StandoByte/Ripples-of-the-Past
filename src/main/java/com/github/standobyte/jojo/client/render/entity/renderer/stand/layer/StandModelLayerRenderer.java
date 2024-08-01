@@ -1,11 +1,12 @@
 package com.github.standobyte.jojo.client.render.entity.renderer.stand.layer;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.StandEntityRenderer;
-import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.client.resources.CustomResources;
+import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
@@ -69,6 +70,10 @@ public abstract class StandModelLayerRenderer<T extends StandEntity, M extends S
         return entityRenderer.getRenderType(entity, getLayerModel(Optional.empty()), getLayerTexture(entity.getStandSkin()));
     }
     
+    public RenderType getRenderType(T entity, Function<ResourceLocation, RenderType> renderTYPE) {
+        return renderTYPE.apply(getLayerTexture(entity.getStandSkin()));
+    }
+    
     public ResourceLocation getBaseTexture() {
         return texture;
     }
@@ -82,16 +87,24 @@ public abstract class StandModelLayerRenderer<T extends StandEntity, M extends S
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight,
             T entity, float walkAnimPos, float walkAnimSpeed, float partialTick,
             float ticks, float headYRotation, float headXRotation) {
-        if (shouldRender(entity, entity.getStandSkin())) {
-            RenderType renderType = getRenderType(entity);
-            if (renderType != null) {
-                M layerModel = getLayerModel(entity);
-                M parentModel = entityRenderer.getModel(entity);
-                layerModel.idleLoopTickStamp = parentModel.idleLoopTickStamp;
-                entityRenderer.renderLayer(matrixStack, buffer.getBuffer(renderType), getPackedLight(packedLight), 
-                        entity, walkAnimPos, walkAnimSpeed, partialTick, 
-                        ticks, headYRotation, headXRotation, layerModel);
-            }
+        RenderType renderType = getRenderType(entity);
+        if (renderType != null) {
+            render(matrixStack, buffer, renderType, packedLight, 
+                    entity, walkAnimPos, walkAnimSpeed, partialTick, 
+                    ticks, headYRotation, headXRotation);
+        }
+    }
+    
+    public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, RenderType renderType, int packedLight,
+            T entity, float walkAnimPos, float walkAnimSpeed, float partialTick,
+            float ticks, float headYRotation, float headXRotation) {
+        if (renderType != null && shouldRender(entity, entity.getStandSkin())) {
+            M layerModel = getLayerModel(entity);
+            M parentModel = entityRenderer.getModel(entity);
+            layerModel.idleLoopTickStamp = parentModel.idleLoopTickStamp;
+            entityRenderer.renderLayer(matrixStack, buffer.getBuffer(renderType), getPackedLight(packedLight), 
+                    entity, walkAnimPos, walkAnimSpeed, partialTick, 
+                    ticks, headYRotation, headXRotation, layerModel);
         }
     }
 }

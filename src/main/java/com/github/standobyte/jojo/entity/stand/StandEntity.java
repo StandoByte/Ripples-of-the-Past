@@ -188,8 +188,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     
     public Vector3d prevTiltVec = Vector3d.ZERO;
     public Vector3d tiltVec = Vector3d.ZERO;
-    
-    public float outlineTicks = 0;
+    public boolean refreshGlowing = false;
     
     public static final DataParameter<Optional<ResourceLocation>> DATA_PARAM_STAND_SKIN = EntityDataManager.defineId(StandEntity.class, 
             (IDataSerializer<Optional<ResourceLocation>>) ModDataSerializers.OPTIONAL_RES_LOC.get().getSerializer());
@@ -213,6 +212,11 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             this.barrageSounds = null;
         }
         init(this);
+    }
+
+    @Override
+    public boolean isGlowing() {
+        return super.isGlowing();
     }
     
     private <T extends StandEntity> void init(T thisEntity) {
