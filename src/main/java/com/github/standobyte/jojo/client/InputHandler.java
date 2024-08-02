@@ -405,8 +405,7 @@ public class InputHandler {
                     case SELECT:
                         ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
                         ControlScheme controls = HudControlSettings.getInstance().getControlScheme(power.getPowerClassification());
-                        // FIXME qweqweqwe
-//                        if (controls.hotbarsEnabled) {
+                        if (controls.hotbarsEnabled) {
                             Hotbar foundHotbar = null;
                             int foundIndex = -1;
                             for (Hotbar hotbarType : Hotbar.values()) {
@@ -426,7 +425,7 @@ public class InputHandler {
                                 hud.setMode(power.getPowerClassification());
                                 hud.selectAction(foundHotbar, foundIndex);
                             }
-//                        }
+                        }
                         break;
                     default:
                         break;

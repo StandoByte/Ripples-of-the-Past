@@ -1884,10 +1884,6 @@ public class ActionsOverlayGui extends AbstractGui {
     private <P extends IPower<P, ?>> void scrollAction(ActionsModeConfig<P> mode, ControlScheme.Hotbar hotbar, boolean backwards) {
         P power = mode.getPower();
         ControlScheme controlScheme = HudControlSettings.getInstance().getControlScheme(power);
-        // FIXME qweqweqwe
-//        if (!controlScheme.hotbarsEnabled) {
-//            return;
-//        }
         List<Action<?>> actions = controlScheme.getActionsHotbar(hotbar).getEnabledActions();
         if (actions.size() == 0) {
             return;
@@ -1922,10 +1918,6 @@ public class ActionsOverlayGui extends AbstractGui {
     public <P extends IPower<P, ?>> Pair<Action<P>, Boolean> onClick(
             P power, ControlScheme.Hotbar hotbar, boolean shiftVariant, boolean sneak, int index) {
         ControlScheme controlScheme = HudControlSettings.getInstance().getControlScheme(getCurrentMode());
-        // FIXME qweqweqwe
-//        if (!controlScheme.hotbarsEnabled) {
-//            return null;
-//        }
         Action<P> action = (Action<P>) controlScheme.getActionsHotbar(hotbar).getBaseActionInSlot(index);
         action = resolveVisibleActionInSlot(action, shiftVariant, power, getMouseTarget());
         return onActionClick(power, action, sneak);

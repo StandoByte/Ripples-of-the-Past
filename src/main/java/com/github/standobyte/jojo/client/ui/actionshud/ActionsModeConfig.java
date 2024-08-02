@@ -47,7 +47,6 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
         return HudControlSettings.getInstance().getControlScheme(powerClassification);
     }
 
-    // FIXME qweqwe
     int getSelectedSlot(ControlScheme.Hotbar hotbar) {
         return getControlScheme().getActionsHotbar(hotbar).getSelectedSlot();
     }
@@ -57,7 +56,6 @@ public class ActionsModeConfig<P extends IPower<P, ?>> {
         resetSelectedTick();
     }
     
-    // FIXME qweqwe
     @Nullable
     Action<P> getSelectedAction(ControlScheme.Hotbar hotbar, boolean shiftVariation, ActionTarget target) {
         return getControlScheme().getActionsHotbar(hotbar).getSelectedAction(power, shiftVariation, target);
