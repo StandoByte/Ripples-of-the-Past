@@ -328,13 +328,13 @@ public class WoodenCoffinBlock extends HorizontalBlock {
         return p_196258_1_.getLevel().getBlockState(blockpos1).canBeReplaced(p_196258_1_) ? this.defaultBlockState().setValue(FACING, direction) : null;
     }
 
-    private static final VoxelShape WALL_1 = Block.box(0.0D, 0.0D, 0.0D, 2.0D, 12.0D, 16.0D);
-    private static final VoxelShape WALL_2 = Block.box(14.0D, 0.0D, 0.0D, 16.0D, 12.0D, 16.0D);
-    private static final VoxelShape WALL_3 = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 12.0D, 2.0D);
-    private static final VoxelShape WALL_4 = Block.box(0.0D, 0.0D, 14.0D, 16.0D, 12.0D, 16.0D);
-    private static final VoxelShape BOTTOM = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 2.0D, 16.0D);
+    private static final VoxelShape WALL_1 = Block.box(0, 0, 0, 2, 10, 16);
+    private static final VoxelShape WALL_2 = Block.box(14, 0, 0, 16, 10, 16);
+    private static final VoxelShape WALL_3 = Block.box(0, 0, 0, 16, 10, 2);
+    private static final VoxelShape WALL_4 = Block.box(0, 0, 14, 16, 10, 16);
+    private static final VoxelShape BOTTOM = Block.box(0, 0, 0, 16, 2, 16);
     
-    protected static final VoxelShape SHAPE_CLOSED = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 15.0D, 16.0D);
+    protected static final VoxelShape SHAPE_CLOSED = Block.box(0, 0, 0, 16, 10, 16);
     protected static final VoxelShape SHAPE_OPEN_W = VoxelShapes.or(BOTTOM, WALL_2, WALL_3, WALL_4);
     protected static final VoxelShape SHAPE_OPEN_E = VoxelShapes.or(BOTTOM, WALL_1, WALL_3, WALL_4);
     protected static final VoxelShape SHAPE_OPEN_N = VoxelShapes.or(BOTTOM, WALL_1, WALL_2, WALL_4);

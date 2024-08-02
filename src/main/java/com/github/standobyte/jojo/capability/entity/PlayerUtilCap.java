@@ -14,7 +14,6 @@ import java.util.function.BooleanSupplier;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.player.IPlayerAction;
 import com.github.standobyte.jojo.block.WoodenCoffinBlock;
@@ -421,7 +420,6 @@ public class PlayerUtilCap {
     }
     
     public boolean canGoToSleep(boolean isCoffin) {
-        JojoMod.LOGGER.debug("{} {} {} {}", this.lastBedType, ticksNoSleep, nextSleepTime, player.level.dayTime());
         return 
                 this.lastBedType == null || 
                 !this.lastBedType.isCoffin && !isCoffin || 
