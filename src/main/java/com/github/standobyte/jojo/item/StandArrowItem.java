@@ -221,7 +221,7 @@ public class StandArrowItem extends ArrowItem {
         if (player != null) {
             IFormattableTextComponent mainText = null;
             
-            Collection<StandType<?>> unbannedStands = StandUtil.availableStands(true)
+            Collection<StandType<?>> unbannedStands = StandUtil.arrowStands(true)
                     .sorted(Comparator.comparingInt(stand -> JojoCustomRegistries.STANDS.getNumericId(stand.getRegistryName())))
                     .collect(Collectors.toList());
             
