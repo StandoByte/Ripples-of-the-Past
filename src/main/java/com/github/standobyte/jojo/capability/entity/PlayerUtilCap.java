@@ -37,7 +37,6 @@ import com.github.standobyte.jojo.util.mc.PlayerStatListener;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.mod.JojoModVersion;
 
-import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -454,10 +453,7 @@ public class PlayerUtilCap {
     }
     
     private void tickCoffinSleepTimer() {
-        if (coffinPreventDayTimeSkip && GeneralUtil.orElseFalse(player.getSleepingPos(), sleepingPos -> {
-            BlockState blockState = player.level.getBlockState(sleepingPos);
-            return blockState.getBlock() instanceof WoodenCoffinBlock;
-        })) {
+        if (coffinPreventDayTimeSkip && WoodenCoffinBlock.isSleepingInCoffin(player)) {
             CommonReflection.setSleepCounter(player, 0);
         }
     }
