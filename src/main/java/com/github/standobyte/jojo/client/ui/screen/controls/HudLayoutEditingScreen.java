@@ -85,7 +85,6 @@ public class HudLayoutEditingScreen extends Screen {
     
     private final SelectedKey selectedKey = new SelectedKey();
     private ActionKeybindsList keybindsList;
-    private Widget addKeybindButton;
     
     public static Predicate<KeyBindingList.Entry> scrollCtrlListTo = null;
 
@@ -577,6 +576,7 @@ public class HudLayoutEditingScreen extends Screen {
             if (draggedAction.isPresent()) {
                 ActionSlot dragged = draggedAction.get();
                 Optional<ControlScheme.Hotbar> plusSlot = getPlusSlotAt(mouseX, mouseY);
+                Optional<ActionKeybindEntry> clickedKeybindActionSlot = keybindsList.getHoveredKeybindSlot();
                 
                 if (clickedActionSlot.isPresent()) {
                     ActionSlot clicked = clickedActionSlot.get();
@@ -601,17 +601,15 @@ public class HudLayoutEditingScreen extends Screen {
                     markLayoutEdited();
                 }
                 
-                else {
-                    Optional<ActionKeybindEntry> clickedKeybindActionSlot = keybindsList.getHoveredKeybindSlot();
-                    if (clickedKeybindActionSlot.isPresent()) {
-                        ActionKeybindEntry slot = clickedKeybindActionSlot.get();
-                        slot.setAction(dragged.actionSwitch.getAction());
-                        markLayoutEdited();
-                    }
+                else if (clickedKeybindActionSlot.isPresent()) {
+                    ActionKeybindEntry slot = clickedKeybindActionSlot.get();
+                    slot.setAction(dragged.actionSwitch.getAction());
+                    markLayoutEdited();
                 }
-    
+                
+                boolean ret = super.mouseClicked(mouseX, mouseY, mouseButton);
                 draggedAction = Optional.empty();
-                return true;
+                return ret;
             }
         }
         
@@ -830,11 +828,12 @@ public class HudLayoutEditingScreen extends Screen {
         return false;
     }
     
-    private void createBlankKeybindEntry() {
+    private ActionKeybindEntry createBlankKeybindEntry() {
         ActionKeybindEntry entry = currentControlScheme.addBlankKeybindEntry();
         markKeybindEdited(entry);
         markLayoutEdited();
         _addKeybindEntryToUi(entry);
+        return entry;
     }
     
     private void setCustomKeybind(Action<?> action, InputMappings.Type inputType, int key) {
@@ -1069,7 +1068,8 @@ public class HudLayoutEditingScreen extends Screen {
         private void addNewKeybindKey() {
             super.addEntry(new AddNewKeyEntry(new CustomButton(screen.getWindowX() + 10, screen.getWindowY() + 64, 20, 20, 
                     button -> {
-                        screen.createBlankKeybindEntry();
+                        ActionKeybindEntry entry = screen.createBlankKeybindEntry();
+                        screen.draggedAction.ifPresent(dragged -> entry.setAction(dragged.actionSwitch.getAction()));
                         screen.markLayoutEdited();
                     }, 
                     (button, matrixStack, x, y) -> {
