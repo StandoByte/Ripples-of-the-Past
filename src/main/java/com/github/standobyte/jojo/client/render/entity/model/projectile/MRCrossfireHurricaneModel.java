@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.client.render.entity.model.projectile;
 
 import com.github.standobyte.jojo.client.render.FlameModelRenderer;
-import com.github.standobyte.jojo.client.render.entity.renderer.stand.MagiciansRedRenderer;
+import com.github.standobyte.jojo.client.render.block.BlockSprites;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRCrossfireHurricaneEntity;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -18,7 +18,9 @@ public class MRCrossfireHurricaneModel extends EntityModel<MRCrossfireHurricaneE
     public MRCrossfireHurricaneModel() {
         texWidth = 64;
         texHeight = 64;
-        ankh = new FlameModelRenderer(this).setFireSprites(MagiciansRedRenderer.FIRE_0_SPRITE, MagiciansRedRenderer.FIRE_1_SPRITE);
+        ankh = new FlameModelRenderer(this).setFireSprites(
+                BlockSprites.MR_FIRE_BLOCK_0::sprite, 
+                BlockSprites.MR_FIRE_BLOCK_1::sprite);
         ankh.setPos(0.0F, 0.0F, 0.0F);
 
         ankh.addFlame(0.0F, -1.0F, 0.0F, 3, 10, Direction.UP);
