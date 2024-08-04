@@ -475,14 +475,15 @@ public class LivingUtilCap {
     
     public void climbLimitPlayerHeadRot() {
         if (wallClimbing && wallClimbBodyRot.isPresent()) {
-            entity.yBodyRot = -wallClimbBodyRot.getAsFloat();
-            entity.yBodyRotO = entity.yBodyRot;
+            float climbYRot = -wallClimbBodyRot.getAsFloat();
             
-            float yRot = entity.yRot;
-            while (yRot <= entity.yBodyRot - 180) yRot += 360;
-            while (yRot > entity.yBodyRot + 180) yRot -= 360;
-            entity.yRot = MathHelper.clamp(yRot, entity.yBodyRot - 75, entity.yBodyRot + 75);
-            entity.yRotO = entity.yRot;
+            entity.setYBodyRot(climbYRot);
+            entity.yBodyRotO = entity.yBodyRot;
+            float f = MathHelper.wrapDegrees(entity.yRot - climbYRot);
+            float f1 = MathHelper.clamp(f, -75, 75);
+            entity.yRotO += f1 - f;
+            entity.yRot += f1 - f;
+            entity.setYHeadRot(entity.yRot);
         }
     }
     
