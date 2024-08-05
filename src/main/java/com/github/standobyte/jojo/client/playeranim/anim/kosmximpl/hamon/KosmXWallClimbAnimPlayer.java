@@ -131,7 +131,7 @@ public class KosmXWallClimbAnimPlayer extends KosmXKeyframeAnimPlayer {
         isPlayerMoving = false;
         setStoppedMovingTick = false;
         stoppedAnim = false;
-        speedModifier.speed = 4;
+        speedModifier.speed = 0.25f;
     }
     
     void tickProperties(boolean isMoving, double movementUp, double movementLeft, float speed) {
@@ -163,13 +163,13 @@ public class KosmXWallClimbAnimPlayer extends KosmXKeyframeAnimPlayer {
     }
     
     void onRender() {
-        if (!isPlayerMoving && !stoppedAnim) {
-            int tick = getAnimTick() % 24;
+        if (getAnimTick() == 0 || !isPlayerMoving && !stoppedAnim) {
+        	int tick = getAnimTick() % 24;
             if (!setStoppedMovingTick) {
-                stoppedMovingTick = tick;
+                stoppedMovingTick = getAnimTick() > 0 ? tick : -1;
                 setStoppedMovingTick = true;
             }
-            if (!(stoppedMovingTick < 12 ^ tick >= 12)) {
+            if (stoppedMovingTick == -1 && tick >= 1 || !(stoppedMovingTick < 12 ^ tick >= 12)) {
                 speedModifier.speed = 0;
                 stoppedAnim = true;
             }
@@ -180,7 +180,6 @@ public class KosmXWallClimbAnimPlayer extends KosmXKeyframeAnimPlayer {
         int tick = (getAnimTick() + 3) % 24;
         int lastTick = this.lastHandTouchTick;
         this.lastHandTouchTick = tick;
-        
         if (!rightHandTouch && lastTick < 12 && tick >= 12) {
             leftHandTouch = false;
             rightHandTouch = true;

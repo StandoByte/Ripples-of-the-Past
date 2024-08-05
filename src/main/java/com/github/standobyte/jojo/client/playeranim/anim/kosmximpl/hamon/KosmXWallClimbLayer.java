@@ -48,20 +48,19 @@ public class KosmXWallClimbLayer extends AnimLayerHandler<KosmXModifierSpeedLaye
     
     
     private static final ResourceLocation CLIMB_UP = new ResourceLocation("jojo", "wall_climb_up");
-//    private static final ResourceLocation CLIMB_DOWN = new ResourceLocation("jojo", "wall_climb_down");
-//    private static final ResourceLocation CLIMB_LEFT = new ResourceLocation("jojo", "wall_climb_left");
-//    private static final ResourceLocation CLIMB_RIGHT = new ResourceLocation("jojo", "wall_climb_right");
+    private static final ResourceLocation CLIMB_DOWN = new ResourceLocation("jojo", "wall_climb_down");
+    private static final ResourceLocation CLIMB_LEFT = new ResourceLocation("jojo", "wall_climb_left");
+    private static final ResourceLocation CLIMB_RIGHT = new ResourceLocation("jojo", "wall_climb_right");
     @Override
     public boolean setAnimEnabled(PlayerEntity player, boolean enabled) {
         if (enabled) {
             KeyframeAnimation up = PlayerAnimationRegistry.getAnimation(CLIMB_UP);
-//            KeyframeAnimation down = PlayerAnimationRegistry.getAnimation(CLIMB_DOWN);
-//            KeyframeAnimation left = PlayerAnimationRegistry.getAnimation(CLIMB_LEFT);
-//            KeyframeAnimation right = PlayerAnimationRegistry.getAnimation(CLIMB_RIGHT);
-//            if (up == null || down == null || left == null || right == null) return false;
-            if (up == null) return false;
+            KeyframeAnimation down = PlayerAnimationRegistry.getAnimation(CLIMB_DOWN);
+            KeyframeAnimation left = PlayerAnimationRegistry.getAnimation(CLIMB_LEFT);
+            KeyframeAnimation right = PlayerAnimationRegistry.getAnimation(CLIMB_RIGHT);
+            if (up == null || down == null || left == null || right == null) return false;
             
-            KosmXWallClimbAnimPlayer keyframePlayer = new KosmXWallClimbAnimPlayer(up, up, up, up);
+            KosmXWallClimbAnimPlayer keyframePlayer = new KosmXWallClimbAnimPlayer(up, down, left, right);
             animStuff.put(player.getUUID(), keyframePlayer);
             KosmXModifierSpeedLayer<?> modifierLayer = getAnimLayer((AbstractClientPlayerEntity) player);
             keyframePlayer.onInit(player, modifierLayer, modifierLayer.speed);
@@ -76,7 +75,10 @@ public class KosmXWallClimbLayer extends AnimLayerHandler<KosmXModifierSpeedLaye
     @Override
     public void tickAnimProperties(PlayerEntity player, boolean isMoving, 
             double movementUp, double movementLeft, float speed) {
-        getWallClimbAnimPlayer(player).tickProperties(isMoving, movementUp, movementLeft, speed);
+    	KosmXWallClimbAnimPlayer climbAnim = getWallClimbAnimPlayer(player);
+    	if (climbAnim != null) {
+    		climbAnim.tickProperties(isMoving, movementUp, movementLeft, speed);
+    	}
         if (player == Minecraft.getInstance().player) {
             PacketManager.sendToServer(new ClSyncMotionAnimPacket(isMoving, movementUp, movementLeft, speed));
         }
