@@ -16,9 +16,9 @@ import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 
-public class KosmXSendoWaveKickLayer extends AnimLayerHandler<ModifierLayer<IAnimation>> implements BasicToggleAnim {
+public class KosmXSendoWaveKickHandler extends AnimLayerHandler<ModifierLayer<IAnimation>> implements BasicToggleAnim {
 
-    public KosmXSendoWaveKickLayer(ResourceLocation id) {
+    public KosmXSendoWaveKickHandler(ResourceLocation id) {
         super(id);
     }
 

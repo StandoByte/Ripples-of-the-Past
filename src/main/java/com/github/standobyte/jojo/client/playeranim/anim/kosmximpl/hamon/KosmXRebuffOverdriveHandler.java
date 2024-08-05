@@ -13,9 +13,9 @@ import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 
-public class KosmXRebuffOverdriveLayer extends AnimLayerHandler<ModifierLayer<IAnimation>> implements BasicToggleAnim {
+public class KosmXRebuffOverdriveHandler extends AnimLayerHandler<ModifierLayer<IAnimation>> implements BasicToggleAnim {
 
-    public KosmXRebuffOverdriveLayer(ResourceLocation id) {
+    public KosmXRebuffOverdriveHandler(ResourceLocation id) {
         super(id);
     }
 

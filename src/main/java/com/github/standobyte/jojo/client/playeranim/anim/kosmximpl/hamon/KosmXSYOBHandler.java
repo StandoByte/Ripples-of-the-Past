@@ -12,9 +12,9 @@ import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 
-public class KosmXSYOBLayer extends AnimLayerHandler<ModifierLayer<IAnimation>> implements HamonSYOBAnim {
+public class KosmXSYOBHandler extends AnimLayerHandler<ModifierLayer<IAnimation>> implements HamonSYOBAnim {
     
-    public KosmXSYOBLayer(ResourceLocation id) {
+    public KosmXSYOBHandler(ResourceLocation id) {
         super(id);
     }
 

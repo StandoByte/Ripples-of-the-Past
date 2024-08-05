@@ -105,6 +105,10 @@ public class HamonWallClimbing2 extends HamonAction {
         }
     }
     
+    private static final double SIDE_SPEED_MULT = 0.5;
+    private static final double DOWN_SPEED_MULT = 0.5;
+    private static final double SIDE_VEC_LEN_MULT = 1 / Math.sqrt(1 + SIDE_SPEED_MULT * SIDE_SPEED_MULT);
+    private static final double DOWN_SIDE_VEC_LEN_MULT = Math.max(DOWN_SPEED_MULT, SIDE_SPEED_MULT) / Math.sqrt(DOWN_SPEED_MULT * DOWN_SPEED_MULT + SIDE_SPEED_MULT * SIDE_SPEED_MULT);
     private static final double MAX_WALL_DISTANCE = 0.5;
     public static boolean travelWallClimb(PlayerEntity player, Vector3d inputVec) {
         LazyOptional<LivingUtilCap> playerData = player.getCapability(LivingUtilCapProvider.CAPABILITY);
@@ -133,15 +137,21 @@ public class HamonWallClimbing2 extends HamonAction {
 //                double zPrev = player.getZ();
                 double climbSpeed = wallClimbData.getWallClimbSpeed() * player.getAttributeValue(Attributes.MOVEMENT_SPEED);
                 boolean canPullUp = false;
-
-                Vector3d movement = new Vector3d(inputVec.x * 0.75, inputVec.z > 0 ? inputVec.z : inputVec.z * 0.75, 0);
-                if (inputVec.x != 0 && inputVec.z != 0) {
-                    movement = movement.scale(0.8); // 1/sqrt(1^2+0.75^2)
-                }
+                
+                Vector3d movement = new Vector3d(inputVec.x * SIDE_SPEED_MULT, inputVec.z > 0 ? inputVec.z : inputVec.z * DOWN_SPEED_MULT, 0);
                 if (movement.lengthSqr() > 1) {
                     movement = movement.normalize();
                 }
+                if (inputVec.x != 0 && inputVec.z != 0) {
+                	if (inputVec.z > 0) {
+                		climbSpeed *= SIDE_VEC_LEN_MULT;
+                	}
+                	else {
+                		climbSpeed *= DOWN_SIDE_VEC_LEN_MULT;
+                	}
+                }
                 movement = movement.scale(climbSpeed);
+                climbSpeed = movement.length();
                 if (climbYRot != 0) {
                     movement = movement.yRot(climbYRot);
                 }

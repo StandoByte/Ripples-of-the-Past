@@ -8,24 +8,26 @@ import java.util.Objects;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.hamon.KosmXWallClimbHandler.PerPlayerModifiersLayer;
 import com.github.standobyte.jojo.client.playeranim.kosmx.anim.KosmXKeyframeAnimPlayer;
 
-import dev.kosmx.playerAnim.api.layered.ModifierLayer;
+import dev.kosmx.playerAnim.api.layered.modifier.MirrorModifier;
 import dev.kosmx.playerAnim.api.layered.modifier.SpeedModifier;
 import dev.kosmx.playerAnim.core.data.KeyframeAnimation;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.HandSide;
+import net.minecraft.util.math.MathHelper;
 
-public class KosmXWallClimbAnimPlayer extends KosmXKeyframeAnimPlayer {
+public class KosmXWallClimbKeyframePlayer extends KosmXKeyframeAnimPlayer {
     protected final Map<ClimbDir, KeyframeAnimation> climbAnim;
     protected final Map<ClimbDir, Map<String, BodyPartTransform>> climbBodyParts;
     protected ClimbDir curAnimUsed;
     
-    public KosmXWallClimbAnimPlayer(
+    public KosmXWallClimbKeyframePlayer(
             @Nonnull KeyframeAnimation upAnim,
             @Nonnull KeyframeAnimation downAnim,
             @Nonnull KeyframeAnimation leftAnim,
-            @Nonnull KeyframeAnimation rightAnim) {
+            @Nonnull KeyframeAnimation rightAnim,
+            PerPlayerModifiersLayer<?> modifiers) {
         super(upAnim);
         Objects.requireNonNull(upAnim);
         Objects.requireNonNull(downAnim);
@@ -48,6 +50,8 @@ public class KosmXWallClimbAnimPlayer extends KosmXKeyframeAnimPlayer {
             climbBodyParts.put(anim.getKey(), bodyParts);
         }
         
+        init(modifiers.speed, modifiers.mirror);
+        
         setClimbDirection(ClimbDir.UP);
     }
 
@@ -64,9 +68,23 @@ public class KosmXWallClimbAnimPlayer extends KosmXKeyframeAnimPlayer {
 //    }
     
     public void setClimbDirection(ClimbDir direction) {
-        this.curAnimUsed = direction;
-        this.data = climbAnim.get(direction);
-        this.bodyParts = climbBodyParts.get(direction);
+    	if (this.curAnimUsed != direction) {
+    		ClimbDir prevAnim = this.curAnimUsed;
+	        this.curAnimUsed = direction;
+	        this.data = climbAnim.get(direction);
+	        this.bodyParts = climbBodyParts.get(direction);
+	        
+	        mirrorModifier.setEnabled(false);
+	        if (prevAnim != null && curAnimUsed != null) {
+	        	if (!prevAnim.isHorizontal && curAnimUsed.isHorizontal) {
+	        		mirrorModifier.setEnabled(currentTick <= 12);
+	        		currentTick %= data.endTick - data.returnToTick;
+	        	}
+	        	else if (prevAnim.isHorizontal && !curAnimUsed.isHorizontal) {
+	        		currentTick = 1;
+	        	}
+	        }
+    	}
     }
     
 //    @Override
@@ -106,14 +124,21 @@ public class KosmXWallClimbAnimPlayer extends KosmXKeyframeAnimPlayer {
     
     
     enum ClimbDir {
-        UP,
-        DOWN,
-        LEFT,
-        RIGHT
+        UP(false),
+        DOWN(false),
+        LEFT(true),
+        RIGHT(true);
+    	
+    	private final boolean isHorizontal;
+    	
+    	private ClimbDir(boolean isHorizontal) {
+    		this.isHorizontal = isHorizontal;
+    	}
     }
     
     
     private SpeedModifier speedModifier;
+    private MirrorModifier mirrorModifier;
     
     private int lastHandTouchTick = 0;
     private boolean leftHandTouch = false;
@@ -124,29 +149,32 @@ public class KosmXWallClimbAnimPlayer extends KosmXKeyframeAnimPlayer {
     private int stoppedMovingTick;
     private boolean stoppedAnim = false;
     
-    void onInit(PlayerEntity player, ModifierLayer<?> animLayer, SpeedModifier speedModifier) {
-        this.speedModifier = speedModifier;
+    private void init(SpeedModifier speedModifier, MirrorModifier mirrorModifier) {
         leftHandTouch = false;
         rightHandTouch = false;
         isPlayerMoving = false;
         setStoppedMovingTick = false;
         stoppedAnim = false;
+        
+        this.speedModifier = speedModifier;
         speedModifier.speed = 0.25f;
+        this.mirrorModifier = mirrorModifier;
+        mirrorModifier.setEnabled(false);
     }
     
     void tickProperties(boolean isMoving, double movementUp, double movementLeft, float speed) {
-        KosmXWallClimbAnimPlayer.ClimbDir direction = null;
+        KosmXWallClimbKeyframePlayer.ClimbDir direction = null;
         if (movementUp > 1E-7) {
-            direction = KosmXWallClimbAnimPlayer.ClimbDir.UP;
+            direction = KosmXWallClimbKeyframePlayer.ClimbDir.UP;
         }
         else if (movementUp < -1E-7) {
-            direction = KosmXWallClimbAnimPlayer.ClimbDir.DOWN;
+            direction = KosmXWallClimbKeyframePlayer.ClimbDir.DOWN;
         }
         else if (movementLeft > 1E-7) {
-            direction = KosmXWallClimbAnimPlayer.ClimbDir.LEFT;
+            direction = KosmXWallClimbKeyframePlayer.ClimbDir.LEFT;
         }
         else if (movementLeft < -1E-7) {
-            direction = KosmXWallClimbAnimPlayer.ClimbDir.RIGHT;
+            direction = KosmXWallClimbKeyframePlayer.ClimbDir.RIGHT;
         }
         else {
             isMoving = false;
@@ -154,7 +182,7 @@ public class KosmXWallClimbAnimPlayer extends KosmXKeyframeAnimPlayer {
         
         if (isMoving) {
             setClimbDirection(direction);
-            speedModifier.speed = Math.min(speed, 2.5f);
+            speedModifier.speed = MathHelper.clamp(speed, 1, Math.abs(movementUp) > 1E-7 ? 2.5f : 1.25f);
             
             stoppedAnim = false;
             setStoppedMovingTick = false;
@@ -177,19 +205,21 @@ public class KosmXWallClimbAnimPlayer extends KosmXKeyframeAnimPlayer {
     }
     
     @Nullable HandSide handTouchFrame() {
-        int tick = (getAnimTick() + 3) % 24;
-        int lastTick = this.lastHandTouchTick;
-        this.lastHandTouchTick = tick;
-        if (!rightHandTouch && lastTick < 12 && tick >= 12) {
-            leftHandTouch = false;
-            rightHandTouch = true;
-            return HandSide.RIGHT;
-        }
-        if (!leftHandTouch && lastTick >= 12 && tick < 12) {
-            leftHandTouch = true;
-            rightHandTouch = false;
-            return HandSide.LEFT;
-        }
+    	if (curAnimUsed != null && !curAnimUsed.isHorizontal) {
+            int tick = (getAnimTick() + 3) % 24;
+            int lastTick = this.lastHandTouchTick;
+            this.lastHandTouchTick = tick;
+            if (!rightHandTouch && lastTick < 12 && tick >= 12) {
+                leftHandTouch = false;
+                rightHandTouch = true;
+                return HandSide.RIGHT;
+            }
+            if (!leftHandTouch && lastTick >= 12 && tick < 12) {
+                leftHandTouch = true;
+                rightHandTouch = false;
+                return HandSide.LEFT;
+            }
+    	}
         
         return null;
     }

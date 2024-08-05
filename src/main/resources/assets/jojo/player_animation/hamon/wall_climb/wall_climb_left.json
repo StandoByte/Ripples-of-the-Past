@@ -4,7 +4,7 @@
     "description": "Ferz",
     "emote":{
         "isLoop": "true",
-        "returnTick": 2,
+        "returnTick": 1,
         "beginTick":0,
         "endTick":13,
         "stopTick":13,
