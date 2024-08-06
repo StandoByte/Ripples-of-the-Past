@@ -97,14 +97,14 @@ public class MathUtil {
     }
     
     public static Vector3d lerpVector(float partial, Vector3d vec1, Vector3d vec2) {
-    	return lerpVector(partial, vec1.x, vec1.y, vec1.z, vec2.x, vec2.y, vec2.z);
+        return lerpVector(partial, vec1.x, vec1.y, vec1.z, vec2.x, vec2.y, vec2.z);
     }
     
     public static Vector3d lerpVector(float partial, double x1, double y1, double z1, double x2, double y2, double z2) {
-    	double x = MathHelper.lerp(partial, x1, x2);
-    	double y = MathHelper.lerp(partial, y1, y2);
-    	double z = MathHelper.lerp(partial, z1, z2);
-    	return new Vector3d(x, y, z);
+        double x = MathHelper.lerp(partial, x1, x2);
+        double y = MathHelper.lerp(partial, y1, y2);
+        double z = MathHelper.lerp(partial, z1, z2);
+        return new Vector3d(x, y, z);
     }
     
     public static int fractionRandomInc(double num) {

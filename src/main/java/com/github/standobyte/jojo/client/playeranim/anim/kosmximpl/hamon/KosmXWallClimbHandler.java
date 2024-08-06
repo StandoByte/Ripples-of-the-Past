@@ -45,7 +45,7 @@ public class KosmXWallClimbHandler extends AnimLayerHandler<KosmXWallClimbHandle
 
     @Override
     protected PerPlayerModifiersLayer<IAnimation> createAnimLayer(AbstractClientPlayerEntity player) {
-    	PerPlayerModifiersLayer<IAnimation> anim = new PerPlayerModifiersLayer<>();
+        PerPlayerModifiersLayer<IAnimation> anim = new PerPlayerModifiersLayer<>();
         anim.addModifierLast(new KosmXHeadRotationModifier());
         return anim;
     }
@@ -58,15 +58,15 @@ public class KosmXWallClimbHandler extends AnimLayerHandler<KosmXWallClimbHandle
         PerPlayerModifiersLayer() {
             this.speed = new SpeedModifier(1);
             this.mirror = new KosmXFixedMirrorModifier() {
-            	
-            	@Override
+                
+                @Override
                 public Vec3f get3DTransform(String modelName, TransformType type, float tickDelta, Vec3f value0) {
-            		if (isEnabled() && "head".equals(modelName)) {
-            			value0 = transformVector(value0, type);
-            			value0 = transformVector(value0, type);
-            		}
-            		return super.get3DTransform(modelName, type, tickDelta, value0);
-            	}
+                    if (isEnabled() && "head".equals(modelName)) {
+                        value0 = transformVector(value0, type);
+                        value0 = transformVector(value0, type);
+                    }
+                    return super.get3DTransform(modelName, type, tickDelta, value0);
+                }
             };
             mirror.setEnabled(false);
             addModifierLast(speed);
@@ -90,7 +90,7 @@ public class KosmXWallClimbHandler extends AnimLayerHandler<KosmXWallClimbHandle
 
             PerPlayerModifiersLayer<?> modifierLayer = getAnimLayer((AbstractClientPlayerEntity) player);
             KosmXWallClimbKeyframePlayer keyframePlayer = new KosmXWallClimbKeyframePlayer(
-            		up, down, left, right, modifierLayer);
+                    up, down, left, right, modifierLayer);
             animStuff.put(player.getUUID(), keyframePlayer);
             return setAnim(player, keyframePlayer);
         }
@@ -103,10 +103,10 @@ public class KosmXWallClimbHandler extends AnimLayerHandler<KosmXWallClimbHandle
     @Override
     public void tickAnimProperties(PlayerEntity player, boolean isMoving, 
             double movementUp, double movementLeft, float speed) {
-    	KosmXWallClimbKeyframePlayer climbAnim = getWallClimbAnimPlayer(player);
-    	if (climbAnim != null) {
-    		climbAnim.tickProperties(isMoving, movementUp, movementLeft, speed);
-    	}
+        KosmXWallClimbKeyframePlayer climbAnim = getWallClimbAnimPlayer(player);
+        if (climbAnim != null) {
+            climbAnim.tickProperties(isMoving, movementUp, movementLeft, speed);
+        }
         if (player == Minecraft.getInstance().player) {
             PacketManager.sendToServer(new ClSyncMotionAnimPacket(isMoving, movementUp, movementLeft, speed));
         }
