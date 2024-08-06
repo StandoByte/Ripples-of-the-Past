@@ -271,14 +271,18 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     
-
+    
+    
+    public static boolean noHudRender(Minecraft mc) {
+        return mc.gameMode.getPlayerMode() == GameType.SPECTATOR || mc.options.hideGui || mc.screen instanceof WasdAllowingScreen
+                || mc.player.isDeadOrDying();
+    }
     
     private ActionTarget _target;
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public void render(RenderGameOverlayEvent.Pre event) {
         _target = null;
-        if (mc.gameMode.getPlayerMode() == GameType.SPECTATOR || mc.options.hideGui || mc.screen instanceof WasdAllowingScreen
-                || mc.player.isDeadOrDying()) {
+        if (noHudRender(mc)) {
             return;
         }
         RenderGameOverlayEvent.ElementType elementTypeRender = event.getType();
@@ -479,6 +483,14 @@ public class ActionsOverlayGui extends AbstractGui {
             }
         }
         return _target;
+    }
+    
+    public static int getPowerUiColor(PowerClassification powerClassification) {
+        IPower<?, ?> power = getInstance().getHudMode(powerClassification).getPower();
+        if (power == null) {
+            return -1;
+        }
+        return getPowerUiColor(power);
     }
     
     public static int getPowerUiColor(IPower<?, ?> power) {
@@ -2228,7 +2240,7 @@ public class ActionsOverlayGui extends AbstractGui {
         RIGHT
     }
     
-    enum BarsOrientation {
+    public enum BarsOrientation {
         VERTICAL,
         HORIZONTAL
     }

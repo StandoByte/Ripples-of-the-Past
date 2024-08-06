@@ -5,6 +5,11 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
+import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer;
+import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer.BarType;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -15,8 +20,10 @@ import net.minecraft.util.text.ITextProperties;
 import net.minecraft.util.text.Style;
 
 public class IconTooltipLine implements ITooltipLine {
-    private final Icon icon;
-    private final int count;
+    private Icon icon;
+    private NonStandPowerType<?> nonStandPowerType;
+    private int count;
+    private int rightSideSpace = 0;
     
     public IconTooltipLine(Icon icon) {
         this(icon, 1);
@@ -27,20 +34,74 @@ public class IconTooltipLine implements ITooltipLine {
         this.count = count;
     }
     
+    public static IconTooltipLine powerEnergy(NonStandPowerType<?> powerType) {
+        IconTooltipLine icon = new IconTooltipLine(Icon.NON_STAND_ENERGY);
+        icon.nonStandPowerType = powerType;
+        return icon;
+    }
+    
+    public IconTooltipLine withRightSideSpace(int px) {
+        this.rightSideSpace = px;
+        return this;
+    }
+    
     
     @Override
     public void draw(MatrixStack matrixStack, float x, float y, FontRenderer font) {
-        Minecraft.getInstance().textureManager.bind(ClientUtil.ADDITIONAL_UI);
-        for (int i = 0; i < count; i++) {
-            RenderSystem.enableBlend();
-            AbstractGui.blit(matrixStack, (int) x, (int) y, 247 - icon.ordinal() * 9, 247, 9, 9, 256, 256);
-            x += 8;
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        int[] iconTex;
+        switch (icon) {
+        case NON_STAND_ENERGY:
+            if (nonStandPowerType != null) {
+                Minecraft.getInstance().textureManager.bind(ActionsOverlayGui.OVERLAY_LOCATION);
+                iconTex = BarsRenderer.getIconTex(BarsRenderer.getEnergyBarIcon(nonStandPowerType), ActionsOverlayGui.BarsOrientation.HORIZONTAL);
+                if (nonStandPowerType == ModPowers.VAMPIRISM.get()) {
+                    iconTex[5] += 3;
+                    iconTex[6] += 3;
+                    iconTex[4] = 2;
+                }
+                AbstractGui.blit(matrixStack, (int) x + iconTex[5] - 2, (int) y + iconTex[6], 
+                        iconTex[0] / iconTex[4], iconTex[1] / iconTex[4], iconTex[2] / iconTex[4], iconTex[3] / iconTex[4], 256 / iconTex[4], 256 / iconTex[4]);
+            }
+            break;
+        case STAND_STAMINA:
+            Minecraft.getInstance().textureManager.bind(ActionsOverlayGui.OVERLAY_LOCATION);
+            iconTex = BarsRenderer.getIconTex(BarType.STAMINA, ActionsOverlayGui.BarsOrientation.HORIZONTAL);
+            iconTex[4] = 2;
+            AbstractGui.blit(matrixStack, (int) x + 1, (int) y - 1, 
+                    iconTex[0] / iconTex[4], iconTex[1] / iconTex[4], iconTex[2] / iconTex[4], iconTex[3] / iconTex[4], 256 / iconTex[4], 256 / iconTex[4]);
+            break;
+        case STAND_RESOLVE:
+            Minecraft.getInstance().textureManager.bind(ActionsOverlayGui.OVERLAY_LOCATION);
+            iconTex = BarsRenderer.getIconTex(BarType.RESOLVE, ActionsOverlayGui.BarsOrientation.HORIZONTAL);
+            AbstractGui.blit(matrixStack, (int) x, (int) y, 
+                    iconTex[0]           / iconTex[4], iconTex[1] / iconTex[4], iconTex[2], iconTex[3], 256 / iconTex[4], 256 / iconTex[4]);
+            AbstractGui.blit(matrixStack, (int) x, (int) y, 
+                    (iconTex[0] + 40) / iconTex[4], iconTex[1] / iconTex[4], iconTex[2], iconTex[3], 256 / iconTex[4], 256 / iconTex[4]);
+            break;
+        default:
+            Minecraft.getInstance().textureManager.bind(ClientUtil.ADDITIONAL_UI);
+            for (int i = 0; i < count; i++) {
+                AbstractGui.blit(matrixStack, (int) x, (int) y, 247 - icon.ordinal() * 9, 247, 9, 9, 256, 256);
+                x += 8;
+            }
+            break;
         }
     }
     
     @Override
     public int getWidth(FontRenderer font) {
-        return count * 8 + 1;
+        switch (icon) {
+        case NON_STAND_ENERGY:
+            return 9 + rightSideSpace;
+        case STAND_STAMINA:
+            return 9 + rightSideSpace;
+        case STAND_RESOLVE:
+            return 15 + rightSideSpace;
+        default:
+            return count * 8 + 1 + rightSideSpace;
+        }
     }
 
     @Override
@@ -64,7 +125,11 @@ public class IconTooltipLine implements ITooltipLine {
         ARMOR,
         STRENGTH,
         VOLUME,
-        TIME
+        TIME,
+        
+        NON_STAND_ENERGY,
+        STAND_STAMINA,
+        STAND_RESOLVE
     }
 
 }

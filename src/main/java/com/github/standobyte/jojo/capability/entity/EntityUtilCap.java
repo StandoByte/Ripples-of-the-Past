@@ -5,8 +5,11 @@ import java.util.OptionalInt;
 import java.util.Queue;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.action.stand.GoldExperienceLifeDetector;
 import com.github.standobyte.jojo.capability.world.TimeStopHandler;
+import com.github.standobyte.jojo.client.ClientEventHandler;
 import com.github.standobyte.jojo.client.IEntityGlowColor;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 
@@ -77,16 +80,18 @@ public class EntityUtilCap {
                 action);
     }
     
-    
+
     
     public void setClGlowingColor(@Nonnull OptionalInt color, int ticks) {
+        setClGlowingColor(color, ticks, null);
+    }
+    
+    public void setClGlowingColor(@Nonnull OptionalInt color, int ticks, @Nullable Object additionalCtx) {
         if (entity instanceof IEntityGlowColor) {
             this.glowingColor = color;
             this.glowColorTicks = ticks;
             ((IEntityGlowColor) entity).setGlowColor(glowingColor);
-            if (showHp && !color.isPresent()) {
-                showHp = false;
-            }
+            setShowHpGEDetector(color.isPresent() && additionalCtx == GoldExperienceLifeDetector.GE_DETECTOR_CTX);
         }
     }
     
@@ -114,12 +119,14 @@ public class EntityUtilCap {
         }
     }
     
-    private boolean showHp = false;
-    public boolean showsHp() {
-        return showHp;
-    }
-    
-    public void setShowHp() {
-        showHp = true;
+    private void setShowHpGEDetector(boolean value) {
+        if (entity.level.isClientSide()) {
+            if (value) {
+                ClientEventHandler.getInstance().addGEDetectedEntity(entity);
+            }
+            else {
+                ClientEventHandler.getInstance().removeGEDetectedEntity(entity);
+            }
+        }
     }
 }

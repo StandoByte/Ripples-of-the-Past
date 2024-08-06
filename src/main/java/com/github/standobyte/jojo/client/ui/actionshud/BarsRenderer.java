@@ -18,6 +18,7 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -92,16 +93,7 @@ public abstract class BarsRenderer {
                     .getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> hamon.getMaxBreathStability())
                     .orElse(nonStandPower.getMaxEnergy());
             
-            BarType type = null;
-            if (nonStandPower.getType() == ModPowers.HAMON.get()) {
-                type = BarType.ENERGY_HAMON;
-            }
-            else if (nonStandPower.getType() == ModPowers.VAMPIRISM.get()) {
-                type = BarType.ENERGY_VAMPIRE;
-            }
-            else {
-                type = BarType.ENERGY_OTHER;
-            }
+            BarType type = getEnergyBarIcon(nonStandPower.getType());
             
             if (type != null) {
                 renderBarStart(matrixStack, type, 
@@ -251,9 +243,28 @@ public abstract class BarsRenderer {
             int width, int length, 
             float alpha) {}
     
+    public static BarType getEnergyBarIcon(NonStandPowerType<?> powerType) {
+        if (powerType == ModPowers.HAMON.get()) {
+            return BarType.ENERGY_HAMON;
+        }
+        else if (powerType == ModPowers.VAMPIRISM.get()) {
+            return BarType.ENERGY_VAMPIRE;
+        }
+        else {
+            return BarType.ENERGY_OTHER;
+        }
+    }
+    
     protected static final int ICON_WIDTH = 12;
     protected static final int ICON_HEIGHT = 16;
-    protected int[] getIconTex(BarType type, BarsOrientation orientation) {
+    /**
+     * [0, 1] - UV position
+     * [2, 3] - icon size
+     * [4] - inverse scale
+     * [5] - horizontal bar icon x offset (left alignment)
+     * [6] - horizontal bar icon y offset
+     */
+    public static int[] getIconTex(BarType type, BarsOrientation orientation) {
         switch (type) {
         case STAMINA:
             return new int[] {128, 0, ICON_WIDTH, ICON_HEIGHT, 1, 0, -7};

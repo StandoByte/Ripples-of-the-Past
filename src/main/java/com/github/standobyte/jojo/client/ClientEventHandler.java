@@ -6,11 +6,15 @@ import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.HEALTH;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.HELMET;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
@@ -29,6 +33,7 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
+import com.github.standobyte.jojo.client.ClientUtil.PosOnScreen;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.particle.custom.FirstPersonHamonAura;
 import com.github.standobyte.jojo.client.polaroid.PhotosCache;
@@ -53,6 +58,12 @@ import com.github.standobyte.jojo.client.ui.screen.widgets.HeightScaledSlider;
 import com.github.standobyte.jojo.client.ui.screen.widgets.ImageVanillaButton;
 import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
 import com.github.standobyte.jojo.client.ui.toasts.MetEntityTypeToast;
+import com.github.standobyte.jojo.client.ui.tooltip.CustomTooltipRender;
+import com.github.standobyte.jojo.client.ui.tooltip.ITooltipLine;
+import com.github.standobyte.jojo.client.ui.tooltip.IconTooltipLine;
+import com.github.standobyte.jojo.client.ui.tooltip.MultiTooltipLine;
+import com.github.standobyte.jojo.client.ui.tooltip.TextTooltipLine;
+import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModStatusEffects;
@@ -104,6 +115,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractSlider;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.gui.widget.list.KeyBindingList;
+import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.FirstPersonRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.model.BipedModel;
@@ -132,6 +144,7 @@ import net.minecraft.util.Util;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector3i;
@@ -173,6 +186,7 @@ public class ClientEventHandler {
     private static ClientEventHandler instance = null;
 
     private final Minecraft mc;
+    private Matrix4f projectionMatrix;
     
     private float pausePartialTick;
     private boolean prevPause = false;
@@ -302,10 +316,11 @@ public class ClientEventHandler {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public <T extends LivingEntity, M extends EntityModel<T>> void onRenderNameplate(RenderNameplateEvent event) {
         Entity entity = event.getEntity();
+        MatrixStack matrixStack = event.getMatrixStack();
         if (entity instanceof LivingEntity) {
             INonStandPower.getNonStandPowerOptional((LivingEntity) entity).ifPresent(power -> {
                 if (power.getHeldAction(true) == ModHamonActions.ZEPPELI_TORNADO_OVERDRIVE.get()) {
-                    event.getMatrixStack().mulPose(Vector3f.YP.rotation((power.getHeldActionTicks() + event.getPartialTicks()) * -2F % 360F));
+                    matrixStack.mulPose(Vector3f.YP.rotation((power.getHeldActionTicks() + event.getPartialTicks()) * -2F % 360F));
                 }
             });
         }
@@ -577,8 +592,10 @@ public class ClientEventHandler {
         if (event.getType() == HELMET) {
             renderLosingVision(event.getMatrixStack(), event.getPartialTicks());
         }
-	}
-	
+        
+        hudRenderEntityGEDetectorData(event.getMatrixStack());
+    }
+    
     @SubscribeEvent(priority = EventPriority.LOW)
     public void renderHpWithBleeding(RenderGameOverlayEvent.Pre event) {
         if (ModInteractionUtil.isModLoaded("healthoverlay")) return;
@@ -1184,6 +1201,8 @@ public class ClientEventHandler {
 
     @SubscribeEvent
     public void renderBlocksOverlay(RenderWorldLastEvent event) {
+        this.projectionMatrix = event.getProjectionMatrix().copy();
+        
         ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
         if (hud.showExtraActionHud(ModStandsInit.CRAZY_DIAMOND_RESTORE_TERRAIN.get())) {
             MatrixStack matrixStack = event.getMatrixStack();
@@ -1218,8 +1237,12 @@ public class ClientEventHandler {
         }
         prevPause = paused;
         
-        ShaderEffectApplier.getInstance().updateTimeStopperScreenPos(
-                event.getMatrixStack(), event.getProjectionMatrix(), mc.gameRenderer.getMainCamera());
+        ActiveRenderInfo camera = mc.gameRenderer.getMainCamera();
+        MatrixStack matrixStack = event.getMatrixStack();
+        Matrix4f projMatrix = event.getProjectionMatrix();
+        float partialTick = event.getPartialTicks();
+        findEntitiesOnScreen(matrixStack, projMatrix, camera, partialTick);
+        ShaderEffectApplier.getInstance().updateTimeStopperScreenPos(matrixStack, projMatrix, camera, partialTick);
     }
     
     public float getPartialTick() {
@@ -1373,6 +1396,115 @@ public class ClientEventHandler {
                 }
             });
         }
+    }
+    
+    
+    private Set<Entity> GEDetectorEntities = new HashSet<>();
+    private Entity GEDetectorShowHpEntity;
+    private PosOnScreen GEDetectorShowHpEntityPos;
+
+    public void addGEDetectedEntity(Entity entity) {
+        this.GEDetectorEntities.add(entity);
+    }
+    
+    public void removeGEDetectedEntity(Entity entity) {
+        this.GEDetectorEntities.remove(entity);
+    }
+    
+    private void findEntitiesOnScreen(MatrixStack worldRenderMatrixStack, Matrix4f projectionMatrix, ActiveRenderInfo camera, float partialTick) {
+        GEDetectorShowHpEntity = getEntityGEDetectHp();
+        if (GEDetectorShowHpEntity != null) {
+            Entity entity = GEDetectorShowHpEntity;
+            Vector3d pos = entity.getPosition(partialTick).add(0, entity.getBbHeight() * 0.5f, 0);
+            GEDetectorShowHpEntityPos = ClientUtil.posOnScreen(pos, camera, worldRenderMatrixStack, projectionMatrix);
+        }
+    }
+    
+    @Nullable
+    private Entity getEntityGEDetectHp() {
+        if (mc.player != null) {
+            Vector3d cameraPos = mc.gameRenderer.getMainCamera().getPosition();
+            Vector3d lookVec = mc.player.getLookAngle();
+            return GEDetectorEntities.stream()
+                    .filter(Entity::isAlive)
+                    .max(Comparator.comparingDouble(entity -> {
+                        Vector3d entityPos = entity.getBoundingBox().getCenter();
+                        Vector3d vecToPos = entityPos.subtract(cameraPos).normalize();
+                        return vecToPos.dot(lookVec);
+                    }))
+                    .orElse(null);
+        }
+        return null;
+    }
+    
+    private void hudRenderEntityGEDetectorData(MatrixStack matrixStack) {
+        Entity entity = GEDetectorShowHpEntity;
+        PosOnScreen entityPos = GEDetectorShowHpEntityPos;
+        if (entity == null || entityPos == null) return;
+
+        List<ITooltipLine> tooltip = new ArrayList<>();
+        if (entity instanceof LivingEntity) {
+            LivingEntity living = (LivingEntity) entity;
+            int iconWidth = 17;
+            
+            if (living.getMaxHealth() > 0) {
+                float hpRatio = living.getHealth() / living.getMaxHealth();
+                ITextComponent text = new StringTextComponent(String.valueOf((int) (hpRatio * 100) + "%"));
+                IconTooltipLine icon = new IconTooltipLine(IconTooltipLine.Icon.HEALTH);
+                ITooltipLine line = new MultiTooltipLine(icon.withRightSideSpace(iconWidth - icon.getWidth(mc.font)), new TextTooltipLine(text));
+                tooltip.add(line);
+            }
+            
+            INonStandPower.getNonStandPowerOptional(living).resolve().ifPresent(power -> {
+                if (power.hasPower() && power.getMaxEnergy() > 0) {
+                    float energyRatio = power.getEnergy() / power.getMaxEnergy();
+                    ITextComponent text = new StringTextComponent(String.valueOf((int) (energyRatio * 100) + "%"));
+                    IconTooltipLine icon = IconTooltipLine.powerEnergy(power.getType());
+                    ITooltipLine line = new MultiTooltipLine(icon.withRightSideSpace(iconWidth - icon.getWidth(mc.font)), new TextTooltipLine(text));
+                    tooltip.add(line);
+                }
+            });
+            
+            IStandPower.getStandPowerOptional(living).resolve().ifPresent(power -> {
+                if (power.hasPower() && power.usesStamina() && power.getMaxStamina() > 0) {
+                    float staminaRatio = power.getStamina() / power.getMaxStamina();
+                    ITextComponent text = new StringTextComponent(String.valueOf((int) (staminaRatio * 100) + "%"));
+                    IconTooltipLine icon = new IconTooltipLine(IconTooltipLine.Icon.STAND_STAMINA);
+                    ITooltipLine line = new MultiTooltipLine(icon.withRightSideSpace(iconWidth - icon.getWidth(mc.font)), new TextTooltipLine(text));
+                    tooltip.add(line);
+                }
+                if (power.hasPower() && power.usesResolve() && power.getMaxResolve() > 0) {
+                    float resolveRatio = living.hasEffect(ModStatusEffects.RESOLVE.get()) ? 1 : power.getResolve() / power.getMaxResolve();
+                    ITextComponent text = new StringTextComponent(String.valueOf((int) (resolveRatio * 100)) + "%");
+                    IconTooltipLine icon = new IconTooltipLine(IconTooltipLine.Icon.STAND_RESOLVE);
+                    ITooltipLine line = new MultiTooltipLine(icon.withRightSideSpace(iconWidth - icon.getWidth(mc.font)), new TextTooltipLine(text));
+                    tooltip.add(line);
+                }
+            });
+        }
+        else if (entity instanceof SoulEntity) {
+            SoulEntity soul = (SoulEntity) entity;
+            float seconds = soul.tickCount / 20f;
+            float maxTime = soul.lifeSpan / 20f;
+            
+            // TODO add soul time tooltip line
+        }
+        
+        int screenWidth = mc.getWindow().getGuiScaledWidth();
+        int screenHeight = mc.getWindow().getGuiScaledHeight();
+        int x = (int) (screenWidth * entityPos.pos.x);
+        int y = (int) (screenHeight * (1 - entityPos.pos.y));
+        
+        int uiColor = ActionsOverlayGui.getPowerUiColor(PowerClassification.STAND);
+        int[] rgb = ClientUtil.rgbInt(uiColor);
+        int color1 = (0xF0 << 24) + ClientUtil.fromRgbInt(rgb[0] / 5, rgb[1] / 5, rgb[2] / 5);
+        int color2 = (0x50 << 24) + uiColor;
+        int color3 = (color2 & 0xFEFEFE) >> 1 | color2 & 0xFF000000;
+        
+        CustomTooltipRender.drawHoveringText(matrixStack, tooltip, 
+                x, y, screenWidth, screenHeight, -1, 
+                color1, color2, color3, 
+                mc.font, false);
     }
     
     
