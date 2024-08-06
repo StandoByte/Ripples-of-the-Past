@@ -9,6 +9,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.playeranim.anim.interfaces.WallClimbAnim;
 import com.github.standobyte.jojo.client.playeranim.kosmx.KosmXPlayerAnimatorInstalled.AnimLayerHandler;
+import com.github.standobyte.jojo.client.playeranim.kosmx.anim.modifier.KosmXFixedMirrorModifier;
 import com.github.standobyte.jojo.client.playeranim.kosmx.anim.modifier.KosmXHeadRotationModifier;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.EnergyRippleLayer;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -16,11 +17,13 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClSyncMotionAnimPac
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 
+import dev.kosmx.playerAnim.api.TransformType;
 import dev.kosmx.playerAnim.api.layered.IAnimation;
 import dev.kosmx.playerAnim.api.layered.ModifierLayer;
 import dev.kosmx.playerAnim.api.layered.modifier.MirrorModifier;
 import dev.kosmx.playerAnim.api.layered.modifier.SpeedModifier;
 import dev.kosmx.playerAnim.core.data.KeyframeAnimation;
+import dev.kosmx.playerAnim.core.util.Vec3f;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
@@ -54,7 +57,17 @@ public class KosmXWallClimbHandler extends AnimLayerHandler<KosmXWallClimbHandle
         
         PerPlayerModifiersLayer() {
             this.speed = new SpeedModifier(1);
-            this.mirror = new MirrorModifier();
+            this.mirror = new KosmXFixedMirrorModifier() {
+            	
+            	@Override
+                public Vec3f get3DTransform(String modelName, TransformType type, float tickDelta, Vec3f value0) {
+            		if (isEnabled() && "head".equals(modelName)) {
+            			value0 = transformVector(value0, type);
+            			value0 = transformVector(value0, type);
+            		}
+            		return super.get3DTransform(modelName, type, tickDelta, value0);
+            	}
+            };
             mirror.setEnabled(false);
             addModifierLast(speed);
             addModifierLast(mirror);

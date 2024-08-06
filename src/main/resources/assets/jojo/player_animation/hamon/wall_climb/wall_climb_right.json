@@ -72,7 +72,7 @@
                 "easing": "EASEINOUTQUAD",
                 "turn": 0,
                 "head":{
-                    "yaw":0.5909523367881775
+                    "yaw":-0.10565116256475449
                 }
             },
             {
@@ -96,7 +96,7 @@
                 "easing": "EASEINOUTQUAD",
                 "turn": 0,
                 "head":{
-                    "roll":-0.14024241268634796
+                    "roll":0.06505239754915237
                 }
             },
             {
@@ -120,7 +120,7 @@
                 "easing": "EASEINOUTQUAD",
                 "turn": 0,
                 "head":{
-                    "pitch":-0.15143898129463196
+                    "pitch":-0.03919651731848717
                 }
             },
             {

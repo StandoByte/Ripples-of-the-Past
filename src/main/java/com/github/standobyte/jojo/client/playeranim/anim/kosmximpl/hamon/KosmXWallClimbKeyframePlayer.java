@@ -21,6 +21,7 @@ public class KosmXWallClimbKeyframePlayer extends KosmXKeyframeAnimPlayer {
     protected final Map<ClimbDir, KeyframeAnimation> climbAnim;
     protected final Map<ClimbDir, Map<String, BodyPartTransform>> climbBodyParts;
     protected ClimbDir curAnimUsed;
+    @Nullable protected ClimbDir nextAnimToSet;
     
     public KosmXWallClimbKeyframePlayer(
             @Nonnull KeyframeAnimation upAnim,
@@ -52,7 +53,7 @@ public class KosmXWallClimbKeyframePlayer extends KosmXKeyframeAnimPlayer {
         
         init(modifiers.speed, modifiers.mirror);
         
-        setClimbDirection(ClimbDir.UP);
+        doSetClimbDirection(ClimbDir.UP);
     }
 
     
@@ -68,20 +69,29 @@ public class KosmXWallClimbKeyframePlayer extends KosmXKeyframeAnimPlayer {
 //    }
     
     public void setClimbDirection(ClimbDir direction) {
+    	if (stoppedAnim) {
+    		doSetClimbDirection(direction);
+    	}
+    	else {
+    		this.nextAnimToSet = direction;
+    	}
+    }
+    
+    private void doSetClimbDirection(ClimbDir direction) {
     	if (this.curAnimUsed != direction) {
     		ClimbDir prevAnim = this.curAnimUsed;
 	        this.curAnimUsed = direction;
 	        this.data = climbAnim.get(direction);
 	        this.bodyParts = climbBodyParts.get(direction);
 	        
-	        mirrorModifier.setEnabled(false);
 	        if (prevAnim != null && curAnimUsed != null) {
 	        	if (!prevAnim.isHorizontal && curAnimUsed.isHorizontal) {
 	        		mirrorModifier.setEnabled(currentTick <= 12);
 	        		currentTick %= data.endTick - data.returnToTick;
 	        	}
 	        	else if (prevAnim.isHorizontal && !curAnimUsed.isHorizontal) {
-	        		currentTick = 1;
+	        		currentTick = mirrorModifier.isEnabled() ? 13 : 1;
+	        		mirrorModifier.setEnabled(false);
 	        	}
 	        }
     	}
@@ -145,15 +155,15 @@ public class KosmXWallClimbKeyframePlayer extends KosmXKeyframeAnimPlayer {
     private boolean rightHandTouch = false;
     
     private boolean isPlayerMoving;
-    private boolean setStoppedMovingTick = false;
-    private int stoppedMovingTick;
+    private boolean consecutiveMotion = true;
+    private int lastTickBeforeMotionChange;
     private boolean stoppedAnim = false;
     
     private void init(SpeedModifier speedModifier, MirrorModifier mirrorModifier) {
         leftHandTouch = false;
         rightHandTouch = false;
         isPlayerMoving = false;
-        setStoppedMovingTick = false;
+        consecutiveMotion = true;
         stoppedAnim = false;
         
         this.speedModifier = speedModifier;
@@ -184,22 +194,32 @@ public class KosmXWallClimbKeyframePlayer extends KosmXKeyframeAnimPlayer {
             setClimbDirection(direction);
             speedModifier.speed = MathHelper.clamp(speed, 1, Math.abs(movementUp) > 1E-7 ? 2.5f : 1.25f);
             
+            if (stoppedAnim) {
+                consecutiveMotion = true;
+            }
             stoppedAnim = false;
-            setStoppedMovingTick = false;
         }
         this.isPlayerMoving = isMoving;
     }
     
     void onRender() {
-        if (getAnimTick() == 0 || !isPlayerMoving && !stoppedAnim) {
+    	boolean shouldStopAnim = getAnimTick() == 0 || !isPlayerMoving && !stoppedAnim;
+        if (nextAnimToSet != null || shouldStopAnim) {
         	int tick = getAnimTick() % 24;
-            if (!setStoppedMovingTick) {
-                stoppedMovingTick = getAnimTick() > 0 ? tick : -1;
-                setStoppedMovingTick = true;
+            if (consecutiveMotion) {
+                lastTickBeforeMotionChange = getAnimTick() > 0 ? tick : -1;
+                consecutiveMotion = false;
             }
-            if (stoppedMovingTick == -1 && tick >= 1 || !(stoppedMovingTick < 12 ^ tick >= 12)) {
-                speedModifier.speed = 0;
-                stoppedAnim = true;
+            if (lastTickBeforeMotionChange == -1 && tick >= 1 || !(lastTickBeforeMotionChange < 12 ^ tick >= 12)) {
+            	if (shouldStopAnim) {
+	                speedModifier.speed = 0;
+	                stoppedAnim = true;
+            	}
+            	else if (nextAnimToSet != null) {
+            		doSetClimbDirection(nextAnimToSet);
+            		nextAnimToSet = null;
+            		consecutiveMotion = true;
+            	}
             }
         }
     }
