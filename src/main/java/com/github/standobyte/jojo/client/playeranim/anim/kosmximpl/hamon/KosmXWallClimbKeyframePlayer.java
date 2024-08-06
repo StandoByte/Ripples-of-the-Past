@@ -69,32 +69,32 @@ public class KosmXWallClimbKeyframePlayer extends KosmXKeyframeAnimPlayer {
 //    }
     
     public void setClimbDirection(ClimbDir direction) {
-    	if (stoppedAnim) {
-    		doSetClimbDirection(direction);
-    	}
-    	else {
-    		this.nextAnimToSet = direction;
-    	}
+        if (stoppedAnim) {
+            doSetClimbDirection(direction);
+        }
+        else {
+            this.nextAnimToSet = direction;
+        }
     }
     
     private void doSetClimbDirection(ClimbDir direction) {
-    	if (this.curAnimUsed != direction) {
-    		ClimbDir prevAnim = this.curAnimUsed;
-	        this.curAnimUsed = direction;
-	        this.data = climbAnim.get(direction);
-	        this.bodyParts = climbBodyParts.get(direction);
-	        
-	        if (prevAnim != null && curAnimUsed != null) {
-	        	if (!prevAnim.isHorizontal && curAnimUsed.isHorizontal) {
-	        		mirrorModifier.setEnabled(currentTick <= 12);
-	        		currentTick %= data.endTick - data.returnToTick;
-	        	}
-	        	else if (prevAnim.isHorizontal && !curAnimUsed.isHorizontal) {
-	        		currentTick = mirrorModifier.isEnabled() ? 13 : 1;
-	        		mirrorModifier.setEnabled(false);
-	        	}
-	        }
-    	}
+        if (this.curAnimUsed != direction) {
+            ClimbDir prevAnim = this.curAnimUsed;
+            this.curAnimUsed = direction;
+            this.data = climbAnim.get(direction);
+            this.bodyParts = climbBodyParts.get(direction);
+            
+            if (prevAnim != null && curAnimUsed != null) {
+                if (!prevAnim.isHorizontal && curAnimUsed.isHorizontal) {
+                    mirrorModifier.setEnabled(currentTick <= 12);
+                    currentTick %= data.endTick - data.returnToTick;
+                }
+                else if (prevAnim.isHorizontal && !curAnimUsed.isHorizontal) {
+                    currentTick = mirrorModifier.isEnabled() ? 13 : 1;
+                    mirrorModifier.setEnabled(false);
+                }
+            }
+        }
     }
     
 //    @Override
@@ -138,12 +138,12 @@ public class KosmXWallClimbKeyframePlayer extends KosmXKeyframeAnimPlayer {
         DOWN(false),
         LEFT(true),
         RIGHT(true);
-    	
-    	private final boolean isHorizontal;
-    	
-    	private ClimbDir(boolean isHorizontal) {
-    		this.isHorizontal = isHorizontal;
-    	}
+        
+        private final boolean isHorizontal;
+        
+        private ClimbDir(boolean isHorizontal) {
+            this.isHorizontal = isHorizontal;
+        }
     }
     
     
@@ -203,29 +203,29 @@ public class KosmXWallClimbKeyframePlayer extends KosmXKeyframeAnimPlayer {
     }
     
     void onRender() {
-    	boolean shouldStopAnim = getAnimTick() == 0 || !isPlayerMoving && !stoppedAnim;
+        boolean shouldStopAnim = getAnimTick() == 0 || !isPlayerMoving && !stoppedAnim;
         if (nextAnimToSet != null || shouldStopAnim) {
-        	int tick = getAnimTick() % 24;
+            int tick = getAnimTick() % 24;
             if (consecutiveMotion) {
                 lastTickBeforeMotionChange = getAnimTick() > 0 ? tick : -1;
                 consecutiveMotion = false;
             }
             if (lastTickBeforeMotionChange == -1 && tick >= 1 || !(lastTickBeforeMotionChange < 12 ^ tick >= 12)) {
-            	if (shouldStopAnim) {
-	                speedModifier.speed = 0;
-	                stoppedAnim = true;
-            	}
-            	else if (nextAnimToSet != null) {
-            		doSetClimbDirection(nextAnimToSet);
-            		nextAnimToSet = null;
-            		consecutiveMotion = true;
-            	}
+                if (shouldStopAnim) {
+                    speedModifier.speed = 0;
+                    stoppedAnim = true;
+                }
+                else if (nextAnimToSet != null) {
+                    doSetClimbDirection(nextAnimToSet);
+                    nextAnimToSet = null;
+                    consecutiveMotion = true;
+                }
             }
         }
     }
     
     @Nullable HandSide handTouchFrame() {
-    	if (curAnimUsed != null && !curAnimUsed.isHorizontal) {
+        if (curAnimUsed != null && !curAnimUsed.isHorizontal) {
             int tick = (getAnimTick() + 3) % 24;
             int lastTick = this.lastHandTouchTick;
             this.lastHandTouchTick = tick;
@@ -239,7 +239,7 @@ public class KosmXWallClimbKeyframePlayer extends KosmXKeyframeAnimPlayer {
                 rightHandTouch = false;
                 return HandSide.LEFT;
             }
-    	}
+        }
         
         return null;
     }

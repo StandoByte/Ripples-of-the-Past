@@ -120,7 +120,7 @@ public class ModStatusEffects {
                 HAMON_SPREAD.get(), 
                 FULL_INVISIBILITY.get(), 
                 VAMPIRE_SUN_BURN.get(),
-        		FREEZE.get(),
+                FREEZE.get(),
                 BLEEDING.get());
     }
     

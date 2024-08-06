@@ -143,12 +143,12 @@ public class HamonWallClimbing2 extends HamonAction {
                     movement = movement.normalize();
                 }
                 if (inputVec.x != 0 && inputVec.z != 0) {
-                	if (inputVec.z > 0) {
-                		climbSpeed *= SIDE_VEC_LEN_MULT;
-                	}
-                	else {
-                		climbSpeed *= DOWN_SIDE_VEC_LEN_MULT;
-                	}
+                    if (inputVec.z > 0) {
+                        climbSpeed *= SIDE_VEC_LEN_MULT;
+                    }
+                    else {
+                        climbSpeed *= DOWN_SIDE_VEC_LEN_MULT;
+                    }
                 }
                 movement = movement.scale(climbSpeed);
                 climbSpeed = movement.length();
