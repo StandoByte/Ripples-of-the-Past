@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.client.ui.screen.stand.ge;
 
-import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
+import com.github.standobyte.jojo.modcompat.ModInteractionUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;

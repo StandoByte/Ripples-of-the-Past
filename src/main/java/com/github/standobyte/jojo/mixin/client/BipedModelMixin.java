@@ -6,6 +6,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
+import com.github.standobyte.jojo.block.WoodenCoffinBlock;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 
 import net.minecraft.client.renderer.entity.model.AgeableModel;
@@ -31,6 +32,13 @@ public abstract class BipedModelMixin<T extends LivingEntity> extends AgeableMod
             rightArm.yRot = 0;
             rightArm.zRot = 0;
             body.zRot = 0;
+        }
+        
+        if (entity.isSleeping() && WoodenCoffinBlock.isSleepingInCoffin(entity)) {
+            leftArm.xRot = 0;
+            leftArm.zRot = 0;
+            rightArm.xRot = 0;
+            rightArm.zRot = 0;
         }
     }
     

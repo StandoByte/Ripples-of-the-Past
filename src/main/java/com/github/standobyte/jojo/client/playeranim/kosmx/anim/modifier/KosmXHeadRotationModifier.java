@@ -4,7 +4,6 @@ import dev.kosmx.playerAnim.api.TransformType;
 import dev.kosmx.playerAnim.api.layered.modifier.AbstractModifier;
 import dev.kosmx.playerAnim.core.util.Vec3f;
 
-// FIXME sometimes the head does 360 when using Hamon Breath
 public class KosmXHeadRotationModifier extends AbstractModifier {
 
     @Override

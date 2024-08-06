@@ -7,9 +7,9 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.player.IPlayerAction;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
+import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
-import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.general.MathUtil;
@@ -106,8 +106,8 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
             }
         }
         
-        // FIXME ! (hamon 2) sound & particles
         else {
+            HamonSparksLoopSound.playSparkSound(user, new Vector3d(user.getX(), user.getY(0.25), user.getZ()), 1.0F, true);
         }
         
         user.fallDistance = 0;
@@ -118,25 +118,21 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
                 DamageUtil.getDamageWithoutHeldItem(user));
     }
     
-    public static boolean protectFromMeleeAttackInKick(LivingEntity user, DamageSource dmgSource, float dmgAmount) {
-        return user.getCapability(PlayerUtilCapProvider.CAPABILITY).map(cap -> {
-            return cap.getContinuousAction().map(action -> action.getAction() == ModHamonActions.ZEPPELI_SENDO_WAVE_KICK.get()).orElse(false) && 
-                    dmgSource.getEntity() != null && dmgSource.getDirectEntity() != null && dmgSource.getEntity().is(dmgSource.getDirectEntity());
-        }).orElse(false);
-    }
-    
-    private static AxisAlignedBB kickHitbox(LivingEntity user) {
+    public static AxisAlignedBB kickHitbox(LivingEntity user) {
         float xzAngle = -user.yRot * MathUtil.DEG_TO_RAD;
         Vector3d lookVec = new Vector3d(Math.sin(xzAngle), 0, Math.cos(xzAngle));
         Vector3d hitboxXZCenter = user.position().add(lookVec.scale(user.getBbWidth() * 0.75F));
         return new AxisAlignedBB(hitboxXZCenter, hitboxXZCenter)
-                .inflate(user.getBbWidth() * 0.6F, 0, user.getBbWidth() * 0.6F)
+                .inflate(user.getBbWidth() * 1.25F, 0.125, user.getBbWidth() * 1.25F)
                 .expandTowards(0, user.getBbHeight() / 2, 0);
     }
     
     @Override
     public SendoWaveKickInstance createContinuousActionInstance(
             LivingEntity user, PlayerUtilCap userCap, INonStandPower power) {
+        if (user.level.isClientSide() && user instanceof PlayerEntity) {
+            ModPlayerAnimations.sendoWaveKick.setAnimEnabled((PlayerEntity) user, true);
+        }
         return new SendoWaveKickInstance(user, userCap, power, this);
     }
     
@@ -167,6 +163,24 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
         public float getInitialYRot() {
             return initialYRot;
         }
+        
+        @Override
+        public boolean cancelIncomingDamage(DamageSource dmgSource, float dmgAmount) {
+            return isMeleeAttack(dmgSource);
+        }
+        
+        @Override
+        public boolean stopAction() {
+            if (super.stopAction()) {
+                if (user.level.isClientSide() && user instanceof PlayerEntity) {
+                    ModPlayerAnimations.sendoWaveKick.setAnimEnabled((PlayerEntity) user, false);
+                }
+                return true;
+            }
+            
+            return false;
+        }
+        
     }
 }
 

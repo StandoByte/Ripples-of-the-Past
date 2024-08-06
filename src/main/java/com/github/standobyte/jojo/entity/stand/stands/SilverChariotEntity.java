@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.action.stand.IHasStandPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.client.sound.BarrageHitSoundHandler;
 import com.github.standobyte.jojo.entity.damaging.DamagingEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
@@ -215,15 +216,14 @@ public class SilverChariotEntity extends StandEntity {
     }
     
     private boolean deflectProjectile(Entity projectile) {
-        if (projectile.getType() != ModEntityTypes.SPACE_RIPPER_STINGY_EYES.get()) {
-            JojoModUtil.deflectProjectile(projectile, getLookAngle());
-            if (projectile instanceof DamagingEntity && ((DamagingEntity) projectile).isFiery()) {
-                entityData.set(RAPIER_ON_FIRE, true);
-                rapierFireTicks = 300;
-            }
-            return true;
+        if (projectile == null || projectile instanceof ModdedProjectileEntity && !((ModdedProjectileEntity) projectile).canBeDeflected(this)) return false;
+        
+        JojoModUtil.deflectProjectile(projectile, getLookAngle());
+        if (projectile instanceof DamagingEntity && ((DamagingEntity) projectile).isFiery()) {
+            entityData.set(RAPIER_ON_FIRE, true);
+            rapierFireTicks = 300;
         }
-        return false;
+        return true;
     }
     
     public void removeRapierFire() {

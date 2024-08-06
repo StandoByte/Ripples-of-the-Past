@@ -188,8 +188,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     
     public Vector3d prevTiltVec = Vector3d.ZERO;
     public Vector3d tiltVec = Vector3d.ZERO;
-    
-    public float outlineTicks = 0;
+    public boolean refreshGlowing = false;
     
     public static final DataParameter<Optional<ResourceLocation>> DATA_PARAM_STAND_SKIN = EntityDataManager.defineId(StandEntity.class, 
             (IDataSerializer<Optional<ResourceLocation>>) ModDataSerializers.OPTIONAL_RES_LOC.get().getSerializer());
@@ -213,6 +212,11 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             this.barrageSounds = null;
         }
         init(this);
+    }
+
+    @Override
+    public boolean isGlowing() {
+        return super.isGlowing();
     }
     
     private <T extends StandEntity> void init(T thisEntity) {
@@ -442,7 +446,6 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         return StandStatFormulas.getLeapStrength(leapBaseStrength() * getStandEfficiency());
     }
     
-    // FIXME ATTACK_DAMAGE is not syncable, therefore the client doesn't know about the strength stat lvling
     protected double leapBaseStrength() {
         return getAttributeValue(Attributes.ATTACK_DAMAGE);
     }
@@ -1107,6 +1110,8 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         setYHeadRot(this.yRot);
     }
     
+    private float prevUserMaxHealth = -1;
+    private static final UUID SYNC_USER_MAX_HP_ATTRIBUTE = UUID.fromString("279afa29-d83b-4562-bcc5-059c3b7773d0");
     @Override
     public void tick() {
         super.tick();
@@ -1184,6 +1189,19 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             }
             else if (user != null) {
                 setHealth(user.isAlive() ? user.getHealth() : 0);
+                float userMaxHealth = user.getMaxHealth();
+                if (prevUserMaxHealth != userMaxHealth) {
+                    float maxHealth = this.getMaxHealth();
+                    if (maxHealth != userMaxHealth) {
+                        ModifiableAttributeInstance maxHpAttr = getAttribute(Attributes.MAX_HEALTH);
+                        for (AttributeModifier attributemodifier : maxHpAttr.getModifiers()) {
+                            maxHpAttr.removeModifier(attributemodifier);
+                        }
+                        maxHpAttr.addTransientModifier(new AttributeModifier(SYNC_USER_MAX_HP_ATTRIBUTE, "User's max health", 
+                                userMaxHealth - getMaxHealth(), AttributeModifier.Operation.ADDITION));
+                    }
+                }
+                prevUserMaxHealth = userMaxHealth;
             }
         }
         else {

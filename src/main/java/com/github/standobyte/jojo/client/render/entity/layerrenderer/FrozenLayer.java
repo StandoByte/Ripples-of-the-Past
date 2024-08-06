@@ -141,7 +141,6 @@ public class FrozenLayer<T extends LivingEntity, M extends EntityModel<T>> exten
         
         ClientUtil.setupForFirstPersonRender(model, player);
         IVertexBuilder vertexBuilder = buffer.getBuffer(RenderType.entityTranslucent(texture));
-        light = ClientUtil.MAX_MODEL_LIGHT;
         ModelRenderer arm = ClientUtil.getArm(model, side);
         ModelRenderer armOuter = ClientUtil.getArmOuter(model, side);
         arm.xRot = 0.0F;

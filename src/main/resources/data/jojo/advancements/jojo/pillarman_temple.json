@@ -1,5 +1,5 @@
 {
-  "parent": "jojo:jojo/root",
+  "parent": "jojo:jojo/buy_map",
   "display": {
     "icon": {
       "item": "jojo:slumbering_pillarman"

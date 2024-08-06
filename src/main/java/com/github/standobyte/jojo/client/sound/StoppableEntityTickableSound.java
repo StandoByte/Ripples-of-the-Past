@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.client.sound;
 
 import java.util.function.Predicate;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.TickableSound;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.SoundCategory;
@@ -58,7 +59,7 @@ public class StoppableEntityTickableSound<T extends Entity> extends TickableSoun
                 volume -= volumeReduction;
             }
         }
-        else if (!(entity.isAlive() && playWhile.test(entity))) {
+        else if (!(Minecraft.getInstance().level == entity.level && entity.isAlive() && playWhile.test(entity))) {
             fadeOut();
         }
         else {

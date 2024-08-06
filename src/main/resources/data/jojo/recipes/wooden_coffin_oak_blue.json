@@ -2,7 +2,7 @@
   "type": "minecraft:crafting_shaped",
   "group": "jojo_wooden_coffin",
   "pattern": [
-    " l ",
+    "gld",
     "www",
     "lll"
   ],
@@ -12,6 +12,12 @@
     },
     "w": {
       "item": "minecraft:blue_wool"
+    },
+    "g": {
+      "tag": "forge:ingots/gold"
+    },
+    "d": {
+      "tag": "forge:dyes/black"
     }
   },
   "result": {

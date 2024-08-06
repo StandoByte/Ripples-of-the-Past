@@ -2,8 +2,8 @@ package com.github.standobyte.jojo.action.stand;
 
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ui.screen.stand.ge.ChooseLifeformScreen;
+import com.github.standobyte.jojo.modcompat.ModInteractionUtil.ResLocSet;
 import com.github.standobyte.jojo.util.mc.EntityTypeToInstance;
-import com.github.standobyte.jojo.util.mod.ModInteractionUtil.ResLocSet;
 
 import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.CreatureEntity;

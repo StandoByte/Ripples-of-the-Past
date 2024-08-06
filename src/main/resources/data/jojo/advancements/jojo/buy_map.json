@@ -1,0 +1,61 @@
+{
+  "parent": "jojo:jojo/root",
+  "display": {
+    "icon": {
+      "item": "minecraft:filled_map",
+      "nbt": "{display:{MapColor:7171001}}"
+    },
+    "title": {
+      "translate": "advancements.jojo.buy_map.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.buy_map.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "meteorite_map": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "minecraft:filled_map",
+            "nbt": "{JojoStructure:meteorite_map}"
+          }
+        ]
+      }
+    },
+    "hamon_temple_map": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "minecraft:filled_map",
+            "nbt": "{JojoStructure:hamon_map}"
+          }
+        ]
+      }
+    },
+    "pillarman_temple_map": {
+      "trigger": "minecraft:inventory_changed",
+      "conditions": {
+        "items": [
+          {
+            "item": "minecraft:filled_map",
+            "nbt": "{JojoStructure:pillarman_map}"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "meteorite_map",
+      "hamon_temple_map",
+      "pillarman_temple_map"
+    ]
+  ]
+}

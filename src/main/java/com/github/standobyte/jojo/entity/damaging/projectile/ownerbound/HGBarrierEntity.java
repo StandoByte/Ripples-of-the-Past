@@ -261,7 +261,7 @@ public class HGBarrierEntity extends OwnerBoundProjectileEntity {
     @Override
     public void writeSpawnData(PacketBuffer buffer) {
         super.writeSpawnData(buffer);
-        buffer.writeInt(standUser.getId());
+        buffer.writeInt(standUser != null ? standUser.getId() : -1);
         boolean isBlockOrigin = originBlockPos != null;
         buffer.writeBoolean(isBlockOrigin);
         if (isBlockOrigin) {

@@ -16,10 +16,12 @@ import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.ResourceLocation;
 
 public class MagiciansRedRenderer extends StandEntityRenderer<MagiciansRedEntity, StandEntityModel<MagiciansRedEntity>> {
-    public static final RenderMaterial MR_FIRE_0 = new RenderMaterial(PlayerContainer.BLOCK_ATLAS, new ResourceLocation(JojoMod.MOD_ID, "block/mr_fire_0"));
-    public static final RenderMaterial MR_FIRE_1 = new RenderMaterial(PlayerContainer.BLOCK_ATLAS, new ResourceLocation(JojoMod.MOD_ID, "block/mr_fire_1"));
-    public static final Supplier<TextureAtlasSprite> FIRE_0_SPRITE = () -> MR_FIRE_0.sprite();
-    public static final Supplier<TextureAtlasSprite> FIRE_1_SPRITE = () -> MR_FIRE_1.sprite();
+    public static final RenderMaterial MR_FIRE_0 = new RenderMaterial(
+            PlayerContainer.BLOCK_ATLAS, new ResourceLocation(JojoMod.MOD_ID, "entity/stand/magicians_red_fire_0"));
+    public static final RenderMaterial MR_FIRE_1 = new RenderMaterial(
+            PlayerContainer.BLOCK_ATLAS, new ResourceLocation(JojoMod.MOD_ID, "entity/stand/magicians_red_fire_1"));
+    public static final Supplier<TextureAtlasSprite> FIRE_0_SPRITE = MR_FIRE_0::sprite;
+    public static final Supplier<TextureAtlasSprite> FIRE_1_SPRITE = MR_FIRE_1::sprite;
 
     public MagiciansRedRenderer(EntityRendererManager renderManager) {
         super(renderManager, 

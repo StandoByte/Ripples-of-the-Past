@@ -72,14 +72,6 @@ public class VerticalBarsRenderer extends BarsRenderer {
         gui.blit(matrixStack, x + 1, y + length - fill + 1, 
                 texX + 1, texY + length - fill + 1, width - 2, fill);
     }
-    
-    @Override
-    protected void barFillEffect(MatrixStack matrixStack, int x, int y, Alignment alignment, 
-            int width, int length, int fill, BarType barType) {
-        if (barType == BarType.ENERGY_HAMON) {
-            // TODO particles effect
-        }
-    }
 
     @Override
     protected void renderCost(MatrixStack matrixStack, 
