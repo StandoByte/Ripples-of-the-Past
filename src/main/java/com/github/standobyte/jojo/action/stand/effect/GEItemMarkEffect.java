@@ -49,8 +49,11 @@ public class GEItemMarkEffect extends StandEffectInstance {
             return;
         }
         
-        if (!world.isClientSide() && !getItemTracker(true).isTracked()) {
-            remove();
+        if (!world.isClientSide()) {
+            TrackerItemStack tracker = getItemTracker(true);
+            if (tracker == null || !tracker.isTracked()) {
+                remove();
+            }
         }
     }
 
