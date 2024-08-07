@@ -1404,6 +1404,7 @@ public class GameplayEventHandler {
                         player.playSound(SoundEvents.COW_MILK, 1.0F, 1.0F);
                         ItemStack milkBucketItem = DrinkHelper.createFilledResult(item, player, 
                                 PotionUtils.setCustomEffects(Items.MILK_BUCKET.getDefaultInstance(), potion.get()));
+                        milkBucketItem.getOrCreateTag().putBoolean(MOD_ADDS_EFFECTS_TO_ITEM, true);
                         player.setItemInHand(hand, milkBucketItem);
                     }
                     else {
@@ -1421,6 +1422,7 @@ public class GameplayEventHandler {
                         
                         PotionUtils.setCustomEffects(stewItem, potion.get());
                         ItemStack stewBowlItem = DrinkHelper.createFilledResult(item, player, stewItem, false);
+                        stewItem.getOrCreateTag().putBoolean(MOD_ADDS_EFFECTS_TO_ITEM, true);
                         player.setItemInHand(hand, stewBowlItem);
                         
                         target.playSound(susEffect != null ? SoundEvents.MOOSHROOM_MILK_SUSPICIOUSLY : SoundEvents.MOOSHROOM_MILK, 1.0F, 1.0F);
@@ -1433,14 +1435,12 @@ public class GameplayEventHandler {
         }
     }
     
+    public static final String MOD_ADDS_EFFECTS_TO_ITEM = "JojoItemUseEffects";
     @SubscribeEvent
     public static void usePotionCowProduct(LivingEntityUseItemEvent.Finish event) {
         ItemStack item = event.getItem();
         LivingEntity entity = event.getEntityLiving();
-        if (!item.isEmpty() && (
-                item.getItem() == Items.MILK_BUCKET
-                || item.getItem() == Items.MUSHROOM_STEW
-                || item.getItem() == Items.SUSPICIOUS_STEW)) {
+        if (!item.isEmpty() && item.hasTag() && item.getTag().getBoolean(MOD_ADDS_EFFECTS_TO_ITEM)) {
             List<EffectInstance> effects = PotionUtils.getMobEffects(item);
             if (!effects.isEmpty()) {
                 effects.forEach(effect -> entity.addEffect(effect));
