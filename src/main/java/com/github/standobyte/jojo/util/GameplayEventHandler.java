@@ -213,6 +213,7 @@ import net.minecraftforge.fml.server.ServerLifecycleHooks;
 //FIXME move all event handlers to their respective classes, leave the method links here
 @EventBusSubscriber(modid = JojoMod.MOD_ID)
 public class GameplayEventHandler {
+    public static final boolean DELETE_ME = true;
     
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingTick(LivingUpdateEvent event) {

@@ -88,6 +88,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandArrowHandler;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
+import com.github.standobyte.jojo.util.GameplayEventHandler;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
@@ -186,7 +187,6 @@ public class ClientEventHandler {
     private static ClientEventHandler instance = null;
 
     private final Minecraft mc;
-    private Matrix4f projectionMatrix;
     
     private float pausePartialTick;
     private boolean prevPause = false;
@@ -1201,8 +1201,6 @@ public class ClientEventHandler {
 
     @SubscribeEvent
     public void renderBlocksOverlay(RenderWorldLastEvent event) {
-        this.projectionMatrix = event.getProjectionMatrix().copy();
-        
         ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
         if (hud.showExtraActionHud(ModStandsInit.CRAZY_DIAMOND_RESTORE_TERRAIN.get())) {
             MatrixStack matrixStack = event.getMatrixStack();
@@ -1438,6 +1436,8 @@ public class ClientEventHandler {
     }
     
     private void hudRenderEntityGEDetectorData(MatrixStack matrixStack) {
+        if (GameplayEventHandler.DELETE_ME) return;
+        
         Entity entity = GEDetectorShowHpEntity;
         PosOnScreen entityPos = GEDetectorShowHpEntityPos;
         if (entity == null || entityPos == null) return;
