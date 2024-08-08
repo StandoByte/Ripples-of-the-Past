@@ -113,6 +113,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.Food;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.network.play.server.SChatPacket;
@@ -384,28 +385,29 @@ public class GameplayEventHandler {
     
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onFoodEaten(LivingEntityUseItemEvent.Finish event) {
-        if (event.getItem().getItem() == Items.ENCHANTED_GOLDEN_APPLE) {
+        LivingEntity entity = event.getEntityLiving();
+        ItemStack item = event.getItem();
+        if (item.getItem() == Items.ENCHANTED_GOLDEN_APPLE) {
             VampirismUtil.onEnchantedGoldenAppleEaten(event.getEntityLiving());
         }
-        else if (ModInteractionUtil.isSquidInkPasta(event.getItem())) {
-            InkPastaItem.onEaten(event.getEntityLiving());
+        else if (ModInteractionUtil.isSquidInkPasta(item)) {
+            InkPastaItem.onEaten(entity);
         }
-        PlayerEntity player = (PlayerEntity) event.getEntity();
-        INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
-            power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).ifPresent(pillarman -> {
-            	if(event.getItem().isEdible()) {
-            		power.addEnergy(event.getItem().getItem().getFoodProperties().getNutrition() * 10);
-            	}        
+        
+        if (event.getItem().isEdible()) {
+            Food food = item.getItem().getFoodProperties();
+            INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
+                power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).ifPresent(pillarman -> {
+                    power.addEnergy(food.getNutrition() * 10);
+                });
+                power.getTypeSpecificData(ModPowers.ZOMBIE.get()).ifPresent(zombie -> {
+                    if (food.isMeat()) {
+                        power.addEnergy(food.getNutrition() * 10); 
+                        entity.heal(food.getNutrition());
+                    }
+                });
             });
-        });
-        INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
-            power.getTypeSpecificData(ModPowers.ZOMBIE.get()).ifPresent(zombie -> {
-            	if(event.getItem().isEdible() && event.getItem().getItem().getFoodProperties().isMeat()) {
-            		power.addEnergy(event.getItem().getItem().getFoodProperties().getNutrition() * 10); 
-                	player.heal(event.getItem().getItem().getFoodProperties().getNutrition());
-            	}
-            });
-        });
+        }
     }
     
     @SubscribeEvent
@@ -927,25 +929,23 @@ public class GameplayEventHandler {
                         entity.hurt(DamageUtil.STONE_MASK, 1000);
                         return false;
                     } else {
-                        if(power.getTypeSpecificData(pillarman).get().getEvolutionStage() < 3) {
+                        if (power.getTypeSpecificData(pillarman).get().getEvolutionStage() < 3) {
                             power.getTypeSpecificData(pillarman).get().setEvolutionStage(3);
                             power.getTypeSpecificData(pillarman).get().setPillarmanBuffs(entity, 1);
                             //Gives a random Mode
-                            double randomMode = Math.random();
-                            if(randomMode > 0 && randomMode < 0.33F) {
+                            switch (entity.getRandom().nextInt(3)) {
+                            case 0:
                                 power.getTypeSpecificData(pillarman).get().setMode(Mode.WIND);
-                                if(randomMode < 0.06F) {
-                                	entity.level.playSound(null, entity, ModSounds.PILLAR_MAN_WIND_MODE2.get(), entity.getSoundSource(), 1.0F, 1.0F);
-                                } else {
-                                	entity.level.playSound(null, entity, ModSounds.PILLAR_MAN_WIND_MODE.get(), entity.getSoundSource(), 1.0F, 1.0F);
-                                }
-                                
-                            } else if(randomMode > 0.33 && randomMode < 0.66F) {
+                                entity.level.playSound(null, entity, ModSounds.PILLAR_MAN_WIND_MODE.get(), entity.getSoundSource(), 1.0F, 1.0F);
+                                break;
+                            case 1:
                                 power.getTypeSpecificData(pillarman).get().setMode(Mode.HEAT);
                                 entity.level.playSound(null, entity, ModSounds.PILLAR_MAN_HEAT_MODE.get(), entity.getSoundSource(), 1.0F, 1.0F);
-                            } else if(randomMode > 0.66 && randomMode < 1) {
+                                break;
+                            case 2:
                                 power.getTypeSpecificData(pillarman).get().setMode(Mode.LIGHT);
                                 entity.level.playSound(null, entity, ModSounds.PILLAR_MAN_LIGHT_MODE.get(), entity.getSoundSource(), 1.0F, 1.0F);
+                                break;
                             }
                             applyMaskEffect(entity, headStack);
                             return true;
