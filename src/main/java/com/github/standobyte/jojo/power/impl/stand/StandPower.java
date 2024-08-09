@@ -185,7 +185,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             }
             setStandInstance(null);
             stamina = 0;
-            resolveCounter.reset();
+            resolveCounter.onClearStandType();
             skippedProgression = false;
             if (countTaken) {
                 serverPlayerUser.ifPresent(player -> {
@@ -860,6 +860,9 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             }
             if (usesStamina()) {
                 PacketManager.sendToClient(new TrStaminaPacket(user.getId(), stamina), player);
+            }
+            if (usesResolve()) {
+                resolveCounter.syncWithTrackingOrUser(player);
             }
             if (standManifestation != null) {
                 standManifestation.syncWithTrackingOrUser(player);
