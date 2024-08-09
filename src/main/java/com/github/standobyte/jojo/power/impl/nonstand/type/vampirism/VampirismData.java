@@ -18,7 +18,6 @@ import com.github.standobyte.jojo.power.impl.nonstand.TypeSpecificData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.CharacterHamonTechnique;
-import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.block.BedBlock;
@@ -58,11 +57,7 @@ public class VampirismData extends TypeSpecificData {
             power.addEnergy(300);
         }
         
-        IStandPower.getStandPowerOptional(user).ifPresent(stand -> {
-            if (stand.hasPower() && stand.wasProgressionSkipped()) {
-                stand.skipProgression();
-            }
-        });
+        super.onPowerGiven(oldType, oldData);
     }
 
     @Override

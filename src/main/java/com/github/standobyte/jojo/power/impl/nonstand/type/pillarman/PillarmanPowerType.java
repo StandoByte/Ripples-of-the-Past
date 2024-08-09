@@ -8,7 +8,6 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.non_stand.PillarmanAction;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
-import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.pillarman.ModPillarmanActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -43,6 +42,7 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
         return true;
     }
     
+    // TODO
     @Override
     public void onClear(INonStandPower power) {
         power.getTypeSpecificData(this).get().setEvolutionStage(0);
@@ -52,7 +52,7 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
         }
     
     public static void effectsCheck(INonStandPower power) {
-    	LivingEntity user = power.getUser();
+        LivingEntity user = power.getUser();
         for (Effect effect : EFFECTS) {
             EffectInstance effectInstance = user.getEffect(effect);
             if (effectInstance != null) {
@@ -91,38 +91,41 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
     public float getStaminaRegenFactor(INonStandPower power, IStandPower standPower) {
         return 1 * power.getTypeSpecificData(this).get().getEvolutionStage();
     }
-    
+
+    // TODO
     @Override
     public void tickUser(LivingEntity entity, INonStandPower power) {
+        super.tickUser(entity, power);
         PillarmanData pillarman = power.getTypeSpecificData(this).get();
         pillarman.tick();
         if (!entity.level.isClientSide()) {
-            if(power.getTypeSpecificData(this).get().isInvaded() == true) {
+            if (pillarman.isInvaded() && entity instanceof ServerPlayerEntity) {
                 ServerPlayerEntity player = (ServerPlayerEntity) entity;
-                if(player.isShiftKeyDown() || (player.getCamera() == player)) {
+                if (player.isShiftKeyDown() || (player.getCamera() == player)) {
                     player.setGameMode(GameType.SURVIVAL);
-                    power.getTypeSpecificData(this).get().setInvaded(false);
+                    pillarman.setInvaded(false);
                 }
             }
-            if(pillarman.getEvolutionStage() > 1) {
+            if (pillarman.getEvolutionStage() > 1) {
                 if (entity instanceof PlayerEntity) {
                     ((PlayerEntity) entity).getFoodData().setFoodLevel(17);
-                    }
+                }
                 entity.setAirSupply(entity.getMaxAirSupply());
-                float energy =  power.getEnergy();
-                if(pillarman.refreshEnergy((int) power.getEnergy())) {
+                float energy = power.getEnergy();
+                if (pillarman.refreshEnergy((int) power.getEnergy())) {
                     for (Effect effect : EFFECTS) {
-                        if (energy > power.getMaxEnergy()/10) {
-                        entity.addEffect(new EffectInstance(effect, Integer.MAX_VALUE, 0, false, false, true));
+                        if (energy > power.getMaxEnergy() / 10) {
+                            entity.addEffect(new EffectInstance(effect, Integer.MAX_VALUE, 0, false, false, true));
                         } else {
                             entity.removeEffect(effect);
-                            }
+                        }
                     }
                 }
             }
         }
     }
-    
+
+    // TODO
     private static final Set<Effect> EFFECTS = new HashSet<>();
     public static void initPillarmanEffects() {
         Collections.addAll(EFFECTS, 
@@ -135,7 +138,8 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
     public boolean isReplaceableWith(NonStandPowerType<?> newType) {
         return false;
     }
-    
+
+    // TODO
     @Override
     public float getTargetResolveMultiplier(INonStandPower power, IStandPower attackingStand) {
         LivingEntity entity = power.getUser();
@@ -152,8 +156,8 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
     
     @Override
     public float getLeapStrength(INonStandPower power) {
-        float leapStrength = 2F + Math.min(power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).get().getEvolutionStage(), 2.25F)/2;
-        return leapStrength * 0.60F;
+        float leapStrength = 2F + Math.min(power.getTypeSpecificData(this).get().getEvolutionStage(), 2.25F) / 2;
+        return leapStrength * 0.6F;
     }
     
     @Override
@@ -165,7 +169,8 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
     public float getLeapEnergyCost() {
         return 0;
     }
-    
+
+    // TODO
     public static void cancelPillarmanEffectRemoval(PotionRemoveEvent event) {
         EffectInstance effectInstance = event.getPotionEffect();
         if (effectInstance != null) {
@@ -174,7 +179,7 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
                 power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).ifPresent(pillarman -> {
                     Effect effect = event.getPotion();
                     if (EFFECTS.contains(effect) 
-                            && power.getEnergy() > power.getMaxEnergy()/10 
+                            && power.getEnergy() > power.getMaxEnergy() / 10 
                             && power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).get().getEvolutionStage() > 1) {
                         event.setCanceled(true);
                     }
@@ -198,7 +203,7 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
         
         PillarmanData pillarman = power.getTypeSpecificData(this).get();
         
-        if (pillarman.getEvolutionStage() > 1 ) {
+        if (pillarman.getEvolutionStage() > 1) {
             controlScheme.addIfMissing(ControlScheme.Hotbar.LEFT_CLICK, ModPillarmanActions.PILLARMAN_ABSORPTION.get());
             controlScheme.addIfMissing(ControlScheme.Hotbar.LEFT_CLICK, ModPillarmanActions.PILLARMAN_HORN_ATTACK.get());
             controlScheme.addIfMissing(ControlScheme.Hotbar.LEFT_CLICK, ModPillarmanActions.PILLARMAN_RIBS_BLADES.get());
@@ -206,7 +211,7 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
             controlScheme.addIfMissing(ControlScheme.Hotbar.RIGHT_CLICK, ModPillarmanActions.PILLARMAN_ENHANCED_SENSES.get());
             controlScheme.addIfMissing(ControlScheme.Hotbar.RIGHT_CLICK, ModPillarmanActions.PILLARMAN_UNNATURAL_AGILITY.get());
         }
-        switch(pillarman.getMode()) {
+        switch (pillarman.getMode()) {
         case WIND:
             controlScheme.addIfMissing(ControlScheme.Hotbar.LEFT_CLICK, ModPillarmanActions.PILLARMAN_SMALL_SANDSTORM.get());
             controlScheme.addIfMissing(ControlScheme.Hotbar.LEFT_CLICK, ModPillarmanActions.PILLARMAN_ATMOSPHERIC_RIFT.get());

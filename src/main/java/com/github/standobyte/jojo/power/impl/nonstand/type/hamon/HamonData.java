@@ -74,7 +74,6 @@ import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
@@ -164,6 +163,10 @@ public class HamonData extends TypeSpecificData {
         for (Exercise exercise : Exercise.values()) {
             exerciseTicks.put(exercise, 0);
         }
+    }
+    
+    public void onClear() {
+        clearBreathingTrainingBuffs(power.getUser());
     }
     
     public void tick() {
@@ -533,6 +536,7 @@ public class HamonData extends TypeSpecificData {
         hamonSkills.addSkill(ModHamonSkills.HEALING.get());
         breathStability = getMaxBreathStability();
         prevBreathStability = breathStability;
+        super.onPowerGiven(oldType, oldData);
     }
     
     
@@ -753,19 +757,18 @@ public class HamonData extends TypeSpecificData {
             UUID.fromString("34dcb563-6759-4a2b-9dd8-ad2dd7e70404"), "Swimming speed from Hamon Training", 0.01, AttributeModifier.Operation.ADDITION);
     
     private void giveBreathingTrainingBuffs(LivingEntity entity) {
-        int lvl = (int) getBreathingLevel();
-        applyAttributeModifier(entity, Attributes.ATTACK_DAMAGE, ATTACK_DAMAGE, lvl);
-        applyAttributeModifier(entity, Attributes.ATTACK_SPEED, ATTACK_SPEED, lvl);
-        applyAttributeModifier(entity, Attributes.MOVEMENT_SPEED, MOVEMENT_SPEED, lvl);
-        applyAttributeModifier(entity, ForgeMod.SWIM_SPEED.get(), SWIMMING_SPEED, lvl);
+        setBreathingTrainingAttributes(entity, (int) getBreathingLevel());
     }
     
-    private static void applyAttributeModifier(LivingEntity entity, Attribute attribute, AttributeModifier modifier, int lvl) {
-        ModifiableAttributeInstance attributeInstance = entity.getAttribute(attribute);
-        if (attributeInstance != null) {
-            attributeInstance.removeModifier(modifier);
-            attributeInstance.addTransientModifier(new AttributeModifier(modifier.getId(), modifier.getName() + " " + lvl, modifier.getAmount() * lvl, modifier.getOperation()));
-        }
+    private void clearBreathingTrainingBuffs(LivingEntity entity) {
+        setBreathingTrainingAttributes(entity, 0);
+    }
+    
+    private void setBreathingTrainingAttributes(LivingEntity entity, int lvl) {
+        MCUtil.applyAttributeModifierMultiplied(entity, Attributes.ATTACK_DAMAGE, ATTACK_DAMAGE, lvl);
+        MCUtil.applyAttributeModifierMultiplied(entity, Attributes.ATTACK_SPEED, ATTACK_SPEED, lvl);
+        MCUtil.applyAttributeModifierMultiplied(entity, Attributes.MOVEMENT_SPEED, MOVEMENT_SPEED, lvl);
+        MCUtil.applyAttributeModifierMultiplied(entity, ForgeMod.SWIM_SPEED.get(), SWIMMING_SPEED, lvl);
     }
     
     public static final AttributeModifier RUNNING_COMPLETED = new AttributeModifier(
@@ -785,12 +788,12 @@ public class HamonData extends TypeSpecificData {
                 switch (exercise) {
                 case RUNNING:
                     if (!entity.level.isClientSide()) {
-                        applyAttributeModifier(entity, Attributes.MOVEMENT_SPEED, RUNNING_COMPLETED, 1);
+                        MCUtil.applyAttibuteModifier(entity, Attributes.MOVEMENT_SPEED, RUNNING_COMPLETED);
                     }
                     break;
                 case MINING:
                     if (!entity.level.isClientSide()) {
-                        applyAttributeModifier(entity, Attributes.ATTACK_SPEED, MINING_COMPLETED, 1);
+                        MCUtil.applyAttibuteModifier(entity, Attributes.ATTACK_SPEED, MINING_COMPLETED);
                     }
                     break;
                 case SWIMMING:

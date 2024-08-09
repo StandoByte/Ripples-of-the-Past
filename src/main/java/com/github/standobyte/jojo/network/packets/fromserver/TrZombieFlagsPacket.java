@@ -6,7 +6,6 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.zombie.ZombieData;
 
 import net.minecraft.entity.Entity;

@@ -6,9 +6,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanData;
-import com.github.standobyte.jojo.power.impl.nonstand.type.zombie.ZombieData;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -42,14 +40,14 @@ public class TrPillarmanFlagsPacket {
         public void encode(TrPillarmanFlagsPacket msg, PacketBuffer buf) {
             buf.writeInt(msg.entityId);
             buf.writeBoolean(msg.stoneFormEnabled);
-            buf.writeInt(msg.stage);
+            buf.writeVarInt(msg.stage);
             buf.writeBoolean(msg.invaded);
             buf.writeEnum(msg.mode);
         }
 
         @Override
         public TrPillarmanFlagsPacket decode(PacketBuffer buf) {
-            return new TrPillarmanFlagsPacket(buf.readInt(), buf.readBoolean(), buf.readInt(), buf.readBoolean(), buf.readEnum(PillarmanData.Mode.class));
+            return new TrPillarmanFlagsPacket(buf.readInt(), buf.readBoolean(), buf.readVarInt(), buf.readBoolean(), buf.readEnum(PillarmanData.Mode.class));
         }
 
         @Override

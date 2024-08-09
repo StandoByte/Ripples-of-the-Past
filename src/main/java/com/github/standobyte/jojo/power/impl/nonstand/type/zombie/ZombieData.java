@@ -1,13 +1,9 @@
 package com.github.standobyte.jojo.power.impl.nonstand.type.zombie;
 
-import com.github.standobyte.jojo.action.Action;
-import com.github.standobyte.jojo.init.power.non_stand.zombie.ModZombieActions;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrZombieFlagsPacket;
-import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.TypeSpecificData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
-import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -25,19 +21,15 @@ public class ZombieData extends TypeSpecificData {
             power.addEnergy(1000);
         }
         
-        IStandPower.getStandPowerOptional(user).ifPresent(stand -> {
-            if (stand.hasPower() && stand.wasProgressionSkipped()) {
-                stand.skipProgression();
-            }
-        });
+        super.onPowerGiven(oldType, oldData);
     }
 
-    @Override
-    public boolean isActionUnlocked(Action<INonStandPower> action, INonStandPower power) {
-        return  action == ModZombieActions.ZOMBIE_CLAW_LACERATE.get() || 
-                action == ModZombieActions.ZOMBIE_DEVOUR.get() ||
-                action == ModZombieActions.ZOMBIE_DISGUISE.get();
-    }
+//    @Override
+//    public boolean isActionUnlocked(Action<INonStandPower> action, INonStandPower power) {
+//        return  action == ModZombieActions.ZOMBIE_CLAW_LACERATE.get() || 
+//                action == ModZombieActions.ZOMBIE_DEVOUR.get() ||
+//                action == ModZombieActions.ZOMBIE_DISGUISE.get();
+//    }
     
     public void tick() {
         LivingEntity user = power.getUser();
@@ -57,6 +49,7 @@ public class ZombieData extends TypeSpecificData {
             LivingEntity user = power.getUser();
             if (!user.level.isClientSide()) {
                 PacketManager.sendToClientsTrackingAndSelf(new TrZombieFlagsPacket(user.getId(), this), user);
+                power.getType().updatePassiveEffects(user, power);
             }
         }
     }
@@ -68,12 +61,13 @@ public class ZombieData extends TypeSpecificData {
     @Override
     public CompoundNBT writeNBT() {
         CompoundNBT nbt = new CompoundNBT();
+        nbt.putBoolean("DisguiseEnabled", disguised);
         return nbt;
     }
     
     @Override
     public void readNBT(CompoundNBT nbt) {
-        
+        disguised = nbt.getBoolean("DisguiseEnabled");
     }
     
     @Override

@@ -44,6 +44,7 @@ import net.minecraft.dispenser.IBlockSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
@@ -594,6 +595,23 @@ public class MCUtil {
         }
 
         return entityAttribute.getAttribute().sanitizeValue(value);
+    }
+    
+    public static void applyAttibuteModifier(LivingEntity entity, Attribute attribute, AttributeModifier modifier) {
+        ModifiableAttributeInstance attributeInstance = entity.getAttribute(attribute);
+        if (attributeInstance != null) {
+            attributeInstance.removeModifier(modifier);
+            attributeInstance.addTransientModifier(modifier);
+        }
+    }
+    
+    public static void applyAttributeModifierMultiplied(LivingEntity entity, Attribute attribute, AttributeModifier modifier, double multiplier) {
+        ModifiableAttributeInstance attributeInstance = entity.getAttribute(attribute);
+        if (attributeInstance != null) {
+            attributeInstance.removeModifier(modifier);
+            attributeInstance.addTransientModifier(new AttributeModifier(modifier.getId(), 
+                    modifier.getName(), modifier.getAmount() * multiplier, modifier.getOperation()));
+        }
     }
     
     

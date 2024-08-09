@@ -72,7 +72,6 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanPo
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismUtil;
-import com.github.standobyte.jojo.power.impl.nonstand.type.zombie.ZombiePowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
@@ -92,6 +91,7 @@ import com.github.standobyte.jojo.util.mc.damage.StandLinkDamageSource;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.github.standobyte.jojo.util.mod.NoKnockbackOnBlocking;
+import com.google.common.collect.Iterables;
 
 import net.minecraft.block.AbstractFurnaceBlock;
 import net.minecraft.block.Block;
@@ -1016,9 +1016,21 @@ public class GameplayEventHandler {
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void cancelPotionRemoval(PotionRemoveEvent event) {
-        VampirismPowerType.cancelVampiricEffectRemoval(event);
-        ZombiePowerType.cancelZombieEffectRemoval(event);
-        PillarmanPowerType.cancelPillarmanEffectRemoval(event);
+        EffectInstance effectInstance = event.getPotionEffect();
+        if (effectInstance != null) {
+            LivingEntity entity = event.getEntityLiving();
+            INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
+                if (power.hasPower()) {
+                    Iterable<Effect> effects = power.getType().getAllPossibleEffects();
+                    Effect effect = event.getPotion();
+                    if (Iterables.contains(effects, effect) && 
+                            power.getType().getPassiveEffectLevel(effect, power) == effectInstance.getAmplifier() && 
+                            !effectInstance.isVisible() && !effectInstance.showIcon()) {
+                        event.setCanceled(true);
+                    }
+                }
+            });
+        }
     }
     
     @SubscribeEvent(priority = EventPriority.LOWEST)
