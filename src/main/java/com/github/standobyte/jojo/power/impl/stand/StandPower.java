@@ -327,6 +327,11 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         if (usesStamina()) {
             addStamina(getStaminaTickGain() + staminaAddNextTick, false);
             staminaAddNextTick = 0;
+            
+            LivingEntity user = getUser();
+            if (!user.level.isClientSide()) {
+                PacketManager.sendToClientsTracking(new TrStaminaPacket(user.getId(), getStamina()), user);
+            }
         }
     }
     
