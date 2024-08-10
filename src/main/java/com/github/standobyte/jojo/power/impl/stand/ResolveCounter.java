@@ -202,7 +202,9 @@ public class ResolveCounter {
         int ticks = noDecayTicks;
         if (send) {
             LivingEntity user = stand.getUser();
-            PacketManager.sendToClientsTrackingAndSelf(new TrResolvePacket(user.getId(), getResolveValue(), ticks), user);
+            if (!user.level.isClientSide()) {
+                PacketManager.sendToClientsTrackingAndSelf(new TrResolvePacket(user.getId(), getResolveValue(), ticks), user);
+            }
         }
         
         int resolveLevel = getResolveLevel();
@@ -269,7 +271,9 @@ public class ResolveCounter {
         boolean send = levels.setResolveLevel(stand, level);
         if (send) {
             LivingEntity user = stand.getUser();
-            PacketManager.sendToClientsTrackingAndSelf(new TrResolveLevelPacket(user.getId(), getResolveLevel()), user);
+            if (!user.level.isClientSide()) {
+                PacketManager.sendToClientsTrackingAndSelf(new TrResolveLevelPacket(user.getId(), getResolveLevel()), user);
+            }
         }
     }
     
@@ -392,7 +396,9 @@ public class ResolveCounter {
         hpOnGettingAttacked = -1;
         
         LivingEntity user = stand.getUser();
-        PacketManager.sendToClientsTrackingAndSelf(TrResolvePacket.reset(user.getId()), user);
+        if (!user.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(TrResolvePacket.reset(user.getId()), user);
+        }
     }
     
     void clone(ResolveCounter previous) {
