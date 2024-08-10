@@ -637,10 +637,11 @@ public class ClientEventHandler {
                     gui.blit(matrixStack, x, y, MARGIN + 45, TOP, 9, 9); //5
                 
                 // !
-                if (i * 2 + 1 >= healthMax)
+                if (i * 2 + 1 >= healthMax) {
                     mc.getTextureManager().bind(ClientUtil.ADDITIONAL_UI);
                     gui.blit(matrixStack, x, y, 0, 160, 9, 9);
                     mc.getTextureManager().bind(AbstractGui.GUI_ICONS_LOCATION);
+                }
             }
         }
 
@@ -688,10 +689,11 @@ public class ClientEventHandler {
                     gui.blit(matrixStack, x, top, HALF, 9, 9, 9);
                 
                 // !
-                if (i * 2 + 1 + heart >= healthMax)
+                if (i * 2 + 1 + heart >= healthMax) {
                     mc.getTextureManager().bind(ClientUtil.ADDITIONAL_UI);
                     gui.blit(matrixStack, x, top, 9, 160, 9, 9);
                     mc.getTextureManager().bind(AbstractGui.GUI_ICONS_LOCATION);
+                }
             }
 
             ForgeIngameGui.right_height += 10;
@@ -1202,7 +1204,7 @@ public class ClientEventHandler {
     }
     
     
-
+    
     private UUID serverId;
     private boolean isLoggedIn = false;
     
