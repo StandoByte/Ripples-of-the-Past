@@ -4,7 +4,6 @@ import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.EXPERIENCE;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.FOOD;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.HEALTH;
-import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.HELMET;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -589,11 +588,16 @@ public class ClientEventHandler {
     
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public void renderUI(RenderGameOverlayEvent.Pre event) {
-        if (event.getType() == HELMET) {
+        switch (event.getType()) {
+        case HELMET:
             renderLosingVision(event.getMatrixStack(), event.getPartialTicks());
+            break;
+        case ALL:
+            hudRenderEntityGEDetectorData(event.getMatrixStack());
+            break;
+        default:
+            break;
         }
-        
-        hudRenderEntityGEDetectorData(event.getMatrixStack());
     }
     
     @SubscribeEvent(priority = EventPriority.LOW)
@@ -1438,8 +1442,6 @@ public class ClientEventHandler {
     }
     
     private void hudRenderEntityGEDetectorData(MatrixStack matrixStack) {
-        if (GameplayEventHandler.DELETE_ME) return;
-        
         Entity entity = GEDetectorShowHpEntity;
         PosOnScreen entityPos = GEDetectorShowHpEntityPos;
         if (entity == null || entityPos == null) return;
