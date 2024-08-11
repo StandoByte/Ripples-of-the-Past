@@ -1,7 +1,6 @@
 package com.github.standobyte.jojo.capability.entity;
 
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -62,7 +61,7 @@ public class PlayerUtilCap {
     private boolean doubleShiftPress = false;
     private boolean shiftSynced = false;
     
-    private Set<OneTimeNotification> notificationsSent = EnumSet.noneOf(OneTimeNotification.class);
+    private Set<OneTimeNotification> notificationsSent = new HashSet<>();
     
     private int knives;
     private int removeKnifeTime;
@@ -183,6 +182,55 @@ public class PlayerUtilCap {
     }
     
     
+    public static class OneTimeNotification {
+        private static final List<OneTimeNotification> VALUES = new ArrayList<>();
+        
+        public static final OneTimeNotification POWER_CONTROLS = new OneTimeNotification("POWER_CONTROLS");
+        public static final OneTimeNotification HAMON_WINDOW = new OneTimeNotification("HAMON_WINDOW");
+        public static final OneTimeNotification HAMON_BREATH_GUIDE = new OneTimeNotification("HAMON_BREATH_GUIDE");
+        public static final OneTimeNotification HIGH_STAND_RANGE = new OneTimeNotification("HIGH_STAND_RANGE");
+        public static final OneTimeNotification BOUGHT_METEORITE_MAP = new OneTimeNotification("BOUGHT_METEORITE_MAP");
+        public static final OneTimeNotification BOUGHT_HAMON_TEMPLE_MAP = new OneTimeNotification("BOUGHT_HAMON_TEMPLE_MAP");
+        public static final OneTimeNotification BOUGHT_PILLAR_MAN_TEMPLE_MAP = new OneTimeNotification("BOUGHT_PILLAR_MAN_TEMPLE_MAP");
+        
+        private final String name;
+        
+        private OneTimeNotification(String name) {
+            this.name = name;
+            VALUES.add(this);
+        }
+        
+        public String name() {
+            return name;
+        }
+        
+        public static List<OneTimeNotification> values() {
+            return VALUES;
+        }
+        
+        @Override
+        public int hashCode() {
+            return name.hashCode();
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj instanceof OneTimeNotification) {
+                return this.name.equals(((OneTimeNotification) obj).name);
+            }
+            return false;
+        }
+        
+        @Override
+        public String toString() {
+            return name;
+        }
+    }
+    
+    
     
     public void addDataForTSUnfreeze(Entity entity, Iterable<EntityDataManager.DataEntry<?>> newData) {
         Map<DataParameter<?>, EntityDataManager.DataEntry<?>> data = tsDelayedData.computeIfAbsent(entity, e -> new HashMap<>());
@@ -295,16 +343,6 @@ public class PlayerUtilCap {
         if (!player.level.isClientSide()) {
             PacketManager.sendToClient(new NotificationSyncPacket(notificationsSent), (ServerPlayerEntity) player);
         }
-    }
-    
-    public static enum OneTimeNotification {
-        POWER_CONTROLS,
-        HAMON_WINDOW,
-        HAMON_BREATH_GUIDE,
-        HIGH_STAND_RANGE,
-        BOUGHT_METEORITE_MAP,
-        BOUGHT_HAMON_TEMPLE_MAP,
-        BOUGHT_PILLAR_MAN_TEMPLE_MAP;
     }
     
     public void notificationsFromNBT(CompoundNBT nbt) {
