@@ -1,8 +1,10 @@
 package com.github.standobyte.jojo.util.mc;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
-import java.util.NoSuchElementException;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.Supplier;
@@ -10,15 +12,24 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.capability.entity.MerchantData;
+import com.github.standobyte.jojo.capability.entity.MerchantDataProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStructures;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrEntitySpecialEffectPacket;
+import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.ImmutableMap;
+import com.google.common.collect.Multimap;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.merchant.IMerchant;
@@ -36,6 +47,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.MerchantOffer;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.SoundEvent;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -50,265 +63,322 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 @EventBusSubscriber(modid = JojoMod.MOD_ID)
 public class CustomVillagerTrades {
-    private static final String ALREADY_GAVE_TRADE_TAG = "JojoUniqueTrade";
     private static final boolean DEBUG = false;
     
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onVillagerInteract(PlayerInteractEvent.EntityInteract event) {
         Entity target = event.getTarget();
-        if (target instanceof VillagerEntity
-                && !target.level.isClientSide()
-                && (DEBUG || !target.getTags().contains(ALREADY_GAVE_TRADE_TAG))
-                && giveTradeManually((VillagerEntity) target, event.getPlayer())) {
-            target.addTag(ALREADY_GAVE_TRADE_TAG);
+        if (target instanceof VillagerEntity && !target.level.isClientSide()) {
+            target.getCapability(MerchantDataProvider.CAPABILITY).ifPresent(merchantData -> {
+                if (!merchantData.gaveUniqueTrade()
+                        && giveTradeManually((VillagerEntity) target, event.getPlayer(), merchantData)) {
+                    merchantData.setGaveUniqueTrade();
+                }
+            });
         }
     }
     
-    
-    public static enum MapTrade {
-        METEORITE_MAP(
-                new EmeraldForMapTrade(16, ModStructures.METEORITE, MapDecoration.Type.TARGET_POINT, 0x6d6bb9, 1, 15), 
-                24000,
-                VillagerType.SNOW),
-        HAMON_MAP(
-                new EmeraldForMapTrade(24, ModStructures.HAMON_TEMPLE, MapDecoration.Type.TARGET_POINT, 0x474747, 1, 23), 
-                48000, 
-                VillagerType.TAIGA),
-        PILLARMAN_MAP(
-                new EmeraldForMapTrade(32, ModStructures.PILLARMAN_TEMPLE, MapDecoration.Type.TARGET_POINT, 0x508d50, 1, 30), 
-                96000, 
-                VillagerType.JUNGLE);
-        
-        final ITrade trade;
-        public final long tradeCooldownTicks;
-        final VillagerType villagerFamiliar;
-        
-        private MapTrade(EmeraldForMapTrade trade, long cooldownTicks, VillagerType villagerFamiliar) {
-            this.trade = trade;
-            trade.destinationType = this;
-            this.tradeCooldownTicks = cooldownTicks;
-            this.villagerFamiliar = villagerFamiliar;
-        }
-        
-        FamiliarWith villagerFamiliarWith(VillagerType villager) {
-            Optional<MapTrade> familiarWithBiome = Arrays.stream(MapTrade.values())
-                    .filter(mapType -> mapType.villagerFamiliar == villager)
-                    .findFirst();
-            if (familiarWithBiome.isPresent()) {
-                return familiarWithBiome.get() == this ? FamiliarWith.THIS_BIOME : FamiliarWith.OTHER_BIOME;
-            }
-            else {
-                return FamiliarWith.NO_BIOME;
-            }
-        }
-        
-        public static enum FamiliarWith {
-            THIS_BIOME,
-            OTHER_BIOME,
-            NO_BIOME
-        }
-    }
-    
-    private static boolean giveTradeManually(VillagerEntity villager, PlayerEntity player) {
+    private static boolean giveTradeManually(VillagerEntity villager, PlayerEntity player, MerchantData merchantData) {
         VillagerData villagerData = villager.getVillagerData();
         VillagerProfession profession = villagerData.getProfession();
-        PlayerUtilCap playerTradeCooldowns = player.getCapability(PlayerUtilCapProvider.CAPABILITY).orElse(null);
-        if (playerTradeCooldowns == null) {
-            return false;
-        }
         
-        if (profession == VillagerProfession.CARTOGRAPHER && villagerData.getLevel() >= 4) {
-            boolean playerHasStand = IStandPower.getStandPowerOptional(player).map(IStandPower::hasPower).orElse(true);
-            boolean playerHasHamon = INonStandPower.getNonStandPowerOptional(player).map(power -> power.getType() == ModPowers.HAMON.get()).orElse(true);
-            boolean playerHasVampirism = INonStandPower.getNonStandPowerOptional(player).map(power -> power.getType() == ModPowers.VAMPIRISM.get()).orElse(true);
+        if (profession == VillagerProfession.CARTOGRAPHER && (DEBUG || villagerData.getLevel() >= 4) && 
+                !merchantData.getPlayerTriedTrading(player, MapTrades.TRIED_BUYING_EXPERT_MAP)) {
+            merchantData.setPlayerTriedTrading(player, MapTrades.TRIED_BUYING_EXPERT_MAP);
+            StandType<?> standType = IStandPower.getStandPowerOptional(player).resolve().map(IPower::getType).orElse(null);
+            NonStandPowerType<?> powerType = INonStandPower.getNonStandPowerOptional(player).resolve().map(IPower::getType).orElse(null);
+            List<MapTrades.MapTrade> maps = MapTrades.MapTrade.values();
+            List<MapTrades.MapTrade> order = new ArrayList<>(maps);
+            Collections.shuffle(order);
             
-            double meteoriteMapChance;
-            if (playerHasStand)                         meteoriteMapChance = 0;
-            else if (playerHasVampirism)                meteoriteMapChance = 0.04;
-            else if (playerHasHamon)                    meteoriteMapChance = 0.1;
-            
-            else switch (MapTrade.METEORITE_MAP.villagerFamiliarWith(villagerData.getType())) {
-            case /*FamiliarWith.*/THIS_BIOME:           meteoriteMapChance = 1;
-                break;
-            case /*FamiliarWith.*/OTHER_BIOME:          meteoriteMapChance = 0;
-                break;
-            case /*FamiliarWith.*/NO_BIOME:             meteoriteMapChance = 0.8;
-                break;
-            default:
-                throw new NoSuchElementException();
-            }
-            
-            if (addMapTrade(meteoriteMapChance, 
-                    villager, MapTrade.METEORITE_MAP, 
-                    playerTradeCooldowns, player)) {
-                return true;
-            }
-            
-            
-            double hamonTempleMapChance;
-            if (playerHasHamon || playerHasVampirism)   hamonTempleMapChance = 0;
-            else if (playerHasStand)                    hamonTempleMapChance = 0.0625;
-            else switch (MapTrade.HAMON_MAP.villagerFamiliarWith(villagerData.getType())) {
-            case /*FamiliarWith.*/THIS_BIOME:           hamonTempleMapChance = 1;
-                break;
-            case /*FamiliarWith.*/OTHER_BIOME:          hamonTempleMapChance = 0;
-                break;
-            case /*FamiliarWith.*/NO_BIOME:             hamonTempleMapChance = 0.5;
-                break;
-            default:
-                throw new NoSuchElementException();
-            }
-            
-            if (addMapTrade(hamonTempleMapChance, 
-                    villager, MapTrade.HAMON_MAP, 
-                    playerTradeCooldowns, player)) {
-                return true;
-            }
-            
-            
-            double pillarManTempleMapChance;
-            if (playerHasHamon || playerHasVampirism)   pillarManTempleMapChance = 0;
-            else if (playerHasStand)                    pillarManTempleMapChance = 0.0125;
-            else switch (MapTrade.PILLARMAN_MAP.villagerFamiliarWith(villagerData.getType())) {
-            case /*FamiliarWith.*/THIS_BIOME:           pillarManTempleMapChance = 1;
-                break;
-            case /*FamiliarWith.*/OTHER_BIOME:          pillarManTempleMapChance = 0;
-                break;
-            case /*FamiliarWith.*/NO_BIOME:             pillarManTempleMapChance = 0.25;
-                break;
-            default:
-                throw new NoSuchElementException();
-            }
-            
-            if (addMapTrade(pillarManTempleMapChance, 
-                    villager, MapTrade.PILLARMAN_MAP, 
-                    playerTradeCooldowns, player)) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    
-    
-    private static boolean addMapTrade(double randomChance,
-            AbstractVillagerEntity trader, MapTrade tradeType, 
-            PlayerUtilCap cooldownsCap, PlayerEntity player) {
-        if (randomChance <= 0) {
-            return false;
-        }
-        
-        if (DEBUG || cooldownsCap.canTradeNow(tradeType, trader.level)) {
-            if (player.getRandom().nextDouble() < randomChance) {
-                MerchantOffer offer = tradeType.trade.getOffer(trader, trader.getRandom());
-                if (offer != null) {
-                    cooldownsCap.setTradeTime(tradeType, trader.level);
-                    trader.getOffers().add(offer);
+            for (MapTrades.MapTrade mapTrade : order) {
+                double mapChance = mapTrade.getMapChance(standType, powerType, villagerData);
+                // TODO add map trade chance event?
+                if (addTrade(mapChance, villager, mapTrade.trade, 
+                        player, merchantData, null /* the tag is null here because we've checked and set the TRIED_BUYING_MAP tag already */)) {
                     return true;
                 }
             }
-            else {
-                cooldownsCap.setTradeTime(tradeType, trader.level);
-            }
         }
         
         return false;
     }
-    
-    // the VillagerTrades.ITrade implementation classes are package private in the vanilla code
-    static class EmeraldForMapTrade implements VillagerTrades.ITrade {
-        private final int emeraldCost;
-        private final Supplier<? extends Structure<?>> destination;
-        private final MapDecoration.Type destinationIcon;
-        private final int customColor;
-        private final int maxUses;
-        private final int villagerXp;
-        private MapTrade destinationType;
-
-        public EmeraldForMapTrade(int pEmeraldCost, Supplier<? extends Structure<?>> pDestination, 
-                MapDecoration.Type pDestinationType, int customColor, int pMaxUses, int pVillagerXp) {
-            this.emeraldCost = pEmeraldCost;
-            this.destination = pDestination;
-            this.destinationIcon = pDestinationType;
-            this.customColor = customColor;
-            this.maxUses = pMaxUses;
-            this.villagerXp = pVillagerXp;
-        }
-
-        @Nullable
-        public MerchantOffer getOffer(Entity pTrader, Random pRand) {
-            if (!(pTrader.level instanceof ServerWorld)) {
-                return null;
-            } else {
-                ServerWorld serverworld = (ServerWorld)pTrader.level;
-                Structure<?> structure = destination.get();
-                BlockPos blockpos = serverworld.findNearestMapFeature(structure, pTrader.blockPosition(), 100, true);
-                if (blockpos != null) {
-                    ItemStack itemstack = FilledMapItem.create(serverworld, blockpos.getX(), blockpos.getZ(), (byte)2, true, true);
-                    FilledMapItem.renderBiomePreviewMap(serverworld, itemstack);
-                    MapData.addTargetDecoration(itemstack, blockpos, "+", this.destinationIcon);
-                    if (customColor > 0) {
-                        CompoundNBT compoundnbt1 = itemstack.getOrCreateTagElement("display");
-                        compoundnbt1.putInt("MapColor", customColor);
-                    }
-                    itemstack.setHoverName(new TranslationTextComponent("filled_map." + structure.getFeatureName().toLowerCase(Locale.ROOT)));
-                    itemstack.getTag().putString("JojoStructure", destinationType.name().toLowerCase()); // no fucking clue why the advancement criteria doesn't work with the custom item name
-                    return new MerchantOffer(new ItemStack(Items.EMERALD, this.emeraldCost), new ItemStack(Items.COMPASS), itemstack, this.maxUses, this.villagerXp, 0.2F);
-                } else {
-                    return null;
-                }
-            }
-        }
-    }
-    
-    
     
     public static void onTrade(PlayerEntity player, ItemStack stack, 
             MerchantInventory slots, MerchantOffer offer) {
         if (stack.isEmpty()) return;
         
         if (stack.getItem() == Items.FILLED_MAP && stack.hasCustomHoverName()) {
-            for (int i = 0; i < MAP_NAMES.length; i++) {
-                ITextComponent mapName = MAP_NAMES[i];
-                if (mapName.equals(stack.getHoverName())) {
-                    PlayerUtilCap.OneTimeNotification notification = PLAYER_NOTIFICATION[i];
-                    Optional<PlayerUtilCap> playerNotifications = player.getCapability(PlayerUtilCapProvider.CAPABILITY).resolve();
-                    if (DEBUG || playerNotifications.map(notif -> !notif.sentNotification(notification)).orElse(false)) {
-                        playerNotifications.get().setSentNotification(notification, true);
-                        
-                        IMerchant merchant = CommonReflection.getMerchant(slots);
-                        if (merchant instanceof Entity) {
-                            Entity merchantEntity = (Entity) merchant;
-                            TrEntitySpecialEffectPacket.Type visualsType = VISUALS_TYPE[i];
-                            player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                                cap.doWhen(
-                                        () -> PacketManager.sendToClientsTrackingAndSelf(new TrEntitySpecialEffectPacket(
-                                                merchantEntity.getId(), visualsType, player.getId()), merchantEntity), 
-                                        () -> player.containerMenu == player.inventoryMenu);
-                            });
-                        }
-                    }
-                    
+            for (MapTrades.MapTrade trade : MapTrades.MapTrade.values()) {
+                if (trade.mapName != null && trade.mapName.equals(stack.getHoverName())) {
+                    trade.onTrade(player, stack, slots, offer);
                     break;
                 }
             }
         }
     }
     
-    private static final ITextComponent[] MAP_NAMES = {
-            new TranslationTextComponent("filled_map.jojo:meteorite"),
-            new TranslationTextComponent("filled_map.jojo:hamon_temple"),
-            new TranslationTextComponent("filled_map.jojo:pillarman_temple")
-    };
-    private static final TrEntitySpecialEffectPacket.Type[] VISUALS_TYPE = {
-            TrEntitySpecialEffectPacket.Type.SOLD_METEORITE_MAP,
-            TrEntitySpecialEffectPacket.Type.SOLD_HAMON_TEMPLE_MAP,
-            TrEntitySpecialEffectPacket.Type.SOLD_PILLAR_MAN_TEMPLE_MAP
-    };
-    private static final PlayerUtilCap.OneTimeNotification[] PLAYER_NOTIFICATION = {
-            PlayerUtilCap.OneTimeNotification.BOUGHT_METEORITE_MAP,
-            PlayerUtilCap.OneTimeNotification.BOUGHT_HAMON_TEMPLE_MAP,
-            PlayerUtilCap.OneTimeNotification.BOUGHT_PILLAR_MAN_TEMPLE_MAP
-    };
+    
+    
+    public static class MapTrades {
+        
+        public abstract static class MapTrade {
+            private static final Multimap<VillagerType, MapTrade> PER_BIOME = ArrayListMultimap.create();
+            private static final List<MapTrade> VALUES = new ArrayList<>();
+            
+            // Probabilities of map trades
+            
+            public static final MapTrade METEORITE_MAP = new MapTrade(VillagerType.SNOW, "meteorite_map",
+                    new EmeraldForMapTrade(16, ModStructures.METEORITE, MapDecoration.Type.TARGET_POINT, 0x6d6bb9, 1, 15),
+                    new TranslationTextComponent("filled_map.jojo:meteorite"), ModSounds.MAP_BOUGHT_METEORITE.get(), PlayerUtilCap.OneTimeNotification.BOUGHT_METEORITE_MAP) {
+                @Override
+                public double getMapChance(@Nullable StandType<?> standType, @Nullable NonStandPowerType<?> powerType, VillagerData villager) {
+                    double meteoriteMapChance;
+
+                    if (standType != null)                                  meteoriteMapChance = 0;
+                    else {
+                        VillagerType biome = villager.getType();
+                        if (biome == VillagerType.SNOW)                     meteoriteMapChance = 1;
+                        else if (biomeHasOtherStructure(biome))             meteoriteMapChance = 0;
+                        else if (canGiveMap(biome, VillagerType.SNOW))      meteoriteMapChance = 0.8;
+                        else                                                meteoriteMapChance = 0.2;
+
+                        if (powerType == ModPowers.VAMPIRISM.get())         meteoriteMapChance *= 0.05;
+                        else if (powerType == ModPowers.HAMON.get())        meteoriteMapChance *= 0.0625;
+                    }
+
+                    return meteoriteMapChance;
+                }
+            };
+            
+            public static final MapTrade HAMON_MAP = new MapTrade(VillagerType.TAIGA, "hamon_map",
+                    new EmeraldForMapTrade(24, ModStructures.HAMON_TEMPLE, MapDecoration.Type.TARGET_POINT, 0x474747, 1, 23),
+                    new TranslationTextComponent("filled_map.jojo:hamon_temple"), ModSounds.MAP_BOUGHT_HAMON_TEMPLE.get(), PlayerUtilCap.OneTimeNotification.BOUGHT_HAMON_TEMPLE_MAP) {
+                @Override
+                public double getMapChance(@Nullable StandType<?> standType, @Nullable NonStandPowerType<?> powerType, VillagerData villager) {
+                    double hamonTempleMapChance;
+
+                    VillagerType biome = villager.getType();
+                    if (biome == VillagerType.TAIGA)                        hamonTempleMapChance = 1;
+                    else if (biomeHasOtherStructure(biome))                 hamonTempleMapChance = 0;
+                    else if (canGiveMap(biome, VillagerType.TAIGA))         hamonTempleMapChance = 0.5;
+                    else                                                    hamonTempleMapChance = 0.125;
+
+                    if (standType != null)                                  hamonTempleMapChance *= 0.0625;
+                    if (powerType == ModPowers.VAMPIRISM.get())             hamonTempleMapChance *= 0.125;
+                    else if (powerType == ModPowers.HAMON.get())            hamonTempleMapChance *= 0.25;
+
+                    return hamonTempleMapChance;
+                }
+            };
+            
+            public static final MapTrade PILLARMAN_MAP = new MapTrade(VillagerType.JUNGLE, "pillarman_map",
+                    new EmeraldForMapTrade(32, ModStructures.PILLARMAN_TEMPLE, MapDecoration.Type.TARGET_POINT, 0x508d50, 1, 30),
+                    new TranslationTextComponent("filled_map.jojo:pillarman_temple"), ModSounds.MAP_BOUGHT_PILLAR_MAN_TEMPLE.get(), PlayerUtilCap.OneTimeNotification.BOUGHT_PILLAR_MAN_TEMPLE_MAP) {
+                @Override
+                public double getMapChance(@Nullable StandType<?> standType, @Nullable NonStandPowerType<?> powerType, VillagerData villager) {
+                    double pillarManTempleMapChance;
+
+                    if (powerType == ModPowers.VAMPIRISM.get())             pillarManTempleMapChance = 0;
+                    else {
+                        VillagerType biome = villager.getType();
+                        if (biome == VillagerType.JUNGLE)                   pillarManTempleMapChance = 1;
+                        else if (biomeHasOtherStructure(biome))             pillarManTempleMapChance = 0;
+                        else if (canGiveMap(biome, VillagerType.JUNGLE))    pillarManTempleMapChance = 0.25;
+                        else                                                pillarManTempleMapChance = 0;
+
+                        if (standType != null)                              pillarManTempleMapChance *= 0.05;
+                        else if (powerType == ModPowers.HAMON.get())        pillarManTempleMapChance *= 0.4;
+                    }
+
+                    return pillarManTempleMapChance;
+                }
+            };
+            
+            /*
+             *   Villager Biome      Meteorite   Hamon Temple    Pillar Man Temple
+             *      Desert              0.2         0.125               0.25            // 0.475 to roll any map
+             *      Jungle              0           0                   1               // 
+             *      Plains              0.2         0.5                 0               // 0.6 to roll any map
+             *      Savanna             0.2         0.125               0.25            // same as Desert
+             *      Snow                1           0                   0               // 
+             *      Swamp               0.8         0.5                 0.25            // 0.925 to roll any map
+             *      Taiga               0           1                   0               // 
+             */     
+            
+            
+            
+            public final ITrade trade;
+            @Nullable public final VillagerType biome;
+            public final String name;
+            public final ITextComponent mapName;
+            public final SoundEvent onFirstBuyFlavorSound;
+            public final PlayerUtilCap.OneTimeNotification playerNotification;
+            
+            public MapTrade(@Nullable VillagerType biome, String name, EmeraldForMapTrade trade,
+                    ITextComponent mapName, SoundEvent onFirstBuyFlavorSound, PlayerUtilCap.OneTimeNotification playerNotification) {
+                this.trade = trade;
+                trade.destinationType = this;
+                this.name = name;
+                
+                VALUES.add(this);
+                this.biome = biome;
+                if (biome != null) {
+                    PER_BIOME.put(biome, this);
+                }
+                
+                this.mapName = mapName;
+                this.onFirstBuyFlavorSound = onFirstBuyFlavorSound;
+                this.playerNotification = playerNotification;
+            }
+            
+            public static List<MapTrade> values() {
+                return VALUES;
+            }
+            
+            public void onTrade(PlayerEntity player, ItemStack stack, MerchantInventory slots, MerchantOffer offer) {
+                if (playerNotification == null || onFirstBuyFlavorSound == null) return;
+                
+                Optional<PlayerUtilCap> playerNotifications = player.getCapability(PlayerUtilCapProvider.CAPABILITY).resolve();
+                if (DEBUG || playerNotifications.map(notif -> !notif.sentNotification(playerNotification)).orElse(false)) {
+                    playerNotifications.get().setSentNotification(playerNotification, true);
+                    
+                    IMerchant merchant = CommonReflection.getMerchant(slots);
+                    if (merchant instanceof Entity) {
+                        Entity merchantEntity = (Entity) merchant;
+                        player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                            cap.doWhen(
+                                    () -> PacketManager.sendToClientsTrackingAndSelf(new TrEntitySpecialEffectPacket(
+                                            merchantEntity.getId(), onFirstBuyFlavorSound, player.getId()), merchantEntity), 
+                                    () -> player.containerMenu == player.inventoryMenu);
+                        });
+                    }
+                }
+            }
+            
+            
+            
+            public abstract double getMapChance(@Nullable StandType<?> standType, @Nullable NonStandPowerType<?> powerType, VillagerData villager);
+        }
+        
+        
+        private static final String TRIED_BUYING_EXPERT_MAP = "ExpertStructureMap";
+        
+        // the VillagerTrades.ITrade implementation classes are package private in the vanilla code
+        public static class EmeraldForMapTrade implements VillagerTrades.ITrade {
+            private final int emeraldCost;
+            private final Supplier<? extends Structure<?>> destination;
+            private final MapDecoration.Type destinationIcon;
+            private final int customColor;
+            private final int maxUses;
+            private final int villagerXp;
+            private MapTrade destinationType;
+
+            public EmeraldForMapTrade(int pEmeraldCost, Supplier<? extends Structure<?>> pDestination, 
+                    MapDecoration.Type pDestinationType, int customColor, int pMaxUses, int pVillagerXp) {
+                this.emeraldCost = pEmeraldCost;
+                this.destination = pDestination;
+                this.destinationIcon = pDestinationType;
+                this.customColor = customColor;
+                this.maxUses = pMaxUses;
+                this.villagerXp = pVillagerXp;
+            }
+
+            @Nullable
+            public MerchantOffer getOffer(Entity pTrader, Random pRand) {
+                if (!(pTrader.level instanceof ServerWorld)) {
+                    return null;
+                } else {
+                    ServerWorld serverworld = (ServerWorld)pTrader.level;
+                    Structure<?> structure = destination.get();
+                    BlockPos blockpos = serverworld.findNearestMapFeature(structure, pTrader.blockPosition(), 100, true);
+                    if (blockpos != null) {
+                        ItemStack itemstack = FilledMapItem.create(serverworld, blockpos.getX(), blockpos.getZ(), (byte)2, true, true);
+                        FilledMapItem.renderBiomePreviewMap(serverworld, itemstack);
+                        MapData.addTargetDecoration(itemstack, blockpos, "+", this.destinationIcon);
+                        if (customColor > 0) {
+                            CompoundNBT compoundnbt1 = itemstack.getOrCreateTagElement("display");
+                            compoundnbt1.putInt("MapColor", customColor);
+                        }
+                        itemstack.setHoverName(new TranslationTextComponent("filled_map." + structure.getFeatureName().toLowerCase(Locale.ROOT)));
+                        itemstack.getTag().putString("JojoStructure", destinationType.name.toLowerCase()); // no fucking clue why the advancement criteria doesn't work with the custom item name
+                        return new MerchantOffer(new ItemStack(Items.EMERALD, this.emeraldCost), new ItemStack(Items.COMPASS), itemstack, this.maxUses, this.villagerXp, 0.2F);
+                    } else {
+                        return null;
+                    }
+                }
+            }
+        }
+        
+        
+        
+        public static final Map<VillagerType, VillagerType[]> MOJANG_REBALANCE_MAP_DESTINATION = Util.make(new ImmutableMap.Builder<VillagerType, VillagerType[]>(), mapBuilder -> {
+            mapBuilder.put(VillagerType.DESERT, new VillagerType[] {
+                                VillagerType.SAVANNA,
+                                VillagerType.PLAINS,
+                                VillagerType.JUNGLE });
+            mapBuilder.put(VillagerType.JUNGLE, new VillagerType[] {
+                                VillagerType.SAVANNA,
+                                VillagerType.DESERT,
+                                VillagerType.SWAMP });
+            mapBuilder.put(VillagerType.PLAINS, new VillagerType[] {
+                                VillagerType.SAVANNA,
+                                VillagerType.TAIGA });
+            mapBuilder.put(VillagerType.SAVANNA, new VillagerType[] {
+                                VillagerType.DESERT,
+                                VillagerType.PLAINS,
+                                VillagerType.JUNGLE });
+            mapBuilder.put(VillagerType.SNOW, new VillagerType[] {
+                                VillagerType.PLAINS,
+                                VillagerType.TAIGA,
+                                VillagerType.SWAMP });
+            mapBuilder.put(VillagerType.SWAMP, new VillagerType[] {
+                                VillagerType.SNOW,
+                                VillagerType.TAIGA,
+                                VillagerType.JUNGLE });
+            mapBuilder.put(VillagerType.TAIGA, new VillagerType[] {
+                                VillagerType.PLAINS,
+                                VillagerType.SNOW,
+                                VillagerType.SWAMP });
+        }).build();
+        
+        public static boolean canGiveMap(VillagerType cartographer, VillagerType destination) {
+            VillagerType[] possibleDestinations = MOJANG_REBALANCE_MAP_DESTINATION.get(cartographer);
+            for (VillagerType type : possibleDestinations) {
+                if (destination == type) {
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+        
+        public static boolean biomeHasOtherStructure(VillagerType biome) {
+            return MapTrade.PER_BIOME.containsKey(biome) && !MapTrade.PER_BIOME.get(biome).isEmpty();
+        }
+    }
+    
+    
+    
+    public static boolean addTrade(double randomChance,
+            AbstractVillagerEntity trader, ITrade trade, 
+            PlayerEntity player, MerchantData merchantData, @Nullable String checkAndSetTag) {
+        if (checkAndSetTag != null) {
+            if (merchantData.getPlayerTriedTrading(player, checkAndSetTag)) {
+                return false;
+            }
+            merchantData.setPlayerTriedTrading(player, checkAndSetTag);
+        }
+        
+        if (randomChance >= 0 && player.getRandom().nextDouble() < randomChance) {
+            MerchantOffer offer = trade.getOffer(trader, trader.getRandom());
+            if (offer != null) {
+                trader.getOffers().add(offer);
+                return true;
+            }
+        }
+        
+        return false;
+    }
     
 }

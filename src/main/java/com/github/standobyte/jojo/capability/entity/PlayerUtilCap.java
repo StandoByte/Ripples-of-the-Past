@@ -1,7 +1,6 @@
 package com.github.standobyte.jojo.capability.entity;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -30,8 +29,6 @@ import com.github.standobyte.jojo.network.packets.fromserver.VampireSleepInCoffi
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.MetEntityTypesPacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
-import com.github.standobyte.jojo.util.mc.CustomVillagerTrades;
-import com.github.standobyte.jojo.util.mc.CustomVillagerTrades.MapTrade;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.PlayerStatListener;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
@@ -52,7 +49,6 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
 
 public class PlayerUtilCap {
     private final PlayerEntity player;
@@ -92,7 +88,6 @@ public class PlayerUtilCap {
     
     private Map<SoundEvent, Integer> recentlyPlayedVoiceLines = new HashMap<>();
     
-    private final Map<CustomVillagerTrades.MapTrade, Long> lastTradeTime = new EnumMap<>(MapTrade.class);
     private final List<PlayerStatListener<?>> statChangeListeners = new ArrayList<>();
     private final List<TimedAction> sendWhenScreenClosed = new ArrayList<>();
     
@@ -129,8 +124,6 @@ public class PlayerUtilCap {
         this.lastBedType = old.lastBedType;
         this.ticksNoSleep = old.ticksNoSleep;
         this.nextSleepTime = old.nextSleepTime;
-        
-        this.lastTradeTime.putAll(old.lastTradeTime);
     }
     
     public CompoundNBT toNBT() {
@@ -145,7 +138,6 @@ public class PlayerUtilCap {
         
         nbt.put("RotpVersion", JojoModVersion.getCurrentVersion().toNBT());
         
-        nbt.put("TradeCD", tradeCooldownToNbt());
         nbt.putBoolean("CoffinRespawn", coffinPreventDayTimeSkip);
         return nbt;
     }
@@ -169,7 +161,6 @@ public class PlayerUtilCap {
             });
         }
         
-        MCUtil.getNbtElement(nbt, "TradeCD", CompoundNBT.class).ifPresent(this::tradeCooldownFromNbt);
         coffinPreventDayTimeSkip = nbt.getBoolean("CoffinRespawn");
     }
     
@@ -524,41 +515,6 @@ public class PlayerUtilCap {
                 voiceLine.setValue(--ticks);
             }
         }
-    }
-    
-    
-    
-    public void setTradeTime(MapTrade type, World world) {
-        lastTradeTime.put(type, world.dayTime());
-    }
-    
-    public boolean canTradeNow(MapTrade type, World world) {
-        if (lastTradeTime.containsKey(type)) {
-            return lastTradeTime.get(type) + type.tradeCooldownTicks < world.dayTime();
-        }
-        else {
-            return true;
-        }
-    }
-    
-    private CompoundNBT tradeCooldownToNbt() {
-        CompoundNBT nbt = new CompoundNBT();
-        lastTradeTime.forEach((cooldown, ticks) -> {
-            if (ticks.intValue() > 0) {
-                nbt.putLong(cooldown.name(), ticks.longValue());
-            }
-        });
-        return nbt;
-    }
-    
-    private void tradeCooldownFromNbt(CompoundNBT nbt) {
-        nbt.getAllKeys().forEach(cdTypeKey -> {
-            try {
-                MapTrade type = Enum.valueOf(MapTrade.class, cdTypeKey);
-                lastTradeTime.put(type, nbt.getLong(cdTypeKey));
-            }
-            catch (IllegalArgumentException nbtError) {}
-        });
     }
     
     

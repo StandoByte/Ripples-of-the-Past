@@ -19,6 +19,8 @@ import com.github.standobyte.jojo.capability.entity.EntityUtilCapStorage;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapStorage;
+import com.github.standobyte.jojo.capability.entity.MerchantData;
+import com.github.standobyte.jojo.capability.entity.MerchantDataProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapStorage;
@@ -66,6 +68,7 @@ import net.minecraft.command.CommandSource;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.merchant.IMerchant;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
@@ -105,6 +108,7 @@ public class ForgeBusEventSubscriber {
     private static final ResourceLocation ENTITY_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "entity_util");
     private static final ResourceLocation ENTITY_HAMON_CHARGE_CAP = new ResourceLocation(JojoMod.MOD_ID, "entity_hamon_charge");
     private static final ResourceLocation PROJECTILE_HAMON_CAP = new ResourceLocation(JojoMod.MOD_ID, "projectile_hamon");
+    private static final ResourceLocation MERCHANT_CAP = new ResourceLocation(JojoMod.MOD_ID, "merchant");
     private static final ResourceLocation WORLD_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "world_util");
     private static final ResourceLocation SAVE_FILE_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "save_file_util");
     private static final ResourceLocation CHUNK_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "chunk_util");
@@ -146,6 +150,7 @@ public class ForgeBusEventSubscriber {
         Entity entity = event.getObject();
         event.addCapability(ENTITY_UTIL_CAP, new EntityUtilCapProvider(entity));
         if (entity instanceof LivingEntity) {
+            LivingEntity living = (LivingEntity) entity;
             if (entity instanceof PlayerEntity) {
                 PlayerEntity player = (PlayerEntity) event.getObject();
                 event.addCapability(STAND_CAP, new StandCapProvider(player));
@@ -155,7 +160,10 @@ public class ForgeBusEventSubscriber {
                     event.addCapability(CLIENT_PLAYER_UTIL_CAP, new ClientPlayerUtilCapProvider(player));
                 }
             }
-            event.addCapability(LIVING_UTIL_CAP, new LivingUtilCapProvider((LivingEntity) entity));
+            event.addCapability(LIVING_UTIL_CAP, new LivingUtilCapProvider(living));
+            if (entity instanceof IMerchant) {
+                event.addCapability(MERCHANT_CAP, new MerchantDataProvider(living, (IMerchant) living));
+            }
         }
         if (entity instanceof ProjectileEntity && (HamonUtil.ProjectileChargeProperties.canBeChargedWithHamon(entity))) {
             event.addCapability(PROJECTILE_HAMON_CAP, new ProjectileHamonChargeCapProvider(entity));
@@ -174,6 +182,7 @@ public class ForgeBusEventSubscriber {
         CapabilityManager.INSTANCE.register(EntityUtilCap.class, new EntityUtilCapStorage(), () -> new EntityUtilCap(null));
         CapabilityManager.INSTANCE.register(EntityHamonChargeCap.class, new EntityHamonChargeCapStorage(), () -> new EntityHamonChargeCap(null));
         CapabilityManager.INSTANCE.register(ProjectileHamonChargeCap.class, new ProjectileHamonChargeCapStorage(), () -> new ProjectileHamonChargeCap(null));
+        CapabilityManager.INSTANCE.register(MerchantData.class, JojoModUtil.makeSerializableStorage(), () -> new MerchantData(null, null));
         
         CapabilityManager.INSTANCE.register(WorldUtilCap.class, new WorldUtilCapStorage(), () -> new WorldUtilCap(null));
         CapabilityManager.INSTANCE.register(SaveFileUtilCap.class, new SaveFileUtilCapStorage(), () -> new SaveFileUtilCap(null));
