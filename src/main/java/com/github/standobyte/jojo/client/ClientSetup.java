@@ -28,6 +28,7 @@ import com.github.standobyte.jojo.client.render.armor.model.BreathControlMaskMod
 import com.github.standobyte.jojo.client.render.armor.model.GlovesModel;
 import com.github.standobyte.jojo.client.render.armor.model.SatiporojaScarfArmorModel;
 import com.github.standobyte.jojo.client.render.armor.model.StoneMaskModel;
+import com.github.standobyte.jojo.client.render.block.BlockSprites;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.EnergyRippleLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.FrozenLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.GlovesLayer;
@@ -288,6 +289,7 @@ public class ClientSetup {
             RenderTypeLookup.setRenderLayer(ModBlocks.STONE_MASK.get(), RenderType.cutoutMipped());
             RenderTypeLookup.setRenderLayer(ModBlocks.SLUMBERING_PILLARMAN.get(), RenderType.cutoutMipped());
             RenderTypeLookup.setRenderLayer(ModBlocks.MAGICIANS_RED_FIRE.get(), RenderType.cutout());
+            ModBlocks.WOODEN_COFFIN_OAK.values().forEach(coffinBlock -> RenderTypeLookup.setRenderLayer(coffinBlock.get(), RenderType.cutout()));
             
             ScreenManager.register(ModContainers.WALKMAN.get(), WalkmanScreen::new);
 
@@ -418,6 +420,7 @@ public class ClientSetup {
     @SubscribeEvent
     public static void addSprites(ModelRegistryEvent event) {
         if (!spritesAdded) {
+            addUnreferencedBlockModels(BlockSprites.MR_FIRE_BLOCK_0, BlockSprites.MR_FIRE_BLOCK_1);
             addUnreferencedBlockModels(MagiciansRedRenderer.MR_FIRE_0, MagiciansRedRenderer.MR_FIRE_1);
             spritesAdded = true;
         }

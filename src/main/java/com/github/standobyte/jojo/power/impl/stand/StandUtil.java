@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.power.impl.stand;
 import java.util.Collection;
 import java.util.List;
 import java.util.Random;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -86,17 +87,22 @@ public class StandUtil {
         public abstract List<StandType<?>> limitStandPool(ServerWorld world /*TODO get stand pool limit data on client*/, List<StandType<?>> availableStands);
     }
     
+    public static Stream<StandType<?>> arrowStands(boolean clientSide) {
+        return filterStands(stand -> StandUtil.canPlayerGetFromArrow(stand, clientSide));
+    }
+    
     public static Stream<StandType<?>> availableStands(boolean clientSide) {
+        return filterStands(stand -> stand.getSurvivalGameplayPool().accessibleToPlayer(stand, clientSide));
+    }
+    
+    public static Stream<StandType<?>> filterStands(Predicate<StandType<?>> filter) {
         Collection<StandType<?>> stands = JojoCustomRegistries.STANDS.getRegistry().getValues();
-        return stands.stream()
-                .filter(stand -> StandUtil.canPlayerGetFromArrow(stand, clientSide));
+        return stands.stream().filter(filter);
     }
     
     public static boolean canPlayerGetFromArrow(StandType<?> standType, boolean clientSide) {
         return standType.getSurvivalGameplayPool() == StandSurvivalGameplayPool.PLAYER_ARROW && 
-                (!JojoModConfig.getCommonConfigInstance(clientSide).isConfigLoaded() || // to make it work when adding items to creative search tab on client initialization, when the config isn't loaded yet
-                !JojoModConfig.getCommonConfigInstance(clientSide).isStandBanned(standType)) &&
-                standType.getStats().getRandomWeight() > 0;
+                StandSurvivalGameplayPool.PLAYER_ARROW.accessibleToPlayer(standType, clientSide);
     }
     
     public static boolean isEntityStandUser(LivingEntity entity) {

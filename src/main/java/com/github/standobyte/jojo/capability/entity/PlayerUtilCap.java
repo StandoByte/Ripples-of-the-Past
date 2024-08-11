@@ -16,6 +16,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.player.IPlayerAction;
+import com.github.standobyte.jojo.block.WoodenCoffinBlock;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -26,6 +27,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrKnivesCountPacket
 import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerContinuousActionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerVisualDetailPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrWalkmanEarbudsPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.VampireSleepInCoffinPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.GESplitConsciousnessPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.MetEntityTypesPacket;
 import com.github.standobyte.jojo.power.IPower;
@@ -34,6 +36,7 @@ import com.github.standobyte.jojo.util.mc.CustomVillagerTrades;
 import com.github.standobyte.jojo.util.mc.CustomVillagerTrades.MapTrade;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.PlayerStatListener;
+import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.mod.JojoModVersion;
 
 import net.minecraft.entity.Entity;
@@ -77,7 +80,9 @@ public class PlayerUtilCap {
     
     private BedType lastBedType;
     private int ticksNoSleep;
+    private long lastSleepTime;
     private long nextSleepTime;
+    public boolean coffinPreventDayTimeSkip = false;
     
     private Optional<RockPaperScissorsGame> currentGame = Optional.empty();
     
@@ -100,9 +105,6 @@ public class PlayerUtilCap {
     public PlayerUtilCap(PlayerEntity player) {
         this.player = player;
         geUIState = new LifeformsUIState(player);
-//        if (!player.level.isClientSide()) {
-//            statChangeListeners.add(new CustomVillagerTrades.MapItemStackTradeListener((ServerPlayerEntity) player));
-//        }
     }
     
     
@@ -123,6 +125,7 @@ public class PlayerUtilCap {
         }
 
         if (ateInkPastaTicks > 0) --ateInkPastaTicks;
+        tickCoffinSleepTimer();
         tickContinuousAction();
         tickDoubleShift();
     }
@@ -154,6 +157,7 @@ public class PlayerUtilCap {
         nbt.put("RotpVersion", JojoModVersion.getCurrentVersion().toNBT());
         
         nbt.put("TradeCD", tradeCooldownToNbt());
+        nbt.putBoolean("CoffinRespawn", coffinPreventDayTimeSkip);
         
         nbt.put("GE_UI", geUIState.toNBT());
         nbt.putInt("AnimalAgeCd", animalAgeCd);
@@ -185,6 +189,7 @@ public class PlayerUtilCap {
         animalAgeCd = nbt.getInt("AnimalAgeCd");
         
         MCUtil.getNbtElement(nbt, "TradeCD", CompoundNBT.class).ifPresent(this::tradeCooldownFromNbt);
+        coffinPreventDayTimeSkip = nbt.getBoolean("CoffinRespawn");
     }
     
     public void onTracking(ServerPlayerEntity tracking) {
@@ -204,6 +209,7 @@ public class PlayerUtilCap {
         PacketManager.sendToClient(new TrKnivesCountPacket(player.getId(), knives), player);
         PacketManager.sendToClient(new TrWalkmanEarbudsPacket(player.getId(), walkmanEarbuds), player);
         PacketManager.sendToClient(new TrPlayerVisualDetailPacket(player.getId(), ateInkPastaTicks), player);
+        PacketManager.sendToClient(new VampireSleepInCoffinPacket(coffinPreventDayTimeSkip), player);
         if (!metEntityTypesId.isEmpty()) {
             PacketManager.sendToClient(new MetEntityTypesPacket(metEntityTypesId), player);
         }
@@ -328,7 +334,10 @@ public class PlayerUtilCap {
         POWER_CONTROLS,
         HAMON_WINDOW,
         HAMON_BREATH_GUIDE,
-        HIGH_STAND_RANGE;
+        HIGH_STAND_RANGE,
+        BOUGHT_METEORITE_MAP,
+        BOUGHT_HAMON_TEMPLE_MAP,
+        BOUGHT_PILLAR_MAN_TEMPLE_MAP;
     }
     
     public void notificationsFromNBT(CompoundNBT nbt) {
@@ -428,6 +437,7 @@ public class PlayerUtilCap {
     
     public void onSleep(boolean isCoffin, int ticksSkipped) {
         this.lastBedType = isCoffin ? BedType.COFFIN : BedType.BED;
+        this.lastSleepTime = player.level.dayTime();
         this.ticksNoSleep = ticksSkipped * 2;
         this.nextSleepTime = player.level.dayTime() + ticksNoSleep;
     }
@@ -437,7 +447,7 @@ public class PlayerUtilCap {
                 this.lastBedType == null || 
                 !this.lastBedType.isCoffin && !isCoffin || 
                 ticksNoSleep <= 0 || 
-                nextSleepTime < player.level.dayTime();
+                nextSleepTime < player.level.dayTime() || player.level.dayTime() < lastSleepTime;
     }
     
     private static enum BedType {
@@ -448,6 +458,27 @@ public class PlayerUtilCap {
         
         private BedType(boolean isCoffin) {
             this.isCoffin = isCoffin;
+        }
+    }
+    
+    
+    public void onSleepingInCoffin(boolean isVampireRespawning) {
+        this.coffinPreventDayTimeSkip = isVampireRespawning;
+        if (!player.level.isClientSide()) {
+            PacketManager.sendToClient(new VampireSleepInCoffinPacket(isVampireRespawning), (ServerPlayerEntity) player);
+        }
+    }
+    
+    public void onWakeUp() {
+        this.coffinPreventDayTimeSkip = false;
+        if (!player.level.isClientSide()) {
+            PacketManager.sendToClient(new VampireSleepInCoffinPacket(false), (ServerPlayerEntity) player);
+        }
+    }
+    
+    private void tickCoffinSleepTimer() {
+        if (coffinPreventDayTimeSkip && WoodenCoffinBlock.isSleepingInCoffin(player)) {
+            CommonReflection.setSleepCounter(player, 0);
         }
     }
     

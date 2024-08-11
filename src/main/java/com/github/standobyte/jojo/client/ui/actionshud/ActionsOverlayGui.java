@@ -236,7 +236,7 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     public boolean isActive() {
-        return currentMode != null;
+        return currentMode != null && currentMode.getControlScheme().hotbarsEnabled;
     }
     
     public boolean noActionSelected(ControlScheme.Hotbar actionType) {
@@ -271,14 +271,18 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     
-
+    
+    
+    public static boolean noHudRender(Minecraft mc) {
+        return mc.gameMode.getPlayerMode() == GameType.SPECTATOR || mc.options.hideGui || mc.screen instanceof WasdAllowingScreen
+                || mc.player.isDeadOrDying();
+    }
     
     private ActionTarget _target;
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public void render(RenderGameOverlayEvent.Pre event) {
         _target = null;
-        if (mc.gameMode.getPlayerMode() == GameType.SPECTATOR || mc.options.hideGui || mc.screen instanceof WasdAllowingScreen
-                || mc.player.isDeadOrDying()) {
+        if (noHudRender(mc)) {
             return;
         }
         RenderGameOverlayEvent.ElementType elementTypeRender = event.getType();
@@ -481,12 +485,21 @@ public class ActionsOverlayGui extends AbstractGui {
         return _target;
     }
     
+    public static int getPowerUiColor(PowerClassification powerClassification) {
+        IPower<?, ?> power = getInstance().getHudMode(powerClassification).getPower();
+        if (power == null) {
+            return -1;
+        }
+        return getPowerUiColor(power);
+    }
+    
     public static int getPowerUiColor(IPower<?, ?> power) {
         switch (power.getPowerClassification()) {
         case NON_STAND:
             if (power.hasPower()) {
                 return ((INonStandPower) power).getType().getColor().orElse(-1);
             }
+            break;
         case STAND:
             return ((IStandPower) power).getStandInstance()
                     .flatMap(StandSkinsManager.getInstance()::getStandSkin)
@@ -594,7 +607,7 @@ public class ActionsOverlayGui extends AbstractGui {
         if (renderHudKeybinds) ++hotbarsRendered;
         int hotbarsElementHeight = 20 + getHotbarsYDiff() * hotbarsRendered;
         
-        if (isActive() && barsBelowHotbars) {
+        if (currentMode != null && barsBelowHotbars) {
             int offset = hotbarsElementHeight + INDENT + VerticalBarsRenderer.ICON_HEIGHT;
             barsPosition.y = Math.max(lmbHotbarPosition.y + offset, barsPosition.y);
         }
@@ -603,7 +616,7 @@ public class ActionsOverlayGui extends AbstractGui {
         boolean hotbarAboveBarsShift = false;
         lmbHotbarPosition.x = hotbarsConfig.getXPos(screenWidth);
         lmbHotbarPosition.y = hotbarsConfig.getYPos(screenHeight, hotbarsElementHeight);
-        if (isActive()) {
+        if (currentMode != null) {
             if (barsConfig == hotbarsConfig) {
                 switch (barsConfig.barsOrientation) {
                 case HORIZONTAL:
@@ -1055,16 +1068,11 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     private <P extends IPower<P, ?>> List<Action<?>> getEnabledActions(P power, InputHandler.ActionKey actionKey) {
-        switch (actionKey) {
-        case ATTACK:
-        case ABILITY:
-            return HudControlSettings.getInstance()
-                    .getControlScheme(power)
-                    .getActionsHotbar(actionKey.getHotbar())
-                    .getEnabledActions();
-        default:
+        ControlScheme controlScheme = HudControlSettings.getInstance().getControlScheme(power);
+        if (!controlScheme.hotbarsEnabled) {
             return Collections.emptyList();
         }
+        return controlScheme.getActionsHotbar(actionKey.getHotbar()).getEnabledActions();
     }
     
     private void renderMouseIcon(MatrixStack matrixStack, int x, int y, InputHandler.ActionKey actionKey) {
@@ -1940,9 +1948,8 @@ public class ActionsOverlayGui extends AbstractGui {
     private static final IntBinaryOperator DEC = (i, n) -> (i + n + 1) % (n + 1) - 1;
     private <P extends IPower<P, ?>> void scrollAction(ActionsModeConfig<P> mode, ControlScheme.Hotbar hotbar, boolean backwards) {
         P power = mode.getPower();
-        List<Action<?>> actions = HudControlSettings.getInstance()
-                .getControlScheme(power)
-                .getActionsHotbar(hotbar).getEnabledActions();
+        ControlScheme controlScheme = HudControlSettings.getInstance().getControlScheme(power);
+        List<Action<?>> actions = controlScheme.getActionsHotbar(hotbar).getEnabledActions();
         if (actions.size() == 0) {
             return;
         }
@@ -1976,10 +1983,8 @@ public class ActionsOverlayGui extends AbstractGui {
     @Nullable
     public <P extends IPower<P, ?>> ActionUseTry<P> onClick(
             P power, ControlScheme.Hotbar hotbar, boolean shiftVariant, boolean sneak, int index, KeyBinding keyPressed) {
-        Action<P> action = (Action<P>) HudControlSettings.getInstance()
-                .getControlScheme(getCurrentMode())
-                .getActionsHotbar(hotbar)
-                .getBaseActionInSlot(index);
+        ControlScheme controlScheme = HudControlSettings.getInstance().getControlScheme(getCurrentMode());
+        Action<P> action = (Action<P>) controlScheme.getActionsHotbar(hotbar).getBaseActionInSlot(index);
         action = resolveVisibleActionInSlot(action, shiftVariant, power, getMouseTarget());
         return onActionClick(power, action, sneak, keyPressed);
     }
@@ -2235,7 +2240,7 @@ public class ActionsOverlayGui extends AbstractGui {
         RIGHT
     }
     
-    enum BarsOrientation {
+    public enum BarsOrientation {
         VERTICAL,
         HORIZONTAL
     }

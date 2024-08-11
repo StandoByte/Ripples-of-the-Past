@@ -26,7 +26,7 @@ public abstract class ItemNbtProjectileEntity extends ItemProjectileEntity {
         super(type, world);
     }
     
-    private void setPickupItem(ItemStack item) {
+    protected void setPickupItem(ItemStack item) {
         this.thrownStack = item.copy();
     }
 

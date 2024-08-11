@@ -115,7 +115,7 @@ public abstract class MarkerRenderer {
         AbstractGui.blit(matrixStack, -16, -32, 0, 0, 32, 32, 256, 256);
         RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         if (marker.outlined) {
-            AbstractGui.blit(matrixStack, -16, -32, 32, 0, 64, 32, 256, 256);
+            AbstractGui.blit(matrixStack, -16, -32, 32, 0, 32, 32, 256, 256);
         }
 
         matrixStack.pushPose();

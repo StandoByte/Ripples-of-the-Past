@@ -694,6 +694,9 @@ public class ClientUtil {
         return new PosOnScreen(posOnScreen, isOnScreen);
     }
     
+    /**
+     *  Both fields of the pos vector range from -1 to 1 if the entity is on screen
+     */
     public static class PosOnScreen {
         public static final PosOnScreen SCREEN_CENTER = new PosOnScreen(new Vector2f(0.5F, 0.5F), true);
         

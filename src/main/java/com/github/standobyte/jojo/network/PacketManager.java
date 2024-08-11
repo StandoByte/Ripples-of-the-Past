@@ -38,6 +38,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClSoulRotationPacke
 import com.github.standobyte.jojo.network.packets.fromclient.ClStandManualMovementPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClStopHeldActionPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClStopWallClimbPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClSyncMotionAnimPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandManualControlPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClToggleStandSummonPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClWalkmanControlsPacket;
@@ -67,12 +68,9 @@ import com.github.standobyte.jojo.network.packets.fromserver.PlayVoiceLinePacket
 import com.github.standobyte.jojo.network.packets.fromserver.PreviousPowerTypesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.PreviousStandTypesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.RefreshMovementInTimeStopPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.ResetResolveValuePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResetSyncedCommonConfigPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveBoostsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveEffectStartPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.ResolveLevelPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.ResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ServerIdPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SkippedStandProgressionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SoulSpawnPacket;
@@ -83,6 +81,8 @@ import com.github.standobyte.jojo.network.packets.fromserver.StandCancelManualMo
 import com.github.standobyte.jojo.network.packets.fromserver.StandControlStatusPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandFullClearPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandStatsDataPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.SyncMotionAnimStatePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.SyncSingleFlagPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopInstancePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerJoinPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopPlayerStatePacket;
@@ -111,6 +111,8 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrNoMotionLerpPacke
 import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerContinuousActionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerVisualDetailPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrResetDeathTimePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrResolveLevelPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStaminaPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandEffectPacket;
@@ -122,6 +124,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrVampirismDataPack
 import com.github.standobyte.jojo.network.packets.fromserver.TrWalkmanEarbudsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrackedItemPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCachePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.VampireSleepInCoffinPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.CDBlocksRestoredPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.GESplitConsciousnessPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.GEUiDataPacket;
@@ -195,6 +198,7 @@ public class PacketManager {
         registerMessage(clientChannel, new ClRemovePlayerSoulEntityPacket.Handler(),       Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClWalkmanControlsPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClReadHamonBreathTabPacket.Handler(),           Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        registerMessage(clientChannel, new ClSyncMotionAnimPacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClMetEntityTypePacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClAllGELifeformsButtonPacket.Handler(),         Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClGEUiDataPacket.Handler(),                     Optional.of(NetworkDirection.PLAY_TO_SERVER));
@@ -206,6 +210,7 @@ public class PacketManager {
         
         packetIndex = 0;
         registerMessage(serverChannel, new ServerIdPacket.Handler(),                       Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(serverChannel, new SyncSingleFlagPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrDoubleShiftPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrResetDeathTimePacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new KnockbackResTickPacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
@@ -233,15 +238,16 @@ public class PacketManager {
         registerMessage(serverChannel, new TrHamonFlagsPacket.Handler(),                   Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new HamonUiEffectPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new HamonSyncOnLoadPacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(serverChannel, new SyncMotionAnimStatePacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrVampirismDataPacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(serverChannel, new VampireSleepInCoffinPacket.Handler(),           Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrStaminaPacket.Handler(),                      Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new ArrowXpLevelsDataPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new PreviousStandTypesPacket.Handler(),             Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new PreviousPowerTypesPacket.Handler(),             Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        registerMessage(serverChannel, new ResolvePacket.Handler(),                        Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(serverChannel, new TrResolvePacket.Handler(),                      Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrStandEffectPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        registerMessage(serverChannel, new ResetResolveValuePacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        registerMessage(serverChannel, new ResolveLevelPacket.Handler(),                   Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(serverChannel, new TrResolveLevelPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new ResolveBoostsPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new MaxAchievedResolvePacket.Handler(),             Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new SkippedStandProgressionPacket.Handler(),        Optional.of(NetworkDirection.PLAY_TO_CLIENT));

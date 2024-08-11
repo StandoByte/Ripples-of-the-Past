@@ -17,8 +17,8 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.JojoModConfig.Common;
-import com.github.standobyte.jojo.action.non_stand.HamonSendoWaveKick;
 import com.github.standobyte.jojo.action.non_stand.VampirismFreeze;
+import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.action.stand.effect.BoyIIManStandPartTakenEffect;
@@ -60,6 +60,7 @@ import com.github.standobyte.jojo.item.OilItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
 import com.github.standobyte.jojo.itemtracking.SidedItemTrackerMap;
+import com.github.standobyte.jojo.modcompat.ModInteractionUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveEffectStartPacket;
@@ -95,7 +96,6 @@ import com.github.standobyte.jojo.util.mc.damage.ModdedDamageSourceWrapper;
 import com.github.standobyte.jojo.util.mc.damage.StandLinkDamageSource;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
-import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
 import com.github.standobyte.jojo.util.mod.NoKnockbackOnBlocking;
 import com.github.standobyte.jojo.world.gen.LoadMeFeature;
 
@@ -221,6 +221,7 @@ import net.minecraftforge.fml.server.ServerLifecycleHooks;
 //FIXME move all event handlers to their respective classes, leave the method links here
 @EventBusSubscriber(modid = JojoMod.MOD_ID)
 public class GameplayEventHandler {
+    public static final boolean DELETE_ME = true;
     
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onLivingTick(LivingUpdateEvent event) {
@@ -616,10 +617,15 @@ public class GameplayEventHandler {
     
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void cancelLivingAttack(LivingAttackEvent event) {
-        if (HamonSendoWaveKick.protectFromMeleeAttackInKick(event.getEntityLiving(), event.getSource(), event.getAmount())
-                || HamonUtil.snakeMuffler(event.getEntityLiving(), event.getSource(), event.getAmount()) 
-                || HamonUtil.rebuffOverdrive(event.getEntityLiving(), event.getSource(), event.getAmount())) 
+        LivingEntity entity = event.getEntityLiving();
+        DamageSource dmgSource = event.getSource();
+        float dmgAmount = event.getAmount();
+        if (GeneralUtil.orElseFalse(ContinuousActionInstance.getCurrentAction(entity), 
+                action -> action.cancelIncomingDamage(dmgSource, dmgAmount))
+                || HamonUtil.snakeMuffler(entity, dmgSource, dmgAmount) 
+                || HamonUtil.rebuffOverdrive(entity, dmgSource, dmgAmount)) {
             event.setCanceled(true);
+        }
     }
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -847,7 +853,7 @@ public class GameplayEventHandler {
         }
     }
 
-    private static void bleed(DamageSource dmgSource, float dmgAmount, LivingEntity target) {
+    public static void bleed(DamageSource dmgSource, float dmgAmount, LivingEntity target) {
         if (dmgSource instanceof StandLinkDamageSource) {
             dmgSource = ((StandLinkDamageSource) dmgSource).getOriginalDamageSource();
         }
@@ -960,7 +966,7 @@ public class GameplayEventHandler {
                 if (power.getTypeSpecificData(vampirism).map(vamp -> !vamp.isVampireAtFullPower()).orElse(false) || power.givePower(vampirism)) {
                     entity.level.playSound(null, entity, ModSounds.STONE_MASK_ACTIVATION_ENTITY.get(), entity.getSoundSource(), 1.0F, 1.0F);
                     power.getTypeSpecificData(vampirism).get().setVampireFullPower(true);
-                    StoneMaskItem.setActivatedArmorTexture(headStack); // TODO light beams on stone mask activation
+                    StoneMaskItem.setActivatedArmorTexture(headStack); // TODO light beams on stone mask activation?
                     headStack.hurtAndBreak(1, entity, stack -> {});
                     return true;
                 }
@@ -1420,6 +1426,7 @@ public class GameplayEventHandler {
                         player.playSound(SoundEvents.COW_MILK, 1.0F, 1.0F);
                         ItemStack milkBucketItem = DrinkHelper.createFilledResult(item, player, 
                                 PotionUtils.setCustomEffects(Items.MILK_BUCKET.getDefaultInstance(), potion.get()));
+                        milkBucketItem.getOrCreateTag().putBoolean(MOD_ADDS_EFFECTS_TO_ITEM, true);
                         player.setItemInHand(hand, milkBucketItem);
                     }
                     else {
@@ -1437,6 +1444,7 @@ public class GameplayEventHandler {
                         
                         PotionUtils.setCustomEffects(stewItem, potion.get());
                         ItemStack stewBowlItem = DrinkHelper.createFilledResult(item, player, stewItem, false);
+                        stewItem.getOrCreateTag().putBoolean(MOD_ADDS_EFFECTS_TO_ITEM, true);
                         player.setItemInHand(hand, stewBowlItem);
                         
                         target.playSound(susEffect != null ? SoundEvents.MOOSHROOM_MILK_SUSPICIOUSLY : SoundEvents.MOOSHROOM_MILK, 1.0F, 1.0F);
@@ -1449,14 +1457,12 @@ public class GameplayEventHandler {
         }
     }
     
+    public static final String MOD_ADDS_EFFECTS_TO_ITEM = "JojoItemUseEffects";
     @SubscribeEvent
     public static void usePotionCowProduct(LivingEntityUseItemEvent.Finish event) {
         ItemStack item = event.getItem();
         LivingEntity entity = event.getEntityLiving();
-        if (!item.isEmpty() && (
-                item.getItem() == Items.MILK_BUCKET
-                || item.getItem() == Items.MUSHROOM_STEW
-                || item.getItem() == Items.SUSPICIOUS_STEW)) {
+        if (!item.isEmpty() && item.hasTag() && item.getTag().getBoolean(MOD_ADDS_EFFECTS_TO_ITEM)) {
             List<EffectInstance> effects = PotionUtils.getMobEffects(item);
             if (!effects.isEmpty()) {
                 effects.forEach(effect -> entity.addEffect(effect));
@@ -1506,14 +1512,20 @@ public class GameplayEventHandler {
     
     @SubscribeEvent
     public static void onWakeUp(PlayerWakeUpEvent event) {
+        PlayerEntity player = event.getPlayer();
+        
         if (!event.wakeImmediately() && !event.updateWorld()) {
-            IStandPower.getStandPowerOptional(event.getPlayer()).ifPresent(stand -> {
+            IStandPower.getStandPowerOptional(player).ifPresent(stand -> {
                 if (stand.hasPower()) {
                     stand.setStamina(stand.getMaxStamina());
                 }
             });
         }
-        VampirismData.finishCuringOnWakingUp(event.getPlayer());
+        
+        VampirismData.finishCuringOnWakingUp(player);
+        
+        player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(
+                playerData -> playerData.onWakeUp());
     }
     
     @SubscribeEvent(priority = EventPriority.LOWEST)

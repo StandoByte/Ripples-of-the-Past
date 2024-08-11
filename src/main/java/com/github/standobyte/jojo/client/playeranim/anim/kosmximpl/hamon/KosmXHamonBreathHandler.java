@@ -22,10 +22,11 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 
-public class KosmXHamonBreathLayer extends AnimLayerHandler implements BasicToggleAnim {
+//FIXME sometimes the head does 360 when using Hamon Breath
+public class KosmXHamonBreathHandler extends AnimLayerHandler<ModifierLayer<IAnimation>> implements BasicToggleAnim {
     private static final Random RANDOM = new Random();
 
-    public KosmXHamonBreathLayer(ResourceLocation id) {
+    public KosmXHamonBreathHandler(ResourceLocation id) {
         super(id);
     }
 

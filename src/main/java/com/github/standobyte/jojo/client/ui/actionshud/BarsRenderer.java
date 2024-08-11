@@ -11,7 +11,6 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.ClientTicking;
 import com.github.standobyte.jojo.client.ClientTicking.ITicking;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.Alignment;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.BarsOrientation;
@@ -19,6 +18,7 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -93,19 +93,9 @@ public abstract class BarsRenderer {
                     .getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> hamon.getMaxBreathStability())
                     .orElse(nonStandPower.getMaxEnergy());
             
-            BarType type = null;
-            if (nonStandPower.getType() == ModPowers.HAMON.get()) {
-                type = BarType.ENERGY_HAMON;
-            }
-            else if (nonStandPower.getType() == ModPowers.VAMPIRISM.get()) {
-                type = BarType.ENERGY_VAMPIRE;
-            }
-            else {
-                type = BarType.ENERGY_OTHER;
-            }
+            BarType type = getEnergyBarIcon(nonStandPower.getType());
             
             if (type != null) {
-                // FIXME ! (hamon 2) bar render effect
                 renderBarStart(matrixStack, type, 
                         currentModeType == PowerClassification.NON_STAND, ActionsOverlayGui.getPowerUiColor(nonStandPower), 1, 
                         energy, maxEnergy, 
@@ -206,9 +196,6 @@ public abstract class BarsRenderer {
             RenderSystem.color4f(rgb[0], rgb[1], rgb[2], barAlpha);
             if (fill > 0) {
                 barFill(matrixStack, x, y, alignment, texX, texY, width, length, fill);
-                if (fillEffect /*&& Minecraft.getInstance().options.graphicsMode != GraphicsFanciness.FAST*/) {
-                    barFillEffect(matrixStack, x, y, alignment, width, length, fill, barType);
-                }
             }
             // border
             drawBarElement(matrixStack, x, y, borderTexX, borderTexY, width, length + 2);
@@ -241,9 +228,6 @@ public abstract class BarsRenderer {
     protected abstract void barFill(MatrixStack matrixStack, int x, int y, Alignment alignment, 
             int texX, int texY, int width, int length, int fill);
     
-    protected void barFillEffect(MatrixStack matrixStack, int x, int y, Alignment alignment, 
-            int width, int length, int fill, BarType barType) {}
-    
     protected void drawBarElement(MatrixStack matrixStack, int x, int y, int texX, int texY, int width, int length) {
         gui.blit(matrixStack, x, y, texX, texY, width, length);
     }
@@ -259,9 +243,28 @@ public abstract class BarsRenderer {
             int width, int length, 
             float alpha) {}
     
+    public static BarType getEnergyBarIcon(NonStandPowerType<?> powerType) {
+        if (powerType == ModPowers.HAMON.get()) {
+            return BarType.ENERGY_HAMON;
+        }
+        else if (powerType == ModPowers.VAMPIRISM.get()) {
+            return BarType.ENERGY_VAMPIRE;
+        }
+        else {
+            return BarType.ENERGY_OTHER;
+        }
+    }
+    
     protected static final int ICON_WIDTH = 12;
     protected static final int ICON_HEIGHT = 16;
-    protected int[] getIconTex(BarType type, BarsOrientation orientation) {
+    /**
+     * [0, 1] - UV position
+     * [2, 3] - icon size
+     * [4] - inverse scale
+     * [5] - horizontal bar icon x offset (left alignment)
+     * [6] - horizontal bar icon y offset
+     */
+    public static int[] getIconTex(BarType type, BarsOrientation orientation) {
         switch (type) {
         case STAMINA:
             return new int[] {128, 0, ICON_WIDTH, ICON_HEIGHT, 1, 0, -7};

@@ -34,7 +34,6 @@ public class PillarmanBossTileEntity extends TileEntity implements ITickableTile
 
     @Override
     public void tick() {
-        // TODO AYAYAYAII
     }
     
     public void incAbsorbed() {

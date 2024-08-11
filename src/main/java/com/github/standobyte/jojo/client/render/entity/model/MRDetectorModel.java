@@ -6,6 +6,7 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.render.block.BlockSprites;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.MagiciansRedRenderer;
 import com.github.standobyte.jojo.entity.MRDetectorEntity;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -100,8 +101,8 @@ public class MRDetectorModel extends EntityModel<MRDetectorEntity> {
     }
     
     private void renderFlame(MatrixStack matrixStack, IRenderTypeBuffer buffer, Vector3d offset, float strength, ActiveRenderInfo camera) {
-        TextureAtlasSprite spriteFire0 = MagiciansRedRenderer.FIRE_0_SPRITE.get();
-        TextureAtlasSprite spriteFire1 = MagiciansRedRenderer.FIRE_1_SPRITE.get();
+        TextureAtlasSprite spriteFire0 = BlockSprites.MR_FIRE_BLOCK_0.sprite();
+        TextureAtlasSprite spriteFire1 = BlockSprites.MR_FIRE_BLOCK_1.sprite();
         matrixStack.pushPose();
         matrixStack.translate(offset.x, offset.y, offset.z);
         float scale = strength * 0.2F;

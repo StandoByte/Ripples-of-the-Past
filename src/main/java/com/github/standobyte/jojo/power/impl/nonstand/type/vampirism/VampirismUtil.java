@@ -203,5 +203,4 @@ public class VampirismUtil {
                 world.getDifficulty().getId()).floatValue();
     }
     
-    // TODO smite enchantment damage
 }

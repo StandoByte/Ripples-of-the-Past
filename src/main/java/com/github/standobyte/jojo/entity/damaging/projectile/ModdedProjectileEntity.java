@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.entity.damaging.projectile;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.damaging.DamagingEntity;
 import com.github.standobyte.jojo.util.general.MathUtil;
@@ -188,6 +190,10 @@ public abstract class ModdedProjectileEntity extends DamagingEntity {
     
     public void setIsDeflected() {
         entityData.set(IS_DEFLECTED, true);
+    }
+    
+    public boolean canBeDeflected(@Nullable Entity context) {
+        return true;
     }
     
     @Override

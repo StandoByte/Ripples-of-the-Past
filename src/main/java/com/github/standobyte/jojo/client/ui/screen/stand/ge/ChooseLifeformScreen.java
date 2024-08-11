@@ -27,10 +27,10 @@ import com.github.standobyte.jojo.client.ui.tooltip.ITooltipLine;
 import com.github.standobyte.jojo.client.ui.tooltip.IconTooltipLine;
 import com.github.standobyte.jojo.client.ui.tooltip.MultiTooltipLine;
 import com.github.standobyte.jojo.client.ui.tooltip.TextTooltipLine;
+import com.github.standobyte.jojo.modcompat.ModInteractionUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClAllGELifeformsButtonPacket;
 import com.github.standobyte.jojo.util.mc.EntityTypeToInstance;
-import com.github.standobyte.jojo.util.mod.ModInteractionUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;

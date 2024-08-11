@@ -105,6 +105,6 @@ public abstract class ArmsBarrageAnimation<T extends LivingEntity, M extends Ent
     }
     
     protected static double maxStandSwingOffset(StandEntity entity) {
-        return 1 - entity.getPrecision() / 32;
+        return 1 - entity.getPrecision() / 40;
     }
 }

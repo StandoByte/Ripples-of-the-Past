@@ -172,7 +172,9 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         standEntity.punch(task, this, task.getTarget());
-        userPower.getUser().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.hasUsedTimeStopToday = true);
+        if (!world.isClientSide()) {
+            userPower.getUser().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.hasUsedTimeStopToday = true);
+        }
     }
 
     @Override

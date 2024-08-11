@@ -60,6 +60,7 @@ public class StandSkinsScreen extends Screen {
     private List<SkinView> skins;
     private int tickCount = 0;
     private int scroll;
+    private List<SkinView> skinsVisible;
     
     @Nullable
     private SkinFullView skinFullView;
@@ -89,6 +90,7 @@ public class StandSkinsScreen extends Screen {
                     return new SkinView(skin, x, y);
                 })
                 .collect(Collectors.toList());
+        setScroll(0);
     }
     
     @Override
@@ -166,13 +168,12 @@ public class StandSkinsScreen extends Screen {
         else {
             RenderSystem.translatef(0, -scroll, 0);
             ClientUtil.enableGlScissor(x, y, WINDOW_INSIDE_WIDTH, WINDOW_INSIDE_HEIGHT);
-            // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! filter to only visible
-            for (SkinView skin : skins) {
+            for (SkinView skin : skinsVisible) {
                 skin.renderStand(matrixStack, mouseX, mouseY, ticks);
             }
 
             Optional<SkinView> hoveredSkin = getSkinAt(mouseX, mouseY);
-            for (SkinView skin : skins) {
+            for (SkinView skin : skinsVisible) {
                 skin.renderAdditional(matrixStack, mouseX, mouseY, ticks, 
                         hoveredSkin.map(hovered -> skin == hovered).orElse(false));
             }
@@ -199,6 +200,11 @@ public class StandSkinsScreen extends Screen {
         else {
             return Optional.empty();
         }
+    }
+    
+    private boolean isSkinBoxVisible(SkinView skin) {
+        int y = skin.y - scroll;
+        return y + SkinView.boxHeight >= 0 && y < WINDOW_INSIDE_HEIGHT;
     }
     
     private int getWindowX() { return (width - WINDOW_WIDTH) / 2; }
@@ -342,7 +348,14 @@ public class StandSkinsScreen extends Screen {
     }
     
     private void addScroll(int scroll) {
-        this.scroll = MathHelper.clamp(this.scroll + scroll, 0, getMaxScroll());
+        setScroll(this.scroll + scroll);
+    }
+    
+    private void setScroll(int scroll) {
+        this.scroll = MathHelper.clamp(scroll, 0, getMaxScroll());
+        this.skinsVisible = skins.stream()
+                .filter(this::isSkinBoxVisible)
+                .collect(Collectors.toList());
     }
     
     public int getMaxScroll() {
@@ -379,7 +392,7 @@ public class StandSkinsScreen extends Screen {
             
             StandType<?> standType = standCap.getType();
             if (standType instanceof EntityStandType) {
-                // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! SP hair isn't animated (decouple model methods from entity instance as much as possible)
+                // FIXME SP hair isn't animated (decouple model methods from entity instance as much as possible)
                 renderStandModel(x + boxWidth / 2, y + boxHeight / 2 + 26.6667F, 25, 0, 
                         (EntityStandType<?>) standType, skin, ticks);
             }

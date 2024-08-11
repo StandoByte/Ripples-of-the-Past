@@ -105,14 +105,6 @@ public class HorizontalBarsRenderer extends BarsRenderer {
                     fill, width - 2);
         }
     }
-    
-    @Override
-    protected void barFillEffect(MatrixStack matrixStack, int x, int y, Alignment alignment, 
-            int width, int length, int fill, BarType barType) {
-        if (barType == BarType.ENERGY_HAMON) {
-            // TODO particles effect
-        }
-    }
 
     @Override
     protected void renderCost(MatrixStack matrixStack, 

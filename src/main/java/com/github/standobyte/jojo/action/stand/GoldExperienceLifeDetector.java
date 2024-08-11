@@ -18,6 +18,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.world.World;
 
 public class GoldExperienceLifeDetector extends StandEntityAction {
+    public static final Object GE_DETECTOR_CTX = new Object();
 
     public GoldExperienceLifeDetector(StandEntityAction.Builder builder) {
         super(builder);
@@ -32,7 +33,7 @@ public class GoldExperienceLifeDetector extends StandEntityAction {
             
             entitiesAround.addAll(MCUtil.entitiesAround(LivingEntity.class, standEntity, 
                     radius, false, 
-                    entity -> entity != userPower.getUser() && GoldExperienceHeal.isLiving(entity) && !entity.isDeadOrDying()));
+                    entity -> entity != userPower.getUser() && GoldExperienceHeal.isLiving(entity)));
             entitiesAround.addAll(MCUtil.entitiesAround(SoulEntity.class, standEntity,
                     radius, false,
                     null));
@@ -40,11 +41,11 @@ public class GoldExperienceLifeDetector extends StandEntityAction {
             entitiesAround.forEach(entity -> entity.getCapability(EntityUtilCapProvider.CAPABILITY).ifPresent(
                     cap -> {
                         if (entity instanceof LivingEntity && ((LivingEntity) entity).isDeadOrDying()) {
-                            cap.setClGlowingColor(OptionalInt.empty(), 80);
+                            cap.resetClGlowingColor();
                         }
                         else {
-                            cap.setClGlowingColor(OptionalInt.of(ActionsOverlayGui.getPowerUiColor(userPower)), 80);
-                            cap.setShowHp();
+                            cap.setClGlowingColor(OptionalInt.of(ActionsOverlayGui.getPowerUiColor(userPower)), 80, 
+                                    entity instanceof StandEntity ? null : GE_DETECTOR_CTX);
                         }
                     }));
         }

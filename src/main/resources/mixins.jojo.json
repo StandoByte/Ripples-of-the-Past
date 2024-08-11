@@ -15,6 +15,7 @@
     "AbstractFurnaceTEMixin",
     "ForgeSimpleChannelMixin",
     "PlacedBlockTriggerMixin",
+    "MerchantResultSlotMixin",
     "TheMostUnnecessaryMixin",
     "itemtracking.equip.MobEntityMixin",
     "itemtracking.equip.ArmorStandEntityMixin",

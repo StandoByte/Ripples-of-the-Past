@@ -19,6 +19,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import net.minecraft.client.util.InputMappings;
+import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 
@@ -32,7 +33,6 @@ public class ControlScheme {
     
     private final List<ActionKeybindEntry> serializedKeybinds = new ArrayList<>();
     private final List<ActionKeybindEntry> legalKeybinds = new ArrayList<>();
-    
     private final List<ActionKeybindEntry> keybindsView = Collections.unmodifiableList(legalKeybinds);
     
     private final Map<Hotbar, ActionsHotbar> hotbars = Util.make(new EnumMap<>(Hotbar.class), map -> {
@@ -40,6 +40,65 @@ public class ControlScheme {
             map.put(hotbar, new ActionsHotbar());
         }
     });
+    public boolean hotbarsEnabled = true;
+    
+    
+    
+    static ControlScheme fromJson(JsonElement json, @Nullable ResourceLocation powerTypeId) {
+        ControlScheme obj;
+        if (powerTypeId != null) {
+            Optional<IPowerType<?, ?>> powerType = Optional.ofNullable(JojoCustomRegistries.NON_STAND_POWERS.fromId(powerTypeId));
+            // Optional#or was only added in Java 9
+            if (!powerType.isPresent()) powerType = Optional.ofNullable(JojoCustomRegistries.STANDS.fromId(powerTypeId));
+            obj = new ControlScheme(powerType.orElse(null));
+        }
+        else {
+            obj = new ControlScheme();
+        }
+        
+        JsonObject jsonObj = json.getAsJsonObject();
+        
+        
+        JsonArray keybindsJson = jsonObj.get("customKeybinds").getAsJsonArray();
+        for (JsonElement keybindJson : keybindsJson) {
+            ActionKeybindEntry keybind = ActionKeybindEntry.fromJson(keybindJson);
+            obj.serializedKeybinds.add(keybind);
+        }
+        
+        JsonObject hotbarsJson = jsonObj.get("hotbars").getAsJsonObject();
+        for (ControlScheme.Hotbar hotbar : ControlScheme.Hotbar.values()) {
+            JsonObject hotbarJson = hotbarsJson.get(hotbar.name()).getAsJsonObject();
+            obj.hotbars.get(hotbar).fromJson(hotbarJson);
+        }
+        
+        obj.hotbarsEnabled = JSONUtils.getAsBoolean(jsonObj, "hotbarsEnabled", obj.hotbarsEnabled);
+        
+        
+        return obj;
+    }
+
+    JsonElement toJson() {
+        JsonObject json = new JsonObject();
+
+        JsonArray keybindsJson = new JsonArray();
+        json.add("customKeybinds", keybindsJson);
+        for (ActionKeybindEntry keybind : serializedKeybinds) {
+            keybindsJson.add(keybind.toJson());
+        }
+
+        JsonObject hotbarsJson = new JsonObject();
+        json.add("hotbars", hotbarsJson);
+        for (Hotbar hotbar : Hotbar.values()) {
+            JsonElement hotbarJson = hotbars.get(hotbar).toJson();
+            hotbarsJson.add(hotbar.name(), hotbarJson);
+        }
+        
+        json.addProperty("hotbarsEnabled", hotbarsEnabled);
+        
+        return json;
+    }
+    
+    
     
     protected ControlScheme() {}
     
@@ -52,6 +111,8 @@ public class ControlScheme {
     private ControlScheme(DefaultControls defaults) {
         this.defaultState = defaults;
     }
+    
+    
     
     private boolean initialized = false;
     public boolean initLoadedFromConfig(IPower<?, ?> power) {
@@ -252,54 +313,5 @@ public class ControlScheme {
     public enum Hotbar {
         LEFT_CLICK,
         RIGHT_CLICK
-    }
-    
-    
-    
-    static ControlScheme fromJson(JsonElement json, @Nullable ResourceLocation powerTypeId) {
-        ControlScheme obj;
-        if (powerTypeId != null) {
-            Optional<IPowerType<?, ?>> powerType = Optional.ofNullable(JojoCustomRegistries.NON_STAND_POWERS.fromId(powerTypeId));
-            // Optional#or was only added in Java 9
-            if (!powerType.isPresent()) powerType = Optional.ofNullable(JojoCustomRegistries.STANDS.fromId(powerTypeId));
-            obj = new ControlScheme(powerType.orElse(null));
-        }
-        else {
-            obj = new ControlScheme();
-        }
-        
-        JsonObject jsonObj = json.getAsJsonObject();
-
-        JsonArray keybindsJson = jsonObj.get("customKeybinds").getAsJsonArray();
-        for (JsonElement keybindJson : keybindsJson) {
-            ActionKeybindEntry keybind = ActionKeybindEntry.fromJson(keybindJson);
-            obj.serializedKeybinds.add(keybind);
-        }
-
-        JsonObject hotbarsJson = jsonObj.get("hotbars").getAsJsonObject();
-        for (ControlScheme.Hotbar hotbar : ControlScheme.Hotbar.values()) {
-            JsonObject hotbarJson = hotbarsJson.get(hotbar.name()).getAsJsonObject();
-            obj.hotbars.get(hotbar).fromJson(hotbarJson);
-        }
-        
-        return obj;
-    }
-
-    JsonElement toJson() {
-        JsonObject json = new JsonObject();
-
-        JsonArray keybindsJson = new JsonArray();
-        json.add("customKeybinds", keybindsJson);
-        for (ActionKeybindEntry keybind : serializedKeybinds) {
-            keybindsJson.add(keybind.toJson());
-        }
-
-        JsonObject hotbarsJson = new JsonObject();
-        json.add("hotbars", hotbarsJson);
-        for (Hotbar hotbar : Hotbar.values()) {
-            JsonElement hotbarJson = hotbars.get(hotbar).toJson();
-            hotbarsJson.add(hotbar.name(), hotbarJson);
-        }
-        return json;
     }
 }

@@ -4,12 +4,16 @@ import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.EXPERIENCE;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.FOOD;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.HEALTH;
-import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.HELMET;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.IntStream;
@@ -28,6 +32,7 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
+import com.github.standobyte.jojo.client.ClientUtil.PosOnScreen;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.particle.custom.FirstPersonHamonAura;
 import com.github.standobyte.jojo.client.polaroid.PhotosCache;
@@ -52,6 +57,12 @@ import com.github.standobyte.jojo.client.ui.screen.widgets.HeightScaledSlider;
 import com.github.standobyte.jojo.client.ui.screen.widgets.ImageVanillaButton;
 import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
 import com.github.standobyte.jojo.client.ui.toasts.MetEntityTypeToast;
+import com.github.standobyte.jojo.client.ui.tooltip.CustomTooltipRender;
+import com.github.standobyte.jojo.client.ui.tooltip.ITooltipLine;
+import com.github.standobyte.jojo.client.ui.tooltip.IconTooltipLine;
+import com.github.standobyte.jojo.client.ui.tooltip.MultiTooltipLine;
+import com.github.standobyte.jojo.client.ui.tooltip.TextTooltipLine;
+import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModStatusEffects;
@@ -62,11 +73,13 @@ import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.item.OilItem;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
+import com.github.standobyte.jojo.modcompat.ModInteractionUtil;
 import com.github.standobyte.jojo.modcompat.OptionalDependencyHelper;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClMetEntityTypePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ServerIdPacket;
+import com.github.standobyte.jojo.potion.BleedingEffect;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -74,6 +87,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandArrowHandler;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
+import com.github.standobyte.jojo.util.GameplayEventHandler;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
@@ -91,6 +105,7 @@ import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
+import net.minecraft.client.gui.IngameGui;
 import net.minecraft.client.gui.screen.ControlsScreen;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.IngameMenuScreen;
@@ -100,6 +115,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractSlider;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.gui.widget.list.KeyBindingList;
+import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.FirstPersonRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.model.BipedModel;
@@ -110,10 +126,13 @@ import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.EnchantedBookItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.potion.Effects;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
@@ -125,6 +144,7 @@ import net.minecraft.util.Util;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector3i;
@@ -149,6 +169,7 @@ import net.minecraftforge.client.event.RenderNameplateEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.client.event.sound.PlaySoundEvent;
+import net.minecraftforge.client.gui.ForgeIngameGui;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.TickEvent;
@@ -294,10 +315,11 @@ public class ClientEventHandler {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public <T extends LivingEntity, M extends EntityModel<T>> void onRenderNameplate(RenderNameplateEvent event) {
         Entity entity = event.getEntity();
+        MatrixStack matrixStack = event.getMatrixStack();
         if (entity instanceof LivingEntity) {
             INonStandPower.getNonStandPowerOptional((LivingEntity) entity).ifPresent(power -> {
                 if (power.getHeldAction(true) == ModHamonActions.ZEPPELI_TORNADO_OVERDRIVE.get()) {
-                    event.getMatrixStack().mulPose(Vector3f.YP.rotation((power.getHeldActionTicks() + event.getPartialTicks()) * -2F % 360F));
+                    matrixStack.mulPose(Vector3f.YP.rotation((power.getHeldActionTicks() + event.getPartialTicks()) * -2F % 360F));
                 }
             });
         }
@@ -571,9 +593,221 @@ public class ClientEventHandler {
     
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public void renderUI(RenderGameOverlayEvent.Pre event) {
-        if (event.getType() == HELMET) {
+        switch (event.getType()) {
+        case HELMET:
             renderLosingVision(event.getMatrixStack(), event.getPartialTicks());
+            break;
+        case ALL:
+            hudRenderEntityGEDetectorData(event.getMatrixStack());
+            break;
+        default:
+            break;
         }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public void renderHpWithBleeding(RenderGameOverlayEvent.Pre event) {
+        if (ModInteractionUtil.isModLoaded("healthoverlay")) return;
+        
+        switch (event.getType()) {
+        case HEALTH:
+        case HEALTHMOUNT:
+            Entity cameraEntity = Minecraft.getInstance().getCameraEntity();
+            if (cameraEntity instanceof PlayerEntity) {
+                boolean mount = event.getType() == RenderGameOverlayEvent.ElementType.HEALTHMOUNT;
+                LivingEntity entity = (LivingEntity) cameraEntity;
+                if (mount) {
+                    Entity mountEntity = entity.getVehicle();
+                    entity = mountEntity instanceof LivingEntity ? (LivingEntity) mountEntity : null;
+                }
+                if (entity != null && entity.hasEffect(ModStatusEffects.BLEEDING.get())) {
+                    IngameGui gui = mc.gui;
+                    int width = mc.getWindow().getGuiScaledWidth();
+                    int height = mc.getWindow().getGuiScaledHeight();
+                    
+                    if (mount) {
+                        renderMountHealthWithBleeding(entity, event.getMatrixStack(), gui, event, width, height);
+                    }
+                    else {
+                        renderHealthWithBleeding(entity, event.getMatrixStack(), gui, event, width, height);
+                    }
+                    event.setCanceled(true);
+                }
+            }
+            break;
+        default:
+            break;
+        }
+    }
+
+    private Random rand = new Random();
+    private int entityHealth;
+    private int lastEntityHealth;
+    private long lastSystemTime;
+    private long healthUpdateCounter;
+    public void renderHealthWithBleeding(LivingEntity entity, MatrixStack matrixStack, IngameGui gui, 
+            RenderGameOverlayEvent event, int width, int height) {
+        mc.getTextureManager().bind(AbstractGui.GUI_ICONS_LOCATION);
+        mc.getProfiler().push("health");
+        RenderSystem.enableBlend();
+
+        int ticks = gui.getGuiTicks();
+        int health = MathHelper.ceil(entity.getHealth());
+        boolean highlight = this.healthUpdateCounter > (long)ticks && 
+                (this.healthUpdateCounter - (long)ticks) / 3L %2L == 1L;
+
+        if (health < this.entityHealth && entity.invulnerableTime > 0)
+        {
+            this.lastSystemTime = Util.getMillis();
+            this.healthUpdateCounter = (long)(ticks + 20);
+        }
+        else if (health > this.entityHealth && entity.invulnerableTime > 0)
+        {
+            this.lastSystemTime = Util.getMillis();
+            this.healthUpdateCounter = (long)(ticks + 10);
+        }
+
+        if (Util.getMillis() - this.lastSystemTime > 1000L)
+        {
+            this.entityHealth = health;
+            this.lastEntityHealth = health;
+            this.lastSystemTime = Util.getMillis();
+        }
+
+        this.entityHealth = health;
+        int healthLast = this.lastEntityHealth;
+
+        ModifiableAttributeInstance attrMaxHealth = entity.getAttribute(Attributes.MAX_HEALTH);
+        float healthWithoutBleedMax = (float) MCUtil.calcValueWithoutModifiers(attrMaxHealth, BleedingEffect.ATTRIBUTE_MODIFIER_ID); // !
+        float healthMax = (float)attrMaxHealth.getValue();
+        float absorb = MathHelper.ceil(entity.getAbsorptionAmount());
+
+        int healthRows = MathHelper.ceil((healthMax + absorb) / 2.0F / 10.0F);
+        int rowHeight = Math.max(10 - (healthRows - 2), 3);
+
+        this.rand.setSeed((long)(ticks * 312871));
+
+        int left = width / 2 - 91;
+        int top = height - ForgeIngameGui.left_height;
+        ForgeIngameGui.left_height += (healthRows * rowHeight);
+        if (rowHeight != 10) ForgeIngameGui.left_height += 10 - rowHeight;
+
+        int regen = -1;
+        if (entity.hasEffect(Effects.REGENERATION))
+        {
+            regen = ticks % 25;
+        }
+
+        final int TOP =  9 * (mc.level.getLevelData().isHardcore() ? 5 : 0);
+        final int BACKGROUND = (highlight ? 25 : 16);
+        int MARGIN = 16;
+        if (entity.hasEffect(Effects.POISON))      MARGIN += 36;
+        else if (entity.hasEffect(Effects.WITHER)) MARGIN += 72;
+        float absorbRemaining = absorb;
+
+        for (int i = MathHelper.ceil((healthWithoutBleedMax + absorb) / 2.0F) - 1; i >= 0; --i) // !
+        {
+            //int b0 = (highlight ? 1 : 0);
+            int row = MathHelper.ceil((float)(i + 1) / 10.0F) - 1;
+            int x = left + i % 10 * 8;
+            int y = top - row * rowHeight;
+
+            if (health <= 4) y += this.rand.nextInt(2);
+            if (i == regen) y -= 2;
+
+            gui.blit(matrixStack, x, y, BACKGROUND, TOP, 9, 9);
+
+            if (highlight)
+            {
+                if (i * 2 + 1 < healthLast)
+                    gui.blit(matrixStack, x, y, MARGIN + 54, TOP, 9, 9); //6
+                else if (i * 2 + 1 == healthLast)
+                    gui.blit(matrixStack, x, y, MARGIN + 63, TOP, 9, 9); //7
+            }
+
+            if (absorbRemaining > 0.0F)
+            {
+                if (absorbRemaining == absorb && absorb % 2.0F == 1.0F)
+                {
+                    gui.blit(matrixStack, x, y, MARGIN + 153, TOP, 9, 9); //17
+                    absorbRemaining -= 1.0F;
+                }
+                else
+                {
+                    gui.blit(matrixStack, x, y, MARGIN + 144, TOP, 9, 9); //16
+                    absorbRemaining -= 2.0F;
+                }
+            }
+            else
+            {
+                if (i * 2 + 1 < health)
+                    gui.blit(matrixStack, x, y, MARGIN + 36, TOP, 9, 9); //4
+                else if (i * 2 + 1 == health)
+                    gui.blit(matrixStack, x, y, MARGIN + 45, TOP, 9, 9); //5
+                
+                // !
+                if (i * 2 + 1 >= healthMax) {
+                    mc.getTextureManager().bind(ClientUtil.ADDITIONAL_UI);
+                    gui.blit(matrixStack, x, y, 64, 0, 9, 9);
+                    mc.getTextureManager().bind(AbstractGui.GUI_ICONS_LOCATION);
+                }
+            }
+        }
+
+        RenderSystem.disableBlend();
+        mc.getProfiler().pop();
+    }
+    
+    public void renderMountHealthWithBleeding(LivingEntity entity, MatrixStack matrixStack, IngameGui gui, 
+            RenderGameOverlayEvent event, int width, int height) {
+        mc.textureManager.bind(AbstractGui.GUI_ICONS_LOCATION);
+
+        boolean unused = false;
+        int left_align = width / 2 + 91;
+
+        mc.getProfiler().popPush("mountHealth");
+        RenderSystem.enableBlend();
+        int health = (int)Math.ceil((double)entity.getHealth());
+        float healthWithoutBleedMax = (float) MCUtil.calcValueWithoutModifiers(entity.getAttribute(
+                Attributes.MAX_HEALTH), BleedingEffect.ATTRIBUTE_MODIFIER_ID); // !
+        float healthMax = entity.getMaxHealth();
+        int hearts = (int)(healthWithoutBleedMax + 0.5F) / 2; // !
+
+        if (hearts > 30) hearts = 30;
+
+        final int MARGIN = 52;
+        final int BACKGROUND = MARGIN + (unused ? 1 : 0);
+        final int HALF = MARGIN + 45;
+        final int FULL = MARGIN + 36;
+
+        for (int heart = 0; hearts > 0; heart += 20)
+        {
+            int top = height - ForgeIngameGui.right_height;
+
+            int rowCount = Math.min(hearts, 10);
+            hearts -= rowCount;
+
+            for (int i = 0; i < rowCount; ++i)
+            {
+                int x = left_align - i * 8 - 9;
+                gui.blit(matrixStack, x, top, BACKGROUND, 9, 9, 9);
+
+                if (i * 2 + 1 + heart < health)
+                    gui.blit(matrixStack, x, top, FULL, 9, 9, 9);
+                else if (i * 2 + 1 + heart == health)
+                    gui.blit(matrixStack, x, top, HALF, 9, 9, 9);
+                
+                // !
+                if (i * 2 + 1 + heart >= healthMax) {
+                    mc.getTextureManager().bind(ClientUtil.ADDITIONAL_UI);
+                    gui.blit(matrixStack, x, top, 73, 0, 9, 9);
+                    mc.getTextureManager().bind(AbstractGui.GUI_ICONS_LOCATION);
+                }
+            }
+
+            ForgeIngameGui.right_height += 10;
+        }
+        RenderSystem.disableBlend();
     }
     
     @SuppressWarnings("deprecation")
@@ -678,7 +912,7 @@ public class ClientEventHandler {
                     boolean hasGloves = GlovesLayer.areGloves(player.getItemInHand(Hand.MAIN_HAND)) || GlovesLayer.areGloves(player.getItemInHand(Hand.OFF_HAND));
                     boolean hasEffect = player.hasEffect(ModStatusEffects.HAMON_SPREAD.get()) || player.hasEffect(ModStatusEffects.FREEZE.get());
                     if (hasGloves && (GlovesLayer.areGloves(item) || item.isEmpty()) || 
-                            hasEffect && item.isEmpty() && !player.isInvisible()) {
+                            hasEffect && item.isEmpty()) {
                         event.setCanceled(true);
                         renderHand(Hand.MAIN_HAND, event.getMatrixStack(), event.getBuffers(), event.getLight(), 
                                 event.getPartialTicks(), event.getInterpolatedPitch(), player);
@@ -1012,8 +1246,12 @@ public class ClientEventHandler {
         }
         prevPause = paused;
         
-        ShaderEffectApplier.getInstance().updateTimeStopperScreenPos(
-                event.getMatrixStack(), event.getProjectionMatrix(), mc.gameRenderer.getMainCamera());
+        ActiveRenderInfo camera = mc.gameRenderer.getMainCamera();
+        MatrixStack matrixStack = event.getMatrixStack();
+        Matrix4f projMatrix = event.getProjectionMatrix();
+        float partialTick = event.getPartialTicks();
+        findEntitiesOnScreen(matrixStack, projMatrix, camera, partialTick);
+        ShaderEffectApplier.getInstance().updateTimeStopperScreenPos(matrixStack, projMatrix, camera, partialTick);
     }
     
     public float getPartialTick() {
@@ -1167,6 +1405,115 @@ public class ClientEventHandler {
                 }
             });
         }
+    }
+    
+    
+    private Set<Entity> GEDetectorEntities = new HashSet<>();
+    private Entity GEDetectorShowHpEntity;
+    private PosOnScreen GEDetectorShowHpEntityPos;
+
+    public void addGEDetectedEntity(Entity entity) {
+        this.GEDetectorEntities.add(entity);
+    }
+    
+    public void removeGEDetectedEntity(Entity entity) {
+        this.GEDetectorEntities.remove(entity);
+    }
+    
+    private void findEntitiesOnScreen(MatrixStack worldRenderMatrixStack, Matrix4f projectionMatrix, ActiveRenderInfo camera, float partialTick) {
+        GEDetectorShowHpEntity = getEntityGEDetectHp();
+        if (GEDetectorShowHpEntity != null) {
+            Entity entity = GEDetectorShowHpEntity;
+            Vector3d pos = entity.getPosition(partialTick).add(0, entity.getBbHeight() * 0.5f, 0);
+            GEDetectorShowHpEntityPos = ClientUtil.posOnScreen(pos, camera, worldRenderMatrixStack, projectionMatrix);
+        }
+    }
+    
+    @Nullable
+    private Entity getEntityGEDetectHp() {
+        if (mc.player != null) {
+            Vector3d cameraPos = mc.gameRenderer.getMainCamera().getPosition();
+            Vector3d lookVec = mc.player.getLookAngle();
+            return GEDetectorEntities.stream()
+                    .filter(Entity::isAlive)
+                    .max(Comparator.comparingDouble(entity -> {
+                        Vector3d entityPos = entity.getBoundingBox().getCenter();
+                        Vector3d vecToPos = entityPos.subtract(cameraPos).normalize();
+                        return vecToPos.dot(lookVec);
+                    }))
+                    .orElse(null);
+        }
+        return null;
+    }
+    
+    private void hudRenderEntityGEDetectorData(MatrixStack matrixStack) {
+        Entity entity = GEDetectorShowHpEntity;
+        PosOnScreen entityPos = GEDetectorShowHpEntityPos;
+        if (entity == null || entityPos == null) return;
+
+        List<ITooltipLine> tooltip = new ArrayList<>();
+        if (entity instanceof LivingEntity) {
+            LivingEntity living = (LivingEntity) entity;
+            int iconWidth = 17;
+            
+            if (living.getMaxHealth() > 0) {
+                float hpRatio = living.getHealth() / living.getMaxHealth();
+                ITextComponent text = new StringTextComponent(String.valueOf((int) (hpRatio * 100) + "%"));
+                IconTooltipLine icon = new IconTooltipLine(IconTooltipLine.Icon.HEALTH);
+                ITooltipLine line = new MultiTooltipLine(icon.withRightSideSpace(iconWidth - icon.getWidth(mc.font)), new TextTooltipLine(text));
+                tooltip.add(line);
+            }
+            
+            INonStandPower.getNonStandPowerOptional(living).resolve().ifPresent(power -> {
+                if (power.hasPower() && power.getMaxEnergy() > 0) {
+                    float energyRatio = power.getEnergy() / power.getMaxEnergy();
+                    ITextComponent text = new StringTextComponent(String.valueOf((int) (energyRatio * 100) + "%"));
+                    IconTooltipLine icon = IconTooltipLine.powerEnergy(power.getType());
+                    ITooltipLine line = new MultiTooltipLine(icon.withRightSideSpace(iconWidth - icon.getWidth(mc.font)), new TextTooltipLine(text));
+                    tooltip.add(line);
+                }
+            });
+            
+            IStandPower.getStandPowerOptional(living).resolve().ifPresent(power -> {
+                if (power.hasPower() && power.usesStamina() && power.getMaxStamina() > 0) {
+                    float staminaRatio = power.getStamina() / power.getMaxStamina();
+                    ITextComponent text = new StringTextComponent(String.valueOf((int) (staminaRatio * 100) + "%"));
+                    IconTooltipLine icon = new IconTooltipLine(IconTooltipLine.Icon.STAND_STAMINA);
+                    ITooltipLine line = new MultiTooltipLine(icon.withRightSideSpace(iconWidth - icon.getWidth(mc.font)), new TextTooltipLine(text));
+                    tooltip.add(line);
+                }
+                if (power.hasPower() && power.usesResolve() && power.getMaxResolve() > 0) {
+                    float resolveRatio = living.hasEffect(ModStatusEffects.RESOLVE.get()) ? 1 : power.getResolve() / power.getMaxResolve();
+                    ITextComponent text = new StringTextComponent(String.valueOf((int) (resolveRatio * 100)) + "%");
+                    IconTooltipLine icon = new IconTooltipLine(IconTooltipLine.Icon.STAND_RESOLVE);
+                    ITooltipLine line = new MultiTooltipLine(icon.withRightSideSpace(iconWidth - icon.getWidth(mc.font)), new TextTooltipLine(text));
+                    tooltip.add(line);
+                }
+            });
+        }
+        else if (entity instanceof SoulEntity) {
+            SoulEntity soul = (SoulEntity) entity;
+            float seconds = soul.tickCount / 20f;
+            float maxTime = soul.lifeSpan / 20f;
+            
+            // TODO add soul time tooltip line
+        }
+        
+        int screenWidth = mc.getWindow().getGuiScaledWidth();
+        int screenHeight = mc.getWindow().getGuiScaledHeight();
+        int x = (int) (screenWidth * entityPos.pos.x);
+        int y = (int) (screenHeight * (1 - entityPos.pos.y));
+        
+        int uiColor = ActionsOverlayGui.getPowerUiColor(PowerClassification.STAND);
+        int[] rgb = ClientUtil.rgbInt(uiColor);
+        int color1 = (0xF0 << 24) + ClientUtil.fromRgbInt(rgb[0] / 5, rgb[1] / 5, rgb[2] / 5);
+        int color2 = (0x50 << 24) + uiColor;
+        int color3 = (color2 & 0xFEFEFE) >> 1 | color2 & 0xFF000000;
+        
+        CustomTooltipRender.drawHoveringText(matrixStack, tooltip, 
+                x, y, screenWidth, screenHeight, -1, 
+                color1, color2, color3, 
+                mc.font, false);
     }
     
     

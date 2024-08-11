@@ -29,14 +29,22 @@ public class CustomTooltipRender {
         drawHoveringText(matrixStack, tooltipLines, 
                 mouseX, mouseY, width, height, -1, 
                 DEFAULT_BACKGROUND_COLOR, DEFAULT_BORDER_COLOR_START, DEFAULT_BORDER_COLOR_END, 
-                font);
+                font, true);
     }
     
-
-    @SuppressWarnings("deprecation")
-    private static void drawHoveringText(MatrixStack mStack, List<? extends ITooltipLine> tooltipLines, int mouseX, int mouseY,
+    @Deprecated
+    public static void drawHoveringText(MatrixStack mStack, List<? extends ITooltipLine> tooltipLines, int mouseX, int mouseY,
                                         int screenWidth, int screenHeight, int maxTextWidth,
                                         int backgroundColor, int borderColorStart, int borderColorEnd, FontRenderer font) {
+        drawHoveringText(mStack, tooltipLines, mouseX, mouseY, 
+                screenWidth, screenHeight, maxTextWidth, 
+                backgroundColor, borderColorStart, borderColorEnd, font, true);
+    }
+    
+    @SuppressWarnings("deprecation")
+    public static void drawHoveringText(MatrixStack mStack, List<? extends ITooltipLine> tooltipLines, int mouseX, int mouseY,
+                                        int screenWidth, int screenHeight, int maxTextWidth,
+                                        int backgroundColor, int borderColorStart, int borderColorEnd, FontRenderer font, boolean firstLineTitle) {
         if (!tooltipLines.isEmpty())
         {
             List<? extends ITextProperties> eventTextOnlyLines = tooltipLines.stream().flatMap(ITooltipLine::getTextOnly).collect(Collectors.toList());
@@ -63,7 +71,7 @@ public class CustomTooltipRender {
 
             boolean needsWrap = false;
 
-            int titleLinesCount = 1;
+            int titleLinesCount = firstLineTitle ? 1 : 0;
             int tooltipX = mouseX + 12;
             if (tooltipX + tooltipTextWidth + 4 > screenWidth)
             {
@@ -114,7 +122,7 @@ public class CustomTooltipRender {
             }
 
             int tooltipY = mouseY - 12;
-            int tooltipHeight = 2; // gap between title lines and next lines
+            int tooltipHeight = titleLinesCount * 2; // gap between title lines and next lines
             
             for (int i = 0; i < tooltipLines.size(); ++i) {
                 tooltipHeight += tooltipLines.get(i).getHeight(font);
