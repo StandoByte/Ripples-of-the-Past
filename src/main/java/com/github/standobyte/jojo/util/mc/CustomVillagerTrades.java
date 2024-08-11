@@ -3,9 +3,9 @@ package com.github.standobyte.jojo.util.mc;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Random;
 import java.util.function.Supplier;
 
@@ -42,20 +42,16 @@ import net.minecraft.entity.merchant.villager.VillagerTrades.ITrade;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.villager.VillagerType;
 import net.minecraft.inventory.MerchantInventory;
-import net.minecraft.item.FilledMapItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.MerchantOffer;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.MapData;
-import net.minecraft.world.storage.MapDecoration;
 import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
@@ -129,7 +125,8 @@ public class CustomVillagerTrades {
             // Probabilities of map trades
             
             public static final MapTrade METEORITE_MAP = new MapTrade(VillagerType.SNOW, "meteorite_map",
-                    new EmeraldForMapTrade(16, ModStructures.METEORITE, MapDecoration.Type.TARGET_POINT, 0x6d6bb9, 1, 15),
+                    new EmeraldForMapTrade(16, ModStructures.METEORITE, 
+                            new ResourceLocation(JojoMod.MOD_ID, "textures/map/meteorite.png"), OptionalInt.of(0x6d6bb9), 1, 15),
                     new TranslationTextComponent("filled_map.jojo:meteorite"), ModSounds.MAP_BOUGHT_METEORITE.get(), PlayerUtilCap.OneTimeNotification.BOUGHT_METEORITE_MAP) {
                 @Override
                 public double getMapChance(@Nullable StandType<?> standType, @Nullable NonStandPowerType<?> powerType, VillagerData villager) {
@@ -152,7 +149,8 @@ public class CustomVillagerTrades {
             };
             
             public static final MapTrade HAMON_MAP = new MapTrade(VillagerType.TAIGA, "hamon_map",
-                    new EmeraldForMapTrade(24, ModStructures.HAMON_TEMPLE, MapDecoration.Type.TARGET_POINT, 0x474747, 1, 23),
+                    new EmeraldForMapTrade(24, ModStructures.HAMON_TEMPLE, 
+                            new ResourceLocation(JojoMod.MOD_ID, "textures/map/hamon_temple.png"), OptionalInt.of(0x474747), 1, 23),
                     new TranslationTextComponent("filled_map.jojo:hamon_temple"), ModSounds.MAP_BOUGHT_HAMON_TEMPLE.get(), PlayerUtilCap.OneTimeNotification.BOUGHT_HAMON_TEMPLE_MAP) {
                 @Override
                 public double getMapChance(@Nullable StandType<?> standType, @Nullable NonStandPowerType<?> powerType, VillagerData villager) {
@@ -173,7 +171,8 @@ public class CustomVillagerTrades {
             };
             
             public static final MapTrade PILLARMAN_MAP = new MapTrade(VillagerType.JUNGLE, "pillarman_map",
-                    new EmeraldForMapTrade(32, ModStructures.PILLARMAN_TEMPLE, MapDecoration.Type.TARGET_POINT, 0x508d50, 1, 30),
+                    new EmeraldForMapTrade(32, ModStructures.PILLARMAN_TEMPLE, 
+                            new ResourceLocation(JojoMod.MOD_ID, "textures/map/pillarman_temple.png"), OptionalInt.of(0x508d50), 1, 30),
                     new TranslationTextComponent("filled_map.jojo:pillarman_temple"), ModSounds.MAP_BOUGHT_PILLAR_MAN_TEMPLE.get(), PlayerUtilCap.OneTimeNotification.BOUGHT_PILLAR_MAN_TEMPLE_MAP) {
                 @Override
                 public double getMapChance(@Nullable StandType<?> standType, @Nullable NonStandPowerType<?> powerType, VillagerData villager) {
@@ -268,17 +267,17 @@ public class CustomVillagerTrades {
         public static class EmeraldForMapTrade implements VillagerTrades.ITrade {
             private final int emeraldCost;
             private final Supplier<? extends Structure<?>> destination;
-            private final MapDecoration.Type destinationIcon;
-            private final int customColor;
+            private final ResourceLocation iconPath;
+            private final OptionalInt customColor;
             private final int maxUses;
             private final int villagerXp;
             private MapTrade destinationType;
 
             public EmeraldForMapTrade(int pEmeraldCost, Supplier<? extends Structure<?>> pDestination, 
-                    MapDecoration.Type pDestinationType, int customColor, int pMaxUses, int pVillagerXp) {
+                    ResourceLocation iconPath, OptionalInt customColor, int pMaxUses, int pVillagerXp) {
                 this.emeraldCost = pEmeraldCost;
                 this.destination = pDestination;
-                this.destinationIcon = pDestinationType;
+                this.iconPath = iconPath;
                 this.customColor = customColor;
                 this.maxUses = pMaxUses;
                 this.villagerXp = pVillagerXp;
@@ -291,17 +290,9 @@ public class CustomVillagerTrades {
                 } else {
                     ServerWorld serverworld = (ServerWorld)pTrader.level;
                     Structure<?> structure = destination.get();
-                    BlockPos blockpos = serverworld.findNearestMapFeature(structure, pTrader.blockPosition(), 100, true);
-                    if (blockpos != null) {
-                        ItemStack itemstack = FilledMapItem.create(serverworld, blockpos.getX(), blockpos.getZ(), (byte)2, true, true);
-                        FilledMapItem.renderBiomePreviewMap(serverworld, itemstack);
-                        MapData.addTargetDecoration(itemstack, blockpos, "+", this.destinationIcon);
-                        if (customColor > 0) {
-                            CompoundNBT compoundnbt1 = itemstack.getOrCreateTagElement("display");
-                            compoundnbt1.putInt("MapColor", customColor);
-                        }
-                        itemstack.setHoverName(new TranslationTextComponent("filled_map." + structure.getFeatureName().toLowerCase(Locale.ROOT)));
-                        itemstack.getTag().putString("JojoStructure", destinationType.name.toLowerCase()); // no fucking clue why the advancement criteria doesn't work with the custom item name
+                    ItemStack itemstack = CustomTargetIconMap.createMap(serverworld, structure, pTrader.blockPosition(), 
+                            customColor, destinationType.name.toLowerCase(), iconPath);
+                    if (itemstack != null) {
                         return new MerchantOffer(new ItemStack(Items.EMERALD, this.emeraldCost), new ItemStack(Items.COMPASS), itemstack, this.maxUses, this.villagerXp, 0.2F);
                     } else {
                         return null;

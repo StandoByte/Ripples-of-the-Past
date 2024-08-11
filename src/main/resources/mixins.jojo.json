@@ -12,6 +12,7 @@
     "ServerChunkProviderMixin",
     "FireBlockMixin",
     "MerchantResultSlotMixin",
+    "MapDataMixin",
     "TheMostUnnecessaryMixin"
   ],
   "client": [
@@ -23,6 +24,8 @@
     "client.LivingEntityClMixin",
     "client.BipedModelMixin",
     "client.PlayerModelAnimationMixin",
-    "client.ItemRendererMixin"
+    "client.ItemRendererMixin",
+    "client.SMapDataPacketMixin",
+    "client.MapItemRendererMixin"
   ]
 }
