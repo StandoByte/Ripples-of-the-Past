@@ -26,12 +26,13 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
-import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.CDBlocksRestoredPacket;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.util.general.LazySupplier;
 import com.github.standobyte.jojo.util.general.MathUtil;
 
 import net.minecraft.block.Block;
@@ -44,6 +45,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -389,5 +391,18 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
     
     private float getStaminaCostPerBlock(IStandPower power) {
         return super.getStaminaCostTicking(power);
+    }
+    
+    private final LazySupplier<ResourceLocation> resolveTex = new LazySupplier<>(() -> makeIconVariant(this, "_improper"));
+    @Override
+    public ResourceLocation getIconTexturePath(@Nullable IStandPower power) {
+        if (power != null) {
+            LivingEntity user = power.getUser();
+            if (user != null && user.hasEffect(ModStatusEffects.RESOLVE.get())) {
+                return resolveTex.get();
+            }
+        }
+        
+        return super.getIconTexturePath(power);
     }
 }

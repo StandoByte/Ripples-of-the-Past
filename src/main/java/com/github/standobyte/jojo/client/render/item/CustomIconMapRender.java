@@ -40,10 +40,10 @@ public class CustomIconMapRender {
         matrixStack.translate(-0.125, 0.125, 0);
         Matrix4f matrix4f1 = matrixStack.last().pose();
         IVertexBuilder ivertexbuilder1 = buffer.getBuffer(icon);
-        ivertexbuilder1.vertex(matrix4f1, -1,  1, (float)index * -0.001F).color(255, 255, 255, 255).uv(0, 0).uv2(packedLight).endVertex();
-        ivertexbuilder1.vertex(matrix4f1,  1,  1, (float)index * -0.001F).color(255, 255, 255, 255).uv(1, 0).uv2(packedLight).endVertex();
-        ivertexbuilder1.vertex(matrix4f1,  1, -1, (float)index * -0.001F).color(255, 255, 255, 255).uv(1, 1).uv2(packedLight).endVertex();
-        ivertexbuilder1.vertex(matrix4f1, -1, -1, (float)index * -0.001F).color(255, 255, 255, 255).uv(0, 1).uv2(packedLight).endVertex();
+        ivertexbuilder1.vertex(matrix4f1, -2,  2, (float)index * -0.001F).color(255, 255, 255, 255).uv(1, 0).uv2(packedLight).endVertex();
+        ivertexbuilder1.vertex(matrix4f1,  2,  2, (float)index * -0.001F).color(255, 255, 255, 255).uv(0, 0).uv2(packedLight).endVertex();
+        ivertexbuilder1.vertex(matrix4f1,  2, -2, (float)index * -0.001F).color(255, 255, 255, 255).uv(0, 1).uv2(packedLight).endVertex();
+        ivertexbuilder1.vertex(matrix4f1, -2, -2, (float)index * -0.001F).color(255, 255, 255, 255).uv(1, 1).uv2(packedLight).endVertex();
         matrixStack.popPose();
     }
 }

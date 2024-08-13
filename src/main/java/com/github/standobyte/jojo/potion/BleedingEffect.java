@@ -19,7 +19,7 @@ public class BleedingEffect extends Effect implements IApplicableEffect {
     public BleedingEffect(EffectType type, int liquidColor) {
         super(type, liquidColor);
         getAttributeModifiers().put(Attributes.MAX_HEALTH, new AttributeModifier(ATTRIBUTE_MODIFIER_ID, 
-                this::getDescriptionId, -0.2, AttributeModifier.Operation.MULTIPLY_TOTAL));
+                this::getDescriptionId, -4, AttributeModifier.Operation.ADDITION));
     }
     
     @Override
