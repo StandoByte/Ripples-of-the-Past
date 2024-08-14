@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -12,6 +13,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.zombie.ZombieData;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
@@ -62,6 +64,13 @@ public class TrPillarmanFlagsPacket {
                         pillarman.setEvolutionStage(msg.stage);
                         pillarman.setInvaded(msg.invaded);
                         pillarman.setMode(msg.mode);
+                        if (entity instanceof PlayerEntity) {
+                            PlayerEntity userPlayer = (PlayerEntity) entity;
+                            ModPlayerAnimations.stoneForm.setAnimEnabled(userPlayer, msg.stoneFormEnabled);
+                            if (msg.stoneFormEnabled && userPlayer == ClientUtil.getClientPlayer()) {
+                                ClientUtil.setThirdPerson();
+                            }
+                        }
                     });
                 });
             }

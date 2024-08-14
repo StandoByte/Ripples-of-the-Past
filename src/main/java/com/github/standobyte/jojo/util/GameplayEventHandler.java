@@ -390,22 +390,24 @@ public class GameplayEventHandler {
         else if (ModInteractionUtil.isSquidInkPasta(event.getItem())) {
             InkPastaItem.onEaten(event.getEntityLiving());
         }
-        PlayerEntity player = (PlayerEntity) event.getEntity();
-        INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
-            power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).ifPresent(pillarman -> {
-            	if(event.getItem().isEdible()) {
-            		power.addEnergy(event.getItem().getItem().getFoodProperties().getNutrition() * 10);
-            	}        
-            });
-        });
-        INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
-            power.getTypeSpecificData(ModPowers.ZOMBIE.get()).ifPresent(zombie -> {
-            	if(event.getItem().isEdible() && event.getItem().getItem().getFoodProperties().isMeat()) {
-            		power.addEnergy(event.getItem().getItem().getFoodProperties().getNutrition() * 10); 
-                	player.heal(event.getItem().getItem().getFoodProperties().getNutrition());
-            	}
-            });
-        });
+        if (event.getEntity() instanceof PlayerEntity) {
+        	PlayerEntity player = (PlayerEntity) event.getEntity();
+	        INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
+	            power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).ifPresent(pillarman -> {
+	            	if(event.getItem().isEdible()) {
+	            		power.addEnergy(event.getItem().getItem().getFoodProperties().getNutrition() * 10);
+	            	}        
+	            });
+	        });
+	        INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
+	            power.getTypeSpecificData(ModPowers.ZOMBIE.get()).ifPresent(zombie -> {
+	            	if(event.getItem().isEdible() && event.getItem().getItem().getFoodProperties().isMeat()) {
+	            		power.addEnergy(event.getItem().getItem().getFoodProperties().getNutrition() * 10); 
+	                	player.heal(event.getItem().getItem().getFoodProperties().getNutrition());
+	            	}
+	            });
+	        });
+        }
     }
     
     @SubscribeEvent

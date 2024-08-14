@@ -4,15 +4,18 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanData;
+import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.zombie.ZombieData;
 import com.github.standobyte.jojo.util.general.LazySupplier;
 
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 

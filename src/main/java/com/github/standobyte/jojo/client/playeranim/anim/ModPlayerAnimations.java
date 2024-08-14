@@ -16,6 +16,10 @@ public class ModPlayerAnimations {
     public static BasicToggleAnim hamonBreath;
     public static WallClimbAnim wallClimbing;
     public static HamonSYOBAnim syoBarrage;
+    public static BasicToggleAnim divineSandstorm;
+    public static BasicToggleAnim unnaturalAgility;
+    public static BasicToggleAnim stoneForm;
+    public static BasicToggleAnim bladeBarrage;
 
     /** 
      * This string must match the full name of the class and the package it's in.<br>
@@ -59,6 +63,22 @@ public class ModPlayerAnimations {
                 "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.KosmXTestAnimLayer",
                 new ResourceLocation(JojoMod.MOD_ID, "test_layer"), 1, 
                 Object::new);
+        
+        divineSandstorm = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXDivineSandstormLayer",
+                new ResourceLocation(JojoMod.MOD_ID, "divine_sandstorm"), 1);
+        
+        unnaturalAgility = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXUnnaturalAgilityLayer",
+                new ResourceLocation(JojoMod.MOD_ID, "unnatural_agility"), 1);
+        
+        stoneForm = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXStoneFormLayer",
+                new ResourceLocation(JojoMod.MOD_ID, "stone_form_1"), 1);
+        
+        bladeBarrage = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXBladeBarrageLayer",
+                new ResourceLocation(JojoMod.MOD_ID, "blade_barrage"), 1);
     }
 
 }

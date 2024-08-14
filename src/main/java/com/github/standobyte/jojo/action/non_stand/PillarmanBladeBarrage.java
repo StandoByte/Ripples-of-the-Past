@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.non_stand;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
@@ -110,5 +111,15 @@ public class PillarmanBladeBarrage extends PillarmanAction {
                 user.swing(ticksHeld % 4 == 0 ? Hand.MAIN_HAND : Hand.OFF_HAND);
             }
         }
+    }
+    
+    @Override
+    public boolean clHeldStartAnim(PlayerEntity user) {
+        return ModPlayerAnimations.bladeBarrage.setAnimEnabled(user, true);
+    }
+    
+    @Override
+    public void clHeldStopAnim(PlayerEntity user) {
+        ModPlayerAnimations.bladeBarrage.setAnimEnabled(user, false);
     }
 }
