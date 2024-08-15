@@ -444,7 +444,6 @@ public class ClientSetup {
         CustomParticlesHelper.saveSprites(mc);
         // yep...
         CustomResources.initCustomResourceManagers(mc);
-        StandControlMouseHelper.overrideVanillaMouseHelper(mc);
     }
 
     private static class SoulCloudParticleFactory extends CloudParticle.Factory {
