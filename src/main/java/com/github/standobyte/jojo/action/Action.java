@@ -310,10 +310,11 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     protected void perform(World world, LivingEntity user, P power, ActionTarget target, @Nullable PacketBuffer extraInput) {
-        perform(world, user, power, target, null);
+        perform(world, user, power, target);
     }
     
-    protected void perform(World world, LivingEntity user, P power, ActionTarget target) {}
+    protected void perform(World world, LivingEntity user, P power, ActionTarget target) {
+    }
     
     public void startedHolding(World world, LivingEntity user, P power, ActionTarget target, boolean requirementsFulfilled) {}
     
