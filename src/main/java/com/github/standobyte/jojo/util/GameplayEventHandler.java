@@ -56,6 +56,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveEffectStartPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SpawnParticlePacket;
+import com.github.standobyte.jojo.potion.BleedingEffect;
 import com.github.standobyte.jojo.potion.HamonSpreadEffect;
 import com.github.standobyte.jojo.potion.IApplicableEffect;
 import com.github.standobyte.jojo.potion.VampireSunBurnEffect;
@@ -922,6 +923,17 @@ public class GameplayEventHandler {
         }
         if (effect instanceof IApplicableEffect && !((IApplicableEffect) effect).isApplicable(entity)) {
             event.setResult(Result.DENY);
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void changePotionAmplifier(PotionAddedEvent event) {
+        EffectInstance effectInstance = event.getPotionEffect();
+        if (effectInstance.getEffect() == ModStatusEffects.BLEEDING.get()) {
+            int amplifier = BleedingEffect.limitAmplifier(event.getEntityLiving(), effectInstance.getAmplifier());
+            if (amplifier != effectInstance.getAmplifier() && amplifier >= 0) {
+                CommonReflection.setEffectAmplifier(effectInstance, amplifier);
+            }
         }
     }
 

@@ -29,6 +29,7 @@ import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.inventory.container.WorkbenchContainer;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.datasync.DataParameter;
+import net.minecraft.potion.EffectInstance;
 import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.Explosion;
@@ -178,6 +179,13 @@ public class CommonReflection {
     
     public static void setAttackStrengthTicker(LivingEntity entity, int attackStrengthTicker) {
         ReflectionUtil.setIntFieldValue(LIVING_ENTITY_ATTACK_STRENGTH_TICKER, entity, attackStrengthTicker);
+    }
+    
+    
+    
+    private static final Field EFFECT_INSTANCE_AMPLIFIER = ObfuscationReflectionHelper.findField(EffectInstance.class, "field_76461_c");
+    public static void setEffectAmplifier(EffectInstance effect, int amplifier) {
+        ReflectionUtil.setIntFieldValue(EFFECT_INSTANCE_AMPLIFIER, effect, amplifier);
     }
     
     

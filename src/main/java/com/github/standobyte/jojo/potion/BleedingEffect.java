@@ -2,8 +2,10 @@ package com.github.standobyte.jojo.potion;
 
 import java.util.UUID;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.LivingEntity;
@@ -14,12 +16,13 @@ import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectType;
 
 public class BleedingEffect extends Effect implements IApplicableEffect {
+    private static final float HP_REDUCTION = 4;
     public static final UUID ATTRIBUTE_MODIFIER_ID = UUID.fromString("1588be77-b81b-4eb0-a745-a8912de51e72");
     
     public BleedingEffect(EffectType type, int liquidColor) {
         super(type, liquidColor);
         getAttributeModifiers().put(Attributes.MAX_HEALTH, new AttributeModifier(ATTRIBUTE_MODIFIER_ID, 
-                this::getDescriptionId, -4, AttributeModifier.Operation.ADDITION));
+                this::getDescriptionId, -HP_REDUCTION, AttributeModifier.Operation.ADDITION));
     }
     
     @Override
@@ -38,9 +41,11 @@ public class BleedingEffect extends Effect implements IApplicableEffect {
         }
     }
     
-    @Override
-    public double getAttributeModifierValue(int pAmplifier, AttributeModifier pModifier) {
-        return super.getAttributeModifierValue(Math.min(pAmplifier, 3), pModifier);
+    public static int limitAmplifier(LivingEntity entity, int amplifier) {
+        JojoMod.LOGGER.debug((entity.getAttributeBaseValue(Attributes.MAX_HEALTH) / HP_REDUCTION) - 1);
+        return Math.min(amplifier, Math.max(
+                (int) (entity.getAttributeBaseValue(Attributes.MAX_HEALTH) / HP_REDUCTION) - 2, 
+                (int) (MCUtil.calcValueWithoutModifiers(entity.getAttribute(Attributes.MAX_HEALTH), ATTRIBUTE_MODIFIER_ID) / HP_REDUCTION) - 2));
     }
     
     @Override

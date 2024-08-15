@@ -639,7 +639,7 @@ public class ClientEventHandler {
                 // !
                 if (i * 2 + 1 >= healthMax) {
                     mc.getTextureManager().bind(ClientUtil.ADDITIONAL_UI);
-                    gui.blit(matrixStack, x, y, 0, 160, 9, 9);
+                    gui.blit(matrixStack, x, y, 64, 0, 9, 9);
                     mc.getTextureManager().bind(AbstractGui.GUI_ICONS_LOCATION);
                 }
             }
@@ -691,7 +691,7 @@ public class ClientEventHandler {
                 // !
                 if (i * 2 + 1 + heart >= healthMax) {
                     mc.getTextureManager().bind(ClientUtil.ADDITIONAL_UI);
-                    gui.blit(matrixStack, x, top, 9, 160, 9, 9);
+                    gui.blit(matrixStack, x, top, 73, 0, 9, 9);
                     mc.getTextureManager().bind(AbstractGui.GUI_ICONS_LOCATION);
                 }
             }
