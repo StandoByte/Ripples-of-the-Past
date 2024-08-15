@@ -288,19 +288,25 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     @Deprecated
     public void onPerform(World world, LivingEntity user, P power, ActionTarget target) {
+        onPerform(world, user, power, target, null);
     }
     
     public void onPerform(World world, LivingEntity user, P power, ActionTarget target, @Nullable PacketBuffer extraInput) {
         if (user instanceof ServerPlayerEntity) {
             ModCriteriaTriggers.ACTION_PERFORM.get().trigger((ServerPlayerEntity) user, this);
         }
-        perform(world, user, power, target);
+        perform(world, user, power, target, extraInput);
         if (swingHand() && withUserPunch() && user instanceof PlayerEntity) {
             ((PlayerEntity) user).resetAttackStrengthTicker();
         }
     }
     
-    protected void perform(World world, LivingEntity user, P power, ActionTarget target) {}
+    protected void perform(World world, LivingEntity user, P power, ActionTarget target, @Nullable PacketBuffer extraInput) {
+        perform(world, user, power, target);
+    }
+    
+    protected void perform(World world, LivingEntity user, P power, ActionTarget target) {
+    }
     
     public void startedHolding(World world, LivingEntity user, P power, ActionTarget target, boolean requirementsFulfilled) {}
     
