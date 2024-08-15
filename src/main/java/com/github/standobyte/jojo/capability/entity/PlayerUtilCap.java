@@ -1,8 +1,6 @@
 package com.github.standobyte.jojo.capability.entity;
 
 import java.util.ArrayList;
-import java.util.EnumMap;
-import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -32,8 +30,6 @@ import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.GE
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.MetEntityTypesPacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
-import com.github.standobyte.jojo.util.mc.CustomVillagerTrades;
-import com.github.standobyte.jojo.util.mc.CustomVillagerTrades.MapTrade;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.PlayerStatListener;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
@@ -54,7 +50,6 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.world.World;
 
 public class PlayerUtilCap {
     private final PlayerEntity player;
@@ -68,7 +63,7 @@ public class PlayerUtilCap {
     private boolean doubleShiftPress = false;
     private boolean shiftSynced = false;
     
-    private Set<OneTimeNotification> notificationsSent = EnumSet.noneOf(OneTimeNotification.class);
+    private Set<OneTimeNotification> notificationsSent = new HashSet<>();
     
     private int knives;
     private int removeKnifeTime;
@@ -92,7 +87,6 @@ public class PlayerUtilCap {
     
     private Map<SoundEvent, Integer> recentlyPlayedVoiceLines = new HashMap<>();
     
-    private final Map<CustomVillagerTrades.MapTrade, Long> lastTradeTime = new EnumMap<>(MapTrade.class);
     private final List<PlayerStatListener<?>> statChangeListeners = new ArrayList<>();
     private final List<TimedAction> sendWhenScreenClosed = new ArrayList<>();
 
@@ -138,8 +132,6 @@ public class PlayerUtilCap {
         this.lastBedType = old.lastBedType;
         this.ticksNoSleep = old.ticksNoSleep;
         this.nextSleepTime = old.nextSleepTime;
-        
-        this.lastTradeTime.putAll(old.lastTradeTime);
     }
     
     public CompoundNBT toNBT() {
@@ -156,7 +148,6 @@ public class PlayerUtilCap {
         
         nbt.put("RotpVersion", JojoModVersion.getCurrentVersion().toNBT());
         
-        nbt.put("TradeCD", tradeCooldownToNbt());
         nbt.putBoolean("CoffinRespawn", coffinPreventDayTimeSkip);
         
         nbt.put("GE_UI", geUIState.toNBT());
@@ -185,11 +176,10 @@ public class PlayerUtilCap {
             });
         }
         
+        coffinPreventDayTimeSkip = nbt.getBoolean("CoffinRespawn");
+        
         MCUtil.nbtGetCompoundOptional(nbt, "GE_UI").ifPresent(geUIState::fromNBT);
         animalAgeCd = nbt.getInt("AnimalAgeCd");
-        
-        MCUtil.getNbtElement(nbt, "TradeCD", CompoundNBT.class).ifPresent(this::tradeCooldownFromNbt);
-        coffinPreventDayTimeSkip = nbt.getBoolean("CoffinRespawn");
     }
     
     public void onTracking(ServerPlayerEntity tracking) {
@@ -212,6 +202,55 @@ public class PlayerUtilCap {
         PacketManager.sendToClient(new VampireSleepInCoffinPacket(coffinPreventDayTimeSkip), player);
         if (!metEntityTypesId.isEmpty()) {
             PacketManager.sendToClient(new MetEntityTypesPacket(metEntityTypesId), player);
+        }
+    }
+    
+    
+    public static class OneTimeNotification {
+        private static final List<OneTimeNotification> VALUES = new ArrayList<>();
+        
+        public static final OneTimeNotification POWER_CONTROLS = new OneTimeNotification("POWER_CONTROLS");
+        public static final OneTimeNotification HAMON_WINDOW = new OneTimeNotification("HAMON_WINDOW");
+        public static final OneTimeNotification HAMON_BREATH_GUIDE = new OneTimeNotification("HAMON_BREATH_GUIDE");
+        public static final OneTimeNotification HIGH_STAND_RANGE = new OneTimeNotification("HIGH_STAND_RANGE");
+        public static final OneTimeNotification BOUGHT_METEORITE_MAP = new OneTimeNotification("BOUGHT_METEORITE_MAP");
+        public static final OneTimeNotification BOUGHT_HAMON_TEMPLE_MAP = new OneTimeNotification("BOUGHT_HAMON_TEMPLE_MAP");
+        public static final OneTimeNotification BOUGHT_PILLAR_MAN_TEMPLE_MAP = new OneTimeNotification("BOUGHT_PILLAR_MAN_TEMPLE_MAP");
+        
+        private final String name;
+        
+        private OneTimeNotification(String name) {
+            this.name = name;
+            VALUES.add(this);
+        }
+        
+        public String name() {
+            return name;
+        }
+        
+        public static List<OneTimeNotification> values() {
+            return VALUES;
+        }
+        
+        @Override
+        public int hashCode() {
+            return name.hashCode();
+        }
+        
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj instanceof OneTimeNotification) {
+                return this.name.equals(((OneTimeNotification) obj).name);
+            }
+            return false;
+        }
+        
+        @Override
+        public String toString() {
+            return name;
         }
     }
     
@@ -328,16 +367,6 @@ public class PlayerUtilCap {
         if (!player.level.isClientSide()) {
             PacketManager.sendToClient(new NotificationSyncPacket(notificationsSent), (ServerPlayerEntity) player);
         }
-    }
-    
-    public static enum OneTimeNotification {
-        POWER_CONTROLS,
-        HAMON_WINDOW,
-        HAMON_BREATH_GUIDE,
-        HIGH_STAND_RANGE,
-        BOUGHT_METEORITE_MAP,
-        BOUGHT_HAMON_TEMPLE_MAP,
-        BOUGHT_PILLAR_MAN_TEMPLE_MAP;
     }
     
     public void notificationsFromNBT(CompoundNBT nbt) {
@@ -560,41 +589,6 @@ public class PlayerUtilCap {
                 voiceLine.setValue(--ticks);
             }
         }
-    }
-    
-    
-    
-    public void setTradeTime(MapTrade type, World world) {
-        lastTradeTime.put(type, world.dayTime());
-    }
-    
-    public boolean canTradeNow(MapTrade type, World world) {
-        if (lastTradeTime.containsKey(type)) {
-            return lastTradeTime.get(type) + type.tradeCooldownTicks < world.dayTime();
-        }
-        else {
-            return true;
-        }
-    }
-    
-    private CompoundNBT tradeCooldownToNbt() {
-        CompoundNBT nbt = new CompoundNBT();
-        lastTradeTime.forEach((cooldown, ticks) -> {
-            if (ticks.intValue() > 0) {
-                nbt.putLong(cooldown.name(), ticks.longValue());
-            }
-        });
-        return nbt;
-    }
-    
-    private void tradeCooldownFromNbt(CompoundNBT nbt) {
-        nbt.getAllKeys().forEach(cdTypeKey -> {
-            try {
-                MapTrade type = Enum.valueOf(MapTrade.class, cdTypeKey);
-                lastTradeTime.put(type, nbt.getLong(cdTypeKey));
-            }
-            catch (IllegalArgumentException nbtError) {}
-        });
     }
     
     

@@ -4,8 +4,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
-import java.util.Optional;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -169,9 +169,9 @@ public abstract class StandAction extends Action<IStandPower> {
     }
     
     @Override
-    public void afterPerform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
-        super.afterPerform(world, user, power, target);
+    public void onPerform(World world, LivingEntity user, IStandPower power, ActionTarget target, @Nullable PacketBuffer extraInput) {
         consumeStamina(world, power);
+        super.onPerform(world, user, power, target, extraInput);
     }
     
     protected void consumeStamina(World world, IStandPower power) {
@@ -192,6 +192,7 @@ public abstract class StandAction extends Action<IStandPower> {
         return autoSummonStand;
     }
     
+    @Deprecated
     public boolean staminaConsumedDifferently(IStandPower power) {
         return false;
     }

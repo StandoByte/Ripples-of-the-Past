@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.network.packets.fromserver;
 
-import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -24,21 +24,21 @@ public class NotificationSyncPacket {
 
         @Override
         public void encode(NotificationSyncPacket msg, PacketBuffer buf) {
-            int encoded = 0;
-            int mask = 1 << OneTimeNotification.values().length;
+            long encoded = 0;
+            long mask = 1 << OneTimeNotification.values().size();
             for (OneTimeNotification flag : OneTimeNotification.values()) {
                 if (msg.notifSent.contains(flag)) {
                     encoded |= mask;
                 }
                 encoded >>= 1;
             }
-            buf.writeVarInt(encoded);
+            buf.writeVarLong(encoded);
         }
 
         @Override
         public NotificationSyncPacket decode(PacketBuffer buf) {
-            int encoded = buf.readVarInt();
-            Set<OneTimeNotification> notifSent = EnumSet.noneOf(OneTimeNotification.class);
+            long encoded = buf.readVarLong();
+            Set<OneTimeNotification> notifSent = new HashSet<>();
             for (OneTimeNotification flag : OneTimeNotification.values()) {
                 if ((encoded & 1) > 0) {
                     notifSent.add(flag);

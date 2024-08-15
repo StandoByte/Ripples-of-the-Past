@@ -3,13 +3,14 @@ package com.github.standobyte.jojo.client;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.screen.DeathScreen;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.KeybindTextComponent;
-import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.GuiOpenEvent;
@@ -55,7 +56,7 @@ public class ControllerSoul {
                     soulEntityWaiting = false;
                 }
                 if (soulEntityWaiting || isCameraEntityPlayerSoul()) {
-                    mc.gui.setOverlayMessage(new TranslationTextComponent("jojo.message.skip_soul_ascension", new KeybindTextComponent("key.jump")), false);
+                    setOverlayMessage(true);
                 }
                 mc.player.deathTime = Math.min(mc.player.deathTime, 18);
             }
@@ -67,7 +68,7 @@ public class ControllerSoul {
                 if (playerSoulEntity != null && !playerSoulEntity.isAlive()) {
                     ClientUtil.setCameraEntityPreventShaderSwitch(mc.player);
                     playerSoulEntity = null;
-                    mc.gui.setOverlayMessage(StringTextComponent.EMPTY, false);
+                    setOverlayMessage(false);
                 }
                 
                 if (standPower == null) {
@@ -123,11 +124,25 @@ public class ControllerSoul {
     public void skipAscension() {
         if (isCameraEntityPlayerSoul()) {
             playerSoulEntity.skipAscension();
-            mc.gui.setOverlayMessage(StringTextComponent.EMPTY, false);
+            setOverlayMessage(false);
         }
         else if (soulEntityWaiting) {
             soulEntityWaiting = false;
-            mc.gui.setOverlayMessage(StringTextComponent.EMPTY, false);
+            setOverlayMessage(false);
+        }
+    }
+    
+    private static final ITextComponent OVERLAY_MESSAGE = new TranslationTextComponent("jojo.message.skip_soul_ascension", new KeybindTextComponent("key.jump"));
+    private void setOverlayMessage(boolean message) {
+        if (message) {
+            mc.gui.setOverlayMessage(OVERLAY_MESSAGE, false);
+        }
+        else {
+            ITextComponent overlayMessage = ClientReflection.getOverlayMessageString(mc.gui);
+            if (OVERLAY_MESSAGE.equals(overlayMessage)) {
+                mc.gui.setOverlayMessage(null, false);
+                ClientReflection.setOverlayMessageTime(mc.gui, 0);
+            }
         }
     }
     

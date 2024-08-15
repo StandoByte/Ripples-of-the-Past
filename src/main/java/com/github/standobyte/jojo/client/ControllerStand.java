@@ -34,6 +34,7 @@ import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.MovementInput;
 import net.minecraft.util.math.MathHelper;
+import net.minecraftforge.client.event.InputEvent;
 import net.minecraftforge.client.event.InputUpdateEvent;
 import net.minecraftforge.client.event.RenderBlockOverlayEvent;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
@@ -114,7 +115,14 @@ public class ControllerStand {
             }
         }
     }
-
+    
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public void onMouseScroll(InputEvent.MouseScrollEvent event) {
+        if (isControllingStand()) {
+            stand.manualMovementSpeed = MathHelper.clamp(stand.manualMovementSpeed + 0.025f * (float) event.getScrollDelta(), 0, 1);
+        }
+    }
+    
     @SubscribeEvent
     public void sendPlayerPositionRotation(PlayerTickEvent event) {
         if (event.side != CLIENT || event.phase != END || !isControllingStand()) {

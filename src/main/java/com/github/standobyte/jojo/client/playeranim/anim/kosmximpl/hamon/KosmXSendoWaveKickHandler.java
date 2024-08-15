@@ -4,6 +4,7 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.client.playeranim.anim.interfaces.BasicToggleAnim;
 import com.github.standobyte.jojo.client.playeranim.kosmx.KosmXPlayerAnimatorInstalled.AnimLayerHandler;
+import com.github.standobyte.jojo.client.playeranim.kosmx.anim.modifier.KosmXHeadRotationModifier;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import dev.kosmx.playerAnim.api.layered.IAnimation;
@@ -24,7 +25,7 @@ public class KosmXSendoWaveKickHandler extends AnimLayerHandler<ModifierLayer<IA
 
     @Override
     protected ModifierLayer<IAnimation> createAnimLayer(AbstractClientPlayerEntity player) {
-        return new ModifierLayer<>(null);
+        return new ModifierLayer<>(null, new KosmXHeadRotationModifier());
     }
     
     

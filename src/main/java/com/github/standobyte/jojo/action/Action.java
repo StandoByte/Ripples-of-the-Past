@@ -16,6 +16,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.config.ActionConfigField;
 import com.github.standobyte.jojo.action.config.ActionConfigSerialized;
+import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.BlitFloat;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
@@ -39,6 +40,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
@@ -292,14 +294,23 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return target;
     }
     
-    public void afterPerform(World world, LivingEntity user, P power, ActionTarget target) {
+    @Deprecated
+    public void onPerform(World world, LivingEntity user, P power, ActionTarget target) {
+        onPerform(world, user, power, target, null);
     }
     
-    public void perform(World world, LivingEntity user, P power, ActionTarget target, @Nullable PacketBuffer extraInput) {
-        perform(world, user, power, target);
+    public void onPerform(World world, LivingEntity user, P power, ActionTarget target, @Nullable PacketBuffer extraInput) {
+        if (user instanceof ServerPlayerEntity) {
+            ModCriteriaTriggers.ACTION_PERFORM.get().trigger((ServerPlayerEntity) user, this);
+        }
+        perform(world, user, power, target, extraInput);
         if (swingHand() && withUserPunch() && user instanceof PlayerEntity) {
             ((PlayerEntity) user).resetAttackStrengthTicker();
         }
+    }
+    
+    protected void perform(World world, LivingEntity user, P power, ActionTarget target, @Nullable PacketBuffer extraInput) {
+        perform(world, user, power, target, null);
     }
     
     protected void perform(World world, LivingEntity user, P power, ActionTarget target) {}

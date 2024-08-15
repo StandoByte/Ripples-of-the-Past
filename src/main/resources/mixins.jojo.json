@@ -18,6 +18,7 @@
     "ForgeSimpleChannelMixin",
     "PlacedBlockTriggerMixin",
     "MerchantResultSlotMixin",
+    "MapDataMixin",
     "TheMostUnnecessaryMixin",
     "itemtracking.equip.MobEntityMixin",
     "itemtracking.equip.ArmorStandEntityMixin",
@@ -39,6 +40,8 @@
     "client.LivingEntityClMixin",
     "client.BipedModelMixin",
     "client.PlayerModelAnimationMixin",
-    "client.ItemRendererMixin"
+    "client.ItemRendererMixin",
+    "client.SMapDataPacketMixin",
+    "client.MapItemRendererMixin"
   ]
 }
