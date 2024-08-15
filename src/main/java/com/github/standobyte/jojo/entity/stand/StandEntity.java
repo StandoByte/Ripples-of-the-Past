@@ -2137,6 +2137,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
 
     private boolean prevTickInput = false;
+    public float manualMovementSpeed = 1;
     public void moveStandManually(float strafe, float forward, boolean jumping, boolean sneaking) {
         if (isManuallyControlled() && canMoveManually()) {
             strafe = manualMovementLocks.strafe(strafe);
@@ -2152,10 +2153,13 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
                     strafe *= 0.5;
                     forward *= 0.5;
                 }
-                setDeltaMovement(getAbsoluteMotion(new Vector3d((double)strafe, y, (double)forward), speed, this.yRot).scale(getUserWalkSpeed()));
-                
                 if (!prevTickInput) {
                     setDeltaMovement(Vector3d.ZERO);
+                }
+                else {
+                    Vector3d motion = getAbsoluteMotion(new Vector3d((double)strafe, y, (double)forward), speed, this.yRot)
+                            .scale(getUserWalkSpeed() * manualMovementSpeed);
+                    setDeltaMovement(motion);
                 }
             }
             else if (prevTickInput) {

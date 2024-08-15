@@ -144,6 +144,7 @@ public class StandUtil {
                         }
                     }
                 }
+                standEntity.manualMovementSpeed = 1;
             }
         });
     }
