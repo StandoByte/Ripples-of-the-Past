@@ -1321,10 +1321,12 @@
   "_advancements.jojo.mr_president.description": "Enter a room created by the ability of the turtle's Stand",
   "_advancements.jojo.mr_president_walls.title": "Even the Sofa and Furniture are Real",
   "_advancements.jojo.mr_president_walls.description": "Decorate the room inside the turtle",
-  "_coco_jumbo.key.no_stand": "This turtle has not awakened its Stand",
+  "_coco_jumbo.key.no_stand": "%s has not awakened its Stand",
   "_coco_jumbo.key.empty": "This key isn't assigned to a turtle",
   "_coco_jumbo.key.wrong": "This key is assigned to another turtle",
   "_coco_jumbo.key.not_empty": "This key is already assigned to a turtle",
+  "_coco_jumbo.carry.offhand": "You need to free your off-hand to carry %s",
+  "_coco_jumbo.hint.release": "Press %s to put %s down",
   
   "jojo.to_be_continued": "Продолжение следует"
 }

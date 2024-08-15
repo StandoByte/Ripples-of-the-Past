@@ -6,6 +6,7 @@ import com.github.standobyte.jojo.entity.mob.CocoJumboTurtleEntity;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
@@ -13,7 +14,12 @@ import net.minecraft.client.renderer.entity.IEntityRenderer;
 import net.minecraft.client.renderer.entity.MobRenderer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.texture.OverlayTexture;
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.math.vector.Vector3f;
 
 public class CocoJumboTurtleRenderer extends MobRenderer<CocoJumboTurtleEntity, CocoJumboTurtleModel<CocoJumboTurtleEntity>> {
     private static final ResourceLocation TURTLE_LOCATION = new ResourceLocation("textures/entity/turtle/big_sea_turtle.png");
@@ -33,8 +39,26 @@ public class CocoJumboTurtleRenderer extends MobRenderer<CocoJumboTurtleEntity, 
             this.shadowRadius *= 0.5F;
         }
         model.hasKey = entity.hasKey();
+        matrixStack.pushPose();
+        
+        LivingEntity carrier = entity.getCarrier();
+        if (carrier != null) {
+            Minecraft mc = Minecraft.getInstance();
+            if (carrier == mc.getCameraEntity() && mc.options.getCameraType().isFirstPerson()) {
+                Vector3d realOffset = CocoJumboTurtleEntity.carryOffset(
+                        MathHelper.lerp(partialTick, carrier.yBodyRotO, carrier.yBodyRot), carrier);
+                Vector3d headRotOffset = CocoJumboTurtleEntity.carryOffset(
+                        MathHelper.lerp(partialTick, carrier.yRotO, carrier.yRot), carrier);
+                Vector3d offset = headRotOffset.subtract(realOffset);
+                matrixStack.translate(offset.x, carrier.getBbHeight() * 0.2, offset.z);
+            }
+            matrixStack.scale(0.5f, 0.5f, 0.5f);
+            matrixStack.mulPose(Vector3f.YP.rotationDegrees(carrier.getMainArm() == HandSide.RIGHT ? -60 : 60));
+            shadowRadius = 0;
+        }
 
         super.render(entity, yRot, partialTick, matrixStack, buffer, light);
+        matrixStack.popPose();
     }
     
     @Override

@@ -18,6 +18,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.entity.mob.CocoJumboTurtleEntity;
 import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -36,6 +37,7 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import net.minecraft.advancements.Advancement;
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.command.CommandSource;
@@ -760,8 +762,22 @@ public class MCUtil {
     
     
     
+    public static boolean hasAdvancement(ServerPlayerEntity player, ResourceLocation advancementPath) {
+        Advancement advancement = player.server.getAdvancements().getAdvancement(advancementPath);
+        if (advancement != null) {
+            return player.getAdvancements().getOrStartProgress(advancement).isDone();
+        }
+        return false;
+    }
+    
+    
+    
     public static boolean isHandFree(LivingEntity entity, Hand hand) {
         if (entity.level.isClientSide() && entity.is(ClientUtil.getClientPlayer()) && ClientUtil.arePlayerHandsBusy()) {
+            return false;
+        }
+        if (hand == Hand.OFF_HAND && entity.getPassengers().stream()
+                    .anyMatch(passenger -> CocoJumboTurtleEntity.isCarriedTurtle(passenger, entity))) {
             return false;
         }
         return itemHandFree(entity.getItemInHand(hand));

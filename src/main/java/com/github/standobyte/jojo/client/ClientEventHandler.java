@@ -63,6 +63,7 @@ import com.github.standobyte.jojo.client.ui.tooltip.IconTooltipLine;
 import com.github.standobyte.jojo.client.ui.tooltip.MultiTooltipLine;
 import com.github.standobyte.jojo.client.ui.tooltip.TextTooltipLine;
 import com.github.standobyte.jojo.entity.SoulEntity;
+import com.github.standobyte.jojo.entity.mob.CocoJumboTurtleEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModStatusEffects;
@@ -87,7 +88,6 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandArrowHandler;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
-import com.github.standobyte.jojo.util.GameplayEventHandler;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
@@ -132,6 +132,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.EnchantedBookItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.IntNBT;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
@@ -808,6 +809,47 @@ public class ClientEventHandler {
             ForgeIngameGui.right_height += 10;
         }
         RenderSystem.disableBlend();
+    }
+    
+    private static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/widgets.png");
+    @SuppressWarnings("deprecation")
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public void renderCarriedCocoJumboSlot(RenderGameOverlayEvent.Pre event) {
+        if (event.getType() == RenderGameOverlayEvent.ElementType.HOTBAR && !mc.player.isSpectator()) {
+            for (Entity passenger : mc.player.getPassengers()) {
+                if (CocoJumboTurtleEntity.isCarriedTurtle(passenger, mc.player)) {
+                    ItemStack turtleItemIcon = new ItemStack(ModItems.METEORIC_SCRAP.get());
+                    turtleItemIcon.getOrCreateTag().put("Icon", IntNBT.valueOf(14));
+                    
+                    MatrixStack matrixStack = event.getMatrixStack();
+                    HandSide offHand = mc.player.getMainArm().getOpposite();
+                    int screenHeight = event.getWindow().getGuiScaledHeight();
+                    int halfWidth = event.getWindow().getGuiScaledWidth() / 2;
+                    IngameGui gui = mc.gui;
+                    int blitOffs = gui.getBlitOffset();
+                    
+                    mc.getTextureManager().bind(WIDGETS_LOCATION);
+                    gui.setBlitOffset(-90);
+                    if (offHand == HandSide.LEFT) {
+                        gui.blit(matrixStack, halfWidth - 91 - 29, screenHeight - 23, 24, 22, 29, 24);
+                    } else {
+                        gui.blit(matrixStack, halfWidth + 91,      screenHeight - 23, 53, 22, 29, 24);
+                    }
+                    
+                    gui.setBlitOffset(blitOffs);
+                    RenderSystem.enableRescaleNormal();
+                    RenderSystem.enableBlend();
+                    RenderSystem.defaultBlendFunc();
+                    
+                    int itemX = offHand == HandSide.LEFT ? halfWidth - 91 - 26 : halfWidth + 91 + 10;
+                    int itemY = screenHeight - 16 - 3;
+                    mc.getItemRenderer().renderAndDecorateItem(mc.player, turtleItemIcon, itemX, itemY);
+//                    mc.getItemRenderer().renderGuiItemDecorations(mc.font, turtleItemIcon, itemX, itemY);
+                    
+                    break;
+                }
+            }
+        }
     }
     
     @SuppressWarnings("deprecation")

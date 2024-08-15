@@ -26,9 +26,10 @@ import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.common.util.INBTSerializable;
 import net.minecraftforge.common.util.LazyOptional;
 
-public class MrPresidentWorldData {
+public class MrPresidentWorldData implements INBTSerializable<CompoundNBT> {
     private final BiMap<UUID, ChunkSectionPos> allocatedRooms = HashBiMap.create();
     private final Map<UUID, MrPresidentTurtlePos> trackedTurtlePos = new HashMap<>();
 
@@ -42,7 +43,8 @@ public class MrPresidentWorldData {
         return LazyOptional.empty();
     }
 
-    public INBT toNBT() {
+    @Override
+    public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
         
         ListNBT roomsMapNbt = new ListNBT();
@@ -63,7 +65,8 @@ public class MrPresidentWorldData {
         return nbt;
     }
 
-    public void fromNBT(INBT inbt) {
+    @Override
+    public void deserializeNBT(CompoundNBT inbt) {
         CompoundNBT nbt = (CompoundNBT) inbt;
         
         ListNBT roomsNbt = nbt.getList("Rooms", Constants.NBT.TAG_COMPOUND);

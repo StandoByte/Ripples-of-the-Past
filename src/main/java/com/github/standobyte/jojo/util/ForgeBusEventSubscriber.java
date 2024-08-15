@@ -76,8 +76,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.INBT;
-import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
@@ -88,8 +86,6 @@ import net.minecraft.world.gen.feature.structure.Structure;
 import net.minecraft.world.gen.settings.DimensionStructuresSettings;
 import net.minecraft.world.gen.settings.StructureSeparationSettings;
 import net.minecraft.world.server.ServerWorld;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.Capability.IStorage;
 import net.minecraftforge.common.capabilities.CapabilityManager;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
@@ -164,8 +160,9 @@ public class ForgeBusEventSubscriber {
         Entity entity = event.getObject();
         event.addCapability(ENTITY_UTIL_CAP, new EntityUtilCapProvider(entity));
         if (entity instanceof LivingEntity) {
+            LivingEntity living = (LivingEntity) entity;
             if (entity instanceof PlayerEntity) {
-                PlayerEntity player = (PlayerEntity) event.getObject();
+                PlayerEntity player = (PlayerEntity) living;
                 event.addCapability(STAND_CAP, new StandCapProvider(player));
                 event.addCapability(NON_STAND_CAP, new NonStandCapProvider(player));
                 event.addCapability(PLAYER_UTIL_CAP, new PlayerUtilCapProvider(player));
@@ -173,7 +170,7 @@ public class ForgeBusEventSubscriber {
                     event.addCapability(CLIENT_PLAYER_UTIL_CAP, new ClientPlayerUtilCapProvider(player));
                 }
             }
-            event.addCapability(LIVING_UTIL_CAP, new LivingUtilCapProvider((LivingEntity) entity));
+            event.addCapability(LIVING_UTIL_CAP, new LivingUtilCapProvider(living));
         }
         if (entity instanceof ProjectileEntity && (HamonUtil.ProjectileChargeProperties.canBeChargedWithHamon(entity))) {
             event.addCapability(PROJECTILE_HAMON_CAP, new ProjectileHamonChargeCapProvider(entity));
@@ -200,10 +197,7 @@ public class ForgeBusEventSubscriber {
         
         CapabilityManager.INSTANCE.register(WorldUtilCap.class, new WorldUtilCapStorage(), () -> new WorldUtilCap(null));
         CapabilityManager.INSTANCE.register(SaveFileUtilCap.class, new SaveFileUtilCapStorage(), () -> new SaveFileUtilCap(null));
-        CapabilityManager.INSTANCE.register(MrPresidentWorldData.class, new IStorage<MrPresidentWorldData>() {
-            @Override public INBT writeNBT(Capability<MrPresidentWorldData> capability, MrPresidentWorldData instance, Direction side) { return instance.toNBT(); }
-            @Override public void readNBT(Capability<MrPresidentWorldData> capability, MrPresidentWorldData instance, Direction side, INBT nbt) { instance.fromNBT(nbt); }
-        }, () -> new MrPresidentWorldData(null));
+        CapabilityManager.INSTANCE.register(MrPresidentWorldData.class, JojoModUtil.makeSerializableStorage(), () -> new MrPresidentWorldData(null));
 
         CapabilityManager.INSTANCE.register(ChunkCap.class, new ChunkCapStorage(), () -> new ChunkCap(null));
 

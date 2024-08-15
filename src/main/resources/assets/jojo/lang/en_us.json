@@ -1352,10 +1352,12 @@
   "advancements.jojo.mr_president.description": "Enter a room created by the ability of the turtle's Stand",
   "advancements.jojo.mr_president_walls.title": "It's Like Some Kind of Spaceship!",
   "advancements.jojo.mr_president_walls.description": "Decorate the room inside the turtle",
-  "coco_jumbo.key.no_stand": "This turtle has not awakened its Stand",
+  "coco_jumbo.key.no_stand": "%s has not awakened its Stand",
   "coco_jumbo.key.empty": "This key isn't assigned to a turtle",
   "coco_jumbo.key.wrong": "This key is assigned to another turtle",
   "coco_jumbo.key.not_empty": "This key is already assigned to a turtle",
+  "coco_jumbo.carry.offhand": "You need to free your off-hand to carry %s",
+  "coco_jumbo.hint.release": "Press %s to put %s down",
   
   "jojo.textutil.shortened": "%s...",
   
