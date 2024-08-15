@@ -21,6 +21,7 @@ import net.minecraft.client.audio.SoundEngine;
 import net.minecraft.client.audio.SoundEventAccessor;
 import net.minecraft.client.audio.SoundSource;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.client.gui.IngameGui;
 import net.minecraft.client.gui.screen.ControlsScreen;
 import net.minecraft.client.gui.screen.IngameMenuScreen;
 import net.minecraft.client.gui.screen.MainMenuScreen;
@@ -101,6 +102,17 @@ public class ClientReflection {
     private static final Field MAIN_MENU_SCREEN_SPLASH = ObfuscationReflectionHelper.findField(MainMenuScreen.class, "field_73975_c");
     public static void setSplash(MainMenuScreen screen, String splash) {
         ReflectionUtil.setFieldValue(MAIN_MENU_SCREEN_SPLASH, screen, splash);
+    }
+    
+    
+    private static final Field INGAME_GUI_OVERLAY_MESSAGE_STRING = ObfuscationReflectionHelper.findField(IngameGui.class, "field_73838_g");
+    public static ITextComponent getOverlayMessageString(IngameGui ingameGui) {
+        return ReflectionUtil.getFieldValue(INGAME_GUI_OVERLAY_MESSAGE_STRING, ingameGui);
+    }
+    
+    private static final Field INGAME_GUI_OVERLAY_MESSAGE_TIME = ObfuscationReflectionHelper.findField(IngameGui.class, "field_73845_h");
+    public static void setOverlayMessageTime(IngameGui ingameGui, int time) {
+        ReflectionUtil.setIntFieldValue(INGAME_GUI_OVERLAY_MESSAGE_TIME, ingameGui, time);
     }
     
     
