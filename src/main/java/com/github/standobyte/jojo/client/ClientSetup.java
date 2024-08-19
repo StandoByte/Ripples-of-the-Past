@@ -287,6 +287,7 @@ public class ClientSetup {
             ClientTimeStopHandler.init(mc);
             ShaderEffectApplier.init(mc);
             FirstPersonHamonAura.init();
+            TemporaryDimensionEffects.init();
             
             Map<String, PlayerRenderer> skinMap = mc.getEntityRenderDispatcher().getSkinMap();
             addLayers(skinMap.get("default"), false);
