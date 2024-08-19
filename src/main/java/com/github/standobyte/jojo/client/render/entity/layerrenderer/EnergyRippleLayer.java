@@ -14,8 +14,8 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
-import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.living.LivingWallClimbing;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.particle.custom.IFirstPersonParticle;
@@ -74,8 +74,7 @@ public class EnergyRippleLayer<T extends LivingEntity, M extends BipedModel<T>> 
     
     @Nullable
     public static ParticleType<?> addHandHamonSparks(LivingEntity entity, HandSide hand) {
-        if (entity.getCapability(LivingUtilCapProvider.CAPABILITY).map(
-                entityData -> entityData.isHamonWallClimbing()).orElse(false)) {
+        if (LivingWallClimbing.getHandler(entity).map(LivingWallClimbing::isHamon).orElse(false)) {
             return ModParticles.HAMON_SPARK.get();
         }
         return null;

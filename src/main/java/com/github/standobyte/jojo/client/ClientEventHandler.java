@@ -23,6 +23,7 @@ import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
+import com.github.standobyte.jojo.capability.entity.living.LivingWallClimbing;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.particle.custom.FirstPersonHamonAura;
@@ -276,7 +277,7 @@ public class ClientEventHandler {
     public void onRenderPlayer(RenderPlayerEvent.Pre event) {
         if (mc.player != event.getPlayer()) {
             event.getPlayer().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                cap.climbLimitPlayerHeadRot();
+                cap.limitPlayerHeadRot();
             });
         }
     }
@@ -292,7 +293,7 @@ public class ClientEventHandler {
                 timeStopHandler.setConstantPartialTick(clientTimer);
                 
                 mc.player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                    cap.climbLimitPlayerHeadRot();
+                    cap.limitPlayerHeadRot();
                 });
                 mc.player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                     cap.applyLockedRotation();
@@ -793,7 +794,7 @@ public class ClientEventHandler {
                                 ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get(), 
                                 ModHamonActions.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE_BARRAGE.get(),
                                 ModHamonActions.HAMON_WALL_CLIMBING.get())
-                                || player.getCapability(LivingUtilCapProvider.CAPABILITY).map(cap -> cap.isWallClimbing()).orElse(false))
+                                || LivingWallClimbing.getHandler(player).map(cap -> cap.isWallClimbing()).orElse(false))
                                 && MCUtil.isHandFree(player, Hand.MAIN_HAND) && MCUtil.isHandFree(player, Hand.OFF_HAND)) {
                             renderHand(Hand.OFF_HAND, event.getMatrixStack(), event.getBuffers(), event.getLight(), 
                                     event.getPartialTicks(), event.getInterpolatedPitch(), player);
