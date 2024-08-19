@@ -9,11 +9,11 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 
 public class StandRelativeOffset {
-    public final double left;
-    public final double forward;
-    public final boolean doYOffset;
+    private final double left;
+    private final double forward;
+    private final boolean doYOffset;
     public final double y;
-    public final boolean useXRot;
+    private final boolean useXRot;
 //    private final float yRotOffset;
     
     public static StandRelativeOffset noYOffset(double left, double forward) {
@@ -75,6 +75,13 @@ public class StandRelativeOffset {
         return forward;
     }
     
+    
+    public StandRelativeOffset applyYOffset(double y) {
+        if (this.doYOffset) {
+            return this;
+        }
+        return new StandRelativeOffset(this.left, y, this.forward, true, this.useXRot);
+    }
     
     public StandRelativeOffset makeSnapshot(double yDefault, float xRot) {
         if (doYOffset && !useXRot) {
