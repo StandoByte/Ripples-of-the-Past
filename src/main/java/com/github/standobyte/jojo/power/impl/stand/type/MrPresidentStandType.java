@@ -1,7 +1,11 @@
 package com.github.standobyte.jojo.power.impl.stand.type;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.UUID;
+import java.util.function.Predicate;
+
+import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.entity.mob.CocoJumboTurtleEntity;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -30,41 +34,55 @@ public class MrPresidentStandType<T extends StandStats> extends NoSummonStandTyp
     public void tickUser(LivingEntity user, IStandPower power) {
         if (!user.level.isClientSide()) {
             LazyOptional<MrPresidentWorldData> mrPresidentTracker = MrPresidentWorldData.get(((ServerWorld) user.level).getServer());
-            if (user.isAlive()) {
-                mrPresidentTracker.ifPresent(tracker -> tracker.rememberTurtlePosition(user));
-                
-                if (power.canUsePower()) {
-                    boolean canTeleport = true;
-                    if (user instanceof CocoJumboTurtleEntity) {
-                        CocoJumboTurtleEntity tutel = (CocoJumboTurtleEntity) user;
-                        canTeleport = tutel.hasKey() || !tutel.hasAssignedKey();
-                    }
-                    if (canTeleport) {
-                        List<Entity> entities = user.level.getEntities(user, user.getBoundingBox()
-                                .move(0, 0.5, 0).inflate(0.25), EntityPredicates.NO_SPECTATORS);
-                        if (!entities.isEmpty()) {
-                            MinecraftServer server = ((ServerWorld) user.level).getServer();
-                            ServerWorld mrPresidentWorld = server.getLevel(ModDimensions.MR_PRESIDENT);
-                            if (mrPresidentWorld != null) {
-                                for (Entity entity : entities) {
-                                    if (!entity.isOnGround() && entity.getDeltaMovement().y < 0 && entity.getY() > user.getY(1)
-                                            && entity.tickCount >= 20 && !MCUtil.hasIndirectPassenger(entity, user)) {
-                                        UUID turtleId = user.getUUID();
-                                        ITeleporter teleporter = new MrPresidentInsideTeleporter(turtleId);
-                                        /* can't call changeDimension right away, 
-                                         * because changeDimension immediately removes the entity, 
-                                         * which can't be done while the entities are ticking */
-                                        server.tell(new TickDelayedTask(server.getTickCount(), () -> {
-                                            entity.changeDimension(mrPresidentWorld, teleporter);
-                                        }));
-                                    }
-                                }
-                            }
-                        }
-                    }
+            mrPresidentTracker.ifPresent(tracker -> tracker.rememberTurtlePosition(user));
+            if (power.canUsePower()) {
+                boolean canTeleport = true;
+                if (user instanceof CocoJumboTurtleEntity) {
+                    CocoJumboTurtleEntity tutel = (CocoJumboTurtleEntity) user;
+                    canTeleport = tutel.hasKey() || !tutel.hasAssignedKey();
+                }
+                if (canTeleport) {
+                    List<Entity> entities = findTargets(user, entity -> 
+                            !entity.isOnGround() && entity.getDeltaMovement().y < 0 && entity.getY() > user.getY(1)
+                            && entity.tickCount >= 20 && !MCUtil.hasIndirectPassenger(entity, user));
+                    teleportEntities(user, power, entities);
                 }
             }
         }
+    }
+    
+    public static List<Entity> findTargets(Entity turtle, @Nullable Predicate<Entity> filter) {
+        Predicate<Entity> predicate = EntityPredicates.NO_SPECTATORS
+                .and(entity -> entity.getBbWidth() < 4 && entity.getBbHeight() < 4);
+        if (filter != null) {
+            predicate = predicate.and(filter);
+        }
+        return turtle.level.getEntities(turtle, turtle.getBoundingBox()
+                .move(0, 0.5, 0).inflate(0.25), predicate);
+    }
+    
+    public static void teleportEntities(Entity turtle, IStandPower power, Collection<Entity> entities) {
+        if (entities.isEmpty()) return;
+            
+        MinecraftServer server = ((ServerWorld) turtle.level).getServer();
+        ServerWorld mrPresidentWorld = server.getLevel(ModDimensions.MR_PRESIDENT);
+        if (mrPresidentWorld != null) {
+            for (Entity entity : entities) {
+                UUID turtleId = turtle.getUUID();
+                teleportToRoom(entity, turtleId, server);
+            }
+        }
+    }
+    
+    private static void teleportToRoom(Entity entity, UUID roomId, MinecraftServer server) {
+        ServerWorld mrPresidentWorld = server.getLevel(ModDimensions.MR_PRESIDENT);
+        ITeleporter teleporter = new MrPresidentInsideTeleporter(roomId);
+        /* can't call changeDimension right away, 
+         * because changeDimension immediately removes the entity, 
+         * which can't be done while the entities are ticking */
+        server.tell(new TickDelayedTask(server.getTickCount(), () -> {
+            entity.changeDimension(mrPresidentWorld, teleporter);
+        }));
     }
 
 }

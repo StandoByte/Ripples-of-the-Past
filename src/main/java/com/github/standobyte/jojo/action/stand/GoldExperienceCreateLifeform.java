@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.action.stand;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.UUID;
@@ -21,6 +23,7 @@ import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MolotovEntity;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
+import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.item.MolotovItem;
 import com.github.standobyte.jojo.itemtracking.SidedItemTrackerMap;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
@@ -30,11 +33,13 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
+import com.github.standobyte.jojo.power.impl.stand.type.MrPresidentStandType;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.ObjectWrapper;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.entitysubtype.EntitySubtype;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
+import com.github.standobyte.jojo.world.dimension.mr_president.MrPresidentWorldData;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.block.BlockState;
@@ -75,6 +80,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 import net.minecraft.world.biome.Biome;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.util.LazyOptional;
 
 public class GoldExperienceCreateLifeform extends StandAction {
 
@@ -264,6 +270,8 @@ public class GoldExperienceCreateLifeform extends StandAction {
                 ObjectWrapper<ITextComponent> customName = new ObjectWrapper<>(null);
                 boolean tfTargetFound = false;
                 
+                ObjectWrapper<Entity> nonUserItemHolder = new ObjectWrapper<>(null);
+                
                 // marked item...
                 if (itemTrackerId.isPresent()) {
                     TrackerItemStack itemTracker = SidedItemTrackerMap.getSidedTrackers(world).getTracker(itemTrackerId.get());
@@ -281,9 +289,13 @@ public class GoldExperienceCreateLifeform extends StandAction {
                                     mobFromInventory(tf, itemTracker.getItem(), world, 
                                             itemEntity instanceof LivingEntity ? (LivingEntity) itemEntity : user, 
                                             itemEntity.blockPosition(), customName);
+                                    if (itemEntity != user) {
+                                        nonUserItemHolder.set(itemEntity);
+                                    }
                                     
                                     Vector3d pos = itemEntity.position();
                                     tf.moveTo(pos.x, pos.y, pos.z, itemEntity.yRot, 0);
+                                    
                                     break;
                                 case ENTITY_IS_ITEM:
                                     mobFromEntity(tf, itemEntity);
@@ -380,6 +392,25 @@ public class GoldExperienceCreateLifeform extends StandAction {
                         lifeFormCreated.setCustomName(customName.get());
                     }
                     world.addFreshEntity(tf);
+                    
+                    if (lifeFormCreated instanceof LivingEntity) {
+                        IStandPower.getStandPowerOptional((LivingEntity) lifeFormCreated).ifPresent(mobStand -> {
+                            if (mobStand.getType() == ModStandsInit.MR_PRESIDENT.get()) {
+                                LazyOptional<MrPresidentWorldData> mrPresidentTracker = MrPresidentWorldData.get(((ServerWorld) user.level).getServer());
+                                mrPresidentTracker.ifPresent(tracker -> {
+                                    tracker.rememberTurtlePosition(lifeFormCreated);
+                                    List<Entity> entitiesToTeleport = MrPresidentStandType.findTargets(
+                                            lifeFormCreated, toTeleport -> 
+                                            toTeleport != tf && toTeleport != user && toTeleport != power.getStandManifestation());
+                                    if (nonUserItemHolder.get() != null) {
+                                        entitiesToTeleport = new ArrayList<>(entitiesToTeleport);
+                                        entitiesToTeleport.add(nonUserItemHolder.get());
+                                    }
+                                    MrPresidentStandType.teleportEntities(lifeFormCreated, mobStand, entitiesToTeleport);
+                                });
+                            }
+                        });
+                    }
                     
                     if (!power.isUserCreative()) {
                         int cooldown = Math.max(ticks / 2, 1);
