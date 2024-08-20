@@ -7,35 +7,40 @@ import com.github.standobyte.jojo.capability.entity.LifeformsUIState;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
+import com.github.standobyte.jojo.util.mc.entitysubtype.EntitySubtype;
+import com.github.standobyte.jojo.util.mc.entitysubtype.SubtypeResourceLocation;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
+import net.minecraftforge.registries.ForgeRegistries;
 
 public class ClGEUiDataPacket {
     private final Type type;
-    private final Optional<EntityType<?>> entityType;
+    private final Optional<SubtypeResourceLocation> resLoc;
     
-    public static ClGEUiDataPacket chosenEntityType(Optional<EntityType<?>> entityType) {
-        return new ClGEUiDataPacket(Type.CHOSEN_ENTITY_TYPE, entityType);
+    public static ClGEUiDataPacket chosenEntityType(Optional<EntitySubtype<?>> entityType) {
+        return new ClGEUiDataPacket(Type.CHOSEN_ENTITY_TYPE, entityType.map(EntitySubtype::getId));
     }
     
     public static ClGEUiDataPacket favoriteAdded(EntityType<?> entityType) {
-        return new ClGEUiDataPacket(Type.FAVORITE_ADDED, Optional.of(entityType));
+        return new ClGEUiDataPacket(Type.FAVORITE_ADDED, Optional.of(entityType)
+                .map(EntityType::getRegistryName).map(SubtypeResourceLocation::new));
     }
 
     public static ClGEUiDataPacket favoriteRemoved(EntityType<?> entityType) {
-        return new ClGEUiDataPacket(Type.FAVORITE_REMOVED, Optional.of(entityType));
+        return new ClGEUiDataPacket(Type.FAVORITE_REMOVED, Optional.of(entityType)
+                .map(EntityType::getRegistryName).map(SubtypeResourceLocation::new));
     }
 
     public static ClGEUiDataPacket clearUnseen() {
         return new ClGEUiDataPacket(Type.CLEAR_UNSEEN, Optional.empty());
     }
     
-    private ClGEUiDataPacket(Type type, Optional<EntityType<?>> entityType) {
+    private ClGEUiDataPacket(Type type, Optional<SubtypeResourceLocation> resLoc) {
         this.type = type;
-        this.entityType = entityType;
+        this.resLoc = resLoc;
     }
     
     
@@ -45,14 +50,14 @@ public class ClGEUiDataPacket {
         @Override
         public void encode(ClGEUiDataPacket msg, PacketBuffer buf) {
             buf.writeEnum(msg.type);
-            NetworkUtil.writeOptional(buf, msg.entityType, entityType -> buf.writeRegistryId(entityType));
+            NetworkUtil.writeOptional(buf, msg.resLoc, id -> buf.writeUtf(id.toString()));
         }
 
         @Override
         public ClGEUiDataPacket decode(PacketBuffer buf) {
             Type packetType = buf.readEnum(Type.class);
-            Optional<EntityType<?>> entityType = NetworkUtil.readOptional(buf, () -> buf.readRegistryIdSafe(EntityType.class));
-            return new ClGEUiDataPacket(packetType, entityType);
+            Optional<SubtypeResourceLocation> id = NetworkUtil.readOptional(buf, () -> new SubtypeResourceLocation(buf.readUtf()));
+            return new ClGEUiDataPacket(packetType, id);
         }
 
         @Override
@@ -62,13 +67,22 @@ public class ClGEUiDataPacket {
                 LifeformsUIState state = cap.getGELifeformsUIState();
                 switch (msg.type) {
                 case CHOSEN_ENTITY_TYPE:
-                    state.setGEChosenLifeformType(msg.entityType.orElse(null), false);
+                    EntitySubtype<?> chosenType = msg.resLoc.map(EntitySubtype::getSubtype).orElse(null);
+                    state.setGEChosenLifeformType(chosenType, false);
                     break;
                 case FAVORITE_ADDED:
-                    state.GELifeformAddFav(msg.entityType.get());
+                    msg.resLoc.ifPresent(id -> {
+                        if (ForgeRegistries.ENTITIES.containsKey(id)) {
+                            state.GELifeformAddFav(ForgeRegistries.ENTITIES.getValue(id));
+                        }
+                    });
                     break;
                 case FAVORITE_REMOVED:
-                    state.GELifeformRemoveFav(msg.entityType.get());
+                    msg.resLoc.ifPresent(id -> {
+                        if (ForgeRegistries.ENTITIES.containsKey(id)) {
+                            state.GELifeformRemoveFav(ForgeRegistries.ENTITIES.getValue(id));
+                        }
+                    });
                     break;
                 case CLEAR_UNSEEN:
                     state.clearGENewMobs();

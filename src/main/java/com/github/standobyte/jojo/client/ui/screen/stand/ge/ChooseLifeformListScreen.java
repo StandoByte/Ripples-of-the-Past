@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.client.ui.screen.stand.ge;
 
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -9,6 +10,8 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.stand.GoldExperienceChooseLifeform;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
+import com.github.standobyte.jojo.util.mc.entitysubtype.EntitySubtype;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.settings.KeyBinding;
@@ -16,10 +19,9 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraftforge.registries.ForgeRegistries;
 
 public class ChooseLifeformListScreen extends ChooseLifeformScreen {
-    private LifeformsList<EntityType<?>> mobList;
+    private LifeformsList<LifeformEntityTypeEntry> mobList;
     
     public ChooseLifeformListScreen(KeyBinding keyHeld) {
         super(keyHeld);
@@ -56,19 +58,21 @@ public class ChooseLifeformListScreen extends ChooseLifeformScreen {
     @Override
     public void refreshEntityTypes() {
         PlayerUtilCap metLifeforms = minecraft.player.getCapability(PlayerUtilCapProvider.CAPABILITY).resolve().get();
-        List<EntityType<?>> entityTypes = ForgeRegistries.ENTITIES.getValues()
+        List<LifeformEntityTypeEntry> entries = EntitySubtype.values()
+                .filter(subtype -> metLifeforms.metEntityType(subtype)
+                        && GoldExperienceChooseLifeform.isValidLifeform(subtype, minecraft.level))
+                .collect(Collectors.groupingBy(subtype -> subtype.vanillaType, LinkedHashMap::new, Collectors.toList()))
+                .entrySet()
                 .stream()
-                .filter(type -> 
-                metLifeforms.metEntityType(type)
-                && GoldExperienceChooseLifeform.isValidLifeform(type, minecraft.level))
+                .map(entry -> new LifeformEntityTypeEntry(entry.getKey(), entry.getValue()))
                 .collect(Collectors.toList());
-        mobList.setAllLegalValues(entityTypes);
-        mobList.update(entityTypes);
+        mobList.setAllLegalValues(entries);
+        mobList.update(entries);
     }
 
     @Override
     protected void searchBarFilter(@Nullable Predicate<EntityType<?>> filter) {
-        mobList.setSearchBarFilter(filter);
+        mobList.setSearchBarFilter(GeneralUtil.mapPredicate(filter, type -> type.entityType));
     }
     
     @Override

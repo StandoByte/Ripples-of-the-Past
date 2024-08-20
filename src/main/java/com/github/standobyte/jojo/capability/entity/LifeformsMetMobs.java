@@ -5,31 +5,22 @@ import java.util.Set;
 
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.MetEntityTypesPacket;
-import com.github.standobyte.jojo.util.mc.SubtypeResourceLocation;
+import com.github.standobyte.jojo.util.mc.entitysubtype.SubtypeResourceLocation;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
-import net.minecraft.util.ResourceLocation;
 
 public class LifeformsMetMobs {
     private Set<SubtypeResourceLocation> metEntityTypesId = new HashSet<>();
     
     
-    public boolean add(ResourceLocation entityTypeId) {
-        return metEntityTypesId.add(new SubtypeResourceLocation(entityTypeId, null));
+    public boolean add(SubtypeResourceLocation entityTypeId) {
+        return metEntityTypesId.add(entityTypeId);
     }
     
-    public boolean add(ResourceLocation entityTypeId, String variant) {
-        return metEntityTypesId.add(new SubtypeResourceLocation(entityTypeId, variant));
-    }
-    
-    public boolean contains(ResourceLocation entityTypeId) {
+    public boolean contains(SubtypeResourceLocation entityTypeId) {
         return metEntityTypesId.contains(entityTypeId);
-    }
-    
-    public boolean contains(ResourceLocation entityTypeId, String variant) {
-        return metEntityTypesId.contains(new SubtypeResourceLocation(entityTypeId, variant));
     }
     
     public boolean isEmpty() {
@@ -57,8 +48,4 @@ public class LifeformsMetMobs {
         PacketManager.sendToClient(new MetEntityTypesPacket(metEntityTypesId), player);
     }
     
-    
-//    public static <T extends Entity> void makeSubtype(EntityType<T> entityType, String subtypeId, Predicate<T> subtype) {
-//        
-//    }
 }

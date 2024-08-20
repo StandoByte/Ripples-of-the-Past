@@ -1,15 +1,14 @@
-package com.github.standobyte.jojo.util.mc;
+package com.github.standobyte.jojo.util.mc.entitysubtype;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 import com.github.standobyte.jojo.JojoMod;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.monster.SlimeEntity;
 import net.minecraft.world.World;
-import net.minecraftforge.registries.ForgeRegistries;
 
 /* 
  * A map to hold entity instances which aren't added into a world, 
@@ -22,29 +21,27 @@ public class EntityTypeToInstance {
     
     public static void init(World world) {
         if (instance == null) {
-            Iterable<EntityType<?>> entityTypes = ForgeRegistries.ENTITIES.getValues();
+            Stream<EntitySubtype<?>> entityTypes = EntitySubtype.values();
             instance = new EntityTypeToInstance(entityTypes, world);
         }
     }
     
-    private final Map<EntityType<?>, Entity> entityMap;
-    private EntityTypeToInstance(Iterable<EntityType<?>> entityTypes, World world) {
-        entityMap = new HashMap<>();
-        for (EntityType<?> type : entityTypes) {
-            entityMap.put(type, createInstance(type, world));
-        }
+    private final Map<SubtypeResourceLocation, Entity> entityInstances = new HashMap<>();
+    
+    private EntityTypeToInstance(Stream<EntitySubtype<?>> entityTypes, World world) {
+        entityTypes.forEach(subtype -> entityInstances.put(subtype.getId(), createInstance(subtype, world)));
     }
     
     @SuppressWarnings("unchecked")
-    public static <T extends Entity> T getEntityInstance(EntityType<T> type, World world) {
+    public static <T extends Entity> T getEntityInstance(EntitySubtype<T> subType, World world) {
         if (instance == null) {
-            JojoMod.getLogger().error("An operation with {} entity type needed an Entity instance, but the map for them hasn't been created yet!", type.getRegistryName());
+            JojoMod.getLogger().error("An operation with {} entity type needed an Entity instance, but the map for them hasn't been created yet!", subType.vanillaType.getRegistryName());
             return null;
         }
-        return (T) instance.entityMap.computeIfAbsent(type, t -> createInstance(t, world));
+        return (T) instance.entityInstances.computeIfAbsent(subType.getId(), __ -> createInstance(subType, world));
     }
     
-    private static <T extends Entity> T createInstance(EntityType<T> type, World world) {
+    private static <T extends Entity> T createInstance(EntitySubtype<T> type, World world) {
         T entity = type.create(world);
         if (entity instanceof SlimeEntity) {
             entity.refreshDimensions();

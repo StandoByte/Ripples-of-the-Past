@@ -33,13 +33,13 @@ import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.ObjectWrapper;
 import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mc.entitysubtype.EntitySubtype;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SpawnReason;
@@ -174,7 +174,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
         PlayerEntity player = ClientUtil.getClientPlayer();
         NetworkUtil.writeOptionally(buf, 
                 getChosenEntityType(player), 
-                type -> buf.writeRegistryId(type));
+                EntitySubtype::toBuf);
         
         Optional<UUID> trackedItemUUID = GoldExperienceMarkItem
                 .getTargetedMarkedItem(IStandPower.getPlayerStandPower(player), player)
@@ -183,7 +183,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
     }
     
     @Nullable
-    public static EntityType<?> getChosenEntityType(PlayerEntity player) {
+    public static EntitySubtype<?> getChosenEntityType(PlayerEntity player) {
 //        ItemStack heldItem = player.getItemInHand(Hand.OFF_HAND);
 //        if (!heldItem.isEmpty()) {
 //            Item item = heldItem.getItem();
@@ -211,7 +211,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                 .map(playerData -> playerData.getGELifeformsUIState().getGEChosenLifeformType()).orElse(null);
     }
     
-    public static Entity createEntity(EntityType<?> type, World world, LivingEntity standUser) {
+    public static Entity createEntity(EntitySubtype<?> type, World world, LivingEntity standUser) {
         Entity lifeFormCreated = type.create(world);
         CompoundNBT nbt = new CompoundNBT();
         nbt.putString("DeathLootTable", "empty");
@@ -248,8 +248,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
     @Override
     public void perform(World world, LivingEntity user, IStandPower power, ActionTarget target, @Nullable PacketBuffer extraInput) {
         if (!world.isClientSide() && extraInput != null) {
-            EntityType<?> type = (EntityType<?>) NetworkUtil.readOptional(extraInput, 
-                    () -> extraInput.readRegistryIdSafe(EntityType.class)).orElse(null);
+            EntitySubtype<?> type = NetworkUtil.readOptional(extraInput, EntitySubtype::fromBuf).orElse(null);
             Optional<UUID> itemTrackerId = NetworkUtil.readOptional(extraInput, extraInput::readUUID);
             if (type != null
                     && GeneralUtil.orElseFalse(user.getCapability(PlayerUtilCapProvider.CAPABILITY), 
@@ -524,7 +523,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
     
     @Override
     public IFormattableTextComponent getTranslatedName(IStandPower power, String key) {
-        EntityType<?> chosenEntityType = getChosenEntityType(ClientUtil.getClientPlayer());
+        EntitySubtype<?> chosenEntityType = getChosenEntityType(ClientUtil.getClientPlayer());
         if (chosenEntityType != null) {
             return new TranslationTextComponent(key + ".param", chosenEntityType.getDescription());
         }
@@ -535,7 +534,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
     
     @Override
     public void renderActionIcon(MatrixStack matrixStack, IStandPower power, float x, float y) {
-        EntityType<?> selectedMob = GoldExperienceCreateLifeform.getChosenEntityType(ClientUtil.getClientPlayer());
+        EntitySubtype<?> selectedMob = GoldExperienceCreateLifeform.getChosenEntityType(ClientUtil.getClientPlayer());
         if (selectedMob != null) {
             EntityTypeIcon.renderIcon(selectedMob, matrixStack, x, y);
         }

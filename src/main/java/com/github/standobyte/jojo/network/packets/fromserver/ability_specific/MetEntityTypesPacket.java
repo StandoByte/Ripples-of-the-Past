@@ -7,7 +7,7 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
-import com.github.standobyte.jojo.util.mc.SubtypeResourceLocation;
+import com.github.standobyte.jojo.util.mc.entitysubtype.SubtypeResourceLocation;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
@@ -31,7 +31,7 @@ public class MetEntityTypesPacket {
 
         @Override
         public MetEntityTypesPacket decode(PacketBuffer buf) {
-            return new MetEntityTypesPacket(NetworkUtil.readCollection(buf, () -> new SubtypeResourceLocation(buf.readUtf(32767))));
+            return new MetEntityTypesPacket(NetworkUtil.readCollection(buf, () -> new SubtypeResourceLocation(buf.readUtf())));
         }
 
         @Override

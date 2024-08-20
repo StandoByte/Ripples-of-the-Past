@@ -20,6 +20,7 @@ import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mc.entitysubtype.EntitySubtype;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.entity.Entity;
@@ -102,22 +103,21 @@ public class GoldExperienceToothLifeform extends StandEntityActionModifier {
     public void clWriteExtraData(PacketBuffer buf) {
         NetworkUtil.writeOptionally(buf, 
                 GoldExperienceCreateLifeform.getChosenEntityType(ClientUtil.getClientPlayer()), 
-                type -> buf.writeRegistryId(type));
+                EntitySubtype::toBuf);
     }
     
     @Override
     public void perform(World world, LivingEntity user, IStandPower power, ActionTarget target, @Nullable PacketBuffer extraInput) {
         super.perform(world, user, power, target, extraInput);
         if (!world.isClientSide() && extraInput != null && power.isActive()) {
-            EntityType<?> type = (EntityType<?>) NetworkUtil.readOptional(extraInput, 
-                    () -> extraInput.readRegistryIdSafe(EntityType.class)).orElse(null);
+            EntitySubtype<?> type = NetworkUtil.readOptional(extraInput, EntitySubtype::fromBuf).orElse(null);
             if (type != null
                     && GeneralUtil.orElseFalse(user.getCapability(PlayerUtilCapProvider.CAPABILITY), 
                             cap -> cap.metEntityType(type))
                     && GoldExperienceChooseLifeform.isValidLifeform(type, world)) {
                 
                 StandEntity stand = (StandEntity) power.getStandManifestation();
-                stand.getCurrentTask().ifPresent(task -> task.getAdditionalData().push(EntityType.class, type));
+                stand.getCurrentTask().ifPresent(task -> task.getAdditionalData().push(EntitySubtype.class, type));
             }
         }
     }
@@ -131,7 +131,7 @@ public class GoldExperienceToothLifeform extends StandEntityActionModifier {
                 Entity objEntity = world.getEntity(toothEntityId);
                 if (objEntity instanceof ObjectEntity) {
                     ObjectEntity toothEntity = (ObjectEntity) objEntity;
-                    EntityType<?> targetType = task.getAdditionalData().popOrNull(EntityType.class);
+                    EntitySubtype<?> targetType = task.getAdditionalData().popOrNull(EntitySubtype.class);
                     if (targetType != null) {
                         LivingEntity user = userPower.getUser();
                         
@@ -195,7 +195,7 @@ public class GoldExperienceToothLifeform extends StandEntityActionModifier {
         if (power.isActive()) {
             StandEntity stand = (StandEntity) power.getStandManifestation();
             if (stand.getCurrentTask().map(task -> task.getTarget().getType() == TargetType.ENTITY).orElse(false)) {
-                EntityType<?> chosenEntityType = GoldExperienceCreateLifeform.getChosenEntityType(ClientUtil.getClientPlayer());
+                EntitySubtype<?> chosenEntityType = GoldExperienceCreateLifeform.getChosenEntityType(ClientUtil.getClientPlayer());
                 if (chosenEntityType != null) {
                     return new TranslationTextComponent(key + ".param", chosenEntityType.getDescription());
                 }
@@ -207,7 +207,7 @@ public class GoldExperienceToothLifeform extends StandEntityActionModifier {
     
     @Override
     public void renderActionIcon(MatrixStack matrixStack, IStandPower power, float x, float y) {
-        EntityType<?> selectedMob = GoldExperienceCreateLifeform.getChosenEntityType(ClientUtil.getClientPlayer());
+        EntitySubtype<?> selectedMob = GoldExperienceCreateLifeform.getChosenEntityType(ClientUtil.getClientPlayer());
         if (selectedMob != null) {
             EntityTypeIcon.renderIcon(selectedMob, matrixStack, x, y);
         }

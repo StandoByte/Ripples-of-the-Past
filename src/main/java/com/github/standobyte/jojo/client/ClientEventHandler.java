@@ -28,6 +28,7 @@ import com.github.standobyte.jojo.action.stand.effect.GEItemMarkEffect;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
@@ -64,6 +65,7 @@ import com.github.standobyte.jojo.client.ui.tooltip.MultiTooltipLine;
 import com.github.standobyte.jojo.client.ui.tooltip.TextTooltipLine;
 import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.mob.CocoJumboTurtleEntity;
+import com.github.standobyte.jojo.entity.mob.IMobStandUser;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModStatusEffects;
@@ -90,6 +92,7 @@ import com.github.standobyte.jojo.power.impl.stand.StandArrowHandler;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
+import com.github.standobyte.jojo.util.mc.entitysubtype.EntitySubtype;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.google.common.base.MoreObjects;
@@ -456,27 +459,32 @@ public class ClientEventHandler {
             
             // learning new lifeforms for Gold Experience
             mc.player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                EntityType<?> type = entity.getType();
-                if (cap.addMetEntityType(type)) {
-                    PacketManager.sendToServer(new ClMetEntityTypePacket(entity.getId()));
-                    
-                    if (GoldExperienceChooseLifeform.isValidLifeform(type, mc.level)) {
-                        IStandPower.getStandPowerOptional(mc.player).ifPresent(power -> {
-                            if (ModStandsInit.GOLD_EXPERIENCE_CHOOSE_LIFEFORM.get().isUnlocked(power)) {
-                                mc.getSoundManager().play(new SimpleSound(SoundEvents.UI_BUTTON_CLICK, 
-                                        SoundCategory.MASTER, 0.5F, 2.0F, 
-                                        entity.getX(), entity.getY(0.5), entity.getZ()));
-                                MetEntityTypeToast.addOrUpdate(mc.getToasts(), type);
-                            }
-                        });
-                    }
-                    
-                    // TODO subtypes for a turtle with and without a stand
-                    if (type == ModEntityTypes.COCO_JUMBO_TURTLE.get()) {
-                        mc.player.displayClientMessage(new TranslationTextComponent("coco_jumbo.stand_arrow_hint").withStyle(TextFormatting.ITALIC), false);
-                    }
-                }
+                EntitySubtype.getMatchingSubtypes(entity)
+                .forEach(subType -> metNewMobSubtype(cap, subType, entity, mc.player));
             });
+        }
+    }
+    
+    private static void metNewMobSubtype(PlayerUtilCap metMobsData, EntitySubtype<?> subtype, Entity entity, PlayerEntity player) {
+        if (metMobsData.addMetEntityType(subtype)) {
+            PacketManager.sendToServer(new ClMetEntityTypePacket(entity.getId()));
+
+            if (GoldExperienceChooseLifeform.isValidLifeform(subtype, entity.level)) {
+                IStandPower.getStandPowerOptional(player).ifPresent(power -> {
+                    if (ModStandsInit.GOLD_EXPERIENCE_CHOOSE_LIFEFORM.get().isUnlocked(power)) {
+                        Minecraft mc = Minecraft.getInstance();
+                        mc.getSoundManager().play(new SimpleSound(SoundEvents.UI_BUTTON_CLICK, 
+                                SoundCategory.MASTER, 0.5F, 2.0F, 
+                                entity.getX(), entity.getY(0.5), entity.getZ()));
+                        MetEntityTypeToast.addOrUpdate(mc.getToasts(), entity.getType());
+                    }
+                });
+            }
+
+            if (entity.getType() == ModEntityTypes.COCO_JUMBO_TURTLE.get()
+                    && !((IMobStandUser) entity).getStandPower().hasPower()) {
+                player.displayClientMessage(new TranslationTextComponent("coco_jumbo.stand_arrow_hint").withStyle(TextFormatting.ITALIC), false);
+            }
         }
     }
     

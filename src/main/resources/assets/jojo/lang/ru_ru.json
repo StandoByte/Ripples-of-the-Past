@@ -1266,6 +1266,7 @@
   "jojo.ge_lifeform.search_field": "Поиск",
   "jojo.ge_lifeform.unlock_all": "Разблокировать все",
   "ge_new_lifeform.toast.title": "Открыта новая форма жизни!",
+  "ge_new_lifeform.toast.title.subtype": "Открыт новый подтип",
   "jojo.ge_item_marked": "Наполнено жизнью",
   "jojo.message.action_condition.choose_lifeform": "Сначала вы должны выбрать форму жизни",
   "jojo.message.action_condition.ge_lifeform_material": "Вам нужен неживой блок или предмет во второстепенной руке",

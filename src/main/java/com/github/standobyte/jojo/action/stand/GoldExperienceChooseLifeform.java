@@ -2,8 +2,13 @@ package com.github.standobyte.jojo.action.stand;
 
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ui.screen.stand.ge.ChooseLifeformScreen;
+import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.modcompat.ModInteractionUtil.ResLocSet;
-import com.github.standobyte.jojo.util.mc.EntityTypeToInstance;
+import com.github.standobyte.jojo.potion.StandVirusEffect;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.util.mc.entitysubtype.EntitySubtype;
+import com.github.standobyte.jojo.util.mc.entitysubtype.EntityTypeToInstance;
 
 import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.CreatureEntity;
@@ -26,7 +31,6 @@ import net.minecraft.entity.passive.AmbientEntity;
 import net.minecraft.entity.passive.GolemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
-import net.minecraftforge.registries.ForgeRegistries;
 
 public class GoldExperienceChooseLifeform extends StandAction {
     
@@ -40,11 +44,20 @@ public class GoldExperienceChooseLifeform extends StandAction {
         return true;
     }
     
+
+    public static void registerExtraEntitySubtypes() {
+        EntitySubtype.registerSubtype(
+                ModEntityTypes.COCO_JUMBO_TURTLE.get(), 
+                "stand", 
+                entity -> StandVirusEffect.getRandomStandGiver(entity).ifPresent(standGiver -> standGiver.giveStand(entity)), 
+                entity -> entity.getStandPower().getType() == ModStandsInit.MR_PRESIDENT.get());
+    }
     
-    public static boolean isValidLifeform(EntityType<?> entityType, World world) {
-        Entity entity = EntityTypeToInstance.getEntityInstance(entityType, world);
+    public static boolean isValidLifeform(EntitySubtype<?> entitySubtype, World world) {
+        Entity entity = EntityTypeToInstance.getEntityInstance(entitySubtype, world);
         if (entity instanceof MobEntity) {
             MobEntity mob = (MobEntity) entity;
+            EntityType<?> entityType = entitySubtype.vanillaType;
             
             CreatureAttribute mobType = mob.getMobType();
             if (
@@ -52,6 +65,10 @@ public class GoldExperienceChooseLifeform extends StandAction {
                     mobType == CreatureAttribute.ILLAGER ||
                     entityType == EntityType.TRADER_LLAMA ||
                     !entityType.canSummon()) {
+                return false;
+            }
+            
+            if (entityType == ModEntityTypes.COCO_JUMBO_TURTLE.get() && !IStandPower.getStandPowerOptional(mob).map(IStandPower::hasPower).orElse(false)) {
                 return false;
             }
             
@@ -125,8 +142,8 @@ public class GoldExperienceChooseLifeform extends StandAction {
     
     public static void unlockAllEntityTypes(PlayerEntity player) {
         player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-            ForgeRegistries.ENTITIES.getValues()
-            .stream().filter(type -> isValidLifeform(type, player.level))
+            EntitySubtype.values()
+            .filter(type -> isValidLifeform(type, player.level))
             .forEach(entityType -> {
                 cap.addMetEntityType(entityType);
             });

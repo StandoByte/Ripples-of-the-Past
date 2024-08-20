@@ -6,7 +6,8 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ui.BlitFloat;
-import com.github.standobyte.jojo.util.mc.EntityTypeToInstance;
+import com.github.standobyte.jojo.util.mc.entitysubtype.EntitySubtype;
+import com.github.standobyte.jojo.util.mc.entitysubtype.EntityTypeToInstance;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -20,14 +21,23 @@ import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 
 public class EntityTypeIcon {
-    private static final Map<EntityType<?>, ResourceLocation> ICONS_CACHE = new HashMap<>();
+    private static final Map<EntitySubtype<?>, ResourceLocation> ICONS_CACHE = new HashMap<>();
     public static final ResourceLocation UNKNOWN = new ResourceLocation("textures/entity_icon/unknown.png");
 
+
     public static void renderIcon(EntityType<?> entityType, MatrixStack matrixStack, float x, float y) {
-        renderIcon(entityType, matrixStack, x, y, true);
+        renderIcon(EntitySubtype.base(entityType), matrixStack, x, y);
     }
 
     public static void renderIcon(EntityType<?> entityType, MatrixStack matrixStack, float x, float y, boolean missingIconLetters) {
+        renderIcon(EntitySubtype.base(entityType), matrixStack, x, y, missingIconLetters);
+    }
+    
+    public static void renderIcon(EntitySubtype<?> entityType, MatrixStack matrixStack, float x, float y) {
+        renderIcon(entityType, matrixStack, x, y, true);
+    }
+
+    public static void renderIcon(EntitySubtype<?> entityType, MatrixStack matrixStack, float x, float y, boolean missingIconLetters) {
         ResourceLocation icon = getIcon(entityType);
         if (icon != UNKNOWN) {
             Minecraft.getInstance().getTextureManager().bind(icon);
@@ -53,13 +63,13 @@ public class EntityTypeIcon {
         }
     }
 
-    public static ResourceLocation getIcon(EntityType<?> entityType) {
+    public static ResourceLocation getIcon(EntitySubtype<?> entityType) {
         return ICONS_CACHE.computeIfAbsent(entityType, EntityTypeIcon::createIconPath);
     }
 
-    private static ResourceLocation createIconPath(EntityType<?> entityType) {
+    private static ResourceLocation createIconPath(EntitySubtype<?> entitySubtype) {
         Minecraft mc = Minecraft.getInstance();
-        ResourceLocation entityTex = getEntityTexture(entityType);
+        ResourceLocation entityTex = getEntityTexture(entitySubtype);
         if (entityTex == null) return UNKNOWN;
         
         String path = entityTex.getPath();
@@ -71,6 +81,17 @@ public class EntityTypeIcon {
                 path = path.replace("/entity/", "/entity_icon/");
             }
             entityTex = new ResourceLocation(entityTex.getNamespace(), path);
+            
+            String subtypeId = entitySubtype.getId().getSubtypeId();
+            if (subtypeId != null) {
+                ResourceLocation subtypeTex = new ResourceLocation(
+                        entityTex.getNamespace(), 
+                        path.substring(0, path.length() - 4) + "." + subtypeId + path.substring(path.length() - 4));
+                if (mc.getResourceManager().hasResource(subtypeTex)) {
+                    return subtypeTex;
+                }
+            }
+            
             if (mc.getResourceManager().hasResource(entityTex)) {
                 return entityTex;
             }
@@ -80,9 +101,9 @@ public class EntityTypeIcon {
     }
     
     @Nullable
-    private static <T extends Entity> ResourceLocation getEntityTexture(EntityType<T> entityType) {
+    private static <T extends Entity> ResourceLocation getEntityTexture(EntitySubtype<T> entityType) {
         Minecraft mc = Minecraft.getInstance();
-        EntityRenderer<? super T> renderer = (EntityRenderer<? super T>) mc.getEntityRenderDispatcher().renderers.get(entityType);
+        EntityRenderer<? super T> renderer = (EntityRenderer<? super T>) mc.getEntityRenderDispatcher().renderers.get(entityType.vanillaType);
         T entity = EntityTypeToInstance.getEntityInstance(entityType, mc.level);
         try {
             return renderer.getTextureLocation(entity);

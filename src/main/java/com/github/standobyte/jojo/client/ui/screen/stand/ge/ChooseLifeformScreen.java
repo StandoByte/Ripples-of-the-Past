@@ -30,7 +30,8 @@ import com.github.standobyte.jojo.client.ui.tooltip.TextTooltipLine;
 import com.github.standobyte.jojo.modcompat.ModInteractionUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClAllGELifeformsButtonPacket;
-import com.github.standobyte.jojo.util.mc.EntityTypeToInstance;
+import com.github.standobyte.jojo.util.mc.entitysubtype.EntitySubtype;
+import com.github.standobyte.jojo.util.mc.entitysubtype.EntityTypeToInstance;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;
@@ -326,19 +327,19 @@ public abstract class ChooseLifeformScreen extends WasdAllowingScreen {
     }
     
     private static final DecimalFormat SIZE_FORMAT = new DecimalFormat("0.0");
-    protected void renderHoveredTooltip(MatrixStack matrixStack, EntityType<?> entityType, int mouseX, int mouseY) {
+    protected void renderHoveredTooltip(MatrixStack matrixStack, EntitySubtype<?> entityType, int mouseX, int mouseY) {
         List<ITooltipLine> entityTypeInfo = makeHoveredTooltip(entityType);
         entityTypeInfo.stream().map(line -> line.getWidth(font)).max(Comparator.naturalOrder()).ifPresent(tooltipWidth -> {
             CustomTooltipRender.renderWrappedToolTip(matrixStack, entityTypeInfo, mouseX, mouseY, font);
         });
     }
     
-    protected List<ITooltipLine> makeHoveredTooltip(EntityType<?> entityType) {
+    protected List<ITooltipLine> makeHoveredTooltip(EntitySubtype<?> entityType) {
         List<ITooltipLine> entityTypeInfo = new ArrayList<>();
         
         entityTypeInfo.add(new TextTooltipLine(entityType.getDescription()));
         
-        entityTypeInfo.add(new TextTooltipLine(new StringTextComponent(ModInteractionUtil.getModName(entityType.getRegistryName()))
+        entityTypeInfo.add(new TextTooltipLine(new StringTextComponent(ModInteractionUtil.getModName(entityType.getId()))
                 .withStyle(TextFormatting.BLUE, TextFormatting.ITALIC)));
         
         Entity entity = EntityTypeToInstance.getEntityInstance(entityType, minecraft.level);

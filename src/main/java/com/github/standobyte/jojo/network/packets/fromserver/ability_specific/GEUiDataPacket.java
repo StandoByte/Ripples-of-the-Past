@@ -9,8 +9,8 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
+import com.github.standobyte.jojo.util.mc.entitysubtype.EntitySubtype;
 
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.ResourceLocation;
@@ -19,10 +19,10 @@ import net.minecraftforge.fml.network.NetworkEvent.Context;
 public class GEUiDataPacket {
     private final Collection<ResourceLocation> favorites;
     private final Collection<ResourceLocation> newMobs;
-    private final Optional<EntityType<?>> selected;
+    private final Optional<EntitySubtype<?>> selected;
     
     public GEUiDataPacket(Collection<ResourceLocation> favorites, Collection<ResourceLocation> newMobs, 
-            Optional<EntityType<?>> selected) {
+            Optional<EntitySubtype<?>> selected) {
         this.favorites = favorites;
         this.newMobs = newMobs;
         this.selected = selected;
@@ -36,7 +36,7 @@ public class GEUiDataPacket {
         public void encode(GEUiDataPacket msg, PacketBuffer buf) {
             NetworkUtil.writeCollection(buf, msg.favorites, id -> buf.writeResourceLocation(id), false);
             NetworkUtil.writeCollection(buf, msg.newMobs, id -> buf.writeResourceLocation(id), false);
-            NetworkUtil.writeOptional(buf, msg.selected, type -> buf.writeRegistryId(type));
+            NetworkUtil.writeOptional(buf, msg.selected, EntitySubtype::toBuf);
         }
 
         @Override
@@ -44,7 +44,7 @@ public class GEUiDataPacket {
             return new GEUiDataPacket(
                     NetworkUtil.readCollection(buf, () -> buf.readResourceLocation()),
                     NetworkUtil.readCollection(buf, () -> buf.readResourceLocation()),
-                    NetworkUtil.readOptional(buf, () -> buf.readRegistryIdSafe(EntityType.class)));
+                    NetworkUtil.readOptional(buf, EntitySubtype::fromBuf));
         }
 
         @Override

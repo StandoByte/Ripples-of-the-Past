@@ -8,7 +8,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -221,6 +223,7 @@ public class NetworkUtil {
     }
     
     
+    @Deprecated
     public static <T> void writeOptionally(PacketBuffer buf, @Nullable T obj, Consumer<T> write) {
         buf.writeBoolean(obj != null);
         if (obj != null) {
@@ -228,13 +231,31 @@ public class NetworkUtil {
         }
     }
     
+    public static <T> void writeOptionally(PacketBuffer buf, @Nullable T obj, BiConsumer<T, PacketBuffer> write) {
+        buf.writeBoolean(obj != null);
+        if (obj != null) {
+            write.accept(obj, buf);
+        }
+    }
+
+    @Deprecated
     public static <T> void writeOptional(PacketBuffer buf, @Nonnull Optional<T> objOptional, Consumer<T> write) {
         buf.writeBoolean(objOptional.isPresent());
         objOptional.ifPresent(obj -> write.accept(obj));
     }
     
+    public static <T> void writeOptional(PacketBuffer buf, @Nonnull Optional<T> objOptional, BiConsumer<T, PacketBuffer> write) {
+        buf.writeBoolean(objOptional.isPresent());
+        objOptional.ifPresent(obj -> write.accept(obj, buf));
+    }
+
+    @Deprecated
     public static <T> Optional<T> readOptional(PacketBuffer buf, Supplier<T> read) {
-        return buf.readBoolean() ? Optional.of(read.get()) : Optional.empty();
+        return buf.readBoolean() ? Optional.ofNullable(read.get()) : Optional.empty();
+    }
+    
+    public static <T> Optional<T> readOptional(PacketBuffer buf, Function<PacketBuffer, T> read) {
+        return buf.readBoolean() ? Optional.ofNullable(read.apply(buf)) : Optional.empty();
     }
     
     public static void writeOptionalInt(PacketBuffer buf, OptionalInt optional, boolean varInt) {

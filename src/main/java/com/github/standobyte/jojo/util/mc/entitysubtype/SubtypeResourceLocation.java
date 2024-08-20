@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.util.mc;
+package com.github.standobyte.jojo.util.mc.entitysubtype;
 
 import java.util.Locale;
 
@@ -9,11 +9,13 @@ import org.apache.commons.lang3.StringUtils;
 import net.minecraft.util.ResourceLocation;
 
 public class SubtypeResourceLocation extends ResourceLocation {
+    public final ResourceLocation withoutSubtype;
     @Nullable private final String variant;
 
     protected SubtypeResourceLocation(String[] elements) {
         super(elements);
         this.variant = StringUtils.isEmpty(elements[2]) ? null : elements[2].toLowerCase(Locale.ROOT);
+        this.withoutSubtype = new ResourceLocation(elements[0], elements[1]);
     }
 
     public SubtypeResourceLocation(String str) {
@@ -24,12 +26,12 @@ public class SubtypeResourceLocation extends ResourceLocation {
         this(new String[] { id.getNamespace(), id.getPath(), variant } );
     }
 
-    public SubtypeResourceLocation(String namespace, String path, String variant) {
-        this(new String[] { namespace, path, variant } );
+    public SubtypeResourceLocation(ResourceLocation id) {
+        this(id, null);
     }
 
-    public SubtypeResourceLocation(String namespace, String path) {
-        this(new String[] { namespace, path, null } );
+    public SubtypeResourceLocation(String namespace, String path, @Nullable String variant) {
+        this(new String[] { namespace, path, variant } );
     }
 
     protected static String[] decompose(String str) {
@@ -48,7 +50,7 @@ public class SubtypeResourceLocation extends ResourceLocation {
     }
 
     @Nullable
-    public String getVariant() {
+    public String getSubtypeId() {
         return this.variant;
     }
 
@@ -82,6 +84,4 @@ public class SubtypeResourceLocation extends ResourceLocation {
         return super.toString() + '#' + this.variant;
     }
     
-    
-
 }

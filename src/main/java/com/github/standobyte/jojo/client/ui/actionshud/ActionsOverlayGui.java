@@ -23,9 +23,6 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.action.stand.GoldExperienceCreateLifeform;
-import com.github.standobyte.jojo.action.stand.GoldExperienceRevertLifeform;
-import com.github.standobyte.jojo.action.stand.effect.GECreatedLifeformEffect;
 import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ControllerStand;
@@ -42,11 +39,8 @@ import com.github.standobyte.jojo.client.ui.actionshud.hotbar.HotbarRenderer;
 import com.github.standobyte.jojo.client.ui.screen.WasdAllowingScreen;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonStatsTabGui;
-import com.github.standobyte.jojo.client.ui.screen.stand.ge.EntityTypeIcon;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
-import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
-import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClClickActionPacket;
 import com.github.standobyte.jojo.power.IPower;
@@ -58,7 +52,6 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData.Exerc
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
-import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
@@ -80,8 +73,6 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.settings.AttackIndicatorStatus;
 import net.minecraft.client.settings.KeyBinding;
-import net.minecraft.entity.EntityType;
-import net.minecraft.item.ItemStack;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
@@ -1188,42 +1179,42 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    @Deprecated
-    public static <P extends IPower<P, ?>> void renderActionIcon(MatrixStack matrixStack, Action<P> action, P power, 
-            float x, float y, float brightness, float alpha) {
-        boolean changeColor = brightness < 1 || alpha < 1;
-        if (changeColor) RenderSystem.color4f(brightness, brightness, brightness, alpha);
-
-        Minecraft mc = Minecraft.getInstance();
-        boolean specialRender = false;
-        
-        if (action == ModStandsInit.GOLD_EXPERIENCE_CREATE_LIFEFORM.get()
-                || action == ModStandsInit.GOLD_EXPERIENCE_TOOTH_LIFEFORM.get()) {
-            EntityType<?> selectedMob = GoldExperienceCreateLifeform.getChosenEntityType(mc.player);
-            if (selectedMob != null) {
-                EntityTypeIcon.renderIcon(selectedMob, matrixStack, x, y);
-                specialRender = true;
-            }
-        }
-        else if (action == ModStandsInit.GOLD_EXPERIENCE_REVERT_LIFEFORM.get()) {
-            ItemStack sourceItem = StandEffectsTracker.getTargetLookedAt((IStandPower) power, 
-                    ModStandEffects.GE_CREATED_LIFEFORM.get(), GoldExperienceRevertLifeform.MARKER_DISTANCE, mc.player)
-                    .map(effect -> ((GECreatedLifeformEffect) effect).getItemView())
-                    .orElse(ItemStack.EMPTY);
-            if (!sourceItem.isEmpty()) {
-                mc.getItemRenderer().renderAndDecorateFakeItem(sourceItem, (int) x, (int) y);
-                specialRender = true;
-            }
-        }
-        
-        if (!specialRender) {
-            ResourceLocation icon = action.getIconTexture(power);
-            mc.getTextureManager().bind(icon);
-            BlitFloat.blitFloat(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
-        }
-        
-        if (changeColor) RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-    }
+//    @Deprecated
+//    public static <P extends IPower<P, ?>> void renderActionIcon(MatrixStack matrixStack, Action<P> action, P power, 
+//            float x, float y, float brightness, float alpha) {
+//        boolean changeColor = brightness < 1 || alpha < 1;
+//        if (changeColor) RenderSystem.color4f(brightness, brightness, brightness, alpha);
+//
+//        Minecraft mc = Minecraft.getInstance();
+//        boolean specialRender = false;
+//        
+//        if (action == ModStandsInit.GOLD_EXPERIENCE_CREATE_LIFEFORM.get()
+//                || action == ModStandsInit.GOLD_EXPERIENCE_TOOTH_LIFEFORM.get()) {
+//            EntitySubtype<?> selectedMob = GoldExperienceCreateLifeform.getChosenEntityType(mc.player);
+//            if (selectedMob != null) {
+//                EntityTypeIcon.renderIcon(selectedMob, matrixStack, x, y);
+//                specialRender = true;
+//            }
+//        }
+//        else if (action == ModStandsInit.GOLD_EXPERIENCE_REVERT_LIFEFORM.get()) {
+//            ItemStack sourceItem = StandEffectsTracker.getTargetLookedAt((IStandPower) power, 
+//                    ModStandEffects.GE_CREATED_LIFEFORM.get(), GoldExperienceRevertLifeform.MARKER_DISTANCE, mc.player)
+//                    .map(effect -> ((GECreatedLifeformEffect) effect).getItemView())
+//                    .orElse(ItemStack.EMPTY);
+//            if (!sourceItem.isEmpty()) {
+//                mc.getItemRenderer().renderAndDecorateFakeItem(sourceItem, (int) x, (int) y);
+//                specialRender = true;
+//            }
+//        }
+//        
+//        if (!specialRender) {
+//            ResourceLocation icon = action.getIconTexture(power);
+//            mc.getTextureManager().bind(icon);
+//            BlitFloat.blitFloat(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
+//        }
+//        
+//        if (changeColor) RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+//    }
     
     private <P extends IPower<P, ?>> ActionConditionResult actionAvailability(Action<P> action, ActionsModeConfig<P> mode, 
             SelectedTargetIcon targetIcon, ActionTarget mouseTarget, boolean isSelected) {

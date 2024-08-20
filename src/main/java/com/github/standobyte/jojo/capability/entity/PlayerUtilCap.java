@@ -31,12 +31,12 @@ import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.PlayerStatListener;
-import com.github.standobyte.jojo.util.mc.SubtypeResourceLocation;
+import com.github.standobyte.jojo.util.mc.entitysubtype.EntitySubtype;
+import com.github.standobyte.jojo.util.mc.entitysubtype.SubtypeResourceLocation;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.mod.JojoModVersion;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -542,16 +542,16 @@ public class PlayerUtilCap {
         return geUIState;
     }
     
-    public boolean addMetEntityType(EntityType<?> entityType) {
-        boolean added = metEntityTypes.add(entityType.getRegistryName());
+    public boolean addMetEntityType(EntitySubtype<?> entityType) {
+        boolean added = metEntityTypes.add(entityType.getId());
         if (added) {
-            geUIState.newUnseenMobs.add(entityType.getRegistryName());
+            geUIState.newUnseenMobs.add(entityType.vanillaType.getRegistryName());
         }
         return added;
     }
     
-    public boolean metEntityType(EntityType<?> entityType) {
-        return metEntityTypes.contains(entityType.getRegistryName());
+    public boolean metEntityType(EntitySubtype<?> entityType) {
+        return metEntityTypes.contains(entityType.getId());
     }
     
     public void addMetEntityTypeId(SubtypeResourceLocation id) {

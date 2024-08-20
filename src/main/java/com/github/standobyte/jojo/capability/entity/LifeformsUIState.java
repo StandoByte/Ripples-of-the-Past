@@ -12,6 +12,8 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClGEUiDataPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.GEUiDataPacket;
 import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mc.entitysubtype.EntitySubtype;
+import com.github.standobyte.jojo.util.mc.entitysubtype.SubtypeResourceLocation;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
@@ -19,12 +21,12 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.registries.ForgeRegistries;
+import net.minecraftforge.common.util.Constants;
 
 public class LifeformsUIState {
     private final PlayerEntity player;
     
-    EntityType<?> chosenType = null;
+    EntitySubtype<?> chosenType = null;
     Set<ResourceLocation> favoritesMobs = new HashSet<>();
     Set<ResourceLocation> newUnseenMobs = new HashSet<>();
     
@@ -35,11 +37,11 @@ public class LifeformsUIState {
     
     
     @Nullable
-    public EntityType<?> getGEChosenLifeformType() {
+    public EntitySubtype<?> getGEChosenLifeformType() {
         return chosenType;
     }
 
-    public void setGEChosenLifeformType(EntityType<?> type, boolean syncToServer) {
+    public void setGEChosenLifeformType(EntitySubtype<?> type, boolean syncToServer) {
         this.chosenType = type;
         if (syncToServer && player.level.isClientSide()) {
             PacketManager.sendToServer(ClGEUiDataPacket.chosenEntityType(Optional.ofNullable(type)));
@@ -103,7 +105,7 @@ public class LifeformsUIState {
         CompoundNBT nbt = new CompoundNBT();
 
         if (chosenType != null) {
-            MCUtil.nbtPutRegistryEntry(nbt, "ChosenType", chosenType);
+            nbt.put("ChosenType", StringNBT.valueOf(chosenType.getId().toString()));
         }
         if (!favoritesMobs.isEmpty()) {
             ListNBT list = favoritesMobs.stream()
@@ -122,7 +124,10 @@ public class LifeformsUIState {
     }
     
     public void fromNBT(CompoundNBT nbt) {
-        chosenType = MCUtil.nbtGetRegistryEntry(nbt, "ChosenType", ForgeRegistries.ENTITIES).orElse(null);
+        if (nbt.contains("ChosenType", Constants.NBT.TAG_STRING)) {
+            SubtypeResourceLocation id = new SubtypeResourceLocation(nbt.getString("ChosenType"));
+            chosenType = EntitySubtype.getSubtype(id);
+        }
         MCUtil.nbtGetList(nbt, "FavoritesMobs", StringNBT.class)
                 .map(listNbt -> listNbt
                         .stream()

@@ -97,16 +97,9 @@ public class StandVirusEffect extends StatusEffect implements IApplicableEffect 
                         });
             }
             else {
-                Optional<MobStandGiver> randomStandGiver = MOB_STAND_GIVER.stream()
-                .filter(m -> m.entityMatches(entity))
-                .collect(Collectors.collectingAndThen(Collectors.toList(), list -> {
-                    if (list.isEmpty()) {
-                        return Optional.empty();
-                    }
-                    return Optional.of(list.get(entity.getRandom().nextInt(list.size())));
-                }));
+                Optional<MobStandGiver> randomStandGiver = getRandomStandGiver(entity);
                 if (randomStandGiver.isPresent()) {
-                    randomStandGiver.get().giveStand(entity, amplifier);
+                    randomStandGiver.get().giveStandFromVirus(entity, amplifier);
                 }
                 else {
                     DamageUtil.hurtThroughInvulTicks(entity, DamageUtil.STAND_VIRUS, baseDamage(amplifier));
@@ -137,6 +130,17 @@ public class StandVirusEffect extends StatusEffect implements IApplicableEffect 
     
     
     private static final List<MobStandGiver> MOB_STAND_GIVER = new ArrayList<>();
+    
+    public static Optional<MobStandGiver> getRandomStandGiver(LivingEntity entity) {
+        return MOB_STAND_GIVER.stream()
+                .filter(m -> m.entityMatches(entity))
+                .collect(Collectors.collectingAndThen(Collectors.toList(), list -> {
+                    if (list.isEmpty()) {
+                        return Optional.empty();
+                    }
+                    return Optional.of(list.get(entity.getRandom().nextInt(list.size())));
+                }));
+    }
     
     public static void addMobStandGiver(MobStandGiver mobStandGiver) {
         MOB_STAND_GIVER.add(mobStandGiver);
@@ -170,13 +174,17 @@ public class StandVirusEffect extends StatusEffect implements IApplicableEffect 
             return 1 - 0.15f * virusEffectLvl;
         }
         
-        public void giveStand(LivingEntity entity, int virusEffectLvl) {
+        public boolean giveStand(LivingEntity entity) {
+            return IStandPower.getStandPowerOptional(entity).map(standPower -> {
+                StandType<?> stand = stands.get(entity.getRandom().nextInt(stands.size())).get();
+                return StandArrowItem.giveStandFromArrow(entity, standPower, stand);
+            }).orElse(false);
+        }
+        
+        public void giveStandFromVirus(LivingEntity entity, int virusEffectLvl) {
             boolean gaveStand = false;
             if (entity.getRandom().nextFloat() <= getSurviveChance(virusEffectLvl)) {
-                gaveStand = IStandPower.getStandPowerOptional(entity).map(standPower -> {
-                    StandType<?> stand = stands.get(entity.getRandom().nextInt(stands.size())).get();
-                    return StandArrowItem.giveStandFromArrow(entity, standPower, stand);
-                }).orElse(false);
+                gaveStand = giveStand(entity);
             }
             if (!gaveStand) {
                 DamageUtil.hurtThroughInvulTicks(entity, DamageUtil.STAND_VIRUS, baseDamage(virusEffectLvl));
