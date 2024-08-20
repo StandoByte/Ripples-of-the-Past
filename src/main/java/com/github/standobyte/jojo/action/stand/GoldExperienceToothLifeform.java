@@ -113,7 +113,7 @@ public class GoldExperienceToothLifeform extends StandEntityActionModifier {
                     () -> extraInput.readRegistryIdSafe(EntityType.class)).orElse(null);
             if (type != null
                     && GeneralUtil.orElseFalse(user.getCapability(PlayerUtilCapProvider.CAPABILITY), 
-                            cap -> cap.didPlayerMeetEntityType(type))
+                            cap -> cap.metEntityType(type))
                     && GoldExperienceChooseLifeform.isValidLifeform(type, world)) {
                 
                 StandEntity stand = (StandEntity) power.getStandManifestation();

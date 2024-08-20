@@ -59,7 +59,7 @@ public class ChooseLifeformListScreen extends ChooseLifeformScreen {
         List<EntityType<?>> entityTypes = ForgeRegistries.ENTITIES.getValues()
                 .stream()
                 .filter(type -> 
-                metLifeforms.didPlayerMeetEntityType(type)
+                metLifeforms.metEntityType(type)
                 && GoldExperienceChooseLifeform.isValidLifeform(type, minecraft.level))
                 .collect(Collectors.toList());
         mobList.setAllLegalValues(entityTypes);

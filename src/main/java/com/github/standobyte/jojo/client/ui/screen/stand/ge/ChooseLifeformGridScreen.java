@@ -78,7 +78,7 @@ public class ChooseLifeformGridScreen extends ChooseLifeformScreen {
         List<EntityType<?>> entityTypes = ForgeRegistries.ENTITIES.getValues()
                 .stream()
                 .filter(type -> 
-                    GeneralUtil.orElseFalse(metEntityTypesCap, cap -> cap.didPlayerMeetEntityType(type))
+                    GeneralUtil.orElseFalse(metEntityTypesCap, cap -> cap.metEntityType(type))
                     && GoldExperienceChooseLifeform.isValidLifeform(type, minecraft.level))
                 .sorted(ENTITY_MOD_NAME_COMPARE.thenComparing(ENTITY_NAME_COMPARE))
                 .collect(Collectors.toList());

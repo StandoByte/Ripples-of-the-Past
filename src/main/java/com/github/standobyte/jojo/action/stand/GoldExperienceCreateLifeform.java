@@ -253,7 +253,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
             Optional<UUID> itemTrackerId = NetworkUtil.readOptional(extraInput, extraInput::readUUID);
             if (type != null
                     && GeneralUtil.orElseFalse(user.getCapability(PlayerUtilCapProvider.CAPABILITY), 
-                            cap -> cap.didPlayerMeetEntityType(type))
+                            cap -> cap.metEntityType(type))
                     && GoldExperienceChooseLifeform.isValidLifeform(type, world)) {
                 
                 Entity lifeFormCreated = createEntity(type, world, user);

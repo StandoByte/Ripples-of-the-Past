@@ -27,11 +27,11 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerVisualDetai
 import com.github.standobyte.jojo.network.packets.fromserver.TrWalkmanEarbudsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.VampireSleepInCoffinPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.GESplitConsciousnessPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.MetEntityTypesPacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.PlayerStatListener;
+import com.github.standobyte.jojo.util.mc.SubtypeResourceLocation;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.mod.JojoModVersion;
 
@@ -45,7 +45,6 @@ import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
@@ -90,7 +89,7 @@ public class PlayerUtilCap {
     private final List<PlayerStatListener<?>> statChangeListeners = new ArrayList<>();
     private final List<TimedAction> sendWhenScreenClosed = new ArrayList<>();
 
-    private Set<ResourceLocation> metEntityTypesId = new HashSet<>();
+    private LifeformsMetMobs metEntityTypes = new LifeformsMetMobs();
     private final LifeformsUIState geUIState;
     public int animalAgeCd;
     
@@ -127,7 +126,8 @@ public class PlayerUtilCap {
     public void onClone(PlayerUtilCap old, boolean wasDeath) {
         this.notificationsSent = old.notificationsSent;
 
-        this.metEntityTypesId = old.metEntityTypesId;
+        this.metEntityTypes = old.metEntityTypes;
+        this.geUIState.onPlayerClone(old.geUIState);
         
         this.lastBedType = old.lastBedType;
         this.ticksNoSleep = old.ticksNoSleep;
@@ -140,18 +140,17 @@ public class PlayerUtilCap {
         
         nbt.putInt("Knives", knives);
         
-        if (!metEntityTypesId.isEmpty()) {
-            ListNBT metEntities = new ListNBT();
-            metEntityTypesId.forEach(entityTypeId -> metEntities.add(StringNBT.valueOf(entityTypeId.toString())));
+        if (!metEntityTypes.isEmpty()) {
+            ListNBT metEntities = metEntityTypes.toNBT();
             nbt.put("MetEntityTypes", metEntities);
         }
+        nbt.put("GE_UI", geUIState.toNBT());
+        nbt.putInt("AnimalAgeCd", animalAgeCd);
         
         nbt.put("RotpVersion", JojoModVersion.getCurrentVersion().toNBT());
         
         nbt.putBoolean("CoffinRespawn", coffinPreventDayTimeSkip);
         
-        nbt.put("GE_UI", geUIState.toNBT());
-        nbt.putInt("AnimalAgeCd", animalAgeCd);
         return nbt;
     }
 
@@ -167,19 +166,12 @@ public class PlayerUtilCap {
         
         if (nbt.contains("MetEntityTypes", MCUtil.getNbtId(ListNBT.class))) {
             ListNBT metEntitiesId = nbt.getList("MetEntityTypes", MCUtil.getNbtId(StringNBT.class));
-            metEntitiesId.forEach(idNBT -> {
-                String idString = ((StringNBT) idNBT).getAsString(); 
-                if (!idString.isEmpty()) {
-                    ResourceLocation registryName = new ResourceLocation(idString);
-                    metEntityTypesId.add(registryName);
-                }
-            });
+            metEntityTypes.fromNBT(metEntitiesId);
         }
-        
-        coffinPreventDayTimeSkip = nbt.getBoolean("CoffinRespawn");
-        
         MCUtil.nbtGetCompoundOptional(nbt, "GE_UI").ifPresent(geUIState::fromNBT);
         animalAgeCd = nbt.getInt("AnimalAgeCd");
+        
+        coffinPreventDayTimeSkip = nbt.getBoolean("CoffinRespawn");
     }
     
     public void onTracking(ServerPlayerEntity tracking) {
@@ -191,18 +183,13 @@ public class PlayerUtilCap {
     public void syncWithClient() {
         ServerPlayerEntity player = (ServerPlayerEntity) this.player;
         PacketManager.sendToClient(new NotificationSyncPacket(notificationsSent), player);
-        if (!metEntityTypesId.isEmpty()) {
-            PacketManager.sendToClient(new MetEntityTypesPacket(metEntityTypesId), player);
-        }
+        metEntityTypes.syncToClient(player);
         PacketManager.sendToClient(geUIState.makePacket(), player);
         
         PacketManager.sendToClient(new TrKnivesCountPacket(player.getId(), knives), player);
         PacketManager.sendToClient(new TrWalkmanEarbudsPacket(player.getId(), walkmanEarbuds), player);
         PacketManager.sendToClient(new TrPlayerVisualDetailPacket(player.getId(), ateInkPastaTicks), player);
         PacketManager.sendToClient(new VampireSleepInCoffinPacket(coffinPreventDayTimeSkip), player);
-        if (!metEntityTypesId.isEmpty()) {
-            PacketManager.sendToClient(new MetEntityTypesPacket(metEntityTypesId), player);
-        }
     }
     
     
@@ -547,28 +534,28 @@ public class PlayerUtilCap {
     
     
     
-    public boolean addMetEntityType(EntityType<?> entityType) {
-        boolean added = metEntityTypesId.add(entityType.getRegistryName());
-        if (added) {
-            geUIState.newUnseenMobs.add(entityType.getRegistryName());
-        }
-        return added;
-    }
-    
-    public boolean didPlayerMeetEntityType(EntityType<?> entityType) {
-        return metEntityTypesId.contains(entityType.getRegistryName());
-    }
-    
-    public void addMetEntityTypeId(ResourceLocation id) {
-        metEntityTypesId.add(id);
+    public LifeformsMetMobs getMetMobs() {
+        return metEntityTypes;
     }
     
     public LifeformsUIState getGELifeformsUIState() {
         return geUIState;
     }
     
+    public boolean addMetEntityType(EntityType<?> entityType) {
+        boolean added = metEntityTypes.add(entityType.getRegistryName());
+        if (added) {
+            geUIState.newUnseenMobs.add(entityType.getRegistryName());
+        }
+        return added;
+    }
+    
     public boolean metEntityType(EntityType<?> entityType) {
-        return metEntityTypesId.contains(entityType.getRegistryName());
+        return metEntityTypes.contains(entityType.getRegistryName());
+    }
+    
+    public void addMetEntityTypeId(SubtypeResourceLocation id) {
+        metEntityTypes.add(id);
     }
     
     

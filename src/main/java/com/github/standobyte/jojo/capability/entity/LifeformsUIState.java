@@ -92,6 +92,13 @@ public class LifeformsUIState {
     }
     
     
+    public void onPlayerClone(LifeformsUIState prev) {
+        this.chosenType = prev.chosenType;
+        this.favoritesMobs = prev.favoritesMobs;
+        this.newUnseenMobs = prev.newUnseenMobs;
+    }
+    
+    
     public CompoundNBT toNBT() {
         CompoundNBT nbt = new CompoundNBT();
 
