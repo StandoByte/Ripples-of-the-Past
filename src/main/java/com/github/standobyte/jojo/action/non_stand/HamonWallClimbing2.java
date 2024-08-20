@@ -5,9 +5,8 @@ import java.util.Optional;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
-import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
-import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.living.LivingWallClimbing;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
@@ -36,7 +35,6 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
-import net.minecraftforge.common.util.LazyOptional;
 
 public class HamonWallClimbing2 extends HamonAction {
 
@@ -75,14 +73,13 @@ public class HamonWallClimbing2 extends HamonAction {
     
     @Override
     public boolean greenSelection(INonStandPower power, ActionConditionResult conditionCheck) {
-        return power.getUser().getCapability(LivingUtilCapProvider.CAPABILITY)
-                .map(cap -> cap.isWallClimbing()).orElse(false);
+        return LivingWallClimbing.getHandler(power.getUser()).map(cap -> cap.isWallClimbing()).orElse(false);
     }
     
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
-            user.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+            LivingWallClimbing.getHandler(user).ifPresent(cap -> {
                 if (target.getType() == TargetType.BLOCK && target.getFace() != null && target.getFace().getAxis() != Direction.Axis.Y) {
                     Direction face = target.getFace();
                     float yRot = 180 - face.toYRot();
@@ -111,16 +108,17 @@ public class HamonWallClimbing2 extends HamonAction {
     private static final double DOWN_SIDE_VEC_LEN_MULT = Math.max(DOWN_SPEED_MULT, SIDE_SPEED_MULT) / Math.sqrt(DOWN_SPEED_MULT * DOWN_SPEED_MULT + SIDE_SPEED_MULT * SIDE_SPEED_MULT);
     private static final double MAX_WALL_DISTANCE = 0.5;
     public static boolean travelWallClimb(PlayerEntity player, Vector3d inputVec) {
-        LazyOptional<LivingUtilCap> playerData = player.getCapability(LivingUtilCapProvider.CAPABILITY);
+        Optional<LivingWallClimbing> playerData = LivingWallClimbing.getHandler(player);
         boolean isWallClimbing = playerData.map(cap -> cap.isWallClimbing()).orElse(false);
         if (isWallClimbing) {
             player.fallDistance = 0;
             
-            LivingUtilCap wallClimbData = playerData.resolve().get();
+            LivingWallClimbing wallClimbData = playerData.get();
             float climbYRot = wallClimbData.getWallClimbYRot().orElseGet(() -> player.yBodyRot) * MathUtil.DEG_TO_RAD;
             Vector3d gripVec = new Vector3d(0, 0, MAX_WALL_DISTANCE).yRot(climbYRot);
             
-            if (!MCUtil.itemHandFree(player.getItemInHand(Hand.MAIN_HAND)) || !MCUtil.itemHandFree(player.getItemInHand(Hand.OFF_HAND))) {
+            if (!MCUtil.itemHandFree(player.getItemInHand(Hand.MAIN_HAND)) || !MCUtil.itemHandFree(player.getItemInHand(Hand.OFF_HAND))
+                    || player.isSpectator()) {
                 stopWallClimbing(player, wallClimbData);
                 return false;
             }
@@ -235,7 +233,7 @@ public class HamonWallClimbing2 extends HamonAction {
     }
     private static final float MIN_MOVEMENT_SPEED = 0.06f;
     
-    private static void stopWallClimbing(PlayerEntity player, LivingUtilCap wallClimbing) {
+    private static void stopWallClimbing(PlayerEntity player, LivingWallClimbing wallClimbing) {
         if (!player.level.isClientSide()) {
             wallClimbing.stopWallClimbing();
         }
@@ -265,8 +263,8 @@ public class HamonWallClimbing2 extends HamonAction {
     
     
     public static void tickWallClimbing(INonStandPower power, HamonData hamon, LivingEntity user) {
-        user.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(wallClimbData -> {
-            if (wallClimbData.isHamonWallClimbing()) {
+        LivingWallClimbing.getHandler(user).ifPresent(wallClimbData -> {
+            if (wallClimbData.isHamon()) {
                 if (hamon.isSkillLearned(ModHamonSkills.WALL_CLIMBING.get())) {
                     boolean isMoving = false;
                     if (user instanceof PlayerEntity) {

@@ -2,8 +2,8 @@ package com.github.standobyte.jojo.network.packets.fromclient;
 
 import java.util.function.Supplier;
 
-import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.living.LivingWallClimbing;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -46,7 +46,7 @@ public class ClHasInputPacket {
         public void handle(ClHasInputPacket msg, Supplier<NetworkEvent.Context> ctx) {
             ServerPlayerEntity player = ctx.get().getSender();
             if (msg.wallClimbing) {
-                player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.wallClimbIsMoving = msg.hasInput);
+                LivingWallClimbing.getHandler(player).ifPresent(cap -> cap.wallClimbIsMoving = msg.hasInput);
             }
             else {
                 player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.setHasClientInput(msg.hasInput));

@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.network.packets.fromclient;
 
 import java.util.function.Supplier;
 
-import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.living.LivingWallClimbing;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 
 import net.minecraft.entity.player.PlayerEntity;
@@ -27,7 +27,7 @@ public class ClStopWallClimbPacket {
         public void handle(ClStopWallClimbPacket msg, Supplier<NetworkEvent.Context> ctx) {
             PlayerEntity player = ctx.get().getSender();
             if (player.isAlive()) {
-                player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.stopWallClimbing());
+                LivingWallClimbing.getHandler(player).ifPresent(cap -> cap.stopWallClimbing());
             }
         }
 

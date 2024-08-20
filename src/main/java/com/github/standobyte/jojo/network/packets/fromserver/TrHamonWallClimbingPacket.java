@@ -2,12 +2,13 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 
 import java.util.function.Supplier;
 
-import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.living.LivingWallClimbing;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.util.general.OptionalFloat;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
@@ -53,7 +54,7 @@ public class TrHamonWallClimbingPacket {
         public void handle(TrHamonWallClimbingPacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity entity = ClientUtil.getEntityById(msg.userId);
             if (entity instanceof PlayerEntity) {
-                entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                LivingWallClimbing.getHandler((LivingEntity) entity).ifPresent(cap -> {
                     cap.setWallClimbing(msg.wallClimbing, msg.hamon, msg.climbSpeed, msg.bodyRot);
                 });
             }

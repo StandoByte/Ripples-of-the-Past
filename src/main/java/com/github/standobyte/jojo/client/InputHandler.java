@@ -24,9 +24,9 @@ import org.lwjgl.glfw.GLFW;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
-import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.living.LivingWallClimbing;
 import com.github.standobyte.jojo.client.controls.ActionKeybindEntry;
 import com.github.standobyte.jojo.client.controls.ActionKeybindEntry.KeyActiveType;
 import com.github.standobyte.jojo.client.controls.ActionKeybindEntry.OnKeyPress;
@@ -1139,7 +1139,7 @@ public class InputHandler {
         player.setDeltaMovement(player.getDeltaMovement().add(dash));
     }
     
-    public void wallClimbClientTick(boolean isMoving, LivingUtilCap wallClimbData) {
+    public void wallClimbClientTick(boolean isMoving, LivingWallClimbing wallClimbData) {
         if (this.wallClimbMoving != isMoving) {
             PacketManager.sendToServer(ClHasInputPacket.wallClimbing(isMoving));
             this.wallClimbMoving = isMoving;
