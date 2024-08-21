@@ -28,7 +28,7 @@ public class DivineSandstormEffectLayer<T extends LivingEntity> extends LayerRen
     public void render(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, 
             T entity, float walkAnimPos, float walkAnimSpeed, float partialTick, 
             float ticks, float headYRotation, float headXRotation) {
-        if (INonStandPower.getNonStandPowerOptional(entity)
+        /*if (INonStandPower.getNonStandPowerOptional(entity)
                 .map(power -> power.getHeldAction(true) == ModPillarmanActions.PILLARMAN_DIVINE_SANDSTORM.get())
                 .orElse(false)) {
             IVertexBuilder ivertexbuilder = buffer.getBuffer(RenderType.entityCutoutNoCull(TEXTURE));
@@ -42,6 +42,6 @@ public class DivineSandstormEffectLayer<T extends LivingEntity> extends LayerRen
                 this.box.render(matrixStack, ivertexbuilder, packedLight, OverlayTexture.NO_OVERLAY);
                 matrixStack.popPose();
             }
-        }
+        }*/
     }
 }

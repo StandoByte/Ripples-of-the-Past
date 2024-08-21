@@ -20,6 +20,7 @@ public class ModPlayerAnimations {
     public static BasicToggleAnim unnaturalAgility;
     public static BasicToggleAnim stoneForm;
     public static BasicToggleAnim bladeBarrage;
+    public static BasicToggleAnim bladeDash;
 
     /** 
      * This string must match the full name of the class and the package it's in.<br>
@@ -79,6 +80,10 @@ public class ModPlayerAnimations {
         bladeBarrage = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
                 "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXBladeBarrageLayer",
                 new ResourceLocation(JojoMod.MOD_ID, "blade_barrage"), 1);
+        
+        bladeDash = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXBladeDashLayer",
+                new ResourceLocation(JojoMod.MOD_ID, "blade_dash"), 1);
     }
 
 }
