@@ -297,6 +297,14 @@ public class ClientSetup {
             MarkerRenderer.Handler.addRenderer(new HierophantGreenBarrierDetectionMarker(mc));
             MarkerRenderer.Handler.addRenderer(new CrazyDiamondAnchorMarker(mc));
             MarkerRenderer.Handler.addRenderer(new CrazyDiamondBloodHomingMarker(mc));
+            
+//            StandStatsRenderer.overrideCosmeticStats(
+//                    ModStands.GOLD_EXPERIENCE_REQUIEM.getStandType().getRegistryName(), 
+//                    new StandStatsRenderer.OverrideCosmeticStat() {
+//                        @Override public double newValue(StandStat stat, IStandPower standData, double curConvertedValue) { 
+//                            return 0;
+//                        }
+//                    });
         });
     }
 

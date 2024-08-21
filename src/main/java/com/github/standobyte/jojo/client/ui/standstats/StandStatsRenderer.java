@@ -1,7 +1,9 @@
 package com.github.standobyte.jojo.client.ui.standstats;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -20,6 +22,8 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -27,92 +31,241 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.fml.client.gui.GuiUtils;
 
 public class StandStatsRenderer {
-    private static final int HEXAGON_EXPAND_TICKS = 20;
     public static final ResourceLocation STAND_STATS_UI = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/stand_stats.png");
-    private static final ResourceLocation STAND_STATS_BG = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/stand_stats_bg.png");
+    
+
+    /*
+     * "A" - 14+
+     * "B" - 11-14
+     * "C" - 8-11
+     * "D" - 5-8
+     * "E" - 0-5
+     * "∅" - 0
+     */
+    public static List<String> STAT_LETTERS = Arrays.asList("∅", "E", "D", "C", "B", "A");
+    
+    public static String getRankFromConvertedValue(double value) {
+        int rankIndex;
+             if (value >= 2) rankIndex = MathHelper.floor(value);
+        else if (value > 0)  rankIndex = 1;
+        else                      rankIndex = 0;
+        return STAT_LETTERS.get(Math.min(rankIndex, STAT_LETTERS.size() - 1));
+    }
+    
+    public static enum StandStat {
+        STRENGTH        (new TranslationTextComponent("jojo.stand_stat.strength"),       0,  -72) {
+            @Override
+            double getValueConverted(IStandPower standData, StandStats stats, float levelRatio) {
+                double value = stats.getBasePower() + stats.getDevPower(levelRatio);
+                if (value > 0) value = (value + 1) / 3;
+                return value;
+            }
+        },
+        SPEED           (new TranslationTextComponent("jojo.stand_stat.speed"),          58, -39) {
+            @Override
+            double getValueConverted(IStandPower standData, StandStats stats, float levelRatio) {
+                double value = stats.getBaseAttackSpeed() + stats.getDevAttackSpeed(levelRatio);
+                if (value > 0) value = (value + 1) / 3;
+                return value;
+            }
+        },
+        RANGE           (new TranslationTextComponent("jojo.stand_stat.range"),          58,  32) {
+            @Override
+            double getValueConverted(IStandPower standData, StandStats stats, float levelRatio) {
+                double value = stats.getEffectiveRange() + (stats.getMaxRange() - stats.getEffectiveRange()) * 0.5;
+                if (value > 0) value = Math.log(value / 1.5) / LN_2 /* or log2(val / 1.5) */ + 1; 
+                return value;
+            }
+        },
+        DURABILITY      (new TranslationTextComponent("jojo.stand_stat.durability"),     0,   65) {
+            @Override
+            double getValueConverted(IStandPower standData, StandStats stats, float levelRatio) {
+                double value = stats.getBaseDurability() + stats.getDevDurability(levelRatio);
+                if (value > 0) value = (value + 1) / 3;
+                return value;
+            }
+        },
+        PRECISION       (new TranslationTextComponent("jojo.stand_stat.precision"),     -58,  32) {
+            @Override
+            double getValueConverted(IStandPower standData, StandStats stats, float levelRatio) {
+                double value = stats.getBasePrecision() + stats.getDevPrecision(levelRatio);
+                if (value > 0) value = (value + 1) / 3;
+                return value;
+            }
+        },
+        DEV_POTENTIAL   (new TranslationTextComponent("jojo.stand_stat.dev_potential"), -58, -39) {
+            @Override
+            double getValueConverted(IStandPower standData, StandStats stats, float levelRatio) {
+                double value = 0;
+                if (levelRatio < 1) {
+                    value = 1 + (1 - levelRatio) * standData.getMaxResolveLevel();
+                }
+                else if (standData.hasUnlockedMatching(action -> action.isTrained() && standData.getLearningProgressRatio(action) < 1)) {
+                    value = 1;
+                }
+                return value;
+            }
+        };
+        
+        private final ITextComponent name;
+        private final int x;
+        private final int y;
+        
+        private StandStat(ITextComponent name, int x, int y) {
+            this.name = name;
+            this.x = x;
+            this.y = y;
+        }
+        
+        abstract double getValueConverted(IStandPower standData, StandStats stats, float levelRatio);
+    }
+    
+    
+    private static final Map<ResourceLocation, OverrideCosmeticStat> OVERRIDE_STAT = new HashMap<>();
+    public static void overrideCosmeticStats(ResourceLocation standId, OverrideCosmeticStat override) {
+        OVERRIDE_STAT.put(standId, override);
+    }
+    
+    public static interface OverrideCosmeticStat {
+        
+        default double newValue(StandStat stat, IStandPower standData, double curConvertedValue) {
+            return curConvertedValue;
+        }
+        
+        default String newRankLetter(StandStat stat, IStandPower standData, double curConvertedValue, String curRankLetter) {
+            return curRankLetter;
+        }
+    }
+    
+    
+
+    public static final int statsWidth = 163;
+    public static final int statsHeight = 163;
+    
+    private static final int BORDERS_FADE_IN_END = 20;
+    private static final int HEXAGON_TICK_START = 20;
+    private static final int HEXAGON_EXPAND_TICKS = 30;
+    private static final int LETTER_TICK_START = 50;
+    private static final float LETTER_FADE_IN = 1.5f;
     
     private static final double LN_2 = Math.log(2);
     @SuppressWarnings("deprecation")
     public static void renderStandStats(MatrixStack matrixStack, Minecraft mc, 
             int x, int y, int screenWidth, int screenHeight, 
             int tick, float partialTick, 
-            float alpha, 
+            float bgAlpha, boolean invertBnW, 
             int mouseX, int mouseY, int maxTextWidth) {
         IStandPower.getStandPowerOptional(mc.player).ifPresent(power -> {
-            if (power.hasPower()) {
+            if (!power.hasPower()) return;
 
-                StandStats stats = power.getType().getStats();
-                float statLeveling = power.getStatsDevelopment();
-                
-                int color = StandSkinsManager.getUiColor(power);
-                int[] rgb = ClientUtil.rgbInt(color);
+            matrixStack.pushPose();
+            matrixStack.translate(0, 0, 1);
+            
+            StandStats stats = power.getType().getStats();
+            float statLeveling = power.getStatsDevelopment();
+            
+            int color = StandSkinsManager.getUiColor(power);
+            int[] rgb = ClientUtil.rgbInt(color);
 
-                double[] statVal = new double[6];
-                statVal[0] = stats.getBasePower() + stats.getDevPower(statLeveling);
-                if (statVal[0] > 0) statVal[0] = (statVal[0] + 1) / 3;
-
-                statVal[1] = stats.getBaseAttackSpeed() + stats.getDevAttackSpeed(statLeveling);
-                if (statVal[1] > 0) statVal[1] = (statVal[1] + 1) / 3;
-
-                statVal[2] = stats.getEffectiveRange() + (stats.getMaxRange() - stats.getEffectiveRange()) * 0.5;
-                if (statVal[2] > 0) statVal[2] = Math.log(statVal[2] / 1.5) / LN_2 /* log2(val / 1.5) */ + 1; 
-
-                statVal[3] = stats.getBaseDurability() + stats.getDevDurability(statLeveling);
-                if (statVal[3] > 0) statVal[3] = (statVal[3] + 1) / 3;
-
-                statVal[4] = stats.getBasePrecision() + stats.getDevPrecision(statLeveling);
-                if (statVal[4] > 0) statVal[4] = (statVal[4] + 1) / 3;
-
-                if (statLeveling < 1) {
-                    statVal[5] = 1 + (1 - statLeveling) * power.getMaxResolveLevel();
+            double[] statVal = new double[6];
+            String[] statRank = new String[6];
+            
+            for (int i = 0; i < statVal.length; i++) {
+                StandStat stat = StandStat.values()[i];
+                statVal[i] = stat.getValueConverted(power, stats, statLeveling);
+                statRank[i] = getRankFromConvertedValue(statVal[i]);
+                OverrideCosmeticStat override = OVERRIDE_STAT.get(power.getType().getRegistryName());
+                if (override != null) {
+                    statVal[i] = Math.max(override.newValue(stat, power, statVal[i]), 0);
+                    statRank[i] = override.newRankLetter(stat, power, statVal[i], getRankFromConvertedValue(statVal[i]));
                 }
-                else if (power.hasUnlockedMatching(action -> action.isTrained() && power.getLearningProgressRatio(action) < 1)) {
-                    statVal[5] = 1;
-                }
+            }
 
-                String[] statRank = new String[6];
+            float xCenter = x + statsWidth / 2f;
+            float yCenter = y + statsHeight / 2f;
+            
+            float scale = tick < HEXAGON_TICK_START ? 0.75f + 0.25f * ((tick + partialTick) / HEXAGON_TICK_START) : 1;
+            float bordersAlpha = tick < BORDERS_FADE_IN_END ? (tick + partialTick) / BORDERS_FADE_IN_END : 1;
+            if (scale < 1) {
+                matrixStack.translate(xCenter * (1 - scale), yCenter * (1 - scale), 0);
+                matrixStack.scale(scale, scale, 1);
+            }
 
+            mc.textureManager.bind(STAND_STATS_UI);
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            // background
+            if (invertBnW) RenderSystem.color4f(0, 0, 0, bgAlpha * bordersAlpha);
+            else           RenderSystem.color4f(1, 1, 1, bgAlpha * bordersAlpha);
+            AbstractGui.blit(matrixStack, x, y, 0, 256, 0, statsWidth, statsHeight, 512, 512);
+            
+            // circles
+            if (invertBnW) RenderSystem.color4f(1, 1, 1, bordersAlpha);
+            else           RenderSystem.color4f(0, 0, 0, bordersAlpha);
+            AbstractGui.blit(matrixStack, x, y, 0, 0, 0, statsWidth, statsHeight, 512, 512);
+            AbstractGui.blit(matrixStack, x, y, 0, 0, 164, statsWidth, statsHeight, 512, 512);
+            AbstractGui.blit(matrixStack, x, y, 0, 256, 164, statsWidth, statsHeight, 512, 512);
+            
+            // rotating outer ring effect
+            float outerRingRot = 0;
+            float innerRingRot = 0;
+            if (tick < LETTER_TICK_START) {
+                outerRingRot = (tick + partialTick) * -6f;
+                innerRingRot = (tick + partialTick) * 9f;
+            }
+            matrixStack.pushPose();
+            matrixStack.translate(xCenter, yCenter, 0);
+            
+            matrixStack.pushPose();
+            matrixStack.mulPose(Vector3f.ZP.rotationDegrees(outerRingRot));
+            BlitFloat.blitFloat(matrixStack, -statsWidth / 2f, -statsHeight / 2f, 0, 0, 328, statsWidth, statsHeight, 512, 512);
+            matrixStack.popPose();
+
+            matrixStack.pushPose();
+            matrixStack.mulPose(Vector3f.ZP.rotationDegrees(innerRingRot));
+            BlitFloat.blitFloat(matrixStack, -statsWidth / 2f, -statsHeight / 2f, 0, 256, 328, statsWidth, statsHeight, 512, 512);
+            matrixStack.popPose();
+            
+            // scale letters
+            for (int i = 1; i < 6; i++) {
+                if (STAT_LETTERS.size() <= i) break;
+                String letter = STAT_LETTERS.get(i);
+                mc.font.draw(matrixStack, new StringTextComponent(letter), 
+                        3.5f, -18.5f - (i - 1) * 9f, 
+                        ClientUtil.addAlpha(invertBnW ? 0xFFFFFF : 0x000000, bordersAlpha));
+            }
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            
+            RenderSystem.color4f(1, 1, 1, 1);
+            
+            matrixStack.popPose();
+            
+            // stats hexagon
+            if (tick >= HEXAGON_TICK_START) {
+                int tick_ = tick - HEXAGON_TICK_START;
                 for (int i = 0; i < statVal.length; i++) {
-                    String rank;
-                         if (statVal[i] >= 5) rank = "A"; // 14+
-                    else if (statVal[i] >= 4) rank = "B"; // 11-14
-                    else if (statVal[i] >= 3) rank = "C"; // 8-11
-                    else if (statVal[i] >= 2) rank = "D"; // 5-8
-                    else if (statVal[i] > 0)  rank = "E"; // 0-5
-                    else                      rank = "∅"; // 0
-                    statRank[i] = rank;
-
                     statVal[i] = statVal[i] <= 1 ? statVal[i] * 4 : 4 + (statVal[i] - 1) * 3;
 
                     if (statVal[i] > 0) {
                         statVal[i] = Math.min(statVal[i] + 1, 20);
                     }
-
-                    if (tick < HEXAGON_EXPAND_TICKS) {
-                        statVal[i] *= ((double) tick + (double) partialTick) / (double) HEXAGON_EXPAND_TICKS;
+                    
+                    if (tick_ < HEXAGON_EXPAND_TICKS) {
+                        statVal[i] *= ((double) tick_ + (double) partialTick) / (double) HEXAGON_EXPAND_TICKS;
                     }
                     statVal[i] *= 3;
                 }
-
-                float xCenter = x + 76.5F;
-                float yCenter = y + 76.5F;
-
-                RenderSystem.enableBlend();
-                RenderSystem.defaultBlendFunc();
-                RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
-                mc.textureManager.bind(STAND_STATS_BG);
-                AbstractGui.blit(matrixStack, x, y, 0, 0, 0, 153, 153, 256, 256);
-                RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
-                mc.textureManager.bind(STAND_STATS_UI);
-                AbstractGui.blit(matrixStack, x, y, 0, 0, 0, 153, 153, 256, 256);
-
+                
                 fillHexagon(xCenter, yCenter, 
                         statVal[0], statVal[1], statVal[2], 
                         statVal[3], statVal[4], statVal[5], 
                         rgb[0], rgb[1], rgb[2], 192);
                 RenderSystem.disableBlend();
-                
-
+            }
+            
+            // stand name and user
+            if (tick >= HEXAGON_TICK_START) {
                 List<IReorderingProcessor> standName = mc.font.split(new TranslationTextComponent("jojo.stand_stat.stand_name", power.getName()), maxTextWidth);
                 List<IReorderingProcessor> standUser = mc.font.split(new TranslationTextComponent("jojo.stand_stat.stand_user", mc.player.getDisplayName()), maxTextWidth);
                 int width = 0;
@@ -127,81 +280,93 @@ public class StandStatsRenderer {
                         width = Math.max(width, mc.font.width(standUser.get(0)));
                     }
                 }
-
+    
                 int standUserY = y - 5 - Math.max(standUser.size(), 1) * 9;
                 int userIconY = standUserY;
                 if (standUser.size() <= 1) {
                     userIconY -= 5;
                 }
-
+    
                 int standNameY = standUserY - 9 - Math.max(standName.size(), 1) * 9;
                 int standIconY = standNameY;
                 if (standName.size() <= 1) {
                     standIconY -= 5;
                 }
-
+    
                 mc.getTextureManager().bind(power.getType().getIconTexture(power));
-                AbstractGui.blit(matrixStack, x + 135 - width, standIconY, 0, 0, 16, 16, 16, 16);
+                AbstractGui.blit(matrixStack, x + statsWidth - 18 - width, standIconY, 0, 0, 16, 16, 16, 16);
                 ClientUtil.drawLines(matrixStack, mc.font, standName, 
-                        x + 153 - width, standNameY, 0, color, true, true);
-
+                        x + statsWidth - width, standNameY, 0, color, true, true);
+    
                 ResourceLocation playerFace = mc.player.getSkinTextureLocation();
                 mc.getTextureManager().bind(playerFace);
-
-                AbstractGui.blit(matrixStack, x + 135 - width, userIconY, 16, 16, 16, 16, 128, 128);
+    
+                AbstractGui.blit(matrixStack, x + statsWidth - 18 - width, userIconY, 16, 16, 16, 16, 128, 128);
                 if (mc.options.getModelParts().contains(PlayerModelPart.HAT)) {
                     matrixStack.pushPose();
-                    matrixStack.translate(x + 135 - width, userIconY, 0);
+                    matrixStack.translate(x + statsWidth - 18 - width, userIconY, 0);
                     matrixStack.scale(9F/8F, 9F/8F, 0);
                     matrixStack.translate(-1, -1, 0);
                     AbstractGui.blit(matrixStack, 0, 0, 80, 16, 16, 16, 128, 128);
                     matrixStack.popPose();
                 }
                 ClientUtil.drawLines(matrixStack, mc.font, standUser, 
-                        x + 153 - width, standUserY, 0, color, true, true);
-
+                        x + statsWidth - width, standUserY, 0, color, true, true);
+    
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            }
 
-
-                for (int i = 0; i < statRank.length; i++) {
-                    float statX = xCenter + STAT_RANK_NAME_OFFSETS[i][0];
-                    float statY = yCenter + STAT_RANK_NAME_OFFSETS[i][1];
-                    String statRankLetter = statRank[i];
-                    ITextComponent rank = new StringTextComponent(statRankLetter).withStyle(TextFormatting.BOLD);
-                    int letterWidth = mc.font.width(rank);
-                    
-                    if ("∅".equals(statRankLetter)) {
-                        mc.textureManager.bind(STAND_STATS_UI);
-                        BlitFloat.blitFloat(matrixStack, statX - letterWidth / 2, statY, 0, 248, 8, 7, 256, 256);
-                    }
-                    else {
-                        ClientUtil.drawCenteredStringNoShadow(matrixStack, mc.font, rank, statX, statY, 0x000000);
-                    }
-                    
-                    if (mouseX >= statX - letterWidth / 2 && mouseX <= statX + letterWidth / 2 && mouseY >= statY && mouseY <= statY + mc.font.lineHeight) {
-                        GuiUtils.drawHoveringText(matrixStack, Arrays.asList(new TranslationTextComponent(STAT_NAME_KEYS[i])), 
-                                mouseX, mouseY, screenWidth, screenHeight, -1, mc.font);
+            // rank letters on the outer ring
+            float tick_ = (tick + partialTick)/ LETTER_FADE_IN;
+            for (int i = 0; i < statRank.length; i++) {
+                int letterStartTick = (int) (LETTER_TICK_START / LETTER_FADE_IN) + i;
+                int letterTicks = STAT_LETTERS.size() - 2;
+                int letterFullTick = letterStartTick + letterTicks;
+                if (tick_ < letterStartTick) continue;
+                
+                StandStat stat = StandStat.values()[i];
+                float statX = xCenter + stat.x;
+                float statY = yCenter + stat.y;
+                String statRankLetter = statRank[i];
+                
+                if (tick_ < letterFullTick) {
+                    int letterIndex = STAT_LETTERS.indexOf(statRankLetter);
+                    if (letterIndex > 1) {
+                        int index = letterIndex - (int) ((letterFullTick - tick_) * letterIndex / letterTicks);
+                        statRankLetter = STAT_LETTERS.get(Math.max(1, index));
                     }
                 }
+                float letterAlpha = tick_ >= letterFullTick ? 1 : 0.25f + 0.75f * 
+                        (float) (tick_ - letterStartTick) / (float) (letterFullTick - letterStartTick);
+                
+                
+                ITextComponent rank = new StringTextComponent(statRankLetter).withStyle(TextFormatting.BOLD);
+                int letterWidth = mc.font.width(rank);
+                
+                if ("∅".equals(statRankLetter)) {
+                    mc.textureManager.bind(STAND_STATS_UI);
+                    if (invertBnW) RenderSystem.color4f(1, 1, 1, letterAlpha);
+                    else           RenderSystem.color4f(0, 0, 0, letterAlpha);
+                    RenderSystem.enableBlend();
+                    BlitFloat.blitFloat(matrixStack, statX - letterWidth / 2, statY, 0, 504, 8, 7, 512, 512);
+                    RenderSystem.color4f(1, 1, 1, 1);
+                }
+                else {
+                    ClientUtil.drawCenteredStringNoShadow(matrixStack, mc.font, rank, 
+                            statX, statY, 
+                            ClientUtil.addAlpha(invertBnW ? 0xFFFFFF : 0x000000, letterAlpha));
+                }
+                
+                // stat name tooltip
+                if (mouseX >= statX - letterWidth / 2 && mouseX <= statX + letterWidth / 2 && mouseY >= statY && mouseY <= statY + mc.font.lineHeight) {
+                    GuiUtils.drawHoveringText(matrixStack, Arrays.asList(stat.name), 
+                            mouseX, mouseY, screenWidth, screenHeight, -1, mc.font);
+                }
             }
+            
+            matrixStack.popPose();
         });
     }
-    private static final String[] STAT_NAME_KEYS = {
-            "jojo.stand_stat.strength",
-            "jojo.stand_stat.speed",
-            "jojo.stand_stat.range",
-            "jojo.stand_stat.durability",
-            "jojo.stand_stat.precision",
-            "jojo.stand_stat.dev_potential",
-    };
-    private static final float[][] STAT_RANK_NAME_OFFSETS = {
-            {0, -72}, 
-            {58, -39}, 
-            {58, 32}, 
-            {0, 65}, 
-            {-58, 32}, 
-            {-58, -39}
-    };
     
 
     /*
@@ -217,6 +382,7 @@ public class StandStatsRenderer {
      */
     private static final double COS_PI_BY_6 = Math.sqrt(3.0) / 2.0;
     private static final double SIN_PI_BY_6 = 0.5;
+    // FIXME hexagon rendering above the screen's tooltips
     private static void fillHexagon(double xCenter, double yCenter, 
             double r1, double r2, double r3, double r4, double r5, double r6, 
             int red, int green, int blue, int alpha) {

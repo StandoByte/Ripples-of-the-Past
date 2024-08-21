@@ -45,6 +45,7 @@ import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.CategoryWith
 import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.ControlSettingToggleButton;
 import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.HoldToggleKeyEntry;
 import com.github.standobyte.jojo.client.ui.screen.widgets.HeightScaledSlider;
+import com.github.standobyte.jojo.client.ui.screen.widgets.ImageMutableButton;
 import com.github.standobyte.jojo.client.ui.screen.widgets.ImageVanillaButton;
 import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
 import com.github.standobyte.jojo.init.ModEntityTypes;
@@ -894,13 +895,18 @@ public class ClientEventHandler {
 
         else if (screen instanceof IngameMenuScreen && ClientReflection.showsPauseMenu((IngameMenuScreen) screen)) {
             float alpha = ClientModSettings.getSettingsReadOnly().standStatsTranslucency;
+            boolean invertBnW = ClientModSettings.getSettingsReadOnly().standStatsInvertBnW;
             int xButtonsRightEdge = screen.width / 2 + 102;
             int windowWidth = screen.width;
             int windowHeight = screen.height;
             
             if (doStandStatsRender(screen)) {
-                StandStatsRenderer.renderStandStats(event.getMatrixStack(), mc, windowWidth - 160, windowHeight - 160, windowWidth, windowHeight,
-                        standStatsTick, partialTick, alpha, event.getMouseX(), event.getMouseY(), windowWidth - xButtonsRightEdge - 14);
+                StandStatsRenderer.renderStandStats(event.getMatrixStack(), mc, 
+                        windowWidth - StandStatsRenderer.statsWidth - 7, windowHeight - StandStatsRenderer.statsHeight - 7, 
+                        windowWidth, windowHeight,
+                        standStatsTick, partialTick, 
+                        alpha, invertBnW,
+                        event.getMouseX(), event.getMouseY(), windowWidth - xButtonsRightEdge - 14);
             }
         }
     }
@@ -946,18 +952,32 @@ public class ClientEventHandler {
                         
                         @Override
                         protected void applyValue() {
-                            ClientModSettings.getInstance().editSettings(settings -> 
-                            settings.standStatsTranslucency = (float) MathHelper.clampedLerp(0.1, 1.0, this.value));
+                            ClientModSettings.getInstance().editSettings(settings -> {
+                                settings.standStatsTranslucency = (float) MathHelper.clampedLerp(0.1, 1.0, this.value);
+                            });
                         }
                     };
                     statsBgAlphaSlider.visible = doStandStatsRender(screen);
                     event.addWidget(statsBgAlphaSlider);
                     
+                    ImageMutableButton invertBnWButton = new ImageMutableButton(screen.width - 8, screen.height - 7, 
+                            8, 8, 464, 496, 8, StandStatsRenderer.STAND_STATS_UI, 512, 512, 
+                            button -> {
+                                ClientModSettings.getInstance().editSettings(settings -> {
+                                    settings.standStatsInvertBnW = !settings.standStatsInvertBnW;
+                                    ((ImageMutableButton) button).xTexStart = settings.standStatsInvertBnW ? 472 : 464;
+                                });
+                            });
+                    invertBnWButton.xTexStart = ClientModSettings.getSettingsReadOnly().standStatsInvertBnW ? 472 : 464;
+                    invertBnWButton.visible = doStandStatsRender(screen);
+                    event.addWidget(invertBnWButton);
+                    
                     Button standStatsToggleButton = new ImageVanillaButton(screen.width - 28, screen.height - 28, 
-                            20, 20, 236, 236, StandStatsRenderer.STAND_STATS_UI, 256, 256, 
+                            20, 20, 492, 492, StandStatsRenderer.STAND_STATS_UI, 512, 512, 
                             button -> {
                                 renderStandStats = !doStandStatsRender(screen);
                                 statsBgAlphaSlider.visible = doStandStatsRender(screen);
+                                invertBnWButton.visible = doStandStatsRender(screen);
                             }, 
                             (button, matrixStack, x, y) -> {
                                 ITextComponent message = doStandStatsRender(screen) ? 

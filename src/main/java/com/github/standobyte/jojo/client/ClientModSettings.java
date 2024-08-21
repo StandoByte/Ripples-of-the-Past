@@ -20,6 +20,7 @@ public class ClientModSettings {
     
     public static class Settings {
         public float standStatsTranslucency = 0.75F;
+        public boolean standStatsInvertBnW = false;
         
         public PositionConfig barsPosition = PositionConfig.TOP_LEFT;
         public PositionConfig hotbarsPosition = PositionConfig.TOP_LEFT;
