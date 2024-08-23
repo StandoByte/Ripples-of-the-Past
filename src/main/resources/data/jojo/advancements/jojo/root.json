@@ -2,7 +2,7 @@
   "display": {
     "icon": {
       "item": "jojo:meteoric_scrap",
-      "nbt": "{Icon:1}"
+      "nbt": "{CustomModel:1}"
     },
     "title": {
       "translate": "advancements.jojo.root.title"

@@ -21,7 +21,6 @@ public class ItemISTERModelWrapper implements IBakedModel {
     
     public ItemISTERModelWrapper(IBakedModel existingModel) {
         this.existingModel = existingModel;
-        setCaptureEntity();
     }
     
     public ItemISTERModelWrapper setCaptureEntity() {

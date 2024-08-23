@@ -89,6 +89,7 @@ import com.github.standobyte.jojo.client.render.entity.renderer.stand.MagiciansR
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.SilverChariotRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.StarPlatinumRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.TheWorldRenderer;
+import com.github.standobyte.jojo.client.render.item.CustomIconItem;
 import com.github.standobyte.jojo.client.render.item.RoadRollerBakedModel;
 import com.github.standobyte.jojo.client.render.item.generic.ItemISTERModelWrapper;
 import com.github.standobyte.jojo.client.render.item.standdisc.StandDiscISTERModel;
@@ -236,9 +237,7 @@ public class ClientSetup {
         HudControlSettings.init(new File(mc.gameDirectory, "config/jojo_rotp/controls/"));
         
         event.enqueueWork(() -> {
-            ItemModelsProperties.register(ModItems.METEORIC_SCRAP.get(), new ResourceLocation(JojoMod.MOD_ID, "icon"), (itemStack, clientWorld, livingEntity) -> {
-                return itemStack.getOrCreateTag().getInt("Icon");
-            });
+            CustomIconItem.registerModelOverride();
             ItemModelsProperties.register(ModItems.KNIFE.get(), new ResourceLocation(JojoMod.MOD_ID, "count"), (itemStack, clientWorld, livingEntity) -> {
                 return livingEntity != null ? itemStack.getCount() : 1;
             });
@@ -388,6 +387,7 @@ public class ClientSetup {
                 model -> new ItemISTERModelWrapper(model).setCaptureEntity());
         registerCustomBakedModel(ModItems.CLACKERS.get().getRegistryName(), event.getModelRegistry(), 
                 model -> new ItemISTERModelWrapper(model).setCaptureEntity());
+        CustomIconItem.onModelBake(event.getModelRegistry());
     }
     
     public static void registerCustomBakedModel(ResourceLocation resLoc, 
