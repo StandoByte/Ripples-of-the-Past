@@ -237,10 +237,11 @@ public class KosmXPlayerAnimatorInstalled extends PlayerAnimationHandler.PlayerA
         }
         
         protected boolean setAnimFromName(PlayerEntity player, ResourceLocation name, Function<KeyframeAnimation, IAnimation> createAnimPlayer) {
-            if (name == null) return false;
-            KeyframeAnimation keyframes = PlayerAnimationRegistry.getAnimation(name);
-            if (keyframes == null) return false;
-            return setAnim(player, createAnimPlayer.apply(keyframes));
+            IAnimation anim = getAnimFromName(name, createAnimPlayer);
+            if (anim == null) {
+                return false;
+            }
+            return setAnim(player, anim);
         }
         
         protected boolean setAnim(PlayerEntity player, IAnimation anim) {
@@ -251,12 +252,27 @@ public class KosmXPlayerAnimatorInstalled extends PlayerAnimationHandler.PlayerA
             return true;
         }
         
-        protected boolean fadeOutAnim(PlayerEntity player, @Nullable AbstractFadeModifier fadeModifier, @Nullable IAnimation newAnimation) {
+        @Nullable
+        protected IAnimation getAnimFromName(ResourceLocation name) {
+            return getAnimFromName(name, KeyframeAnimationPlayer::new);
+        }
+
+        @Nullable
+        protected IAnimation getAnimFromName(ResourceLocation name, Function<KeyframeAnimation, IAnimation> createAnimPlayer) {
+            if (name == null) return null;
+            KeyframeAnimation keyframes = PlayerAnimationRegistry.getAnimation(name);
+            if (keyframes == null) return null;
+            return createAnimPlayer.apply(keyframes);
+        }
+        
+        protected boolean fadeOutAnim(PlayerEntity player, @Nullable AbstractFadeModifier fadeModifier, 
+                @Nullable IAnimation newAnimation) {
             if (player == null) return false;
             ModifierLayer<IAnimation> animLayer = getAnimLayer((AbstractClientPlayerEntity) player);
             if (animLayer != null) {
                 if (fadeModifier != null) {
-                    animLayer.replaceAnimationWithFade(fadeModifier, newAnimation);
+                    boolean fadeInFromNothing = true;
+                    animLayer.replaceAnimationWithFade(fadeModifier, newAnimation, fadeInFromNothing);
                 }
                 else {
                     animLayer.setAnimation(newAnimation);

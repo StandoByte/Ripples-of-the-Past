@@ -16,6 +16,8 @@ public class ModPlayerAnimations {
     public static BasicToggleAnim hamonBreath;
     public static WallClimbAnim wallClimbing;
     public static HamonSYOBAnim syoBarrage;
+    public static BasicToggleAnim sendoWaveKick;
+    public static BasicToggleAnim rebuffOverdrive;
 
     /** 
      * This string must match the full name of the class and the package it's in.<br>
@@ -32,32 +34,42 @@ public class ModPlayerAnimations {
      */
     public static void init() {
         meditationPoseAnim = PlayerAnimationHandler.getPlayerAnimator().registerAnimLayer(
-                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.hamon.KosmXMeditationPoseLayer",
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.hamon.KosmXMeditationPoseHandler",
                 new ResourceLocation(JojoMod.MOD_ID, "meditation"), 1, 
                 HamonMeditationPoseAnim.NoPlayerAnimator::new);
         
         playerBarrageAnim = PlayerAnimationHandler.getPlayerAnimator().registerAnimLayer(
-                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.barrage.KosmXBarrageAnimLayer",
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.barrage.KosmXBarrageAnimHandler",
                 new ResourceLocation(JojoMod.MOD_ID, "barrage"), 1, 
                 PlayerBarrageAnim.NoPlayerAnimator::new);
         
         hamonBreath = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
-                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.hamon.KosmXHamonBreathLayer",
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.hamon.KosmXHamonBreathHandler",
                 new ResourceLocation(JojoMod.MOD_ID, "hamon_breath"), 1);
         
         syoBarrage = PlayerAnimationHandler.getPlayerAnimator().registerAnimLayer(
-                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.hamon.KosmXSYOBLayer",
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.hamon.KosmXSYOBHandler",
                 new ResourceLocation(JojoMod.MOD_ID, "syo_barrage"), 1, 
                 HamonSYOBAnim.NoPlayerAnimator::new);
         
         wallClimbing = PlayerAnimationHandler.getPlayerAnimator().registerAnimLayer(
-                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.hamon.KosmXWallClimbLayer",
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.hamon.KosmXWallClimbHandler",
                 new ResourceLocation(JojoMod.MOD_ID, "wall_climb"), 1, 
                 WallClimbAnim.NoPlayerAnimator::new);
         
+        sendoWaveKick = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.hamon.KosmXSendoWaveKickHandler",
+                new ResourceLocation(JojoMod.MOD_ID, "sendo_wave_kick"), 1);
+        
+        rebuffOverdrive = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.hamon.KosmXRebuffOverdriveHandler",
+                new ResourceLocation(JojoMod.MOD_ID, "rebuff_overdrive"), 1);
+        
+        
+        
         PlayerAnimationHandler.getPlayerAnimator().registerAnimLayer(
-                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.KosmXTestAnimLayer",
-                new ResourceLocation(JojoMod.MOD_ID, "test_layer"), 1, 
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.KosmXTestAnimHandler",
+                new ResourceLocation(JojoMod.MOD_ID, "test_anim"), 1, 
                 Object::new);
     }
 

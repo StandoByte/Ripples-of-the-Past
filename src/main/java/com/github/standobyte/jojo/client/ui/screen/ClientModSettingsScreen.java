@@ -6,11 +6,12 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.render.item.CustomIconItem;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.Alignment;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.HudTextRender;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.PositionConfig;
-import com.github.standobyte.jojo.client.ui.screen.widgets.ImageVanillaButton;
+import com.github.standobyte.jojo.client.ui.screen.widgets.ItemButton;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -516,9 +517,8 @@ public class ClientModSettingsScreen extends SettingsScreen {
         }
         
         ITextComponent tooltip = new TranslationTextComponent("jojo.options.client.title");
-        return new ImageVanillaButton(buttonPos[0], buttonPos[1], 20, 20, 
-                80, 128, 
-                ClientUtil.ADDITIONAL_UI, 256, 256,
+        return new ItemButton(buttonPos[0], buttonPos[1], 20, 20, 
+                CustomIconItem.makeIconItem(CustomIconItem.CustomModelIcon.MOD_LOGO),
                 button -> {
                     optionsScreen.getMinecraft().setScreen(new ClientModSettingsScreen(optionsScreen, ClientModSettings.getInstance()));
                 },

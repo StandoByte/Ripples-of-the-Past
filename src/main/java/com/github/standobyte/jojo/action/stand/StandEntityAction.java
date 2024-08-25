@@ -233,9 +233,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     }
     
     @Override
-    public boolean staminaConsumedDifferently(IStandPower power) {
-        return true;
-    }
+    protected void consumeStamina(World world, IStandPower power) {} // consumed from StandEntity's task instead
     
     @Override
     public void startedHolding(World world, LivingEntity user, IStandPower power, ActionTarget target, boolean requirementsFulfilled) {
@@ -272,7 +270,8 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     }
 
     @Override
-    protected final void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
+    protected
+    final void perform(World world, LivingEntity user, IStandPower power, ActionTarget target) {
         invokeForStand(power, stand -> {
             if (stand.getCurrentTask().map(task -> {
                 if (task.getPhase() == Phase.BUTTON_HOLD) {

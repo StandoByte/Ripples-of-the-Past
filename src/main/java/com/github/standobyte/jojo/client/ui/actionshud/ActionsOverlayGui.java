@@ -65,6 +65,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import io.netty.buffer.Unpooled;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
@@ -73,6 +74,7 @@ import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.settings.AttackIndicatorStatus;
 import net.minecraft.client.settings.KeyBinding;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
@@ -226,7 +228,7 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     public boolean isActive() {
-        return currentMode != null;
+        return currentMode != null && currentMode.getControlScheme().hotbarsEnabled;
     }
     
     public boolean noActionSelected(ControlScheme.Hotbar actionType) {
@@ -585,7 +587,7 @@ public class ActionsOverlayGui extends AbstractGui {
         if (renderHudKeybinds) ++hotbarsRendered;
         int hotbarsElementHeight = 20 + getHotbarsYDiff() * hotbarsRendered;
         
-        if (isActive() && barsBelowHotbars) {
+        if (currentMode != null && barsBelowHotbars) {
             int offset = hotbarsElementHeight + INDENT + VerticalBarsRenderer.ICON_HEIGHT;
             barsPosition.y = Math.max(lmbHotbarPosition.y + offset, barsPosition.y);
         }
@@ -594,7 +596,7 @@ public class ActionsOverlayGui extends AbstractGui {
         boolean hotbarAboveBarsShift = false;
         lmbHotbarPosition.x = hotbarsConfig.getXPos(screenWidth);
         lmbHotbarPosition.y = hotbarsConfig.getYPos(screenHeight, hotbarsElementHeight);
-        if (isActive()) {
+        if (currentMode != null) {
             if (barsConfig == hotbarsConfig) {
                 switch (barsConfig.barsOrientation) {
                 case HORIZONTAL:
@@ -1046,16 +1048,11 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     private <P extends IPower<P, ?>> List<Action<?>> getEnabledActions(P power, InputHandler.ActionKey actionKey) {
-        switch (actionKey) {
-        case ATTACK:
-        case ABILITY:
-            return HudControlSettings.getInstance()
-                    .getControlScheme(power)
-                    .getActionsHotbar(actionKey.getHotbar())
-                    .getEnabledActions();
-        default:
+        ControlScheme controlScheme = HudControlSettings.getInstance().getControlScheme(power);
+        if (!controlScheme.hotbarsEnabled) {
             return Collections.emptyList();
         }
+        return controlScheme.getActionsHotbar(actionKey.getHotbar()).getEnabledActions();
     }
     
     private void renderMouseIcon(MatrixStack matrixStack, int x, int y, InputHandler.ActionKey actionKey) {
@@ -1888,9 +1885,8 @@ public class ActionsOverlayGui extends AbstractGui {
     private static final IntBinaryOperator DEC = (i, n) -> (i + n + 1) % (n + 1) - 1;
     private <P extends IPower<P, ?>> void scrollAction(ActionsModeConfig<P> mode, ControlScheme.Hotbar hotbar, boolean backwards) {
         P power = mode.getPower();
-        List<Action<?>> actions = HudControlSettings.getInstance()
-                .getControlScheme(power)
-                .getActionsHotbar(hotbar).getEnabledActions();
+        ControlScheme controlScheme = HudControlSettings.getInstance().getControlScheme(power);
+        List<Action<?>> actions = controlScheme.getActionsHotbar(hotbar).getEnabledActions();
         if (actions.size() == 0) {
             return;
         }
@@ -1923,10 +1919,8 @@ public class ActionsOverlayGui extends AbstractGui {
     @Nullable
     public <P extends IPower<P, ?>> Pair<Action<P>, Boolean> onClick(
             P power, ControlScheme.Hotbar hotbar, boolean shiftVariant, boolean sneak, int index) {
-        Action<P> action = (Action<P>) HudControlSettings.getInstance()
-                .getControlScheme(getCurrentMode())
-                .getActionsHotbar(hotbar)
-                .getBaseActionInSlot(index);
+        ControlScheme controlScheme = HudControlSettings.getInstance().getControlScheme(getCurrentMode());
+        Action<P> action = (Action<P>) controlScheme.getActionsHotbar(hotbar).getBaseActionInSlot(index);
         action = resolveVisibleActionInSlot(action, shiftVariant, power, getMouseTarget());
         return onActionClick(power, action, sneak);
     }
@@ -1949,7 +1943,8 @@ public class ActionsOverlayGui extends AbstractGui {
         }
         return baseAction;
     }
-    
+
+    private final PacketBuffer extraInputBuf = new PacketBuffer(Unpooled.buffer());
     // sends the packet which fires the action to the server
     @Nullable
     public <P extends IPower<P, ?>> Pair<Action<P>, Boolean> onActionClick(P power, Action<P> action, boolean sneak) {
@@ -1961,7 +1956,9 @@ public class ActionsOverlayGui extends AbstractGui {
             ClClickActionPacket packet = new ClClickActionPacket(
                     power.getPowerClassification(), action, mouseTarget, sneak);
             PacketManager.sendToServer(packet);
-            boolean actionWentOff = power.clickAction(action, sneak, mouseTarget);
+            action.clWriteExtraData(extraInputBuf);
+            boolean actionWentOff = power.clickAction(action, sneak, mouseTarget, extraInputBuf);
+            extraInputBuf.clear();
             return Pair.of(action, actionWentOff);
         }
         return null;

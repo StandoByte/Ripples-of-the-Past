@@ -6,6 +6,7 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.render.item.ClackersISTER;
+import com.github.standobyte.jojo.client.render.item.CustomIconItem;
 import com.github.standobyte.jojo.client.render.item.RoadRollerISTER;
 import com.github.standobyte.jojo.client.render.item.polaroid.PolaroidISTER;
 import com.github.standobyte.jojo.client.render.item.standdisc.StandDiscISTER;
@@ -60,7 +61,7 @@ public class ModItems {
     public static final ItemGroup MAIN_TAB = (new ItemGroup("jojo_tab") {
         @Override
         public ItemStack makeIcon() {
-            return new ItemStack(ModItems.STONE_MASK.get());
+            return CustomIconItem.makeIconItem(CustomIconItem.CustomModelIcon.MOD_LOGO);
         }
     }).setEnchantmentCategories(new EnchantmentType[]{ ModEnchantments.STAND_ARROW, ModEnchantments.GLOVES });
     
@@ -172,7 +173,7 @@ public class ModItems {
             () -> new BlockItem(ModBlocks.METEORIC_ORE.get(), new Item.Properties().tab(MAIN_TAB).rarity(Rarity.UNCOMMON)));
 
     public static final RegistryObject<Item> METEORIC_SCRAP = ITEMS.register("meteoric_scrap", 
-            () -> new Item(new Item.Properties().tab(MAIN_TAB).rarity(Rarity.UNCOMMON)));
+            () -> new Item(new Item.Properties().tab(MAIN_TAB).rarity(Rarity.UNCOMMON).setISTER(() -> CustomIconItem.DummyIconItemISTER::new)));
 
     public static final RegistryObject<Item> METEORIC_INGOT = ITEMS.register("meteoric_ingot", 
             () -> new Item(new Item.Properties().tab(MAIN_TAB).rarity(Rarity.UNCOMMON)));

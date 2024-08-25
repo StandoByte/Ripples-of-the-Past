@@ -23,6 +23,7 @@ import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.command.configpack.StandStatsConfig;
+import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
@@ -36,6 +37,7 @@ import com.google.common.collect.Iterables;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.ResourceLocation;
@@ -500,10 +502,27 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     
     
     
-    public static interface IStandPool {}
+    public static interface IStandPool {
+        
+        default boolean addToCreativeTab(StandType<?> standType, ItemGroup creativeTab, boolean clientSide) {
+            return ModItems.STAND_DISC.get().allowdedIn(creativeTab) // technically it's equivalent to `creativeTab == ModItems.MAIN_TAB`
+                    && accessibleToPlayer(standType, clientSide);
+        }
+        
+        default boolean accessibleToPlayer(StandType<?> standType, boolean clientSide) {
+            return false;
+        }
+    }
     
     public static enum StandSurvivalGameplayPool implements IStandPool {
-        PLAYER_ARROW,
+        PLAYER_ARROW {
+            @Override
+            public boolean accessibleToPlayer(StandType<?> standType, boolean clientSide) {
+                return (!JojoModConfig.getCommonConfigInstance(clientSide).isConfigLoaded() || // to make it work when adding items to creative search tab on client initialization, when the config isn't loaded yet
+                        !JojoModConfig.getCommonConfigInstance(clientSide).isStandBanned(standType)) &&
+                        standType.getStats().getRandomWeight() > 0;
+            }
+        },
         NON_ARROW, // Requiems, C-Moon, Made in Heaven, Acts depending on their implementation, etc.
         NPC_ENCOUNTER,
         ANIMAL,

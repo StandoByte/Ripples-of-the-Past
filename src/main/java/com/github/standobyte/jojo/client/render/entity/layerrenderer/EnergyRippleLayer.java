@@ -12,9 +12,10 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
-import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.living.LivingWallClimbing;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.particle.custom.IFirstPersonParticle;
@@ -73,8 +74,7 @@ public class EnergyRippleLayer<T extends LivingEntity, M extends BipedModel<T>> 
     
     @Nullable
     public static ParticleType<?> addHandHamonSparks(LivingEntity entity, HandSide hand) {
-        if (entity.getCapability(LivingUtilCapProvider.CAPABILITY).map(
-                entityData -> entityData.isHamonWallClimbing()).orElse(false)) {
+        if (LivingWallClimbing.getHandler(entity).map(LivingWallClimbing::isHamon).orElse(false)) {
             return ModParticles.HAMON_SPARK.get();
         }
         return null;
@@ -204,14 +204,16 @@ public class EnergyRippleLayer<T extends LivingEntity, M extends BipedModel<T>> 
                 }
             }
             
-            // hand sparks (wall climbing)
+            // sparks
             float handSparkIntensity = 4 + entityHamon.getHamonStrengthLevelRatio() * 12;
             int particles = MathUtil.fractionRandomInc(handSparkIntensity * delta);
             if (particles > 0) {
+                float controlLevel = entityHamon.getHamonControlLevelRatio();
+                
+                // hand sparks (wall climbing)
                 for (HandSide hand : HandSide.values()) {
                     ParticleType<?> particle = addHandHamonSparks(entity, hand);
                     if (particle != null) {
-                        float controlLevel = entityHamon.getHamonControlLevelRatio();
                         for (int i = 0; i < particles; i++) {
                             Vector3d offset = new Vector3d(
                                     (RANDOM.nextDouble() - 0.5) * 0.4,
@@ -219,6 +221,18 @@ public class EnergyRippleLayer<T extends LivingEntity, M extends BipedModel<T>> 
                                     (RANDOM.nextDouble() - 0.5) * 0.4);
                             addSpark(SparkPseudoParticle.armSpark(model, hand == HandSide.RIGHT, particle, offset));
                         }
+                    }
+                }
+                
+                // knee sparks (sendo wave kick)
+                if (GeneralUtil.orElseFalse(ContinuousActionInstance.getCurrentAction(entity), 
+                        action -> action.getAction() == ModHamonActions.ZEPPELI_SENDO_WAVE_KICK.get())) {
+                    for (int i = 0; i < particles; i++) {
+                        Vector3d offset = new Vector3d(
+                                (RANDOM.nextDouble() - 0.5) * 0.4,
+                                (RANDOM.nextDouble() - 0.5) * (0.3 - 0.2 * controlLevel) - 0.375,
+                                (RANDOM.nextDouble()) * 0.2);
+                        addSpark(SparkPseudoParticle.legSpark(model, true, ModParticles.HAMON_SPARK.get(), offset));
                     }
                 }
             }

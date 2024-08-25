@@ -25,8 +25,8 @@ import org.lwjgl.glfw.GLFW;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
-import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.living.LivingWallClimbing;
 import com.github.standobyte.jojo.client.controls.ActionKeybindEntry;
 import com.github.standobyte.jojo.client.controls.ActionKeybindEntry.KeyActiveType;
 import com.github.standobyte.jojo.client.controls.ActionKeybindEntry.OnKeyPress;
@@ -221,7 +221,7 @@ public class InputHandler {
                 setToggleHotbarsDisabled(!toggledHotbarsDisabled);
             }
             actionsOverlay.setHotbarsEnabled(!areHotbarsDisabled());
-            
+
             if (actionsOverlay.isActive()) {
                 boolean chooseAttack = controlsAreOnHotbar(ControlScheme.Hotbar.LEFT_CLICK);
                 boolean chooseAbility = controlsAreOnHotbar(ControlScheme.Hotbar.RIGHT_CLICK);
@@ -409,25 +409,26 @@ public class InputHandler {
                     case SELECT:
                         ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
                         ControlScheme controls = HudControlSettings.getInstance().getControlScheme(power.getPowerClassification());
-                        
-                        Hotbar foundHotbar = null;
-                        int foundIndex = -1;
-                        for (Hotbar hotbarType : Hotbar.values()) {
-                            ActionsHotbar hotbar = controls.getActionsHotbar(hotbarType);
-                            List<Action<?>> actions = hotbar.getEnabledActions();
-                            for (int i = 0; i < actions.size() && foundIndex < 0; i++) {
-                                Action<?> action = actions.get(i);
-                                if (action == keybindEntry.getAction() || action.getShiftVariationIfPresent() == keybindEntry.getAction()) {
-                                    foundIndex = i;
-                                    foundHotbar = hotbarType;
+                        if (controls.hotbarsEnabled) {
+                            Hotbar foundHotbar = null;
+                            int foundIndex = -1;
+                            for (Hotbar hotbarType : Hotbar.values()) {
+                                ActionsHotbar hotbar = controls.getActionsHotbar(hotbarType);
+                                List<Action<?>> actions = hotbar.getEnabledActions();
+                                for (int i = 0; i < actions.size() && foundIndex < 0; i++) {
+                                    Action<?> action = actions.get(i);
+                                    if (action == keybindEntry.getAction() || action.getShiftVariationIfPresent() == keybindEntry.getAction()) {
+                                        foundIndex = i;
+                                        foundHotbar = hotbarType;
+                                    }
                                 }
+                                if (foundHotbar != null) break;
                             }
-                            if (foundHotbar != null) break;
-                        }
-                        
-                        if (foundHotbar != null && foundIndex >= 0) {
-                            hud.setMode(power.getPowerClassification());
-                            hud.selectAction(foundHotbar, foundIndex);
+                            
+                            if (foundHotbar != null && foundIndex >= 0) {
+                                hud.setMode(power.getPowerClassification());
+                                hud.selectAction(foundHotbar, foundIndex);
+                            }
                         }
                         break;
                     default:
@@ -1134,7 +1135,7 @@ public class InputHandler {
         player.setDeltaMovement(player.getDeltaMovement().add(dash));
     }
     
-    public void wallClimbClientTick(boolean isMoving, LivingUtilCap wallClimbData) {
+    public void wallClimbClientTick(boolean isMoving, LivingWallClimbing wallClimbData) {
         if (this.wallClimbMoving != isMoving) {
             PacketManager.sendToServer(ClHasInputPacket.wallClimbing(isMoving));
             this.wallClimbMoving = isMoving;

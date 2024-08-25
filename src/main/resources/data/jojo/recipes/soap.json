@@ -1,9 +1,23 @@
 {
   "type": "minecraft:crafting_shapeless",
   "ingredients": [
-    {
-      "item": "minecraft:porkchop"
-    },
+    [
+      {
+        "item": "minecraft:porkchop"
+      },
+      {
+        "item": "minecraft:beef"
+      },
+      {
+        "item": "minecraft:chicken"
+      },
+      {
+        "item": "minecraft:mutton"
+      },
+      {
+        "item": "minecraft:rabbit"
+      }
+    ],
     {
       "item": "minecraft:bone"
     },
@@ -11,11 +25,11 @@
       "item": "minecraft:leather"
     },
     {
-      "item": "minecraft:glass_bottle"
-    }
-    ,
-    {
-      "item": "minecraft:water_bucket"
+      "type": "forge:nbt",
+      "item": "minecraft:potion",
+      "nbt": {
+        "Potion": "minecraft:water"
+      }
     }
   ],
   "result": {

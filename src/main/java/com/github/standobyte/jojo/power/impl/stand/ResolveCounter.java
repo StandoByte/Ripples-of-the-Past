@@ -8,10 +8,9 @@ import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.MaxAchievedResolvePacket;
-import com.github.standobyte.jojo.network.packets.fromserver.ResetResolveValuePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveBoostsPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.ResolveLevelPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.ResolvePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrResolveLevelPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrResolvePacket;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.general.DiscardingSortedMultisetWrapper;
@@ -202,9 +201,10 @@ public class ResolveCounter {
         
         int ticks = noDecayTicks;
         if (send) {
-            serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new ResolvePacket(getResolveValue(), ticks), player);
-            });
+            LivingEntity user = stand.getUser();
+            if (!user.level.isClientSide()) {
+                PacketManager.sendToClientsTrackingAndSelf(new TrResolvePacket(user.getId(), getResolveValue(), ticks), user);
+            }
         }
         
         int resolveLevel = getResolveLevel();
@@ -270,9 +270,10 @@ public class ResolveCounter {
     void setResolveLevel(int level) {
         boolean send = levels.setResolveLevel(stand, level);
         if (send) {
-            serverPlayerUser.ifPresent(player -> {
-                PacketManager.sendToClient(new ResolveLevelPacket(getResolveLevel()), player);
-            });
+            LivingEntity user = stand.getUser();
+            if (!user.level.isClientSide()) {
+                PacketManager.sendToClientsTrackingAndSelf(new TrResolveLevelPacket(user.getId(), getResolveLevel()), user);
+            }
         }
     }
     
@@ -372,7 +373,7 @@ public class ResolveCounter {
         this.hpOnGettingAttacked = hp;
     }
 
-    void reset() {
+    void onClearStandType() {
         resolve = 0;
         prevTickResolve = 0;
         levels.onStandSet(null);
@@ -393,9 +394,11 @@ public class ResolveCounter {
         maxAchievedValue = 0;
         setBoosts(1, 1, 1);
         hpOnGettingAttacked = -1;
-        serverPlayerUser.ifPresent(player -> {
-            PacketManager.sendToClient(new ResetResolveValuePacket(), player);
-        });
+        
+        LivingEntity user = stand.getUser();
+        if (!user.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(TrResolvePacket.reset(user.getId()), user);
+        }
     }
     
     void clone(ResolveCounter previous) {
@@ -426,9 +429,14 @@ public class ResolveCounter {
     }
 
     void syncWithUser(ServerPlayerEntity player) {
-        PacketManager.sendToClient(new ResolvePacket(getResolveValue(), noResolveDecayTicks), player);
         PacketManager.sendToClient(new MaxAchievedResolvePacket(maxAchievedValue), player);
         PacketManager.sendToClient(new ResolveBoostsPacket(boostAttack, boostRemoteControl, boostChat, hpOnGettingAttacked), player);
+    }
+
+    void syncWithTrackingOrUser(ServerPlayerEntity player) {
+        LivingEntity user = stand.getUser();
+        PacketManager.sendToClient(new TrResolveLevelPacket(user.getId(), getResolveLevel()), player);
+        PacketManager.sendToClient(new TrResolvePacket(user.getId(), getResolveValue(), noResolveDecayTicks), player);
     }
 
     void readNbt(CompoundNBT nbt) {

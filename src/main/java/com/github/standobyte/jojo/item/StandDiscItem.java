@@ -105,14 +105,6 @@ public class StandDiscItem extends Item {
         }
         return ActionResult.fail(stack);
     }
-
-//    private static boolean canGetStandFromDisc(LivingEntity entity, IStandPower entityStandPower, StandType<?> stand) {
-//        if (entity instanceof PlayerEntity) {
-//            PlayerEntity player = (PlayerEntity) entity;
-//            return player.abilities.instabuild || entityStandPower.hadAnyStand();
-//        }
-//        return false;
-//    }
     
     @Override
     public void fillItemCategory(ItemGroup group, NonNullList<ItemStack> items) {
@@ -130,6 +122,12 @@ public class StandDiscItem extends Item {
             .forEach(stand -> items.add(withStand(new ItemStack(this), new StandInstance(stand))));
         }
     }
+    
+    @Override
+    public boolean allowdedIn(ItemGroup creativeTab) {
+        return super.allowdedIn(creativeTab);
+    }
+    
     
     public static ItemStack withStand(ItemStack discStack, StandInstance standInstance) {
         discStack.getOrCreateTag().put(STAND_TAG, standInstance.writeNBT());

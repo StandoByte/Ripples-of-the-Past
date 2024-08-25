@@ -507,6 +507,13 @@ public class HamonData extends TypeSpecificData {
 //            efficiency *= healthRatio * 3F + 0.25F;
 //        }
         
+        float bleeding = 0;
+        EffectInstance bleedingEffect = user.getEffect(ModStatusEffects.BLEEDING.get());
+        if (bleedingEffect != null) {
+            bleeding = Math.min((bleedingEffect.getAmplifier() + 1) * 0.2F, 0.8F);
+        }
+        efficiency *= (1F - bleeding);
+        
         float freeze = 0;
         EffectInstance freezeEffect = user.getEffect(ModStatusEffects.FREEZE.get());
         if (freezeEffect != null) {

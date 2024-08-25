@@ -95,6 +95,13 @@ public class EntityUtilCap {
         setClGlowingColor(OptionalInt.empty(), -1);
     }
     
+    public void refreshClEntityGlowing() {
+        if (entity instanceof IEntityGlowColor) {
+            IEntityGlowColor colorData = (IEntityGlowColor) entity;
+            colorData.setGlowColor(glowingColor);
+        }
+    }
+    
     private void tickGlowingColor() {
         if (glowingColor.isPresent() && glowColorTicks > 0 && --glowColorTicks == 0 && entity instanceof IEntityGlowColor) {
             IEntityGlowColor colorData = (IEntityGlowColor) entity;

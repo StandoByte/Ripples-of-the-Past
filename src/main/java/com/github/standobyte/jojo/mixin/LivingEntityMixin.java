@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
-import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.living.LivingWallClimbing;
 import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
 import com.github.standobyte.jojo.util.mod.NoKnockbackOnBlocking;
 
@@ -44,8 +44,7 @@ public abstract class LivingEntityMixin extends Entity {
     
     @Inject(method = "onClimbable", at = @At("HEAD"), cancellable = true)
     public void jojoOnClimbableFlag(CallbackInfoReturnable<Boolean> ci) {
-        if (!this.isSpectator() && this.getCapability(LivingUtilCapProvider.CAPABILITY)
-                .map(cap -> cap.isHamonWallClimbing()).orElse(false)) {
+        if (!this.isSpectator() && LivingWallClimbing.getHandler((LivingEntity) (Entity) this).map(cap -> cap.isWallClimbing()).orElse(false)) {
             ci.setReturnValue(true);
         }
     }

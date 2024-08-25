@@ -97,9 +97,7 @@ public class StandStatFormulas {
     
     public static float getPhysicalResistance(double durability, double strength, float blocked, float damageDealt) {
         double x = (durability * 2 + strength * 1) / 3;
-        double resistance = Math.min(
-                Math.sqrt(x / 20), 
-                1 - 1 / (x + 1));
+        double resistance = x / (x + 4); // simplified `1 - 1 / (x / 4 + 1)`
         double dmgCoeff = 1;
         
         if (blocked > 0) {

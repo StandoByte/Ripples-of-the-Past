@@ -7,6 +7,8 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.player.IPlayerAction;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
+import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
+import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
@@ -104,8 +106,8 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
             }
         }
         
-        // FIXME ! (hamon 2) sound & particles
         else {
+            HamonSparksLoopSound.playSparkSound(user, new Vector3d(user.getX(), user.getY(0.25), user.getZ()), 1.0F, true);
         }
         
         user.fallDistance = 0;
@@ -121,13 +123,16 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
         Vector3d lookVec = new Vector3d(Math.sin(xzAngle), 0, Math.cos(xzAngle));
         Vector3d hitboxXZCenter = user.position().add(lookVec.scale(user.getBbWidth() * 0.75F));
         return new AxisAlignedBB(hitboxXZCenter, hitboxXZCenter)
-                .inflate(user.getBbWidth() * 0.6F, 0, user.getBbWidth() * 0.6F)
+                .inflate(user.getBbWidth() * 1.25F, 0.125, user.getBbWidth() * 1.25F)
                 .expandTowards(0, user.getBbHeight() / 2, 0);
     }
     
     @Override
     public SendoWaveKickInstance createContinuousActionInstance(
             LivingEntity user, PlayerUtilCap userCap, INonStandPower power) {
+        if (user.level.isClientSide() && user instanceof PlayerEntity) {
+            ModPlayerAnimations.sendoWaveKick.setAnimEnabled((PlayerEntity) user, true);
+        }
         return new SendoWaveKickInstance(user, userCap, power, this);
     }
     
@@ -163,6 +168,19 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
         public boolean cancelIncomingDamage(DamageSource dmgSource, float dmgAmount) {
             return isMeleeAttack(dmgSource);
         }
+        
+        @Override
+        public boolean stopAction() {
+            if (super.stopAction()) {
+                if (user.level.isClientSide() && user instanceof PlayerEntity) {
+                    ModPlayerAnimations.sendoWaveKick.setAnimEnabled((PlayerEntity) user, false);
+                }
+                return true;
+            }
+            
+            return false;
+        }
+        
     }
 }
 

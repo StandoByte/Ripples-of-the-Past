@@ -202,38 +202,39 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
     private final Map<Supplier<ModelRenderer>, Consumer<ModelRenderer>> baseHumanoidBoxGenerators;
 
     @Override
-    public void updatePartsVisibility(VisibilityMode mode, boolean invert) {
-        if (mode == VisibilityMode.ALL) {
-            head.visible = !invert;
-            torso.visible = !invert;
-            leftLeg.visible = !invert;
-            rightLeg.visible = !invert;
-            leftArm.visible = !invert;
-            rightArm.visible = !invert;
+    public void updatePartsVisibility(VisibilityMode mode) {
+        VisibilityMode baseMode = mode.baseMode;
+        boolean setVisible = !mode.isInverted;
+        if (baseMode == VisibilityMode.ALL) {
+            head.visible = setVisible;
+            torso.visible = setVisible;
+            leftLeg.visible = setVisible;
+            rightLeg.visible = setVisible;
+            leftArm.visible = setVisible;
+            rightArm.visible = setVisible;
         }
         else {
-            head.visible = invert;
-            torso.visible = invert;
-            leftLeg.visible = invert;
-            rightLeg.visible = invert;
-            switch (mode) {
+            head.visible = !setVisible;
+            torso.visible = !setVisible;
+            leftLeg.visible = !setVisible;
+            rightLeg.visible = !setVisible;
+            switch (baseMode) {
             case ARMS_ONLY:
-                leftArm.visible = !invert;
-                rightArm.visible = !invert;
+                leftArm.visible = setVisible;
+                rightArm.visible = setVisible;
                 break;
             case LEFT_ARM_ONLY:
-                leftArm.visible = !invert;
-                rightArm.visible = invert;
+                leftArm.visible = setVisible;
+                rightArm.visible = !setVisible;
                 break;
             case RIGHT_ARM_ONLY:
-                leftArm.visible = invert;
-                rightArm.visible = !invert;
+                leftArm.visible = !setVisible;
+                rightArm.visible = setVisible;
                 break;
             case NONE:
-                leftArm.visible = invert;
-                rightArm.visible = invert;
-                
-            case ALL:
+                leftArm.visible = !setVisible;
+                rightArm.visible = !setVisible;
+            default:
                 break;
             }
         }

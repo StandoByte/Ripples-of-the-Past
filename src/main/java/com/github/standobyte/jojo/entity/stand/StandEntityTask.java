@@ -256,7 +256,11 @@ public class StandEntityTask {
     
     @Nullable
     public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity) {
-        return offsetFromUserOverride != null ? offsetFromUserOverride : action.getOffsetFromUser(standPower, standEntity, this);
+        StandRelativeOffset offset = offsetFromUserOverride != null ? offsetFromUserOverride : action.getOffsetFromUser(standPower, standEntity, this);
+        if (offset != null) {
+            return offset.applyYOffset(standEntity.getDefaultOffsetFromUser().y);
+        }
+        return null;
     }
     
     

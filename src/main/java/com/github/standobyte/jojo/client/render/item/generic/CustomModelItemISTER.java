@@ -31,11 +31,11 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.ForgeHooksClient;
 
 public class CustomModelItemISTER<M extends Model> extends ItemStackTileEntityRenderer implements ISTERWithEntity {
-    protected final ResourceLocation modelResource;
-    protected final ResourceLocation texture;
+    public final ResourceLocation modelResource;
+    public final ResourceLocation texture;
     protected final Supplier<? extends Item> item;
     protected final Supplier<M> modelObjConstructor;
-    protected M model;
+    public M model;
     @Nullable protected LivingEntity entity;
     
     public CustomModelItemISTER(ResourceLocation modelResource, ResourceLocation texture, 

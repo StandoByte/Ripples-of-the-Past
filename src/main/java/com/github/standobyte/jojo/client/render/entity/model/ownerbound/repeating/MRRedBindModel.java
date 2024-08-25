@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.client.render.entity.model.ownerbound.repeating;
 
 import com.github.standobyte.jojo.client.render.FlameModelRenderer;
-import com.github.standobyte.jojo.client.render.entity.renderer.stand.MagiciansRedRenderer;
+import com.github.standobyte.jojo.client.render.block.BlockSprites;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.MRRedBindEntity;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -17,7 +17,9 @@ public class MRRedBindModel extends RepeatingModel<MRRedBindEntity> {
         texWidth = 32;
         texHeight = 32;
 
-        flameRope = new FlameModelRenderer(this).setFireSprites(MagiciansRedRenderer.FIRE_0_SPRITE, MagiciansRedRenderer.FIRE_1_SPRITE);
+        flameRope = new FlameModelRenderer(this).setFireSprites(
+                BlockSprites.MR_FIRE_BLOCK_0::sprite, 
+                BlockSprites.MR_FIRE_BLOCK_1::sprite);
         flameRope.setPos(0.0F, 0.0F, 0.0F);
         flameRope.addFlame(0, 1.0F, 0, 2F, 3F, Direction.NORTH);
     }

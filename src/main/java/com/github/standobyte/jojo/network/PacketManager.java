@@ -66,12 +66,9 @@ import com.github.standobyte.jojo.network.packets.fromserver.PlayVoiceLinePacket
 import com.github.standobyte.jojo.network.packets.fromserver.PreviousPowerTypesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.PreviousStandTypesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.RefreshMovementInTimeStopPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.ResetResolveValuePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResetSyncedCommonConfigPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveBoostsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveEffectStartPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.ResolveLevelPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.ResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ServerIdPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SkippedStandProgressionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SoulSpawnPacket;
@@ -112,6 +109,8 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrNoMotionLerpPacke
 import com.github.standobyte.jojo.network.packets.fromserver.TrPillarmanFlagsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerContinuousActionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerVisualDetailPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrResolveLevelPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStaminaPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandEffectPacket;
@@ -240,10 +239,9 @@ public class PacketManager {
         registerMessage(serverChannel, new ArrowXpLevelsDataPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new PreviousStandTypesPacket.Handler(),             Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new PreviousPowerTypesPacket.Handler(),             Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        registerMessage(serverChannel, new ResolvePacket.Handler(),                        Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(serverChannel, new TrResolvePacket.Handler(),                      Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrStandEffectPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        registerMessage(serverChannel, new ResetResolveValuePacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        registerMessage(serverChannel, new ResolveLevelPacket.Handler(),                   Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(serverChannel, new TrResolveLevelPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new ResolveBoostsPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new MaxAchievedResolvePacket.Handler(),             Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new SkippedStandProgressionPacket.Handler(),        Optional.of(NetworkDirection.PLAY_TO_CLIENT));

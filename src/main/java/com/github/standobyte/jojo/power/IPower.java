@@ -55,7 +55,7 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     void resetCooldowns();
     ActionCooldownTracker getCooldowns();
     
-    boolean clickAction(Action<P> action, boolean sneak, ActionTarget target);
+    boolean clickAction(Action<P> action, boolean sneak, ActionTarget target, @Nullable PacketBuffer extraInput);
     ActionConditionResult checkRequirements(Action<P> action, ObjectWrapper<ActionTarget> targetContainer, boolean checkTargetType);
     ActionConditionResult checkTarget(Action<P> action, ObjectWrapper<ActionTarget> targetContainer);
     boolean canUsePower();

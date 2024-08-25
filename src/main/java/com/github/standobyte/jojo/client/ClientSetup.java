@@ -28,6 +28,7 @@ import com.github.standobyte.jojo.client.render.armor.model.BreathControlMaskMod
 import com.github.standobyte.jojo.client.render.armor.model.GlovesModel;
 import com.github.standobyte.jojo.client.render.armor.model.SatiporojaScarfArmorModel;
 import com.github.standobyte.jojo.client.render.armor.model.StoneMaskModel;
+import com.github.standobyte.jojo.client.render.block.BlockSprites;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.EnergyRippleLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.FrozenLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.GlovesLayer;
@@ -94,6 +95,7 @@ import com.github.standobyte.jojo.client.render.entity.renderer.stand.MagiciansR
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.SilverChariotRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.StarPlatinumRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.TheWorldRenderer;
+import com.github.standobyte.jojo.client.render.item.CustomIconItem;
 import com.github.standobyte.jojo.client.render.item.RoadRollerBakedModel;
 import com.github.standobyte.jojo.client.render.item.generic.ItemISTERModelWrapper;
 import com.github.standobyte.jojo.client.render.item.standdisc.StandDiscISTERModel;
@@ -246,9 +248,7 @@ public class ClientSetup {
         HudControlSettings.init(new File(mc.gameDirectory, "config/jojo_rotp/controls/"));
         
         event.enqueueWork(() -> {
-            ItemModelsProperties.register(ModItems.METEORIC_SCRAP.get(), new ResourceLocation(JojoMod.MOD_ID, "icon"), (itemStack, clientWorld, livingEntity) -> {
-                return itemStack.getOrCreateTag().getInt("Icon");
-            });
+            CustomIconItem.registerModelOverride();
             ItemModelsProperties.register(ModItems.KNIFE.get(), new ResourceLocation(JojoMod.MOD_ID, "count"), (itemStack, clientWorld, livingEntity) -> {
                 return livingEntity != null ? itemStack.getCount() : 1;
             });
@@ -284,6 +284,7 @@ public class ClientSetup {
             RenderTypeLookup.setRenderLayer(ModBlocks.AJA_STONE_MASK.get(), RenderType.cutoutMipped());
             RenderTypeLookup.setRenderLayer(ModBlocks.SLUMBERING_PILLARMAN.get(), RenderType.cutoutMipped());
             RenderTypeLookup.setRenderLayer(ModBlocks.MAGICIANS_RED_FIRE.get(), RenderType.cutout());
+            ModBlocks.WOODEN_COFFIN_OAK.values().forEach(coffinBlock -> RenderTypeLookup.setRenderLayer(coffinBlock.get(), RenderType.cutout()));
             
             ScreenManager.register(ModContainers.WALKMAN.get(), WalkmanScreen::new);
 
@@ -297,6 +298,7 @@ public class ClientSetup {
             ClientTimeStopHandler.init(mc);
             ShaderEffectApplier.init(mc);
             FirstPersonHamonAura.init();
+            TemporaryDimensionEffects.init();
             
             Map<String, PlayerRenderer> skinMap = mc.getEntityRenderDispatcher().getSkinMap();
             addLayers(skinMap.get("default"), false);
@@ -306,6 +308,14 @@ public class ClientSetup {
             MarkerRenderer.Handler.addRenderer(new HierophantGreenBarrierDetectionMarker(mc));
             MarkerRenderer.Handler.addRenderer(new CrazyDiamondAnchorMarker(mc));
             MarkerRenderer.Handler.addRenderer(new CrazyDiamondBloodHomingMarker(mc));
+            
+//            StandStatsRenderer.overrideCosmeticStats(
+//                    ModStands.GOLD_EXPERIENCE_REQUIEM.getStandType().getRegistryName(), 
+//                    new StandStatsRenderer.OverrideCosmeticStat() {
+//                        @Override public double newValue(StandStat stat, IStandPower standData, double curConvertedValue) { 
+//                            return 0;
+//                        }
+//                    });
         });
     }
 
@@ -391,6 +401,7 @@ public class ClientSetup {
                 model -> new ItemISTERModelWrapper(model).setCaptureEntity());
         registerCustomBakedModel(ModItems.CLACKERS.get().getRegistryName(), event.getModelRegistry(), 
                 model -> new ItemISTERModelWrapper(model).setCaptureEntity());
+        CustomIconItem.onModelBake(event.getModelRegistry());
     }
     
     public static void registerCustomBakedModel(ResourceLocation resLoc, 
@@ -412,6 +423,7 @@ public class ClientSetup {
     @SubscribeEvent
     public static void addSprites(ModelRegistryEvent event) {
         if (!spritesAdded) {
+            addUnreferencedBlockModels(BlockSprites.MR_FIRE_BLOCK_0, BlockSprites.MR_FIRE_BLOCK_1);
             addUnreferencedBlockModels(MagiciansRedRenderer.MR_FIRE_0, MagiciansRedRenderer.MR_FIRE_1);
             spritesAdded = true;
         }
@@ -457,7 +469,6 @@ public class ClientSetup {
         CustomParticlesHelper.saveSprites(mc);
         // yep...
         CustomResources.initCustomResourceManagers(mc);
-        StandControlMouseHelper.overrideVanillaMouseHelper(mc);
     }
 
     private static class SoulCloudParticleFactory extends CloudParticle.Factory {

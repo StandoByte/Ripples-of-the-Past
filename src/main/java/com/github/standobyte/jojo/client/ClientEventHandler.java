@@ -23,6 +23,7 @@ import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
+import com.github.standobyte.jojo.capability.entity.living.LivingWallClimbing;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.particle.custom.FirstPersonHamonAura;
@@ -44,6 +45,7 @@ import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.CategoryWith
 import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.ControlSettingToggleButton;
 import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.HoldToggleKeyEntry;
 import com.github.standobyte.jojo.client.ui.screen.widgets.HeightScaledSlider;
+import com.github.standobyte.jojo.client.ui.screen.widgets.ImageMutableButton;
 import com.github.standobyte.jojo.client.ui.screen.widgets.ImageVanillaButton;
 import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
 import com.github.standobyte.jojo.init.ModEntityTypes;
@@ -301,7 +303,7 @@ public class ClientEventHandler {
     public void onRenderPlayer(RenderPlayerEvent.Pre event) {
         if (mc.player != event.getPlayer()) {
             event.getPlayer().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                cap.climbLimitPlayerHeadRot();
+                cap.limitPlayerHeadRot();
             });
         }
     }
@@ -317,7 +319,7 @@ public class ClientEventHandler {
                 timeStopHandler.setConstantPartialTick(clientTimer);
                 
                 mc.player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                    cap.climbLimitPlayerHeadRot();
+                    cap.limitPlayerHeadRot();
                 });
                 mc.player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                     cap.applyLockedRotation();
@@ -663,10 +665,11 @@ public class ClientEventHandler {
                     gui.blit(matrixStack, x, y, MARGIN + 45, TOP, 9, 9); //5
                 
                 // !
-                if (i * 2 + 1 >= healthMax)
+                if (i * 2 + 1 >= healthMax) {
                     mc.getTextureManager().bind(ClientUtil.ADDITIONAL_UI);
-                    gui.blit(matrixStack, x, y, 0, 160, 9, 9);
+                    gui.blit(matrixStack, x, y, 64, 0, 9, 9);
                     mc.getTextureManager().bind(AbstractGui.GUI_ICONS_LOCATION);
+                }
             }
         }
 
@@ -714,10 +717,11 @@ public class ClientEventHandler {
                     gui.blit(matrixStack, x, top, HALF, 9, 9, 9);
                 
                 // !
-                if (i * 2 + 1 + heart >= healthMax)
+                if (i * 2 + 1 + heart >= healthMax) {
                     mc.getTextureManager().bind(ClientUtil.ADDITIONAL_UI);
-                    gui.blit(matrixStack, x, top, 9, 160, 9, 9);
+                    gui.blit(matrixStack, x, top, 73, 0, 9, 9);
                     mc.getTextureManager().bind(AbstractGui.GUI_ICONS_LOCATION);
+                }
             }
 
             ForgeIngameGui.right_height += 10;
@@ -817,7 +821,7 @@ public class ClientEventHandler {
                                 ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get(), 
                                 ModHamonActions.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE_BARRAGE.get(),
                                 ModHamonActions.HAMON_WALL_CLIMBING.get())
-                                || player.getCapability(LivingUtilCapProvider.CAPABILITY).map(cap -> cap.isWallClimbing()).orElse(false))
+                                || LivingWallClimbing.getHandler(player).map(cap -> cap.isWallClimbing()).orElse(false))
                                 && MCUtil.isHandFree(player, Hand.MAIN_HAND) && MCUtil.isHandFree(player, Hand.OFF_HAND)) {
                             renderHand(Hand.OFF_HAND, event.getMatrixStack(), event.getBuffers(), event.getLight(), 
                                     event.getPartialTicks(), event.getInterpolatedPitch(), player);
@@ -917,13 +921,18 @@ public class ClientEventHandler {
 
         else if (screen instanceof IngameMenuScreen && ClientReflection.showsPauseMenu((IngameMenuScreen) screen)) {
             float alpha = ClientModSettings.getSettingsReadOnly().standStatsTranslucency;
+            boolean invertBnW = ClientModSettings.getSettingsReadOnly().standStatsInvertBnW;
             int xButtonsRightEdge = screen.width / 2 + 102;
             int windowWidth = screen.width;
             int windowHeight = screen.height;
             
             if (doStandStatsRender(screen)) {
-                StandStatsRenderer.renderStandStats(event.getMatrixStack(), mc, windowWidth - 160, windowHeight - 160, windowWidth, windowHeight,
-                        standStatsTick, partialTick, alpha, event.getMouseX(), event.getMouseY(), windowWidth - xButtonsRightEdge - 14);
+                StandStatsRenderer.renderStandStats(event.getMatrixStack(), mc, 
+                        windowWidth - StandStatsRenderer.statsWidth - 7, windowHeight - StandStatsRenderer.statsHeight - 7, 
+                        windowWidth, windowHeight,
+                        standStatsTick, partialTick, 
+                        alpha, invertBnW,
+                        event.getMouseX(), event.getMouseY(), windowWidth - xButtonsRightEdge - 14);
             }
         }
     }
@@ -969,18 +978,32 @@ public class ClientEventHandler {
                         
                         @Override
                         protected void applyValue() {
-                            ClientModSettings.getInstance().editSettings(settings -> 
-                            settings.standStatsTranslucency = (float) MathHelper.clampedLerp(0.1, 1.0, this.value));
+                            ClientModSettings.getInstance().editSettings(settings -> {
+                                settings.standStatsTranslucency = (float) MathHelper.clampedLerp(0.1, 1.0, this.value);
+                            });
                         }
                     };
                     statsBgAlphaSlider.visible = doStandStatsRender(screen);
                     event.addWidget(statsBgAlphaSlider);
                     
+                    ImageMutableButton invertBnWButton = new ImageMutableButton(screen.width - 8, screen.height - 7, 
+                            8, 8, 464, 496, 8, StandStatsRenderer.STAND_STATS_UI, 512, 512, 
+                            button -> {
+                                ClientModSettings.getInstance().editSettings(settings -> {
+                                    settings.standStatsInvertBnW = !settings.standStatsInvertBnW;
+                                    ((ImageMutableButton) button).xTexStart = settings.standStatsInvertBnW ? 472 : 464;
+                                });
+                            });
+                    invertBnWButton.xTexStart = ClientModSettings.getSettingsReadOnly().standStatsInvertBnW ? 472 : 464;
+                    invertBnWButton.visible = doStandStatsRender(screen);
+                    event.addWidget(invertBnWButton);
+                    
                     Button standStatsToggleButton = new ImageVanillaButton(screen.width - 28, screen.height - 28, 
-                            20, 20, 236, 236, StandStatsRenderer.STAND_STATS_UI, 256, 256, 
+                            20, 20, 492, 492, StandStatsRenderer.STAND_STATS_UI, 512, 512, 
                             button -> {
                                 renderStandStats = !doStandStatsRender(screen);
                                 statsBgAlphaSlider.visible = doStandStatsRender(screen);
+                                invertBnWButton.visible = doStandStatsRender(screen);
                             }, 
                             (button, matrixStack, x, y) -> {
                                 ITextComponent message = doStandStatsRender(screen) ? 
@@ -1228,7 +1251,7 @@ public class ClientEventHandler {
     }
     
     
-
+    
     private UUID serverId;
     private boolean isLoggedIn = false;
     

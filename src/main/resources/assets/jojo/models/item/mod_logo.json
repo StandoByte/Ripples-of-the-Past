@@ -1,0 +1,43 @@
+{
+	"credit": "Made with Blockbench",
+	"textures": {
+		"particle": "jojo:item/stand_arrow"
+	},
+	"display": {
+		"thirdperson_righthand": {
+			"translation": [0, 3, 1],
+			"scale": [0.55, 0.55, 0.55]
+		},
+		"thirdperson_lefthand": {
+			"translation": [0, 3, 1],
+			"scale": [0.55, 0.55, 0.55]
+		},
+		"firstperson_righthand": {
+			"rotation": [0, 150, -7.5],
+			"translation": [-1.25, 4.25, 0.5],
+			"scale": [0.5, 0.5, 0.5]
+		},
+		"firstperson_lefthand": {
+			"rotation": [0, 150, -7.5],
+			"translation": [-1.25, 4.25, 0.5],
+			"scale": [0.5, 0.5, 0.5]
+		},
+		"ground": {
+			"translation": [0, 2, 0],
+			"scale": [0.5, 0.5, 0.5]
+		},
+		"gui": {
+			"rotation": [0, 180, 0],
+			"translation": [-0.75, -2.75, 0],
+			"scale": [0.75, 0.75, 0.75]
+		},
+		"head": {
+			"translation": [0, 11, 0],
+			"scale": [0.5, 0.5, 0.5]
+		},
+		"fixed": {
+			"translation": [0.75, -2, -6],
+			"scale": [0.75, 0.75, 0.75]
+		}
+	}
+}

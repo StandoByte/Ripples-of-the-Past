@@ -13,10 +13,10 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.client.event.ClientChatEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-public class KosmXTestAnimLayer extends AnimLayerHandler<ModifierLayer<IAnimation>> {
+public class KosmXTestAnimHandler extends AnimLayerHandler<ModifierLayer<IAnimation>> {
     private SpeedModifier animSpeed = new SpeedModifier(1);
 
-    public KosmXTestAnimLayer(ResourceLocation id) {
+    public KosmXTestAnimHandler(ResourceLocation id) {
         super(id);
     }
 
@@ -32,6 +32,11 @@ public class KosmXTestAnimLayer extends AnimLayerHandler<ModifierLayer<IAnimatio
         return true;
     }
     
+    /* 
+     *   /animtest <name>
+     *   /animtest <name> <speed>
+     *   /animtest <fadeOutTicks>
+     */
     @SubscribeEvent
     public void onChat(ClientChatEvent event) {
         String[] msg = event.getMessage().split(" ");
@@ -73,6 +78,7 @@ public class KosmXTestAnimLayer extends AnimLayerHandler<ModifierLayer<IAnimatio
                 setAnim(player, null);
             }
             event.setCanceled(true);
+            Minecraft.getInstance().gui.getChat().addRecentChat(event.getMessage());
         }
     }
     

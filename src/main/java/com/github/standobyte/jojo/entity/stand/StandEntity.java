@@ -188,8 +188,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     
     public Vector3d prevTiltVec = Vector3d.ZERO;
     public Vector3d tiltVec = Vector3d.ZERO;
-    
-    public float outlineTicks = 0;
+    public boolean refreshGlowing = false;
     
     public static final DataParameter<Optional<ResourceLocation>> DATA_PARAM_STAND_SKIN = EntityDataManager.defineId(StandEntity.class, 
             (IDataSerializer<Optional<ResourceLocation>>) ModDataSerializers.OPTIONAL_RES_LOC.get().getSerializer());
@@ -213,6 +212,11 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             this.barrageSounds = null;
         }
         init(this);
+    }
+
+    @Override
+    public boolean isGlowing() {
+        return super.isGlowing();
     }
     
     private <T extends StandEntity> void init(T thisEntity) {
@@ -1521,7 +1525,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     public boolean checkInputBuffer() {
         if (inputBuffer != null) {
             LivingEntity user = getUser();
-            if (userPower.clickAction(inputBuffer, user != null && user.isShiftKeyDown(), ActionTarget.EMPTY)) {
+            if (userPower.clickAction(inputBuffer, user != null && user.isShiftKeyDown(), ActionTarget.EMPTY, null)) {
                 inputBuffer = null;
                 return true;
             }
@@ -2133,6 +2137,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
 
     private boolean prevTickInput = false;
+    public float manualMovementSpeed = 1;
     public void moveStandManually(float strafe, float forward, boolean jumping, boolean sneaking) {
         if (isManuallyControlled() && canMoveManually()) {
             strafe = manualMovementLocks.strafe(strafe);
@@ -2148,10 +2153,13 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
                     strafe *= 0.5;
                     forward *= 0.5;
                 }
-                setDeltaMovement(getAbsoluteMotion(new Vector3d((double)strafe, y, (double)forward), speed, this.yRot).scale(getUserWalkSpeed()));
-                
                 if (!prevTickInput) {
                     setDeltaMovement(Vector3d.ZERO);
+                }
+                else {
+                    Vector3d motion = getAbsoluteMotion(new Vector3d((double)strafe, y, (double)forward), speed, this.yRot)
+                            .scale(getUserWalkSpeed() * manualMovementSpeed);
+                    setDeltaMovement(motion);
                 }
             }
             else if (prevTickInput) {

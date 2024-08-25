@@ -7,7 +7,9 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
@@ -24,6 +26,7 @@ import com.google.common.collect.ObjectArrays;
 
 import io.netty.handler.codec.DecoderException;
 import net.minecraft.client.network.play.IClientPlayNetHandler;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.IPacket;
@@ -206,6 +209,7 @@ public class NetworkUtil {
     }
     
     
+    @Deprecated
     public static <T> void writeOptionally(PacketBuffer buf, @Nullable T obj, Consumer<T> write) {
         buf.writeBoolean(obj != null);
         if (obj != null) {
@@ -213,13 +217,31 @@ public class NetworkUtil {
         }
     }
     
+    public static <T> void writeOptionally(PacketBuffer buf, @Nullable T obj, BiConsumer<T, PacketBuffer> write) {
+        buf.writeBoolean(obj != null);
+        if (obj != null) {
+            write.accept(obj, buf);
+        }
+    }
+
+    @Deprecated
     public static <T> void writeOptional(PacketBuffer buf, @Nonnull Optional<T> objOptional, Consumer<T> write) {
         buf.writeBoolean(objOptional.isPresent());
         objOptional.ifPresent(obj -> write.accept(obj));
     }
     
+    public static <T> void writeOptional(PacketBuffer buf, @Nonnull Optional<T> objOptional, BiConsumer<T, PacketBuffer> write) {
+        buf.writeBoolean(objOptional.isPresent());
+        objOptional.ifPresent(obj -> write.accept(obj, buf));
+    }
+
+    @Deprecated
     public static <T> Optional<T> readOptional(PacketBuffer buf, Supplier<T> read) {
-        return buf.readBoolean() ? Optional.of(read.get()) : Optional.empty();
+        return buf.readBoolean() ? Optional.ofNullable(read.get()) : Optional.empty();
+    }
+    
+    public static <T> Optional<T> readOptional(PacketBuffer buf, Function<PacketBuffer, T> read) {
+        return buf.readBoolean() ? Optional.ofNullable(read.apply(buf)) : Optional.empty();
     }
     
     
@@ -286,5 +308,23 @@ public class NetworkUtil {
         default:
             throw new IllegalArgumentException();
         }
+    }
+    
+    
+    public static void writeEntity(PacketBuffer buf, @Nullable Entity entity) {
+        buf.writeBoolean(entity != null);
+        if (entity != null) {
+            buf.writeInt(entity.getId());
+        }
+    }
+    
+    @Nullable
+    public static Entity readEntity(PacketBuffer buf, World world) {
+        boolean hasEntity = buf.readBoolean();
+        if (hasEntity) {
+            int entityId = buf.readInt();
+            return world.getEntity(entityId);
+        }
+        return null;
     }
 }

@@ -9,7 +9,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.playeranim.anim.interfaces.WallClimbAnim;
 import com.github.standobyte.jojo.client.playeranim.kosmx.KosmXPlayerAnimatorInstalled.AnimLayerHandler;
-import com.github.standobyte.jojo.client.playeranim.kosmx.anim.KosmXModifierSpeedLayer;
+import com.github.standobyte.jojo.client.playeranim.kosmx.anim.modifier.KosmXFixedMirrorModifier;
 import com.github.standobyte.jojo.client.playeranim.kosmx.anim.modifier.KosmXHeadRotationModifier;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.EnergyRippleLayer;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -17,9 +17,13 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClSyncMotionAnimPac
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 
+import dev.kosmx.playerAnim.api.TransformType;
 import dev.kosmx.playerAnim.api.layered.IAnimation;
+import dev.kosmx.playerAnim.api.layered.ModifierLayer;
+import dev.kosmx.playerAnim.api.layered.modifier.MirrorModifier;
 import dev.kosmx.playerAnim.api.layered.modifier.SpeedModifier;
 import dev.kosmx.playerAnim.core.data.KeyframeAnimation;
+import dev.kosmx.playerAnim.core.util.Vec3f;
 import dev.kosmx.playerAnim.minecraftApi.PlayerAnimationRegistry;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
@@ -32,39 +36,62 @@ import net.minecraftforge.client.event.RenderPlayerEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
-public class KosmXWallClimbLayer extends AnimLayerHandler<KosmXModifierSpeedLayer<IAnimation>> implements WallClimbAnim {
-    private Map<UUID, KosmXWallClimbAnimPlayer> animStuff = new HashMap<>();
+public class KosmXWallClimbHandler extends AnimLayerHandler<KosmXWallClimbHandler.PerPlayerModifiersLayer<IAnimation>> implements WallClimbAnim {
+    private Map<UUID, KosmXWallClimbKeyframePlayer> animStuff = new HashMap<>();
     
-    public KosmXWallClimbLayer(ResourceLocation id) {
+    public KosmXWallClimbHandler(ResourceLocation id) {
         super(id);
     }
 
     @Override
-    protected KosmXModifierSpeedLayer<IAnimation> createAnimLayer(AbstractClientPlayerEntity player) {
-        KosmXModifierSpeedLayer<IAnimation> anim = new KosmXModifierSpeedLayer<>(new SpeedModifier(1));
+    protected PerPlayerModifiersLayer<IAnimation> createAnimLayer(AbstractClientPlayerEntity player) {
+        PerPlayerModifiersLayer<IAnimation> anim = new PerPlayerModifiersLayer<>();
         anim.addModifierLast(new KosmXHeadRotationModifier());
         return anim;
     }
     
     
+    static class PerPlayerModifiersLayer<T extends IAnimation> extends ModifierLayer<T> {
+        public final SpeedModifier speed;
+        public final MirrorModifier mirror;
+        
+        PerPlayerModifiersLayer() {
+            this.speed = new SpeedModifier(1);
+            this.mirror = new KosmXFixedMirrorModifier() {
+                
+                @Override
+                public Vec3f get3DTransform(String modelName, TransformType type, float tickDelta, Vec3f value0) {
+                    if (isEnabled() && "head".equals(modelName)) {
+                        value0 = transformVector(value0, type);
+                        value0 = transformVector(value0, type);
+                    }
+                    return super.get3DTransform(modelName, type, tickDelta, value0);
+                }
+            };
+            mirror.setEnabled(false);
+            addModifierLast(speed);
+            addModifierLast(mirror);
+        }
+    }
+    
+    
     private static final ResourceLocation CLIMB_UP = new ResourceLocation("jojo", "wall_climb_up");
-//    private static final ResourceLocation CLIMB_DOWN = new ResourceLocation("jojo", "wall_climb_down");
-//    private static final ResourceLocation CLIMB_LEFT = new ResourceLocation("jojo", "wall_climb_left");
-//    private static final ResourceLocation CLIMB_RIGHT = new ResourceLocation("jojo", "wall_climb_right");
+    private static final ResourceLocation CLIMB_DOWN = new ResourceLocation("jojo", "wall_climb_down");
+    private static final ResourceLocation CLIMB_LEFT = new ResourceLocation("jojo", "wall_climb_left");
+    private static final ResourceLocation CLIMB_RIGHT = new ResourceLocation("jojo", "wall_climb_right");
     @Override
     public boolean setAnimEnabled(PlayerEntity player, boolean enabled) {
         if (enabled) {
             KeyframeAnimation up = PlayerAnimationRegistry.getAnimation(CLIMB_UP);
-//            KeyframeAnimation down = PlayerAnimationRegistry.getAnimation(CLIMB_DOWN);
-//            KeyframeAnimation left = PlayerAnimationRegistry.getAnimation(CLIMB_LEFT);
-//            KeyframeAnimation right = PlayerAnimationRegistry.getAnimation(CLIMB_RIGHT);
-//            if (up == null || down == null || left == null || right == null) return false;
-            if (up == null) return false;
-            
-            KosmXWallClimbAnimPlayer keyframePlayer = new KosmXWallClimbAnimPlayer(up, up, up, up);
+            KeyframeAnimation down = PlayerAnimationRegistry.getAnimation(CLIMB_DOWN);
+            KeyframeAnimation left = PlayerAnimationRegistry.getAnimation(CLIMB_LEFT);
+            KeyframeAnimation right = PlayerAnimationRegistry.getAnimation(CLIMB_RIGHT);
+            if (up == null || down == null || left == null || right == null) return false;
+
+            PerPlayerModifiersLayer<?> modifierLayer = getAnimLayer((AbstractClientPlayerEntity) player);
+            KosmXWallClimbKeyframePlayer keyframePlayer = new KosmXWallClimbKeyframePlayer(
+                    up, down, left, right, modifierLayer);
             animStuff.put(player.getUUID(), keyframePlayer);
-            KosmXModifierSpeedLayer<?> modifierLayer = getAnimLayer((AbstractClientPlayerEntity) player);
-            keyframePlayer.onInit(player, modifierLayer, modifierLayer.speed);
             return setAnim(player, keyframePlayer);
         }
         else {
@@ -76,14 +103,17 @@ public class KosmXWallClimbLayer extends AnimLayerHandler<KosmXModifierSpeedLaye
     @Override
     public void tickAnimProperties(PlayerEntity player, boolean isMoving, 
             double movementUp, double movementLeft, float speed) {
-        getWallClimbAnimPlayer(player).tickProperties(isMoving, movementUp, movementLeft, speed);
+        KosmXWallClimbKeyframePlayer climbAnim = getWallClimbAnimPlayer(player);
+        if (climbAnim != null) {
+            climbAnim.tickProperties(isMoving, movementUp, movementLeft, speed);
+        }
         if (player == Minecraft.getInstance().player) {
             PacketManager.sendToServer(new ClSyncMotionAnimPacket(isMoving, movementUp, movementLeft, speed));
         }
     }
     
     @Nullable
-    private KosmXWallClimbAnimPlayer getWallClimbAnimPlayer(PlayerEntity player) {
+    private KosmXWallClimbKeyframePlayer getWallClimbAnimPlayer(PlayerEntity player) {
         return animStuff.get(player.getUUID());
     }
     
@@ -96,7 +126,7 @@ public class KosmXWallClimbLayer extends AnimLayerHandler<KosmXModifierSpeedLaye
     @SubscribeEvent
     public void onEntityRender(RenderPlayerEvent.Post event) {
         PlayerEntity player = event.getPlayer();
-        KosmXWallClimbAnimPlayer animStuff = getWallClimbAnimPlayer(player);
+        KosmXWallClimbKeyframePlayer animStuff = getWallClimbAnimPlayer(player);
         if (animStuff != null && animStuff.isActive()) {
             animStuff.onRender();
             
@@ -115,7 +145,7 @@ public class KosmXWallClimbLayer extends AnimLayerHandler<KosmXModifierSpeedLaye
         Minecraft mc = Minecraft.getInstance();
         if (mc.options.getCameraType().isFirstPerson()) {
             PlayerEntity player = mc.player;
-            KosmXWallClimbAnimPlayer animStuff = getWallClimbAnimPlayer(player);
+            KosmXWallClimbKeyframePlayer animStuff = getWallClimbAnimPlayer(player);
             if (animStuff != null && animStuff.isActive()) {
                 animStuff.onRender();
                 

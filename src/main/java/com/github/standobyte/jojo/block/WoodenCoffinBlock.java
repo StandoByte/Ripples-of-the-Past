@@ -142,7 +142,7 @@ public class WoodenCoffinBlock extends HorizontalBlock {
         boolean occupied = blockState.getValue(OCCUPIED);
         if (player.isShiftKeyDown() || occupied) {
             world.setBlock(blockPos, blockState.setValue(CLOSED, !blockState.getValue(CLOSED)), 3);
-            if (occupied) {
+            if (!player.isShiftKeyDown() && occupied) {
                 player.displayClientMessage(new TranslationTextComponent("block.minecraft.bed.occupied"), true);
             }
         } else {
@@ -160,6 +160,15 @@ public class WoodenCoffinBlock extends HorizontalBlock {
                     }
                 }
             });
+            if (player.isSleeping()) {
+                Vector3d sleepingPos = new Vector3d(
+                        blockPos.getX() + 0.5, 
+                        blockPos.getY() + 0.1875, 
+                        blockPos.getZ() + 0.5);
+                Direction dir = blockState.getBedDirection(world, coffinPos);
+                sleepingPos = sleepingPos.add(Vector3d.atLowerCornerOf(dir.getNormal()).scale(0.085));
+                player.teleportTo(sleepingPos.x, sleepingPos.y, sleepingPos.z);
+            }
         }
     }
     
@@ -267,18 +276,17 @@ public class WoodenCoffinBlock extends HorizontalBlock {
                 if (blockState.getBlock() instanceof WoodenCoffinBlock) {
                     if (!player.level.isClientSide()) {
                         sleepInsideCoffin(player, player.level, respawnPos, blockState, true);
-                        Vector3d sleepingPos = new Vector3d(
-                                respawnPos.getX() + 0.5, 
-                                respawnPos.getY() + 0.6875, 
-                                respawnPos.getZ() + 0.5);
-                        player.teleportTo(sleepingPos.x, sleepingPos.y, sleepingPos.z);
                     }
                 }
             }
         }
     }
     
-    private static boolean isBlockCoffin(World world, Optional<BlockPos> blockPos) {
+    public static boolean isSleepingInCoffin(LivingEntity entity) {
+        return isBlockCoffin(entity.level, entity.getSleepingPos());
+    }
+    
+    public static boolean isBlockCoffin(World world, Optional<BlockPos> blockPos) {
         return blockPos.map(pos -> world.getBlockState(pos).getBlock() instanceof WoodenCoffinBlock).orElse(false);
     }
     
@@ -328,13 +336,13 @@ public class WoodenCoffinBlock extends HorizontalBlock {
         return p_196258_1_.getLevel().getBlockState(blockpos1).canBeReplaced(p_196258_1_) ? this.defaultBlockState().setValue(FACING, direction) : null;
     }
 
-    private static final VoxelShape WALL_1 = Block.box(0.0D, 0.0D, 0.0D, 2.0D, 12.0D, 16.0D);
-    private static final VoxelShape WALL_2 = Block.box(14.0D, 0.0D, 0.0D, 16.0D, 12.0D, 16.0D);
-    private static final VoxelShape WALL_3 = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 12.0D, 2.0D);
-    private static final VoxelShape WALL_4 = Block.box(0.0D, 0.0D, 14.0D, 16.0D, 12.0D, 16.0D);
-    private static final VoxelShape BOTTOM = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 2.0D, 16.0D);
+    private static final VoxelShape WALL_1 = Block.box(0, 0, 0, 2, 10, 16);
+    private static final VoxelShape WALL_2 = Block.box(14, 0, 0, 16, 10, 16);
+    private static final VoxelShape WALL_3 = Block.box(0, 0, 0, 16, 10, 2);
+    private static final VoxelShape WALL_4 = Block.box(0, 0, 14, 16, 10, 16);
+    private static final VoxelShape BOTTOM = Block.box(0, 0, 0, 16, 2, 16);
     
-    protected static final VoxelShape SHAPE_CLOSED = Block.box(0.0D, 0.0D, 0.0D, 16.0D, 15.0D, 16.0D);
+    protected static final VoxelShape SHAPE_CLOSED = Block.box(0, 0, 0, 16, 13, 16);
     protected static final VoxelShape SHAPE_OPEN_W = VoxelShapes.or(BOTTOM, WALL_2, WALL_3, WALL_4);
     protected static final VoxelShape SHAPE_OPEN_E = VoxelShapes.or(BOTTOM, WALL_1, WALL_3, WALL_4);
     protected static final VoxelShape SHAPE_OPEN_N = VoxelShapes.or(BOTTOM, WALL_1, WALL_2, WALL_4);

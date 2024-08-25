@@ -5,7 +5,7 @@ import java.util.Map;
 import java.util.Random;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.living.LivingWallClimbing;
 import com.github.standobyte.jojo.client.playeranim.anim.interfaces.BasicToggleAnim;
 import com.github.standobyte.jojo.client.playeranim.kosmx.KosmXPlayerAnimatorInstalled.AnimLayerHandler;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
@@ -22,10 +22,11 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 
-public class KosmXHamonBreathLayer extends AnimLayerHandler<ModifierLayer<IAnimation>> implements BasicToggleAnim {
+//FIXME sometimes the head does 360 when using Hamon Breath
+public class KosmXHamonBreathHandler extends AnimLayerHandler<ModifierLayer<IAnimation>> implements BasicToggleAnim {
     private static final Random RANDOM = new Random();
 
-    public KosmXHamonBreathLayer(ResourceLocation id) {
+    public KosmXHamonBreathHandler(ResourceLocation id) {
         super(id);
     }
 
@@ -37,7 +38,7 @@ public class KosmXHamonBreathLayer extends AnimLayerHandler<ModifierLayer<IAnima
     
     @Override
     public boolean setAnimEnabled(PlayerEntity player, boolean enabled) {
-        enabled &= !player.isPassenger() && !player.getCapability(LivingUtilCapProvider.CAPABILITY).map(wallClimb -> wallClimb.isWallClimbing()).orElse(false);
+        enabled &= !player.isPassenger() && !LivingWallClimbing.getHandler(player).map(wallClimb -> wallClimb.isWallClimbing()).orElse(false);
         if (enabled) {
             return setAnimFromName((AbstractClientPlayerEntity) player, getAnimPath(player));
         }
