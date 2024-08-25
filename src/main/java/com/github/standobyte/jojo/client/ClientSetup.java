@@ -29,6 +29,7 @@ import com.github.standobyte.jojo.client.render.armor.model.GlovesModel;
 import com.github.standobyte.jojo.client.render.armor.model.SatiporojaScarfArmorModel;
 import com.github.standobyte.jojo.client.render.armor.model.StoneMaskModel;
 import com.github.standobyte.jojo.client.render.block.BlockSprites;
+import com.github.standobyte.jojo.client.render.entity.layerrenderer.DivineSandstormEffectLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.EnergyRippleLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.FrozenLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.GlovesLayer;
@@ -336,6 +337,7 @@ public class ClientSetup {
     private static void addLayers(PlayerRenderer renderer, boolean slim) {
         renderer.addLayer(new KnifeLayer<>(renderer));
         renderer.addLayer(new TornadoOverdriveEffectLayer<>(renderer));
+        renderer.addLayer(new DivineSandstormEffectLayer<>(renderer));
         renderer.addLayer(new BarrageFistAfterimagesLayer(renderer));
         renderer.addLayer(new EnergyRippleLayer<>(renderer));
         renderer.addLayer(new GlovesLayer<>(renderer, new GlovesModel<>(0.3F, slim), slim));

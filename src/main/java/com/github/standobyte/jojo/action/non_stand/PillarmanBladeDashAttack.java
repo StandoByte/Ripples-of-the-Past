@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.player.IPlayerAction;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -103,6 +104,9 @@ public class PillarmanBladeDashAttack extends PillarmanAction implements IPlayer
     @Override
     public PillarmanBladeDashInstance createContinuousActionInstance(
             LivingEntity user, PlayerUtilCap userCap, INonStandPower power) {
+    	if (user.level.isClientSide() && user instanceof PlayerEntity) {
+            ModPlayerAnimations.bladeDash.setAnimEnabled((PlayerEntity) user, true);
+        }
         return new PillarmanBladeDashInstance(user, userCap, power, this);
     }
     
@@ -130,6 +134,18 @@ public class PillarmanBladeDashAttack extends PillarmanAction implements IPlayer
         @Override
         public boolean cancelIncomingDamage(DamageSource dmgSource, float dmgAmount) {
             return isMeleeAttack(dmgSource);
+        }
+        
+        @Override
+        public boolean stopAction() {
+            if (super.stopAction()) {
+                if (user.level.isClientSide() && user instanceof PlayerEntity) {
+                    ModPlayerAnimations.bladeDash.setAnimEnabled((PlayerEntity) user, false);
+                }
+                return true;
+            }
+
+            return false;
         }
     }
 }

@@ -65,6 +65,7 @@ public class TrTypeNonStandPowerPacket {
                         power.clear();
                         if (entity instanceof PlayerEntity) {
                             ModPlayerAnimations.meditationPoseAnim.setAnimEnabled((PlayerEntity) entity, false);
+                            ModPlayerAnimations.stoneForm.setAnimEnabled((PlayerEntity) entity, false);
                         }
                     }
                     else {
