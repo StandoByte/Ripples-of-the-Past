@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.non_stand;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
 import com.github.standobyte.jojo.entity.damaging.projectile.HamonTurquoiseBlueOverdriveEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.PillarmanDivineSandstormEntity;
 import com.github.standobyte.jojo.init.ModParticles;
@@ -12,6 +13,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanDa
 
 import net.minecraft.client.particle.Particle;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.UseAction;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.util.math.vector.Vector3d;
@@ -80,5 +82,15 @@ public class PillarmanDivineSandstorm extends PillarmanAction {
     @Override
     public boolean isHeldSentToTracking() {
         return true;
+    }
+    
+    @Override
+    public boolean clHeldStartAnim(PlayerEntity user) {
+        return ModPlayerAnimations.divineSandstorm.setAnimEnabled(user, true);
+    }
+    
+    @Override
+    public void clHeldStopAnim(PlayerEntity user) {
+        ModPlayerAnimations.divineSandstorm.setAnimEnabled(user, false);
     }
 }

@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStatusEffects;
@@ -14,6 +15,7 @@ import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.DamageSource;
 import net.minecraft.world.World;
@@ -52,5 +54,15 @@ public class PillarmanUnnaturalAgility extends PillarmanAction {
         if (stateRefreshed && requirementsFulfilled) {
             ClientTickingSoundsHelper.playHeldActionSound(ModSounds.HAMON_SYO_SWING.get(), 1.0F, 1.25F, true, user, power, this);
         }
+    }
+    
+    @Override
+    public boolean clHeldStartAnim(PlayerEntity user) {
+        return ModPlayerAnimations.unnaturalAgility.setAnimEnabled(user, true);
+    }
+    
+    @Override
+    public void clHeldStopAnim(PlayerEntity user) {
+        ModPlayerAnimations.unnaturalAgility.setAnimEnabled(user, false);
     }
 }
