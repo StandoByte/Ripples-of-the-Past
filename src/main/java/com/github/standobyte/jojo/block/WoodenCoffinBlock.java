@@ -423,12 +423,5 @@ public class WoodenCoffinBlock extends HorizontalBlock {
         return 5;
     }
     
-    
-    public static boolean isSleepingInCoffin(LivingEntity entity) {
-        return entity.isSleeping() && entity.getSleepingPos().map(sleepingPos -> {
-            BlockState blockState = entity.level.getBlockState(sleepingPos);
-            return blockState.getBlock() instanceof WoodenCoffinBlock && blockState.getValue(WoodenCoffinBlock.CLOSED);
-        }).orElse(false);
-    }
 
 }
