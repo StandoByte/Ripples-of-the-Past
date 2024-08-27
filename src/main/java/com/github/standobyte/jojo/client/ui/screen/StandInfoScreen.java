@@ -52,7 +52,7 @@ public class StandInfoScreen extends Screen {
 
         if (JojoStuffScreen.mouseClick(mouseX, mouseY, 
                 JojoStuffScreen.uniformX(minecraft), JojoStuffScreen.uniformY(minecraft), 
-                JojoStuffScreen.TabsEnumType.STAND)) {
+                JojoStuffScreen.StandTab.values())) {
             return true;
         }
         

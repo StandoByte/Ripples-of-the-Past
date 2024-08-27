@@ -37,12 +37,16 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.BufferBuilder;
+import net.minecraft.client.renderer.ItemModelMesher;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
+import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.Model;
 import net.minecraft.client.renderer.model.ModelRenderer;
+import net.minecraft.client.renderer.model.SimpleBakedModel;
+import net.minecraft.client.renderer.texture.MissingTextureSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
 import net.minecraft.client.settings.ParticleStatus;
@@ -617,6 +621,12 @@ public class ClientUtil {
     
     public static ITextComponent donoItemTooltip(String donoUsername) {
         return new TranslationTextComponent("item.jojo.dono_tooltip", donoUsername).withStyle(TextFormatting.DARK_GRAY);
+    }
+    
+    
+    public static boolean isMissingModel(IBakedModel model, ItemModelMesher itemModelShaper) {
+//        return model == itemModelShaper.getModelManager().getMissingModel(); // you'd think that should work
+        return model instanceof SimpleBakedModel && (((SimpleBakedModel) model).getParticleIcon() instanceof MissingTextureSprite);
     }
     
     

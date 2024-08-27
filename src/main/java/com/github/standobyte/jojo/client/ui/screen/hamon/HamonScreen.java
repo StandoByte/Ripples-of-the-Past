@@ -14,11 +14,14 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotific
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.ui.screen.JojoStuffScreen;
+import com.github.standobyte.jojo.client.ui.screen.JojoStuffScreen.HamonTab;
 import com.github.standobyte.jojo.client.ui.screen.TabPositionType;
+import com.github.standobyte.jojo.client.ui.screen.controls.HudLayoutEditingScreen;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonWindowOpenedPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClReadHamonBreathTabPacket;
+import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
@@ -32,6 +35,7 @@ import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.chat.NarratorChatListener;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextProperties;
@@ -69,6 +73,11 @@ public class HamonScreen extends Screen {
 
     public HamonScreen() {
         super(NarratorChatListener.NO_TITLE);
+    }
+    
+    public static void clientInit() {
+        HudLayoutEditingScreen.RightSideTabs.register(ModPowers.HAMON.get().getRegistryName(), 
+                HamonTab.values(), HamonTab.CONTROLS, PowerClassification.NON_STAND);
     }
     
     @Override
@@ -146,7 +155,7 @@ public class HamonScreen extends Screen {
         }
         if (JojoStuffScreen.mouseClick(mouseX, mouseY, 
                 JojoStuffScreen.uniformX(minecraft), JojoStuffScreen.uniformY(minecraft), 
-                JojoStuffScreen.TabsEnumType.HAMON)) {
+                JojoStuffScreen.HamonTab.values())) {
             return true;
         }
         if (selectedTab != null) {
@@ -304,9 +313,11 @@ public class HamonScreen extends Screen {
         for (HamonTabGui tabGui : selectableTabs) {
             tabGui.drawIcon(matrixStack, windowX, windowY, itemRenderer);
         }
-        JojoStuffScreen.renderHamonTabs(matrixStack, 
+
+        JojoStuffScreen.renderVerticalTabs(matrixStack, HandSide.RIGHT, 
                 JojoStuffScreen.uniformX(minecraft), JojoStuffScreen.uniformY(minecraft), false, 
-                mouseX, mouseY, this, JojoStuffScreen.HamonTab.MAIN_SCREEN);
+                mouseX, mouseY, this, 
+                JojoStuffScreen.HamonTab.MAIN_SCREEN, JojoStuffScreen.HamonTab.values());
         RenderSystem.disableBlend();
         if (selectedTab != null) {
             font.draw(matrixStack, selectedTab.getTitle(), windowX + 8, windowY + 6, 0x404040);

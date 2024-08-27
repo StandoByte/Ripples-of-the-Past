@@ -102,6 +102,8 @@ import com.github.standobyte.jojo.client.ui.marker.CrazyDiamondAnchorMarker;
 import com.github.standobyte.jojo.client.ui.marker.CrazyDiamondBloodHomingMarker;
 import com.github.standobyte.jojo.client.ui.marker.HierophantGreenBarrierDetectionMarker;
 import com.github.standobyte.jojo.client.ui.marker.MarkerRenderer;
+import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
+import com.github.standobyte.jojo.client.ui.screen.vampirism.VampirismScreen;
 import com.github.standobyte.jojo.client.ui.screen.walkman.WalkmanScreen;
 import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModContainers;
@@ -115,7 +117,6 @@ import com.github.standobyte.jojo.item.StandArrowItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
 import com.github.standobyte.jojo.item.cassette.CassetteCap;
-import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 
 import net.minecraft.client.Minecraft;
@@ -153,7 +154,6 @@ import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
-import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
@@ -235,6 +235,9 @@ public class ClientSetup {
         
         ClientModSettings.init(mc, new File(mc.gameDirectory, "config/jojo_rotp/client_settings.json"));
         HudControlSettings.init(new File(mc.gameDirectory, "config/jojo_rotp/controls/"));
+        
+        HamonScreen.clientInit();
+        VampirismScreen.clientInit();
         
         event.enqueueWork(() -> {
             CustomIconItem.registerModelOverride();
@@ -414,9 +417,7 @@ public class ClientSetup {
             spritesAdded = true;
         }
         
-        for (StandType<?> standType : JojoCustomRegistries.STANDS.getRegistry().getValues()) {
-            ModelLoader.addSpecialModel(StandDiscOverrideList.makeStandSpecificModelPath(standType));
-        }
+        StandDiscOverrideList.onModelRegistry();
     }
     
     public static void addUnreferencedBlockModels(RenderMaterial... renderMaterials) {

@@ -52,22 +52,37 @@ public class ClientModSettingsScreen extends SettingsScreen {
     protected void addButtons() {
         int i = 0;
         
-        addButton(new Button(calcButtonX(i), calcButtonY(i++), 150, 20, 
+        BooleanSetting characterVoiceLines = new BooleanSetting(settings, 
+                new TranslationTextComponent("jojo.config.client.characterVoiceLines"), 
+                new TranslationTextComponent("jojo.config.client.characterVoiceLines.tooltip")
+                ) {
+            @Override public boolean get() { return settingsValues.characterVoiceLines; }
+            @Override public void set(boolean value) { settingsValues.characterVoiceLines = value; }
+        };
+        addButton(characterVoiceLines.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this, i));
+        
+        BooleanSetting menacingParticles = new BooleanSetting(settings, 
+                new TranslationTextComponent("jojo.config.client.menacingParticles"), 
+                new TranslationTextComponent("jojo.config.client.menacingParticles.tooltip")
+                ) {
+            @Override public boolean get() { return settingsValues.menacingParticles; }
+            @Override public void set(boolean value) { settingsValues.menacingParticles = value; }
+        };
+        addButton(menacingParticles.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this, i));
+        
+        i += (i % 2 == 1) ? 3 : 2;
+        
+        addButton(new Button(calcButtonX(i), calcButtonY(i++) + 6, 150, 20, 
                 new TranslationTextComponent("jojo.options.client.hud"), 
                 button -> minecraft.setScreen(new HudSettings(this, settings, button.getMessage()))));
         
-        addButton(new Button(calcButtonX(i), calcButtonY(i++), 150, 20, 
+        addButton(new Button(calcButtonX(i), calcButtonY(i++) + 6, 150, 20, 
                 new TranslationTextComponent("jojo.options.client.stand"), 
                 button -> minecraft.setScreen(new StandSettings(this, settings, button.getMessage()))));
         
-        addButton(new Button(calcButtonX(i), calcButtonY(i++), 150, 20, 
+        addButton(new Button(calcButtonX(i), calcButtonY(i++) + 6, 150, 20, 
                 new TranslationTextComponent("jojo.options.client.hamon"), 
                 button -> minecraft.setScreen(new HamonSettings(this, settings, button.getMessage()))));
-        
-        addButton(new Button(calcButtonX(i), calcButtonY(i++), 150, 20, 
-                new TranslationTextComponent("jojo.options.client.misc"), 
-                button -> minecraft.setScreen(new MiscSettings(this, settings, button.getMessage()))));
-        
         
         addBackButton(DialogTexts.GUI_DONE, i);
     }
@@ -262,40 +277,6 @@ public class ClientModSettingsScreen extends SettingsScreen {
         
     }
     
-    public static class MiscSettings extends ClientModSettingsScreen {
-
-        public MiscSettings(Screen lastScreen, ClientModSettings settings, ITextComponent title) {
-            super(lastScreen, settings, title);
-        }
-        
-        @Override
-        protected void addButtons() {
-            int i = 0;
-            
-            BooleanSetting characterVoiceLines = new BooleanSetting(settings, 
-                    new TranslationTextComponent("jojo.config.client.characterVoiceLines"), 
-                    new TranslationTextComponent("jojo.config.client.characterVoiceLines.tooltip")
-                    ) {
-                @Override public boolean get() { return settingsValues.characterVoiceLines; }
-                @Override public void set(boolean value) { settingsValues.characterVoiceLines = value; }
-            };
-            addButton(characterVoiceLines.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this, i));
-            
-            
-            BooleanSetting menacingParticles = new BooleanSetting(settings, 
-                    new TranslationTextComponent("jojo.config.client.menacingParticles"), 
-                    new TranslationTextComponent("jojo.config.client.menacingParticles.tooltip")
-                    ) {
-                @Override public boolean get() { return settingsValues.menacingParticles; }
-                @Override public void set(boolean value) { settingsValues.menacingParticles = value; }
-            };
-            addButton(menacingParticles.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this, i));
-            
-            addBackButton(DialogTexts.GUI_BACK, i);
-        }
-        
-    }
-    
     
     
     protected int calcButtonX(int i) {
@@ -303,7 +284,7 @@ public class ClientModSettingsScreen extends SettingsScreen {
     }
     
     protected int calcButtonY(int i) {
-        return this.height / 6 + 24 * (i >> 1);
+        return this.height / 6 - 12 + 24 * (i >> 1);
     }
 
     @Override
@@ -314,7 +295,7 @@ public class ClientModSettingsScreen extends SettingsScreen {
     @Override
     public void render(MatrixStack pMatrixStack, int pMouseX, int pMouseY, float pPartialTicks) {
         renderBackground(pMatrixStack);
-        drawCenteredString(pMatrixStack, font, title, width / 2, 20, 0xFFFFFF);
+        drawCenteredString(pMatrixStack, font, title, width / 2, 15, 0xFFFFFF);
         super.render(pMatrixStack, pMouseX, pMouseY, pPartialTicks);
     }
     

@@ -10,9 +10,7 @@ import com.github.standobyte.jojo.client.ui.screen.controls.HudLayoutEditingScre
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
 import com.github.standobyte.jojo.client.ui.screen.standskin.StandSkinsScreen;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
-import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
-import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -21,17 +19,18 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.renderer.texture.TextureManager;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public class JojoStuffScreen {
     public static final ResourceLocation TABS = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/screen_tabs.png");
-    private static final Tab CONTROLS_TAB = new Tab(TABS, 240, 240, new TranslationTextComponent("jojo.key.edit_hud"), 
+    public static final Tab CONTROLS_TAB = new Tab(TABS, 240, 240, new TranslationTextComponent("jojo.key.edit_hud"), 
             HudLayoutEditingScreen::new) {
         @Override
-        protected Screen onClick(TabsEnumType powerType) {
-            Screen screen = new HudLayoutEditingScreen(powerType.power);
+        protected Screen onClick() {
+            Screen screen = new HudLayoutEditingScreen(hudEditingCurPower);
             Minecraft.getInstance().setScreen(screen);
             return screen;
         }
@@ -41,14 +40,14 @@ public class JojoStuffScreen {
     public static int uniformY(Minecraft mc) { return (mc.getWindow().getGuiScaledHeight() - HudLayoutEditingScreen.WINDOW_HEIGHT) / 2; }
     
     public static class Tab {
-        ResourceLocation icon;
-        int texX;
-        int texY;
-        int texSizeX;
-        int texSizeY;
-        ITextComponent name;
-        final Supplier<Screen> openScreen;
-        boolean isEnabled;
+        protected ResourceLocation icon;
+        protected int texX;
+        protected int texY;
+        protected int texSizeX;
+        protected int texSizeY;
+        protected ITextComponent name;
+        protected final Supplier<Screen> openScreen;
+        protected boolean isEnabled;
         
         public Tab(ResourceLocation icon, int texX, int texY, ITextComponent name, Supplier<Screen> openScreen) {
             this(icon, texX, texY, 256, 256, name, openScreen);
@@ -72,10 +71,17 @@ public class JojoStuffScreen {
             return this;
         }
         
-        protected Screen onClick(TabsEnumType powerType) {
+        protected Screen onClick() {
             Screen screen = openScreen.get();
             Minecraft.getInstance().setScreen(screen);
             return screen;
+        }
+        
+        protected void renderIcon(MatrixStack matrixStack, int x, int y) {
+            if (icon != null) {
+                Minecraft.getInstance().textureManager.bind(icon);
+                AbstractGui.blit(matrixStack, x + 2, y + 6, texX, texY, 16, 16, texSizeX, texSizeY);
+            }
         }
         
         protected boolean isActive() {
@@ -85,7 +91,16 @@ public class JojoStuffScreen {
     
     public static interface TabSupplier extends Supplier<Tab> {}
     
+    @Deprecated
     public static void renderRightSideTabs(MatrixStack matrixStack, 
+            int x, int y, boolean atTheTop, int mouseX, int mouseY, Screen screen, 
+            TabSupplier tabSelected, TabSupplier... tabs) {
+        renderVerticalTabs(matrixStack, HandSide.RIGHT, 
+                x, y, atTheTop, mouseX, mouseY, screen, 
+                tabSelected, tabs);
+    }
+    
+    public static void renderVerticalTabs(MatrixStack matrixStack, HandSide side, 
             int x, int y, boolean atTheTop, int mouseX, int mouseY, Screen screen, 
             TabSupplier tabSelected, TabSupplier... tabs) {
         Tab[] activeTabs = Arrays.stream(tabs)
@@ -95,9 +110,22 @@ public class JojoStuffScreen {
         
         int y0 = y;
         TextureManager textureManager = Minecraft.getInstance().textureManager;
+        if (side == HandSide.LEFT) {
+            x -= 24;
+        }
         for (int i = 0; i < activeTabs.length; i++) {
             boolean isSelected = i == selectedIndex;
-            int texX = atTheTop && i == 0 ? 96 : 128;
+            int texX;
+            switch (side) {
+            case LEFT:
+                texX = atTheTop && i == 0 ? 0 : 32;
+                break;
+            case RIGHT:
+                texX = atTheTop && i == 0 ? 96 : 128;
+                break;
+            default:
+                return;
+            }
             int texY = isSelected ? 92 : 64;
             textureManager.bind(TABS);
             AbstractGui.blit(matrixStack, x - 4, y, texX, texY, 32, 28, 256, 256);
@@ -107,10 +135,12 @@ public class JojoStuffScreen {
         y = y0;
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
+        if (side == HandSide.LEFT) {
+            x += 4;
+        }
         for (int i = 0; i < activeTabs.length; i++) {
             Tab tab = activeTabs[i];
-            textureManager.bind(tab.icon);
-            AbstractGui.blit(matrixStack, x + 2, y + 6, tab.texX, tab.texY, 16, 16, tab.texSizeX, tab.texSizeY);
+            tab.renderIcon(matrixStack, x, y);
             y += 28;
         }
         RenderSystem.disableBlend();
@@ -135,15 +165,16 @@ public class JojoStuffScreen {
         return -1;
     }
     
-    public static boolean mouseClick(double mouseX, double mouseY, int tabsX, int tabsY, TabsEnumType powerType) {
-        Tab[] activeTabs = Arrays.stream(powerType.getTabs())
+    public static PowerClassification hudEditingCurPower;
+    public static boolean mouseClick(double mouseX, double mouseY, int tabsX, int tabsY, TabSupplier[] tabValues) {
+        Tab[] activeTabs = Arrays.stream(tabValues)
                 .map(Supplier::get).filter(Tab::isActive)
                 .toArray(Tab[]::new);
         
         int tabIndex = getTabMouseOver((int) mouseX, (int) mouseY, tabsX, tabsY, activeTabs.length);
         if (tabIndex >= 0) {
             Tab tab = activeTabs[tabIndex];
-            tab.onClick(powerType);
+            tab.onClick();
             return true;
         }
         
@@ -177,7 +208,8 @@ public class JojoStuffScreen {
             StandTab tab, IStandPower playerStand) {
         StandTab.GENERAL_INFO.tab.icon = playerStand.clGetPowerTypeIcon();
         StandTab.SKINS.tab.icon = playerStand.clGetPowerTypeIcon();
-        renderRightSideTabs(matrixStack, x, y, atTheTop, mouseX, mouseY, screen, 
+        renderVerticalTabs(matrixStack, HandSide.RIGHT, 
+                x, y, atTheTop, mouseX, mouseY, screen, 
                 tab, StandTab.values());
     }
 
@@ -199,15 +231,6 @@ public class JojoStuffScreen {
         }
     }
     
-    public static void renderHamonTabs(MatrixStack matrixStack, 
-            int x, int y, boolean atTheTop, int mouseX, int mouseY, Screen screen, 
-            HamonTab tab) {
-        renderRightSideTabs(matrixStack, x, y, atTheTop, mouseX, mouseY, screen, 
-                tab, HamonTab.values());
-    }
-    
-    
-    
     public static enum VampirismTab implements TabSupplier {
         CONTROLS(CONTROLS_TAB);
         
@@ -219,51 +242,6 @@ public class JojoStuffScreen {
         @Override
         public Tab get() {
             return tab;
-        }
-    }
-    
-    public static void renderVampirismTabs(MatrixStack matrixStack, 
-            int x, int y, boolean atTheTop, int mouseX, int mouseY, Screen screen, 
-            VampirismTab tab) {
-        renderRightSideTabs(matrixStack, x, y, atTheTop, mouseX, mouseY, screen, 
-                tab, VampirismTab.values());
-    }
-    
-    
-    
-    public static enum TabsEnumType {
-        STAND(StandTab.values(), PowerClassification.STAND),
-        HAMON(HamonTab.values(), PowerClassification.NON_STAND),
-        VAMPIRISM(VampirismTab.values(), PowerClassification.NON_STAND);
-        
-        private final TabSupplier[] tabsArray;
-        private final PowerClassification power;
-        
-        private TabsEnumType(TabSupplier[] tabsArray, PowerClassification power) {
-            this.tabsArray = tabsArray;
-            this.power = power;
-        }
-        
-        public static TabsEnumType getTabsEnum(IPower<?, ?> power) {
-            switch (power.getPowerClassification()) {
-            case STAND:
-                return STAND;
-            case NON_STAND:
-                IPowerType<?, ?> powerType = power.getType();
-                if (powerType == ModPowers.HAMON.get()) {
-                    return HAMON;
-                }
-                else if (powerType == ModPowers.VAMPIRISM.get()) {
-                    return VAMPIRISM;
-                }
-                break;
-            }
-            
-            return null;
-        }
-        
-        public TabSupplier[] getTabs() {
-            return tabsArray;
         }
     }
     
