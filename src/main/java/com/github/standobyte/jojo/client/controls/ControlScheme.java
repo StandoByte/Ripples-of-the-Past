@@ -47,9 +47,9 @@ public class ControlScheme {
     static ControlScheme fromJson(JsonElement json, @Nullable ResourceLocation powerTypeId) {
         ControlScheme obj;
         if (powerTypeId != null) {
-            Optional<IPowerType<?, ?>> powerType = Optional.ofNullable(JojoCustomRegistries.NON_STAND_POWERS.fromId(powerTypeId));
+            Optional<IPowerType<?, ?>> powerType = Optional.ofNullable(JojoCustomRegistries.NON_STAND_POWERS.getValue(powerTypeId));
             // Optional#or was only added in Java 9
-            if (!powerType.isPresent()) powerType = Optional.ofNullable(JojoCustomRegistries.STANDS.fromId(powerTypeId));
+            if (!powerType.isPresent()) powerType = Optional.ofNullable(JojoCustomRegistries.STANDS.getValue(powerTypeId));
             obj = new ControlScheme(powerType.orElse(null));
         }
         else {

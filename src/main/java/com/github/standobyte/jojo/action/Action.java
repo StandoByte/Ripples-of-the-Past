@@ -623,7 +623,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         public Action<?> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
                 throws JsonParseException {
             if (json.isJsonPrimitive() && ((JsonPrimitive) json).isString()) {
-                return JojoCustomRegistries.ACTIONS.fromId(new ResourceLocation(json.getAsString()));
+                return JojoCustomRegistries.ACTIONS.getValue(new ResourceLocation(json.getAsString()));
             }
             
             throw new JsonParseException("An action is defined by its string id");

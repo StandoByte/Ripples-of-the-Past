@@ -25,7 +25,7 @@ public class ActionVisibilitySwitch {
     }
     
     public void init() {
-        this.action = JojoCustomRegistries.ACTIONS.fromId(this.actionId);
+        this.action = JojoCustomRegistries.ACTIONS.getValue(this.actionId);
     }
     
     public Action<?> getAction() {
