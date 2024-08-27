@@ -319,7 +319,7 @@ public class InputHandler {
                         ClientUtil.openHamonTeacherUi();
                     }
                 }
-                else {
+                else if (nonStandPower.canGetPower(ModPowers.HAMON.get())) {
                     boolean askedForHamonTraining = false;
                     if (mouseTarget instanceof EntityRayTraceResult) {
                         Entity mouseTargetEntity = ((EntityRayTraceResult) mouseTarget).getEntity();

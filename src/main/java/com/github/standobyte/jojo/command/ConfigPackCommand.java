@@ -29,6 +29,6 @@ public class ConfigPackCommand {
         ConfigFolderLink.init().commandRegister(command, "folder_link");
         
         dispatcher.register(command);
-        JojoCommandsCommand.addCommand("jojoconfigpack");
+        JojoCommandsCommand.addCommand("jojoconfig");
     }
 }

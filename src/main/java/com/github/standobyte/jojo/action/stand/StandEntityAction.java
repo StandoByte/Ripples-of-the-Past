@@ -411,7 +411,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         }
     }
     
-    protected Optional<StandRelativeOffset> offsetToTarget(IStandPower standPower, StandEntity standEntity, StandEntityTask task, 
+    protected static Optional<StandRelativeOffset> offsetToTarget(IStandPower standPower, StandEntity standEntity, StandEntityTask task, 
             double minOffset, double maxOffset, @Nullable Supplier<ActionTarget> noTaskTarget) {
         if (standEntity.isArmsOnlyMode()) {
             return Optional.empty();
