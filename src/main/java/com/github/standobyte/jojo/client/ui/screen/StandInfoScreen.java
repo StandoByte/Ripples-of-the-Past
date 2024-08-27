@@ -6,6 +6,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.StringTextComponent;
 
@@ -51,7 +52,7 @@ public class StandInfoScreen extends Screen {
         }
 
         if (JojoStuffScreen.mouseClick(mouseX, mouseY, 
-                JojoStuffScreen.uniformX(minecraft), JojoStuffScreen.uniformY(minecraft), 
+                JojoStuffScreen.uniformX(minecraft), JojoStuffScreen.uniformY(minecraft), HandSide.RIGHT, 
                 JojoStuffScreen.StandTab.values())) {
             return true;
         }

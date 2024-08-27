@@ -677,7 +677,7 @@ public class HudLayoutEditingScreen extends Screen {
         RightSideTabs tabsType = RightSideTabs.getTabsType(selectedPower);
         JojoStuffScreen.hudEditingCurPower = selectedTab;
         if (tabsType != null && JojoStuffScreen.mouseClick(mouseX, mouseY, 
-                JojoStuffScreen.uniformX(minecraft), JojoStuffScreen.uniformY(minecraft), 
+                JojoStuffScreen.uniformX(minecraft), JojoStuffScreen.uniformY(minecraft), HandSide.RIGHT, 
                 tabsType.getTabs())) {
             return true;
         }

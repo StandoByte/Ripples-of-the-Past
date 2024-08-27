@@ -100,23 +100,24 @@ public class JojoStuffScreen {
                 tabSelected, tabs);
     }
     
-    public static void renderVerticalTabs(MatrixStack matrixStack, HandSide side, 
+    public static void renderVerticalTabs(MatrixStack matrixStack, HandSide tabsSide, 
             int x, int y, boolean atTheTop, int mouseX, int mouseY, Screen screen, 
             TabSupplier tabSelected, TabSupplier... tabs) {
         Tab[] activeTabs = Arrays.stream(tabs)
                 .map(Supplier::get).filter(Tab::isActive)
                 .toArray(Tab[]::new);
         int selectedIndex = ArrayUtils.indexOf(activeTabs, tabSelected.get());
-        
+
+        int x0 = x;
         int y0 = y;
         TextureManager textureManager = Minecraft.getInstance().textureManager;
-        if (side == HandSide.LEFT) {
+        if (tabsSide == HandSide.LEFT) {
             x -= 24;
         }
         for (int i = 0; i < activeTabs.length; i++) {
             boolean isSelected = i == selectedIndex;
             int texX;
-            switch (side) {
+            switch (tabsSide) {
             case LEFT:
                 texX = atTheTop && i == 0 ? 0 : 32;
                 break;
@@ -135,7 +136,7 @@ public class JojoStuffScreen {
         y = y0;
         RenderSystem.enableBlend();
         RenderSystem.defaultBlendFunc();
-        if (side == HandSide.LEFT) {
+        if (tabsSide == HandSide.LEFT) {
             x += 4;
         }
         for (int i = 0; i < activeTabs.length; i++) {
@@ -145,14 +146,18 @@ public class JojoStuffScreen {
         }
         RenderSystem.disableBlend();
         
+        x = x0;
         y = y0;
-        int tooltipTab = getTabMouseOver(mouseX, mouseY, x, y, activeTabs.length);
+        int tooltipTab = getTabMouseOver(mouseX, mouseY, x, y, tabsSide, activeTabs.length);
         if (tooltipTab >= 0) {
             screen.renderTooltip(matrixStack, activeTabs[tooltipTab].name, mouseX, mouseY);
         }
     }
     
-    private static int getTabMouseOver(int mouseX, int mouseY, int tabsX, int tabsY, int tabsCount) {
+    private static int getTabMouseOver(int mouseX, int mouseY, int tabsX, int tabsY, HandSide tabsSide, int tabsCount) {
+        if (tabsSide == HandSide.LEFT) {
+            tabsX -= 28;
+        }
         if (mouseX >= tabsX && mouseX < tabsX + 30) {
             for (int i = 0; i < tabsCount; i++) {
                 if (mouseY >= tabsY && mouseY < tabsY + 28) {
@@ -166,12 +171,12 @@ public class JojoStuffScreen {
     }
     
     public static PowerClassification hudEditingCurPower;
-    public static boolean mouseClick(double mouseX, double mouseY, int tabsX, int tabsY, TabSupplier[] tabValues) {
+    public static boolean mouseClick(double mouseX, double mouseY, int tabsX, int tabsY, HandSide tabsSide, TabSupplier[] tabValues) {
         Tab[] activeTabs = Arrays.stream(tabValues)
                 .map(Supplier::get).filter(Tab::isActive)
                 .toArray(Tab[]::new);
         
-        int tabIndex = getTabMouseOver((int) mouseX, (int) mouseY, tabsX, tabsY, activeTabs.length);
+        int tabIndex = getTabMouseOver((int) mouseX, (int) mouseY, tabsX, tabsY, tabsSide, activeTabs.length);
         if (tabIndex >= 0) {
             Tab tab = activeTabs[tabIndex];
             tab.onClick();

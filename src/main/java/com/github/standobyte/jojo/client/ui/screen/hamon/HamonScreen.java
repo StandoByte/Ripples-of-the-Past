@@ -154,7 +154,7 @@ public class HamonScreen extends Screen {
             }
         }
         if (JojoStuffScreen.mouseClick(mouseX, mouseY, 
-                JojoStuffScreen.uniformX(minecraft), JojoStuffScreen.uniformY(minecraft), 
+                JojoStuffScreen.uniformX(minecraft), JojoStuffScreen.uniformY(minecraft), HandSide.RIGHT, 
                 JojoStuffScreen.HamonTab.values())) {
             return true;
         }
