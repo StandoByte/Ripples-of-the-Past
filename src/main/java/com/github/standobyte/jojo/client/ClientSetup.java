@@ -94,6 +94,7 @@ import com.github.standobyte.jojo.client.render.entity.renderer.stand.MagiciansR
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.SilverChariotRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.StarPlatinumRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.TheWorldRenderer;
+import com.github.standobyte.jojo.client.render.item.CustomIconItem;
 import com.github.standobyte.jojo.client.render.item.RoadRollerBakedModel;
 import com.github.standobyte.jojo.client.render.item.generic.ItemISTERModelWrapper;
 import com.github.standobyte.jojo.client.render.item.standdisc.StandDiscISTERModel;
@@ -109,6 +110,8 @@ import com.github.standobyte.jojo.client.ui.marker.GoldExperienceLifeformRevertM
 import com.github.standobyte.jojo.client.ui.marker.GoldExperienceMarkedItemMarker;
 import com.github.standobyte.jojo.client.ui.marker.HierophantGreenBarrierDetectionMarker;
 import com.github.standobyte.jojo.client.ui.marker.MarkerRenderer;
+import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
+import com.github.standobyte.jojo.client.ui.screen.vampirism.VampirismScreen;
 import com.github.standobyte.jojo.client.ui.screen.walkman.WalkmanScreen;
 import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModContainers;
@@ -122,7 +125,6 @@ import com.github.standobyte.jojo.item.StandArrowItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
 import com.github.standobyte.jojo.item.cassette.CassetteCap;
-import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 
 import net.minecraft.client.Minecraft;
@@ -160,7 +162,6 @@ import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
-import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
@@ -251,10 +252,11 @@ public class ClientSetup {
         ClientModSettings.init(mc, new File(mc.gameDirectory, "config/jojo_rotp/client_settings.json"));
         HudControlSettings.init(new File(mc.gameDirectory, "config/jojo_rotp/controls/"));
         
+        HamonScreen.clientInit();
+        VampirismScreen.clientInit();
+        
         event.enqueueWork(() -> {
-            ItemModelsProperties.register(ModItems.METEORIC_SCRAP.get(), new ResourceLocation(JojoMod.MOD_ID, "icon"), (itemStack, clientWorld, livingEntity) -> {
-                return itemStack.getOrCreateTag().getInt("Icon");
-            });
+            CustomIconItem.registerModelOverride();
             ItemModelsProperties.register(ModItems.KNIFE.get(), new ResourceLocation(JojoMod.MOD_ID, "count"), (itemStack, clientWorld, livingEntity) -> {
                 return livingEntity != null ? itemStack.getCount() : 1;
             });
@@ -317,6 +319,14 @@ public class ClientSetup {
             MarkerRenderer.Handler.addRenderer(new GoldExperienceLifeformMarker(mc));
             MarkerRenderer.Handler.addRenderer(new GoldExperienceLifeformRevertMarker(mc));
             MarkerRenderer.Handler.addRenderer(new GoldExperienceMarkedItemMarker(mc));
+            
+//            StandStatsRenderer.overrideCosmeticStats(
+//                    ModStands.GOLD_EXPERIENCE_REQUIEM.getStandType().getRegistryName(), 
+//                    new StandStatsRenderer.OverrideCosmeticStat() {
+//                        @Override public double newValue(StandStat stat, IStandPower standData, double curConvertedValue) { 
+//                            return 0;
+//                        }
+//                    });
         });
     }
 
@@ -400,6 +410,7 @@ public class ClientSetup {
                 model -> new ItemISTERModelWrapper(model).setCaptureEntity());
         registerCustomBakedModel(ModItems.CLACKERS.get().getRegistryName(), event.getModelRegistry(), 
                 model -> new ItemISTERModelWrapper(model).setCaptureEntity());
+        CustomIconItem.onModelBake(event.getModelRegistry());
     }
     
     public static void registerCustomBakedModel(ResourceLocation resLoc, 
@@ -426,9 +437,7 @@ public class ClientSetup {
             spritesAdded = true;
         }
         
-        for (StandType<?> standType : JojoCustomRegistries.STANDS.getRegistry().getValues()) {
-            ModelLoader.addSpecialModel(StandDiscOverrideList.makeStandSpecificModelPath(standType));
-        }
+        StandDiscOverrideList.onModelRegistry();
     }
     
     public static void addUnreferencedBlockModels(RenderMaterial... renderMaterials) {

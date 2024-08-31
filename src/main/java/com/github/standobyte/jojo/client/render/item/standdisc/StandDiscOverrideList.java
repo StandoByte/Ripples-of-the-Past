@@ -5,6 +5,8 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
@@ -13,12 +15,11 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ItemModelMesher;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ItemOverrideList;
-import net.minecraft.client.renderer.model.SimpleBakedModel;
-import net.minecraft.client.renderer.texture.MissingTextureSprite;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
+import net.minecraftforge.client.model.ModelLoader;
 
 public class StandDiscOverrideList extends ItemOverrideList {
     private final Map<ResourceLocation, IBakedModel> cache = new HashMap<>();
@@ -35,7 +36,7 @@ public class StandDiscOverrideList extends ItemOverrideList {
             StandType<?> standType = discStand.getType();
             ItemModelMesher itemModelShaper = Minecraft.getInstance().getItemRenderer().getItemModelShaper();
             IBakedModel standSpecificModel = cache.computeIfAbsent(standType.getRegistryName(), standId -> itemModelShaper.getModelManager().getModel(makeStandSpecificModelPath(standType)));
-            if (standSpecificModel != null && !isMissingModel(standSpecificModel, itemModelShaper)) {
+            if (standSpecificModel != null && !ClientUtil.isMissingModel(standSpecificModel, itemModelShaper)) {
                 model = standSpecificModel;
             }
         }
@@ -43,14 +44,15 @@ public class StandDiscOverrideList extends ItemOverrideList {
         return wrappedOverrides.resolve(model, item, world, entity);
     }
     
+    public static void onModelRegistry() {
+        for (StandType<?> standType : JojoCustomRegistries.STANDS.getRegistry().getValues()) {
+            ModelLoader.addSpecialModel(makeStandSpecificModelPath(standType));
+        }
+    }
+    
     public static ResourceLocation makeStandSpecificModelPath(StandType<?> standType) {
         ResourceLocation id = standType.getRegistryName();
         return new ResourceLocation(id.getNamespace(), "item/stand_disc_" + id.getPath());
     }
     
-    private static boolean isMissingModel(IBakedModel model, ItemModelMesher itemModelShaper) {
-//        return model == itemModelShaper.getModelManager().getMissingModel(); // you'd think that should work
-        return model instanceof SimpleBakedModel && (((SimpleBakedModel) model).getParticleIcon() instanceof MissingTextureSprite);
-    }
-
 }

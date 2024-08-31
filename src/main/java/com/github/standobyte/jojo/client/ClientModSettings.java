@@ -21,6 +21,7 @@ public class ClientModSettings {
     
     public static class Settings {
         public float standStatsTranslucency = 0.75F;
+        public boolean standStatsInvertBnW = false;
         public ChooseLifeformScreen.ViewMode viewModeGE = null;
         
         public PositionConfig barsPosition = PositionConfig.TOP_LEFT;

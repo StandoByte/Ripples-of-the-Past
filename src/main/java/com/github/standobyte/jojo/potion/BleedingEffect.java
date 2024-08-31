@@ -2,7 +2,6 @@ package com.github.standobyte.jojo.potion;
 
 import java.util.UUID;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -42,7 +41,6 @@ public class BleedingEffect extends Effect implements IApplicableEffect {
     }
     
     public static int limitAmplifier(LivingEntity entity, int amplifier) {
-        JojoMod.LOGGER.debug((entity.getAttributeBaseValue(Attributes.MAX_HEALTH) / HP_REDUCTION) - 1);
         return Math.min(amplifier, Math.max(
                 (int) (entity.getAttributeBaseValue(Attributes.MAX_HEALTH) / HP_REDUCTION) - 2, 
                 (int) (MCUtil.calcValueWithoutModifiers(entity.getAttribute(Attributes.MAX_HEALTH), ATTRIBUTE_MODIFIER_ID) / HP_REDUCTION) - 2));

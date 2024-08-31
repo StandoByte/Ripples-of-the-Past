@@ -15,7 +15,7 @@ import net.minecraft.util.ResourceLocation;
 
 @JeiPlugin
 public class JeiJojoPlugin implements IModPlugin {
-    private final ResourceLocation id = new ResourceLocation(JojoMod.MOD_ID, "jei_plugin");
+    private final ResourceLocation id = new ResourceLocation(JojoMod.MOD_ID, "general");
     
     public JeiJojoPlugin() {}
 
