@@ -14,6 +14,7 @@ import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.item.MrPresidentKeyItem;
+import com.github.standobyte.jojo.item.StandArrowItem;
 import com.github.standobyte.jojo.potion.StandVirusEffect;
 import com.github.standobyte.jojo.potion.StandVirusEffect.MobStandGiver;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -334,20 +335,23 @@ public class CocoJumboTurtleEntity extends TurtleEntity implements IMobStandUser
                 PlayerEntity nearestPlayer = spawnRegion.getLevel().getNearestPlayer(x, y, z, -1, EntityPredicates.NO_SPECTATORS);
                 if (nearestPlayer instanceof ServerPlayerEntity) {
                     ServerPlayerEntity player = (ServerPlayerEntity) nearestPlayer;
+                    boolean hasArrow = !MCUtil.findInInventory(player.inventory, item -> item.getItem() instanceof StandArrowItem).isEmpty();
                     boolean hasArrowAdvancement = MCUtil.hasAdvancement(player, GOT_ARROW_ADVANCEMENT);
                     boolean hasTurtleAdvancement = MCUtil.hasAdvancement(player, MET_TURTLE_ADVANCEMENT);
                     
                     float spawnChancePerTurtle;
                     switch (spawnReason) {
                     case CHUNK_GENERATION:
-                        if (!hasArrowAdvancement)           spawnChancePerTurtle = 0.0125f;
-                        else if (!hasTurtleAdvancement)     spawnChancePerTurtle = 0.05f;
-                        else                                spawnChancePerTurtle = 0.025f;
+                        if (!hasTurtleAdvancement)          spawnChancePerTurtle = 0.075f;
+                        else if (hasArrow)                  spawnChancePerTurtle = 0.0375f;
+                        else if (hasArrowAdvancement)       spawnChancePerTurtle = 0.025f;
+                        else                                spawnChancePerTurtle = 0.0125f;
                         break;
                     default:
-                        if (!hasArrowAdvancement)           spawnChancePerTurtle = 0.0025f;
-                        else if (!hasTurtleAdvancement)     spawnChancePerTurtle = 0.01f;
-                        else                                spawnChancePerTurtle = 0.005f;
+                        if (!hasTurtleAdvancement)          spawnChancePerTurtle = 0.015f;
+                        else if (hasArrow)                  spawnChancePerTurtle = 0.0075f;
+                        else if (hasArrowAdvancement)       spawnChancePerTurtle = 0.005f;
+                        else                                spawnChancePerTurtle = 0.0025f;
                         break;
                     }
                     
