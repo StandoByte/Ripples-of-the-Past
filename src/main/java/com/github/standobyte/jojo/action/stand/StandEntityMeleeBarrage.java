@@ -25,12 +25,10 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrBarrageHitSoundPa
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
-import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -149,15 +147,11 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
 
     @Override
     public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
-        if (standEntity.isArmsOnlyMode()) {
-            return super.getOffsetFromUser(standPower, standEntity, task);
-        }
-        double minOffset = 0.5;
-        double maxOffset = minOffset + standEntity.getAttributeValue(Attributes.MOVEMENT_SPEED) * 1.5 * standEntity.getStaminaCondition();
-        return offsetToTarget(standPower, standEntity, task, 
-                minOffset, maxOffset, 
-                () -> ActionTarget.fromRayTraceResult(JojoModUtil.rayTrace(standPower.getUser(), maxOffset, standEntity::canHarm, 0.25, 0)))
-                .orElse(StandRelativeOffset.withXRot(0, Math.min(maxOffset, standEntity.getMaxEffectiveRange())));
+        double minOffset = Math.min(0.5, standEntity.getMaxEffectiveRange());
+        double maxOffset = Math.min(1.5, standEntity.getMaxEffectiveRange());
+
+        return front3dOffset(standPower, standEntity, task.getTarget(), minOffset, maxOffset)
+                .orElse(super.getOffsetFromUser(standPower, standEntity, task));
     }
     
     @Override

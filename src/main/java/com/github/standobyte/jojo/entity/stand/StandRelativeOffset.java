@@ -92,7 +92,7 @@ public class StandRelativeOffset {
         double y = doYOffset ? this.y : yDefault;
         double z = forward;
         if (useXRot) {
-            Vector3d vec = new Vector3d(x, y, z).xRot(-xRot * MathUtil.DEG_TO_RAD);
+            Vector3d vec = new Vector3d(x, 0, z).xRot(-xRot * MathUtil.DEG_TO_RAD);
             x = vec.x;
             y = vec.y;
             z = vec.z;
@@ -100,12 +100,15 @@ public class StandRelativeOffset {
         return new StandRelativeOffset(x, y, z, true, false);
     }
     
-    public StandRelativeOffset lerp(StandRelativeOffset prev, double lerp) {
+    public StandRelativeOffset lerp(StandRelativeOffset prev, double lerp, double yDefault, float xRot) {
+        StandRelativeOffset offset0 = prev.makeSnapshot(yDefault, xRot);
+        StandRelativeOffset offset1 = this.makeSnapshot(yDefault, xRot);
+        
         return new StandRelativeOffset(
-                MathHelper.lerp(lerp, prev.left, this.left),
-                MathHelper.lerp(lerp, prev.y, this.y),
-                MathHelper.lerp(lerp, prev.forward, this.forward),
-                prev.doYOffset, useXRot);
+                MathHelper.lerp(lerp, offset0.left,    offset1.left),
+                MathHelper.lerp(lerp, offset0.y,       offset1.y),
+                MathHelper.lerp(lerp, offset0.forward, offset1.forward),
+                true, false);
     }
     
 

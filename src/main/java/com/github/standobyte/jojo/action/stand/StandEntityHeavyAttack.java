@@ -16,6 +16,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandPose;
+import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -173,10 +174,26 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         return StandStatFormulas.getHeavyAttackRecovery(standEntity.getAttackSpeed(), standEntity.getLastHeavyFinisherValue());
     }
     
+    
     @Override
     protected boolean standKeepsTarget(ActionTarget target) {
         return target.getType() == TargetType.ENTITY;
     }
+    
+    @Override
+    public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
+        double minOffset = Math.min(0.5, standEntity.getMaxEffectiveRange());
+        double maxOffset = Math.min(2, standEntity.getMaxRange());
+
+        return front3dOffset(standPower, standEntity, task.getTarget(), minOffset, maxOffset)
+                .orElse(super.getOffsetFromUser(standPower, standEntity, task));
+    }
+    
+    @Override
+    public boolean lockOnTargetPosition(IStandPower standPower, StandEntity standEntity, StandEntityTask curTask) {
+        return false;
+    }
+    
     
     @Override
     public boolean noFinisherDecay() {

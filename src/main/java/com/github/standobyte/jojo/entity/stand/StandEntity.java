@@ -135,7 +135,6 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     private StandRelativeOffset offsetDefault = StandRelativeOffset.withYOffset(-0.75, 0.2, -0.75);
     private StandRelativeOffset offsetDefaultArmsOnly = StandRelativeOffset.withYOffset(0, 0, 0.15);
     protected StandRelativeOffset prevOffset;
-    protected StandRelativeOffset prevOffsetSnapshot;
     protected StandRelativeOffset curOffset;
     protected int offsetLerpTicks;
     protected int offsetLerpMaxTicks;
@@ -1244,13 +1243,15 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             StandRelativeOffset relativeOffset = getOffsetFromUser();
             if (relativeOffset != null) {
                 Optional<StandEntityTask> currentTask = getCurrentTask();
-                Vector3d pos = user.position().add(taskOffset(user, relativeOffset, currentTask));
+                Vector3d offset = taskOffset(user, relativeOffset, currentTask);
+                Vector3d pos = user.position().add(offset);
                 if (!isArmsOnlyMode()) {
                     pos = collideNextPos(pos);
                 }
 
                 setPos(pos.x, pos.y, pos.z);
             }
+            this.curOffset = relativeOffset;
         }
         else if (isBeingRetracted()) {
             if (!isCloseToUser()) {
@@ -1291,6 +1292,10 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         if (Optional.ofNullable(getCurrentTaskAction()).map(action -> action.noAdheringToUserOffset(userPower, this)).orElse(false)) {
             return null;
         }
+        LivingEntity user = getUser();
+        if (user == null) {
+            return null;
+        }
         
         StandRelativeOffset defaultOffset = getDefaultOffsetFromUser();
         StandRelativeOffset offset = getCurrentTask().map(task -> {
@@ -1301,8 +1306,9 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         }).orElse(defaultOffset);
 
         if (level.isClientSide() && doOffsetLerp) {
-            if (prevOffsetSnapshot != null && offsetLerpTicks < offsetLerpMaxTicks) {
-                offset = offset.lerp(prevOffsetSnapshot, (double) offsetLerpTicks / (double) offsetLerpMaxTicks);
+            if (prevOffset != null && offsetLerpTicks < offsetLerpMaxTicks) {
+                offset = offset.lerp(prevOffset, (double) offsetLerpTicks / (double) offsetLerpMaxTicks, 
+                        defaultOffset.y, user.xRot);
             }
         }
         
@@ -1310,30 +1316,23 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
     
     protected void actionOffsetChanged() {
-        StandRelativeOffset defaultOffset = getDefaultOffsetFromUser();
-        StandRelativeOffset offset = lastTask.map(task -> {
-            StandRelativeOffset taskOffset = task.getOffsetFromUser(userPower, this);
-            if (taskOffset != null) return taskOffset;
-            
-            return defaultOffset;
-        }).orElse(defaultOffset);
-        
         if (level.isClientSide() && doOffsetLerp) {
-            if (offset != this.curOffset) {
+            if (this.prevOffset != this.curOffset) {
                 this.prevOffset = this.curOffset;
-                this.prevOffsetSnapshot = prevOffset != null ? prevOffset.makeSnapshot(defaultOffset.y, xRot) : null;
-                this.curOffset = offset;
                 this.offsetLerpTicks = 1;
-                this.offsetLerpMaxTicks = 3;
+                this.offsetLerpMaxTicks = 4;
             }
         }
     }
     
     private Vector3d taskOffset(LivingEntity user, StandRelativeOffset relativeOffset, Optional<StandEntityTask> currentTask) {
-        ActionTarget target = currentTask.map(StandEntityTask::getTarget).orElse(ActionTarget.EMPTY);
         float yRot;
         float xRot;
-        Vector3d targetPos = target.getTargetPos(true);
+        
+        Vector3d targetPos = currentTask.map(task -> {
+            return task.getAction().lockOnTargetPosition(getUserPower(), this, task) ? task.getTarget() : ActionTarget.EMPTY;
+        }).map(target -> target.getTargetPos(true)).orElse(null);
+        
         if (targetPos != null) {
             Vector3d vecToTarget = targetPos.subtract(user.getEyePosition(1.0F));
             yRot = MathUtil.yRotDegFromVec(vecToTarget);
@@ -1345,7 +1344,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         }
             
         Vector3d offset = relativeOffset.getAbsoluteVec(yRot, xRot, this, user, getDefaultOffsetFromUser().y);
-        if (user.isShiftKeyDown()) {
+        if (!currentTask.isPresent() && user.isShiftKeyDown()) {
             offset = new Vector3d(offset.x, 0, offset.z);
         }
         
@@ -1408,13 +1407,6 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
                     if (prevTask.getTarget().getType() != TargetType.EMPTY
                             && task.getTarget().getType() == TargetType.EMPTY) {
                         task.setTarget(this, prevTask.getTarget(), userPower);
-                    }
-                    
-                    if (task.getAction().transfersPreviousOffset(userPower, this, prevTask)) {
-                        StandRelativeOffset offset = prevTask.getOffsetFromUser(userPower, this);
-                        if (offset != null) {
-                            task.overrideOffsetFromUser(offset);
-                        }
                     }
                 });
                 

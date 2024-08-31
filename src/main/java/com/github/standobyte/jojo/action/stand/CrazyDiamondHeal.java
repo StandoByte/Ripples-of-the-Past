@@ -180,7 +180,7 @@ public class CrazyDiamondHeal extends StandEntityAction {
 
     @Override
     public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
-        return offsetToTarget(standPower, standEntity, task, 0, standEntity.getMaxEffectiveRange(), null)
+        return offsetToTarget(standPower, standEntity, task.getTarget(), 0, standEntity.getMaxEffectiveRange(), null)
                 .orElse(super.getOffsetFromUser(standPower, standEntity, task));
     }
 }
