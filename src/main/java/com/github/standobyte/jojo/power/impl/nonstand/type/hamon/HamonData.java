@@ -1510,6 +1510,7 @@ public class HamonData extends TypeSpecificData {
         hamonSkills.syncWithTrackingOrUser(user, entity, this);
         PacketManager.sendToClient(new TrHamonAuraColorPacket(user.getId(), auraColor), entity);
         PacketManager.sendToClient(new TrHamonFlagsPacket(user.getId(), this), entity);
+        PacketManager.sendToClient(new TrHamonMeditationPacket(user.getId(), isMeditating()), entity);
     }
     
     public enum Exercise {
