@@ -977,7 +977,10 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
                     }
                 }
             }
-            if (blockedRatio == 1) {
+            if (getCurrentTask().isPresent()) {
+                blockedRatio += (1 - blockedRatio) * 0.5f;
+            }
+            if (blockedRatio >= 1) {
                 wasDamageBlocked = true;
 //                if (damageSrc.getEntity() instanceof StandEntity) {
 //                    ((StandEntity) damageSrc.getEntity()).playPunchSound = false;
