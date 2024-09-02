@@ -1555,7 +1555,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     
     public ActionTarget aimWithThisOrUser(double reachDistance, ActionTarget currentTarget) {
         ActionTarget target;
-        if (currentTarget.getType() == TargetType.ENTITY && isTargetInReach(currentTarget)) {
+        if (currentTarget.getType() != TargetType.EMPTY && isTargetInReach(currentTarget)) {
             target = currentTarget;
         }
         else {
