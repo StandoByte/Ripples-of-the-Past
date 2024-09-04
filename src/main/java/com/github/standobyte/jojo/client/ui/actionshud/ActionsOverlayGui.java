@@ -476,14 +476,6 @@ public class ActionsOverlayGui extends AbstractGui {
         return _target;
     }
     
-    public static int getPowerUiColor(PowerClassification powerClassification) {
-        IPower<?, ?> power = getInstance().getHudMode(powerClassification).getPower();
-        if (power == null) {
-            return -1;
-        }
-        return getPowerUiColor(power);
-    }
-    
     public static int getPowerUiColor(IPower<?, ?> power) {
         switch (power.getPowerClassification()) {
         case NON_STAND:
@@ -498,6 +490,14 @@ public class ActionsOverlayGui extends AbstractGui {
                     .orElse(-1);
         }
         return -1;
+    }
+    
+    public static int getPowerUiColor(PowerClassification powerClassification) {
+        IPower<?, ?> power = getInstance().getHudMode(powerClassification).getPower();
+        if (power == null) {
+            return -1;
+        }
+        return getPowerUiColor(power);
     }
 
     
