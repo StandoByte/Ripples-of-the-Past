@@ -392,6 +392,8 @@
   "death.attack.arrow.stand_user": "%s был застрелен Стендом %s, %s",
   "death.attack.explosion.stand": "%1$s был взорван %2$s",
   "death.attack.explosion.stand.item": "%1$s был взорван %2$s с помощью %3$s",
+  "_death.attack.entityFlewInto": "%1$s experienced someone's kinetic energy",
+  "_death.attack.entityFlewInto.player": "%1$s experienced %2$s's kinetic energy",
   "death.attack.roadRoller": "%s был раздавлен в лепёшку",
   "death.attack.roadRoller.player": "%s был раздавлен в лепёшку, пока боролся с %s",
   "death.attack.eyeOfEnderShards": "Внутренности %s были разорваны осколками Ока Эндера",

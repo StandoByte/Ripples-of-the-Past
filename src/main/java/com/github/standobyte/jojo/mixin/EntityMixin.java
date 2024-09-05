@@ -3,9 +3,12 @@ package com.github.standobyte.jojo.mixin;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.github.standobyte.jojo.capability.world.TimeStopHandler;
+import com.github.standobyte.jojo.util.mc.damage.KnockbackCollisionImpact;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.fluid.FluidState;
@@ -15,10 +18,24 @@ import net.minecraft.world.IBlockReader;
 import net.minecraft.world.World;
 
 @Mixin(Entity.class)
-public class EntityMixin {
+public abstract class EntityMixin {
+    @Shadow public World level;
     
-    @Shadow
-    public World level;
+    private KnockbackCollisionImpact jojoKbCollision;
+    
+    
+    
+    @Inject(method = "collide", at = @At("HEAD"))
+    public void jojoCollideBreakBlocks(Vector3d movementVec, CallbackInfoReturnable<Vector3d> ci) {
+        if (jojoKbCollision == null) {
+            jojoKbCollision = KnockbackCollisionImpact.getHandler((Entity) (Object) this).get();
+        }
+        if (jojoKbCollision != null) {
+            jojoKbCollision.collideBreakBlocks(movementVec);
+        }
+    }
+    
+    
     
     @Redirect(method = "updateFluidHeightAndDoFluidPushing", at = @At(
             value = "INVOKE", 

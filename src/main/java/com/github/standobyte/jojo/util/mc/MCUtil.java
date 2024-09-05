@@ -34,6 +34,7 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.command.CommandSource;
@@ -473,6 +474,23 @@ public class MCUtil {
         return new AxisAlignedBB(
                 center.x - inflX, center.y - inflY, center.z - inflZ,
                 center.x + inflX, center.y + inflY, center.z + inflZ);
+    }
+    
+    public static double getManhattanDist(AxisAlignedBB aabb1, AxisAlignedBB aabb2) {
+        double xDist = 0;
+        double yDist = 0;
+        double zDist = 0;
+        
+        if      (aabb1.maxX < aabb2.minX) xDist = aabb2.minX - aabb1.maxX;
+        else if (aabb2.maxX < aabb1.minX) xDist = aabb1.minX - aabb2.maxX;
+        
+        if      (aabb1.maxY < aabb2.minY) yDist = aabb2.minY - aabb1.maxY;
+        else if (aabb2.maxY < aabb1.minY) yDist = aabb1.minY - aabb2.maxY;
+        
+        if      (aabb1.maxZ < aabb2.minZ) zDist = aabb2.minZ - aabb1.maxZ;
+        else if (aabb2.maxZ < aabb1.minZ) zDist = aabb1.minZ - aabb2.maxZ;
+        
+        return xDist + yDist + zDist;
     }
     
     

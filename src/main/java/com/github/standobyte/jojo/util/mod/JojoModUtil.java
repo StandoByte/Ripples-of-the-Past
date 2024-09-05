@@ -247,10 +247,10 @@ public class JojoModUtil {
 
 
 
-    public static boolean canEntityDestroy(ServerWorld world, BlockPos blockPos, BlockState blockState, LivingEntity entity) {
+    public static boolean canEntityDestroy(ServerWorld world, BlockPos blockPos, BlockState blockState, Entity entity) {
         if (breakingBlocksEnabled(world)
                 && blockState.canEntityDestroy(world, blockPos, entity)
-                && ForgeEventFactory.onEntityDestroyBlock(entity, blockPos, blockState)) {
+                && (!(entity instanceof LivingEntity) || ForgeEventFactory.onEntityDestroyBlock((LivingEntity) entity, blockPos, blockState))) {
             PlayerEntity player = null;
             if (entity instanceof PlayerEntity) {
                 player = (PlayerEntity) entity;

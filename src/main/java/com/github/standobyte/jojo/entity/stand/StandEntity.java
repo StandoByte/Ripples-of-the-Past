@@ -1947,7 +1947,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
     
     public boolean canBreakBlock(BlockPos blockPos, BlockState blockState) {
-        float blockHardness = blockState.getDestroySpeed(level, blockPos);
+        float blockHardness = StandStatFormulas.getStandBreakBlockHardness(blockState, level, blockPos);
         return blockHardness >= 0 && canBreakBlock(blockHardness, blockState.getHarvestLevel());
     }
 

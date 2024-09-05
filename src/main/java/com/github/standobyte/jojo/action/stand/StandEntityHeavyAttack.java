@@ -22,6 +22,7 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.util.general.ObjectWrapper;
+import com.github.standobyte.jojo.util.mc.damage.KnockbackCollisionImpact;
 import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
 
 import net.minecraft.block.BlockState;
@@ -312,11 +313,16 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
 
         @Override
         protected void afterAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, StandEntityTask task, boolean hurt, boolean killed) {
-            if (!stand.level.isClientSide() && target instanceof StandEntity && hurt && !killed) {
-                StandEntity standTarget = (StandEntity) target;
-                if (standTarget.getCurrentTask().isPresent() && standTarget.getCurrentTaskAction().stopOnHeavyAttack(this)) {
-                    standTarget.stopTaskWithRecovery();
+            if (!stand.level.isClientSide() && hurt) {
+                if (target instanceof StandEntity && !killed) {
+                    StandEntity standTarget = (StandEntity) target;
+                    if (standTarget.getCurrentTask().isPresent() && standTarget.getCurrentTaskAction().stopOnHeavyAttack(this)) {
+                        standTarget.stopTaskWithRecovery();
+                    }
                 }
+                
+                KnockbackCollisionImpact.getHandler(target).ifPresent(
+                        cap -> cap.onPunchSetKnockbackImpact(target.getDeltaMovement()));
             }
             super.afterAttack(stand, target, dmgSource, task, hurt, killed);
         }
