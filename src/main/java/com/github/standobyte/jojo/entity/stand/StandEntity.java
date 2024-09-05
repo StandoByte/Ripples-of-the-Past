@@ -1683,6 +1683,9 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             break;
         case ENTITY:
             Entity entity = target.getEntity();
+            if (!(entity instanceof LivingEntity)) {
+                playPunchSound = true;
+            }
             StandEntityPunch entityPunchInstance = punchAction.punchEntity(this, entity, getDamageSource());
             punchInstance = entityPunchInstance;
             break;
