@@ -22,18 +22,26 @@ public abstract class EntityMixin {
     @Shadow public World level;
     
     private KnockbackCollisionImpact jojoKbCollision;
+    private boolean repeatCollide;
     
-    
-    
-    @Inject(method = "collide", at = @At("HEAD"))
+    @Inject(method = "collide", at = @At("TAIL"), cancellable = true)
     public void jojoCollideBreakBlocks(Vector3d movementVec, CallbackInfoReturnable<Vector3d> ci) {
+        if (repeatCollide) {
+            repeatCollide = false;
+            return;
+        }
         if (jojoKbCollision == null) {
             jojoKbCollision = KnockbackCollisionImpact.getHandler((Entity) (Object) this).get();
         }
-        if (jojoKbCollision != null) {
-            jojoKbCollision.collideBreakBlocks(movementVec);
+        if (jojoKbCollision != null && jojoKbCollision.collideBreakBlocks(movementVec, ci.getReturnValue(), level)) {
+            repeatCollide = true;
+            Vector3d repeatCollide = collide(movementVec);
+            ci.setReturnValue(repeatCollide);
         }
     }
+    
+    @Shadow
+    protected abstract Vector3d collide(Vector3d pVec);
     
     
     

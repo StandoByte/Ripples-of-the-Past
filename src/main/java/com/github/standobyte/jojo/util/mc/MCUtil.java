@@ -24,6 +24,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.SpawnParticlePacket;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -500,6 +501,20 @@ public class MCUtil {
             return ((PlayerEntity) entity).isLocalPlayer();
         }
         return !entity.level.isClientSide() || entity.isControlledByLocalInstance();
+    }
+    
+    
+    
+    // TODO less particles and sounds than vanilla does
+    public static void destroyBlocksInBulk(Collection<BlockPos> blocks, ServerWorld world, @Nullable Entity entity) {
+        Stream<BlockPos> stream = blocks.stream();
+        if (entity != null) {
+            stream = stream.filter(blockPos -> {
+                BlockState blockState = world.getBlockState(blockPos);
+                return JojoModUtil.canEntityDestroy(world, blockPos, blockState, entity);
+            });
+        }
+        stream.forEach(blockPos -> world.removeBlock(blockPos, false));
     }
     
     

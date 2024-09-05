@@ -53,12 +53,18 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
     }
     
     
-    public void collideBreakBlocks(Vector3d movementVec) {
+    /**
+     * @return true if the block collision needs to be recalculated
+     */
+    public boolean collideBreakBlocks(Vector3d movementVec, Vector3d collidedVec, World world) {
         if (knockbackVec == null || movementVec.lengthSqr() < 1E-07) {
-            return;
+            return false;
         }
         
-        collideBoundingBox(entity, movementVec, knockbackVec);
+        boolean canBreakBlocks = JojoModUtil.breakingBlocksEnabled(world);
+        boolean collidedWithBlocks = !movementVec.equals(collidedVec);
+        collideBoundingBox(entity, movementVec, collidedWithBlocks, canBreakBlocks);
+        return canBreakBlocks && collidedWithBlocks;
     }
     
     public void onPunchSetKnockbackImpact(Vector3d knockbackVec) {
@@ -138,84 +144,50 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
     
     
     
-    public void collideBoundingBox(Entity entity, Vector3d movementVec, Vector3d kbVec) {
+    public void collideBoundingBox(Entity entity, Vector3d movementVec, boolean collideBlocks, boolean canBreakBlocks) {
         World world = entity.level;
         if (world.isClientSide()) return;
         
-        AxisAlignedBB aabb = entity.getBoundingBox();
+        AxisAlignedBB aabb = entity.getBoundingBox().inflate(0.25);
         ISelectionContext selectionContext = ISelectionContext.of(entity);
+        ServerWorld serverWorld = (ServerWorld) world;
         
         VoxelShape worldBorder = world.getWorldBorder().getCollisionShape();
         ReuseableStream<VoxelShape> worldBorderCollision = new ReuseableStream<>(
                 VoxelShapes.joinIsNotEmpty(worldBorder, VoxelShapes.create(aabb.deflate(1.0E-7D)), IBooleanFunction.AND) ? Stream.empty() : Stream.of(worldBorder));
-        ReuseableStream<Pair<Entity, VoxelShape>> entityCollisions = new ReuseableStream<>(getEntityCollisions(world, entity, aabb.expandTowards(movementVec), e -> true));
         
-        double x = movementVec.x;
-        double y = movementVec.y;
-        double z = movementVec.z;
-        
-        Collection<Pair<BlockPos, VoxelShape>> blocksCollided = new ArrayList<>();
+        ReuseableStream<Pair<Entity, VoxelShape>> potentialEntityCollisions = new ReuseableStream<>(getEntityCollisions(world, entity, aabb.expandTowards(movementVec), e -> true));
         Collection<Entity> entitiesCollided = new ArrayList<>();
-        Integer countFloorBlocks = y < 0 && (getHadImpactWithBlock()) ? 0 : null;
-        
-        if (y != 0) {
-            y = collide(Direction.Axis.Y, aabb, world, y, 
-                    worldBorderCollision, entityCollisions, 
-                    selectionContext, blocksCollided, entitiesCollided);
-            if (y != 0) {
-                aabb = aabb.move(0, y, 0);
-            }
+        collideEntities(aabb, movementVec, world, 
+                worldBorderCollision, potentialEntityCollisions, 
+                selectionContext, entitiesCollided);
+
+        if (!entitiesCollided.isEmpty()) {
+            Vector3d vec = entity.getDeltaMovement();
+
+            entitiesCollided.forEach(targetEntity -> {
+                DamageUtil.hurtThroughInvulTicks(targetEntity, new EntityDamageSource("entityFlewInto", entity), 
+                        (float) getKnockbackImpactStrength() * 5);
+                if (targetEntity instanceof LivingEntity) {
+                    LivingEntity living = (LivingEntity) targetEntity;
+                    living.knockback((float) getKnockbackImpactStrength(), -vec.x, -vec.z);
+                }
+            });
         }
 
-        if (countFloorBlocks != null) countFloorBlocks = blocksCollided.size();
-        boolean zFirst = Math.abs(x) < Math.abs(z);
-        if (zFirst && z != 0) {
-            z = collide(Direction.Axis.Z, aabb, world, z, 
-                    worldBorderCollision, entityCollisions, 
-                    selectionContext, blocksCollided, entitiesCollided);
-            if (z != 0) {
-                aabb = aabb.move(0, 0, z);
+        if (collideBlocks) {
+            Collection<Pair<BlockPos, VoxelShape>> blocks;
+            if (canBreakBlocks) {
+                blocks = collideBreakBlocks(movementVec, aabb, serverWorld, worldBorder, selectionContext);
             }
-        }
+            else {
+                blocks = collideNoBreakingBlocks(movementVec, aabb, serverWorld, worldBorder, selectionContext);
+            }
+            
+            
+            Collection<BlockPos> blocksToDestroy = new ArrayList<>();
 
-        if (x != 0) {
-            x = collide(Direction.Axis.X, aabb, world, x, 
-                    worldBorderCollision, entityCollisions, 
-                    selectionContext, blocksCollided, entitiesCollided);
-            if (!zFirst && x != 0) {
-                aabb = aabb.move(x, 0, 0);
-            }
-        }
-
-        if (!zFirst && z != 0) {
-            z = collide(Direction.Axis.Z, aabb, world, z, 
-                    worldBorderCollision, entityCollisions, 
-                    selectionContext, blocksCollided, entitiesCollided);
-        }
-        
-        
-        
-        if (!world.isClientSide()) {
-            ServerWorld serverWorld = (ServerWorld) world;
-            
-            if (!entitiesCollided.isEmpty()) {
-                Vector3d vec = entity.getDeltaMovement();
-                
-                entitiesCollided.forEach(targetEntity -> {
-                    DamageUtil.hurtThroughInvulTicks(targetEntity, new EntityDamageSource("entityFlewInto", entity), 
-                            (float) getKnockbackImpactStrength() * 5);
-                    if (targetEntity instanceof LivingEntity) {
-                        LivingEntity living = (LivingEntity) targetEntity;
-                        living.knockback((float) getKnockbackImpactStrength(), -vec.x, -vec.z);
-                    }
-                });
-            }
-            
-            if (countFloorBlocks != null && countFloorBlocks > 0 && countFloorBlocks == blocksCollided.size()) {
-                setKnockbackImpactStrength(0);
-            }
-            
-            blocksCollided.stream()
+            blocks.stream().distinct()
             .sorted(Comparator.comparingDouble(block -> {
                 AxisAlignedBB blockBB = block.getRight().bounds();
                 return MCUtil.getManhattanDist(blockBB, entity.getBoundingBox());
@@ -227,8 +199,9 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
                 float useImpactStrength = 0;
                 if (hardness >= 0) {
                     useImpactStrength = hardness * 0.05f;
-                    if (getKnockbackImpactStrength() >= useImpactStrength
-                            && JojoModUtil.canEntityDestroy(serverWorld, blockPos, blockState, entity)) {
+                    
+                    if (canBreakBlocks && getKnockbackImpactStrength() >= useImpactStrength) {
+                        blocksToDestroy.add(blockPos);
                         world.destroyBlock(blockPos, true, entity);
                     }
                 }
@@ -248,8 +221,11 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
                 }
                 return getKnockbackImpactStrength() > 0;
             });
+            
+            MCUtil.destroyBlocksInBulk(blocksToDestroy, serverWorld, entity);
         }
     }
+    
     
     private static Stream<Pair<Entity, VoxelShape>> getEntityCollisions(World world, @Nullable Entity pEntity, AxisAlignedBB pArea, Predicate<Entity> pFilter) {
         if (pArea.getSize() < 1.0E-7D) {
@@ -262,9 +238,199 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
         }
     }
     
+    private static void collideEntities(AxisAlignedBB aabb, Vector3d movementVec, World world, 
+            ReuseableStream<VoxelShape> worldBorderCollision, ReuseableStream<Pair<Entity, VoxelShape>> potentialEntityCollisions, 
+            ISelectionContext selectionContext, Collection<Entity> entityCollision) {
+        double x = movementVec.x;
+        double y = movementVec.y;
+        double z = movementVec.z;
+        
+        if (y != 0) {
+            y = collideEntitiesAxis(Direction.Axis.Y, aabb, world, y, 
+                    worldBorderCollision, potentialEntityCollisions, 
+                    selectionContext, entityCollision);
+            if (y != 0) {
+                aabb = aabb.move(0, y, 0);
+            }
+        }
+
+        boolean zFirst = Math.abs(x) < Math.abs(z);
+        if (zFirst && z != 0) {
+            z = collideEntitiesAxis(Direction.Axis.Z, aabb, world, z, 
+                    worldBorderCollision, potentialEntityCollisions, 
+                    selectionContext, entityCollision);
+            if (z != 0) {
+                aabb = aabb.move(0, 0, z);
+            }
+        }
+
+        if (x != 0) {
+            x = collideEntitiesAxis(Direction.Axis.X, aabb, world, x, 
+                    worldBorderCollision, potentialEntityCollisions, 
+                    selectionContext, entityCollision);
+            if (!zFirst && x != 0) {
+                aabb = aabb.move(x, 0, 0);
+            }
+        }
+
+        if (!zFirst && z != 0) {
+            z = collideEntitiesAxis(Direction.Axis.Z, aabb, world, z, 
+                    worldBorderCollision, potentialEntityCollisions, 
+                    selectionContext, entityCollision);
+        }
+    }
+    
+    private static double collideEntitiesAxis(Direction.Axis movementAxis, AxisAlignedBB collisionBox, World world, double desiredOffset, 
+            ReuseableStream<VoxelShape> worldBorderCollision, ReuseableStream<Pair<Entity, VoxelShape>> potentialEntityCollisions, 
+            ISelectionContext pSelectionContext, Collection<Entity> entityCollision) {
+        if (!(collisionBox.getXsize() < 1.0E-6D) && !(collisionBox.getYsize() < 1.0E-6D) && !(collisionBox.getZsize() < 1.0E-6D)) {
+            if (Math.abs(desiredOffset) < 1.0E-7D) {
+                return 0;
+            } else {
+                AxisRotation pRotationAxis = AxisRotation.between(movementAxis, Direction.Axis.Z);
+                AxisRotation axisrotation = pRotationAxis.inverse();
+                Direction.Axis direction$axis2 = axisrotation.cycle(Direction.Axis.Z);
+
+                MutableDouble worldBorderCollideOffset = new MutableDouble(desiredOffset);
+                worldBorderCollision.getStream().forEach(voxelShape -> {
+                    worldBorderCollideOffset.setValue(voxelShape.collide(direction$axis2, collisionBox, worldBorderCollideOffset.doubleValue()));
+                });
+                desiredOffset = worldBorderCollideOffset.doubleValue();
+                
+                double maxOffset = desiredOffset;
+                MutableDouble collidedOffset = new MutableDouble(maxOffset);
+                potentialEntityCollisions.getStream().forEach(entityVoxelShape -> {
+                    double entityCollideResult = entityVoxelShape.getRight().collide(direction$axis2, collisionBox, collidedOffset.doubleValue());
+                    if (entityCollideResult != maxOffset) {
+                        entityCollision.add(entityVoxelShape.getLeft());
+                        collidedOffset.setValue(entityCollideResult);
+                    }
+                });
+                
+                return desiredOffset;
+            }
+        } else {
+            return desiredOffset;
+        }
+    }
+    
+    
+    // FIXME when the knockback is high, the entity flies to a different direction for some reason
+    private Collection<Pair<BlockPos, VoxelShape>> collideBreakBlocks(Vector3d movementVec, AxisAlignedBB aabb, ServerWorld world, 
+            VoxelShape worldBorder, ISelectionContext selectionContext) {
+        Collection<Pair<BlockPos, VoxelShape>> blocksCollided = new ArrayList<>();
+        Integer countFloorBlocks = movementVec.y < 0 && getHadImpactWithBlock() ? 0 : null;
+
+        if (countFloorBlocks != null && countFloorBlocks > 0 && countFloorBlocks == blocksCollided.size()) {
+            setKnockbackImpactStrength(0);
+        }
+
+        Vector3d step;
+        AxisAlignedBB loopCollisionBB = aabb;
+        double xAbs = Math.abs(movementVec.x);
+        double yAbs = Math.abs(movementVec.y);
+        double zAbs = Math.abs(movementVec.z);
+        double iterations;
+        if (xAbs >= yAbs && xAbs >= zAbs) {
+            iterations = xAbs;
+        }
+        else if (yAbs >= zAbs && yAbs >= xAbs) {
+            iterations = yAbs;
+        }
+        else /*if (zAbs >= xAbs && zAbs >= yAbs)*/ {
+            iterations = zAbs;
+        }
+        
+        step = movementVec.scale(1.0 / iterations);
+
+        for (int i = 0; i < iterations; i++) {
+            addBlocksInsideBB(loopCollisionBB, world, 
+                    worldBorder, selectionContext, 
+                    blocksCollided);
+
+            if (i + 1 > iterations) {
+                step = step.scale(iterations - i);
+            }
+            loopCollisionBB = loopCollisionBB.move(step);
+        }
+        
+        return blocksCollided;
+    }
+    
+    private Collection<Pair<BlockPos, VoxelShape>> collideNoBreakingBlocks(Vector3d movementVec, AxisAlignedBB aabb, ServerWorld world, 
+            VoxelShape worldBorder, ISelectionContext selectionContext) {
+        ReuseableStream<VoxelShape> worldBorderCollision = new ReuseableStream<>(
+                VoxelShapes.joinIsNotEmpty(worldBorder, VoxelShapes.create(aabb.deflate(1.0E-7D)), IBooleanFunction.AND) ? Stream.empty() : Stream.of(worldBorder));
+        
+        double x = movementVec.x;
+        double y = movementVec.y;
+        double z = movementVec.z;
+        
+        Collection<Pair<BlockPos, VoxelShape>> blocksCollided = new ArrayList<>();
+        Integer countFloorBlocks = y < 0 && (getHadImpactWithBlock()) ? 0 : null;
+        
+        if (y != 0) {
+            y = collide(Direction.Axis.Y, aabb, world, y, 
+                    worldBorderCollision, selectionContext, blocksCollided);
+            if (y != 0) {
+                aabb = aabb.move(0, y, 0);
+            }
+        }
+
+        if (countFloorBlocks != null) countFloorBlocks = blocksCollided.size();
+        boolean zFirst = Math.abs(x) < Math.abs(z);
+        if (zFirst && z != 0) {
+            z = collide(Direction.Axis.Z, aabb, world, z, 
+                    worldBorderCollision, selectionContext, blocksCollided);
+            if (z != 0) {
+                aabb = aabb.move(0, 0, z);
+            }
+        }
+
+        if (x != 0) {
+            x = collide(Direction.Axis.X, aabb, world, x, 
+                    worldBorderCollision, selectionContext, blocksCollided);
+            if (!zFirst && x != 0) {
+                aabb = aabb.move(x, 0, 0);
+            }
+        }
+
+        if (!zFirst && z != 0) {
+            z = collide(Direction.Axis.Z, aabb, world, z, 
+                    worldBorderCollision, selectionContext, blocksCollided);
+        }
+        
+        return blocksCollided;
+    }
+    
+    
+    private static void addBlocksInsideBB(AxisAlignedBB collisionBox, World world, 
+            VoxelShape worldBorder, ISelectionContext selectionContext, 
+            Collection<Pair<BlockPos, VoxelShape>> blockCollision) {
+        BlockPos.Mutable blockPos = new BlockPos.Mutable();
+        int x0 = MathHelper.floor(collisionBox.minX);
+        int y0 = MathHelper.floor(collisionBox.minY);
+        int z0 = MathHelper.floor(collisionBox.minZ);
+        int x1 = MathHelper.ceil(collisionBox.maxX);
+        int y1 = MathHelper.ceil(collisionBox.maxY);
+        int z1 = MathHelper.ceil(collisionBox.maxZ);
+        
+        for (int x = x0; x <= x1; x++) {
+            for (int y = y0; y <= y1; y++) {
+                for (int z = z0; z <= z1; z++) {
+                    blockPos.set(x, y, z);
+                    BlockState blockstate = world.getBlockState(blockPos);
+                    VoxelShape collisionShape = blockstate.getCollisionShape(world, blockPos, selectionContext);
+                    if (!collisionShape.isEmpty()) {
+                        blockCollision.add(Pair.of(new BlockPos(blockPos), collisionShape));
+                    }
+                }
+            }
+        }
+    }
+    
     private static double collide(Direction.Axis movementAxis, AxisAlignedBB collisionBox, World world, double desiredOffset, 
-            ReuseableStream<VoxelShape> worldBorderCollision, ReuseableStream<Pair<Entity, VoxelShape>> entityCollisions, 
-            ISelectionContext pSelectionContext, Collection<Pair<BlockPos, VoxelShape>> blockCollision, Collection<Entity> entityCollision) {
+            ReuseableStream<VoxelShape> worldBorderCollision, ISelectionContext pSelectionContext, Collection<Pair<BlockPos, VoxelShape>> blockCollision) {
         if (!(collisionBox.getXsize() < 1.0E-6D) && !(collisionBox.getYsize() < 1.0E-6D) && !(collisionBox.getZsize() < 1.0E-6D)) {
             if (Math.abs(desiredOffset) < 1.0E-7D) {
                 return 0;
@@ -342,15 +508,15 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
                     l1 += k1;
                 }
                 
-                double maxOffset = desiredOffset;
-                MutableDouble collidedOffset = new MutableDouble(maxOffset);
-                entityCollisions.getStream().forEach(entityVoxelShape -> {
-                    double entityCollideResult = entityVoxelShape.getRight().collide(direction$axis2, collisionBox, collidedOffset.doubleValue());
-                    if (entityCollideResult != maxOffset) {
-                        entityCollision.add(entityVoxelShape.getLeft());
-                        collidedOffset.setValue(entityCollideResult);
-                    }
-                });
+//                double maxOffset = desiredOffset;
+//                MutableDouble collidedOffset = new MutableDouble(maxOffset);
+//                potentialEntityCollisions.getStream().forEach(entityVoxelShape -> {
+//                    double entityCollideResult = entityVoxelShape.getRight().collide(direction$axis2, collisionBox, collidedOffset.doubleValue());
+//                    if (entityCollideResult != maxOffset) {
+//                        entityCollision.add(entityVoxelShape.getLeft());
+//                        collidedOffset.setValue(entityCollideResult);
+//                    }
+//                });
                 
                 return desiredOffset;
             }
