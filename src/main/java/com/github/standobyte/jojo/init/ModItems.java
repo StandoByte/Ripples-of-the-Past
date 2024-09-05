@@ -176,10 +176,10 @@ public class ModItems {
             () -> new Item(new Item.Properties().tab(MAIN_TAB).rarity(Rarity.UNCOMMON)));
 
     public static final RegistryObject<StandArrowItem> STAND_ARROW = ITEMS.register("stand_arrow", 
-            () -> new StandArrowItem(new Item.Properties().tab(MAIN_TAB).rarity(Rarity.UNCOMMON).durability(25), 10));
+            () -> new StandArrowItem(new Item.Properties().tab(MAIN_TAB).rarity(Rarity.UNCOMMON).durability(25), 10, false));
 
     public static final RegistryObject<StandArrowItem> STAND_ARROW_BEETLE = ITEMS.register("stand_arrow_beetle", 
-            () -> new StandArrowItem(new Item.Properties().tab(MAIN_TAB).rarity(Rarity.RARE).durability(250), 25));
+            () -> new StandArrowItem(new Item.Properties().tab(MAIN_TAB).rarity(Rarity.RARE).durability(250), 25, true));
 
 //    public static final RegistryObject<StandArrowShardItem> STAND_ARROW_SHARD = ITEMS.register("stand_arrow_shard", 
 //            () -> new StandArrowShardItem(new Item.Properties().tab(MAIN_TAB).rarity(Rarity.UNCOMMON)));
