@@ -977,8 +977,10 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
                     }
                 }
             }
-            if (getCurrentTask().isPresent()) {
-                blockedRatio += (1 - blockedRatio) * 0.5f;
+            Float multiplier = getCurrentTask().map(task -> task.getAction()
+                    .getDamageBlockMultiplier(userPower, this, task)).orElse(null);
+            if (multiplier != null && multiplier != 0) {
+                blockedRatio += (1 - blockedRatio) * multiplier;
             }
             if (blockedRatio >= 1) {
                 wasDamageBlocked = true;

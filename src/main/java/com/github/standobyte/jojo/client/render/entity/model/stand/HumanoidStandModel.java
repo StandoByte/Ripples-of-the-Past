@@ -10,6 +10,7 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -35,7 +36,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
-import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.ModelRenderer;
@@ -697,9 +697,9 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
     
     
     
-    public void addCrumbleParticleAt(HumanoidPart humanoidPart, ResourceLocation texture, Vector3d pos) {
+    private static final Random RANDOM = new Random();
+    public void addCrumbleParticleAt(HumanoidPart humanoidPart, ResourceLocation texture, T entity) {
         Minecraft mc = Minecraft.getInstance();
-        StandCrumbleParticle particle = new StandCrumbleParticle(mc.level, pos.x, pos.y, pos.z, 0, 0, 0);
         
         ModelRenderer mainPart;
         switch (humanoidPart) {
@@ -724,15 +724,17 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
         default:
             throw new IllegalArgumentException();
         }
-        Random random = new Random();
         List<ModelRenderer> allModelParts = new ArrayList<>();
         addChildren(mainPart, allModelParts);
-        ModelRenderer randomPart = allModelParts.get(random.nextInt(allModelParts.size()));
-        ObjectList<ModelRenderer.ModelBox> cubes = ClientReflection.getCubes(randomPart); // TODO don't use reflection here
+        
+        List<ModelRenderer.ModelBox> cubes = allModelParts.stream()
+                .flatMap(modelPart -> ClientReflection.getCubes(modelPart).stream()) // TODO don't use reflection here
+                .collect(Collectors.toList());
+        
         if (!cubes.isEmpty()) {
-            ModelRenderer.ModelBox cube = cubes.get(random.nextInt(cubes.size()));
+            ModelRenderer.ModelBox cube = cubes.get(RANDOM.nextInt(cubes.size()));
             ModelRenderer.TexturedQuad[] polygons = ClientReflection.getPolygons(cube); // TODO don't use reflection here
-            ModelRenderer.TexturedQuad polygon = polygons[random.nextInt(polygons.length)];
+            ModelRenderer.TexturedQuad polygon = polygons[RANDOM.nextInt(polygons.length)];
             if (polygon != null) {
                 ModelRenderer.PositionTextureVertex[] vertices = polygon.vertices;
                 if (vertices.length > 0) {
@@ -740,6 +742,11 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
                     float v0 = (float) Arrays.stream(vertices).mapToDouble(vertex -> vertex.v).min().getAsDouble();
                     float u1 = (float) Arrays.stream(vertices).mapToDouble(vertex -> vertex.u).max().getAsDouble();
                     float v1 = (float) Arrays.stream(vertices).mapToDouble(vertex -> vertex.v).max().getAsDouble();
+                    
+                    double x = entity.getX();
+                    double y = entity.getY(0.5);
+                    double z = entity.getZ();
+                    StandCrumbleParticle particle = new StandCrumbleParticle(mc.level, x, y, z, 0, 0, 0);
                     particle.setTextureAndUv(texture, u0, v0, u1, v1);
                     mc.particleEngine.add(particle);
                 }
@@ -754,7 +761,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
         }
     }
     
-    private enum HumanoidPart {
+    public enum HumanoidPart {
         HEAD,
         TORSO,
         LEFT_ARM,

@@ -506,6 +506,10 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         return false;
     }
     
+    public float getDamageBlockMultiplier(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
+        return 0.5f;
+    }
+    
     @Override
     public boolean heldAllowsOtherAction(IStandPower standPower, Action<IStandPower> action) {
         return getHoldDurationToFire(standPower) == 0;
