@@ -7,7 +7,7 @@ import java.util.function.Supplier;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.stand.IHasStandPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
-import com.github.standobyte.jojo.client.sound.BarrageHitSoundHandler;
+import com.github.standobyte.jojo.client.sound.barrage.BarrageHitSoundHandler;
 import com.github.standobyte.jojo.entity.damaging.DamagingEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;

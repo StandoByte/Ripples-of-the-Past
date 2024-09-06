@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.sound;
+package com.github.standobyte.jojo.client.sound.barrage;
 
 import java.util.List;
 import java.util.function.Predicate;

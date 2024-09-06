@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.sound;
+package com.github.standobyte.jojo.client.sound.barrage;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -16,6 +16,8 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.github.standobyte.jojo.client.WalkmanSoundHandler;
+import com.github.standobyte.jojo.client.sound.EventlessSoundAccessor;
+import com.github.standobyte.jojo.client.sound.StoppableEntityTickableSound;
 import com.github.standobyte.jojo.init.ModSounds;
 
 import net.minecraft.client.Minecraft;

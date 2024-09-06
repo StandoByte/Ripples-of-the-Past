@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.client.resources;
 
 import com.github.standobyte.jojo.client.ResourcePathChecker;
-import com.github.standobyte.jojo.client.sound.StandCrySoundHandler;
+import com.github.standobyte.jojo.client.sound.barrage.StandCrySoundHandler;
 
 import net.minecraft.client.resources.ReloadListener;
 import net.minecraft.profiler.IProfiler;
