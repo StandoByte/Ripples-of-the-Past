@@ -152,6 +152,11 @@ public class CocoJumboTurtleEntity extends TurtleEntity implements IMobStandUser
     }
     
     @Override
+    public boolean removeWhenFarAway(double distToClosestPlayer) {
+        return false;
+    }
+    
+    @Override
     public boolean requiresCustomPersistence() {
         return true;
     }
