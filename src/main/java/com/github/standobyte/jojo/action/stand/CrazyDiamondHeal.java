@@ -101,8 +101,11 @@ public class CrazyDiamondHeal extends StandEntityAction {
     public static boolean healLivingEntity(World world, LivingEntity entity, StandEntity standEntity) {
         // FIXME disable it if the target is a dead body already
         if (entity.deathTime > 0) {
-            boolean resolveEffect = standEntity.getUser() != null && standEntity.getUser().hasEffect(ModStatusEffects.RESOLVE.get());
-            if (!resolveEffect && entity.deathTime > 1 || entity.deathTime > 15) {
+//            boolean resolveEffect = standEntity.getUser() != null && standEntity.getUser().hasEffect(ModStatusEffects.RESOLVE.get());
+//            if (!resolveEffect && entity.deathTime > 1 || entity.deathTime > 15) {
+//                return false;
+//            }
+            if (entity.deathTime > 15) {
                 return false;
             }
             return heal(world, entity, 
