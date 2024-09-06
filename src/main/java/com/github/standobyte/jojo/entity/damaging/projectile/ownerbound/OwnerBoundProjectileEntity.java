@@ -244,7 +244,9 @@ public abstract class OwnerBoundProjectileEntity extends ModdedProjectileEntity 
         Vector3d rtVec = startPos.subtract(endPos);
         AxisAlignedBB aabb = getBoundingBox().expandTowards(rtVec).inflate(1.0D);
         double minDistance = rtVec.length();
-        return JojoModUtil.rayTraceMultipleEntities(startPos, endPos, aabb, minDistance, level, this, this::canHitEntity, getBbWidth() / 2, 0);
+        return JojoModUtil.rayTraceMultipleEntities(startPos, endPos, aabb, 
+                minDistance, level, this, this::canHitEntity, 
+                getBbWidth() / 2, 0);
     }
     
     @Override

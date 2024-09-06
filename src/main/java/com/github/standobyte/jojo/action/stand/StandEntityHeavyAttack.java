@@ -16,11 +16,13 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandPose;
+import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.util.general.ObjectWrapper;
+import com.github.standobyte.jojo.util.mc.damage.KnockbackCollisionImpact;
 import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
 
 import net.minecraft.block.BlockState;
@@ -174,10 +176,26 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         return StandStatFormulas.getHeavyAttackRecovery(standEntity.getAttackSpeed(), standEntity.getLastHeavyFinisherValue());
     }
     
+    
     @Override
     protected boolean standKeepsTarget(ActionTarget target) {
         return target.getType() == TargetType.ENTITY;
     }
+    
+    @Override
+    public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
+        double minOffset = Math.min(0.5, standEntity.getMaxEffectiveRange());
+        double maxOffset = Math.min(2, standEntity.getMaxRange());
+
+        return front3dOffset(standPower, standEntity, task.getTarget(), minOffset, maxOffset)
+                .orElse(super.getOffsetFromUser(standPower, standEntity, task));
+    }
+    
+    @Override
+    public boolean lockOnTargetPosition(IStandPower standPower, StandEntity standEntity, StandEntityTask curTask) {
+        return false;
+    }
+    
     
     @Override
     public boolean noFinisherDecay() {
@@ -296,11 +314,16 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
 
         @Override
         protected void afterAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, StandEntityTask task, boolean hurt, boolean killed) {
-            if (!stand.level.isClientSide() && target instanceof StandEntity && hurt && !killed) {
-                StandEntity standTarget = (StandEntity) target;
-                if (standTarget.getCurrentTask().isPresent() && standTarget.getCurrentTaskAction().stopOnHeavyAttack(this)) {
-                    standTarget.stopTaskWithRecovery();
+            if (!stand.level.isClientSide() && hurt) {
+                if (target instanceof StandEntity && !killed) {
+                    StandEntity standTarget = (StandEntity) target;
+                    if (standTarget.getCurrentTask().isPresent() && standTarget.getCurrentTaskAction().stopOnHeavyAttack(this)) {
+                        standTarget.stopTaskWithRecovery();
+                    }
                 }
+                
+                KnockbackCollisionImpact.getHandler(target).ifPresent(
+                        cap -> cap.onPunchSetKnockbackImpact(target.getDeltaMovement()));
             }
             super.afterAttack(stand, target, dmgSource, task, hurt, killed);
         }

@@ -27,6 +27,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrResetDeathTimePac
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
@@ -38,6 +39,7 @@ import com.google.gson.JsonSerializer;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.advancements.Advancement;
+import net.minecraft.block.BlockState;
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.command.CommandSource;
@@ -571,6 +573,23 @@ public class MCUtil {
                 center.x + inflX, center.y + inflY, center.z + inflZ);
     }
     
+    public static double getManhattanDist(AxisAlignedBB aabb1, AxisAlignedBB aabb2) {
+        double xDist = 0;
+        double yDist = 0;
+        double zDist = 0;
+        
+        if      (aabb1.maxX < aabb2.minX) xDist = aabb2.minX - aabb1.maxX;
+        else if (aabb2.maxX < aabb1.minX) xDist = aabb1.minX - aabb2.maxX;
+        
+        if      (aabb1.maxY < aabb2.minY) yDist = aabb2.minY - aabb1.maxY;
+        else if (aabb2.maxY < aabb1.minY) yDist = aabb1.minY - aabb2.maxY;
+        
+        if      (aabb1.maxZ < aabb2.minZ) zDist = aabb2.minZ - aabb1.maxZ;
+        else if (aabb2.maxZ < aabb1.minZ) zDist = aabb1.minZ - aabb2.maxZ;
+        
+        return xDist + yDist + zDist;
+    }
+    
     
     
     public static void multipliedAttrModifier(LivingEntity entity, Attribute attribute, AttributeModifier modifier, float mult) {
@@ -591,6 +610,20 @@ public class MCUtil {
             return ((PlayerEntity) entity).isLocalPlayer();
         }
         return !entity.level.isClientSide() || entity.isControlledByLocalInstance();
+    }
+    
+    
+    
+    // TODO less particles and sounds than vanilla does
+    public static void destroyBlocksInBulk(Collection<BlockPos> blocks, ServerWorld world, @Nullable Entity entity) {
+        Stream<BlockPos> stream = blocks.stream();
+        if (entity != null) {
+            stream = stream.filter(blockPos -> {
+                BlockState blockState = world.getBlockState(blockPos);
+                return JojoModUtil.canEntityDestroy(world, blockPos, blockState, entity);
+            });
+        }
+        stream.forEach(blockPos -> world.removeBlock(blockPos, false));
     }
     
     

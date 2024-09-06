@@ -5,7 +5,10 @@ import java.util.Random;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.world.World;
 
 public class StandStatFormulas {
 
@@ -158,6 +161,14 @@ public class StandStatFormulas {
         return Math.max((int) (30 - movementSpeed * 25), 2);
     }
     
+    public static float getStandBreakBlockHardness(BlockState blockState, World world, BlockPos blockPos) {
+        float hardness = blockState.getDestroySpeed(world, blockPos);
+        if (!blockState.requiresCorrectToolForDrops()) {
+            hardness *= 0.6f;
+        }
+        return hardness;
+    }
+    
     public static boolean isBlockBreakable(double strength, float blockHardness, int blockHarvestLevel) {
         /* damage:
          * 2                                4                                   8                                   12                                      16
@@ -177,6 +188,7 @@ public class StandStatFormulas {
          * harvest level:
          * -1: leaves/grass                 0: dirt/wood/stone                  1: iron                             2: diamond/gold                         3: obsidian/netherite
          */
+        //   UPD: wood and other blocks that can be harvested by hand now have x0.6 hardness
         return blockHardness >= 0 && blockHardness < Math.exp(strength / 4) && blockHarvestLevel < (int) strength / 4;
     }
     

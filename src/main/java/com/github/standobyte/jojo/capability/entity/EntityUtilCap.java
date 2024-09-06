@@ -12,11 +12,16 @@ import com.github.standobyte.jojo.capability.world.TimeStopHandler;
 import com.github.standobyte.jojo.client.ClientEventHandler;
 import com.github.standobyte.jojo.client.IEntityGlowColor;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
+import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mc.damage.KnockbackCollisionImpact;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.nbt.CompoundNBT;
 
 public class EntityUtilCap {
     private final Entity entity;
+    
+    private KnockbackCollisionImpact kbImpact;
     
     private boolean stoppedInTime = false;
     private Queue<Runnable> runOnTimeResume = new LinkedList<>();
@@ -26,6 +31,19 @@ public class EntityUtilCap {
     
     public EntityUtilCap(Entity entity) {
         this.entity = entity;
+        this.kbImpact = new KnockbackCollisionImpact(entity);
+    }
+    
+    public CompoundNBT serializeNBT() {
+        CompoundNBT nbt = new CompoundNBT();
+        nbt.putBoolean("StoppedInTime", wasStoppedInTime());
+        nbt.put("KbImpact", kbImpact.serializeNBT());
+        return nbt;
+    }
+    
+    public void deserializeNBT(CompoundNBT nbt) {
+        nbtSetWasStoppedInTime(nbt.getBoolean("StoppedInTime"));
+        MCUtil.nbtGetCompoundOptional(nbt, "KbImpact").ifPresent(kbImpact::deserializeNBT);
     }
     
     /**
@@ -37,6 +55,9 @@ public class EntityUtilCap {
     public void tick() {
         if (entity.level.isClientSide()) {
             tickGlowingColor();
+        }
+        else {
+            kbImpact.tick();
         }
     }
     
@@ -80,7 +101,11 @@ public class EntityUtilCap {
                 action);
     }
     
-
+    
+    public final KnockbackCollisionImpact getKbImpact() {
+        return kbImpact;
+    }
+    
     
     public void setClGlowingColor(@Nonnull OptionalInt color, int ticks) {
         setClGlowingColor(color, ticks, null);

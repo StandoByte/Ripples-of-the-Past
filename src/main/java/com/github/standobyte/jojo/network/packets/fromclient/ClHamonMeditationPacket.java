@@ -11,10 +11,11 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 public class ClHamonMeditationPacket {
-    private final boolean value;
     
+    public ClHamonMeditationPacket() {}
+    
+    @Deprecated
     public ClHamonMeditationPacket(boolean value) {
-        this.value = value;
     }
     
     
@@ -23,24 +24,23 @@ public class ClHamonMeditationPacket {
     
         @Override
         public void encode(ClHamonMeditationPacket msg, PacketBuffer buf) {
-            buf.writeBoolean(msg.value);
         }
 
         @Override
         public ClHamonMeditationPacket decode(PacketBuffer buf) {
-            return new ClHamonMeditationPacket(buf.readBoolean());
+            return new ClHamonMeditationPacket();
         }
 
         @Override
         public void handle(ClHamonMeditationPacket msg, Supplier<NetworkEvent.Context> ctx) {
             PlayerEntity player = ctx.get().getSender();
-            if (player.isOnGround() || !msg.value) {
-                INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
-                    power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                        hamon.setIsMeditating(player, msg.value);
-                    });
+            INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
+                power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
+                    if (player.isOnGround() || hamon.isMeditating()) {
+                        hamon.setIsMeditating(player, !hamon.isMeditating());
+                    }
                 });
-            }
+            });
         }
 
         @Override

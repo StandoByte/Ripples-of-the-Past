@@ -2,6 +2,8 @@ package com.github.standobyte.jojo.action.stand.punch;
 
 import java.util.function.Supplier;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -271,8 +273,8 @@ public class StandEntityPunch implements IPunch {
 
         boolean hurt = stand.hurtTarget(target, dmgSource, damage);
         
-        if (hurt) {
-            if (targetLiving != null) {
+        if (targetLiving != null) {
+            if (hurt) {
                 if (getAdditionalKnockback() > 0) {
                     Vector3d vecToTarget = target.position().subtract(stand.position());
                     float knockbackYRot = (float) -MathHelper.atan2(vecToTarget.x, vecToTarget.z) * MathUtil.RAD_TO_DEG + this.knockbackYRot;
@@ -294,6 +296,33 @@ public class StandEntityPunch implements IPunch {
             }
         }
         
+        knockbackTarget(targetLiving);
+        
         return hurt;
+    }
+    
+    private void knockbackTarget(@Nullable LivingEntity targetAsLiving) {
+        if (getAdditionalKnockback() > 0) {
+            Vector3d vecToTarget = target.position().subtract(stand.position());
+            float knockbackYRot = (float) -MathHelper.atan2(vecToTarget.x, vecToTarget.z) * MathUtil.RAD_TO_DEG + this.knockbackYRot;
+            float knockbackStrength = getAdditionalKnockback() * 0.5F;
+            
+            if (targetAsLiving != null) {
+                if (Math.abs(knockbackXRot) < 90) {
+                    DamageUtil.knockback(targetAsLiving, knockbackStrength * MathHelper.cos(knockbackXRot * MathUtil.DEG_TO_RAD), knockbackYRot);
+                }
+                if (knockbackXRot != 0) {
+                    DamageUtil.upwardsKnockback(targetAsLiving, -knockbackStrength * MathHelper.sin(knockbackXRot * MathUtil.DEG_TO_RAD));
+                }
+            }
+            else {
+                Vector3d knockbackVec = new Vector3d(0, 0, knockbackStrength);
+                if (knockbackXRot != 0) {
+                    knockbackVec = knockbackVec.xRot(-knockbackXRot * MathUtil.DEG_TO_RAD);
+                }
+                knockbackVec = knockbackVec.yRot(-knockbackYRot * MathUtil.DEG_TO_RAD);
+                target.setDeltaMovement(knockbackVec);
+            }
+        }
     }
 }

@@ -15,7 +15,6 @@ import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
-import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.StoryPart;
@@ -112,7 +111,7 @@ public class StandDiscItem extends Item {
             boolean isClientSide = Thread.currentThread().getThreadGroup() == SidedThreadGroups.CLIENT;
             List<StandType<?>> legalStands = new ArrayList<>();
             for (StandType<?> standType : JojoCustomRegistries.STANDS.getRegistry()) {
-                if (StandUtil.canPlayerGetFromArrow(standType, isClientSide)) {
+                if (standType.getSurvivalGameplayPool().addToCreativeTab(standType, group, isClientSide)) {
                     legalStands.add(standType);
                 }
             }

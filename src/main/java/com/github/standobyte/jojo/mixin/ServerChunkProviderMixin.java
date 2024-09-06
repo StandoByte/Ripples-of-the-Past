@@ -20,9 +20,9 @@ public class ServerChunkProviderMixin {
     @Shadow
     private ServerWorld level;
 
-    @Inject(method = "isTickingChunk", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "isTickingChunk", at = @At("TAIL"), cancellable = true)
     public void jojoTsCancelBlockTick(BlockPos blockPos, CallbackInfoReturnable<Boolean> ci) {
-        if (TimeStopHandler.isTimeStopped(level, blockPos)
+        if (ci.getReturnValue() && TimeStopHandler.isTimeStopped(level, blockPos)
                 && (/*cancelCommandBlocks || */ !(level.getBlockState(blockPos).getBlock() instanceof CommandBlockBlock))) {
             ci.setReturnValue(false);
         }

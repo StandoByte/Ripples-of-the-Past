@@ -40,8 +40,6 @@ public class StandEntityTask {
     @Nonnull
     private StandEntityAction.Phase phase;
     private Set<StandEntityActionModifier> taskModifiers = new HashSet<>();
-    @Nullable
-    private StandRelativeOffset offsetFromUserOverride;
     private StacksTHC additionalData = new StacksTHC();
     
     private StandEntityTask(StandEntityAction action, int ticks, 
@@ -250,13 +248,9 @@ public class StandEntityTask {
         }
     }
     
-    public void overrideOffsetFromUser(StandRelativeOffset offset) {
-        this.offsetFromUserOverride = offset;
-    }
-    
     @Nullable
     public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity) {
-        StandRelativeOffset offset = offsetFromUserOverride != null ? offsetFromUserOverride : action.getOffsetFromUser(standPower, standEntity, this);
+        StandRelativeOffset offset = action.getOffsetFromUser(standPower, standEntity, this);
         if (offset != null) {
             return offset.applyYOffset(standEntity.getDefaultOffsetFromUser().y);
         }
@@ -288,11 +282,6 @@ public class StandEntityTask {
                 
                 task.target.writeToBuf(buf);
                 
-                buf.writeBoolean(task.offsetFromUserOverride != null);
-                if (task.offsetFromUserOverride != null) {
-                    task.offsetFromUserOverride.writeToBuf(buf);
-                }
-                
                 NetworkUtil.writeCollection(buf, task.taskModifiers, action -> buf.writeRegistryId(action), false);
                 
                 task.action.taskWriteAdditional(task, buf);
@@ -318,11 +307,6 @@ public class StandEntityTask {
             
             StandEntityTask task = new StandEntityTask(standAction, ticks, phase, false, target);
             
-            if (buf.readBoolean()) {
-                StandRelativeOffset offset = StandRelativeOffset.readFromBuf(buf);
-                task.overrideOffsetFromUser(offset);
-            }
-            
             NetworkUtil.readCollection(buf, () -> buf.readRegistryIdSafe(Action.class)).forEach(modifier -> {
                 if (modifier instanceof StandEntityActionModifier) {
                     task.taskModifiers.add((StandEntityActionModifier) modifier);
@@ -339,9 +323,7 @@ public class StandEntityTask {
             if (value.isPresent()) {
                 StandEntityTask task = value.get();
                 StandEntityTask taskNew = new StandEntityTask(task.action, task.startingTicks, task.phase, false, task.target.copy());
-                taskNew.offsetFromUserOverride = task.offsetFromUserOverride;
                 taskNew.ticksLeft = task.ticksLeft;
-                taskNew.offsetFromUserOverride = task.offsetFromUserOverride;
                 taskNew.taskModifiers = task.taskModifiers;
                 task.action.taskCopyAdditional(taskNew, task);
                 

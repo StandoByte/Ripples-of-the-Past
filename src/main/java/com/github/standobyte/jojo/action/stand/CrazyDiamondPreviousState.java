@@ -422,12 +422,17 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
 
     @Override
     public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
-        return offsetToTarget(standPower, standEntity, task, 0, standEntity.getMaxEffectiveRange(), null)
+        return offsetToTarget(standPower, standEntity, task.getTarget(), 0, standEntity.getMaxEffectiveRange(), null)
                 .orElse(!standEntity.isArmsOnlyMode() && standEntity.getUser().getMainArm() == HandSide.LEFT ? 
                         userOffsetLeftArm
                         : super.getOffsetFromUser(standPower, standEntity, task));
     }
-
+    
+    @Override
+    public boolean lockOnTargetPosition(IStandPower standPower, StandEntity standEntity, StandEntityTask curTask) {
+        return false;
+    }
+    
     @Override
     public float yRotForOffset(LivingEntity user, StandEntityTask task) {
         return task.getTarget().getType() != TargetType.EMPTY ? super.yRotForOffset(user, task) : user.yBodyRot;
