@@ -25,6 +25,7 @@ import com.github.standobyte.jojo.action.stand.punch.StandMissedPunch;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.barrage.BarrageSwingsHolder;
 import com.github.standobyte.jojo.client.sound.barrage.BarrageHitSoundHandler;
@@ -1112,6 +1113,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
     
     private float prevUserMaxHealth = -1;
+    private boolean prevIsDead = false;
     private static final UUID SYNC_USER_MAX_HP_ATTRIBUTE = UUID.fromString("279afa29-d83b-4562-bcc5-059c3b7773d0");
     @Override
     public void tick() {
@@ -1224,6 +1226,12 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         if (user != null) {
             deathTime = user.deathTime;
         }
+        
+        boolean isDead = deathTime > 0;
+//        if (true || !prevIsDead && isDead) {
+//            onStandDying();
+//        }
+        prevIsDead = isDead;
     }
 
 
@@ -2251,8 +2259,24 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         return false;
     }
     
-
-
+    
+    
+    protected void onStandDying() {
+        if (level.isClientSide()) {
+            for (double y = 0.25; y < getBbHeight(); y += 0.25) {
+                addCrumbleParticles(y);
+            }
+        }
+    }
+    
+    public void addCrumbleParticles(double entityY) {
+        if (level.isClientSide()) {
+            CustomParticlesHelper.addStandCrumbleParticles(this, position().add(0, entityY, 0), TargetHitPart.getHitTarget(this, entityY));
+        }
+    }
+    
+    
+    
     public float getAlpha(float partialTick) {
         float alpha = 1F;
         int ticks = summonLockTicks > 0 ? summonLockTicks : gradualSummonWeaknessTicks;

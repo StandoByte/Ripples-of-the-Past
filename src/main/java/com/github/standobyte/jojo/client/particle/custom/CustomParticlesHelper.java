@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.client.particle.custom;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Random;
@@ -9,6 +10,11 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.HamonAuraParticle;
 import com.github.standobyte.jojo.client.particle.SendoHamonOverdriveParticle;
+import com.github.standobyte.jojo.client.render.entity.model.stand.HumanoidStandModel;
+import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
+import com.github.standobyte.jojo.client.render.entity.renderer.stand.StandEntityRenderer;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.entity.stand.TargetHitPart;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
@@ -18,6 +24,8 @@ import net.minecraft.client.particle.IAnimatedSprite;
 import net.minecraft.client.particle.Particle;
 import net.minecraft.client.particle.SpriteTexturedParticle;
 import net.minecraft.client.renderer.ActiveRenderInfo;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.entity.Entity;
@@ -165,6 +173,38 @@ public abstract class CustomParticlesHelper {
                         x, y, z, xSpeed, ySpeed, zSpeed, particleData.getType());
                 CustomParticlesHelper.addParticle(particle, new Vector3d(x, y, z), particleData.getType().getOverrideLimiter(), false);
             }
+        }
+    }
+    
+    // TODO use chariot's armor layer if it is on
+    public static <T extends StandEntity> void addStandCrumbleParticles(T standEntity, Vector3d pos, TargetHitPart humanoidPart) {
+        EntityRenderer<? super T> renderer = Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(standEntity);
+        if (renderer instanceof StandEntityRenderer) {
+            StandEntityRenderer<? super T, ?> standRenderer = (StandEntityRenderer<? super T, ?>) renderer;
+            StandEntityModel<? super T> model = standRenderer.getModel(standEntity);
+            
+            ResourceLocation texture = renderer.getTextureLocation(standEntity);
+            if (texture == null) return;
+            
+            ModelRenderer.TexturedQuad polygon = HumanoidStandModel.getRandomQuad(model.getRandomCubeAt(humanoidPart));
+            if (polygon != null) {
+                ModelRenderer.PositionTextureVertex[] vertices = polygon.vertices;
+                if (vertices.length > 0) {
+                    float u0 = (float) Arrays.stream(vertices).mapToDouble(vertex -> vertex.u).min().getAsDouble();
+                    float v0 = (float) Arrays.stream(vertices).mapToDouble(vertex -> vertex.v).min().getAsDouble();
+                    float u1 = (float) Arrays.stream(vertices).mapToDouble(vertex -> vertex.u).max().getAsDouble();
+                    float v1 = (float) Arrays.stream(vertices).mapToDouble(vertex -> vertex.v).max().getAsDouble();
+                    
+                    Minecraft mc = Minecraft.getInstance();
+                    double x = pos.x;
+                    double y = pos.y;
+                    double z = pos.z;
+                    StandCrumbleParticle particle = new StandCrumbleParticle(mc.level, x, y, z, 0, 0, 0);
+                    particle.setTextureAndUv(texture, u0, v0, u1, v1);
+                    mc.particleEngine.add(particle);
+                }
+            }
+            
         }
     }
     
