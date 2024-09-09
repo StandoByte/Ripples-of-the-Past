@@ -176,6 +176,15 @@
     			"jojo:hamon_spark_short_28", "jojo:hamon_spark_short_29", "jojo:hamon_spark_short_30",
     			"jojo:hamon_spark_short_31", "jojo:hamon_spark_short_32", "jojo:hamon_spark_short_33" ]
   },
+  "hamon_healing": {
+    "subtitle": "jojo.subtitle.hamon_healing",
+	"sounds": [
+	  {
+	    "name": "jojo:hamon_early_sound",
+	    "volume": 0.2
+	  }
+	]
+  },
   "hamon_syo_charge": {
     "subtitle": "jojo.subtitle.hamon_syo_charge",
     "sounds": [ "jojo:hamon_syo_charge" ]
@@ -193,16 +202,13 @@
       }
     ]
   },
-  
   "glider_flight": {
     "sounds": [ "minecraft:item/elytra/elytra_loop" ]
   },
-  
   "hamon_detector": {
     "subtitle": "jojo.subtitle.hamon_concentration",
-    "sounds": [ "jojo:hamon_detector" ]
+    "sounds": [ "jojo:hamon_early_sound" ]
   },
-  
   "hamon_concentration": {
     "subtitle": "jojo.subtitle.hamon_concentration",
     "sounds": [
@@ -212,7 +218,6 @@
       }
     ]
   },
-  
   "hamon_breath": {
     "subtitle": "jojo.subtitle.hamon_breath",
     "sounds": [ "minecraft:entity.player.breath" ]

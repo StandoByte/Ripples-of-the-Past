@@ -172,7 +172,7 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
         }
     }
 
-    private static final float PLAYER_RENDER_SCALE = 0.9375F;
+    public static final float PLAYER_RENDER_SCALE = 0.9375F;
     @Override
     protected void scale(T entity, MatrixStack matrixStack, float partialTick) {
         matrixStack.scale(

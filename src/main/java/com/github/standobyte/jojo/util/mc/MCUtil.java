@@ -24,6 +24,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.SpawnParticlePacket;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
+import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonDeserializationContext;
@@ -78,6 +79,7 @@ import net.minecraft.network.play.server.SSpawnMovingSoundEffectPacket;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.particles.ItemParticleData;
 import net.minecraft.particles.ParticleTypes;
+import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.potion.Potions;
@@ -623,6 +625,39 @@ public class MCUtil {
             return entity.removeEffect(effectInstance.getEffect());
         }
         return false;
+    }
+    
+    public static boolean reduceEffect(LivingEntity entity, Effect effect, int reduceDuration, int reduceAmplifier) {
+        EffectInstance mainEffectInstance = entity.getEffect(effect);
+        if (mainEffectInstance == null) {
+            return false;
+        }
+        
+        EffectInstance effectInstance = mainEffectInstance;
+        EffectInstance prevInstance = null;
+        
+        while (effectInstance != null) {
+            if (effectInstance.getAmplifier() < reduceAmplifier || effectInstance.getDuration() <= reduceDuration) {
+                if (effectInstance == mainEffectInstance) {
+                    return entity.removeEffect(effect);
+                }
+                else {
+                    prevInstance.hiddenEffect = null;
+                    break;
+                }
+            }
+            
+            if (reduceAmplifier > 0) {
+                effectInstance.amplifier -= reduceAmplifier;
+            }
+            effectInstance.duration -= reduceDuration;
+            
+            prevInstance = effectInstance;
+            effectInstance = effectInstance.hiddenEffect;
+        }
+        
+        CommonReflection.onEffectUpdated(entity, mainEffectInstance, true);
+        return true;
     }
     
     

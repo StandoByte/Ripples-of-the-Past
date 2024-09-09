@@ -5,6 +5,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.action.non_stand.HamonHealing;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.potion.BleedingEffect;
 import com.github.standobyte.jojo.potion.FreezeEffect;
@@ -25,15 +26,10 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectType;
 import net.minecraft.potion.Effects;
-import net.minecraftforge.event.RegistryEvent;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.RegistryObject;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.ForgeRegistries;
 
-@EventBusSubscriber(modid = JojoMod.MOD_ID, bus = EventBusSubscriber.Bus.MOD)
 public class ModStatusEffects {
     public static final DeferredRegister<Effect> EFFECTS = DeferredRegister.create(ForgeRegistries.POTIONS, JojoMod.MOD_ID);
     
@@ -105,8 +101,7 @@ public class ModStatusEffects {
 //            () -> new StatusEffect(EffectType.HARMFUL, 0xCACAD8)); // TODO Stand Sealing effect
     
     private static final Set<Effect> TRACKED_EFFECTS = new HashSet<>();
-    @SubscribeEvent(priority = EventPriority.LOW)
-    public static void afterEffectsRegister(RegistryEvent.Register<Effect> event) {
+    public static void afterEffectsRegister() {
         VampirismPowerType.initVampiricEffects();
         StandEntity.addSharedEffectsFromUser(TIME_STOP.get(), Effects.BLINDNESS);
         StandEntity.addSharedEffectsFromStand(STUN.get(), IMMOBILIZE.get());
@@ -122,6 +117,7 @@ public class ModStatusEffects {
                 VAMPIRE_SUN_BURN.get(),
                 FREEZE.get(),
                 BLEEDING.get());
+        HamonHealing.initVenomEffects();
     }
     
     // Makes it so that the effect is also sent to the surrounding players, in case it is needed for visuals

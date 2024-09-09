@@ -719,7 +719,7 @@
   "action.jojo.hamon_breath": "Aliento Hamon",
   "action.jojo.hamon_speed_boost": "Aumento de velocidad",
   "action.jojo.hamon_healing": "Curar",
-  "action.jojo.hamon_healing_touch": "Toque sanador",
+  "_action.jojo.hamon_healing_touch": "Heal %s",
   "action.jojo.hamon_wall_climbing": "Escalar el muro",
   "action.jojo.hamon_detector": "Detector de vida Hamon",
   "action.jojo.hamon_life_magnetism": "Magnetismo de la vida",

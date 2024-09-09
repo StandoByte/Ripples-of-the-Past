@@ -812,7 +812,7 @@
  "action.jojo.hamon_breath": "波纹呼吸",
  "action.jojo.hamon_speed_boost": "身体机能控制",
  "action.jojo.hamon_healing": "波纹治疗",
- "action.jojo.hamon_healing_touch": "碰触治疗",
+ "_action.jojo.hamon_healing_touch": "Heal %s",
  "action.jojo.hamon_wall_climbing": "攀爬",
  "action.jojo.hamon_detector": "波纹生命侦测",
  "action.jojo.hamon_life_magnetism": "生命磁气波纹疾走",

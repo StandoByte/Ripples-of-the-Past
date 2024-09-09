@@ -321,11 +321,12 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     public void stoppedHolding(World world, LivingEntity user, P power, int ticksHeld, boolean willFire) {}
     
+    @Deprecated
     public boolean isHeldSentToTracking() {
-        return false;
+        return true;
     }
     
-    public void onHoldTickClientEffect(LivingEntity user, P power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {}
+    public void onHoldTickClientEffect(LivingEntity user, P power, int ticksHeld, boolean reqFulfilled, boolean reqStateChanged) {}
     
     public LivingEntity getPerformer(LivingEntity user, P power) {
         return user;
