@@ -772,11 +772,11 @@ public class MCUtil {
                     break;
                 }
             }
-            
+
+            effectInstance.duration -= reduceDuration;
             if (reduceAmplifier > 0) {
                 effectInstance.amplifier -= reduceAmplifier;
             }
-            effectInstance.duration -= reduceDuration;
             
             prevInstance = effectInstance;
             effectInstance = effectInstance.hiddenEffect;

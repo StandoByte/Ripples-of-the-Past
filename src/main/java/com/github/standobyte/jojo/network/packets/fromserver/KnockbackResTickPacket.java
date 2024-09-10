@@ -4,7 +4,7 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
-import com.github.standobyte.jojo.util.mod.NoKnockbackOnBlocking;
+import com.github.standobyte.jojo.util.mc.damage.NoKnockbackOnBlocking;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;

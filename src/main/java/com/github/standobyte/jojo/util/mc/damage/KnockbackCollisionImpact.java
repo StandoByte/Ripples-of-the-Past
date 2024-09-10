@@ -9,20 +9,24 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.github.standobyte.jojo.capability.entity.EntityUtilCap;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.AxisRotation;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
@@ -42,6 +46,7 @@ import net.minecraftforge.common.util.INBTSerializable;
 
 public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
     private final Entity entity;
+    private final LivingEntity asLiving;
     
     private Vector3d knockbackVec = null;
     private double knockbackImpactStrength;
@@ -50,6 +55,7 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
     
     public KnockbackCollisionImpact(Entity entity) {
         this.entity = entity;
+        this.asLiving = entity instanceof LivingEntity ? (LivingEntity) entity : null;
     }
     
     
@@ -174,7 +180,14 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
                 }
             });
         }
-
+        
+        MutableBoolean didGlassBleeding = new MutableBoolean();
+        float armorCover = 0;
+        if (asLiving != null) {
+            armorCover = asLiving.getArmorCoverPercentage();
+        }
+        float bleedingChance = Math.max(1 - armorCover, 0.05f);
+        
         if (collideBlocks) {
             Collection<Pair<BlockPos, VoxelShape>> blocks;
             if (canBreakBlocks) {
@@ -217,6 +230,12 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
                     useImpactStrength = Math.min(impactLeft, useImpactStrength);
                     float damage = useImpactStrength * 5;
                     DamageUtil.hurtThroughInvulTicks(entity, DamageSource.FLY_INTO_WALL, damage);
+                    
+                    if (!didGlassBleeding.booleanValue() && asLiving != null 
+                            && blockState.getMaterial() == Material.GLASS && asLiving.getRandom().nextFloat() < bleedingChance) {
+                        didGlassBleeding.setTrue();
+                        asLiving.addEffect(new EffectInstance(ModStatusEffects.BLEEDING.get(), 100, 0, false, false, true));
+                    }
                 }
                 return getKnockbackImpactStrength() > 0;
             });
