@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.action.stand.effect;
 
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
+import com.github.standobyte.jojo.potion.BleedingEffect;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -32,7 +33,7 @@ public class GEHealingEffect extends StandEffectInstance {
                 return;
             }
             
-            if (entity.getHealth() >= entity.getMaxHealth() && --fullHpTicks <= 0) {
+            if (entity.getHealth() >= BleedingEffect.getMaxHealthWithoutBleeding(entity) && --fullHpTicks <= 0) {
                 remove();
             }
         }

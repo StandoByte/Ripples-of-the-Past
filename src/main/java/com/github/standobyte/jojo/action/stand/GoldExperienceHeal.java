@@ -12,6 +12,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
+import com.github.standobyte.jojo.potion.BleedingEffect;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -28,6 +29,7 @@ import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public class GoldExperienceHeal extends StandEntityAction {
@@ -95,22 +97,25 @@ public class GoldExperienceHeal extends StandEntityAction {
                 }
             }
             
-            int currentRegen = MCUtil.getEffectLevel(entity, regenEffectFor(entity));
-            if (currentRegen >= effectMax) {
-                if (entity == userGE) {
-                    return conditionMessage("ge_heal_stronger");
-                }
-                else {
-                    return conditionMessage("ge_heal_stronger.other", entity.getDisplayName());
-                }
-            }
             
-            if (entity.getHealth() >= entity.getMaxHealth()) {
-                if (entity == userGE) {
-                    return conditionMessage("ge_heal_full_hp");
+            if (!entity.hasEffect(ModStatusEffects.BLEEDING.get())) {
+                int currentRegen = MCUtil.getEffectLevel(entity, regenEffectFor(entity));
+                if (currentRegen >= effectMax) {
+                    if (entity == userGE) {
+                        return conditionMessage("ge_heal_stronger");
+                    }
+                    else {
+                        return conditionMessage("ge_heal_stronger.other", entity.getDisplayName());
+                    }
                 }
-                else {
-                    return conditionMessage("ge_heal_full_hp.other", entity.getDisplayName());
+                
+                if (entity.getHealth() >= entity.getMaxHealth()) {
+                    if (entity == userGE) {
+                        return conditionMessage("ge_heal_full_hp");
+                    }
+                    else {
+                        return conditionMessage("ge_heal_full_hp.other", entity.getDisplayName());
+                    }
                 }
             }
             
@@ -213,21 +218,29 @@ public class GoldExperienceHeal extends StandEntityAction {
             lvl = 0;
         }
         
-        if (userPower != null) {
-            GEHealingEffect healingTracker = userPower.getContinuousEffects()
-                    .getOrCreateEffect(ModStandEffects.GE_HEALING.get(), entity);
-            healingTracker.fullHpTicks = 0;
-            healingTracker.regenLevel = lvl;
-            if (healingTracker.tickCount == 0 && currentRegen != null) {
-                healingTracker.prevEffect = new EffectInstance(currentRegen);
+        if (lvl <= MAX_REGEN_LVL) {
+            if (userPower != null) {
+                GEHealingEffect healingTracker = userPower.getContinuousEffects()
+                        .getOrCreateEffect(ModStandEffects.GE_HEALING.get(), entity);
+                healingTracker.fullHpTicks = 0;
+                healingTracker.regenLevel = lvl;
+                if (healingTracker.tickCount == 0 && currentRegen != null) {
+                    healingTracker.prevEffect = new EffectInstance(currentRegen);
+                }
             }
+            
+            EffectInstance newRegen = new EffectInstance(regenEffect, duration, lvl, false, true, true, currentRegen);
+            entity.addEffect(newRegen);
         }
-
         entity.hurt(DamageSource.GENERIC, 0.0001F);
         
-        EffectInstance newRegen = new EffectInstance(regenEffect, duration, lvl, false, true, true, currentRegen);
-        entity.addEffect(newRegen);
         
+        EffectInstance bleeding = entity.getEffect(ModStatusEffects.BLEEDING.get());
+        if (bleeding != null) {
+            int reduceDuration = durationMax / 20;
+            MCUtil.reduceEffect(entity, ModStatusEffects.BLEEDING.get(), 
+                    MathHelper.clamp(bleeding.getDuration() - reduceDuration, 0, reduceDuration), 1);
+        }
     }
     
     public static void playHealSound(LivingEntity entity) {
