@@ -27,6 +27,8 @@ import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.ArmorStandEntity;
+import net.minecraft.entity.passive.GolemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BoneMealItem;
 import net.minecraft.item.ItemStack;
@@ -195,6 +197,7 @@ public class HamonHealing extends HamonAction {
 ////            if (entityToHeal.getHealth() < entityToHeal.getMaxHealth()) {
 //                addPointsForAction(power, hamon, HamonStat.CONTROL, cost, hamonEfficiency);
 ////            }
+//            
 //            updateRegenEffect(entityToHeal, regenDuration, regenLvl);
 //            if (hamon.isSkillLearned(ModHamonSkills.EXPEL_VENOM.get())) {
 //                if (VENOM_EFFECTS == null) {
@@ -267,7 +270,10 @@ public class HamonHealing extends HamonAction {
     }
     
     private boolean canBeHealed(LivingEntity targetEntity, LivingEntity user) {
-        return !JojoModUtil.isUndeadOrVampiric(targetEntity);
+        return  !(
+                JojoModUtil.isUndeadOrVampiric(targetEntity) ||
+                targetEntity instanceof GolemEntity ||
+                targetEntity instanceof ArmorStandEntity);
     }
 
     public static boolean bonemealEffect(World world, PlayerEntity applyingPlayer, BlockPos pos, Direction face) {
