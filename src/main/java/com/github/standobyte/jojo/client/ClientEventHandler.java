@@ -203,14 +203,14 @@ public class ClientEventHandler {
             return;
         }
         
-        float partialTick = event.getPartialRenderTick();
-        float changePartialTick = ClientTimeStopHandler.getInstance().getConstantEntityPartialTick(entity, partialTick);
-        if (partialTick != changePartialTick) {
-            event.setCanceled(true);
-            event.getRenderer().render((T) entity, MathHelper.lerp(changePartialTick, entity.yRotO, entity.yRot), 
-                    changePartialTick, event.getMatrixStack(), event.getBuffers(), event.getLight());
-            return;
-        }
+//        float partialTick = event.getPartialRenderTick();
+//        float changePartialTick = ClientTimeStopHandler.getInstance().getConstantEntityPartialTick(entity, partialTick);
+//        if (partialTick != changePartialTick) {
+//            event.setCanceled(true);
+//            event.getRenderer().render((T) entity, MathHelper.lerp(changePartialTick, entity.yRotO, entity.yRot), 
+//                    changePartialTick, event.getMatrixStack(), event.getBuffers(), event.getLight());
+//            return;
+//        }
         
         M model = event.getRenderer().getModel();
         if (model instanceof BipedModel) {

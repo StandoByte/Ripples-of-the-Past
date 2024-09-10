@@ -494,7 +494,7 @@ public class ModStandsInit {
                             .durability(11.0, 12.0)
                             .armor(20.0F)
                             .armorToughness(12.0F)
-                            .precision(13.0, 16.0)
+                            .precision(11.5, 16.0)
                             .randomWeight(2)
                             )
                     .addSummonShout(ModSounds.POLNAREFF_SILVER_CHARIOT)
