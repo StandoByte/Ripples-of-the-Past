@@ -43,7 +43,11 @@ public class BleedingEffect extends Effect implements IApplicableEffect {
     public static int limitAmplifier(LivingEntity entity, int amplifier) {
         return Math.min(amplifier, Math.max(
                 (int) (entity.getAttributeBaseValue(Attributes.MAX_HEALTH) / HP_REDUCTION) - 2, 
-                (int) (MCUtil.calcValueWithoutModifiers(entity.getAttribute(Attributes.MAX_HEALTH), ATTRIBUTE_MODIFIER_ID) / HP_REDUCTION) - 2));
+                (int) (getMaxHealthWithoutBleeding(entity) / HP_REDUCTION) - 2));
+    }
+    
+    public static float getMaxHealthWithoutBleeding(LivingEntity entity) {
+        return (float) MCUtil.calcValueWithoutModifiers(entity.getAttribute(Attributes.MAX_HEALTH), ATTRIBUTE_MODIFIER_ID);
     }
     
     @Override

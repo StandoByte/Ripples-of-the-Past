@@ -137,7 +137,7 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
     }
     
     @Override
-    public boolean noFinisherDecay() {
+    public boolean noFinisherBarDecay() {
         return true;
     }
     

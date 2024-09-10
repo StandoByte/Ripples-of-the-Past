@@ -1005,7 +1005,7 @@ public class GameplayEventHandler {
         if (effectInstance.getEffect() == ModStatusEffects.BLEEDING.get()) {
             int amplifier = BleedingEffect.limitAmplifier(event.getEntityLiving(), effectInstance.getAmplifier());
             if (amplifier != effectInstance.getAmplifier() && amplifier >= 0) {
-                CommonReflection.setEffectAmplifier(effectInstance, amplifier);
+                effectInstance.amplifier = amplifier;
             }
         }
     }

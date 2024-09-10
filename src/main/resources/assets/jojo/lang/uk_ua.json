@@ -531,7 +531,7 @@
   "action.jojo.hamon_zoom_punch" : "Приближений Удар",
   "action.jojo.hamon_speed_boost" : "Прискорення Швидкості",
   "action.jojo.hamon_healing" : "Лікування",
-  "action.jojo.hamon_healing_touch" : "Цілющий Дотик",
+  "_action.jojo.hamon_healing_touch": "Heal %s",
   "action.jojo.hamon_wall_climbing" : "Лазіння по Стіні",
   "action.jojo.hamon_detector" : "Життєвий Детектор Хамону",
   "action.jojo.hamon_life_magnetism" : "Магнетизм Життєвої енергії",

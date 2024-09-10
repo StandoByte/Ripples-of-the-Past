@@ -62,7 +62,7 @@ public class HamonOverdrive extends HamonAction {
                 float cost = getEnergyCost(power, target);
                 float efficiency = hamon.getActionEfficiency(cost, true);
                 
-                int attackStrengthTicker = CommonReflection.getAttackStrengthTicker(user);
+//                int attackStrengthTicker = CommonReflection.getAttackStrengthTicker(user);
                 if (dealDamage(target, targetEntity, getDamage() * efficiency, user, power, hamon)) {
                 	if (strongerVersion) {
                 		world.playSound(null, targetEntity.getX(), targetEntity.getEyeY(), targetEntity.getZ(), ModSounds.HAMON_SYO_PUNCH.get(), targetEntity.getSoundSource(), 1F, 1.5F);
@@ -70,7 +70,7 @@ public class HamonOverdrive extends HamonAction {
                 	}
                     addPointsForAction(power, hamon, HamonStat.STRENGTH, cost, efficiency);
                 }
-                CommonReflection.setAttackStrengthTicker(user, attackStrengthTicker);
+//                CommonReflection.setAttackStrengthTicker(user, attackStrengthTicker);
             }
         }
     }

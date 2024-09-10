@@ -202,7 +202,6 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
                     
                     if (canBreakBlocks && getKnockbackImpactStrength() >= useImpactStrength) {
                         blocksToDestroy.add(blockPos);
-                        world.destroyBlock(blockPos, true, entity);
                     }
                 }
                 else if (hardness < 0) {
@@ -222,7 +221,7 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
                 return getKnockbackImpactStrength() > 0;
             });
             
-            MCUtil.destroyBlocksInBulk(blocksToDestroy, serverWorld, entity);
+            MCUtil.destroyBlocksInBulk(blocksToDestroy, serverWorld, entity, true);
         }
     }
     

@@ -15,7 +15,7 @@ public class StandBlockPunch implements IPunch {
     public final StandEntity stand;
     public final BlockPos blockPos;
     public final BlockState blockState;
-    private boolean targetHit;
+    protected boolean targetHit;
     protected Supplier<SoundEvent> punchSound = () -> null;
     
     public StandBlockPunch(StandEntity stand, BlockPos targetPos, BlockState blockState) {
@@ -27,7 +27,9 @@ public class StandBlockPunch implements IPunch {
     @Override
     public boolean doHit(StandEntityTask task) {
         if (stand.level.isClientSide()) return false;
-        targetHit = stand.breakBlock(blockPos, blockState, true);
+        if (stand.breakBlock(blockPos, blockState, true)) {
+            targetHit = true;
+        }
         return targetHit;
     }
 

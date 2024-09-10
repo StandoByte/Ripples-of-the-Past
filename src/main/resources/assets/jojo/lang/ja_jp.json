@@ -581,7 +581,7 @@
   "action.jojo.hamon_zoom_punch": "ズームパンチ",
   "action.jojo.hamon_speed_boost": "スピードブースト",
   "action.jojo.hamon_healing": "ヒーリング",
-  "action.jojo.hamon_healing_touch": "ヒーリングタッチ",
+  "action.jojo.hamon_healing_touch": "%sを回復",
   "action.jojo.hamon_wall_climbing": "壁登り",
   "action.jojo.hamon_detector": "波紋の生命探知機",
   "action.jojo.hamon_life_magnetism": "生命磁気への波紋疾走",

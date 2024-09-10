@@ -28,8 +28,8 @@ public class StarPlatinumZoom extends StandEntityAction {
     }
     
     @Override
-    public void onHoldTickClientEffect(LivingEntity user, IStandPower power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {
-        if (stateRefreshed && requirementsFulfilled) {
+    public void onHoldTickClientEffect(LivingEntity user, IStandPower power, int ticksHeld, boolean reqFulfilled, boolean reqStateChanged) {
+        if (reqStateChanged && reqFulfilled) {
             ClientTickingSoundsHelper.playHeldActionSound(ModSounds.STAR_PLATINUM_ZOOM.get(), 
                     1.0F, 1.0F, false, (StandEntity) power.getStandManifestation(), power, this);
         }

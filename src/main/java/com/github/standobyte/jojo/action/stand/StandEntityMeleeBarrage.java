@@ -218,7 +218,7 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
     }
     
     @Override
-    public boolean noFinisherDecay() {
+    public boolean noFinisherBarDecay() {
         return true;
     }
     

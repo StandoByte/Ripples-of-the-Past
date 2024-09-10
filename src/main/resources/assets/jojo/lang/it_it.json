@@ -537,7 +537,7 @@
   "action.jojo.hamon_zoom_punch": "Pungo Zoom",
   "action.jojo.hamon_speed_boost": "Incremento della velocità",
   "action.jojo.hamon_healing": "Curamento",
-  "action.jojo.hamon_healing_touch": "Tocco Curante",
+  "_action.jojo.hamon_healing_touch": "Heal %s",
   "action.jojo.hamon_wall_climbing": "Scavalcamento delle Pareti",
   "action.jojo.hamon_detector": "Rilevatore di vita Hamon",
   "action.jojo.hamon_life_magnetism": "Magnetismo Vitale",

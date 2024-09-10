@@ -304,7 +304,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
             ModCriteriaTriggers.ACTION_PERFORM.get().trigger((ServerPlayerEntity) user, this);
         }
         perform(world, user, power, target, extraInput);
-        if (swingHand() && withUserPunch() && user instanceof PlayerEntity) {
+        if (swingHand() && !withUserPunch() && user instanceof PlayerEntity) {
             ((PlayerEntity) user).resetAttackStrengthTicker();
         }
     }
@@ -329,11 +329,12 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     public void stoppedHolding(World world, LivingEntity user, P power, int ticksHeld, boolean willFire) {}
     
+    @Deprecated
     public boolean isHeldSentToTracking() {
-        return false;
+        return true;
     }
     
-    public void onHoldTickClientEffect(LivingEntity user, P power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {}
+    public void onHoldTickClientEffect(LivingEntity user, P power, int ticksHeld, boolean reqFulfilled, boolean reqStateChanged) {}
     
     @Nonnull
     public LivingEntity getPerformer(LivingEntity user, P power) {
