@@ -6,7 +6,6 @@ import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -15,6 +14,7 @@ import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -25,7 +25,6 @@ import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -128,36 +127,13 @@ public class HamonHealing extends HamonAction {
                     hamon.hamonPointsFromAction(HamonStat.CONTROL, Math.min(tickEnergyCost, power.getEnergy()));
                 }
                 
+                int reduceEffectTime = 3200 / maxTicksLeftover; // <
+                int durationDecrease = ticksInc; // >
+                
+                reduceHarmfulEffect(entityToHeal, ModStatusEffects.BLEEDING.get(), ticksHeld, durationDecrease, reduceEffectTime);
                 if (hamon.isSkillLearned(ModHamonSkills.EXPEL_VENOM.get())) {
-                    int reduceEffectTime = 3200 / maxTicksLeftover; // <
-                    int durationDecrease = ticksInc; // >
                     for (Effect venomEffect : VENOM_EFFECTS) {
-                        EffectInstance effect = entityToHeal.getEffect(venomEffect);
-                        if (effect != null) {
-                            int venomAmplifier = effect.getAmplifier();
-                            if (venomAmplifier > 0 && ticksHeld > 0 && ticksHeld % reduceEffectTime == 0) {
-                                --venomAmplifier;
-                            }
-                            
-                            int venomDuration = effect.getDuration() - durationDecrease;
-                            if (venomDuration > 0) {
-                                if (venomEffect == Effects.POISON) {
-                                    venomDuration = updateEffect(entityToHeal, venomDuration, venomAmplifier, venomEffect, 25);
-                                }
-                                else if (venomEffect == Effects.WITHER) {
-                                    venomDuration = updateEffect(entityToHeal, venomDuration, venomAmplifier, venomEffect, 40);
-                                }
-                            }
-                            
-                            if (venomDuration <= 0) {
-                                entityToHeal.removeEffect(venomEffect);
-                            }
-                            else {
-                                MCUtil.reduceEffect(entityToHeal, venomEffect, 
-                                        effect.getDuration() - venomDuration, 
-                                        effect.getAmplifier() - venomAmplifier);
-                            }
-                        }
+                        reduceHarmfulEffect(entityToHeal, venomEffect, ticksHeld, durationDecrease, reduceEffectTime);
                     }
                 }
             }
@@ -165,6 +141,31 @@ public class HamonHealing extends HamonAction {
                 HamonSparksLoopSound.playSparkSound(user, user.position(), 1.0F);
                 CustomParticlesHelper.createHamonSparkParticles(user instanceof PlayerEntity ? (PlayerEntity) user : null, 
                         user.getX(), user.getY(0.5), user.getZ(), 1);
+            }
+        }
+    }
+    
+    private void reduceHarmfulEffect(LivingEntity entity, Effect effect,
+            int ticksHeld, int durationDecrease, int reduceEffectTime) {
+        EffectInstance effectInstance = entity.getEffect(effect);
+        if (effectInstance != null) {
+            int amplifier = effectInstance.getAmplifier();
+            if (amplifier > 0 && ticksHeld > 0 && ticksHeld % reduceEffectTime == 0) {
+                --amplifier;
+            }
+            
+            int duration = effectInstance.getDuration() - durationDecrease;
+            if (duration > 0) {
+                duration = updateKnownEffect(entity, duration, amplifier, effect);
+            }
+            
+            if (duration <= 0) {
+                entity.removeEffect(effect);
+            }
+            else {
+                MCUtil.reduceEffect(entity, effect, 
+                        effectInstance.getDuration() - duration, 
+                        effectInstance.getAmplifier() - amplifier);
             }
         }
     }
@@ -220,11 +221,25 @@ public class HamonHealing extends HamonAction {
                 .collect(Collectors.toList());
     }
     
-    // prevents the health regeneration being faster or slower when spamming the ability
     public static int updateRegenEffect(LivingEntity entity, int duration, int level, Effect effect) {
         return updateEffect(entity, duration, level, effect, 50);
     }
+
+    public static int updateKnownEffect(LivingEntity entity, int duration, int level, Effect effect) {
+        if (effect == Effects.REGENERATION || effect == ModStatusEffects.UNDEAD_REGENERATION.get()) {
+            return updateEffect(entity, duration, level, effect, 50);
+        }
+        else if (effect == Effects.POISON) {
+            return updateEffect(entity, duration, level, effect, 25);
+        }
+        else if (effect == Effects.WITHER) {
+            return updateEffect(entity, duration, level, effect, 40);
+        }
+        
+        return duration;
+    }
     
+    // prevents the health regeneration/damage being faster or slower than it should be when giving an effect frequently
     public static int updateEffect(LivingEntity entity, int duration, int level, Effect effect, int level0Gap) {
         EffectInstance oldEffect = entity.getEffect(effect);
         if (oldEffect != null && level < MathHelper.log2(level0Gap)) {

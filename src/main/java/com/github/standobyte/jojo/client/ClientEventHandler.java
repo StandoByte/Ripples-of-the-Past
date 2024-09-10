@@ -571,7 +571,7 @@ public class ClientEventHandler {
         int healthLast = this.lastEntityHealth;
 
         ModifiableAttributeInstance attrMaxHealth = entity.getAttribute(Attributes.MAX_HEALTH);
-        float healthWithoutBleedMax = (float) MCUtil.calcValueWithoutModifiers(attrMaxHealth, BleedingEffect.ATTRIBUTE_MODIFIER_ID); // !
+        float healthWithoutBleedMax = BleedingEffect.getMaxHealthWithoutBleeding(entity); // !
         float healthMax = (float)attrMaxHealth.getValue();
         float absorb = MathHelper.ceil(entity.getAbsorptionAmount());
 
@@ -661,8 +661,7 @@ public class ClientEventHandler {
         mc.getProfiler().popPush("mountHealth");
         RenderSystem.enableBlend();
         int health = (int)Math.ceil((double)entity.getHealth());
-        float healthWithoutBleedMax = (float) MCUtil.calcValueWithoutModifiers(entity.getAttribute(
-                Attributes.MAX_HEALTH), BleedingEffect.ATTRIBUTE_MODIFIER_ID); // !
+        float healthWithoutBleedMax = BleedingEffect.getMaxHealthWithoutBleeding(entity); // !
         float healthMax = entity.getMaxHealth();
         int hearts = (int)(healthWithoutBleedMax + 0.5F) / 2; // !
 

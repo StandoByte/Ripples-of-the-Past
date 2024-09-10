@@ -13,6 +13,7 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
+import com.github.standobyte.jojo.entity.mob.IMobStandUser;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModGamerules;
 import com.github.standobyte.jojo.init.ModTags;
@@ -337,7 +338,8 @@ public class JojoModUtil {
                 || entity instanceof AgeableEntity
                 || entity instanceof INPC
                 || entity instanceof AbstractIllagerEntity
-                || entity instanceof WaterMobEntity;
+                || entity instanceof WaterMobEntity
+                || entity instanceof IMobStandUser;
     }
 
     public static void extinguishFieryStandEntity(Entity entity, ServerWorld world) {

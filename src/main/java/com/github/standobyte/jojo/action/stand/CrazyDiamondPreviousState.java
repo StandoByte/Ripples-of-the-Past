@@ -161,7 +161,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                 }
 
                 else if (targetEntity.getType() == EntityType.SNOW_GOLEM) {
-                    if (!CrazyDiamondHeal.healLivingEntity(world, (LivingEntity) targetEntity, standEntity)) {
+                    if (!CrazyDiamondHeal.healLivingEntity(world, (LivingEntity) targetEntity, standEntity, task)) {
                         if (!world.isClientSide() && standEntity.getRandom().nextFloat() < 0.1F) {
                             BlockPos blockPos = targetEntity.blockPosition();
                             targetEntity.remove();
@@ -178,7 +178,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                 
                 else if (targetEntity instanceof CreeperEntity) {
                     CreeperEntity creeper = (CreeperEntity) targetEntity;
-                    if (creeper.isPowered() && !CrazyDiamondHeal.healLivingEntity(world, (LivingEntity) targetEntity, standEntity)) {
+                    if (creeper.isPowered() && !CrazyDiamondHeal.healLivingEntity(world, (LivingEntity) targetEntity, standEntity, task)) {
                         if (!world.isClientSide() && standEntity.getRandom().nextFloat() < 0.05F) {
                             creeper.getEntityData().set(CommonReflection.getCreeperPoweredParameter(), false);
                         }
@@ -189,7 +189,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
 
                 else if (userPower.getResolveLevel() >= 4) {
                     if (targetEntity.getType() == EntityType.IRON_GOLEM) {
-                        if (!CrazyDiamondHeal.healLivingEntity(world, (LivingEntity) targetEntity, standEntity)) {
+                        if (!CrazyDiamondHeal.healLivingEntity(world, (LivingEntity) targetEntity, standEntity, task)) {
                             if (!world.isClientSide() && standEntity.getRandom().nextFloat() < 0.05F) {
                                 BlockPos blockPos = targetEntity.blockPosition();
                                 targetEntity.remove();
