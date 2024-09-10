@@ -26,6 +26,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.LotsOfBlocksBrokenP
 import com.github.standobyte.jojo.network.packets.fromserver.SpawnParticlePacket;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
+import com.github.standobyte.jojo.util.mc.damage.explosion.CustomExplosion;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.google.common.collect.ImmutableMap;
@@ -36,8 +37,10 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
+import com.mojang.datafixers.util.Pair;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -322,6 +325,53 @@ public class MCUtil {
     
     
     
+    public static Collection<BlockPos> explosionBlocks(BlockPos center, float radius, World world) {
+        Set<BlockPos> set = new HashSet<>();
+        for(int j = 0; j < 16; ++j) {
+            for (int k = 0; k < 16; ++k) {
+                for (int l = 0; l < 16; ++l) {
+                    if (j == 0 || j == 15 || k == 0 || k == 15 || l == 0 || l == 15) {
+                        double d0 = (j / 15.0F * 2.0F - 1.0F);
+                        double d1 = (k / 15.0F * 2.0F - 1.0F);
+                        double d2 = (l / 15.0F * 2.0F - 1.0F);
+                        double d3 = Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
+                        d0 = d0 / d3;
+                        d1 = d1 / d3;
+                        d2 = d2 / d3;
+                        float f = radius * (0.7F + world.random.nextFloat() * 0.6F);
+                        double d4 = center.getX();
+                        double d6 = center.getY();
+                        double d8 = center.getZ();
+
+                        for (; f > 0.0F; f -= 0.225F) {
+                            BlockPos blockpos = new BlockPos(d4, d6, d8);
+                            BlockState blockstate = world.getBlockState(blockpos);
+                            FluidState fluidstate = world.getFluidState(blockpos);
+                            Optional<Float> optional = blockstate.isAir(world, blockpos) && fluidstate.isEmpty()
+                                    ? Optional.empty()
+                                    : Optional.of(Math.max(blockstate.getBlock().getExplosionResistance(), fluidstate.getExplosionResistance()));
+                            if (optional.isPresent()) {
+                                f -= (optional.get() + 0.3F) * 0.3F;
+                            }
+
+                            if (f > 0.0F) {
+                                set.add(blockpos);
+                            }
+
+                            d4 += d0 * (double)0.3F;
+                            d6 += d1 * (double)0.3F;
+                            d8 += d2 * (double)0.3F;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return set;
+    }
+    
+    
+    
     public static Set<ServerPlayerEntity> getTrackingPlayers(Entity entity) {
         if (entity.level.isClientSide()) {
             throw new IllegalStateException();
@@ -516,21 +566,22 @@ public class MCUtil {
     /**
      *  Limits the amount of particles and break sounds that the blocks produce, sending it all in one packet
      */
-    public static void destroyBlocksInBulk(Collection<BlockPos> blocks, ServerWorld world, @Nullable Entity entity, boolean dropBlock) {
+    public static int destroyBlocksInBulk(Collection<BlockPos> blocks, ServerWorld world, @Nullable Entity entity, boolean dropBlock) {
         if (!world.isClientSide() && world.isDebug()) {
-            return;
+            return -1;
         }
         
         Iterator<BlockPos> iter = blocks.iterator();
         while (iter.hasNext()) {
             BlockPos blockPos = iter.next();
             BlockState blockState = world.getBlockState(blockPos);
-            if (World.isOutsideBuildHeight(blockPos) || !JojoModUtil.canEntityDestroy(world, blockPos, blockState, entity)
-                    || blockState.isAir(world, blockPos)) {
+            if (World.isOutsideBuildHeight(blockPos) || blockState.isAir(world, blockPos)
+                    || !JojoModUtil.canEntityDestroy(world, blockPos, blockState, entity)) {
                 iter.remove();
             }
         }
-        if (blocks.isEmpty()) return;
+        if (blocks.isEmpty()) return 0;
+        int blocksBroken = 0;
         
         LotsOfBlocksBrokenPacket packet = new LotsOfBlocksBrokenPacket();
         int minX = 30000001;
@@ -539,6 +590,8 @@ public class MCUtil {
         int maxX = -30000001;
         int maxY = -999;
         int maxZ = -30000001;
+        
+        ObjectArrayList<Pair<ItemStack, BlockPos>> dropPositions = new ObjectArrayList<>();
         
         for (BlockPos blockPos : blocks) {
             FluidState fluidState = world.getFluidState(blockPos);
@@ -557,11 +610,19 @@ public class MCUtil {
             }
             if (dropBlock) {
                 TileEntity tileentity = oldState.hasTileEntity() ? world.getBlockEntity(blockPos) : null;
-                Block.dropResources(oldState, world, blockPos, tileentity, entity, ItemStack.EMPTY);
+
+                Block.getDrops(oldState, world, blockPos, tileentity, entity, ItemStack.EMPTY).forEach(itemStack -> {
+                    CustomExplosion.addBlockDrops(dropPositions, itemStack, blockPos);
+                });
             }
             
-            
-            world.setBlock(blockPos, newState, 3);
+            if (world.setBlock(blockPos, newState, 3)) {
+                ++blocksBroken;
+            }
+        }
+        
+        for (Pair<ItemStack, BlockPos> pair : dropPositions) {
+            Block.popResource(world, pair.getSecond(), pair.getFirst());
         }
         
         final double radius = 64;
@@ -570,15 +631,17 @@ public class MCUtil {
                 double x = player.getX();
                 double y = player.getY();
                 double z = player.getZ();
-                
+
                 double xDiff = x < minX ? minX - x : x > maxX ? x - maxX : 0;
                 double yDiff = y < minY ? minY - y : y > maxY ? y - maxY : 0;
                 double zDiff = z < minZ ? minZ - z : z > maxZ ? z - maxZ : 0;
                 if (xDiff * xDiff + yDiff * yDiff + zDiff * zDiff < radius * radius) {
                     PacketManager.sendToClient(packet, player);
                 }
-             }
+            }
         }
+        
+        return blocksBroken;
     }
     
     

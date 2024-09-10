@@ -1138,7 +1138,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             }
             else {
                 StandEntityAction currentAction = getCurrentTaskAction();
-                if (currentAction == null || !currentAction.noFinisherDecay()) {
+                if (currentAction == null || !currentAction.noFinisherBarDecay()) {
                     float decay = FINISHER_DECAY;
                     float value = entityData.get(FINISHER_VALUE);
                     if (value < 0.5F) {
@@ -1930,7 +1930,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
     
     protected boolean breakBlock(BlockPos blockPos, BlockState blockState, boolean dropLootTableItems, @Nullable List<ItemStack> createdDrops) {
-        if (level.isClientSide() || !JojoModUtil.canEntityDestroy((ServerWorld) level, blockPos, blockState, this)) {
+        if (level.isClientSide() || !JojoModUtil.canEntityDestroy((ServerWorld) level, blockPos, blockState, this) || blockState.isAir(level, blockPos)) {
             return false;
         }
         
