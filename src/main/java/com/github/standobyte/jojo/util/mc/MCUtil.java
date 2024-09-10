@@ -4,6 +4,7 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -21,6 +22,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.LotsOfBlocksBrokenPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SpawnParticlePacket;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
@@ -36,6 +38,8 @@ import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
+import net.minecraft.block.AbstractFireBlock;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.client.world.ClientWorld;
@@ -54,6 +58,7 @@ import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.PotionEntity;
+import net.minecraft.fluid.FluidState;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
@@ -84,6 +89,7 @@ import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.potion.Potions;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
@@ -507,20 +513,77 @@ public class MCUtil {
     
     
     
-    // TODO less particles and sounds than vanilla does
-    public static void destroyBlocksInBulk(Collection<BlockPos> blocks, ServerWorld world, @Nullable Entity entity) {
-        Stream<BlockPos> stream = blocks.stream();
-        if (entity != null) {
-            stream = stream.filter(blockPos -> {
-                BlockState blockState = world.getBlockState(blockPos);
-                return JojoModUtil.canEntityDestroy(world, blockPos, blockState, entity);
-            });
+    /**
+     *  Limits the amount of particles and break sounds that the blocks produce, sending it all in one packet
+     */
+    public static void destroyBlocksInBulk(Collection<BlockPos> blocks, ServerWorld world, @Nullable Entity entity, boolean dropBlock) {
+        if (!world.isClientSide() && world.isDebug()) {
+            return;
         }
-        stream.forEach(blockPos -> world.removeBlock(blockPos, false));
+        
+        Iterator<BlockPos> iter = blocks.iterator();
+        while (iter.hasNext()) {
+            BlockPos blockPos = iter.next();
+            BlockState blockState = world.getBlockState(blockPos);
+            if (World.isOutsideBuildHeight(blockPos) || !JojoModUtil.canEntityDestroy(world, blockPos, blockState, entity)
+                    || blockState.isAir(world, blockPos)) {
+                iter.remove();
+            }
+        }
+        if (blocks.isEmpty()) return;
+        
+        LotsOfBlocksBrokenPacket packet = new LotsOfBlocksBrokenPacket();
+        int minX = 30000001;
+        int minY = 999;
+        int minZ = 30000001;
+        int maxX = -30000001;
+        int maxY = -999;
+        int maxZ = -30000001;
+        
+        for (BlockPos blockPos : blocks) {
+            FluidState fluidState = world.getFluidState(blockPos);
+            BlockState newState = fluidState.createLegacyBlock();
+            
+            BlockState oldState = world.getBlockState(blockPos);
+
+            if (!(oldState.getBlock() instanceof AbstractFireBlock)) {
+                minX = Math.min(minX, blockPos.getX());
+                minY = Math.min(minY, blockPos.getY());
+                minZ = Math.min(minZ, blockPos.getZ());
+                maxX = Math.max(maxX, blockPos.getX());
+                maxY = Math.max(maxY, blockPos.getY());
+                maxZ = Math.max(maxZ, blockPos.getZ());
+                packet.addBlock(blockPos, oldState);
+            }
+            if (dropBlock) {
+                TileEntity tileentity = oldState.hasTileEntity() ? world.getBlockEntity(blockPos) : null;
+                Block.dropResources(oldState, world, blockPos, tileentity, entity, ItemStack.EMPTY);
+            }
+            
+            
+            world.setBlock(blockPos, newState, 3);
+        }
+        
+        final double radius = 64;
+        for (ServerPlayerEntity player : world.players()) {
+            if (player.level.dimension() == world.dimension()) {
+                double x = player.getX();
+                double y = player.getY();
+                double z = player.getZ();
+                
+                double xDiff = x < minX ? minX - x : x > maxX ? x - maxX : 0;
+                double yDiff = y < minY ? minY - y : y > maxY ? y - maxY : 0;
+                double zDiff = z < minZ ? minZ - z : z > maxZ ? z - maxZ : 0;
+                if (xDiff * xDiff + yDiff * yDiff + zDiff * zDiff < radius * radius) {
+                    PacketManager.sendToClient(packet, player);
+                }
+             }
+        }
     }
     
     
-
+    
+    
     public static void playSound(World world, @Nullable PlayerEntity clientHandled, BlockPos blockPos, 
             SoundEvent sound, SoundCategory category, float volume, float pitch, Predicate<PlayerEntity> condition) {
         playSound(world, clientHandled, (double) blockPos.getX() + 0.5D, (double) blockPos.getY() + 0.5D, (double)blockPos.getZ() + 0.5D, 

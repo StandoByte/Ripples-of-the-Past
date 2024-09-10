@@ -19,6 +19,7 @@ import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.particle.IAnimatedSprite;
 import net.minecraft.client.particle.Particle;
@@ -37,6 +38,7 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.registries.ForgeRegistries;
@@ -206,6 +208,10 @@ public abstract class CustomParticlesHelper {
             }
             
         }
+    }
+    
+    public static void addBlockBreakParticles(BlockPos blockPos, BlockState blockState) {
+        Minecraft.getInstance().particleEngine.destroy(blockPos, blockState);
     }
     
     public static void createParticlesEmitter(Entity entity, IParticleData type, int ticks) {
