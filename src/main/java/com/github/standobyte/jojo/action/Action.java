@@ -296,7 +296,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
             ModCriteriaTriggers.ACTION_PERFORM.get().trigger((ServerPlayerEntity) user, this);
         }
         perform(world, user, power, target, extraInput);
-        if (swingHand() && withUserPunch() && user instanceof PlayerEntity) {
+        if (swingHand() && !withUserPunch() && user instanceof PlayerEntity) {
             ((PlayerEntity) user).resetAttackStrengthTicker();
         }
     }
