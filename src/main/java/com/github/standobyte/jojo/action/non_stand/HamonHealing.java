@@ -193,7 +193,9 @@ public class HamonHealing extends HamonAction {
 //            LivingEntity entityToHeal = targetEntity != null && canBeHealed(targetLiving, user) ? targetLiving : user;
 //            int regenDuration = (int) ((50F + hamonEfficiency * 50F) * (1 + hamonControl));
 //            int regenLvl = MathHelper.clamp((int) ((hamonControl - 0.0001F) * 3 + (hamonEfficiency - 0.75F) * 4 - 1), 0, 2);
-//            addPointsForAction(power, hamon, HamonStat.CONTROL, cost, hamonEfficiency);
+////            if (entityToHeal.getHealth() < entityToHeal.getMaxHealth()) {
+//                addPointsForAction(power, hamon, HamonStat.CONTROL, cost, hamonEfficiency);
+////            }
 //            
 //            updateRegenEffect(entityToHeal, regenDuration, regenLvl);
 //            if (hamon.isSkillLearned(ModHamonSkills.EXPEL_VENOM.get())) {
@@ -297,9 +299,14 @@ public class HamonHealing extends HamonAction {
     public IFormattableTextComponent getTranslatedName(INonStandPower power, String key) {
         if (power.getUser() != null && JojoModUtil.useShiftVar(power.getUser())) {
             ActionTarget target = ActionsOverlayGui.getInstance().getMouseTarget();
-            if (target.getEntity() != null) {
-                key += "_touch";
-                return new TranslationTextComponent(key, target.getEntity().getDisplayName());
+            if (power.getTypeSpecificData(ModPowers.HAMON.get())
+                    .map(hamon -> hamon.isSkillLearned(ModHamonSkills.HEALING_TOUCH.get())).orElse(false)
+                    && target.getType() == TargetType.ENTITY) {
+                Entity targetEntity = target.getEntity();
+                if (targetEntity instanceof LivingEntity && canBeHealed((LivingEntity) targetEntity, power.getUser())) {
+                    key += "_touch";
+                    return new TranslationTextComponent(key, targetEntity.getName());
+                }
             }
         }
         return super.getTranslatedName(power, key);
