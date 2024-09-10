@@ -11,6 +11,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.ControllerConsciousness;
 import com.github.standobyte.jojo.client.ControllerStand;
 import com.github.standobyte.jojo.client.IEntityGlowColor;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -47,10 +48,18 @@ public class EntityClMixin implements IEntityGlowColor {
     @Inject(method = "turn", at = @At("HEAD"), cancellable = true)
     public void jojoTurnRemoteStand(double yRot, double xRot, CallbackInfo ci) {
         if ((Object) this == ClientUtil.getClientPlayer()) {
+            Entity splitCsns = ControllerConsciousness.getInstance().getCsnsEntity();
+            if (splitCsns != null) {
+                splitCsns.turn(yRot, xRot);
+                ci.cancel();
+                return;
+            }
+            
             StandEntity standManual = ControllerStand.getInstance().getManuallyControlledStand();
             if (standManual != null && standManual.isAlive()) {
                 standManual.turn(yRot, xRot);
                 ci.cancel();
+                return;
             }
         }
     }

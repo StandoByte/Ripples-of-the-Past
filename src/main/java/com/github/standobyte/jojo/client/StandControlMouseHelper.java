@@ -9,6 +9,7 @@ import net.minecraft.client.util.MouseSmoother;
 import net.minecraft.client.util.NativeUtil;
 import net.minecraft.entity.Entity;
 
+@Deprecated
 public class StandControlMouseHelper extends MouseHelper {
     private final Minecraft minecraft;
     private final MouseSmoother smoothTurnX = new MouseSmoother();
