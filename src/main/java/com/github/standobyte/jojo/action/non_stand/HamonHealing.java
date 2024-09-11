@@ -95,8 +95,9 @@ public class HamonHealing extends HamonAction {
         
         if (hamonEfficiency > 0) {
             if (!world.isClientSide()) {
-                int maxLevel = MathHelper.clamp((int) (hamonControl * 3 + (hamonEfficiency - 0.75) * 4 - 1), 0, 2);
-                int maxTicksLeftover = (int) ((20F + hamonEfficiency * 60F) * (1 + hamonControl));
+                float qLevel = hamonControl * 3 + (hamonEfficiency - 0.75f) * 4 - 1;
+                int maxLevel = MathHelper.clamp((int) qLevel, 0, 2);
+                int maxTicksLeftover = (int) Math.max(((50F + hamonEfficiency * 50F) * (1 + hamonControl)), 51);
                 float ticksIncreaseSpeed = 0.75f + hamonControl * 0.75f;
                 int ticksInc = (int) (ticksIncreaseSpeed * ticksHeld) - (int) (ticksIncreaseSpeed * (ticksHeld - 1));
                 
@@ -113,7 +114,7 @@ public class HamonHealing extends HamonAction {
                     }
                     int impliedDuration = hamon.regenImpliedDuration.getAsInt();
                     regenDuration = Math.min(impliedDuration + ticksInc, maxTicksLeftover);
-                    int giveAmplifier = (int) ((float) regenDuration / maxTicksLeftover * maxLevel);
+                    int giveAmplifier = (int) ((float) regenDuration / maxTicksLeftover * qLevel);
                     regenAmplifier = MathHelper.clamp(regenEffect.getAmplifier(), giveAmplifier, maxLevel);
                 }
                 if (regenAmplifier >= 0 && regenDuration > 0) {
@@ -156,6 +157,9 @@ public class HamonHealing extends HamonAction {
                 --amplifier;
             }
             
+            if (amplifier == 0) {
+                durationDecrease *= 2;
+            }
             int duration = effectInstance.getDuration() - durationDecrease;
             if (duration > 0) {
                 duration = updateKnownEffect(entity, duration, amplifier, effect);
