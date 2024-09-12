@@ -61,6 +61,7 @@ import com.github.standobyte.jojo.client.render.entity.renderer.damaging.extendi
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.extending.SatiporojaScarfBindingRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.extending.SatiporojaScarfRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.extending.SnakeMufflerRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.BlockShardRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.CDBlockBulletRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.CDBloodCutterRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.HGEmeraldRenderer;
@@ -195,6 +196,7 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.MOLOTOV.get(), manager -> new MolotovRenderer<>(manager, Minecraft.getInstance().getItemRenderer(), 1.0F, true));
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.STAND_ARROW.get(), StandArrowRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SOUL.get(), SoulRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.BLOCK_SHARD.get(), BlockShardRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.PILLARMAN_TEMPLE_ENGRAVING.get(), PillarmanTempleEngravingRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SP_STAR_FINGER.get(), SPStarFingerRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HG_STRING.get(), HGStringRenderer::new);

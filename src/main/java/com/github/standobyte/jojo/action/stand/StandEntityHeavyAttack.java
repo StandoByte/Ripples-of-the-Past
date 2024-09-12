@@ -1,8 +1,10 @@
 package com.github.standobyte.jojo.action.stand;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Random;
 import java.util.Set;
 import java.util.function.Supplier;
 
@@ -16,6 +18,7 @@ import com.github.standobyte.jojo.action.stand.punch.StandBlockPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandMissedPunch;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.entity.damaging.projectile.BlockShardEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandPose;
@@ -401,9 +404,27 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
                     ServerWorld world = (ServerWorld) level;
                     List<BlockPos> toBlow = getToBlow();
                     
+                    List<Entity> blockShardEntities = new ArrayList<>();
+                    
+                    Random random = attacker.getRandom();
+                    for (BlockPos blockPos : toBlow) {
+                        BlockState blockState = level.getBlockState(blockPos);
+                        if (CrazyDiamondBlockBullet.hardMaterial(blockState)) {
+                            BlockShardEntity blockShard = new BlockShardEntity(level, blockState);
+                            blockShard.setPos(
+                                    blockPos.getX() + random.nextDouble(),
+                                    blockPos.getY() + random.nextDouble(),
+                                    blockPos.getZ() + random.nextDouble());
+                            blockShardEntities.add(blockShard);
+                        }
+                    }
+                    
                     LivingEntity user = StandUtil.getStandUser(attacker);
                     boolean dropBlocks = !(user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild);
                     MCUtil.destroyBlocksInBulk(toBlow, world, attacker, dropBlocks);
+                    for (Entity blockShard : blockShardEntities) {
+                        level.addFreshEntity(blockShard);
+                    }
                 }
             }
             

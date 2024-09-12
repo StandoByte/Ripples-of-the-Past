@@ -178,6 +178,7 @@
   "entity.jojo.molotov": "Зажигательная бомба",
   "entity.jojo.knife": "Нож",
   "entity.jojo.stand_arrow": "Стрела",
+  "entity.jojo.block_shard": "Осколок блока",
   "entity.jojo.soul": "Душа",
   
   "effect.jojo.freeze": "Заморозка",

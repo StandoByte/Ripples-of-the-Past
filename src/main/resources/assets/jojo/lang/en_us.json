@@ -179,6 +179,7 @@
   "entity.jojo.molotov": "Firebomb",
   "entity.jojo.knife": "Knife",
   "entity.jojo.stand_arrow": "Arrow",
+  "entity.jojo.block_shard": "Block Shard",
   "entity.jojo.soul": "Soul",
   
   "effect.jojo.freeze": "Freeze",
