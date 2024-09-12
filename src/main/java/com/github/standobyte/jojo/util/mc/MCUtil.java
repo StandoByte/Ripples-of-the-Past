@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.util.mc;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.network.NetworkUtil;
@@ -45,6 +47,7 @@ import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.DispenserBlock;
+import net.minecraft.block.TNTBlock;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.command.CommandSource;
 import net.minecraft.crash.CrashReport;
@@ -93,6 +96,7 @@ import net.minecraft.potion.PotionUtils;
 import net.minecraft.potion.Potions;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.Direction;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
@@ -566,7 +570,7 @@ public class MCUtil {
     /**
      *  Limits the amount of particles and break sounds that the blocks produce, sending it all in one packet
      */
-    public static int destroyBlocksInBulk(Collection<BlockPos> blocks, ServerWorld world, @Nullable Entity entity, boolean dropBlock) {
+    public static int destroyBlocksInBulk(Collection<BlockPos> blocks, ServerWorld world, @Nullable Entity entity, boolean dropItems) {
         if (!world.isClientSide() && world.isDebug()) {
             return -1;
         }
@@ -608,12 +612,17 @@ public class MCUtil {
                 maxZ = Math.max(maxZ, blockPos.getZ());
                 packet.addBlock(blockPos, oldState);
             }
-            if (dropBlock) {
+            if (dropItems) {
                 TileEntity tileentity = oldState.hasTileEntity() ? world.getBlockEntity(blockPos) : null;
 
                 Block.getDrops(oldState, world, blockPos, tileentity, entity, ItemStack.EMPTY).forEach(itemStack -> {
                     CustomExplosion.addBlockDrops(dropPositions, itemStack, blockPos);
                 });
+            }
+            else {
+                CrazyDiamondRestoreTerrain.rememberBrokenBlock(world, blockPos, oldState, 
+                        Optional.ofNullable(world.getBlockEntity(blockPos)), 
+                        Collections.emptyList());
             }
             
             if (world.setBlock(blockPos, newState, 3)) {
@@ -642,6 +651,15 @@ public class MCUtil {
         }
         
         return blocksBroken;
+    }
+    
+    public static void blockCatchFire(World world, BlockPos blockPos, BlockState blockState, @Nullable Direction face, @Nullable LivingEntity igniter) {
+        blockState.catchFire(world, blockPos, face, igniter);
+        if (blockState.getBlock() instanceof TNTBlock) {
+            CrazyDiamondRestoreTerrain.rememberBrokenBlock(world, blockPos, blockState, 
+                    Optional.ofNullable(world.getBlockEntity(blockPos)), Collections.emptyList());
+            world.removeBlock(blockPos, false);
+        }
     }
     
     

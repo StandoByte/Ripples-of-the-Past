@@ -20,6 +20,9 @@ import net.minecraft.world.World;
 @Mixin(Entity.class)
 public abstract class EntityMixin {
     @Shadow public World level;
+
+//    @Shadow private int portalCooldown;
+//    @Shadow protected int portalTime;
     
     private KnockbackCollisionImpact jojoKbCollision;
     private boolean repeatCollide;
@@ -31,12 +34,14 @@ public abstract class EntityMixin {
             return;
         }
         if (jojoKbCollision == null) {
-            jojoKbCollision = KnockbackCollisionImpact.getHandler((Entity) (Object) this).get();
+            jojoKbCollision = KnockbackCollisionImpact.getHandler((Entity) (Object) this).orElse(null);
         }
-        if (jojoKbCollision != null && jojoKbCollision.collideBreakBlocks(movementVec, ci.getReturnValue(), level)) {
-            repeatCollide = true;
-            Vector3d repeatCollide = collide(movementVec);
-            ci.setReturnValue(repeatCollide);
+        if (jojoKbCollision != null) {
+            if (jojoKbCollision.collideBreakBlocks(movementVec, ci.getReturnValue(), level)) {
+                repeatCollide = true;
+                Vector3d repeatCollide = collide(movementVec);
+                ci.setReturnValue(repeatCollide);
+            }
         }
     }
     

@@ -11,12 +11,14 @@ import javax.annotation.Nullable;
 
 import org.apache.commons.lang3.mutable.MutableBoolean;
 import org.apache.commons.lang3.mutable.MutableDouble;
+import org.apache.commons.lang3.mutable.MutableFloat;
 import org.apache.commons.lang3.tuple.Pair;
 
 import com.github.standobyte.jojo.capability.entity.EntityUtilCap;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModStatusEffects;
+import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
@@ -25,6 +27,7 @@ import net.minecraft.block.Blocks;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.AxisRotation;
@@ -52,6 +55,7 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
     private double knockbackImpactStrength;
     private double minCos;
     private boolean hadImpactWithBlock = false;
+    private boolean dropBlockItems = true;
     
     public KnockbackCollisionImpact(Entity entity) {
         this.entity = entity;
@@ -73,11 +77,13 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
         return canBreakBlocks && collidedWithBlocks;
     }
     
-    public void onPunchSetKnockbackImpact(Vector3d knockbackVec) {
+    public void onPunchSetKnockbackImpact(Vector3d knockbackVec, Entity attacker) {
         this.knockbackImpactStrength = knockbackVec.length();
         this.knockbackVec = knockbackVec.scale(1 / knockbackImpactStrength);
         this.minCos = 1;
         this.hadImpactWithBlock = false;
+        LivingEntity attackerStandUser = attacker instanceof LivingEntity ? (StandUtil.getStandUser((LivingEntity) attacker)) : null;
+        this.dropBlockItems = !(attackerStandUser instanceof PlayerEntity && ((PlayerEntity) attackerStandUser).abilities.instabuild);
     }
     
     public void tick() {
@@ -135,6 +141,7 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
             nbt.putDouble("Power", knockbackImpactStrength);
             nbt.putDouble("MinCos", minCos);
             nbt.putBoolean("HadBlockImpact", hadImpactWithBlock);
+            nbt.putBoolean("DropItems", dropBlockItems);
         }
         return nbt;
     }
@@ -145,6 +152,7 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
             knockbackImpactStrength = nbt.getDouble("Power");
             minCos = nbt.getDouble("MinCos");
             hadImpactWithBlock = nbt.getBoolean("HadBlockImpact");
+            dropBlockItems = nbt.getBoolean("DropItems");
         }
     }
     
@@ -181,6 +189,7 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
             });
         }
         
+        
         MutableBoolean didGlassBleeding = new MutableBoolean();
         float armorCover = 0;
         if (asLiving != null) {
@@ -188,19 +197,26 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
         }
         float bleedingChance = Math.max(1 - armorCover, 0.05f);
         
+        MutableFloat wallDamage = new MutableFloat(0);
+        
         if (collideBlocks) {
             Collection<Pair<BlockPos, VoxelShape>> blocks;
+            Collection<Pair<BlockPos, VoxelShape>> blocksCollision;
+            Collection<Pair<BlockPos, VoxelShape>> blocksCanBreak;
+            blocksCollision = collideNoBreakingBlocks(movementVec, aabb, serverWorld, worldBorder, selectionContext);
             if (canBreakBlocks) {
-                blocks = collideBreakBlocks(movementVec, aabb, serverWorld, worldBorder, selectionContext);
+                blocksCanBreak = collideBreakBlocks(movementVec, aabb, serverWorld, worldBorder, selectionContext);
+                blocks = blocksCanBreak;
             }
             else {
-                blocks = collideNoBreakingBlocks(movementVec, aabb, serverWorld, worldBorder, selectionContext);
+                blocks = blocksCollision;
             }
             
-            
             Collection<BlockPos> blocksToDestroy = new ArrayList<>();
-
-            blocks.stream().distinct()
+            float initialImpact = (float) getKnockbackImpactStrength();
+            
+            blocks.stream()
+            .distinct()
             .sorted(Comparator.comparingDouble(block -> {
                 AxisAlignedBB blockBB = block.getRight().bounds();
                 return MCUtil.getManhattanDist(blockBB, entity.getBoundingBox());
@@ -223,25 +239,51 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
                 if (useImpactStrength > 0) {
                     setHadImpactWithBlock();
                     float impactLeft = (float) getKnockbackImpactStrength();
-                    setKnockbackImpactStrength(getKnockbackImpactStrength() - useImpactStrength);
                     if (impactLeft < useImpactStrength) {
                         useImpactStrength = (impactLeft + useImpactStrength) / 2;
                     }
                     useImpactStrength = Math.min(impactLeft, useImpactStrength);
-                    float damage = useImpactStrength * 5;
-                    DamageUtil.hurtThroughInvulTicks(entity, DamageSource.FLY_INTO_WALL, damage);
                     
+                    if (blockPos.getY() + 1 > entity.position().y) {
+                        float damage = useImpactStrength * 4;
+                        if (!canBreakBlocks) {
+                            damage *= initialImpact;
+                        }
+                        wallDamage.add(damage);
+                    }
+
+
+                    blockState.entityInside(serverWorld, blockPos, entity);
+
+                    // episode #158 of me being on the spectrum
                     if (!didGlassBleeding.booleanValue() && asLiving != null 
                             && blockState.getMaterial() == Material.GLASS && asLiving.getRandom().nextFloat() < bleedingChance) {
                         didGlassBleeding.setTrue();
                         asLiving.addEffect(new EffectInstance(ModStatusEffects.BLEEDING.get(), 100, 0, false, false, true));
                     }
+                    if (blockState.getMaterial() == Material.CACTUS) {
+                        DamageUtil.hurtThroughInvulTicks(entity, DamageSource.CACTUS, 1);
+                    }
+                    if (entity.isOnFire()) {
+                        MCUtil.blockCatchFire(world, blockPos, blockState, null, asLiving);
+                    }
+
+
+                    setKnockbackImpactStrength(getKnockbackImpactStrength() - Math.max(useImpactStrength, 0.05f));
                 }
+                
                 return getKnockbackImpactStrength() > 0;
             });
             
-            MCUtil.destroyBlocksInBulk(blocksToDestroy, serverWorld, entity, true);
+            if (canBreakBlocks) {
+                MCUtil.destroyBlocksInBulk(blocksToDestroy, serverWorld, entity, dropBlockItems);
+            }
+            
+            if (wallDamage.floatValue() > 0) {
+                DamageUtil.hurtThroughInvulTicks(entity, DamageSource.FLY_INTO_WALL, wallDamage.floatValue());
+            }
         }
+        
     }
     
     
@@ -337,11 +379,6 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
     private Collection<Pair<BlockPos, VoxelShape>> collideBreakBlocks(Vector3d movementVec, AxisAlignedBB aabb, ServerWorld world, 
             VoxelShape worldBorder, ISelectionContext selectionContext) {
         Collection<Pair<BlockPos, VoxelShape>> blocksCollided = new ArrayList<>();
-        Integer countFloorBlocks = movementVec.y < 0 && getHadImpactWithBlock() ? 0 : null;
-
-        if (countFloorBlocks != null && countFloorBlocks > 0 && countFloorBlocks == blocksCollided.size()) {
-            setKnockbackImpactStrength(0);
-        }
 
         Vector3d step;
         AxisAlignedBB loopCollisionBB = aabb;
@@ -385,7 +422,6 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
         double z = movementVec.z;
         
         Collection<Pair<BlockPos, VoxelShape>> blocksCollided = new ArrayList<>();
-        Integer countFloorBlocks = y < 0 && (getHadImpactWithBlock()) ? 0 : null;
         
         if (y != 0) {
             y = collide(Direction.Axis.Y, aabb, world, y, 
@@ -395,7 +431,6 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
             }
         }
 
-        if (countFloorBlocks != null) countFloorBlocks = blocksCollided.size();
         boolean zFirst = Math.abs(x) < Math.abs(z);
         if (zFirst && z != 0) {
             z = collide(Direction.Axis.Z, aabb, world, z, 
@@ -471,11 +506,11 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
                 int k1 = flag ? 1 : -1;
                 int l1 = i1;
 
-                MutableDouble worldBorderCollideOffset = new MutableDouble(desiredOffset);
-                worldBorderCollision.getStream().forEach(voxelShape -> {
-                    worldBorderCollideOffset.setValue(voxelShape.collide(direction$axis2, collisionBox, worldBorderCollideOffset.doubleValue()));
-                });
-                desiredOffset = worldBorderCollideOffset.doubleValue();
+//                MutableDouble worldBorderCollideOffset = new MutableDouble(desiredOffset);
+//                worldBorderCollision.getStream().forEach(voxelShape -> {
+//                    worldBorderCollideOffset.setValue(voxelShape.collide(direction$axis2, collisionBox, worldBorderCollideOffset.doubleValue()));
+//                });
+//                desiredOffset = worldBorderCollideOffset.doubleValue();
 //                double minOffset = desiredOffset;
                 
                 while(true) {
@@ -545,6 +580,25 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
     
     private static int lastC(double pDesiredOffset, double pMin, double pMax) {
        return pDesiredOffset > 0.0D ? MathHelper.floor(pMax + pDesiredOffset) + 1 : MathHelper.floor(pMin + pDesiredOffset) - 1;
+    }
+    
+    
+    public static boolean isSoftMaterial(BlockState blockState) {
+        Material material = blockState.getMaterial();
+        return 
+                material == Material.CLOTH_DECORATION || 
+                material == Material.TOP_SNOW || 
+                material == Material.WEB || 
+                material == Material.CLAY || 
+                material == Material.DIRT || 
+                material == Material.GRASS || 
+                material == Material.SAND || 
+                material == Material.SPONGE || 
+                material == Material.WOOL || 
+                material == Material.LEAVES || 
+                material == Material.CACTUS || 
+                material == Material.SNOW || 
+                material == Material.VEGETABLE;
     }
     
     

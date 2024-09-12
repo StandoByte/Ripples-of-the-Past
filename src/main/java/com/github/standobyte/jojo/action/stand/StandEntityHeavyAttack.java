@@ -24,6 +24,7 @@ import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
+import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.general.ObjectWrapper;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.KnockbackCollisionImpact;
@@ -34,6 +35,7 @@ import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -337,7 +339,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
                 }
                 
                 KnockbackCollisionImpact.getHandler(target).ifPresent(
-                        cap -> cap.onPunchSetKnockbackImpact(target.getDeltaMovement()));
+                        cap -> cap.onPunchSetKnockbackImpact(target.getDeltaMovement(), stand));
             }
             super.afterAttack(stand, target, dmgSource, task, hurt, killed);
         }
@@ -392,13 +394,16 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
                 this.attacker = pSource;
             }
             
-            // FIXME seemingly drops 1 less item (or just can't restore the block with CD)
+            // FIXME reduce the amount of blocks destroyed on y axis
             @Override
             protected void explodeBlocks() {
                 if (JojoModUtil.breakingBlocksEnabled(level) && level instanceof ServerWorld) {
                     ServerWorld world = (ServerWorld) level;
                     List<BlockPos> toBlow = getToBlow();
-                    MCUtil.destroyBlocksInBulk(toBlow, world, attacker, true);
+                    
+                    LivingEntity user = StandUtil.getStandUser(attacker);
+                    boolean dropBlocks = !(user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild);
+                    MCUtil.destroyBlocksInBulk(toBlow, world, attacker, dropBlocks);
                 }
             }
             
@@ -407,7 +412,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
                 Iterator<Entity> iter = entities.iterator();
                 while (iter.hasNext()) {
                     Entity entity = iter.next();
-                    if (entity instanceof LivingEntity && !attacker.canAttack((LivingEntity) entity)) {
+                    if (!(entity instanceof LivingEntity && attacker.canAttack((LivingEntity) entity))) {
                         iter.remove();
                     }
                 }

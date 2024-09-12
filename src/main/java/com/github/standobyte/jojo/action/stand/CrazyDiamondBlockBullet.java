@@ -66,7 +66,7 @@ public class CrazyDiamondBlockBullet extends StandEntityAction {
         return super.checkSpecificConditions(user, power, target);
     }
     
-    private boolean hardMaterial(BlockState blockState) {
+    public static boolean hardMaterial(BlockState blockState) {
         Material material = blockState.getMaterial();
         return 
                 material == Material.BUILDABLE_GLASS || 
