@@ -189,4 +189,30 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
             return this;
         }
     }
+    
+    public static class LightPunchInstance extends StandEntityPunch {
+
+        public LightPunchInstance(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
+            super(stand, target, dmgSource);
+        }
+        
+        @Override
+        protected boolean onAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, float damage) {
+            if (!target.level.isClientSide() && target instanceof StandEntity) {
+                StandEntity targetStand = (StandEntity) target;
+                StandEntityAction opponentAttack = targetStand.getCurrentTaskAction();
+                if (opponentAttack instanceof StandEntityLightAttack
+                        && targetStand.getCurrentTaskPhase().get() == StandEntityAction.Phase.WINDUP
+                        && targetStand.canBlockOrParryFromAngle(dmgSource.getSourcePosition())) {
+                    // TODO slight knockback
+                    // TODO play both punch sounds
+                    // TODO spark particles
+                    targetStand.stopTask(true);
+                    return true;
+                }
+            }
+            
+            return super.onAttack(stand, target, dmgSource, damage);
+        }
+    }
 }

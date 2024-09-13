@@ -1441,7 +1441,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         stopTask(false);
     }
     
-    protected void stopTask(boolean stopNonCancelable) {
+    public void stopTask(boolean stopNonCancelable) {
         stopTask(null, stopNonCancelable);
     }
     

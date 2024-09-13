@@ -254,9 +254,8 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         return !isFinisher;
     }
     
-    @Deprecated
     public boolean canBeParried() {
-        return !isFinisher;
+        return true;
     }
     
 //    @Override
@@ -330,7 +329,28 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         public HeavyPunchInstance(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
             super(stand, target, dmgSource);
         }
-
+        
+        @Override
+        protected boolean onAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, float damage) {
+            if (target instanceof StandEntity) {
+                StandEntity targetStand = (StandEntity) target;
+                StandEntityAction opponentAttack = targetStand.getCurrentTaskAction();
+                if (opponentAttack instanceof StandEntityHeavyAttack
+                        && ((StandEntityHeavyAttack) opponentAttack).canBeParried()
+                        && targetStand.getCurrentTaskPhase().get() == StandEntityAction.Phase.WINDUP
+                        && targetStand.canBlockOrParryFromAngle(dmgSource.getSourcePosition())) {
+                    // TODO play the punch sound
+                    // TODO MORE spark particles
+                    // TODO "loser gets knocked back" what did i mean?
+                    // TODO a few ticks of freeze?
+                    targetStand.stopTask(true);
+                    // i should really do camera shake
+                }
+            }
+            
+            return super.onAttack(stand, target, dmgSource, damage);
+        }
+        
         @Override
         protected void afterAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, StandEntityTask task, boolean hurt, boolean killed) {
             if (!stand.level.isClientSide() && hurt) {
