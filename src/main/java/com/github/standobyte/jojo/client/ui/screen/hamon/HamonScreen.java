@@ -57,7 +57,6 @@ public class HamonScreen extends Screen {
     private boolean introWasRead;
     HamonStatsTabGui statsTab;
     HamonAbandonTabGui abandonTrainingTab;
-    TmpHamonWipTabGui techniquesWipTab;
     HamonTabGui selectedTab;
     private Set<HamonTabGui> tabsWithSkillRequirements = new HashSet<>();
     boolean isTeacherNearby = false;
@@ -104,7 +103,6 @@ public class HamonScreen extends Screen {
         
         allTabs.addAll(selectableTabs);
         allTabs.add(abandonTrainingTab = new HamonAbandonTabGui(minecraft, this, "hamon.abandon.tab"));
-        allTabs.add(techniquesWipTab = new TmpHamonWipTabGui(minecraft, this));
         
         for (HamonTabGui tab : allTabs) {
             tab.addButtons();
@@ -222,12 +220,6 @@ public class HamonScreen extends Screen {
             introWasRead = true;
             PacketManager.sendToServer(new ClReadHamonBreathTabPacket());
             reorderTabs();
-        }
-        
-        boolean wipNotice = true;
-        if (wipNotice && !(selectedTab instanceof TmpHamonWipTabGui) && tab instanceof HamonTechniqueTabGui) {
-            techniquesWipTab.techniquesTab = tab;
-            tab = techniquesWipTab;
         }
         
         selectedTab = tab;
