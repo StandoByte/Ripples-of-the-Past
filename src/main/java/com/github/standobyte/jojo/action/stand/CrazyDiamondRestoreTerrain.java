@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.stand;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -37,6 +38,7 @@ import com.github.standobyte.jojo.util.general.MathUtil;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.FallingBlock;
 import net.minecraft.block.FireBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -111,21 +113,20 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
                     block -> blockPosSelectedForRestoration(block, cameraEntity, lookVec, eyePosD, eyePos, resolveEffect, onlyAimedAt));
             
             blocks
-            
             .filter(block -> {
+                if (restorationExclude(block, world)) {
+                    return false;
+                }
                 if (blockCanBePlaced(world, block.pos, block.state)) {
                     return true;
                 }
                 blocksToForget.add(block.pos);
                 return false;
             })
-            
-            .sorted((bl1, bl2) -> {
-                return bl1.pos.distManhattan(eyePos) - bl2.pos.distManhattan(eyePos);
-            })
-            
+            .sorted(Comparator
+                    .comparingInt((PrevBlockInfo block) -> restorationPriority(block, world))
+                    .thenComparingInt((PrevBlockInfo block) -> block.pos.distManhattan(eyePos)))
             .limit(blocksToRestore)
-            
             .forEach(block -> {
                 if (tryPlaceBlock(world, block.pos, block.state, blocksPlaced, 
                         creative, block.drops, block.getDroppedXp(), playerUser, userInventory, itemsAround, 
@@ -142,6 +143,35 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
             forgetBrokenBlocks(world, blocksToForget);
         }
     }
+    
+    // this whole junk fixes janky restoration of sand blocks, e.g. explosions in a desert
+    private static boolean restorationExclude(PrevBlockInfo block, World world) {
+        if (block.state.getBlock() instanceof FallingBlock) {
+            BlockPos blockBelow = block.pos.below();
+            if (world.isEmptyBlock(blockBelow)) {
+                IChunk chunk = world.getChunk(block.pos);
+                if (chunk instanceof Chunk) {
+                    boolean blockBelowCanBeRestored = ((Chunk) chunk).getCapability(ChunkCapProvider.CAPABILITY).map(cap -> {
+                        return cap.getBrokenBlocks().anyMatch(brokenBlock -> blockBelow.equals(brokenBlock.pos));
+                    }).orElse(false);
+                    
+                    if (blockBelowCanBeRestored) {
+                        return true;
+                    }
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    private static int restorationPriority(PrevBlockInfo block, World world) {
+        if (block.state.getBlock() instanceof FallingBlock && !world.isEmptyBlock(block.pos.below())) {
+            return 1;
+        }
+        return 2;
+    }
+    
     
     private int blocksPerTick(StandEntity standEntity) {
         return MathUtil.fractionRandomInc(CrazyDiamondHeal.healingSpeed(standEntity) * 3);

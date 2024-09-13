@@ -59,7 +59,7 @@ public class StandUserDummyRenderer extends BipedRenderer<StandUserDummyEntity, 
         String hp = format.format(pEntity.getHealth());
         String maxHp = format.format(pEntity.getMaxHealth());
         this.renderNameTag(pEntity, 
-                new StringTextComponent("\u2665 ️" + hp + "/" + maxHp), 
+                new StringTextComponent("❤ " + hp + "/" + maxHp), 
                 pMatrixStack, pBuffer, pPackedLight);
         
         pMatrixStack.popPose();

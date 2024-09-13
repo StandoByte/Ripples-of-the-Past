@@ -178,6 +178,7 @@
   "entity.jojo.molotov": "Firebomb",
   "entity.jojo.knife": "Knife",
   "entity.jojo.stand_arrow": "Arrow",
+  "entity.jojo.block_shard": "Block Shard",
   "entity.jojo.soul": "Soul",
   
   "effect.jojo.freeze": "Freeze",
@@ -681,6 +682,7 @@
   "stand.unknown": "Unknown Stand: %s",
   "non_stand.unknown": "Unknown Power: %s",
   "action.unknown": "Unknown Action: %s",
+  "jojo.command.id_ambiguous": "Ambiguous id: %s",
   "commands.stand.give.success.single": "Gave %s to %s",
   "commands.stand.give.success.multiple": "Gave %s to %s players",
   "commands.stand.give.success.multiple.random": "Gave random Stands to %s players",

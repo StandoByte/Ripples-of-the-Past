@@ -78,7 +78,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
 //                return ActionConditionResult.noMessage(convertTo(blockItem, user.level, recipe -> {
 //                    ItemStack[] ingredients = getIngredients(recipe);
 //                    return ingredients.length == 1 && !ingredients[0].isEmpty() && ingredients[0].getItem() instanceof BlockItem;
-//                }, user.getRandom()).isPresent());
+//                }, user.getRandom(), false).isPresent());
 //            }
             return ActionConditionResult.NEGATIVE;
         case ENTITY:
@@ -246,7 +246,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
 //                    ItemStack[] ingredients = getIngredients(recipe);
 //                    return ingredients.length == 1 && !ingredients[0].isEmpty() && ingredients[0].getItem() instanceof BlockItem
 //                            && ingredients[0].getCount() == recipe.getResultItem().getCount();
-//                }, standEntity.getRandom()).ifPresent(oneItemArray -> {
+//                }, standEntity.getRandom(), true).ifPresent(oneItemArray -> {
 //                    BlockItem item = (BlockItem) oneItemArray.getLeft()[0].getItem();
 //                    world.setBlockAndUpdate(blockPos, item.getBlock().defaultBlockState());
 //                });

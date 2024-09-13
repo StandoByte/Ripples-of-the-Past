@@ -21,6 +21,7 @@ import net.minecraftforge.client.IWeatherParticleRenderHandler;
 import net.minecraftforge.client.IWeatherRenderHandler;
 
 // not used in the code anymore
+@Deprecated
 public class TimeStopWeatherHandler implements IWeatherRenderHandler, IWeatherParticleRenderHandler {
     private static final ResourceLocation RAIN_LOCATION = new ResourceLocation("textures/environment/rain.png");
     private static final ResourceLocation SNOW_LOCATION = new ResourceLocation("textures/environment/snow.png");

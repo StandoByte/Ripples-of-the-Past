@@ -87,6 +87,7 @@ public class StandUserDummyEntity extends MobEntity implements IMobStandUser, IE
         stand.postTick();
     }
     
+    // TODO wear armor / hold items
     @Override
     protected ActionResultType mobInteract(PlayerEntity player, Hand hand) {
         ItemStack item = player.getItemInHand(hand);

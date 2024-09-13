@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.JojoModConfig.Common;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.enchantment.StandArrowXpReductionEnchantment;
 import com.github.standobyte.jojo.init.ModEnchantments;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.ArrowXpLevelsDataPacket;
@@ -40,8 +41,10 @@ public class StandArrowHandler {
     
     public void tick(LivingEntity user) {
         if (healStandArrowDamage) {
-            float health = user.getHealth();
-            if (health < user.getMaxHealth()) {
+            if (user.hasEffect(ModStatusEffects.BLEEDING.get())) {
+                user.removeEffect(ModStatusEffects.BLEEDING.get());
+            }
+            if (user.getHealth() < user.getMaxHealth()) {
                 user.heal(0.25F);
             }
             else {

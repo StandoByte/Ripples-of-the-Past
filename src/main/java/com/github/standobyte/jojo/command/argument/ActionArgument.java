@@ -94,7 +94,8 @@ public class ActionArgument implements ArgumentType<Action<?>> {
                 if (s.startsWith(remaining)) {
                     suggest.accept(t);
                 }
-            } else if (resourceLocation.getNamespace().startsWith(remaining) || resourceLocation.getNamespace().equals(JojoMod.MOD_ID) && resourceLocation.getPath().startsWith(remaining)) {
+            } else if (resourceLocation.getNamespace().startsWith(remaining) || 
+                    resourceLocation.getNamespace().equals(JojoMod.MOD_ID) && resourceLocation.getPath().startsWith(remaining)) {
                 suggest.accept(t);
             }
         });

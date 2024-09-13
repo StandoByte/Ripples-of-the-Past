@@ -25,18 +25,24 @@ import net.minecraft.util.text.ITextComponent;
  * [V]     Stand entity
  * [_]     stuff like projectiles
  * [V]   power icon
- * [_]   in-mod UI
  * [V]     actions
- * [_]   particles
- * [_]   shaders
  *     
  * [_] lang
  *     
  * [V] Stand model
+ * [_]     gecko animations
  *     
  * [_] sounds
  * [_]   sounds.json
  * [_]   sound files
+ * 
+ * [_] optional advancement (inside the skin's directory of the resource pack)
+ * 
+ * 
+ * Extras:
+ * [_]   in-mod UI
+ * [_]   particles
+ * [_]   shaders
  * 
  */
 public class StandSkin {

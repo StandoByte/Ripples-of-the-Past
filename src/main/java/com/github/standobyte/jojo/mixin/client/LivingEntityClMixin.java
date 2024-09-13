@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.util.mc.MCUtil.EntityEvents;
-import com.github.standobyte.jojo.util.mod.NoKnockbackOnBlocking;
+import com.github.standobyte.jojo.util.mc.damage.NoKnockbackOnBlocking;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;

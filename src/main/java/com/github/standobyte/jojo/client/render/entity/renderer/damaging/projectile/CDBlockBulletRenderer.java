@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.Random;
 
 import javax.annotation.Nullable;
@@ -51,13 +52,18 @@ public class CDBlockBulletRenderer extends SimpleEntityRenderer<CDBlockBulletEnt
         List<BakedQuad> quads = blockModel.getQuads(blockState, Direction.NORTH, RANDOM, EmptyModelData.INSTANCE);
         if (!quads.isEmpty()) {
             TextureAtlasSprite sprite = quads.get(0).getSprite();
-            if (sprite != null) {
-                ResourceLocation name = sprite.getName();
-                if (name != null) {
-                    return new ResourceLocation(name.getNamespace(), "textures/" + name.getPath() + ".png");
-                }
-            }
+            return getSpriteTexture(sprite).orElse(null);
         }
         return null;
+    }
+    
+    public static Optional<ResourceLocation> getSpriteTexture(TextureAtlasSprite sprite) {
+        if (sprite != null) {
+            ResourceLocation name = sprite.getName();
+            if (name != null) {
+                return Optional.of(new ResourceLocation(name.getNamespace(), "textures/" + name.getPath() + ".png"));
+            }
+        }
+        return Optional.empty();
     }
 }

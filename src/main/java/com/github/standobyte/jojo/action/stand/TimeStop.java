@@ -102,6 +102,9 @@ public class TimeStop extends StandAction {
                         timeManualResumeVoiceLine.get());
             }
             
+            // TODO event
+            timeStopTicks = instance.getTicksLeft();
+            
             EffectInstance immunityEffect = new EffectInstance(ModStatusEffects.TIME_STOP.get(), timeStopTicks, 0, false, false, true);
             user.addEffect(immunityEffect);
             instance.setStatusEffectInstance(immunityEffect);
