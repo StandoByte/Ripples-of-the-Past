@@ -607,7 +607,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public void addLearningProgressPoints(StandAction action, float points) {
         if (user != null && points > 0 && user.hasEffect(ModStatusEffects.RESOLVE.get())) {
-            points *= 4;
+            points *= action.resolveLearningMultiplier(this);
         }
         
         float currentValue = actionLearningProgressMap.getLearningProgressPoints(action, getType());

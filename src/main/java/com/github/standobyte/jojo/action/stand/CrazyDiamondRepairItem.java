@@ -26,6 +26,7 @@ import net.minecraft.entity.item.ExperienceOrbEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.item.TieredItem;
 import net.minecraft.util.DrinkHelper;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
@@ -94,11 +95,11 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
         ItemStack newStack = null;
         if (itemStack.getItem() == Items.CHIPPED_ANVIL) { 
             newStack = new ItemStack(Items.ANVIL);
-            damage = 250;
+            damage = 125;
         }
         else if (itemStack.getItem() == Items.DAMAGED_ANVIL) {
             newStack = new ItemStack(Items.CHIPPED_ANVIL);
-            damage = 250;
+            damage = 125;
         }
         else if (itemStack.getItem() == Items.COBBLESTONE) {
             damage = 1;
@@ -127,7 +128,26 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
             }
         }
         
+        float multiplier = 1;
         if (!itemStack.isEmpty()) {
+            switch (itemStack.getRarity()) {
+            case UNCOMMON:
+                multiplier += 0.5f;
+                break;
+            case RARE:
+                multiplier += 1.5f;
+                break;
+            case EPIC:
+                multiplier += 3;
+                break;
+            default:
+                break;
+            }
+            if (itemStack.getItem() instanceof TieredItem) {
+                int level = ((TieredItem) itemStack.getItem()).getTier().getLevel();
+                multiplier += (float) level / 2;
+            }
+            
             dropExperience(user, itemStack);
             itemStack.removeTagKey("Enchantments");
             itemStack.removeTagKey("StoredEnchantments");
@@ -139,7 +159,13 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
             }
         }
         
-        return (float) damage * 0.00005F;
+        return (float) damage * multiplier * RATE;
+    }
+    private static final float RATE = 0.002f / 13f;
+    
+    @Override
+    public float resolveLearningMultiplier(IStandPower power) {
+        return 1;
     }
     
     public static boolean itemTransformationTick(int taskTicks, StandEntity standEntity) {

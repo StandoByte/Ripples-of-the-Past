@@ -67,6 +67,10 @@ public abstract class StandAction extends Action<IStandPower> {
         return isTrained;
     }
     
+    public float resolveLearningMultiplier(IStandPower power) {
+        return 4;
+    }
+    
     public Collection<StandAction> getExtraUnlockables() {
         List<StandAction> actions = extraUnlockables.stream()
                 .map(Supplier::get)

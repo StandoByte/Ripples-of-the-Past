@@ -1154,7 +1154,7 @@ public class ActionsOverlayGui extends AbstractGui {
             float barX = x + 2;
             float barY = y + 13;
             ClientUtil.fillRect(Tessellator.getInstance().getBuilder(), barX, barY, 13, 2, 0, 0, 0, 255);
-            ClientUtil.fillRect(Tessellator.getInstance().getBuilder(), barX, barY, Math.round(learningProgress * 13.0F), 1, 0, 255, 0, 255);
+            ClientUtil.fillRect(Tessellator.getInstance().getBuilder(), barX, barY, learningProgress * 13.0F, 1, 0, 255, 0, 255);
             RenderSystem.enableBlend();
             RenderSystem.enableAlphaTest();
             RenderSystem.enableTexture();
