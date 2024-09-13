@@ -64,6 +64,7 @@ import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.IInventory;
 import net.minecraft.item.BucketItem;
 import net.minecraft.item.FishBucketItem;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.ThrowablePotionItem;
@@ -444,14 +445,17 @@ public class GoldExperienceCreateLifeform extends StandAction {
     private void mobFromInventory(GETransformationEntity tf, ItemStack item, World world, 
             @Nonnull LivingEntity wouldBeThrower, BlockPos fishBucketPos, ObjectWrapper<ITextComponent> mobName) {
         Entity itemEntity;
-        ItemStack transformedItem;
+        ItemStack transformedItem = null;
         if (item.getItem() instanceof BucketItem) {
             BucketItem bucketType = (BucketItem) item.getItem();
             Fluid fluid = bucketType.getFluid();
-            transformedItem = new ItemStack(fluid.getBucket());
-            bucketType.checkExtraContent(world, item, fishBucketPos);
+            Item bucketWithoutFish = fluid.getBucket();
+            if (bucketWithoutFish != Items.AIR) {
+                transformedItem = new ItemStack(bucketWithoutFish);
+                bucketType.checkExtraContent(world, item, fishBucketPos);
+            }
         }
-        else {
+        if (transformedItem == null) {
             transformedItem = item.copy();
         }
         transformedItem.setCount(1);
