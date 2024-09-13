@@ -5,24 +5,22 @@ import com.github.standobyte.jojo.init.ModEntityTypes;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.network.IPacket;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
-import net.minecraftforge.fml.network.NetworkHooks;
 
-public class BlockShardEntity extends Entity implements IEntityAdditionalSpawnData {
+public class BlockShardEntity extends ModdedProjectileEntity {
     private BlockState blockState;
 
-    public BlockShardEntity(World world, BlockState blockState) {
-        this(ModEntityTypes.BLOCK_SHARD.get(), world);
+    public BlockShardEntity(LivingEntity shooter, World world, BlockState blockState) {
+        super(ModEntityTypes.BLOCK_SHARD.get(), shooter, world);
         this.blockState = blockState;
     }
 
-    public BlockShardEntity(EntityType<?> entityType, World world) {
+    public BlockShardEntity(EntityType<? extends BlockShardEntity> entityType, World world) {
         super(entityType, world);
     }
     
@@ -39,39 +37,71 @@ public class BlockShardEntity extends Entity implements IEntityAdditionalSpawnDa
     }
     
     @Override
-    public void tick() {
-        super.tick();
-        if (tickCount > 10 && !level.isClientSide()) {
-            remove();
+    public int ticksLifespan() {
+        return 100;
+    }
+
+    // TODO damage based on the block hardness
+    @Override
+    protected float getBaseDamage() {
+        return 2.5f;
+    }
+
+    @Override
+    protected float getMaxHardnessBreakable() {
+        return 0;
+    }
+
+    @Override
+    public boolean standDamage() {
+        return false;
+    }
+    
+    @Override
+    protected boolean constVelocity() {
+        return false;
+    }
+    
+    @Override
+    protected double getGravityAcceleration() {
+        return 0.05;
+    }
+    
+    @Override
+    protected boolean hasGravity() {
+        return true;
+    }
+    
+
+
+    @Override
+    protected void readAdditionalSaveData(CompoundNBT nbt) {
+        super.readAdditionalSaveData(nbt);
+        if (blockState != null) {
+            nbt.put("Block", NBTUtil.writeBlockState(blockState));
         }
     }
-    
 
     @Override
-    protected void defineSynchedData() {
-    }
-
-    @Override
-    protected void readAdditionalSaveData(CompoundNBT pCompound) {
-    }
-
-    @Override
-    protected void addAdditionalSaveData(CompoundNBT pCompound) {
+    protected void addAdditionalSaveData(CompoundNBT nbt) {
+        super.addAdditionalSaveData(nbt);
+        blockState = NBTUtil.readBlockState(nbt.getCompound("Block"));
+        if (blockState.getBlock() == Blocks.AIR) {
+            blockState = Blocks.COBBLESTONE.defaultBlockState();
+        }
     }
 
     
-    @Override
-    public IPacket<?> getAddEntityPacket() {
-        return NetworkHooks.getEntitySpawningPacket(this);
-    }
 
     @Override
     public void writeSpawnData(PacketBuffer buffer) {
+        super.writeSpawnData(buffer);
         buffer.writeInt(Block.getId(getBlock()));
     }
 
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
+        super.readSpawnData(additionalData);
         this.blockState = Block.stateById(additionalData.readInt());
     }
 

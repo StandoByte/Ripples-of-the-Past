@@ -101,7 +101,8 @@ public abstract class ModdedProjectileEntity extends DamagingEntity {
         
         if (!constVelocity()) {
             if (!isNoGravity()) {
-                setDeltaMovement(movementVec.x, movementVec.y - getGravityAcceleration(), movementVec.z);
+                movementVec = movementVec.subtract(0, getGravityAcceleration(), 0);
+                setDeltaMovement(movementVec);
             }   
             
             rotateTowardsMovement(1.0F);
@@ -150,15 +151,15 @@ public abstract class ModdedProjectileEntity extends DamagingEntity {
     }
 
     protected double getGravityAcceleration() {
-        return 0.03D;
+        return 0.03;
     }
     
     protected double getInertia() {
-        return 0.99D;
+        return 0.99;
     }
     
     protected double getWaterInertiaFactor() {
-        return 0.8D;
+        return 0.8;
     }
     
     protected void breakProjectile(TargetType targetType, RayTraceResult hitTarget) {
