@@ -584,7 +584,10 @@ public class ClientEventHandler {
                 }
             });
         }
-        else if (event.getType() == HEALTH && JojoModUtil.isDyingBody(mc.player)) {
+        if (JojoModUtil.isDyingBody(mc.player) && (
+                event.getType() == HEALTH || 
+                event.getType() == FOOD || 
+                event.getType() == AIR)) {
             event.setCanceled(true);
         }
         
@@ -1519,7 +1522,7 @@ public class ClientEventHandler {
     private void hudRenderEntityGEDetectorData(MatrixStack matrixStack) {
         Entity entity = GEDetectorShowHpEntity;
         PosOnScreen entityPos = GEDetectorShowHpEntityPos;
-        if (entity == null || entityPos == null) return;
+        if (entity == null || entityPos == null || !entityPos.isOnScreen) return;
 
         List<ITooltipLine> tooltip = new ArrayList<>();
         if (entity instanceof LivingEntity) {
