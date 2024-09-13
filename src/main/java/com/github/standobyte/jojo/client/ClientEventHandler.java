@@ -1110,6 +1110,11 @@ public class ClientEventHandler {
                 ClientReflection.setSplash((MainMenuScreen) screen, splash);
             }
         }
+        else if (screen instanceof IngameMenuScreen) {
+            IStandPower.getStandPowerOptional(mc.player).resolve()
+            .map(StandStatsRenderer.ICosmeticStandStats::getHandler)
+            .ifPresent(StandStatsRenderer.ICosmeticStandStats::onPauseScreenOpened);
+        }
         else if (screen == null) {
             onScreenClosed();
         }
