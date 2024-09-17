@@ -26,7 +26,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
-public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<HamonSendoWaveKick.SendoWaveKickInstance, INonStandPower> {
+public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<HamonSendoWaveKick.Instance, INonStandPower> {
 
     public HamonSendoWaveKick(HamonAction.Builder builder) {
         super(builder);
@@ -56,7 +56,7 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
 
     private static final int USUAL_SENDO_WAVE_KICK_DURATION = 10;
     @Override
-    public void playerTick(SendoWaveKickInstance kick) {
+    public void playerTick(Instance kick) {
         LivingEntity user = kick.getUser();
         if (!user.level.isClientSide()) {
             if (kick.sendoWaveKickPositionWaitingTimer >= 0) {
@@ -128,23 +128,23 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
     }
     
     @Override
-    public SendoWaveKickInstance createContinuousActionInstance(
+    public Instance createContinuousActionInstance(
             LivingEntity user, PlayerUtilCap userCap, INonStandPower power) {
         if (user.level.isClientSide() && user instanceof PlayerEntity) {
             ModPlayerAnimations.sendoWaveKick.setAnimEnabled((PlayerEntity) user, true);
         }
-        return new SendoWaveKickInstance(user, userCap, power, this);
+        return new Instance(user, userCap, power, this);
     }
     
     
     
-    public static class SendoWaveKickInstance extends ContinuousActionInstance<SendoWaveKickInstance, INonStandPower> {
+    public static class Instance extends ContinuousActionInstance<Instance, INonStandPower> {
         private int sendoWaveKickPositionWaitingTimer = 0;
         private boolean gaveThisSendoWaveKickPoints = false;
         private float energySpent;
         private final float initialYRot;
 
-        public SendoWaveKickInstance(LivingEntity user, PlayerUtilCap userCap, 
+        public Instance(LivingEntity user, PlayerUtilCap userCap, 
                 INonStandPower playerPower, HamonSendoWaveKick action) {
             super(user, userCap, playerPower, action);
             this.initialYRot = user.yRot;
@@ -156,7 +156,7 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
         }
 
         @Override
-        protected SendoWaveKickInstance getThis() {
+        protected Instance getThis() {
             return this;
         }
         
@@ -166,7 +166,7 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
         
         @Override
         public boolean cancelIncomingDamage(DamageSource dmgSource, float dmgAmount) {
-            return isMeleeAttack(dmgSource);
+            return DamageUtil.isMeleeAttack(dmgSource);
         }
         
         @Override

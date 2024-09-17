@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.action.non_stand;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.action.non_stand.HamonSunlightYellowOverdriveBarrage.SunlightYellowOverdriveInstance;
+import com.github.standobyte.jojo.action.non_stand.HamonSunlightYellowOverdriveBarrage.Instance;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.player.IPlayerAction;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
@@ -37,7 +37,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.ForgeHooks;
 
-public class HamonSunlightYellowOverdriveBarrage extends HamonAction implements IPlayerAction<SunlightYellowOverdriveInstance, INonStandPower> {
+public class HamonSunlightYellowOverdriveBarrage extends HamonAction implements IPlayerAction<Instance, INonStandPower> {
 
     public HamonSunlightYellowOverdriveBarrage(HamonAction.Builder builder) {
         super(builder.holdType());
@@ -81,7 +81,7 @@ public class HamonSunlightYellowOverdriveBarrage extends HamonAction implements 
     private static final int FINISHING_PUNCH_DURATION = 10;
     
     @Override
-    public void playerTick(SunlightYellowOverdriveInstance continuousAction) {
+    public void playerTick(Instance continuousAction) {
         LivingEntity user = continuousAction.getUser();
         World world = user.level;
         int tick = continuousAction.getTick();
@@ -167,26 +167,26 @@ public class HamonSunlightYellowOverdriveBarrage extends HamonAction implements 
     }
     
     @Override
-    public SunlightYellowOverdriveInstance createContinuousActionInstance(
+    public Instance createContinuousActionInstance(
             LivingEntity user, PlayerUtilCap userCap, INonStandPower power) {
         if (user.level.isClientSide() && user instanceof PlayerEntity) {
             ModPlayerAnimations.playerBarrageAnim.setAnimEnabled((PlayerEntity) user, true);
         }
-        return new SunlightYellowOverdriveInstance(user, userCap, power, this);
+        return new Instance(user, userCap, power, this);
     }
     
     
     
-    public static class SunlightYellowOverdriveInstance extends ContinuousActionInstance<SunlightYellowOverdriveInstance, INonStandPower> {
+    public static class Instance extends ContinuousActionInstance<Instance, INonStandPower> {
         private boolean finishingPunch = false;
 
-        public SunlightYellowOverdriveInstance(LivingEntity user, PlayerUtilCap userCap, 
+        public Instance(LivingEntity user, PlayerUtilCap userCap, 
                 INonStandPower playerPower, HamonSunlightYellowOverdriveBarrage action) {
             super(user, userCap, playerPower, action);
         }
 
         @Override
-        protected SunlightYellowOverdriveInstance getThis() {
+        protected Instance getThis() {
             return this;
         }
         

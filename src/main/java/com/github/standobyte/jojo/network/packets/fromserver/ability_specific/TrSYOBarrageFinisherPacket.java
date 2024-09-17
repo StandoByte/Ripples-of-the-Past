@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.network.packets.fromserver.ability_specific;
 
 import java.util.function.Supplier;
 
-import com.github.standobyte.jojo.action.non_stand.HamonSunlightYellowOverdriveBarrage.SunlightYellowOverdriveInstance;
+import com.github.standobyte.jojo.action.non_stand.HamonSunlightYellowOverdriveBarrage;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
@@ -38,8 +38,8 @@ public class TrSYOBarrageFinisherPacket {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity instanceof LivingEntity) {
                 ContinuousActionInstance.getCurrentAction((LivingEntity) entity).ifPresent(action -> {
-                    if (action instanceof SunlightYellowOverdriveInstance) {
-                        ((SunlightYellowOverdriveInstance) action).startFinishingPunch();
+                    if (action instanceof HamonSunlightYellowOverdriveBarrage.Instance) {
+                        ((HamonSunlightYellowOverdriveBarrage.Instance) action).startFinishingPunch();
                     }
                 });
             }

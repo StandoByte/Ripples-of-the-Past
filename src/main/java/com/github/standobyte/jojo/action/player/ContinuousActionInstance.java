@@ -6,6 +6,7 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.DamageSource;
@@ -84,8 +85,9 @@ public abstract class ContinuousActionInstance<T extends ContinuousActionInstanc
         return false;
     }
     
+    @Deprecated
     protected boolean isMeleeAttack(DamageSource dmgSource) {
-        return dmgSource.getEntity() != null && dmgSource.getDirectEntity() != null && dmgSource.getEntity().is(dmgSource.getDirectEntity());
+        return DamageUtil.isMeleeAttack(dmgSource);
     }
     
     
