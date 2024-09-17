@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
+import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.entity.MRDetectorEntity;
@@ -42,6 +43,11 @@ public abstract class ClientTickingSoundsHelper {
     }
     
     public static boolean playVoiceLine(Entity entity, SoundEvent soundEvent, SoundCategory category, float volume, float pitch, boolean interrupt) {
+        if (soundEvent == null || !ClientModSettings.getSettingsReadOnly().characterVoiceLines) {
+            voiceLineNotTriggered(entity);
+            return false;
+        }
+        
         Minecraft mc = Minecraft.getInstance();
         
         PlaySoundAtEntityEvent event = ForgeEventFactory.onPlaySoundAtEntity(mc.player, soundEvent, category, volume, pitch);

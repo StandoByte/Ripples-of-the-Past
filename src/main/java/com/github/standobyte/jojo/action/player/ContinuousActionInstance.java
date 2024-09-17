@@ -80,11 +80,11 @@ public abstract class ContinuousActionInstance<T extends ContinuousActionInstanc
     public void setPhase(Phase phase, boolean sync) {
         if (this.phase != phase) {
             onPhaseSet(this.phase, phase);
-            this.phase = phase;
-            this.tick = 0;
-            if (!user.level.isClientSide()) {
-                PacketManager.sendToClientsTrackingAndSelf(TrPlayerContinuousActionPacket.setPhase(user.getId(), phase), user);
-            }
+        }
+        this.phase = phase;
+        this.tick = 0;
+        if (!user.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(TrPlayerContinuousActionPacket.setPhase(user.getId(), phase), user);
         }
     }
     

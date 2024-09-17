@@ -151,8 +151,6 @@ public class HamonData extends TypeSpecificData {
     
     public HamonProjectileShieldEntity shieldEntity;
     private boolean hamonProtection = false;
-    private boolean isRebuffOverdriveOn = false;
-    private int rebuffTick = 0;
     public OptionalInt regenImpliedDuration = OptionalInt.empty();
     
     private boolean waterWalkingPrevTick = false;
@@ -175,15 +173,6 @@ public class HamonData extends TypeSpecificData {
             if (hamonProtection) {
                 if (user.level.isClientSide) {
                     tickHamonProtection();
-                }
-            }
-            
-            if (isRebuffOverdriveOn) {
-                if (rebuffTick <= 20) {
-                    ++rebuffTick;    
-                } else {
-                    isRebuffOverdriveOn = false;
-                    rebuffTick = 0;
                 }
             }
             
@@ -211,7 +200,6 @@ public class HamonData extends TypeSpecificData {
                 shieldEntity = null;
             }
             hamonProtection = false;
-            isRebuffOverdriveOn = false;
         }
         
         waterWalkingThisTick = false;
@@ -1614,15 +1602,6 @@ public class HamonData extends TypeSpecificData {
     
     public float waterWalkingTickCost() {
         return waterWalkingPrevTick ? 1 : 50;
-    }
-    
-    
-    public boolean getRebuffOverdrive() {
-        return isRebuffOverdriveOn;
-    }
-    
-    public void setRebuffOverdrive(boolean usingRO) {
-        this.isRebuffOverdriveOn = usingRO;
     }
     
 }

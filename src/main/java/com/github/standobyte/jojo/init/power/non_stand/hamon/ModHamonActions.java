@@ -177,8 +177,8 @@ public class ModHamonActions {
     public static final RegistryObject<HamonAction> ZEPPELI_TORNADO_OVERDRIVE = ACTIONS.register("zeppeli_tornado_overdrive", 
             () -> new HamonTornadoOverdrive(new HamonAction.Builder().holdEnergyCost(75F).shout(ModSounds.ZEPPELI_TORNADO_OVERDRIVE)));
     
-    public static final RegistryObject<HamonAction> JOSEPH_REBUFF_OVERDRIVE = ACTIONS.register("joseph_rebuff_overdrive", 
-            () -> new HamonRebuffOverdrive(new HamonAction.Builder().cooldown(80).shout(ModSounds.JOSEPH_GIGGLE)));
+    public static final RegistryObject<HamonRebuffOverdrive> JOSEPH_REBUFF_OVERDRIVE = ACTIONS.register("joseph_rebuff_overdrive", 
+            () -> new HamonRebuffOverdrive(new HamonAction.Builder().cooldown(100)));
     
     public static final RegistryObject<HamonAction> CAESAR_BUBBLE_LAUNCHER = ACTIONS.register("caesar_bubble_launcher", 
             () -> new HamonBubbleLauncher(new HamonAction.Builder().holdEnergyCost(50F).heldWalkSpeed(0.3F).shout(ModSounds.CAESAR_BUBBLE_LAUNCHER)));
