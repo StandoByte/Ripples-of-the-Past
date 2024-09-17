@@ -77,80 +77,6 @@ public class HamonSunlightYellowOverdriveBarrage extends HamonAction implements 
         }
     }
     
-    private static final int MAX_BARRAGE_DURATION = 70;
-    private static final int FINISHING_PUNCH_DURATION = 10;
-    
-    @Override
-    public void playerTick(Instance continuousAction) {
-        LivingEntity user = continuousAction.getUser();
-        World world = user.level;
-        int tick = continuousAction.getTick();
-        if (tick < MAX_BARRAGE_DURATION) {
-            // barrage tick
-            ActionTarget target = continuousAction.getPower().getMouseTarget();
-            LivingEntity targetEntity = null;
-            switch (target.getType()) {
-            case BLOCK:
-                BlockPos pos = target.getBlockPos();
-                if (!world.isClientSide() && JojoModUtil.canEntityDestroy((ServerWorld) world, pos, world.getBlockState(pos), user)) {
-                    if (!world.isEmptyBlock(pos)) {
-                        BlockState blockState = world.getBlockState(pos);
-                        float digDuration = blockState.getDestroySpeed(world, pos);
-                        boolean dropItem = true;
-                        if (user instanceof PlayerEntity) {
-                            PlayerEntity player = (PlayerEntity) user;
-                            digDuration /= player.getDigSpeed(blockState, pos);
-                            if (player.abilities.instabuild) {
-                                digDuration = 0;
-                                dropItem = false;
-                            }
-                            else if (!ForgeHooks.canHarvestBlock(blockState, player, world, pos)) {
-                                digDuration *= 10F / 3F;
-//                                dropItem = false;
-                            }
-                        }
-                        if (digDuration >= 0 && digDuration <= 2.5F * Math.sqrt(user.getAttributeValue(Attributes.ATTACK_DAMAGE))) {
-                            world.destroyBlock(pos, dropItem);
-                        }
-                        else {
-                            SoundType soundType = blockState.getSoundType(world, pos, user);
-                            world.playSound(null, pos, soundType.getHitSound(), SoundCategory.BLOCKS, (soundType.getVolume() + 1.0F) / 8.0F, soundType.getPitch() * 0.5F);
-                        }
-                    }
-                }
-                break;
-            case ENTITY:
-                if (target.getEntity() instanceof LivingEntity) {
-                    targetEntity = (LivingEntity) target.getEntity();
-                    targetEntity.addEffect(new EffectInstance(ModStatusEffects.IMMOBILIZE.get(), 10, 0, false, false, false));
-                    if (user instanceof PlayerEntity) {
-                        int invulTicks = targetEntity.invulnerableTime;
-                        ((PlayerEntity) user).attack(targetEntity);
-                        targetEntity.invulnerableTime = invulTicks;
-                    }
-                    if (!world.isClientSide()) {
-                        DamageUtil.dealHamonDamage(targetEntity, 0.1F, user, null, 
-                                attack -> attack.hamonParticle(ModParticles.HAMON_SPARK_YELLOW.get()));
-                        if (targetEntity.getHealth() < 2) {
-                            continuousAction.startFinishingPunch();
-                        }
-                    }
-                }
-                break;
-            default:
-                break;
-            }
-            
-            if (world.isClientSide() && tick % 2 == 0) {
-                user.swinging = false;
-                user.swing(tick % 4 == 0 ? Hand.MAIN_HAND : Hand.OFF_HAND);
-            }
-        }
-        else if (!world.isClientSide() && tick == MAX_BARRAGE_DURATION) {
-            continuousAction.startFinishingPunch();
-        }
-    }
-    
     @Override
     public boolean isHeldSentToTracking() {
         return true;
@@ -189,6 +115,9 @@ public class HamonSunlightYellowOverdriveBarrage extends HamonAction implements 
         protected Instance getThis() {
             return this;
         }
+
+        private static final int MAX_BARRAGE_DURATION = 70;
+        private static final int FINISHING_PUNCH_DURATION = 10;
         
         public void startFinishingPunch() {
             LivingEntity user = getUser();
@@ -245,6 +174,77 @@ public class HamonSunlightYellowOverdriveBarrage extends HamonAction implements 
                     ModPlayerAnimations.playerBarrageAnim.setAnimEnabled(player, false);
                     ModPlayerAnimations.syoBarrage.setFinisherAnim(player);
                 }
+            }
+        }
+        
+        @Override
+        public void playerTick() {
+            LivingEntity user = getUser();
+            World world = user.level;
+            int tick = getTick();
+            if (tick < MAX_BARRAGE_DURATION) {
+                // barrage tick
+                ActionTarget target = getPower().getMouseTarget();
+                LivingEntity targetEntity = null;
+                switch (target.getType()) {
+                case BLOCK:
+                    BlockPos pos = target.getBlockPos();
+                    if (!world.isClientSide() && JojoModUtil.canEntityDestroy((ServerWorld) world, pos, world.getBlockState(pos), user)) {
+                        if (!world.isEmptyBlock(pos)) {
+                            BlockState blockState = world.getBlockState(pos);
+                            float digDuration = blockState.getDestroySpeed(world, pos);
+                            boolean dropItem = true;
+                            if (user instanceof PlayerEntity) {
+                                PlayerEntity player = (PlayerEntity) user;
+                                digDuration /= player.getDigSpeed(blockState, pos);
+                                if (player.abilities.instabuild) {
+                                    digDuration = 0;
+                                    dropItem = false;
+                                }
+                                else if (!ForgeHooks.canHarvestBlock(blockState, player, world, pos)) {
+                                    digDuration *= 10F / 3F;
+//                                    dropItem = false;
+                                }
+                            }
+                            if (digDuration >= 0 && digDuration <= 2.5F * Math.sqrt(user.getAttributeValue(Attributes.ATTACK_DAMAGE))) {
+                                world.destroyBlock(pos, dropItem);
+                            }
+                            else {
+                                SoundType soundType = blockState.getSoundType(world, pos, user);
+                                world.playSound(null, pos, soundType.getHitSound(), SoundCategory.BLOCKS, (soundType.getVolume() + 1.0F) / 8.0F, soundType.getPitch() * 0.5F);
+                            }
+                        }
+                    }
+                    break;
+                case ENTITY:
+                    if (target.getEntity() instanceof LivingEntity) {
+                        targetEntity = (LivingEntity) target.getEntity();
+                        targetEntity.addEffect(new EffectInstance(ModStatusEffects.IMMOBILIZE.get(), 10, 0, false, false, false));
+                        if (user instanceof PlayerEntity) {
+                            int invulTicks = targetEntity.invulnerableTime;
+                            ((PlayerEntity) user).attack(targetEntity);
+                            targetEntity.invulnerableTime = invulTicks;
+                        }
+                        if (!world.isClientSide()) {
+                            DamageUtil.dealHamonDamage(targetEntity, 0.1F, user, null, 
+                                    attack -> attack.hamonParticle(ModParticles.HAMON_SPARK_YELLOW.get()));
+                            if (targetEntity.getHealth() < 2) {
+                                startFinishingPunch();
+                            }
+                        }
+                    }
+                    break;
+                default:
+                    break;
+                }
+                
+                if (world.isClientSide() && tick % 2 == 0) {
+                    user.swinging = false;
+                    user.swing(tick % 4 == 0 ? Hand.MAIN_HAND : Hand.OFF_HAND);
+                }
+            }
+            else if (!world.isClientSide() && tick == MAX_BARRAGE_DURATION) {
+                startFinishingPunch();
             }
         }
         

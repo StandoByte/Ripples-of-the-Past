@@ -53,65 +53,6 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
             }
         }
     }
-
-    private static final int USUAL_SENDO_WAVE_KICK_DURATION = 10;
-    @Override
-    public void playerTick(Instance kick) {
-        LivingEntity user = kick.getUser();
-        if (!user.level.isClientSide()) {
-            if (kick.sendoWaveKickPositionWaitingTimer >= 0) {
-                // FIXME ! (hamon 2) check if the client sent position
-                boolean clientSentPosition = true;
-                if (clientSentPosition) {
-                    kick.sendoWaveKickPositionWaitingTimer = -1;
-                }
-                else {
-                    kick.sendoWaveKickPositionWaitingTimer++;
-                }
-            }
-            if (kick.sendoWaveKickPositionWaitingTimer < 0 && user.isOnGround()
-                    || kick.sendoWaveKickPositionWaitingTimer >= USUAL_SENDO_WAVE_KICK_DURATION) {
-                kick.stopAction();
-                return;
-            }
-            
-            List<LivingEntity> targets = user.level.getEntitiesOfClass(LivingEntity.class, kickHitbox(user), 
-                    entity -> !entity.is(user) && user.canAttack(entity));
-            boolean points = false;
-            for (LivingEntity target : targets) {
-                boolean kickDamage = dealPhysicalDamage(user, target);
-                boolean hamonDamage = DamageUtil.dealHamonDamage(target, 0.5F, user, null);
-                if (kickDamage || hamonDamage) {
-                    Vector3d vecToTarget = target.position().subtract(user.position());
-                    boolean left = MathHelper.wrapDegrees(
-                            user.yBodyRot - MathUtil.yRotDegFromVec(vecToTarget))
-                            < 0;
-                    float knockbackYRot = (60F + user.getRandom().nextFloat() * 30F) * (left ? 1 : -1);
-                    knockbackYRot += (float) -MathHelper.atan2(vecToTarget.x, vecToTarget.z) * MathUtil.RAD_TO_DEG;
-                    DamageUtil.knockback((LivingEntity) target, 0.75F, knockbackYRot);
-                    
-                    if (hamonDamage) {
-                        points = true;
-                    }
-                }
-            }
-
-            if (!kick.gaveThisSendoWaveKickPoints && points) {
-                INonStandPower.getNonStandPowerOptional(user).ifPresent(power -> {
-                    power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                        hamon.hamonPointsFromAction(HamonStat.STRENGTH, kick.energySpent); 
-                    });
-                });
-                kick.gaveThisSendoWaveKickPoints = true;
-            }
-        }
-        
-        else {
-            HamonSparksLoopSound.playSparkSound(user, new Vector3d(user.getX(), user.getY(0.25), user.getZ()), 1.0F, true);
-        }
-        
-        user.fallDistance = 0;
-    }
     
     private static boolean dealPhysicalDamage(LivingEntity user, Entity target) {
         return target.hurt(new EntityDamageSource(user instanceof PlayerEntity ? "player" : "mob", user), 
@@ -167,6 +108,65 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
         @Override
         public boolean cancelIncomingDamage(DamageSource dmgSource, float dmgAmount) {
             return DamageUtil.isMeleeAttack(dmgSource);
+        }
+
+        private static final int USUAL_SENDO_WAVE_KICK_DURATION = 10;
+        @Override
+        public void playerTick() {
+            LivingEntity user = getUser();
+            if (!user.level.isClientSide()) {
+                if (sendoWaveKickPositionWaitingTimer >= 0) {
+                    // FIXME ! (hamon 2) check if the client sent position
+                    boolean clientSentPosition = true;
+                    if (clientSentPosition) {
+                        sendoWaveKickPositionWaitingTimer = -1;
+                    }
+                    else {
+                        sendoWaveKickPositionWaitingTimer++;
+                    }
+                }
+                if (sendoWaveKickPositionWaitingTimer < 0 && user.isOnGround()
+                        || sendoWaveKickPositionWaitingTimer >= USUAL_SENDO_WAVE_KICK_DURATION) {
+                    stopAction();
+                    return;
+                }
+                
+                List<LivingEntity> targets = user.level.getEntitiesOfClass(LivingEntity.class, kickHitbox(user), 
+                        entity -> !entity.is(user) && user.canAttack(entity));
+                boolean points = false;
+                for (LivingEntity target : targets) {
+                    boolean kickDamage = dealPhysicalDamage(user, target);
+                    boolean hamonDamage = DamageUtil.dealHamonDamage(target, 0.5F, user, null);
+                    if (kickDamage || hamonDamage) {
+                        Vector3d vecToTarget = target.position().subtract(user.position());
+                        boolean left = MathHelper.wrapDegrees(
+                                user.yBodyRot - MathUtil.yRotDegFromVec(vecToTarget))
+                                < 0;
+                        float knockbackYRot = (60F + user.getRandom().nextFloat() * 30F) * (left ? 1 : -1);
+                        knockbackYRot += (float) -MathHelper.atan2(vecToTarget.x, vecToTarget.z) * MathUtil.RAD_TO_DEG;
+                        DamageUtil.knockback((LivingEntity) target, 0.75F, knockbackYRot);
+                        
+                        if (hamonDamage) {
+                            points = true;
+                        }
+                    }
+                }
+
+                if (!gaveThisSendoWaveKickPoints && points) {
+                    INonStandPower.getNonStandPowerOptional(user).ifPresent(power -> {
+                        power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
+                            hamon.hamonPointsFromAction(HamonStat.STRENGTH, energySpent); 
+                        });
+                    });
+                    gaveThisSendoWaveKickPoints = true;
+                }
+            }
+            
+            else {
+                HamonSparksLoopSound.playSparkSound(user, new Vector3d(user.getX(), user.getY(0.25), user.getZ()), 1.0F, true);
+            }
+            
+            user.fallDistance = 0;
         }
         
         @Override
