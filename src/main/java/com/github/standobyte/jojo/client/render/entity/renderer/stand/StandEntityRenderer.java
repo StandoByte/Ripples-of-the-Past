@@ -133,7 +133,7 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
     
     protected ViewObstructionPrevention obstructsView(T entity, float partialTick) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.options.getCameraType().isFirstPerson()) {
+        if (mc.options.getCameraType().isFirstPerson() && isBodyVisible(entity)) {
             Entity user = entity.getUser();
             if (mc.cameraEntity != null && mc.cameraEntity.is(user)) {
                 if (ClientEventHandler.getInstance().isZooming) {
@@ -172,7 +172,7 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
         }
     }
 
-    private static final float PLAYER_RENDER_SCALE = 0.9375F;
+    public static final float PLAYER_RENDER_SCALE = 0.9375F;
     @Override
     protected void scale(T entity, MatrixStack matrixStack, float partialTick) {
         matrixStack.scale(

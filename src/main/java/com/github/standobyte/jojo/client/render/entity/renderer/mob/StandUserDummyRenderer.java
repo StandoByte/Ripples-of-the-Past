@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.client.render.entity.renderer.mob;
 
+import java.text.DecimalFormat;
+
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.mob.StandUserDummyEntity;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -23,10 +25,12 @@ public class StandUserDummyRenderer extends BipedRenderer<StandUserDummyEntity, 
     public void render(StandUserDummyEntity pEntity, float pEntityYaw, float pPartialTicks, 
             MatrixStack pMatrixStack, IRenderTypeBuffer pBuffer, int pPackedLight) {
         super.render(pEntity, pEntityYaw, pPartialTicks, pMatrixStack, pBuffer, pPackedLight);
+        pMatrixStack.pushPose();
+        
         if (Minecraft.renderNames() && pEntity == this.entityRenderDispatcher.crosshairPickEntity) {
             IStandPower stand = pEntity.getStandPower();
             if (stand.hasPower()) {
-                pMatrixStack.pushPose();
+                
                 pMatrixStack.translate(0, 0.25, 0);
                 float staminaRatio = stand.getStamina() / stand.getMaxStamina();
                 float staminaCondition = 0.25F + Math.min(staminaRatio * 1.5F, 0.75F);
@@ -47,8 +51,17 @@ public class StandUserDummyRenderer extends BipedRenderer<StandUserDummyEntity, 
                 this.renderNameTag(pEntity, 
                         stand.getName(), 
                         pMatrixStack, pBuffer, pPackedLight);
-                pMatrixStack.popPose();
             }
         }
+        
+        DecimalFormat format = new DecimalFormat("#.##");
+        pMatrixStack.translate(0, 0.25, 0);
+        String hp = format.format(pEntity.getHealth());
+        String maxHp = format.format(pEntity.getMaxHealth());
+        this.renderNameTag(pEntity, 
+                new StringTextComponent("❤ " + hp + "/" + maxHp), 
+                pMatrixStack, pBuffer, pPackedLight);
+        
+        pMatrixStack.popPose();
     }
 }

@@ -66,7 +66,7 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     
     float getLearningProgressRatio(Action<P> action);
 
-    void setHeldAction(Action<P> action);
+    void setHeldAction(Action<P> action, ActionTarget target);
     @Nullable default Action<P> getHeldAction() {
         return getHeldAction(false);
     }

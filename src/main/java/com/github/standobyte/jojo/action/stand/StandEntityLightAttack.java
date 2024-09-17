@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandPose;
+import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -136,13 +137,27 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
     }
     
     @Override
-    public boolean noFinisherDecay() {
+    public boolean noFinisherBarDecay() {
         return true;
     }
     
     @Override
     protected boolean standKeepsTarget(ActionTarget target) {
         return true;
+    }
+
+    @Override
+    public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
+        double minOffset = Math.min(0.5, standEntity.getMaxEffectiveRange());
+        double maxOffset = Math.min(2, standEntity.getMaxRange());
+
+        return front3dOffset(standPower, standEntity, task.getTarget(), minOffset, maxOffset)
+                .orElse(super.getOffsetFromUser(standPower, standEntity, task));
+    }
+    
+    @Override
+    public boolean lockOnTargetPosition(IStandPower standPower, StandEntity standEntity, StandEntityTask curTask) {
+        return false;
     }
     
     
@@ -172,6 +187,32 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
         @Override
         protected Builder getThis() {
             return this;
+        }
+    }
+    
+    public static class LightPunchInstance extends StandEntityPunch {
+
+        public LightPunchInstance(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
+            super(stand, target, dmgSource);
+        }
+        
+        @Override
+        protected boolean onAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, float damage) {
+            if (!target.level.isClientSide() && target instanceof StandEntity) {
+                StandEntity targetStand = (StandEntity) target;
+                StandEntityAction opponentAttack = targetStand.getCurrentTaskAction();
+                if (opponentAttack instanceof StandEntityLightAttack
+                        && targetStand.getCurrentTaskPhase().get() == StandEntityAction.Phase.WINDUP
+                        && targetStand.canBlockOrParryFromAngle(dmgSource.getSourcePosition())) {
+                    // TODO slight knockback
+                    // TODO play both punch sounds
+                    // TODO spark particles
+                    targetStand.stopTask(true);
+                    return true;
+                }
+            }
+            
+            return super.onAttack(stand, target, dmgSource, damage);
         }
     }
 }

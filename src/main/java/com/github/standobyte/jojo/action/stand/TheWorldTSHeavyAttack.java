@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack.HeavyPunchBlockInstance;
 import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack.HeavyPunchInstance;
 import com.github.standobyte.jojo.action.stand.punch.StandBlockPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
@@ -191,7 +192,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
     
     @Override
     public StandBlockPunch punchBlock(StandEntity stand, BlockPos pos, BlockState state) {
-        return IHasStandPunch.super.punchBlock(stand, pos, state)
+        return new HeavyPunchBlockInstance(stand, pos, state)
                 .impactSound(ModSounds.THE_WORLD_PUNCH_HEAVY);
     }
     
@@ -216,7 +217,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
     }
     
     @Override
-    public boolean noFinisherDecay() {
+    public boolean noFinisherBarDecay() {
         return true;
     }
     

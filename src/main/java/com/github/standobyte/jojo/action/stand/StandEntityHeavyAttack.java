@@ -1,6 +1,11 @@
 package com.github.standobyte.jojo.action.stand;
 
+import java.util.ArrayList;
 import java.util.EnumSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Random;
+import java.util.Set;
 import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
@@ -13,27 +18,43 @@ import com.github.standobyte.jojo.action.stand.punch.StandBlockPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandMissedPunch;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.entity.damaging.projectile.BlockShardEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandPose;
+import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
+import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.general.ObjectWrapper;
+import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mc.damage.KnockbackCollisionImpact;
 import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
+import com.github.standobyte.jojo.util.mc.damage.explosion.CustomExplosion;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.Explosion;
+import net.minecraft.world.ExplosionContext;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.event.ForgeEventFactory;
 
 public class StandEntityHeavyAttack extends StandEntityAction implements IHasStandPunch {
     private final Supplier<? extends StandEntityHeavyAttack> finisherVariation;
-    private final Supplier<? extends StandEntityActionModifier> recoveryAction;
     boolean isFinisher = false;
+    
+    private final Supplier<? extends StandEntityActionModifier> recoveryAction;
+    
     private final Supplier<SoundEvent> punchSound;
     private final Supplier<SoundEvent> swingSound;
 
@@ -139,7 +160,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     
     @Override
     public StandBlockPunch punchBlock(StandEntity stand, BlockPos pos, BlockState state) {
-        return IHasStandPunch.super.punchBlock(stand, pos, state)
+        return new HeavyPunchBlockInstance(stand, pos, state)
                 .impactSound(punchSound);
     }
     
@@ -173,13 +194,29 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         return StandStatFormulas.getHeavyAttackRecovery(standEntity.getAttackSpeed(), standEntity.getLastHeavyFinisherValue());
     }
     
+    
     @Override
     protected boolean standKeepsTarget(ActionTarget target) {
         return target.getType() == TargetType.ENTITY;
     }
     
     @Override
-    public boolean noFinisherDecay() {
+    public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
+        double minOffset = Math.min(0.5, standEntity.getMaxEffectiveRange());
+        double maxOffset = Math.min(2, standEntity.getMaxRange());
+
+        return front3dOffset(standPower, standEntity, task.getTarget(), minOffset, maxOffset)
+                .orElse(super.getOffsetFromUser(standPower, standEntity, task));
+    }
+    
+    @Override
+    public boolean lockOnTargetPosition(IStandPower standPower, StandEntity standEntity, StandEntityTask curTask) {
+        return false;
+    }
+    
+    
+    @Override
+    public boolean noFinisherBarDecay() {
         return true;
     }
     
@@ -212,13 +249,13 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         return isFinisher;
     }
     
-    public boolean canBeParried() {
-        return !isFinisher;
-    }
-    
     @Override
     public boolean isLegalInHud(IStandPower power) {
         return !isFinisher;
+    }
+    
+    public boolean canBeParried() {
+        return true;
     }
     
 //    @Override
@@ -292,16 +329,180 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         public HeavyPunchInstance(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
             super(stand, target, dmgSource);
         }
-
+        
+        @Override
+        protected boolean onAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, float damage) {
+            if (target instanceof StandEntity) {
+                StandEntity targetStand = (StandEntity) target;
+                StandEntityAction opponentAttack = targetStand.getCurrentTaskAction();
+                if (opponentAttack instanceof StandEntityHeavyAttack
+                        && ((StandEntityHeavyAttack) opponentAttack).canBeParried()
+                        && targetStand.getCurrentTaskPhase().get() == StandEntityAction.Phase.WINDUP
+                        && targetStand.canBlockOrParryFromAngle(dmgSource.getSourcePosition())) {
+                    // TODO play the punch sound
+                    // TODO MORE spark particles
+                    // TODO "loser gets knocked back" what did i mean?
+                    // TODO a few ticks of freeze?
+                    targetStand.stopTask(true);
+                    // i should really do camera shake
+                }
+            }
+            
+            return super.onAttack(stand, target, dmgSource, damage);
+        }
+        
         @Override
         protected void afterAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, StandEntityTask task, boolean hurt, boolean killed) {
-            if (!stand.level.isClientSide() && target instanceof StandEntity && hurt && !killed) {
-                StandEntity standTarget = (StandEntity) target;
-                if (standTarget.getCurrentTask().isPresent() && standTarget.getCurrentTaskAction().stopOnHeavyAttack(this)) {
-                    standTarget.stopTaskWithRecovery();
+            if (!stand.level.isClientSide() && hurt) {
+                if (target instanceof StandEntity && !killed) {
+                    StandEntity standTarget = (StandEntity) target;
+                    if (standTarget.getCurrentTask().isPresent() && standTarget.getCurrentTaskAction().stopOnHeavyAttack(this)) {
+                        standTarget.stopTaskWithRecovery();
+                    }
                 }
+                
+                KnockbackCollisionImpact.getHandler(target).ifPresent(
+                        cap -> cap.onPunchSetKnockbackImpact(target.getDeltaMovement(), stand));
             }
             super.afterAttack(stand, target, dmgSource, task, hurt, killed);
         }
+    }
+    
+    // FIXME make Silver Chariot's attacks not use this
+    public static class HeavyPunchBlockInstance extends StandBlockPunch {
+
+        public HeavyPunchBlockInstance(StandEntity stand, BlockPos targetPos, BlockState blockState) {
+            super(stand, targetPos, blockState);
+        }
+
+        @Override
+        public boolean doHit(StandEntityTask task) {
+            if (stand.level.isClientSide()) return false;
+            super.doHit(task);
+            
+            HeavyPunchExplosion explosion = new HeavyPunchExplosion(stand.level, stand, 
+                    null, null, 
+                    blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5, 
+                    (float) stand.getAttackDamage() / 4, false, 
+                    JojoModUtil.breakingBlocksEnabled(stand.level) ? Explosion.Mode.BREAK : Explosion.Mode.NONE,
+                    stand.getAttackDamage(), stand.getPrecision());
+            if (!ForgeEventFactory.onExplosionStart(stand.level, explosion)) {
+                explosion.explode();
+                explosion.finalizeExplosion(true);
+            }
+            
+            return targetHit;
+        }
+        
+        @Override
+        public boolean playImpactSound() {
+            return true;
+        }
+        
+        
+        
+        public static class HeavyPunchExplosion extends CustomExplosion {
+            private final LivingEntity attacker;
+            private double strength;
+            private double precision;
+
+            // FIXME limit the radius
+            // FIXME set the proper damage source
+            // FIXME wth is explosion context
+            public HeavyPunchExplosion(World pLevel, LivingEntity pSource, 
+                    @Nullable DamageSource pDamageSource, @Nullable ExplosionContext pDamageCalculator, 
+                    double pToBlowX, double pToBlowY, double pToBlowZ, 
+                    float pRadius, boolean pFire, Explosion.Mode pBlockInteraction, 
+                    double strength, double precision) {
+                super(pLevel, pSource, 
+                        pDamageSource, pDamageCalculator, 
+                        pToBlowX, pToBlowY, pToBlowZ, 
+                        pRadius, pFire, pBlockInteraction);
+                this.attacker = pSource;
+                this.strength = strength;
+                this.precision = precision;
+            }
+            
+            // FIXME reduce the amount of blocks destroyed on y axis
+            @Override
+            protected void explodeBlocks() {
+                if (JojoModUtil.breakingBlocksEnabled(level) && level instanceof ServerWorld) {
+                    ServerWorld world = (ServerWorld) level;
+                    List<BlockPos> toBlow = getToBlow();
+                    
+                    List<Entity> blockShardEntities = new ArrayList<>();
+                    
+                    Random random = attacker.getRandom();
+                    LivingEntity standUser = StandUtil.getStandUser(attacker);
+                    
+                    
+                    Vector3d entityLook = attacker.getLookAngle();
+                    float shardsVelocity = 0.5f + (float) strength * 0.05f;
+                    float shardsInaccuracy = Math.max(100 - (float) precision * 4.5f, 0);
+                    
+                    for (BlockPos blockPos : toBlow) {
+                        BlockState blockState = level.getBlockState(blockPos);
+                        if (CrazyDiamondBlockBullet.hardMaterial(blockState)) {
+                            for (int i = 0; i < 3; i++) {
+                                BlockShardEntity blockShard = new BlockShardEntity(attacker, level, blockState);
+                                blockShard.setPos(
+                                        blockPos.getX() + random.nextDouble(),
+                                        blockPos.getY() + random.nextDouble(),
+                                        blockPos.getZ() + random.nextDouble());
+                                
+                                blockShard.shoot(entityLook.x, entityLook.y, entityLook.z, shardsVelocity, shardsInaccuracy);
+                                blockShardEntities.add(blockShard);
+                            }
+                        }
+                    }
+                    
+                    boolean dropBlocks = !(standUser instanceof PlayerEntity && ((PlayerEntity) standUser).abilities.instabuild);
+                    MCUtil.destroyBlocksInBulk(toBlow, world, attacker, dropBlocks);
+                    
+                    if (!blockShardEntities.isEmpty()) {
+                        // TODO stone crumble sound
+                        for (Entity blockShard : blockShardEntities) {
+                            level.addFreshEntity(blockShard);
+                        }
+                    }
+                }
+            }
+            
+            @Override
+            protected void filterEntities(List<Entity> entities) {
+                Iterator<Entity> iter = entities.iterator();
+                while (iter.hasNext()) {
+                    Entity entity = iter.next();
+                    if (!(entity instanceof LivingEntity && attacker.canAttack((LivingEntity) entity))) {
+                        iter.remove();
+                    }
+                }
+            }
+            
+            // FIXME the mobs' AI targets the stand
+            @Override
+            protected void hurtEntity(Entity entity, float damage, double knockback, Vector3d vecToEntityNorm) {
+                super.hurtEntity(entity, damage, knockback, vecToEntityNorm);
+            }
+            
+            // FIXME only 1 damage?
+            @Override
+            protected float calcDamage(double impact, double diameter) {
+                return (float) ((impact * impact + impact) / 2.0D * 7.0D * diameter + 1.0D);
+            }
+            
+            // FIXME explosion is barely exploding if punching smth like a stone
+            @Override
+            protected Set<BlockPos> calculateBlocksToBlow() {
+                return super.calculateBlocksToBlow();
+            }
+            
+            @Override
+            protected void playSound() {}
+            
+            @Override
+            protected void spawnParticles() {}
+        }
+        
     }
 }

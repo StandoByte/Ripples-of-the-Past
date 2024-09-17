@@ -50,13 +50,17 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.fml.common.thread.SidedThreadGroups;
 
 public class StandArrowItem extends ArrowItem {
     private final int enchantability;
+    private final boolean higherDurability;
 
-    public StandArrowItem(Properties properties, int enchantability) {
+    public StandArrowItem(Properties properties, int enchantability, boolean higherDurability) {
         super(properties);
         this.enchantability = enchantability;
+        this.higherDurability = higherDurability;
         
         DispenserBlock.registerBehavior(this, new ProjectileDispenseBehavior() {
             @Override
@@ -303,5 +307,13 @@ public class StandArrowItem extends ArrowItem {
     @Override
     public boolean isValidRepairItem(ItemStack item, ItemStack repairItem) {
         return repairItem.getItem() == ModItems.METEORIC_INGOT.get();
+    }
+    
+    @Override
+    public int getMaxDamage(ItemStack stack) {
+        boolean isClientSide = Thread.currentThread().getThreadGroup() == SidedThreadGroups.CLIENT;
+        JojoModConfig.Common config = JojoModConfig.getCommonConfigInstance(isClientSide);
+        ForgeConfigSpec.IntValue configOption = higherDurability ? config.arrowDurabilityBeetle : config.arrowDurability;
+        return configOption.get();
     }
 }

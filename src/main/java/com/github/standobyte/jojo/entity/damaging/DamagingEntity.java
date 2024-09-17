@@ -21,7 +21,6 @@ import com.github.standobyte.jojo.util.mc.damage.ModdedDamageSourceWrapper;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.block.TNTBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -264,8 +263,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
         Direction face = blockRayTraceResult.getDirection();
         boolean brokenBlock = canBreakBlock(blockPos, blockState);
         if (isFiery() && blockState.isFlammable(level, blockPos, face)) {
-            blockState.catchFire(level, blockPos, face, getOwner());
-            if (blockState.getBlock() instanceof TNTBlock) level.removeBlock(blockPos, false);
+            MCUtil.blockCatchFire(level, blockPos, blockState, face, getOwner());
             return false;
         }
         if (brokenBlock) {

@@ -31,10 +31,13 @@ import com.github.standobyte.jojo.client.controls.HudControlSettings;
 import com.github.standobyte.jojo.client.controls.PowerTypeControlSchemes;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.JojoStuffScreen;
+import com.github.standobyte.jojo.client.ui.screen.JojoStuffScreen.StandTab;
+import com.github.standobyte.jojo.client.ui.screen.JojoStuffScreen.TabSupplier;
 import com.github.standobyte.jojo.client.ui.screen.widgets.CustomButton;
 import com.github.standobyte.jojo.client.ui.screen.widgets.ToggleSwitch;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
+import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.Vector2i;
@@ -54,6 +57,7 @@ import net.minecraft.client.gui.widget.list.AbstractOptionList;
 import net.minecraft.client.gui.widget.list.KeyBindingList;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
@@ -96,6 +100,7 @@ public class HudLayoutEditingScreen extends Screen {
         this();
         selectedTab = selectTab;
     }
+    
     
     @Override
     protected void init() {
@@ -234,7 +239,58 @@ public class HudLayoutEditingScreen extends Screen {
         RenderSystem.disableBlend();
     }
     
+    
+    
+    public static class RightSideTabs {
+        private static final Map<ResourceLocation, RightSideTabs> TABS = new HashMap<>();
+        
+        public static final RightSideTabs STAND = new RightSideTabs(StandTab.values(), StandTab.CONTROLS, PowerClassification.STAND);
+        
+        private final TabSupplier[] tabsArray;
+        private final TabSupplier hudLayoutTab;
+        private final PowerClassification power;
+        
+        protected RightSideTabs(TabSupplier[] tabsArray, TabSupplier hudLayoutTab, PowerClassification power) {
+            this.tabsArray = tabsArray;
+            this.hudLayoutTab = hudLayoutTab;
+            this.power = power;
+        }
 
+        public static <T extends TabSupplier> RightSideTabs register(ResourceLocation powerType, T[] tabsArray, T hudLayoutTab, PowerClassification power) {
+            RightSideTabs tabs = new RightSideTabs(tabsArray, hudLayoutTab, power);
+            TABS.put(powerType, tabs);
+            return tabs;
+        }
+        
+        public static RightSideTabs getTabsType(IPower<?, ?> power) {
+            if (power.hasPower()) {
+                IPowerType<?, ?> powerType = power.getType();
+                RightSideTabs registered = TABS.get(powerType.getRegistryName());
+                if (registered != null) {
+                    return registered;
+                }
+                if (power.getPowerClassification() == PowerClassification.STAND) {
+                    return STAND;
+                }
+            }
+            
+            return null;
+        }
+        
+        
+        public TabSupplier getHUDLayoutTab() {
+            return hudLayoutTab;
+        }
+        
+        public TabSupplier[] getTabs() {
+            return tabsArray;
+        }
+        
+        public PowerClassification getPower() {
+            return power;
+        }
+    }
+    
     private void renderTabButtons(MatrixStack matrixStack, int mouseX, int mouseY) {
         for (int i = 0; i < powersPresent.size(); i++) {
             boolean isTabSelected = isTabSelected(powersPresent.get(i));
@@ -261,24 +317,20 @@ public class HudLayoutEditingScreen extends Screen {
         if (selectedTab != null) {
             int tabsX = JojoStuffScreen.uniformX(minecraft);
             int tabsY = JojoStuffScreen.uniformY(minecraft);
-            JojoStuffScreen.TabsEnumType tabsType = JojoStuffScreen.TabsEnumType.getTabsEnum(selectedPower);
+            RightSideTabs tabsType = RightSideTabs.getTabsType(selectedPower);
             if (tabsType != null) {
-                switch (tabsType) {
+                switch (tabsType.getPower()) {
                 case STAND:
                     JojoStuffScreen.renderStandTabs(matrixStack, 
                             tabsX, tabsY, true, 
-                            mouseX, mouseY, this, JojoStuffScreen.StandTab.CONTROLS, 
-                            ((IStandPower) selectedPower));
+                            mouseX, mouseY, this, 
+                            JojoStuffScreen.StandTab.CONTROLS, ((IStandPower) selectedPower));
                     break;
-                case HAMON:
-                    JojoStuffScreen.renderHamonTabs(matrixStack, 
+                case NON_STAND:
+                    JojoStuffScreen.renderVerticalTabs(matrixStack, HandSide.RIGHT, 
                             tabsX, tabsY, true, 
-                            mouseX, mouseY, this, JojoStuffScreen.HamonTab.CONTROLS);
-                    break;
-                case VAMPIRISM:
-                    JojoStuffScreen.renderVampirismTabs(matrixStack, 
-                            tabsX, tabsY, true, 
-                            mouseX, mouseY, this, JojoStuffScreen.VampirismTab.CONTROLS);
+                            mouseX, mouseY, this, 
+                            tabsType.getHUDLayoutTab(), tabsType.getTabs());
                     break;
                 }
             }
@@ -294,6 +346,8 @@ public class HudLayoutEditingScreen extends Screen {
     private boolean isTabSelected(IPower<?, ?> power) {
         return power == selectedPower;
     }
+    
+    
 
     private static final int HOTBARS_X = 20;
     private static final int ATTACKS_HOTBAR_Y = 10;
@@ -620,9 +674,11 @@ public class HudLayoutEditingScreen extends Screen {
             return true;
         }
         
-        JojoStuffScreen.TabsEnumType tabsType = JojoStuffScreen.TabsEnumType.getTabsEnum(selectedPower);
+        RightSideTabs tabsType = RightSideTabs.getTabsType(selectedPower);
+        JojoStuffScreen.hudEditingCurPower = selectedTab;
         if (tabsType != null && JojoStuffScreen.mouseClick(mouseX, mouseY, 
-                JojoStuffScreen.uniformX(minecraft), JojoStuffScreen.uniformY(minecraft), tabsType)) {
+                JojoStuffScreen.uniformX(minecraft), JojoStuffScreen.uniformY(minecraft), HandSide.RIGHT, 
+                tabsType.getTabs())) {
             return true;
         }
         

@@ -28,7 +28,9 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrBarrageHitSoundPacket;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.type.EntityStandType;
+import com.github.standobyte.jojo.util.general.OptionalUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -36,6 +38,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
@@ -411,13 +414,26 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         }
     }
     
-    protected Optional<StandRelativeOffset> offsetToTarget(IStandPower standPower, StandEntity standEntity, StandEntityTask task, 
+    protected static Optional<StandRelativeOffset> front3dOffset(IStandPower standPower, StandEntity standEntity, ActionTarget target, 
+            double minOffset, double maxOffset) {
+        if (standEntity.isArmsOnlyMode()) {
+            return Optional.empty();
+        }
+        
+        return OptionalUtil.or(
+                offsetToTarget(standPower, standEntity, target, 
+                        minOffset, maxOffset, 
+                        () -> ActionTarget.fromRayTraceResult(JojoModUtil.rayTraceMultipleEntities(
+                                standPower.getUser(), maxOffset, standEntity::canHarm, RayTraceContext.BlockMode.COLLIDER, 0.25, 0)[0])), 
+                () -> StandRelativeOffset.withXRot(0, maxOffset));
+    }
+    
+    protected static Optional<StandRelativeOffset> offsetToTarget(IStandPower standPower, StandEntity standEntity, ActionTarget target, 
             double minOffset, double maxOffset, @Nullable Supplier<ActionTarget> noTaskTarget) {
         if (standEntity.isArmsOnlyMode()) {
             return Optional.empty();
         }
         LivingEntity user = standEntity.getUser();
-        ActionTarget target = task.getTarget();
         
         if (target.getType() == TargetType.EMPTY && noTaskTarget != null) {
             target = noTaskTarget.get();
@@ -436,8 +452,16 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         }
     }
     
-    public boolean transfersPreviousOffset(IStandPower standPower, StandEntity standEntity, StandEntityTask previousTask) {
+    /**
+     * If this returns true, the Stand entity will prioritize staying at its current task target, even if the user is looking in a different direction.
+     */
+    public boolean lockOnTargetPosition(IStandPower standPower, StandEntity standEntity, StandEntityTask curTask) {
         return true;
+    }
+    
+    @Deprecated
+    public boolean transfersPreviousOffset(IStandPower standPower, StandEntity standEntity, StandEntityTask previousTask) {
+        return false;
     }
     
     protected final void invokeForStand(IStandPower power, Consumer<StandEntity> consumer) {
@@ -482,12 +506,16 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         return false;
     }
     
+    public float getDamageBlockMultiplier(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
+        return 0.5f;
+    }
+    
     @Override
     public boolean heldAllowsOtherAction(IStandPower standPower, Action<IStandPower> action) {
         return getHoldDurationToFire(standPower) == 0;
     }
     
-    public boolean noFinisherDecay() {
+    public boolean noFinisherBarDecay() {
         return false;
     }
     

@@ -183,9 +183,9 @@ public class CommonReflection {
     
     
     
-    private static final Field EFFECT_INSTANCE_AMPLIFIER = ObfuscationReflectionHelper.findField(EffectInstance.class, "field_76461_c");
-    public static void setEffectAmplifier(EffectInstance effect, int amplifier) {
-        ReflectionUtil.setIntFieldValue(EFFECT_INSTANCE_AMPLIFIER, effect, amplifier);
+    private static final Method LIVING_ENTITY_ON_EFFECT_UPDATED = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "func_70695_b", EffectInstance.class, boolean.class);
+    public static void onEffectUpdated(LivingEntity entity, EffectInstance effect, boolean resetAttributes) {
+        ReflectionUtil.invokeMethod(LIVING_ENTITY_ON_EFFECT_UPDATED, entity, effect, resetAttributes);
     }
     
     

@@ -211,8 +211,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                 if (!user.level.isClientSide()) {
                     action.playVoiceLine(user, getThis(), target, wasActive, sneak);
                 }
-                setHeldAction(action);
-                setMouseTarget(target);
+                setHeldAction(action, target);
                 return true;
             }
             else {
@@ -341,10 +340,11 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
 
     @Override
-    public void setHeldAction(Action<P> action) {
-        heldActionData = new HeldActionData<P>(action);
-        if (!user.level.isClientSide() && action.isHeldSentToTracking()) {
-            PacketManager.sendToClientsTracking(new TrHeldActionPacket(user.getId(), getPowerClassification(), action, false), user);
+    public void setHeldAction(Action<P> action, ActionTarget target) {
+        this.heldActionData = new HeldActionData<P>(action);
+        setMouseTarget(target);
+        if (!user.level.isClientSide()) {
+            PacketManager.sendToClientsTracking(new TrHeldActionPacket(user.getId(), getPowerClassification(), action, false, target), user);
         }
     }
 
@@ -398,13 +398,8 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                 heldAction.onHoldTickClientEffect(user, getThis(), heldActionData.getTicks(), requirementsFulfilled, true);
             }
             else {
-                TrHeldActionPacket packet = new TrHeldActionPacket(user.getId(), getPowerClassification(), heldAction, requirementsFulfilled);
-                if (heldAction.isHeldSentToTracking()) {
-                    PacketManager.sendToClientsTrackingAndSelf(packet, user);
-                }
-                else {
-                    serverPlayerUser.ifPresent(player -> PacketManager.sendToClient(packet, player));
-                }
+                TrHeldActionPacket packet = new TrHeldActionPacket(user.getId(), getPowerClassification(), heldAction, requirementsFulfilled, getMouseTarget());
+                PacketManager.sendToClientsTrackingAndSelf(packet, user);
             }
         }
     }
@@ -447,22 +442,15 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             heldActionData = null;
             if (!user.level.isClientSide()) {
                 TrHeldActionPacket packet = TrHeldActionPacket.actionStopped(user.getId(), getPowerClassification());
-                if (heldAction.isHeldSentToTracking()) {
-                    PacketManager.sendToClientsTrackingAndSelf(packet, user);
-                }
-                else {
-                    serverPlayerUser.ifPresent(player -> PacketManager.sendToClient(packet, player));
-                }
+                PacketManager.sendToClientsTrackingAndSelf(packet, user);
             }
         }
     }
     
-
+    
     @Override
     public void setMouseTarget(ActionTarget target) {
-        if (target != null) {
-            this.mouseTarget = target;
-        }
+        this.mouseTarget = target != null ? target : ActionTarget.EMPTY;
     }
     
     @Override
@@ -607,12 +595,12 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     public void syncWithTrackingOrUser(ServerPlayerEntity player) {
         if (hasPower() && user != null) {
             if (getHeldAction() != null) {
-                PacketManager.sendToClient(new TrHeldActionPacket(user.getId(), getPowerClassification(), getHeldAction(), false), player);
+                PacketManager.sendToClient(new TrHeldActionPacket(user.getId(), getPowerClassification(), getHeldAction(), false, getMouseTarget()), player);
             }
         }
     }
     
-    private P getThis() {
+    private final P getThis() {
         return (P) this;
     }
 }

@@ -51,10 +51,10 @@ import net.minecraftforge.event.ForgeEventFactory;
 public abstract class CustomExplosion extends Explosion {
     protected final World level;
     protected final float radius;
-    private final Explosion.Mode blockInteraction;
+    protected final Explosion.Mode blockInteraction;
     protected final boolean fire;
     protected final Random random = new Random();
-    private final ExplosionContext damageCalculator;
+    protected final ExplosionContext damageCalculator;
     
     protected CustomExplosion(World pLevel, @Nullable Entity pSource, 
             @Nullable DamageSource pDamageSource, @Nullable ExplosionContext pDamageCalculator, 
@@ -223,20 +223,20 @@ public abstract class CustomExplosion extends Explosion {
             if (!blockState.isAir(level, blockPos)) {
                 level.getProfiler().push("explosion_blocks");
                 if (blockState.canDropFromExplosion(level, blockPos, this) && level instanceof ServerWorld) {
-                    TileEntity tileentity = blockState.hasTileEntity() ? level.getBlockEntity(blockPos) : null;
-                    LootContext.Builder lootcontext$builder = (
+                    TileEntity tileEntity = blockState.hasTileEntity() ? level.getBlockEntity(blockPos) : null;
+                    LootContext.Builder lootCtxBuilder = (
                             new LootContext.Builder((ServerWorld)level))
                             .withRandom(level.random)
                             .withParameter(LootParameters.ORIGIN, Vector3d.atCenterOf(blockPos))
                             .withParameter(LootParameters.TOOL, ItemStack.EMPTY)
-                            .withOptionalParameter(LootParameters.BLOCK_ENTITY, tileentity)
+                            .withOptionalParameter(LootParameters.BLOCK_ENTITY, tileEntity)
                             .withOptionalParameter(LootParameters.THIS_ENTITY, getExploder());
                     if (blockInteraction == Explosion.Mode.DESTROY) {
-                        lootcontext$builder.withParameter(LootParameters.EXPLOSION_RADIUS, radius);
+                        lootCtxBuilder.withParameter(LootParameters.EXPLOSION_RADIUS, radius);
                     }
 
-                    blockState.getDrops(lootcontext$builder).forEach(itemStack -> {
-                        addBlockDrops(dropPositions, itemStack, blockPos.immutable());
+                    blockState.getDrops(lootCtxBuilder).forEach(itemStack -> {
+                        addBlockDrops(dropPositions, itemStack, blockPos);
                     });
                 }
                 
@@ -276,7 +276,7 @@ public abstract class CustomExplosion extends Explosion {
     }
     
     
-    private static void addBlockDrops(ObjectArrayList<Pair<ItemStack, BlockPos>> pDropPositionArray, ItemStack pStack, BlockPos pPos) {
+    public static void addBlockDrops(ObjectArrayList<Pair<ItemStack, BlockPos>> pDropPositionArray, ItemStack pStack, BlockPos pPos) {
         for (int i = 0; i < pDropPositionArray.size(); ++i) {
             Pair<ItemStack, BlockPos> pair = pDropPositionArray.get(i);
             ItemStack itemstack = pair.getFirst();
@@ -289,7 +289,7 @@ public abstract class CustomExplosion extends Explosion {
             }
         }
         
-        pDropPositionArray.add(Pair.of(pStack, pPos));
+        pDropPositionArray.add(Pair.of(pStack, pPos.immutable()));
     }
     
     
@@ -387,7 +387,7 @@ public abstract class CustomExplosion extends Explosion {
         
         
         @FunctionalInterface
-        private static interface CustomExplosionSupplier {
+        protected static interface CustomExplosionSupplier {
             CustomExplosion createExplosion(World pLevel, Entity pSource, DamageSource pDamageSource,
                     ExplosionContext pDamageCalculator, double pToBlowX, double pToBlowY, double pToBlowZ,
                     float pRadius, boolean pFire, Mode pBlockInteraction);

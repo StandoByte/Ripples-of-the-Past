@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.OptionalInt;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
@@ -151,6 +152,7 @@ public class HamonData extends TypeSpecificData {
     private boolean hamonProtection = false;
     private boolean isRebuffOverdriveOn = false;
     private int rebuffTick = 0;
+    public OptionalInt regenImpliedDuration = OptionalInt.empty();
     
     private boolean waterWalkingPrevTick = false;
     private boolean waterWalkingThisTick = false;
@@ -501,11 +503,6 @@ public class HamonData extends TypeSpecificData {
     public float getBloodstreamEfficiency() {
         float efficiency = 1;
         LivingEntity user = power.getUser();
-        
-//        float healthRatio = user.getHealth() / user.getMaxHealth();
-//        if (healthRatio < 0.25F) {
-//            efficiency *= healthRatio * 3F + 0.25F;
-//        }
         
         float bleeding = 0;
         EffectInstance bleedingEffect = user.getEffect(ModStatusEffects.BLEEDING.get());
@@ -1513,6 +1510,7 @@ public class HamonData extends TypeSpecificData {
         hamonSkills.syncWithTrackingOrUser(user, entity, this);
         PacketManager.sendToClient(new TrHamonAuraColorPacket(user.getId(), auraColor), entity);
         PacketManager.sendToClient(new TrHamonFlagsPacket(user.getId(), this), entity);
+        PacketManager.sendToClient(new TrHamonMeditationPacket(user.getId(), isMeditating()), entity);
     }
     
     public enum Exercise {

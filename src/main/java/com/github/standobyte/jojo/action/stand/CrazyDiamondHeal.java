@@ -1,8 +1,5 @@
 package com.github.standobyte.jojo.action.stand;
 
-import java.util.function.BiConsumer;
-import java.util.function.Predicate;
-
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
@@ -17,6 +14,7 @@ import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStatusEffects;
+import com.github.standobyte.jojo.potion.BleedingEffect;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -67,30 +65,34 @@ public class CrazyDiamondHeal extends StandEntityAction {
         
         if (targetEntity instanceof LivingEntity) {
             LivingEntity targetLiving = (LivingEntity) targetEntity;
-            healedThisTick = healLivingEntity(world, targetLiving, standEntity);
-        }
-        else if (targetEntity instanceof IHasHealth) {
-            healedThisTick = heal(world, targetEntity, (IHasHealth) targetEntity, 
-                    (e, clientSide) -> {
-                        if (!clientSide) {
-                            e.setHealth(e.getHealth() + e.getMaxHealth() / 40 * (float) healingSpeed(standEntity));
-                        }
-                    },
-                    e -> e.getHealth() < e.getMaxHealth());
-        }
-        else if (targetEntity instanceof BoatEntity) {
-            healedThisTick = heal(world, targetEntity, (BoatEntity) targetEntity, 
-                    (e, clientSide) -> {
-                        if (!clientSide) {
-                            e.setDamage(Math.max(e.getDamage() - (float) healingSpeed(standEntity), 0));
-                        }
-                    },
-                    e -> e.getDamage() > 0);
+            healedThisTick = healLivingEntity(world, targetLiving, standEntity, task);
         }
         
-
+        else if (targetEntity instanceof IHasHealth) {
+            IHasHealth toHeal = (IHasHealth) targetEntity;
+            if (toHeal.getHealth() < toHeal.getMaxHealth()) {
+                if (!world.isClientSide()) {
+                    toHeal.setHealth(toHeal.getHealth() + toHeal.getMaxHealth() / 40 * (float) healingSpeed(standEntity));
+                }
+                healedThisTick = true;
+                addParticlesAround(targetEntity);
+            }
+        }
+        
+        else if (targetEntity instanceof BoatEntity) {
+            BoatEntity toHeal = (BoatEntity) targetEntity;
+            if (toHeal.getDamage() > 0) {
+                if (!world.isClientSide()) {
+                    toHeal.setDamage(Math.max(toHeal.getDamage() - (float) healingSpeed(standEntity), 0));
+                }
+                healedThisTick = true;
+                addParticlesAround(targetEntity);
+            }
+        }
+        
+        
         if (!world.isClientSide()) {
-            barrageVisualsTick(standEntity, healedThisTick, targetEntity != null ? targetEntity.getBoundingBox().getCenter() : null);
+            barrageVisualsTick(standEntity, targetEntity != null, targetEntity != null ? targetEntity.getBoundingBox().getCenter() : null);
         }
     }
 
@@ -98,45 +100,70 @@ public class CrazyDiamondHeal extends StandEntityAction {
         return standEntity.getAttackSpeed() * 0.05F + 0.55;
     }
 
-    public static boolean healLivingEntity(World world, LivingEntity entity, StandEntity standEntity) {
+    public static boolean healLivingEntity(World world, LivingEntity entity, StandEntity standEntity, StandEntityTask task) {
+        LivingEntity toHeal = StandUtil.getStandUser(entity);
         // FIXME disable it if the target is a dead body already
         if (entity.deathTime > 0) {
-            boolean resolveEffect = standEntity.getUser() != null && standEntity.getUser().hasEffect(ModStatusEffects.RESOLVE.get());
-            if (!resolveEffect && entity.deathTime > 1 || entity.deathTime > 15) {
+//            boolean resolveEffect = standEntity.getUser() != null && standEntity.getUser().hasEffect(ModStatusEffects.RESOLVE.get());
+//            if (!resolveEffect && entity.deathTime > 1 || entity.deathTime > 15) {
+//                return false;
+//            }
+            if (entity.deathTime > 15) {
                 return false;
             }
-            return heal(world, entity, 
-                    entity, (e, clientSide) -> {
-                        LivingEntity toHeal = e;
-                        toHeal = StandUtil.getStandUser(e);
-                        toHeal.deathTime = Math.max(toHeal.deathTime - 2, 0);
-                        e.deathTime = toHeal.deathTime;
-                        if (!clientSide && toHeal.deathTime <= 0) {
-                            toHeal.setHealth(0.001F);
-                            if (toHeal instanceof ServerPlayerEntity) {
-                                MCUtil.onPlayerResurrect((ServerPlayerEntity) toHeal);
-                            }
-                        }
-                    }, e -> true);
+            
+            toHeal.deathTime = Math.max(toHeal.deathTime - 2, 0);
+            entity.deathTime = toHeal.deathTime;
+            if (!world.isClientSide() && toHeal.deathTime <= 0) {
+                toHeal.setHealth(0.001F);
+                if (toHeal instanceof ServerPlayerEntity) {
+                    MCUtil.onPlayerResurrect((ServerPlayerEntity) toHeal);
+                }
+            }
+            return true;
+        }
+        float healingSpeed = (float) healingSpeed(standEntity);
+        boolean healed = toHeal.getHealth() < toHeal.getMaxHealth() || toHeal.hasEffect(ModStatusEffects.BLEEDING.get());
+        
+        if (toHeal.getHealth() < toHeal.getMaxHealth()) {
+            toHeal.setHealth(toHeal.getHealth() + 0.5F * healingSpeed);
         }
         
-        return heal(world, entity, 
-                entity, (e, clientSide) -> {
-                    if (!clientSide) {
-                        LivingEntity toHeal = StandUtil.getStandUser(e);
-                        toHeal.setHealth(toHeal.getHealth() + 0.5F * (float) healingSpeed(standEntity));
-                    }
-                }, 
-                e -> e.getHealth() < e.getMaxHealth());
+        int reduceBleedingTime = (int) (20 / healingSpeed);
+        BleedingTimer bleedingTimer = task.getAdditionalData().peekOrNull(BleedingTimer.class);
+        if (bleedingTimer == null) {
+            bleedingTimer = new BleedingTimer(reduceBleedingTime);
+            task.getAdditionalData().push(BleedingTimer.class, bleedingTimer);
+        }
+        if (bleedingTimer.tick(reduceBleedingTime)) {
+            MCUtil.reduceEffect(toHeal, ModStatusEffects.BLEEDING.get(), 0, 1);
+        }
+        
+        if (healed) {
+            addParticlesAround(toHeal);
+            if (toHeal != entity) {
+                addParticlesAround(entity);
+            }
+            return true;
+        }
+        
+        return false;
     }
     
-    public static <T> boolean heal(World world, Entity entity, T entityCasted, BiConsumer<T, Boolean> heal, Predicate<T> isHealthMissing) {
-        boolean healed = isHealthMissing.test(entityCasted);
-        heal.accept(entityCasted, world.isClientSide());
-        if (world.isClientSide() && isHealthMissing.test(entityCasted) && ClientUtil.canSeeStands()) {
-            addParticlesAround(entity);
+    private static class BleedingTimer {
+        private int timer;
+        
+        BleedingTimer(int reduceEffectTime) {
+            this.timer = reduceEffectTime / 2;
         }
-        return healed;
+        
+        boolean tick(int reduceEffectTime) {
+            if (timer++ >= reduceEffectTime) {
+                timer = 0;
+                return true;
+            }
+            return false;
+        }
     }
     
     public static void addParticlesAround(Entity entity) {
@@ -173,14 +200,14 @@ public class CrazyDiamondHeal extends StandEntityAction {
         ActionTarget target = task.getTarget();
         if (target.getType() == TargetType.ENTITY && target.getEntity() instanceof LivingEntity) {
             LivingEntity targetLiving = (LivingEntity) target.getEntity();
-            return targetLiving.getHealth() / targetLiving.getMaxHealth() <= 0.5F;
+            return targetLiving.getHealth() / BleedingEffect.getMaxHealthWithoutBleeding(targetLiving) <= 0.5F;
         }
         return false;
     }
 
     @Override
     public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
-        return offsetToTarget(standPower, standEntity, task, 0, standEntity.getMaxEffectiveRange(), null)
+        return offsetToTarget(standPower, standEntity, task.getTarget(), 0, standEntity.getMaxEffectiveRange(), null)
                 .orElse(super.getOffsetFromUser(standPower, standEntity, task));
     }
 }

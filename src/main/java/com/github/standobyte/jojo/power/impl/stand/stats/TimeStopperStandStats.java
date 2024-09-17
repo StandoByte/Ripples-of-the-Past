@@ -9,11 +9,11 @@ import net.minecraft.network.PacketBuffer;
  */
 @Deprecated
 public class TimeStopperStandStats extends StandStats {
-    private final int timeStopMaxTicks;
-    private final int timeStopMaxTicksVampire;
-    public final float timeStopLearningPerTick;
-    public final float timeStopDecayPerDay;
-    public final float timeStopCooldownPerTick;
+    transient private final int timeStopMaxTicks;
+    transient private final int timeStopMaxTicksVampire;
+    transient public final float timeStopLearningPerTick;
+    transient public final float timeStopDecayPerDay;
+    transient public final float timeStopCooldownPerTick;
 
     protected TimeStopperStandStats(Builder builder) {
         super(builder);

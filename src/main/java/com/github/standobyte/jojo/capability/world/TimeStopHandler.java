@@ -37,6 +37,7 @@ import com.google.common.collect.HashBiMap;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.datasync.EntityDataManager;
@@ -144,6 +145,12 @@ public class TimeStopHandler {
                     entity.invulnerableTime--;
                 }
                 entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.lastHurtByStandTick());
+            }
+            else if (entity instanceof ItemEntity) {
+                ItemEntity itemEntity = (ItemEntity) entity;
+                if (itemEntity.pickupDelay > 0 && itemEntity.pickupDelay != 32767) {
+                    --itemEntity.pickupDelay;
+                }
             }
         }
         entity.tickCount--;

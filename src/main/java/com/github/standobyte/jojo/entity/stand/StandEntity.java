@@ -25,9 +25,10 @@ import com.github.standobyte.jojo.action.stand.punch.StandMissedPunch;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.barrage.BarrageSwingsHolder;
-import com.github.standobyte.jojo.client.sound.BarrageHitSoundHandler;
+import com.github.standobyte.jojo.client.sound.barrage.BarrageHitSoundHandler;
 import com.github.standobyte.jojo.entity.damaging.DamagingEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
 import com.github.standobyte.jojo.entity.mob.IMobStandUser;
@@ -135,7 +136,6 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     private StandRelativeOffset offsetDefault = StandRelativeOffset.withYOffset(-0.75, 0.2, -0.75);
     private StandRelativeOffset offsetDefaultArmsOnly = StandRelativeOffset.withYOffset(0, 0, 0.15);
     protected StandRelativeOffset prevOffset;
-    protected StandRelativeOffset prevOffsetSnapshot;
     protected StandRelativeOffset curOffset;
     protected int offsetLerpTicks;
     protected int offsetLerpMaxTicks;
@@ -978,7 +978,12 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
                     }
                 }
             }
-            if (blockedRatio == 1) {
+            Float multiplier = getCurrentTask().map(task -> task.getAction()
+                    .getDamageBlockMultiplier(userPower, this, task)).orElse(null);
+            if (multiplier != null && multiplier != 0) {
+                blockedRatio += (1 - blockedRatio) * multiplier;
+            }
+            if (blockedRatio >= 1) {
                 wasDamageBlocked = true;
 //                if (damageSrc.getEntity() instanceof StandEntity) {
 //                    ((StandEntity) damageSrc.getEntity()).playPunchSound = false;
@@ -1108,6 +1113,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
     
     private float prevUserMaxHealth = -1;
+    private boolean prevIsDead = false;
     private static final UUID SYNC_USER_MAX_HP_ATTRIBUTE = UUID.fromString("279afa29-d83b-4562-bcc5-059c3b7773d0");
     @Override
     public void tick() {
@@ -1132,7 +1138,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             }
             else {
                 StandEntityAction currentAction = getCurrentTaskAction();
-                if (currentAction == null || !currentAction.noFinisherDecay()) {
+                if (currentAction == null || !currentAction.noFinisherBarDecay()) {
                     float decay = FINISHER_DECAY;
                     float value = entityData.get(FINISHER_VALUE);
                     if (value < 0.5F) {
@@ -1220,6 +1226,12 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         if (user != null) {
             deathTime = user.deathTime;
         }
+        
+        boolean isDead = deathTime > 0;
+//        if (true || !prevIsDead && isDead) {
+//            onStandDying();
+//        }
+        prevIsDead = isDead;
     }
 
 
@@ -1244,13 +1256,15 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             StandRelativeOffset relativeOffset = getOffsetFromUser();
             if (relativeOffset != null) {
                 Optional<StandEntityTask> currentTask = getCurrentTask();
-                Vector3d pos = user.position().add(taskOffset(user, relativeOffset, currentTask));
+                Vector3d offset = taskOffset(user, relativeOffset, currentTask);
+                Vector3d pos = user.position().add(offset);
                 if (!isArmsOnlyMode()) {
                     pos = collideNextPos(pos);
                 }
 
                 setPos(pos.x, pos.y, pos.z);
             }
+            this.curOffset = relativeOffset;
         }
         else if (isBeingRetracted()) {
             if (!isCloseToUser()) {
@@ -1291,6 +1305,10 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         if (Optional.ofNullable(getCurrentTaskAction()).map(action -> action.noAdheringToUserOffset(userPower, this)).orElse(false)) {
             return null;
         }
+        LivingEntity user = getUser();
+        if (user == null) {
+            return null;
+        }
         
         StandRelativeOffset defaultOffset = getDefaultOffsetFromUser();
         StandRelativeOffset offset = getCurrentTask().map(task -> {
@@ -1301,8 +1319,9 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         }).orElse(defaultOffset);
 
         if (level.isClientSide() && doOffsetLerp) {
-            if (prevOffsetSnapshot != null && offsetLerpTicks < offsetLerpMaxTicks) {
-                offset = offset.lerp(prevOffsetSnapshot, (double) offsetLerpTicks / (double) offsetLerpMaxTicks);
+            if (prevOffset != null && offsetLerpTicks < offsetLerpMaxTicks) {
+                offset = offset.lerp(prevOffset, (double) offsetLerpTicks / (double) offsetLerpMaxTicks, 
+                        defaultOffset.y, user.xRot);
             }
         }
         
@@ -1310,30 +1329,23 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
     
     protected void actionOffsetChanged() {
-        StandRelativeOffset defaultOffset = getDefaultOffsetFromUser();
-        StandRelativeOffset offset = lastTask.map(task -> {
-            StandRelativeOffset taskOffset = task.getOffsetFromUser(userPower, this);
-            if (taskOffset != null) return taskOffset;
-            
-            return defaultOffset;
-        }).orElse(defaultOffset);
-        
         if (level.isClientSide() && doOffsetLerp) {
-            if (offset != this.curOffset) {
+            if (this.prevOffset != this.curOffset) {
                 this.prevOffset = this.curOffset;
-                this.prevOffsetSnapshot = prevOffset != null ? prevOffset.makeSnapshot(defaultOffset.y, xRot) : null;
-                this.curOffset = offset;
                 this.offsetLerpTicks = 1;
-                this.offsetLerpMaxTicks = 3;
+                this.offsetLerpMaxTicks = 4;
             }
         }
     }
     
     private Vector3d taskOffset(LivingEntity user, StandRelativeOffset relativeOffset, Optional<StandEntityTask> currentTask) {
-        ActionTarget target = currentTask.map(StandEntityTask::getTarget).orElse(ActionTarget.EMPTY);
         float yRot;
         float xRot;
-        Vector3d targetPos = target.getTargetPos(true);
+        
+        Vector3d targetPos = currentTask.map(task -> {
+            return task.getAction().lockOnTargetPosition(getUserPower(), this, task) ? task.getTarget() : ActionTarget.EMPTY;
+        }).map(target -> target.getTargetPos(true)).orElse(null);
+        
         if (targetPos != null) {
             Vector3d vecToTarget = targetPos.subtract(user.getEyePosition(1.0F));
             yRot = MathUtil.yRotDegFromVec(vecToTarget);
@@ -1345,7 +1357,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         }
             
         Vector3d offset = relativeOffset.getAbsoluteVec(yRot, xRot, this, user, getDefaultOffsetFromUser().y);
-        if (user.isShiftKeyDown()) {
+        if (!currentTask.isPresent() && user.isShiftKeyDown()) {
             offset = new Vector3d(offset.x, 0, offset.z);
         }
         
@@ -1409,13 +1421,6 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
                             && task.getTarget().getType() == TargetType.EMPTY) {
                         task.setTarget(this, prevTask.getTarget(), userPower);
                     }
-                    
-                    if (task.getAction().transfersPreviousOffset(userPower, this, prevTask)) {
-                        StandRelativeOffset offset = prevTask.getOffsetFromUser(userPower, this);
-                        if (offset != null) {
-                            task.overrideOffsetFromUser(offset);
-                        }
-                    }
                 });
                 
                 entityData.set(CURRENT_TASK, Optional.of(task));
@@ -1436,7 +1441,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         stopTask(false);
     }
     
-    protected void stopTask(boolean stopNonCancelable) {
+    public void stopTask(boolean stopNonCancelable) {
         stopTask(null, stopNonCancelable);
     }
     
@@ -1560,7 +1565,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     
     public ActionTarget aimWithThisOrUser(double reachDistance, ActionTarget currentTarget) {
         ActionTarget target;
-        if (currentTarget.getType() == TargetType.ENTITY && isTargetInReach(currentTarget)) {
+        if (currentTarget.getType() != TargetType.EMPTY && isTargetInReach(currentTarget)) {
             target = currentTarget;
         }
         else {
@@ -1688,6 +1693,9 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             break;
         case ENTITY:
             Entity entity = target.getEntity();
+            if (!(entity instanceof LivingEntity)) {
+                playPunchSound = true;
+            }
             StandEntityPunch entityPunchInstance = punchAction.punchEntity(this, entity, getDamageSource());
             punchInstance = entityPunchInstance;
             break;
@@ -1922,7 +1930,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
     
     protected boolean breakBlock(BlockPos blockPos, BlockState blockState, boolean dropLootTableItems, @Nullable List<ItemStack> createdDrops) {
-        if (level.isClientSide() || !JojoModUtil.canEntityDestroy((ServerWorld) level, blockPos, blockState, this)) {
+        if (level.isClientSide() || !JojoModUtil.canEntityDestroy((ServerWorld) level, blockPos, blockState, this) || blockState.isAir(level, blockPos)) {
             return false;
         }
         
@@ -1952,7 +1960,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
     
     public boolean canBreakBlock(BlockPos blockPos, BlockState blockState) {
-        float blockHardness = blockState.getDestroySpeed(level, blockPos);
+        float blockHardness = StandStatFormulas.getStandBreakBlockHardness(blockState, level, blockPos);
         return blockHardness >= 0 && canBreakBlock(blockHardness, blockState.getHarvestLevel());
     }
 
@@ -2251,8 +2259,24 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         return false;
     }
     
-
-
+    
+    
+    protected void onStandDying() {
+        if (level.isClientSide()) {
+            for (double y = 0.25; y < getBbHeight(); y += 0.25) {
+                addCrumbleParticles(y);
+            }
+        }
+    }
+    
+    public void addCrumbleParticles(double entityY) {
+        if (level.isClientSide()) {
+            CustomParticlesHelper.addStandCrumbleParticles(this, position().add(0, entityY, 0), TargetHitPart.getHitTarget(this, entityY));
+        }
+    }
+    
+    
+    
     public float getAlpha(float partialTick) {
         float alpha = 1F;
         int ticks = summonLockTicks > 0 ? summonLockTicks : gradualSummonWeaknessTicks;

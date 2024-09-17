@@ -4,7 +4,7 @@
 	"textures": {
         "0": "jojo:block/coffin_outside",
         "1": "jojo:block/coffin_inside/red_wool",
-        "particle": "jojo:block/coffin_outside"
+        "particle": "jojo:block/coffin_particle"
 	},
 	"elements": [
 		{

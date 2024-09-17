@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.util.mod;
+package com.github.standobyte.jojo.util.mc.damage;
 
 import java.util.UUID;
 

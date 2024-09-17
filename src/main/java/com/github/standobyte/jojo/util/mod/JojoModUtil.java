@@ -13,6 +13,7 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
+import com.github.standobyte.jojo.entity.mob.IMobStandUser;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModGamerules;
 import com.github.standobyte.jojo.init.ModTags;
@@ -79,34 +80,63 @@ public class JojoModUtil {
         return rayTrace(entity, reachDistance, entityFilter, rayTraceInflate, 0);
     }
 
-    public static RayTraceResult rayTrace(Entity entity, double reachDistance, @Nullable Predicate<Entity> entityFilter, 
+    public static RayTraceResult rayTrace(Entity entity, double reachDistance, 
+            @Nullable Predicate<Entity> entityFilter, 
             double rayTraceInflate, double standPrecision) {
         return rayTraceMultipleEntities(entity, reachDistance, entityFilter, rayTraceInflate, standPrecision)[0];
     }
     
-    public static RayTraceResult[] rayTraceMultipleEntities(Entity entity, double reachDistance, @Nullable Predicate<Entity> entityFilter, 
+    public static RayTraceResult[] rayTraceMultipleEntities(Entity entity, double reachDistance, 
+            @Nullable Predicate<Entity> entityFilter, 
             double rayTraceInflate, double standPrecision) {
         return rayTraceMultipleEntities(entity.getEyePosition(1.0F), entity.getViewVector(1.0F), reachDistance, 
-                entity.level, entity, entityFilter, rayTraceInflate, standPrecision);
+                entity.level, entity, 
+                entityFilter, RayTraceContext.BlockMode.OUTLINE, 
+                rayTraceInflate, standPrecision);
+    }
+    
+    public static RayTraceResult[] rayTraceMultipleEntities(Entity entity, double reachDistance, 
+            @Nullable Predicate<Entity> entityFilter, RayTraceContext.BlockMode blockMode, 
+            double rayTraceInflate, double standPrecision) {
+        return rayTraceMultipleEntities(entity.getEyePosition(1.0F), entity.getViewVector(1.0F), reachDistance, 
+                entity.level, entity, entityFilter, blockMode, rayTraceInflate, standPrecision);
     }
     
     public static RayTraceResult[] rayTraceMultipleEntities(Vector3d startPos, Vector3d rayVec, double distance, 
-            World world, @Nullable Entity entity, @Nullable Predicate<Entity> entityFilter, 
+            World world, @Nullable Entity entity, 
+            @Nullable Predicate<Entity> entityFilter, RayTraceContext.BlockMode blockMode, 
             double rayTraceInflate, double standPrecision) {
         Vector3d rtVec = rayVec.normalize().scale(distance);
         Vector3d endPos = startPos.add(rtVec);
         AxisAlignedBB aabb = entity.getBoundingBox().expandTowards(rtVec).inflate(1.0D);
-        return rayTraceMultipleEntities(startPos, endPos, aabb, distance, entity.level, entity, entityFilter, rayTraceInflate, standPrecision);
+        return rayTraceMultipleEntities(startPos, endPos, aabb, 
+                distance, entity.level, entity, entityFilter, blockMode, 
+                rayTraceInflate, standPrecision);
     }
 
     public static RayTraceResult rayTrace(Vector3d startPos, Vector3d rayVec, double distance, 
-            World world, @Nullable Entity entity, @Nullable Predicate<Entity> entityFilter, 
+            World world, @Nullable Entity entity, 
+            @Nullable Predicate<Entity> entityFilter, 
             double rayTraceInflate, double standPrecision) {
-        return rayTraceMultipleEntities(startPos, rayVec, distance, world, entity, entityFilter, rayTraceInflate, standPrecision)[0];
+        return rayTraceMultipleEntities(startPos, rayVec, distance, 
+                world, entity, 
+                entityFilter, RayTraceContext.BlockMode.OUTLINE, 
+                rayTraceInflate, standPrecision)[0];
     }
 
     public static RayTraceResult[] rayTraceMultipleEntities(Vector3d startPos, Vector3d endPos, AxisAlignedBB aabb, 
-            double minDistance, World world, @Nullable Entity entity, @Nullable Predicate<Entity> entityFilter, 
+            double minDistance, World world, @Nullable Entity entity, 
+            @Nullable Predicate<Entity> entityFilter, 
+            double rayTraceInflate, double standPrecision) {
+        return rayTraceMultipleEntities(startPos, endPos, aabb, 
+                minDistance, world, entity, 
+                entityFilter, RayTraceContext.BlockMode.OUTLINE, 
+                rayTraceInflate, standPrecision);
+    }
+
+    public static RayTraceResult[] rayTraceMultipleEntities(Vector3d startPos, Vector3d endPos, AxisAlignedBB aabb, 
+            double minDistance, World world, @Nullable Entity entity, 
+            @Nullable Predicate<Entity> entityFilter, RayTraceContext.BlockMode blockMode, 
             double rayTraceInflate, double standPrecision) {
         aabb.inflate(rayTraceInflate);
         double minDistanceSqr = minDistance * minDistance;
@@ -134,7 +164,7 @@ public class JojoModUtil {
         }
         if (rayTracedWithDistance.isEmpty()) {
             return new RayTraceResult[] { 
-                    world.clip(new RayTraceContext(startPos, endPos, RayTraceContext.BlockMode.OUTLINE, RayTraceContext.FluidMode.NONE, entity))
+                    world.clip(new RayTraceContext(startPos, endPos, blockMode, RayTraceContext.FluidMode.NONE, entity))
                     };
         }
         return rayTracedWithDistance.entrySet().stream()
@@ -218,10 +248,10 @@ public class JojoModUtil {
 
 
 
-    public static boolean canEntityDestroy(ServerWorld world, BlockPos blockPos, BlockState blockState, LivingEntity entity) {
+    public static boolean canEntityDestroy(ServerWorld world, BlockPos blockPos, BlockState blockState, Entity entity) {
         if (breakingBlocksEnabled(world)
                 && blockState.canEntityDestroy(world, blockPos, entity)
-                && ForgeEventFactory.onEntityDestroyBlock(entity, blockPos, blockState)) {
+                && (!(entity instanceof LivingEntity) || ForgeEventFactory.onEntityDestroyBlock((LivingEntity) entity, blockPos, blockState))) {
             PlayerEntity player = null;
             if (entity instanceof PlayerEntity) {
                 player = (PlayerEntity) entity;
@@ -311,7 +341,8 @@ public class JojoModUtil {
                 || entity instanceof AgeableEntity
                 || entity instanceof INPC
                 || entity instanceof AbstractIllagerEntity
-                || entity instanceof WaterMobEntity;
+                || entity instanceof WaterMobEntity
+                || entity instanceof IMobStandUser;
     }
 
     public static void extinguishFieryStandEntity(Entity entity, ServerWorld world) {

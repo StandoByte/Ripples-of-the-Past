@@ -25,12 +25,17 @@ import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.ItemUseContext;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.ActionResult;
+import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.ToolType;
 
 public class KnifeItem extends Item {
     private final Multimap<Attribute, AttributeModifier> attributeModifiers;
@@ -116,4 +121,55 @@ public class KnifeItem extends Item {
         }
         return super.getAttributeModifiers(slot, stack);
     }
+    
+    
+    // axes are in shambles rn
+    @Override
+    public ActionResultType useOn(ItemUseContext pContext) {
+        World world = pContext.getLevel();
+        BlockPos blockpos = pContext.getClickedPos();
+        BlockState blockstate = world.getBlockState(blockpos);
+        BlockState block = blockstate.getToolModifiedState(world, blockpos, pContext.getPlayer(), pContext.getItemInHand(), ToolType.AXE);
+        if (block != null) {
+            PlayerEntity playerentity = pContext.getPlayer();
+            world.playSound(playerentity, blockpos, SoundEvents.AXE_STRIP, SoundCategory.BLOCKS, 1.0F, 1.0F);
+            if (!world.isClientSide) {
+                world.setBlock(blockpos, block, 11);
+//                if (playerentity != null) {
+//                    pContext.getItemInHand().hurtAndBreak(1, playerentity, (p_220040_1_) -> {
+//                        p_220040_1_.broadcastBreakEvent(pContext.getHand());
+//                    });
+//                }
+            }
+
+            return ActionResultType.sidedSuccess(world.isClientSide);
+        } else {
+            return ActionResultType.PASS;
+        }
+    }
+    
+    // this would actually nerf shears though so i don't feel like going through with this suggestion
+//    @Override
+//    public ActionResultType interactLivingEntity(ItemStack stack, PlayerEntity playerIn, LivingEntity entity, Hand hand) {
+//        if (entity.level.isClientSide) return ActionResultType.PASS;
+//        if (entity instanceof IForgeShearable) {
+//            IForgeShearable target = (IForgeShearable)entity;
+//            BlockPos pos = new BlockPos(entity.getX(), entity.getY(), entity.getZ());
+//            if (target.isShearable(stack, entity.level, pos)) {
+//                List<ItemStack> drops = target.onSheared(playerIn, stack, entity.level, pos,
+//                        EnchantmentHelper.getItemEnchantmentLevel(Enchantments.BLOCK_FORTUNE, stack));
+//                Random rand = new Random();
+//                drops.forEach(d -> {
+//                    ItemEntity ent = entity.spawnAtLocation(d, 1.0F);
+//                    ent.setDeltaMovement(ent.getDeltaMovement().add(
+//                            (double)((rand.nextFloat() - rand.nextFloat()) * 0.1F), 
+//                            (double)(rand.nextFloat() * 0.05F), 
+//                            (double)((rand.nextFloat() - rand.nextFloat()) * 0.1F)));
+//                });
+////                stack.hurtAndBreak(1, entity, e -> e.broadcastBreakEvent(hand));
+//            }
+//            return ActionResultType.SUCCESS;
+//        }
+//        return ActionResultType.PASS;
+//    }
 }

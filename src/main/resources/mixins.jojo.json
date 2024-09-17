@@ -5,6 +5,7 @@
   "minVersion": "0.8",
   "plugin": "com.github.standobyte.jojo.modcompat.JojoMixinConfigPlugin",
   "mixins": [
+    "EntityMixin",
     "LivingEntityMixin",
     "PlayerEntityMixin",
     "ServerPlayerEntityMixin",

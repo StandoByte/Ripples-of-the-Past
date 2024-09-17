@@ -2,6 +2,8 @@ package com.github.standobyte.jojo.action.stand.punch;
 
 import java.util.function.Supplier;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -248,15 +250,6 @@ public class StandEntityPunch implements IPunch {
             hp = targetLiving.getHealth();
             
             dmgSource.setStandInvulTicks(standInvulTime);
-            
-            if (target instanceof StandEntity) {
-                StandEntity targetStand = (StandEntity) target;
-                
-                if (disablesBlocking() && stand.getRandom().nextFloat() < disableBlockingChance) {
-                    targetStand.breakStandBlocking(StandStatFormulas.getBlockingBreakTicks(targetStand.getDurability()));
-                }
-            }
-            
             damage = DamageUtil.addArmorPiercing(damage, armorPiercing, targetLiving);
             
             final float dmg = damage;
@@ -268,11 +261,14 @@ public class StandEntityPunch implements IPunch {
         if (damage <= 0) {
             return false;
         }
-
+        
+        if (onAttack(stand, target, dmgSource, damage)) {
+            return false;
+        }
         boolean hurt = stand.hurtTarget(target, dmgSource, damage);
         
-        if (hurt) {
-            if (targetLiving != null) {
+        if (targetLiving != null) {
+            if (hurt) {
                 if (getAdditionalKnockback() > 0) {
                     Vector3d vecToTarget = target.position().subtract(stand.position());
                     float knockbackYRot = (float) -MathHelper.atan2(vecToTarget.x, vecToTarget.z) * MathUtil.RAD_TO_DEG + this.knockbackYRot;
@@ -294,6 +290,43 @@ public class StandEntityPunch implements IPunch {
             }
         }
         
+        knockbackTarget(targetLiving);
+        
         return hurt;
+    }
+    
+    protected boolean onAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, float damage) {
+        if (target instanceof StandEntity) {
+            StandEntity targetStand = (StandEntity) target;
+            if (disablesBlocking() && stand.getRandom().nextFloat() < disableBlockingChance) {
+                targetStand.breakStandBlocking(StandStatFormulas.getBlockingBreakTicks(targetStand.getDurability()));
+            }
+        }
+        return false;
+    }
+    
+    private void knockbackTarget(@Nullable LivingEntity targetAsLiving) {
+        if (getAdditionalKnockback() > 0) {
+            Vector3d vecToTarget = target.position().subtract(stand.position());
+            float knockbackYRot = (float) -MathHelper.atan2(vecToTarget.x, vecToTarget.z) * MathUtil.RAD_TO_DEG + this.knockbackYRot;
+            float knockbackStrength = getAdditionalKnockback() * 0.5F;
+            
+            if (targetAsLiving != null) {
+                if (Math.abs(knockbackXRot) < 90) {
+                    DamageUtil.knockback(targetAsLiving, knockbackStrength * MathHelper.cos(knockbackXRot * MathUtil.DEG_TO_RAD), knockbackYRot);
+                }
+                if (knockbackXRot != 0) {
+                    DamageUtil.upwardsKnockback(targetAsLiving, -knockbackStrength * MathHelper.sin(knockbackXRot * MathUtil.DEG_TO_RAD));
+                }
+            }
+            else {
+                Vector3d knockbackVec = new Vector3d(0, 0, knockbackStrength);
+                if (knockbackXRot != 0) {
+                    knockbackVec = knockbackVec.xRot(-knockbackXRot * MathUtil.DEG_TO_RAD);
+                }
+                knockbackVec = knockbackVec.yRot(-knockbackYRot * MathUtil.DEG_TO_RAD);
+                target.setDeltaMovement(knockbackVec);
+            }
+        }
     }
 }

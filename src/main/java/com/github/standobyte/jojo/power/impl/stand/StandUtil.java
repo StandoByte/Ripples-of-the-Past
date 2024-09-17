@@ -42,7 +42,7 @@ public class StandUtil {
     @Nullable
     public static StandType<?> randomStand(PlayerEntity entity, Random random) {
         if (!entity.level.isClientSide()) {
-            List<StandType<?>> stands = availableStands(entity.level.isClientSide()).collect(Collectors.toList());
+            List<StandType<?>> stands = arrowStands(entity.level.isClientSide()).collect(Collectors.toList());
 
             if (stands.isEmpty()) {
                 return null;
@@ -103,6 +103,11 @@ public class StandUtil {
     public static boolean canPlayerGetFromArrow(StandType<?> standType, boolean clientSide) {
         return standType.getSurvivalGameplayPool() == StandSurvivalGameplayPool.PLAYER_ARROW && 
                 StandSurvivalGameplayPool.PLAYER_ARROW.accessibleToPlayer(standType, clientSide);
+    }
+    
+    public static boolean isStandBanned(StandType<?> standType, boolean clientSide) {
+        return JojoModConfig.getCommonConfigInstance(clientSide).isConfigLoaded() && // to make it work when adding items to creative search tab on client initialization, when the config isn't loaded yet
+                JojoModConfig.getCommonConfigInstance(clientSide).isStandBanned(standType);
     }
     
     public static boolean isEntityStandUser(LivingEntity entity) {

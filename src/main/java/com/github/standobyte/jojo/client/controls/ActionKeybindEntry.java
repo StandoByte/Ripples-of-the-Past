@@ -61,7 +61,7 @@ public class ActionKeybindEntry {
     }
     
     void init() {
-        Action<?> action = JojoCustomRegistries.ACTIONS.fromId(this.actionId);
+        Action<?> action = JojoCustomRegistries.ACTIONS.getValue(this.actionId);
         if (action != null) {
             KeyBinding keyBinding = createNewKey(keyModifier, keyCode);
             this.action = action;

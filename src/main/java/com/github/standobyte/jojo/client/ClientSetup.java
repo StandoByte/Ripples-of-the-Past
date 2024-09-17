@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.client;
 
 import java.io.File;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -68,6 +69,7 @@ import com.github.standobyte.jojo.client.render.entity.renderer.damaging.extendi
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.extending.SatiporojaScarfBindingRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.extending.SatiporojaScarfRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.extending.SnakeMufflerRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.BlockShardRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.CDBlockBulletRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.CDBloodCutterRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.HGEmeraldRenderer;
@@ -109,7 +111,11 @@ import com.github.standobyte.jojo.client.ui.marker.CrazyDiamondAnchorMarker;
 import com.github.standobyte.jojo.client.ui.marker.CrazyDiamondBloodHomingMarker;
 import com.github.standobyte.jojo.client.ui.marker.HierophantGreenBarrierDetectionMarker;
 import com.github.standobyte.jojo.client.ui.marker.MarkerRenderer;
+import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
+import com.github.standobyte.jojo.client.ui.screen.vampirism.VampirismScreen;
 import com.github.standobyte.jojo.client.ui.screen.walkman.WalkmanScreen;
+import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
+import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer.StandStat;
 import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModContainers;
 import com.github.standobyte.jojo.init.ModEntityTypes;
@@ -122,7 +128,8 @@ import com.github.standobyte.jojo.item.StandArrowItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
 import com.github.standobyte.jojo.item.cassette.CassetteCap;
-import com.github.standobyte.jojo.power.impl.stand.type.StandType;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 
 import net.minecraft.client.Minecraft;
@@ -160,7 +167,6 @@ import net.minecraftforge.client.event.ColorHandlerEvent;
 import net.minecraftforge.client.event.ModelBakeEvent;
 import net.minecraftforge.client.event.ModelRegistryEvent;
 import net.minecraftforge.client.event.ParticleFactoryRegisterEvent;
-import net.minecraftforge.client.model.ModelLoader;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.client.registry.RenderingRegistry;
@@ -202,6 +208,7 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.MOLOTOV.get(), manager -> new MolotovRenderer<>(manager, Minecraft.getInstance().getItemRenderer(), 1.0F, true));
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.STAND_ARROW.get(), StandArrowRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SOUL.get(), SoulRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.BLOCK_SHARD.get(), BlockShardRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.PILLARMAN_TEMPLE_ENGRAVING.get(), PillarmanTempleEngravingRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.SP_STAR_FINGER.get(), SPStarFingerRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HG_STRING.get(), HGStringRenderer::new);
@@ -247,6 +254,9 @@ public class ClientSetup {
         
         ClientModSettings.init(mc, new File(mc.gameDirectory, "config/jojo_rotp/client_settings.json"));
         HudControlSettings.init(new File(mc.gameDirectory, "config/jojo_rotp/controls/"));
+        
+        HamonScreen.clientInit();
+        VampirismScreen.clientInit();
         
         event.enqueueWork(() -> {
             CustomIconItem.registerModelOverride();
@@ -310,13 +320,7 @@ public class ClientSetup {
             MarkerRenderer.Handler.addRenderer(new CrazyDiamondAnchorMarker(mc));
             MarkerRenderer.Handler.addRenderer(new CrazyDiamondBloodHomingMarker(mc));
             
-//            StandStatsRenderer.overrideCosmeticStats(
-//                    ModStands.GOLD_EXPERIENCE_REQUIEM.getStandType().getRegistryName(), 
-//                    new StandStatsRenderer.OverrideCosmeticStat() {
-//                        @Override public double newValue(StandStat stat, IStandPower standData, double curConvertedValue) { 
-//                            return 0;
-//                        }
-//                    });
+            statsStatsOverrideExamples();
         });
     }
 
@@ -430,9 +434,7 @@ public class ClientSetup {
             spritesAdded = true;
         }
         
-        for (StandType<?> standType : JojoCustomRegistries.STANDS.getRegistry().getValues()) {
-            ModelLoader.addSpecialModel(StandDiscOverrideList.makeStandSpecificModelPath(standType));
-        }
+        StandDiscOverrideList.onModelRegistry();
     }
     
     public static void addUnreferencedBlockModels(RenderMaterial... renderMaterials) {
@@ -485,5 +487,72 @@ public class ClientSetup {
            particle.setColor(1.0F, 1.0F, 0.25F);
            return particle;
         }
+    }
+    
+    
+    private static void statsStatsOverrideExamples() {
+//        StandStatsRenderer.overrideCosmeticStats(
+//                ModStands.GOLD_EXPERIENCE_REQUIEM.getStandType().getRegistryName(), 
+//                new StandStatsRenderer.ICosmeticStandStats() {
+//                    @Override public double statConvertedValue(StandStat stat, IStandPower standData, StandStats stats, float statLeveling) {
+//                        return 0;
+//                    }
+//                });
+//        
+//        StandStatsRenderer.overrideCosmeticStats(
+//                ModStands.MADE_IN_HEAVEN.getStandType().getRegistryName(), 
+//                new StandStatsRenderer.ICosmeticStandStats() {
+//                    @Override public String statRankLetter(StandStat stat, IStandPower standData, double statConvertedValue) {
+//                        if (stat == StandStat.SPEED) {
+//                            return "∞";
+//                        }
+//                        return StandStatsRenderer.ICosmeticStandStats.super.statRankLetter(stat, standData, statConvertedValue);
+//                    }
+//                });
+//        
+//        StandStatsRenderer.overrideCosmeticStats(
+//                ModStands.NOTORIOUS_BIG.getStandType().getRegistryName(), 
+//                new StandStatsRenderer.ICosmeticStandStats() {
+//                    @Override public String statRankLetter(StandStat stat, IStandPower standData, double statConvertedValue) {
+//                        switch (stat) {
+//                        case SPEED:
+//                        case RANGE:
+//                        case DURABILITY:
+//                            return "∞";
+//                        default:
+//                            return StandStatsRenderer.ICosmeticStandStats.super.statRankLetter(stat, standData, statConvertedValue);
+//                        }
+//                    }
+//                });
+//        
+//        StandStatsRenderer.overrideCosmeticStats(
+//                ModStands.BABY_FACE.getStandType().getRegistryName(), 
+//                new StandStatsRenderer.ICosmeticStandStats() {
+//                    @Override public double statConvertedValue(StandStat stat, IStandPower standData, StandStats stats, float statLeveling) {
+//                        if (dependsOnEducation(stat)) {
+//                            return 0;
+//                        }
+//                        return StandStatsRenderer.ICosmeticStandStats.super.statConvertedValue(stat, standData, stats, statLeveling);
+//                    }
+//                    
+//                    @Override public String statRankLetter(StandStat stat, IStandPower standData, double statConvertedValue) {
+//                        if (dependsOnEducation(stat)) {
+//                            return StandStatsRenderer.REFERENCE_MARK;
+//                        }
+//                        return StandStatsRenderer.ICosmeticStandStats.super.statRankLetter(stat, standData, statConvertedValue);
+//                    }
+//                    
+//                    @Override public List<ITextComponent> statTooltip(StandStat stat, IStandPower standData) {
+//                        List<ITextComponent> tooltip = StandStatsRenderer.ICosmeticStandStats.super.statTooltip(stat, standData);
+//                        if (dependsOnEducation(stat)) {
+//                            tooltip.add(new TranslationTextComponent("babyface_stat_note")); // "babyface_stat_note": "(Depends on education)"
+//                        }
+//                        return tooltip;
+//                    }
+//                    
+//                    private boolean dependsOnEducation(StandStat stat) {
+//                        return true;
+//                    }
+//                });
     }
 }

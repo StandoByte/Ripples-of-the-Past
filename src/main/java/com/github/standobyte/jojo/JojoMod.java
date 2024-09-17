@@ -113,6 +113,7 @@ public class JojoMod {
             ConfigPackCommand.initConfigs(MinecraftForge.EVENT_BUS);
             
             // things to do after registry events
+            ModStatusEffects.afterEffectsRegister();
             ModPotions.registerRecipes();
             
             Action.initShiftVariations();

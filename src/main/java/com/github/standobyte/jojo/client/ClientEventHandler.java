@@ -204,14 +204,14 @@ public class ClientEventHandler {
             return;
         }
         
-        float partialTick = event.getPartialRenderTick();
-        float changePartialTick = ClientTimeStopHandler.getInstance().getConstantEntityPartialTick(entity, partialTick);
-        if (partialTick != changePartialTick) {
-            event.setCanceled(true);
-            event.getRenderer().render((T) entity, MathHelper.lerp(changePartialTick, entity.yRotO, entity.yRot), 
-                    changePartialTick, event.getMatrixStack(), event.getBuffers(), event.getLight());
-            return;
-        }
+//        float partialTick = event.getPartialRenderTick();
+//        float changePartialTick = ClientTimeStopHandler.getInstance().getConstantEntityPartialTick(entity, partialTick);
+//        if (partialTick != changePartialTick) {
+//            event.setCanceled(true);
+//            event.getRenderer().render((T) entity, MathHelper.lerp(changePartialTick, entity.yRotO, entity.yRot), 
+//                    changePartialTick, event.getMatrixStack(), event.getBuffers(), event.getLight());
+//            return;
+//        }
         
         M model = event.getRenderer().getModel();
         if (model instanceof BipedModel) {
@@ -597,7 +597,7 @@ public class ClientEventHandler {
         int healthLast = this.lastEntityHealth;
 
         ModifiableAttributeInstance attrMaxHealth = entity.getAttribute(Attributes.MAX_HEALTH);
-        float healthWithoutBleedMax = (float) MCUtil.calcValueWithoutModifiers(attrMaxHealth, BleedingEffect.ATTRIBUTE_MODIFIER_ID); // !
+        float healthWithoutBleedMax = BleedingEffect.getMaxHealthWithoutBleeding(entity); // !
         float healthMax = (float)attrMaxHealth.getValue();
         float absorb = MathHelper.ceil(entity.getAbsorptionAmount());
 
@@ -687,8 +687,7 @@ public class ClientEventHandler {
         mc.getProfiler().popPush("mountHealth");
         RenderSystem.enableBlend();
         int health = (int)Math.ceil((double)entity.getHealth());
-        float healthWithoutBleedMax = (float) MCUtil.calcValueWithoutModifiers(entity.getAttribute(
-                Attributes.MAX_HEALTH), BleedingEffect.ATTRIBUTE_MODIFIER_ID); // !
+        float healthWithoutBleedMax = BleedingEffect.getMaxHealthWithoutBleeding(entity); // !
         float healthMax = entity.getMaxHealth();
         int hearts = (int)(healthWithoutBleedMax + 0.5F) / 2; // !
 
@@ -1136,6 +1135,11 @@ public class ClientEventHandler {
             if (splash != null) {
                 ClientReflection.setSplash((MainMenuScreen) screen, splash);
             }
+        }
+        else if (screen instanceof IngameMenuScreen) {
+            IStandPower.getStandPowerOptional(mc.player).resolve()
+            .map(StandStatsRenderer.ICosmeticStandStats::getHandler)
+            .ifPresent(StandStatsRenderer.ICosmeticStandStats::onPauseScreenOpened);
         }
         else if (screen == null) {
             onScreenClosed();

@@ -69,6 +69,8 @@ public class JojoModConfig {
         public final ForgeConfigSpec.BooleanValue undeadMobsSunDamage;
         public final ForgeConfigSpec.IntValue vampirismCuringDuration;
 
+        public final ForgeConfigSpec.IntValue arrowDurability;
+        public final ForgeConfigSpec.IntValue arrowDurabilityBeetle;
         public final ForgeConfigSpec.IntValue standXpCostInitial;
         public final ForgeConfigSpec.IntValue standXpCostIncrease;
         public final ForgeConfigSpec.EnumValue<StandUtil.StandRandomPoolFilter> standRandomPoolFilter;
@@ -220,6 +222,16 @@ public class JojoModConfig {
             builder.pop();
             
             builder.comment(" Settings of Stand-giving Arrows and the commands giving Stands at random.").push("Arrow");
+                arrowDurability = builder
+                        .comment("    Durability of the Arrows crafted from meteoric ingots.")
+                        .translation("jojo.config.arrowDurability")
+                        .defineInRange("arrowDurability", 25, 1, Integer.MAX_VALUE);
+                
+                arrowDurabilityBeetle = builder
+                        .comment("    Durability of the Beetle Arrows found in the desert temples.")
+                        .translation("jojo.config.arrowDurabilityBeetle")
+                        .defineInRange("arrowDurabilityBeetle", 250, 1, Integer.MAX_VALUE);
+            
                 standXpCostInitial = builder
                         .comment("    The initial cost of getting a Stand from a Stand Arrow (in experience levels).")
                         .translation("jojo.config.standXpCostInitial")

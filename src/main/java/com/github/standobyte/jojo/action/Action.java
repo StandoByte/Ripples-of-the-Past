@@ -296,7 +296,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
             ModCriteriaTriggers.ACTION_PERFORM.get().trigger((ServerPlayerEntity) user, this);
         }
         perform(world, user, power, target, extraInput);
-        if (swingHand() && withUserPunch() && user instanceof PlayerEntity) {
+        if (swingHand() && !withUserPunch() && user instanceof PlayerEntity) {
             ((PlayerEntity) user).resetAttackStrengthTicker();
         }
     }
@@ -321,11 +321,12 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     public void stoppedHolding(World world, LivingEntity user, P power, int ticksHeld, boolean willFire) {}
     
+    @Deprecated
     public boolean isHeldSentToTracking() {
-        return false;
+        return true;
     }
     
-    public void onHoldTickClientEffect(LivingEntity user, P power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {}
+    public void onHoldTickClientEffect(LivingEntity user, P power, int ticksHeld, boolean reqFulfilled, boolean reqStateChanged) {}
     
     public LivingEntity getPerformer(LivingEntity user, P power) {
         return user;
@@ -623,7 +624,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         public Action<?> deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
                 throws JsonParseException {
             if (json.isJsonPrimitive() && ((JsonPrimitive) json).isString()) {
-                return JojoCustomRegistries.ACTIONS.fromId(new ResourceLocation(json.getAsString()));
+                return JojoCustomRegistries.ACTIONS.getValue(new ResourceLocation(json.getAsString()));
             }
             
             throw new JsonParseException("An action is defined by its string id");

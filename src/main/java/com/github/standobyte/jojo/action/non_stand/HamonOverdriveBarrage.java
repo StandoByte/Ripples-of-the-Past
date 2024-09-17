@@ -94,8 +94,8 @@ public class HamonOverdriveBarrage extends HamonAction {
     }
     
     @Override
-    public void onHoldTickClientEffect(LivingEntity user, INonStandPower power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {
-        if (requirementsFulfilled) {
+    public void onHoldTickClientEffect(LivingEntity user, INonStandPower power, int ticksHeld, boolean reqFulfilled, boolean reqStateChanged) {
+        if (reqFulfilled) {
             if (ticksHeld % 2 == 0) {
                 user.swinging = false;
                 user.swing(ticksHeld % 4 == 0 ? Hand.MAIN_HAND : Hand.OFF_HAND);

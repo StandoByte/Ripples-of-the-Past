@@ -28,8 +28,8 @@ public class HamonDetector extends HamonAction {
     }
     
     @Override
-    public void onHoldTickClientEffect(LivingEntity user, INonStandPower power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {
-        if (stateRefreshed && requirementsFulfilled) {
+    public void onHoldTickClientEffect(LivingEntity user, INonStandPower power, int ticksHeld, boolean reqFulfilled, boolean reqStateChanged) {
+        if (reqStateChanged && reqFulfilled) {
             ClientTickingSoundsHelper.playHeldActionSound(ModSounds.HAMON_DETECTOR.get(), 
                     1.0F, 1.0F, true, user, power, this, 15);
         }
@@ -41,7 +41,8 @@ public class HamonDetector extends HamonAction {
         if (requirementsFulfilled) {
             if (ticksHeld < 160 || ticksHeld % 20 == 0) {
                 HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
-                double controlRatio = (double) hamon.getHamonControlLevel() / (double) HamonData.MAX_STAT_LEVEL * hamon.getActionEfficiency(getHeldTickEnergyCost(power), false);
+                float tickEnergyCost = getHeldTickEnergyCost(power);
+                double controlRatio = (double) hamon.getHamonControlLevel() / (double) HamonData.MAX_STAT_LEVEL * hamon.getActionEfficiency(tickEnergyCost, false);
                 double radius = (double) ticksHeld * (controlRatio * 0.8D + 0.2D);
                 double maxRadius = 8D + controlRatio * 24D;
                 List<LivingEntity> entitiesAround = MCUtil.entitiesAround(LivingEntity.class, user, Math.min(radius, maxRadius), false, null);
@@ -56,7 +57,7 @@ public class HamonDetector extends HamonAction {
                             user.getX(), user.getY(0.5), user.getZ(), 1);
                 }
                 else if (!entitiesAround.isEmpty()) {
-                    hamon.hamonPointsFromAction(HamonStat.CONTROL, getHeldTickEnergyCost(power)); 
+                    hamon.hamonPointsFromAction(HamonStat.CONTROL, Math.min(tickEnergyCost, power.getEnergy()));
                 }
             }
         }

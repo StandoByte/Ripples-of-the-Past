@@ -20,6 +20,7 @@ import com.github.standobyte.jojo.entity.PillarmanTempleEngravingEntity;
 import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.damaging.LightBeamEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.BlockShardEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDBlockBulletEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.CDBloodCutterEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.HGEmeraldEntity;
@@ -191,6 +192,10 @@ public class ModEntityTypes {
     public static final RegistryObject<EntityType<SoulEntity>> SOUL = ENTITIES.register("soul", 
             () -> EntityType.Builder.<SoulEntity>of(SoulEntity::new, EntityClassification.MISC).sized(0.6F, 1.8F).noSummon()
             .build(new ResourceLocation(JojoMod.MOD_ID, "soul").toString()));
+    
+    public static final RegistryObject<EntityType<BlockShardEntity>> BLOCK_SHARD = ENTITIES.register("block_shard", 
+            () -> EntityType.Builder.<BlockShardEntity>of(BlockShardEntity::new, EntityClassification.MISC).sized(0.5F, 0.5F)
+            .build(new ResourceLocation(JojoMod.MOD_ID, "block_shard").toString()));
     
     public static final RegistryObject<EntityType<StandUserDummyEntity>> STAND_USER_DUMMY = ENTITIES.register("dummy", 
             () -> EntityType.Builder.<StandUserDummyEntity>of(StandUserDummyEntity::new, EntityClassification.MISC).sized(0.6F, 1.95F)

@@ -88,10 +88,10 @@ import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
 import com.github.standobyte.jojo.util.mc.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.mc.damage.ModdedDamageSourceWrapper;
+import com.github.standobyte.jojo.util.mc.damage.NoKnockbackOnBlocking;
 import com.github.standobyte.jojo.util.mc.damage.StandLinkDamageSource;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
-import com.github.standobyte.jojo.util.mod.NoKnockbackOnBlocking;
 import com.google.common.collect.Iterables;
 
 import net.minecraft.block.AbstractFurnaceBlock;
@@ -289,7 +289,7 @@ public class GameplayEventHandler {
                 break;
             case END:
                 ((ServerWorld) event.world).getAllEntities().forEach(entity -> {
-//                    entity.getCapability(EntityUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
+                    entity.getCapability(EntityUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
                     entity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
                     entity.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> cap.tick());
                 });
@@ -1005,7 +1005,7 @@ public class GameplayEventHandler {
         if (effectInstance.getEffect() == ModStatusEffects.BLEEDING.get()) {
             int amplifier = BleedingEffect.limitAmplifier(event.getEntityLiving(), effectInstance.getAmplifier());
             if (amplifier != effectInstance.getAmplifier() && amplifier >= 0) {
-                CommonReflection.setEffectAmplifier(effectInstance, amplifier);
+                effectInstance.amplifier = amplifier;
             }
         }
     }

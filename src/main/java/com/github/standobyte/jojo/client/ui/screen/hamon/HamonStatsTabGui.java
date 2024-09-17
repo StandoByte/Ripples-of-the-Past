@@ -217,7 +217,7 @@ public class HamonStatsTabGui extends HamonTabGui {
         matrixStack.pushPose();
         matrixStack.scale(0.5F, 0.5F, 0.5F);
 
-        gui.blit(matrixStack, (x - 3) * 2, (y - 1) * 2, 230, 124 + exercise.ordinal() * 16, 16, 16);
+        gui.blit(matrixStack, (x - 3) * 2, (y - 1) * 2, 230, 92 + exercise.ordinal() * 16, 16, 16);
         
         if (renderShadowCheckmark || ticks >= ticksMax) {
             if (ticks < ticksMax) {
