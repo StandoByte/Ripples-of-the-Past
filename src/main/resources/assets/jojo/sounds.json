@@ -209,6 +209,10 @@
     "subtitle": "jojo.subtitle.hamon_concentration",
     "sounds": [ "jojo:hamon_early_sound" ]
   },
+  "hamon_rebuff_punch": {
+    "subtitle": "subtitles.entity.player.attack.strong",
+    "sounds": [ "jojo:punch_heavy" ]
+  },
   "hamon_concentration": {
     "subtitle": "jojo.subtitle.hamon_concentration",
     "sounds": [

@@ -14,6 +14,7 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
+import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
@@ -42,6 +43,7 @@ import net.minecraft.world.World;
      *  a few ticks of the target entity stunned
      *  "!" particles
      */
+// FIXME hand swing messes up the player animation
 public class HamonRebuffOverdrive extends HamonAction implements IPlayerAction<HamonRebuffOverdrive.Instance, INonStandPower> {
     
     public HamonRebuffOverdrive(HamonAction.Builder builder) {
@@ -76,7 +78,7 @@ public class HamonRebuffOverdrive extends HamonAction implements IPlayerAction<H
             if (!world.isClientSide()) {
                 setPlayerAction(user, power);
             }
-            else if (user == ClientUtil.getClientPlayer()) {
+            else if (user == ClientUtil.getClientPlayer() && user.getRandom().nextInt(5) == 0) {
                 ClientTickingSoundsHelper.playVoiceLine(user, ModSounds.JOSEPH_GIGGLE.get(), user.getSoundSource(), 1, 1, false);
             }
         }
@@ -115,9 +117,9 @@ public class HamonRebuffOverdrive extends HamonAction implements IPlayerAction<H
         return getCurRebuff(power.getUser()).isPresent();
     }
     
-    private Optional<HamonRebuffOverdrive.Instance> getCurRebuff(LivingEntity user) {
+    public static Optional<HamonRebuffOverdrive.Instance> getCurRebuff(LivingEntity user) {
         return ContinuousActionInstance.getCurrentAction(user)
-                .filter(action -> action.getAction() == this)
+                .filter(action -> action.getAction() == ModHamonActions.JOSEPH_REBUFF_OVERDRIVE.get())
                 .map(action -> (HamonRebuffOverdrive.Instance) action);
     }
     
@@ -137,13 +139,22 @@ public class HamonRebuffOverdrive extends HamonAction implements IPlayerAction<H
                 IPlayerAction<Instance, INonStandPower> action) {
             super(user, userCap, playerPower, action);
             setPhase(Phase.WINDUP);
+            
+            if (user.level.isClientSide()) {
+                ClientTickingSoundsHelper.playStoppableEntitySound(user, ModSounds.HAMON_SYO_CHARGE.get(), 
+                        1.0F, 1.0F, false, 
+                        entity -> ContinuousActionInstance.getCurrentAction(user).map(
+                                playerAction -> playerAction == this && playerAction.getPhase() != Phase.RECOVERY).orElse(false),
+                        PERFORM_TICKS);
+            }
+            
             userHamon = INonStandPower.getNonStandPowerOptional(user)
                     .resolve().flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get()));
             actionCooldown = ((Action<INonStandPower>) action).getCooldown(playerPower, -1);
         }
         
         private static final int WINDUP_TICKS = 14;
-        public static final int COUNTER_TIMING_WINDOW = 7;
+        public static final int COUNTER_TIMING_WINDOW = 6;
 //        public static final int MANUAL_TIMING_WINDOW = 4;
         private static final int PERFORM_TICKS = 10;
         private static final int RECOVERY_TICKS = 16;
@@ -168,6 +179,10 @@ public class HamonRebuffOverdrive extends HamonAction implements IPlayerAction<H
                 break;
             default:
                 throw new IllegalStateException();
+            }
+            
+            if (user.level.isClientSide() && isCounterTiming()) {
+                HamonSparksLoopSound.playSparkSound(user, user.position(), 1.0F);
             }
         }
         
@@ -219,9 +234,13 @@ public class HamonRebuffOverdrive extends HamonAction implements IPlayerAction<H
             return this.getPhase() == Phase.PERFORM;
         }
         
-        protected boolean doCounterAttack(LivingEntity target) {
-            if (!didAttack && this.getPhase() == Phase.WINDUP) {
-                if (getTick() < WINDUP_TICKS - COUNTER_TIMING_WINDOW) {
+        public boolean isCounterTiming() {
+            return getPhase() == Phase.WINDUP && getTick() >= WINDUP_TICKS - COUNTER_TIMING_WINDOW;
+        }
+        
+        private boolean doCounterAttack(LivingEntity target) {
+            if (!didAttack && getPhase() == Phase.WINDUP) {
+                if (!isCounterTiming()) {
                     JojoModUtil.sayVoiceLine(user, ModSounds.JOSEPH_OH_NO.get(), null, 1, 1, 0, true);
                     stopAction();
                     return false;
@@ -239,7 +258,7 @@ public class HamonRebuffOverdrive extends HamonAction implements IPlayerAction<H
             return false;
         }
         
-        protected boolean doRegularAttack() {
+        private boolean doRegularAttack() {
             // TODO if there is a melee mob that is REALLY close (doesn't have to be aimed at, just in a counter angle), 
             //    full counter it anyway, their ai is really f-ing annoying
             // TODO also full counter if a mob is just trying to hit but can't deal damage (you can clearly see the f-ing zombie hand swing)
@@ -260,7 +279,7 @@ public class HamonRebuffOverdrive extends HamonAction implements IPlayerAction<H
             return false;
         }
         
-        protected void punch(LivingEntity target, boolean properCounter) {
+        private void punch(LivingEntity target, boolean properCounter) {
             float damage = properCounter ? 6.0f : 3.0f;
             float knockback = properCounter ? 2.0f : 0.5f;
             boolean canShock = properCounter;
@@ -268,11 +287,14 @@ public class HamonRebuffOverdrive extends HamonAction implements IPlayerAction<H
             
             if (DamageUtil.dealHamonDamage(counterTarget, damage, user, null)) {
                 counterTarget.level.playSound(null, counterTarget.getX(), counterTarget.getEyeY(), counterTarget.getZ(), 
-                        ModSounds.HAMON_SYO_PUNCH.get(), counterTarget.getSoundSource(), soundVolume, 1.0f);
+                        ModSounds.HAMON_REBUFF_PUNCH.get(), counterTarget.getSoundSource(), soundVolume, 1.0f);
                 counterTarget.knockback(knockback, user.getX() - counterTarget.getX(), user.getZ() - counterTarget.getZ());
                 if (canShock && userHamon.map(hamon -> hamon.isSkillLearned(ModHamonSkills.HAMON_SHOCK.get())).orElse(false)) {
                     counterTarget.addEffect(new EffectInstance(ModStatusEffects.HAMON_SHOCK.get(), 50, 0, false, false, true));
                 }
+            }
+            if (!properCounter) {
+                // TODO low pitch swing sound
             }
 
             user.swing(Hand.MAIN_HAND, true);
@@ -322,7 +344,7 @@ public class HamonRebuffOverdrive extends HamonAction implements IPlayerAction<H
     }
     
     public static void onWASDInput(LivingEntity user) {
-        ModHamonActions.JOSEPH_REBUFF_OVERDRIVE.get().getCurRebuff(user).ifPresent(rebuff -> {
+        getCurRebuff(user).ifPresent(rebuff -> {
             if (user.level.isClientSide()) {
                 if (rebuff.didAttack || rebuff.getPhase() == Phase.RECOVERY) {
                     rebuff.stopAction();
