@@ -11,6 +11,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
@@ -37,45 +38,55 @@ public class StandArgument implements ArgumentType<StandType<?>> {
     private static final Collection<String> EXAMPLES = Arrays.asList("star_platinum", "jojo:hierophant_green");
     public static final DynamicCommandExceptionType STAND_UNKNOWN = new DynamicCommandExceptionType((key) -> new TranslationTextComponent("stand.unknown", key));
     public static final DynamicCommandExceptionType AMBIGUOUS_ID = new DynamicCommandExceptionType((key) -> new TranslationTextComponent("jojo.command.id_ambiguous", key));
+    private static Map<String, List<Map.Entry<RegistryKey<StandType<?>>, StandType<?>>>> BY_LOCATION;
     
     public static void commonSetupRegister() {
         ArgumentTypes.register("stand", StandArgument.class, new ArgumentSerializer<>(StandArgument::new));
+        BY_LOCATION = groupByKeyLocation(JojoCustomRegistries.STANDS.getRegistry());
     }
-
+    
     @Override
     public StandType<?> parse(StringReader reader) throws CommandSyntaxException {
         String input = read(reader);
-        return bestFittingValue(input, JojoCustomRegistries.STANDS.getRegistry(), STAND_UNKNOWN);
+        return bestFittingValue(input, JojoCustomRegistries.STANDS.getRegistry(), BY_LOCATION, STAND_UNKNOWN);
     }
     
     public static <V extends IForgeRegistryEntry<V>> V bestFittingValue(String idInput, IForgeRegistry<V> registry, 
+            Map<String, List<Map.Entry<RegistryKey<V>, V>>> aliasMap, 
             DynamicCommandExceptionType unknownException) throws CommandSyntaxException { 
         ResourceLocation id;
         if (idInput.contains(":")) {
             id = new ResourceLocation(idInput);
-            
-            if (registry.containsKey(id)) {
-                V value = registry.getValue(id);
-                if (value != null) {
-                    return value;
-                }
-            }
-            throw unknownException.create(id);
         }
-        else {
-            List<Map.Entry<RegistryKey<V>, V>> addonKeys = registry.getEntries().stream()
-                    .filter(registryKey -> registryKey.getKey().location().getPath().equals(idInput))
-                    .collect(Collectors.toList());
-            if (addonKeys.size() == 1) {
-                return addonKeys.get(0).getValue();
-            }
-            else if (addonKeys.isEmpty()) {
+        else if (BY_LOCATION != null) {
+            List<Map.Entry<RegistryKey<V>, V>> addonKeys = aliasMap.get(idInput);
+            if (addonKeys == null || addonKeys.isEmpty()) {
                 throw unknownException.create(idInput);
             }
-            else {
+            else if (addonKeys.size() > 1) {
                 throw AMBIGUOUS_ID.create(idInput);
             }
+            else {
+                return addonKeys.get(0).getValue();
+            }
         }
+        else {
+            id = new ResourceLocation(JojoMod.MOD_ID, idInput);
+        }
+        
+        if (registry.containsKey(id)) {
+            V value = registry.getValue(id);
+            if (value != null) {
+                return value;
+            }
+        }
+        throw unknownException.create(id);
+    }
+    
+    
+    public static <V extends IForgeRegistryEntry<V>> Map<String, List<Map.Entry<RegistryKey<V>, V>>> groupByKeyLocation(IForgeRegistry<V> registry) {
+        return registry.getEntries().stream()
+                .collect(Collectors.groupingBy(entry -> entry.getKey().location().getPath()));
     }
 
     public static String read(StringReader reader) throws CommandSyntaxException {
