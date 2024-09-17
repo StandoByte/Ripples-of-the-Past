@@ -136,7 +136,7 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
                 boolean points = false;
                 for (LivingEntity target : targets) {
                     boolean kickDamage = dealPhysicalDamage(user, target);
-                    boolean hamonDamage = DamageUtil.dealHamonDamage(target, 0.5F, user, null);
+                    boolean hamonDamage = DamageUtil.dealHamonDamage(target, 2.5F, user, null);
                     if (kickDamage || hamonDamage) {
                         Vector3d vecToTarget = target.position().subtract(user.position());
                         boolean left = MathHelper.wrapDegrees(
