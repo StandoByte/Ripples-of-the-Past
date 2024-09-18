@@ -22,6 +22,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.mob.CocoJumboTurtleEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -682,13 +683,16 @@ public class MCUtil {
     
     
     public static boolean canHarm(LivingEntity attacker, Entity target) {
+        if (attacker == target) return false;
         Team team = attacker.getTeam();
         Team team1 = target.getTeam();
-        if (team == null) {
-            return true;
-        } else {
-            return !team.isAlliedTo(team1) ? true : team.isAllowFriendlyFire();
+        if (team != null && team.isAlliedTo(team1) && !team.isAllowFriendlyFire()) {
+            return false;
         }
+        if (attacker instanceof StandEntity) {
+            return ((StandEntity) attacker).canHarm(target);
+        }
+        return target instanceof LivingEntity && attacker.canAttack((LivingEntity) target);
     }
     
     
