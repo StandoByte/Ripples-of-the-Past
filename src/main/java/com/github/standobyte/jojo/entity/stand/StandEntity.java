@@ -11,7 +11,6 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
@@ -1671,7 +1670,6 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     public boolean punch(StandEntityTask task, IHasStandPunch punch, ActionTarget target) {
         if (!level.isClientSide()) {
             ActionTarget finalTarget = aimWithThisOrUser(getAimDistance(getUser()), target);
-            JojoMod.LOGGER.debug("{} {}", target.getType(), finalTarget.getType());
             target = finalTarget.getType() != TargetType.EMPTY && isTargetInReach(finalTarget) ? finalTarget : ActionTarget.EMPTY;
             setTaskTarget(target);
         }
