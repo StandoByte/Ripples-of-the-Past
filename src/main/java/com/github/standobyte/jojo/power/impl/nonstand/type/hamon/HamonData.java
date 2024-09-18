@@ -205,19 +205,11 @@ public class HamonData extends TypeSpecificData {
         waterWalkingThisTick = false;
     }
     
+    public static final float ENERGY_TICK_DOWN_AMOUNT = 20;
     public float tickEnergy() {
         LivingEntity user = power.getUser();
         if (power.getHeldAction() == ModHamonActions.HAMON_BREATH.get() && user.getAirSupply() >= user.getMaxAirSupply()) {
-            ticksMaskWithNoHamonBreath = 0;
-            if (user.level.isClientSide() && power.getEnergy() > 0 && !playedEnergySound) {
-                ClientTickingSoundsHelper.playHamonEnergyConcentrationSound(user, 1.0F, ModHamonActions.HAMON_BREATH.get());
-                playedEnergySound = true;
-                if (user == ClientUtil.getClientPlayer()) {
-                    BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).resetRedHighlight();
-                }
-            }
-            updateNoEnergyDecayTicks();
-            return power.getEnergy() + getMaxBreathStability() / fullEnergyTicks();
+            return power.getEnergy() + tickHamonBreath(ModHamonActions.HAMON_BREATH.get());
         }
         else {
             if (isUserWearingBreathMask()) {
@@ -237,12 +229,26 @@ public class HamonData extends TypeSpecificData {
                 return power.getEnergy();
             }
             else if (JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).hamonEnergyTicksDown.get()) {
-                return power.getEnergy() - 20F;
+                return power.getEnergy() - ENERGY_TICK_DOWN_AMOUNT;
             }
             else {
                 return power.getEnergy();
             }
         }
+    }
+    
+    public float tickHamonBreath(Action<?> hamonBreathAction) {
+        LivingEntity user = power.getUser();
+        ticksMaskWithNoHamonBreath = 0;
+        if (user.level.isClientSide() && power.getEnergy() > 0 && !playedEnergySound) {
+            ClientTickingSoundsHelper.playHamonEnergyConcentrationSound(user, 1.0F, hamonBreathAction);
+            playedEnergySound = true;
+            if (user == ClientUtil.getClientPlayer()) {
+                BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).resetRedHighlight();
+            }
+        }
+        updateNoEnergyDecayTicks();
+        return getMaxBreathStability() / fullEnergyTicks();
     }
 
     public float getMaxEnergy() {
