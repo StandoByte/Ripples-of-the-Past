@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
@@ -24,9 +25,12 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClStopRebuffPacket;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.general.LazySupplier;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
+import com.github.standobyte.jojo.util.mc.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.LivingEntity;
@@ -66,12 +70,9 @@ public class HamonRebuffOverdrive extends HamonAction implements IPlayerAction<H
         if (curRebuff.isPresent()) {
             HamonRebuffOverdrive.Instance rebuff = curRebuff.get();
             if (!world.isClientSide()) {
-                if (rebuff.getPhase() == Phase.WINDUP) {
-                    float cdRatio = (float) rebuff.getTick() / Instance.WINDUP_TICKS;
-                    cdRatio *= cdRatio;
-                    rebuff.actionCooldown = (int) (rebuff.actionCooldown * cdRatio);
+                if (rebuff.canCancel()) {
+                    rebuff.cancel();
                 }
-                rebuff.stopAction();
             }
         }
         else {
@@ -94,7 +95,7 @@ public class HamonRebuffOverdrive extends HamonAction implements IPlayerAction<H
     @Override
     public String getTranslationKey(INonStandPower power, ActionTarget target) {
         String key = super.getTranslationKey(power, target);
-        if (getCurRebuff(power.getUser()).isPresent()) {
+        if (getCurRebuff(power.getUser()).map(rebuff -> rebuff.canCancel()).orElse(false)) {
             key += ".cancel";
         }
         return key;
@@ -104,7 +105,7 @@ public class HamonRebuffOverdrive extends HamonAction implements IPlayerAction<H
             new LazySupplier<>(() -> makeIconVariant(this, "_cancel"));
     @Override
     public ResourceLocation getIconTexturePath(@Nullable INonStandPower power) {
-        if (power != null && getCurRebuff(power.getUser()).isPresent()) {
+        if (power != null && getCurRebuff(power.getUser()).map(rebuff -> rebuff.canCancel()).orElse(false)) {
             return cancelTex.get();
         }
         else {
@@ -130,8 +131,8 @@ public class HamonRebuffOverdrive extends HamonAction implements IPlayerAction<H
     
     public static class Instance extends ContinuousActionInstance<Instance, INonStandPower> {
         private LivingEntity counterTarget;
+        private boolean canAttack = true;
         private boolean didAttack = false;
-//        private boolean manualEarlyCounter = false;
         private Optional<HamonData> userHamon;
         private int actionCooldown;
         
@@ -154,16 +155,26 @@ public class HamonRebuffOverdrive extends HamonAction implements IPlayerAction<H
         }
         
         private static final int WINDUP_TICKS = 14;
-        public static final int COUNTER_TIMING_WINDOW = 6;
-//        public static final int MANUAL_TIMING_WINDOW = 4;
+        public static final int COUNTER_TIMING_WINDOW = 7;
         private static final int PERFORM_TICKS = 10;
         private static final int RECOVERY_TICKS = 16;
         
         @Override
         public void playerTick() {
+            if (!(MCUtil.isHandFree(user, Hand.MAIN_HAND) && MCUtil.isHandFree(user, Hand.OFF_HAND))) {
+                canAttack = false;
+            }
+            
             switch (getPhase()) {
             case WINDUP:
-                if (getTick() >= WINDUP_TICKS) {
+                if (!user.level.isClientSide() && !canAttack) {
+                    cancel();
+                    return;
+                }
+                if (getTick() == WINDUP_TICKS - 3) {
+                    swing();
+                }
+                else if (getTick() >= WINDUP_TICKS) {
                     setPhase(Phase.PERFORM);
                 }
                 break;
@@ -188,129 +199,144 @@ public class HamonRebuffOverdrive extends HamonAction implements IPlayerAction<H
         
         @Override
         protected void onPhaseSet(Phase oldPhase, Phase nextPhase) {
-            if (!user.level.isClientSide()) {
-                if (nextPhase == Phase.PERFORM && !didAttack) {
-                    doRegularAttack();
+            switch (nextPhase) {
+            case PERFORM:
+                if (!didAttack) {
+                    if (!user.level.isClientSide()) {
+                        // TODO if there is a melee mob that is REALLY close (doesn't have to be aimed at, just in a counter angle), 
+                        //    full counter it anyway, their ai is really f-ing annoying
+                        // TODO also full counter if a mob is just trying to hit but can't deal damage (you can clearly see the f-ing zombie hand swing)
+                        LivingEntity fullCounterAnyway = null;
+                        if (fullCounterAnyway != null) {
+                            doCounterAttack(fullCounterAnyway);
+                        }
+
+                        // TODO aim
+                        LivingEntity aimTarget = null;
+                        if (aimTarget != null) {
+                            punch(aimTarget, false);
+                        }
+                    }
                 }
-                else if (nextPhase == Phase.RECOVERY && !didAttack) {
-                    JojoModUtil.sayVoiceLine(user, ModSounds.JOSEPH_OH_NO.get(), null, 1, 1, 0, true);
-                }
+                break;
+            case RECOVERY:
+//                if (!user.level.isClientSide() && !didAttack) {
+//                    JojoModUtil.sayVoiceLine(user, ModSounds.JOSEPH_OH_NO.get(), null, 1, 1, 0, true);
+//                }
+                break;
+            default:
+                break;
             }
-            else if (user instanceof PlayerEntity) {
+            
+            if (user.level.isClientSide() && user instanceof PlayerEntity) {
                 setAnim((PlayerEntity) user, nextPhase);
             }
         }
         
-//        public boolean setEarlyManual() {
-//            if (getPhase() == Phase.WINDUP && !manualEarlyCounter) {
-//                manualEarlyCounter = true;
-//                tick = WINDUP_TICKS - MANUAL_TIMING_WINDOW;
-//                
-//                if (!user.level.isClientSide()) {
-//                    PacketManager.sendToClientsTrackingAndSelf(TrPlayerContinuousActionPacket.specialPacket(user.getId(), 
-//                            TrPlayerContinuousActionPacket.PacketType.REBUFF_MANUAL), user);
-//                }
-//                else if (user instanceof PlayerEntity) {
-//                    ModPlayerAnimations.rebuffOverdrive.setManualCounterAnim((PlayerEntity) user);
-//                }
-//                
-//                return true;
-//            }
-//            return false;
-//        }
         
         @Override
         public boolean cancelIncomingDamage(DamageSource dmgSource, float dmgAmount) {
-            boolean canCounter = DamageUtil.isMeleeAttack(dmgSource) && dmgSource.getDirectEntity() instanceof LivingEntity;
-            if (canCounter) {
-                if (doCounterAttack((LivingEntity) dmgSource.getDirectEntity())) {
-                    setPhase(Phase.PERFORM, true);
-                    return true;
+            LivingEntity meleeAttacker = DamageUtil.getMeleeAttacker(dmgSource);
+            boolean canCounterStand = isUsingHermitPurple(user);
+            
+            if (getPhase() == Phase.PERFORM) {
+                return true;
+            }
+            
+            if (meleeAttacker != null && DamageUtil.isShieldBlockAngle(user, dmgSource)
+                    && (canCounterStand || !(dmgSource instanceof IStandDamageSource))) {
+                if (isCounterTiming()) {
+                    LivingEntity dealDamageTo = (LivingEntity) dmgSource.getDirectEntity();
+                    if (canCounterStand && dealDamageTo instanceof StandEntity && ((StandEntity) dealDamageTo).transfersDamage()) {
+                        dealDamageTo = StandUtil.getStandUser(dealDamageTo);
+                    }
+                    if (doCounterAttack(dealDamageTo)) {
+                        setPhase(Phase.PERFORM, true);
+                        return true;
+                    }
+                }
+                else {
+                    JojoModUtil.sayVoiceLine(user, ModSounds.JOSEPH_OH_NO.get(), null, 1, 1, 0, true);
+                    stopAction();
+                    return false;
                 }
             }
             else {
                 // TODO protection
             }
-            return this.getPhase() == Phase.PERFORM;
+            
+            return super.cancelIncomingDamage(dmgSource, dmgAmount);
         }
         
         public boolean isCounterTiming() {
             return getPhase() == Phase.WINDUP && getTick() >= WINDUP_TICKS - COUNTER_TIMING_WINDOW;
         }
         
+        public boolean addSparksThisTick() {
+            return getPhase() == Phase.WINDUP && getTick() >= WINDUP_TICKS - COUNTER_TIMING_WINDOW + 1;
+        }
+        
         private boolean doCounterAttack(LivingEntity target) {
             if (!didAttack && getPhase() == Phase.WINDUP) {
-                if (!isCounterTiming()) {
-                    JojoModUtil.sayVoiceLine(user, ModSounds.JOSEPH_OH_NO.get(), null, 1, 1, 0, true);
-                    stopAction();
-                    return false;
-                }
-                
                 this.counterTarget = target;
-                
                 JojoModUtil.sayVoiceLine(user, ModSounds.JOSEPH_REBUFF_OVERDRIVE.get());
-                
                 punch(counterTarget, true);
-                didAttack = true;
                 return true;
             }
             
             return false;
         }
         
-        private boolean doRegularAttack() {
-            // TODO if there is a melee mob that is REALLY close (doesn't have to be aimed at, just in a counter angle), 
-            //    full counter it anyway, their ai is really f-ing annoying
-            // TODO also full counter if a mob is just trying to hit but can't deal damage (you can clearly see the f-ing zombie hand swing)
-            LivingEntity fullCounterAnyway = null;
-            if (fullCounterAnyway != null) {
-                return doCounterAttack(fullCounterAnyway);
-            }
-            
-            // TODO aim
-            LivingEntity aimTarget = null;
-            if (aimTarget != null) {
-                punch(aimTarget, false);
-                didAttack = true;
-                return true;
-            }
-            
-            user.swing(Hand.MAIN_HAND, true);
-            return false;
-        }
         
         private void punch(LivingEntity target, boolean properCounter) {
-            float damage = properCounter ? 6.0f : 3.0f;
+            if (!canAttack) return;
+            
+            float damage = properCounter ? 8.0f : 4.0f;
             float knockback = properCounter ? 2.0f : 0.5f;
             boolean canShock = properCounter;
-            float soundVolume = properCounter ? 1.0f : 0.5f;
             
-            if (DamageUtil.dealHamonDamage(counterTarget, damage, user, null)) {
-                counterTarget.level.playSound(null, counterTarget.getX(), counterTarget.getEyeY(), counterTarget.getZ(), 
-                        ModSounds.HAMON_REBUFF_PUNCH.get(), counterTarget.getSoundSource(), soundVolume, 1.0f);
-                counterTarget.knockback(knockback, user.getX() - counterTarget.getX(), user.getZ() - counterTarget.getZ());
+            HamonSunlightYellowOverdrive.doMeleeAttack(user, target);
+            
+            if (DamageUtil.dealHamonDamage(target, damage, user, null)) {
+                if (properCounter) {
+                    target.level.playSound(null, target.getX(), target.getEyeY(), target.getZ(), 
+                            ModSounds.HAMON_REBUFF_PUNCH.get(), target.getSoundSource(), 1.0f, 1.0f);
+                }
+                target.knockback(knockback, user.getX() - target.getX(), user.getZ() - target.getZ());
                 if (canShock && userHamon.map(hamon -> hamon.isSkillLearned(ModHamonSkills.HAMON_SHOCK.get())).orElse(false)) {
-                    counterTarget.addEffect(new EffectInstance(ModStatusEffects.HAMON_SHOCK.get(), 50, 0, false, false, true));
+                    target.addEffect(new EffectInstance(ModStatusEffects.HAMON_SHOCK.get(), 50, 0, false, false, true));
                 }
             }
-            if (!properCounter) {
-                // TODO low pitch swing sound
+            
+            swing();
+            if (user instanceof PlayerEntity) {
+                ((PlayerEntity) user).resetAttackStrengthTicker();
             }
-
-            user.swing(Hand.MAIN_HAND, true);
+            didAttack = true;
             actionCooldown = properCounter ? 0 : actionCooldown / 2;
         }
         
-        private void setAnim(PlayerEntity abstrClientPlayer, Phase phase) {
-            switch (phase) {
-            case WINDUP:
-                ModPlayerAnimations.rebuffOverdrive.setWindupAnim((PlayerEntity) user);
-                break;
-            case PERFORM:
-                ModPlayerAnimations.rebuffOverdrive.setAttackAnim((PlayerEntity) user);
-                break;
-            default:
-                break;
+        private boolean didSwing = false;
+        private void swing() {
+            if (!didSwing) {
+                user.level.playSound(null, user.getX(), user.getEyeY(), user.getZ(), 
+                        ModSounds.HAMON_SYO_SWING.get(), user.getSoundSource(), 1.0f, 0.5f);
+                user.swing(Hand.MAIN_HAND, true);
+                didSwing = true;
+            }
+        }
+        
+        
+        public boolean canCancel() {
+            return getPhase() == Phase.WINDUP;
+        }
+        
+        public void cancel() {
+            if (getPhase() == Phase.WINDUP) {
+                float cdRatio = (float) getTick() / Instance.WINDUP_TICKS;
+                cdRatio *= cdRatio;
+                actionCooldown = (int) (actionCooldown * cdRatio);
+                stopAction();
             }
         }
         
@@ -336,11 +362,34 @@ public class HamonRebuffOverdrive extends HamonAction implements IPlayerAction<H
             return false;
         }
         
+        private void setAnim(PlayerEntity abstrClientPlayer, Phase phase) {
+            switch (phase) {
+            case WINDUP:
+                ModPlayerAnimations.rebuffOverdrive.setWindupAnim((PlayerEntity) user);
+                break;
+            case PERFORM:
+                ModPlayerAnimations.rebuffOverdrive.setAttackAnim((PlayerEntity) user);
+                break;
+            default:
+                break;
+            }
+        }
+        
         @Override
         protected Instance getThis() {
             return this;
         }
         
+    }
+    
+    private static boolean isUsingHermitPurple(LivingEntity user) {
+        return IStandPower.getStandPowerOptional(user).map(power -> {
+            if (power.hasPower() && power.isActive()) {
+                return /*power.getType() == ModStands.HERMIT_PURPLE.get() || */
+                        power.getType().getRegistryName().getPath().equals("hermito_purple");
+            }
+            return false;
+        }).orElse(false);
     }
     
     public static void onWASDInput(LivingEntity user) {

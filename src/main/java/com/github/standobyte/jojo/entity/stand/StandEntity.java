@@ -300,15 +300,15 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         return false;
     }
 
-    protected boolean transfersDamage() {
+    public boolean transfersDamage() {
         return true;
     }
 
-    protected boolean standCanHaveNoPhysics() {
+    public boolean standCanHaveNoPhysics() {
         return true;
     }
 
-    protected boolean standHasNoGravity() {
+    public boolean standHasNoGravity() {
         return true;
     }
 

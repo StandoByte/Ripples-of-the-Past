@@ -44,13 +44,15 @@ public class TrPlayerContinuousActionPacket {
     }
     
     public static TrPlayerContinuousActionPacket specialPacket(int entityId, PacketType type) {
+        if (type == PacketType.SET_ACTION || type == PacketType.SET_PHASE) {
+            throw new IllegalArgumentException();
+        }
         return new TrPlayerContinuousActionPacket(entityId, type, null, null);
     }
     
     public enum PacketType {
         SET_ACTION,
-        SET_PHASE,
-        REBUFF_MANUAL
+        SET_PHASE
     }
     
     
@@ -105,13 +107,6 @@ public class TrPlayerContinuousActionPacket {
                         break;
                     case SET_PHASE:
                         cap.getContinuousAction().ifPresent(action -> action.setPhase(msg.phase, true));
-                        break;
-                    case REBUFF_MANUAL:
-//                        cap.getContinuousAction().ifPresent(action -> {
-//                            if (action instanceof HamonRebuffOverdrive.Instance) {
-//                                ((HamonRebuffOverdrive.Instance) action).setEarlyManual();
-//                            }
-//                        });
                         break;
                     }
                 });

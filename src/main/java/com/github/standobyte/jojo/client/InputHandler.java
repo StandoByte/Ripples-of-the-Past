@@ -729,7 +729,7 @@ public class InputHandler {
         return result;
     }
     
-    private void mcPlayerAttack() {
+    public void mcPlayerAttack() {
         if (mc.hitResult != null && !mc.player.isHandsBusy() && mc.hitResult.getType() == RayTraceResult.Type.ENTITY) {
             mc.gameMode.attack(mc.player, ((EntityRayTraceResult) mc.hitResult).getEntity());
         }
