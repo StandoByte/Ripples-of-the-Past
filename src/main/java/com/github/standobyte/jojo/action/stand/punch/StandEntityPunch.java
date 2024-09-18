@@ -250,15 +250,6 @@ public class StandEntityPunch implements IPunch {
             hp = targetLiving.getHealth();
             
             dmgSource.setStandInvulTicks(standInvulTime);
-            
-            if (target instanceof StandEntity) {
-                StandEntity targetStand = (StandEntity) target;
-                
-                if (disablesBlocking() && stand.getRandom().nextFloat() < disableBlockingChance) {
-                    targetStand.breakStandBlocking(StandStatFormulas.getBlockingBreakTicks(targetStand.getDurability()));
-                }
-            }
-            
             damage = DamageUtil.addArmorPiercing(damage, armorPiercing, targetLiving);
             
             final float dmg = damage;
@@ -270,7 +261,10 @@ public class StandEntityPunch implements IPunch {
         if (damage <= 0) {
             return false;
         }
-
+        
+        if (onAttack(stand, target, dmgSource, damage)) {
+            return false;
+        }
         boolean hurt = stand.hurtTarget(target, dmgSource, damage);
         
         if (targetLiving != null) {
@@ -299,6 +293,16 @@ public class StandEntityPunch implements IPunch {
         knockbackTarget(targetLiving);
         
         return hurt;
+    }
+    
+    protected boolean onAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, float damage) {
+        if (target instanceof StandEntity) {
+            StandEntity targetStand = (StandEntity) target;
+            if (disablesBlocking() && stand.getRandom().nextFloat() < disableBlockingChance) {
+                targetStand.breakStandBlocking(StandStatFormulas.getBlockingBreakTicks(targetStand.getDurability()));
+            }
+        }
+        return false;
     }
     
     private void knockbackTarget(@Nullable LivingEntity targetAsLiving) {

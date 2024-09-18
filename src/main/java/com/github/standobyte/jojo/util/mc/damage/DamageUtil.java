@@ -300,6 +300,10 @@ public class DamageUtil {
         }
     }
     
+    public static boolean isMeleeAttack(DamageSource dmgSource) {
+        return dmgSource.getEntity() != null && dmgSource.getDirectEntity() != null && dmgSource.getEntity().is(dmgSource.getDirectEntity());
+    }
+    
     public static void knockback(LivingEntity target, float strength, float yRotDeg) {
         target.knockback(strength, 
                 (double) MathHelper.sin(yRotDeg * MathUtil.DEG_TO_RAD), 

@@ -11,6 +11,7 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
@@ -179,6 +180,8 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     private IPunch lastPunch;
     private BarrageSwingsHolder<?, ?> barrageSwings;
     private final BarrageHitSoundHandler barrageSounds;
+    
+    public ActionTarget clFrontTarget = ActionTarget.EMPTY;
 
     public float lastRenderTick = 0;
     public float lastMotionTiltTick = -1;
@@ -1444,7 +1447,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         stopTask(false);
     }
     
-    protected void stopTask(boolean stopNonCancelable) {
+    public void stopTask(boolean stopNonCancelable) {
         stopTask(null, stopNonCancelable);
     }
     
@@ -1671,6 +1674,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     public boolean punch(StandEntityTask task, IHasStandPunch punch, ActionTarget target) {
         if (!level.isClientSide()) {
             ActionTarget finalTarget = aimWithThisOrUser(getAimDistance(getUser()), target);
+            JojoMod.LOGGER.debug("{} {}", target.getType(), finalTarget.getType());
             target = finalTarget.getType() != TargetType.EMPTY && isTargetInReach(finalTarget) ? finalTarget : ActionTarget.EMPTY;
             setTaskTarget(target);
         }
@@ -1812,10 +1816,8 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         
         LivingEntity user = getUser();
         if (user != null) {
-            return !entity.is(user) && user.canAttack(entity)
-                    && !(entity instanceof AnimalEntity && entity.isPassengerOfSameVehicle(user))
-                    && !(user instanceof PlayerEntity && entity instanceof PlayerEntity
-                            && !((PlayerEntity) user).canHarmPlayer((PlayerEntity) entity));
+            boolean canHarm = MCUtil.canHarm(user, entity);
+            return canHarm && !(entity instanceof AnimalEntity && entity.isPassengerOfSameVehicle(user));
         }
         
         return true;

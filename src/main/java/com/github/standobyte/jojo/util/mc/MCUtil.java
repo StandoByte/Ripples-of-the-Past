@@ -105,6 +105,7 @@ import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.potion.Potions;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -652,15 +653,21 @@ public class MCUtil {
     
     
     
-    public static void multipliedAttrModifier(LivingEntity entity, Attribute attribute, AttributeModifier modifier, float mult) {
-        ModifiableAttributeInstance attributeInstance = entity.getAttribute(attribute);
-        if (attributeInstance != null) {
-            attributeInstance.removeModifier(modifier);
-            if (mult != 0) {
-                attributeInstance.addTransientModifier(new AttributeModifier(modifier.getId(), 
-                        modifier.getName() + " " + mult, modifier.getAmount() * mult, modifier.getOperation()));
-            }
+    public static boolean canHarm(LivingEntity attacker, LivingEntity target) {
+        if (attacker.is(target)) {
+            return false;
         }
+        if (!attacker.canAttack(target)) {
+            return false;
+        }
+        
+        Team team1 = attacker.getTeam();
+        Team team2 = target.getTeam();
+        if (team1 != null && team1.isAlliedTo(team2) && !team1.isAllowFriendlyFire()) {
+            return false;
+        }
+        
+        return true;
     }
     
     
@@ -841,6 +848,17 @@ public class MCUtil {
         // TODO compatibility with Tinkers Construct
         
         return false;
+    }
+    
+    public static void multipliedAttrModifier(LivingEntity entity, Attribute attribute, AttributeModifier modifier, float mult) {
+        ModifiableAttributeInstance attributeInstance = entity.getAttribute(attribute);
+        if (attributeInstance != null) {
+            attributeInstance.removeModifier(modifier);
+            if (mult != 0) {
+                attributeInstance.addTransientModifier(new AttributeModifier(modifier.getId(), 
+                        modifier.getName() + " " + mult, modifier.getAmount() * mult, modifier.getOperation()));
+            }
+        }
     }
     
     public static double calcValueWithoutModifiers(ModifiableAttributeInstance entityAttribute, UUID... modifierIds) {

@@ -6,6 +6,7 @@ import com.github.standobyte.jojo.client.playeranim.anim.interfaces.BasicToggleA
 import com.github.standobyte.jojo.client.playeranim.anim.interfaces.HamonMeditationPoseAnim;
 import com.github.standobyte.jojo.client.playeranim.anim.interfaces.HamonSYOBAnim;
 import com.github.standobyte.jojo.client.playeranim.anim.interfaces.PlayerBarrageAnim;
+import com.github.standobyte.jojo.client.playeranim.anim.interfaces.RebuffOverdriveAnim;
 import com.github.standobyte.jojo.client.playeranim.anim.interfaces.WallClimbAnim;
 
 import net.minecraft.util.ResourceLocation;
@@ -17,7 +18,7 @@ public class ModPlayerAnimations {
     public static WallClimbAnim wallClimbing;
     public static HamonSYOBAnim syoBarrage;
     public static BasicToggleAnim sendoWaveKick;
-    public static BasicToggleAnim rebuffOverdrive;
+    public static RebuffOverdriveAnim rebuffOverdrive;
 
     /** 
      * This string must match the full name of the class and the package it's in.<br>
@@ -61,9 +62,10 @@ public class ModPlayerAnimations {
                 "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.hamon.KosmXSendoWaveKickHandler",
                 new ResourceLocation(JojoMod.MOD_ID, "sendo_wave_kick"), 1);
         
-        rebuffOverdrive = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
+        rebuffOverdrive = PlayerAnimationHandler.getPlayerAnimator().registerAnimLayer(
                 "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.hamon.KosmXRebuffOverdriveHandler",
-                new ResourceLocation(JojoMod.MOD_ID, "rebuff_overdrive"), 1);
+                new ResourceLocation(JojoMod.MOD_ID, "rebuff_overdrive"), 1, 
+                RebuffOverdriveAnim.NoPlayerAnimator::new);
         
         
         

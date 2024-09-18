@@ -1,9 +1,12 @@
 package com.github.standobyte.jojo.client.ui.standstats;
 
-import java.util.Arrays;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import javax.annotation.Nonnull;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -22,6 +25,7 @@ import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.ITextComponent;
@@ -42,7 +46,10 @@ public class StandStatsRenderer {
      * "E" - 0-5
      * "∅" - 0
      */
-    public static List<String> STAT_LETTERS = Arrays.asList("∅", "E", "D", "C", "B", "A");
+    public static List<String> STAT_LETTERS = Util.make(new ArrayList<>(), list -> {
+        Collections.addAll(list, "∅", "E", "D", "C", "B", "A");
+    });
+    public static final String REFERENCE_MARK = "\u203B";
     
     public static String getRankFromConvertedValue(double value) {
         int rankIndex;
@@ -121,19 +128,56 @@ public class StandStatsRenderer {
     }
     
     
-    private static final Map<ResourceLocation, OverrideCosmeticStat> OVERRIDE_STAT = new HashMap<>();
-    public static void overrideCosmeticStats(ResourceLocation standId, OverrideCosmeticStat override) {
+    private static final Map<ResourceLocation, ICosmeticStandStats> OVERRIDE_STAT = new HashMap<>();
+    public static void overrideCosmeticStats(ResourceLocation standId, ICosmeticStandStats override) {
         OVERRIDE_STAT.put(standId, override);
     }
     
-    public static interface OverrideCosmeticStat {
+    public static interface ICosmeticStandStats {
+        /*
+         *  These methods can be used in conjunction to render different stats for something like Sub-Stands or Stand Acts:
+         *  Create a few more instances of ICosmeticStandStats for each Sub-Stands/Act/etc. and keep them as final fields in the main instance.
+         *  Each time the pause screen is opened, choose one of them randomly (or on specific conditions, 
+         *  like having SHA summoned to render its stats) and set it to another (non-final) field.
+         *  Then return that randomly chosen instance in getSubStandStats().
+         */
+        default void onPauseScreenOpened() {}
         
-        default double newValue(StandStat stat, IStandPower standData, double curConvertedValue) {
-            return curConvertedValue;
+        @Nonnull
+        default ICosmeticStandStats getSubStandStats() {
+            return this;
         }
         
-        default String newRankLetter(StandStat stat, IStandPower standData, double curConvertedValue, String curRankLetter) {
-            return curRankLetter;
+        
+        default void preStatsRenderFrame(IStandPower standData, float partialTick) {}
+        
+        default double statConvertedValue(StandStat stat, IStandPower standData, StandStats stats, float statLeveling) {
+            return stat.getValueConverted(standData, stats, statLeveling);
+        }
+        
+        default String statRankLetter(StandStat stat, IStandPower standData, double statConvertedValue) {
+            return getRankFromConvertedValue(statConvertedValue);
+        }
+        
+        default ITextComponent standName(IStandPower standData) {
+            return standData.getName();
+        }
+        
+        default ResourceLocation standIcon(IStandPower standData) {
+            return standData.getType().getIconTexture(standData);
+        }
+        
+        default List<ITextComponent> statTooltip(StandStat stat, IStandPower standData) {
+            List<ITextComponent> tooltip = new ArrayList<>();
+            tooltip.add(stat.name);
+            return tooltip;
+        }
+        
+        
+        public static final ICosmeticStandStats DEFAULT = new ICosmeticStandStats() {};
+        public static ICosmeticStandStats getHandler(IStandPower standData) {
+            ICosmeticStandStats handler = standData.hasPower() ? OVERRIDE_STAT.getOrDefault(standData.getType().getRegistryName(), DEFAULT) : DEFAULT;
+            return handler;
         }
     }
     
@@ -163,6 +207,8 @@ public class StandStatsRenderer {
             
             StandStats stats = power.getType().getStats();
             float statLeveling = power.getStatsDevelopment();
+            ICosmeticStandStats override = ICosmeticStandStats.getHandler(power).getSubStandStats();
+            override.preStatsRenderFrame(power, partialTick);
             
             int color = StandSkinsManager.getUiColor(power);
             int[] rgb = ClientUtil.rgbInt(color);
@@ -172,13 +218,8 @@ public class StandStatsRenderer {
             
             for (int i = 0; i < statVal.length; i++) {
                 StandStat stat = StandStat.values()[i];
-                statVal[i] = stat.getValueConverted(power, stats, statLeveling);
-                statRank[i] = getRankFromConvertedValue(statVal[i]);
-                OverrideCosmeticStat override = OVERRIDE_STAT.get(power.getType().getRegistryName());
-                if (override != null) {
-                    statVal[i] = Math.max(override.newValue(stat, power, statVal[i]), 0);
-                    statRank[i] = override.newRankLetter(stat, power, statVal[i], getRankFromConvertedValue(statVal[i]));
-                }
+                statVal[i] = override.statConvertedValue(stat, power, stats, statLeveling);
+                statRank[i] = override.statRankLetter(stat, power, statVal[i]);
             }
 
             float xCenter = x + statsWidth / 2f;
@@ -266,7 +307,7 @@ public class StandStatsRenderer {
             
             // stand name and user
             if (tick >= HEXAGON_TICK_START) {
-                List<IReorderingProcessor> standName = mc.font.split(new TranslationTextComponent("jojo.stand_stat.stand_name", power.getName()), maxTextWidth);
+                List<IReorderingProcessor> standName = mc.font.split(new TranslationTextComponent("jojo.stand_stat.stand_name", override.standName(power)), maxTextWidth);
                 List<IReorderingProcessor> standUser = mc.font.split(new TranslationTextComponent("jojo.stand_stat.stand_user", mc.player.getDisplayName()), maxTextWidth);
                 int width = 0;
                 if (standName.size() > 1 || standUser.size() > 1) {
@@ -293,7 +334,7 @@ public class StandStatsRenderer {
                     standIconY -= 5;
                 }
     
-                mc.getTextureManager().bind(power.getType().getIconTexture(power));
+                mc.getTextureManager().bind(override.standIcon(power));
                 AbstractGui.blit(matrixStack, x + statsWidth - 18 - width, standIconY, 0, 0, 16, 16, 16, 16);
                 ClientUtil.drawLines(matrixStack, mc.font, standName, 
                         x + statsWidth - width, standNameY, 0, color, true, true);
@@ -330,10 +371,12 @@ public class StandStatsRenderer {
                 String statRankLetter = statRank[i];
                 
                 if (tick_ < letterFullTick) {
-                    int letterIndex = STAT_LETTERS.indexOf(statRankLetter);
+                    int letterIndex = "∞".equals(statRankLetter) ? STAT_LETTERS.size() : STAT_LETTERS.indexOf(statRankLetter);
                     if (letterIndex > 1) {
                         int index = letterIndex - (int) ((letterFullTick - tick_) * letterIndex / letterTicks);
-                        statRankLetter = STAT_LETTERS.get(Math.max(1, index));
+                        if (index < STAT_LETTERS.size()) {
+                            statRankLetter = STAT_LETTERS.get(Math.max(1, index));
+                        }
                     }
                 }
                 float letterAlpha = tick_ >= letterFullTick ? 1 : 0.25f + 0.75f * 
@@ -343,15 +386,17 @@ public class StandStatsRenderer {
                 ITextComponent rank = new StringTextComponent(statRankLetter).withStyle(TextFormatting.BOLD);
                 int letterWidth = mc.font.width(rank);
                 
-                if ("∅".equals(statRankLetter)) {
-                    mc.textureManager.bind(STAND_STATS_UI);
-                    if (invertBnW) RenderSystem.color4f(1, 1, 1, letterAlpha);
-                    else           RenderSystem.color4f(0, 0, 0, letterAlpha);
-                    RenderSystem.enableBlend();
-                    BlitFloat.blitFloat(matrixStack, statX - letterWidth / 2, statY, 0, 504, 8, 7, 512, 512);
-                    RenderSystem.color4f(1, 1, 1, 1);
-                }
-                else {
+                switch (statRankLetter) {
+                case "∅":
+                    renderLetterFromTex(matrixStack, letterAlpha, invertBnW, statX, statY, letterWidth, 0, 504);
+                    break;
+                case "∞":
+                    renderLetterFromTex(matrixStack, letterAlpha, invertBnW, statX, statY, letterWidth, 12, 504);
+                    break;
+                case REFERENCE_MARK:
+                    renderLetterFromTex(matrixStack, letterAlpha, invertBnW, statX + 1f, statY, letterWidth, 24, 504);
+                    break;
+                default:
                     ClientUtil.drawCenteredStringNoShadow(matrixStack, mc.font, rank, 
                             statX, statY, 
                             ClientUtil.addAlpha(invertBnW ? 0xFFFFFF : 0x000000, letterAlpha));
@@ -359,13 +404,23 @@ public class StandStatsRenderer {
                 
                 // stat name tooltip
                 if (mouseX >= statX - letterWidth / 2 && mouseX <= statX + letterWidth / 2 && mouseY >= statY && mouseY <= statY + mc.font.lineHeight) {
-                    GuiUtils.drawHoveringText(matrixStack, Arrays.asList(stat.name), 
+                    GuiUtils.drawHoveringText(matrixStack, override.statTooltip(stat, power), 
                             mouseX, mouseY, screenWidth, screenHeight, -1, mc.font);
                 }
             }
             
             matrixStack.popPose();
         });
+    }
+    
+    private static void renderLetterFromTex(MatrixStack matrixStack, float letterAlpha, boolean invertBnW, 
+            float statX, float statY, float letterWidth, int texX, int texY) {
+        Minecraft.getInstance().textureManager.bind(STAND_STATS_UI);
+        if (invertBnW) RenderSystem.color4f(1, 1, 1, letterAlpha);
+        else           RenderSystem.color4f(0, 0, 0, letterAlpha);
+        RenderSystem.enableBlend();
+        BlitFloat.blitFloat(matrixStack, statX - letterWidth / 2, statY, texX, texY, 8, 7, 512, 512);
+        RenderSystem.color4f(1, 1, 1, 1);
     }
     
 

@@ -228,7 +228,7 @@ public class ModHamonSkills {
     public static final RegistryObject<CharacterTechniqueHamonSkill> REBUFF_OVERDRIVE = HAMON_SKILLS.register("rebuff_overdrive",
             () -> new CharacterTechniqueHamonSkill.Builder(RewardType.ATTACK)
             .unlocks(ModHamonActions.JOSEPH_REBUFF_OVERDRIVE)
-            .requiredSkill(SPEED_BOOST).requiredSkill(PROTECTION).build());
+            .requiredSkill(PROTECTION).build());
     
     public static final RegistryObject<CharacterHamonTechnique> CHARACTER_JOSEPH = HAMON_CHARACTER_TECHNIQUES.register("joseph", 
             () -> new CharacterHamonTechnique.Builder("joseph", Util.make(new ArrayList<>(), list -> {

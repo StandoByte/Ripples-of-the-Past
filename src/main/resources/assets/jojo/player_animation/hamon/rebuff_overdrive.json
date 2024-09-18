@@ -1,13 +1,12 @@
 {
     "name": "rebuff_overdrive",
     "author": "dikiytechies",
-    "description": "uses interpolation",
     "emote":{
         "isLoop": "false",
-        "returnTick": 2,
+        "returnTick": 14,
         "beginTick":0,
-        "endTick":28,
-        "stopTick":29,
+        "endTick":80,
+        "stopTick":80,
         "degrees":false,
         "moves":[
             

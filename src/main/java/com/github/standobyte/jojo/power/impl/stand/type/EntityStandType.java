@@ -26,8 +26,12 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 
 public class EntityStandType<T extends StandStats> extends StandType<T> {
@@ -121,12 +125,27 @@ public class EntityStandType<T extends StandStats> extends StandType<T> {
             if (JojoModUtil.isAnotherEntityTargeted(vanillaHitResult, stand)) {
                 return super.clientHitResult(power, cameraEntity, vanillaHitResult);
             }
-
-            RayTraceResult standHitResult = stand.precisionRayTrace(cameraEntity);
-
-            if (JojoModUtil.isAnotherEntityTargeted(standHitResult, stand)) {
-                return standHitResult;
+            
+            RayTraceResult miss = null;
+            RayTraceResult hitResult;
+            if (vanillaHitResult.getType() == RayTraceResult.Type.MISS) {
+                miss = vanillaHitResult;
+                hitResult = stand.precisionRayTrace(cameraEntity);
             }
+            else {
+                hitResult = vanillaHitResult;
+            }
+            
+            if (hitResult.getType() == RayTraceResult.Type.ENTITY && !JojoModUtil.isAnotherEntityTargeted(hitResult, stand)) {
+                if (miss == null) {
+                    Vector3d lookVec = cameraEntity.getLookAngle();
+                    Vector3d eyePos = cameraEntity.getEyePosition(1);
+                    miss = BlockRayTraceResult.miss(eyePos, Direction.getNearest(lookVec.x, lookVec.y, lookVec.z), new BlockPos(eyePos));
+                }
+                return miss;
+            }
+
+            return hitResult;
         }
         return super.clientHitResult(power, cameraEntity, vanillaHitResult);
     }

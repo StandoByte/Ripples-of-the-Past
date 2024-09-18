@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
+import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.barrage.StandCrySoundHandler;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
@@ -43,6 +44,11 @@ public abstract class ClientTickingSoundsHelper {
     }
     
     public static boolean playVoiceLine(Entity entity, SoundEvent soundEvent, SoundCategory category, float volume, float pitch, boolean interrupt) {
+        if (soundEvent == null || !ClientModSettings.getSettingsReadOnly().characterVoiceLines) {
+            voiceLineNotTriggered(entity);
+            return false;
+        }
+        
         Minecraft mc = Minecraft.getInstance();
         
         PlaySoundAtEntityEvent event = ForgeEventFactory.onPlaySoundAtEntity(mc.player, soundEvent, category, volume, pitch);
@@ -184,8 +190,13 @@ public abstract class ClientTickingSoundsHelper {
     
     public static <T extends Entity> void playStoppableEntitySound(T entity, SoundEvent sound, 
             float volume, float pitch, boolean looping, Predicate<T> playWhile) {
+        playStoppableEntitySound(entity, sound, volume, pitch, looping, playWhile, 0);
+    }
+    
+    public static <T extends Entity> void playStoppableEntitySound(T entity, SoundEvent sound, 
+            float volume, float pitch, boolean looping, Predicate<T> playWhile, int fadeOut) {
         Minecraft.getInstance().getSoundManager().play(new StoppableEntityTickableSound<T>(sound, entity.getSoundSource(), 
-                volume, pitch, looping, entity, playWhile));
+                volume, pitch, looping, entity, playWhile).withFadeOut(fadeOut));
     }
     
     public static void playHamonSparksSound(Entity entity, float volume, float pitch) {

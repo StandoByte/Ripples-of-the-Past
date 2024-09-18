@@ -107,7 +107,6 @@ public abstract class CustomParticlesHelper {
         }
     }
     
-    // FIXME !!!!!! particles at arms in 1st person
     public static void summonHamonAuraParticlesFirstPerson(IParticleData type, LivingEntity user, float particlesPerTick) {
         IAnimatedSprite sprite = getSavedSpriteSet(type.getType());
         if (sprite != null) {
@@ -116,9 +115,6 @@ public abstract class CustomParticlesHelper {
             
             for (HandSide handSide : HandSide.values()) {
                 GeneralUtil.doFractionTimes(() -> {
-//                    double x = random.nextDouble() * 0.25 - 0.5;   // -0.5 - -0.25
-//                    double y = random.nextDouble() * 0.75 + 0.125; // 0.125 - 0.875
-//                    double z = random.nextDouble() * 0.25 - 0.125; // -0.125 - 0.125
                     double x = random.nextDouble() * 0.5 - 0.625;
                     double y = random.nextDouble();
                     double z = random.nextDouble() * 0.5 - 0.25;
