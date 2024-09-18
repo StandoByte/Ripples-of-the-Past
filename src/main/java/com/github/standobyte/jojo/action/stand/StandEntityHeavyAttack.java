@@ -334,17 +334,28 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         protected boolean onAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, float damage) {
             if (target instanceof StandEntity) {
                 StandEntity targetStand = (StandEntity) target;
-                StandEntityAction opponentAttack = targetStand.getCurrentTaskAction();
-                if (opponentAttack instanceof StandEntityHeavyAttack
-                        && ((StandEntityHeavyAttack) opponentAttack).canBeParried()
-                        && targetStand.getCurrentTaskPhase().get() == StandEntityAction.Phase.WINDUP
-                        && targetStand.canBlockOrParryFromAngle(dmgSource.getSourcePosition())) {
-                    // TODO play the punch sound
-                    // TODO MORE spark particles
-                    // TODO "loser gets knocked back" what did i mean?
-                    // TODO a few ticks of freeze?
-                    targetStand.stopTask(true);
-                    // i should really do camera shake
+                StandEntityAction opponentTask = targetStand.getCurrentTaskAction();
+                if (opponentTask instanceof StandEntityHeavyAttack) {
+                    StandEntityHeavyAttack opponentAttack = (StandEntityHeavyAttack) opponentTask;
+                    if (opponentAttack.canBeParried()
+                            && targetStand.getCurrentTaskPhase().get() == StandEntityAction.Phase.WINDUP
+                            && targetStand.canBlockOrParryFromAngle(dmgSource.getSourcePosition())) {
+                        // TODO MORE spark particles
+                        // TODO "loser gets knocked back" what did i mean?
+                        // TODO a few ticks of freeze?
+                        targetStand.stopTask(true);
+                        
+                        SoundEvent thisSound = this.getImpactSound();
+                        if (thisSound != null) {
+                            stand.playSound(thisSound, 1.0F, 1.0F, null, targetStand.getEyePosition(1));
+                        }
+
+                        SoundEvent opponentSound = opponentAttack.punchSound != null ? opponentAttack.punchSound.get() : null;
+                        if (opponentSound != null) {
+                            targetStand.playSound(opponentSound, 1.0F, 1.0F, null, stand.getEyePosition(1));
+                        }
+                        // i should really do camera shake
+                    }
                 }
             }
             
