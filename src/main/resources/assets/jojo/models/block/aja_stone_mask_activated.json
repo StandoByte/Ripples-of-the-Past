@@ -3,7 +3,7 @@
   "textures": {
     "particle": "jojo:block/aja_stone_mask_face",
     "face": "jojo:block/aja_stone_mask_face",
-    "left": "jojo:block/tone_mask_left",
+    "left": "jojo:block/stone_mask_left",
     "right": "jojo:block/stone_mask_right",
     "up": "jojo:block/stone_mask_up",
     "down": "jojo:block/stone_mask_down"
