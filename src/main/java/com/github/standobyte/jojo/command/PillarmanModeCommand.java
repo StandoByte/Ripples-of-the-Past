@@ -50,7 +50,6 @@ public class PillarmanModeCommand {
                 Optional<PillarmanData> pillarmanOptional = power.getTypeSpecificData(ModPowers.PILLAR_MAN.get());
                 pillarmanOptional.ifPresent(pillarman -> {
                     pillarman.setEvolutionStage(stage);
-                    pillarman.setPillarmanBuffs(player, 1);
                     PillarmanPowerType.effectsCheck(power);
                 });
                 return pillarmanOptional.isPresent() ? 1 : 0;

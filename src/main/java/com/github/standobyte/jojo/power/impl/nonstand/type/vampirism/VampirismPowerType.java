@@ -117,7 +117,6 @@ public class VampirismPowerType extends NonStandPowerType<VampirismData> {
                 () -> Effects.MOVEMENT_SPEED,
                 () -> Effects.DIG_SPEED,
                 () -> Effects.JUMP,
-//                () -> Effects.DAMAGE_RESISTANCE,
                 () -> Effects.NIGHT_VISION,
 
                 () -> Effects.MOVEMENT_SLOWDOWN,

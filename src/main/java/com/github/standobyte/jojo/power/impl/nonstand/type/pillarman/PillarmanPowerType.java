@@ -42,14 +42,12 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
         return true;
     }
     
-    // TODO
     @Override
     public void onClear(INonStandPower power) {
-        power.getTypeSpecificData(this).get().setEvolutionStage(0);
-        power.getTypeSpecificData(this).get().setMode(Mode.NONE);
-        power.getTypeSpecificData(this).get().setPillarmanBuffs(power.getUser(), 0);
+        super.onClear(power);
+        power.getTypeSpecificData(this).ifPresent(PillarmanData::onClear);
         effectsCheck(power);
-        }
+    }
     
     public static void effectsCheck(INonStandPower power) {
         LivingEntity user = power.getUser();

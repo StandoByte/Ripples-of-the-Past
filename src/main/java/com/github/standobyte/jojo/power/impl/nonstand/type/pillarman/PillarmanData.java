@@ -49,18 +49,26 @@ public class PillarmanData extends TypeSpecificData {
     
     
 
-    // TODO
-    public void setPillarmanBuffs(LivingEntity entity, int rate) { // wtf is this
-        World world = entity.level;
-        int lvl = (world.getDifficulty().getId() * stage) * rate;
-        MCUtil.applyAttributeModifierMultiplied(entity, Attributes.ATTACK_DAMAGE, ATTACK_DAMAGE, lvl);
-        MCUtil.applyAttributeModifierMultiplied(entity, Attributes.ATTACK_SPEED, ATTACK_SPEED, lvl);
-        MCUtil.applyAttributeModifierMultiplied(entity, Attributes.MOVEMENT_SPEED, MOVEMENT_SPEED, lvl);
-        MCUtil.applyAttributeModifierMultiplied(entity, ForgeMod.SWIM_SPEED.get(), SWIMMING_SPEED, lvl);
-        MCUtil.applyAttributeModifierMultiplied(entity, Attributes.MAX_HEALTH, MAX_HEALTH, lvl);
-        if (stage > 0) {
-            ServerPlayerEntity user = (ServerPlayerEntity) entity;
-            PacketManager.sendToClient(new TrPillarmanDataPacket(entity.getId(), this), user);
+    private void updatePillarmanBuffs(LivingEntity entity) {
+        if (!entity.level.isClientSide()) {
+            World world = entity.level;
+            int lvl = (world.getDifficulty().getId() * stage);
+            MCUtil.applyAttributeModifierMultiplied(entity, Attributes.ATTACK_DAMAGE, ATTACK_DAMAGE, lvl);
+            MCUtil.applyAttributeModifierMultiplied(entity, Attributes.ATTACK_SPEED, ATTACK_SPEED, lvl);
+            MCUtil.applyAttributeModifierMultiplied(entity, Attributes.MOVEMENT_SPEED, MOVEMENT_SPEED, lvl);
+            MCUtil.applyAttributeModifierMultiplied(entity, ForgeMod.SWIM_SPEED.get(), SWIMMING_SPEED, lvl);
+            MCUtil.applyAttributeModifierMultiplied(entity, Attributes.MAX_HEALTH, MAX_HEALTH, lvl);
+        }
+    }
+    
+    void onClear() {
+        LivingEntity user = power.getUser();
+        if (!user.level.isClientSide()) {
+            MCUtil.removeAttributeModifier(user, Attributes.ATTACK_DAMAGE, ATTACK_DAMAGE);
+            MCUtil.removeAttributeModifier(user, Attributes.ATTACK_SPEED, ATTACK_SPEED);
+            MCUtil.removeAttributeModifier(user, Attributes.MOVEMENT_SPEED, MOVEMENT_SPEED);
+            MCUtil.removeAttributeModifier(user, ForgeMod.SWIM_SPEED.get(), SWIMMING_SPEED);
+            MCUtil.removeAttributeModifier(user, Attributes.MAX_HEALTH, MAX_HEALTH);
         }
     }
     
@@ -70,7 +78,7 @@ public class PillarmanData extends TypeSpecificData {
         if (!user.level.isClientSide()) {
             power.addEnergy(1000);
         }
-        setPillarmanBuffs(user, 1);
+        updatePillarmanBuffs(user);
         user.level.playSound(null, user, ModSounds.PILLAR_MAN_AWAKENING.get(), user.getSoundSource(), 1.0F, 1.0F);
         
         super.onPowerGiven(oldType, oldData);
@@ -116,7 +124,7 @@ public class PillarmanData extends TypeSpecificData {
     
     @Override
     public void syncWithUserOnly(ServerPlayerEntity user) {
-        setPillarmanBuffs(user, 1);
+        updatePillarmanBuffs(user);
     }
 
     // TODO check the packet
@@ -135,19 +143,19 @@ public class PillarmanData extends TypeSpecificData {
         this.stage = stage;
         LivingEntity user = power.getUser();
         if (!user.level.isClientSide()) {
-        	if (user instanceof ServerPlayerEntity) {
-        		ServerPlayerEntity player = (ServerPlayerEntity) user;
-        		if (stage == 2) {
-                	ModCriteriaTriggers.EVOLVE_PILLARMAN.get().trigger(player);
+            serverPlayer.ifPresent(player -> {
+                if (stage == 2) {
+                    ModCriteriaTriggers.EVOLVE_PILLARMAN.get().trigger(player);
                 } else if (stage == 3) {
-                	ModCriteriaTriggers.EVOLVE_PILLARMAN.get().trigger(player);
-                	ModCriteriaTriggers.EVOLVE_PILLARMAN_AJA.get().trigger(player);
+                    ModCriteriaTriggers.EVOLVE_PILLARMAN.get().trigger(player);
+                    ModCriteriaTriggers.EVOLVE_PILLARMAN_AJA.get().trigger(player);
                 }
-        	}
+            });
+            
+        	updatePillarmanBuffs(user);
             PacketManager.sendToClientsTrackingAndSelf(new TrPillarmanDataPacket(user.getId(), this), user);
         }
         power.clUpdateHud();
-        
     }
     
     public boolean toggleStoneForm() {

@@ -940,7 +940,6 @@ public class GameplayEventHandler {
                         PillarmanData pillarman = pillarmanOptional.get();
                         if (pillarmanOptional.get().getEvolutionStage() < 3) {
                             pillarman.setEvolutionStage(3);
-                            pillarman.setPillarmanBuffs(entity, 1);
                             //Gives a random Mode
                             switch (entity.getRandom().nextInt(3)) {
                             case 0:
@@ -966,7 +965,6 @@ public class GameplayEventHandler {
                         PillarmanData pillarman = pillarmanOptional.get();
                         if (pillarman.getEvolutionStage() < 2) {
                             pillarman.setEvolutionStage(2);
-                            pillarman.setPillarmanBuffs(entity, 1);
                             applyMaskEffect(entity, headStack);
                             return true;
                         }
