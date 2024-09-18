@@ -10,7 +10,6 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
@@ -39,6 +38,7 @@ import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
@@ -395,7 +395,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
             HeavyPunchExplosion explosion = new HeavyPunchExplosion(stand.level, stand, new ActionTarget(blockPos, face), 
                     stand.getDamageSource().setExplosion(), null, 
                     blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5, 
-                    (float) stand.getAttackDamage() / 4, false, 
+                    Math.min((float) stand.getAttackDamage() * 0.2f, 10), false, 
                     JojoModUtil.breakingBlocksEnabled(stand.level) ? Explosion.Mode.BREAK : Explosion.Mode.NONE,
                     stand.getAttackDamage(), stand.getPrecision());
             if (!ForgeEventFactory.onExplosionStart(stand.level, explosion)) {
@@ -512,11 +512,17 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
                 }
             }
             
-            // FIXME wtf
             @Override
             protected float calcDamage(double impact, double diameter) {
-                JojoMod.LOGGER.debug("{} {} {}", impact, diameter, (float) ((impact * impact + impact) / 2.0D * 7.0D * diameter + 1.0D));
-                return (float) ((impact * impact + impact) / 2.0D * 7.0D * diameter + 1.0D);
+                float strength;
+                if (attackerAsStand != null) {
+                    strength = (float) attackerAsStand.getAttackDamage() * 0.4f;
+                }
+                else {
+                    strength = (float) attacker.getAttributeValue(Attributes.ATTACK_DAMAGE) * 0.4f;
+                }
+                return strength;
+//                return (float) ((impact * impact + impact) / 2.0D * 7.0D * diameter + 1.0D); // fuck this
             }
             
             // FIXME explosion is barely exploding if punching smth like a stone
