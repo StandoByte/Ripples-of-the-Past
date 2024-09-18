@@ -57,8 +57,4 @@ public class HamonTornadoOverdrive extends HamonAction {
         }
     }
     
-    @Override
-    public boolean isHeldSentToTracking() {
-        return true;
-    }
 }

@@ -19,17 +19,17 @@ public class PillarmanRibsBlades extends PillarmanAction {
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
-        	Vector2f rotOffsets = MathUtil.xRotYRotOffsets(Math.PI * 2, 10);
-             addRibProjectile(world, power, user, rotOffsets.x, rotOffsets.y, -0.18D, -0.50D);
-             addRibProjectile(world, power, user, rotOffsets.x, rotOffsets.y, -0.22D, -0.60D);
-             addRibProjectile(world, power, user, rotOffsets.x, rotOffsets.y, -0.22D, -0.70D);
-             addRibProjectile(world, power, user, rotOffsets.x, rotOffsets.y, -0.18D, -0.80D);
-             addRibProjectile(world, power, user, rotOffsets.x, rotOffsets.y, 0.18D, -0.50D);
-             addRibProjectile(world, power, user, rotOffsets.x, rotOffsets.y, 0.22D, -0.65D);
-             addRibProjectile(world, power, user, rotOffsets.x, rotOffsets.y, 0.22D, -0.85D);
-             addRibProjectile(world, power, user, rotOffsets.x, rotOffsets.y, 0.18D, -0.95D);
+            Vector2f rotOffsets = MathUtil.xRotYRotOffsets(Math.PI * 2, 10);
+            addRibProjectile(world, power, user, rotOffsets.x, rotOffsets.y, -0.18D, -0.50D);
+            addRibProjectile(world, power, user, rotOffsets.x, rotOffsets.y, -0.22D, -0.60D);
+            addRibProjectile(world, power, user, rotOffsets.x, rotOffsets.y, -0.22D, -0.70D);
+            addRibProjectile(world, power, user, rotOffsets.x, rotOffsets.y, -0.18D, -0.80D);
+            addRibProjectile(world, power, user, rotOffsets.x, rotOffsets.y, 0.18D, -0.50D);
+            addRibProjectile(world, power, user, rotOffsets.x, rotOffsets.y, 0.22D, -0.65D);
+            addRibProjectile(world, power, user, rotOffsets.x, rotOffsets.y, 0.22D, -0.85D);
+            addRibProjectile(world, power, user, rotOffsets.x, rotOffsets.y, 0.18D, -0.95D);
         }
-}
+    }
 
     public static void addRibProjectile(World world, INonStandPower power, LivingEntity user, float xRotDelta, float yRotDelta, double offsetX, double offsetY) {
         PillarmanRibEntity string = new PillarmanRibEntity(world, user, xRotDelta, yRotDelta, offsetX, offsetY);

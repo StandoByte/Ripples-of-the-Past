@@ -204,7 +204,7 @@ public class DamageUtil {
             if (!undeadTarget) {
                 amount *= 0.2F;
             }
-            if (INonStandPower.getNonStandPowerOptional(livingTarget)
+            else if (INonStandPower.getNonStandPowerOptional(livingTarget)
                     .map(power -> power.getType() == ModPowers.PILLAR_MAN.get()).orElse(false)) {
                 amount *= 0.5F;
             }

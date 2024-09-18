@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.power.impl.nonstand.type.zombie;
 
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.TrZombieFlagsPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrZombieDataPacket;
 import com.github.standobyte.jojo.power.impl.nonstand.TypeSpecificData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 
@@ -9,7 +9,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 
-public class ZombieData extends TypeSpecificData {
+public class ZombieData extends TypeSpecificData { // TODO remember the vampire that turned the player into zombie (UUID)
     private int lastBloodLevel = -999;
     private boolean disguised = false;
 
@@ -23,13 +23,6 @@ public class ZombieData extends TypeSpecificData {
         
         super.onPowerGiven(oldType, oldData);
     }
-
-//    @Override
-//    public boolean isActionUnlocked(Action<INonStandPower> action, INonStandPower power) {
-//        return  action == ModZombieActions.ZOMBIE_CLAW_LACERATE.get() || 
-//                action == ModZombieActions.ZOMBIE_DEVOUR.get() ||
-//                action == ModZombieActions.ZOMBIE_DISGUISE.get();
-//    }
     
     public void tick() {
         LivingEntity user = power.getUser();
@@ -38,9 +31,8 @@ public class ZombieData extends TypeSpecificData {
         }
     }
     
-    public boolean toggleDisguise() {
+    public void toggleDisguise() {
         setDisguiseEnabled(!disguised);
-        return disguised;
     }
     
     public void setDisguiseEnabled(boolean isEnabled) {
@@ -48,7 +40,7 @@ public class ZombieData extends TypeSpecificData {
             this.disguised = isEnabled;
             LivingEntity user = power.getUser();
             if (!user.level.isClientSide()) {
-                PacketManager.sendToClientsTrackingAndSelf(new TrZombieFlagsPacket(user.getId(), this), user);
+                PacketManager.sendToClientsTrackingAndSelf(new TrZombieDataPacket(user.getId(), this), user);
                 power.getType().updatePassiveEffects(user, power);
             }
         }
@@ -83,6 +75,6 @@ public class ZombieData extends TypeSpecificData {
     
     @Override
     public void syncWithTrackingOrUser(LivingEntity user, ServerPlayerEntity entity) {
-        PacketManager.sendToClient(new TrZombieFlagsPacket(user.getId(), this), entity);
+        PacketManager.sendToClient(new TrZombieDataPacket(user.getId(), this), entity);
     }
 }

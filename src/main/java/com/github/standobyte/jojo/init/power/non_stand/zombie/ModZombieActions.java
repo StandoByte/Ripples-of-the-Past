@@ -34,7 +34,8 @@ public class ModZombieActions {
                             ZOMBIE_CLAW_LACERATE.get(),
                             ZOMBIE_DEVOUR.get()}, 
                     new ZombieAction[] {
-                            ZOMBIE_DISGUISE.get()},
+                            ZOMBIE_DISGUISE.get()
+                    },
                     ZOMBIE_DEVOUR.get()
                     ).withColor(ZombiePowerType.COLOR));
 

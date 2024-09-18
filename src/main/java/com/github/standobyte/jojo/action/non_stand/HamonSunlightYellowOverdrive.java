@@ -125,8 +125,4 @@ public class HamonSunlightYellowOverdrive extends HamonAction {
         }
     }
     
-    @Override
-    public boolean isHeldSentToTracking() {
-        return true;
-    }
 }

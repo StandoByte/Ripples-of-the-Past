@@ -15,18 +15,18 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-public class TrPillarmanFlagsPacket {
+public class TrPillarmanDataPacket {
     private final int entityId;
     private final boolean stoneFormEnabled;
     private final int stage;
     private final boolean invaded;
     public PillarmanData.Mode mode;
     
-    public TrPillarmanFlagsPacket(int entityId, PillarmanData pillarmanData) {
+    public TrPillarmanDataPacket(int entityId, PillarmanData pillarmanData) {
         this(entityId, pillarmanData.isStoneFormEnabled(), pillarmanData.getEvolutionStage(), pillarmanData.isInvaded(), pillarmanData.getMode());
     }
     
-    public TrPillarmanFlagsPacket(int entityId, boolean stoneFormEnabled, int stage, boolean invaded, PillarmanData.Mode mode) {
+    public TrPillarmanDataPacket(int entityId, boolean stoneFormEnabled, int stage, boolean invaded, PillarmanData.Mode mode) {
         this.entityId = entityId;
         this.stoneFormEnabled = stoneFormEnabled;
         this.stage = stage;
@@ -36,10 +36,10 @@ public class TrPillarmanFlagsPacket {
     
     
     
-    public static class Handler implements IModPacketHandler<TrPillarmanFlagsPacket> {
+    public static class Handler implements IModPacketHandler<TrPillarmanDataPacket> {
 
         @Override
-        public void encode(TrPillarmanFlagsPacket msg, PacketBuffer buf) {
+        public void encode(TrPillarmanDataPacket msg, PacketBuffer buf) {
             buf.writeInt(msg.entityId);
             buf.writeBoolean(msg.stoneFormEnabled);
             buf.writeVarInt(msg.stage);
@@ -48,35 +48,36 @@ public class TrPillarmanFlagsPacket {
         }
 
         @Override
-        public TrPillarmanFlagsPacket decode(PacketBuffer buf) {
-            return new TrPillarmanFlagsPacket(buf.readInt(), buf.readBoolean(), buf.readVarInt(), buf.readBoolean(), buf.readEnum(PillarmanData.Mode.class));
+        public TrPillarmanDataPacket decode(PacketBuffer buf) {
+            return new TrPillarmanDataPacket(buf.readInt(), buf.readBoolean(), buf.readVarInt(), buf.readBoolean(), buf.readEnum(PillarmanData.Mode.class));
         }
 
         @Override
-        public void handle(TrPillarmanFlagsPacket msg, Supplier<NetworkEvent.Context> ctx) {
+        public void handle(TrPillarmanDataPacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity instanceof LivingEntity) {
-                INonStandPower.getNonStandPowerOptional((LivingEntity) entity).ifPresent(power -> {
-                    power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).ifPresent(pillarman -> {
-                        pillarman.setStoneFormEnabled(msg.stoneFormEnabled);
-                        pillarman.setEvolutionStage(msg.stage);
-                        pillarman.setInvaded(msg.invaded);
-                        pillarman.setMode(msg.mode);
-                        if (entity instanceof PlayerEntity) {
-                            PlayerEntity userPlayer = (PlayerEntity) entity;
-                            ModPlayerAnimations.stoneForm.setAnimEnabled(userPlayer, msg.stoneFormEnabled);
-                            if (msg.stoneFormEnabled && userPlayer == ClientUtil.getClientPlayer()) {
-                                ClientUtil.setThirdPerson();
-                            }
+                INonStandPower.getNonStandPowerOptional((LivingEntity) entity).resolve()
+                .flatMap(power -> power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()))
+                .ifPresent(pillarman -> {
+                    boolean prevStoneForm = pillarman.isStoneFormEnabled();
+                    pillarman.setStoneFormEnabled(msg.stoneFormEnabled);
+                    pillarman.setEvolutionStage(msg.stage);
+                    pillarman.setInvaded(msg.invaded);
+                    pillarman.setMode(msg.mode);
+                    if (entity instanceof PlayerEntity) {
+                        PlayerEntity userPlayer = (PlayerEntity) entity;
+                        ModPlayerAnimations.stoneForm.setAnimEnabled(userPlayer, msg.stoneFormEnabled);
+                        if (!prevStoneForm && msg.stoneFormEnabled && userPlayer == ClientUtil.getClientPlayer()) {
+                            ClientUtil.setThirdPerson();
                         }
-                    });
+                    }
                 });
             }
         }
 
         @Override
-        public Class<TrPillarmanFlagsPacket> getPacketClass() {
-            return TrPillarmanFlagsPacket.class;
+        public Class<TrPillarmanDataPacket> getPacketClass() {
+            return TrPillarmanDataPacket.class;
         }
     }
 

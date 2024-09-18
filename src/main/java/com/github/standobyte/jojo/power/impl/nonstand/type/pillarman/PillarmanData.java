@@ -6,7 +6,7 @@ import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.TrPillarmanFlagsPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrPillarmanDataPacket;
 import com.github.standobyte.jojo.power.impl.nonstand.TypeSpecificData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -50,7 +50,7 @@ public class PillarmanData extends TypeSpecificData {
     
 
     // TODO
-    public void setPillarmanBuffs(LivingEntity entity, int rate) {
+    public void setPillarmanBuffs(LivingEntity entity, int rate) { // wtf is this
         World world = entity.level;
         int lvl = (world.getDifficulty().getId() * stage) * rate;
         MCUtil.applyAttributeModifierMultiplied(entity, Attributes.ATTACK_DAMAGE, ATTACK_DAMAGE, lvl);
@@ -60,7 +60,7 @@ public class PillarmanData extends TypeSpecificData {
         MCUtil.applyAttributeModifierMultiplied(entity, Attributes.MAX_HEALTH, MAX_HEALTH, lvl);
         if (stage > 0) {
             ServerPlayerEntity user = (ServerPlayerEntity) entity;
-            PacketManager.sendToClient(new TrPillarmanFlagsPacket(entity.getId(), this), user);
+            PacketManager.sendToClient(new TrPillarmanDataPacket(entity.getId(), this), user);
         }
     }
     
@@ -122,7 +122,7 @@ public class PillarmanData extends TypeSpecificData {
     // TODO check the packet
     @Override
     public void syncWithTrackingOrUser(LivingEntity user, ServerPlayerEntity entity) {
-        PacketManager.sendToClient(new TrPillarmanFlagsPacket(user.getId(), this), entity);
+        PacketManager.sendToClient(new TrPillarmanDataPacket(user.getId(), this), entity);
     }
     
     //States
@@ -144,7 +144,7 @@ public class PillarmanData extends TypeSpecificData {
                 	ModCriteriaTriggers.EVOLVE_PILLARMAN_AJA.get().trigger(player);
                 }
         	}
-            PacketManager.sendToClientsTrackingAndSelf(new TrPillarmanFlagsPacket(user.getId(), this), user);
+            PacketManager.sendToClientsTrackingAndSelf(new TrPillarmanDataPacket(user.getId(), this), user);
         }
         power.clUpdateHud();
         
@@ -160,7 +160,7 @@ public class PillarmanData extends TypeSpecificData {
             this.stoneForm = isEnabled;
             LivingEntity user = power.getUser();
             if (!user.level.isClientSide()) {
-                PacketManager.sendToClientsTrackingAndSelf(new TrPillarmanFlagsPacket(user.getId(), this), user);
+                PacketManager.sendToClientsTrackingAndSelf(new TrPillarmanDataPacket(user.getId(), this), user);
             }
         }
     }
@@ -174,7 +174,7 @@ public class PillarmanData extends TypeSpecificData {
             this.invaded = isEnabled;
             LivingEntity user = power.getUser();
             if (!user.level.isClientSide()) {
-                PacketManager.sendToClientsTrackingAndSelf(new TrPillarmanFlagsPacket(user.getId(), this), user);
+                PacketManager.sendToClientsTrackingAndSelf(new TrPillarmanDataPacket(user.getId(), this), user);
             }
         }
     }
@@ -209,7 +209,7 @@ public class PillarmanData extends TypeSpecificData {
     	            break;
         	    }
         	}
-            PacketManager.sendToClientsTrackingAndSelf(new TrPillarmanFlagsPacket(user.getId(), this), user);
+            PacketManager.sendToClientsTrackingAndSelf(new TrPillarmanDataPacket(user.getId(), this), user);
         }
         power.clUpdateHud();
     }

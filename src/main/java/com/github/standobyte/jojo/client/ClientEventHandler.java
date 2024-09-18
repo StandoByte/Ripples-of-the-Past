@@ -64,7 +64,6 @@ import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
-import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandArrowHandler;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
@@ -219,29 +218,22 @@ public class ClientEventHandler {
             correctHeldItemPose(entity, bipedModel, HandSide.RIGHT);
             correctHeldItemPose(entity, bipedModel, HandSide.LEFT);
         }
+        
         if (model instanceof PlayerModel) {
-	        PillarmanPowerType pillarman = ModPowers.PILLAR_MAN.get();
-	        if (event.getEntity() instanceof PlayerEntity) {
-		        PlayerEntity player = (PlayerEntity) event.getEntity();
-		        INonStandPower.getNonStandPowerOptional(player).map(power -> {
-		            if (power.getTypeSpecificData(pillarman).map(pillarmanData -> pillarmanData.isStoneFormEnabled()).orElse(false)) {
-		                    ModelRenderer sleeveLeft = ((PlayerModel<?>) model).leftSleeve;
-		                    ModelRenderer sleeveRight = ((PlayerModel<?>) model).rightSleeve;
-		                    ModelRenderer pantsLeft = ((PlayerModel<?>) model).leftPants;
-		                    ModelRenderer pantsRight = ((PlayerModel<?>) model).rightPants;
-		                    ModelRenderer hat = ((PlayerModel<?>) model).hat;
-		                    ModelRenderer jacket = ((PlayerModel<?>) model).jacket;
-		                    pantsLeft.visible = false;
-		                    pantsRight.visible = false;
-		                    sleeveLeft.visible = false;
-		                    sleeveRight.visible = false;
-		                    hat.visible = false;
-		                    jacket.visible = false;
-		                return true;
-		            }
-		            return false;
-		        });
-	        }
+            INonStandPower.getNonStandPowerOptional(event.getEntity()).map(power -> {
+                if (power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).map(
+                        pillarmanData -> pillarmanData.isStoneFormEnabled()).orElse(false)) {
+                    PlayerModel<?> playerModel = (PlayerModel<?>) model;
+                    playerModel.leftSleeve.visible = false;
+                    playerModel.rightSleeve.visible = false;
+                    playerModel.leftPants.visible = false;
+                    playerModel.rightPants.visible = false;
+                    playerModel.hat.visible = false;
+                    playerModel.jacket.visible = false;
+                    return true;
+                }
+                return false;
+            });
         }
         // FIXME (vampire\curing) shake vampire while curing
         // yRot += (float) (Math.cos((double)entity.tickCount * 3.25) * Math.PI * 0.4);

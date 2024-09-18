@@ -25,7 +25,7 @@ public abstract class PillarmanAction extends NonStandAction {
     
     @Override
     public ActionConditionResult checkConditions(LivingEntity user, INonStandPower power, ActionTarget target) {
-        if(this.canBeUsedInStone == false && power.getTypeSpecificData(ModPowers.PILLAR_MAN.get())
+        if (!this.canBeUsedInStone && power.getTypeSpecificData(ModPowers.PILLAR_MAN.get())
                 .map(PillarmanData::isStoneFormEnabled).orElse(false)) {
             return conditionMessage("stone_form");
         }

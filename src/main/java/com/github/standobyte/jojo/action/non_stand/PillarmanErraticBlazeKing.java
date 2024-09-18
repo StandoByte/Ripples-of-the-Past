@@ -24,8 +24,8 @@ public class PillarmanErraticBlazeKing extends PillarmanAction {
             for (int i = 0; i < n; i++) {
                 Vector2f rotOffsets = MathUtil.xRotYRotOffsets((double) i / (double) n * Math.PI * 2, 10);
                 //addVeinProjectile(world, power, user, rotOffsets.x, rotOffsets.y, rotOffsets.x, rotOffsets.y - 0.6D);
-                addVeinProjectile(world, power, user, rotOffsets.x, rotOffsets.y, -0.4D, -0.65D);
-                addVeinProjectile(world, power, user, rotOffsets.x, rotOffsets.y, 0.4D, -0.65D);
+                addVeinProjectile(world, power, user, rotOffsets.x, rotOffsets.y, -0.4, -0.65);
+                addVeinProjectile(world, power, user, rotOffsets.x, rotOffsets.y, 0.4, -0.65);
             }
         }
 }

@@ -89,11 +89,6 @@ public class HamonOverdriveBarrage extends HamonAction {
     }
     
     @Override
-    public boolean isHeldSentToTracking() {
-        return true;
-    }
-    
-    @Override
     public void onHoldTickClientEffect(LivingEntity user, INonStandPower power, int ticksHeld, boolean reqFulfilled, boolean reqStateChanged) {
         if (reqFulfilled) {
             if (ticksHeld % 2 == 0) {

@@ -13,8 +13,8 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.JojoModConfig.Common;
-import com.github.standobyte.jojo.action.non_stand.PillarmanUnnaturalAgility;
 import com.github.standobyte.jojo.action.non_stand.HamonRebuffOverdrive;
+import com.github.standobyte.jojo.action.non_stand.PillarmanUnnaturalAgility;
 import com.github.standobyte.jojo.action.non_stand.VampirismFreeze;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
@@ -69,10 +69,9 @@ import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
+import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanData.Mode;
-import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismData;
-import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
@@ -926,33 +925,34 @@ public class GameplayEventHandler {
         }
         if (entity instanceof PlayerEntity) {
             PlayerEntity player = (PlayerEntity) entity;
-            VampirismPowerType vampirism = ModPowers.VAMPIRISM.get();
-            PillarmanPowerType pillarman = ModPowers.PILLAR_MAN.get();
             return INonStandPower.getNonStandPowerOptional(player).map(power -> {
                 //Prevents aja-stone mask to work on non pillar men
-                if(headStack.getItem() == ModItems.AJA_STONE_MASK.get()) {
-                    if(power.getType() != pillarman) {
+                Optional<PillarmanData> pillarmanOptional = power.getTypeSpecificData(ModPowers.PILLAR_MAN.get());
+                
+                if (headStack.getItem() == ModItems.AJA_STONE_MASK.get()) {
+                    if (!pillarmanOptional.isPresent()) {
                     	if (entity instanceof ServerPlayerEntity) {
                     		ModCriteriaTriggers.MASK_SUICIDE.get().trigger((ServerPlayerEntity) entity);
                     	}
                         entity.hurt(DamageUtil.STONE_MASK, 1000);
                         return false;
                     } else {
-                        if (power.getTypeSpecificData(pillarman).get().getEvolutionStage() < 3) {
-                            power.getTypeSpecificData(pillarman).get().setEvolutionStage(3);
-                            power.getTypeSpecificData(pillarman).get().setPillarmanBuffs(entity, 1);
+                        PillarmanData pillarman = pillarmanOptional.get();
+                        if (pillarmanOptional.get().getEvolutionStage() < 3) {
+                            pillarman.setEvolutionStage(3);
+                            pillarman.setPillarmanBuffs(entity, 1);
                             //Gives a random Mode
                             switch (entity.getRandom().nextInt(3)) {
                             case 0:
-                                power.getTypeSpecificData(pillarman).get().setMode(Mode.WIND);
+                                pillarman.setMode(Mode.WIND);
                                 entity.level.playSound(null, entity, ModSounds.PILLAR_MAN_WIND_MODE.get(), entity.getSoundSource(), 1.0F, 1.0F);
                                 break;
                             case 1:
-                                power.getTypeSpecificData(pillarman).get().setMode(Mode.HEAT);
+                                pillarman.setMode(Mode.HEAT);
                                 entity.level.playSound(null, entity, ModSounds.PILLAR_MAN_HEAT_MODE.get(), entity.getSoundSource(), 1.0F, 1.0F);
                                 break;
                             case 2:
-                                power.getTypeSpecificData(pillarman).get().setMode(Mode.LIGHT);
+                                pillarman.setMode(Mode.LIGHT);
                                 entity.level.playSound(null, entity, ModSounds.PILLAR_MAN_LIGHT_MODE.get(), entity.getSoundSource(), 1.0F, 1.0F);
                                 break;
                             }
@@ -961,21 +961,24 @@ public class GameplayEventHandler {
                         }
                     }
                 }
-                if ((power.getType() == pillarman) 
-                        || (power.getTypeSpecificData(vampirism).map(vamp -> !vamp.isVampireAtFullPower()).orElse(false) || power.givePower(vampirism))) {
-                    if (headStack.getItem() == ModItems.STONE_MASK.get()) {
-                        if (power.getType() == vampirism) {
-                            power.getTypeSpecificData(vampirism).get().setVampireFullPower(true);
-                            applyMaskEffect(entity, headStack);
-                            return true;
-                        } else if (power.getType() == pillarman && power.getTypeSpecificData(pillarman).get().getEvolutionStage() < 2) {
-                            power.getTypeSpecificData(pillarman).get().setEvolutionStage(2);
-                            power.getTypeSpecificData(pillarman).get().setPillarmanBuffs(entity, 1);
+                else /*if (headStack.getItem() == ModItems.STONE_MASK.get())*/ {
+                    if (pillarmanOptional.isPresent()) {
+                        PillarmanData pillarman = pillarmanOptional.get();
+                        if (pillarman.getEvolutionStage() < 2) {
+                            pillarman.setEvolutionStage(2);
+                            pillarman.setPillarmanBuffs(entity, 1);
                             applyMaskEffect(entity, headStack);
                             return true;
                         }
                     }
-                    return false;
+                    else if (power.getTypeSpecificData(ModPowers.VAMPIRISM.get()).map(
+                            vamp -> !vamp.isVampireAtFullPower()).orElse(false) || power.givePower(ModPowers.VAMPIRISM.get())) {
+                        if (power.getType() == ModPowers.VAMPIRISM.get()) {
+                            power.getTypeSpecificData(ModPowers.VAMPIRISM.get()).get().setVampireFullPower(true);
+                            applyMaskEffect(entity, headStack);
+                            return true;
+                        }
+                    }
                 }
                 return false;
             }).orElse(false);

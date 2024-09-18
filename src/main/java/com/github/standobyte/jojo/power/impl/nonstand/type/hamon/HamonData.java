@@ -53,7 +53,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrHamonAuraColorPac
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonBreathStabilityPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonCharacterTechniquePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonEnergyTicksPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrHamonFlagsPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHamonProtectionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonLiquidWalkingPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonMeditationPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonStatsPacket;
@@ -1503,7 +1503,7 @@ public class HamonData extends TypeSpecificData {
         PacketManager.sendToClient(new TrHamonEnergyTicksPacket(user.getId(), noEnergyDecayTicks), entity);
         hamonSkills.syncWithTrackingOrUser(user, entity, this);
         PacketManager.sendToClient(new TrHamonAuraColorPacket(user.getId(), auraColor), entity);
-        PacketManager.sendToClient(new TrHamonFlagsPacket(user.getId(), this), entity);
+        PacketManager.sendToClient(new TrHamonProtectionPacket(user.getId(), this), entity);
         PacketManager.sendToClient(new TrHamonMeditationPacket(user.getId(), isMeditating()), entity);
     }
     
@@ -1549,7 +1549,7 @@ public class HamonData extends TypeSpecificData {
             this.hamonProtection = isEnabled;
             LivingEntity user = power.getUser();
             if (!user.level.isClientSide()) {
-                PacketManager.sendToClientsTrackingAndSelf(new TrHamonFlagsPacket(user.getId(), this), user);
+                PacketManager.sendToClientsTrackingAndSelf(new TrHamonProtectionPacket(user.getId(), this), user);
             }
         }
     }

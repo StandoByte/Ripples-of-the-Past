@@ -27,8 +27,8 @@ public class PillarmanEnhancedSenses extends PillarmanAction {
     protected void holdTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
             if (ticksHeld < 160 || ticksHeld % 20 == 0) {
-                double radius = (double) ticksHeld * 0.5D;
-                double maxRadius = 36D;
+                double radius = (double) ticksHeld * 0.5;
+                double maxRadius = 36;
                 List<LivingEntity> entitiesAround = MCUtil.entitiesAround(LivingEntity.class, user, Math.min(radius, maxRadius), false, null);
                 
                 if (world.isClientSide()) {

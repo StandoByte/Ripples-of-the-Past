@@ -1,7 +1,6 @@
 package com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.client.playeranim.anim.interfaces.BasicToggleAnim;
 import com.github.standobyte.jojo.client.playeranim.kosmx.KosmXPlayerAnimatorInstalled.AnimLayerHandler;
 import com.github.standobyte.jojo.client.playeranim.kosmx.anim.modifier.KosmXArmsRotationModifier;
@@ -16,7 +15,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 
-public class KosmXBladeBarrageLayer extends AnimLayerHandler implements BasicToggleAnim {
+public class KosmXBladeBarrageLayer extends AnimLayerHandler<ModifierLayer<IAnimation>> implements BasicToggleAnim {
 
     public KosmXBladeBarrageLayer(ResourceLocation id) {
         super(id);
@@ -28,21 +27,16 @@ public class KosmXBladeBarrageLayer extends AnimLayerHandler implements BasicTog
     }
     
     
+    private static final ResourceLocation ANIM = new ResourceLocation(JojoMod.MOD_ID, "blade_barrage");
     @Override
     public boolean setAnimEnabled(PlayerEntity player, boolean enabled) {
         enabled &= !player.isPassenger();
         if (enabled) {
-            return setAnimFromName((AbstractClientPlayerEntity) player, getAnimPath(player));
+            return setAnimFromName((AbstractClientPlayerEntity) player, ANIM);
         }
         else {
             return fadeOutAnim((AbstractClientPlayerEntity) player, AbstractFadeModifier.standardFadeIn(10, Ease.OUTCUBIC), null);
         }
     }
-    
-    private ResourceLocation getAnimPath(PlayerEntity player) {
-    	return DEFAULT_POSE;
-    }
-    
-    private static final ResourceLocation DEFAULT_POSE = new ResourceLocation(JojoMod.MOD_ID, "blade_barrage");
 
 }

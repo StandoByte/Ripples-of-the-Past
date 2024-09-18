@@ -280,20 +280,21 @@ public class ModEntityTypes {
             () -> EntityType.Builder.<FireworkInsideEntity>of(FireworkInsideEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10)
             .build(new ResourceLocation(JojoMod.MOD_ID, "firework_inside").toString()));
     
+    
     public static final RegistryObject<EntityType<PillarmanDivineSandstormEntity>> PILLARMAN_DIVINE_SANDSTORM = ENTITIES.register("pillarman_divine_sandstorm", 
-            () -> EntityType.Builder.<PillarmanDivineSandstormEntity>of(PillarmanDivineSandstormEntity::new, EntityClassification.MISC).sized(4F, 2F).noSummon().setUpdateInterval(20).fireImmune()
+            () -> EntityType.Builder.<PillarmanDivineSandstormEntity>of(PillarmanDivineSandstormEntity::new, EntityClassification.MISC).sized(4F, 2F).setUpdateInterval(20).fireImmune()
             .build(new ResourceLocation(JojoMod.MOD_ID, "pillarman_divine_sandstorm").toString()));
     
     public static final RegistryObject<EntityType<PillarmanHornEntity>> PILLARMAN_HORN = ENTITIES.register("pm_horn", 
-            () -> EntityType.Builder.<PillarmanHornEntity>of(PillarmanHornEntity::new, EntityClassification.MISC).sized(0.125F, 0.125F).noSummon().noSave().setUpdateInterval(20)
+            () -> EntityType.Builder.<PillarmanHornEntity>of(PillarmanHornEntity::new, EntityClassification.MISC).sized(0.125F, 0.125F).setUpdateInterval(20)
             .build(new ResourceLocation(JojoMod.MOD_ID, "pm_horn").toString()));
     
     public static final RegistryObject<EntityType<PillarmanVeinEntity>> PILLARMAN_VEINS = ENTITIES.register("pillarman_veins", 
-            () -> EntityType.Builder.<PillarmanVeinEntity>of(PillarmanVeinEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).noSummon().noSave().setUpdateInterval(20)
+            () -> EntityType.Builder.<PillarmanVeinEntity>of(PillarmanVeinEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).setUpdateInterval(20)
             .build(new ResourceLocation(JojoMod.MOD_ID, "pillarman_veins").toString()));
     
     public static final RegistryObject<EntityType<PillarmanRibEntity>> PILLARMAN_RIBS = ENTITIES.register("pillarman_ribs", 
-            () -> EntityType.Builder.<PillarmanRibEntity>of(PillarmanRibEntity::new, EntityClassification.MISC).sized(0.35F, 0.35F).noSummon().noSave().setUpdateInterval(20)
+            () -> EntityType.Builder.<PillarmanRibEntity>of(PillarmanRibEntity::new, EntityClassification.MISC).sized(0.35F, 0.35F).setUpdateInterval(20)
             .build(new ResourceLocation(JojoMod.MOD_ID, "pillarman_ribs").toString()));
     
 

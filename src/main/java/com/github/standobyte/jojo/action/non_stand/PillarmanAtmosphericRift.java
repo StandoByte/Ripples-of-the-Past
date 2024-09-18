@@ -1,7 +1,6 @@
 package com.github.standobyte.jojo.action.non_stand;
 
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
 import com.github.standobyte.jojo.entity.damaging.projectile.PillarmanDivineSandstormEntity;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -33,17 +32,17 @@ public class PillarmanAtmosphericRift extends PillarmanDivineSandstorm {
     public float getHeldTickEnergyCost(INonStandPower power) {
         int maxTicks = Math.max(getHoldDurationToFire(power), 1);
         int ticksHeld = Math.min(power.getHeldActionTicks(), maxTicks);
-        if(ticksHeld >= maxTicks) {
+        if (ticksHeld >= maxTicks) {
             return 5.0F;
         }
-            return 0;
+        return 0;
     }
     
     @Override
     protected void holdTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (!world.isClientSide()) {
             int maxTicks = Math.max(getHoldDurationToFire(power), 1);
-            if(ticksHeld >= maxTicks && power.getEnergy() > 0) {
+            if (ticksHeld >= maxTicks && power.getEnergy() > 0) {
                 PillarmanDivineSandstormEntity sanstormWave = new PillarmanDivineSandstormEntity(world, user)
                         .setRadius(0.5F)
                         .setDamage(2F)
@@ -52,7 +51,7 @@ public class PillarmanAtmosphericRift extends PillarmanDivineSandstorm {
                 world.addFreshEntity(sanstormWave);
                 PlayerEntity playerentity = user instanceof PlayerEntity ? (PlayerEntity)user : null;
                 if (playerentity == null || !playerentity.abilities.instabuild) {
-                    user.hurt(EntityDamageSource.GENERIC, 2F);
+                    user.hurt(EntityDamageSource.GENERIC, 2F); // TODO separate DamageSource with a death message
                 }
             }
         }

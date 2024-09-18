@@ -23,11 +23,11 @@ public class PillarmanWindCloak extends PillarmanAction {
     public void onHoldTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (requirementsFulfilled) {
             for (int i = 0; i < 4; i++) {
-            Vector3d particlePos = user.position().add(
-                    (Math.random() - 0.5) * (user.getBbWidth() + 0.75), 
-                    Math.random() * (user.getBbHeight() + 0.25 ), 
-                    (Math.random() - 0.5) * (user.getBbWidth() + 0.75));
-            user.level.addParticle(ParticleTypes.CLOUD, particlePos.x, particlePos.y, particlePos.z, 0, 0.1, 0);
+                Vector3d particlePos = user.position().add(
+                        (Math.random() - 0.5) * (user.getBbWidth() + 0.75), 
+                        Math.random() * (user.getBbHeight() + 0.25 ), 
+                        (Math.random() - 0.5) * (user.getBbWidth() + 0.75));
+                user.level.addParticle(ParticleTypes.CLOUD, particlePos.x, particlePos.y, particlePos.z, 0, 0.1, 0);
             }
         }
     }
@@ -38,11 +38,6 @@ public class PillarmanWindCloak extends PillarmanAction {
             user.addEffect(new EffectInstance(Effects.INVISIBILITY, 200, 0, false, false));
             user.addEffect(new EffectInstance(ModStatusEffects.SUN_RESISTANCE.get(), 200, 0, false, false));
         }
-    }
-
-    @Override
-    public boolean isHeldSentToTracking() {
-        return true;
     }
     
 }

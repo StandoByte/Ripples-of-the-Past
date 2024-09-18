@@ -1066,6 +1066,7 @@
   "action.jojo.zombie_claw_lacerate": "Рвать когтями",
   "action.jojo.zombie_devour": "Пожирание",
   "action.jojo.zombie_disguise": "Маскировка",
+  "action.jojo.zombie_disguise.disable": "Вернуть облик зомби",
   
   "non_stand.jojo.pillarman": "Человек из Колонны",
   "action.jojo.pillarman_heavy_punch": "Тяжелый удар",

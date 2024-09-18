@@ -22,7 +22,7 @@ public class PillarmanHornAttack extends PillarmanAction {
             pillarmanHorn.setLifeSpan(40);
             world.addFreshEntity(pillarmanHorn);
         }
-}
+    }
 
 
 }

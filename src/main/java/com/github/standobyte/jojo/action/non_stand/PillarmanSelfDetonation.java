@@ -47,7 +47,7 @@ public class PillarmanSelfDetonation extends PillarmanAction {
     
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
-        if(!world.isClientSide) {
+        if (!world.isClientSide) {
             CustomExplosion.explode(world, user, DamageSource.ON_FIRE.setExplosion(), null, 
                     user.getX(), user.getY(), user.getZ(), 3.0F, 
                     true, Explosion.Mode.BREAK, CustomExplosionType.PILLAR_MAN_DETONATION);
@@ -57,11 +57,6 @@ public class PillarmanSelfDetonation extends PillarmanAction {
                 user.addEffect(new EffectInstance(Effects.FIRE_RESISTANCE, 200, 0));
             }
         }
-    }
-    
-    @Override
-    public boolean isHeldSentToTracking() {
-        return true;
     }
     
     

@@ -3,11 +3,8 @@ package com.github.standobyte.jojo.action.non_stand;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
-import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanData.Mode;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
@@ -78,7 +75,7 @@ public class PillarmanBladeBarrage extends PillarmanAction {
                 }
                 break;
             case ENTITY:
-            	if(targetEntity instanceof LivingEntity) {
+            	if (targetEntity instanceof LivingEntity) {
             		LivingEntity targetLiving = (LivingEntity) targetEntity;
 	                if (user instanceof PlayerEntity) {
 	                    int invulTicks = targetEntity.invulnerableTime;
@@ -86,7 +83,7 @@ public class PillarmanBladeBarrage extends PillarmanAction {
 	                }
 	                if (!world.isClientSide()) {
 	                    DamageUtil.hurtThroughInvulTicks(targetLiving, EntityDamageSource.playerAttack((PlayerEntity) user), 
-	                            (DamageUtil.getDamageWithoutHeldItem(user)*0.2F));
+	                            (DamageUtil.getDamageWithoutHeldItem(user) * 0.2F));
 	                }
             	}
                 break;
@@ -96,11 +93,6 @@ public class PillarmanBladeBarrage extends PillarmanAction {
             world.playSound(null, user.getX(), user.getY(), user.getZ(), ModSounds.SILVER_CHARIOT_BARRAGE_SWIPE.get(), user.getSoundSource(), 1.0F, 1.0F);
             PillarmanDivineSandstorm.auraEffect(user, ParticleTypes.SWEEP_ATTACK, 1);
         }
-    }
-    
-    @Override
-    public boolean isHeldSentToTracking() {
-        return true;
     }
     
     @Override

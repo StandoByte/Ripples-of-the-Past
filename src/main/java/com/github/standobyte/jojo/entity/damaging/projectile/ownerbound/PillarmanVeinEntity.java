@@ -1,18 +1,14 @@
 package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 
-import com.github.standobyte.jojo.init.ModStatusEffects;
-import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModParticles;
-import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -122,6 +118,26 @@ public class PillarmanVeinEntity extends OwnerBoundProjectileEntity {
     @Override
     protected Vector3d originOffset(float yRot, float xRot, double distance) {
         return super.originOffset(yRot + yRotOffset, xRot + xRotOffset, distance);
+    }
+
+    @Override
+    protected void addAdditionalSaveData(CompoundNBT nbt) {
+        super.addAdditionalSaveData(nbt);
+        nbt.putFloat("YRotOffset", yRotOffset);
+        nbt.putFloat("XRotOffset", xRotOffset);
+        nbt.putFloat("Knockback", knockback);
+        nbt.putDouble("YOriginOffset", yOriginOffset);
+        nbt.putDouble("XOriginOffset", xOriginOffset);
+    }
+
+    @Override
+    protected void readAdditionalSaveData(CompoundNBT nbt) {
+        super.readAdditionalSaveData(nbt);
+        yRotOffset = nbt.getFloat("YRotOffset");
+        xRotOffset = nbt.getFloat("XRotOffset");
+        knockback = nbt.getFloat("Knockback");
+        yOriginOffset = nbt.getDouble("YOriginOffset");
+        xOriginOffset = nbt.getDouble("XOriginOffset");
     }
 
     @Override

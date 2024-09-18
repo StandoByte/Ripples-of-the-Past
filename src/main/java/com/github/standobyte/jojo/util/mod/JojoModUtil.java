@@ -310,6 +310,16 @@ public class JojoModUtil {
         return false;
     }
     
+    /** 
+     * You don't have to call this, it's just a condition to change the PlayerEntity's getMobType() to CreatureAttribute.UNDEAD via a mixin
+     */
+    public static boolean playerUndeadAttribute(LivingEntity player) {
+        return INonStandPower.getNonStandPowerOptional(player).map(power -> {
+            NonStandPowerType<?> powerType = power.getType();
+            return powerType == ModPowers.VAMPIRISM.get() || powerType == ModPowers.ZOMBIE.get();
+        }).orElse(false);
+    }
+    
     /**
      * Is treated differently from the conventional vanilla "undead"
      */

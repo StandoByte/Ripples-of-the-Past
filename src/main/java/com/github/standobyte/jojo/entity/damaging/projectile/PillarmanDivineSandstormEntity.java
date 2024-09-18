@@ -1,27 +1,13 @@
 package com.github.standobyte.jojo.entity.damaging.projectile;
 
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModEntityTypes;
-import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
-import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
-import com.github.standobyte.jojo.util.mc.damage.IndirectStandEntityDamageSource;
-import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
-import com.github.standobyte.jojo.util.mc.damage.explosion.CustomExplosion;
-import com.github.standobyte.jojo.util.mc.damage.explosion.CustomExplosion.CustomExplosionType;
 
-import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.EntityType;
@@ -30,25 +16,18 @@ import net.minecraft.entity.Pose;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.particles.ParticleTypes;
-import net.minecraft.util.Direction;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.EntityRayTraceResult;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RayTraceContext.FluidMode;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.Explosion;
 import net.minecraft.world.World;
-import net.minecraftforge.common.ToolType;
-import net.minecraftforge.event.ForgeEventFactory;
 
 public class PillarmanDivineSandstormEntity extends ModdedProjectileEntity {
     private float radius;
     private float damage;
-    private float sparksCount;
+    private float particlesCount;
     private int duration;
 
     public PillarmanDivineSandstormEntity(World world, LivingEntity entity) {
@@ -57,7 +36,7 @@ public class PillarmanDivineSandstormEntity extends ModdedProjectileEntity {
     
     public PillarmanDivineSandstormEntity setRadius(float radius) {
         this.radius = radius;
-        this.sparksCount = radius * 2;
+        this.particlesCount = radius * 2;
         Vector3d pos = getBoundingBox().getCenter();
         refreshDimensions();
         setBoundingBox(new AxisAlignedBB(pos, pos).inflate(radius));
@@ -89,8 +68,8 @@ public class PillarmanDivineSandstormEntity extends ModdedProjectileEntity {
         super.tick();
         if (level.isClientSide()) {
             Vector3d center = getBoundingBox().getCenter();
-            int sparksCount = Math.max((int) (this.sparksCount * damageWearOffMultiplier()), 1);
-            for (int i = 0; i < sparksCount; i++) {
+            int particlesCount = Math.max((int) (this.particlesCount * damageWearOffMultiplier()), 1);
+            for (int i = 0; i < particlesCount; i++) {
                 Vector3d sparkVec = center.add(new Vector3d(
                         (random.nextDouble() - 1.0), 
                         (random.nextDouble() - 1.0),
@@ -187,6 +166,7 @@ public class PillarmanDivineSandstormEntity extends ModdedProjectileEntity {
         nbt.putFloat("Radius", radius);
         nbt.putFloat("Damage", damage);
         nbt.putInt("Duration", duration);
+        nbt.putFloat("Particles", particlesCount);
     }
 
     @Override
@@ -195,6 +175,7 @@ public class PillarmanDivineSandstormEntity extends ModdedProjectileEntity {
         setRadius(nbt.getFloat("Radius"));
         damage = nbt.getFloat("Damage");
         duration = nbt.getInt("Duration");
+        particlesCount = nbt.getFloat("Particles");
     }
     
     @Override
@@ -202,6 +183,7 @@ public class PillarmanDivineSandstormEntity extends ModdedProjectileEntity {
         super.writeSpawnData(buffer);
         buffer.writeFloat(radius);
         buffer.writeVarInt(duration);
+        buffer.writeFloat(particlesCount);
     }
 
     @Override
@@ -209,6 +191,7 @@ public class PillarmanDivineSandstormEntity extends ModdedProjectileEntity {
         super.readSpawnData(additionalData);
         setRadius(additionalData.readFloat());
         setDuration(additionalData.readVarInt());
+        particlesCount = additionalData.readFloat();
     }
     
     private static final Vector3d OFFSET = new Vector3d(0, 0.8F, 0);

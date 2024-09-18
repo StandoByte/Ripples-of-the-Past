@@ -257,11 +257,6 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     protected void holdTick(World world, LivingEntity user, IStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {}
 
     @Override
-    public boolean isHeldSentToTracking() {
-        return true;
-    }
-
-    @Override
     public void stoppedHolding(World world, LivingEntity user, IStandPower power, int ticksHeld, boolean willFire) {
         if (!willFire) {
             invokeForStand(power, stand -> {

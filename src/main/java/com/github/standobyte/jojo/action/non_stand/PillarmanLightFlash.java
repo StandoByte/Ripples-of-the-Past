@@ -15,7 +15,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class PillarmanLightFlash extends PillarmanAction {
@@ -40,23 +39,17 @@ public class PillarmanLightFlash extends PillarmanAction {
                     LivingEntity.class, user, range, false, entity -> 
                     entity.canSee(user) && !(entity instanceof StandEntity && user.is(((StandEntity) entity).getUser())))) {
                 if (user.distanceTo(entity) < 5) {
-                    entity.addEffect(new EffectInstance(Effects.BLINDNESS, 200, 0));
+                    entity.addEffect(new EffectInstance(Effects.BLINDNESS, 200, 0, true, true, false));
                 } else {
-                    entity.addEffect(new EffectInstance(Effects.BLINDNESS, 60, 0));
+                    entity.addEffect(new EffectInstance(Effects.BLINDNESS, 60, 0, true, true, false));
                 }
-                if(!(entity instanceof PlayerEntity)) {
-                    entity.addEffect(new EffectInstance(ModStatusEffects.STUN.get(), 200, 0));
+                if (!(entity instanceof PlayerEntity)) {
+                    entity.addEffect(new EffectInstance(ModStatusEffects.STUN.get(), 200, 0, true, true, false));
                 }
             }
         }
-        user.playSound(ModSounds.AJA_STONE_BEAM.get(), (float) (range + 16) / 16F, 1.0F); // Need to replace
+        user.playSound(ModSounds.AJA_STONE_BEAM.get(), (float) (range + 16) / 16F, 1.0F); // TODO replace the light flash sound
         HamonUtil.createHamonSparkParticlesEmitter(user, 2F, 0, ParticleTypes.FLASH);
-        
-    }
-
-    @Override
-    public boolean isHeldSentToTracking() {
-        return true;
     }
     
 }

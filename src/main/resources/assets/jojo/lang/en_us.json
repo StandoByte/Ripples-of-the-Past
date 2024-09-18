@@ -1089,6 +1089,7 @@
   "action.jojo.zombie_claw_lacerate": "Claw Lacerate",
   "action.jojo.zombie_devour": "Devour",
   "action.jojo.zombie_disguise": "Disguise",
+  "action.jojo.zombie_disguise.disable": "Back to zombie form",
   
   "non_stand.jojo.pillarman": "Pillar Man",
   "action.jojo.pillarman_heavy_punch": "Heavy Blow",

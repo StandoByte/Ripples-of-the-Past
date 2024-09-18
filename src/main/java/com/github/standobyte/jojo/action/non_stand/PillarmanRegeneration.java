@@ -24,7 +24,7 @@ public class PillarmanRegeneration extends PillarmanAction {
             int level = 3;
             duration = HamonHealing.updateRegenEffect(user, duration, level, Effects.REGENERATION);
             user.addEffect(new EffectInstance(Effects.REGENERATION, duration, level, false, false, true));
-            world.playSound(null, user.getX(), user.getEyeY(), user.getZ(), ModSounds.VAMPIRE_BLOOD_DRAIN.get(), user.getSoundSource(), 1.5F, 1.2F);
+            world.playSound(null, user.getX(), user.getEyeY(), user.getZ(), ModSounds.VAMPIRE_BLOOD_DRAIN.get(), user.getSoundSource(), 1.5F, 1.2F); // TODO separate sound event
         }
     }
 }

@@ -242,7 +242,7 @@ public class HungryZombieEntity extends ZombieEntity {
         if (world.getDifficulty() != Difficulty.EASY) createZombie(world, getOwner(), entityDead, isPersistenceRequired());
     }
     
-    public static boolean createZombie(ServerWorld world, LivingEntity owner, LivingEntity dead, boolean makePersistent) {
+    public static boolean createZombie(ServerWorld world, @Nullable LivingEntity owner, LivingEntity dead, boolean makePersistent) {
         if ((world.getDifficulty() == Difficulty.HARD
                 || world.getDifficulty() == Difficulty.NORMAL && dead.getRandom().nextBoolean()
                 || world.getDifficulty() == Difficulty.EASY && dead.getRandom().nextFloat() <= 0.125F)) {

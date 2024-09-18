@@ -13,49 +13,49 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-public class TrZombieFlagsPacket {
+public class TrZombieDataPacket {
     private final int entityId;
     private final boolean disguiseEnabled;
     
-    public TrZombieFlagsPacket(int entityId, ZombieData zombieData) {
+    public TrZombieDataPacket(int entityId, ZombieData zombieData) {
         this(entityId, zombieData.isDisguiseEnabled());
     }
     
-    public TrZombieFlagsPacket(int entityId, boolean disguiseEnabled) {
+    public TrZombieDataPacket(int entityId, boolean disguiseEnabled) {
         this.entityId = entityId;
         this.disguiseEnabled = disguiseEnabled;
     }
     
     
     
-    public static class Handler implements IModPacketHandler<TrZombieFlagsPacket> {
+    public static class Handler implements IModPacketHandler<TrZombieDataPacket> {
 
         @Override
-        public void encode(TrZombieFlagsPacket msg, PacketBuffer buf) {
+        public void encode(TrZombieDataPacket msg, PacketBuffer buf) {
             buf.writeInt(msg.entityId);
             buf.writeBoolean(msg.disguiseEnabled);
         }
 
         @Override
-        public TrZombieFlagsPacket decode(PacketBuffer buf) {
-            return new TrZombieFlagsPacket(buf.readInt(), buf.readBoolean());
+        public TrZombieDataPacket decode(PacketBuffer buf) {
+            return new TrZombieDataPacket(buf.readInt(), buf.readBoolean());
         }
 
         @Override
-        public void handle(TrZombieFlagsPacket msg, Supplier<NetworkEvent.Context> ctx) {
+        public void handle(TrZombieDataPacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity instanceof LivingEntity) {
-                INonStandPower.getNonStandPowerOptional((LivingEntity) entity).ifPresent(power -> {
-                    power.getTypeSpecificData(ModPowers.ZOMBIE.get()).ifPresent(zombie -> {
-                        zombie.setDisguiseEnabled(msg.disguiseEnabled);
-                    });
+                INonStandPower.getNonStandPowerOptional((LivingEntity) entity).resolve()
+                .flatMap(power -> power.getTypeSpecificData(ModPowers.ZOMBIE.get()))
+                .ifPresent(zombie -> {
+                    zombie.setDisguiseEnabled(msg.disguiseEnabled);
                 });
             }
         }
 
         @Override
-        public Class<TrZombieFlagsPacket> getPacketClass() {
-            return TrZombieFlagsPacket.class;
+        public Class<TrZombieDataPacket> getPacketClass() {
+            return TrZombieDataPacket.class;
         }
     }
 

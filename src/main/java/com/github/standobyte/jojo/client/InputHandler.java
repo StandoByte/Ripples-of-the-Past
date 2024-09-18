@@ -65,7 +65,6 @@ import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanData;
-import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanPowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
@@ -77,8 +76,6 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
-import net.minecraft.client.renderer.entity.model.PlayerModel;
-import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.entity.Entity;
@@ -980,10 +977,10 @@ public class InputHandler {
         MovementInput input = event.getMovementInput();
 
         PlayerEntity player = (PlayerEntity) event.getEntity();
-        if(INonStandPower.getNonStandPowerOptional(player).resolve()
-        		.flatMap(power -> power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()))
-        		.map(PillarmanData::isStoneFormEnabled).orElse(false)) {
-        	input.shiftKeyDown = false;
+        if (INonStandPower.getNonStandPowerOptional(player).resolve()
+                .flatMap(power -> power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()))
+                .map(PillarmanData::isStoneFormEnabled).orElse(false)) {
+            input.shiftKeyDown = false;
         }
         
         boolean hasInput = input.up || input.down || input.left || input.right || input.jumping || input.shiftKeyDown;
