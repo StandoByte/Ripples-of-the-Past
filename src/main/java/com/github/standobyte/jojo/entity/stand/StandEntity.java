@@ -1809,10 +1809,8 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         
         LivingEntity user = getUser();
         if (user != null) {
-            return !entity.is(user) && user.canAttack(entity)
-                    && !(entity instanceof AnimalEntity && entity.isPassengerOfSameVehicle(user))
-                    && !(user instanceof PlayerEntity && entity instanceof PlayerEntity
-                            && !((PlayerEntity) user).canHarmPlayer((PlayerEntity) entity));
+            boolean canHarm = MCUtil.canHarm(user, entity);
+            return canHarm && !(entity instanceof AnimalEntity && entity.isPassengerOfSameVehicle(user));
         }
         
         return true;

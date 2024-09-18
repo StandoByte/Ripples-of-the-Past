@@ -94,6 +94,7 @@ import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.PotionUtils;
 import net.minecraft.potion.Potions;
+import net.minecraft.scoreboard.Team;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Direction;
@@ -554,6 +555,25 @@ public class MCUtil {
         else if (aabb2.maxZ < aabb1.minZ) zDist = aabb1.minZ - aabb2.maxZ;
         
         return xDist + yDist + zDist;
+    }
+    
+    
+    
+    public static boolean canHarm(LivingEntity attacker, LivingEntity target) {
+        if (attacker.is(target)) {
+            return false;
+        }
+        if (!attacker.canAttack(target)) {
+            return false;
+        }
+        
+        Team team1 = attacker.getTeam();
+        Team team2 = target.getTeam();
+        if (team1 != null && team1.isAlliedTo(team2) && !team1.isAllowFriendlyFire()) {
+            return false;
+        }
+        
+        return true;
     }
     
     
