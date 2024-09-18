@@ -556,8 +556,7 @@ public class GameplayEventHandler {
         float dmgAmount = event.getAmount();
         if (GeneralUtil.orElseFalse(ContinuousActionInstance.getCurrentAction(entity), 
                 action -> action.cancelIncomingDamage(dmgSource, dmgAmount))
-                || HamonUtil.snakeMuffler(entity, dmgSource, dmgAmount) 
-                || HamonUtil.rebuffOverdrive(entity, dmgSource, dmgAmount)) {
+                || HamonUtil.snakeMuffler(entity, dmgSource, dmgAmount)) {
             event.setCanceled(true);
         }
     }
