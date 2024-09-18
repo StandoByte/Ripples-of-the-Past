@@ -1,82 +1,82 @@
 {
-	"credit": "Made with Blockbench",
-	"texture_size": [64, 64],
-	"elements": [
-		{
-			"name": "brooch",
-			"from": [7.05, 4.725, 7.1],
-			"to": [8.85, 7.525, 7.9],
-			"rotation": {"angle": 0, "axis": "y", "origin": [0.3, -12.65, 7.8]},
-			"faces": {
-				"north": {"uv": [6.5, 1, 7.25, 2], "texture": "#layer0"},
-				"east": {"uv": [6, 1, 6.5, 2], "texture": "#layer0"},
-				"south": {"uv": [7.75, 1, 8.5, 2], "texture": "#layer0"},
-				"west": {"uv": [7.25, 1, 7.75, 2], "texture": "#layer0"},
-				"up": {"uv": [7.25, 1, 6.5, 0.5], "texture": "#layer0"},
-				"down": {"uv": [8, 0.5, 7.25, 1], "texture": "#layer0"}
-			}
-		},
-		{
-			"from": [7.8, 5.2, 7.6],
-			"to": [8.1, 6.5, 7.9],
-			"rotation": {"angle": -22.5, "axis": "x", "origin": [7.95, 6.5, 7.85]},
-			"faces": {
-				"north": {"uv": [8.75, 1.5, 9, 2], "texture": "#layer0"},
-				"east": {"uv": [8.5, 1.5, 8.75, 2], "texture": "#layer0"},
-				"south": {"uv": [9.25, 1.5, 9.5, 2], "texture": "#layer0"},
-				"west": {"uv": [9, 1.5, 9.25, 2], "texture": "#layer0"},
-				"up": {"uv": [9, 1.5, 8.75, 1.25], "texture": "#layer0"},
-				"down": {"uv": [9.25, 1.25, 9, 1.5], "texture": "#layer0"}
-			}
-		}
-	],
-	"display": {
-		"thirdperson_righthand": {
-			"translation": [0, 3, 1]
-		},
-		"thirdperson_lefthand": {
-			"translation": [0, 3, 1]
-		},
-		"firstperson_righthand": {
-			"rotation": [-22.5, 180, -15],
-			"translation": [0.5, 4.5, 1.13]
-		},
-		"firstperson_lefthand": {
-			"rotation": [-22.5, 180, -15],
-			"translation": [0.5, 4.5, 1.13]
-		},
-		"ground": {
-			"translation": [0, 1.5, 0],
-			"scale": [1.5, 1.5, 1.5]
-		},
-		"gui": {
-			"rotation": [-30, -150, -22.5],
-			"translation": [-3, 5.5, 0],
-			"scale": [4, 4, 4]
-		},
-		"head": {
-			"rotation": [90, 0, 0],
-			"translation": [0, 6.25, 0]
-		},
-		"fixed": {
-			"translation": [0, 3.75, 1],
-			"scale": [2, 2, 2]
-		}
-	},
-	"groups": [
-		{
-			"name": "brooch",
-			"origin": [2.85, 19.375, -2.4],
-			"color": 0,
-			"children": [
-				0,
-				{
-					"name": "broochPin",
-					"origin": [2.85, 19.75, -2],
-					"color": 0,
-					"children": [1]
-				}
-			]
-		}
-	]
+    "credit": "Made with Blockbench",
+    "texture_size": [64, 64],
+    "elements": [
+        {
+            "name": "brooch",
+            "from": [7.05, 4.725, 7.1],
+            "to": [8.85, 7.525, 7.9],
+            "rotation": {"angle": 0, "axis": "y", "origin": [0.3, -12.65, 7.8]},
+            "faces": {
+                "north": {"uv": [6.5, 1, 7.25, 2], "texture": "#layer0"},
+                "east": {"uv": [6, 1, 6.5, 2], "texture": "#layer0"},
+                "south": {"uv": [7.75, 1, 8.5, 2], "texture": "#layer0"},
+                "west": {"uv": [7.25, 1, 7.75, 2], "texture": "#layer0"},
+                "up": {"uv": [7.25, 1, 6.5, 0.5], "texture": "#layer0"},
+                "down": {"uv": [8, 0.5, 7.25, 1], "texture": "#layer0"}
+            }
+        },
+        {
+            "from": [7.8, 5.2, 7.6],
+            "to": [8.1, 6.5, 7.9],
+            "rotation": {"angle": -22.5, "axis": "x", "origin": [7.95, 6.5, 7.85]},
+            "faces": {
+                "north": {"uv": [8.75, 1.5, 9, 2], "texture": "#layer0"},
+                "east": {"uv": [8.5, 1.5, 8.75, 2], "texture": "#layer0"},
+                "south": {"uv": [9.25, 1.5, 9.5, 2], "texture": "#layer0"},
+                "west": {"uv": [9, 1.5, 9.25, 2], "texture": "#layer0"},
+                "up": {"uv": [9, 1.5, 8.75, 1.25], "texture": "#layer0"},
+                "down": {"uv": [9.25, 1.25, 9, 1.5], "texture": "#layer0"}
+            }
+        }
+    ],
+    "display": {
+        "thirdperson_righthand": {
+            "translation": [0, 3, 1]
+        },
+        "thirdperson_lefthand": {
+            "translation": [0, 3, 1]
+        },
+        "firstperson_righthand": {
+            "rotation": [-22.5, 180, -15],
+            "translation": [0.5, 4.5, 1.13]
+        },
+        "firstperson_lefthand": {
+            "rotation": [-22.5, 180, -15],
+            "translation": [0.5, 4.5, 1.13]
+        },
+        "ground": {
+            "translation": [0, 1.5, 0],
+            "scale": [1.5, 1.5, 1.5]
+        },
+        "gui": {
+            "rotation": [-30, -150, -22.5],
+            "translation": [-3, 5.5, 0],
+            "scale": [4, 4, 4]
+        },
+        "head": {
+            "rotation": [90, 0, 0],
+            "translation": [0, 6.25, 0]
+        },
+        "fixed": {
+            "translation": [0, 3.75, 1],
+            "scale": [2, 2, 2]
+        }
+    },
+    "groups": [
+        {
+            "name": "brooch",
+            "origin": [2.85, 19.375, -2.4],
+            "color": 0,
+            "children": [
+                0,
+                {
+                    "name": "broochPin",
+                    "origin": [2.85, 19.75, -2],
+                    "color": 0,
+                    "children": [1]
+                }
+            ]
+        }
+    ]
 }

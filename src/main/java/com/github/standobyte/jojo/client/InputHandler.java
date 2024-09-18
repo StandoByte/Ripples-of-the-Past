@@ -11,6 +11,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_O;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_UNKNOWN;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_V;
 
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -65,6 +66,7 @@ import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.IPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
+import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanData;
 import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
@@ -591,6 +593,7 @@ public class InputHandler {
         }
     }
     
+    private EnumSet<PowerClassification> prevTargetUpdateTick = EnumSet.noneOf(PowerClassification.class);
     private void checkHeldActionAndTarget(IPower<?, ?> power, boolean targetChanged) {
         boolean keyHeld;
         if (heldKeys.containsKey(power)) {
@@ -603,12 +606,19 @@ public class InputHandler {
             keyHeld = mc.options.keyAttack.isDown() || mc.options.keyUse.isDown() || mc.options.keyPickItem.isDown();
         }
         
+        PowerClassification powerClass = power.getPowerClassification();
+        
         if (!keyHeld && power.getHeldAction() != null) {
-            stopHeldAction(power, power.getPowerClassification() == actionsOverlay.getCurrentMode());
+            stopHeldAction(power, powerClass == actionsOverlay.getCurrentMode());
         }
         
-        if (power.isTargetUpdateTick() && targetChanged) {
-            PacketManager.sendToServer(ClHeldActionTargetPacket.withRayTraceResult(power.getPowerClassification(), mouseTarget));
+        boolean targetUpdatePrevTick = prevTargetUpdateTick.contains(powerClass);
+        boolean targetUpdateThisTick = power.isTargetUpdateTick();
+        if (targetUpdateThisTick)   prevTargetUpdateTick.add(powerClass);
+        else                        prevTargetUpdateTick.remove(powerClass);
+        
+        if (targetUpdateThisTick && (!targetUpdatePrevTick || targetChanged)) {
+            PacketManager.sendToServer(ClHeldActionTargetPacket.withRayTraceResult(powerClass, mouseTarget));
         }
     }
     
@@ -631,6 +641,11 @@ public class InputHandler {
                     event.setCanceled(true);
                     event.setSwingHand(false);
                 }
+            });
+            nonStandPower.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).ifPresent(pillarman -> {
+            	if (pillarman.isStoneFormEnabled()) {
+            		event.setSwingHand(false);
+            	}
             });
         }
     }
@@ -728,7 +743,7 @@ public class InputHandler {
         return result;
     }
     
-    private void mcPlayerAttack() {
+    public void mcPlayerAttack() {
         if (mc.hitResult != null && !mc.player.isHandsBusy() && mc.hitResult.getType() == RayTraceResult.Type.ENTITY) {
             mc.gameMode.attack(mc.player, ((EntityRayTraceResult) mc.hitResult).getEntity());
         }
@@ -983,9 +998,16 @@ public class InputHandler {
     @SubscribeEvent(priority = EventPriority.LOW)
     public void onInputUpdate(InputUpdateEvent event) {
         MovementInput input = event.getMovementInput();
+
+        PlayerEntity player = (PlayerEntity) event.getEntity();
+        if (INonStandPower.getNonStandPowerOptional(player).resolve()
+                .flatMap(power -> power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()))
+                .map(PillarmanData::isStoneFormEnabled).orElse(false)) {
+            input.shiftKeyDown = false;
+        }
         
-        mc.player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(player -> {
-            if (player.isDyingBody() && player.getDyingBodyTicksLeft() == 0) {
+        mc.player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(entity -> {
+            if (entity.isDyingBody() && entity.getDyingBodyTicksLeft() == 0) {
                 mc.player.setSprinting(false);
             }
         });

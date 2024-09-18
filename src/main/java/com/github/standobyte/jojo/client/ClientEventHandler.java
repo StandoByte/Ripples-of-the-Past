@@ -274,6 +274,23 @@ public class ClientEventHandler {
             correctHeldItemPose(entity, bipedModel, HandSide.RIGHT);
             correctHeldItemPose(entity, bipedModel, HandSide.LEFT);
         }
+        
+        if (model instanceof PlayerModel) {
+            INonStandPower.getNonStandPowerOptional(event.getEntity()).map(power -> {
+                if (power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).map(
+                        pillarmanData -> pillarmanData.isStoneFormEnabled()).orElse(false)) {
+                    PlayerModel<?> playerModel = (PlayerModel<?>) model;
+                    playerModel.leftSleeve.visible = false;
+                    playerModel.rightSleeve.visible = false;
+                    playerModel.leftPants.visible = false;
+                    playerModel.rightPants.visible = false;
+                    playerModel.hat.visible = false;
+                    playerModel.jacket.visible = false;
+                    return true;
+                }
+                return false;
+            });
+        }
         // FIXME (vampire\curing) shake vampire while curing
         // yRot += (float) (Math.cos((double)entity.tickCount * 3.25) * Math.PI * 0.4);
     }
@@ -579,7 +596,8 @@ public class ClientEventHandler {
         boolean isVampirismModVampire = OptionalDependencyHelper.vampirism().isEntityVampire(mc.player);
         if (event.getType() == FOOD && !isVampirismModVampire || event.getType() == AIR) {
             INonStandPower.getNonStandPowerOptional(mc.player).ifPresent(power -> {
-                if (power.getType() == ModPowers.VAMPIRISM.get()) {
+                if (power.getType() == ModPowers.VAMPIRISM.get() || power.getType() == ModPowers.ZOMBIE.get() 
+                        || power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).map(pillarMan -> pillarMan.getEvolutionStage() > 1).orElse(false)) {
                     event.setCanceled(true);
                 }
             });
@@ -831,7 +849,7 @@ public class ClientEventHandler {
             for (Entity passenger : mc.player.getPassengers()) {
                 if (CocoJumboTurtleEntity.isCarriedTurtle(passenger, mc.player)) {
                     ItemStack turtleItemIcon = new ItemStack(ModItems.METEORIC_SCRAP.get());
-                    turtleItemIcon.getOrCreateTag().put("Icon", IntNBT.valueOf(14));
+                    turtleItemIcon.getOrCreateTag().put("Icon", IntNBT.valueOf(22));
                     
                     MatrixStack matrixStack = event.getMatrixStack();
                     HandSide offHand = mc.player.getMainArm().getOpposite();

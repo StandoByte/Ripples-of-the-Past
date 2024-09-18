@@ -33,11 +33,6 @@ public class HamonBreath extends HamonAction {
         }
         return ActionConditionResult.POSITIVE;
     }
-
-    @Override
-    public boolean isHeldSentToTracking() {
-        return true;
-    }
     
     @Override
     protected boolean changesAuraColor() {

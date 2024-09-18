@@ -681,6 +681,17 @@ public class MCUtil {
     
     
     
+    public static boolean canHarm(LivingEntity attacker, Entity target) {
+        Team team = attacker.getTeam();
+        Team team1 = target.getTeam();
+        if (team == null) {
+            return true;
+        } else {
+            return !team.isAlliedTo(team1) ? true : team.isAllowFriendlyFire();
+        }
+    }
+    
+    
     /**
      *  Limits the amount of particles and break sounds that the blocks produce, sending it all in one packet
      */
@@ -886,6 +897,31 @@ public class MCUtil {
 
         return entityAttribute.getAttribute().sanitizeValue(value);
     }
+    
+    public static void applyAttributeModifier(LivingEntity entity, Attribute attribute, AttributeModifier modifier) {
+        ModifiableAttributeInstance attributeInstance = entity.getAttribute(attribute);
+        if (attributeInstance != null) {
+            attributeInstance.removeModifier(modifier);
+            attributeInstance.addTransientModifier(modifier);
+        }
+    }
+    
+    public static void removeAttributeModifier(LivingEntity entity, Attribute attribute, AttributeModifier modifier) {
+        ModifiableAttributeInstance instance = entity.getAttribute(attribute);
+        if (instance != null && instance.hasModifier(modifier)) {
+            instance.removeModifier(modifier);
+        }
+    }
+    
+    public static void applyAttributeModifierMultiplied(LivingEntity entity, Attribute attribute, AttributeModifier modifier, double multiplier) {
+        ModifiableAttributeInstance attributeInstance = entity.getAttribute(attribute);
+        if (attributeInstance != null) {
+            attributeInstance.removeModifier(modifier);
+            attributeInstance.addTransientModifier(new AttributeModifier(modifier.getId(), 
+                    modifier.getName(), modifier.getAmount() * multiplier, modifier.getOperation()));
+        }
+    }
+    
     
     
     

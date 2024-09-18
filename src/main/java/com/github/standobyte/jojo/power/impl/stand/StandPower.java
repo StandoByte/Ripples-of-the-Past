@@ -153,7 +153,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         
         if (user != null && !user.level.isClientSide()) {
             setStamina(getMaxStamina() * 0.5F);
-            if (playerSkipsActionTraining()) {
+            if (playerSkipsActionTraining(user)) {
                 skipProgression();
             }
             else {
@@ -562,7 +562,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         return usesResolve() ? (float) getResolveLevel() / (float) getMaxResolveLevel() : 0;
     }
     
-    private boolean playerSkipsActionTraining() {
+    public static boolean playerSkipsActionTraining(LivingEntity user) {
         return user != null && (user instanceof PlayerEntity && ((PlayerEntity) user).abilities.instabuild
                 || JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).skipStandProgression.get());
     }
@@ -570,7 +570,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public boolean unlockAction(StandAction action) {
         if (actionLearningProgressMap.addEntry(action, getType())) {
-            boolean getFull = !action.isTrained() || playerSkipsActionTraining();
+            boolean getFull = !action.isTrained() || playerSkipsActionTraining(user);
             setLearningProgressPoints(action, getFull ? action.getMaxTrainingPoints(this) : 0F);
             return true;
         }

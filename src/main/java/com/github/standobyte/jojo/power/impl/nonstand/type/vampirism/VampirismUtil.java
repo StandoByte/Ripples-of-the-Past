@@ -4,9 +4,8 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 import com.github.standobyte.jojo.JojoModConfig;
-import com.github.standobyte.jojo.block.WoodenCoffinBlock;
-import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.potion.VampireSunBurnEffect;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -15,7 +14,6 @@ import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
-import net.minecraft.block.BlockState;
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityPredicate;
 import net.minecraft.entity.LivingEntity;
@@ -35,11 +33,9 @@ import net.minecraftforge.event.entity.living.LivingHealEvent;
 public class VampirismUtil {
 
     public static void tickSunDamage(LivingEntity entity) {
-        if (!entity.level.isClientSide() && entity.invulnerableTime <= 10) {
+        if (!entity.level.isClientSide() && entity.invulnerableTime <= 10 && DamageUtil.entityTakesUVDamage(entity, true)) {
             float sunDamage = getSunDamage(entity);
-            if (    
-                    sunDamage > 0
-                    && DamageUtil.dealUltravioletDamage(entity, sunDamage, null, null, true)) {
+            if (sunDamage > 0 && DamageUtil.dealUltravioletDamage(entity, sunDamage, null, null, true)) {
                 incSunBurn(entity, 1);
             }
         }
@@ -64,14 +60,6 @@ public class VampirismUtil {
 //    private static final float MAX_SUN_DAMAGE = 10;
 //    private static final float MIN_SUN_DAMAGE = 2;
     private static float getSunDamage(LivingEntity entity) {
-        if (entity.hasEffect(ModStatusEffects.SUN_RESISTANCE.get())
-                || !(entity instanceof PlayerEntity || JojoModConfig.getCommonConfigInstance(false).undeadMobsSunDamage.get())
-                || entity.isSleeping() && entity.getSleepingPos().map(sleepingPos -> {
-                    BlockState blockState = entity.level.getBlockState(sleepingPos);
-                    return blockState.getBlock() instanceof WoodenCoffinBlock && blockState.getValue(WoodenCoffinBlock.CLOSED);
-                }).orElse(false)) {
-            return 0;
-        }
         World world = entity.level;
         if (
                 world.dimensionType().hasSkyLight()
@@ -143,7 +131,12 @@ public class VampirismUtil {
 //                                    JojoModUtil.isPlayerUndead((PlayerEntity) target) &&
                                     INonStandPower.getNonStandPowerOptional(target).map(
                                             power -> power.getTypeSpecificData(ModPowers.VAMPIRISM.get())
-                                            .map(vampirism -> vampirism.getCuringStage() < 3).orElse(false)).orElse(false));
+                                            .map(vampirism -> vampirism.getCuringStage() < 3).orElse(false)).orElse(false)) 
+                            && !(INonStandPower.getNonStandPowerOptional(target).map(power ->power.getType() == ModPowers.ZOMBIE.get()).orElse(false)) 
+                            && !(INonStandPower.getNonStandPowerOptional(target).map(power -> power.getTypeSpecificData(ModPowers.PILLAR_MAN.get())
+                                    .map(pillarman -> pillarman.isStoneFormEnabled()).orElse(false)).orElse(false) || 
+                                    INonStandPower.getNonStandPowerOptional(target).map(power -> power.getTypeSpecificData(ModPowers.PILLAR_MAN.get())
+                                            .map(pillarman -> pillarman.getEvolutionStage() > 1).orElse(false)).orElse(false));
                         CommonReflection.setTargetConditions(targetGoal, new EntityPredicate().range(CommonReflection.getTargetDistance(targetGoal)).selector(
                                 oldPredicate != null ? oldPredicate.and(undeadPredicate) : undeadPredicate));
                     }
@@ -179,7 +172,9 @@ public class VampirismUtil {
         LivingEntity entity = event.getEntityLiving();
         if (entity.isAlive()) {
             INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
-                if (power.getType() == ModPowers.VAMPIRISM.get()) {
+                if (power.getType() == ModPowers.VAMPIRISM.get() 
+                        || (power.getType() == ModPowers.PILLAR_MAN.get() 
+                        && power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).get().getEvolutionStage() > 1)) {
                     float healCost = healCost(entity.level);
                     if (healCost > 0) {
                         float actualHeal = Math.min(event.getAmount(), power.getEnergy() / healCost);

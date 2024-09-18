@@ -11,7 +11,6 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
@@ -301,15 +300,15 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         return false;
     }
 
-    protected boolean transfersDamage() {
+    public boolean transfersDamage() {
         return true;
     }
 
-    protected boolean standCanHaveNoPhysics() {
+    public boolean standCanHaveNoPhysics() {
         return true;
     }
 
-    protected boolean standHasNoGravity() {
+    public boolean standHasNoGravity() {
         return true;
     }
 
@@ -1674,7 +1673,6 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     public boolean punch(StandEntityTask task, IHasStandPunch punch, ActionTarget target) {
         if (!level.isClientSide()) {
             ActionTarget finalTarget = aimWithThisOrUser(getAimDistance(getUser()), target);
-            JojoMod.LOGGER.debug("{} {}", target.getType(), finalTarget.getType());
             target = finalTarget.getType() != TargetType.EMPTY && isTargetInReach(finalTarget) ? finalTarget : ActionTarget.EMPTY;
             setTaskTarget(target);
         }
@@ -1695,7 +1693,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         switch (target.getType()) {
         case BLOCK:
             BlockPos blockPos = target.getBlockPos();
-            StandBlockPunch blockPunchInstance = punchAction.punchBlock(this, blockPos, level.getBlockState(blockPos));
+            StandBlockPunch blockPunchInstance = punchAction.punchBlock(this, blockPos, level.getBlockState(blockPos), target.getFace());
             punchInstance = blockPunchInstance;
             break;
         case ENTITY:

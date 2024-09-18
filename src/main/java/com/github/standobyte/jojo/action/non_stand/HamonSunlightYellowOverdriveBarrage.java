@@ -78,11 +78,6 @@ public class HamonSunlightYellowOverdriveBarrage extends HamonAction implements 
     }
     
     @Override
-    public boolean isHeldSentToTracking() {
-        return true;
-    }
-    
-    @Override
     public boolean clHeldStartAnim(PlayerEntity user) {
         return ModPlayerAnimations.syoBarrage.setStartingAnim(user);
     }

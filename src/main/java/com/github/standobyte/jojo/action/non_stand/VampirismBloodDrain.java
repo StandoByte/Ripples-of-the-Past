@@ -74,6 +74,11 @@ public class VampirismBloodDrain extends VampirismAction {
     
     @Override
     protected void holdTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
+        drainPerform(world, user, power, ticksHeld, target, requirementsFulfilled, 0, true);
+    }
+    
+    public static void drainPerform(World world, LivingEntity user, INonStandPower power, int ticksHeld, 
+            ActionTarget target, boolean requirementsFulfilled, float healMult, boolean tameZombie) {
         if (requirementsFulfilled) {
             if (!world.isClientSide() && target.getEntity() instanceof LivingEntity) {
                 LivingEntity targetEntity = (LivingEntity) target.getEntity();
@@ -106,14 +111,14 @@ public class VampirismBloodDrain extends VampirismAction {
                         }
                         else {
                             float healed = user.getHealth();
-                          //user.heal(bloodAndHealModifier * 0.5F);
+                            user.heal(bloodAndHealModifier * healMult);
                             healed = user.getHealth() - healed;
                             if (healed > 0) {
                                 power.addEnergy(healed * VampirismUtil.healCost(world));
                             }
                         }
                         if (targetEntity.isDeadOrDying()) {
-                            boolean zombieCreated = HungryZombieEntity.createZombie((ServerWorld) world, user, targetEntity, false);
+                            boolean zombieCreated = HungryZombieEntity.createZombie((ServerWorld) world, tameZombie ? user : null, targetEntity, false);
                             if (user instanceof ServerPlayerEntity) {
                                 ServerPlayerEntity player = (ServerPlayerEntity) user;
                                 player.awardStat(isHuman ? ModCustomStats.VAMPIRE_PEOPLE_DRAINED : ModCustomStats.VAMPIRE_ANIMALS_DRAINED);
@@ -130,6 +135,7 @@ public class VampirismBloodDrain extends VampirismAction {
             }
         }
     }
+    
 
     private static final Effect[] BLOOD_DRAIN_EFFECTS = {
             Effects.MOVEMENT_SLOWDOWN,
@@ -163,11 +169,6 @@ public class VampirismBloodDrain extends VampirismAction {
     @Override
     public double getMaxRangeSqEntityTarget() {
         return 4;
-    }
-    
-    @Override
-    public boolean isHeldSentToTracking() {
-        return true;
     }
     
     @Override

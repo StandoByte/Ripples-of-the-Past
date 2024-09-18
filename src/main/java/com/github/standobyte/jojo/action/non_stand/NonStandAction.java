@@ -79,10 +79,14 @@ public abstract class NonStandAction extends Action<INonStandPower> {
     
     @Override
     public void onPerform(World world, LivingEntity user, INonStandPower power, ActionTarget target, @Nullable PacketBuffer extraInput) {
+        consumeEnergy(world, user, power, target);
+        super.onPerform(world, user, power, target, extraInput);
+    }
+    
+    protected void consumeEnergy(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
             power.consumeEnergy(getEnergyCost(power, target));
         }
-        super.onPerform(world, user, power, target, extraInput);
     }
     
     @Override

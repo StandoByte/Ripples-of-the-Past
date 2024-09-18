@@ -68,10 +68,5 @@ public class HamonDetector extends HamonAction {
             }
         }
     }
-    
-    @Override
-    public boolean isHeldSentToTracking() {
-        return true;
-    }
 
 }

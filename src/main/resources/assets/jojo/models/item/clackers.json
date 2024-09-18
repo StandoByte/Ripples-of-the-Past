@@ -1,20 +1,20 @@
 {
-	"parent": "item/generated",
-	"textures": {
-		"layer0": "jojo:item/clackers"
-	},
-	"display": {
-		"thirdperson_righthand": {
-			"translation": [8, 8, 8]
-		},
-		"thirdperson_lefthand": {
-			"translation": [-8, 8, 8]
-		},
-		"firstperson_righthand": {
-			"translation": [16, 8, 0]
-		},
-		"firstperson_lefthand": {
-			"translation": [0, 8, 0]
-		}
-	}
+    "parent": "item/generated",
+    "textures": {
+        "layer0": "jojo:item/clackers"
+    },
+    "display": {
+        "thirdperson_righthand": {
+            "translation": [8, 8, 8]
+        },
+        "thirdperson_lefthand": {
+            "translation": [-8, 8, 8]
+        },
+        "firstperson_righthand": {
+            "translation": [16, 8, 0]
+        },
+        "firstperson_lefthand": {
+            "translation": [0, 8, 0]
+        }
+    }
 }

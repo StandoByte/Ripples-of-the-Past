@@ -171,11 +171,6 @@ public class VampirismFreeze extends VampirismAction {
     public double getMaxRangeSqEntityTarget() {
         return 4;
     }
-
-    @Override
-    public boolean isHeldSentToTracking() {
-        return true;
-    }
     
     @Override
     public void onHoldTickClientEffect(LivingEntity user, INonStandPower power, int ticksHeld, boolean reqFulfilled, boolean reqStateChanged) {

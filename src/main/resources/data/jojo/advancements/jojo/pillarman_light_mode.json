@@ -1,0 +1,31 @@
+{
+  "parent": "jojo:jojo/pillarman_evolve_aja",
+  "display": {
+    "icon": {
+      "item": "jojo:meteoric_scrap",
+      "nbt": "{Icon:17}"
+    },
+    "title": {
+      "translate": "advancements.jojo.pillarman_light_mode.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.pillarman_light_mode.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "pillarman_light_mode": {
+      "trigger": "jojo:pillarman_light_mode",
+      "conditions": {
+      }
+    }
+  },
+  "requirements": [
+    [
+      "pillarman_light_mode"
+    ]
+  ]
+}

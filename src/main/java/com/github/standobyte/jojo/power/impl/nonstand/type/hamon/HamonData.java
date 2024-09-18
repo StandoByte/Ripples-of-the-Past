@@ -53,7 +53,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrHamonAuraColorPac
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonBreathStabilityPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonCharacterTechniquePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonEnergyTicksPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrHamonFlagsPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrHamonProtectionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonLiquidWalkingPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonMeditationPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrHamonStatsPacket;
@@ -75,7 +75,6 @@ import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
@@ -166,6 +165,10 @@ public class HamonData extends TypeSpecificData {
         }
     }
     
+    public void onClear() {
+        clearBreathingTrainingBuffs(power.getUser());
+    }
+    
     public void tick() {
         updateHeight = false;
         LivingEntity user = power.getUser();
@@ -205,22 +208,14 @@ public class HamonData extends TypeSpecificData {
         waterWalkingThisTick = false;
     }
     
+    public static final float ENERGY_TICK_DOWN_AMOUNT = 20;
     public float tickEnergy() {
         LivingEntity user = power.getUser();
         if (JojoModUtil.isDyingBody(user)) {
             return 0;
         }
         if (power.getHeldAction() == ModHamonActions.HAMON_BREATH.get() && user.getAirSupply() >= user.getMaxAirSupply()) {
-            ticksMaskWithNoHamonBreath = 0;
-            if (user.level.isClientSide() && power.getEnergy() > 0 && !playedEnergySound) {
-                ClientTickingSoundsHelper.playHamonEnergyConcentrationSound(user, 1.0F, ModHamonActions.HAMON_BREATH.get());
-                playedEnergySound = true;
-                if (user == ClientUtil.getClientPlayer()) {
-                    BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).resetRedHighlight();
-                }
-            }
-            updateNoEnergyDecayTicks();
-            return power.getEnergy() + getMaxBreathStability() / fullEnergyTicks();
+            return power.getEnergy() + tickHamonBreath(ModHamonActions.HAMON_BREATH.get());
         }
         else {
             if (isUserWearingBreathMask()) {
@@ -240,12 +235,26 @@ public class HamonData extends TypeSpecificData {
                 return power.getEnergy();
             }
             else if (JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).hamonEnergyTicksDown.get()) {
-                return power.getEnergy() - 20F;
+                return power.getEnergy() - ENERGY_TICK_DOWN_AMOUNT;
             }
             else {
                 return power.getEnergy();
             }
         }
+    }
+    
+    public float tickHamonBreath(Action<?> hamonBreathAction) {
+        LivingEntity user = power.getUser();
+        ticksMaskWithNoHamonBreath = 0;
+        if (user.level.isClientSide() && power.getEnergy() > 0 && !playedEnergySound) {
+            ClientTickingSoundsHelper.playHamonEnergyConcentrationSound(user, 1.0F, hamonBreathAction);
+            playedEnergySound = true;
+            if (user == ClientUtil.getClientPlayer()) {
+                BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).resetRedHighlight();
+            }
+        }
+        updateNoEnergyDecayTicks();
+        return getMaxBreathStability() / fullEnergyTicks();
     }
 
     public float getMaxEnergy() {
@@ -534,6 +543,7 @@ public class HamonData extends TypeSpecificData {
         hamonSkills.addSkill(ModHamonSkills.HEALING.get());
         breathStability = getMaxBreathStability();
         prevBreathStability = breathStability;
+        super.onPowerGiven(oldType, oldData);
     }
     
     
@@ -754,19 +764,18 @@ public class HamonData extends TypeSpecificData {
             UUID.fromString("34dcb563-6759-4a2b-9dd8-ad2dd7e70404"), "Swimming speed from Hamon Training", 0.01, AttributeModifier.Operation.ADDITION);
     
     private void giveBreathingTrainingBuffs(LivingEntity entity) {
-        int lvl = (int) getBreathingLevel();
-        applyAttributeModifier(entity, Attributes.ATTACK_DAMAGE, ATTACK_DAMAGE, lvl);
-        applyAttributeModifier(entity, Attributes.ATTACK_SPEED, ATTACK_SPEED, lvl);
-        applyAttributeModifier(entity, Attributes.MOVEMENT_SPEED, MOVEMENT_SPEED, lvl);
-        applyAttributeModifier(entity, ForgeMod.SWIM_SPEED.get(), SWIMMING_SPEED, lvl);
+        setBreathingTrainingAttributes(entity, (int) getBreathingLevel());
     }
     
-    private static void applyAttributeModifier(LivingEntity entity, Attribute attribute, AttributeModifier modifier, int lvl) {
-        ModifiableAttributeInstance attributeInstance = entity.getAttribute(attribute);
-        if (attributeInstance != null) {
-            attributeInstance.removeModifier(modifier);
-            attributeInstance.addTransientModifier(new AttributeModifier(modifier.getId(), modifier.getName() + " " + lvl, modifier.getAmount() * lvl, modifier.getOperation()));
-        }
+    private void clearBreathingTrainingBuffs(LivingEntity entity) {
+        setBreathingTrainingAttributes(entity, 0);
+    }
+    
+    private void setBreathingTrainingAttributes(LivingEntity entity, int lvl) {
+        MCUtil.applyAttributeModifierMultiplied(entity, Attributes.ATTACK_DAMAGE, ATTACK_DAMAGE, lvl);
+        MCUtil.applyAttributeModifierMultiplied(entity, Attributes.ATTACK_SPEED, ATTACK_SPEED, lvl);
+        MCUtil.applyAttributeModifierMultiplied(entity, Attributes.MOVEMENT_SPEED, MOVEMENT_SPEED, lvl);
+        MCUtil.applyAttributeModifierMultiplied(entity, ForgeMod.SWIM_SPEED.get(), SWIMMING_SPEED, lvl);
     }
     
     public static final AttributeModifier RUNNING_COMPLETED = new AttributeModifier(
@@ -786,12 +795,12 @@ public class HamonData extends TypeSpecificData {
                 switch (exercise) {
                 case RUNNING:
                     if (!entity.level.isClientSide()) {
-                        applyAttributeModifier(entity, Attributes.MOVEMENT_SPEED, RUNNING_COMPLETED, 1);
+                        MCUtil.applyAttributeModifier(entity, Attributes.MOVEMENT_SPEED, RUNNING_COMPLETED);
                     }
                     break;
                 case MINING:
                     if (!entity.level.isClientSide()) {
-                        applyAttributeModifier(entity, Attributes.ATTACK_SPEED, MINING_COMPLETED, 1);
+                        MCUtil.applyAttributeModifier(entity, Attributes.ATTACK_SPEED, MINING_COMPLETED);
                     }
                     break;
                 case SWIMMING:
@@ -1503,7 +1512,7 @@ public class HamonData extends TypeSpecificData {
         PacketManager.sendToClient(new TrHamonEnergyTicksPacket(user.getId(), noEnergyDecayTicks), entity);
         hamonSkills.syncWithTrackingOrUser(user, entity, this);
         PacketManager.sendToClient(new TrHamonAuraColorPacket(user.getId(), auraColor), entity);
-        PacketManager.sendToClient(new TrHamonFlagsPacket(user.getId(), this), entity);
+        PacketManager.sendToClient(new TrHamonProtectionPacket(user.getId(), this), entity);
         PacketManager.sendToClient(new TrHamonMeditationPacket(user.getId(), isMeditating()), entity);
     }
     
@@ -1549,7 +1558,7 @@ public class HamonData extends TypeSpecificData {
             this.hamonProtection = isEnabled;
             LivingEntity user = power.getUser();
             if (!user.level.isClientSide()) {
-                PacketManager.sendToClientsTrackingAndSelf(new TrHamonFlagsPacket(user.getId(), this), user);
+                PacketManager.sendToClientsTrackingAndSelf(new TrHamonProtectionPacket(user.getId(), this), user);
             }
         }
     }

@@ -85,13 +85,8 @@ public class LotsOfBlocksBrokenPacket {
         public void handle(LotsOfBlocksBrokenPacket msg, Supplier<NetworkEvent.Context> ctx) {
             World world = ClientUtil.getClientWorld();
             
-            for (BrokenBlock block : msg.brokenBlocks) {
-                block.handleResolveBlockState();
-                CustomParticlesHelper.addBlockBreakParticles(block.blockPos, block.blockState);
-            }
-            
             Stream<BrokenBlock> stream = msg.brokenBlocks.stream();
-
+            
             if (msg.brokenBlocks.size() > 31) {
                 Vector3d cameraPos = ClientUtil.getCameraPos();
                 stream = stream
@@ -99,7 +94,9 @@ public class LotsOfBlocksBrokenPacket {
                         .limit(31);
             }
             stream.forEach(block -> {
+                block.handleResolveBlockState();
                 if (!block.blockState.isAir(world, block.blockPos)) {
+                    CustomParticlesHelper.addBlockBreakParticles(block.blockPos, block.blockState);
                     SoundType soundType = block.blockState.getSoundType(world, block.blockPos, null);
                     world.playLocalSound(
                             block.blockPos.getX() + 0.5, 

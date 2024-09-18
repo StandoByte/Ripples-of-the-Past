@@ -110,7 +110,8 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     
     @Override
     public void onClear(INonStandPower power) {
-        power.getTypeSpecificData(this).ifPresent(hamon -> hamon.setBreathingLevel(0));
+        super.onClear(power);
+        power.getTypeSpecificData(this).ifPresent(HamonData::onClear);
     }
 
     @Override
@@ -137,7 +138,6 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
     @Override
     public void onLeap(INonStandPower power) {
         power.getTypeSpecificData(this).get().hamonPointsFromAction(HamonStat.CONTROL, getLeapEnergyCost());
-//        createHamonSparkParticles(power.getUser().level, null, power.getUser().position(), getLeapStrength(power) * 0.15F);
     }
     
     @Override
@@ -173,6 +173,7 @@ public class HamonPowerType extends NonStandPowerType<HamonData> {
 
     @Override
     public void tickUser(LivingEntity user, INonStandPower power) {
+        super.tickUser(user, power);
         HamonData hamon = power.getTypeSpecificData(this).get();
         World world = user.level;
         hamon.tick();

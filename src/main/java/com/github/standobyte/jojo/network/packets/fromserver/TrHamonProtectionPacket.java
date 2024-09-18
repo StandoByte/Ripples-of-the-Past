@@ -13,36 +13,36 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraftforge.fml.network.NetworkEvent;
 
-public class TrHamonFlagsPacket {
+public class TrHamonProtectionPacket {
     private final int entityId;
     private final boolean protectionEnabled;
     
-    public TrHamonFlagsPacket(int entityId, HamonData hamonData) {
+    public TrHamonProtectionPacket(int entityId, HamonData hamonData) {
         this(entityId, hamonData.isProtectionEnabled());
     }
     
-    public TrHamonFlagsPacket(int entityId, boolean protectionEnabled) {
+    public TrHamonProtectionPacket(int entityId, boolean protectionEnabled) {
         this.entityId = entityId;
         this.protectionEnabled = protectionEnabled;
     }
     
     
     
-    public static class Handler implements IModPacketHandler<TrHamonFlagsPacket> {
+    public static class Handler implements IModPacketHandler<TrHamonProtectionPacket> {
 
         @Override
-        public void encode(TrHamonFlagsPacket msg, PacketBuffer buf) {
+        public void encode(TrHamonProtectionPacket msg, PacketBuffer buf) {
             buf.writeInt(msg.entityId);
             buf.writeBoolean(msg.protectionEnabled);
         }
 
         @Override
-        public TrHamonFlagsPacket decode(PacketBuffer buf) {
-            return new TrHamonFlagsPacket(buf.readInt(), buf.readBoolean());
+        public TrHamonProtectionPacket decode(PacketBuffer buf) {
+            return new TrHamonProtectionPacket(buf.readInt(), buf.readBoolean());
         }
 
         @Override
-        public void handle(TrHamonFlagsPacket msg, Supplier<NetworkEvent.Context> ctx) {
+        public void handle(TrHamonProtectionPacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity instanceof LivingEntity) {
                 INonStandPower.getNonStandPowerOptional((LivingEntity) entity).ifPresent(power -> {
@@ -54,8 +54,8 @@ public class TrHamonFlagsPacket {
         }
 
         @Override
-        public Class<TrHamonFlagsPacket> getPacketClass() {
-            return TrHamonFlagsPacket.class;
+        public Class<TrHamonProtectionPacket> getPacketClass() {
+            return TrHamonProtectionPacket.class;
         }
     }
 }

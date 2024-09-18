@@ -12,7 +12,7 @@
   "result": {
     "item": "jojo:bubble_gloves",
     "nbt":{
-    	"Ammo": 500
+        "Ammo": 500
     }
   }
 }

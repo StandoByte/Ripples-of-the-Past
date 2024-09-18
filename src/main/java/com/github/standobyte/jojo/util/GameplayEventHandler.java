@@ -17,6 +17,8 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.JojoModConfig.Common;
+import com.github.standobyte.jojo.action.non_stand.HamonRebuffOverdrive;
+import com.github.standobyte.jojo.action.non_stand.PillarmanUnnaturalAgility;
 import com.github.standobyte.jojo.action.non_stand.VampirismFreeze;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
@@ -76,8 +78,9 @@ import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
+import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanData;
+import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanData.Mode;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismData;
-import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismPowerType;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
@@ -99,6 +102,7 @@ import com.github.standobyte.jojo.util.mc.damage.StandLinkDamageSource;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.github.standobyte.jojo.world.gen.LoadMeFeature;
+import com.google.common.collect.Iterables;
 
 import net.minecraft.block.AbstractFurnaceBlock;
 import net.minecraft.block.Block;
@@ -123,6 +127,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.inventory.EquipmentSlotType;
+import net.minecraft.item.Food;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SuspiciousStewItem;
@@ -431,11 +436,28 @@ public class GameplayEventHandler {
     
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onFoodEaten(LivingEntityUseItemEvent.Finish event) {
-        if (event.getItem().getItem() == Items.ENCHANTED_GOLDEN_APPLE) {
+        LivingEntity entity = event.getEntityLiving();
+        ItemStack item = event.getItem();
+        if (item.getItem() == Items.ENCHANTED_GOLDEN_APPLE) {
             VampirismUtil.onEnchantedGoldenAppleEaten(event.getEntityLiving());
         }
-        else if (ModInteractionUtil.isSquidInkPasta(event.getItem())) {
-            InkPastaItem.onEaten(event.getEntityLiving());
+        else if (ModInteractionUtil.isSquidInkPasta(item)) {
+            InkPastaItem.onEaten(entity);
+        }
+        
+        if (event.getItem().isEdible()) {
+            Food food = item.getItem().getFoodProperties();
+            INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
+                power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).ifPresent(pillarman -> {
+                    power.addEnergy(food.getNutrition() * 10);
+                });
+                power.getTypeSpecificData(ModPowers.ZOMBIE.get()).ifPresent(zombie -> {
+                    if (food.isMeat()) {
+                        power.addEnergy(food.getNutrition() * 10); 
+                        entity.heal(food.getNutrition());
+                    }
+                });
+            });
         }
     }
     
@@ -509,7 +531,7 @@ public class GameplayEventHandler {
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void onLivingHurtStart(LivingAttackEvent event) {
-    	DamageSource dmgSource = event.getSource();
+        DamageSource dmgSource = event.getSource();
         LivingEntity target = event.getEntityLiving();
         Entity attacker = dmgSource.getEntity();
         
@@ -607,6 +629,9 @@ public class GameplayEventHandler {
         if (VampirismFreeze.onUserAttacked(event)) {
             event.setCanceled(true);
         }
+        if (PillarmanUnnaturalAgility.onUserAttacked(event)) {
+            event.setCanceled(true);
+        }
         
         if (GeneralUtil.orElseFalse(target.getSleepingPos(), sleepingPos -> {
             BlockState blockState = target.level.getBlockState(sleepingPos);
@@ -623,8 +648,7 @@ public class GameplayEventHandler {
         float dmgAmount = event.getAmount();
         if (GeneralUtil.orElseFalse(ContinuousActionInstance.getCurrentAction(entity), 
                 action -> action.cancelIncomingDamage(dmgSource, dmgAmount))
-                || HamonUtil.snakeMuffler(entity, dmgSource, dmgAmount) 
-                || HamonUtil.rebuffOverdrive(entity, dmgSource, dmgAmount)) {
+                || HamonUtil.snakeMuffler(entity, dmgSource, dmgAmount)) {
             event.setCanceled(true);
         }
     }
@@ -733,8 +757,15 @@ public class GameplayEventHandler {
                 if (
                         target.getType() == ModEntityTypes.HAMON_MASTER.get() || 
                         power.getTypeSpecificData(ModPowers.HAMON.get()).map(HamonData::isProtectionEnabled).orElse(false)) {
-                    event.setAmount(ModHamonActions.HAMON_PROTECTION.get().reduceDamageAmount(
-                            power, power.getUser(), dmgSource, event.getAmount()));
+                    float amount = ModHamonActions.HAMON_PROTECTION.get().reduceDamageAmount(
+                            power, power.getUser(), dmgSource, event.getAmount());
+                    event.setAmount(amount);
+                }
+                else {
+                    HamonRebuffOverdrive.getCurRebuff(target).ifPresent(rebuff -> {
+                        float amount = rebuff.reduceDamageAmount(dmgSource, event.getAmount());
+                        event.setAmount(amount);
+                    });
                 }
             });
         }
@@ -962,19 +993,69 @@ public class GameplayEventHandler {
         }
         if (entity instanceof PlayerEntity) {
             PlayerEntity player = (PlayerEntity) entity;
-            VampirismPowerType vampirism = ModPowers.VAMPIRISM.get();
             return INonStandPower.getNonStandPowerOptional(player).map(power -> {
-                if (power.getTypeSpecificData(vampirism).map(vamp -> !vamp.isVampireAtFullPower()).orElse(false) || power.givePower(vampirism)) {
-                    entity.level.playSound(null, entity, ModSounds.STONE_MASK_ACTIVATION_ENTITY.get(), entity.getSoundSource(), 1.0F, 1.0F);
-                    power.getTypeSpecificData(vampirism).get().setVampireFullPower(true);
-                    StoneMaskItem.setActivatedArmorTexture(headStack); // TODO light beams on stone mask activation?
-                    headStack.hurtAndBreak(1, entity, stack -> {});
-                    return true;
+                //Prevents aja-stone mask to work on non pillar men
+                Optional<PillarmanData> pillarmanOptional = power.getTypeSpecificData(ModPowers.PILLAR_MAN.get());
+                
+                if (headStack.getItem() == ModItems.AJA_STONE_MASK.get()) {
+                    if (!pillarmanOptional.isPresent()) {
+                    	if (entity instanceof ServerPlayerEntity) {
+                    		ModCriteriaTriggers.MASK_SUICIDE.get().trigger((ServerPlayerEntity) entity);
+                    	}
+                        entity.hurt(DamageUtil.STONE_MASK, 1000);
+                        return false;
+                    } else {
+                        PillarmanData pillarman = pillarmanOptional.get();
+                        if (pillarmanOptional.get().getEvolutionStage() < 3) {
+                            pillarman.setEvolutionStage(3);
+                            //Gives a random Mode
+                            switch (entity.getRandom().nextInt(3)) {
+                            case 0:
+                                pillarman.setMode(Mode.WIND);
+                                entity.level.playSound(null, entity, ModSounds.PILLAR_MAN_WIND_MODE.get(), entity.getSoundSource(), 1.0F, 1.0F);
+                                break;
+                            case 1:
+                                pillarman.setMode(Mode.HEAT);
+                                entity.level.playSound(null, entity, ModSounds.PILLAR_MAN_HEAT_MODE.get(), entity.getSoundSource(), 1.0F, 1.0F);
+                                break;
+                            case 2:
+                                pillarman.setMode(Mode.LIGHT);
+                                entity.level.playSound(null, entity, ModSounds.PILLAR_MAN_LIGHT_MODE.get(), entity.getSoundSource(), 1.0F, 1.0F);
+                                break;
+                            }
+                            applyMaskEffect(entity, headStack);
+                            return true;
+                        }
+                    }
+                }
+                else /*if (headStack.getItem() == ModItems.STONE_MASK.get())*/ {
+                    if (pillarmanOptional.isPresent()) {
+                        PillarmanData pillarman = pillarmanOptional.get();
+                        if (pillarman.getEvolutionStage() < 2) {
+                            pillarman.setEvolutionStage(2);
+                            applyMaskEffect(entity, headStack);
+                            return true;
+                        }
+                    }
+                    else if (power.getTypeSpecificData(ModPowers.VAMPIRISM.get()).map(
+                            vamp -> !vamp.isVampireAtFullPower()).orElse(false) || power.givePower(ModPowers.VAMPIRISM.get())) {
+                        if (power.getType() == ModPowers.VAMPIRISM.get()) {
+                            power.getTypeSpecificData(ModPowers.VAMPIRISM.get()).get().setVampireFullPower(true);
+                            applyMaskEffect(entity, headStack);
+                            return true;
+                        }
+                    }
                 }
                 return false;
             }).orElse(false);
         }
         return false;
+    }
+    
+    private static void applyMaskEffect(LivingEntity entity, ItemStack headStack) {
+        entity.level.playSound(null, entity, ModSounds.STONE_MASK_ACTIVATION_ENTITY.get(), entity.getSoundSource(), 1.0F, 1.0F);
+        StoneMaskItem.setActivatedArmorTexture(headStack); // TODO light beams on stone mask activation
+        headStack.hurtAndBreak(1, entity, stack -> {});
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -1035,7 +1116,21 @@ public class GameplayEventHandler {
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void cancelPotionRemoval(PotionRemoveEvent event) {
-        VampirismPowerType.cancelVampiricEffectRemoval(event);
+        EffectInstance effectInstance = event.getPotionEffect();
+        if (effectInstance != null) {
+            LivingEntity entity = event.getEntityLiving();
+            INonStandPower.getNonStandPowerOptional(entity).ifPresent(power -> {
+                if (power.hasPower()) {
+                    Iterable<Effect> effects = power.getType().getAllPossibleEffects();
+                    Effect effect = event.getPotion();
+                    if (Iterables.contains(effects, effect) && 
+                            power.getType().getPassiveEffectLevel(effect, power) == effectInstance.getAmplifier() && 
+                            !effectInstance.isVisible() && !effectInstance.showIcon()) {
+                        event.setCanceled(true);
+                    }
+                }
+            });
+        }
     }
     
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -1185,6 +1280,7 @@ public class GameplayEventHandler {
             if (!dead.is(killer)) {
                 if (killer instanceof ServerPlayerEntity) {
                     ModCriteriaTriggers.PLAYER_KILLED_ENTITY.get().trigger((ServerPlayerEntity) killer, dead, dmgSource);
+                    ModCriteriaTriggers.PLAYER_KILLED_PILLAR_MAN.get().trigger((ServerPlayerEntity) killer, dead, dmgSource);
                 }
                 if (dead instanceof ServerPlayerEntity && killer != null) {
                     ModCriteriaTriggers.ENTITY_KILLED_PLAYER.get().trigger((ServerPlayerEntity) dead, killer, dmgSource);

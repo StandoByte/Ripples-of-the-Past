@@ -8,7 +8,9 @@ import java.util.function.Predicate;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
+import com.github.standobyte.jojo.block.WoodenCoffinBlock;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCap;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
@@ -17,9 +19,11 @@ import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModParticles;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
+import com.github.standobyte.jojo.init.power.non_stand.pillarman.ModPillarmanActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
@@ -64,6 +68,7 @@ public class DamageUtil {
     public static final DamageSource SUFFOCATION = new DamageSource("suffocation").bypassArmor();
     public static final DamageSource EYE_OF_ENDER_SHARDS = new DamageSource("eyeOfEnderShards").bypassArmor();
     public static final String ROAD_ROLLER_MSG = "roadRoller";
+    public static final DamageSource STONE_MASK = new DamageSource("stoneMask").bypassArmor();
     
     public static float knockbackReduction(DamageSource source) {
         if (source instanceof StandLinkDamageSource || ROAD_ROLLER_MSG.equals(source.msgId)) {
@@ -74,9 +79,12 @@ public class DamageUtil {
             return moddedSrc.getKnockbackFactor();
         }
         if (source instanceof EntityDamageSource) {
-            if (source.getDirectEntity() instanceof LivingEntity && 
-                    INonStandPower.getNonStandPowerOptional((LivingEntity) source.getDirectEntity())
-                    .map(power -> power.getHeldAction() == ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get()).orElse(false)) {
+            if (source.getDirectEntity() instanceof LivingEntity && (INonStandPower.getNonStandPowerOptional((LivingEntity) source.getDirectEntity())
+                    .map(power -> {
+                        Action<?> heldAction = power.getHeldAction();
+                        return heldAction == ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get()
+                                || heldAction == ModPillarmanActions.PILLARMAN_BLADE_BARRAGE.get();
+                    }).orElse(false))) {
                 return 0.05F;
             }
             String msgId = source.getMsgId();
@@ -93,9 +101,32 @@ public class DamageUtil {
     public static DamageSource bloodDrainDamage(Entity srcDirect) {
         return new EntityDamageSource(BLOOD_DRAIN_MSG, srcDirect).bypassArmor();
     }
+    
+    public static boolean entityTakesUVDamage(Entity target, boolean sun) {
+        if (target instanceof LivingEntity) {
+            LivingEntity living = (LivingEntity) target;
+            
+            if (JojoModUtil.isUndeadOrVampiric(living)
+                    && !WoodenCoffinBlock.isSleepingInCoffin(living)
+                    && INonStandPower.getNonStandPowerOptional(living).resolve().flatMap(
+                            power -> power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()))
+                    .map(pillarman -> !pillarman.isStoneFormEnabled()).orElse(true)) {
+                
+                if (sun) {
+                    return (living instanceof PlayerEntity || JojoModConfig.getCommonConfigInstance(false).undeadMobsSunDamage.get())
+                            && target.getType() != EntityType.WITHER
+                            && !living.hasEffect(ModStatusEffects.SUN_RESISTANCE.get());
+                }
+                
+                return true;
+            }
+        }
+        
+        return false;
+    }
 
     public static boolean dealUltravioletDamage(Entity target, float amount, @Nullable Entity srcDirect, @Nullable Entity srcIndirect, boolean sun) {
-        if (target instanceof LivingEntity && JojoModUtil.isUndeadOrVampiric((LivingEntity) target) && !(sun && target.getType() == EntityType.WITHER)) {
+        if (target instanceof LivingEntity) {
             DamageSource dmgSource = srcDirect == null ? ULTRAVIOLET : 
                 srcIndirect == null ? new EntityDamageSource(ULTRAVIOLET.getMsgId() + ".entity", srcDirect).bypassArmor().bypassMagic() : 
                 new IndirectEntityDamageSource(ULTRAVIOLET.getMsgId() + ".entity", srcDirect, srcIndirect).bypassArmor().bypassMagic();
@@ -149,10 +180,17 @@ public class DamageUtil {
                 return false;
             }
             
+            Optional<INonStandPower> targetPower = INonStandPower.getNonStandPowerOptional(livingTarget).resolve();
+            
+            if (INonStandPower.getNonStandPowerOptional(livingTarget).resolve().flatMap(
+                    power -> power.getTypeSpecificData(ModPowers.PILLAR_MAN.get())
+                    .map(pillarman -> pillarman.isStoneFormEnabled())).orElse(false)) {
+                return false;
+            }
+            
             boolean scarf = livingTarget.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.SATIPOROJA_SCARF.get();
             if (scarf) {
-                if (INonStandPower.getNonStandPowerOptional(livingTarget)
-                        .map(power -> power.getType() == ModPowers.HAMON.get()).orElse(false)) {
+                if (targetPower.map(power -> power.getType() == ModPowers.HAMON.get()).orElse(false)) {
                     return false;
                 }
                 amount *= 0.25F;
@@ -165,6 +203,10 @@ public class DamageUtil {
             boolean undeadTarget = JojoModUtil.isAffectedByHamon(livingTarget);
             if (!undeadTarget) {
                 amount *= 0.2F;
+            }
+            else if (INonStandPower.getNonStandPowerOptional(livingTarget)
+                    .map(power -> power.getType() == ModPowers.PILLAR_MAN.get()).orElse(false)) {
+                amount *= 0.5F;
             }
             
             final float dmgAmount = amount;
@@ -219,10 +261,10 @@ public class DamageUtil {
     
     public static boolean dealPillarmanAbsorptionDamage(Entity target, float amount, @Nullable Entity src) {
         if (target instanceof LivingEntity) {
-            LivingEntity livingTarget = (LivingEntity) target;
+            /*LivingEntity livingTarget = (LivingEntity) target;
             if (!JojoModUtil.canBleed(livingTarget)) {
                 return false;
-            }
+            }*/
             DamageSource dmgSource = 
                     src == null ? PILLAR_MAN_ABSORPTION : new EntityDamageSource(PILLAR_MAN_ABSORPTION.getMsgId() + ".entity", src);
             return target.hurt(dmgSource, amount);
@@ -301,7 +343,16 @@ public class DamageUtil {
     }
     
     public static boolean isMeleeAttack(DamageSource dmgSource) {
-        return dmgSource.getEntity() != null && dmgSource.getDirectEntity() != null && dmgSource.getEntity().is(dmgSource.getDirectEntity());
+        return getMeleeAttacker(dmgSource) != null;
+    }
+    
+    @Nullable
+    public static LivingEntity getMeleeAttacker(DamageSource dmgSource) {
+        if (dmgSource.getEntity() != null && dmgSource.getDirectEntity() != null
+                && dmgSource.getEntity().is(dmgSource.getDirectEntity()) && dmgSource.getEntity() instanceof LivingEntity) {
+            return (LivingEntity) dmgSource.getEntity();
+        }
+        return null;
     }
     
     public static void knockback(LivingEntity target, float strength, float yRotDeg) {
@@ -368,8 +419,23 @@ public class DamageUtil {
         });
     }
     
+    public static boolean isShieldBlockAngle(LivingEntity target, DamageSource damageSource) {
+        Vector3d damagePos = damageSource.getSourcePosition();
+        if (damagePos != null) {
+            Vector3d targetViewVec = target.getViewVector(1.0F);
+            Vector3d vecToTarget = damagePos.vectorTo(target.position());
+            vecToTarget = vecToTarget.normalize();
+            vecToTarget = new Vector3d(vecToTarget.x, 0, vecToTarget.z); // it's not normalized anymore though?
+            if (vecToTarget.dot(targetViewVec) < 0.0D) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
     public static void suffocateTick(LivingEntity entity, float speed) {
-        if (entity.canBreatheUnderwater() || entity instanceof PlayerEntity && JojoModUtil.isPlayerJojoVampiric((PlayerEntity) entity)
+        if (entity.canBreatheUnderwater() || entity instanceof PlayerEntity && JojoModUtil.isUndeadOrVampiric((PlayerEntity) entity)
                 || JojoModUtil.isDyingBody(entity) || entity instanceof IronGolemEntity) return;
         
         if (entity.getAirSupply() > 0) {

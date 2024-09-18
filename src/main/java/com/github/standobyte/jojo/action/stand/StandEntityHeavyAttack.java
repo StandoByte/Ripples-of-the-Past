@@ -38,8 +38,10 @@ import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.Direction;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
@@ -160,8 +162,8 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     }
     
     @Override
-    public StandBlockPunch punchBlock(StandEntity stand, BlockPos pos, BlockState state) {
-        return new HeavyPunchBlockInstance(stand, pos, state)
+    public StandBlockPunch punchBlock(StandEntity stand, BlockPos pos, BlockState state, Direction face) {
+        return new HeavyPunchBlockInstance(stand, pos, state, face)
                 .impactSound(punchSound);
     }
     
@@ -335,17 +337,28 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         protected boolean onAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, float damage) {
             if (target instanceof StandEntity) {
                 StandEntity targetStand = (StandEntity) target;
-                StandEntityAction opponentAttack = targetStand.getCurrentTaskAction();
-                if (opponentAttack instanceof StandEntityHeavyAttack
-                        && ((StandEntityHeavyAttack) opponentAttack).canBeParried()
-                        && targetStand.getCurrentTaskPhase().get() == StandEntityAction.Phase.WINDUP
-                        && targetStand.canBlockOrParryFromAngle(dmgSource.getSourcePosition())) {
-                    // TODO play the punch sound
-                    // TODO MORE spark particles
-                    // TODO "loser gets knocked back" what did i mean?
-                    // TODO a few ticks of freeze?
-                    targetStand.stopTask(true);
-                    // i should really do camera shake
+                StandEntityAction opponentTask = targetStand.getCurrentTaskAction();
+                if (opponentTask instanceof StandEntityHeavyAttack) {
+                    StandEntityHeavyAttack opponentAttack = (StandEntityHeavyAttack) opponentTask;
+                    if (opponentAttack.canBeParried()
+                            && targetStand.getCurrentTaskPhase().get() == StandEntityAction.Phase.WINDUP
+                            && targetStand.canBlockOrParryFromAngle(dmgSource.getSourcePosition())) {
+                        // TODO MORE spark particles
+                        // TODO "loser gets knocked back" what did i mean?
+                        // TODO a few ticks of freeze?
+                        targetStand.stopTask(true);
+                        
+                        SoundEvent thisSound = this.getImpactSound();
+                        if (thisSound != null) {
+                            stand.playSound(thisSound, 1.0F, 1.0F, null, targetStand.getEyePosition(1));
+                        }
+
+                        SoundEvent opponentSound = opponentAttack.punchSound != null ? opponentAttack.punchSound.get() : null;
+                        if (opponentSound != null) {
+                            targetStand.playSound(opponentSound, 1.0F, 1.0F, null, stand.getEyePosition(1));
+                        }
+                        // i should really do camera shake
+                    }
                 }
             }
             
@@ -369,11 +382,10 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         }
     }
     
-    // FIXME make Silver Chariot's attacks not use this
     public static class HeavyPunchBlockInstance extends StandBlockPunch {
 
-        public HeavyPunchBlockInstance(StandEntity stand, BlockPos targetPos, BlockState blockState) {
-            super(stand, targetPos, blockState);
+        public HeavyPunchBlockInstance(StandEntity stand, BlockPos targetPos, BlockState blockState, Direction face) {
+            super(stand, targetPos, blockState, face);
         }
 
         @Override
@@ -381,10 +393,10 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
             if (stand.level.isClientSide()) return false;
             super.doHit(task);
             
-            HeavyPunchExplosion explosion = new HeavyPunchExplosion(stand.level, stand, 
-                    null, null, 
+            HeavyPunchExplosion explosion = new HeavyPunchExplosion(stand.level, stand, new ActionTarget(blockPos, face), 
+                    stand.getDamageSource().setExplosion(), null, 
                     blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5, 
-                    (float) stand.getAttackDamage() / 4, false, 
+                    Math.min((float) stand.getAttackDamage() * 0.2f, 10), false, 
                     JojoModUtil.breakingBlocksEnabled(stand.level) ? Explosion.Mode.BREAK : Explosion.Mode.NONE,
                     stand.getAttackDamage(), stand.getPrecision());
             if (!ForgeEventFactory.onExplosionStart(stand.level, explosion)) {
@@ -404,13 +416,14 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         
         public static class HeavyPunchExplosion extends CustomExplosion {
             private final LivingEntity attacker;
+            @Nullable private final StandEntity attackerAsStand;
+            private final ActionTarget hitBlock;
             private double strength;
             private double precision;
 
             // FIXME limit the radius
-            // FIXME set the proper damage source
             // FIXME wth is explosion context
-            public HeavyPunchExplosion(World pLevel, LivingEntity pSource, 
+            public HeavyPunchExplosion(World pLevel, LivingEntity pSource, ActionTarget hitBlock, 
                     @Nullable DamageSource pDamageSource, @Nullable ExplosionContext pDamageCalculator, 
                     double pToBlowX, double pToBlowY, double pToBlowZ, 
                     float pRadius, boolean pFire, Explosion.Mode pBlockInteraction, 
@@ -420,6 +433,8 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
                         pToBlowX, pToBlowY, pToBlowZ, 
                         pRadius, pFire, pBlockInteraction);
                 this.attacker = pSource;
+                this.hitBlock = hitBlock;
+                this.attackerAsStand = pSource instanceof StandEntity ? (StandEntity) pSource : null;
                 this.strength = strength;
                 this.precision = precision;
             }
@@ -474,22 +489,41 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
                 Iterator<Entity> iter = entities.iterator();
                 while (iter.hasNext()) {
                     Entity entity = iter.next();
-                    if (!(entity instanceof LivingEntity && attacker.canAttack((LivingEntity) entity))) {
+                    if (!(entity instanceof LivingEntity && MCUtil.canHarm(attacker, entity))) {
                         iter.remove();
                     }
                 }
             }
             
-            // FIXME the mobs' AI targets the stand
             @Override
             protected void hurtEntity(Entity entity, float damage, double knockback, Vector3d vecToEntityNorm) {
-                super.hurtEntity(entity, damage, knockback, vecToEntityNorm);
+                if (attackerAsStand != null) {
+                    attackerAsStand.hurtTarget(entity, getDamageSource(), damage);
+                    
+                    entity.setDeltaMovement(entity.getDeltaMovement().add(vecToEntityNorm.scale(knockback)));
+                    if (entity instanceof PlayerEntity) {
+                        PlayerEntity player = (PlayerEntity) entity;
+                        if (!player.isSpectator() && (!player.isCreative() || !player.abilities.flying)) {
+                            getHitPlayers().put(player, vecToEntityNorm.scale(knockback));
+                        }
+                    }
+                }
+                else {
+                    super.hurtEntity(entity, damage, knockback, vecToEntityNorm);
+                }
             }
             
-            // FIXME only 1 damage?
             @Override
             protected float calcDamage(double impact, double diameter) {
-                return (float) ((impact * impact + impact) / 2.0D * 7.0D * diameter + 1.0D);
+                float strength;
+                if (attackerAsStand != null) {
+                    strength = (float) attackerAsStand.getAttackDamage() * 0.4f;
+                }
+                else {
+                    strength = (float) attacker.getAttributeValue(Attributes.ATTACK_DAMAGE) * 0.4f;
+                }
+                return strength;
+//                return (float) ((impact * impact + impact) / 2.0D * 7.0D * diameter + 1.0D); // fuck this
             }
             
             // FIXME explosion is barely exploding if punching smth like a stone

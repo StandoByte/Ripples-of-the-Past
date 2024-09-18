@@ -853,7 +853,7 @@
  "hamonSkill.cheat_death.name": "詐死",
  "hamonSkill.cheat_death.desc": "當你即將被殺死時，你會迴避死亡並獲得短暫隱形效果（在遊戲中每一天都會擁有一次詐死的機會，無法疊加）。\n你的下一句話: \"這和波紋有什麼關係？\"",
  "hamonSkill.rebuff_overdrive.name": "波紋肘支疾走",
- "hamonSkill.rebuff_overdrive.desc": "被攻擊後反擊敵人，對攻擊者造成波紋傷害和擊退",
+ "_hamonSkill.rebuff_overdrive.desc": "You get into a defensive stance and swing with both elbows. If attacked in melee during a specific timing window, your strike parries the attack, dealing devastating amount of Hamon damage and extra knockback.",
  "hamon.caesar_soap_hint.name": "肥皂",
  "hamon.caesar_soap_hint.desc": "所有泡沫攻擊都會消耗肥皂，你需要製作肥皂水或肥皂塗層手套。",
  "hamonSkill.bubble_launcher.name": "泡沫發射",

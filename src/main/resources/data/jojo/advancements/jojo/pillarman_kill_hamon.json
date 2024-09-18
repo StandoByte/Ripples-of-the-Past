@@ -1,0 +1,39 @@
+{
+  "parent": "jojo:jojo/pillarman_evolve",
+  "display": {
+    "icon": {
+      "item": "jojo:meteoric_scrap",
+      "nbt": "{Icon:20}"
+    },
+    "title": {
+      "translate": "advancements.jojo.pillarman_kill_hamon.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.pillarman_kill_hamon.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "hamon_killed": {
+      "trigger": "jojo:player_killed_entity",
+      "conditions": {
+        "power": {
+          "classification": "non_stand",
+          "type": "jojo:pillarman"
+        },
+        "killed_power": {
+          "classification": "non_stand",
+          "type": "jojo:hamon"
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "hamon_killed"
+    ]
+  ]
+}

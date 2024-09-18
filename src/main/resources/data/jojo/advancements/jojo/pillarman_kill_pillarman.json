@@ -1,0 +1,45 @@
+{
+  "parent": "jojo:jojo/get_pillarman",
+  "display": {
+    "icon": {
+      "item": "jojo:meteoric_scrap",
+      "nbt": "{Icon:18}"
+    },
+    "title": {
+      "translate": "advancements.jojo.pillarman_kill_pillarman.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.pillarman_kill_pillarman.description"
+    },
+    "frame": "goal",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "pillarman_killed_pillarman": {
+      "trigger": "jojo:kill_pillarman",
+      "conditions": {
+      "power": {
+        "classification": "non_stand",
+        "type": "jojo:pillarman",
+        "pillarman_stage": {
+          "max": 1
+        }
+      },
+        "killed_power": {
+          "classification": "non_stand",
+          "type": "jojo:pillarman",
+          "pillarman_stage": {
+            "min": 2
+          }
+        }
+      }
+    }
+  },
+  "requirements": [
+    [
+      "pillarman_killed_pillarman"
+    ]
+  ]
+}

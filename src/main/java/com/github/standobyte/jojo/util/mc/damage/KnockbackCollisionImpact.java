@@ -192,6 +192,11 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
         }
         
         
+        // that will do for now maybe (А ВОТ ХУЙ ТАМ)
+        if (movementVec.y < 0) {
+            movementVec = new Vector3d(movementVec.x, 0, movementVec.z);
+        }
+        
         MutableBoolean didGlassBleeding = new MutableBoolean();
         float bleedingChance = asLiving != null ? BlockShardEntity.glassShardBleedingChance(asLiving) : 0;
         

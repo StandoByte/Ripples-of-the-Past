@@ -205,6 +205,29 @@ public class ActionTarget {
         return false;
     }
     
+    @Override
+    public String toString() {
+        String str = "ActionTarget";
+        switch (type) {
+        case EMPTY:
+            str += " (EMPTY)";
+            break;
+        case ENTITY:
+            str += " (ENTITY - ";
+            str += entity != null ? entity.getName().getString() : "null (uh-oh)";
+            str += ")";
+            break;
+        case BLOCK:
+            str += " (BLOCK - ";
+            str += blockPos != null ? "{" + blockPos.getX() + ", " + blockPos.getY() + ", " + blockPos.getZ() + "}" : "null (uh-oh)";
+            str += " / ";
+            str += face != null ? face.getName() : "null";
+            str += ")";
+            break;
+        }
+        return str;
+    }
+    
     public static enum TargetType {
         EMPTY,
         BLOCK,

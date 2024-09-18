@@ -10,9 +10,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.github.standobyte.jojo.action.non_stand.HamonWallClimbing2;
-import com.github.standobyte.jojo.capability.entity.power.NonStandCapProvider;
-import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.CreatureAttribute;
 import net.minecraft.entity.Entity;
@@ -33,8 +32,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin {
     
     @Override
     public void jojoPlayerUndeadCreature(CallbackInfoReturnable<CreatureAttribute> ci) {
-        if (this.getCapability(NonStandCapProvider.NON_STAND_CAP).map(power -> 
-        power.getType() == ModPowers.VAMPIRISM.get()).orElse(false)) {
+        if (JojoModUtil.playerUndeadAttribute((LivingEntity) (Object) this)) {
             ci.setReturnValue(CreatureAttribute.UNDEAD);
         }
     }

@@ -25,6 +25,7 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.IndirectEntityDamageSource;
+import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -254,6 +255,13 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
             if (user != null) {
                 user.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.setUsingZoomPunch(value));
             }
+        }
+    }
+    
+    @Override
+    protected void afterEntityHit(EntityRayTraceResult entityRayTraceResult, boolean entityHurt) {
+        if (entityHurt) {
+            setIsRetracting(true);
         }
     }
 

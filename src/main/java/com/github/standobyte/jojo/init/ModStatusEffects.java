@@ -20,7 +20,6 @@ import com.github.standobyte.jojo.potion.StatusEffect;
 import com.github.standobyte.jojo.potion.StunEffect;
 import com.github.standobyte.jojo.potion.UndeadRegenerationEffect;
 import com.github.standobyte.jojo.potion.VampireSunBurnEffect;
-import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismPowerType;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.Effect;
@@ -105,7 +104,6 @@ public class ModStatusEffects {
     
     private static final Set<Effect> TRACKED_EFFECTS = new HashSet<>();
     public static void afterEffectsRegister() {
-        VampirismPowerType.initVampiricEffects();
         StandEntity.addSharedEffectsFromUser(TIME_STOP.get(), Effects.BLINDNESS);
         StandEntity.addSharedEffectsFromStand(STUN.get(), IMMOBILIZE.get());
         setEffectAsTracked(

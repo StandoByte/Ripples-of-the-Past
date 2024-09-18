@@ -1,0 +1,14 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "jojo:item/aja_stone_mask"
+  },
+  "overrides": [
+    {
+      "predicate": {
+        "jojo:aja_stone_mask_activated": 1
+      },
+      "model": "jojo:item/aja_stone_mask_activated"
+    }
+  ]
+}
