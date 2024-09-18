@@ -16,7 +16,6 @@ import java.util.stream.Stream;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
-import com.github.standobyte.jojo.util.general.ThatsSimplyNotPossible;
 import com.google.common.collect.Streams;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
@@ -97,7 +96,7 @@ public class ActionArgument implements ArgumentType<Action<?>> {
                                 JojoCustomRegistries.HAMON_CHARACTER_TECHNIQUES.getRegistry().getKeys().stream());
                         break;
                     default:
-                        throw new ThatsSimplyNotPossible();
+                        throw new AssertionError();
                     }
 
                     ResourceLocation actionKey = entry.getKey().location();
