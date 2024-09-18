@@ -259,6 +259,10 @@ public class PlayerUtilCap {
     
     
     public void setContinuousAction(@Nullable ContinuousActionInstance<?, ?> action) {
+        continuousAction.ifPresent(ContinuousActionInstance::onStop);
+        if (action != null) {
+            action.onStart();
+        }
         continuousAction = Optional.ofNullable(action);
         if (!player.level.isClientSide()) {
             PacketManager.sendToClientsTrackingAndSelf(new TrPlayerContinuousActionPacket(

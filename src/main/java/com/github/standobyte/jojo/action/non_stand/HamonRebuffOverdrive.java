@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.action.non_stand;
 
 import java.util.Optional;
+import java.util.UUID;
 
 import javax.annotation.Nullable;
 
@@ -34,6 +35,8 @@ import com.github.standobyte.jojo.util.mc.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.AttributeModifier;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.DamageSource;
@@ -130,7 +133,10 @@ public class HamonRebuffOverdrive extends HamonAction implements IPlayerAction<H
     
     
     public static class Instance extends ContinuousActionInstance<Instance, INonStandPower> {
+        private static final AttributeModifier NO_KNOCKBACK = new AttributeModifier(UUID.fromString("c10b7337-504f-4c92-af39-232626b9818d"), 
+                "Rebuff overdrive full knockback resistance", 1, AttributeModifier.Operation.ADDITION);
         private LivingEntity counterTarget;
+        private DamageSource reduceDamage;
         private boolean canAttack = true;
         private boolean didAttack = false;
         private Optional<HamonData> userHamon;
@@ -139,19 +145,33 @@ public class HamonRebuffOverdrive extends HamonAction implements IPlayerAction<H
         public Instance(LivingEntity user, PlayerUtilCap userCap, INonStandPower playerPower,
                 IPlayerAction<Instance, INonStandPower> action) {
             super(user, userCap, playerPower, action);
-            setPhase(Phase.WINDUP);
             
-            if (user.level.isClientSide()) {
+            userHamon = INonStandPower.getNonStandPowerOptional(user)
+                    .resolve().flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get()));
+            actionCooldown = ((Action<INonStandPower>) action).getCooldown(playerPower, -1);
+        }
+        
+        @Override
+        public void onStart() {
+            super.onStart();
+            setPhase(Phase.WINDUP);
+            if (!user.level.isClientSide()) {
+                MCUtil.giveModifier(user, Attributes.KNOCKBACK_RESISTANCE, NO_KNOCKBACK);
+            }
+            else {
                 ClientTickingSoundsHelper.playStoppableEntitySound(user, ModSounds.HAMON_SYO_CHARGE.get(), 
                         1.0F, 1.0F, false, 
                         entity -> ContinuousActionInstance.getCurrentAction(user).map(
                                 playerAction -> playerAction == this && playerAction.getPhase() != Phase.RECOVERY).orElse(false),
                         PERFORM_TICKS);
             }
-            
-            userHamon = INonStandPower.getNonStandPowerOptional(user)
-                    .resolve().flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get()));
-            actionCooldown = ((Action<INonStandPower>) action).getCooldown(playerPower, -1);
+        }
+        
+        @Override
+        public void onStop() {
+            if (!user.level.isClientSide()) {
+                MCUtil.removeModifier(user, Attributes.KNOCKBACK_RESISTANCE, NO_KNOCKBACK);
+            }
         }
         
         private static final int WINDUP_TICKS = 14;
@@ -262,10 +282,20 @@ public class HamonRebuffOverdrive extends HamonAction implements IPlayerAction<H
                 }
             }
             else {
-                // TODO protection
+                this.reduceDamage = dmgSource;
             }
             
             return super.cancelIncomingDamage(dmgSource, dmgAmount);
+        }
+        
+        public float reduceDamageAmount(DamageSource dmgSource, float dmgAmount) {
+            if (this.reduceDamage == dmgSource) {
+                float amount = ModHamonActions.HAMON_PROTECTION.get().reduceDamageAmount(playerPower, user, dmgSource, dmgAmount);
+                reduceDamage = null;
+                return amount;
+            }
+            
+            return dmgAmount;
         }
         
         public boolean isCounterTiming() {

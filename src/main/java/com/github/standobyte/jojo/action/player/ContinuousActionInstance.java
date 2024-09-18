@@ -32,6 +32,8 @@ public abstract class ContinuousActionInstance<T extends ContinuousActionInstanc
         this.playerPower = playerPower;
     }
     
+    public void onStart() {}
+    
     public final void tick() {
         if (phase == null) {
             phase = Phase.PERFORM;
@@ -97,6 +99,8 @@ public abstract class ContinuousActionInstance<T extends ContinuousActionInstanc
         }
         return false;
     }
+    
+    public void onStop() {}
     
     public boolean isStopped() {
         return stop;

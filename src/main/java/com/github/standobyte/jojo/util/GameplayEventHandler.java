@@ -13,6 +13,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.JojoModConfig.Common;
+import com.github.standobyte.jojo.action.non_stand.HamonRebuffOverdrive;
 import com.github.standobyte.jojo.action.non_stand.VampirismFreeze;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
@@ -665,8 +666,15 @@ public class GameplayEventHandler {
                 if (
                         target.getType() == ModEntityTypes.HAMON_MASTER.get() || 
                         power.getTypeSpecificData(ModPowers.HAMON.get()).map(HamonData::isProtectionEnabled).orElse(false)) {
-                    event.setAmount(ModHamonActions.HAMON_PROTECTION.get().reduceDamageAmount(
-                            power, power.getUser(), dmgSource, event.getAmount()));
+                    float amount = ModHamonActions.HAMON_PROTECTION.get().reduceDamageAmount(
+                            power, power.getUser(), dmgSource, event.getAmount());
+                    event.setAmount(amount);
+                }
+                else {
+                    HamonRebuffOverdrive.getCurRebuff(target).ifPresent(rebuff -> {
+                        float amount = rebuff.reduceDamageAmount(dmgSource, event.getAmount());
+                        event.setAmount(amount);
+                    });
                 }
             });
         }
