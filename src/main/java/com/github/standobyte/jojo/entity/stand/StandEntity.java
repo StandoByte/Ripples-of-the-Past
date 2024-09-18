@@ -179,6 +179,8 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     private IPunch lastPunch;
     private BarrageSwingsHolder<?, ?> barrageSwings;
     private final BarrageHitSoundHandler barrageSounds;
+    
+    public ActionTarget clFrontTarget = ActionTarget.EMPTY;
 
     public float lastRenderTick = 0;
     public float lastMotionTiltTick = -1;
@@ -298,15 +300,15 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         return false;
     }
 
-    protected boolean transfersDamage() {
+    public boolean transfersDamage() {
         return true;
     }
 
-    protected boolean standCanHaveNoPhysics() {
+    public boolean standCanHaveNoPhysics() {
         return true;
     }
 
-    protected boolean standHasNoGravity() {
+    public boolean standHasNoGravity() {
         return true;
     }
 
@@ -1809,10 +1811,8 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         
         LivingEntity user = getUser();
         if (user != null) {
-            return !entity.is(user) && user.canAttack(entity)
-                    && !(entity instanceof AnimalEntity && entity.isPassengerOfSameVehicle(user))
-                    && !(user instanceof PlayerEntity && entity instanceof PlayerEntity
-                            && !((PlayerEntity) user).canHarmPlayer((PlayerEntity) entity));
+            boolean canHarm = MCUtil.canHarm(user, entity);
+            return canHarm && !(entity instanceof AnimalEntity && entity.isPassengerOfSameVehicle(user));
         }
         
         return true;

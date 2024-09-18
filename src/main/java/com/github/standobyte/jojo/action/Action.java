@@ -64,7 +64,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     protected final boolean continueHolding;
     private final float heldWalkSpeed;
     private final int cooldownTechnical;
-    private final int cooldownAdditional;
+    protected final int cooldown;
     private final boolean needsFreeMainHand;
     private final boolean ignoresPerformerStun;
     private final boolean swingHand;
@@ -81,7 +81,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         this.continueHolding = builder.continueHolding;
         this.heldWalkSpeed = builder.heldWalkSpeed;
         this.cooldownTechnical = builder.cooldownTechnical;
-        this.cooldownAdditional = builder.cooldownAdditional;
+        this.cooldown = builder.cooldownAdditional;
         this.needsFreeMainHand = builder.needsFreeMainHand;
         this.ignoresPerformerStun = builder.ignoresPerformerStun;
         this.swingHand = builder.swingHand;
@@ -337,7 +337,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     protected int getCooldownAdditional(P power, int ticksHeld) {
-        return power.isUserCreative() ? 0 : cooldownAdditional;
+        return power.isUserCreative() ? 0 : cooldown;
     }
     
     protected final int cooldownFromHoldDuration(int cooldown, P power, int ticksHeld) {
@@ -349,6 +349,13 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     public int getCooldown(P power, int ticksHeld) {
         return getCooldownTechnical(power) + getCooldownAdditional(power, ticksHeld);
+    }
+    
+    public void setCooldownOnUse(P power) {
+        int cooldown = getCooldown(power, -1);
+        if (cooldown > 0) {
+            power.setCooldownTimer(this, cooldown);
+        }
     }
 
     public boolean swingHand() {

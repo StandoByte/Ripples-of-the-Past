@@ -331,10 +331,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
                 ModCriteriaTriggers.ACTION_PERFORM.get().trigger(player, action);
             });
             if (!world.isClientSide()) {
-                int cooldown = action.getCooldown(getThis(), -1);
-                if (cooldown > 0) {
-                    setCooldownTimer(action, cooldown);
-                }
+                action.setCooldownOnUse(getThis());
             }
         }
     }

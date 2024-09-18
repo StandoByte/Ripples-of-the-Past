@@ -24,6 +24,7 @@ import org.lwjgl.glfw.GLFW;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
+import com.github.standobyte.jojo.action.non_stand.HamonRebuffOverdrive;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.living.LivingWallClimbing;
@@ -737,7 +738,7 @@ public class InputHandler {
         return result;
     }
     
-    private void mcPlayerAttack() {
+    public void mcPlayerAttack() {
         if (mc.hitResult != null && !mc.player.isHandsBusy() && mc.hitResult.getType() == RayTraceResult.Type.ENTITY) {
             mc.gameMode.attack(mc.player, ((EntityRayTraceResult) mc.hitResult).getEntity());
         }
@@ -862,12 +863,14 @@ public class InputHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void invertMovementInput(InputUpdateEvent event) {
+        MovementInput input = event.getMovementInput();
+        boolean hasInput = input.up || input.down || input.left || input.right || input.jumping;
+        
+        HamonRebuffOverdrive.onWASDInput(mc.player);
         if (GeneralUtil.orElseFalse(INonStandPower.getNonStandPowerOptional(event.getPlayer()).resolve().flatMap(
                 power -> power.getTypeSpecificData(ModPowers.HAMON.get())), hamon -> {
                     if (hamon.isMeditating()) {
-                        MovementInput input = event.getMovementInput();
                         if (hamon.getMeditationTicks() >= 40) {
-                            boolean hasInput = input.up || input.down || input.left || input.right || input.jumping;
                             if (hasInput) {
                                 PacketManager.sendToServer(new ClHamonMeditationPacket(false));
                             }
@@ -887,7 +890,6 @@ public class InputHandler {
         }
         
         if (event.getPlayer().hasEffect(ModStatusEffects.MISSHAPEN_LEGS.get())) {
-            MovementInput input = event.getMovementInput();
             input.forwardImpulse *= -1;
             input.leftImpulse *= -1;
             

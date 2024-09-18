@@ -150,8 +150,6 @@ public class HamonData extends TypeSpecificData {
     
     public HamonProjectileShieldEntity shieldEntity;
     private boolean hamonProtection = false;
-    private boolean isRebuffOverdriveOn = false;
-    private int rebuffTick = 0;
     public OptionalInt regenImpliedDuration = OptionalInt.empty();
     
     private boolean waterWalkingPrevTick = false;
@@ -181,15 +179,6 @@ public class HamonData extends TypeSpecificData {
                 }
             }
             
-            if (isRebuffOverdriveOn) {
-                if (rebuffTick <= 20) {
-                    ++rebuffTick;    
-                } else {
-                    isRebuffOverdriveOn = false;
-                    rebuffTick = 0;
-                }
-            }
-            
             HamonWallClimbing2.tickWallClimbing(power, this, user);
             tickNewPlayerLearners(user);
             if (!user.level.isClientSide()) {
@@ -214,25 +203,16 @@ public class HamonData extends TypeSpecificData {
                 shieldEntity = null;
             }
             hamonProtection = false;
-            isRebuffOverdriveOn = false;
         }
         
         waterWalkingThisTick = false;
     }
     
+    public static final float ENERGY_TICK_DOWN_AMOUNT = 20;
     public float tickEnergy() {
         LivingEntity user = power.getUser();
         if (power.getHeldAction() == ModHamonActions.HAMON_BREATH.get() && user.getAirSupply() >= user.getMaxAirSupply()) {
-            ticksMaskWithNoHamonBreath = 0;
-            if (user.level.isClientSide() && power.getEnergy() > 0 && !playedEnergySound) {
-                ClientTickingSoundsHelper.playHamonEnergyConcentrationSound(user, 1.0F, ModHamonActions.HAMON_BREATH.get());
-                playedEnergySound = true;
-                if (user == ClientUtil.getClientPlayer()) {
-                    BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).resetRedHighlight();
-                }
-            }
-            updateNoEnergyDecayTicks();
-            return power.getEnergy() + getMaxBreathStability() / fullEnergyTicks();
+            return power.getEnergy() + tickHamonBreath(ModHamonActions.HAMON_BREATH.get());
         }
         else {
             if (isUserWearingBreathMask()) {
@@ -252,12 +232,26 @@ public class HamonData extends TypeSpecificData {
                 return power.getEnergy();
             }
             else if (JojoModConfig.getCommonConfigInstance(user.level.isClientSide()).hamonEnergyTicksDown.get()) {
-                return power.getEnergy() - 20F;
+                return power.getEnergy() - ENERGY_TICK_DOWN_AMOUNT;
             }
             else {
                 return power.getEnergy();
             }
         }
+    }
+    
+    public float tickHamonBreath(Action<?> hamonBreathAction) {
+        LivingEntity user = power.getUser();
+        ticksMaskWithNoHamonBreath = 0;
+        if (user.level.isClientSide() && power.getEnergy() > 0 && !playedEnergySound) {
+            ClientTickingSoundsHelper.playHamonEnergyConcentrationSound(user, 1.0F, hamonBreathAction);
+            playedEnergySound = true;
+            if (user == ClientUtil.getClientPlayer()) {
+                BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).resetRedHighlight();
+            }
+        }
+        updateNoEnergyDecayTicks();
+        return getMaxBreathStability() / fullEnergyTicks();
     }
 
     public float getMaxEnergy() {
@@ -792,12 +786,12 @@ public class HamonData extends TypeSpecificData {
                 switch (exercise) {
                 case RUNNING:
                     if (!entity.level.isClientSide()) {
-                        MCUtil.applyAttibuteModifier(entity, Attributes.MOVEMENT_SPEED, RUNNING_COMPLETED);
+                        MCUtil.applyAttributeModifier(entity, Attributes.MOVEMENT_SPEED, RUNNING_COMPLETED);
                     }
                     break;
                 case MINING:
                     if (!entity.level.isClientSide()) {
-                        MCUtil.applyAttibuteModifier(entity, Attributes.ATTACK_SPEED, MINING_COMPLETED);
+                        MCUtil.applyAttributeModifier(entity, Attributes.ATTACK_SPEED, MINING_COMPLETED);
                     }
                     break;
                 case SWIMMING:
@@ -1617,15 +1611,6 @@ public class HamonData extends TypeSpecificData {
     
     public float waterWalkingTickCost() {
         return waterWalkingPrevTick ? 1 : 50;
-    }
-    
-    
-    public boolean getRebuffOverdrive() {
-        return isRebuffOverdriveOn;
-    }
-    
-    public void setRebuffOverdrive(boolean usingRO) {
-        this.isRebuffOverdriveOn = usingRO;
     }
     
 }

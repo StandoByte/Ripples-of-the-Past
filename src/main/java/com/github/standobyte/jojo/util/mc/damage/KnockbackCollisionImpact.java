@@ -33,6 +33,7 @@ import net.minecraft.util.AxisRotation;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.EntityDamageSource;
+import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.ReuseableStream;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -50,6 +51,7 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
     private final Entity entity;
     private final LivingEntity asLiving;
     
+    private LivingEntity attackerStandUser;
     private Vector3d knockbackVec = null;
     private double knockbackImpactStrength;
     private double minCos;
@@ -81,7 +83,7 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
         this.knockbackVec = knockbackVec.scale(1 / knockbackImpactStrength);
         this.minCos = 1;
         this.hadImpactWithBlock = false;
-        LivingEntity attackerStandUser = attacker instanceof LivingEntity ? (StandUtil.getStandUser((LivingEntity) attacker)) : null;
+        this.attackerStandUser = attacker instanceof LivingEntity ? (StandUtil.getStandUser((LivingEntity) attacker)) : null;
         this.dropBlockItems = !(attackerStandUser instanceof PlayerEntity && ((PlayerEntity) attackerStandUser).abilities.instabuild);
     }
     
@@ -169,7 +171,8 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
         ReuseableStream<VoxelShape> worldBorderCollision = new ReuseableStream<>(
                 VoxelShapes.joinIsNotEmpty(worldBorder, VoxelShapes.create(aabb.deflate(1.0E-7D)), IBooleanFunction.AND) ? Stream.empty() : Stream.of(worldBorder));
         
-        ReuseableStream<Pair<Entity, VoxelShape>> potentialEntityCollisions = new ReuseableStream<>(getEntityCollisions(world, entity, aabb.expandTowards(movementVec), e -> true));
+        ReuseableStream<Pair<Entity, VoxelShape>> potentialEntityCollisions = new ReuseableStream<>(getEntityCollisions(world, entity, aabb.expandTowards(movementVec), 
+                EntityPredicates.NO_CREATIVE_OR_SPECTATOR.and(e -> e.isPickable() && (attackerStandUser == null || e instanceof LivingEntity && MCUtil.canHarm(attackerStandUser, (LivingEntity) e)))));
         Collection<Entity> entitiesCollided = new ArrayList<>();
         collideEntities(aabb, movementVec, world, 
                 worldBorderCollision, potentialEntityCollisions, 

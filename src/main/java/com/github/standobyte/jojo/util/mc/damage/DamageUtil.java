@@ -342,6 +342,19 @@ public class DamageUtil {
         }
     }
     
+    public static boolean isMeleeAttack(DamageSource dmgSource) {
+        return getMeleeAttacker(dmgSource) != null;
+    }
+    
+    @Nullable
+    public static LivingEntity getMeleeAttacker(DamageSource dmgSource) {
+        if (dmgSource.getEntity() != null && dmgSource.getDirectEntity() != null
+                && dmgSource.getEntity().is(dmgSource.getDirectEntity()) && dmgSource.getEntity() instanceof LivingEntity) {
+            return (LivingEntity) dmgSource.getEntity();
+        }
+        return null;
+    }
+    
     public static void knockback(LivingEntity target, float strength, float yRotDeg) {
         target.knockback(strength, 
                 (double) MathHelper.sin(yRotDeg * MathUtil.DEG_TO_RAD), 
@@ -404,6 +417,21 @@ public class DamageUtil {
         target.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(util -> {
             util.didStackKnockbackInstead = true;
         });
+    }
+    
+    public static boolean isShieldBlockAngle(LivingEntity target, DamageSource damageSource) {
+        Vector3d damagePos = damageSource.getSourcePosition();
+        if (damagePos != null) {
+            Vector3d targetViewVec = target.getViewVector(1.0F);
+            Vector3d vecToTarget = damagePos.vectorTo(target.position());
+            vecToTarget = vecToTarget.normalize();
+            vecToTarget = new Vector3d(vecToTarget.x, 0, vecToTarget.z); // it's not normalized anymore though?
+            if (vecToTarget.dot(targetViewVec) < 0.0D) {
+                return true;
+            }
+        }
+        
+        return false;
     }
     
     public static void suffocateTick(LivingEntity entity, float speed) {

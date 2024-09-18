@@ -17,5 +17,6 @@ public interface IPlayerAction<T extends ContinuousActionInstance<T, P>, P exten
     
     T createContinuousActionInstance(LivingEntity user, PlayerUtilCap userCap, P power);
     
-    void playerTick(T continuousAction);
+    @Deprecated
+    default void playerTick(T continuousAction) {}
 }

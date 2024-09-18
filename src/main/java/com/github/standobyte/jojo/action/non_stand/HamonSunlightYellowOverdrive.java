@@ -82,13 +82,8 @@ public class HamonSunlightYellowOverdrive extends HamonAction {
             if (!world.isClientSide()) {
                 forPerform(world, user, power, target);
             }
-
-            if (playerUser != null) {
-                playerUser.attack(targetEntity);
-            }
-            else if (!world.isClientSide()) {
-                user.doHurtTarget(targetEntity);
-            }
+            
+            doMeleeAttack(user, targetEntity);
 
             if (world.isClientSide()) {
                 user.swing(Hand.MAIN_HAND);
@@ -96,6 +91,16 @@ public class HamonSunlightYellowOverdrive extends HamonAction {
         }
         else {
             user.playSound(ModSounds.HAMON_SYO_SWING.get(), 1.0F, 1.0F);
+        }
+    }
+    
+    public static void doMeleeAttack(LivingEntity attacker, LivingEntity targetEntity) {
+        if (attacker instanceof PlayerEntity) {
+            PlayerEntity player = (PlayerEntity) attacker;
+            player.attack(targetEntity);
+        }
+        else if (!attacker.level.isClientSide()) {
+            attacker.doHurtTarget(targetEntity);
         }
     }
     

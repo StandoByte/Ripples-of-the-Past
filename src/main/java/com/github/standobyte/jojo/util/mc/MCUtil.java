@@ -560,6 +560,25 @@ public class MCUtil {
     
     
     
+    public static boolean canHarm(LivingEntity attacker, LivingEntity target) {
+        if (attacker.is(target)) {
+            return false;
+        }
+        if (!attacker.canAttack(target)) {
+            return false;
+        }
+        
+        Team team1 = attacker.getTeam();
+        Team team2 = target.getTeam();
+        if (team1 != null && team1.isAlliedTo(team2) && !team1.isAllowFriendlyFire()) {
+            return false;
+        }
+        
+        return true;
+    }
+    
+    
+    
     public static boolean isControlledThisSide(Entity entity) {
         if (entity instanceof PlayerEntity) {
             return ((PlayerEntity) entity).isLocalPlayer();
@@ -775,11 +794,18 @@ public class MCUtil {
         return entityAttribute.getAttribute().sanitizeValue(value);
     }
     
-    public static void applyAttibuteModifier(LivingEntity entity, Attribute attribute, AttributeModifier modifier) {
+    public static void applyAttributeModifier(LivingEntity entity, Attribute attribute, AttributeModifier modifier) {
         ModifiableAttributeInstance attributeInstance = entity.getAttribute(attribute);
         if (attributeInstance != null) {
             attributeInstance.removeModifier(modifier);
             attributeInstance.addTransientModifier(modifier);
+        }
+    }
+    
+    public static void removeAttributeModifier(LivingEntity entity, Attribute attribute, AttributeModifier modifier) {
+        ModifiableAttributeInstance instance = entity.getAttribute(attribute);
+        if (instance != null && instance.hasModifier(modifier)) {
+            instance.removeModifier(modifier);
         }
     }
     
@@ -791,6 +817,7 @@ public class MCUtil {
                     modifier.getName(), modifier.getAmount() * multiplier, modifier.getOperation()));
         }
     }
+    
     
     
     

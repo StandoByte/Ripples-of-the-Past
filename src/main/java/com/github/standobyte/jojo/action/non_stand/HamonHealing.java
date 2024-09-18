@@ -66,12 +66,7 @@ public class HamonHealing extends HamonAction {
         }
     }
     
-    /*
-     * TODO
-     *   energy cost
-     *       test adding hamon control points
-     *   bone meal
-     */
+    // TODO bone meal
     // TODO hamon sparks only on hands when curing a target entity (for tracking players too)
     @Override
     protected void holdTick(World world, LivingEntity user, INonStandPower power, 
@@ -104,6 +99,7 @@ public class HamonHealing extends HamonAction {
                 int regenAmplifier = -1;
                 int regenDuration = -1;
                 EffectInstance regenEffect = entityToHeal.getEffect(Effects.REGENERATION);
+                
                 if (regenEffect == null) {
                     regenAmplifier = 0;
                     regenDuration = 51;
@@ -126,29 +122,49 @@ public class HamonHealing extends HamonAction {
                     hamon.regenImpliedDuration = OptionalInt.of(regenDuration);
                     regenDuration = updateRegenEffect(entityToHeal, regenDuration, regenAmplifier, Effects.REGENERATION);
                     entityToHeal.addEffect(new EffectInstance(Effects.REGENERATION, regenDuration, regenAmplifier, false, false, true));
-                    
-                    hamon.hamonPointsFromAction(HamonStat.CONTROL, Math.min(tickEnergyCost, power.getEnergy()));
                 }
                 
                 int reduceEffectTime = 3200 / maxTicksLeftover; // <
                 int durationDecrease = ticksInc; // >
                 
-                reduceHarmfulEffect(entityToHeal, ModStatusEffects.BLEEDING.get(), ticksHeld, durationDecrease, reduceEffectTime);
+                boolean healedBleeding = reduceHarmfulEffect(entityToHeal, ModStatusEffects.BLEEDING.get(), ticksHeld, durationDecrease, reduceEffectTime);
+                boolean hadHarmfulEffects = healedBleeding;
                 if (hamon.isSkillLearned(ModHamonSkills.EXPEL_VENOM.get())) {
                     for (Effect venomEffect : VENOM_EFFECTS) {
-                        reduceHarmfulEffect(entityToHeal, venomEffect, ticksHeld, durationDecrease, reduceEffectTime);
+                        boolean healedVenom = reduceHarmfulEffect(entityToHeal, venomEffect, ticksHeld, durationDecrease, reduceEffectTime);
+                        hadHarmfulEffects |= healedVenom;
                     }
                 }
+                if (hamon.isSkillLearned(ModHamonSkills.PLANTS_GROWTH.get()) && user instanceof PlayerEntity && target.getType() == TargetType.BLOCK) {
+                    Direction face = target.getType() == TargetType.BLOCK ? target.getFace() : Direction.UP;
+                    bonemealEffect(user.level, (PlayerEntity) user, target.getBlockPos(), face);
+                }
+                
+                boolean hitLimit = regenEffect != null && regenEffect.getAmplifier() == maxLevel
+                        && hamon.regenImpliedDuration.isPresent() && hamon.regenImpliedDuration.getAsInt() >= maxTicksLeftover;
+                float points = Math.min(tickEnergyCost, power.getEnergy());
+                if (points > 0) {
+                    if (hitLimit) {
+                        points *= Math.max(HamonData.ENERGY_TICK_DOWN_AMOUNT / tickEnergyCost, 2);
+                    }
+                    if (entityToHeal.getHealth() < entityToHeal.getMaxHealth() || hadHarmfulEffects) {
+                        points *= 4;
+                    }
+                    if (entityToHeal != user) {
+                        points *= 2;
+                    }
+                    hamon.hamonPointsFromAction(HamonStat.CONTROL, points);
+                }
             }
-            if (world.isClientSide()) {
+            else {
                 HamonSparksLoopSound.playSparkSound(user, user.position(), 1.0F);
                 CustomParticlesHelper.createHamonSparkParticles(user instanceof PlayerEntity ? (PlayerEntity) user : null, 
-                        user.getX(), user.getY(0.5), user.getZ(), 1);
+                        user.getRandomX(1), user.getRandomY(), user.getRandomZ(1), 1);
             }
         }
     }
     
-    private void reduceHarmfulEffect(LivingEntity entity, Effect effect,
+    private boolean reduceHarmfulEffect(LivingEntity entity, Effect effect,
             int ticksHeld, int durationDecrease, int reduceEffectTime) {
         EffectInstance effectInstance = entity.getEffect(effect);
         if (effectInstance != null) {
@@ -173,7 +189,10 @@ public class HamonHealing extends HamonAction {
                         effectInstance.getDuration() - duration, 
                         effectInstance.getAmplifier() - amplifier);
             }
+            
+            return true;
         }
+        return false;
     }
     
     @Override
@@ -274,12 +293,30 @@ public class HamonHealing extends HamonAction {
     }
     
     private boolean canBeHealed(LivingEntity targetEntity, LivingEntity user) {
-        return  !(
-                JojoModUtil.isUndeadOrVampiric(targetEntity) ||
+        return !(JojoModUtil.isUndeadOrVampiric(targetEntity) ||
                 targetEntity instanceof GolemEntity ||
                 targetEntity instanceof ArmorStandEntity);
     }
-
+    
+    @Override
+    public IFormattableTextComponent getTranslatedName(INonStandPower power, String key) {
+        if (power.getUser() != null && JojoModUtil.useShiftVar(power.getUser())) {
+            ActionTarget target = ActionsOverlayGui.getInstance().getMouseTarget();
+            if (power.getTypeSpecificData(ModPowers.HAMON.get())
+                    .map(hamon -> hamon.isSkillLearned(ModHamonSkills.HEALING_TOUCH.get())).orElse(false)
+                    && target.getType() == TargetType.ENTITY) {
+                Entity targetEntity = target.getEntity();
+                if (targetEntity instanceof LivingEntity && canBeHealed((LivingEntity) targetEntity, power.getUser())) {
+                    key += "_touch";
+                    return new TranslationTextComponent(key, targetEntity.getName());
+                }
+            }
+        }
+        return super.getTranslatedName(power, key);
+    }
+    
+    
+    
     public static boolean bonemealEffect(World world, PlayerEntity applyingPlayer, BlockPos pos, Direction face) {
         if (BoneMealItem.applyBonemeal(ItemStack.EMPTY, world, pos, applyingPlayer)) {
             if (!world.isClientSide()) {
@@ -299,21 +336,118 @@ public class HamonHealing extends HamonAction {
             }
         }
     }
-    
-    @Override
-    public IFormattableTextComponent getTranslatedName(INonStandPower power, String key) {
-        if (power.getUser() != null && JojoModUtil.useShiftVar(power.getUser())) {
-            ActionTarget target = ActionsOverlayGui.getInstance().getMouseTarget();
-            if (power.getTypeSpecificData(ModPowers.HAMON.get())
-                    .map(hamon -> hamon.isSkillLearned(ModHamonSkills.HEALING_TOUCH.get())).orElse(false)
-                    && target.getType() == TargetType.ENTITY) {
-                Entity targetEntity = target.getEntity();
-                if (targetEntity instanceof LivingEntity && canBeHealed((LivingEntity) targetEntity, power.getUser())) {
-                    key += "_touch";
-                    return new TranslationTextComponent(key, targetEntity.getName());
-                }
-            }
-        }
-        return super.getTranslatedName(power, key);
-    }
+
+    // f this
+//    public static boolean gradualBonemealEffect(ServerWorld world, PlayerEntity applyingPlayer, BlockPos pos, Direction clickedSide) {
+//        BlockState clickedBlock = world.getBlockState(pos);
+//        int hook = ForgeEventFactory.onApplyBonemeal(applyingPlayer, world, pos, clickedBlock, ItemStack.EMPTY);
+//        if (hook != 0) return hook > 0;
+//        Random random = world.random;
+//        
+//        if (clickedBlock.getBlock() instanceof IGrowable) {
+//            IGrowable igrowable = (IGrowable) clickedBlock.getBlock();
+//            if (igrowable.isValidBonemealTarget(world, pos, clickedBlock, world.isClientSide)) {
+//                if (igrowable.isBonemealSuccess(world, world.random, pos, clickedBlock)) {
+//                    if (igrowable instanceof GrassBlock) {
+//                        // TODO just one plant block & particles
+//                        BlockPos blockpos = pos.above();
+//                        BlockState grassBlock = Blocks.GRASS.defaultBlockState();
+//
+//                        label48:
+//                            for (int i = 0; i < 128; ++i) {
+//                                BlockPos blockpos1 = blockpos;
+//
+//                                for(int j = 0; j < i / 16; ++j) {
+//                                    blockpos1 = blockpos1.offset(random.nextInt(3) - 1, (random.nextInt(3) - 1) * random.nextInt(3) / 2, random.nextInt(3) - 1);
+//                                    if (!world.getBlockState(blockpos1.below()).is(clickedBlock.getBlock()) || world.getBlockState(blockpos1).isCollisionShapeFullBlock(world, blockpos1)) {
+//                                        continue label48;
+//                                    }
+//                                }
+//
+//                                BlockState blockstate2 = world.getBlockState(blockpos1);
+//                                if (blockstate2.is(grassBlock.getBlock()) && random.nextInt(10) == 0) {
+//                                    ((IGrowable) grassBlock.getBlock()).performBonemeal(world, random, blockpos1, blockstate2);
+//                                }
+//
+//                                if (blockstate2.isAir()) {
+//                                    BlockState blockstate1;
+//                                    if (random.nextInt(8) == 0) {
+//                                        List<ConfiguredFeature<?, ?>> list = world.getBiome(blockpos1).getGenerationSettings().getFlowerFeatures();
+//                                        if (list.isEmpty()) {
+//                                            continue;
+//                                        }
+//
+//                                        ConfiguredFeature<?, ?> configuredfeature = list.get(0);
+//                                        FlowersFeature flowersfeature = (FlowersFeature)configuredfeature.feature;
+//                                        blockstate1 = flowersfeature.getRandomFlower(random, blockpos1, configuredfeature.config());
+//                                    } else {
+//                                        blockstate1 = grassBlock;
+//                                    }
+//
+//                                    if (blockstate1.canSurvive(world, blockpos1)) {
+//                                        world.setBlock(blockpos1, blockstate1, 3);
+//                                    }
+//                                }
+//                            }
+//                    }
+//                    else {
+//                        igrowable.performBonemeal(world, world.random, pos, clickedBlock);
+//                    }
+//                }
+//                
+//                world.levelEvent(2005, pos, 0);
+//                return true;
+//            }
+//        }
+//
+//
+//        
+//        BlockPos posOffset = pos.relative(clickedSide);
+//        BlockState blockState = world.getBlockState(pos);
+//        if (blockState.isFaceSturdy(world, pos, clickedSide)) {
+//            if (world.getBlockState(posOffset).is(Blocks.WATER) && world.getFluidState(posOffset).getAmount() == 8) {
+//                label80:
+//                    for (int i = 0; i < 128; ++i) {
+//                        BlockPos blockpos = posOffset;
+//                        BlockState blockstate = Blocks.SEAGRASS.defaultBlockState();
+//
+//                        for(int j = 0; j < i / 16; ++j) {
+//                            blockpos = blockpos.offset(random.nextInt(3) - 1, (random.nextInt(3) - 1) * random.nextInt(3) / 2, random.nextInt(3) - 1);
+//                            if (world.getBlockState(blockpos).isCollisionShapeFullBlock(world, blockpos)) {
+//                                continue label80;
+//                            }
+//                        }
+//
+//                        Optional<RegistryKey<Biome>> optional = world.getBiomeName(blockpos);
+//                        if (Objects.equals(optional, Optional.of(Biomes.WARM_OCEAN)) || Objects.equals(optional, Optional.of(Biomes.DEEP_WARM_OCEAN))) {
+//                            if (i == 0 && clickedSide != null && clickedSide.getAxis().isHorizontal()) {
+//                                blockstate = BlockTags.WALL_CORALS.getRandomElement(world.random).defaultBlockState().setValue(DeadCoralWallFanBlock.FACING, clickedSide);
+//                            } else if (random.nextInt(4) == 0) {
+//                                blockstate = BlockTags.UNDERWATER_BONEMEALS.getRandomElement(random).defaultBlockState();
+//                            }
+//                        }
+//
+//                        if (blockstate.getBlock().is(BlockTags.WALL_CORALS)) {
+//                            for(int k = 0; !blockstate.canSurvive(world, blockpos) && k < 4; ++k) {
+//                                blockstate = blockstate.setValue(DeadCoralWallFanBlock.FACING, Direction.Plane.HORIZONTAL.getRandomDirection(random));
+//                            }
+//                        }
+//
+//                        if (blockstate.canSurvive(world, blockpos)) {
+//                            BlockState blockstate1 = world.getBlockState(blockpos);
+//                            if (blockstate1.is(Blocks.WATER) && world.getFluidState(blockpos).getAmount() == 8) {
+//                                world.setBlock(blockpos, blockstate, 3);
+//                            } else if (blockstate1.is(Blocks.SEAGRASS) && random.nextInt(10) == 0) {
+//                                ((IGrowable)Blocks.SEAGRASS).performBonemeal((ServerWorld)world, random, blockpos, blockstate1);
+//                            }
+//                        }
+//                    }
+//
+//                world.levelEvent(2005, posOffset, 0);
+//                return true;
+//            }
+//        }
+//        
+//        return false;
+//    }
 }
