@@ -11,6 +11,7 @@ import static org.lwjgl.glfw.GLFW.GLFW_KEY_O;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_UNKNOWN;
 import static org.lwjgl.glfw.GLFW.GLFW_KEY_V;
 
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -599,6 +600,7 @@ public class InputHandler {
         }
     }
     
+    private EnumSet<PowerClassification> prevTargetUpdateTick = EnumSet.noneOf(PowerClassification.class);
     private void checkHeldActionAndTarget(IPower<?, ?> power, boolean targetChanged) {
         boolean keyHeld;
         if (heldKeys.containsKey(power)) {
@@ -611,12 +613,19 @@ public class InputHandler {
             keyHeld = mc.options.keyAttack.isDown() || mc.options.keyUse.isDown() || mc.options.keyPickItem.isDown();
         }
         
+        PowerClassification powerClass = power.getPowerClassification();
+        
         if (!keyHeld && power.getHeldAction() != null) {
-            stopHeldAction(power, power.getPowerClassification() == actionsOverlay.getCurrentMode());
+            stopHeldAction(power, powerClass == actionsOverlay.getCurrentMode());
         }
         
-        if (power.isTargetUpdateTick() && targetChanged) {
-            PacketManager.sendToServer(ClHeldActionTargetPacket.withRayTraceResult(power.getPowerClassification(), mouseTarget));
+        boolean targetUpdatePrevTick = prevTargetUpdateTick.contains(powerClass);
+        boolean targetUpdateThisTick = power.isTargetUpdateTick();
+        if (targetUpdateThisTick)   prevTargetUpdateTick.add(powerClass);
+        else                        prevTargetUpdateTick.remove(powerClass);
+        
+        if (targetUpdateThisTick && (!targetUpdatePrevTick || targetChanged)) {
+            PacketManager.sendToServer(ClHeldActionTargetPacket.withRayTraceResult(powerClass, mouseTarget));
         }
     }
     

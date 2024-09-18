@@ -89,8 +89,9 @@ public class EnergyRippleLayer<T extends LivingEntity, M extends BipedModel<T>> 
             // elbow sparks (rebuff overdrive)
             HamonRebuffOverdrive.getCurRebuff(entity).ifPresent(rebuff -> {
                 if (rebuff.addSparksThisTick()) {
+                    int rebuffParticles = MathUtil.fractionRandomInc(12 + hamon.getHamonStrengthLevelRatio() * 12 * timeDelta);
                     for (HandSide hand : HandSide.values()) {
-                        for (int i = 0; i < particles; i++) {
+                        for (int i = 0; i < rebuffParticles; i++) {
                             Vector3d offset = new Vector3d(
                                     (RANDOM.nextDouble() - 0.5) * 0.4,
                                     RANDOM.nextDouble() * (0.5 - 0.4 * 0) - 0.45,

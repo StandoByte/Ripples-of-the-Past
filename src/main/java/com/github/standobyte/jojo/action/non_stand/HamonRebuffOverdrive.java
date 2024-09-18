@@ -47,10 +47,6 @@ import net.minecraft.world.World;
 
 // TODO first person animation
 // TODO counter polish
-    /*  
-     *  a few ticks of the target entity stunned
-     *  "!" particles
-     */
 // FIXME hand swing messes up the player animation
 public class HamonRebuffOverdrive extends HamonAction implements IPlayerAction<HamonRebuffOverdrive.Instance, INonStandPower> {
     
@@ -234,20 +230,19 @@ public class HamonRebuffOverdrive extends HamonAction implements IPlayerAction<H
                         if (fullCounterAnyway != null) {
                             doCounterAttack(fullCounterAnyway);
                         }
-
-                        // TODO aim
-                        LivingEntity aimTarget = null;
-                        if (aimTarget != null) {
-                            punch(aimTarget, false);
+                        
+                        ActionTarget target = playerPower.getMouseTarget();
+                        if (target.getEntity() instanceof LivingEntity) {
+                            punch((LivingEntity) target.getEntity(), false);
                         }
                     }
                 }
                 break;
-            case RECOVERY:
-//                if (!user.level.isClientSide() && !didAttack) {
-//                    JojoModUtil.sayVoiceLine(user, ModSounds.JOSEPH_OH_NO.get(), null, 1, 1, 0, true);
-//                }
-                break;
+//            case RECOVERY:
+////                if (!user.level.isClientSide() && !didAttack) {
+////                    JojoModUtil.sayVoiceLine(user, ModSounds.JOSEPH_OH_NO.get(), null, 1, 1, 0, true); // nah
+////                }
+//                break;
             default:
                 break;
             }
@@ -371,7 +366,7 @@ public class HamonRebuffOverdrive extends HamonAction implements IPlayerAction<H
         
         private boolean didSwing = false;
         private void swing() {
-            if (!didSwing) {
+            if (!didSwing && !user.level.isClientSide()) {
                 user.level.playSound(null, user.getX(), user.getEyeY(), user.getZ(), 
                         ModSounds.HAMON_SYO_SWING.get(), user.getSoundSource(), 1.0f, 0.5f);
                 user.swing(Hand.MAIN_HAND, true);
@@ -396,6 +391,11 @@ public class HamonRebuffOverdrive extends HamonAction implements IPlayerAction<H
         @Override
         public float getWalkSpeed() {
             return 0;
+        }
+        
+        @Override
+        public boolean updateTarget() {
+            return true;
         }
         
         @Override

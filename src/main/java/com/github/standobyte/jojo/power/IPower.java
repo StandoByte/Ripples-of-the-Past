@@ -76,7 +76,7 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     void stopHeldAction(boolean shouldFire);
 
     void setMouseTarget(ActionTarget target);
-    @Nullable ActionTarget getMouseTarget();
+    ActionTarget getMouseTarget();
     boolean isTargetUpdateTick();
     
     void onUserGettingAttacked(DamageSource dmgSource, float dmgAmount);
