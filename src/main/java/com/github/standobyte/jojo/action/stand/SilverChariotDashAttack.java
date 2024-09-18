@@ -16,6 +16,7 @@ import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
@@ -107,7 +108,7 @@ public class SilverChariotDashAttack extends StandEntityHeavyAttack {
     }
     
     @Override
-    public StandBlockPunch punchBlock(StandEntity stand, BlockPos pos, BlockState state) {
+    public StandBlockPunch punchBlock(StandEntity stand, BlockPos pos, BlockState state, Direction face) {
         return new StandBlockPunch(stand, pos, state);
     }
     

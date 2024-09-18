@@ -32,6 +32,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attributes;
+import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
@@ -191,8 +192,8 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
     }
     
     @Override
-    public StandBlockPunch punchBlock(StandEntity stand, BlockPos pos, BlockState state) {
-        return new HeavyPunchBlockInstance(stand, pos, state)
+    public StandBlockPunch punchBlock(StandEntity stand, BlockPos pos, BlockState state, Direction face) {
+        return new HeavyPunchBlockInstance(stand, pos, state, face)
                 .impactSound(ModSounds.THE_WORLD_PUNCH_HEAVY);
     }
     

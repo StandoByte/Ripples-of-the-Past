@@ -16,6 +16,7 @@ import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.particles.ParticleTypes;
+import net.minecraft.util.Direction;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -87,8 +88,8 @@ public class SilverChariotSweepingAttack extends StandEntityHeavyAttack {
     }
     
     @Override
-    public StandBlockPunch punchBlock(StandEntity stand, BlockPos pos, BlockState state) {
-        return new StandBlockPunch(stand, pos, state);
+    public StandBlockPunch punchBlock(StandEntity stand, BlockPos pos, BlockState state, Direction face) {
+        return new StandBlockPunch(stand, pos, state, face);
     }
     
     @Override

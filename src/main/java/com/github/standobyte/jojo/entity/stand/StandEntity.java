@@ -1690,7 +1690,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         switch (target.getType()) {
         case BLOCK:
             BlockPos blockPos = target.getBlockPos();
-            StandBlockPunch blockPunchInstance = punchAction.punchBlock(this, blockPos, level.getBlockState(blockPos));
+            StandBlockPunch blockPunchInstance = punchAction.punchBlock(this, blockPos, level.getBlockState(blockPos), target.getFace());
             punchInstance = blockPunchInstance;
             break;
         case ENTITY:

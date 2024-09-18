@@ -24,6 +24,7 @@ import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
+import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -68,8 +69,8 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
     }
     
     @Override
-    public StandBlockPunch punchBlock(StandEntity stand, BlockPos pos, BlockState state) {
-        return IHasStandPunch.super.punchBlock(stand, pos, state)
+    public StandBlockPunch punchBlock(StandEntity stand, BlockPos pos, BlockState state, Direction face) {
+        return IHasStandPunch.super.punchBlock(stand, pos, state, face)
                 .impactSound(punchSound);
     }
     

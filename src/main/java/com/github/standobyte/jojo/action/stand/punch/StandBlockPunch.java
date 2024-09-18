@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.util.Direction;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
@@ -15,13 +16,20 @@ public class StandBlockPunch implements IPunch {
     public final StandEntity stand;
     public final BlockPos blockPos;
     public final BlockState blockState;
+    public final Direction face;
     protected boolean targetHit;
     protected Supplier<SoundEvent> punchSound = () -> null;
     
+    @Deprecated
     public StandBlockPunch(StandEntity stand, BlockPos targetPos, BlockState blockState) {
+        this(stand, targetPos, blockState, null);
+    }
+    
+    public StandBlockPunch(StandEntity stand, BlockPos targetPos, BlockState blockState, Direction face) {
         this.stand = stand;
         this.blockPos = targetPos;
         this.blockState = blockState;
+        this.face = face;
     }
 
     @Override

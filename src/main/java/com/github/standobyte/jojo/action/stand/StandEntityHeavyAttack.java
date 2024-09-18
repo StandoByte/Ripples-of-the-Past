@@ -41,6 +41,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.Direction;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
@@ -160,8 +161,8 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     }
     
     @Override
-    public StandBlockPunch punchBlock(StandEntity stand, BlockPos pos, BlockState state) {
-        return new HeavyPunchBlockInstance(stand, pos, state)
+    public StandBlockPunch punchBlock(StandEntity stand, BlockPos pos, BlockState state, Direction face) {
+        return new HeavyPunchBlockInstance(stand, pos, state, face)
                 .impactSound(punchSound);
     }
     
@@ -382,8 +383,8 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     
     public static class HeavyPunchBlockInstance extends StandBlockPunch {
 
-        public HeavyPunchBlockInstance(StandEntity stand, BlockPos targetPos, BlockState blockState) {
-            super(stand, targetPos, blockState);
+        public HeavyPunchBlockInstance(StandEntity stand, BlockPos targetPos, BlockState blockState, Direction face) {
+            super(stand, targetPos, blockState, face);
         }
 
         @Override
@@ -391,7 +392,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
             if (stand.level.isClientSide()) return false;
             super.doHit(task);
             
-            HeavyPunchExplosion explosion = new HeavyPunchExplosion(stand.level, stand, 
+            HeavyPunchExplosion explosion = new HeavyPunchExplosion(stand.level, stand, new ActionTarget(blockPos, face), 
                     stand.getDamageSource().setExplosion(), null, 
                     blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5, 
                     (float) stand.getAttackDamage() / 4, false, 
@@ -415,13 +416,13 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         public static class HeavyPunchExplosion extends CustomExplosion {
             private final LivingEntity attacker;
             @Nullable private final StandEntity attackerAsStand;
+            private final ActionTarget hitBlock;
             private double strength;
             private double precision;
 
             // FIXME limit the radius
-            // FIXME set the proper damage source
             // FIXME wth is explosion context
-            public HeavyPunchExplosion(World pLevel, LivingEntity pSource, 
+            public HeavyPunchExplosion(World pLevel, LivingEntity pSource, ActionTarget hitBlock, 
                     @Nullable DamageSource pDamageSource, @Nullable ExplosionContext pDamageCalculator, 
                     double pToBlowX, double pToBlowY, double pToBlowZ, 
                     float pRadius, boolean pFire, Explosion.Mode pBlockInteraction, 
@@ -431,6 +432,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
                         pToBlowX, pToBlowY, pToBlowZ, 
                         pRadius, pFire, pBlockInteraction);
                 this.attacker = pSource;
+                this.hitBlock = hitBlock;
                 this.attackerAsStand = pSource instanceof StandEntity ? (StandEntity) pSource : null;
                 this.strength = strength;
                 this.precision = precision;
