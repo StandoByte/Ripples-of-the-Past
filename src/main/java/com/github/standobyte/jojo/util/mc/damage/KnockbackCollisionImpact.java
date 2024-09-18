@@ -192,7 +192,7 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
         }
         
         
-        // that will do for now maybe
+        // that will do for now maybe (А ВОТ ХУЙ ТАМ)
         if (movementVec.y < 0) {
             movementVec = new Vector3d(movementVec.x, 0, movementVec.z);
         }

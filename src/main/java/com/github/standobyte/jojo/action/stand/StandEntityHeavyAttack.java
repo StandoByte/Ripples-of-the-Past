@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
@@ -379,7 +380,6 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         }
     }
     
-    // FIXME make Silver Chariot's attacks not use this
     public static class HeavyPunchBlockInstance extends StandBlockPunch {
 
         public HeavyPunchBlockInstance(StandEntity stand, BlockPos targetPos, BlockState blockState) {
@@ -392,7 +392,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
             super.doHit(task);
             
             HeavyPunchExplosion explosion = new HeavyPunchExplosion(stand.level, stand, 
-                    null, null, 
+                    stand.getDamageSource().setExplosion(), null, 
                     blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5, 
                     (float) stand.getAttackDamage() / 4, false, 
                     JojoModUtil.breakingBlocksEnabled(stand.level) ? Explosion.Mode.BREAK : Explosion.Mode.NONE,
@@ -414,6 +414,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         
         public static class HeavyPunchExplosion extends CustomExplosion {
             private final LivingEntity attacker;
+            @Nullable private final StandEntity attackerAsStand;
             private double strength;
             private double precision;
 
@@ -430,6 +431,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
                         pToBlowX, pToBlowY, pToBlowZ, 
                         pRadius, pFire, pBlockInteraction);
                 this.attacker = pSource;
+                this.attackerAsStand = pSource instanceof StandEntity ? (StandEntity) pSource : null;
                 this.strength = strength;
                 this.precision = precision;
             }
@@ -484,21 +486,34 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
                 Iterator<Entity> iter = entities.iterator();
                 while (iter.hasNext()) {
                     Entity entity = iter.next();
-                    if (!(entity instanceof LivingEntity && attacker.canAttack((LivingEntity) entity))) {
+                    if (!(entity instanceof LivingEntity && MCUtil.canHarm(attacker, entity))) {
                         iter.remove();
                     }
                 }
             }
             
-            // FIXME the mobs' AI targets the stand
             @Override
             protected void hurtEntity(Entity entity, float damage, double knockback, Vector3d vecToEntityNorm) {
-                super.hurtEntity(entity, damage, knockback, vecToEntityNorm);
+                if (attackerAsStand != null) {
+                    attackerAsStand.hurtTarget(entity, getDamageSource(), damage);
+                    
+                    entity.setDeltaMovement(entity.getDeltaMovement().add(vecToEntityNorm.scale(knockback)));
+                    if (entity instanceof PlayerEntity) {
+                        PlayerEntity player = (PlayerEntity) entity;
+                        if (!player.isSpectator() && (!player.isCreative() || !player.abilities.flying)) {
+                            getHitPlayers().put(player, vecToEntityNorm.scale(knockback));
+                        }
+                    }
+                }
+                else {
+                    super.hurtEntity(entity, damage, knockback, vecToEntityNorm);
+                }
             }
             
-            // FIXME only 1 damage?
+            // FIXME wtf
             @Override
             protected float calcDamage(double impact, double diameter) {
+                JojoMod.LOGGER.debug("{} {} {}", impact, diameter, (float) ((impact * impact + impact) / 2.0D * 7.0D * diameter + 1.0D));
                 return (float) ((impact * impact + impact) / 2.0D * 7.0D * diameter + 1.0D);
             }
             
