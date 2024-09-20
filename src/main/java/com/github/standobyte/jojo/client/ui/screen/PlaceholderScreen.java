@@ -1,7 +1,6 @@
 package com.github.standobyte.jojo.client.ui.screen;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
@@ -9,30 +8,28 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.StringTextComponent;
 
-public class StandInfoScreen extends Screen implements IJojoScreen {
-    private static final ResourceLocation WINDOW = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/stand_info.png");
+public class PlaceholderScreen extends Screen implements IJojoScreen {
+    private static final ResourceLocation WINDOW = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/empty.png");
     private static final int WINDOW_WIDTH = 230;
     private static final int WINDOW_HEIGHT = 180;
-    private IStandPower standCap;
 
-    public StandInfoScreen() {
+    public PlaceholderScreen() {
         super(StringTextComponent.EMPTY);
     }
     
     @Override
     public void init() {
         super.init();
-        standCap = IStandPower.getPlayerStandPower(minecraft.player);
     }
     
     @Override
     public IJojoScreen.TabCategory getTabCategory() {
-        return IJojoScreen.TabCategory.STAND;
+        return IJojoScreen.TabCategory.GENERAL;
     }
     
     @Override
     public IJojoScreen.Tab getTab() {
-        return IJojoScreen.StandTab.GENERAL_INFO.get();
+        return IJojoScreen.GeneralTab.WIP_CATEGORY.get();
     }
     
     @Override

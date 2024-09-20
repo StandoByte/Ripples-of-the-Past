@@ -438,6 +438,7 @@
   "jojo.key.toggle_stand": "Summon Stand",
   "jojo.key.stand_remote_control": "Stand Remote Control",
   "jojo.key.hamon_skills_window": "Hamon Skills",
+  "jojo.key.jojo_menu": "JoJo Menu",
   
   "key.categories.jojo.hud": "JoJo | HUD",
   "jojo.key.stand_mode": "HUD Mode: Stand",
@@ -800,6 +801,7 @@
   "commands.jojoconfigpack.stand_assign.failed.clear": "%s didn't have any Stands assigned",
   
   "chat.stand_remote_reveal_name": "%s (Stand User: %s)",
+  "jojo.ui.player_menu": "Player Menu (TBA)",
   
   "jojo.action.toast.title": "New actions unlocked!",
   "jojo.action.toast.stand.attack.description": "New Stand attacks",

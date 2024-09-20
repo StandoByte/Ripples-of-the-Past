@@ -13,15 +13,12 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.InputHandler;
-import com.github.standobyte.jojo.client.ui.screen.JojoStuffScreen;
-import com.github.standobyte.jojo.client.ui.screen.JojoStuffScreen.HamonTab;
+import com.github.standobyte.jojo.client.ui.screen.IJojoScreen;
 import com.github.standobyte.jojo.client.ui.screen.TabPositionType;
-import com.github.standobyte.jojo.client.ui.screen.controls.HudLayoutEditingScreen;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonWindowOpenedPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClReadHamonBreathTabPacket;
-import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
@@ -42,7 +39,7 @@ import net.minecraft.util.text.ITextProperties;
 import net.minecraft.util.text.Style;
 
 @SuppressWarnings("deprecation")
-public class HamonScreen extends Screen {
+public class HamonScreen extends Screen implements IJojoScreen {
     static final int WINDOW_WIDTH = 230;
     static final int WINDOW_HEIGHT = 227;
     
@@ -74,9 +71,9 @@ public class HamonScreen extends Screen {
         super(NarratorChatListener.NO_TITLE);
     }
     
+    private static IJojoScreen.TabCategory HAMON_CATEGORY;
     public static void clientInit() {
-        HudLayoutEditingScreen.RightSideTabs.register(ModPowers.HAMON.get().getRegistryName(), 
-                HamonTab.values(), HamonTab.CONTROLS, PowerClassification.NON_STAND);
+        HAMON_CATEGORY = IJojoScreen.TabCategory.registerCategory(ModPowers.HAMON.get(), HamonTab.values());
     }
     
     @Override
@@ -110,6 +107,16 @@ public class HamonScreen extends Screen {
         }
         selectTab(introWasRead ? selectableTabs.get(1) : introTab);
         PacketManager.sendToServer(new ClHamonWindowOpenedPacket());
+    }
+    
+    @Override
+    public IJojoScreen.TabCategory getTabCategory() {
+        return HAMON_CATEGORY;
+    }
+    
+    @Override
+    public IJojoScreen.Tab getTab() {
+        return IJojoScreen.HamonTab.MAIN_SCREEN.get();
     }
     
     private void reorderTabs() {
@@ -151,9 +158,7 @@ public class HamonScreen extends Screen {
                 return true;
             }
         }
-        if (JojoStuffScreen.mouseClick(mouseX, mouseY, 
-                JojoStuffScreen.uniformX(minecraft), JojoStuffScreen.uniformY(minecraft), HandSide.RIGHT, 
-                JojoStuffScreen.HamonTab.values())) {
+        if (IJojoScreen.mouseClickRightSideTab(mouseX, mouseY, HAMON_CATEGORY)) {
             return true;
         }
         if (selectedTab != null) {
@@ -164,6 +169,15 @@ public class HamonScreen extends Screen {
                 return true;
             }
         }
+        
+        IJojoScreen.TabCategory[] activeTabs = IJojoScreen.TabCategory.getVisibleCategories();
+        int index = IJojoScreen.getTabMouseOver((int) mouseX, (int) mouseY, 
+                IJojoScreen.uniformX(minecraft), IJojoScreen.uniformY(minecraft) + IJojoScreen.UPPER_TABS_RIGHT_ALIGNMENT_OFFSET, 
+                HandSide.RIGHT, activeTabs.length);
+        if (index >= 0) {
+            return activeTabs[index].onClick();
+        }
+        
         return false;
     }
     
@@ -305,11 +319,14 @@ public class HamonScreen extends Screen {
         for (HamonTabGui tabGui : selectableTabs) {
             tabGui.drawIcon(matrixStack, windowX, windowY, itemRenderer);
         }
+        
+        IJojoScreen.renderVerticalTabs(matrixStack, HandSide.RIGHT, 
+                false, mouseX, mouseY, this, 
+                IJojoScreen.HamonTab.MAIN_SCREEN.get(), HAMON_CATEGORY);
 
-        JojoStuffScreen.renderVerticalTabs(matrixStack, HandSide.RIGHT, 
-                JojoStuffScreen.uniformX(minecraft), JojoStuffScreen.uniformY(minecraft), false, 
-                mouseX, mouseY, this, 
-                JojoStuffScreen.HamonTab.MAIN_SCREEN, JojoStuffScreen.HamonTab.values());
+        IJojoScreen.renderCategoryTabsRight(matrixStack, 
+                IJojoScreen.uniformX(minecraft), IJojoScreen.uniformY(minecraft) + IJojoScreen.UPPER_TABS_RIGHT_ALIGNMENT_OFFSET, 
+                mouseX, mouseY, this, HAMON_CATEGORY);
         RenderSystem.disableBlend();
         if (selectedTab != null) {
             font.draw(matrixStack, selectedTab.getTitle(), windowX + 8, windowY + 6, 0x404040);

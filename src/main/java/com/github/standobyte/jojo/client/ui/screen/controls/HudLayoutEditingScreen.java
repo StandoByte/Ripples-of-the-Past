@@ -30,15 +30,11 @@ import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.controls.HudControlSettings;
 import com.github.standobyte.jojo.client.controls.PowerTypeControlSchemes;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
-import com.github.standobyte.jojo.client.ui.screen.JojoStuffScreen;
-import com.github.standobyte.jojo.client.ui.screen.JojoStuffScreen.StandTab;
-import com.github.standobyte.jojo.client.ui.screen.JojoStuffScreen.TabSupplier;
+import com.github.standobyte.jojo.client.ui.screen.IJojoScreen;
 import com.github.standobyte.jojo.client.ui.screen.widgets.CustomButton;
 import com.github.standobyte.jojo.client.ui.screen.widgets.ToggleSwitch;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
-import com.github.standobyte.jojo.power.IPowerType;
-import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.Vector2i;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
@@ -57,7 +53,6 @@ import net.minecraft.client.gui.widget.list.AbstractOptionList;
 import net.minecraft.client.gui.widget.list.KeyBindingList;
 import net.minecraft.client.settings.KeyBinding;
 import net.minecraft.client.util.InputMappings;
-import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
@@ -71,7 +66,7 @@ import net.minecraftforge.client.settings.KeyModifier;
  */
 // TODO saving layout variants
 @SuppressWarnings("deprecation")
-public class HudLayoutEditingScreen extends Screen {
+public class HudLayoutEditingScreen extends Screen implements IJojoScreen {
     private static final ResourceLocation WINDOW = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/layout_editing.png");
     public static final int WINDOW_WIDTH = 230;
     public static final int WINDOW_HEIGHT = 180;
@@ -227,9 +222,21 @@ public class HudLayoutEditingScreen extends Screen {
         renderDragged(matrixStack, mouseX, mouseY);
         renderToolTips(matrixStack, mouseX, mouseY);
         buttons.forEach(button -> button.render(matrixStack, mouseX, mouseY, partialTick));
+        if (selectedTab != null) IJojoScreen.LastScreenRemembered.lastHudEditingPowerClass = selectedTab;
     }
     
-
+    
+    @Override
+    public IJojoScreen.TabCategory getTabCategory() {
+        return IJojoScreen.TabCategory.getCategoryForPower(selectedPower);
+    }
+    
+    @Override
+    public IJojoScreen.Tab getTab() {
+        return IJojoScreen.CONTROLS_TAB;
+    }
+    
+    
     private void renderWindow(MatrixStack matrixStack) {
         RenderSystem.enableBlend();
         minecraft.getTextureManager().bind(WINDOW);
@@ -241,114 +248,20 @@ public class HudLayoutEditingScreen extends Screen {
     
     
     
-    public static class RightSideTabs {
-        private static final Map<ResourceLocation, RightSideTabs> TABS = new HashMap<>();
-        
-        public static final RightSideTabs STAND = new RightSideTabs(StandTab.values(), StandTab.CONTROLS, PowerClassification.STAND);
-        
-        private final TabSupplier[] tabsArray;
-        private final TabSupplier hudLayoutTab;
-        private final PowerClassification power;
-        
-        protected RightSideTabs(TabSupplier[] tabsArray, TabSupplier hudLayoutTab, PowerClassification power) {
-            this.tabsArray = tabsArray;
-            this.hudLayoutTab = hudLayoutTab;
-            this.power = power;
-        }
-
-        public static <T extends TabSupplier> RightSideTabs register(ResourceLocation powerType, T[] tabsArray, T hudLayoutTab, PowerClassification power) {
-            RightSideTabs tabs = new RightSideTabs(tabsArray, hudLayoutTab, power);
-            TABS.put(powerType, tabs);
-            return tabs;
-        }
-        
-        public static RightSideTabs getTabsType(IPower<?, ?> power) {
-            if (power.hasPower()) {
-                IPowerType<?, ?> powerType = power.getType();
-                RightSideTabs registered = TABS.get(powerType.getRegistryName());
-                if (registered != null) {
-                    return registered;
-                }
-                if (power.getPowerClassification() == PowerClassification.STAND) {
-                    return STAND;
-                }
-            }
-            
-            return null;
-        }
-        
-        
-        public TabSupplier getHUDLayoutTab() {
-            return hudLayoutTab;
-        }
-        
-        public TabSupplier[] getTabs() {
-            return tabsArray;
-        }
-        
-        public PowerClassification getPower() {
-            return power;
-        }
-    }
-    
     private void renderTabButtons(MatrixStack matrixStack, int mouseX, int mouseY) {
-        for (int i = 0; i < powersPresent.size(); i++) {
-            boolean isTabSelected = isTabSelected(powersPresent.get(i));
-            int textureX;
-            int textureY;
-            if (isTabSelected) {
-                textureX = i == 0 ? 0 : 28;
-                textureY = 32;
-            }
-            else {
-                textureX = i == 0 ? 168 : 196;
-                textureY = 2;
-            }
-            minecraft.getTextureManager().bind(JojoStuffScreen.TABS);
-            int[] xy = getTabButtonCoords(i);
-            blit(matrixStack, xy[0], xy[1], textureX, textureY, 28, 32);
-
-            RenderSystem.enableBlend();
-            minecraft.getTextureManager().bind(powersPresent.get(i).clGetPowerTypeIcon());
-            blit(matrixStack, xy[0] + 6, xy[1] + 10, 0, 0, 16, 16, 16, 16);
-            RenderSystem.disableBlend();
-        }
-        
         if (selectedTab != null) {
-            int tabsX = JojoStuffScreen.uniformX(minecraft);
-            int tabsY = JojoStuffScreen.uniformY(minecraft);
-            RightSideTabs tabsType = RightSideTabs.getTabsType(selectedPower);
-            if (tabsType != null) {
-                switch (tabsType.getPower()) {
-                case STAND:
-                    JojoStuffScreen.renderStandTabs(matrixStack, 
-                            tabsX, tabsY, true, 
-                            mouseX, mouseY, this, 
-                            JojoStuffScreen.StandTab.CONTROLS, ((IStandPower) selectedPower));
-                    break;
-                case NON_STAND:
-                    JojoStuffScreen.renderVerticalTabs(matrixStack, HandSide.RIGHT, 
-                            tabsX, tabsY, true, 
-                            mouseX, mouseY, this, 
-                            tabsType.getHUDLayoutTab(), tabsType.getTabs());
-                    break;
-                }
+            IJojoScreen.TabCategory tabsType = getTabCategory();
+            IJojoScreen.renderCategoryTabs(matrixStack, mouseX, mouseY, this, tabsType);
+            if (tabsType != null && tabsType.getPower() != null) {
+                IJojoScreen.renderRightSideTabs(matrixStack, 
+                        true, mouseX, mouseY, this, 
+                        IJojoScreen.CONTROLS_TAB, tabsType);
             }
         }
     }
     
-    private int[] getTabButtonCoords(int tabIndex) {
-        int x = getWindowX() + tabIndex * 29;
-        int y = getWindowY() - 28;
-        return new int[] {x, y};
-    }
-    
-    private boolean isTabSelected(IPower<?, ?> power) {
-        return power == selectedPower;
-    }
     
     
-
     private static final int HOTBARS_X = 20;
     private static final int ATTACKS_HOTBAR_Y = 10;
     private static final int ABILITIES_HOTBAR_Y = 36;
@@ -545,34 +458,29 @@ public class HudLayoutEditingScreen extends Screen {
     private Runnable renderAfterScissor = null;
     private void renderToolTips(MatrixStack matrixStack, int mouseX, int mouseY) {
         if (draggedAction.isPresent()) return;
-        int tab = getTabButtonAt(mouseX, mouseY);
-        if (tab >= 0 && tab < powersPresent.size()) {
-            renderTooltip(matrixStack, powersPresent.get(tab).getName(), mouseX, mouseY);
-        }
-        else {
-            hoveredAction.ifPresent(slot -> {
-                List<ITextComponent> tooltip = new ArrayList<>();
-                
-                IFormattableTextComponent name = getActionName(selectedPower, slot.actionSwitch.getAction());
-                if (!slot.actionSwitch.isEnabled()) {
-                    name.withStyle(TextFormatting.STRIKETHROUGH);
-                }
-                tooltip.add(name);
-                
-                tooltip.add(StringTextComponent.EMPTY);
-                tooltip.add(new TranslationTextComponent("jojo.screen.edit_hud_layout.hint.lmb").withStyle(TextFormatting.GRAY, TextFormatting.ITALIC));
-                tooltip.add(new TranslationTextComponent("jojo.screen.edit_hud_layout.hint.rmb").withStyle(TextFormatting.GRAY, TextFormatting.ITALIC));
-                
-                renderComponentTooltip(matrixStack, tooltip, mouseX, mouseY);
-            });
+        
+        hoveredAction.ifPresent(slot -> {
+            List<ITextComponent> tooltip = new ArrayList<>();
             
-            keybindsList.getHoveredKeybindSlot().ifPresent(slot -> {
-                if (slot.getAction() != null) {
-                    IFormattableTextComponent name = getActionName(selectedPower, slot.getAction());
-                    renderTooltip(matrixStack, name, mouseX, mouseY);
-                }
-            });
-        }
+            IFormattableTextComponent name = getActionName(selectedPower, slot.actionSwitch.getAction());
+            if (!slot.actionSwitch.isEnabled()) {
+                name.withStyle(TextFormatting.STRIKETHROUGH);
+            }
+            tooltip.add(name);
+
+            tooltip.add(StringTextComponent.EMPTY);
+            tooltip.add(new TranslationTextComponent("jojo.screen.edit_hud_layout.hint.lmb").withStyle(TextFormatting.GRAY, TextFormatting.ITALIC));
+            tooltip.add(new TranslationTextComponent("jojo.screen.edit_hud_layout.hint.rmb").withStyle(TextFormatting.GRAY, TextFormatting.ITALIC));
+
+            renderComponentTooltip(matrixStack, tooltip, mouseX, mouseY);
+        });
+
+        keybindsList.getHoveredKeybindSlot().ifPresent(slot -> {
+            if (slot.getAction() != null) {
+                IFormattableTextComponent name = getActionName(selectedPower, slot.getAction());
+                renderTooltip(matrixStack, name, mouseX, mouseY);
+            }
+        });
         
         renderHintTooltip(matrixStack, mouseX, mouseY, HINT_HOTBARS_X, HINT_HOTBARS_Y, "jojo.screen.edit_hud_layout.hint.hotbars");
         renderHintTooltip(matrixStack, mouseX, mouseY, HINT_KEYBINDS_X, HINT_KEYBINDS_Y, "jojo.screen.edit_hud_layout.hint.keybinds");
@@ -603,16 +511,6 @@ public class HudLayoutEditingScreen extends Screen {
         }
         
         return name;
-    }
-    
-    private int getTabButtonAt(int mouseX, int mouseY) {
-        mouseX -= getWindowX();
-        mouseY -= getWindowY();
-        if (mouseY > -28 && mouseY < 0 && mouseX >= 0) {
-            int tab = mouseX / 29;
-            return tab;
-        }
-        return -1;
     }
     
     private int getWindowX() { return (width - WINDOW_WIDTH) / 2; }
@@ -668,17 +566,27 @@ public class HudLayoutEditingScreen extends Screen {
         }
         
         
-        int tab = getTabButtonAt(mouseX, mouseY);
-        if (tab >= 0 && tab < powersPresent.size()) {
-            selectTab(powersPresent.get(tab));
-            return true;
+        IJojoScreen.TabCategory tab = IJojoScreen.upperTabAt(mouseX, mouseY, 
+                IJojoScreen.uniformUpperX(minecraft), IJojoScreen.uniformUpperY(minecraft));
+        if (tab != null) {
+            if (tab.getPower() != null) {
+                switch (tab.getPower()) {
+                case STAND:
+                    selectTab(PowerClassification.STAND);
+                    break;
+                case NON_STAND:
+                    selectTab(PowerClassification.NON_STAND);
+                    break;
+                }
+                return true;
+            }
+            else {
+                return tab.onClick();
+            }
         }
         
-        RightSideTabs tabsType = RightSideTabs.getTabsType(selectedPower);
-        JojoStuffScreen.hudEditingCurPower = selectedTab;
-        if (tabsType != null && JojoStuffScreen.mouseClick(mouseX, mouseY, 
-                JojoStuffScreen.uniformX(minecraft), JojoStuffScreen.uniformY(minecraft), HandSide.RIGHT, 
-                tabsType.getTabs())) {
+        IJojoScreen.TabCategory tabsType = getTabCategory();
+        if (tabsType != null && IJojoScreen.mouseClickRightSideTab(mouseX, mouseY, tabsType)) {
             return true;
         }
         
@@ -733,6 +641,7 @@ public class HudLayoutEditingScreen extends Screen {
                 currentControlScheme = ControlScheme.EMPTY;
             }
             refreshCustomKeybindEntries();
+            IJojoScreen.rememberScreenTab(this);
         }
     }
     
@@ -767,7 +676,7 @@ public class HudLayoutEditingScreen extends Screen {
     
     @Override
     public boolean keyPressed(int key, int scanCode, int modifiers) {
-        if (InputHandler.getInstance().editHotbars.matches(key, scanCode)) {
+        if (InputHandler.getInstance().jojoStuffMenu.matches(key, scanCode)) {
             onClose();
             return true;
         } 

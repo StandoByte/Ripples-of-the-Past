@@ -40,7 +40,7 @@ public class SilverChariotEntity extends StandEntity {
     private static final AttributeModifier NO_ARMOR_MOVEMENT_SPEED_BOOST = new AttributeModifier(
             UUID.fromString("a31ffbee-5a26-4022-a298-59c839e5048d"), "Movement speed boost with no armor", 1.5, AttributeModifier.Operation.MULTIPLY_BASE);
     private static final AttributeModifier NO_ARMOR_ATTACK_SPEED_BOOST = new AttributeModifier(
-            UUID.fromString("c3e4ddb0-daa9-4cbb-acb9-dbc7eecad3f1"), "Attack speed boost with no armor", 1, AttributeModifier.Operation.MULTIPLY_BASE);
+            UUID.fromString("c3e4ddb0-daa9-4cbb-acb9-dbc7eecad3f1"), "Attack speed boost with no armor", 0.5, AttributeModifier.Operation.MULTIPLY_BASE);
     private static final AttributeModifier NO_ARMOR = new AttributeModifier(
             UUID.fromString("d4987f5f-55e8-45db-9a5e-b2fd0a98c2ec"), "No armor", -1, AttributeModifier.Operation.MULTIPLY_TOTAL);
     private static final AttributeModifier NO_ARMOR_TOUGHNESS = new AttributeModifier(

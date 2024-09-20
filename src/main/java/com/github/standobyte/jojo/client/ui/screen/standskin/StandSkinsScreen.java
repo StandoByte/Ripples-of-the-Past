@@ -15,7 +15,7 @@ import com.github.standobyte.jojo.client.render.FlameModelRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.StandEntityRenderer;
 import com.github.standobyte.jojo.client.standskin.StandSkin;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
-import com.github.standobyte.jojo.client.ui.screen.JojoStuffScreen;
+import com.github.standobyte.jojo.client.ui.screen.IJojoScreen;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClSetStandSkinPacket;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -33,14 +33,13 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.Widget;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
-import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.text.StringTextComponent;
 
-public class StandSkinsScreen extends Screen {
+public class StandSkinsScreen extends Screen implements IJojoScreen {
     public static final ResourceLocation TEXTURE_MAIN_WINDOW = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/stand_skins.png");
     private static final ResourceLocation TEXTURE_BG = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/stand_skins_bg.png");
     
@@ -99,6 +98,16 @@ public class StandSkinsScreen extends Screen {
     }
     
     @Override
+    public IJojoScreen.TabCategory getTabCategory() {
+        return IJojoScreen.TabCategory.STAND;
+    }
+    
+    @Override
+    public IJojoScreen.Tab getTab() {
+        return IJojoScreen.StandTab.SKINS.get();
+    }
+    
+    @Override
     public void tick() {
         tickCount++;
     }
@@ -115,9 +124,7 @@ public class StandSkinsScreen extends Screen {
         renderContents(mouseX, mouseY, partialTick);
         renderWindow(matrixStack);
         
-        JojoStuffScreen.renderStandTabs(matrixStack, 
-                JojoStuffScreen.uniformX(minecraft), JojoStuffScreen.uniformY(minecraft), true, 
-                mouseX, mouseY, this, JojoStuffScreen.StandTab.SKINS, standCap);
+        defaultRenderTabs(matrixStack, mouseX, mouseY, this);
         
         for (Widget button : buttons) {
             button.render(matrixStack, mouseX, mouseY, partialTick);
@@ -213,13 +220,7 @@ public class StandSkinsScreen extends Screen {
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int mouseButton) {
-        if (super.mouseClicked(mouseX, mouseY, mouseButton)) {
-            return true;
-        }
-
-        if (JojoStuffScreen.mouseClick(mouseX, mouseY, 
-                JojoStuffScreen.uniformX(minecraft), JojoStuffScreen.uniformY(minecraft), HandSide.RIGHT, 
-                JojoStuffScreen.StandTab.values())) {
+        if (defaultClickTab(mouseX, mouseY)) {
             return true;
         }
         
@@ -244,7 +245,7 @@ public class StandSkinsScreen extends Screen {
             }
         }
         
-        return false;
+        return super.mouseClicked(mouseX, mouseY, mouseButton);
     }
     
     @Override

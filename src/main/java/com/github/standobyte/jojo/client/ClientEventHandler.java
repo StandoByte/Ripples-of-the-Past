@@ -40,6 +40,7 @@ import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.ClientModSettingsScreen;
+import com.github.standobyte.jojo.client.ui.screen.IJojoScreen;
 import com.github.standobyte.jojo.client.ui.screen.controls.HudLayoutEditingScreen;
 import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.CategoryWithButtonsEntry;
 import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.ControlSettingToggleButton;
@@ -165,6 +166,7 @@ public class ClientEventHandler {
     private double zoomModifier;
     public boolean isZooming;
 
+    public int tickCount = 0;
     private int deathScreenTick;
     private int standStatsTick;
     
@@ -363,6 +365,7 @@ public class ClientEventHandler {
         if (event.phase == TickEvent.Phase.START) {
             ClientTimeStopHandler.getInstance().tickPauseIrrelevant();
             
+            ++tickCount;
             deathScreenTick = mc.screen instanceof DeathScreen ? deathScreenTick + 1 : 0;
             standStatsTick = mc.screen instanceof IngameMenuScreen && doStandStatsRender(mc.screen) ? standStatsTick + 1 : 0;
         }
@@ -1136,6 +1139,11 @@ public class ClientEventHandler {
         else if (screen == null) {
             onScreenClosed();
         }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onScreenOpened2(GuiOpenEvent event) {
+        IJojoScreen.rememberScreenTab(event.getGui());
     }
     
     private void onScreenClosed() {

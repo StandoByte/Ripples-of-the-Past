@@ -33,7 +33,7 @@ public class JojoControlsCommand {
                     new KeybindTextComponent("jojo.key.toggle_stand").withStyle(TextFormatting.ITALIC),
                     new KeybindTextComponent("jojo.key.stand_remote_control").withStyle(TextFormatting.ITALIC)).withStyle(TextFormatting.GRAY),
             new TranslationTextComponent("jojo.chat.command.controls.layout_edit", 
-                    new KeybindTextComponent("jojo.key.edit_hud").withStyle(TextFormatting.ITALIC)).withStyle(TextFormatting.GRAY),
+                    new KeybindTextComponent("jojo.key.jojo_menu").withStyle(TextFormatting.ITALIC)).withStyle(TextFormatting.GRAY),
             new TranslationTextComponent("jojo.chat.command.controls.changeable").withStyle(TextFormatting.GRAY)
     };
 
