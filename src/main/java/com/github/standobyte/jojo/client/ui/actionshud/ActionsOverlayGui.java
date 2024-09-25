@@ -89,39 +89,36 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.GameType;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.EventPriority;
-import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 @SuppressWarnings("deprecation")
 public class ActionsOverlayGui extends AbstractGui {
     public static final ResourceLocation OVERLAY_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/overlay.png");
-    private static final ResourceLocation RADIAL_INDICATOR = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/radial_indicator.png");
+    protected static final ResourceLocation RADIAL_INDICATOR = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/radial_indicator.png");
     
-    private static ActionsOverlayGui instance = null;
-    private final Minecraft mc;
-    private int tickCount;
+    protected static ActionsOverlayGui instance = null;
+    protected final Minecraft mc;
+    protected int tickCount;
     
     public final ActionsModeConfig<INonStandPower> nonStandUiMode = new ActionsModeConfig<>(PowerClassification.NON_STAND);
     public final ActionsModeConfig<IStandPower> standUiMode = new ActionsModeConfig<>(PowerClassification.STAND);
     @Nullable
-    private ActionsModeConfig<?> currentMode = null;
+    protected ActionsModeConfig<?> currentMode = null;
     
-    private final ElementTransparency modeSelectorTransparency = new ElementTransparency(40, 10);
-    private final ElementTransparency energyBarTransparency = new ElementTransparency(40, 10);
-    private final ElementTransparency staminaBarTransparency = new ElementTransparency(40, 10);
-    private final ElementTransparency resolveBarTransparency = new ElementTransparency(40, 10);
-    private final ElementTransparency powerNameTransparency = new ElementTransparency(40, 10);
-    private final Map<InputHandler.ActionKey, ElementTransparency> actionNameTransparency = Arrays.stream(InputHandler.ActionKey.values())
+    protected final ElementTransparency modeSelectorTransparency = new ElementTransparency(40, 10);
+    protected final ElementTransparency energyBarTransparency = new ElementTransparency(40, 10);
+    protected final ElementTransparency staminaBarTransparency = new ElementTransparency(40, 10);
+    protected final ElementTransparency resolveBarTransparency = new ElementTransparency(40, 10);
+    protected final ElementTransparency powerNameTransparency = new ElementTransparency(40, 10);
+    protected final Map<InputHandler.ActionKey, ElementTransparency> actionNameTransparency = Arrays.stream(InputHandler.ActionKey.values())
             .collect(Maps.toImmutableEnumMap(hotbar -> hotbar, hotbar -> new ElementTransparency(40, 10)));
-    private final Map<InputHandler.ActionKey, ITextComponent> lastActionName = new EnumMap<>(InputHandler.ActionKey.class);
-    private final Map<ControlScheme.Hotbar, FadeOut> actionHotbarFold = Arrays.stream(ControlScheme.Hotbar.values())
+    protected final Map<InputHandler.ActionKey, ITextComponent> lastActionName = new EnumMap<>(InputHandler.ActionKey.class);
+    protected final Map<ControlScheme.Hotbar, FadeOut> actionHotbarFold = Arrays.stream(ControlScheme.Hotbar.values())
             .collect(Maps.toImmutableEnumMap(hotbar -> hotbar, hotbar -> new FadeOut(40, 10)));
-    private final Map<PowerClassification, ElementTransparency> customKeybindActionTransparency = Arrays.stream(PowerClassification.values())
+    protected final Map<PowerClassification, ElementTransparency> customKeybindActionTransparency = Arrays.stream(PowerClassification.values())
             .collect(Maps.toImmutableEnumMap(Function.identity(), __ -> new ElementTransparency(40, 10)));
-    private final Map<Exercise, ElementTransparency> exerciseBarsTransparency = Arrays.stream(Exercise.values())
+    protected final Map<Exercise, ElementTransparency> exerciseBarsTransparency = Arrays.stream(Exercise.values())
             .collect(Maps.toImmutableEnumMap(Function.identity(), __ -> new ElementTransparency(40, 10)));
-    private final Map<HamonStatIncNotif, ElementTransparency> hamonLvlIncreaseTransparency = Arrays.stream(HamonStatIncNotif.values())
+    protected final Map<HamonStatIncNotif, ElementTransparency> hamonLvlIncreaseTransparency = Arrays.stream(HamonStatIncNotif.values())
             .collect(Maps.toImmutableEnumMap(Function.identity(), __ -> new ElementTransparency(100, 20)));
     
     public static enum HamonStatIncNotif {
@@ -130,12 +127,12 @@ public class ActionsOverlayGui extends AbstractGui {
         BREATHING
     }
     
-    private final BarsRenderer verticalBars = new VerticalBarsRenderer(this, 
+    protected final BarsRenderer verticalBars = new VerticalBarsRenderer(this, 
             energyBarTransparency, staminaBarTransparency, resolveBarTransparency);
-    private final BarsRenderer horizontalBars = new HorizontalBarsRenderer(this, 
+    protected final BarsRenderer horizontalBars = new HorizontalBarsRenderer(this, 
             energyBarTransparency, staminaBarTransparency, resolveBarTransparency);
     
-    private FadeOut[] tickingFadeOut = Streams.concat(Stream.of(
+    protected FadeOut[] tickingFadeOut = Streams.concat(Stream.of(
             modeSelectorTransparency,
             energyBarTransparency,
             staminaBarTransparency,
@@ -148,23 +145,20 @@ public class ActionsOverlayGui extends AbstractGui {
             hamonLvlIncreaseTransparency.values().stream())
             .toArray(FadeOut[]::new);
     
-    private boolean attackSelection;
-    private boolean abilitySelection;
-    private boolean hotbarsEnabled;
-    private boolean altDeselectsAttack;
-    private boolean altDeselectsAbility;
+    protected boolean attackSelection;
+    protected boolean abilitySelection;
+    protected boolean hotbarsEnabled;
+    protected boolean altDeselectsAttack;
+    protected boolean altDeselectsAbility;
     
-    private ActionsOverlayGui(Minecraft mc) {
+    protected ActionsOverlayGui(Minecraft mc) {
         this.mc = mc;
     }
 
     public static void init(Minecraft mc) {
         if (instance == null) {
             try {
-                
-            instance = new ActionsOverlayGui(mc);
-            MinecraftForge.EVENT_BUS.register(instance);
-            
+                instance = new ActionsOverlayGui(mc);
             }
             catch (Throwable e) {
                 e.printStackTrace();
@@ -251,7 +245,7 @@ public class ActionsOverlayGui extends AbstractGui {
         return currentMode.powerClassification;
     }
     
-    private ActionsModeConfig<?> getHudMode(PowerClassification power) {
+    protected ActionsModeConfig<?> getHudMode(PowerClassification power) {
         switch (power) {
         case STAND:
             return standUiMode;
@@ -265,8 +259,7 @@ public class ActionsOverlayGui extends AbstractGui {
     
 
     
-    private ActionTarget _target;
-    @SubscribeEvent(priority = EventPriority.NORMAL)
+    protected ActionTarget _target;
     public void render(RenderGameOverlayEvent.Pre event) {
         _target = null;
         if (mc.gameMode.getPlayerMode() == GameType.SPECTATOR || mc.options.hideGui
@@ -459,7 +452,7 @@ public class ActionsOverlayGui extends AbstractGui {
             break;
         }
     }
-    private boolean[] hotbarIsRendered = new boolean[4];
+    protected boolean[] hotbarIsRendered = new boolean[4];
     
     public ActionTarget getMouseTarget() {
         if (_target == null) {
@@ -491,10 +484,10 @@ public class ActionsOverlayGui extends AbstractGui {
 
     
 
-    private ActionKeybindEntry lastHotkeyPressedAction;
-    private boolean hotkeyRenderOffHudAction;
-    private List<HudHotkey> hotkeyInHudActions = new ArrayList<>();
-    private void updateHotkeyUi() {
+    protected ActionKeybindEntry lastHotkeyPressedAction;
+    protected boolean hotkeyRenderOffHudAction;
+    protected List<HudHotkey> hotkeyInHudActions = new ArrayList<>();
+    protected void updateHotkeyUi() {
         hotkeyRenderOffHudAction = lastHotkeyPressedAction != null;
         hotkeyInHudActions.clear();
         
@@ -541,7 +534,7 @@ public class ActionsOverlayGui extends AbstractGui {
         lastHotkeyPressedAction = action;
     }
     
-    private static class HudHotkey {
+    protected static class HudHotkey {
         final ActionKeybindEntry actionEntry;
         final IFormattableTextComponent keyName;
         final int maxWidth;
@@ -555,21 +548,21 @@ public class ActionsOverlayGui extends AbstractGui {
     
     
 
-    private static final int HOTBARS_ELEMENT_HEIGHT_PX = 110;
+    protected static final int HOTBARS_ELEMENT_HEIGHT_PX = 110;
     
-    private final ElementPosition barsPosition = new ElementPosition();
-    private BarsRenderer barsRenderer;
-    private final ElementPosition lmbHotbarPosition = new ElementPosition();
-    private final ElementPosition rmbHotbarPosition = new ElementPosition();
-    private final ElementPosition inHudHotkeysPosition = new ElementPosition();
-    private final ElementPosition offHudHotkeyPosition = new ElementPosition();
-    private final ElementPosition warningsPosition = new ElementPosition();
-    private List<ITextComponent> warningLines = new ArrayList<>();
-    private final ElementPosition standStrengthPosition = new ElementPosition();
-    private final ElementPosition modeSelectorPosition = new ElementPosition();
-    private final ElementPosition hamonExerciseBarsPosition = new ElementPosition();
+    protected final ElementPosition barsPosition = new ElementPosition();
+    protected BarsRenderer barsRenderer;
+    protected final ElementPosition lmbHotbarPosition = new ElementPosition();
+    protected final ElementPosition rmbHotbarPosition = new ElementPosition();
+    protected final ElementPosition inHudHotkeysPosition = new ElementPosition();
+    protected final ElementPosition offHudHotkeyPosition = new ElementPosition();
+    protected final ElementPosition warningsPosition = new ElementPosition();
+    protected List<ITextComponent> warningLines = new ArrayList<>();
+    protected final ElementPosition standStrengthPosition = new ElementPosition();
+    protected final ElementPosition modeSelectorPosition = new ElementPosition();
+    protected final ElementPosition hamonExerciseBarsPosition = new ElementPosition();
     
-    private void updateElementPositions(PositionConfig barsConfig, PositionConfig hotbarsConfig, 
+    protected void updateElementPositions(PositionConfig barsConfig, PositionConfig hotbarsConfig, 
             boolean renderLmbHotbar, boolean renderRmbHotbar, boolean renderHudKeybinds, boolean renderOffHudKeybind, 
             int screenWidth, int screenHeight) {
         int halfWidth = screenWidth / 2;
@@ -686,7 +679,7 @@ public class ActionsOverlayGui extends AbstractGui {
         hamonExerciseBarsPosition.alignment = Alignment.LEFT;
     }
     
-    private void updateWarnings(@Nullable ActionsModeConfig<?> mode) {
+    protected void updateWarnings(@Nullable ActionsModeConfig<?> mode) {
         warningLines.clear();
         if (mode != null) {
             appendWarnings(warningLines, mode, ControlScheme.Hotbar.LEFT_CLICK);
@@ -694,7 +687,7 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    private <P extends IPower<P, ?>> void appendWarnings(List<ITextComponent> list, 
+    protected <P extends IPower<P, ?>> void appendWarnings(List<ITextComponent> list, 
             ActionsModeConfig<P> powerMode, ControlScheme.Hotbar actionType) {
         boolean shiftVariation = InputHandler.useShiftActionVariant(mc);
         Action<P> action = powerMode.getSelectedAction(actionType, shiftVariation, getMouseTarget());
@@ -705,7 +698,7 @@ public class ActionsOverlayGui extends AbstractGui {
     
     
 
-    private void renderBars(MatrixStack matrixStack, ElementPosition pos, BarsRenderer renderer, float partialTick) {
+    protected void renderBars(MatrixStack matrixStack, ElementPosition pos, BarsRenderer renderer, float partialTick) {
         int x = pos.x;
         int y = pos.y;
         if (renderer != null) {
@@ -716,7 +709,7 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    private void drawBarsText(MatrixStack matrixStack, BarsRenderer renderer, float partialTick) {
+    protected void drawBarsText(MatrixStack matrixStack, BarsRenderer renderer, float partialTick) {
         if (renderer != null) {
             renderer.drawTextAfterRender(matrixStack, getCurrentMode(), nonStandUiMode.getPower(), 
                     standUiMode.getPower(), tickCount, partialTick, mc.font, this);
@@ -725,7 +718,7 @@ public class ActionsOverlayGui extends AbstractGui {
 
     
     
-    private <P extends IPower<P, ?>> boolean hotbarWillRender(ActionsModeConfig<P> powerMode, InputHandler.ActionKey hotbar) {
+    protected <P extends IPower<P, ?>> boolean hotbarWillRender(ActionsModeConfig<P> powerMode, InputHandler.ActionKey hotbar) {
         if (powerMode == null) return false;
         P power = powerMode.getPower();
         if (!power.hasPower()) return false;
@@ -733,7 +726,7 @@ public class ActionsOverlayGui extends AbstractGui {
         return !actions.isEmpty();
     }
 
-    private <P extends IPower<P, ?>> void renderActionsHotbar(MatrixStack matrixStack, 
+    protected <P extends IPower<P, ?>> void renderActionsHotbar(MatrixStack matrixStack, 
             ElementPosition position, InputHandler.ActionKey actionKey, ActionsModeConfig<P> mode, ActionTarget target, float partialTick) {
         P power = mode.getPower();
         List<Action<?>> actions = getEnabledActions(power, actionKey);
@@ -898,7 +891,7 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
 
-    private <P extends IPower<P, ?>> void renderInHudKeybindActionSlots(MatrixStack matrixStack, 
+    protected <P extends IPower<P, ?>> void renderInHudKeybindActionSlots(MatrixStack matrixStack, 
             ElementPosition position, ActionTarget target, float partialTick) {
         int x = position.x;
         List<HudHotkey> hotkeysIterate = position.alignment == Alignment.RIGHT ? Lists.reverse(hotkeyInHudActions) : hotkeyInHudActions;
@@ -924,7 +917,7 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
 
-    private <P extends IPower<P, ?>> void renderInHudKeybindActionNames(MatrixStack matrixStack, ElementPosition position) {
+    protected <P extends IPower<P, ?>> void renderInHudKeybindActionNames(MatrixStack matrixStack, ElementPosition position) {
         int x = position.x + 9;
         if (position.alignment == Alignment.RIGHT) {
             x -= 26;
@@ -968,7 +961,7 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
 
-    private <P extends IPower<P, ?>> void renderOffHudKeybindActionSlot(MatrixStack matrixStack, 
+    protected <P extends IPower<P, ?>> void renderOffHudKeybindActionSlot(MatrixStack matrixStack, 
             ElementPosition position, Action<P> action, 
             ActionTarget target, float partialTick) {
         if (action != null) {
@@ -980,7 +973,7 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    private <P extends IPower<P, ?>> void renderSingleActionInSlot(MatrixStack matrixStack, 
+    protected <P extends IPower<P, ?>> void renderSingleActionInSlot(MatrixStack matrixStack, 
             int x, int y, Alignment alignment, Action<P> action, 
             ActionTarget target, float alpha, float partialTick, boolean isSelected) {
         if (action == null) return;
@@ -1047,7 +1040,7 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    private <P extends IPower<P, ?>> List<Action<?>> getEnabledActions(P power, InputHandler.ActionKey actionKey) {
+    protected <P extends IPower<P, ?>> List<Action<?>> getEnabledActions(P power, InputHandler.ActionKey actionKey) {
         ControlScheme controlScheme = HudControlSettings.getInstance().getControlScheme(power);
         if (!controlScheme.hotbarsEnabled) {
             return Collections.emptyList();
@@ -1055,7 +1048,7 @@ public class ActionsOverlayGui extends AbstractGui {
         return controlScheme.getActionsHotbar(actionKey.getHotbar()).getEnabledActions();
     }
     
-    private void renderMouseIcon(MatrixStack matrixStack, int x, int y, InputHandler.ActionKey actionKey) {
+    protected void renderMouseIcon(MatrixStack matrixStack, int x, int y, InputHandler.ActionKey actionKey) {
         InputHandler.MouseButton button = null;
         switch (actionKey) {
         case ATTACK:
@@ -1070,15 +1063,15 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    private void renderMouseIcon(MatrixStack matrixStack, int x, int y, InputHandler.MouseButton button) {
+    protected void renderMouseIcon(MatrixStack matrixStack, int x, int y, InputHandler.MouseButton button) {
         blit(matrixStack, x, y, 216 + button.ordinal() * 10, 128, 9, 16);
     }
     
-    private int getHotbarsYDiff() {
+    protected int getHotbarsYDiff() {
         return 2 * 2 + 22 + mc.font.lineHeight;
     }
     
-    private <P extends IPower<P, ?>> void renderActionIcon(MatrixStack matrixStack, SelectedTargetIcon targetIcon, ActionsModeConfig<P> mode, 
+    protected <P extends IPower<P, ?>> void renderActionIcon(MatrixStack matrixStack, SelectedTargetIcon targetIcon, ActionsModeConfig<P> mode, 
             Action<P> action, ActionTarget target, int x, int y, 
             float partialTick, boolean isSelected, float hotbarAlpha) {
         renderActionIcon(matrixStack, targetIcon, mode, 
@@ -1087,7 +1080,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 0, 16);
     }
     
-    private <P extends IPower<P, ?>> void renderActionIcon(MatrixStack matrixStack, SelectedTargetIcon targetIcon, ActionsModeConfig<P> mode, 
+    protected <P extends IPower<P, ?>> void renderActionIcon(MatrixStack matrixStack, SelectedTargetIcon targetIcon, ActionsModeConfig<P> mode, 
             Action<P> action, ActionTarget target, float x, float y, 
             float partialTick, boolean isSelected, float hotbarAlpha, 
             float leftCut, float cutWidth) {
@@ -1167,7 +1160,7 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    private <P extends IPower<P, ?>> ActionConditionResult actionAvailability(Action<P> action, ActionsModeConfig<P> mode, 
+    protected <P extends IPower<P, ?>> ActionConditionResult actionAvailability(Action<P> action, ActionsModeConfig<P> mode, 
             SelectedTargetIcon targetIcon, ActionTarget mouseTarget, boolean isSelected) {
         P power = mode.getPower();
         ObjectWrapper<ActionTarget> targetContainer = new ObjectWrapper<>(mouseTarget);
@@ -1217,7 +1210,7 @@ public class ActionsOverlayGui extends AbstractGui {
         return hotbarsEnabled;
     }
     
-    private <P extends IPower<P, ?>> void drawHotbarText(MatrixStack matrixStack, ElementPosition position, 
+    protected <P extends IPower<P, ?>> void drawHotbarText(MatrixStack matrixStack, ElementPosition position, 
             InputHandler.ActionKey actionKey, @Nonnull ActionsModeConfig<P> mode, ActionTarget target, 
             int color, float partialTick) {
         P power = mode.getPower();
@@ -1274,7 +1267,7 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    private static <P extends IPower<P, ?>> ITextComponent actionName(Action<P> action, P power, ActionTarget target) {
+    protected static <P extends IPower<P, ?>> ITextComponent actionName(Action<P> action, P power, ActionTarget target) {
         String translationKey = action.getTranslationKey(power, target);
         ITextComponent actionName = action.getTranslatedName(power, translationKey);
         if (action.getHoldDurationMax(power) > 0) {
@@ -1283,7 +1276,7 @@ public class ActionsOverlayGui extends AbstractGui {
         return actionName;
     }
     
-    private <P extends IPower<P, ?>> void drawCustomKeybindActionText(MatrixStack matrixStack, ElementPosition position, 
+    protected <P extends IPower<P, ?>> void drawCustomKeybindActionText(MatrixStack matrixStack, ElementPosition position, 
             Action<P> action, @Nonnull ActionsModeConfig<?> currentMode, ActionTarget target, 
             int color, float partialTick) {
         ActionsModeConfig<P> mode = (ActionsModeConfig<P>) currentMode;
@@ -1333,7 +1326,7 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    private float getNameAlpha(ElementTransparency transparency, float partialTick) {
+    protected float getNameAlpha(ElementTransparency transparency, float partialTick) {
         HudTextRender renderMode = ClientModSettings.getSettingsReadOnly().hudTextRender;
         switch (renderMode) {
         case NEVER:
@@ -1346,7 +1339,7 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    private float mulAlpha(float alpha, float multiplier) {
+    protected float mulAlpha(float alpha, float multiplier) {
         return Math.max(alpha * multiplier, 1f / 63f);
     }
     
@@ -1356,7 +1349,7 @@ public class ActionsOverlayGui extends AbstractGui {
 //        return getSelectedActionHoldDuration(actionType, currentMode) > 0;
 //    }
 //    
-//    private <P extends IPower<P, ?>> int getSelectedActionHoldDuration(ActionType actionType, @Nonnull ActionsModeConfig<P> mode) {
+//    protected <P extends IPower<P, ?>> int getSelectedActionHoldDuration(ActionType actionType, @Nonnull ActionsModeConfig<P> mode) {
 //        Action<P> action = mode.getSelectedAction(actionType, InputHandler.useShiftActionVariant(mc));
 //        if (action != null) {
 //            return action.getHoldDurationMax(mode.getPower());
@@ -1366,7 +1359,7 @@ public class ActionsOverlayGui extends AbstractGui {
     
     
 
-    private void renderPowerIcon(MatrixStack matrixStack, ElementPosition position, @Nullable ActionsModeConfig<?> mode, float alpha) {
+    protected void renderPowerIcon(MatrixStack matrixStack, ElementPosition position, @Nullable ActionsModeConfig<?> mode, float alpha) {
         int x = position.x;
         if (position.alignment == Alignment.RIGHT) {
             x -= 16;
@@ -1386,7 +1379,7 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    private void drawPowerName(MatrixStack matrixStack, ElementPosition position, @Nonnull ActionsModeConfig<?> mode, int color, float partialTick) {
+    protected void drawPowerName(MatrixStack matrixStack, ElementPosition position, @Nonnull ActionsModeConfig<?> mode, int color, float partialTick) {
         float alpha = getNameAlpha(powerNameTransparency, partialTick);
         if (alpha > 0) {
             int x = position.x + (position.alignment == Alignment.RIGHT ? -19 : 19);
@@ -1400,7 +1393,7 @@ public class ActionsOverlayGui extends AbstractGui {
 
 
 
-    private void renderWarningIcons(MatrixStack matrixStack, ElementPosition position, List<ITextComponent> warningLines) {
+    protected void renderWarningIcons(MatrixStack matrixStack, ElementPosition position, List<ITextComponent> warningLines) {
         mc.getTextureManager().bind(OVERLAY_LOCATION);
         int x = position.x;
         int y = position.y - 4;
@@ -1410,7 +1403,7 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    private void drawWarningText(MatrixStack matrixStack, ElementPosition position, List<ITextComponent> warningLines) {
+    protected void drawWarningText(MatrixStack matrixStack, ElementPosition position, List<ITextComponent> warningLines) {
         int x = position.x;
         int y = position.y;
         switch (position.alignment) {
@@ -1428,7 +1421,7 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    private void drawStandRemoteRange(MatrixStack matrixStack, float distance, float damageFactor) {
+    protected void drawStandRemoteRange(MatrixStack matrixStack, float distance, float damageFactor) {
         int x = standStrengthPosition.x;
         int y = standStrengthPosition.y;
         Alignment alignment = standStrengthPosition.alignment;
@@ -1445,7 +1438,7 @@ public class ActionsOverlayGui extends AbstractGui {
     
     
 
-    private <P extends IPower<P, ?>> void renderActionHoldProgress(MatrixStack matrixStack, P power, Action<P> action, 
+    protected <P extends IPower<P, ?>> void renderActionHoldProgress(MatrixStack matrixStack, P power, Action<P> action, 
             int ticks, float partialTick, float x, float y) {
         if (action == null) return;
 
@@ -1473,12 +1466,12 @@ public class ActionsOverlayGui extends AbstractGui {
     
     
     
-    private final List<ActionsModeConfig<?>> modes = Collections.unmodifiableList(Arrays.asList(
+    protected final List<ActionsModeConfig<?>> modes = Collections.unmodifiableList(Arrays.asList(
             null,
             nonStandUiMode,
             standUiMode
             ));
-    private void renderModeSelector(MatrixStack matrixStack, ElementPosition position, float partialTick) {
+    protected void renderModeSelector(MatrixStack matrixStack, ElementPosition position, float partialTick) {
         if (modeSelectorTransparency.shouldRender()) {
             int x = position.x;
             int y = position.y;
@@ -1499,7 +1492,7 @@ public class ActionsOverlayGui extends AbstractGui {
     
     
     
-    private void renderModeSelectorIcons(MatrixStack matrixStack, int x, int y, float partialTick) {
+    protected void renderModeSelectorIcons(MatrixStack matrixStack, int x, int y, float partialTick) {
         for (ActionsModeConfig<?> mode : modes) {
             if (mode != null) {
                 IPower<?, ?> power = mode.getPower();
@@ -1512,7 +1505,7 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    private void drawModeSelectorNames(MatrixStack matrixStack, ElementPosition position, int color, float partialTick) {
+    protected void drawModeSelectorNames(MatrixStack matrixStack, ElementPosition position, int color, float partialTick) {
         if (modeSelectorTransparency.shouldRender()) {
             int x = position.x + (position.alignment == Alignment.LEFT ? 26 : -4);
             int y = position.y + (22 - mc.font.lineHeight) / 2;
@@ -1528,7 +1521,7 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     @Nullable
-    private ITextComponent getModeNameForSelector(ActionsModeConfig<?> mode) {
+    protected ITextComponent getModeNameForSelector(ActionsModeConfig<?> mode) {
         ITextComponent name;
         if (mode == null) {
             if (currentMode == null) {
@@ -1550,11 +1543,11 @@ public class ActionsOverlayGui extends AbstractGui {
         return name;
     }
 
-    private Map<ActionsModeConfig<?>, Supplier<KeyBinding>> modeKeys = ImmutableMap.of(
+    protected Map<ActionsModeConfig<?>, Supplier<KeyBinding>> modeKeys = ImmutableMap.of(
             nonStandUiMode, () -> InputHandler.getInstance().nonStandMode,
             standUiMode, () -> InputHandler.getInstance().standMode);
     @Nullable
-    private ITextComponent getKeyName(ActionsModeConfig<?> mode) {
+    protected ITextComponent getKeyName(ActionsModeConfig<?> mode) {
         if (mode == currentMode) {
             return null;
         }
@@ -1570,7 +1563,7 @@ public class ActionsOverlayGui extends AbstractGui {
     
     
     
-    private void renderLeapIcon(MatrixStack matrixStack, @Nonnull ActionsModeConfig<?> mode, int screenWidth, int screenHeight) {
+    protected void renderLeapIcon(MatrixStack matrixStack, @Nonnull ActionsModeConfig<?> mode, int screenWidth, int screenHeight) {
         IPower<?, ?> power = mode.getPower();
         if (power.isLeapUnlocked()) {
             mc.getTextureManager().bind(OVERLAY_LOCATION);
@@ -1595,7 +1588,7 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    private void renderIconBarAtCrosshair(MatrixStack matrixStack, int screenWidth, int screenHeight, float partialTick) {
+    protected void renderIconBarAtCrosshair(MatrixStack matrixStack, int screenWidth, int screenHeight, float partialTick) {
         int xLeft = screenWidth / 2 - 24;
         int xRight = screenWidth / 2 + 8;
         int y = screenHeight / 2 - 8;
@@ -1635,7 +1628,7 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    private boolean renderBowChargeIcon(MatrixStack matrixStack, BowChargeEffectInstance<?, ?> bowCharge, float partialTick, int x, int y) {
+    protected boolean renderBowChargeIcon(MatrixStack matrixStack, BowChargeEffectInstance<?, ?> bowCharge, float partialTick, int x, int y) {
         if (bowCharge != null && bowCharge.isBeingCharged()) {
             mc.getTextureManager().bind(bowCharge.getPower().clGetPowerTypeIcon());
             float fill = bowCharge.getProgress(partialTick);
@@ -1679,7 +1672,7 @@ public class ActionsOverlayGui extends AbstractGui {
         return false;
     }
 
-    private void renderFilledIcon(MatrixStack matrixStack, int x, int y, boolean translucent, float fill, 
+    protected void renderFilledIcon(MatrixStack matrixStack, int x, int y, boolean translucent, float fill, 
             int texX, int texY, int fillTexX, int fillTexY, int texWidth, int texHeight, int color) {
         blit(matrixStack, x, y, texX, texY, texWidth, texHeight);
         float[] rgb = ClientUtil.rgb(color);
@@ -1698,7 +1691,7 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
 
-    private void renderHamonExerciseBars(MatrixStack matrixStack, ElementPosition position, HamonData hamon, float partialTick) {
+    protected void renderHamonExerciseBars(MatrixStack matrixStack, ElementPosition position, HamonData hamon, float partialTick) {
         int x = position.x;
         int y = position.y;
         
@@ -1800,7 +1793,7 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    private final PowerClassification[] modesOrder = {
+    protected final PowerClassification[] modesOrder = {
             null,
             PowerClassification.NON_STAND,
             PowerClassification.STAND
@@ -1812,7 +1805,7 @@ public class ActionsOverlayGui extends AbstractGui {
         for (int i = 1; i <= modes || !setMode(modesOrder[(iCurrent + i) % modes]); i++);
     }
     
-    private boolean setPowerMode(@Nullable ActionsModeConfig<?> mode) {
+    protected boolean setPowerMode(@Nullable ActionsModeConfig<?> mode) {
         if (mode == null) {
             modeSelectorTransparency.reset();
             if (currentMode == nonStandUiMode) {
@@ -1881,9 +1874,9 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
 
-    private static final IntBinaryOperator INC = (i, n) -> (i + 2) % (n + 1) - 1;
-    private static final IntBinaryOperator DEC = (i, n) -> (i + n + 1) % (n + 1) - 1;
-    private <P extends IPower<P, ?>> void scrollAction(ActionsModeConfig<P> mode, ControlScheme.Hotbar hotbar, boolean backwards) {
+    protected static final IntBinaryOperator INC = (i, n) -> (i + 2) % (n + 1) - 1;
+    protected static final IntBinaryOperator DEC = (i, n) -> (i + n + 1) % (n + 1) - 1;
+    protected <P extends IPower<P, ?>> void scrollAction(ActionsModeConfig<P> mode, ControlScheme.Hotbar hotbar, boolean backwards) {
         P power = mode.getPower();
         ControlScheme controlScheme = HudControlSettings.getInstance().getControlScheme(power);
         List<Action<?>> actions = controlScheme.getActionsHotbar(hotbar).getEnabledActions();
@@ -1944,7 +1937,7 @@ public class ActionsOverlayGui extends AbstractGui {
         return baseAction;
     }
 
-    private final PacketBuffer extraInputBuf = new PacketBuffer(Unpooled.buffer());
+    protected final PacketBuffer extraInputBuf = new PacketBuffer(Unpooled.buffer());
     // sends the packet which fires the action to the server
     @Nullable
     public <P extends IPower<P, ?>> Pair<Action<P>, Boolean> onActionClick(P power, Action<P> action, boolean sneak) {
@@ -2027,7 +2020,7 @@ public class ActionsOverlayGui extends AbstractGui {
         nonStandUiMode.autoOpened = false;
     }
     
-    private void blitFloat(MatrixStack pMatrixStack, float pX, float pY, 
+    protected void blitFloat(MatrixStack pMatrixStack, float pX, float pY, 
             float pUOffset, float pVOffset, float pUWidth, float pVHeight) {
         BlitFloat.blitFloat(pMatrixStack, 
                 pX, pY, this.getBlitOffset(), 
@@ -2036,11 +2029,11 @@ public class ActionsOverlayGui extends AbstractGui {
     
     
     
-    private boolean outOfBreath = false;
-    private boolean outOfBreathMaskSprite = false;
-    private int outOfBreathSpriteTicks = 0;
-    private float prevAir;
-    private float vignetteBeforeFadeAway = -1;
+    protected boolean outOfBreath = false;
+    protected boolean outOfBreathMaskSprite = false;
+    protected int outOfBreathSpriteTicks = 0;
+    protected float prevAir;
+    protected float vignetteBeforeFadeAway = -1;
     public void setOutOfBreath(boolean mask) {
         outOfBreath = true;
         outOfBreathMaskSprite = mask;
@@ -2053,7 +2046,7 @@ public class ActionsOverlayGui extends AbstractGui {
         return outOfBreath;
     }
     
-    private void tickOutOfBreathEffect() {
+    protected void tickOutOfBreathEffect() {
         if (outOfBreath) {
             prevAir = mc.player.getAirSupply();
             if (prevAir >= mc.player.getMaxAirSupply()) {
@@ -2063,7 +2056,7 @@ public class ActionsOverlayGui extends AbstractGui {
         if (outOfBreathSpriteTicks > 0) outOfBreathSpriteTicks--;
     }
     
-    private void renderOutOfBreathSprite(MatrixStack matrixStack, float partialTick, int windowWidth, int windowHeight) {
+    protected void renderOutOfBreathSprite(MatrixStack matrixStack, float partialTick, int windowWidth, int windowHeight) {
         if (outOfBreathSpriteTicks > 0) {
             boolean bubblePopped = outOfBreathSpriteTicks < 11;
             mc.getTextureManager().bind(ClientUtil.ADDITIONAL_UI);
@@ -2071,7 +2064,7 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
-    private void renderOutOfBreathVignette(MatrixStack matrixStack, float partialTick) {
+    protected void renderOutOfBreathVignette(MatrixStack matrixStack, float partialTick) {
         if (outOfBreath) {
             float air = MathHelper.lerp(partialTick, prevAir, (float) mc.player.getAirSupply()) / (float) mc.player.getMaxAirSupply();
             float vignette;
@@ -2088,8 +2081,8 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
 
-    private static final ResourceLocation VIGNETTE_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/vignette.png");
-    private void renderVignette(MatrixStack matrixStack, float r, float g, float b) {
+    protected static final ResourceLocation VIGNETTE_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/vignette.png");
+    protected void renderVignette(MatrixStack matrixStack, float r, float g, float b) {
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
@@ -2114,13 +2107,13 @@ public class ActionsOverlayGui extends AbstractGui {
     
     
     
-    private class ElementPosition {
-        private int x;
-        private int y;
-        private Alignment alignment;
+    protected class ElementPosition {
+        protected int x;
+        protected int y;
+        protected Alignment alignment;
     }
 
-    private static final int INDENT = 4;
+    protected static final int INDENT = 4;
     public enum PositionConfig {
         TOP_LEFT(Alignment.LEFT, BarsOrientation.HORIZONTAL, 
                 screenWidth -> INDENT, (screenHeight, elementHeight) -> INDENT),
@@ -2133,8 +2126,8 @@ public class ActionsOverlayGui extends AbstractGui {
         
         final Alignment alignment;
         final BarsOrientation barsOrientation;
-        private final IntUnaryOperator xPos;
-        private final IntBinaryOperator yPos;
+        protected final IntUnaryOperator xPos;
+        protected final IntBinaryOperator yPos;
         
         private PositionConfig(Alignment alignment, BarsOrientation barsOrientation, 
                 IntUnaryOperator xPos, IntBinaryOperator yPos) {

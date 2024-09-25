@@ -516,6 +516,14 @@ public class ClientEventHandler {
             });
         }
     }
+
+    @SubscribeEvent(priority = EventPriority.NORMAL)
+    public void renderModOverlay(RenderGameOverlayEvent.Pre event) {
+        ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
+        if (hud != null) {
+            hud.render(event);
+        }
+    }
     
     @SubscribeEvent(priority = EventPriority.LOW)
     public void renderHpWithBleeding(RenderGameOverlayEvent.Pre event) {
