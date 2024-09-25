@@ -280,7 +280,7 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
             });
             
             if (canBreakBlocks) {
-                MCUtil.destroyBlocksInBulk(blocksToDestroy, serverWorld, entity, dropBlockItems);
+                MCUtil.destroyBlocksInBulk(blocksToDestroy, serverWorld, entity instanceof LivingEntity ? (LivingEntity) entity : null, dropBlockItems);
             }
             
             if (wallDamage.floatValue() > 0) {

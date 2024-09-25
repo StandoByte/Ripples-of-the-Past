@@ -8,6 +8,7 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.capability.entity.living.LivingWallClimbing;
+import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
 import com.github.standobyte.jojo.client.playeranim.anim.interfaces.BasicToggleAnim;
 import com.github.standobyte.jojo.modcompat.OptionalDependencyHelper;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -48,6 +49,11 @@ public class PlayerAnimationHandler {
         <T extends LivingEntity, M extends BipedModel<T>> void heldItemLayerChangeItemLocation(LivingEntity livingEntity, MatrixStack matrices, HandSide arm);
         
         void setupLayerFirstPersonRender(PlayerModel<?> layerModel);
+        
+        @Deprecated
+        default void setBarrageAnim(PlayerEntity player, boolean val) {
+            ModPlayerAnimations.playerBarrageAnim.setAnimEnabled(player, val);
+        }
     }
     
     

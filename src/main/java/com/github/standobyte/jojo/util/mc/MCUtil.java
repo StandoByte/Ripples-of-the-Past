@@ -606,7 +606,7 @@ public class MCUtil {
     /**
      *  Limits the amount of particles and break sounds that the blocks produce, sending it all in one packet
      */
-    public static int destroyBlocksInBulk(Collection<BlockPos> blocks, ServerWorld world, @Nullable Entity entity, boolean dropItems) {
+    public static int destroyBlocksInBulk(Collection<BlockPos> blocks, ServerWorld world, @Nullable LivingEntity entity, boolean dropItems) {
         if (!world.isClientSide() && world.isDebug()) {
             return -1;
         }
