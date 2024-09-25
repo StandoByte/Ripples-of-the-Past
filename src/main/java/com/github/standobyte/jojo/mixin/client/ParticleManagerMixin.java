@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.mixin.client;
 import java.util.Map;
 import java.util.Queue;
 
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -19,8 +20,8 @@ import net.minecraft.client.particle.ParticleManager;
 // TODO tick instances of ItemPickupParticle
 @Mixin(ParticleManager.class)
 public class ParticleManagerMixin {
-    @Shadow private Map<IParticleRenderType, Queue<Particle>> particles;
-    @Shadow private Queue<Particle> particlesToAdd;
+    @Shadow @Final private Map<IParticleRenderType, Queue<Particle>> particles;
+    @Shadow @Final private Queue<Particle> particlesToAdd;
 
     @Inject(method = "tick", at = @At("HEAD"), cancellable = true)
     public void jojoTsParticleCancelTick(CallbackInfo ci) {

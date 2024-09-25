@@ -339,11 +339,11 @@ public class ClientSetup {
         renderer.addLayer(new DivineSandstormEffectLayer<>(renderer));
         renderer.addLayer(new BarrageFistAfterimagesLayer(renderer));
         renderer.addLayer(new EnergyRippleLayer<>(renderer));
-        renderer.addLayer(new GlovesLayer<>(renderer, new GlovesModel<>(0.3F, slim), slim));
         renderer.addLayer(new LadybugBroochLayer<>(renderer));
         renderer.addLayer(new InkLipsLayer<>(renderer));
         addLivingLayers(renderer);
         addBipedLayers(renderer);
+        renderer.addLayer(new GlovesLayer<>(renderer, new GlovesModel<>(0.3F, slim), slim));
     }
     
     private static <T extends LivingEntity, M extends BipedModel<T>> void addLayersToEntities(EntityRenderer<?> renderer) {

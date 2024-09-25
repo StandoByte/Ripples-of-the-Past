@@ -23,6 +23,8 @@
     "client.WorldRendererMixin",
     "client.EntityClMixin",
     "client.LivingEntityClMixin",
+	"client.LivingRendererMixin",
+	"client.PlayerRendererMixin",
     "client.BipedModelMixin",
     "client.PlayerModelAnimationMixin",
     "client.ItemRendererMixin",

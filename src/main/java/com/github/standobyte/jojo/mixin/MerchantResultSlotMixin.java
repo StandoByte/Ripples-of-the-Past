@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.mixin;
 
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -15,9 +16,7 @@ import net.minecraft.item.ItemStack;
 
 @Mixin(MerchantResultSlot.class)
 public abstract class MerchantResultSlotMixin {
-    
-    @Shadow
-    public MerchantInventory slots;
+    @Shadow @Final public MerchantInventory slots;
     
     @Inject(method = "onTake", at = @At(
             value = "INVOKE", 

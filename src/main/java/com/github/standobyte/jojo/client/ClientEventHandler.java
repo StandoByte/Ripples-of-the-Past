@@ -30,9 +30,7 @@ import com.github.standobyte.jojo.client.particle.custom.FirstPersonHamonAura;
 import com.github.standobyte.jojo.client.polaroid.PhotosCache;
 import com.github.standobyte.jojo.client.polaroid.PolaroidHelper;
 import com.github.standobyte.jojo.client.render.block.overlay.TranslucentBlockRenderHelper;
-import com.github.standobyte.jojo.client.render.entity.layerrenderer.FrozenLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.GlovesLayer;
-import com.github.standobyte.jojo.client.render.entity.layerrenderer.HamonBurnLayer;
 import com.github.standobyte.jojo.client.render.item.InventoryItemHighlight;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
 import com.github.standobyte.jojo.client.resources.CustomResources;
@@ -807,29 +805,24 @@ public class ClientEventHandler {
         Hand hand = event.getHand();
         ItemStack item = player.getItemInHand(hand);
         if (!event.isCanceled() && !modPostedEvent) {
-            if (hand == Hand.MAIN_HAND) {
-                if (!player.isInvisible()) {
-                    INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
-                        ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
-                        if ((hud.isActionSelectedAndEnabled(
-                                ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get(), 
-                                ModHamonActions.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE_BARRAGE.get(),
-                                ModHamonActions.HAMON_WALL_CLIMBING.get())
-                                || LivingWallClimbing.getHandler(player).map(cap -> cap.isWallClimbing()).orElse(false))
-                                && MCUtil.isHandFree(player, Hand.MAIN_HAND) && MCUtil.isHandFree(player, Hand.OFF_HAND)) {
-                            renderHand(Hand.OFF_HAND, event.getMatrixStack(), event.getBuffers(), event.getLight(), 
-                                    event.getPartialTicks(), event.getInterpolatedPitch(), player);
-                        }
-                    });
-
-                    boolean hasGloves = GlovesLayer.areGloves(player.getItemInHand(Hand.MAIN_HAND)) || GlovesLayer.areGloves(player.getItemInHand(Hand.OFF_HAND));
-                    boolean hasEffect = player.hasEffect(ModStatusEffects.HAMON_SPREAD.get()) || player.hasEffect(ModStatusEffects.FREEZE.get());
-                    if (hasGloves && (GlovesLayer.areGloves(item) || item.isEmpty()) || 
-                            hasEffect && item.isEmpty()) {
-                        event.setCanceled(true);
-                        renderHand(Hand.MAIN_HAND, event.getMatrixStack(), event.getBuffers(), event.getLight(), 
+            if (hand == Hand.MAIN_HAND && !player.isInvisible() && MCUtil.isHandFree(player, Hand.MAIN_HAND) && MCUtil.isHandFree(player, Hand.OFF_HAND)) {
+                INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
+                    ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
+                    if (hud.isActionSelectedAndEnabled(
+                            ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get(), 
+                            ModHamonActions.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE_BARRAGE.get(),
+                            ModHamonActions.HAMON_WALL_CLIMBING.get())
+                            || LivingWallClimbing.getHandler(player).map(cap -> cap.isWallClimbing()).orElse(false)) {
+                        renderHand(Hand.OFF_HAND, event.getMatrixStack(), event.getBuffers(), event.getLight(), 
                                 event.getPartialTicks(), event.getInterpolatedPitch(), player);
                     }
+                });
+                
+                boolean hasGloves = GlovesLayer.areGloves(player.getItemInHand(Hand.MAIN_HAND)) || GlovesLayer.areGloves(player.getItemInHand(Hand.OFF_HAND));
+                if (hasGloves && (GlovesLayer.areGloves(item) || item.isEmpty())) {
+                    event.setCanceled(true);
+                    renderHand(Hand.MAIN_HAND, event.getMatrixStack(), event.getBuffers(), event.getLight(), 
+                            event.getPartialTicks(), event.getInterpolatedPitch(), player);
                 }
             }
             
@@ -861,9 +854,9 @@ public class ClientEventHandler {
             matrixStack.pushPose();
             ClientReflection.renderPlayerArm(matrixStack, buffer, light, equipProgress, 
                     swingProgress, handSide, renderer);
-            HamonBurnLayer.renderFirstPerson(handSide, matrixStack, buffer, light, player);
-            FrozenLayer.renderFirstPerson(handSide, matrixStack, buffer, light, player);
-            GlovesLayer.renderFirstPerson(handSide, matrixStack, buffer, light, player);
+//            HamonBurnLayer.renderFirstPerson(handSide, matrixStack, buffer, light, player);
+//            FrozenLayer.renderFirstPerson(handSide, matrixStack, buffer, light, player);
+//            GlovesLayer.renderFirstPerson(handSide, matrixStack, buffer, light, player);
             matrixStack.popPose();
             // i've won... but at what cost?
         }
