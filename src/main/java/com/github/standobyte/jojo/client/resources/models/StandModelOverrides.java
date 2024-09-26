@@ -35,7 +35,7 @@ import net.minecraft.resources.IResourceManager;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 
-public class StandModelOverrides extends ReloadListener<Map<ResourceLocation, StandModelOverrides.CustomModelPrepared>> {
+public class StandModelOverrides extends ReloadListener<Map<StandModelOverrides.ModelType, Map<ResourceLocation, StandModelOverrides.CustomModelPrepared>>> {
     private static final Logger LOGGER = LogManager.getLogger();
     private final Gson gson;
     private final Map<ResourceLocation, StandEntityModel<?>> standModelOverrides = new HashMap<>();
@@ -45,26 +45,29 @@ public class StandModelOverrides extends ReloadListener<Map<ResourceLocation, St
     }
     
     public static ModelPathInfo[] FILE_PATHS = new ModelPathInfo[] {
-            new ModelPathInfo("geo", ".json", Format.GECKO),
             new ModelPathInfo("geo", ".geo.json", Format.GECKO),
             new ModelPathInfo("bb", ".bb.json", Format.BB_GENERIC),
             new ModelPathInfo("bb", ".bbmodel", Format.BB_GENERIC)
     };
     
     @Override
-    protected Map<ResourceLocation, CustomModelPrepared> prepare(IResourceManager pResourceManager, IProfiler pProfiler) {
-        Map<ResourceLocation, CustomModelPrepared> map = Maps.newHashMap();
-        for (ModelPathInfo path : FILE_PATHS) {
-            addEntries(path.directory, path.filePostfix, pResourceManager, path.format, map);
+    protected Map<ModelType, Map<ResourceLocation, CustomModelPrepared>> prepare(IResourceManager pResourceManager, IProfiler pProfiler) {
+        Map<ModelType, Map<ResourceLocation, CustomModelPrepared>> map = Maps.newHashMap();
+        for (ModelType modelType : ModelType.values()) {
+            Map<ResourceLocation, CustomModelPrepared> entriesMap = map.compute(modelType, (__, ___) -> new HashMap<>());
+            for (ModelPathInfo path : FILE_PATHS) {
+                addEntries(path.directory + modelType.subDir, path.filePostfix, pResourceManager, 
+                        path.format, modelType, entriesMap);
+            }
         }
         return map;
     }
     
-    protected void addEntries(String directory, String pathSuffix, IResourceManager pResourceManager, Format format, 
-            Map<ResourceLocation, CustomModelPrepared> entriesMap) {
-        for (ResourceLocation path : pResourceManager.listResources(directory, p -> p.endsWith(pathSuffix))) {
+    protected void addEntries(String directory, String pathPostfix, IResourceManager pResourceManager, 
+            Format format, ModelType modelType, Map<ResourceLocation, CustomModelPrepared> entriesMap) {
+        for (ResourceLocation path : pResourceManager.listResources(directory, p -> p.endsWith(pathPostfix))) {
             String fileName = path.getPath();
-            fileName = fileName.substring(directory.length() + 1, fileName.length() - pathSuffix.length());
+            fileName = fileName.substring(directory.length() + 1, fileName.length() - pathPostfix.length());
             ResourceLocation preparedPath = new ResourceLocation(path.getNamespace(), fileName);
             
             try (
@@ -74,7 +77,7 @@ public class StandModelOverrides extends ReloadListener<Map<ResourceLocation, St
                     ) {
                 JsonElement json = JSONUtils.fromJson(this.gson, reader, JsonElement.class);
                 if (json != null) {
-                    CustomModelPrepared preparedData = new CustomModelPrepared(json, format);
+                    CustomModelPrepared preparedData = new CustomModelPrepared(json, format, modelType);
                     CustomModelPrepared alreadyPresent = entriesMap.get(preparedPath);
                     if (alreadyPresent != null) {
                         LOGGER.warn("Duplicate model {} found", preparedPath);
@@ -92,16 +95,27 @@ public class StandModelOverrides extends ReloadListener<Map<ResourceLocation, St
     
     
     @Override
-    protected void apply(Map<ResourceLocation, CustomModelPrepared> pObject, 
+    protected void apply(Map<ModelType, Map<ResourceLocation, CustomModelPrepared>> pObject, 
             IResourceManager pResourceManager, IProfiler pProfiler) {
         standModelOverrides.clear();
-        for (Map.Entry<ResourceLocation, CustomModelPrepared> entry : pObject.entrySet()) {
-            ResourceLocation modelId = clearFormatExtension(entry.getKey());
-            Optional<Pair<ResourceLocation, StandEntityModel<?>>> standModel = 
-                    createStandModelFromJson(modelId, entry.getValue());
-            standModel.ifPresent(model -> standModelOverrides.put(model.getKey(), model.getValue()));
-            if (!standModel.isPresent()) {
-                ResourceEntityModels.loadEntityModel(modelId, entry.getValue());
+        for (ModelType modelType : ModelType.values()) {
+            for (Map.Entry<ResourceLocation, CustomModelPrepared> entry : pObject.get(modelType).entrySet()) {
+                CustomModelPrepared modelRead = entry.getValue();
+                ResourceLocation modelId = modelRead.clearFormatExtension(entry.getKey());
+                switch (modelType) {
+                case STAND:
+                    Optional<Pair<ResourceLocation, StandEntityModel<?>>> standModel = createStandModelFromJson(modelId, modelRead);
+                    standModel.ifPresent(model -> standModelOverrides.put(model.getKey(), model.getValue()));
+                    break;
+                case CLOTHES:
+                    // TODO
+                    break;
+                case MISC:
+                    ResourceEntityModels.loadEntityModel(modelId, modelRead);
+                    break;
+                default:
+                    throw new AssertionError();
+                }
             }
         }
     }
@@ -126,11 +140,6 @@ public class StandModelOverrides extends ReloadListener<Map<ResourceLocation, St
         return Optional.empty();
     }
     
-    public static ResourceLocation clearFormatExtension(ResourceLocation modelResLoc) {
-        return new ResourceLocation(
-                modelResLoc.getNamespace(), 
-                modelResLoc.getPath().replace(".geo", "").replace(".bb", ""));
-    }
     
     
     public static enum Format {
@@ -150,6 +159,17 @@ public class StandModelOverrides extends ReloadListener<Map<ResourceLocation, St
         public abstract EntityModelUnbaked parse(JsonElement json, ResourceLocation modelId);
     }
     
+    public static enum ModelType {
+        STAND(""),
+        CLOTHES("/clothes"),
+        MISC("/misc");
+        
+        public final String subDir;
+        private ModelType(String subDir) {
+            this.subDir = subDir;
+        }
+    }
+    
     public static class ModelPathInfo {
         public final String directory;
         public final String filePostfix;
@@ -165,15 +185,23 @@ public class StandModelOverrides extends ReloadListener<Map<ResourceLocation, St
     public static class CustomModelPrepared {
         public final JsonElement modelJson;
         public final Format format;
+        public final ModelType modelType;
         
-        public CustomModelPrepared(JsonElement modelJson, Format format) {
+        public CustomModelPrepared(JsonElement modelJson, Format format, ModelType modelType) {
             this.modelJson = modelJson;
             this.format = format;
+            this.modelType = modelType;
         }
         
         public EntityModelUnbaked createModel(ResourceLocation modelId) {
             EntityModelUnbaked model = format.parse(modelJson, modelId);
             return model;
+        }
+        
+        public ResourceLocation clearFormatExtension(ResourceLocation modelId) {
+            String path = modelId.getPath();
+            path = path.replace(".geo", "").replace(".bb", "");
+            return new ResourceLocation(modelId.getNamespace(), path);
         }
     }
     

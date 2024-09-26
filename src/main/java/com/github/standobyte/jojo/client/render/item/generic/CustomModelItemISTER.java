@@ -66,11 +66,21 @@ public class CustomModelItemISTER<M extends Model> extends ItemStackTileEntityRe
             IRenderTypeBuffer renderTypeBuffer, int light, int overlay) {
         Item item = itemStack.getItem();
         if (item == this.item.get()) {
-            matrixStack.pushPose();
-            matrixStack.scale(-1.0F, -1.0F, 1.0F);
-            matrixStack.translate(-0.5, -1.5, 0.5);
-            doRender(itemStack, transformType, matrixStack, renderTypeBuffer, light, overlay);
-            matrixStack.popPose();
+            if (model != null) {
+                matrixStack.pushPose();
+                matrixStack.scale(-1.0F, -1.0F, 1.0F);
+                matrixStack.translate(-0.5, -1.5, 0.5);
+                doRender(itemStack, transformType, matrixStack, renderTypeBuffer, light, overlay);
+                matrixStack.popPose();
+            }
+            else {
+                ItemRenderer itemRenderer = Minecraft.getInstance().getItemRenderer();
+                IBakedModel missingModel = itemRenderer.getItemModelShaper().getModelManager().getMissingModel();
+                IVertexBuilder vertexBuilder = ItemRenderer.getFoilBufferDirect(
+                        renderTypeBuffer, RenderTypeLookup.getRenderType(itemStack, true), 
+                        false, itemStack.hasFoil());
+                itemRenderer.renderModelLists(missingModel, itemStack, light, overlay, matrixStack, vertexBuilder);
+            }
         }
     }
     
