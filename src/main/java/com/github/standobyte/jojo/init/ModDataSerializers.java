@@ -51,12 +51,12 @@ public class ModDataSerializers {
 
         @Override
         public void write(PacketBuffer buf, Optional<ResourceLocation> value) {
-            NetworkUtil.writeOptional(buf, value, resLoc -> buf.writeResourceLocation(resLoc));
+            NetworkUtil.writeOptional(buf, value, buf::writeResourceLocation);
         }
 
         @Override
         public Optional<ResourceLocation> read(PacketBuffer buf) {
-            return NetworkUtil.readOptional(buf, () -> buf.readResourceLocation());
+            return NetworkUtil.readOptional(buf, PacketBuffer::readResourceLocation);
         }
 
         @Override

@@ -471,7 +471,6 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     public void onStandSkinSet(IStandPower power, Optional<ResourceLocation> skin) {}
     
     
-    @Deprecated
     public static class StandTypeOptionals {
         private IStandPool survivalGameplayPool = StandSurvivalGameplayPool.PLAYER_ARROW; 
         private Supplier<SoundEvent> summonShoutSupplier = () -> null;

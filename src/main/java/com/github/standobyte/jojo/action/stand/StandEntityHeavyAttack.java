@@ -420,8 +420,8 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
             private double strength;
             private double precision;
 
-            // FIXME limit the radius
-            // FIXME wth is explosion context
+            // FIXME (!) limit the radius
+            // FIXME (!) wth is explosion context
             public HeavyPunchExplosion(World pLevel, LivingEntity pSource, ActionTarget hitBlock, 
                     @Nullable DamageSource pDamageSource, @Nullable ExplosionContext pDamageCalculator, 
                     double pToBlowX, double pToBlowY, double pToBlowZ, 
@@ -438,7 +438,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
                 this.precision = precision;
             }
             
-            // FIXME reduce the amount of blocks destroyed on y axis
+            // FIXME (!) reduce the amount of blocks destroyed on y axis
             @Override
             protected void explodeBlocks() {
                 if (JojoModUtil.breakingBlocksEnabled(level) && level instanceof ServerWorld) {
@@ -525,7 +525,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
 //                return (float) ((impact * impact + impact) / 2.0D * 7.0D * diameter + 1.0D); // fuck this
             }
             
-            // FIXME explosion is barely exploding if punching smth like a stone
+            // FIXME (!) explosion is barely exploding if punching smth like a stone
             @Override
             protected Set<BlockPos> calculateBlocksToBlow() {
                 return super.calculateBlocksToBlow();

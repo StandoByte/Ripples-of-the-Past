@@ -105,6 +105,7 @@ public class GeneralUtil {
             enumClass = superClass;
         }
         
+        @SuppressWarnings("unchecked")
         T[] values = ((Class<T>) enumClass).getEnumConstants();
         int ordinal = enumVal.ordinal();
         return values[(ordinal + 1) % values.length];

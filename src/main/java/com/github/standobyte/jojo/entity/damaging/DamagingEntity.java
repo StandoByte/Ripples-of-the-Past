@@ -422,14 +422,14 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     public void writeSpawnData(PacketBuffer buffer) {
         buffer.writeInt(tickCount);
         buffer.writeDouble(speedFactor);
-        NetworkUtil.writeOptional(buffer, standSkin, path -> buffer.writeResourceLocation(path));
+        NetworkUtil.writeOptional(buffer, standSkin, buffer::writeResourceLocation);
     }
 
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
         tickCount = additionalData.readInt();
         speedFactor = additionalData.readDouble();
-        standSkin = NetworkUtil.readOptional(additionalData, () -> additionalData.readResourceLocation());
+        standSkin = NetworkUtil.readOptional(additionalData, PacketBuffer::readResourceLocation);
     }
 
     @Override

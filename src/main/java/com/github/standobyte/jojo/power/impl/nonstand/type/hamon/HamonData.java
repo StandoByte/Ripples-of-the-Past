@@ -930,7 +930,6 @@ public class HamonData extends TypeSpecificData {
     }
     
     private static final int MEDITATION_INC_START = 40;
-    // FIXME !!! do not update if playerAnimator isn't installed
     private float bbHeightMult = 1;
     private boolean updateHeight = false;
     private void updateBbHeight(LivingEntity user) {

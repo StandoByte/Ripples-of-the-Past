@@ -81,7 +81,7 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser,
             if (!fluidHeight.isEmpty()) {
                 for (Map.Entry<ITag<Fluid>, Double> entry : fluidHeight.object2DoubleEntrySet()) {
                     if (entry.getValue() > 0 && entry.getValue() < 0.4) {
-                        // FIXME !!!!!!!!!!!!!!!!!! sfx
+                        // FIXME !!!!!! (hamon) npc liquid walking sfx
                         HamonUtil.emitHamonSparkParticles(level, ClientUtil.getClientPlayer(), position(), 0.1F);
                         break;
                     }

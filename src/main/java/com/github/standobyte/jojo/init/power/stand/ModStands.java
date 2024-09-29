@@ -10,7 +10,6 @@ import com.github.standobyte.jojo.entity.stand.stands.TheWorldEntity;
 import com.github.standobyte.jojo.init.power.stand.EntityStandRegistryObject.EntityStandSupplier;
 import com.github.standobyte.jojo.power.impl.stand.stats.ArmoredStandStats;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
-import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.power.impl.stand.type.EntityStandType;
 
 /* 
@@ -22,10 +21,10 @@ import com.github.standobyte.jojo.power.impl.stand.type.EntityStandType;
  */
 public class ModStands {
 
-    public static final EntityStandSupplier<EntityStandType<TimeStopperStandStats>, StandEntityType<StarPlatinumEntity>> 
+    public static final EntityStandSupplier<EntityStandType<StandStats>, StandEntityType<StarPlatinumEntity>> 
     STAR_PLATINUM = new EntityStandSupplier<>(ModStandsInit.STAND_STAR_PLATINUM);
 
-    public static final EntityStandSupplier<EntityStandType<TimeStopperStandStats>, StandEntityType<TheWorldEntity>> 
+    public static final EntityStandSupplier<EntityStandType<StandStats>, StandEntityType<TheWorldEntity>> 
     THE_WORLD = new EntityStandSupplier<>(ModStandsInit.STAND_THE_WORLD);
 
     public static final EntityStandSupplier<EntityStandType<StandStats>, StandEntityType<HierophantGreenEntity>> 

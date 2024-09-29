@@ -120,11 +120,6 @@ public class TheWorldModelOld extends HumanoidStandModel<TheWorldEntity> {
         slopeNew = new ModelRenderer(this);
         slopeNew.setPos(0.0F, -6.4F, 1.3F);
         headpiece.addChild(slopeNew);
-//        SlopeModelBox.addSlopeBox(slopeNew, 
-//                30, 14, 
-//                -4.0F, 0.2F, -2.8F, 0.2F, 
-//                8.0F, 6.0F, 7.0F, 8.0F, 
-//                0.2F, false, texWidth, texHeight);
         new CustomVerticesModelBox.Builder(true)
         .withVertex(true,  true,  false,  4.2F,     0,     0)
         .withVertex(false, true,  false, -4.2F,     0,     0)
@@ -146,7 +141,6 @@ public class TheWorldModelOld extends HumanoidStandModel<TheWorldEntity> {
         faceRight.setPos(-4.2F, -6.4F, 1.3F);
         headpiece.addChild(faceRight);
         setRotationAngle(faceRight, 0.0F, 0.3023F, 0.0F);
-//        faceRight.texOffs(69, 21).addBox(0.2F, 0.2F, 0.2F, 4.0F, 6.0F, 1.0F, 0.2F, false);
         new CustomVerticesModelBox.Builder(true)
         .withVertex(true,  true,  false,     0,      0,     0)
         .withVertex(false, true,  false, -4.4F,  -0.5F,     0)
@@ -168,7 +162,6 @@ public class TheWorldModelOld extends HumanoidStandModel<TheWorldEntity> {
         faceLeft.setPos(4.2F, -6.4F, 1.3F);
         headpiece.addChild(faceLeft);
         setRotationAngle(faceLeft, 0.0F, -0.3023F, 0.0F);
-//        faceLeft.texOffs(80, 21).addBox(-4.2F, 0.2F, 0.2F, 4.0F, 6.0F, 1.0F, 0.2F, true);
         new CustomVerticesModelBox.Builder(true)
         .withVertex(true,  true,  false,  4.4F,  -0.5F,     0)
         .withVertex(false, true,  false,     0,      0,     0)

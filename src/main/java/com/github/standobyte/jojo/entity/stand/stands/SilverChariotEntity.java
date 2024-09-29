@@ -90,7 +90,7 @@ public class SilverChariotEntity extends StandEntity {
         }
     }
 
-    // FIXME render rapier in left arm if the user is left-handed
+    // TODO render rapier in left arm if the user is left-handed
     @Override
     public HandSide getMainArm() {
         return HandSide.RIGHT;

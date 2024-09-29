@@ -71,7 +71,7 @@ public class TrHamonParticlesPacket {
             case EMITTER:
                 buf.writeFloat(msg.intensity);
                 buf.writeFloat(msg.soundVolume);
-                NetworkUtil.writeOptionally(buf, msg.particleType, particle -> writeParticle(particle, buf));
+                NetworkUtil.writeOptionally(buf, msg.particleType, this::writeParticle);
                 break;
             case SHORT_SPARK:
                 NetworkUtil.writeVecApproximate(buf, msg.pos);

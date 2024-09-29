@@ -26,12 +26,12 @@ public class MetEntityTypesPacket {
 
         @Override
         public void encode(MetEntityTypesPacket msg, PacketBuffer buf) {
-            NetworkUtil.writeCollection(buf, msg.metEntityTypeIds, id -> buf.writeResourceLocation(id), false);
+            NetworkUtil.writeCollection(buf, msg.metEntityTypeIds, buf::writeResourceLocation, false);
         }
 
         @Override
         public MetEntityTypesPacket decode(PacketBuffer buf) {
-            return new MetEntityTypesPacket(NetworkUtil.readCollection(buf, () -> buf.readResourceLocation()));
+            return new MetEntityTypesPacket(NetworkUtil.readCollection(buf, PacketBuffer::readResourceLocation));
         }
 
         @Override

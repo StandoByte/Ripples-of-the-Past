@@ -24,7 +24,7 @@ public class PreviousPowerTypesPacket {
 
         @Override
         public void encode(PreviousPowerTypesPacket msg, PacketBuffer buf) {
-            NetworkUtil.writeCollection(buf, msg.types, type -> buf.writeRegistryId(type), false);
+            NetworkUtil.writeCollection(buf, msg.types, buf::writeRegistryId, false);
         }
 
         @Override

@@ -34,7 +34,7 @@ public class StandAssignmentDataPacket {
         @Override
         public void encode(StandAssignmentDataPacket msg, PacketBuffer buf) {
             NetworkUtil.writeOptional(buf, msg.stands, 
-                    list -> NetworkUtil.writeCollection(buf, list, stand -> buf.writeRegistryId(stand), false));
+                    list -> NetworkUtil.writeCollection(buf, list, buf::writeRegistryId, false));
         }
 
         @Override

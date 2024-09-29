@@ -289,7 +289,7 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
         if (item.isEmpty()) return Optional.empty();
         
         if (item.getItem() == Items.ENCHANTED_BOOK)     return createItems ? Optional.of(Pair.of(new ItemStack[]{new ItemStack(Items.BOOK)}, 1)) : EXISTS;
-        // FIXME free up the map id
+        // TODO free up the map id
 //        if (item.getItem() == Items.FILLED_MAP)         return createItems ? Optional.of(Pair.of(new ItemStack[]{new ItemStack(Items.MAP)}, 1))  : EXISTS;
         
         if (item.getItem() == Items.WRITTEN_BOOK) {
@@ -302,10 +302,10 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
             }
         }
 
-        // FIXME revert brewing recipes
+        // TODO revert brewing recipes
         return GeneralUtil.groupByPredicatesOrdered(
                 world.getRecipeManager().getRecipes().stream(), Util.make(new ArrayList<>(), list -> {
-                    // FIXME revert nbt recipes (including netherite armor)
+                    // TODO revert nbt recipes (including netherite armor)
                     list.add(recipe -> recipe instanceof SmithingRecipe);
                     list.add(recipe -> recipe instanceof AbstractCookingRecipe);
                     list.add(recipe -> recipe instanceof StonecuttingRecipe);

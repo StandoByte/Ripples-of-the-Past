@@ -209,7 +209,6 @@ public class NetworkUtil {
     }
     
     
-    @Deprecated
     public static <T> void writeOptionally(PacketBuffer buf, @Nullable T obj, Consumer<T> write) {
         buf.writeBoolean(obj != null);
         if (obj != null) {
@@ -224,7 +223,6 @@ public class NetworkUtil {
         }
     }
 
-    @Deprecated
     public static <T> void writeOptional(PacketBuffer buf, @Nonnull Optional<T> objOptional, Consumer<T> write) {
         buf.writeBoolean(objOptional.isPresent());
         objOptional.ifPresent(obj -> write.accept(obj));
@@ -235,7 +233,6 @@ public class NetworkUtil {
         objOptional.ifPresent(obj -> write.accept(obj, buf));
     }
 
-    @Deprecated
     public static <T> Optional<T> readOptional(PacketBuffer buf, Supplier<T> read) {
         return buf.readBoolean() ? Optional.ofNullable(read.get()) : Optional.empty();
     }
@@ -245,7 +242,6 @@ public class NetworkUtil {
     }
     
     
-    @Deprecated
     public static <T> int writeCollection(PacketBuffer buf, Collection<T> collection, Consumer<T> writeElement, 
             boolean removeWrittenFromCollection) {
         int i = 0;
@@ -272,7 +268,6 @@ public class NetworkUtil {
         return i;
     }
     
-    @Deprecated
     public static <T, C extends Collection<T>> C readCollection(Supplier<C> createCollection, PacketBuffer buf, Supplier<T> readElement) {
         C collection = createCollection.get();
         int size = buf.readInt();
@@ -284,7 +279,6 @@ public class NetworkUtil {
         return collection;
     }
     
-    @Deprecated
     public static <T> List<T> readCollection(PacketBuffer buf, Supplier<T> readElement) {
         return readCollection(ArrayList::new, buf, readElement);
     }

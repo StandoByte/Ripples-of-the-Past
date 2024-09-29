@@ -226,6 +226,7 @@ public class NonStandPower extends PowerBaseImpl<INonStandPower, NonStandPowerTy
         return type.getLeapCooldownPeriod();
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     public <T extends NonStandPowerType<D>, D extends TypeSpecificData> Optional<D> getTypeSpecificData(@Nullable T requiredType) {
         if (typeSpecificData != null && (requiredType == null || requiredType == type)) {

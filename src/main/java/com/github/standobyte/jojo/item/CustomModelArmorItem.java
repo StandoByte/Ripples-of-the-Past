@@ -18,6 +18,7 @@ public class CustomModelArmorItem extends ArmorItem {
         super(material, slot, builder);
     }
     
+    @SuppressWarnings("unchecked")
     @Override
     public <A extends BipedModel<?>> A getArmorModel(LivingEntity livingEntity, ItemStack itemStack, EquipmentSlotType armorSlot, A _default) {
         A model = (A) ArmorModelRegistry.getModel(this);

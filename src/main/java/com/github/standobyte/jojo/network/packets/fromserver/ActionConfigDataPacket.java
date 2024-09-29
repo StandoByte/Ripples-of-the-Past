@@ -36,7 +36,7 @@ public class ActionConfigDataPacket {
 
         @Override
         public ActionConfigDataPacket decode(PacketBuffer buf) {
-            List<ResourceLocation> actionIds = NetworkUtil.readCollection(buf, () -> buf.readResourceLocation());
+            List<ResourceLocation> actionIds = NetworkUtil.readCollection(buf, PacketBuffer::readResourceLocation);
 
             List<Action<?>> actions = new ArrayList<>();
             if (!actionIds.isEmpty()) {

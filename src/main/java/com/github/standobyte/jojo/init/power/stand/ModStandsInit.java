@@ -72,7 +72,6 @@ import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.power.impl.stand.stats.ArmoredStandStats;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
-import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.power.impl.stand.type.EntityStandType;
 import com.github.standobyte.jojo.power.impl.stand.type.NoManifestationStandType;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
@@ -196,10 +195,10 @@ public class ModStandsInit {
             () -> new TimeResume(new StandAction.Builder().shiftVariationOf(STAR_PLATINUM_TIME_STOP)));
     
     
-    public static final EntityStandRegistryObject<EntityStandType<TimeStopperStandStats>, StandEntityType<StarPlatinumEntity>> STAND_STAR_PLATINUM = 
+    public static final EntityStandRegistryObject<EntityStandType<StandStats>, StandEntityType<StarPlatinumEntity>> STAND_STAR_PLATINUM = 
             new EntityStandRegistryObject<>("star_platinum", 
                     STAND_TYPES, 
-                    () -> new EntityStandType.Builder<TimeStopperStandStats>()
+                    () -> new EntityStandType.Builder<StandStats>()
                     .color(0x8E45FF)
                     .storyPartName(StoryPart.STARDUST_CRUSADERS.getName())
                     .leftClickHotbar(
@@ -213,16 +212,12 @@ public class ModStandsInit {
                             STAR_PLATINUM_INHALE.get(), 
                             STAR_PLATINUM_TIME_STOP.get()
                             )
-                    .defaultStats(TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
+                    .defaultStats(StandStats.class, new StandStats.Builder()
                             .power(16.0, 18.5)
                             .speed(16.0, 19.0)
                             .range(2.0, 10.0)
                             .durability(16.0, 20.0)
                             .precision(20.0)
-                            .timeStopMaxTicks(100, 180)
-                            .timeStopLearningPerTick(0.25F)
-                            .timeStopDecayPerDay(0F)
-                            .timeStopCooldownPerTick(3F)
                             .randomWeight(1)
                             )
                     .addSummonShout(ModSounds.JOTARO_STAR_PLATINUM)
@@ -302,10 +297,10 @@ public class ModStandsInit {
                     .partsRequired(StandPart.MAIN_BODY, StandPart.ARMS), THE_WORLD_TIME_STOP_BLINK));
     
     
-    public static final EntityStandRegistryObject<EntityStandType<TimeStopperStandStats>, StandEntityType<TheWorldEntity>> STAND_THE_WORLD = 
+    public static final EntityStandRegistryObject<EntityStandType<StandStats>, StandEntityType<TheWorldEntity>> STAND_THE_WORLD = 
             new EntityStandRegistryObject<>("the_world", 
                     STAND_TYPES,
-                    () -> new EntityStandType.Builder<TimeStopperStandStats>()
+                    () -> new EntityStandType.Builder<StandStats>()
                     .color(0xFFD800)
                     .storyPartName(StoryPart.STARDUST_CRUSADERS.getName())
                     .leftClickHotbar(
@@ -317,16 +312,12 @@ public class ModStandsInit {
                             THE_WORLD_BLOCK.get(), 
                             THE_WORLD_TIME_STOP.get()
                             )
-                    .defaultStats(TimeStopperStandStats.class, new TimeStopperStandStats.Builder()
+                    .defaultStats(StandStats.class, new StandStats.Builder()
                             .power(16.0, 19.0)
                             .speed(16.0, 18.5)
                             .range(5.0, 10.0)
                             .durability(16.0, 20.0)
                             .precision(12.0)
-                            .timeStopMaxTicks(100, 180)
-                            .timeStopLearningPerTick(0.1F)
-                            .timeStopDecayPerDay(0F)
-                            .timeStopCooldownPerTick(3F)
                             .randomWeight(1)
                             )
                     .addSummonShout(ModSounds.DIO_THE_WORLD)

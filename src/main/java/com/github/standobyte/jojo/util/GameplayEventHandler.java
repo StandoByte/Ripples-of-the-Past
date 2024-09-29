@@ -198,7 +198,7 @@ import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.LogicalSide;
 import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
-//FIXME move all event handlers to their respective classes, leave the method links here
+//TODO move all event handlers to their respective classes, leave the method links here
 @EventBusSubscriber(modid = JojoMod.MOD_ID)
 public class GameplayEventHandler {
     public static final boolean DELETE_ME = true;

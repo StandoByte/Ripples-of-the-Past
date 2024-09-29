@@ -41,7 +41,7 @@ import net.minecraftforge.event.ForgeEventFactory;
 
 public class RockPaperScissorsKidEntity extends VillagerEntity implements IMobStandUser {
     private final IStandPower standPower = new StandPower(this);
-    // FIXME (BIIM) also keep pvp games (in the save file cap?)
+    // TODO (BIIM) also keep pvp games (in the save file cap?)
     private Map<UUID, RockPaperScissorsGame> games = new HashMap<>();
     private Set<UUID> lostTo = new HashSet<>();
     @Nullable
@@ -61,7 +61,7 @@ public class RockPaperScissorsKidEntity extends VillagerEntity implements IMobSt
         return this.currentGame != null;
     }
 
-    // FIXME (BIIM) make proper ai, remove this hack
+    // TODO (BIIM) make proper ai, remove this hack
     @Override
     public boolean isTrading() {
         return super.isTrading() || isPlaying();
@@ -92,7 +92,7 @@ public class RockPaperScissorsKidEntity extends VillagerEntity implements IMobSt
     @Override
     public void tick() {
         super.tick();
-        // FIXME (BIIM) random pick
+        // TODO (BIIM) random pick
         if (!level.isClientSide() && tickCount % 10 == 0) {
             makeRandomPick();
         }

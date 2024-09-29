@@ -21,8 +21,6 @@ import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.Model;
-import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.HandSide;
@@ -118,12 +116,12 @@ public class HamonBurnLayer<T extends LivingEntity, M extends EntityModel<T>> ex
         _256x128(8, 7),
         _256x256(8, 8);
         
-        private final int widthLog2;
-        private final int heightLog2;
+//        private final int widthLog2;
+//        private final int heightLog2;
         
         private TextureSize(int widthLog2, int heightLog2) {
-            this.widthLog2 = widthLog2;
-            this.heightLog2 = heightLog2;
+//            this.widthLog2 = widthLog2;
+//            this.heightLog2 = heightLog2;
         }
         
         public static TextureSize getClosestTexSize(Model model) {

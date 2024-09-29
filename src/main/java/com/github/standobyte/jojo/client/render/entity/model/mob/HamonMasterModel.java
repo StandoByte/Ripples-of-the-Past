@@ -158,8 +158,6 @@ public class HamonMasterModel extends BipedModel<HamonMasterEntity> {
         }
     }
     
-    // FIXME !!! (hamon master model) pose without bendy-lib
-    // FIXME !!! (hamon master model) pose without playerAnimator
     @Override
     public void setupAnim(HamonMasterEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
         setDefaultPivot();

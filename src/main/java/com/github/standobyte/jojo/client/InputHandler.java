@@ -1022,7 +1022,7 @@ public class InputHandler {
                         boolean atWall = false && mc.player.horizontalCollision;
                         
                         boolean groundLeap = onGround && (mc.player.isPassenger() || input.shiftKeyDown) && input.jumping;
-                        // FIXME wall leap without pressing shift
+                        // TODO wall leap without pressing shift
                         boolean wallLeap = false;
 //                                atWall && !groundLeap && input.jumping &&
 //                                (!leapNeedsShiift || input.shiftKeyDown || false);

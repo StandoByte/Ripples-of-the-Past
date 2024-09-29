@@ -14,6 +14,7 @@ public class StatusEffect extends Effect {
         super(type, liquidColor);
     }
     
+    @SuppressWarnings("unchecked")
     public <T extends StatusEffect> T setUncurable() {
         this.isUncurable = true;
         return (T) this;

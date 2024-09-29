@@ -402,6 +402,7 @@ public class StandStatsRenderer {
         });
     }
     
+    @SuppressWarnings("deprecation")
     private static void renderLetterFromTex(MatrixStack matrixStack, float letterAlpha, boolean invertBnW, 
             float statX, float statY, float letterWidth, int texX, int texY) {
         Minecraft.getInstance().textureManager.bind(STAND_STATS_UI);

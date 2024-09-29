@@ -12,7 +12,6 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TimeStopInstancePacket;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
-import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.impl.stand.stats.TimeStopperStandStats;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -65,11 +64,7 @@ public class TimeStopInstance {
         this.chunkRange = chunkRange;
         this.user = user;
         this.userPower = IStandPower.getStandPowerOptional(user);
-        this.statsOptional = Optional.ofNullable(userPower.map(power -> {
-            if (!power.hasPower()) return null;
-            StandStats stats = power.getType().getStats();
-            return stats instanceof TimeStopperStandStats ? (TimeStopperStandStats) stats : null;
-        }).orElse(null));
+        this.statsOptional = Optional.empty();
         this.action = action;
         this.id = id;
     }

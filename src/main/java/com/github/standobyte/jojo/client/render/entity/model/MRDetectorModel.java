@@ -7,7 +7,6 @@ import java.util.Map;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.render.block.BlockSprites;
-import com.github.standobyte.jojo.client.render.entity.renderer.stand.MagiciansRedRenderer;
 import com.github.standobyte.jojo.entity.MRDetectorEntity;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;

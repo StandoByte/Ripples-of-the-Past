@@ -852,7 +852,6 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     protected void actuallyHurt(DamageSource dmgSource, float damageAmount) {
         boolean blockableAngle = canBlockOrParryFromAngle(dmgSource.getSourcePosition());
         if (!isManuallyControlled() && canBlockDamage(dmgSource) && blockableAngle && !getCurrentTask().isPresent() && canStartBlocking()) {
-            // FIXME extend the task if it's already blocking
             setTask(ModStandsInit.BLOCK_STAND_ENTITY.get(), 5, StandEntityAction.Phase.PERFORM, ActionTarget.EMPTY);
         }
         if (transfersDamage() && hasUser()) {

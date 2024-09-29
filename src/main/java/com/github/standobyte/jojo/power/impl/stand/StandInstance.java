@@ -163,7 +163,7 @@ public class StandInstance {
         missingParts.forEach(part -> buf.writeEnum(part));
         
         DataSerializers.OPTIONAL_COMPONENT.write(buf, customName);
-        NetworkUtil.writeOptional(buf, standSkin, skinResLoc -> buf.writeResourceLocation(skinResLoc));
+        NetworkUtil.writeOptional(buf, standSkin, buf::writeResourceLocation);
     }
     
     public static StandInstance fromBuf(PacketBuffer buf) {
@@ -176,7 +176,7 @@ public class StandInstance {
         }
         
         standInstance.customName = DataSerializers.OPTIONAL_COMPONENT.read(buf);
-        standInstance.standSkin = NetworkUtil.readOptional(buf, () -> buf.readResourceLocation());
+        standInstance.standSkin = NetworkUtil.readOptional(buf, PacketBuffer::readResourceLocation);
         
         return standInstance;
     }
