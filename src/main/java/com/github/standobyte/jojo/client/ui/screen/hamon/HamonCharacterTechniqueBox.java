@@ -44,7 +44,7 @@ public class HamonCharacterTechniqueBox {
                 (skill, i) -> new HamonSkillElementTechniquePerk(skill, this.x + (int) i * 18, this.y, font))
                 .collect(Collectors.toCollection(ArrayList::new));
         if (technique == ModHamonSkills.CHARACTER_CAESAR.get()) {
-            perks.add(new HamonSkillElementTechniquePerk(this.x + (perks.size() - 1) * 18, this.y, font, 
+            perks.add(new HamonSkillElementTechniquePerk(this.x + (int) perks.stream().filter(perk -> perk.isVisible()).count() * 18, this.y, font, 
                     new TranslationTextComponent("hamon.caesar_soap_hint.name"),
                     new TranslationTextComponent("hamon.caesar_soap_hint.desc").withStyle(TextFormatting.ITALIC))
                     .withItemIcon(new ItemStack(ModItems.SOAP.get())));
