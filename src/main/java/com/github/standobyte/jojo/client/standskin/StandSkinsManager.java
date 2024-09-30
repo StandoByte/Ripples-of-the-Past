@@ -30,6 +30,7 @@ import com.github.standobyte.jojo.client.resources.models.StandModelOverrides;
 import com.github.standobyte.jojo.client.resources.models.StandModelOverrides.CustomModelPrepared;
 import com.github.standobyte.jojo.client.resources.models.StandModelOverrides.Format;
 import com.github.standobyte.jojo.client.resources.models.StandModelOverrides.ModelPathInfo;
+import com.github.standobyte.jojo.client.ui.text.JojoTextComponentWrapper;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
@@ -319,7 +320,11 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
             if (storyPartDefObj.has("key") && storyPartDefObj.has("color")) {
                 IFormattableTextComponent name = new TranslationTextComponent(storyPartDefObj.get("key").getAsString());
                 int color = parseColor(storyPartDefObj.get("color"));
-                return name.withStyle(ClientUtil.textColor(color));
+                name.withStyle(ClientUtil.textColor(color));
+                if (storyPartDefObj.has("sprite")) {
+                    name = new JojoTextComponentWrapper(name).setStoryPartSprite(new ResourceLocation(storyPartDefObj.get("sprite").getAsString()));
+                }
+                return name;
             }
         }
         

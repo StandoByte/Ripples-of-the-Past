@@ -47,6 +47,7 @@ import com.github.standobyte.jojo.client.ui.screen.widgets.HeightScaledSlider;
 import com.github.standobyte.jojo.client.ui.screen.widgets.ImageMutableButton;
 import com.github.standobyte.jojo.client.ui.screen.widgets.ImageVanillaButton;
 import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
+import com.github.standobyte.jojo.client.ui.text.JojoTextComponentWrapper;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModStatusEffects;
@@ -119,6 +120,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.ITextProperties;
 import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -135,6 +137,7 @@ import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderNameplateEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
+import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.client.gui.ForgeIngameGui;
@@ -949,6 +952,23 @@ public class ClientEventHandler {
         mc.textureManager.bind(ClientUtil.ADDITIONAL_UI);
         ui.blit(matrixStack, x, y, 0, 231, 130, 25);
         AbstractGui.drawCenteredString(matrixStack, mc.font, new TranslationTextComponent("jojo.to_be_continued"), x + 61, y + 8, 0x525544);
+    }
+    
+    @SubscribeEvent
+    public void onTooltipRender(RenderTooltipEvent.PostText event) {
+        List<? extends ITextProperties> lines = event.getLines();
+        int x = event.getX();
+        int y = event.getY();
+        for (int i = 0; i < lines.size(); i++) {
+            ITextProperties line = lines.get(i);
+            if (line instanceof JojoTextComponentWrapper) {
+                ((JojoTextComponentWrapper) line).tooltipRenderExtra(event.getMatrixStack(), x, y - 0.5f);
+            }
+            if (i == 0) {
+                y += 2;
+            }
+            y += 10;
+        }
     }
     
     @SubscribeEvent(priority = EventPriority.LOW)

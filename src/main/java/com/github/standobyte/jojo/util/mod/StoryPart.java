@@ -6,30 +6,51 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.annotation.Nullable;
+
+import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.client.ui.text.JojoTextComponentWrapper;
+
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public enum StoryPart {
-    PHANTOM_BLOOD           (new TranslationTextComponent("jojo.story_part.1").withStyle(TextFormatting.DARK_BLUE)),
-    BATTLE_TENDENCY         (new TranslationTextComponent("jojo.story_part.2").withStyle(TextFormatting.GREEN)),
-    STARDUST_CRUSADERS      (new TranslationTextComponent("jojo.story_part.3").withStyle(TextFormatting.DARK_PURPLE)),
-    DIAMOND_IS_UNBREAKABLE  (new TranslationTextComponent("jojo.story_part.4").withStyle(TextFormatting.RED)),
-    GOLDEN_WIND             (new TranslationTextComponent("jojo.story_part.5").withStyle(TextFormatting.GOLD)),
-    STONE_OCEAN             (new TranslationTextComponent("jojo.story_part.6").withStyle(TextFormatting.AQUA)),
-    STEEL_BALL_RUN          (new TranslationTextComponent("jojo.story_part.7").withStyle(TextFormatting.LIGHT_PURPLE)),
-    JOJOLION                (new TranslationTextComponent("jojo.story_part.8").withStyle(TextFormatting.WHITE)),
-    THE_JOJOLANDS           (new TranslationTextComponent("jojo.story_part.9").withStyle(TextFormatting.BLUE)),
-    OTHER                   (new TranslationTextComponent("jojo.story_part.none").withStyle(TextFormatting.GRAY));
+    PHANTOM_BLOOD           (1, new TranslationTextComponent("jojo.story_part.1").withStyle(TextFormatting.DARK_BLUE)),
+    BATTLE_TENDENCY         (2, new TranslationTextComponent("jojo.story_part.2").withStyle(TextFormatting.GREEN)),
+    STARDUST_CRUSADERS      (3, new TranslationTextComponent("jojo.story_part.3").withStyle(TextFormatting.DARK_PURPLE)),
+    DIAMOND_IS_UNBREAKABLE  (4, new TranslationTextComponent("jojo.story_part.4").withStyle(TextFormatting.RED)),
+    GOLDEN_WIND             (5, new TranslationTextComponent("jojo.story_part.5").withStyle(TextFormatting.GOLD)),
+    STONE_OCEAN             (6, new TranslationTextComponent("jojo.story_part.6").withStyle(TextFormatting.AQUA)),
+    STEEL_BALL_RUN          (7, new TranslationTextComponent("jojo.story_part.7").withStyle(TextFormatting.LIGHT_PURPLE)),
+    JOJOLION                (8, new TranslationTextComponent("jojo.story_part.8").withStyle(TextFormatting.WHITE)),
+    THE_JOJOLANDS           (9, new TranslationTextComponent("jojo.story_part.9").withStyle(TextFormatting.BLUE)),
+    OTHER                   (-1, new TranslationTextComponent("jojo.story_part.none").withStyle(TextFormatting.GRAY));
     
     private final ITextComponent name;
+    private final ITextComponent tooltipName;
+    @Nullable private ResourceLocation sprite;
     
-    private StoryPart(ITextComponent name) {
+    private StoryPart(int partNumber, IFormattableTextComponent name) {
+        if (partNumber > 0) {
+            this.sprite = new ResourceLocation(JojoMod.MOD_ID, "textures/gui/story_part/" + partNumber + ".png");
+        }
         this.name = name;
+        this.tooltipName = new JojoTextComponentWrapper(name).setStoryPartSprite(this);
     }
     
     public ITextComponent getName() {
+        return tooltipName;
+    }
+    
+    public ITextComponent getNonTooltipName() {
         return name;
+    }
+    
+    public ResourceLocation getSprite() {
+        return sprite;
     }
     
     
