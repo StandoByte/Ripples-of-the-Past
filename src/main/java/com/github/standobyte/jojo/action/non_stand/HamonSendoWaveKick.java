@@ -74,14 +74,20 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
         if (user.level.isClientSide() && user instanceof PlayerEntity) {
             ModPlayerAnimations.sendoWaveKick.setAnimEnabled((PlayerEntity) user, true);
         }
-        return new Instance(user, userCap, power, this);
+        Instance sendoWaveKick = new Instance(user, userCap, power, this);
+        
+        float energyCost = Math.min(getEnergyCost(power, ActionTarget.EMPTY), power.getEnergy());
+        float efficiency = power.getTypeSpecificData(ModPowers.HAMON.get()).get().getActionEfficiency(energyCost, true);
+        sendoWaveKick.setEnergySpent(energyCost * efficiency);
+        
+        return sendoWaveKick;
     }
     
     
     
     public static class Instance extends ContinuousActionInstance<Instance, INonStandPower> {
-        private int sendoWaveKickPositionWaitingTimer = 0;
-        private boolean gaveThisSendoWaveKickPoints = false;
+        private int positionWaitingTimer = 0;
+        private boolean gavePoints = false;
         private float energySpent;
         private final float initialYRot;
 
@@ -91,7 +97,6 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
             this.initialYRot = user.yRot;
         }
         
-        // FIXME ! (hamon 2) set spent energy points to give hamon strength points
         public void setEnergySpent(float energy) {
             this.energySpent = energy;
         }
@@ -115,18 +120,18 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
         public void playerTick() {
             LivingEntity user = getUser();
             if (!user.level.isClientSide()) {
-                if (sendoWaveKickPositionWaitingTimer >= 0) {
+                if (positionWaitingTimer >= 0) {
                     // FIXME ! (hamon 2) check if the client sent position
                     boolean clientSentPosition = true;
                     if (clientSentPosition) {
-                        sendoWaveKickPositionWaitingTimer = -1;
+                        positionWaitingTimer = -1;
                     }
                     else {
-                        sendoWaveKickPositionWaitingTimer++;
+                        positionWaitingTimer++;
                     }
                 }
-                if (sendoWaveKickPositionWaitingTimer < 0 && user.isOnGround()
-                        || sendoWaveKickPositionWaitingTimer >= USUAL_SENDO_WAVE_KICK_DURATION) {
+                if (positionWaitingTimer < 0 && user.isOnGround()
+                        || positionWaitingTimer >= USUAL_SENDO_WAVE_KICK_DURATION) {
                     stopAction();
                     return;
                 }
@@ -152,13 +157,13 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
                     }
                 }
 
-                if (!gaveThisSendoWaveKickPoints && points) {
+                if (!gavePoints && points) {
                     INonStandPower.getNonStandPowerOptional(user).ifPresent(power -> {
                         power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                             hamon.hamonPointsFromAction(HamonStat.STRENGTH, energySpent); 
                         });
                     });
-                    gaveThisSendoWaveKickPoints = true;
+                    gavePoints = true;
                 }
             }
             

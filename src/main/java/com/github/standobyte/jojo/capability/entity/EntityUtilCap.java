@@ -33,7 +33,9 @@ public class EntityUtilCap {
     
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
-        nbt.putBoolean("StoppedInTime", wasStoppedInTime());
+        if (wasStoppedInTime()) {
+            nbt.putBoolean("StoppedInTime", true);
+        }
         nbt.put("KbImpact", kbImpact.serializeNBT());
         return nbt;
     }
