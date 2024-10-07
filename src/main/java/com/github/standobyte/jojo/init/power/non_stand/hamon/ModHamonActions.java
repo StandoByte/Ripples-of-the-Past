@@ -58,7 +58,7 @@ public class ModHamonActions {
                    .shout(ModHamonSkills.CHARACTER_JONATHAN, ModSounds.JONATHAN_SENDO_OVERDRIVE)));
 
     public static final RegistryObject<HamonAction> HAMON_TURQUOISE_BLUE_OVERDRIVE = ACTIONS.register("hamon_turquoise_blue_overdrive", 
-            () -> new HamonTurquoiseBlueOverdrive(new HamonAction.Builder().energyCost(250F).cooldown(30)
+            () -> new HamonTurquoiseBlueOverdrive(new HamonAction.Builder().energyCost(1000F).cooldown(10)
                     .needsFreeMainHand().swingHand()));
     
    public static final RegistryObject<HamonAction> HAMON_SUNLIGHT_YELLOW_OVERDRIVE = ACTIONS.register("hamon_sunlight_yellow_overdrive", 
@@ -188,10 +188,10 @@ public class ModHamonActions {
                     .shout(ModSounds.CAESAR_BUBBLE_BARRIER)));
     
     public static final RegistryObject<HamonAction> CAESAR_BUBBLE_CUTTER = ACTIONS.register("caesar_bubble_cutter", 
-            () -> new HamonBubbleCutter(new HamonAction.Builder().energyCost(500F).cooldown(20).swingHand().shout(ModSounds.CAESAR_BUBBLE_CUTTER)));
+            () -> new HamonBubbleCutter(new HamonAction.Builder().energyCost(500F).cooldown(10).swingHand().shout(ModSounds.CAESAR_BUBBLE_CUTTER)));
     
     public static final RegistryObject<HamonAction> CAESAR_BUBBLE_CUTTER_GLIDING = ACTIONS.register("caesar_bubble_cutter_gliding", 
-            () -> new HamonBubbleCutter(new HamonAction.Builder().energyCost(600F).cooldown(20).swingHand()
+            () -> new HamonBubbleCutter(new HamonAction.Builder().energyCost(600F).cooldown(10).swingHand()
                     .shout(ModSounds.CAESAR_BUBBLE_CUTTER_GLIDING).shiftVariationOf(CAESAR_BUBBLE_CUTTER)));
     
 }

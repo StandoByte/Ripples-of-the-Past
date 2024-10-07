@@ -55,7 +55,7 @@ public class PillarmanVeinEntity extends OwnerBoundProjectileEntity {
     
     @Override
     public float getBaseDamage() {
-        return 1F;
+        return 0.35F;
     }
     
     public void addKnockback(float knockback) {
@@ -64,8 +64,11 @@ public class PillarmanVeinEntity extends OwnerBoundProjectileEntity {
     
     @Override
     protected boolean hurtTarget(Entity target, LivingEntity owner) {
-        return DamageUtil.dealDamageAndSetOnFire(target, 
-                entity -> super.hurtTarget(entity, owner), 10, true);
+    	if(!isRetracting()) {
+    		return DamageUtil.dealDamageAndSetOnFire(target, 
+                    entity -> super.hurtTarget(entity, owner), 10, true);
+    	}
+    	return false;
     }
     
     @Override
