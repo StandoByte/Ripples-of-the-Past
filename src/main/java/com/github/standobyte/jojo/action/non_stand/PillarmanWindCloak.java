@@ -1,16 +1,13 @@
 package com.github.standobyte.jojo.action.non_stand;
 
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanData.Mode;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.particles.IParticleData;
-import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.math.vector.Vector3d;

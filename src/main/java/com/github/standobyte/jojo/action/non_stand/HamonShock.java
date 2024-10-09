@@ -5,7 +5,6 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
-import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
@@ -16,8 +15,6 @@ import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.item.ArmorStandEntity;
-import net.minecraft.entity.passive.GolemEntity;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -43,9 +40,7 @@ public class HamonShock extends HamonAction {
             if (entity.getType() == ModEntityTypes.HAMON_MASTER.get() || ModStatusEffects.isStunned(targetLiving)) {
                 return ActionConditionResult.NEGATIVE;
             }
-            // not the best way to determine living mobs in other mods
-            isLiving = !(targetLiving instanceof StandEntity || targetLiving instanceof ArmorStandEntity || targetLiving instanceof GolemEntity)
-                    && !JojoModUtil.isUndeadOrVampiric(targetLiving);
+            isLiving = HamonUtil.isLiving(targetLiving);
         }
         else {
             isLiving = false;

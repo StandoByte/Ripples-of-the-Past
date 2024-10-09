@@ -29,6 +29,7 @@ import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer.BarType;
 import com.github.standobyte.jojo.entity.CrimsonBubbleEntity;
 import com.github.standobyte.jojo.entity.HamonBlockChargeEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.SnakeMufflerEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModParticles;
@@ -62,8 +63,10 @@ import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.passive.ChickenEntity;
+import net.minecraft.entity.passive.GolemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
@@ -180,6 +183,14 @@ public class HamonUtil {
             }
         }
         return false;
+    }
+    
+    public static boolean isLiving(LivingEntity entity) {
+        // not the best way to determine living mobs in other mods
+        return !(JojoModUtil.isUndeadOrVampiric(entity) ||
+                entity instanceof GolemEntity ||
+                entity instanceof ArmorStandEntity || 
+                entity instanceof StandEntity);
     }
 
     @Nullable

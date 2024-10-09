@@ -13,7 +13,6 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanDa
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particles.IParticleData;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class PillarmanDivineSandstorm extends PillarmanAction {

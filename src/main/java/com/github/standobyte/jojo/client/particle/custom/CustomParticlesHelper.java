@@ -8,7 +8,6 @@ import java.util.Random;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.particle.DivineSandstormParticle;
 import com.github.standobyte.jojo.client.particle.HamonAuraParticle;
 import com.github.standobyte.jojo.client.particle.SendoHamonOverdriveParticle;
 import com.github.standobyte.jojo.client.render.entity.model.stand.HumanoidStandModel;

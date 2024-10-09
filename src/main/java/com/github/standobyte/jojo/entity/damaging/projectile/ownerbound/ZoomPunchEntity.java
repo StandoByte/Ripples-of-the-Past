@@ -59,13 +59,10 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
     }
 
     public ZoomPunchEntity setHamonDamageOnHit(float damage, float hitCost, boolean useBreathStab) {
-    	if(!isRetracting()) {
-	        this.hamonDamage = damage;
-	        this.hamonDamageCost = hitCost;
-	        this.spendHamonStability = useBreathStab;
-	        return this;
-    	}
-    	return null;
+        this.hamonDamage = damage;
+        this.hamonDamageCost = hitCost;
+        this.spendHamonStability = useBreathStab;
+        return this;
     }
 
     public ZoomPunchEntity setBaseUsageStatPoints(float points) {

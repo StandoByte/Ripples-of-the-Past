@@ -27,8 +27,6 @@ import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.item.ArmorStandEntity;
-import net.minecraft.entity.passive.GolemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.BoneMealItem;
 import net.minecraft.item.ItemStack;
@@ -293,9 +291,7 @@ public class HamonHealing extends HamonAction {
     }
     
     private boolean canBeHealed(LivingEntity targetEntity, LivingEntity user) {
-        return !(JojoModUtil.isUndeadOrVampiric(targetEntity) ||
-                targetEntity instanceof GolemEntity ||
-                targetEntity instanceof ArmorStandEntity);
+        return HamonUtil.isLiving(targetEntity);
     }
     
     @Override

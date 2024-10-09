@@ -4,16 +4,11 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
-import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.particle.IAnimatedSprite;
-import net.minecraft.client.particle.LargeExplosionParticle.Factory;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.EntityType;
@@ -21,8 +16,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Pose;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.particles.IParticleData;
-import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockRayTraceResult;
