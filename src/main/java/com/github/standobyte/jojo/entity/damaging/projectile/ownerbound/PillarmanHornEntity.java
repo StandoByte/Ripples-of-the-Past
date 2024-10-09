@@ -1,7 +1,9 @@
 package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.math.vector.Vector3d;
@@ -24,9 +26,9 @@ public class PillarmanHornEntity extends OwnerBoundProjectileEntity {
     
     @Override
     public float getBaseDamage() {
-        return 1.0F;
+        return 0.5F;
     }
-    
+
     @Override
     protected boolean shouldHurtThroughInvulTicks() {
         return true;

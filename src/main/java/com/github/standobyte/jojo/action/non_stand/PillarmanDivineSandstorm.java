@@ -2,6 +2,8 @@ package com.github.standobyte.jojo.action.non_stand;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
 import com.github.standobyte.jojo.entity.damaging.projectile.PillarmanDivineSandstormEntity;
 import com.github.standobyte.jojo.init.ModParticles;
@@ -43,7 +45,7 @@ public class PillarmanDivineSandstorm extends PillarmanAction {
     
     @Override
     public void onHoldTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
-        if (requirementsFulfilled) {
+        if (requirementsFulfilled && world.isClientSide()) {
             auraEffect(user, ModParticles.HAMON_AURA_GREEN.get(), 12);
         }
         super.onHoldTick(world, user, power, ticksHeld, target, requirementsFulfilled);
@@ -58,19 +60,22 @@ public class PillarmanDivineSandstorm extends PillarmanAction {
                         .setRadius(1.5F)
                         .setDamage(2F)
                         .setDuration(10);
-                sanstormWave.shootFromRotation(user, 0.9F, 1F);
+                sanstormWave.shootFromRotation(user, 0.9F, 15F);
                 world.addFreshEntity(sanstormWave);
             }
         }
     }
     
     public static void auraEffect(LivingEntity user, IParticleData particles, int intensity) {
-        for (int i = 0; i < intensity; i++) {
-            Vector3d particlePos = user.position().add(
-                    (Math.random() - 0.5) * (user.getBbWidth() + 0.5), 
-                    Math.random() * (user.getBbHeight()), 
-                    (Math.random() - 0.5) * (user.getBbWidth() + 0.5));
-            user.level.addParticle(particles, particlePos.x, particlePos.y, particlePos.z, 0, 0, 0);
+    	boolean isUserTheCameraEntity = user == ClientUtil.getCameraEntity();
+    	for (int i = 0; i < intensity; i++) {
+        	CustomParticlesHelper.createHamonAuraParticle(particles, user, 
+                    user.getX() + (Math.random() - 0.5) * (user.getBbWidth() + 0.5F), 
+                    user.getY() + Math.random() * (user.getBbHeight() * 0.5F), 
+                    user.getZ() + (Math.random() - 0.5) * (user.getBbWidth() + 0.5F));
+        }
+        if (isUserTheCameraEntity) {
+            CustomParticlesHelper.summonHamonAuraParticlesFirstPerson(particles, user, intensity / 5);
         }
     }
     
