@@ -61,7 +61,7 @@ public class PillarmanAbsorption extends PillarmanAction {
                         float bloodAndHealModifier = GeneralUtil.getOrLast(
                                 JojoModConfig.getCommonConfigInstance(false).bloodDrainMultiplier.get(), 
                                 world.getDifficulty().getId()).floatValue();
-                        power.addEnergy(bloodAndHealModifier * 4F);
+                        power.addEnergy(bloodAndHealModifier * 35F);
                     }
                 }
             }

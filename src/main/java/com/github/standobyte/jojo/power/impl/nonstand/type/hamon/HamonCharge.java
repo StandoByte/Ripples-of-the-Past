@@ -6,17 +6,24 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil.HamonAttackProperties;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.item.ArmorStandEntity;
+import net.minecraft.entity.passive.GolemEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -91,7 +98,18 @@ public class HamonCharge {
                                 Vector3d knockbackVec = new Vector3d(chargePos.x - target.getX(), 0, chargePos.z - target.getZ()).normalize();
                                 target.knockback(0.75F, knockbackVec.x, knockbackVec.z);
                             }
-                            
+                         // If Hamon Shock is learned Entity Infuse will shock aswell
+                            boolean isLiving = !(target instanceof StandEntity || target instanceof ArmorStandEntity || target instanceof GolemEntity)
+                                    && !JojoModUtil.isUndeadOrVampiric(target);
+                            INonStandPower.getNonStandPowerOptional((LivingEntity) user).ifPresent(power -> {
+                            	if (power.getTypeSpecificData(ModPowers.HAMON.get()).get().isSkillLearned(ModHamonSkills.HAMON_SHOCK.get())) {
+                            		if (isLiving && !ModStatusEffects.isStunned(target) && doLargeChargeDmg) {
+	                            		if (chargedEntity != null && chargedEntity instanceof LivingEntity) {
+	                            			target.addEffect(new EffectInstance(ModStatusEffects.HAMON_SHOCK.get(), 30, 0, false, false));
+	                            		}
+                            		}
+                            	}
+                            });
                             if (chargedBlock != null) {
                                 if (doLargeChargeDmg && world.getBlockState(chargedBlock).getBlock() != Blocks.COBWEB) {
                                     chargeTicks = 0;
@@ -105,7 +123,6 @@ public class HamonCharge {
                         }
                         gavePoints = true;
                         // One time charge
-                        
                     }
                 }
             }
