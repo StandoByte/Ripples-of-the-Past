@@ -1,6 +1,9 @@
 package com.github.standobyte.jojo.action.non_stand;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
@@ -90,6 +93,7 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
         private boolean gavePoints = false;
         private float energySpent;
         private final float initialYRot;
+        private Set<UUID> damagedEntities = new HashSet<>();
 
         public Instance(LivingEntity user, PlayerUtilCap userCap, 
                 INonStandPower playerPower, HamonSendoWaveKick action) {
@@ -140,19 +144,21 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
                         entity -> !entity.is(user) && user.canAttack(entity));
                 boolean points = false;
                 for (LivingEntity target : targets) {
-                    boolean kickDamage = dealPhysicalDamage(user, target);
-                    boolean hamonDamage = DamageUtil.dealHamonDamage(target, 2.5F, user, null);
-                    if (kickDamage || hamonDamage) {
-                        Vector3d vecToTarget = target.position().subtract(user.position());
-                        boolean left = MathHelper.wrapDegrees(
-                                user.yBodyRot - MathUtil.yRotDegFromVec(vecToTarget))
-                                < 0;
-                        float knockbackYRot = (60F + user.getRandom().nextFloat() * 30F) * (left ? 1 : -1);
-                        knockbackYRot += (float) -MathHelper.atan2(vecToTarget.x, vecToTarget.z) * MathUtil.RAD_TO_DEG;
-                        DamageUtil.knockback((LivingEntity) target, 0.75F, knockbackYRot);
-                        
-                        if (hamonDamage) {
-                            points = true;
+                    if (damagedEntities.add(target.getUUID())) {
+                        boolean kickDamage = dealPhysicalDamage(user, target);
+                        boolean hamonDamage = DamageUtil.dealHamonDamage(target, 3.0F, user, null);
+                        if (kickDamage || hamonDamage) {
+                            Vector3d vecToTarget = target.position().subtract(user.position());
+                            boolean left = MathHelper.wrapDegrees(
+                                    user.yBodyRot - MathUtil.yRotDegFromVec(vecToTarget))
+                                    < 0;
+                            float knockbackYRot = (60F + user.getRandom().nextFloat() * 30F) * (left ? 1 : -1);
+                            knockbackYRot += (float) -MathHelper.atan2(vecToTarget.x, vecToTarget.z) * MathUtil.RAD_TO_DEG;
+                            DamageUtil.knockback((LivingEntity) target, 0.75F, knockbackYRot);
+                            
+                            if (hamonDamage) {
+                                points = true;
+                            }
                         }
                     }
                 }

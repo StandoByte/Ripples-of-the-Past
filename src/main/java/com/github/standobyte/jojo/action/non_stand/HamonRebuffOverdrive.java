@@ -335,7 +335,7 @@ public class HamonRebuffOverdrive extends HamonAction implements IPlayerAction<H
                 float energyCost = ((NonStandAction) action).getEnergyCost(playerPower, new ActionTarget(target));
                 float efficiency = userHamon.getActionEfficiency(energyCost, true);
                 
-                float damage = properCounter ? 9.0f : 6.0f;
+                float damage = properCounter ? 10.0f : 6.0f;
                 float knockback = properCounter ? 2.0f : 1.0f;
                 boolean canShock = properCounter;
                 
