@@ -9,6 +9,7 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
@@ -1577,7 +1578,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
                     aim = precisionRayTrace(user, reachDistance);
                 }
             }
-            if (aim == null) {
+            if (aim == null || aim.getType() == RayTraceResult.Type.MISS) {
                 aim = precisionRayTrace(this, reachDistance);
             }
             
@@ -1614,10 +1615,12 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
                 && !(entity instanceof ProjectileEntity && this.is(((ProjectileEntity) entity).getOwner()));
     }
     
+    @Nonnull
     public RayTraceResult precisionRayTrace(Entity aimingEntity, double reachDistance) {
         return precisionRayTrace(aimingEntity, reachDistance, 0);
     }
-    
+
+    @Nonnull
     public RayTraceResult precisionRayTrace(Entity aimingEntity, double reachDistance, double rayTraceInflate) {
         RayTraceResult[] targets = JojoModUtil.rayTraceMultipleEntities(aimingEntity, 
                 reachDistance, canTarget(), rayTraceInflate, getPrecision());

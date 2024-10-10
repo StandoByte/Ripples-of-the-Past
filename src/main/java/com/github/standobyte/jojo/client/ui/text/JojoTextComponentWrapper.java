@@ -42,7 +42,7 @@ public class JojoTextComponentWrapper implements IFormattableTextComponent {
         return this;
     }
     
-    
+    // FIXME fix the icon not rendering if any line from the tooltip is wrapped
     public void tooltipRenderExtra(MatrixStack matrixStack, float x, float y) {
         if (storyPartSprite != null) {
             Minecraft.getInstance().textureManager.bind(storyPartSprite);

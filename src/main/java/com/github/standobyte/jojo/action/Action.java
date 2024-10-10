@@ -362,6 +362,11 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return swingHand;
     }
 
+    @Deprecated
+    public boolean cancelsVanillaClick() {
+        return !withUserPunch();
+    }
+
     public boolean withUserPunch() {
         return withUserPunch;
     }
