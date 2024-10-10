@@ -28,7 +28,8 @@
     "itemtracking.inventory.InventoryMixin",
     "itemtracking.ContainerSlotMixin",
     "itemtracking.projectile.BowItemMixin",
-    "itemtracking.projectile.ArrowEntityMixin"
+    "itemtracking.projectile.ArrowEntityMixin",
+    "itemtracking.projectile.AbstractArrowEntityMixin"
   ],
   "client": [
     "client.GameRendererMixin",

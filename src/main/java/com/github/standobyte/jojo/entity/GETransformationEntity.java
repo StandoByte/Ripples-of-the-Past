@@ -9,6 +9,8 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.ai.GELifeformFollowOwnerGoal;
@@ -79,7 +81,8 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
     private int duration;
     private float renderAsItemTime;
     public int actionCooldown;
-
+    
+    
     public GETransformationEntity(EntityType<?> type, World level) {
         super(type, level);
     }
@@ -536,6 +539,11 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         private BlockState sourceBlockState;
         private BlockPos sourceBlockPos;
         private CompoundNBT sourceTileEntityNbt = null;
+        
+        // TODO lifeform host (when it's created from arrows)
+        private LivingEntity hostFollow = null;
+        private Vector3d hostFollowOffset = Vector3d.ZERO;
+        private float hostDealDamage = 0;
         
         
         

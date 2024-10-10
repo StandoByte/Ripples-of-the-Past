@@ -15,12 +15,14 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.non_stand.HamonOrganismInfusion;
 import com.github.standobyte.jojo.action.stand.effect.GECreatedLifeformEffect;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.screen.stand.ge.EntityTypeIcon;
 import com.github.standobyte.jojo.entity.GETransformationEntity;
 import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MolotovEntity;
+import com.github.standobyte.jojo.entity.itemprojectile.KnifeEntity;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
@@ -58,6 +60,7 @@ import net.minecraft.entity.monster.SlimeEntity;
 import net.minecraft.entity.passive.horse.AbstractHorseEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.PotionEntity;
 import net.minecraft.fluid.Fluid;
 import net.minecraft.inventory.EquipmentSlotType;
@@ -71,6 +74,7 @@ import net.minecraft.item.ThrowablePotionItem;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -279,29 +283,55 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     if (itemTracker != null && itemTracker.checkItemIsThere((ServerWorld) world)) {
                         // ...from entity
                         Entity itemEntity = itemTracker.getAtEntity(world);
+                        LivingEntity livingItemHolder = itemEntity instanceof LivingEntity ? (LivingEntity) itemEntity : null;
                         if (itemEntity != null) {
                             KnownItemState itemState = itemTracker.getItemState();
                             if (itemState != null) {
                                 tfTargetFound = true;
                                 itemTracker.clear();
+                                Vector3d pos = itemEntity.position();
                                 
                                 switch (itemState) {
                                 case ENTITY_HAS_ITEM:
                                     mobFromInventory(tf, itemTracker.getItem(), world, 
-                                            itemEntity instanceof LivingEntity ? (LivingEntity) itemEntity : user, 
+                                            livingItemHolder != null ? livingItemHolder : user, 
                                             itemEntity.blockPosition(), customName);
                                     if (itemEntity != user) {
                                         nonUserItemHolder.set(itemEntity);
                                     }
                                     
-                                    Vector3d pos = itemEntity.position();
                                     tf.moveTo(pos.x, pos.y, pos.z, itemEntity.yRot, 0);
                                     
                                     break;
                                 case ENTITY_IS_ITEM:
                                     mobFromEntity(tf, itemEntity);
                                     break;
+                                case STUCK_ARROW:
+                                    tf.getTfSourceData().withEntitySource(new ArrowEntity(world, user));
+                                    tf.moveTo(pos.x, pos.y, pos.z, itemEntity.yRot, itemEntity.xRot);
+                                    if (livingItemHolder != null) {
+                                        livingItemHolder.setArrowCount(livingItemHolder.getArrowCount() - 1);
+                                        
+//                                        float volume = GoldExperienceCreateLifeform.getVolume(lifeFormCreated);
+//                                        float damage = Math.min(volume, 5);
+//                                        livingItemHolder.hurt(new DamageSource("arrowLifeform").bypassArmor(), damage);
+                                    }
+                                    break;
+                                case STUCK_KNIFE:
+                                    tf.getTfSourceData().withEntitySource(new KnifeEntity(world, user));
+                                    tf.moveTo(pos.x, pos.y, pos.z, itemEntity.yRot, itemEntity.xRot);
+                                    if (livingItemHolder != null) {
+                                        livingItemHolder.getCapability(LivingUtilCapProvider.CAPABILITY).map(data -> data.getStuckObjects().getKnives()).ifPresent(
+                                                knives -> knives.setCount(knives.getCount() - 1));
+                                        livingItemHolder.setArrowCount(livingItemHolder.getArrowCount() - 1);
+                                        
+//                                        float volume = GoldExperienceCreateLifeform.getVolume(lifeFormCreated);
+//                                        float damage = Math.min(volume, 5);
+//                                        livingItemHolder.hurt(new DamageSource("arrowLifeform").bypassArmor(), damage);
+                                    }
+                                    break;
                                 default:
+                                    JojoMod.getLogger().error("Didn't handle the case of {} item being inside an entity", itemState);
                                     break;
                                 }
                             }
@@ -330,6 +360,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                                         tfTargetFound = false;
                                         break;
                                     default:
+                                        JojoMod.getLogger().error("Didn't handle the case of {} item being inside a block", itemState);
                                         break;
                                     }
                                 }

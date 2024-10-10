@@ -426,6 +426,8 @@
   "death.attack.roadRoller.player": "%s was smashed flat as a pancake whilst fighting %s",
   "death.attack.eyeOfEnderShards": "%s's insides were torn apart by an eye of ender shards",
   "death.attack.eyeOfEnderShards.player": "%s's insides were torn apart by an eye of ender shards",
+  "death.attack.arrowLifeform": "%s died from a foreign organism growing inside",
+  "death.attack.arrowLifeform.player": "%s died from a foreign organism growing inside",
   "death.attack.stoneMask": "%s's brain couldn't take the power of Stone Mask's needles",
   
   "stat.jojo.vampire_animals_drained": "Animals Drained",
