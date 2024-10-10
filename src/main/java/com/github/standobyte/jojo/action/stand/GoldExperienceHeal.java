@@ -5,14 +5,11 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.non_stand.HamonHealing;
 import com.github.standobyte.jojo.action.stand.effect.GEHealingEffect;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
-import com.github.standobyte.jojo.potion.BleedingEffect;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -163,7 +160,8 @@ public class GoldExperienceHeal extends StandEntityAction {
             else {
                 int knives = getKnivesCount(entity);
                 if (knives > 0) {
-                    entity.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(data -> data.setKnives(knives - 1));
+                    entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(
+                            data -> data.getStuckObjects().getKnives().setCount(knives - 1));
                     stuckProjectile = true;
                 }
             }
@@ -257,7 +255,8 @@ public class GoldExperienceHeal extends StandEntityAction {
     
     protected static int getKnivesCount(LivingEntity entity) {
         if (entity instanceof PlayerEntity) {
-            return entity.getCapability(PlayerUtilCapProvider.CAPABILITY).map(PlayerUtilCap::getKnivesCount).orElse(0);
+            return entity.getCapability(LivingUtilCapProvider.CAPABILITY)
+                    .map(data -> data.getStuckObjects().getKnives().getCount()).orElse(0);
         }
         return 0;
     }

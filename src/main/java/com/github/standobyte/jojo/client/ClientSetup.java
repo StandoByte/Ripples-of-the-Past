@@ -37,6 +37,7 @@ import com.github.standobyte.jojo.client.render.entity.layerrenderer.HamonBurnLa
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.InkLipsLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.KnifeLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.LadybugBroochLayer;
+import com.github.standobyte.jojo.client.render.entity.layerrenderer.MobStuckArrowLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.PillarmanLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.TornadoOverdriveEffectLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.ZombieLayer;
@@ -376,6 +377,7 @@ public class ClientSetup {
             else {
                 livingRenderer.addLayer(new FrozenLayer<T, M>(livingRenderer, FrozenLayer.NON_BIPED_PATH));
             }
+            livingRenderer.addLayer(new MobStuckArrowLayer<>(livingRenderer));
         }
     }
     

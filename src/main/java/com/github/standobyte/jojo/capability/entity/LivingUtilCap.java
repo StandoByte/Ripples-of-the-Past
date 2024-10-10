@@ -12,6 +12,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.stand.GoldExperienceEntityLifeshot;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
+import com.github.standobyte.jojo.capability.entity.living.LivingStuckObjects;
 import com.github.standobyte.jojo.capability.entity.living.LivingWallClimbing;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.AfterimageEntity;
@@ -75,6 +76,8 @@ public class LivingUtilCap {
     
     private int noGravityTicks = 0;
     
+    private final LivingStuckObjects stuckObjects;
+    
     private List<StandEffectInstance> standEffectsTargetedBy = new LinkedList<>();
     
     public boolean hasUsedTimeStopToday = false;
@@ -107,6 +110,7 @@ public class LivingUtilCap {
     public LivingUtilCap(LivingEntity entity) {
         this.entity = entity;
         this.wallClimb = new LivingWallClimbing(entity);
+        this.stuckObjects = new LivingStuckObjects(entity);
     }
     
     public void tick() {
@@ -115,6 +119,7 @@ public class LivingUtilCap {
         tickHurtAnim();
         tickDownHamonDamage();
         tickDyingBody();
+        stuckObjects.tick();
         
         if (!entity.level.isClientSide()) {
             tickSendoOverdriveHurtTimer();
@@ -257,6 +262,12 @@ public class LivingUtilCap {
             ModifiableAttributeInstance gravity = entity.getAttribute(ForgeMod.ENTITY_GRAVITY.get());
             gravity.removeModifier(NO_GRAVITY_MODIFIER);
         }
+    }
+    
+    
+    
+    public LivingStuckObjects getStuckObjects() {
+        return stuckObjects;
     }
     
     
@@ -660,6 +671,7 @@ public class LivingUtilCap {
             PacketManager.sendToClient(TrCosmeticItemsPacket.ladybugBrooch(entity.getId(), 
                     ladybugBroochesColored), tracking);
         }
+        stuckObjects.onTracking(tracking);
         wallClimb.syncToPlayer(tracking);
     }
     
@@ -675,6 +687,7 @@ public class LivingUtilCap {
                 PacketManager.sendToClient(TrCosmeticItemsPacket.ladybugBrooch(entity.getId(), 
                         ladybugBroochesColored), player);
             }
+            stuckObjects.syncWithClient();
             wallClimb.syncToPlayer(player);
         }
     }
@@ -698,6 +711,7 @@ public class LivingUtilCap {
             nbt.putUUID("PreHypnosisOwner", preHypnosisOwner);
         }
         nbt.putBoolean("GotScarf", gotScarf);
+        nbt.put("Stuck", stuckObjects.serializeNBT());
         
         if (productPotions != null && !productPotions.isEmpty()) {
             ListNBT effectsNbt = new ListNBT();
@@ -724,6 +738,7 @@ public class LivingUtilCap {
             preHypnosisOwner = nbt.getUUID("PreHypnosisOwner");
         }
         gotScarf = nbt.getBoolean("GotScarf");
+        MCUtil.nbtGetCompoundOptional(nbt, "Stuck").ifPresent(stuckObjects::deserializeNBT);
         
         if (nbt.contains("ProductPotion", Constants.NBT.TAG_LIST)) {
             ListNBT effectsNbt = nbt.getList("ProductPotion", Constants.NBT.TAG_COMPOUND);

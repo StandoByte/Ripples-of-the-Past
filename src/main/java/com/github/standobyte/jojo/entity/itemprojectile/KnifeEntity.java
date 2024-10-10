@@ -1,7 +1,7 @@
 package com.github.standobyte.jojo.entity.itemprojectile;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModSounds;
@@ -137,8 +137,8 @@ public class KnifeEntity extends ItemProjectileEntity {
     @Override
     protected void doPostHurtEffects(LivingEntity entity) {
         if (!level.isClientSide()) {
-            entity.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                cap.addKnife();
+            entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                cap.getStuckObjects().getKnives().increment();
             });
         }
     }

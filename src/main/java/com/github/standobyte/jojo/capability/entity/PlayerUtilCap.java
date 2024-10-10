@@ -21,7 +21,6 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.NotificationSyncPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDirectEntityDataPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDoubleShiftPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrKnivesCountPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerContinuousActionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerVisualDetailPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrWalkmanEarbudsPacket;
@@ -64,9 +63,6 @@ public class PlayerUtilCap {
     
     private Set<OneTimeNotification> notificationsSent = new HashSet<>();
     
-    private int knives;
-    private int removeKnifeTime;
-    
     private int ateInkPastaTicks = 0;
     
     private boolean hasClientInput;
@@ -104,7 +100,6 @@ public class PlayerUtilCap {
     
     public void tick() {
         if (!player.level.isClientSide()) {
-            tickKnivesRemoval();
             tickVoiceLines();
             tickClientInputTimer();
             tickNoSleepTimer();
@@ -138,8 +133,6 @@ public class PlayerUtilCap {
         CompoundNBT nbt = new CompoundNBT();
         nbt.put("NotificationsSent", notificationsToNBT());
         
-        nbt.putInt("Knives", knives);
-        
         if (!metEntityTypes.isEmpty()) {
             ListNBT metEntities = metEntityTypes.toNBT();
             nbt.put("MetEntityTypes", metEntities);
@@ -162,8 +155,6 @@ public class PlayerUtilCap {
             notificationsFromNBT(notificationsMap);
         }
         
-        knives = nbt.getInt("Knives");
-        
         if (nbt.contains("MetEntityTypes", MCUtil.getNbtId(ListNBT.class))) {
             ListNBT metEntitiesId = nbt.getList("MetEntityTypes", MCUtil.getNbtId(StringNBT.class));
             metEntityTypes.fromNBT(metEntitiesId);
@@ -175,7 +166,6 @@ public class PlayerUtilCap {
     }
     
     public void onTracking(ServerPlayerEntity tracking) {
-        PacketManager.sendToClient(new TrKnivesCountPacket(player.getId(), knives), tracking);
         PacketManager.sendToClient(new TrWalkmanEarbudsPacket(player.getId(), walkmanEarbuds), tracking);
         PacketManager.sendToClient(new TrPlayerVisualDetailPacket(player.getId(), ateInkPastaTicks), tracking);
     }
@@ -186,7 +176,6 @@ public class PlayerUtilCap {
         metEntityTypes.syncToClient(player);
         PacketManager.sendToClient(geUIState.makePacket(), player);
         
-        PacketManager.sendToClient(new TrKnivesCountPacket(player.getId(), knives), player);
         PacketManager.sendToClient(new TrWalkmanEarbudsPacket(player.getId(), walkmanEarbuds), player);
         PacketManager.sendToClient(new TrPlayerVisualDetailPacket(player.getId(), ateInkPastaTicks), player);
         PacketManager.sendToClient(new VampireSleepInCoffinPacket(coffinPreventDayTimeSkip), player);
@@ -379,34 +368,15 @@ public class PlayerUtilCap {
     
     
     
-    public void setKnives(int knives) {
-        knives = Math.max(knives, 0);
-        if (this.knives != knives) {
-            this.knives = knives;
-            if (!player.level.isClientSide()) {
-                PacketManager.sendToClientsTrackingAndSelf(new TrKnivesCountPacket(player.getId(), knives), player);
-            }
-        }
-    }
-    
-    public void addKnife() {
-        setKnives(knives + 1);
-    }
-    
+    @Deprecated
+    public void setKnives(int knives) {}
+
+    @Deprecated
+    public void addKnife() {}
+
+    @Deprecated
     public int getKnivesCount() {
-        return knives;
-    }
-    
-    private void tickKnivesRemoval() {
-        if (knives > 0) {
-            if (removeKnifeTime <= 0) {
-                removeKnifeTime = 20 * (30 - knives);
-            }
-            removeKnifeTime--;
-            if (removeKnifeTime <= 0) {
-                setKnives(knives - 1);
-            }
-        }
+        return 0;
     }
     
 
