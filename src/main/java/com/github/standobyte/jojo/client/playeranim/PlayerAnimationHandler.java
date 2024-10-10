@@ -48,7 +48,7 @@ public class PlayerAnimationHandler {
         
         <T extends LivingEntity, M extends BipedModel<T>> void heldItemLayerChangeItemLocation(LivingEntity livingEntity, MatrixStack matrices, HandSide arm);
         
-        void setupLayerFirstPersonRender(PlayerModel<?> layerModel);
+        void setupLayerFirstPersonRender(BipedModel<?> layerModel);
         
         @Deprecated
         default void setBarrageAnim(PlayerEntity player, boolean val) {
@@ -139,7 +139,7 @@ public class PlayerAnimationHandler {
                 LivingEntity livingEntity, MatrixStack matrices, HandSide arm) {}
 
         @Override
-        public void setupLayerFirstPersonRender(PlayerModel<?> layerModel) {}
+        public void setupLayerFirstPersonRender(BipedModel<?> layerModel) {}
     }
     
     public static enum BendablePart {

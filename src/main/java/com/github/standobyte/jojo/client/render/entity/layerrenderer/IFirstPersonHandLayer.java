@@ -24,14 +24,23 @@ public interface IFirstPersonHandLayer {
             IRenderTypeBuffer buffer, int light, AbstractClientPlayerEntity player, 
             PlayerRenderer playerRenderer, 
             PlayerModel<AbstractClientPlayerEntity> model, ResourceLocation texture) {
+        defaultRender(side, matrixStack, buffer, light, player, playerRenderer, model, texture,
+                1, 1, 1, 1);
+    }
+    
+    static void defaultRender(HandSide side, MatrixStack matrixStack, 
+            IRenderTypeBuffer buffer, int light, AbstractClientPlayerEntity player, 
+            PlayerRenderer playerRenderer, 
+            PlayerModel<AbstractClientPlayerEntity> model, ResourceLocation texture,
+            float red, float green, float blue, float alpha) {
         if (texture == null || player.isSpectator()) return;
         ClientUtil.setupForFirstPersonRender(model, player);
         IVertexBuilder vertexBuilder = buffer.getBuffer(RenderType.entityTranslucent(texture));
         ModelRenderer arm = ClientUtil.getArm(model, side);
         ModelRenderer armOuter = ClientUtil.getArmOuter(model, side);
         arm.xRot = 0.0F;
-        arm.render(matrixStack, vertexBuilder, light, OverlayTexture.NO_OVERLAY);
+        arm.render(matrixStack, vertexBuilder, light, OverlayTexture.NO_OVERLAY, red, green, blue, alpha);
         armOuter.xRot = 0.0F;
-        armOuter.render(matrixStack, vertexBuilder, light, OverlayTexture.NO_OVERLAY);
+        armOuter.render(matrixStack, vertexBuilder, light, OverlayTexture.NO_OVERLAY, red, green, blue, alpha);
     }
 }

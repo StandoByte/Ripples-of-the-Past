@@ -33,7 +33,6 @@ import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.model.BipedModel;
-import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.HandSide;
@@ -182,7 +181,7 @@ public class KosmXPlayerAnimatorInstalled extends PlayerAnimationHandler.PlayerA
     }
     
     @Override
-    public void setupLayerFirstPersonRender(PlayerModel<?> layerModel) {
+    public void setupLayerFirstPersonRender(BipedModel<?> layerModel) {
         if (layerModel instanceof IPlayerModel && AnimUtils.disableFirstPersonAnim) {
             ((IPlayerModel) layerModel).playerAnimator_prepForFirstPersonRender();
         }

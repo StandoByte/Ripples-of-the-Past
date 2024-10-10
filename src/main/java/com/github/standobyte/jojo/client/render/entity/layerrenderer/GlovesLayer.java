@@ -63,7 +63,6 @@ public class GlovesLayer<T extends LivingEntity, M extends PlayerModel<T>> exten
         PlayerModel<AbstractClientPlayerEntity> model = (PlayerModel<AbstractClientPlayerEntity>) glovesModel;
         ResourceLocation texture = getTexture(glovesItem);
         
-//        ClientUtil.setupForFirstPersonRender(model, player);
         ClientUtil.setupForFirstPersonRender(model, player);
         IVertexBuilder vertexBuilder = ItemRenderer.getArmorFoilBuffer(buffer, RenderType.armorCutoutNoCull(texture), false, glovesItemStack.hasFoil());
         ModelRenderer glove = ClientUtil.getArm(model, side);
