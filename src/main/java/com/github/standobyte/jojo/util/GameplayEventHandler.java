@@ -99,6 +99,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.HorizontalFaceBlock;
+import net.minecraft.block.SoundType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
@@ -121,6 +122,7 @@ import net.minecraft.network.play.server.SChatPacket;
 import net.minecraft.network.play.server.SPlayEntityEffectPacket;
 import net.minecraft.network.play.server.SPlaySoundEffectPacket;
 import net.minecraft.network.play.server.SRemoveEntityEffectPacket;
+import net.minecraft.particles.BlockParticleData;
 import net.minecraft.particles.ParticleTypes;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
@@ -136,6 +138,7 @@ import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -1224,6 +1227,16 @@ public class GameplayEventHandler {
                                  and i don't feel like using reflection here */, 
                             dmgSource);
                 }
+            }
+            
+            EffectInstance freezeEffect = dead.getEffect(ModStatusEffects.FREEZE.get());
+            if (freezeEffect != null && freezeEffect.getAmplifier() >= 3 && !(dead instanceof ServerPlayerEntity)) {
+                ((ServerWorld) dead.level).sendParticles(new BlockParticleData(ParticleTypes.BLOCK, Blocks.ICE.defaultBlockState()), 
+                        dead.getX(), dead.getY(0.5), dead.getZ(), 128, 
+                        dead.getBbWidth() / 2, dead.getBbHeight() / 2, dead.getBbWidth() / 2, 0.25);
+                SoundType soundtype = Blocks.ICE.defaultBlockState().getSoundType(dead.level, dead.blockPosition(), null);
+                dead.level.playSound(null, dead.getX(), dead.getY(), dead.getZ(), SoundEvents.GLASS_BREAK, dead.getSoundSource(), 
+                        (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
             }
         }
     }
