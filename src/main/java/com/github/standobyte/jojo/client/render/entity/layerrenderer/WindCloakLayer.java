@@ -1,7 +1,5 @@
 package com.github.standobyte.jojo.client.render.entity.layerrenderer;
 
-import javax.annotation.Nullable;
-
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.init.power.non_stand.pillarman.ModPillarmanActions;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -40,20 +38,10 @@ public class WindCloakLayer<T extends LivingEntity, M extends EntityModel<T>> ex
 	        PlayerModel<T> entitymodel = model;
 	        entitymodel.prepareMobModel(pLivingEntity, pLimbSwing, pLimbSwingAmount, pPartialTicks);
 	        this.getParentModel().copyPropertiesTo(entitymodel);
-	        IVertexBuilder ivertexbuilder = pBuffer.getBuffer(RenderType.energySwirl(getTexture(model, pLivingEntity), this.xOffset(f), f * 0.01F));
+	        IVertexBuilder ivertexbuilder = pBuffer.getBuffer(RenderType.energySwirl(TEXTURE, this.xOffset(f), f * 0.01F));
 	        entitymodel.setupAnim(pLivingEntity, pLimbSwing, pLimbSwingAmount, pAgeInTicks, pNetHeadYaw, pHeadPitch);
 	        entitymodel.renderToBuffer(pMatrixStack, ivertexbuilder, pPackedLight, OverlayTexture.NO_OVERLAY, 0.2F, 0.2F, 0.2F, 0.25F);
     	}
-    }
-    
-    @Nullable
-    private ResourceLocation getTexture(EntityModel<?> model, LivingEntity entity) {
-    	if (INonStandPower.getNonStandPowerOptional(entity)
-                .map(power -> power.getHeldAction(true) == ModPillarmanActions.PILLARMAN_WIND_CLOAK.get())
-                .orElse(false)) {
-            return TEXTURE;
-        }
-        return null;
     }
     
     @Override
@@ -62,7 +50,7 @@ public class WindCloakLayer<T extends LivingEntity, M extends EntityModel<T>> ex
             PlayerRenderer playerRenderer) {
         PlayerModel<AbstractClientPlayerEntity> model = playerRenderer.getModel();
         IFirstPersonHandLayer.defaultRender(side, matrixStack, buffer, light, player, playerRenderer, 
-                model, getTexture(model, player));
+                model, TEXTURE);
     }
     
     protected float xOffset(float p_225634_1_) {

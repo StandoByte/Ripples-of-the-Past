@@ -14,6 +14,7 @@ import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 
+// TODO render the layers in 1st person when the player is invisible
 public interface IFirstPersonHandLayer {
     void renderHandFirstPerson(HandSide side, MatrixStack matrixStack, 
             IRenderTypeBuffer buffer, int light, AbstractClientPlayerEntity player, 
