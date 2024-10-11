@@ -17,6 +17,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCap;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.entity.damaging.projectile.BlockShardEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -172,7 +173,11 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
                 VoxelShapes.joinIsNotEmpty(worldBorder, VoxelShapes.create(aabb.deflate(1.0E-7D)), IBooleanFunction.AND) ? Stream.empty() : Stream.of(worldBorder));
         
         ReuseableStream<Pair<Entity, VoxelShape>> potentialEntityCollisions = new ReuseableStream<>(getEntityCollisions(world, entity, aabb.expandTowards(movementVec), 
-                EntityPredicates.NO_CREATIVE_OR_SPECTATOR.and(e -> e.isPickable() && (attackerStandUser == null || e instanceof LivingEntity && MCUtil.canHarm(attackerStandUser, (LivingEntity) e)))));
+                EntityPredicates.NO_CREATIVE_OR_SPECTATOR.and(
+                        e -> e.isPickable()
+                        && (attackerStandUser == null || MCUtil.canHarm(attackerStandUser, e))
+                        && !(entity instanceof LivingEntity && !MCUtil.canHarm((LivingEntity) entity, e))
+                        )));
         Collection<Entity> entitiesCollided = new ArrayList<>();
         collideEntities(aabb, movementVec, world, 
                 worldBorderCollision, potentialEntityCollisions, 

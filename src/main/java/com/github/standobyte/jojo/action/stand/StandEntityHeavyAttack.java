@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
@@ -334,32 +335,33 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         
         @Override
         protected boolean onAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, float damage) {
-            if (target instanceof StandEntity) {
-                StandEntity targetStand = (StandEntity) target;
-                StandEntityAction opponentTask = targetStand.getCurrentTaskAction();
-                if (opponentTask instanceof StandEntityHeavyAttack) {
-                    StandEntityHeavyAttack opponentAttack = (StandEntityHeavyAttack) opponentTask;
-                    if (opponentAttack.canBeParried()
-                            && targetStand.getCurrentTaskPhase().get() == StandEntityAction.Phase.WINDUP
-                            && targetStand.canBlockOrParryFromAngle(dmgSource.getSourcePosition())) {
-                        // TODO MORE spark particles
-                        // TODO "loser gets knocked back" what did i mean?
-                        // TODO a few ticks of freeze?
-                        targetStand.stopTask(true);
-                        
-                        SoundEvent thisSound = this.getImpactSound();
-                        if (thisSound != null) {
-                            stand.playSound(thisSound, 1.0F, 1.0F, null, targetStand.getEyePosition(1));
-                        }
-
-                        SoundEvent opponentSound = opponentAttack.punchSound != null ? opponentAttack.punchSound.get() : null;
-                        if (opponentSound != null) {
-                            targetStand.playSound(opponentSound, 1.0F, 1.0F, null, stand.getEyePosition(1));
-                        }
-                        // i should really do camera shake
-                    }
-                }
-            }
+            // FIXME heavy punch clashes
+//            if (target instanceof StandEntity) {
+//                StandEntity targetStand = (StandEntity) target;
+//                StandEntityAction opponentTask = targetStand.getCurrentTaskAction();
+//                if (opponentTask instanceof StandEntityHeavyAttack) {
+//                    StandEntityHeavyAttack opponentAttack = (StandEntityHeavyAttack) opponentTask;
+//                    if (opponentAttack.canBeParried()
+//                            && targetStand.getCurrentTaskPhase().get() == StandEntityAction.Phase.WINDUP
+//                            && targetStand.canBlockOrParryFromAngle(dmgSource.getSourcePosition())) {
+//                        // TODO MORE spark particles
+//                        // TODO "loser gets knocked back" what did i mean?
+//                        // TODO a few ticks of freeze?
+//                        targetStand.stopTask(true);
+//                        
+//                        SoundEvent thisSound = this.getImpactSound();
+//                        if (thisSound != null) {
+//                            stand.playSound(thisSound, 1.0F, 1.0F, null, targetStand.getEyePosition(1));
+//                        }
+//
+//                        SoundEvent opponentSound = opponentAttack.punchSound != null ? opponentAttack.punchSound.get() : null;
+//                        if (opponentSound != null) {
+//                            targetStand.playSound(opponentSound, 1.0F, 1.0F, null, stand.getEyePosition(1));
+//                        }
+//                        // i should really do camera shake
+//                    }
+//                }
+//            }
             
             return super.onAttack(stand, target, dmgSource, damage);
         }
@@ -367,15 +369,21 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         @Override
         protected void afterAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, StandEntityTask task, boolean hurt, boolean killed) {
             if (!stand.level.isClientSide() && hurt) {
+                Entity knockedBack = target;
                 if (target instanceof StandEntity && !killed) {
                     StandEntity standTarget = (StandEntity) target;
                     if (standTarget.getCurrentTask().isPresent() && standTarget.getCurrentTaskAction().stopOnHeavyAttack(this)) {
                         standTarget.stopTaskWithRecovery();
                     }
+                    LivingEntity standUser = standTarget.getUser();
+                    if (standUser != null) {
+                        knockedBack = standUser;
+                    }
                 }
                 
-                KnockbackCollisionImpact.getHandler(target).ifPresent(
-                        cap -> cap.onPunchSetKnockbackImpact(target.getDeltaMovement(), stand));
+                Entity _knockedBack = knockedBack;
+                KnockbackCollisionImpact.getHandler(_knockedBack).ifPresent(
+                        cap -> cap.onPunchSetKnockbackImpact(_knockedBack.getDeltaMovement(), stand));
             }
             super.afterAttack(stand, target, dmgSource, task, hurt, killed);
         }

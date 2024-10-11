@@ -199,30 +199,31 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
         
         @Override
         protected boolean onAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, float damage) {
-            if (!target.level.isClientSide() && target instanceof StandEntity) {
-                StandEntity targetStand = (StandEntity) target;
-                StandEntityAction opponentTask = targetStand.getCurrentTaskAction();
-                if (opponentTask instanceof StandEntityLightAttack) {
-                    StandEntityLightAttack opponentAttack = (StandEntityLightAttack) opponentTask;
-                    if (targetStand.getCurrentTaskPhase().get() == StandEntityAction.Phase.WINDUP
-                            && targetStand.canBlockOrParryFromAngle(dmgSource.getSourcePosition())) {
-                        // TODO slight knockback
-                        // TODO spark particles
-                        targetStand.stopTask(true);
-                        
-                        SoundEvent thisSound = this.getImpactSound();
-                        if (thisSound != null) {
-                            stand.playSound(thisSound, 1.0F, 1.0F, null, targetStand.getEyePosition(1));
-                        }
-                        
-                        SoundEvent opponentSound = opponentAttack.punchSound != null ? opponentAttack.punchSound.get() : null;
-                        if (opponentSound != null) {
-                            targetStand.playSound(opponentSound, 1.0F, 1.0F, null, stand.getEyePosition(1));
-                        }
-                        return true;
-                    }
-                }
-            }
+            // FIXME light punch clashes
+//            if (!target.level.isClientSide() && target instanceof StandEntity) {
+//                StandEntity targetStand = (StandEntity) target;
+//                StandEntityAction opponentTask = targetStand.getCurrentTaskAction();
+//                if (opponentTask instanceof StandEntityLightAttack) {
+//                    StandEntityLightAttack opponentAttack = (StandEntityLightAttack) opponentTask;
+//                    if (targetStand.getCurrentTaskPhase().get() == StandEntityAction.Phase.WINDUP
+//                            && targetStand.canBlockOrParryFromAngle(dmgSource.getSourcePosition())) {
+//                        // TODO slight knockback
+//                        // TODO spark particles
+//                        targetStand.stopTask(true);
+//                        
+//                        SoundEvent thisSound = this.getImpactSound();
+//                        if (thisSound != null) {
+//                            stand.playSound(thisSound, 1.0F, 1.0F, null, targetStand.getEyePosition(1));
+//                        }
+//                        
+//                        SoundEvent opponentSound = opponentAttack.punchSound != null ? opponentAttack.punchSound.get() : null;
+//                        if (opponentSound != null) {
+//                            targetStand.playSound(opponentSound, 1.0F, 1.0F, null, stand.getEyePosition(1));
+//                        }
+//                        return true;
+//                    }
+//                }
+//            }
             
             return super.onAttack(stand, target, dmgSource, damage);
         }
