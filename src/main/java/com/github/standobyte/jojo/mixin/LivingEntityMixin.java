@@ -1,15 +1,12 @@
 package com.github.standobyte.jojo.mixin;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.github.standobyte.jojo.capability.entity.living.LivingWallClimbing;
-import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
 import com.github.standobyte.jojo.util.mc.damage.NoKnockbackOnBlocking;
 
 import net.minecraft.entity.CreatureAttribute;
@@ -28,18 +25,6 @@ public abstract class LivingEntityMixin extends Entity {
 
     @Inject(method = "getMobType", at = @At("HEAD"), cancellable = true)
     public void jojoPlayerUndeadCreature(CallbackInfoReturnable<CreatureAttribute> ci) {}
-    
-    
-    @Shadow
-    protected abstract void hurtArmor(DamageSource damageSource, float damageAmount);
-
-    @Redirect(method = "getDamageAfterArmorAbsorb", at = @At(
-            value = "INVOKE", target = "Lnet/minecraft/entity/LivingEntity;hurtArmor(Lnet/minecraft/util/DamageSource;F)V"))
-    public void jojoBarrageLessArmorBreaking(LivingEntity entity, DamageSource damageSource, float damageAmount) {
-        if (!(damageSource instanceof IModdedDamageSource && ((IModdedDamageSource) damageSource).preventsDamagingArmor())) {
-            hurtArmor(damageSource, damageAmount);
-        }
-    }
     
     
     @Inject(method = "onClimbable", at = @At("HEAD"), cancellable = true)
