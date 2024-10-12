@@ -65,20 +65,19 @@ public class HamonProtection extends HamonAction {
 
     public float reduceDamageAmount(INonStandPower power, LivingEntity user, 
             DamageSource dmgSource, float dmgAmount) {
-        float damageReductionMult;
-        if (user.getType() == ModEntityTypes.HAMON_MASTER.get()) {
-            damageReductionMult = 1;
-        }
-        
-        else {
-            HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
-            float energyCost = dmgAmount * 75;
-            damageReductionMult = hamon.consumeHamonEnergyTo(efficiency -> {
-                float baseReduction = 0.4F + hamon.getHamonControlLevelRatio() * 0.2F;
-                hamon.hamonPointsFromAction(HamonStat.CONTROL, Math.min(energyCost, power.getEnergy()) * efficiency);
-                return MathHelper.clamp(baseReduction * efficiency, 0, 1);
-            }, energyCost);
-        }
+        float damageReductionMult = power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
+            if (user.getType() == ModEntityTypes.HAMON_MASTER.get()) {
+                return 1f;
+            }
+            else {
+                float energyCost = dmgAmount * 75;
+                return hamon.consumeHamonEnergyTo(efficiency -> {
+                    float baseReduction = 0.4F + hamon.getHamonControlLevelRatio() * 0.2F;
+                    hamon.hamonPointsFromAction(HamonStat.CONTROL, Math.min(energyCost, power.getEnergy()) * efficiency);
+                    return MathHelper.clamp(baseReduction * efficiency, 0, 1);
+                }, energyCost);
+            }
+        }).orElse(0f);
         
         if (damageReductionMult > 0) {
             float damageReduced = dmgAmount * damageReductionMult;

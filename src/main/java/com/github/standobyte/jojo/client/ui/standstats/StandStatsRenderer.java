@@ -377,12 +377,15 @@ public class StandStatsRenderer {
                 
                 switch (statRankLetter) {
                 case "∅":
+                    letterWidth = 9;
                     renderLetterFromTex(matrixStack, letterAlpha, invertBnW, statX, statY, letterWidth, 0, 504);
                     break;
                 case "∞":
+                    letterWidth = 9;
                     renderLetterFromTex(matrixStack, letterAlpha, invertBnW, statX, statY, letterWidth, 12, 504);
                     break;
                 case REFERENCE_MARK:
+                    letterWidth = 9;
                     renderLetterFromTex(matrixStack, letterAlpha, invertBnW, statX + 1f, statY, letterWidth, 24, 504);
                     break;
                 default:
