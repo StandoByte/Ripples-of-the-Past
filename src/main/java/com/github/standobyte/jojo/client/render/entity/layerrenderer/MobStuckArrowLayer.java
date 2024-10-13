@@ -1,17 +1,12 @@
 package com.github.standobyte.jojo.client.render.entity.layerrenderer;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.lang.reflect.ParameterizedType;
 import java.util.Random;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
-import org.apache.commons.lang3.reflect.FieldUtils;
-
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.client.render.entity.util.ModelCubeWeightedList;
 import com.github.standobyte.jojo.entity.itemprojectile.KnifeEntity;
-import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -22,48 +17,80 @@ import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.monster.SlimeEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.util.math.MathHelper;
 
 public class MobStuckArrowLayer<T extends LivingEntity, M extends EntityModel<T>> extends LayerRenderer<T, M> {
-    private List<ModelRenderer> modelParts;
+    private final LivingRenderer<T, M> renderer;
+    private ModelCubeWeightedList modelCubes;
     private final EntityRendererManager dispatcher;
-    private ArrowEntity arrow;
-    private KnifeEntity knife;
+    private Entity arrow;
+    private boolean slime;
     
     public MobStuckArrowLayer(LivingRenderer<T, M> renderer) {
         super(renderer);
+        this.renderer = renderer;
         this.dispatcher = renderer.getDispatcher();
     }
     
     @Override
     public void render(MatrixStack pMatrixStack, IRenderTypeBuffer pBuffer, int pPackedLight, T pLivingEntity, 
             float pLimbSwing, float pLimbSwingAmount, float pPartialTicks, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
+        boolean init = true;
+        float[] scaleBack = DEFAULT_SCALE;
         for (Type projectileType : Type.values()) {
             int num = numStuck(projectileType, pLivingEntity);
             if (num > 0) {
-                if (modelParts == null) {
-                    lazyInitModelParts();
+                if (init) {
+                    lazyInitLayer(pLivingEntity);
+                    if (!modelCubes.cacheVisibleCubes()) {
+                        return;
+                    }
+                    scaleBack = scaleBackEntity(pLivingEntity, pPartialTicks);
+                    init = false;
                 }
-                if (modelParts.isEmpty()) return;
                 
-                Random random = new Random((long) pLivingEntity.getId());
+                Random random = new Random((long) pLivingEntity.getId() + projectileType.ordinal());
                 for (int i = 0; i < num; ++i) {
+                    ModelCubeWeightedList.ModelCube modelCube = modelCubes.getRandomCube(random);
                     pMatrixStack.pushPose();
-                    ModelRenderer modelrenderer = modelParts.get(random.nextInt(this.modelParts.size()));
-                    ModelRenderer.ModelBox modelrenderer$modelbox = modelrenderer.getRandomCube(random);
-                    modelrenderer.translateAndRotate(pMatrixStack);
-                    float f = random.nextFloat();
-                    float f1 = random.nextFloat();
-                    float f2 = random.nextFloat();
-                    float f3 = MathHelper.lerp(f, modelrenderer$modelbox.minX, modelrenderer$modelbox.maxX) / 16.0F;
-                    float f4 = MathHelper.lerp(f1, modelrenderer$modelbox.minY, modelrenderer$modelbox.maxY) / 16.0F;
-                    float f5 = MathHelper.lerp(f2, modelrenderer$modelbox.minZ, modelrenderer$modelbox.maxZ) / 16.0F;
+                    modelCube.translateAndRotate(pMatrixStack);
+                    ModelRenderer.ModelBox modelBox = modelCube.cube();
+                    float minX = modelBox.minX;
+                    float maxX = modelBox.maxX;
+                    float minY = modelBox.minY;
+                    float maxY = modelBox.maxY;
+                    float minZ = modelBox.minZ;
+                    float maxZ = modelBox.maxZ;
+                    // TODO fix with AgeableModel
+                    
+                    float f = 0;
+                    float f1 = 0;
+                    float f2 = 0;
+                    if (slime) {
+                        f  = random.nextFloat() * 0.5f + 0.25f;
+                        f1 = random.nextFloat() * 0.5f + 0.25f;
+                        f2 = random.nextFloat() * 0.5f + 0.25f;
+                    }
+                    else switch (random.nextInt(6)) {
+                    case 0: f = 0;                  f1 = random.nextFloat(); f2 = random.nextFloat(); break;
+                    case 1: f = 1;                  f1 = random.nextFloat(); f2 = random.nextFloat(); break;
+                    case 2: f = random.nextFloat(); f1 = 0;                  f2 = random.nextFloat(); break;
+                    case 3: f = random.nextFloat(); f1 = 1;                  f2 = random.nextFloat(); break;
+                    case 4: f = random.nextFloat(); f1 = random.nextFloat(); f2 = 0;                  break;
+                    case 5: f = random.nextFloat(); f1 = random.nextFloat(); f2 = 1;                  break;
+                    }
+                    
+                    float f3 = MathHelper.lerp(f,  minX, maxX) / 16.0F;
+                    float f4 = MathHelper.lerp(f1, minY, maxY) / 16.0F;
+                    float f5 = MathHelper.lerp(f2, minZ, maxZ) / 16.0F;
                     pMatrixStack.translate((double)f3, (double)f4, (double)f5);
                     f = -1.0F * (f * 2.0F - 1.0F);
                     f1 = -1.0F * (f1 * 2.0F - 1.0F);
                     f2 = -1.0F * (f2 * 2.0F - 1.0F);
-                    this.renderStuckItem(projectileType, pMatrixStack, pBuffer, pPackedLight, pLivingEntity, f, f1, f2, pPartialTicks);
+                    pMatrixStack.scale(scaleBack[0], scaleBack[1], scaleBack[2]);
+                    this.renderStuckItem(projectileType, pMatrixStack, pBuffer, pPackedLight, pLivingEntity, f, f1, f2, pPartialTicks, random);
                     pMatrixStack.popPose();
                 }
             }
@@ -73,36 +100,46 @@ public class MobStuckArrowLayer<T extends LivingEntity, M extends EntityModel<T>
     protected int numStuck(Type projectileType, T entity) {
         switch (projectileType) {
         case ARROW:
-            return entity.getArrowCount();
+            return entity.getArrowCount() + 6;
         case KNIFE:
             return entity.getCapability(LivingUtilCapProvider.CAPABILITY).map(
-                    data -> data.getStuckObjects().getKnives().getCount()).orElse(0);
+                    data -> data.getStuckObjects().getKnives().getCount()).orElse(0) + 4;
         default:
             throw new AssertionError();
         }
     }
     
-    protected void renderStuckItem(Type projectileType, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, Entity entity, 
-            float x, float y, float z, float partialTick) {
+    protected void renderStuckItem(Type projectileType, MatrixStack matrixStack, IRenderTypeBuffer buffer, 
+            int packedLight, T entity, float x, float y, float z, float partialTick, Random random) {
+        matrixStack.pushPose();
         float f = MathHelper.sqrt(x * x + z * z);
         switch (projectileType) {
         case ARROW:
             arrow = new ArrowEntity(entity.level, entity.getX(), entity.getY(), entity.getZ());
-            arrow.yRot = (float)(Math.atan2((double)x, (double)z) * (double)(180F / (float)Math.PI));
-            arrow.xRot = (float)(Math.atan2((double)y, (double)f) * (double)(180F / (float)Math.PI));
-            arrow.yRotO = arrow.yRot;
-            arrow.xRotO = arrow.xRot;
-            dispatcher.render(arrow, 0.0D, 0.0D, 0.0D, 0.0F, partialTick, matrixStack, buffer, packedLight);
             break;
         case KNIFE:
-            knife = new KnifeEntity(entity.level, entity.getX(), entity.getY(), entity.getZ());
-            knife.yRot = (float)(Math.atan2((double)x, (double)z) * (double)(180F / (float)Math.PI));
-            knife.xRot = (float)(Math.atan2((double)y, (double)f) * (double)(180F / (float)Math.PI));
-            knife.yRotO = knife.yRot;
-            knife.xRotO = knife.xRot;
-            dispatcher.render(knife, 0.0D, 0.0D, 0.0D, 0.0F, partialTick, matrixStack, buffer, packedLight);
+            arrow = new KnifeEntity(entity.level, entity.getX(), entity.getY(), entity.getZ());
             break;
         }
+
+        arrow.yRot = (float)(Math.atan2((double)x, (double)z) * (double)(180F / (float)Math.PI));
+        arrow.xRot = (float)(Math.atan2((double)y, (double)f) * (double)(180F / (float)Math.PI));
+        arrow.yRotO = arrow.yRot;
+        arrow.xRotO = arrow.xRot;
+        dispatcher.render(arrow, 0.0D, 0.0D, 0.0D, 0.0F, partialTick, matrixStack, buffer, packedLight);
+        matrixStack.popPose();
+    }
+    
+    private static final float[] DEFAULT_SCALE = { 1, 1, 1 };
+    private float[] scaleBackEntity(T entity, float partialTick) {
+//        MatrixStack matrixStack = new MatrixStack();
+//        renderer.scale(entity, matrixStack, partialTick);
+//        Matrix4f scaled = matrixStack.last().pose();
+//        float scaleX = scaled.m00;
+//        float scaleY = scaled.m11;
+//        float scaleZ = scaled.m22;
+//        return new float[] { 1 / scaleX, 1 / scaleY, 1 / scaleZ };
+        return DEFAULT_SCALE;
     }
     
     private enum Type {
@@ -110,43 +147,15 @@ public class MobStuckArrowLayer<T extends LivingEntity, M extends EntityModel<T>
         KNIFE
     }
     
-    
-    private void lazyInitModelParts() {
-        if (modelParts == null) {
+    private void lazyInitLayer(T entityExample) {
+        if (modelCubes == null) {
             M model = getParentModel();
             if (model != null) {
-                List<ModelRenderer> inModModelParts = FieldUtils.getAllFieldsList(model.getClass()).stream()
-                        .filter(field -> ModelRenderer.class.isAssignableFrom(field.getType()))
-                        .flatMap(field -> {
-                            field.setAccessible(true);
-                            ModelRenderer inModModelPart;
-                            try {
-                                inModModelPart = (ModelRenderer) field.get(model);
-                                return Stream.of(inModModelPart);
-                            } catch (IllegalArgumentException | IllegalAccessException e) {
-                                return Stream.empty();
-                            }
-                        })
-                        .collect(Collectors.toList());
-                
-                List<ModelRenderer> prevGen = new ArrayList<>(inModModelParts);
-                List<ModelRenderer> children = new ArrayList<>();
-                do {
-                    for (ModelRenderer modelPart : prevGen) {
-                        children.addAll(ClientReflection.getChildren(modelPart));
-                    }
-                    inModModelParts.addAll(children);
-                    prevGen = children;
-                    children = new ArrayList<>();
-                }
-                while (!children.isEmpty());
-                
-                this.modelParts = inModModelParts.stream()
-                        .filter(modelPart -> !ClientReflection.getCubes(modelPart).isEmpty())
-                        .collect(Collectors.toList());
+                this.modelCubes = ModelCubeWeightedList.fromModel(model);
+                this.slime = entityExample instanceof SlimeEntity;
             }
             else {
-                this.modelParts = Collections.emptyList();
+                this.modelCubes = ModelCubeWeightedList.empty();
             }
         }
     }
