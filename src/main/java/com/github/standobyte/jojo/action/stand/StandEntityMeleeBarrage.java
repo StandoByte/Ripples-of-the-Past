@@ -138,16 +138,23 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
     public void playPunchImpactSound(IPunch punch, TargetType punchType, boolean canPlay, boolean playAlways) {
         StandEntity stand = punch.getStand();
         if (!stand.level.isClientSide()) {
+            boolean playSound = canPlay && (playAlways || punch.playImpactSound());
             SoundEvent sound = punch.getImpactSound();
             Vector3d pos = punch.getImpactSoundPos();
-            PacketManager.sendToClientsTracking(
-                    sound != null && pos != null && canPlay && (playAlways || punch.playImpactSound()) ? 
-                            new TrBarrageHitSoundPacket(stand.getId(), sound, pos)
-                            : TrBarrageHitSoundPacket.noSound(stand.getId()), 
-            stand);
+            tickBarrageSound(playSound, sound, pos, stand);
         }
     }
-
+    
+    public static void tickBarrageSound(boolean playSound, SoundEvent sound, Vector3d soundPos, StandEntity stand) {
+        if (!stand.level.isClientSide()) {
+            PacketManager.sendToClientsTracking(
+                    playSound && sound != null && soundPos != null ? 
+                            new TrBarrageHitSoundPacket(stand.getId(), sound, soundPos)
+                            : TrBarrageHitSoundPacket.noSound(stand.getId()), 
+                            stand);
+        }
+    }
+    
     @Override
     public StandRelativeOffset getOffsetFromUser(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
         double minOffset = Math.min(0.5, standEntity.getMaxEffectiveRange());

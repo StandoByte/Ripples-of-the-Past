@@ -24,8 +24,6 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
-import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.TrBarrageHitSoundPacket;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.type.EntityStandType;
 import com.github.standobyte.jojo.util.general.OptionalUtil;
@@ -379,11 +377,7 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     protected void barrageVisualsTick(StandEntity stand, boolean playSound, Vector3d soundPos) {
         if (!stand.level.isClientSide()) {
             SoundEvent hitSound = barrageVisuals.get() != null ? barrageVisuals.get().getHitSound() : null;
-            if (hitSound != null) {
-                PacketManager.sendToClientsTracking(playSound && soundPos != null ? 
-                        new TrBarrageHitSoundPacket(stand.getId(), hitSound, soundPos)
-                        : TrBarrageHitSoundPacket.noSound(stand.getId()), stand);
-            }
+            StandEntityMeleeBarrage.tickBarrageSound(playSound, hitSound, soundPos, stand);
         }
     }
     

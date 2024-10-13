@@ -65,6 +65,8 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Nullable
     private IStandManifestation standManifestation = null;
     private float stamina;
+    private float staminaAddNextTick = 0;
+    private boolean sendStaminaToTracking = false;
     
     private final ResolveCounter resolveCounter;
     private boolean skippedProgression;
@@ -262,7 +264,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     public float getStamina() {
         return isStaminaInfinite() ? getMaxStamina() : stamina;
     }
-
+    
     @Override
     public float getMaxStamina() {
         if (!usesStamina()) {
@@ -283,7 +285,6 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
         setStamina(MathHelper.clamp(this.stamina + amount, 0, getMaxStamina()), sendToClient);
     }
 
-    private float staminaAddNextTick = 0;
     @Override
     public boolean consumeStamina(float amount, boolean ticking) {
         if (isStaminaInfinite()) {
@@ -315,24 +316,34 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     
     private void setStamina(float amount, boolean sendToClient) {
         amount = MathHelper.clamp(amount, 0, getMaxStamina());
-        if (this.stamina != amount) {
+        if (this.stamina != amount && user != null && (!user.level.isClientSide() || user == ClientUtil.getClientPlayer())) {
             this.stamina = amount;
-            if (sendToClient && user != null && !user.level.isClientSide()) {
-                PacketManager.sendToClientsTrackingAndSelf(new TrStaminaPacket(user.getId(), getStamina()), user);
+            if (sendToClient) {
+                serverPlayerUser.ifPresent(player -> PacketManager.sendToClient(new TrStaminaPacket(user.getId(), getStamina()), player));
+                sendStaminaToTracking = true;
             }
         }
     }
     
     private void tickStamina() {
         if (usesStamina()) {
+            float prevStamina = getStamina();
             addStamina(getStaminaTickGain() + staminaAddNextTick, false);
             staminaAddNextTick = 0;
             
-            LivingEntity user = getUser();
-            if (!user.level.isClientSide()) {
-                PacketManager.sendToClientsTracking(new TrStaminaPacket(user.getId(), getStamina()), user);
+            if (user != null && !user.level.isClientSide()) {
+                float curStamina = getStamina();
+                if (sendStaminaToTracking || prevStamina != curStamina) {
+                    PacketManager.sendToClientsTracking(new TrStaminaPacket(user.getId(), curStamina), user);
+                    sendStaminaToTracking = false;
+                }
             }
         }
+    }
+    
+    @Override
+    public void clPacketSetStamina(float amount) {
+        this.stamina = amount;
     }
     
     @Override

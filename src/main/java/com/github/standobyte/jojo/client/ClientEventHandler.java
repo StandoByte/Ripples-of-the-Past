@@ -506,17 +506,18 @@ public class ClientEventHandler {
             });
         }
         
-        if (event.getType() == EXPERIENCE && mc.gameMode.hasExperience()
-                && mc.player.hasEffect(ModStatusEffects.STAND_VIRUS.get())) {
-            IStandPower.getStandPowerOptional(mc.player).ifPresent(power -> {
-                StandArrowHandler handler = power.getStandArrowHandler();
-                int standArrowLevels = handler.getXpLevelsTakenByArrow();
-                if (standArrowLevels > 0) {
-                    MatrixStack matrixStack = event.getMatrixStack();
-                    renderExperienceBar(matrixStack, standArrowLevels, event.getWindow());
-                    event.setCanceled(true);
-                }
-            });
+        if (event.getType() == EXPERIENCE && mc.gameMode.hasExperience()) {
+            if (mc.player.hasEffect(ModStatusEffects.STAND_VIRUS.get())) {
+                IStandPower.getStandPowerOptional(mc.player).ifPresent(power -> {
+                    StandArrowHandler handler = power.getStandArrowHandler();
+                    int standArrowLevels = handler.getXpLevelsTakenByArrow();
+                    if (standArrowLevels > 0) {
+                        MatrixStack matrixStack = event.getMatrixStack();
+                        renderExperienceBar(matrixStack, standArrowLevels, event.getWindow());
+                        event.setCanceled(true);
+                    }
+                });
+            }
         }
     }
 
