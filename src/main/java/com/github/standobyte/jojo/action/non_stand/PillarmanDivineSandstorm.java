@@ -66,15 +66,17 @@ public class PillarmanDivineSandstorm extends PillarmanAction {
     }
     
     public static void auraEffect(LivingEntity user, IParticleData particles, int intensity) {
-    	boolean isUserTheCameraEntity = user == ClientUtil.getCameraEntity();
-    	for (int i = 0; i < intensity; i++) {
-        	CustomParticlesHelper.createHamonAuraParticle(particles, user, 
-                    user.getX() + (Math.random() - 0.5) * (user.getBbWidth() + 0.5F), 
-                    user.getY() + Math.random() * (user.getBbHeight() * 0.5F), 
-                    user.getZ() + (Math.random() - 0.5) * (user.getBbWidth() + 0.5F));
-        }
-        if (isUserTheCameraEntity) {
-            CustomParticlesHelper.summonHamonAuraParticlesFirstPerson(particles, user, intensity / 5);
+        if (user.level.isClientSide()) {
+            boolean isUserTheCameraEntity = user == ClientUtil.getCameraEntity();
+            for (int i = 0; i < intensity; i++) {
+                CustomParticlesHelper.createHamonAuraParticle(particles, user, 
+                        user.getX() + (Math.random() - 0.5) * (user.getBbWidth() + 0.5F), 
+                        user.getY() + Math.random() * (user.getBbHeight() * 0.5F), 
+                        user.getZ() + (Math.random() - 0.5) * (user.getBbWidth() + 0.5F));
+            }
+            if (isUserTheCameraEntity) {
+                CustomParticlesHelper.summonHamonAuraParticlesFirstPerson(particles, user, intensity / 5);
+            }
         }
     }
     

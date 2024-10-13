@@ -74,6 +74,7 @@ public class PillarmanAbsorption extends PillarmanAction {
             Effects.WEAKNESS,
             Effects.CONFUSION
     };
+    
     public static boolean absorb(World world, LivingEntity attacker, LivingEntity target, float absorbDamage) {
         if (HamonUtil.preventBlockDamage(target, attacker.level, null, null, 
                 new EntityDamageSource(DamageUtil.PILLAR_MAN_ABSORPTION.getMsgId(), attacker), absorbDamage)) {
@@ -83,8 +84,8 @@ public class PillarmanAbsorption extends PillarmanAction {
             Vector3d particlesPos = userPos.add(targetPos.subtract(userPos).scale(0.5));
             if (world.isClientSide()) {
             	HamonSparksLoopSound.playSparkSound(attacker, particlesPos, 1.0F, true);
+            	CustomParticlesHelper.createHamonSparkParticles(null, particlesPos, 1);
             }
-            CustomParticlesHelper.createHamonSparkParticles(null, particlesPos, 1);
             return false;
         }
         
