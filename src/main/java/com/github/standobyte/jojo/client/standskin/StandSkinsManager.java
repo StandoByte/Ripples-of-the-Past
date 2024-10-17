@@ -30,6 +30,7 @@ import com.github.standobyte.jojo.client.resources.models.StandModelOverrides;
 import com.github.standobyte.jojo.client.resources.models.StandModelOverrides.CustomModelPrepared;
 import com.github.standobyte.jojo.client.resources.models.StandModelOverrides.Format;
 import com.github.standobyte.jojo.client.resources.models.StandModelOverrides.ModelPathInfo;
+import com.github.standobyte.jojo.client.ui.text.JojoTextComponentWrapper;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
@@ -201,14 +202,14 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
             if (customModels == null) {
                 customModels = new ArrayList<>();
             }
-            customModels.add(Pair.of(modelResLoc, new CustomModelPrepared(modelJson, format)));
+            customModels.add(Pair.of(modelResLoc, new CustomModelPrepared(modelJson, format, StandModelOverrides.ModelType.STAND)));
         }
         
         void apply(StandSkin skin) {
             if (customModels != null) {
                 for (Pair<ResourceLocation, CustomModelPrepared> customModelData : customModels) {
-                    ResourceLocation modelResLoc = StandModelOverrides.clearFormatExtension(customModelData.getLeft());
                     CustomModelPrepared modelJson = customModelData.getRight();
+                    ResourceLocation modelResLoc = modelJson.clearFormatExtension(customModelData.getLeft());
                     StandModelOverrides.createStandModelFromJson(modelResLoc, modelJson).ifPresent(model -> {
                         skin.standModels.cacheValue(model.getKey(), model.getValue());
                     });
@@ -319,7 +320,11 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
             if (storyPartDefObj.has("key") && storyPartDefObj.has("color")) {
                 IFormattableTextComponent name = new TranslationTextComponent(storyPartDefObj.get("key").getAsString());
                 int color = parseColor(storyPartDefObj.get("color"));
-                return name.withStyle(ClientUtil.textColor(color));
+                name.withStyle(ClientUtil.textColor(color));
+                if (storyPartDefObj.has("sprite")) {
+                    name = new JojoTextComponentWrapper(name).setStoryPartSprite(new ResourceLocation(storyPartDefObj.get("sprite").getAsString()));
+                }
+                return name;
             }
         }
         

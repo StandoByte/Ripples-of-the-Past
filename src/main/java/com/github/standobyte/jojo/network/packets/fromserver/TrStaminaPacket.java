@@ -41,7 +41,7 @@ public class TrStaminaPacket {
             if (userEntity instanceof LivingEntity) {
                 LivingEntity userLiving = (LivingEntity) userEntity;
                 IStandPower.getStandPowerOptional(userLiving).ifPresent(power -> {
-                    power.setStamina(msg.stamina);
+                    power.clPacketSetStamina(msg.stamina);
                 });
             }
         }

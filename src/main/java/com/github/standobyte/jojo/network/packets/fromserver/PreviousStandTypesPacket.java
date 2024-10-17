@@ -46,7 +46,7 @@ public class PreviousStandTypesPacket {
             if (!msg.clear) {
                 buf.writeBoolean(msg.sendingAll);
                 if (msg.sendingAll) {
-                    NetworkUtil.writeCollection(buf, msg.allStands, type -> buf.writeRegistryId(type), false);
+                    NetworkUtil.writeCollection(buf, msg.allStands, buf::writeRegistryId, false);
                 }
                 else {
                     buf.writeRegistryId(msg.newStand);

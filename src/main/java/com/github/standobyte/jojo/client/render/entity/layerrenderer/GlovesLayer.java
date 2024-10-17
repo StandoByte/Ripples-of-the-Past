@@ -1,20 +1,15 @@
 package com.github.standobyte.jojo.client.render.entity.layerrenderer;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
 import com.github.standobyte.jojo.item.GlovesItem;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.ItemRenderer;
 import net.minecraft.client.renderer.RenderType;
-import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.IEntityRenderer;
 import net.minecraft.client.renderer.entity.PlayerRenderer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
@@ -26,16 +21,12 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 
-public class GlovesLayer<T extends LivingEntity, M extends PlayerModel<T>> extends LayerRenderer<T, M> {
-    private static final Map<PlayerRenderer, GlovesLayer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>> RENDERER_LAYERS = new HashMap<>();
+public class GlovesLayer<T extends LivingEntity, M extends PlayerModel<T>> extends LayerRenderer<T, M> implements IFirstPersonHandLayer {
     private final M glovesModel;
     private final boolean slim;
     
     public GlovesLayer(IEntityRenderer<T, M> renderer, M glovesModel, boolean slim) {
         super(renderer);
-        if (renderer instanceof PlayerRenderer) {
-            RENDERER_LAYERS.put((PlayerRenderer) renderer, (GlovesLayer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>) this);
-        }
         this.glovesModel = glovesModel;
         this.slim = slim;
         PlayerAnimationHandler.getPlayerAnimator().onArmorLayerInit(this);
@@ -62,39 +53,20 @@ public class GlovesLayer<T extends LivingEntity, M extends PlayerModel<T>> exten
         }
     }
     
-    
-    
-    public static void renderFirstPerson(HandSide side, MatrixStack matrixStack, 
-            IRenderTypeBuffer buffer, int light, AbstractClientPlayerEntity player) {
-        EntityRenderer<?> renderer = Minecraft.getInstance().getEntityRenderDispatcher().getRenderer(player);
-        if (renderer instanceof PlayerRenderer) {
-            PlayerRenderer playerRenderer = (PlayerRenderer) renderer;
-            if (RENDERER_LAYERS.containsKey(playerRenderer)) {
-                GlovesLayer<?, ?> layer = RENDERER_LAYERS.get(playerRenderer);
-                if (layer != null) {
-                    layer.renderHandFirstPerson(side, matrixStack, 
-                            buffer, light, player, playerRenderer);
-                }
-            }
-        }
-    }
-    
-    private void renderHandFirstPerson(HandSide side, MatrixStack matrixStack, 
+    @Override
+    public void renderHandFirstPerson(HandSide side, MatrixStack matrixStack, 
             IRenderTypeBuffer buffer, int light, AbstractClientPlayerEntity player, 
             PlayerRenderer playerRenderer) {
-        if (player.isSpectator()) return;
-        
         ItemStack glovesItemStack = getRenderedGlovesItem(player);
         if (glovesItemStack.isEmpty()) return;
-        
-        PlayerModel<AbstractClientPlayerEntity> model = playerRenderer.getModel();
-        ClientUtil.setupForFirstPersonRender(model, player);
         GlovesItem glovesItem = (GlovesItem) glovesItemStack.getItem();
-        ClientUtil.setupForFirstPersonRender((PlayerModel<AbstractClientPlayerEntity>) glovesModel, player);
+        PlayerModel<AbstractClientPlayerEntity> model = (PlayerModel<AbstractClientPlayerEntity>) glovesModel;
+        ResourceLocation texture = getTexture(glovesItem);
+        
+        ClientUtil.setupForFirstPersonRender(model, player);
+        IVertexBuilder vertexBuilder = ItemRenderer.getArmorFoilBuffer(buffer, RenderType.armorCutoutNoCull(texture), false, glovesItemStack.hasFoil());
         ModelRenderer glove = ClientUtil.getArm(model, side);
         ModelRenderer gloveOuter = ClientUtil.getArmOuter(model, side);
-        ResourceLocation texture = getTexture(glovesItem);
-        IVertexBuilder vertexBuilder = ItemRenderer.getArmorFoilBuffer(buffer, RenderType.armorCutoutNoCull(texture), false, glovesItemStack.hasFoil());
         glove.xRot = 0.0F;
         glove.render(matrixStack, vertexBuilder, light, OverlayTexture.NO_OVERLAY);
         gloveOuter.xRot = 0.0F;

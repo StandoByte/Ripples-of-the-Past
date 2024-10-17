@@ -71,7 +71,7 @@ public class ModCriteriaTriggers {
             new CriteriaTriggerSupplier<>(() -> new UnconditionalTrigger(new ResourceLocation(JojoMod.MOD_ID, "coco_jumbo_key")));
     public static final CriteriaTriggerSupplier<UnconditionalTrigger> MR_PRESIDENT_ROOM_WALLS = 
             new CriteriaTriggerSupplier<>(() -> new UnconditionalTrigger(new ResourceLocation(JojoMod.MOD_ID, "mr_president_walls")));
-    // FIXME (BIIM) un-hide the achievement
+    // TODO (BIIM) un-hide the achievement
     public static final CriteriaTriggerSupplier<RPSGameTrigger> ROCK_PAPER_SCISSORS_GAME = 
             new CriteriaTriggerSupplier<>(() -> new RPSGameTrigger(new ResourceLocation(JojoMod.MOD_ID, "rps_game")));
     public static final CriteriaTriggerSupplier<UnconditionalTrigger> EVOLVE_PILLARMAN = 

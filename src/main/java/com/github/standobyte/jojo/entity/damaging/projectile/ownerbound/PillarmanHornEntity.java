@@ -24,9 +24,9 @@ public class PillarmanHornEntity extends OwnerBoundProjectileEntity {
     
     @Override
     public float getBaseDamage() {
-        return 1.0F;
+        return 0.5F;
     }
-    
+
     @Override
     protected boolean shouldHurtThroughInvulTicks() {
         return true;

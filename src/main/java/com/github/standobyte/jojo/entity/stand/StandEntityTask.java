@@ -282,7 +282,7 @@ public class StandEntityTask {
                 
                 task.target.writeToBuf(buf);
                 
-                NetworkUtil.writeCollection(buf, task.taskModifiers, action -> buf.writeRegistryId(action), false);
+                NetworkUtil.writeCollection(buf, task.taskModifiers, buf::writeRegistryId, false);
                 
                 task.action.taskWriteAdditional(task, buf);
             }

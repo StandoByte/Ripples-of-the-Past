@@ -42,6 +42,7 @@ import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.ActionUseTry;
 import com.github.standobyte.jojo.client.ui.screen.WasdAllowingScreen;
 import com.github.standobyte.jojo.client.ui.screen.controls.HudLayoutEditingScreen;
+import com.github.standobyte.jojo.client.ui.screen.IJojoScreen;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.ItemProjectileEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -125,7 +126,7 @@ public class InputHandler {
     public static final String HUD_CATEGORY = new String("key.categories." + JojoMod.MOD_ID + ".hud");
     public KeyBinding nonStandMode;
     public KeyBinding standMode;
-    public KeyBinding editHotbars;
+    public KeyBinding jojoStuffMenu;
     public KeyBinding disableHotbars;
     public KeyBinding attackHotbar;
     public KeyBinding abilityHotbar;
@@ -173,10 +174,10 @@ public class InputHandler {
         ClientRegistry.registerKeyBinding(toggleStand = new KeyBinding(JojoMod.MOD_ID + ".key.toggle_stand", GLFW_KEY_M, MAIN_CATEGORY));
         ClientRegistry.registerKeyBinding(standRemoteControl = new KeyBinding(JojoMod.MOD_ID + ".key.stand_remote_control", GLFW_KEY_O, MAIN_CATEGORY));
         ClientRegistry.registerKeyBinding(hamonSkillsWindow = new KeyBinding(JojoMod.MOD_ID + ".key.hamon_skills_window", GLFW_KEY_H, MAIN_CATEGORY));
+        ClientRegistry.registerKeyBinding(jojoStuffMenu = new KeyBinding(JojoMod.MOD_ID + ".key.jojo_menu", GLFW_KEY_BACKSLASH, HUD_CATEGORY));
         
         ClientRegistry.registerKeyBinding(nonStandMode = new KeyBinding(JojoMod.MOD_ID + ".key.non_stand_mode", GLFW_KEY_J, HUD_CATEGORY));
         ClientRegistry.registerKeyBinding(standMode = new KeyBinding(JojoMod.MOD_ID + ".key.stand_mode", GLFW_KEY_K, HUD_CATEGORY));
-        ClientRegistry.registerKeyBinding(editHotbars = new KeyBinding(JojoMod.MOD_ID + ".key.edit_hud", GLFW_KEY_BACKSLASH, HUD_CATEGORY));
         
         ClientRegistry.registerKeyBinding(attackHotbar = new KeyBinding(JojoMod.MOD_ID + ".key.attack_hotbar", GLFW_KEY_V, HUD_CATEGORY));
         ClientRegistry.registerKeyBinding(abilityHotbar = new KeyBinding(JojoMod.MOD_ID + ".key.ability_hotbar", GLFW_KEY_B, HUD_CATEGORY));
@@ -355,9 +356,8 @@ public class InputHandler {
                 PacketManager.sendToServer(new ClHamonMeditationPacket(true));
             }
             
-            if (editHotbars.consumeClick() && (standPower.hasPower() || nonStandPower.hasPower())) {
-                HudLayoutEditingScreen screen = new HudLayoutEditingScreen();
-                mc.setScreen(screen);
+            if (jojoStuffMenu.consumeClick()) {
+                IJojoScreen.onScreenKeyPress();
             }
             
             if (!mc.options.keyAttack.isDown()) {
@@ -1043,7 +1043,7 @@ public class InputHandler {
                         boolean atWall = false && mc.player.horizontalCollision;
                         
                         boolean groundLeap = onGround && (mc.player.isPassenger() || input.shiftKeyDown) && input.jumping;
-                        // FIXME wall leap without pressing shift
+                        // TODO wall leap without pressing shift
                         boolean wallLeap = false;
 //                                atWall && !groundLeap && input.jumping &&
 //                                (!leapNeedsShiift || input.shiftKeyDown || false);
@@ -1189,6 +1189,29 @@ public class InputHandler {
         if (standPower != null) standPower.clUpdateHud();
         if (nonStandPower != null) nonStandPower.clUpdateHud();
         heldKeys.clear();
+    }
+    
+    
+    public boolean hasPower(PowerClassification power) {
+        switch (power) {
+        case STAND:
+            return standPower != null && standPower.hasPower();
+        case NON_STAND:
+            return nonStandPower != null && nonStandPower.hasPower();
+        default:
+            return false;
+        }
+    }
+
+    public IPower<?, ?> getPowerCache(PowerClassification power) {
+        switch (power) {
+        case STAND:
+            return standPower;
+        case NON_STAND:
+            return nonStandPower;
+        default:
+            return null;
+        }
     }
     
     

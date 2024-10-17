@@ -1,8 +1,5 @@
 package com.github.standobyte.jojo.client.render.entity.layerrenderer;
 
-import java.util.HashMap;
-import java.util.Map;
-
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
@@ -21,17 +18,14 @@ import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 
-public class ZombieLayer<T extends LivingEntity, M extends EntityModel<T>> extends LayerRenderer<T, M> {
-    private static final Map<PlayerRenderer, ZombieLayer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>> RENDERER_LAYERS = new HashMap<>();
+public class ZombieLayer<T extends LivingEntity, M extends EntityModel<T>> extends LayerRenderer<T, M> implements IFirstPersonHandLayer {
     public static final ResourceLocation TEXTURE = new ResourceLocation(JojoMod.MOD_ID, "textures/entity/biped/sated_zombie.png");
     
     public ZombieLayer(IEntityRenderer<T, M> renderer) {
         super(renderer);
-        if (renderer instanceof PlayerRenderer) {
-            RENDERER_LAYERS.put((PlayerRenderer) renderer, (ZombieLayer<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>>) this);
-        }
     }
     
     @Override
@@ -55,6 +49,15 @@ public class ZombieLayer<T extends LivingEntity, M extends EntityModel<T>> exten
             return TEXTURE;
         }
         return null;
+    }
+    
+    @Override
+    public void renderHandFirstPerson(HandSide side, MatrixStack matrixStack, 
+            IRenderTypeBuffer buffer, int light, AbstractClientPlayerEntity player, 
+            PlayerRenderer playerRenderer) {
+        PlayerModel<AbstractClientPlayerEntity> model = playerRenderer.getModel();
+        IFirstPersonHandLayer.defaultRender(side, matrixStack, buffer, light, player, playerRenderer, 
+                model, getTexture(model, player));
     }
     
 }

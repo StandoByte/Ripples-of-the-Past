@@ -194,14 +194,14 @@ public class CDBlockBulletEntity extends ModdedProjectileEntity {
             setTarget(((ServerWorld) level).getEntity(targetUUID));
         }
         super.writeSpawnData(buffer);
-        NetworkUtil.writeOptionally(buffer, block, bl -> buffer.writeRegistryId(bl));
-        NetworkUtil.writeOptionally(buffer, homingTarget.map(target -> target.getId()).orElse(null), id -> buffer.writeInt(id));
+        NetworkUtil.writeOptionally(buffer, block, buffer::writeRegistryId);
+        NetworkUtil.writeOptionally(buffer, homingTarget.map(target -> target.getId()).orElse(null), buffer::writeInt);
     }
 
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
         super.readSpawnData(additionalData);
         NetworkUtil.readOptional(additionalData, () -> additionalData.readRegistryIdSafe(Block.class)).ifPresent(block -> setBlock(block));
-        NetworkUtil.readOptional(additionalData, () -> additionalData.readInt()).ifPresent(id -> setTarget(level.getEntity(id)));
+        NetworkUtil.readOptional(additionalData, additionalData::readInt).ifPresent(id -> setTarget(level.getEntity(id)));
     }
 }

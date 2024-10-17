@@ -60,7 +60,9 @@ import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.client.settings.PointOfView;
 import net.minecraft.client.util.InputMappings;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.item.Item;
 import net.minecraft.util.ColorHelper;
 import net.minecraft.util.Direction;
@@ -385,6 +387,22 @@ public class ClientUtil {
         RenderSystem.enableDepthTest();
     }
     
+    public static void renderPlayerFace(MatrixStack matrixStack, int x, int y, AbstractClientPlayerEntity player) {
+        Minecraft mc = Minecraft.getInstance();
+        ResourceLocation playerFace = player.getSkinTextureLocation();
+        mc.getTextureManager().bind(playerFace);
+
+        AbstractGui.blit(matrixStack, x, y, 16, 16, 16, 16, 128, 128);
+        if (mc.options.getModelParts().contains(PlayerModelPart.HAT)) {
+            matrixStack.pushPose();
+            matrixStack.translate(x, y, 0);
+            matrixStack.scale(9F/8F, 9F/8F, 0);
+            matrixStack.translate(-1, -1, 0);
+            AbstractGui.blit(matrixStack, 0, 0, 80, 16, 16, 16, 128, 128);
+            matrixStack.popPose();
+        }
+    }
+    
     public static void drawBackdrop(MatrixStack matrixStack, int x, int y, int width, float alpha) {
         Minecraft mc = Minecraft.getInstance();
         int backdropColor = mc.options.getBackgroundColor(0.0F);
@@ -659,7 +677,7 @@ public class ClientUtil {
         return side == HandSide.LEFT ? model.leftSleeve : model.rightSleeve;
     }
     
-    public static void setupForFirstPersonRender(PlayerModel<AbstractClientPlayerEntity> model, AbstractClientPlayerEntity player) {
+    public static <T extends LivingEntity> void setupForFirstPersonRender(BipedModel<T> model, T player) {
         model.rightArmPose = BipedModel.ArmPose.EMPTY;
         model.leftArmPose = BipedModel.ArmPose.EMPTY;
         model.attackTime = 0.0F;

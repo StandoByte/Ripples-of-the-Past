@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.mixin;
 
 import java.util.Map;
 
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -24,7 +25,7 @@ public abstract class MapDataMixin implements IMapDataMixin {
     @Shadow public int z;
     @Shadow public RegistryKey<World> dimension;
     @Shadow public byte scale;
-    @Shadow public Map<String, MapDecoration> decorations;
+    @Shadow @Final public Map<String, MapDecoration> decorations;
     
     @Inject(method = "tickCarriedBy", at = @At("TAIL"))
     public void jojoAddMapTargetDecoration(PlayerEntity player, ItemStack mapStack, CallbackInfo ci) {

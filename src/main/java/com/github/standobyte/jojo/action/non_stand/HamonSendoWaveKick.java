@@ -1,6 +1,9 @@
 package com.github.standobyte.jojo.action.non_stand;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
@@ -74,16 +77,23 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
         if (user.level.isClientSide() && user instanceof PlayerEntity) {
             ModPlayerAnimations.sendoWaveKick.setAnimEnabled((PlayerEntity) user, true);
         }
-        return new Instance(user, userCap, power, this);
+        Instance sendoWaveKick = new Instance(user, userCap, power, this);
+        
+        float energyCost = Math.min(getEnergyCost(power, ActionTarget.EMPTY), power.getEnergy());
+        float efficiency = power.getTypeSpecificData(ModPowers.HAMON.get()).get().getActionEfficiency(energyCost, true);
+        sendoWaveKick.setEnergySpent(energyCost * efficiency);
+        
+        return sendoWaveKick;
     }
     
     
     
     public static class Instance extends ContinuousActionInstance<Instance, INonStandPower> {
-        private int sendoWaveKickPositionWaitingTimer = 0;
-        private boolean gaveThisSendoWaveKickPoints = false;
+        private int positionWaitingTimer = 0;
+        private boolean gavePoints = false;
         private float energySpent;
         private final float initialYRot;
+        private Set<UUID> damagedEntities = new HashSet<>();
 
         public Instance(LivingEntity user, PlayerUtilCap userCap, 
                 INonStandPower playerPower, HamonSendoWaveKick action) {
@@ -91,7 +101,6 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
             this.initialYRot = user.yRot;
         }
         
-        // FIXME ! (hamon 2) set spent energy points to give hamon strength points
         public void setEnergySpent(float energy) {
             this.energySpent = energy;
         }
@@ -115,18 +124,18 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
         public void playerTick() {
             LivingEntity user = getUser();
             if (!user.level.isClientSide()) {
-                if (sendoWaveKickPositionWaitingTimer >= 0) {
+                if (positionWaitingTimer >= 0) {
                     // FIXME ! (hamon 2) check if the client sent position
                     boolean clientSentPosition = true;
                     if (clientSentPosition) {
-                        sendoWaveKickPositionWaitingTimer = -1;
+                        positionWaitingTimer = -1;
                     }
                     else {
-                        sendoWaveKickPositionWaitingTimer++;
+                        positionWaitingTimer++;
                     }
                 }
-                if (sendoWaveKickPositionWaitingTimer < 0 && user.isOnGround()
-                        || sendoWaveKickPositionWaitingTimer >= USUAL_SENDO_WAVE_KICK_DURATION) {
+                if (positionWaitingTimer < 0 && user.isOnGround()
+                        || positionWaitingTimer >= USUAL_SENDO_WAVE_KICK_DURATION) {
                     stopAction();
                     return;
                 }
@@ -135,30 +144,32 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
                         entity -> !entity.is(user) && user.canAttack(entity));
                 boolean points = false;
                 for (LivingEntity target : targets) {
-                    boolean kickDamage = dealPhysicalDamage(user, target);
-                    boolean hamonDamage = DamageUtil.dealHamonDamage(target, 2.5F, user, null);
-                    if (kickDamage || hamonDamage) {
-                        Vector3d vecToTarget = target.position().subtract(user.position());
-                        boolean left = MathHelper.wrapDegrees(
-                                user.yBodyRot - MathUtil.yRotDegFromVec(vecToTarget))
-                                < 0;
-                        float knockbackYRot = (60F + user.getRandom().nextFloat() * 30F) * (left ? 1 : -1);
-                        knockbackYRot += (float) -MathHelper.atan2(vecToTarget.x, vecToTarget.z) * MathUtil.RAD_TO_DEG;
-                        DamageUtil.knockback((LivingEntity) target, 0.75F, knockbackYRot);
-                        
-                        if (hamonDamage) {
-                            points = true;
+                    if (damagedEntities.add(target.getUUID())) {
+                        boolean kickDamage = dealPhysicalDamage(user, target);
+                        boolean hamonDamage = DamageUtil.dealHamonDamage(target, 3.0F, user, null);
+                        if (kickDamage || hamonDamage) {
+                            Vector3d vecToTarget = target.position().subtract(user.position());
+                            boolean left = MathHelper.wrapDegrees(
+                                    user.yBodyRot - MathUtil.yRotDegFromVec(vecToTarget))
+                                    < 0;
+                            float knockbackYRot = (60F + user.getRandom().nextFloat() * 30F) * (left ? 1 : -1);
+                            knockbackYRot += (float) -MathHelper.atan2(vecToTarget.x, vecToTarget.z) * MathUtil.RAD_TO_DEG;
+                            DamageUtil.knockback((LivingEntity) target, 0.75F, knockbackYRot);
+                            
+                            if (hamonDamage) {
+                                points = true;
+                            }
                         }
                     }
                 }
 
-                if (!gaveThisSendoWaveKickPoints && points) {
+                if (!gavePoints && points) {
                     INonStandPower.getNonStandPowerOptional(user).ifPresent(power -> {
                         power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
                             hamon.hamonPointsFromAction(HamonStat.STRENGTH, energySpent); 
                         });
                     });
-                    gaveThisSendoWaveKickPoints = true;
+                    gavePoints = true;
                 }
             }
             

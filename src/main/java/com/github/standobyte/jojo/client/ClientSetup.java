@@ -12,6 +12,7 @@ import com.github.standobyte.jojo.client.controls.HudControlSettings;
 import com.github.standobyte.jojo.client.particle.AirStreamParticle;
 import com.github.standobyte.jojo.client.particle.BloodParticle;
 import com.github.standobyte.jojo.client.particle.CDRestorationParticle;
+import com.github.standobyte.jojo.client.particle.DivineSandstormParticle;
 import com.github.standobyte.jojo.client.particle.HamonAuraParticle;
 import com.github.standobyte.jojo.client.particle.HamonSparkParticle;
 import com.github.standobyte.jojo.client.particle.MeteoriteVirusParticle;
@@ -40,6 +41,7 @@ import com.github.standobyte.jojo.client.render.entity.layerrenderer.LadybugBroo
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.MobStuckArrowLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.PillarmanLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.TornadoOverdriveEffectLayer;
+import com.github.standobyte.jojo.client.render.entity.layerrenderer.WindCloakLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.ZombieLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.barrage.BarrageFistAfterimagesLayer;
 import com.github.standobyte.jojo.client.render.entity.renderer.AfterimageRenderer;
@@ -360,11 +362,12 @@ public class ClientSetup {
         renderer.addLayer(new DivineSandstormEffectLayer<>(renderer));
         renderer.addLayer(new BarrageFistAfterimagesLayer(renderer));
         renderer.addLayer(new EnergyRippleLayer<>(renderer));
-        renderer.addLayer(new GlovesLayer<>(renderer, new GlovesModel<>(0.3F, slim), slim));
         renderer.addLayer(new LadybugBroochLayer<>(renderer));
         renderer.addLayer(new InkLipsLayer<>(renderer));
         addLivingLayers(renderer);
         addBipedLayers(renderer);
+        renderer.addLayer(new GlovesLayer<>(renderer, new GlovesModel<>(0.3F, slim), slim));
+        renderer.addLayer(new WindCloakLayer<>(renderer));
     }
     
     private static <T extends LivingEntity, M extends BipedModel<T>> void addLayersToEntities(EntityRenderer<?> renderer) {
@@ -486,6 +489,7 @@ public class ClientSetup {
         mc.particleEngine.register(ModParticles.RPS_ROCK.get(),             RPSPickPartile.Factory::new);
         mc.particleEngine.register(ModParticles.RPS_PAPER.get(),            RPSPickPartile.Factory::new);
         mc.particleEngine.register(ModParticles.RPS_SCISSORS.get(),         RPSPickPartile.Factory::new);
+        mc.particleEngine.register(ModParticles.SANDSTORM.get(),         DivineSandstormParticle.Factory::new);
 
         CustomParticlesHelper.saveSprites(mc);
         // yep...

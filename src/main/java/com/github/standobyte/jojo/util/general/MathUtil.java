@@ -105,6 +105,15 @@ public class MathUtil {
         return new Vector3d(x, y, z);
     }
     
+    public static Vector3d vecFromAngles(float xRotRad, float yRotRad) {
+        yRotRad = -yRotRad;
+        float f2 = MathHelper.cos(yRotRad);
+        float f3 = MathHelper.sin(yRotRad);
+        float f4 = MathHelper.cos(xRotRad);
+        float f5 = MathHelper.sin(xRotRad);
+        return new Vector3d((double)(f3 * f4), (double)(-f5), (double)(f2 * f4));
+    }
+    
     public static int fractionRandomInc(double num) {
         int numInt = MathHelper.floor(num);
         if (Math.random() < num - (double) numInt) {

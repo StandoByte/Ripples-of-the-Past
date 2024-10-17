@@ -78,9 +78,9 @@ public class HamonHypnosis extends HamonAction {
         }
     }
     
-    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! add proper energy check
+    // FIXME !!!!!!! add proper energy check
     
-    /* FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! to add
+    /* FIXME !!!!!!! to add
      *  spark visuals on cast
      *  spark visuals on hypnotized entities
      */

@@ -59,7 +59,15 @@ public class CustomIconItem {
         SOUL_CLOUD(10),
         RPS_ICONS(11),
         MR_FIREBALL(12),
-        STEVE_MUSCLE(13);
+        STEVE_MUSCLE(13),
+        AWAKEN(14),
+        WIND_MODE(15),
+        HEAT_MODE(16),
+        LIGHT_MODE(17),
+        PILLAR_MAN_PUNCH(18),
+        VAMPIRISM_PUNCH(19),
+        HAMON_PUNCH(20),
+        PILLAR_MAN_EXPLODE(21);
         
         private final int overrideValue;
         

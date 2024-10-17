@@ -19,7 +19,7 @@ public class PillarmanGiantCarthwheelPrison extends PillarmanErraticBlazeKing {
  
     @Override
     public void onHoldTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
-        if (requirementsFulfilled) {
+        if (requirementsFulfilled && world.isClientSide()) {
             PillarmanDivineSandstorm.auraEffect(user, ModParticles.HAMON_AURA_RED.get(), 12);
         }
     }

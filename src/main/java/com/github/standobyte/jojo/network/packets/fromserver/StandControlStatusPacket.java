@@ -42,7 +42,7 @@ public class StandControlStatusPacket {
 
         @Override
         public void handle(StandControlStatusPacket msg, Supplier<NetworkEvent.Context> ctx) {
-            // FIXME when a player dies with the stand summoned, throws "java.lang.IllegalStateException: Player's stand power capability is empty."
+            // FIXME (!) when a player dies with the stand summoned, throws "java.lang.IllegalStateException: Player's stand power capability is empty."
             StandUtil.setManualControl(ClientUtil.getClientPlayer(), msg.manualControl, msg.keepPosition);
         }
 

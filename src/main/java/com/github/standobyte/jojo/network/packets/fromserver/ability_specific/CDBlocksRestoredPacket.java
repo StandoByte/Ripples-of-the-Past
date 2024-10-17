@@ -26,12 +26,12 @@ public class CDBlocksRestoredPacket {
 
         @Override
         public void encode(CDBlocksRestoredPacket msg, PacketBuffer buf) {
-            NetworkUtil.writeCollection(buf, msg.positions, pos -> buf.writeBlockPos(pos), false);
+            NetworkUtil.writeCollection(buf, msg.positions, buf::writeBlockPos, false);
         }
 
         @Override
         public CDBlocksRestoredPacket decode(PacketBuffer buf) {
-            return new CDBlocksRestoredPacket(NetworkUtil.readCollection(buf, () -> buf.readBlockPos()));
+            return new CDBlocksRestoredPacket(NetworkUtil.readCollection(buf, PacketBuffer::readBlockPos));
         }
 
         @Override

@@ -40,9 +40,7 @@ import com.github.standobyte.jojo.client.particle.custom.FirstPersonHamonAura;
 import com.github.standobyte.jojo.client.polaroid.PhotosCache;
 import com.github.standobyte.jojo.client.polaroid.PolaroidHelper;
 import com.github.standobyte.jojo.client.render.block.overlay.TranslucentBlockRenderHelper;
-import com.github.standobyte.jojo.client.render.entity.layerrenderer.FrozenLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.GlovesLayer;
-import com.github.standobyte.jojo.client.render.entity.layerrenderer.HamonBurnLayer;
 import com.github.standobyte.jojo.client.render.item.InventoryItemHighlight;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
 import com.github.standobyte.jojo.client.resources.CustomResources;
@@ -51,6 +49,7 @@ import com.github.standobyte.jojo.client.sound.StandOstSound;
 import com.github.standobyte.jojo.client.sound.barrage.StandCrySoundHandler;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.ClientModSettingsScreen;
+import com.github.standobyte.jojo.client.ui.screen.IJojoScreen;
 import com.github.standobyte.jojo.client.ui.screen.controls.HudLayoutEditingScreen;
 import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.CategoryWithButtonsEntry;
 import com.github.standobyte.jojo.client.ui.screen.controls.vanilla.ControlSettingToggleButton;
@@ -68,6 +67,7 @@ import com.github.standobyte.jojo.client.ui.tooltip.TextTooltipLine;
 import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.mob.CocoJumboTurtleEntity;
 import com.github.standobyte.jojo.entity.mob.IMobStandUser;
+import com.github.standobyte.jojo.client.ui.text.JojoTextComponentWrapper;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModStatusEffects;
@@ -156,6 +156,7 @@ import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector3i;
 import net.minecraft.util.text.Color;
 import net.minecraft.util.text.ITextComponent;
+import net.minecraft.util.text.ITextProperties;
 import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
@@ -173,6 +174,7 @@ import net.minecraftforge.client.event.RenderHandEvent;
 import net.minecraftforge.client.event.RenderLivingEvent;
 import net.minecraftforge.client.event.RenderNameplateEvent;
 import net.minecraftforge.client.event.RenderPlayerEvent;
+import net.minecraftforge.client.event.RenderTooltipEvent;
 import net.minecraftforge.client.event.RenderWorldLastEvent;
 import net.minecraftforge.client.event.sound.PlaySoundEvent;
 import net.minecraftforge.client.gui.ForgeIngameGui;
@@ -203,6 +205,7 @@ public class ClientEventHandler {
     private double zoomModifier;
     public boolean isZooming;
 
+    public int tickCount = 0;
     private int deathScreenTick;
     private int standStatsTick;
     
@@ -423,6 +426,7 @@ public class ClientEventHandler {
         if (event.phase == TickEvent.Phase.START) {
             ClientTimeStopHandler.getInstance().tickPauseIrrelevant();
             
+            ++tickCount;
             deathScreenTick = mc.screen instanceof DeathScreen ? deathScreenTick + 1 : 0;
             standStatsTick = mc.screen instanceof IngameMenuScreen && doStandStatsRender(mc.screen) ? standStatsTick + 1 : 0;
             
@@ -609,17 +613,26 @@ public class ClientEventHandler {
             event.setCanceled(true);
         }
         
-        if (event.getType() == EXPERIENCE && mc.gameMode.hasExperience()
-                && mc.player.hasEffect(ModStatusEffects.STAND_VIRUS.get())) {
-            IStandPower.getStandPowerOptional(mc.player).ifPresent(power -> {
-                StandArrowHandler handler = power.getStandArrowHandler();
-                int standArrowLevels = handler.getXpLevelsTakenByArrow();
-                if (standArrowLevels > 0) {
-                    MatrixStack matrixStack = event.getMatrixStack();
-                    renderExperienceBar(matrixStack, standArrowLevels, event.getWindow());
-                    event.setCanceled(true);
-                }
-            });
+        if (event.getType() == EXPERIENCE && mc.gameMode.hasExperience()) {
+            if (mc.player.hasEffect(ModStatusEffects.STAND_VIRUS.get())) {
+                IStandPower.getStandPowerOptional(mc.player).ifPresent(power -> {
+                    StandArrowHandler handler = power.getStandArrowHandler();
+                    int standArrowLevels = handler.getXpLevelsTakenByArrow();
+                    if (standArrowLevels > 0) {
+                        MatrixStack matrixStack = event.getMatrixStack();
+                        renderExperienceBar(matrixStack, standArrowLevels, event.getWindow());
+                        event.setCanceled(true);
+                    }
+                });
+            }
+        }
+    }
+
+    @SubscribeEvent(priority = EventPriority.NORMAL)
+    public void renderModOverlay(RenderGameOverlayEvent.Pre event) {
+        ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
+        if (hud != null) {
+            hud.render(event);
         }
     }
     
@@ -966,29 +979,24 @@ public class ClientEventHandler {
         Hand hand = event.getHand();
         ItemStack item = player.getItemInHand(hand);
         if (!event.isCanceled() && !modPostedEvent) {
-            if (hand == Hand.MAIN_HAND) {
-                if (!player.isInvisible()) {
-                    INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
-                        ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
-                        if ((hud.isActionSelectedAndEnabled(
-                                ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get(), 
-                                ModHamonActions.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE_BARRAGE.get(),
-                                ModHamonActions.HAMON_WALL_CLIMBING.get())
-                                || LivingWallClimbing.getHandler(player).map(cap -> cap.isWallClimbing()).orElse(false))
-                                && MCUtil.isHandFree(player, Hand.MAIN_HAND) && MCUtil.isHandFree(player, Hand.OFF_HAND)) {
-                            renderHand(Hand.OFF_HAND, event.getMatrixStack(), event.getBuffers(), event.getLight(), 
-                                    event.getPartialTicks(), event.getInterpolatedPitch(), player);
-                        }
-                    });
-
-                    boolean hasGloves = GlovesLayer.areGloves(player.getItemInHand(Hand.MAIN_HAND)) || GlovesLayer.areGloves(player.getItemInHand(Hand.OFF_HAND));
-                    boolean hasEffect = player.hasEffect(ModStatusEffects.HAMON_SPREAD.get()) || player.hasEffect(ModStatusEffects.FREEZE.get());
-                    if (hasGloves && (GlovesLayer.areGloves(item) || item.isEmpty()) || 
-                            hasEffect && item.isEmpty()) {
-                        event.setCanceled(true);
-                        renderHand(Hand.MAIN_HAND, event.getMatrixStack(), event.getBuffers(), event.getLight(), 
+            if (hand == Hand.MAIN_HAND && !player.isInvisible() && MCUtil.isHandFree(player, Hand.MAIN_HAND) && MCUtil.isHandFree(player, Hand.OFF_HAND)) {
+                INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
+                    ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
+                    if (hud.isActionSelectedAndEnabled(
+                            ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get(), 
+                            ModHamonActions.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE_BARRAGE.get(),
+                            ModHamonActions.HAMON_WALL_CLIMBING.get())
+                            || LivingWallClimbing.getHandler(player).map(cap -> cap.isWallClimbing()).orElse(false)) {
+                        renderHand(Hand.OFF_HAND, event.getMatrixStack(), event.getBuffers(), event.getLight(), 
                                 event.getPartialTicks(), event.getInterpolatedPitch(), player);
                     }
+                });
+                
+                boolean hasGloves = GlovesLayer.areGloves(player.getItemInHand(Hand.MAIN_HAND)) || GlovesLayer.areGloves(player.getItemInHand(Hand.OFF_HAND));
+                if (hasGloves && (GlovesLayer.areGloves(item) || item.isEmpty())) {
+                    event.setCanceled(true);
+                    renderHand(Hand.MAIN_HAND, event.getMatrixStack(), event.getBuffers(), event.getLight(), 
+                            event.getPartialTicks(), event.getInterpolatedPitch(), player);
                 }
             }
             
@@ -1020,9 +1028,9 @@ public class ClientEventHandler {
             matrixStack.pushPose();
             ClientReflection.renderPlayerArm(matrixStack, buffer, light, equipProgress, 
                     swingProgress, handSide, renderer);
-            HamonBurnLayer.renderFirstPerson(handSide, matrixStack, buffer, light, player);
-            FrozenLayer.renderFirstPerson(handSide, matrixStack, buffer, light, player);
-            GlovesLayer.renderFirstPerson(handSide, matrixStack, buffer, light, player);
+//            HamonBurnLayer.renderFirstPerson(handSide, matrixStack, buffer, light, player);
+//            FrozenLayer.renderFirstPerson(handSide, matrixStack, buffer, light, player);
+//            GlovesLayer.renderFirstPerson(handSide, matrixStack, buffer, light, player);
             matrixStack.popPose();
             // i've won... but at what cost?
         }
@@ -1107,6 +1115,23 @@ public class ClientEventHandler {
         mc.textureManager.bind(ClientUtil.ADDITIONAL_UI);
         ui.blit(matrixStack, x, y, 0, 231, 130, 25);
         AbstractGui.drawCenteredString(matrixStack, mc.font, new TranslationTextComponent("jojo.to_be_continued"), x + 61, y + 8, 0x525544);
+    }
+    
+    @SubscribeEvent
+    public void onTooltipRender(RenderTooltipEvent.PostText event) {
+        List<? extends ITextProperties> lines = event.getLines();
+        int x = event.getX();
+        int y = event.getY();
+        for (int i = 0; i < lines.size(); i++) {
+            ITextProperties line = lines.get(i);
+            if (line instanceof JojoTextComponentWrapper) {
+                ((JojoTextComponentWrapper) line).tooltipRenderExtra(event.getMatrixStack(), x, y - 0.5f);
+            }
+            if (i == 0) {
+                y += 2;
+            }
+            y += 10;
+        }
     }
     
     @SubscribeEvent(priority = EventPriority.LOW)
@@ -1298,6 +1323,11 @@ public class ClientEventHandler {
         else if (screen == null) {
             onScreenClosed();
         }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public void onScreenOpened2(GuiOpenEvent event) {
+        IJojoScreen.rememberScreenTab(event.getGui());
     }
     
     private void onScreenClosed() {

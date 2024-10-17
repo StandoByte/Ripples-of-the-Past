@@ -132,6 +132,14 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
                 Effects.NIGHT_VISION);
     }
     
+    /*@Override
+    protected void initPassiveEffects() {
+        initAllPossibleEffects(
+                () -> Effects.REGENERATION,
+                () -> Effects.DAMAGE_RESISTANCE,
+                () -> Effects.NIGHT_VISION);
+    }*/
+    
     @Override
     public boolean isReplaceableWith(NonStandPowerType<?> newType) {
         return false;

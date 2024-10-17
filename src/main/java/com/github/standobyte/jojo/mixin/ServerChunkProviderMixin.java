@@ -16,9 +16,7 @@ import net.minecraft.world.server.ServerWorld;
 
 @Mixin(ServerChunkProvider.class)
 public class ServerChunkProviderMixin {
-    @Final
-    @Shadow
-    private ServerWorld level;
+    @Shadow @Final private ServerWorld level;
 
     @Inject(method = "isTickingChunk", at = @At("TAIL"), cancellable = true)
     public void jojoTsCancelBlockTick(BlockPos blockPos, CallbackInfoReturnable<Boolean> ci) {

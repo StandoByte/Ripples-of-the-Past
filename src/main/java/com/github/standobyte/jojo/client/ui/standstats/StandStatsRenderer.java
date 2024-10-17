@@ -22,7 +22,6 @@ import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.Tessellator;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.entity.player.PlayerModelPart;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
@@ -59,6 +58,7 @@ public class StandStatsRenderer {
         return STAT_LETTERS.get(Math.min(rankIndex, STAT_LETTERS.size() - 1));
     }
     
+    private static final double LN_2 = Math.log(2);
     public static enum StandStat {
         STRENGTH        (new TranslationTextComponent("jojo.stand_stat.strength"),       0,  -72) {
             @Override
@@ -192,7 +192,6 @@ public class StandStatsRenderer {
     private static final int LETTER_TICK_START = 50;
     private static final float LETTER_FADE_IN = 1.5f;
     
-    private static final double LN_2 = Math.log(2);
     @SuppressWarnings("deprecation")
     public static void renderStandStats(MatrixStack matrixStack, Minecraft mc, 
             int x, int y, int screenWidth, int screenHeight, 
@@ -339,18 +338,8 @@ public class StandStatsRenderer {
                 ClientUtil.drawLines(matrixStack, mc.font, standName, 
                         x + statsWidth - width, standNameY, 0, color, true, true);
     
-                ResourceLocation playerFace = mc.player.getSkinTextureLocation();
-                mc.getTextureManager().bind(playerFace);
-    
-                AbstractGui.blit(matrixStack, x + statsWidth - 18 - width, userIconY, 16, 16, 16, 16, 128, 128);
-                if (mc.options.getModelParts().contains(PlayerModelPart.HAT)) {
-                    matrixStack.pushPose();
-                    matrixStack.translate(x + statsWidth - 18 - width, userIconY, 0);
-                    matrixStack.scale(9F/8F, 9F/8F, 0);
-                    matrixStack.translate(-1, -1, 0);
-                    AbstractGui.blit(matrixStack, 0, 0, 80, 16, 16, 16, 128, 128);
-                    matrixStack.popPose();
-                }
+                ClientUtil.renderPlayerFace(matrixStack, x + statsWidth - 18 - width, userIconY, mc.player);
+                
                 ClientUtil.drawLines(matrixStack, mc.font, standUser, 
                         x + statsWidth - width, standUserY, 0, color, true, true);
     
@@ -388,12 +377,15 @@ public class StandStatsRenderer {
                 
                 switch (statRankLetter) {
                 case "∅":
+                    letterWidth = 9;
                     renderLetterFromTex(matrixStack, letterAlpha, invertBnW, statX, statY, letterWidth, 0, 504);
                     break;
                 case "∞":
+                    letterWidth = 9;
                     renderLetterFromTex(matrixStack, letterAlpha, invertBnW, statX, statY, letterWidth, 12, 504);
                     break;
                 case REFERENCE_MARK:
+                    letterWidth = 9;
                     renderLetterFromTex(matrixStack, letterAlpha, invertBnW, statX + 1f, statY, letterWidth, 24, 504);
                     break;
                 default:
@@ -413,6 +405,7 @@ public class StandStatsRenderer {
         });
     }
     
+    @SuppressWarnings("deprecation")
     private static void renderLetterFromTex(MatrixStack matrixStack, float letterAlpha, boolean invertBnW, 
             float statX, float statY, float letterWidth, int texX, int texY) {
         Minecraft.getInstance().textureManager.bind(STAND_STATS_UI);

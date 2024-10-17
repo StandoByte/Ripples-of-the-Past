@@ -10,8 +10,7 @@ import net.minecraft.crash.CrashReport;
 @Mixin(CrashReport.class)
 public abstract class TheMostUnnecessaryMixin {
     
-    @Shadow
-    public abstract String getExceptionMessage();
+    @Shadow public abstract String getExceptionMessage();
     
     @Redirect(method = "getFriendlyReport", at = @At(
             value = "INVOKE", 

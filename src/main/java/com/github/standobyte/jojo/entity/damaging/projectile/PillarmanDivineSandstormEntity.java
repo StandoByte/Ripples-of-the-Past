@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
@@ -15,7 +16,6 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Pose;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.particles.ParticleTypes;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -75,8 +75,8 @@ public class PillarmanDivineSandstormEntity extends ModdedProjectileEntity {
                         (random.nextDouble() - 1.0),
                         (random.nextDouble() - 1.0))
                         .normalize().scale(random.nextDouble() * radius));
-                level.addParticle(ParticleTypes.EXPLOSION, false, sparkVec.x, sparkVec.y, sparkVec.z, 0, 0, 0);
                 
+                level.addParticle(ModParticles.SANDSTORM.get(), false, sparkVec.x, sparkVec.y, sparkVec.z, 0, 0, 0);
             }
             level.playSound(ClientUtil.getClientPlayer(), center.x, center.y, center.z, ModSounds.MAGICIANS_RED_FIRE_BLAST.get(), 
                     SoundCategory.AMBIENT, 0.1F, 1.0F);
@@ -137,7 +137,7 @@ public class PillarmanDivineSandstormEntity extends ModdedProjectileEntity {
     
     @Override
     protected float getDamageAmount() {
-        return damage * damageWearOffMultiplier();
+        return damage * Math.max(damageWearOffMultiplier(), 0.5F);
     }
     
     private float damageWearOffMultiplier() {

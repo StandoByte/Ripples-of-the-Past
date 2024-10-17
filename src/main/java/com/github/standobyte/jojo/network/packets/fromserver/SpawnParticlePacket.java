@@ -70,7 +70,7 @@ public class SpawnParticlePacket {
             buf.writeFloat(msg.maxSpeed);
             buf.writeInt(msg.count);
             msg.particle.writeToNetwork(buf);
-            NetworkUtil.writeOptionally(buf, msg.context, context -> buf.writeEnum(context));
+            NetworkUtil.writeOptionally(buf, msg.context, buf::writeEnum);
         }
         
         @Override

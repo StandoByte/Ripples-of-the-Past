@@ -440,6 +440,7 @@
   "jojo.key.toggle_stand": "Summon Stand",
   "jojo.key.stand_remote_control": "Stand Remote Control",
   "jojo.key.hamon_skills_window": "Hamon Skills",
+  "jojo.key.jojo_menu": "JoJo Menu",
   
   "key.categories.jojo.hud": "JoJo | HUD",
   "jojo.key.stand_mode": "HUD Mode: Stand",
@@ -802,6 +803,7 @@
   "commands.jojoconfigpack.stand_assign.failed.clear": "%s didn't have any Stands assigned",
   
   "chat.stand_remote_reveal_name": "%s (Stand User: %s)",
+  "jojo.ui.player_menu": "Player Menu (TBA)",
   
   "jojo.action.toast.title": "New actions unlocked!",
   "jojo.action.toast.stand.attack.description": "New Stand attacks",
@@ -938,7 +940,7 @@
   "hamonSkill.sendo_overdrive.desc": "Applying this attack to a wall or floor creates a wave of Hamon energy, which damages mobs and players in the area.",
   "hamonSkill.turquoise_blue_overdrive.name": "Turquoise Blue Overdrive",
   "hamonSkill.turquoise_blue_overdrive.desc": "While underwater, the user can transfer a powerful wave of Hamon energy through water.",
-  "hamonSkill.sunlight_yellow_overdrive.name": "Sunlight Yellow Overdrive",
+  "hamonSkill.sunlight_yellow_overdrive.name": "Sunlight Yellow Overdrive (WIP)",
   "hamonSkill.sunlight_yellow_overdrive.desc": "The user channels all their energy into a slow, but powerful Sunlight Yellow Overdrive attack.",
   "hamonSkill.throwables_infusion.name": "Throwables Infusion",
   "hamonSkill.throwables_infusion.desc": "Snowballs, eggs and splash water bottles the user throws inflict additional Hamon damage.",
@@ -994,7 +996,7 @@
   
   "hamonSkill.natural_talent.name": "Natural Talent",
   "hamonSkill.natural_talent.desc": "Your Hamon training is 2x faster.",
-  "hamonSkill.scarlet_overdrive.name": "Scarlet Overdrive",
+  "hamonSkill.scarlet_overdrive.name": "Scarlet Overdrive (WIP)",
   "hamonSkill.scarlet_overdrive.desc": "A special type of Overdrive attack, which deals additional damage and sets the target on fire.",
   "hamonSkill.metal_silver_overdrive.name": "Metal Silver Overdrive",
   "hamonSkill.metal_silver_overdrive.desc": "You can perform Overdrive attack with a weapon or a tool.\nWithout a weapon, the regular Overdrive deals more damage to targets with armor or an equipped melee weapon.",
@@ -1138,7 +1140,7 @@
   "jojo.stand_stat.button.show": "Show Stand Stats",
   "jojo.stand_stat.button.hide": "Hide Stand Stats",
   
-  "jojo.stand_skins.button": "Stand Skins",
+  "jojo.stand_skins.button": "Stand Skins (WIP)",
   
   "jojo.stand_ui.name": "Stand Info (WIP)",
   

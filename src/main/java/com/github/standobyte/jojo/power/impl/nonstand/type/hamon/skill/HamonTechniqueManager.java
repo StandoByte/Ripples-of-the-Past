@@ -61,8 +61,8 @@ public class HamonTechniqueManager implements IHamonSkillsManager<CharacterTechn
             return ActionConditionResult.NEGATIVE;
         }
         
-        if (!JojoModConfig.getCommonConfigInstance(clientSide).mixHamonTechniques.get()
-                && skill.getTechnique() != null && skill.getTechnique() != this.technique) {
+        if (skill.getTechnique() == null || 
+                !JojoModConfig.getCommonConfigInstance(clientSide).mixHamonTechniques.get() && skill.getTechnique() != this.technique) {
             return WRONG_TECHNIQUE;
         }
         

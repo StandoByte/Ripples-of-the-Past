@@ -12,14 +12,21 @@ import net.minecraftforge.fml.loading.LoadingModList;
 
 public class JojoMixinConfigPlugin implements IMixinConfigPlugin {
 
+    private static final int PACKAGE_NAME_LENGTH = "com.github.standobyte.jojo.mixin.".length();
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        switch (mixinClassName) {
-        case "com.github.standobyte.jojo.mixin.EntityLiquidWalkingMixin":
+        switch (mixinClassName.substring(PACKAGE_NAME_LENGTH)) {
+        case "EntityLiquidWalkingMixin":
             return !isModPresent("expandability");
+        case "LivingEntityArmorBreakMixin":
+            if (isModPresent("arclight")) {
+                System.out.println("RotP: Minor incompatibility issue with Arclight - Stand barrages and similar moves will reduce armor durability a lot faster than they should.");
+                return false;
+            }
         default:
-            return true;
+            break;
         }
+        return true;
     }
     
     private static boolean isModPresent(String modId) {

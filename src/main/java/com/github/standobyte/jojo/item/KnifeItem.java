@@ -6,8 +6,8 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.itemtracking.ITrackedArrowEntity;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack.KnownItemState;
+import com.github.standobyte.jojo.potion.BleedingEffect;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
-import com.github.standobyte.jojo.util.GameplayEventHandler;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableMultimap.Builder;
 import com.google.common.collect.Multimap;
@@ -67,7 +67,7 @@ public class KnifeItem extends Item {
         int knivesToThrow = !player.isShiftKeyDown() ? Math.min(handStack.getCount(), MAX_KNIVES_THROW) : 1;
         if (!world.isClientSide()) {
             ItemStack headStack = player.getItemBySlot(EquipmentSlotType.HEAD);
-            if (handStack.getCount() == 1 && headStack.getItem() instanceof StoneMaskItem && GameplayEventHandler.applyStoneMask(player, headStack)) {
+            if (handStack.getCount() == 1 && headStack.getItem() instanceof StoneMaskItem && BleedingEffect.applyStoneMask(player, headStack)) {
                 player.hurt(DamageSource.playerAttack(player), 1.0F);
                 return ActionResult.consume(handStack);
             }

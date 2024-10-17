@@ -394,15 +394,15 @@ public class HamonSendoOverdriveEntity extends Entity implements IEntityAddition
 
     @Override
     public void writeSpawnData(PacketBuffer buffer) {
-        NetworkUtil.writeOptionally(buffer, axis, e -> buffer.writeEnum(e));
+        NetworkUtil.writeOptionally(buffer, axis, buffer::writeEnum);
         buffer.writeFloat(radius);
         buffer.writeVarInt(wavesToAdd);
         buffer.writeVarInt(addedWaves);
         buffer.writeVarInt(tickLifeSpan);
         buffer.writeVarInt(tickCount);
         
-        NetworkUtil.writeOptionally(buffer, targetedBlockPos, pos -> buffer.writeBlockPos(pos));
-        NetworkUtil.writeOptionally(buffer, targetedFace, face -> buffer.writeEnum(face));
+        NetworkUtil.writeOptionally(buffer, targetedBlockPos, buffer::writeBlockPos);
+        NetworkUtil.writeOptionally(buffer, targetedFace, buffer::writeEnum);
     }
 
     @Override
@@ -415,7 +415,7 @@ public class HamonSendoOverdriveEntity extends Entity implements IEntityAddition
         this.tickCount = additionalData.readVarInt();
         absMoveTo(xo, yo, zo, yRot, xRot);
         
-        NetworkUtil.readOptional(additionalData, () -> additionalData.readBlockPos()).ifPresent(pos -> this.targetedBlockPos = pos);
+        NetworkUtil.readOptional(additionalData, additionalData::readBlockPos).ifPresent(pos -> this.targetedBlockPos = pos);
         NetworkUtil.readOptional(additionalData, () -> additionalData.readEnum(Direction.class)).ifPresent(face -> this.targetedFace = face);
     }
 }

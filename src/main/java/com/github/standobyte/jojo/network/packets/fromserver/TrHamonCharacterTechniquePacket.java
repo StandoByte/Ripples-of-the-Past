@@ -47,7 +47,7 @@ public class TrHamonCharacterTechniquePacket {
         @Override
         public void encode(TrHamonCharacterTechniquePacket msg, PacketBuffer buf) {
             buf.writeInt(msg.entityId);
-            NetworkUtil.writeOptional(buf, msg.technique, technique -> buf.writeRegistryId(technique));
+            NetworkUtil.writeOptional(buf, msg.technique, buf::writeRegistryId);
             buf.writeBoolean(msg.playPickSound);
         }
 

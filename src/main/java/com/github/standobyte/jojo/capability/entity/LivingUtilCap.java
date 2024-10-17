@@ -88,6 +88,8 @@ public class LivingUtilCap {
     private int deadBodyTimer = -1;
     private int deadBodyDuration = 1;
     
+    public Vector3d bleedingParticlesPos;
+    
     private HamonSendoOverdriveEntity hurtFromSendoOverdrive;
     private int sendoOverdriveWaveTicks;
     
@@ -140,6 +142,8 @@ public class LivingUtilCap {
                 it.remove();
             }
         }
+        
+        bleedingParticlesPos = null;
     }
     
     

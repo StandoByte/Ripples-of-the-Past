@@ -68,7 +68,7 @@ public class ModPillarmanActions {
                     .shiftVariationOf(PILLARMAN_SMALL_SANDSTORM)));
 
     public static final RegistryObject<PillarmanAction> PILLARMAN_WIND_CLOAK = ACTIONS.register("pillarman_wind_cloak", 
-            () -> new PillarmanWindCloak(new NonStandAction.Builder().energyCost(60F).cooldown(20).swingHand().holdToFire(30, false)));
+            () -> new PillarmanWindCloak(new NonStandAction.Builder().holdType(200).holdEnergyCost(2F).cooldown(100)));
 
     public static final RegistryObject<PillarmanAction> PILLARMAN_ATMOSPHERIC_RIFT = ACTIONS.register("pillarman_atmospheric_rift", 
             () -> new PillarmanAtmosphericRift(new NonStandAction.Builder().holdToFire(60, true).heldWalkSpeed(0.1F)));
