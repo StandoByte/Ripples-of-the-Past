@@ -1,12 +1,13 @@
 package com.github.standobyte.jojo.client.render.entity.layerrenderer;
 
-import java.lang.reflect.ParameterizedType;
 import java.util.Random;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.client.render.entity.util.ModelCubeWeightedList;
 import com.github.standobyte.jojo.entity.itemprojectile.KnifeEntity;
+import com.github.standobyte.jojo.mixin.Matrix4fAccessor;
+import com.github.standobyte.jojo.mixin.client.LivingRendererInvoker;
+import com.github.standobyte.jojo.util.general.MathUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.renderer.IRenderTypeBuffer;
@@ -100,10 +101,10 @@ public class MobStuckArrowLayer<T extends LivingEntity, M extends EntityModel<T>
     protected int numStuck(Type projectileType, T entity) {
         switch (projectileType) {
         case ARROW:
-            return entity.getArrowCount() + 6;
+            return entity.getArrowCount() + 10;
         case KNIFE:
             return entity.getCapability(LivingUtilCapProvider.CAPABILITY).map(
-                    data -> data.getStuckObjects().getKnives().getCount()).orElse(0) + 4;
+                    data -> data.getStuckObjects().getKnives().getCount()).orElse(0);
         default:
             throw new AssertionError();
         }
@@ -130,16 +131,16 @@ public class MobStuckArrowLayer<T extends LivingEntity, M extends EntityModel<T>
         matrixStack.popPose();
     }
     
-    private static final float[] DEFAULT_SCALE = { 1, 1, 1 };
+    private static final float PLAYER_SCALE = 0.9375F;
+    private static final float[] DEFAULT_SCALE = { PLAYER_SCALE, PLAYER_SCALE, PLAYER_SCALE };
     private float[] scaleBackEntity(T entity, float partialTick) {
-//        MatrixStack matrixStack = new MatrixStack();
-//        renderer.scale(entity, matrixStack, partialTick);
-//        Matrix4f scaled = matrixStack.last().pose();
-//        float scaleX = scaled.m00;
-//        float scaleY = scaled.m11;
-//        float scaleZ = scaled.m22;
-//        return new float[] { 1 / scaleX, 1 / scaleY, 1 / scaleZ };
-        return DEFAULT_SCALE;
+        MatrixStack matrixStack = new MatrixStack();
+        ((LivingRendererInvoker<T, M>) renderer).invokeScale(entity, matrixStack, partialTick);
+        Matrix4fAccessor scaled = (Matrix4fAccessor) (Object) matrixStack.last().pose();
+        float scaleX = MathUtil.getM(scaled, 0, 0);
+        float scaleY = MathUtil.getM(scaled, 1, 1);
+        float scaleZ = MathUtil.getM(scaled, 2, 2);
+        return new float[] { 1 / scaleX * PLAYER_SCALE, 1 / scaleY * PLAYER_SCALE, 1 / scaleZ * PLAYER_SCALE };
     }
     
     private enum Type {

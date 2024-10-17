@@ -29,7 +29,8 @@
     "itemtracking.ContainerSlotMixin",
     "itemtracking.projectile.BowItemMixin",
     "itemtracking.projectile.ArrowEntityMixin",
-    "itemtracking.projectile.AbstractArrowEntityMixin"
+    "itemtracking.projectile.AbstractArrowEntityMixin",
+	"Matrix4fAccessor"
   ],
   "client": [
     "client.GameRendererMixin",
@@ -43,6 +44,7 @@
     "client.PlayerModelAnimationMixin",
     "client.ItemRendererMixin",
     "client.SMapDataPacketMixin",
-    "client.MapItemRendererMixin"
+    "client.MapItemRendererMixin",
+    "client.LivingRendererInvoker"
   ]
 }
