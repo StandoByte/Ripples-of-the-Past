@@ -279,7 +279,7 @@ public class CocoJumboTurtleEntity extends TurtleEntity implements IMobStandUser
     @Override
     public void onSyncedDataUpdated(DataParameter<?> key) {
         super.onSyncedDataUpdated(key);
-        if (key == IS_CARRIED && !entityData.get(IS_CARRIED)) {
+        if (IS_CARRIED.equals(key) && !entityData.get(IS_CARRIED)) {
             stopRiding();
         }
     }
