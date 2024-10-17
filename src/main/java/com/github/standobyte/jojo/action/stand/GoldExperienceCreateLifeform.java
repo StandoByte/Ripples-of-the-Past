@@ -47,6 +47,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SpawnReason;
@@ -310,7 +311,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                                     tf.getTfSourceData().withEntitySource(new ArrowEntity(world, user));
                                     tf.moveTo(pos.x, pos.y, pos.z, itemEntity.yRot, itemEntity.xRot);
                                     if (livingItemHolder != null) {
-                                        livingItemHolder.setArrowCount(livingItemHolder.getArrowCount() - 1);
+                                        decrementStuckArrow(livingItemHolder);
                                         
 //                                        float volume = GoldExperienceCreateLifeform.getVolume(lifeFormCreated);
 //                                        float damage = Math.min(volume, 5);
@@ -321,9 +322,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                                     tf.getTfSourceData().withEntitySource(new KnifeEntity(world, user));
                                     tf.moveTo(pos.x, pos.y, pos.z, itemEntity.yRot, itemEntity.xRot);
                                     if (livingItemHolder != null) {
-                                        livingItemHolder.getCapability(LivingUtilCapProvider.CAPABILITY).map(data -> data.getStuckObjects().getKnives()).ifPresent(
-                                                knives -> knives.setCount(knives.getCount() - 1));
-                                        livingItemHolder.setArrowCount(livingItemHolder.getArrowCount() - 1);
+                                        decrementStuckKnife(livingItemHolder);
                                         
 //                                        float volume = GoldExperienceCreateLifeform.getVolume(lifeFormCreated);
 //                                        float damage = Math.min(volume, 5);
@@ -583,6 +582,25 @@ public class GoldExperienceCreateLifeform extends StandAction {
             }
         }
         return 0;
+    }
+    
+    
+    public static int getStuckArrows(LivingEntity entity) {
+        return entity.getArrowCount();
+    }
+    
+    public static void decrementStuckArrow(LivingEntity entity) {
+        entity.setArrowCount(entity.getArrowCount() - 1);
+    }
+    
+    public static int getStuckKnives(LivingEntity entity) {
+        return entity.getCapability(LivingUtilCapProvider.CAPABILITY)
+                .map(data -> data.getStuckObjects().getKnives().getCount()).orElse(0);
+    }
+    
+    public static void decrementStuckKnife(LivingEntity entity) {
+        entity.getCapability(LivingUtilCapProvider.CAPABILITY).map(data -> data.getStuckObjects().getKnives()).ifPresent(
+                knives -> knives.setCount(knives.getCount() - 1));
     }
     
     

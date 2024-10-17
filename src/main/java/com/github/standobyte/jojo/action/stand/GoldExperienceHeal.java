@@ -76,12 +76,9 @@ public class GoldExperienceHeal extends StandEntityAction {
             }
             
             if (!tissueItem) {
-                int arrows = entity.getArrowCount();
-                if (arrows > 0) {
-                    return ActionConditionResult.POSITIVE;
-                }
-                int knives = getKnivesCount(entity);
-                if (knives > 0) {
+                if (
+                        GoldExperienceCreateLifeform.getStuckArrows(entity) > 0 || 
+                        GoldExperienceCreateLifeform.getStuckKnives(entity) > 0) {
                     return ActionConditionResult.POSITIVE;
                 }
                 
@@ -152,18 +149,13 @@ public class GoldExperienceHeal extends StandEntityAction {
             
             
             boolean stuckProjectile = false;
-            int arrows = entity.getArrowCount();
-            if (arrows > 0) {
-                entity.setArrowCount(arrows - 1);
+            if (GoldExperienceCreateLifeform.getStuckArrows(entity) > 0) {
+                GoldExperienceCreateLifeform.decrementStuckArrow(entity);
                 stuckProjectile = true;
             }
-            else {
-                int knives = getKnivesCount(entity);
-                if (knives > 0) {
-                    entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(
-                            data -> data.getStuckObjects().getKnives().setCount(knives - 1));
-                    stuckProjectile = true;
-                }
+            else if (GoldExperienceCreateLifeform.getStuckKnives(entity) > 0) {
+                GoldExperienceCreateLifeform.decrementStuckKnife(entity);
+                stuckProjectile = true;
             }
             if (stuckProjectile) {
                 if (JojoModUtil.isDyingBody(entity)) {
@@ -253,26 +245,16 @@ public class GoldExperienceHeal extends StandEntityAction {
         return postfix != null ? key + postfix : key;
     }
     
-    protected static int getKnivesCount(LivingEntity entity) {
-        if (entity instanceof PlayerEntity) {
-            return entity.getCapability(LivingUtilCapProvider.CAPABILITY)
-                    .map(data -> data.getStuckObjects().getKnives().getCount()).orElse(0);
-        }
-        return 0;
-    }
-    
     protected String getPostfix(LivingEntity entityToHeal) {
         if (entityToHeal.isDeadOrDying()) {
             return ".dying";
         }
         
-        int arrows = entityToHeal.getArrowCount();
-        if (arrows > 0) {
+        if (GoldExperienceCreateLifeform.getStuckArrows(entityToHeal) > 0) {
             return ".arrow";
         }
         
-        int knives = getKnivesCount(entityToHeal);
-        if (knives > 0) {
+        if (GoldExperienceCreateLifeform.getStuckKnives(entityToHeal) > 0) {
             return ".knife";
         }
         

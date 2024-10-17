@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.client.render.entity.layerrenderer;
 
 import java.util.Random;
 
-import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.action.stand.GoldExperienceCreateLifeform;
 import com.github.standobyte.jojo.client.render.entity.util.ModelCubeWeightedList;
 import com.github.standobyte.jojo.entity.itemprojectile.KnifeEntity;
 import com.github.standobyte.jojo.mixin.Matrix4fAccessor;
@@ -101,10 +101,9 @@ public class MobStuckArrowLayer<T extends LivingEntity, M extends EntityModel<T>
     protected int numStuck(Type projectileType, T entity) {
         switch (projectileType) {
         case ARROW:
-            return entity.getArrowCount() + 10;
+            return GoldExperienceCreateLifeform.getStuckArrows(entity);
         case KNIFE:
-            return entity.getCapability(LivingUtilCapProvider.CAPABILITY).map(
-                    data -> data.getStuckObjects().getKnives().getCount()).orElse(0);
+            return GoldExperienceCreateLifeform.getStuckKnives(entity);
         default:
             throw new AssertionError();
         }

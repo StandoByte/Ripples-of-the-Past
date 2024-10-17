@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.mixin.itemtracking;
 
 import java.util.stream.IntStream;
 
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -23,7 +24,7 @@ import net.minecraft.world.World;
 @Mixin(Slot.class)
 public abstract class ContainerSlotMixin {
     @Shadow
-    public IInventory container;
+    @Final public IInventory container;
     
     @Inject(method = "set", at = @At("TAIL"))
     public void jojoOnItemSetToSlot(ItemStack pStack, CallbackInfo ci) {

@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.mixin.itemtracking.inventory;
 import java.util.Collection;
 import java.util.List;
 
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -22,9 +23,9 @@ import net.minecraft.util.NonNullList;
 @Mixin(PlayerInventory.class)
 public abstract class PlayerInventoryMixin implements IInventory {
     @Shadow
-    public PlayerEntity player;
+    @Final public PlayerEntity player;
     @Shadow
-    private List<NonNullList<ItemStack>> compartments;
+    @Final private List<NonNullList<ItemStack>> compartments;
     
     @Inject(method = "add(ILnet/minecraft/item/ItemStack;)Z", at = @At("RETURN"))
     public void jojoOnItemAddedToInv(int slot, ItemStack item, CallbackInfoReturnable<Boolean> ci) {

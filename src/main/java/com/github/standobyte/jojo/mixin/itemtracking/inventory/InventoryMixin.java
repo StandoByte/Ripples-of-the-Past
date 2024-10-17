@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.mixin.itemtracking.inventory;
 
 import java.util.List;
 
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -21,7 +22,7 @@ import net.minecraft.util.NonNullList;
 @Mixin(Inventory.class)
 public abstract class InventoryMixin implements IInventory {
     @Shadow
-    private NonNullList<ItemStack> items;
+    @Final private NonNullList<ItemStack> items;
     @Shadow
     private List<IInventoryChangedListener> listeners;
     
