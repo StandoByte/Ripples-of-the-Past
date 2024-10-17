@@ -47,7 +47,6 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.block.BlockState;
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.SpawnReason;
@@ -75,7 +74,6 @@ import net.minecraft.item.ThrowablePotionItem;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -312,10 +310,8 @@ public class GoldExperienceCreateLifeform extends StandAction {
                                     tf.moveTo(pos.x, pos.y, pos.z, itemEntity.yRot, itemEntity.xRot);
                                     if (livingItemHolder != null) {
                                         decrementStuckArrow(livingItemHolder);
-                                        
-//                                        float volume = GoldExperienceCreateLifeform.getVolume(lifeFormCreated);
-//                                        float damage = Math.min(volume, 5);
-//                                        livingItemHolder.hurt(new DamageSource("arrowLifeform").bypassArmor(), damage);
+                                        tf.withHost(livingItemHolder);
+                                        tf.getTfSourceData().withFollowTarget(livingItemHolder.getUUID());
                                     }
                                     break;
                                 case STUCK_KNIFE:
@@ -323,10 +319,8 @@ public class GoldExperienceCreateLifeform extends StandAction {
                                     tf.moveTo(pos.x, pos.y, pos.z, itemEntity.yRot, itemEntity.xRot);
                                     if (livingItemHolder != null) {
                                         decrementStuckKnife(livingItemHolder);
-                                        
-//                                        float volume = GoldExperienceCreateLifeform.getVolume(lifeFormCreated);
-//                                        float damage = Math.min(volume, 5);
-//                                        livingItemHolder.hurt(new DamageSource("arrowLifeform").bypassArmor(), damage);
+                                        tf.withHost(livingItemHolder);
+                                        tf.getTfSourceData().withFollowTarget(livingItemHolder.getUUID());
                                     }
                                     break;
                                 default:

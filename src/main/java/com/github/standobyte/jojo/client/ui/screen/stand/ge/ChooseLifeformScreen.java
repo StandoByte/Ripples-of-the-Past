@@ -362,7 +362,7 @@ public abstract class ChooseLifeformScreen extends WasdAllowingScreen {
                 new IconTooltipLine(IconTooltipLine.Icon.TIME),
                 new TextTooltipLine(new TranslationTextComponent("gold_experience.lifeform_time", creationSecs)
                         .withStyle(isCorrectBiome ? TextFormatting.GREEN : TextFormatting.WHITE))));
-        
+
 //        entityTypeInfo.add(new TextTooltipLine(new StringTextComponent(String.valueOf(GoldExperienceCreateLifeform.getVolume(entity)))));
         
         return entityTypeInfo;

@@ -33,7 +33,7 @@ public class EntityOwnerResolver {
     }
     
     private void _setNewOwnerEntity(Entity entity) {
-        if (entity instanceof LivingEntity) {
+        if (entity == null || entity instanceof LivingEntity) {
             this.owner = (LivingEntity) entity;
         }
     }
@@ -55,6 +55,6 @@ public class EntityOwnerResolver {
     }
     
     public void readNetwork(PacketBuffer buf) {
-        buf.readInt();
+        ownerNetworkId = buf.readInt();
     }
 }

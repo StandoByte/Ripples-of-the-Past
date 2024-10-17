@@ -143,7 +143,7 @@ public class GoldExperienceToothLifeform extends StandEntityActionModifier {
                         
                         Entity targetEntity = objEntity;
                         MCUtil.cloneEntity(targetEntity).ifPresent(entity -> tf.getTfSourceData()
-                                .withEntitySource(entity).withAggroTarget(toothEntity.getOwner()));
+                                .withEntitySource(entity).withFollowTarget(toothEntity.getOwner()));
                         targetEntity.remove();
 
                         Vector3d pos = targetEntity.position();

@@ -5,11 +5,10 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
-
-import org.apache.commons.lang3.tuple.Pair;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -17,9 +16,12 @@ import com.github.standobyte.jojo.entity.ai.GELifeformFollowOwnerGoal;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.network.NetworkUtil;
+import com.github.standobyte.jojo.potion.BleedingEffect;
 import com.github.standobyte.jojo.util.mc.EntityOwnerResolver;
 import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 
 import net.minecraft.block.AbstractFireBlock;
@@ -51,9 +53,11 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.potion.EffectInstance;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.BlockPos;
@@ -68,10 +72,11 @@ import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
 
-public class GETransformationEntity extends Entity implements IEntityAdditionalSpawnData {
+public class GETransformationEntity extends Entity implements IEntityAdditionalSpawnData, IPassengerMixinReposition {
     private static final DataParameter<Boolean> LIFE_FORM_SPAWNED = EntityDataManager.defineId(GETransformationEntity.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> IS_TURNING_BACK = EntityDataManager.defineId(GETransformationEntity.class, DataSerializers.BOOLEAN);
     private static final DataParameter<Boolean> REVERSE_SIGNAL = EntityDataManager.defineId(GETransformationEntity.class, DataSerializers.BOOLEAN);
+    private static final DataParameter<OptionalInt> HOST_ID = EntityDataManager.defineId(GETransformationEntity.class, DataSerializers.OPTIONAL_UNSIGNED_INT);
     
     private GETransformationData source = new GETransformationData();
     private EntityOwnerResolver owner = new EntityOwnerResolver();
@@ -81,6 +86,9 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
     private int duration;
     private float renderAsItemTime;
     public int actionCooldown;
+    
+    private EntityOwnerResolver host = new EntityOwnerResolver(); // TODO entityData entry
+    private Vector3d hostFollowOffset = Vector3d.ZERO;
     
     
     public GETransformationEntity(EntityType<?> type, World level) {
@@ -183,6 +191,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                         mob.goalSelector.addGoal(-1, new GELifeformFollowOwnerGoal(mob, source.aggroTarget, 1.0));
                     }
                 }
+                hostBleeding();
             }
         }
         else if (blockToPlace != null) {
@@ -276,6 +285,26 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             }
         }
         
+        if (!level.isClientSide() && !isTurningBack()) {
+            LivingEntity host = this.host.getEntity(level);
+            if (host != null) {
+                if (getVehicle() != host) {
+                    withHost(null);
+                }
+                else {
+                    int lifeformCreationTick = tickCount;
+                    if (lifeformCreationTick > 0) {
+                        if (lifeformCreationTick > 40) {
+                            hostBleeding();
+                            withHost(null);
+                        }
+                        else if (lifeformCreationTick % 10 == 9) {
+                            dealDamageToHost();
+                        }
+                    }
+                }
+            }
+        }
         
         refreshDimensions();
         
@@ -351,6 +380,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         entityData.define(LIFE_FORM_SPAWNED, false);
         entityData.define(IS_TURNING_BACK, false);
         entityData.define(REVERSE_SIGNAL, false);
+        entityData.define(HOST_ID, OptionalInt.empty());
     }
     
     @Override
@@ -361,8 +391,13 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
     @Override
     public void onSyncedDataUpdated(DataParameter<?> key) {
         super.onSyncedDataUpdated(key);
-        if (key == REVERSE_SIGNAL && entityData.get(REVERSE_SIGNAL)) {
-            reverseTransformation();
+        if (REVERSE_SIGNAL.equals(key)) {
+            if (entityData.get(REVERSE_SIGNAL)) {
+                reverseTransformation();
+            }
+        }
+        else if (HOST_ID.equals(key)) {
+            updateHostEntity(entityData.get(HOST_ID));
         }
     }
     
@@ -474,6 +509,73 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
     }
     
     
+    public GETransformationEntity withHost(LivingEntity hostEntity) {
+        if (hostEntity != null) {
+            boolean riding = startRiding(hostEntity, true);
+            if (riding) {
+                float height = hostEntity.getBbHeight();
+                hostFollowOffset = new Vector3d(0, height - 0.5, 0);
+            }
+        }
+        else if (getVehicle() == this.host.getEntity(level)) {
+            stopRiding();
+        }
+        this.host.setOwner(hostEntity);
+        if (!level.isClientSide()) {
+            entityData.set(HOST_ID, hostEntity != null ? OptionalInt.of(hostEntity.getId()) : OptionalInt.empty());
+        }
+        return this;
+    }
+    
+    private void updateHostEntity(OptionalInt entityId) {
+        if (level.isClientSide()) {
+            Entity entity = level.getEntity(entityId.orElse(-1));
+            withHost(entity instanceof LivingEntity ? (LivingEntity) entity : null);
+        }
+    }
+    
+    @Override
+    public boolean isPickable() {
+        boolean isPickable = super.isPickable();
+        if (isPickable) {
+            Entity vehicle = getVehicle();
+            if (vehicle != null && vehicle == host.getEntity(level)) {
+                return false;
+            }
+        }
+        return isPickable;
+    }
+    
+    @Override
+    public Vector3d repositionPassenger(Entity vehicle) {
+        if (hostFollowOffset != null && vehicle == host.getEntity(level)) {
+            return vehicle.position().add(hostFollowOffset);
+        }
+        return null;
+    }
+    
+    private void hostBleeding() {
+        if (!level.isClientSide()) {
+            LivingEntity host = this.host.getEntity(level);
+            if (host != null) {
+                if (hostFollowOffset != null) {
+                    BleedingEffect.setNextParticlesPos(host, host.position().add(hostFollowOffset).add(0, 0.5, 0));
+                }
+                host.addEffect(new EffectInstance(ModStatusEffects.BLEEDING.get(), 200, 1, false, false, true));
+            }
+        }
+    }
+    
+    private void dealDamageToHost() {
+        if (!level.isClientSide()) {
+            LivingEntity host = this.host.getEntity(level);
+            if (host != null) {
+                DamageUtil.hurtThroughInvulTicks(host, new DamageSource("arrowLifeform").bypassArmor(), 2);
+            }
+        }
+    }
+    
+    
     @Override
     protected void readAdditionalSaveData(CompoundNBT nbt) {
         this.tickCount = nbt.getInt("Age");
@@ -487,6 +589,9 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             target = EntityType.create(entityNbt, level).orElse(null);
         }
         owner.loadNbt(nbt, "Owner");
+        
+        host.loadNbt(nbt, "Host");
+        hostFollowOffset = MCUtil.nbtGetVec3d(nbt, "HostOffset");
     }
 
     @Override
@@ -502,6 +607,11 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             nbt.put("TargetEntity", entityNbt);
         }
         owner.saveNbt(nbt, "Owner");
+        
+        host.saveNbt(nbt, "Host");
+        if (hostFollowOffset != null) {
+            MCUtil.nbtPutVec3d(nbt, "HostOffset", hostFollowOffset);
+        }
     }
 
     @Override
@@ -518,6 +628,9 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         writeEntityData(buffer, target);
         source.resolveNbtRead(level);
         source.toBuf(buffer);
+        
+        host.writeNetwork(buffer);
+        NetworkUtil.writeOptionally(buffer, hostFollowOffset, (vec, buf) -> NetworkUtil.writeVecApproximate(buf, vec));
     }
 
     @Override
@@ -528,6 +641,9 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         
         target = readEntityData(additionalData, level);
         source.fromBuf(additionalData, level);
+        
+        host.readNetwork(additionalData);
+        hostFollowOffset = NetworkUtil.readOptional(additionalData, NetworkUtil::readVecApproximate).orElse(null);
     }
     
     
@@ -539,11 +655,6 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         private BlockState sourceBlockState;
         private BlockPos sourceBlockPos;
         private CompoundNBT sourceTileEntityNbt = null;
-        
-        // TODO lifeform host (when it's created from arrows)
-        private LivingEntity hostFollow = null;
-        private Vector3d hostFollowOffset = Vector3d.ZERO;
-        private float hostDealDamage = 0;
         
         
         
@@ -561,7 +672,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             return this;
         }
         
-        public GETransformationData withAggroTarget(UUID entity) {
+        public GETransformationData withFollowTarget(UUID entity) {
             this.aggroTarget = entity;
             return this;
         }
