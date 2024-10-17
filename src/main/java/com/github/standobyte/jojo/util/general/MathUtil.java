@@ -96,6 +96,26 @@ public class MathUtil {
         return (x - a) / (b - a);
     }
     
+    public static Vector3d lerpVector(float partial, Vector3d vec1, Vector3d vec2) {
+        return lerpVector(partial, vec1.x, vec1.y, vec1.z, vec2.x, vec2.y, vec2.z);
+    }
+    
+    public static Vector3d lerpVector(float partial, double x1, double y1, double z1, double x2, double y2, double z2) {
+        double x = MathHelper.lerp(partial, x1, x2);
+        double y = MathHelper.lerp(partial, y1, y2);
+        double z = MathHelper.lerp(partial, z1, z2);
+        return new Vector3d(x, y, z);
+    }
+    
+    public static Vector3d vecFromAngles(float xRotRad, float yRotRad) {
+        yRotRad = -yRotRad;
+        float f2 = MathHelper.cos(yRotRad);
+        float f3 = MathHelper.sin(yRotRad);
+        float f4 = MathHelper.cos(xRotRad);
+        float f5 = MathHelper.sin(xRotRad);
+        return new Vector3d((double)(f3 * f4), (double)(-f5), (double)(f2 * f4));
+    }
+    
     public static int fractionRandomInc(double num) {
         int numInt = MathHelper.floor(num);
         if (Math.random() < num - (double) numInt) {

@@ -1,11 +1,15 @@
 package com.github.standobyte.jojo.network.packets.fromserver;
 
+import java.util.Optional;
+import java.util.Random;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.init.ModParticles;
+import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
+import com.github.standobyte.jojo.util.general.MathUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.network.PacketBuffer;
@@ -14,13 +18,23 @@ import net.minecraftforge.fml.network.NetworkEvent;
 
 public class BloodParticlesPacket {
     private final Vector3d posSource;
-    private final Vector3d posDest;
+    private final Optional<Vector3d> posDest;
+    private final float speed;
     private final int count;
     private final int entityId;
 
-    public BloodParticlesPacket(Vector3d posSource, Vector3d posDest, int count, int entityId) {
+    public BloodParticlesPacket(Vector3d posSource, float speed, int count, int entityId) {
+        this(posSource, Optional.empty(), speed, count, entityId);
+    }
+
+    public BloodParticlesPacket(Vector3d posSource, Vector3d posDest, float speed, int count, int entityId) {
+        this(posSource, Optional.of(posDest), speed, count, entityId);
+    }
+
+    public BloodParticlesPacket(Vector3d posSource, Optional<Vector3d> posDest, float speed, int count, int entityId) {
         this.posSource = posSource;
         this.posDest = posDest;
+        this.speed = speed;
         this.count = count;
         this.entityId = entityId;
     }
@@ -34,9 +48,12 @@ public class BloodParticlesPacket {
             buf.writeDouble(msg.posSource.x);
             buf.writeDouble(msg.posSource.y);
             buf.writeDouble(msg.posSource.z);
-            buf.writeDouble(msg.posDest.x);
-            buf.writeDouble(msg.posDest.y);
-            buf.writeDouble(msg.posDest.z);
+            NetworkUtil.writeOptional(buf, msg.posDest, (vec, buffer) -> {
+                buffer.writeDouble(vec.x);
+                buffer.writeDouble(vec.y);
+                buffer.writeDouble(vec.z);
+            });
+            buf.writeFloat(msg.speed);
             buf.writeVarInt(msg.count);
             buf.writeInt(msg.entityId);
         }
@@ -45,17 +62,28 @@ public class BloodParticlesPacket {
         public BloodParticlesPacket decode(PacketBuffer buf) {
             return new BloodParticlesPacket(
                     new Vector3d(buf.readDouble(), buf.readDouble(), buf.readDouble()), 
-                    new Vector3d(buf.readDouble(), buf.readDouble(), buf.readDouble()), buf.readVarInt(), buf.readInt());
+                    NetworkUtil.readOptional(buf, vec -> new Vector3d(
+                            buf.readDouble(),
+                            buf.readDouble(),
+                            buf.readDouble())
+                            ),
+                    buf.readFloat(), buf.readVarInt(), buf.readInt());
         }
 
+        private static final Random RANDOM = new Random();
         @Override
         public void handle(BloodParticlesPacket msg, Supplier<NetworkEvent.Context> ctx) {
-            Vector3d diff = msg.posDest.subtract(msg.posSource).normalize().scale(0.375);
+            Optional<Vector3d> diff = msg.posDest.map(vec -> vec.subtract(msg.posSource).normalize().scale(msg.speed));
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             for (int i = 0; i < msg.count; i++) {
+                Vector3d speedVec = diff.orElseGet(() -> {
+                    float xRot = (RANDOM.nextFloat() - 0.5f) * (float) Math.PI;
+                    float yRot = RANDOM.nextFloat() * (float) Math.PI * 2;
+                    return MathUtil.vecFromAngles(xRot, yRot).scale(msg.speed);
+                });
                 CustomParticlesHelper.createBloodParticle(ModParticles.BLOOD.get(), entity, 
                         msg.posSource.x, msg.posSource.y, msg.posSource.z, 
-                        diff.x, diff.y, diff.z);
+                        speedVec.x, speedVec.y, speedVec.z);
             }
         }
 

@@ -72,6 +72,8 @@ public class LivingUtilCap {
     private int noLerpTicks = 0;
     private int hurtTimeSaved;
     
+    public Vector3d bleedingParticlesPos;
+    
     private HamonSendoOverdriveEntity hurtFromSendoOverdrive;
     private int sendoOverdriveWaveTicks;
     
@@ -111,6 +113,8 @@ public class LivingUtilCap {
                 it.remove();
             }
         }
+        
+        bleedingParticlesPos = null;
     }
     
     

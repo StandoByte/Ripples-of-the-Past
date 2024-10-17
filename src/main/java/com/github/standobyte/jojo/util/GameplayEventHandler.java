@@ -1,10 +1,10 @@
 package com.github.standobyte.jojo.util;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Random;
 import java.util.function.Consumer;
 
@@ -20,9 +20,7 @@ import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.action.stand.effect.BoyIIManStandPartTakenEffect;
-import com.github.standobyte.jojo.action.stand.effect.DriedBloodDrops;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
-import com.github.standobyte.jojo.block.StoneMaskBlock;
 import com.github.standobyte.jojo.block.WoodenCoffinBlock;
 import com.github.standobyte.jojo.capability.chunk.ChunkCapProvider;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
@@ -32,10 +30,8 @@ import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeC
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.enchantment.GlovesSpeedEnchantment;
-import com.github.standobyte.jojo.entity.damaging.projectile.CDBloodCutterEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
-import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModPaintings;
@@ -52,10 +48,8 @@ import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.item.InkPastaItem;
 import com.github.standobyte.jojo.item.OilItem;
 import com.github.standobyte.jojo.item.StandDiscItem;
-import com.github.standobyte.jojo.item.StoneMaskItem;
 import com.github.standobyte.jojo.modcompat.ModInteractionUtil;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.BloodParticlesPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveEffectStartPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SpawnParticlePacket;
 import com.github.standobyte.jojo.potion.BleedingEffect;
@@ -69,8 +63,6 @@ import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
-import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanData;
-import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanData.Mode;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -80,7 +72,6 @@ import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.type.EntityStandType;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
-import com.github.standobyte.jojo.tileentity.StoneMaskTileEntity;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -95,10 +86,8 @@ import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.google.common.collect.Iterables;
 
 import net.minecraft.block.AbstractFurnaceBlock;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
-import net.minecraft.block.HorizontalFaceBlock;
 import net.minecraft.block.SoundType;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -114,7 +103,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
-import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.Food;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
@@ -134,24 +122,19 @@ import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.Util;
-import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.math.RayTraceContext;
-import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ChatType;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.LanguageMap;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.event.HoverEvent;
-import net.minecraft.world.Difficulty;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
@@ -844,155 +827,17 @@ public class GameplayEventHandler {
         splashBlood(world, target.getBoundingBox().getCenter(), 2, dmgAmount, Optional.of(target));
     }
     
-    public static boolean splashBlood(World world, Vector3d splashPos, double radius, float bleedAmount, Optional<LivingEntity> ownerEntity) {
-        if (world.isClientSide()) {
-            return false;
-        }
-
-        AxisAlignedBB aabb = new AxisAlignedBB(splashPos.subtract(radius, radius, radius), splashPos.add(radius, radius, radius));
-        List<Vector3d> particlePos = new ArrayList<>();
-        List<LivingEntity> entitiesAround = world.getEntitiesOfClass(LivingEntity.class, aabb, 
-                EntityPredicates.ENTITY_STILL_ALIVE.and(EntityPredicates.NO_SPECTATORS)
-                .and(entity -> {
-                    return world.clip(new RayTraceContext(splashPos, entity.getBoundingBox().getCenter(), 
-                          RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, entity))
-                          .getType() == RayTraceResult.Type.MISS;
-                }));
-        for (LivingEntity entity : entitiesAround) {
-            if (dropBloodOnEntity(ownerEntity, entity, bleedAmount)) {
-                particlePos.add(entity.getEyePosition(1.0F));
-            }
-        }
-
-        BlockPos blockPos = new BlockPos(splashPos);
-        BlockPos.betweenClosedStream(blockPos.offset(-radius, -radius, -radius), blockPos.offset(radius, radius, radius))
-        .filter(pos -> world.getBlockState(pos).getBlock() == ModBlocks.STONE_MASK.get())
-        .forEach(pos -> {
-            BlockState blockState = world.getBlockState(pos);
-            world.playSound(null, pos, ModSounds.STONE_MASK_ACTIVATION.get(), SoundCategory.BLOCKS, 1.0F, 1.0F);
-            switch (blockState.getValue(HorizontalFaceBlock.FACE)) {
-            case FLOOR:
-                TileEntity tileEntity = world.getBlockEntity(pos);
-                if (tileEntity instanceof StoneMaskTileEntity) {
-                    ((StoneMaskTileEntity) tileEntity).activate();
-                }
-                particlePos.add(Vector3d.atBottomCenterOf(pos));
-                break;
-            default:
-                Block.popResource(world, pos, StoneMaskBlock.getItemFromBlock(world, pos, blockState));
-                world.removeBlock(pos, false);
-                particlePos.add(Vector3d.atCenterOf(pos));
-                break;
-            }
-        });
-
-        if (!particlePos.isEmpty()) {
-            int count = Math.min((int) (bleedAmount * 5), 50);
-            particlePos.forEach(posTo -> {
-                PacketManager.sendToTrackingChunk(new BloodParticlesPacket(splashPos, posTo, count, ownerEntity.map(Entity::getId).orElse(-1)), world.getChunkAt(blockPos));
-            });
-        }
-        
-        return !particlePos.isEmpty();
+    @Deprecated
+    public static boolean splashBlood(World world, Vector3d splashPos, double radius, 
+            float bleedAmount, Optional<LivingEntity> ownerEntity) {
+        return BleedingEffect.splashBlood(world, splashPos, radius, bleedAmount, OptionalInt.empty(), ownerEntity);
     }
     
-    private static boolean dropBloodOnEntity(Optional<LivingEntity> bleedingEntity, LivingEntity nearbyEntity, float bleedAmount) {
-        boolean dropped = false;
-        
-        ItemStack headArmor = nearbyEntity.getItemBySlot(EquipmentSlotType.HEAD);
-        if (headArmor.getItem() instanceof StoneMaskItem && applyStoneMask(nearbyEntity, headArmor)) {
-            dropped = true;
-        }
-
-        dropped |= GeneralUtil.orElseFalse(bleedingEntity, entity -> {
-            return nearbyEntity.getRandom().nextFloat() < bleedAmount / 5 && 
-                    GeneralUtil.orElseFalse(IStandPower.getStandPowerOptional(entity), (IStandPower power) -> {
-                        if (ModStandsInit.CRAZY_DIAMOND_BLOOD_CUTTER.get().isUnlocked(power) && CDBloodCutterEntity.canHaveBloodDropsOn(nearbyEntity, power)) {
-                            DriedBloodDrops bloodDrops = power.getContinuousEffects().getOrCreateEffect(ModStandEffects.DRIED_BLOOD_DROPS.get(), nearbyEntity);
-                            return bloodDrops.tickCount > 0;
-                        }
-                        return false;
-                    });
-        });
-        
-        return dropped;
-    }
-
+    @Deprecated
     public static boolean applyStoneMask(LivingEntity entity, ItemStack headStack) {
-        if (entity.level.getDifficulty() == Difficulty.PEACEFUL) {
-            if (entity instanceof ServerPlayerEntity) {
-                ((ServerPlayerEntity) entity).displayClientMessage(
-                        new TranslationTextComponent("jojo.chat.message.stone_mask_peaceful"), true);
-            }
-            return false;
-        }
-        if (entity instanceof PlayerEntity) {
-            PlayerEntity player = (PlayerEntity) entity;
-            return INonStandPower.getNonStandPowerOptional(player).map(power -> {
-                //Prevents aja-stone mask to work on non pillar men
-                Optional<PillarmanData> pillarmanOptional = power.getTypeSpecificData(ModPowers.PILLAR_MAN.get());
-                
-                if (headStack.getItem() == ModItems.AJA_STONE_MASK.get()) {
-                    if (!pillarmanOptional.isPresent()) {
-                    	if (entity instanceof ServerPlayerEntity) {
-                    		ModCriteriaTriggers.MASK_SUICIDE.get().trigger((ServerPlayerEntity) entity);
-                    	}
-                        entity.hurt(DamageUtil.STONE_MASK, 1000);
-                        return false;
-                    } else {
-                        PillarmanData pillarman = pillarmanOptional.get();
-                        if (pillarmanOptional.get().getEvolutionStage() < 3) {
-                            pillarman.setEvolutionStage(3);
-                            //Gives a random Mode
-                            switch (entity.getRandom().nextInt(3)) {
-                            case 0:
-                                pillarman.setMode(Mode.WIND);
-                                entity.level.playSound(null, entity, ModSounds.PILLAR_MAN_WIND_MODE.get(), entity.getSoundSource(), 1.0F, 1.0F);
-                                break;
-                            case 1:
-                                pillarman.setMode(Mode.HEAT);
-                                entity.level.playSound(null, entity, ModSounds.PILLAR_MAN_HEAT_MODE.get(), entity.getSoundSource(), 1.0F, 1.0F);
-                                break;
-                            case 2:
-                                pillarman.setMode(Mode.LIGHT);
-                                entity.level.playSound(null, entity, ModSounds.PILLAR_MAN_LIGHT_MODE.get(), entity.getSoundSource(), 1.0F, 1.0F);
-                                break;
-                            }
-                            applyMaskEffect(entity, headStack);
-                            return true;
-                        }
-                    }
-                }
-                else /*if (headStack.getItem() == ModItems.STONE_MASK.get())*/ {
-                    if (pillarmanOptional.isPresent()) {
-                        PillarmanData pillarman = pillarmanOptional.get();
-                        if (pillarman.getEvolutionStage() < 2) {
-                            pillarman.setEvolutionStage(2);
-                            applyMaskEffect(entity, headStack);
-                            return true;
-                        }
-                    }
-                    else if (power.getTypeSpecificData(ModPowers.VAMPIRISM.get()).map(
-                            vamp -> !vamp.isVampireAtFullPower()).orElse(false) || power.givePower(ModPowers.VAMPIRISM.get())) {
-                        if (power.getType() == ModPowers.VAMPIRISM.get()) {
-                            power.getTypeSpecificData(ModPowers.VAMPIRISM.get()).get().setVampireFullPower(true);
-                            applyMaskEffect(entity, headStack);
-                            return true;
-                        }
-                    }
-                }
-                return false;
-            }).orElse(false);
-        }
-        return false;
+        return BleedingEffect.applyStoneMask(entity, headStack);
     }
     
-    private static void applyMaskEffect(LivingEntity entity, ItemStack headStack) {
-        entity.level.playSound(null, entity, ModSounds.STONE_MASK_ACTIVATION_ENTITY.get(), entity.getSoundSource(), 1.0F, 1.0F);
-        StoneMaskItem.setActivatedArmorTexture(headStack); // TODO light beams on stone mask activation
-        headStack.hurtAndBreak(1, entity, stack -> {});
-    }
-
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onPotionApply(PotionApplicableEvent event) {
         LivingEntity entity = event.getEntityLiving();
