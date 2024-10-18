@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.action.stand;
 
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ui.screen.stand.ge.ChooseLifeformScreen;
 import com.github.standobyte.jojo.init.ModEntityTypes;
@@ -16,6 +17,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.FlyingEntity;
 import net.minecraft.entity.INPC;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.merchant.IMerchant;
 import net.minecraft.entity.monster.BlazeEntity;
@@ -31,6 +33,7 @@ import net.minecraft.entity.passive.AmbientEntity;
 import net.minecraft.entity.passive.GolemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 
 public class GoldExperienceChooseLifeform extends StandAction {
     
@@ -41,7 +44,15 @@ public class GoldExperienceChooseLifeform extends StandAction {
     @Override
     public boolean clientOnly() {
         ChooseLifeformScreen.openWindowOnClick();
-        return true;
+        return false;
+    }
+    
+    @Override
+    public void onClick(World world, LivingEntity user, IStandPower power) {
+        if (!world.isClientSide()) {
+            user.getCapability(PlayerUtilCapProvider.CAPABILITY).map(PlayerUtilCap::getMetMobs).ifPresent(
+                    metMobs -> metMobs.updateNativeMobs((ServerWorld) world, user, true));
+        }
     }
     
 
@@ -67,6 +78,10 @@ public class GoldExperienceChooseLifeform extends StandAction {
                     !entityType.canSummon()) {
                 return false;
             }
+            
+//            if (world.getDifficulty() == Difficulty.PEACEFUL && mob.shouldDespawnInPeaceful()) {
+//                return false;
+//            }
             
             if (entityType == ModEntityTypes.COCO_JUMBO_TURTLE.get() && !IStandPower.getStandPowerOptional(mob).map(IStandPower::hasPower).orElse(false)) {
                 return false;

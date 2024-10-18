@@ -13,7 +13,9 @@ import org.lwjgl.glfw.GLFW;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.GoldExperienceChooseLifeform;
 import com.github.standobyte.jojo.action.stand.GoldExperienceCreateLifeform;
+import com.github.standobyte.jojo.capability.entity.LifeformsMetMobs;
 import com.github.standobyte.jojo.capability.entity.LifeformsUIState;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -51,6 +53,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 
 public abstract class ChooseLifeformScreen extends WasdAllowingScreen {
     protected LifeformsUIState playerUISettings;
+    protected LifeformsMetMobs unlockedMobsData;
     
     // TODO save those on server instead
     private static String savedSearchFilter = "";
@@ -109,7 +112,9 @@ public abstract class ChooseLifeformScreen extends WasdAllowingScreen {
     @Override
     protected void init() {
         super.init();
-        playerUISettings = minecraft.player.getCapability(PlayerUtilCapProvider.CAPABILITY).resolve().get().getGELifeformsUIState();
+        PlayerUtilCap playerData = minecraft.player.getCapability(PlayerUtilCapProvider.CAPABILITY).resolve().get();
+        playerUISettings = playerData.getGELifeformsUIState();
+        unlockedMobsData = playerData.getMetMobs();
     }
     
     protected void addSearchField() {
@@ -346,8 +351,8 @@ public abstract class ChooseLifeformScreen extends WasdAllowingScreen {
         String width = SIZE_FORMAT.format(entity.getBbWidth());
         String height = SIZE_FORMAT.format(entity.getBbHeight());
         double strength = GoldExperienceCreateLifeform.getAttackStrength(entity);
-        int creationTicks = GoldExperienceCreateLifeform.getTicksToCreate(minecraft.player, ClientUtil.getStandPowerClCached(), entity);
-        boolean isCorrectBiome = GoldExperienceCreateLifeform.correctBiome(entity, minecraft.level, minecraft.player.blockPosition());
+        int creationTicks = GoldExperienceCreateLifeform.getTicksToCreate(minecraft.player, ClientUtil.getStandPowerClCached(), entity, unlockedMobsData);
+        boolean isMobNativeToArea = unlockedMobsData.isMobNativeToPlayerPos(minecraft.level, entity, minecraft.player);
         String creationSecs = String.format("%.2f", (float) creationTicks / 20F);
         
         entityTypeInfo.add(new MultiTooltipLine(
@@ -361,7 +366,7 @@ public abstract class ChooseLifeformScreen extends WasdAllowingScreen {
         entityTypeInfo.add(new MultiTooltipLine(
                 new IconTooltipLine(IconTooltipLine.Icon.TIME),
                 new TextTooltipLine(new TranslationTextComponent("gold_experience.lifeform_time", creationSecs)
-                        .withStyle(isCorrectBiome ? TextFormatting.GREEN : TextFormatting.WHITE))));
+                        .withStyle(isMobNativeToArea ? TextFormatting.GREEN : TextFormatting.WHITE))));
 
 //        entityTypeInfo.add(new TextTooltipLine(new StringTextComponent(String.valueOf(GoldExperienceCreateLifeform.getVolume(entity)))));
         

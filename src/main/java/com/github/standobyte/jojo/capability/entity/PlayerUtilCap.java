@@ -106,6 +106,7 @@ public class PlayerUtilCap {
             tickStatUpdates();
             tickQueuedOnScreenClose();
             tickLifeshotKnockback();
+            metEntityTypes.serverTick();
             
             if (knivesThrewTicks > 0) knivesThrewTicks--;
             if (chatSpamTickCount > 0) chatSpamTickCount--;

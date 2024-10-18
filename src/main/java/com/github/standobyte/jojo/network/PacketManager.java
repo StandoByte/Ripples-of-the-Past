@@ -130,6 +130,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrackedItemPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCachePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.VampireSleepInCoffinPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.CDBlocksRestoredPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.GENativeMobsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.GESplitConsciousnessPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.GEUiDataPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.MetEntityTypesPacket;
@@ -300,6 +301,7 @@ public class PacketManager {
         registerMessage(serverChannel, new CDBlocksRestoredPacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new MetEntityTypesPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new GEUiDataPacket.Handler(),                       Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(serverChannel, new GENativeMobsPacket.Handler(),                   Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new GESplitConsciousnessPacket.Handler(),           Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrackedItemPacket.Handler(),                    Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrDyingBodyTimerPacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));

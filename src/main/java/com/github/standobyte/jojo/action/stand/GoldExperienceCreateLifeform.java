@@ -15,7 +15,9 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.non_stand.HamonOrganismInfusion;
 import com.github.standobyte.jojo.action.stand.effect.GECreatedLifeformEffect;
+import com.github.standobyte.jojo.capability.entity.LifeformsMetMobs;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.screen.stand.ge.EntityTypeIcon;
@@ -82,7 +84,6 @@ import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.LazyOptional;
 
@@ -519,9 +520,14 @@ public class GoldExperienceCreateLifeform extends StandAction {
         tf.getTfSourceData().withBlockSource(blockState, blockPos, tileEntity);
     }
     
+
     
+    static int getTicksToCreate(LivingEntity user, IStandPower power, Entity targetEntity) {
+        return getTicksToCreate(user, power, targetEntity, 
+                targetEntity.getCapability(PlayerUtilCapProvider.CAPABILITY).map(PlayerUtilCap::getMetMobs).orElse(null));
+    }
     
-    public static int getTicksToCreate(LivingEntity user, IStandPower power, Entity targetEntity) {
+    public static int getTicksToCreate(LivingEntity user, IStandPower power, Entity targetEntity, LifeformsMetMobs geUserMetMobs) {
         double entityStrength = getAttackStrength(targetEntity);
         float volume = getVolume(targetEntity);
         double standSpeed = 0;
@@ -532,17 +538,12 @@ public class GoldExperienceCreateLifeform extends StandAction {
         
         double value = 240 / Math.max(standSpeed, 1)
                 + MathHelper.ceil(volume * (1 + entityStrength * 0.125) * MathHelper.clamp(100 - standSpeed * 2, 0, 100));
-        if (correctBiome(targetEntity, user.level, user.blockPosition())) {
-            value *= 0.6;
+        if (geUserMetMobs != null && geUserMetMobs.isMobNativeToPlayerPos(user.level, targetEntity, user)) {
+            value *= 0.5;
         }
         return (int) value;
     }
     
-    public static boolean correctBiome(Entity mobInstance, World world, BlockPos pos) {
-        Biome biome = world.getBiome(pos);
-        return biome.getMobSettings().getMobs(mobInstance.getClassification(false))
-                .stream().anyMatch(spawners -> spawners.type == mobInstance.getType());
-    }
     
     public float getStaminaCostTicking(IStandPower stand, Entity lifeform) {
         float baseCost = getStaminaCostTicking(stand);
