@@ -1,10 +1,12 @@
 package com.github.standobyte.jojo.action.stand.effect;
 
 import java.util.List;
+import java.util.UUID;
 
 import com.github.standobyte.jojo.action.stand.GoldExperienceRevertLifeform;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.entity.GETransformationEntity;
+import com.github.standobyte.jojo.entity.GETransformationEntity.FollowTargetMode;
 import com.github.standobyte.jojo.entity.GETransformationEntity.GETransformationData;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
@@ -21,6 +23,7 @@ import net.minecraft.potion.PotionUtils;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 
 public class GECreatedLifeformEffect extends StandEffectInstance {
     private GETransformationData source = new GETransformationData();
@@ -101,15 +104,7 @@ public class GECreatedLifeformEffect extends StandEffectInstance {
     @Override
     protected void tick() {
         Entity entity = getTarget();
-        double maxDistSqr = GoldExperienceRevertLifeform.MARKER_DISTANCE * GoldExperienceRevertLifeform.MARKER_DISTANCE;
-        if (entity != null && entity.distanceToSqr(user) > maxDistSqr) {
-            if (!world.isClientSide()) {
-                remove();
-            }
-            return;
-        }
-        
-        Entity lifeform = getTargetLiving();
+        Entity lifeform = entity;
         if (lifeform == null && entity instanceof GETransformationEntity) {
             lifeform = ((GETransformationEntity) entity).getTransformationTarget();
         }
@@ -118,6 +113,26 @@ public class GECreatedLifeformEffect extends StandEffectInstance {
         if (!userPower.consumeStamina(staminaCost, true)) {
             if (!world.isClientSide()) {
                 remove();
+                return;
+            }
+        }
+        
+        if (!world.isClientSide()) {
+            if (entity != null) {
+                double maxDistSqr = GoldExperienceRevertLifeform.MARKER_DISTANCE * GoldExperienceRevertLifeform.MARKER_DISTANCE;
+                if (entity.distanceToSqr(user) > maxDistSqr) {
+                    remove();
+                    return;
+                }
+                
+                UUID followTargetId = source.getFollowTarget();
+                if (followTargetId != null && source.getFollowTargetMode() == FollowTargetMode.DELIVERY) {
+                    Entity deliveryDest = ((ServerWorld) entity.level).getEntity(followTargetId);
+                    if (deliveryDest != null && deliveryDest.distanceToSqr(entity) < 4) {
+                        remove();
+                        return;
+                    }
+                }
             }
         }
     }

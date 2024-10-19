@@ -5,9 +5,12 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Stack;
 import java.util.UUID;
+import java.util.stream.IntStream;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionConditionResult;
@@ -312,7 +315,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                                     if (livingItemHolder != null) {
                                         decrementStuckArrow(livingItemHolder);
                                         tf.withHost(livingItemHolder);
-                                        tf.getTfSourceData().withFollowTarget(livingItemHolder.getUUID());
+                                        tf.getTfSourceData().withFollowTarget(livingItemHolder.getUUID(), GETransformationEntity.FollowTargetMode.AGGRO);
                                     }
                                     break;
                                 case STUCK_KNIFE:
@@ -321,7 +324,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                                     if (livingItemHolder != null) {
                                         decrementStuckKnife(livingItemHolder);
                                         tf.withHost(livingItemHolder);
-                                        tf.getTfSourceData().withFollowTarget(livingItemHolder.getUUID());
+                                        tf.getTfSourceData().withFollowTarget(livingItemHolder.getUUID(), GETransformationEntity.FollowTargetMode.AGGRO);
                                     }
                                     break;
                                 default:
@@ -397,7 +400,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     
                     if (!HamonOrganismInfusion.isBlockLiving(blockState)) {
                         tfTargetFound = true;
-                        mobFromBlock(tf, blockPos, blockState, world);
+                        mobFromBlock(tf, blockPos, blockState, (ServerWorld) world, lifeFormCreated);
                         tf.moveTo(blockPos, performer.yRot, 0);
                     }
                 }
@@ -508,11 +511,28 @@ public class GoldExperienceCreateLifeform extends StandAction {
         tf.getTfSourceData().withEntitySource(itemEntity);
     }
     
-    private void mobFromBlock(GETransformationEntity tf, BlockPos blockPos, BlockState blockState, World world) {
+    private void mobFromBlock(GETransformationEntity tf, BlockPos blockPos, BlockState blockState, ServerWorld world, Entity lifeformCreated) {
         TileEntity tileEntity = world.getBlockEntity(blockPos);
         
         if (tileEntity instanceof IInventory) {
             KEEP_ITEMS.add(tileEntity);
+            
+            if (lifeformCreated.getType().getRegistryName().getPath().contains("pigeon")) {
+                IInventory inventory = (IInventory) tileEntity;
+                Optional<UUID> deliveryDest = IntStream.range(0, inventory.getMaxStackSize()).mapToObj(inventory::getItem)
+                        .filter(item -> !item.isEmpty() && item.getItem() == Items.NAME_TAG && item.hasCustomHoverName())
+                        .map(nameTag -> nameTag.getHoverName().getString())
+                        .filter(name -> !StringUtils.isBlank(name))
+                        .map(name -> {
+                            ServerPlayerEntity online = world.getServer().getPlayerList().getPlayerByName(name);
+                            if (online != null) {
+                                return online.getUUID();
+                            }
+                            return PlayerEntity.createPlayerUUID(name);
+                        })
+                        .filter(id -> id != null).findFirst();
+                deliveryDest.ifPresent(destId -> tf.getTfSourceData().withFollowTarget(destId, GETransformationEntity.FollowTargetMode.DELIVERY));
+            }
         }
         world.removeBlock(blockPos, false);
         KEEP_ITEMS.remove(tileEntity);

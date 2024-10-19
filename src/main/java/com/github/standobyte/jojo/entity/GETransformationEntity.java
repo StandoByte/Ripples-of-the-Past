@@ -187,8 +187,8 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                 if (entityToSummon instanceof MobEntity) {
                     MobEntity mob = (MobEntity) entityToSummon;
                     mob.playAmbientSound();
-                    if (source.aggroTarget != null) {
-                        mob.goalSelector.addGoal(-1, new GELifeformFollowOwnerGoal(mob, source.aggroTarget, 1.0));
+                    if (source.followTarget != null) {
+                        mob.goalSelector.addGoal(-1, new GELifeformFollowOwnerGoal(mob, source.followTarget, 1.0));
                     }
                 }
                 hostBleeding();
@@ -648,8 +648,15 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
     
     
     
+    public enum FollowTargetMode {
+        TRACK,
+        AGGRO,
+        DELIVERY
+    }
+    
     public static class GETransformationData {
-        private UUID aggroTarget;
+        private UUID followTarget;
+        private FollowTargetMode followTargetMode;
         private Entity sourceEntity;
         private CompoundNBT sourceEntityNbt = null;
         private BlockState sourceBlockState;
@@ -672,13 +679,14 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             return this;
         }
         
-        public GETransformationData withFollowTarget(UUID entity) {
-            this.aggroTarget = entity;
+        public GETransformationData withFollowTarget(UUID entity, FollowTargetMode mode) {
+            this.followTarget = entity;
+            this.followTargetMode = mode;
             return this;
         }
         
         public void copyFrom(GETransformationData other, World world) {
-            this.aggroTarget = other.aggroTarget;
+            this.followTarget = other.followTarget;
             this.sourceEntity = other.sourceEntity;
             this.sourceBlockState = other.sourceBlockState;
             this.sourceBlockPos = other.sourceBlockPos;
@@ -776,8 +784,12 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         }
         
         @Nullable
-        public UUID getAggroTarget() {
-            return aggroTarget;
+        public UUID getFollowTarget() {
+            return followTarget;
+        }
+        
+        public FollowTargetMode getFollowTargetMode() {
+            return followTargetMode;
         }
         
         
@@ -796,8 +808,11 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             if (sourceTileEntityNbt != null) {
                 nbt.put("GESourceTE", sourceTileEntityNbt);
             }
-            if (aggroTarget != null) {
-                nbt.putUUID("Owner", aggroTarget);
+            if (followTarget != null) {
+                nbt.putUUID("Owner", followTarget);
+                if (followTargetMode != null) {
+                    MCUtil.nbtPutEnum(nbt, "FollowMode", followTargetMode);
+                }
             }
         }
         
@@ -815,7 +830,8 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                 sourceTileEntityNbt = nbt.getCompound("GESourceTE");
             }
             if (nbt.hasUUID("Owner")) {
-                aggroTarget = nbt.getUUID("Owner");
+                followTarget = nbt.getUUID("Owner");
+                followTargetMode = MCUtil.nbtGetEnum(nbt, "FollowMode", FollowTargetMode.class);
             }
         }
         
