@@ -25,7 +25,8 @@ public class GoldExperienceLifeformRevertMarker extends MarkerRenderer {
     @Override
     protected boolean shouldRender() {
         ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
-        return hud.getCurrentMode() == PowerClassification.STAND && hud.showExtraActionHud(ModStandsInit.GOLD_EXPERIENCE_REVERT_LIFEFORM.get());
+        return hud.getCurrentMode() == PowerClassification.STAND && hud.showExtraActionHud(ModStandsInit.GOLD_EXPERIENCE_REVERT_LIFEFORM.get())
+                || hud.hasAvailableHotkey(ModStandsInit.GOLD_EXPERIENCE_REVERT_LIFEFORM.get());
     }
     
     @Override

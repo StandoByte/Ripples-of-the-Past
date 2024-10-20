@@ -114,12 +114,6 @@ import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.loopplayer.LoopPlayerHandler;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
-import com.github.standobyte.jojo.client.ui.marker.CrazyDiamondAnchorMarker;
-import com.github.standobyte.jojo.client.ui.marker.CrazyDiamondBloodHomingMarker;
-import com.github.standobyte.jojo.client.ui.marker.GoldExperienceLifeformMarker;
-import com.github.standobyte.jojo.client.ui.marker.GoldExperienceLifeformRevertMarker;
-import com.github.standobyte.jojo.client.ui.marker.GoldExperienceMarkedItemMarker;
-import com.github.standobyte.jojo.client.ui.marker.HierophantGreenBarrierDetectionMarker;
 import com.github.standobyte.jojo.client.ui.marker.MarkerRenderer;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
 import com.github.standobyte.jojo.client.ui.screen.vampirism.VampirismScreen;
@@ -330,13 +324,8 @@ public class ClientSetup {
             addLayers(skinMap.get("default"), false);
             addLayers(skinMap.get("slim"), true);
             mc.getEntityRenderDispatcher().renderers.values().forEach(ClientSetup::addLayersToEntities);
-
-            MarkerRenderer.Handler.addRenderer(new HierophantGreenBarrierDetectionMarker(mc));
-            MarkerRenderer.Handler.addRenderer(new CrazyDiamondAnchorMarker(mc));
-            MarkerRenderer.Handler.addRenderer(new CrazyDiamondBloodHomingMarker(mc));
-            MarkerRenderer.Handler.addRenderer(new GoldExperienceLifeformMarker(mc));
-            MarkerRenderer.Handler.addRenderer(new GoldExperienceLifeformRevertMarker(mc));
-            MarkerRenderer.Handler.addRenderer(new GoldExperienceMarkedItemMarker(mc));
+            
+            MarkerRenderer.registerMarkers(mc);
             
             statsStatsOverrideExamples();
         });

@@ -7,8 +7,6 @@ import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.stand.ge.EntityTypeIcon;
 import com.github.standobyte.jojo.entity.GETransformationEntity;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
-import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
-import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;
@@ -22,8 +20,7 @@ public class GoldExperienceLifeformMarker extends MarkerRenderer {
     
     @Override
     protected boolean shouldRender() {
-        ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
-        return hud.getCurrentMode() == PowerClassification.STAND && !hud.showExtraActionHud(ModStandsInit.GOLD_EXPERIENCE_REVERT_LIFEFORM.get());
+        return !MarkerRenderer.GE_REVERT_LIFEFORM.shouldRender();
     }
     
     @Override

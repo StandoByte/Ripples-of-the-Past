@@ -39,6 +39,7 @@ import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
+import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.impl.stand.type.MrPresidentStandType;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
@@ -80,8 +81,12 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Hand;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.RayTraceContext;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
@@ -98,11 +103,33 @@ public class GoldExperienceCreateLifeform extends StandAction {
     }
     
     @Override
+    public void overrideVanillaMouseTarget(ObjectWrapper<ActionTarget> targetContainer, World world, LivingEntity user, IStandPower power) {
+        Entity aimingEntity = StandUtil.getStandIfInManualControl(power);
+        Vector3d startPos = aimingEntity.getEyePosition(1.0F);
+        double distance = Math.sqrt(getMaxRangeSqBlockTarget());
+        Vector3d rtVec = aimingEntity.getViewVector(1.0F).scale(distance);
+        Vector3d endPos = startPos.add(rtVec);
+        AxisAlignedBB aabb = aimingEntity.getBoundingBox().expandTowards(rtVec).inflate(1);
+        RayTraceResult rayTrace = JojoModUtil.rayTraceMultipleEntities(startPos, endPos, aabb, 
+                distance, world, aimingEntity, 
+                e -> e instanceof ItemEntity, false, RayTraceContext.BlockMode.COLLIDER, 
+                0, 0)[0];
+        if (rayTrace.getType() == RayTraceResult.Type.ENTITY) {
+            JojoMod.LOGGER.debug(((ItemEntity) ((EntityRayTraceResult) rayTrace).getEntity()).getItem().getItem().getRegistryName());
+            targetContainer.set(ActionTarget.fromRayTraceResult(rayTrace));
+        }
+    }
+    
+    @Override
     protected ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, IStandPower power) {
         switch (target.getType()) {
         case ENTITY:
-            // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! use more types of inanimate entities as targets?
             Entity entity = target.getEntity();
+            if (entity instanceof ItemEntity) {
+                ItemStack item = ((ItemEntity) entity).getItem();
+                return HamonUtil.isItemLivingMatter(item) ? conditionMessage("ge_lifeform_material_item") : ActionConditionResult.POSITIVE;
+            }
+            // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! use more types of inanimate entities as targets?
             return ActionConditionResult.noMessage(
                     entity instanceof TNTEntity || 
                     entity instanceof RoadRollerEntity || 
@@ -468,6 +495,13 @@ public class GoldExperienceCreateLifeform extends StandAction {
             tf.setSecondsOnFire((entity.getRemainingFireTicks() + 19) / 20);
         }
         tf.setDeltaMovement(entity.getDeltaMovement());
+        
+        if (entity instanceof ItemEntity) {
+            UUID thrower = ((ItemEntity) entity).getThrower();
+            if (thrower != null) {
+                tf.getTfSourceData().withFollowTarget(thrower, GETransformationEntity.FollowTargetMode.TRACK);
+            }
+        }
     }
     
     private void mobFromInventory(GETransformationEntity tf, ItemStack item, World world, 

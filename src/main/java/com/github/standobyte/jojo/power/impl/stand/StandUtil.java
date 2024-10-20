@@ -166,6 +166,16 @@ public class StandUtil {
         return standOrUser;
     }
     
+    public static LivingEntity getStandIfInManualControl(IStandPower power) {
+        if (power.getStandManifestation() instanceof StandEntity) {
+            StandEntity stand = (StandEntity) power.getStandManifestation();
+            if (stand.isManuallyControlled()) {
+                return stand;
+            }
+        }
+        return power.getUser();
+    }
+    
     public static void addResolve(IStandPower stand, LivingEntity target, float points) {
         target = getStandUser(target);
         boolean hitSelf = target != null && stand.getUser() != null && getStandUser(target).is(stand.getUser());

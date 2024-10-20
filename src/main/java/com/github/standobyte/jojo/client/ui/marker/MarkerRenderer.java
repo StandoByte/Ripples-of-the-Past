@@ -46,6 +46,23 @@ public abstract class MarkerRenderer {
     private final List<MarkerInstance> positions = new ArrayList<>();
     protected final Minecraft mc;
     protected boolean renderThroughBlocks = true;
+
+    public static MarkerRenderer HG_BARRIER_DETECTION;
+    public static MarkerRenderer CD_ANCHOR;
+    public static MarkerRenderer CD_BLOOD_DROPS;
+    public static MarkerRenderer GE_LIFEFORM;
+    public static MarkerRenderer GE_REVERT_LIFEFORM;
+    public static MarkerRenderer GE_MARKED_ITEM;
+    
+    public static void registerMarkers(Minecraft mc) {
+        MarkerRenderer.Handler.addRenderer(HG_BARRIER_DETECTION = new HierophantGreenBarrierDetectionMarker(mc));
+        MarkerRenderer.Handler.addRenderer(CD_ANCHOR = new CrazyDiamondAnchorMarker(mc));
+        MarkerRenderer.Handler.addRenderer(CD_BLOOD_DROPS = new CrazyDiamondBloodHomingMarker(mc));
+        MarkerRenderer.Handler.addRenderer(GE_LIFEFORM = new GoldExperienceLifeformMarker(mc));
+        MarkerRenderer.Handler.addRenderer(GE_REVERT_LIFEFORM = new GoldExperienceLifeformRevertMarker(mc));
+        MarkerRenderer.Handler.addRenderer(GE_MARKED_ITEM = new GoldExperienceMarkedItemMarker(mc));
+    }
+    
     
     @Deprecated
     /**

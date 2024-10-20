@@ -527,6 +527,16 @@ public class ActionsOverlayGui extends AbstractGui {
         }
     }
     
+    public boolean hasAvailableHotkey(Action<?> action) {
+        return hotkeyInHudActions.stream().filter(hotkey -> {
+            Action<?> hotkeyAction = hotkey.actionEntry.getAction();
+            if (InputHandler.useShiftActionVariant(mc)) {
+                hotkeyAction = hotkeyAction.getShiftVariationIfPresent();
+            }
+            return hotkeyAction == action;
+        }).findAny().isPresent();
+    }
+    
     List<ActionKeybindEntry> heldThisTick = new ArrayList<>();
     public void resetHeldThisTick() {
         heldThisTick.clear();

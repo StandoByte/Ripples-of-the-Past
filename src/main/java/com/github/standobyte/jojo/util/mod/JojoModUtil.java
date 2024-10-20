@@ -140,10 +140,20 @@ public class JojoModUtil {
             double minDistance, World world, @Nullable Entity entity, 
             @Nullable Predicate<Entity> entityFilter, RayTraceContext.BlockMode blockMode, 
             double rayTraceInflate, double standPrecision) {
+        return rayTraceMultipleEntities(startPos, endPos, aabb, 
+                minDistance, world, entity, 
+                entityFilter, true, blockMode, 
+                rayTraceInflate, standPrecision);
+    }
+
+    public static RayTraceResult[] rayTraceMultipleEntities(Vector3d startPos, Vector3d endPos, AxisAlignedBB aabb, 
+            double minDistance, World world, @Nullable Entity entity, 
+            @Nullable Predicate<Entity> entityFilter, boolean checkPickable, RayTraceContext.BlockMode blockMode, 
+            double rayTraceInflate, double standPrecision) {
         aabb.inflate(rayTraceInflate);
         double minDistanceSqr = minDistance * minDistance;
         Map<EntityRayTraceResult, Double> rayTracedWithDistance = new HashMap<>();
-        List<Entity> entities = world.getEntities(entity, aabb, e -> !e.isSpectator() && e.isPickable() && (entityFilter == null || entityFilter.test(e)));
+        List<Entity> entities = world.getEntities(entity, aabb, e -> (!checkPickable || !e.isSpectator() && e.isPickable()) && (entityFilter == null || entityFilter.test(e)));
         for (Entity potentialTarget : entities) {
             AxisAlignedBB targetCollisionAABB = potentialTarget.getBoundingBox().inflate((double) potentialTarget.getPickRadius() + rayTraceInflate);
             targetCollisionAABB = standPrecisionTargetHitbox(targetCollisionAABB, standPrecision);
