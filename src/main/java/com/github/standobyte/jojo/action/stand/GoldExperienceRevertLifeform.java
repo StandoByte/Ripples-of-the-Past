@@ -27,7 +27,6 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
 public class GoldExperienceRevertLifeform extends StandAction {
-    public static final double MARKER_DISTANCE = 64;
 
     public GoldExperienceRevertLifeform(StandAction.Builder builder) {
         super(builder);
@@ -37,7 +36,7 @@ public class GoldExperienceRevertLifeform extends StandAction {
     public Action<IStandPower> getVisibleAction(IStandPower power, ActionTarget target) {
         Action<IStandPower> action = super.getVisibleAction(power, target);
         if (action == this && 
-                !StandEffectsTracker.getEffectsOfType(power, ModStandEffects.GE_CREATED_LIFEFORM.get(), MARKER_DISTANCE)
+                !StandEffectsTracker.getEffectsOfType(power, ModStandEffects.GE_CREATED_LIFEFORM.get(), ModStandsInit.GOLD_EXPERIENCE_CREATE_LIFEFORM.get().maxLifeformDistance)
                 .findAny().isPresent()) {
             action = null;
         }
@@ -46,7 +45,8 @@ public class GoldExperienceRevertLifeform extends StandAction {
     
     @Override
     public void clWriteExtraData(PacketBuffer buf) {
-        clWriteTargetedStandEffect(buf, ModStandEffects.GE_CREATED_LIFEFORM.get(), MARKER_DISTANCE);
+        double distance = ModStandsInit.GOLD_EXPERIENCE_CREATE_LIFEFORM.get().maxLifeformDistance;
+        clWriteTargetedStandEffect(buf, ModStandEffects.GE_CREATED_LIFEFORM.get(), distance);
     }
     
     @Override
@@ -67,7 +67,8 @@ public class GoldExperienceRevertLifeform extends StandAction {
     
     @Override
     public IFormattableTextComponent getTranslatedName(IStandPower power, String key) {
-        Optional<StandEffectInstance> targetedEffect = clGetTargetedStandEffect(ModStandEffects.GE_CREATED_LIFEFORM.get(), MARKER_DISTANCE);
+        double distance = ModStandsInit.GOLD_EXPERIENCE_CREATE_LIFEFORM.get().maxLifeformDistance;
+        Optional<StandEffectInstance> targetedEffect = clGetTargetedStandEffect(ModStandEffects.GE_CREATED_LIFEFORM.get(), distance);
         return targetedEffect.map(e -> {
             GECreatedLifeformEffect effect = (GECreatedLifeformEffect) e;
             return (IFormattableTextComponent) new TranslationTextComponent(key + ".param", effect.getName());
@@ -76,8 +77,9 @@ public class GoldExperienceRevertLifeform extends StandAction {
     
     @Override
     public void renderActionIcon(MatrixStack matrixStack, IStandPower power, float x, float y) {
+        double distance = ModStandsInit.GOLD_EXPERIENCE_CREATE_LIFEFORM.get().maxLifeformDistance;
         ItemStack sourceItem = StandEffectsTracker.getTargetLookedAt((IStandPower) power, 
-                ModStandEffects.GE_CREATED_LIFEFORM.get(), GoldExperienceRevertLifeform.MARKER_DISTANCE, ClientUtil.getClientPlayer())
+                ModStandEffects.GE_CREATED_LIFEFORM.get(), distance, ClientUtil.getClientPlayer())
                 .map(effect -> ((GECreatedLifeformEffect) effect).getItemView())
                 .orElse(ItemStack.EMPTY);
         if (!sourceItem.isEmpty()) {

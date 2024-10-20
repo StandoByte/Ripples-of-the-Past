@@ -16,6 +16,7 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.action.config.ActionConfigField;
 import com.github.standobyte.jojo.action.non_stand.HamonOrganismInfusion;
 import com.github.standobyte.jojo.action.stand.effect.GECreatedLifeformEffect;
 import com.github.standobyte.jojo.capability.entity.LifeformsMetMobs;
@@ -83,7 +84,6 @@ import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.RayTraceResult;
@@ -96,6 +96,7 @@ import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.LazyOptional;
 
 public class GoldExperienceCreateLifeform extends StandAction {
+    @ActionConfigField public double maxLifeformDistance = 128;
 
     public GoldExperienceCreateLifeform(StandAction.Builder builder) {
         super(builder);
@@ -115,7 +116,6 @@ public class GoldExperienceCreateLifeform extends StandAction {
                 e -> e instanceof ItemEntity, false, RayTraceContext.BlockMode.COLLIDER, 
                 0, 0)[0];
         if (rayTrace.getType() == RayTraceResult.Type.ENTITY) {
-            JojoMod.LOGGER.debug(((ItemEntity) ((EntityRayTraceResult) rayTrace).getEntity()).getItem().getItem().getRegistryName());
             targetContainer.set(ActionTarget.fromRayTraceResult(rayTrace));
         }
     }

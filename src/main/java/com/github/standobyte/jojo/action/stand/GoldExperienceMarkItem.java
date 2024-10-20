@@ -16,6 +16,7 @@ import com.github.standobyte.jojo.action.stand.effect.GEItemMarkEffect;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
+import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack.KnownItemState;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -133,14 +134,14 @@ public class GoldExperienceMarkItem extends StandAction {
     }
     
     public static List<Pair<GEItemMarkEffect, Vector3d>> getTargets(IStandPower stand, LivingEntity player) {
-        double rangeSq = GoldExperienceRevertLifeform.MARKER_DISTANCE * GoldExperienceRevertLifeform.MARKER_DISTANCE;
+        double range = ModStandsInit.GOLD_EXPERIENCE_CREATE_LIFEFORM.get().maxLifeformDistance;
         List<Pair<GEItemMarkEffect, Vector3d>> targets = stand.getContinuousEffects()
                 .getEffects()
                 .filter(effect -> effect.effectType == ModStandEffects.GE_ITEM_MARK.get())
                 .map(effect -> (GEItemMarkEffect) effect)
                 .filter(effect -> effect.getItemTracker(true) != null && effect.getItemTracker(false).getAtEntity(player.level) != player)
                 .map(effect -> Pair.of(effect, effect.getItemTracker(false).markerPos(player.level, ClientUtil.getPartialTick())))
-                .filter(entry -> entry.getRight() != null && entry.getRight().distanceToSqr(player.position()) < rangeSq)
+                .filter(entry -> entry.getRight() != null && entry.getRight().distanceToSqr(player.position()) < range * range)
                 .collect(Collectors.toList());
 //        return targets;
         // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! make sure only one marked item can exist at the same time

@@ -2,11 +2,11 @@ package com.github.standobyte.jojo.client.ui.marker;
 
 import java.util.List;
 
-import com.github.standobyte.jojo.action.stand.GoldExperienceRevertLifeform;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.stand.ge.EntityTypeIcon;
 import com.github.standobyte.jojo.entity.GETransformationEntity;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
+import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.Minecraft;
@@ -57,8 +57,9 @@ public class GoldExperienceLifeformMarker extends MarkerRenderer {
     }
     
     public static void updateGELifeformMarkers(List<MarkerInstance> list, float partialTick, Minecraft mc, boolean highlightLookedAt) {
+        double distance = ModStandsInit.GOLD_EXPERIENCE_CREATE_LIFEFORM.get().maxLifeformDistance;
         fillWithStandEffectTargets(list, partialTick, ModStandEffects.GE_CREATED_LIFEFORM.get(), 
-                GoldExperienceRevertLifeform.MARKER_DISTANCE, mc, highlightLookedAt);
+                distance, mc, highlightLookedAt);
         
         for (MarkerInstance marker : list) {
             marker.standEffect.ifPresent(effect -> {

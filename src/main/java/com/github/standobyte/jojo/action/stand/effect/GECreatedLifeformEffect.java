@@ -3,7 +3,6 @@ package com.github.standobyte.jojo.action.stand.effect;
 import java.util.List;
 import java.util.UUID;
 
-import com.github.standobyte.jojo.action.stand.GoldExperienceRevertLifeform;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.entity.GETransformationEntity;
 import com.github.standobyte.jojo.entity.GETransformationEntity.FollowTargetMode;
@@ -119,8 +118,8 @@ public class GECreatedLifeformEffect extends StandEffectInstance {
         
         if (!world.isClientSide()) {
             if (entity != null) {
-                double maxDistSqr = GoldExperienceRevertLifeform.MARKER_DISTANCE * GoldExperienceRevertLifeform.MARKER_DISTANCE;
-                if (entity.distanceToSqr(user) > maxDistSqr) {
+                double maxDist = ModStandsInit.GOLD_EXPERIENCE_CREATE_LIFEFORM.get().maxLifeformDistance;
+                if (entity.distanceToSqr(user) > maxDist * maxDist) {
                     remove();
                     return;
                 }
