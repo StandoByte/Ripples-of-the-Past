@@ -67,6 +67,7 @@ import net.minecraft.entity.monster.SlimeEntity;
 import net.minecraft.entity.passive.horse.AbstractHorseEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.entity.projectile.ArrowEntity;
 import net.minecraft.entity.projectile.PotionEntity;
 import net.minecraft.fluid.Fluid;
@@ -337,7 +338,9 @@ public class GoldExperienceCreateLifeform extends StandAction {
                                     mobFromEntity(tf, itemEntity, user);
                                     break;
                                 case STUCK_ARROW:
-                                    tf.getTfSourceData().withEntitySource(new ArrowEntity(world, user));
+                                    AbstractArrowEntity arrow = new ArrowEntity(world, user);
+                                    arrow.pickup = AbstractArrowEntity.PickupStatus.ALLOWED;
+                                    tf.getTfSourceData().withEntitySource(arrow);
                                     tf.moveTo(pos.x, pos.y, pos.z, itemEntity.yRot, itemEntity.xRot);
                                     if (livingItemHolder != null) {
                                         decrementStuckArrow(livingItemHolder);
@@ -346,7 +349,9 @@ public class GoldExperienceCreateLifeform extends StandAction {
                                     }
                                     break;
                                 case STUCK_KNIFE:
-                                    tf.getTfSourceData().withEntitySource(new KnifeEntity(world, user));
+                                    AbstractArrowEntity knife = new KnifeEntity(world, user);
+                                    knife.pickup = AbstractArrowEntity.PickupStatus.ALLOWED;
+                                    tf.getTfSourceData().withEntitySource(knife);
                                     tf.moveTo(pos.x, pos.y, pos.z, itemEntity.yRot, itemEntity.xRot);
                                     if (livingItemHolder != null) {
                                         decrementStuckKnife(livingItemHolder);

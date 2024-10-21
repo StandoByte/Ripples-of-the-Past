@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.CDBlockBulletRenderer;
 import com.github.standobyte.jojo.client.render.rendertype.CustomRenderType;
 import com.github.standobyte.jojo.entity.GETransformationEntity;
@@ -62,6 +63,10 @@ public class GETransformationRenderer<T extends GETransformationEntity> extends 
 
     @Override
     public void render(T entity, float yRotation, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
+        if (entity.getVehicle() != null && entity.getVehicle() == ClientUtil.getClientPlayer()) {
+            return;
+        }
+        
         if (!entity.isInvisibleTo(Minecraft.getInstance().player)) {
             float age = entity.getTfProgressTime(partialTick);
             float ageMax = entity.getDuration();

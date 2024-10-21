@@ -87,7 +87,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
     private float renderAsItemTime;
     public int actionCooldown;
     
-    private EntityOwnerResolver host = new EntityOwnerResolver(); // TODO entityData entry
+    private EntityOwnerResolver host = new EntityOwnerResolver();
     private Vector3d hostFollowOffset = Vector3d.ZERO;
     
     
