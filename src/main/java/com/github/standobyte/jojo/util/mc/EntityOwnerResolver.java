@@ -20,8 +20,16 @@ public class EntityOwnerResolver {
         _setNewOwnerEntity(owner);
     }
     
+    public void setOwner(UUID ownerUuid) {
+        this.ownerUUID = ownerUuid;
+    }
+    
     public LivingEntity getEntity(World world) {
-        if (owner == null || !owner.isAlive()) {
+        if (owner != null && !owner.isAlive()) {
+            owner = null;
+            ownerNetworkId = 0;
+        }
+        if (owner == null) {
             if (ownerUUID != null && world instanceof ServerWorld) {
                 _setNewOwnerEntity(((ServerWorld) world).getEntity(ownerUUID));
             } else if (ownerNetworkId != 0) {
@@ -35,6 +43,7 @@ public class EntityOwnerResolver {
     private void _setNewOwnerEntity(Entity entity) {
         if (entity == null || entity instanceof LivingEntity) {
             this.owner = (LivingEntity) entity;
+            this.ownerNetworkId = owner != null ? owner.getId() : 0;
         }
     }
     
@@ -47,7 +56,7 @@ public class EntityOwnerResolver {
     }
     
     public void loadNbt(CompoundNBT nbt, String key) {
-        ownerUUID = nbt.hasUUID(key) ? nbt.getUUID(key) : null;
+        setOwner(nbt.hasUUID(key) ? nbt.getUUID(key) : null);
     }
     
     public void writeNetwork(PacketBuffer buf) {

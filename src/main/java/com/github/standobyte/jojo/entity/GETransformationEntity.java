@@ -12,7 +12,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.entity.ai.GELifeformFollowOwnerGoal;
+import com.github.standobyte.jojo.entity.ai.SpecificTargetGoal;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModSounds;
@@ -188,7 +188,10 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                     MobEntity mob = (MobEntity) entityToSummon;
                     mob.playAmbientSound();
                     if (source.followTarget != null) {
-                        mob.goalSelector.addGoal(-1, new GELifeformFollowOwnerGoal(mob, source.followTarget, 1.0));
+                        boolean aggro = source.followTargetMode == FollowTargetMode.AGGRO;
+                        if (aggro) {
+                            mob.targetSelector.addGoal(0, new SpecificTargetGoal(mob, source.followTarget, false, false));
+                        }
                     }
                 }
                 hostBleeding();
@@ -679,8 +682,11 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             return this;
         }
         
-        public GETransformationData withFollowTarget(UUID entity, FollowTargetMode mode) {
+        public GETransformationData withFollowTarget(UUID entity, FollowTargetMode mode, LivingEntity standUser) {
             this.followTarget = entity;
+            if (mode == FollowTargetMode.AGGRO && standUser != null && standUser.getUUID().equals(entity)) {
+                mode = FollowTargetMode.TRACK;
+            }
             this.followTargetMode = mode;
             return this;
         }

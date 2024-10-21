@@ -334,7 +334,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                                     
                                     break;
                                 case ENTITY_IS_ITEM:
-                                    mobFromEntity(tf, itemEntity);
+                                    mobFromEntity(tf, itemEntity, user);
                                     break;
                                 case STUCK_ARROW:
                                     tf.getTfSourceData().withEntitySource(new ArrowEntity(world, user));
@@ -342,7 +342,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                                     if (livingItemHolder != null) {
                                         decrementStuckArrow(livingItemHolder);
                                         tf.withHost(livingItemHolder);
-                                        tf.getTfSourceData().withFollowTarget(livingItemHolder.getUUID(), GETransformationEntity.FollowTargetMode.AGGRO);
+                                        tf.getTfSourceData().withFollowTarget(livingItemHolder.getUUID(), GETransformationEntity.FollowTargetMode.AGGRO, user);
                                     }
                                     break;
                                 case STUCK_KNIFE:
@@ -351,7 +351,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                                     if (livingItemHolder != null) {
                                         decrementStuckKnife(livingItemHolder);
                                         tf.withHost(livingItemHolder);
-                                        tf.getTfSourceData().withFollowTarget(livingItemHolder.getUUID(), GETransformationEntity.FollowTargetMode.AGGRO);
+                                        tf.getTfSourceData().withFollowTarget(livingItemHolder.getUUID(), GETransformationEntity.FollowTargetMode.AGGRO, user);
                                     }
                                     break;
                                 default:
@@ -400,7 +400,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                 if (!tfTargetFound && target.getType() == TargetType.ENTITY) {
                     Entity targetEntity = target.getEntity();
                     tfTargetFound = true;
-                    mobFromEntity(tf, targetEntity);
+                    mobFromEntity(tf, targetEntity, user);
                 }
                 
                 // item held in off-hand
@@ -427,7 +427,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     
                     if (!HamonOrganismInfusion.isBlockLiving(blockState)) {
                         tfTargetFound = true;
-                        mobFromBlock(tf, blockPos, blockState, (ServerWorld) world, lifeFormCreated);
+                        mobFromBlock(tf, blockPos, blockState, (ServerWorld) world, lifeFormCreated, user);
                         tf.moveTo(blockPos, performer.yRot, 0);
                     }
                 }
@@ -484,7 +484,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
     public static final Stack<TileEntity> KEEP_ITEMS = new Stack<>();
     
     
-    private void mobFromEntity(GETransformationEntity tf, Entity entity) {
+    private void mobFromEntity(GETransformationEntity tf, Entity entity, LivingEntity geUser) {
         MCUtil.cloneEntity(entity).ifPresent(e -> tf.getTfSourceData().withEntitySource(e));
         entity.remove();
         
@@ -499,7 +499,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
         if (entity instanceof ItemEntity) {
             UUID thrower = ((ItemEntity) entity).getThrower();
             if (thrower != null) {
-                tf.getTfSourceData().withFollowTarget(thrower, GETransformationEntity.FollowTargetMode.TRACK);
+                tf.getTfSourceData().withFollowTarget(thrower, GETransformationEntity.FollowTargetMode.TRACK, geUser);
             }
         }
     }
@@ -545,7 +545,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
         tf.getTfSourceData().withEntitySource(itemEntity);
     }
     
-    private void mobFromBlock(GETransformationEntity tf, BlockPos blockPos, BlockState blockState, ServerWorld world, Entity lifeformCreated) {
+    private void mobFromBlock(GETransformationEntity tf, BlockPos blockPos, BlockState blockState, ServerWorld world, Entity lifeformCreated, LivingEntity geUser) {
         TileEntity tileEntity = world.getBlockEntity(blockPos);
         
         if (tileEntity instanceof IInventory) {
@@ -565,7 +565,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                             return PlayerEntity.createPlayerUUID(name);
                         })
                         .filter(id -> id != null).findFirst();
-                deliveryDest.ifPresent(destId -> tf.getTfSourceData().withFollowTarget(destId, GETransformationEntity.FollowTargetMode.DELIVERY));
+                deliveryDest.ifPresent(destId -> tf.getTfSourceData().withFollowTarget(destId, GETransformationEntity.FollowTargetMode.DELIVERY, geUser));
             }
         }
         world.removeBlock(blockPos, false);
