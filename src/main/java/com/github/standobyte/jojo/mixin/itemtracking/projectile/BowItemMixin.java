@@ -2,13 +2,16 @@ package com.github.standobyte.jojo.mixin.itemtracking.projectile;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 
 import com.github.standobyte.jojo.itemtracking.ITrackedArrowEntity;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack.KnownItemState;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.item.ArrowItem;
 import net.minecraft.item.BowItem;
@@ -23,11 +26,13 @@ public abstract class BowItemMixin extends ShootableItem {
         super(properties);
     }
     
-    @Redirect(method = "releaseUsing", at = @At(value = "INVOKE", 
-            target = "Lnet/minecraft/item/ArrowItem;createArrow(Lnet/minecraft/world/World;Lnet/minecraft/item/ItemStack;Lnet/minecraft/entity/LivingEntity;)Lnet/minecraft/entity/projectile/AbstractArrowEntity;"))
-    public AbstractArrowEntity jojoModifyBowArrow(ArrowItem arrowItem, World world, ItemStack arrowItemStack, LivingEntity shooter) {
-        AbstractArrowEntity arrowEntity = arrowItem.createArrow(world, arrowItemStack, shooter);
-        TrackerItemStack.getItemTracker(arrowItemStack).ifPresent(tracker -> {
+    @Inject(method = "releaseUsing", at = @At(value = "INVOKE", 
+                target = "Lnet/minecraft/entity/projectile/AbstractArrowEntity;shootFromRotation(Lnet/minecraft/entity/Entity;FFFFF)V"),
+            locals = LocalCapture.CAPTURE_FAILSOFT)
+    public void jojoModifyBowArrow(ItemStack bowItem, World world, LivingEntity entity, int holdTimeLeft, CallbackInfo ci, 
+            PlayerEntity player, boolean hasAmmo, ItemStack projectileItem, int charge, float arrowPower, boolean infinity, 
+            ArrowItem arrowitem, AbstractArrowEntity arrowEntity) {
+        TrackerItemStack.getItemTracker(projectileItem).ifPresent(tracker -> {
             if (tracker.isTracked()) {
                 tracker.setAtEntity(arrowEntity.getId(), world, KnownItemState.ENTITY_IS_ITEM);
                 tracker.setItemStillThereCheck(null);
@@ -36,6 +41,5 @@ public abstract class BowItemMixin extends ShootableItem {
                 }
             }
         });
-        return arrowEntity;
     }
 }

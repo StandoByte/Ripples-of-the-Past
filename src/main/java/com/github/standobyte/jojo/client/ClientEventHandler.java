@@ -58,6 +58,7 @@ import com.github.standobyte.jojo.client.ui.screen.widgets.HeightScaledSlider;
 import com.github.standobyte.jojo.client.ui.screen.widgets.ImageMutableButton;
 import com.github.standobyte.jojo.client.ui.screen.widgets.ImageVanillaButton;
 import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
+import com.github.standobyte.jojo.client.ui.text.JojoTextComponentWrapper;
 import com.github.standobyte.jojo.client.ui.toasts.MetEntityTypeToast;
 import com.github.standobyte.jojo.client.ui.tooltip.CustomTooltipRender;
 import com.github.standobyte.jojo.client.ui.tooltip.ITooltipLine;
@@ -67,17 +68,14 @@ import com.github.standobyte.jojo.client.ui.tooltip.TextTooltipLine;
 import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.mob.CocoJumboTurtleEntity;
 import com.github.standobyte.jojo.entity.mob.IMobStandUser;
-import com.github.standobyte.jojo.client.ui.text.JojoTextComponentWrapper;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
-import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.item.OilItem;
-import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
 import com.github.standobyte.jojo.modcompat.ModInteractionUtil;
 import com.github.standobyte.jojo.modcompat.OptionalDependencyHelper;
 import com.github.standobyte.jojo.network.NetworkUtil;
@@ -1397,24 +1395,14 @@ public class ClientEventHandler {
                 }
             });
             
-            TrackerItemStack.getItemTracker(item).ifPresent(tracker -> {
-                if (tracker.isTracked()) {
-                    if (powerOptional.map(power -> power
-                                .getContinuousEffects()
-                                .getEffects()
-                                .filter(effect -> effect.effectType == ModStandEffects.GE_ITEM_MARK.get())
-                                .map(effect -> (GEItemMarkEffect) effect)
-                                .anyMatch(effect -> tracker.getTrackerId().equals(effect.getItemTrackerId())))
-                            .orElse(false)) {
-                        event.getToolTip().add(
-                                new TranslationTextComponent("jojo.ge_item_marked")
-                                .withStyle(Style.EMPTY.withColor(
-                                        Color.fromRgb(ActionsOverlayGui.getPowerUiColor(powerOptional.get())))));
-                    }
-                }
-            });
+            if (GEItemMarkEffect.isItemMarked(item, player)) {
+                event.getToolTip().add(
+                        new TranslationTextComponent("jojo.ge_item_marked")
+                        .withStyle(Style.EMPTY.withColor(
+                                Color.fromRgb(ActionsOverlayGui.getPowerUiColor(powerOptional.get())))));
+            }
             
-           OilItem.remainingOiledUses(item).ifPresent(uses -> {
+            OilItem.remainingOiledUses(item).ifPresent(uses -> {
                if (uses > 0) {
                    event.getToolTip().add(new TranslationTextComponent("item.jojo.oil.uses", uses).withStyle(TextFormatting.GOLD));
                }
