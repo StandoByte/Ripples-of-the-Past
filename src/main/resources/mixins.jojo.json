@@ -29,6 +29,7 @@
     "itemtracking.inventory.InventoryMixin",
     "itemtracking.ContainerSlotMixin",
     "itemtracking.projectile.BowItemMixin",
+	"itemtracking.projectile.CrossbowItemMixin",
     "itemtracking.projectile.ArrowEntityMixin",
     "itemtracking.projectile.AbstractArrowEntityMixin",
 	"Matrix4fAccessor"
