@@ -32,6 +32,7 @@
 	"itemtracking.projectile.CrossbowItemMixin",
     "itemtracking.projectile.ArrowEntityMixin",
     "itemtracking.projectile.AbstractArrowEntityMixin",
+    "itemtracking.projectile.PlayerPreferredProjectileMixin",
 	"Matrix4fAccessor"
   ],
   "client": [
