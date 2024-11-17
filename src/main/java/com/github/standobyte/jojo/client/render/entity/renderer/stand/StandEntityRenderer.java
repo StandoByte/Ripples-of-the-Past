@@ -218,7 +218,7 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
 
     public boolean firstPersonRender = false;
     private float alpha;
-    private ViewObstructionPrevention viewObstructionPrevention;
+    private ViewObstructionPrevention viewObstructionPrevention = ViewObstructionPrevention.NONE;
     private boolean isVisibilityInverted = false;
     @Override
     public void render(T entity, float yRotation, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
@@ -470,7 +470,9 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
                 LivingRenderer.getOverlayCoords(entity, getWhiteOverlayProgress(entity, partialTick)), 1.0F, 1.0F, 1.0F, entity.getAlpha(partialTick));
     }
     
-    
+    /**
+     * Used only in Stand skins UI
+     */
     public void renderIdleWithSkin(MatrixStack matrixStack, StandSkin standSkin, IRenderTypeBuffer buffer, float ticks) {
         matrixStack.pushPose();
         Optional<ResourceLocation> nonDefaultSkin = standSkin.getNonDefaultLocation();

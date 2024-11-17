@@ -29,7 +29,6 @@ import com.github.standobyte.jojo.client.controls.ActionsHotbar;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.controls.HudControlSettings;
 import com.github.standobyte.jojo.client.controls.PowerTypeControlSchemes;
-import com.github.standobyte.jojo.client.ui.BlitFloat;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.IJojoScreen;
 import com.github.standobyte.jojo.client.ui.screen.widgets.CustomButton;
@@ -358,10 +357,7 @@ public class HudLayoutEditingScreen extends Screen implements IJojoScreen {
             boolean changeColor = brightness < 1 || alpha < 1;
             if (changeColor) RenderSystem.color4f(brightness, brightness, brightness, alpha);
             
-            Minecraft mc = Minecraft.getInstance();
-            ResourceLocation icon = action.getIconTexture(power);
-            mc.getTextureManager().bind(icon);
-            BlitFloat.blitFloat(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
+            action.renderActionIcon(matrixStack, power, x, y);
             
             if (changeColor) RenderSystem.color4f(1, 1, 1, 1);
         }
@@ -705,7 +701,8 @@ public class HudLayoutEditingScreen extends Screen implements IJojoScreen {
                     return true;
                 }
             }
-            else if (key != GLFW.GLFW_KEY_ESCAPE && hoveredAction.isPresent()) {
+            else if (key != GLFW.GLFW_KEY_ESCAPE && hoveredAction.isPresent()
+                    && !KeyModifier.isKeyCodeModifier(InputMappings.Type.KEYSYM.getOrCreate(key))) {
                 setCustomKeybind(hoveredAction.get().actionSwitch.getAction(), InputMappings.Type.KEYSYM, key);
             }
         }

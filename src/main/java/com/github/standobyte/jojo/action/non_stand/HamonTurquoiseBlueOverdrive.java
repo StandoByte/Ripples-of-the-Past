@@ -29,7 +29,7 @@ public class HamonTurquoiseBlueOverdrive extends HamonAction {
         if (!world.isClientSide()) {
             HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
             float energyCost = getEnergyCost(power, target);
-            float hamonEfficiency = hamon.getActionEfficiency(energyCost, true);
+            float hamonEfficiency = hamon.getActionEfficiency(energyCost, true, getUnlockingSkill());
             float hamonControl = hamon.getHamonControlLevelRatio();
             
             HamonTurquoiseBlueOverdriveEntity overdriveWave = new HamonTurquoiseBlueOverdriveEntity(world, user)

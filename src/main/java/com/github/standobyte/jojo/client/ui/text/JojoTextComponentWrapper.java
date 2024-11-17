@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.client.ui.text;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -8,8 +9,10 @@ import org.apache.commons.lang3.StringUtils;
 import com.github.standobyte.jojo.client.ui.BlitFloat;
 import com.github.standobyte.jojo.util.mod.StoryPart;
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.datafixers.util.Either;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.IReorderingProcessor;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
@@ -20,12 +23,12 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
 
 public class JojoTextComponentWrapper implements IFormattableTextComponent {
-    private static final ITextComponent[] SPACE_OFFSET = Util.make(new ITextComponent[8], array -> {
+    private static final ITextComponent[] SPRITE_OFFSET = Util.make(new ITextComponent[8], array -> {
         for (int i = 0; i < array.length; i++) {
-            array[i] = new StringTextComponent(StringUtils.repeat(" ", i));
+            array[i] = new StringTextComponent(StringUtils.repeat(" ", (i + 1) * 2));
         }
     });
-    private ResourceLocation storyPartSprite;
+    private List<Either<ResourceLocation, TextureAtlasSprite>> sprites = new ArrayList<>();
     private final IFormattableTextComponent component;
     
     public JojoTextComponentWrapper(IFormattableTextComponent component) {
@@ -34,35 +37,50 @@ public class JojoTextComponentWrapper implements IFormattableTextComponent {
     
     
     public JojoTextComponentWrapper setStoryPartSprite(StoryPart storyPart) {
-        return setStoryPartSprite(storyPart != null ? storyPart.getSprite() : null);
+        return addSprite(storyPart != null ? storyPart.getSprite() : null);
     }
     
-    public JojoTextComponentWrapper setStoryPartSprite(ResourceLocation storyPartSprite) {
-        this.storyPartSprite = storyPartSprite;
+    public JojoTextComponentWrapper addSprite(ResourceLocation sprite) {
+        sprites.add(Either.left(sprite));
+        return this;
+    }
+    
+    public JojoTextComponentWrapper addSprite(TextureAtlasSprite sprite) {
+        sprites.add(Either.right(sprite));
         return this;
     }
     
     // FIXME fix the icon not rendering if any line from the tooltip is wrapped
     public void tooltipRenderExtra(MatrixStack matrixStack, float x, float y) {
-        if (storyPartSprite != null) {
-            Minecraft.getInstance().textureManager.bind(storyPartSprite);
-            BlitFloat.blitFloat(matrixStack, x - 1, y, 
-                    0, 0, 8, 8, 8, 8);
+        for (Either<ResourceLocation, TextureAtlasSprite> sprite : sprites) {
+            float spriteX = x - 1;
+            sprite
+            .ifLeft(texLocation -> {
+                Minecraft.getInstance().textureManager.bind(texLocation);
+                BlitFloat.blitFloat(matrixStack, spriteX, y, 0, 0, 8, 8, 8, 8);
+            })
+            .ifRight(atlasSprite -> {
+                Minecraft.getInstance().getTextureManager().bind(atlasSprite.atlas().location());
+                BlitFloat.blitFloat(matrixStack, spriteX, y, 0, 8, 8, atlasSprite);
+            });
+            x += 10;
         }
     }
     
     @Override
     public <T> Optional<T> visit(ITextProperties.IStyledTextAcceptor<T> pAcceptor, Style pStyle) {
-        if (storyPartSprite != null) {
-            SPACE_OFFSET[2].visit(pAcceptor, pStyle);
+        if (!sprites.isEmpty()) {
+            int index = Math.min(sprites.size(), SPRITE_OFFSET.length) - 1;
+            SPRITE_OFFSET[index].visit(pAcceptor, pStyle);
         }
         return component.visit(pAcceptor, pStyle);
     }
 
     @Override
     public <T> Optional<T> visit(ITextProperties.ITextAcceptor<T> pAcceptor) {
-        if (storyPartSprite != null) {
-            SPACE_OFFSET[2].visit(pAcceptor);
+        if (!sprites.isEmpty()) {
+            int index = Math.min(sprites.size(), SPRITE_OFFSET.length) - 1;
+            SPRITE_OFFSET[index].visit(pAcceptor);
         }
         return component.visit(pAcceptor);
     }
@@ -90,8 +108,9 @@ public class JojoTextComponentWrapper implements IFormattableTextComponent {
 
     @Override
     public IFormattableTextComponent copy() {
-        return new JojoTextComponentWrapper(component.copy())
-                .setStoryPartSprite(storyPartSprite);
+        JojoTextComponentWrapper copy = new JojoTextComponentWrapper(component.copy());
+        copy.sprites.addAll(this.sprites);
+        return copy;
     }
 
     @Override

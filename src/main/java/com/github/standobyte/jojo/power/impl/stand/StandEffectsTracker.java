@@ -1,10 +1,16 @@
 package com.github.standobyte.jojo.power.impl.stand;
 
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectType;
@@ -158,6 +164,14 @@ public class StandEffectsTracker {
         }
     }
     
+    @Deprecated
+    public List<StandEffectInstance> getEffects(@Nullable Predicate<StandEffectInstance> filter) {
+        if (filter == null) {
+            return new ArrayList<>(effects.values());
+        }
+        return effects.values().stream().filter(filter).collect(Collectors.toList());
+    }
+    
     public Stream<StandEffectInstance> getEffects() {
         return effects.values().stream();
     }
@@ -199,6 +213,29 @@ public class StandEffectsTracker {
     
     
     
+    /**
+     * @return Optional of stream with StandEffectInstance of that type. Instead of an empty stream returns empty optional.
+     */
+    @SuppressWarnings("unchecked")
+    public static <T extends StandEffectInstance> Stream<T> getEffectsOfType(LivingEntity user, StandEffectType<T> type) {
+        return IStandPower.getStandPowerOptional(user).resolve()
+                .map(power -> power.getContinuousEffects().getEffects()
+                        .filter(effect -> effect.effectType == type)
+                        .map(standEffectInstance -> (T) standEffectInstance))
+                .orElse(Stream.empty());
+    }
+
+    @SuppressWarnings("unchecked")
+    public static <T extends StandEffectInstance> Optional<T> getEffectOfType(LivingEntity user, StandEffectType<T> type) {
+        return IStandPower.getStandPowerOptional(user).resolve()
+                .flatMap(power -> power.getContinuousEffects().getEffects()
+                        .filter(effect -> effect.effectType == type)
+                        .findFirst()
+                        .map(standEffectInstance -> (T) standEffectInstance));
+    }
+    
+
+    @SuppressWarnings("unchecked")
     public static <T extends StandEffectInstance> Stream<T> getEffectsOfType(IStandPower power, StandEffectType<T> type, double range) {
         double rangeSq = range * range;
         return power.getContinuousEffects()
@@ -212,6 +249,7 @@ public class StandEffectsTracker {
     /**
      * @return Optional of stream with StandEffectInstance of that type. Instead of an empty stream returns empty optional.
      */
+    @SuppressWarnings("unchecked")
     public static <T extends StandEffectInstance> Stream<T> getEffectsTargetedBy(LivingEntity entity, StandEffectType<T> type) {
         return entity.getCapability(LivingUtilCapProvider.CAPABILITY).resolve().map(cap -> cap.getEffectsTargetedBy().stream()
                         .filter(effect -> effect.effectType == type)

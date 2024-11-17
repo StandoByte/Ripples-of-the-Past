@@ -75,7 +75,7 @@ public class HamonProtection extends HamonAction {
                     float baseReduction = 0.4F + hamon.getHamonControlLevelRatio() * 0.2F;
                     hamon.hamonPointsFromAction(HamonStat.CONTROL, Math.min(energyCost, power.getEnergy()) * efficiency);
                     return MathHelper.clamp(baseReduction * efficiency, 0, 1);
-                }, energyCost);
+                }, energyCost, getUnlockingSkill());
             }
         }).orElse(0f);
         

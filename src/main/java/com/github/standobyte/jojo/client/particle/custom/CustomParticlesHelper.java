@@ -21,8 +21,10 @@ import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.particle.DiggingParticle;
 import net.minecraft.client.particle.IAnimatedSprite;
 import net.minecraft.client.particle.Particle;
+import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.particle.SpriteTexturedParticle;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -210,6 +212,22 @@ public abstract class CustomParticlesHelper {
     
     public static void addBlockBreakParticles(BlockPos blockPos, BlockState blockState) {
         Minecraft.getInstance().particleEngine.destroy(blockPos, blockState);
+    }
+    
+    public static void addBlockShardBreakParticles(Vector3d pos, BlockState blockState) {
+        Minecraft mc = Minecraft.getInstance();
+        ParticleManager particleManager = mc.particleEngine;
+        ClientWorld world = mc.level;
+        BlockPos blockPos = new BlockPos(pos);
+        if (!blockState.isAir(world, blockPos)) {
+            for (int i = 0; i < 4; i++) {
+                double x = (Math.random() - 0.5) * 0.2;
+                double y = (Math.random() - 0.5) * 0.2;
+                double z = (Math.random() - 0.5) * 0.2;
+                particleManager.add(new DiggingParticle(world, pos.x + x, pos.y + y, pos.z + z, 
+                        x * 0.25, y * 0.25, z * 0.25, blockState).init(blockPos));
+            }
+        }
     }
     
     public static void createParticlesEmitter(Entity entity, IParticleData type, int ticks) {

@@ -26,17 +26,23 @@ public class TrHeldActionPacket {
     @Nullable private final Action<?> action;
     private final boolean requirementsFulfilled;
     private final ActionTarget target;
+    private final boolean actionFired;
     
     public TrHeldActionPacket(int userId, PowerClassification classification, Action<?> action, boolean requirementsFulfilled, ActionTarget target) {
+        this(userId, classification, action, requirementsFulfilled, target, false);
+    }
+    
+    public TrHeldActionPacket(int userId, PowerClassification classification, Action<?> action, boolean requirementsFulfilled, ActionTarget target, boolean actionFired) {
         this.userId = userId;
         this.classification = classification;
         this.action = action;
         this.requirementsFulfilled = requirementsFulfilled;
         this.target = target;
+        this.actionFired = actionFired;
     }
     
-    public static TrHeldActionPacket actionStopped(int userId, PowerClassification classification) {
-        return new TrHeldActionPacket(userId, classification, null, false, ActionTarget.EMPTY);
+    public static TrHeldActionPacket actionStopped(int userId, PowerClassification classification, boolean actionFired) {
+        return new TrHeldActionPacket(userId, classification, null, false, ActionTarget.EMPTY, actionFired);
     }
     
     
@@ -49,7 +55,10 @@ public class TrHeldActionPacket {
             buf.writeBoolean(stopHeld);
             buf.writeInt(msg.userId);
             buf.writeEnum(msg.classification);
-            if (!stopHeld) {
+            if (stopHeld) {
+                buf.writeBoolean(msg.actionFired);
+            }
+            else {
                 buf.writeRegistryIdUnsafe(JojoCustomRegistries.ACTIONS.getRegistry(), msg.action);
                 buf.writeBoolean(msg.requirementsFulfilled);
                 msg.target.writeToBuf(buf);
@@ -60,7 +69,8 @@ public class TrHeldActionPacket {
         public TrHeldActionPacket decode(PacketBuffer buf) {
             boolean stopHeld = buf.readBoolean();
             if (stopHeld) {
-                return actionStopped(buf.readInt(), buf.readEnum(PowerClassification.class));
+                return actionStopped(buf.readInt(), buf.readEnum(PowerClassification.class), 
+                        buf.readBoolean());
             }
             return new TrHeldActionPacket(buf.readInt(), buf.readEnum(PowerClassification.class), 
                     buf.readRegistryIdUnsafe(JojoCustomRegistries.ACTIONS.getRegistry()), buf.readBoolean(), ActionTarget.readFromBuf(buf));
@@ -85,9 +95,9 @@ public class TrHeldActionPacket {
                         }
                     }
                     else {
-                        power.stopHeldAction(false);
+                        power.stopHeldAction(msg.actionFired);
                         if (isClientPlayer) {
-                            InputHandler.getInstance().stopHeldAction(power, false);
+                            InputHandler.getInstance().stopHeldAction(power);
                         }
                         if (user instanceof PlayerEntity) {
                             user.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {

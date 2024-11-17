@@ -3,7 +3,7 @@ package com.github.standobyte.jojo.capability.entity.power;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandPower;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.INBT;
 import net.minecraft.util.Direction;
 import net.minecraftforge.common.capabilities.Capability;
@@ -16,7 +16,7 @@ public class StandCapProvider implements ICapabilitySerializable<INBT> {
     public static Capability<IStandPower> STAND_CAP = null;
     private LazyOptional<IStandPower> instance;
     
-    public StandCapProvider(PlayerEntity user) {
+    public StandCapProvider(LivingEntity user) {
         this.instance = LazyOptional.of(() -> new StandPower(user));
     }
 

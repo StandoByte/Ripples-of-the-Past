@@ -1,10 +1,7 @@
 package com.github.standobyte.jojo.power.impl.nonstand.type.hamon;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
@@ -12,7 +9,11 @@ import java.util.Set;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
+import com.github.standobyte.jojo.action.non_stand.HamonLiquidWalking;
 import com.github.standobyte.jojo.action.non_stand.HamonOrganismInfusion;
+import com.github.standobyte.jojo.action.non_stand.HamonPlantItemInfusion;
+import com.github.standobyte.jojo.action.non_stand.HamonRopeTrap;
+import com.github.standobyte.jojo.action.non_stand.HamonSnakeMuffler;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
@@ -24,11 +25,7 @@ import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
-import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer;
-import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer.BarType;
 import com.github.standobyte.jojo.entity.CrimsonBubbleEntity;
-import com.github.standobyte.jojo.entity.HamonBlockChargeEntity;
-import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.SnakeMufflerEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
@@ -48,18 +45,13 @@ import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mc.damage.explosion.CustomExplosion;
-import com.github.standobyte.jojo.util.mc.damage.explosion.CustomExplosion.CustomExplosionType;
 import com.github.standobyte.jojo.util.mc.damage.explosion.HamonBlastExplosion;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
-import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
 import net.minecraft.block.CactusBlock;
 import net.minecraft.block.SweetBerryBushBlock;
-import net.minecraft.block.TripWireBlock;
-import net.minecraft.enchantment.EnchantmentHelper;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -72,9 +64,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.AbstractArrowEntity;
 import net.minecraft.entity.projectile.PotionEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
-import net.minecraft.fluid.Fluid;
 import net.minecraft.fluid.FluidState;
-import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.EggItem;
 import net.minecraft.item.FishBucketItem;
@@ -83,13 +73,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Effects;
-import net.minecraft.state.BooleanProperty;
-import net.minecraft.state.Property;
-import net.minecraft.tags.FluidTags;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.util.DamageSource;
-import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
@@ -108,85 +93,214 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
 public class HamonUtil {
-
     
+    @Deprecated
+    public static void chargeItemEntity(PlayerEntity throwerPlayer, ItemEntity itemEntity) {
+        HamonPlantItemInfusion.chargeItemEntity(throwerPlayer, itemEntity);
+    }
+    
+    @Deprecated
+    public static boolean onLiquidWalkingEvent(LivingEntity entity, FluidState fluidState) {
+        return HamonLiquidWalking.onLiquidWalkingEvent(entity, fluidState);
+    }
+    
+    @Deprecated
     public static boolean ropeTrap(LivingEntity user, BlockPos pos, BlockState blockState, World world, INonStandPower power, HamonData hamon) {
-        if (hamon.isSkillLearned(ModHamonSkills.ROPE_TRAP.get())) {
-            createChargedCobweb(user, pos, blockState, world, 64, null, power, 
-                    40 + (int) ((float) (160 * hamon.getHamonStrengthLevel()) / (float) HamonData.MAX_STAT_LEVEL * hamon.getActionEfficiency(STRING_CHARGE_COST, false)), 
-                    0.02F * hamon.getHamonDamageMultiplier() * hamon.getActionEfficiency(STRING_CHARGE_COST, false), hamon);
-            return true;
-        }
-        return false;
+        return HamonRopeTrap.ropeTrap(user, pos, blockState, world, power, hamon);
     }
     
-    private static final Map<BooleanProperty, Direction> PROPERTY_TO_DIRECTION = ImmutableMap.of(
-            TripWireBlock.EAST, Direction.EAST, 
-            TripWireBlock.SOUTH, Direction.SOUTH, 
-            TripWireBlock.WEST, Direction.WEST, 
-            TripWireBlock.NORTH, Direction.NORTH);
-    private static final float STRING_CHARGE_COST = 10;
-    private static void createChargedCobweb(LivingEntity user, BlockPos pos, BlockState blockState, World world, 
-            int range, @Nullable Direction from, INonStandPower power, int chargeTicks, float charge, HamonData hamon) {
-        if (range > 0 && blockState.getBlock() == Blocks.TRIPWIRE && power.consumeEnergy(STRING_CHARGE_COST)) {
-            hamon.hamonPointsFromAction(HamonStat.CONTROL, STRING_CHARGE_COST / 2);
-            Map<Property<?>, Comparable<?>> values = blockState.getValues();
-            List<Direction> directions = new ArrayList<Direction>();
-            for (Map.Entry<BooleanProperty, Direction> entry: PROPERTY_TO_DIRECTION.entrySet()) {
-                if (entry.getValue() != from && (Boolean) values.get(entry.getKey())) {
-                    directions.add(entry.getValue());
-                }
-            }
-            world.setBlock(pos, Blocks.COBWEB.defaultBlockState(), 3);
-            HamonBlockChargeEntity chargeEntity = new HamonBlockChargeEntity(world, pos);
-            chargeEntity.setCharge(charge, chargeTicks, user, STRING_CHARGE_COST / 2);
-            world.addFreshEntity(chargeEntity);
-            for (Direction direction : directions) {
-                BlockPos nextPos = pos.relative(direction);
-                createChargedCobweb(user, nextPos, world.getBlockState(nextPos), world, 
-                        range - 1, direction.getOpposite(), power, chargeTicks, charge, hamon);
-            }
-        }
-    }
-    
-    public static void updateCheatDeathEffect(LivingEntity user) {
-        user.addEffect(new EffectInstance(ModStatusEffects.CHEAT_DEATH.get(), 120000, 0, false, false, true));
-    }
-    
+    @Deprecated
     public static boolean snakeMuffler(LivingEntity target, DamageSource dmgSource, float dmgAmount) {
-        if (!target.level.isClientSide() && target.canUpdate() && target.isOnGround()) {
-            Entity attacker = dmgSource.getEntity();
-            if (attacker != null && dmgSource.getDirectEntity() == attacker && attacker instanceof LivingEntity
-                    && target instanceof PlayerEntity && target.getItemBySlot(EquipmentSlotType.HEAD).getItem() == ModItems.SATIPOROJA_SCARF.get()) {
-                LivingEntity livingAttacker = (LivingEntity) attacker;
-                PlayerEntity playerTarget = (PlayerEntity) target;
-                if (!playerTarget.getCooldowns().isOnCooldown(ModItems.SATIPOROJA_SCARF.get())) {
-                    INonStandPower power = INonStandPower.getPlayerNonStandPower(playerTarget);
-                    float energyCost = 500F;
-                    if (power.hasEnergy(energyCost)) {
-                        if (power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
-                            if (hamon.isSkillLearned(ModHamonSkills.SNAKE_MUFFLER.get())) {
-                                playerTarget.getCooldowns().addCooldown(ModItems.SATIPOROJA_SCARF.get(), 80);
-                                float efficiency = hamon.getActionEfficiency(energyCost, false);
-                                if (efficiency == 1 || efficiency >= dmgAmount / target.getMaxHealth()) {
-                                    JojoModUtil.sayVoiceLine(target, ModSounds.LISA_LISA_SNAKE_MUFFLER.get());
-                                    power.consumeEnergy(energyCost);
-                                    DamageUtil.dealHamonDamage(attacker, 0.75F, target, null);
-                                    livingAttacker.addEffect(new EffectInstance(Effects.GLOWING, 200));
-                                    SnakeMufflerEntity snakeMuffler = new SnakeMufflerEntity(target.level, target);
-                                    snakeMuffler.setEntityToJumpOver(attacker);
-                                    target.level.addFreshEntity(snakeMuffler);
-                                    snakeMuffler.attachToBlockPos(target.blockPosition());
-                                    return true;
-                                }
+        return HamonSnakeMuffler.snakeMuffler(target, dmgSource, dmgAmount);
+    }
+    
+    
+    
+    public static void chargeNewEntity(Entity entity, World world) {
+        if (!world.isClientSide()) {
+            if (entity instanceof ProjectileEntity) {
+                ProjectileEntity projectile = (ProjectileEntity) entity;
+                if (projectile.getOwner() instanceof LivingEntity) {
+                    LivingEntity shooter = (LivingEntity) projectile.getOwner();
+                    if (projectile instanceof AbstractArrowEntity) {
+                        // TODO stand effects on arrows
+                        IStandPower.getStandPowerOptional(shooter).ifPresent(stand -> {
+                            BowChargeEffectInstance<?, ?> bowCharge = stand.getBowChargeEffect();
+                            if (bowCharge != null) {
+                                bowCharge.onArrowShot((AbstractArrowEntity) projectile);
                             }
-                            return false;
-                        }).orElse(false)) return true;
+                        });
+                    }
+                    
+                    ProjectileChargeProperties hamonChargeProperties = ProjectileChargeProperties.getChargeProperties(projectile);
+                    if (hamonChargeProperties != null) {
+                        projectile.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(projCharge -> {
+                            
+                            // projectiles charged by a hamon user
+                            INonStandPower.getNonStandPowerOptional(shooter).ifPresent(power -> {
+                                if (power.getEnergy() > 0) {
+                                    power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
+                                        AbstractHamonSkill skillRequired = projectile instanceof AbstractArrowEntity
+                                                ? ModHamonSkills.ARROW_INFUSION.get() : ModHamonSkills.THROWABLES_INFUSION.get();
+                                        if (hamon.isSkillLearned(skillRequired)) {
+                                            hamon.consumeHamonEnergyTo(efficiency -> {
+                                                hamonChargeProperties.applyCharge(projCharge, efficiency, power);
+                                                projCharge.setMultiplyWithUserStrength(true);
+                                                return null;
+                                            }, hamonChargeProperties.energyRequired, skillRequired);
+                                        }
+                                    });
+                                }
+                            });
+
+                            // projectiles charged by an infused entity
+                            shooter.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> {
+                                if (cap.hasHamonCharge()) {
+                                    HamonCharge hamonCharge = cap.getHamonCharge();
+                                    hamonCharge.decreaseTicks((int) (hamonCharge.getInitialTicks() * hamonChargeProperties.energyRequired / 1000F));
+                                    hamonChargeProperties.applyCharge(projCharge, hamonCharge.getDamage(), null);
+                                    projCharge.setMultiplyWithUserStrength(false);
+                                }
+                            });
+                        });
                     }
                 }
             }
+            
+            // charge chicken coming out of a charged egg
+            if (entity instanceof ChickenEntity) {
+                world.getCapability(WorldUtilCapProvider.CAPABILITY).resolve()
+                .flatMap(worldCap -> worldCap.eggChargingChicken(entity)).ifPresent(eggEntity -> {
+                    eggEntity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(eggCharge -> {
+                        entity.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(chickenCharge -> {
+                            Entity eggThrower = eggEntity.getOwner();
+                            LivingEntity throwerLiving = eggThrower instanceof LivingEntity ? (LivingEntity) eggThrower : null;
+                            Optional<HamonData> userHamon = throwerLiving != null ? INonStandPower.getNonStandPowerOptional(throwerLiving)
+                                    .map(power -> power.getTypeSpecificData(ModPowers.HAMON.get())).map(Optional::get)
+                                    : Optional.empty();
+                            chickenCharge.setHamonCharge(
+                                    eggCharge.getHamonDamage() * userHamon.map(hamon -> hamon.getHamonDamageMultiplier() * hamon.getBloodstreamEfficiency()).orElse(1F), 
+                                    Integer.MAX_VALUE, 
+                                    throwerLiving, 0);
+                        });
+                    });
+                });
+            }
         }
-        return false;
+    }
+    
+    public static final class ProjectileChargeProperties {
+        public static final ProjectileChargeProperties ABSTRACT_ARROW = new ProjectileChargeProperties(1.5F, OptionalInt.of(10), 1000);
+        public static final ProjectileChargeProperties SNOWBALL = new ProjectileChargeProperties(0.75F, OptionalInt.of(20), 500);
+        public static final ProjectileChargeProperties EGG = new ProjectileChargeProperties(0.75F, OptionalInt.empty(), 200);
+        public static final ProjectileChargeProperties WATER_BOTTLE = new ProjectileChargeProperties(1.0F, OptionalInt.of(30), 750);
+        public static final ProjectileChargeProperties MOLOTOV = new ProjectileChargeProperties(1.0F, OptionalInt.of(200), 500);
+        
+        private final float baseMultiplier;
+        private final OptionalInt chargeTicks;
+        public final float energyRequired;
+        
+        private ProjectileChargeProperties(float baseMultiplier, OptionalInt chargeTicks, float energyRequired) {
+            this.baseMultiplier = baseMultiplier;
+            this.chargeTicks = chargeTicks;
+            this.energyRequired = energyRequired;
+        }
+        
+        public static boolean canBeChargedWithHamon(Entity entity) {
+            return entity.getType() == EntityType.POTION // potion item hasn't been set yet, so we can't check if it's a water bottle
+                    || ProjectileChargeProperties.getChargeProperties(entity) != null;
+        }
+        
+        @Nullable 
+        public static ProjectileChargeProperties getChargeProperties(Entity projectile) {
+            if (projectile instanceof AbstractArrowEntity && !isChargedInOtherWay(projectile)) {
+                return ABSTRACT_ARROW;
+            }
+            EntityType<?> type = projectile.getType();
+            if (type == EntityType.SNOWBALL) {
+                return SNOWBALL;
+            }
+            else if (type == EntityType.EGG) {
+                return EGG;
+            }
+            else if (type == EntityType.POTION && MCUtil.isPotionWaterBottle((PotionEntity) projectile)) {
+                return WATER_BOTTLE;
+            }
+            else if (type == ModEntityTypes.MOLOTOV.get()) {
+                return MOLOTOV;
+            }
+            return null;
+        }
+        
+        public void applyCharge(ProjectileHamonChargeCap chargeCap, float damageMultiplier, @Nullable INonStandPower spendingEnergy) {
+            chargeCap.setBaseDmg(this.baseMultiplier * damageMultiplier);
+            if (chargeTicks.isPresent()) {
+                chargeCap.setMaxChargeTicks(chargeTicks.getAsInt());
+            }
+            else {
+                chargeCap.setInfiniteChargeTime();
+            }
+            if (spendingEnergy != null) {
+                chargeCap.setSpentEnergy(Math.min(spendingEnergy.getEnergy(), energyRequired));
+            }
+        }
+    }
+    
+    private static boolean isChargedInOtherWay(Entity projectile) {
+        return projectile.getType() == ModEntityTypes.CLACKERS.get();
+    }
+    
+    
+    
+    public static void hamonPerksOnDeath(LivingEntity dead) {
+        if (JojoModConfig.getCommonConfigInstance(false).keepHamonOnDeath.get() && !dead.level.getLevelData().isHardcore()) return;
+        INonStandPower.getNonStandPowerOptional(dead).ifPresent(power -> {
+            power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
+                if (hamon.isSkillLearned(ModHamonSkills.CRIMSON_BUBBLE.get())) {
+                    CrimsonBubbleEntity bubble = new CrimsonBubbleEntity(dead.level);
+                    ItemStack heldItem = dead.getMainHandItem();
+                    if (!heldItem.isEmpty()) {
+                        dead.setItemInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
+                        ItemEntity item = new ItemEntity(dead.level, dead.getX(), dead.getEyeY() - 0.3D, dead.getZ(), heldItem);
+                        item.setPickUpDelay(2);
+                        dead.level.addFreshEntity(item);
+                        bubble.putItem(item);
+                    }
+                    dead.level.playSound(null, dead.getX(), dead.getY(), dead.getZ(), 
+                            ModSounds.CAESAR_LAST_HAMON.get(), dead.getSoundSource(), 1.0F, 1.0F);
+                    bubble.moveTo(dead.getX(), dead.getEyeY(), dead.getZ(), dead.yRot, dead.xRot);
+                    bubble.setHamonPoints(hamon.getHamonStrengthPoints(), hamon.getHamonControlPoints());
+                    dead.level.addFreshEntity(bubble);
+                }
+                else if (hamon.isSkillLearned(ModHamonSkills.DEEP_PASS.get())) {
+                    PlayerEntity closestHamonUser = MCUtil.entitiesAround(PlayerEntity.class, dead, 8, false, player -> 
+                    INonStandPower.getNonStandPowerOptional(player).map(pwr -> pwr.getType() == ModPowers.HAMON.get()).orElse(false))
+                            .stream()
+                            .min(Comparator.comparingDouble(player -> player.distanceToSqr(dead)))
+                            .orElse(null);
+                    if (closestHamonUser != null) {
+                        dead.level.playSound(null, dead.getX(), dead.getY(), dead.getZ(), 
+                                ModSounds.ZEPPELI_DEEP_PASS.get(), dead.getSoundSource(), 1.0F, 1.0F);
+                        HamonData receiverHamon = INonStandPower.getPlayerNonStandPower(closestHamonUser).getTypeSpecificData(ModPowers.HAMON.get()).get();
+                        if (receiverHamon.characterIs(ModHamonSkills.CHARACTER_JONATHAN.get())) {
+                            JojoModUtil.sayVoiceLine(closestHamonUser, ModSounds.JONATHAN_DEEP_PASS_REACTION.get());
+                        }
+                        receiverHamon.setHamonStatPoints(HamonStat.STRENGTH, 
+                                receiverHamon.getHamonStrengthPoints() + hamon.getHamonStrengthPoints(), true, false);
+                        receiverHamon.setHamonStatPoints(HamonStat.CONTROL, 
+                                receiverHamon.getHamonControlPoints() + hamon.getHamonControlPoints(), true, false);
+                        if (closestHamonUser instanceof ServerPlayerEntity) {
+                            ModCriteriaTriggers.LAST_HAMON.get().trigger((ServerPlayerEntity) closestHamonUser, dead);
+                        }
+                        createHamonSparkParticlesEmitter(closestHamonUser, 1.0F);
+                    }
+                }
+            });
+        });
+    }
+
+    public static void updateCheatDeathEffect(LivingEntity user) {
+        user.addEffect(new EffectInstance(ModStatusEffects.CHEAT_DEATH.get(), 120000, 0, false, false, true));
     }
     
     public static boolean isLiving(LivingEntity entity) {
@@ -287,60 +401,13 @@ public class HamonUtil {
         }
         return;
     }
-
-    public static void hamonPerksOnDeath(LivingEntity dead) {
-        if (JojoModConfig.getCommonConfigInstance(false).keepHamonOnDeath.get() && !dead.level.getLevelData().isHardcore()) return;
-        INonStandPower.getNonStandPowerOptional(dead).ifPresent(power -> {
-            power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                if (hamon.isSkillLearned(ModHamonSkills.CRIMSON_BUBBLE.get())) {
-                    CrimsonBubbleEntity bubble = new CrimsonBubbleEntity(dead.level);
-                    ItemStack heldItem = dead.getMainHandItem();
-                    if (!heldItem.isEmpty()) {
-                        dead.setItemInHand(Hand.MAIN_HAND, ItemStack.EMPTY);
-                        ItemEntity item = new ItemEntity(dead.level, dead.getX(), dead.getEyeY() - 0.3D, dead.getZ(), heldItem);
-                        item.setPickUpDelay(2);
-                        dead.level.addFreshEntity(item);
-                        bubble.putItem(item);
-                    }
-                    dead.level.playSound(null, dead.getX(), dead.getY(), dead.getZ(), 
-                            ModSounds.CAESAR_LAST_HAMON.get(), dead.getSoundSource(), 1.0F, 1.0F);
-                    bubble.moveTo(dead.getX(), dead.getEyeY(), dead.getZ(), dead.yRot, dead.xRot);
-                    bubble.setHamonPoints(hamon.getHamonStrengthPoints(), hamon.getHamonControlPoints());
-                    dead.level.addFreshEntity(bubble);
-                }
-                else if (hamon.isSkillLearned(ModHamonSkills.DEEP_PASS.get())) {
-                    PlayerEntity closestHamonUser = MCUtil.entitiesAround(PlayerEntity.class, dead, 8, false, player -> 
-                    INonStandPower.getNonStandPowerOptional(player).map(pwr -> pwr.getType() == ModPowers.HAMON.get()).orElse(false))
-                            .stream()
-                            .min(Comparator.comparingDouble(player -> player.distanceToSqr(dead)))
-                            .orElse(null);
-                    if (closestHamonUser != null) {
-                        dead.level.playSound(null, dead.getX(), dead.getY(), dead.getZ(), 
-                                ModSounds.ZEPPELI_DEEP_PASS.get(), dead.getSoundSource(), 1.0F, 1.0F);
-                        HamonData receiverHamon = INonStandPower.getPlayerNonStandPower(closestHamonUser).getTypeSpecificData(ModPowers.HAMON.get()).get();
-                        if (receiverHamon.characterIs(ModHamonSkills.CHARACTER_JONATHAN.get())) {
-                            JojoModUtil.sayVoiceLine(closestHamonUser, ModSounds.JONATHAN_DEEP_PASS_REACTION.get());
-                        }
-                        receiverHamon.setHamonStatPoints(HamonStat.STRENGTH, 
-                                receiverHamon.getHamonStrengthPoints() + hamon.getHamonStrengthPoints(), true, false);
-                        receiverHamon.setHamonStatPoints(HamonStat.CONTROL, 
-                                receiverHamon.getHamonControlPoints() + hamon.getHamonControlPoints(), true, false);
-                        if (closestHamonUser instanceof ServerPlayerEntity) {
-                            ModCriteriaTriggers.LAST_HAMON.get().trigger((ServerPlayerEntity) closestHamonUser, dead);
-                        }
-                        createHamonSparkParticlesEmitter(closestHamonUser, 1.0F);
-                    }
-                }
-            });
-        });
-    }
     
     public static void hamonExplosion(World world, @Nullable Entity source, @Nullable Entity hamonUser, 
             Vector3d position, float radius, float damage) {
         HamonBlastExplosion hamonBlast = new HamonBlastExplosion(world, source, null, 
                 position.x, position.y, position.z, radius);
         hamonBlast.setHamonDamage(damage);
-        CustomExplosion.explodePreCreated(hamonBlast, world, CustomExplosionType.HAMON);
+        CustomExplosion.explode(hamonBlast);
     }
     
 
@@ -466,193 +533,6 @@ public class HamonUtil {
         return false;
     }
     
-    
-    
-    public static boolean onLiquidWalkingEvent(LivingEntity entity, FluidState fluidState) {
-        boolean liquidWalking = isLiquidWalking(entity, fluidState);
-        
-        if (liquidWalking && entity.isEffectiveAi()) {
-            INonStandPower.getNonStandPowerOptional((LivingEntity) entity).resolve()
-            .flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get()))
-            .ifPresent(hamon -> {
-                hamon.setWaterWalkingThisTick();
-            });
-        }
-        
-        return liquidWalking;
-    }
-    
-    private static boolean isLiquidWalking(LivingEntity entity, FluidState fluidState) {
-        boolean doubleShift = entity.isShiftKeyDown() && entity.getCapability(PlayerUtilCapProvider.CAPABILITY).map(
-                cap -> cap.getDoubleShiftPress()).orElse(false);
-        if (doubleShift) {
-            return false;
-        }
-
-        return INonStandPower.getNonStandPowerOptional(entity).map(power -> {
-            return power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
-                boolean liquidWalking = hamon.isSkillLearned(ModHamonSkills.LIQUID_WALKING.get());
-                if (liquidWalking) {
-                    Fluid fluidType = fluidState.getType();
-                    if (!(fluidType.is(FluidTags.WATER) && entity.isOnFire())) {
-                        if (power.getEnergy() > 0) {
-                            entity.setOnGround(true);
-                            if (!entity.level.isClientSide()) {
-                                if (fluidType.is(FluidTags.LAVA) 
-                                        && !entity.fireImmune() && !EnchantmentHelper.hasFrostWalker(entity)) {
-                                    entity.hurt(DamageSource.HOT_FLOOR, 1.0F);
-                                }
-                                power.consumeEnergy(hamon.waterWalkingTickCost());
-                            }
-                            return true;
-                        }
-                        else if (entity.level.isClientSide() && entity == ClientUtil.getClientPlayer()) {
-                            BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).triggerRedHighlight(1);
-                        }
-                    }
-                }
-                return false;
-            }).orElse(false);
-        }).orElse(false);
-        
-    }
-    
-    
-    
-    public static void chargeShotProjectile(Entity entity, World world) {
-        if (!world.isClientSide()) {
-            if (entity instanceof ProjectileEntity) {
-                ProjectileEntity projectile = (ProjectileEntity) entity;
-                if (projectile.getOwner() instanceof LivingEntity) {
-                    LivingEntity shooter = (LivingEntity) projectile.getOwner();
-                    if (projectile instanceof AbstractArrowEntity) {
-                        // TODO stand effects on arrows
-                        IStandPower.getStandPowerOptional(shooter).ifPresent(stand -> {
-                            BowChargeEffectInstance<?, ?> bowCharge = stand.getBowChargeEffect();
-                            if (bowCharge != null) {
-                                bowCharge.onArrowShot((AbstractArrowEntity) projectile);
-                            }
-                        });
-                    }
-                    
-                    ProjectileChargeProperties hamonChargeProperties = ProjectileChargeProperties.getChargeProperties(projectile);
-                    if (hamonChargeProperties != null) {
-                        projectile.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(projCharge -> {
-                            
-                            // projectiles charged by a hamon user
-                            INonStandPower.getNonStandPowerOptional(shooter).ifPresent(power -> {
-                                if (power.getEnergy() > 0) {
-                                    power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                                        AbstractHamonSkill skillRequired = projectile instanceof AbstractArrowEntity
-                                                ? ModHamonSkills.ARROW_INFUSION.get() : ModHamonSkills.THROWABLES_INFUSION.get();
-                                        if (hamon.isSkillLearned(skillRequired)) {
-                                            hamon.consumeHamonEnergyTo(efficiency -> {
-                                                hamonChargeProperties.applyCharge(projCharge, efficiency, power);
-                                                projCharge.setMultiplyWithUserStrength(true);
-                                                return null;
-                                            }, hamonChargeProperties.energyRequired);
-                                        }
-                                    });
-                                }
-                            });
-
-                            // projectiles charged by an infused entity
-                            shooter.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> {
-                                if (cap.hasHamonCharge()) {
-                                    HamonCharge hamonCharge = cap.getHamonCharge();
-                                    hamonCharge.decreaseTicks((int) (hamonCharge.getInitialTicks() * hamonChargeProperties.energyRequired / 1000F));
-                                    hamonChargeProperties.applyCharge(projCharge, hamonCharge.getDamage(), null);
-                                    projCharge.setMultiplyWithUserStrength(false);
-                                }
-                            });
-                        });
-                    }
-                }
-            }
-            
-            // charge chicken coming out of a charged egg
-            if (entity instanceof ChickenEntity) {
-                world.getCapability(WorldUtilCapProvider.CAPABILITY).resolve()
-                .flatMap(worldCap -> worldCap.eggChargingChicken(entity)).ifPresent(eggEntity -> {
-                    eggEntity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(eggCharge -> {
-                        entity.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(chickenCharge -> {
-                            Entity eggThrower = eggEntity.getOwner();
-                            LivingEntity throwerLiving = eggThrower instanceof LivingEntity ? (LivingEntity) eggThrower : null;
-                            Optional<HamonData> userHamon = throwerLiving != null ? INonStandPower.getNonStandPowerOptional(throwerLiving)
-                                    .map(power -> power.getTypeSpecificData(ModPowers.HAMON.get())).map(Optional::get)
-                                    : Optional.empty();
-                            chickenCharge.setHamonCharge(
-                                    eggCharge.getHamonDamage() * userHamon.map(hamon -> hamon.getHamonDamageMultiplier() * hamon.getBloodstreamEfficiency()).orElse(1F), 
-                                    Integer.MAX_VALUE, 
-                                    throwerLiving, 0);
-                        });
-                    });
-                });
-            }
-        }
-    }
-    
-    public static final class ProjectileChargeProperties {
-        public static final ProjectileChargeProperties ABSTRACT_ARROW = new ProjectileChargeProperties(1.5F, OptionalInt.of(10), 1000);
-        public static final ProjectileChargeProperties SNOWBALL = new ProjectileChargeProperties(0.75F, OptionalInt.of(20), 500);
-        public static final ProjectileChargeProperties EGG = new ProjectileChargeProperties(0.75F, OptionalInt.empty(), 200);
-        public static final ProjectileChargeProperties WATER_BOTTLE = new ProjectileChargeProperties(1.0F, OptionalInt.of(30), 750);
-        public static final ProjectileChargeProperties MOLOTOV = new ProjectileChargeProperties(1.0F, OptionalInt.of(200), 500);
-        
-        private final float baseMultiplier;
-        private final OptionalInt chargeTicks;
-        public final float energyRequired;
-        
-        private ProjectileChargeProperties(float baseMultiplier, OptionalInt chargeTicks, float energyRequired) {
-            this.baseMultiplier = baseMultiplier;
-            this.chargeTicks = chargeTicks;
-            this.energyRequired = energyRequired;
-        }
-        
-        public static boolean canBeChargedWithHamon(Entity entity) {
-            return entity.getType() == EntityType.POTION // potion item hasn't been set yet, so we can't check if it's a water bottle
-                    || ProjectileChargeProperties.getChargeProperties(entity) != null;
-        }
-        
-        @Nullable 
-        public static ProjectileChargeProperties getChargeProperties(Entity projectile) {
-            if (projectile instanceof AbstractArrowEntity && !isChargedInOtherWay(projectile)) {
-                return ABSTRACT_ARROW;
-            }
-            EntityType<?> type = projectile.getType();
-            if (type == EntityType.SNOWBALL) {
-                return SNOWBALL;
-            }
-            else if (type == EntityType.EGG) {
-                return EGG;
-            }
-            else if (type == EntityType.POTION && MCUtil.isPotionWaterBottle((PotionEntity) projectile)) {
-                return WATER_BOTTLE;
-            }
-            else if (type == ModEntityTypes.MOLOTOV.get()) {
-                return MOLOTOV;
-            }
-            return null;
-        }
-        
-        public void applyCharge(ProjectileHamonChargeCap chargeCap, float damageMultiplier, @Nullable INonStandPower spendingEnergy) {
-            chargeCap.setBaseDmg(this.baseMultiplier * damageMultiplier);
-            if (chargeTicks.isPresent()) {
-                chargeCap.setMaxChargeTicks(chargeTicks.getAsInt());
-            }
-            else {
-                chargeCap.setInfiniteChargeTime();
-            }
-            if (spendingEnergy != null) {
-                chargeCap.setSpentEnergy(Math.min(spendingEnergy.getEnergy(), energyRequired));
-            }
-        }
-    }
-    
-    private static boolean isChargedInOtherWay(Entity projectile) {
-        return projectile.getType() == ModEntityTypes.CLACKERS.get();
-    }
-    
     public static void onProjectileImpact(Entity entity, RayTraceResult target) {
         entity.getCapability(ProjectileHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> {
             cap.onTargetHit(target);
@@ -674,29 +554,6 @@ public class HamonUtil {
                     }
                 });
             }
-        }
-    }
-    
-    
-    public static void chargeItemEntity(PlayerEntity throwerPlayer, ItemEntity itemEntity) {
-        if (!throwerPlayer.level.isClientSide()) {
-            INonStandPower.getNonStandPowerOptional(throwerPlayer).ifPresent(power -> {
-                if (power.getEnergy() > 0) {
-                    power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                        if (hamon.isSkillLearned(ModHamonSkills.PLANT_ITEM_INFUSION.get()) && isItemLivingMatter(itemEntity.getItem())) {
-                            hamon.consumeHamonEnergyTo(hamonEfficiency -> {
-                                int chargeTicks = 100 + MathHelper.floor((float) (1100 * hamon.getHamonStrengthLevel())
-                                        / (float) HamonData.MAX_STAT_LEVEL * hamonEfficiency * hamonEfficiency);
-                                
-                                itemEntity.getCapability(EntityHamonChargeCapProvider.CAPABILITY).ifPresent(cap -> 
-                                cap.setHamonCharge(hamon.getHamonDamageMultiplier() * hamonEfficiency, chargeTicks, throwerPlayer, 200));
-                                
-                                return null;
-                            }, 200);
-                        }
-                    });
-                }
-            });
         }
     }
     

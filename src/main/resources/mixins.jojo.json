@@ -13,6 +13,7 @@
     "EntityLiquidWalkingMixin",
     "ServerChunkProviderMixin",
     "ServerPlayNetHandlerMixin",
+	"LootTableMixin",
     "FireBlockMixin",
     "InventoryHelperMixin",
     "AbstractFurnaceTEMixin",

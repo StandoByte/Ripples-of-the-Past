@@ -12,16 +12,13 @@ import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 
 public class NoKnockbackOnBlocking {
-    public static boolean clCancelHurtBob = false;
-    public static boolean clDidHurtWithNoBob = false;
-
-    
-    public static final AttributeModifier ONE_TICK_KB_RES = new AttributeModifier(UUID.fromString("94d947b4-5036-4453-a548-d1c213d8281a"), 
+    private static final UUID ONE_TICK_KB_RES_ID = UUID.fromString("94d947b4-5036-4453-a548-d1c213d8281a");
+    private static final AttributeModifier ONE_TICK_KB_RES = new AttributeModifier(ONE_TICK_KB_RES_ID, 
             "No stagger when blocking a hit", 1, AttributeModifier.Operation.ADDITION);
     
     public static void setOneTickKbRes(LivingEntity entity) {
         ModifiableAttributeInstance kbRes = entity.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
-        if (kbRes != null && !kbRes.hasModifier(ONE_TICK_KB_RES)) {
+        if (kbRes != null && kbRes.getModifier(ONE_TICK_KB_RES_ID) == null) {
             kbRes.addTransientModifier(ONE_TICK_KB_RES);
         }
         if (!entity.level.isClientSide()) {
@@ -45,26 +42,8 @@ public class NoKnockbackOnBlocking {
     
     public static void tickAttribute(LivingEntity entity) {
         ModifiableAttributeInstance kbRes = entity.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
-        if (kbRes.hasModifier(NoKnockbackOnBlocking.ONE_TICK_KB_RES)) {
-            kbRes.removeModifier(NoKnockbackOnBlocking.ONE_TICK_KB_RES);
-        }
-    }
-    
-    
-    public static void onClientPlayerDamage(LivingEntity player) {
-        if (hasOneTickKbRes(player)) {
-            if (clCancelHurtBob) {
-                if (!clDidHurtWithNoBob) {
-                    clDidHurtWithNoBob = true;
-                }
-                else {
-                    clDidHurtWithNoBob = false;
-                    clCancelHurtBob = false;
-                }
-            }
-        }
-        else {
-            clCancelHurtBob = false;
+        if (kbRes.hasModifier(ONE_TICK_KB_RES)) {
+            kbRes.removeModifier(ONE_TICK_KB_RES);
         }
     }
 }

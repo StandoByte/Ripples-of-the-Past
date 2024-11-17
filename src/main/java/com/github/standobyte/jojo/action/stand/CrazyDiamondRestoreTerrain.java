@@ -131,6 +131,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
                 if (tryPlaceBlock(world, block.pos, block.state, blocksPlaced, 
                         creative, block.drops, block.getDroppedXp(), playerUser, userInventory, itemsAround, 
                         resolveEffect && !onlyAimedAt)) {
+                    block.onRestore();
                     blocksToForget.add(block.pos);
                 }
             });

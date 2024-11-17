@@ -126,9 +126,8 @@ public class StandCommand {
         }
         else {
             if (targets.size() == 1) {
-                source.sendSuccess(new TranslationTextComponent("commands.stand.give.success.single", 
-                        stand != null ? stand.getName() : "", 
-                                targets.iterator().next().getDisplayName()), true);
+                source.sendSuccess(new TranslationTextComponent("commands.stand.give.success.single.random", 
+                        targets.iterator().next().getDisplayName()), true);
             }
             else {
                 source.sendSuccess(new TranslationTextComponent(

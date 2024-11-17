@@ -7,8 +7,13 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
+import org.apache.commons.lang3.tuple.Pair;
 
+import com.github.standobyte.jojo.JojoMod;
+import com.mojang.datafixers.util.Either;
+
+import it.unimi.dsi.fastutil.objects.Object2FloatArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2FloatMap;
 import net.minecraft.util.SoundEvent;
 import net.minecraftforge.registries.ForgeRegistryEntry;
 
@@ -17,13 +22,24 @@ public class CharacterHamonTechnique extends ForgeRegistryEntry<CharacterHamonTe
     private final List<Supplier<CharacterTechniqueHamonSkill>> skills;
     private final List<Supplier<CharacterTechniqueHamonSkill>> perksOnPick;
     @Nullable private final Supplier<SoundEvent> musicOnPick;
-
+    private final Object2FloatMap<AbstractHamonSkill> addSkillsEfficiency = new Object2FloatArrayMap<>();
+    public final List<Pair<Either<BaseHamonSkill.SkillBranch, AbstractHamonSkill>, Float>> addEfficiencyInfo = new ArrayList<>();
+    
     private CharacterHamonTechnique(Builder builder) {
         this.name = builder.name;
         this.skills = builder.skills;
         this.perksOnPick = builder.perksOnPick;
         this.musicOnPick = builder.musicOnPick;
         assignTechniqueToSkills();
+        builder.addSkillBranchEfficiency.object2FloatEntrySet().forEach(entry -> {
+            BaseHamonSkill.SkillBranch skillBranch = entry.getKey();
+            float value = entry.getFloatValue();
+            addEfficiencyInfo.add(Pair.of(Either.left(skillBranch), value));
+            skillBranch.getSkillsView().forEach(skill -> addSkillsEfficiency.put(skill, value));
+        });
+        builder.addIndividualSkillEfficiency.object2FloatEntrySet().forEach(entry -> {
+            addSkillsEfficiency.put(entry.getKey(), entry.getFloatValue());
+        });
     }
     
     public String getName() {
@@ -60,12 +76,18 @@ public class CharacterHamonTechnique extends ForgeRegistryEntry<CharacterHamonTe
         }
     }
     
+    public float getAddSkillEfficiency(AbstractHamonSkill skill) {
+        return addSkillsEfficiency.getOrDefault(skill, 0);
+    }
+    
     
     
     public static class Builder {
         private final String name;
         private final List<Supplier<CharacterTechniqueHamonSkill>> skills;
         private final List<Supplier<CharacterTechniqueHamonSkill>> perksOnPick = new ArrayList<>();
+        private final Object2FloatMap<BaseHamonSkill.SkillBranch> addSkillBranchEfficiency = new Object2FloatArrayMap<>();
+        private final Object2FloatMap<AbstractHamonSkill> addIndividualSkillEfficiency = new Object2FloatArrayMap<>();
         @Nullable private Supplier<SoundEvent> musicOnPick;
 
         public Builder(String name, List<Supplier<CharacterTechniqueHamonSkill>> skills) {
@@ -80,6 +102,16 @@ public class CharacterHamonTechnique extends ForgeRegistryEntry<CharacterHamonTe
         
         public Builder musicOnPick(@Nullable Supplier<SoundEvent> musicOnPick) {
             this.musicOnPick = musicOnPick;
+            return this;
+        }
+        
+        public Builder baseSkillBranchEfficiency(BaseHamonSkill.SkillBranch branch, float addEfficiency) {
+            addSkillBranchEfficiency.put(branch, addEfficiency);
+            return this;
+        }
+        
+        public Builder baseSkillEfficiency(AbstractHamonSkill skill, float addEfficiency) {
+            addIndividualSkillEfficiency.put(skill, addEfficiency);
             return this;
         }
         

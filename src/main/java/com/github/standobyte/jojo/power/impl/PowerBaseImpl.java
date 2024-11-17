@@ -346,6 +346,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
 
     @Override
     public void setHeldAction(Action<P> action, ActionTarget target) {
+        stopHeldAction(false);
         this.heldActionData = new HeldActionData<P>(action);
         setMouseTarget(target);
         if (!user.level.isClientSide()) {
@@ -418,6 +419,8 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     public void stopHeldAction(boolean shouldFire) {
         if (heldActionData != null) {
             Action<P> heldAction = heldActionData.action;
+//            int ticks = heldActionData.getTicks();
+            
             ActionTarget target = getMouseTarget();
             int ticksHeld = getHeldActionTicks();
             
@@ -431,22 +434,25 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
             }
             else {
                 ObjectWrapper<ActionTarget> targetContainer = new ObjectWrapper<>(target);
-                boolean fire = shouldFire && heldActionData.getTicks() >= heldAction.getHoldDurationToFire(getThis()) && 
-                        checkRequirements(heldAction, targetContainer, true).isPositive();
-
-                heldAction.stoppedHolding(user.level, user, getThis(), ticksHeld, fire);
-                if (fire && heldAction.swingHand()) {
+                if (!user.level.isClientSide()) {
+                    shouldFire &= checkRequirements(heldAction, targetContainer, true).isPositive();
+                }
+                
+                heldAction.stoppedHolding(user.level, user, getThis(), ticksHeld, shouldFire);
+                if (shouldFire && heldAction.swingHand()) {
                     user.swing(Hand.MAIN_HAND);
                 }
                 
-                if (fire) {
+                if (shouldFire) {
                     target = targetContainer.get();
                     performAction(heldAction, target, null);
                 }
             }
+            
             heldActionData = null;
+            
             if (!user.level.isClientSide()) {
-                TrHeldActionPacket packet = TrHeldActionPacket.actionStopped(user.getId(), getPowerClassification());
+                TrHeldActionPacket packet = TrHeldActionPacket.actionStopped(user.getId(), getPowerClassification(), shouldFire);
                 PacketManager.sendToClientsTrackingAndSelf(packet, user);
             }
         }

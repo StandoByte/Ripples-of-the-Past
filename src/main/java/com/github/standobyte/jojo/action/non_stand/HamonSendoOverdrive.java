@@ -12,6 +12,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.util.general.ObjectWrapper;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -37,12 +38,17 @@ public class HamonSendoOverdrive extends HamonAction {
     
     @Override
     public void overrideVanillaMouseTarget(ObjectWrapper<ActionTarget> targetContainer, World world, LivingEntity user, INonStandPower power) {
-        if (targetContainer.get().getType() == TargetType.BLOCK) {
-            Vector3d pos1 = user.getEyePosition(1.0F);
-            Vector3d pos2 = pos1.add(user.getViewVector(1.0F).scale(Math.sqrt(getMaxRangeSqBlockTarget())));
-            RayTraceResult targetCollisionBlocks = user.level.clip(new RayTraceContext(
-                    pos1, pos2, RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, user)); // to not target plant blocks like grass
-            targetContainer.set(ActionTarget.fromRayTraceResult(targetCollisionBlocks));
+        ActionTarget target = targetContainer.get();
+        if (target.getType() == TargetType.BLOCK) {
+            BlockPos blockPos = target.getBlockPos();
+            BlockState blockState = world.getBlockState(blockPos);
+            if (blockState.getCollisionShape(world, blockPos).isEmpty()) {
+                Vector3d pos1 = user.getEyePosition(1.0F);
+                Vector3d pos2 = pos1.add(user.getViewVector(1.0F).scale(Math.sqrt(getMaxRangeSqBlockTarget())));
+                RayTraceResult targetCollisionBlocks = user.level.clip(new RayTraceContext(
+                        pos1, pos2, RayTraceContext.BlockMode.COLLIDER, RayTraceContext.FluidMode.NONE, user)); // to not target plant blocks like grass
+                targetContainer.set(ActionTarget.fromRayTraceResult(targetCollisionBlocks));
+            }
         }
     }
     
@@ -62,7 +68,7 @@ public class HamonSendoOverdrive extends HamonAction {
         if (!world.isClientSide()) {
             HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
             float energyCost = getEnergyCost(power, target);
-            float hamonEfficiency = hamon.getActionEfficiency(energyCost, true);
+            float hamonEfficiency = hamon.getActionEfficiency(energyCost, true, getUnlockingSkill());
             
             BlockPos blockPos = target.getBlockPos();
             HamonSendoOverdriveEntity sendoOverdrive = new HamonSendoOverdriveEntity(world, 

@@ -16,20 +16,24 @@ import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.DamageSource;
 
-public abstract class ContinuousActionInstance<T extends ContinuousActionInstance<T, P>, P extends IPower<P, ?>> {
+public abstract class ContinuousActionInstance<T extends IPlayerAction<?, P>, P extends IPower<P, ?>> {
     protected final LivingEntity user;
     protected final PlayerUtilCap userCap;
     protected final P playerPower;
-    protected final IPlayerAction<T, P> action;
+    protected final T action;
     private Phase phase;
     protected int tick = 0;
     private boolean stop = false;
+    protected int actionCooldown;
     
-    public ContinuousActionInstance(LivingEntity user, PlayerUtilCap userCap, P playerPower, IPlayerAction<T, P> action) {
+    public ContinuousActionInstance(LivingEntity user, PlayerUtilCap userCap, P playerPower, T action) {
         this.user = user;
         this.userCap = userCap;
         this.action = action;
         this.playerPower = playerPower;
+        if (action instanceof Action) {
+            actionCooldown = ((Action<P>) action).getCooldown(playerPower, -1);
+        }
     }
     
     public void onStart() {}
@@ -38,7 +42,6 @@ public abstract class ContinuousActionInstance<T extends ContinuousActionInstanc
         if (phase == null) {
             phase = Phase.PERFORM;
         }
-        action.playerTick(getThis());
         playerTick();
         tick++;
         int maxTicks = getMaxDuration();
@@ -46,8 +49,6 @@ public abstract class ContinuousActionInstance<T extends ContinuousActionInstanc
             stopAction();
         }
     }
-    
-    protected abstract T getThis();
     
     protected void playerTick() {}
     
@@ -59,7 +60,7 @@ public abstract class ContinuousActionInstance<T extends ContinuousActionInstanc
         return playerPower;
     }
     
-    public IPlayerAction<T, P> getAction() {
+    public T getAction() {
         return action;
     }
     
@@ -92,15 +93,20 @@ public abstract class ContinuousActionInstance<T extends ContinuousActionInstanc
     
     protected void onPhaseSet(@Nullable Phase oldPhase, Phase nextPhase) {}
     
-    public boolean stopAction() {
+    public final boolean stopAction() {
         if (!stop) {
             stop = true;
+            onStop();
             return true;
         }
         return false;
     }
     
-    public void onStop() {}
+    public void onStop() {
+        if (!user.level.isClientSide() && actionCooldown > 0) {
+            playerPower.setCooldownTimer((Action<P>) action, actionCooldown);
+        }
+    }
     
     public boolean isStopped() {
         return stop;

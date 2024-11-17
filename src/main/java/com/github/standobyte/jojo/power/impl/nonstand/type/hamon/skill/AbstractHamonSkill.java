@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.non_stand.HamonAction;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 
 import it.unimi.dsi.fastutil.objects.Object2BooleanArrayMap;
@@ -74,12 +75,25 @@ public abstract class AbstractHamonSkill extends ForgeRegistryEntry<AbstractHamo
         hamon.addHamonSkill(user, this, true, true);
     }
     
+    private IFormattableTextComponent name;
+    private List<IFormattableTextComponent> description;
+    
     public IFormattableTextComponent getNameTranslated() {
-        return new TranslationTextComponent("hamonSkill." + getName() + ".name");
+        if (name == null) {
+            name = new TranslationTextComponent("hamonSkill." + getName() + ".name");
+        }
+        return name;
     }
     
-    public IFormattableTextComponent getDescTranslated() {
-        return new TranslationTextComponent("hamonSkill." + getName() + ".desc");
+    public List<IFormattableTextComponent> getDescTranslated() {
+        if (description == null) {
+            description = new ArrayList<>();
+            description.add(new TranslationTextComponent("hamonSkill." + getName() + ".desc"));
+            if (this == ModHamonSkills.OVERDRIVE.get()) {
+                description.add(new TranslationTextComponent("hamonSkill.overdrive_strong.desc"));
+            }
+        }
+        return description;
     }
     
     private String translationKey = null;

@@ -46,7 +46,15 @@ public class BloodParticle extends SpriteTexturedParticle {
             return;
         }
         
-        else if (entityOffset.isPresent()) {
+        if (!entityOffset.isPresent()) {
+            List<Entity> entities = checkEntity();
+            if (!entities.isEmpty()) {
+                Entity entity = entities.get(0);
+                entityOffset = Optional.of(Pair.of(entity, entity.position().subtract(x, y, z)));
+            }
+        }
+        
+        if (entityOffset.isPresent()) {
             Entity entity = entityOffset.get().getLeft();
             if (!entity.isAlive()) {
                 entityOffset = Optional.empty();
@@ -56,8 +64,8 @@ public class BloodParticle extends SpriteTexturedParticle {
                 setPos(pos.x, pos.y, pos.z);
             }
         }
-        else if (xd > 0 || yd > 0 || zd > 0) {
-            if (age >= 5) {
+        else {
+            if (age >= 5 && !(xd == 0 && yd == 0 && zd == 0)) {
                 yd -= 0.04D * (double) gravity;
             }
             double xdPrev = xd;
@@ -68,14 +76,9 @@ public class BloodParticle extends SpriteTexturedParticle {
             if (Math.abs(xdPrev) >= smallVal && Math.abs(xd) < smallVal || 
                 Math.abs(ydPrev) >= smallVal && Math.abs(yd) < smallVal || 
                 Math.abs(zdPrev) >= smallVal && Math.abs(zd) < smallVal) {
-                stopParticle();
-            }
-            else {
-                List<Entity> entities = checkEntity();
-                if (!entities.isEmpty()) {
-                    Entity entity = entities.get(0);
-                    entityOffset = Optional.of(Pair.of(entity, entity.position().subtract(x, y, z)));
-                }
+                xd = 0;
+                yd = 0;
+                zd = 0;
             }
         }
         
@@ -89,7 +92,7 @@ public class BloodParticle extends SpriteTexturedParticle {
     }
 
     protected List<Entity> checkEntity() {
-        return level.getEntities((Entity) null, this.getBoundingBox(), 
+        return level.getEntities((Entity) null, this.getBoundingBox().move(xd, yd, zd).move(xd, yd, zd).move(xd, yd, zd).move(xd, yd, zd), 
                 entity -> entity.getType() != ModEntityTypes.CD_BLOOD_CUTTER.get());
     }
     

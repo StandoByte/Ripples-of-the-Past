@@ -6,6 +6,7 @@ import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mod.IPlayerLeap;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
@@ -52,6 +53,7 @@ public class ClOnLeapPacket {
                         player.setShiftKeyDown(false);
                         player.hasImpulse = true;
                         power.onLeap();
+                        IPlayerLeap.onLeapFixWrongMovement(player);
                         BlockPos posOn = getOnPos(player);
                         World world = player.level;
                         if (!player.level.isEmptyBlock(posOn)) {

@@ -29,7 +29,7 @@ public class HamonSkillElementTechniquePerk extends HamonSkillGuiElement {
         super(skill, x, y, 16, 16);
         this.perkDesc = Stream.concat(
                 font.split(new TranslationTextComponent("hamon.technique_perk", skill.getNameTranslated()), 200).stream(), 
-                font.split(skill.getDescTranslated().withStyle(TextFormatting.ITALIC), 200).stream())
+                skill.getDescTranslated().stream().flatMap(desc -> font.split(desc.withStyle(TextFormatting.GRAY, TextFormatting.ITALIC), 200).stream()))
                 .collect(Collectors.toList());
     }
 

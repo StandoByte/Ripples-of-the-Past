@@ -13,7 +13,7 @@ import net.minecraft.util.math.vector.Matrix4f;
 public class BlitFloat {
     
     public static void blitFloat(MatrixStack pMatrixStack, float pX, float pY, int pBlitOffset, 
-            float pUOffset, float pVOffset, float pUWidth, float pVHeight, int pTextureHeight, int pTextureWidth) {
+            float pUOffset, float pVOffset, float pUWidth, float pVHeight, float pTextureWidth, float pTextureHeight) {
         innerBlitFloat(pMatrixStack, 
                 pX, pX + pUWidth, pY, pY + pVHeight, pBlitOffset, 
                 pUWidth, pVHeight, pUOffset, pVOffset, pTextureWidth, pTextureHeight);

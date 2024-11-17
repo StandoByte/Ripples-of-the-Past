@@ -22,27 +22,27 @@ public class HamonScarletOverdrive extends HamonSunlightYellowOverdrive {
     
     
     
-    @Override 
-    public void forPerform(World world, LivingEntity user, INonStandPower power, ActionTarget target){
-        Entity entity = target.getEntity();
-        LivingEntity targetEntity = (LivingEntity) entity;
-        HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
-        int maxTicks = Math.max(getHoldDurationToFire(power), 1);
-        int ticksHeld = Math.min(power.getHeldActionTicks(), maxTicks);
-        float holdRatio = (float) ticksHeld / (float) maxTicks;
-        
-        float efficiency = hamon.getActionEfficiency(0, true);
-        
-        float damage = 1.5F + 3.5F * holdRatio;
-        damage *= efficiency;
-
-        if (DamageUtil.dealHamonDamage(targetEntity, damage, user, null, attack -> attack.hamonParticle(ModParticles.HAMON_SPARK_RED.get()))) {
-            if (holdRatio > 0.25F) {
-                DamageUtil.setOnFire(targetEntity, MathHelper.floor(2 + 8F * (float) hamon.getHamonStrengthLevel() / 
-                        (float) HamonData.MAX_STAT_LEVEL * hamon.getActionEfficiency(getEnergyCost(power, target), true)), false);
-                world.playSound(null, targetEntity.getX(), targetEntity.getEyeY(), targetEntity.getZ(), ModSounds.HAMON_SYO_PUNCH.get(), targetEntity.getSoundSource(), holdRatio, 1.0F);
-            }
-            hamon.hamonPointsFromAction(HamonStat.STRENGTH, power.getMaxEnergy() * holdRatio * efficiency);
-        }
-    }
+//    @Override 
+//    public void forPerform(World world, LivingEntity user, INonStandPower power, ActionTarget target){
+//        Entity entity = target.getEntity();
+//        LivingEntity targetEntity = (LivingEntity) entity;
+//        HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
+//        int maxTicks = Math.max(getHoldDurationToFire(power), 1);
+//        int ticksHeld = Math.min(power.getHeldActionTicks(), maxTicks);
+//        float holdRatio = (float) ticksHeld / (float) maxTicks;
+//        
+//        float efficiency = hamon.getActionEfficiency(0, true, getUnlockingSkill());
+//        
+//        float damage = 1.5F + 3.5F * holdRatio;
+//        damage *= efficiency;
+//
+//        if (DamageUtil.dealHamonDamage(targetEntity, damage, user, null, attack -> attack.hamonParticle(ModParticles.HAMON_SPARK_RED.get()))) {
+//            if (holdRatio > 0.25F) {
+//                DamageUtil.setOnFire(targetEntity, MathHelper.floor(2 + 8F * (float) hamon.getHamonStrengthLevel() / 
+//                        (float) HamonData.MAX_STAT_LEVEL * hamon.getActionEfficiency(getEnergyCost(power, target), true, getUnlockingSkill())), false);
+//                world.playSound(null, targetEntity.getX(), targetEntity.getEyeY(), targetEntity.getZ(), ModSounds.HAMON_SYO_PUNCH.get(), targetEntity.getSoundSource(), holdRatio, 1.0F);
+//            }
+//            hamon.hamonPointsFromAction(HamonStat.STRENGTH, power.getMaxEnergy() * holdRatio * efficiency);
+//        }
+//    }
 }

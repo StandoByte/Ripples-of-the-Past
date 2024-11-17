@@ -39,11 +39,9 @@ public class HamonUiEffectPacket {
                 break;
             case OUT_OF_BREATH:
                 ActionsOverlayGui.getInstance().setOutOfBreath(false);
-                BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).resetRedHighlight();
                 break;
             case OUT_OF_BREATH_MASK:
                 ActionsOverlayGui.getInstance().setOutOfBreath(true);
-                BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).resetRedHighlight();
                 break;
             }
         }

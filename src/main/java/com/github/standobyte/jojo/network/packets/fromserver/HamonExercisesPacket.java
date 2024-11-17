@@ -1,34 +1,28 @@
 package com.github.standobyte.jojo.network.packets.fromserver;
 
+import java.util.Arrays;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData.Exercise;
 
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.math.MathHelper;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 public class HamonExercisesPacket {
-    private final int miningTicks;
-    private final int runningTicks;
-    private final int swimmingTicks;
-    private final int meditationTicks;
-
+    private final int[] exerciseTicks;
     private final boolean sendBonus;
     private final float trainingBonus;
     private final int canSkipTrainingDays;
     
     public static HamonExercisesPacket allData(HamonData hamon) {
         return new HamonExercisesPacket(
-                hamon.getExerciseTicks(Exercise.MINING), 
-                hamon.getExerciseTicks(Exercise.RUNNING), 
-                hamon.getExerciseTicks(Exercise.SWIMMING), 
-                hamon.getExerciseTicks(Exercise.MEDITATION), 
+                Arrays.stream(Exercise.values()).mapToInt(ex -> hamon.getExerciseTicks(ex)).toArray(),
                 true,
                 hamon.getTrainingBonus(false),
                 hamon.getCanSkipTrainingDays());
@@ -36,20 +30,12 @@ public class HamonExercisesPacket {
     
     public static HamonExercisesPacket exercisesOnly(HamonData hamon) {
         return new HamonExercisesPacket(
-                hamon.getExerciseTicks(Exercise.MINING), 
-                hamon.getExerciseTicks(Exercise.RUNNING), 
-                hamon.getExerciseTicks(Exercise.SWIMMING), 
-                hamon.getExerciseTicks(Exercise.MEDITATION), 
+                Arrays.stream(Exercise.values()).mapToInt(ex -> hamon.getExerciseTicks(ex)).toArray(),
                 false, 0, 0);
     }
 
-    private HamonExercisesPacket(int miningTicks, int runningTicks, int swimmingTicks, int meditationTicks, 
-            boolean sendBonus, float trainingBonus, int canSkipTrainingDays) {
-        this.miningTicks = miningTicks;
-        this.runningTicks = runningTicks;
-        this.swimmingTicks = swimmingTicks;
-        this.meditationTicks = meditationTicks;
-        
+    private HamonExercisesPacket(int[] exerciseTicks, boolean sendBonus, float trainingBonus, int canSkipTrainingDays) {
+        this.exerciseTicks = exerciseTicks;
         this.sendBonus = sendBonus;
         this.trainingBonus = trainingBonus;
         this.canSkipTrainingDays = canSkipTrainingDays;
@@ -60,8 +46,7 @@ public class HamonExercisesPacket {
     public static class Handler implements IModPacketHandler<HamonExercisesPacket> {
 
         public void encode(HamonExercisesPacket msg, PacketBuffer buf) {
-            buf.writeLong(writeExercises(msg.miningTicks, msg.runningTicks, msg.swimmingTicks, msg.meditationTicks));
-            
+            NetworkUtil.writeIntArray(buf, msg.exerciseTicks);
             buf.writeBoolean(msg.sendBonus);
             if (msg.sendBonus) {
                 buf.writeFloat(msg.trainingBonus);
@@ -70,25 +55,17 @@ public class HamonExercisesPacket {
         }
     
         public HamonExercisesPacket decode(PacketBuffer buf) {
-            long l = buf.readLong();
-            int[] exerciseTicks = readExercises(l);
-            
+            int[] exerciseTicks = NetworkUtil.readIntArray(buf);
             boolean readBonus = buf.readBoolean();
             float trainingBonus = readBonus ? buf.readFloat() : 0;
             int canSkipTrainingDays = readBonus ? buf.readVarInt() : 0;
-            
-            return new HamonExercisesPacket(
-                    exerciseTicks[0], 
-                    exerciseTicks[1], 
-                    exerciseTicks[2], 
-                    exerciseTicks[3], 
-                    readBonus, trainingBonus, canSkipTrainingDays);
+            return new HamonExercisesPacket(exerciseTicks, readBonus, trainingBonus, canSkipTrainingDays);
         }
         
         public void handle(HamonExercisesPacket msg, Supplier<NetworkEvent.Context> ctx) {
             INonStandPower.getNonStandPowerOptional(ClientUtil.getClientPlayer()).ifPresent(power -> {
                 power.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-                    hamon.setExerciseTicks(msg.miningTicks, msg.runningTicks, msg.swimmingTicks, msg.meditationTicks, true);
+                    hamon.setExerciseTicks(msg.exerciseTicks, true);
                     if (msg.sendBonus) {
                         hamon.setTrainingBonus(msg.trainingBonus);
                         hamon.setCanSkipTrainingDays(msg.canSkipTrainingDays);
@@ -100,40 +77,6 @@ public class HamonExercisesPacket {
         @Override
         public Class<HamonExercisesPacket> getPacketClass() {
             return HamonExercisesPacket.class;
-        }
-        
-        
-        
-        private static final long MASK_MINING = (1L << MathHelper.log2(MathHelper.smallestEncompassingPowerOfTwo(Exercise.MINING.getMaxTicks(null)))) - 1L;
-        private static final int BITS_RUNNING = MathHelper.log2(MathHelper.smallestEncompassingPowerOfTwo(Exercise.RUNNING.getMaxTicks(null)));
-        private static final long MASK_RUNNING = (1L << BITS_RUNNING) - 1L;
-        private static final int BITS_SWIMMING = MathHelper.log2(MathHelper.smallestEncompassingPowerOfTwo(Exercise.SWIMMING.getMaxTicks(null)));
-        private static final long MASK_SWIMMING = (1L << BITS_SWIMMING) - 1L;
-        private static final int BITS_MEDITATION = MathHelper.log2(MathHelper.smallestEncompassingPowerOfTwo(Exercise.MEDITATION.getMaxTicks(null)));
-        private static final long MASK_MEDITATION = (1L << BITS_MEDITATION) - 1L;
-        
-        private long writeExercises(int mining, int running, int swimming, int meditation) {
-            long encoded = mining;
-            encoded <<= BITS_RUNNING;
-            encoded |= running;
-            encoded <<= BITS_SWIMMING;
-            encoded |= swimming;
-            encoded <<= BITS_MEDITATION;
-            encoded |= meditation;
-            
-            return encoded;
-        }
-        
-        private int[] readExercises(long encoded) {
-            int meditation = (int) (encoded & MASK_MEDITATION);
-            encoded >>= BITS_MEDITATION;
-            int swimming = (int) (encoded & MASK_SWIMMING);
-            encoded >>= BITS_SWIMMING;
-            int running = (int) (encoded & MASK_RUNNING);
-            encoded >>= BITS_RUNNING;
-            int mining = (int) (encoded & MASK_MINING);
-            
-            return new int[] { mining, running, swimming, meditation };
         }
     }
 }

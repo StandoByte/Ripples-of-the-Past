@@ -8,7 +8,6 @@ import java.util.stream.Collectors;
 
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
-import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
@@ -71,7 +70,7 @@ public class HamonHealing extends HamonAction {
         HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
         float tickEnergyCost = getHeldTickEnergyCost(power);
         float hamonControl = hamon.getHamonControlLevelRatio();
-        float hamonEfficiency = hamon.getActionEfficiency(tickEnergyCost, false);
+        float hamonEfficiency = hamon.getActionEfficiency(tickEnergyCost, false, getUnlockingSkill());
         
         LivingEntity entityToHeal = user;
         if (JojoModUtil.useShiftVar(user)) {
@@ -83,7 +82,7 @@ public class HamonHealing extends HamonAction {
                 }
             }
         }
-        if (world.isClientSide) ClientUtil.getClientPlayer().displayClientMessage(entityToHeal.getName(), true);
+//        if (world.isClientSide) ClientUtil.getClientPlayer().displayClientMessage(entityToHeal.getName(), true);
         
         if (hamonEfficiency > 0) {
             if (!world.isClientSide()) {

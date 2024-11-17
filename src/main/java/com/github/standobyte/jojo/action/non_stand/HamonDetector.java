@@ -45,7 +45,7 @@ public class HamonDetector extends HamonAction {
             if (ticksHeld < 160 || ticksHeld % 20 == 0) {
                 HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
                 float tickEnergyCost = getHeldTickEnergyCost(power);
-                double controlRatio = (double) hamon.getHamonControlLevel() / (double) HamonData.MAX_STAT_LEVEL * hamon.getActionEfficiency(tickEnergyCost, false);
+                double controlRatio = (double) hamon.getHamonControlLevel() / (double) HamonData.MAX_STAT_LEVEL * hamon.getActionEfficiency(tickEnergyCost, false, getUnlockingSkill());
                 double radius = (double) ticksHeld * (controlRatio * 0.8D + 0.2D);
                 double maxRadius = 8D + controlRatio * 24D;
                 List<LivingEntity> entitiesAround = MCUtil.entitiesAround(LivingEntity.class, 

@@ -1,10 +1,14 @@
 package com.github.standobyte.jojo.entity.stand;
 
+import java.util.Optional;
+
+import com.github.standobyte.jojo.capability.entity.player.PlayerClientBroadcastedSettings;
 import com.github.standobyte.jojo.util.general.MathUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.Pose;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 
@@ -44,12 +48,23 @@ public class StandRelativeOffset {
         this.useXRot = useXRot;
     }
     
+    @Deprecated
     public Vector3d getAbsoluteVec(float yRot, float xRot, StandEntity standEntity, LivingEntity user, double yDefault) {
+        return getAbsoluteVec(yRot, xRot, standEntity, user, yDefault, Optional.empty());
+    }
+    
+    public Vector3d getAbsoluteVec(float yRot, float xRot, StandEntity standEntity, LivingEntity user, double yDefault, 
+            Optional<PlayerClientBroadcastedSettings> userSettings) {
         double yOffset = 0;
         if (standEntity.isArmsOnlyMode() && user.getPose() != Pose.STANDING) {
             yOffset = (user.getDimensions(user.getPose()).height - user.getDimensions(Pose.STANDING).height) * 0.85F;
         }
         Vector3d vec;
+        double left = this.left;
+        if (userSettings.map(settings -> settings.standSide == HandSide.LEFT).orElse(false)) {
+            left = -left;
+        }
+        
         if (useXRot) {
             vec = new Vector3d(left, 0, forward).xRot(-xRot * MathUtil.DEG_TO_RAD).yRot(-yRot * MathUtil.DEG_TO_RAD);
         }
@@ -58,19 +73,23 @@ public class StandRelativeOffset {
         }
         return vec;
     }
-    
+
+    @Deprecated
     public Vector3d toRelativeVec() {
         return new Vector3d(left, y, forward);
     }
-    
+
+    @Deprecated
     public StandRelativeOffset withRelativeVec(Vector3d vec) {
         return new StandRelativeOffset(vec.x, vec.y, vec.z, this.doYOffset, this.useXRot);
     }
     
+    @Deprecated
     public double getLeft() {
         return left;
     }
-    
+
+    @Deprecated
     public double getForward() {
         return forward;
     }

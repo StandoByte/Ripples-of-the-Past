@@ -6,6 +6,7 @@ import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
@@ -37,7 +38,7 @@ public class HamonBubbleBarrierEntity extends ModdedProjectileEntity {
         super(ModEntityTypes.HAMON_BUBBLE_BARRIER.get(), shooter, world);
         this.power = power;
         barrierMaxTicks = (int) (100F * power.getTypeSpecificData(ModPowers.HAMON.get())
-                .map(hamon -> hamon.getActionEfficiency(0, true)).orElse(1F));
+                .map(hamon -> hamon.getActionEfficiency(0, true, ModHamonSkills.BUBBLE_BARRIER.get())).orElse(1F));
     }
 
     public HamonBubbleBarrierEntity(EntityType<? extends HamonBubbleBarrierEntity> type, World world) {

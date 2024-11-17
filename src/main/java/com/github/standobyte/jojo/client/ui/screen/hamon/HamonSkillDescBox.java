@@ -4,6 +4,7 @@ import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WIND
 import static com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen.WINDOW_UPPER_BORDER;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractHamonSkill;
@@ -57,7 +58,10 @@ public class HamonSkillDescBox {
     }
     
     protected List<IReorderingProcessor> createFullDescText(AbstractHamonSkill skill, FontRenderer font, int textWidth) {
-        return font.split(skill.getDescTranslated(), textWidth);
+        List<IReorderingProcessor> lines = skill.getDescTranslated().stream()
+                .flatMap(desc -> font.split(desc, textWidth).stream())
+                .collect(Collectors.toList());
+        return lines;
     }
     
     public void renderBg(MatrixStack matrixStack, int x, int y, int mouseX, int mouseY) {

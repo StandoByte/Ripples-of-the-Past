@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
+import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
@@ -148,7 +149,7 @@ public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
 	                }
 	                
 	                return dealtHamonDamage;
-	            }, hamonDamageCost);
+	            }, hamonDamageCost, ModHamonSkills.ZOOM_PUNCH.get());
 	            return dealtDamage != null && dealtDamage;
 	        });
 	        

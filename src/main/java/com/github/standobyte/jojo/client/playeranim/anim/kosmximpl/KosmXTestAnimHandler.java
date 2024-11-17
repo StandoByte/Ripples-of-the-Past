@@ -1,10 +1,10 @@
 package com.github.standobyte.jojo.client.playeranim.anim.kosmximpl;
 
 import com.github.standobyte.jojo.client.playeranim.kosmx.KosmXPlayerAnimatorInstalled.AnimLayerHandler;
+import com.github.standobyte.jojo.client.playeranim.kosmx.anim.modifier.KosmXFixedFadeModifier;
 
 import dev.kosmx.playerAnim.api.layered.IAnimation;
 import dev.kosmx.playerAnim.api.layered.ModifierLayer;
-import dev.kosmx.playerAnim.api.layered.modifier.AbstractFadeModifier;
 import dev.kosmx.playerAnim.api.layered.modifier.SpeedModifier;
 import dev.kosmx.playerAnim.core.util.Ease;
 import net.minecraft.client.Minecraft;
@@ -72,7 +72,7 @@ public class KosmXTestAnimHandler extends AnimLayerHandler<ModifierLayer<IAnimat
                 }
             }
             else if (fadeOutTicks > 0) {
-                fadeOutAnim(player, AbstractFadeModifier.standardFadeIn(fadeOutTicks, Ease.OUTCUBIC), null);
+                fadeOutAnim(player, KosmXFixedFadeModifier.standardFadeIn(fadeOutTicks, Ease.OUTCUBIC), null);
             }
             else {
                 setAnim(player, null);

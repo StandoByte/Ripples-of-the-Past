@@ -6,17 +6,14 @@ import com.github.standobyte.jojo.power.IPower;
 
 import net.minecraft.entity.LivingEntity;
 
-public interface IPlayerAction<T extends ContinuousActionInstance<T, P>, P extends IPower<P, ?>> {
+public interface IPlayerAction<I extends ContinuousActionInstance<?, P>, P extends IPower<P, ?>> {
     
     default void setPlayerAction(LivingEntity user, P power) {
         user.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-            T action = createContinuousActionInstance(user, cap, power);
+            I action = createContinuousActionInstance(user, cap, power);
             cap.setContinuousAction(action);
         });
     }
     
-    T createContinuousActionInstance(LivingEntity user, PlayerUtilCap userCap, P power);
-    
-    @Deprecated
-    default void playerTick(T continuousAction) {}
+    I createContinuousActionInstance(LivingEntity user, PlayerUtilCap userCap, P power);
 }

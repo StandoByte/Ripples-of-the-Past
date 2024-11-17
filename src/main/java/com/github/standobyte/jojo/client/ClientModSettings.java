@@ -6,6 +6,7 @@ import java.io.File;
 import java.util.function.Consumer;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.capability.entity.player.PlayerClientBroadcastedSettings;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.HudTextRender;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.PositionConfig;
 import com.github.standobyte.jojo.client.ui.screen.stand.ge.ChooseLifeformScreen;
@@ -44,6 +45,8 @@ public class ClientModSettings {
         public boolean thirdPersonHamonAura = true;
         public boolean firstPersonHamonAura = true;
         public boolean hamonAuraBlur = false;
+        
+        public final PlayerClientBroadcastedSettings broadcasted = new PlayerClientBroadcastedSettings();
     }
     
     
@@ -56,7 +59,14 @@ public class ClientModSettings {
     
     @Deprecated
     public void editSettings(Consumer<Settings> edit) {
+        editSettings(edit, false);
+    }
+    
+    public void editSettings(Consumer<Settings> edit, boolean broadcast) {
         edit.accept(settings);
+        if (broadcast) {
+            settings.broadcasted.broadcastToServer();
+        }
         save();
     }
     

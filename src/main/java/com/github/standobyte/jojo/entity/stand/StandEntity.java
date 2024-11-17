@@ -25,6 +25,7 @@ import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandMissedPunch;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.player.PlayerClientBroadcastedSettings;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
@@ -140,7 +141,8 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     protected StandRelativeOffset curOffset;
     protected int offsetLerpTicks;
     protected int offsetLerpMaxTicks;
-
+    private Optional<PlayerClientBroadcastedSettings> playerSettings = Optional.empty();
+    
     private static final DataParameter<Boolean> SWING_OFF_HAND = EntityDataManager.defineId(StandEntity.class, DataSerializers.BOOLEAN);
     private boolean alternateAdditionalSwing;
     private int lastSwingTick = -2;
@@ -601,9 +603,12 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     
     private void updateUserFromNetwork(int userId) {
         userRef = lookupUser(userId);
-        if (level.isClientSide()) {
-            LivingEntity user = getUser();
-            if (user != null) {
+        LivingEntity user = getUser();
+        if (user != null) {
+            if (user instanceof PlayerEntity) {
+                playerSettings = PlayerClientBroadcastedSettings.getPlayerSettings((PlayerEntity) user);
+            }
+            if (level.isClientSide()) {
                 IStandPower standPower = IStandPower.getStandPowerOptional(user).resolve().get();
                 if (standPower.getStandManifestation() != this) {
                     standPower.setStandManifestation(this);
@@ -667,6 +672,17 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             }
         }
         return super.isAlliedTo(entity);
+    }
+    
+    
+    
+    @Override
+    public boolean isBaby() {
+        LivingEntity user = getUser();
+        if (user != null) {
+            return user.isBaby();
+        }
+        return super.isBaby();
     }
 
 
@@ -1360,8 +1376,8 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             yRot = currentTask.map(task -> task.getAction().yRotForOffset(user, task)).orElse(user.yRot);
             xRot = user.xRot;
         }
-            
-        Vector3d offset = relativeOffset.getAbsoluteVec(yRot, xRot, this, user, getDefaultOffsetFromUser().y);
+        
+        Vector3d offset = relativeOffset.getAbsoluteVec(yRot, xRot, this, user, getDefaultOffsetFromUser().y, playerSettings);
         if (!currentTask.isPresent() && user.isShiftKeyDown()) {
             offset = new Vector3d(offset.x, 0, offset.z);
         }
@@ -1972,7 +1988,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     public boolean canBreakBlock(float blockHardness, int blockHarvestLevel) {
         return StandStatFormulas.isBlockBreakable(getAttackDamage(), blockHardness, blockHarvestLevel);
     }
-
+    
     public double getMaxRange() {
         return rangeMax;
     }

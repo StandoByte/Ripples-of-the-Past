@@ -13,7 +13,6 @@ import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanData.Mode;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.explosion.CustomExplosion;
-import com.github.standobyte.jojo.util.mc.damage.explosion.CustomExplosion.CustomExplosionType;
 
 import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.block.BlockState;
@@ -24,6 +23,7 @@ import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityDamageSource;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.ExplosionContext;
@@ -48,9 +48,11 @@ public class PillarmanSelfDetonation extends PillarmanAction {
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide) {
-            CustomExplosion.explode(world, user, DamageSource.ON_FIRE.setExplosion(), null, 
+            PillarmanExplosion explosion = new PillarmanExplosion(world, user, 
+                    DamageSource.ON_FIRE.setExplosion(), null, 
                     user.getX(), user.getY(), user.getZ(), 3.0F, 
-                    true, Explosion.Mode.BREAK, CustomExplosionType.PILLAR_MAN_DETONATION);
+                    true, Explosion.Mode.BREAK);
+            CustomExplosion.explode(explosion);
             PlayerEntity playerentity = user instanceof PlayerEntity ? (PlayerEntity)user : null;
             if (playerentity == null || !playerentity.abilities.instabuild) {
                 user.hurt(EntityDamageSource.explosion(user), 40F);
@@ -62,6 +64,10 @@ public class PillarmanSelfDetonation extends PillarmanAction {
     
     
     public static class PillarmanExplosion extends CustomExplosion {
+
+        public PillarmanExplosion(World pLevel, double pToBlowX, double pToBlowY, double pToBlowZ, float pRadius) {
+            super(pLevel, pToBlowX, pToBlowY, pToBlowZ, pRadius);
+        }
 
         public PillarmanExplosion(World pLevel, @Nullable Entity pSource, 
                 @Nullable DamageSource pDamageSource, @Nullable ExplosionContext pDamageCalculator, 
@@ -102,6 +108,11 @@ public class PillarmanSelfDetonation extends PillarmanAction {
                     }
                 }
             }
+        }
+        
+        @Override
+        public ResourceLocation getExplosionType() {
+            return CustomExplosion.Register.PILLAR_MAN_DETONATION;
         }
     }
     

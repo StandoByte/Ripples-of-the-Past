@@ -18,7 +18,6 @@ import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mc.damage.IndirectStandEntityDamageSource;
 import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
 import com.github.standobyte.jojo.util.mc.damage.explosion.CustomExplosion;
-import com.github.standobyte.jojo.util.mc.damage.explosion.CustomExplosion.CustomExplosionType;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.BlockState;
@@ -30,6 +29,7 @@ import net.minecraft.entity.Pose;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
@@ -244,15 +244,21 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
             if (small) {
                 dmgSource.setBypassInvulTicksInEvent();
             }
-            CustomExplosion.explode(level, this, dmgSource.setExplosion(), null, 
-                    getX(), getY(), getZ(), (small ? 1.0F : 3.0F) * getScale(), 
-                    true, Explosion.Mode.NONE, CustomExplosionType.CROSSFIRE_HURRICANE);
+            CrossfireHurricaneExplosion explosion = new CrossfireHurricaneExplosion(level, this, 
+                    dmgSource.setExplosion(), null, 
+                    getX(), getY(), getZ(), 
+                    (small ? 1.0F : 3.0F) * getScale(), true, Explosion.Mode.NONE);
+            CustomExplosion.explode(explosion);
         }
     }
     
     
     public static class CrossfireHurricaneExplosion extends CustomExplosion {
-        private final MRCrossfireHurricaneEntity sourceProjectile;
+        private MRCrossfireHurricaneEntity sourceProjectile;
+
+        public CrossfireHurricaneExplosion(World pLevel, double pToBlowX, double pToBlowY, double pToBlowZ, float pRadius) {
+            super(pLevel, pToBlowX, pToBlowY, pToBlowZ, pRadius);
+        }
         
         public CrossfireHurricaneExplosion(World pLevel, @Nullable Entity pSource, 
                 @Nullable DamageSource pDamageSource, @Nullable ExplosionContext pDamageCalculator, 
@@ -313,6 +319,11 @@ public class MRCrossfireHurricaneEntity extends ModdedProjectileEntity {
                     }
                 }
             }
+        }
+        
+        @Override
+        public ResourceLocation getExplosionType() {
+            return CustomExplosion.Register.CROSSFIRE_HURRICANE;
         }
     }
     

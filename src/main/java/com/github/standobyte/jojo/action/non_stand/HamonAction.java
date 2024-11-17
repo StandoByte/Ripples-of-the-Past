@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.action.non_stand;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -33,6 +34,9 @@ public abstract class HamonAction extends NonStandAction {
     public HamonAction(HamonAction.AbstractBuilder<?> builder) {
         super(builder);
         voiceLinesUnregistered = builder.voiceLines;
+        if (builder.baseSkillBranch != null) {
+            builder.baseSkillBranch.add(this);
+        }
     }
     
     public void initUnlockingSkill(AbstractHamonSkill skill) {
@@ -129,12 +133,18 @@ public abstract class HamonAction extends NonStandAction {
     }
     
     protected abstract static class AbstractBuilder<T extends NonStandAction.AbstractBuilder<T>> extends NonStandAction.AbstractBuilder<T> {
+        protected List<HamonAction> baseSkillBranch = null;
         protected final Map<Supplier<CharacterHamonTechnique>, Supplier<SoundEvent>> voiceLines = new HashMap<>();
         
         public T shout(Supplier<CharacterHamonTechnique> technique, Supplier<SoundEvent> shoutSupplier) {
             if (technique != null) {
                 voiceLines.put(technique, shoutSupplier);
             }
+            return getThis();
+        }
+        
+        public T baseSkillBranch(List<HamonAction> branch) {
+            this.baseSkillBranch = branch;
             return getThis();
         }
     }

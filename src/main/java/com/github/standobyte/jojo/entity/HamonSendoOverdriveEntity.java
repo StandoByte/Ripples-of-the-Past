@@ -22,10 +22,8 @@ import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.Pose;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.IntNBT;
@@ -132,6 +130,11 @@ public class HamonSendoOverdriveEntity extends Entity implements IEntityAddition
                 }
             }
             
+            if (fullBox == null) {
+                fullBox = makeHurtHitBox(radius);
+            }
+            setBoundingBox(fullBox);
+            
             if (!level.isClientSide()) {
                 Iterator<Wave> it = waves.iterator();
                 while (it.hasNext()) {
@@ -222,6 +225,7 @@ public class HamonSendoOverdriveEntity extends Entity implements IEntityAddition
             list.add(null);
         }
     });
+    private AxisAlignedBB fullBox;
     
     private AxisAlignedBB getHurtHitbox(int tick) {
         AxisAlignedBB cache = hitboxes.get(tick);
@@ -251,26 +255,7 @@ public class HamonSendoOverdriveEntity extends Entity implements IEntityAddition
         return hitBox;
     }
     
-    @Override
-    public EntitySize getDimensions(Pose pose) {
-        if (axis == null) {
-            return super.getDimensions(pose);
-        }
-        else if (axis == Direction.Axis.Y) {
-            return EntitySize.fixed(radius * 2, (float) WIDTH);
-        }
-        else {
-            return EntitySize.fixed(radius * 2, radius * 2);
-        }
-    }
     private static final double WIDTH = 2;
-    
-    @Override
-    public void setPos(double pX, double pY, double pZ) {
-        this.setPosRaw(pX, pY, pZ);
-        AxisAlignedBB aabb = this.getDimensions(null).makeBoundingBox(pX, pY, pZ);
-        this.setBoundingBox(aabb);
-    }
     
     private Entity getUser() {
         if (user != null && !user.isAlive()) {

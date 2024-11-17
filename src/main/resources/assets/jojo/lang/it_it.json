@@ -356,6 +356,7 @@
   "stand.unknown": "Stand Sconosciuto: %s",
   "commands.stand.give.success.single": "Dato %s a %s",
   "commands.stand.give.success.multiple": "Dato %s a %s Giocatori",
+  "commands.stand.give.success.single.random": "Dato stand a caso a %s",
   "commands.stand.give.success.multiple.random": "Dato stand a caso a %s Giocatori",
   "commands.stand.give.failed.single.has": "%s Ha già uno stand",
   "commands.stand.give.failed.multiple.have": "Tutti e %s hanno già uno stand",
@@ -419,7 +420,7 @@
   "hamon.mining_exercise": "Scavando",
   "hamon.running_exercise": "Correndo",
   "hamon.swimming_exercise": "Nuotando",
-  "hamon.meditation": "Meditazione",
+  "hamon.meditation_exercise": "Meditazione",
   
   "hamon.next_point.strength": "Prossimo punto abilità al livello %s Forza Hamon",
   "hamon.next_point.control": "Prossimo punto abilità al livello %s Controllo Hamon",

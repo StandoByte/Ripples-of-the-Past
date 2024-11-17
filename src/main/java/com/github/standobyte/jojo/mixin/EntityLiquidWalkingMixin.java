@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.Unique;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
 
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
+import com.github.standobyte.jojo.action.non_stand.HamonLiquidWalking;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -108,7 +108,7 @@ public class EntityLiquidWalkingMixin {
                     break;
                 }
 
-                if (!landingState.isEmpty() && HamonUtil.onLiquidWalkingEvent(entity, landingState)) {
+                if (!landingState.isEmpty() && HamonLiquidWalking.onLiquidWalkingEvent(entity, landingState)) {
                     entry.setValue(distanceToFluidSurface);
                     break;
                 }

@@ -20,6 +20,7 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.mutable.MutableInt;
 import org.lwjgl.glfw.GLFW;
 
 import com.github.standobyte.jojo.JojoMod;
@@ -72,6 +73,7 @@ import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mod.IPlayerLeap;
 import com.github.standobyte.jojo.util.mod.JojoModUtil.Direction2D;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -183,9 +185,13 @@ public class InputHandler {
         ClientRegistry.registerKeyBinding(disableHotbars = new KeyBinding(JojoMod.MOD_ID + ".key.disable_hotbars", GLFW_KEY_LEFT_ALT, HUD_CATEGORY));
         
         ClientRegistry.registerKeyBinding(scrollMode = new KeyBinding(JojoMod.MOD_ID + ".key.scroll_mode", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
-        ClientRegistry.registerKeyBinding(scrollAttack = new KeyBinding(JojoMod.MOD_ID + ".key.scroll_attack", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
-        ClientRegistry.registerKeyBinding(scrollAbility = new KeyBinding(JojoMod.MOD_ID + ".key.scroll_ability", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
+        ClientRegistry.registerKeyBinding(scrollAttack = new KeyBinding(JojoMod.MOD_ID + ".key.scroll_attack", GLFW_KEY_V, HUD_ALTERNATIVE_CATEGORY));
+        scrollAttack.setKey(InputMappings.Type.KEYSYM.getOrCreate(GLFW_KEY_UNKNOWN));
+        ClientRegistry.registerKeyBinding(scrollAbility = new KeyBinding(JojoMod.MOD_ID + ".key.scroll_ability", GLFW_KEY_B, HUD_ALTERNATIVE_CATEGORY));
+        scrollAbility.setKey(InputMappings.Type.KEYSYM.getOrCreate(GLFW_KEY_UNKNOWN));
         ClientRegistry.registerKeyBinding(hamonMeditation = new KeyBinding(JojoMod.MOD_ID + ".key.meditation", GLFW_KEY_UNKNOWN, HUD_ALTERNATIVE_CATEGORY));
+        
+        initHeldKeybindTimers();
     }
     
     @SubscribeEvent(priority = EventPriority.HIGH)
@@ -200,14 +206,75 @@ public class InputHandler {
             if (scrollAttack || scrollAbility) {
                 if (scrollAttack) {
                     actionsOverlay.scrollAction(ControlScheme.Hotbar.LEFT_CLICK, event.getScrollDelta() > 0.0D);
+                    preventHotbarScrollIfSameKey(ControlScheme.Hotbar.LEFT_CLICK);
                 }
                 if (scrollAbility) {
                     actionsOverlay.scrollAction(ControlScheme.Hotbar.RIGHT_CLICK, event.getScrollDelta() > 0.0D);
+                    preventHotbarScrollIfSameKey(ControlScheme.Hotbar.RIGHT_CLICK);
                 }
                 event.setCanceled(true);
             }
         }
     }
+    
+    
+    /**
+     * On the very same tick the key is released, the value is negative, and signifies for how many ticks the key has been held.
+     */
+    private Map<KeyBinding, MutableInt> keybindHeldTimer;
+    
+    private void initHeldKeybindTimers() {
+        keybindHeldTimer = Util.make(new HashMap<>(), map -> {
+            map.put(scrollAttack, new MutableInt(0));
+            map.put(scrollAbility, new MutableInt(0));
+        });
+    }
+    
+    private void tickHeldKeybindTimers() {
+        keybindHeldTimer.entrySet().forEach(heldKeyTimer -> {
+            MutableInt timer = heldKeyTimer.getValue();
+            if (heldKeyTimer.getKey().isDown()) {
+                if (timer.intValue() <= 0) {
+                    timer.setValue(1);
+                }
+                else {
+                    timer.increment();
+                }
+            }
+            else {
+                if (timer.intValue() > 0) {
+                    timer.setValue(-timer.intValue());
+                }
+                else if (timer.intValue() < 0) {
+                    timer.setValue(0);
+                }
+            }
+        });
+    }
+    
+    private void preventHotbarScrollIfSameKey(ControlScheme.Hotbar hotbar) {
+        KeyBinding scrollKey;
+        boolean sameKeyAsNewerHotbarControls;
+        switch (hotbar) {
+        case LEFT_CLICK:
+            scrollKey = scrollAttack;
+            sameKeyAsNewerHotbarControls = scrollAttack.getKey().equals(attackHotbar.getKey());
+            break;
+        case RIGHT_CLICK:
+            scrollKey = scrollAbility;
+            sameKeyAsNewerHotbarControls = scrollAbility.getKey().equals(abilityHotbar.getKey());
+            break;
+        default:
+            throw new AssertionError();
+        }
+        if (sameKeyAsNewerHotbarControls) {
+            MutableInt timer = keybindHeldTimer.get(scrollKey);
+            if (timer.intValue() > 0) {
+                timer.setValue(1337);
+            }
+        }
+    }
+    
     
     @SubscribeEvent
     public void handleKeyBindings(ClientTickEvent event) {
@@ -222,6 +289,7 @@ public class InputHandler {
                 setToggleHotbarsDisabled(!toggledHotbarsDisabled);
             }
             actionsOverlay.setHotbarsEnabled(!areHotbarsDisabled());
+            tickHeldKeybindTimers();
 
             if (actionsOverlay.isActive()) {
                 boolean chooseAttack = controlsAreOnHotbar(ControlScheme.Hotbar.LEFT_CLICK);
@@ -232,19 +300,26 @@ public class InputHandler {
                         if (mc.options.keyHotbarSlots[i].consumeClick()) {
                             if (chooseAttack) {
                                 actionsOverlay.selectAction(ControlScheme.Hotbar.LEFT_CLICK, i);
+                                preventHotbarScrollIfSameKey(ControlScheme.Hotbar.LEFT_CLICK);
                             }
                             if (chooseAbility) {
                                 actionsOverlay.selectAction(ControlScheme.Hotbar.RIGHT_CLICK, i);
+                                preventHotbarScrollIfSameKey(ControlScheme.Hotbar.RIGHT_CLICK);
                             }
                         }
                     }
                 }
                 
-                if (scrollAttack.consumeClick()) {
+                // i don't feel like making a separate method for that today
+                int scrollKeyHeldFor = keybindHeldTimer.get(scrollAttack).intValue();
+                boolean sameKey = scrollAttack.getKey().equals(attackHotbar.getKey());
+                if (sameKey && scrollKeyHeldFor < 0 && scrollKeyHeldFor >= -20 || !sameKey && scrollKeyHeldFor == 1) {
                     actionsOverlay.scrollAction(ControlScheme.Hotbar.LEFT_CLICK, mc.player.isShiftKeyDown());
                 }
                 
-                if (scrollAbility.consumeClick()) {
+                scrollKeyHeldFor = keybindHeldTimer.get(scrollAbility).intValue();
+                sameKey = scrollAbility.getKey().equals(abilityHotbar.getKey());
+                if (sameKey && scrollKeyHeldFor < 0 && scrollKeyHeldFor >= -20 || !sameKey && scrollKeyHeldFor == 1) {
                     actionsOverlay.scrollAction(ControlScheme.Hotbar.RIGHT_CLICK, mc.player.isShiftKeyDown());
                 }
                 
@@ -352,7 +427,7 @@ public class InputHandler {
             }
             
             if (hamonMeditation.consumeClick()) {
-                PacketManager.sendToServer(new ClHamonMeditationPacket(true));
+                PacketManager.sendToServer(new ClHamonMeditationPacket());
             }
             
             if (jojoStuffMenu.consumeClick()) {
@@ -608,7 +683,7 @@ public class InputHandler {
         PowerClassification powerClass = power.getPowerClassification();
         
         if (!keyHeld && power.getHeldAction() != null) {
-            stopHeldAction(power, powerClass == actionsOverlay.getCurrentMode());
+            stopHeldAction(power);
         }
         
         boolean targetUpdatePrevTick = prevTargetUpdateTick.contains(powerClass);
@@ -621,9 +696,16 @@ public class InputHandler {
         }
     }
     
-    public void stopHeldAction(IPower<?, ?> power, boolean shouldFire) {
-        if (power.getHeldAction() != null) {
-            power.stopHeldAction(shouldFire);
+    public <P extends IPower<P, ?>> void stopHeldAction(IPower<?, ?> p) {
+        P power = (P) p;
+        Action<P> heldAction = power.getHeldAction();
+        if (heldAction != null) {
+            boolean shouldFire = false;
+            if (!heldAction.holdOnly(power)) {
+                int heldForTicks = power.getHeldActionTicks();
+                int ticksToFire = heldAction.getHoldDurationToFire(power);
+                shouldFire = heldForTicks >= ticksToFire;
+            }
             PacketManager.sendToServer(new ClStopHeldActionPacket(power.getPowerClassification(), shouldFire));
         }
     }
@@ -653,7 +735,7 @@ public class InputHandler {
     public void modActionClick(ClickInputEvent event) {
         doubleShift.reset();
         
-        if (mc.player.isSpectator() || event.getHand() == Hand.OFF_HAND || areHotbarsDisabled()) {
+        if (mc.player.isSpectator() || event.getHand() == Hand.OFF_HAND) {
             return;
         }
 
@@ -750,7 +832,7 @@ public class InputHandler {
     
     private <P extends IPower<P, ?>> HudClickResult handleMouseClickPowerHud(ActionKey key, KeyBinding keyBinding) {
         HudClickResult result = new HudClickResult();
-        if (!actionsOverlay.areHotbarsEnabled() || mc.player.isSpectator()) {
+        if (mc.player.isSpectator()) {
             return result;
         }
 
@@ -758,13 +840,13 @@ public class InputHandler {
 
         ControlScheme.Hotbar hotbar = key.getHotbar();
         boolean actionClick = false;
-        if (power != null) {
+        if (power != null && actionsOverlay.areHotbarsEnabled()) {
             actionClick = !actionsOverlay.noActionSelected(hotbar);
         }
         
         if (!actionClick) {
             // cancel vanilla click
-            if (shouldVanillaInputStun()) {
+            if (shouldVanillaInputStun() || ContinuousActionInstance.getCurrentAction(mc.player).isPresent()) {
                 result.cancelVanillaInput();
             }
             return result;
@@ -1057,6 +1139,7 @@ public class InputHandler {
                                 
                                 Entity entity = playerVehicle != null ? playerVehicle : mc.player;
                                 PacketManager.sendToServer(new ClOnLeapPacket(power.getPowerClassification()));
+                                IPlayerLeap.onLeapFixWrongMovement(mc.player);
                                 if (groundLeap) {
                                     MCUtil.leap(entity, leapStrength);
                                 }

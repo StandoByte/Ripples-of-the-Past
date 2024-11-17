@@ -2,9 +2,11 @@ package com.github.standobyte.jojo.client.particle.custom;
 
 import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.particle.HamonAuraParticle;
+import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.particle.IAnimatedSprite;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.settings.PointOfView;
@@ -14,6 +16,7 @@ import net.minecraft.util.math.vector.Vector3d;
 
 public class HamonAura3PersonParticle extends HamonAuraParticle {
     private final LivingEntity user;
+    private final AbstractClientPlayerEntity userAsPlayer;
     private Vector3d userPositionPrev;
     
     protected HamonAura3PersonParticle(ClientWorld world, LivingEntity entity, 
@@ -22,6 +25,7 @@ public class HamonAura3PersonParticle extends HamonAuraParticle {
         super(world, x, y, z, xda, yda, zda, sprites);
         this.user = entity;
         this.userPositionPrev = entity.position();
+        this.userAsPlayer = user instanceof AbstractClientPlayerEntity ? (AbstractClientPlayerEntity) user : null;
     }
     
     @Override
@@ -34,7 +38,23 @@ public class HamonAura3PersonParticle extends HamonAuraParticle {
                 return;
             }
         }
+        
+        Vector3d playerAnimPos = userAsPlayer != null ? PlayerAnimationHandler.getPlayerAnimator().getBodyPos(userAsPlayer, partialTick) : Vector3d.ZERO;
+        x += playerAnimPos.x;
+        y += playerAnimPos.y;
+        z += playerAnimPos.z;
+        xo += playerAnimPos.x;
+        yo += playerAnimPos.y;
+        zo += playerAnimPos.z;
+        
         super.render(vertexBuilder, camera, partialTick);
+        
+        x -= playerAnimPos.x;
+        y -= playerAnimPos.y;
+        z -= playerAnimPos.z;
+        xo -= playerAnimPos.x;
+        yo -= playerAnimPos.y;
+        zo -= playerAnimPos.z;
     }
     
     @Override

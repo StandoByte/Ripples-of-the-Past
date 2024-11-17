@@ -22,6 +22,7 @@ public class BreathControlMaskItem extends CustomModelArmorItem {
     @Override
     public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag) {
         tooltip.add(new TranslationTextComponent("item.jojo.breath_control_mask.hint").withStyle(TextFormatting.GRAY));
+        tooltip.add(new StringTextComponent(" ").withStyle(TextFormatting.GRAY));
         tooltip.add(new TranslationTextComponent("item.jojo.breath_control_mask.hint2").withStyle(TextFormatting.GRAY));
         tooltip.add(new StringTextComponent(" "));
     }

@@ -12,10 +12,11 @@ import java.util.Random;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.non_stand.HamonRebuffOverdrive;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
+import com.github.standobyte.jojo.action.player.IPlayerAction;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.living.LivingWallClimbing;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
@@ -26,6 +27,7 @@ import com.github.standobyte.jojo.client.render.entity.layerrenderer.EnergyRippl
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
+import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
@@ -63,6 +65,7 @@ public class EnergyRippleLayer<T extends LivingEntity, M extends BipedModel<T>> 
         super(renderer);
     }
     
+    // TODO refactor this to be able to add particles from the abilities themselves
     private static void addHamonSparks(LivingEntity entity, HamonData hamon, BipedModel<?> model, float timeDelta, HamonEnergyRippleHandler sparks) {
         float handSparkIntensity = 4 + hamon.getHamonStrengthLevelRatio() * 12;
         int particles = MathUtil.fractionRandomInc(handSparkIntensity * timeDelta);
@@ -122,11 +125,11 @@ public class EnergyRippleLayer<T extends LivingEntity, M extends BipedModel<T>> 
         int waves = t1 - t2;
         if (waves > 0) {
             ParticleType<?> particle = null;
+            Action<?> heldAction = INonStandPower.getNonStandPowerOptional(entity).resolve().map(IPower::getHeldAction).orElse(null);;
+            IPlayerAction<?, ?> curAction = ContinuousActionInstance.getCurrentAction(entity).map(instance -> instance.getAction()).orElse(null);
 
-            if (GeneralUtil.orElseFalse(INonStandPower.getNonStandPowerOptional(entity), 
-                    power -> power.getHeldAction() == ModHamonActions.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE_BARRAGE.get()) || 
-                GeneralUtil.orElseFalse(entity.getCapability(PlayerUtilCapProvider.CAPABILITY), 
-                    cap -> cap.getContinuousActionIfItIs(ModHamonActions.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE_BARRAGE.get()).isPresent())) {
+            if (heldAction == ModHamonActions.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE_BARRAGE.get() || 
+                    curAction == ModHamonActions.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE_BARRAGE.get()) {
                 particle = ModParticles.HAMON_SPARK_YELLOW.get();
             }
             

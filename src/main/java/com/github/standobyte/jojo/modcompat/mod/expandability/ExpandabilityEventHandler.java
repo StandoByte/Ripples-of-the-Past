@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.modcompat.mod.expandability;
 
-import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
+import com.github.standobyte.jojo.action.non_stand.HamonLiquidWalking;
 
 import be.florens.expandability.api.forge.LivingFluidCollisionEvent;
 import net.minecraft.entity.LivingEntity;
@@ -15,7 +15,7 @@ public class ExpandabilityEventHandler {
         if (event.getEntity() instanceof LivingEntity) {
             LivingEntity entity = (LivingEntity) event.getEntity();
             FluidState fluid = event.getFluidState();
-            if (HamonUtil.onLiquidWalkingEvent(entity, fluid)) {
+            if (HamonLiquidWalking.onLiquidWalkingEvent(entity, fluid)) {
                 event.setResult(Event.Result.ALLOW);
             }
         }

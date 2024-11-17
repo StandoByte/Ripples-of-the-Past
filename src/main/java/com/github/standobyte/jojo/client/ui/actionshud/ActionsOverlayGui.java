@@ -34,6 +34,7 @@ import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.github.standobyte.jojo.client.ui.BlitFloat;
 import com.github.standobyte.jojo.client.ui.ShortKeybindTextComponent;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsModeConfig.SelectedTargetIcon;
+import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer.BarType;
 import com.github.standobyte.jojo.client.ui.actionshud.hotbar.HotbarFold;
 import com.github.standobyte.jojo.client.ui.actionshud.hotbar.HotbarRenderer;
 import com.github.standobyte.jojo.client.ui.screen.WasdAllowingScreen;
@@ -88,6 +89,9 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.GameType;
 import net.minecraftforge.client.event.RenderGameOverlayEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 @SuppressWarnings("deprecation")
 public class ActionsOverlayGui extends AbstractGui {
@@ -108,6 +112,17 @@ public class ActionsOverlayGui extends AbstractGui {
     protected final ElementTransparency staminaBarTransparency = new ElementTransparency(40, 10);
     protected final ElementTransparency resolveBarTransparency = new ElementTransparency(40, 10);
     protected final ElementTransparency powerNameTransparency = new ElementTransparency(40, 10);
+    protected final ElementTransparency crosshairFillTransparency = new ElementTransparency(8, 6) {
+        private static final int FADE_IN_TICKS = 2;
+        @Override
+        float getValue(float partialTick) {
+            if (ticksMax - ticks <= FADE_IN_TICKS) {
+                return (ticksMax - ticks + partialTick) / FADE_IN_TICKS;
+            }
+            return super.getValue(partialTick);
+        }
+    };
+    protected Action<?> crosshairFillLastAction;
     protected final Map<InputHandler.ActionKey, ElementTransparency> actionNameTransparency = Arrays.stream(InputHandler.ActionKey.values())
             .collect(Maps.toImmutableEnumMap(hotbar -> hotbar, hotbar -> new ElementTransparency(40, 10)));
     protected final Map<InputHandler.ActionKey, ITextComponent> lastActionName = new EnumMap<>(InputHandler.ActionKey.class);
@@ -136,7 +151,8 @@ public class ActionsOverlayGui extends AbstractGui {
             energyBarTransparency,
             staminaBarTransparency,
             resolveBarTransparency,
-            powerNameTransparency), 
+            powerNameTransparency,
+            crosshairFillTransparency), 
             actionNameTransparency.values().stream(),
             actionHotbarFold.values().stream(),
             customKeybindActionTransparency.values().stream(),
@@ -158,6 +174,7 @@ public class ActionsOverlayGui extends AbstractGui {
         if (instance == null) {
             try {
                 instance = new ActionsOverlayGui(mc);
+                MinecraftForge.EVENT_BUS.register(instance);
             }
             catch (Throwable e) {
                 e.printStackTrace();
@@ -264,6 +281,7 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     protected ActionTarget _target;
+    @SubscribeEvent(priority = EventPriority.NORMAL)
     public void render(RenderGameOverlayEvent.Pre event) {
         _target = null;
         if (noHudRender(mc)) {
@@ -455,6 +473,31 @@ public class ActionsOverlayGui extends AbstractGui {
             break;
         }
     }
+    
+    @SubscribeEvent(priority = EventPriority.NORMAL)
+    public void renderPost(RenderGameOverlayEvent.Post event) {
+        if (!noHudRender(mc)) {
+            return;
+        }
+        
+        MatrixStack matrixStack = event.getMatrixStack();
+        int screenWidth = mc.getWindow().getGuiScaledWidth();
+        int screenHeight = mc.getWindow().getGuiScaledHeight();
+        float partialTick = event.getPartialTicks();
+        switch (event.getType()) {
+        case CROSSHAIRS:
+            if (mc.options.getCameraType().isFirstPerson()
+                    && !(mc.options.renderDebug && !mc.player.isReducedDebugInfo() && !mc.options.reducedDebugInfo)) {
+                RenderSystem.defaultBlendFunc();
+                renderCrosshair(matrixStack, screenWidth, screenHeight, partialTick);
+                RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ONE_MINUS_DST_COLOR, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
+            }
+            break;
+        default:
+            break;
+        }
+    }
+    
     protected boolean[] hotbarIsRendered = new boolean[4];
     
     public ActionTarget getMouseTarget() {
@@ -1523,9 +1566,9 @@ public class ActionsOverlayGui extends AbstractGui {
     
     public static void renderRadialIndicator(MatrixStack matrixStack, float x, float y, float ratio) {
         Minecraft.getInstance().getTextureManager().bind(RADIAL_INDICATOR);
-        int deg = (int) (ratio * 360F);
-        BlitFloat.blitFloat(matrixStack, x + 1.5F, y + 1.5F, deg % 19 * 13, deg / 19 * 13, 13, 13, 256, 256);
-        RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+//        int deg = (int) (ratio * 360F);
+//        BlitFloat.blitFloat(matrixStack, x + 1.5F, y + 1.5F, deg % 19 * 13, deg / 19 * 13, 13, 13, 256, 256);
+        RadialBar.render(matrixStack, x, y, 0, ratio, 0, 0, 234, 234, 13, 13, 256, 256, 0);
     }
     
     
@@ -1690,6 +1733,56 @@ public class ActionsOverlayGui extends AbstractGui {
                 }
             }
         }
+    }
+    
+    protected <P extends IPower<P, ?>> void renderCrosshair(MatrixStack matrixStack, int screenWidth, int screenHeight, float partialTick) {
+        mc.textureManager.bind(ActionsOverlayGui.OVERLAY_LOCATION);
+        matrixStack.pushPose();
+        float x = (screenWidth - 15) / 2;
+        float y = (screenHeight - 15) / 2;
+        matrixStack.translate(x + 7.5f, y + 7.5f, 0);
+        x = -7.5f;
+        y = -7.5f;
+        
+        for (PowerClassification powerClass : PowerClassification.values()) {
+            P power = (P) getHudMode(powerClass).getPower();
+            Action<P> heldAction = power.getHeldAction();
+            if (heldAction != null) {
+                int ticksToFire = heldAction.getHoldDurationToFire(power);
+                if (ticksToFire > 0) {
+                    float heldActionRatio = MathHelper.clamp(((float) power.getHeldActionTicks() + partialTick) / (float) ticksToFire, 0, 1);
+                    if (heldActionRatio > 0) {
+                        if (heldActionRatio < 1) {
+                            crosshairFillLastAction = null;
+                        }
+                        else if (crosshairFillLastAction != heldAction) {
+                            crosshairFillLastAction = heldAction;
+                            crosshairFillTransparency.reset();
+                        }
+                        
+                        float height = heldActionRatio == 1 ? 15 : 3 + 9 * heldActionRatio;
+                        BlitFloat.blitFloat(matrixStack, x, y + 15 - height, 88, 30 - height, 15, height, 256, 256);
+                        
+                        break;
+                    }
+                }
+            }
+        }
+        
+        if (crosshairFillTransparency.shouldRender()) {
+            float alpha = crosshairFillTransparency.getAlpha(partialTick);
+            if (alpha > 0) {
+                RenderSystem.enableBlend();
+                RenderSystem.defaultBlendFunc();
+                RenderSystem.color4f(1, 1, 1, alpha);
+                float scale = 1 + alpha * 0.25f;
+                matrixStack.scale(scale, scale, 1);
+                BlitFloat.blitFloat(matrixStack, x, y, 88, 0, 15, 15, 256, 256);
+                RenderSystem.color4f(1, 1, 1, 1);
+            }
+        }
+        
+        matrixStack.popPose();
     }
     
     protected boolean renderBowChargeIcon(MatrixStack matrixStack, BowChargeEffectInstance<?, ?> bowCharge, float partialTick, int x, int y) {
@@ -2123,6 +2216,8 @@ public class ActionsOverlayGui extends AbstractGui {
         outOfBreathSpriteTicks = 15;
         vignetteBeforeFadeAway = -1;
         prevAir = 0;
+        BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).resetRedHighlight();
+        mc.gui.setOverlayMessage(new TranslationTextComponent("hamon.out_of_breath"), false);
     }
     
     public boolean isPlayerOutOfBreath() {
@@ -2130,7 +2225,7 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     protected void tickOutOfBreathEffect() {
-        if (outOfBreath) {
+        if (outOfBreath && outOfBreathSpriteTicks == 0) {
             prevAir = mc.player.getAirSupply();
             if (prevAir >= mc.player.getMaxAirSupply()) {
                 outOfBreath = false;

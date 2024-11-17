@@ -47,7 +47,7 @@ public class StandUserDummyEntity extends MobEntity implements IMobStandUser, IE
     @Override
     public void onSyncedDataUpdated(DataParameter<?> key) {
         super.onSyncedDataUpdated(key);
-        if (key == CommonReflection.getEntityCustomNameParameter() && !level.isClientSide()) {
+        if (CommonReflection.getEntityCustomNameParameter().equals(key) && !level.isClientSide()) {
             updateStandAction();
         }
     }

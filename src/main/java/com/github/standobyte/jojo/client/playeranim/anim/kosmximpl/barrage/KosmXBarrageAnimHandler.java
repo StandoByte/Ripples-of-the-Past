@@ -4,12 +4,12 @@ import com.github.standobyte.jojo.client.playeranim.IPlayerBarrageAnimation;
 import com.github.standobyte.jojo.client.playeranim.anim.interfaces.PlayerBarrageAnim;
 import com.github.standobyte.jojo.client.playeranim.kosmx.KosmXPlayerAnimatorInstalled.AnimLayerHandler;
 import com.github.standobyte.jojo.client.playeranim.kosmx.anim.modifier.KosmXArmsRotationModifier;
+import com.github.standobyte.jojo.client.playeranim.kosmx.anim.modifier.KosmXFixedFadeModifier;
 import com.github.standobyte.jojo.client.playeranim.kosmx.anim.modifier.KosmXHeadRotationModifier;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.barrage.BarrageFistAfterimagesLayer;
 
 import dev.kosmx.playerAnim.api.layered.IAnimation;
 import dev.kosmx.playerAnim.api.layered.ModifierLayer;
-import dev.kosmx.playerAnim.api.layered.modifier.AbstractFadeModifier;
 import dev.kosmx.playerAnim.core.util.Ease;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
@@ -36,7 +36,7 @@ public class KosmXBarrageAnimHandler extends AnimLayerHandler<ModifierLayer<IAni
             res = setAnim(player, createSwingAnim(null));
         }
         else {
-            res = fadeOutAnim(player, AbstractFadeModifier.standardFadeIn(4, Ease.OUTCUBIC), null);
+            res = fadeOutAnim(player, KosmXFixedFadeModifier.standardFadeIn(4, Ease.OUTCUBIC), null);
         }
         
         BarrageFistAfterimagesLayer.setIsBarraging(player, res && enabled);

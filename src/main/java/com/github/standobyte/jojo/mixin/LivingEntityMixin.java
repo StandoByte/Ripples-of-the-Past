@@ -24,6 +24,9 @@ public abstract class LivingEntityMixin extends Entity {
         super(type, level);
     }
 
+    @Inject(method = "tick", at = @At("HEAD"))
+    public void jojoMixinTick(CallbackInfo ci) {}
+
     @Inject(method = "getMobType", at = @At("HEAD"), cancellable = true)
     public void jojoPlayerUndeadCreature(CallbackInfoReturnable<CreatureAttribute> ci) {}
     

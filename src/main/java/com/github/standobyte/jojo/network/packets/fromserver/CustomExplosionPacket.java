@@ -7,15 +7,16 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
-import com.github.standobyte.jojo.util.mc.damage.explosion.CustomExplosion.CustomExplosionType;
+import com.github.standobyte.jojo.util.mc.damage.explosion.CustomExplosion;
+import com.github.standobyte.jojo.util.mc.damage.explosion.CustomExplosion.CustomExplosionSupplier;
 import com.google.common.collect.Lists;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
-import net.minecraft.world.Explosion;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 public class CustomExplosionPacket {
@@ -27,10 +28,12 @@ public class CustomExplosionPacket {
     private final float knockbackX;
     private final float knockbackY;
     private final float knockbackZ;
-    private final CustomExplosionType type;
+    private final ResourceLocation type;
+    private CustomExplosion srvExplosion;
+    private PacketBuffer extraData;
     
-    public CustomExplosionPacket(double pX, double pY, double pZ, float pPower, 
-            List<BlockPos> pToBlow, @Nullable Vector3d pKnockback, CustomExplosionType type) {
+    public CustomExplosionPacket(CustomExplosion explosion, double pX, double pY, double pZ, float pPower, 
+            List<BlockPos> pToBlow, @Nullable Vector3d pKnockback, ResourceLocation type) {
         this.x = pX;
         this.y = pY;
         this.z = pZ;
@@ -47,6 +50,7 @@ public class CustomExplosionPacket {
             this.knockbackZ = 0;
         }
         this.type = type;
+        this.srvExplosion = explosion;
     }
     
     
@@ -74,7 +78,8 @@ public class CustomExplosionPacket {
             buf.writeFloat(msg.knockbackY);
             buf.writeFloat(msg.knockbackZ);
             
-            buf.writeEnum(msg.type);
+            buf.writeResourceLocation(msg.type);
+            msg.srvExplosion.toBuf(buf);
         }
 
         @Override
@@ -100,18 +105,24 @@ public class CustomExplosionPacket {
             float knockbackY = buf.readFloat();
             float knockbackZ = buf.readFloat();
             
-            CustomExplosionType type = buf.readEnum(CustomExplosionType.class);
+            ResourceLocation type = buf.readResourceLocation();
             
-            return new CustomExplosionPacket(xPos, yPos, zPos, power, toBlow, new Vector3d(knockbackX, knockbackY, knockbackZ), type);
+            CustomExplosionPacket packet = new CustomExplosionPacket(null, xPos, yPos, zPos, power, toBlow, new Vector3d(knockbackX, knockbackY, knockbackZ), type);
+            packet.extraData = buf;
+            return packet;
         }
 
         @Override
         public void handle(CustomExplosionPacket msg, Supplier<NetworkEvent.Context> ctx) {
             PlayerEntity player = ClientUtil.getClientPlayer();
-            Explosion explosion = msg.type.createExplosionOnClient(ClientUtil.getClientWorld(), null, 
-                    msg.x, msg.y, msg.z, msg.power, msg.toBlow);
-            explosion.finalizeExplosion(true);
-            player.setDeltaMovement(player.getDeltaMovement().add((double)msg.knockbackX, (double)msg.knockbackY, (double)msg.knockbackZ));
+            CustomExplosionSupplier explosionSupplier = CustomExplosion.Register.REGISTER.get(msg.type);
+            if (explosionSupplier != null) {
+                CustomExplosion explosion = explosionSupplier.createExplosion(ClientUtil.getClientWorld(), msg.x, msg.y, msg.z, msg.power);
+                explosion.getToBlow().addAll(msg.toBlow);
+                explosion.fromBuf(msg.extraData);
+                explosion.finalizeExplosion(true);
+                player.setDeltaMovement(player.getDeltaMovement().add((double)msg.knockbackX, (double)msg.knockbackY, (double)msg.knockbackZ));
+            }
         }
 
         @Override

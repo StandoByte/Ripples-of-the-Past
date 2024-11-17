@@ -44,7 +44,7 @@ public class HamonWallClimbing2 extends HamonAction {
     
     @Override
     protected ActionConditionResult checkHeldItems(LivingEntity user, INonStandPower power) {
-        if (!(MCUtil.isHandFree(user, Hand.MAIN_HAND) && MCUtil.isHandFree(user, Hand.OFF_HAND))) {
+        if (!MCUtil.areHandsFree(user, Hand.MAIN_HAND, Hand.OFF_HAND)) {
             return conditionMessage("hands");
         }
         return ActionConditionResult.POSITIVE;
@@ -248,7 +248,7 @@ public class HamonWallClimbing2 extends HamonAction {
         return hamonOptional.map(hamon -> {
             INonStandPower power = powerOptional.get();
             double speed = (1.2 + hamon.getBreathingLevel() * 0.004 + hamon.getHamonControlLevel() * 0.00667)
-                    * hamon.getActionEfficiency(power.getMaxEnergy() / 2, false);
+                    * hamon.getActionEfficiency(power.getMaxEnergy() / 2, false, ModHamonSkills.WALL_CLIMBING.get());
             return speed;
         }).orElse(0.0);
     }
@@ -275,7 +275,7 @@ public class HamonWallClimbing2 extends HamonAction {
                         boolean consumedEnergy = false;
 
                         float energyCost = ModHamonActions.HAMON_WALL_CLIMBING.get().getTickEnergyCost(power, isMoving);
-                        float points = Math.min(energyCost, power.getEnergy() * hamon.getActionEfficiency(energyCost, false));
+                        float points = Math.min(energyCost, power.getEnergy() * hamon.getActionEfficiency(energyCost, false, ModHamonSkills.WALL_CLIMBING.get()));
                         if (power.hasEnergy(energyCost)) {
                             power.consumeEnergy(energyCost);
                             consumedEnergy = true;

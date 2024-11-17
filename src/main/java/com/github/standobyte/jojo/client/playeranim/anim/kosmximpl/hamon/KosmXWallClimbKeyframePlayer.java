@@ -97,41 +97,6 @@ public class KosmXWallClimbKeyframePlayer extends KosmXKeyframeAnimPlayer {
         }
     }
     
-//    @Override
-//    public void tick() {
-//        if (isActive()) {
-//            currentTick++;
-//            if (isInfinite() && getCurrentTick() > getEndTick()) {
-//                currentTick = getReturnToTick();
-//                isLoopStarted = true;
-//            }
-//            if (currentTick >= getStopTick()) {
-//                stop();
-//            }
-//        }
-//    }
-//    
-//    
-//    protected int getCurrentTick() {
-//        return currentTick;
-//    }
-//    
-//    protected int getStopTick() {
-//        return data.stopTick;
-//    }
-//
-//    protected boolean isInfinite() {
-//        return data.isInfinite;
-//    }
-//    
-//    protected int getEndTick() {
-//        return data.endTick;
-//    }
-//    
-//    protected int getReturnToTick() {
-//        return data.returnToTick;
-//    }
-    
     
     enum ClimbDir {
         UP(false),

@@ -47,6 +47,7 @@ import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.ItemModelMesher;
 import net.minecraft.client.renderer.LightTexture;
 import net.minecraft.client.renderer.Tessellator;
+import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.client.renderer.model.IBakedModel;
@@ -90,6 +91,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.client.gui.GuiUtils;
+import net.minecraftforge.fml.client.registry.IRenderFactory;
 
 /**
  * Any methods from this class are only to be called on the client side
@@ -247,6 +249,19 @@ public class ClientUtil {
         } catch (IOException e) {
             return false;
         }
+    }
+    
+    public static <T extends Entity> IRenderFactory<? super T> logException(IRenderFactory<? super T> renderFactory) {
+        return manager -> {
+            try {
+                EntityRenderer<? super T> renderer = renderFactory.createRenderFor(manager);
+                return renderer;
+            }
+            catch (Exception e) {
+                JojoMod.getLogger().error("Error creating a renderer class for an entity", e);
+                throw e;
+            }
+        };
     }
     
     public static void drawRightAlignedString(MatrixStack matrixStack, FontRenderer font, String line, float x, float y, int color) {
@@ -576,24 +591,6 @@ public class ClientUtil {
         private DefaultPlayerSkinType(ResourceLocation skinTex) {
             this.skinTex = skinTex;
         }
-    }
-    
-    public static void addRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
-        modelRenderer.xRot += x;
-        modelRenderer.yRot += y;
-        modelRenderer.zRot += z;
-    }
-    
-    public static void translateModelPart(ModelRenderer modelRenderer, Vector3f tlVec) {
-        modelRenderer.x += tlVec.x();
-        modelRenderer.y += tlVec.y();
-        modelRenderer.z += tlVec.z();
-    }
-    
-    public static void rotateModelPart(ModelRenderer modelRenderer, Vector3f rotVec) {
-        modelRenderer.xRot = rotVec.x();
-        modelRenderer.yRot = rotVec.y();
-        modelRenderer.zRot = rotVec.z();
     }
     
     /**

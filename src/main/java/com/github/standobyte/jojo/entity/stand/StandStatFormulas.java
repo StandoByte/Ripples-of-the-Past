@@ -126,7 +126,7 @@ public class StandStatFormulas {
     }
     
     public static float getStaminaMultiplier(double durability) {
-        return 0.5F + (float) durability * 3 / 32;
+        return 1 + (float) durability / 16;
     }
     
     public static float getBlockStaminaCost(float incomingDamage) {

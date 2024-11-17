@@ -4,8 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
+
+import org.apache.commons.lang3.tuple.Pair;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
@@ -15,52 +16,59 @@ import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.IWorldReader;
 
 public class CollideBlocks {
 
-    public static Collection<BlockPos> collideBoundingBox(Vector3d pVec, AxisAlignedBB pCollisionBox, IWorldReader pLevel, ISelectionContext pSelectionContext) {
-        List<BlockPos> collidedWith = new ArrayList<>();
+    public static BlockCollisionResult collideBoundingBox(Vector3d pVec, AxisAlignedBB pCollisionBox, IWorldReader pLevel, ISelectionContext pSelectionContext) {
+        BlockCollisionResult collision = new BlockCollisionResult();
         double x = pVec.x;
         double y = pVec.y;
         double z = pVec.z;
+        collision.movementX = x;
+        collision.movementY = y;
+        collision.movementZ = z;
         if (y != 0) {
-            y = collide(Direction.Axis.Y, pCollisionBox, pLevel, y, pSelectionContext, collidedWith::add);
-//            if (y != 0) {
-//                pCollisionBox = pCollisionBox.move(0, y, 0);
-//            }
+            y = collide(Direction.Axis.Y, pCollisionBox, pLevel, y, pSelectionContext, collision.blocks);
+            if (y != 0) {
+                pCollisionBox = pCollisionBox.move(0, y, 0);
+            }
         }
 
         boolean zAxisFirst = Math.abs(x) < Math.abs(z);
         if (zAxisFirst && z != 0) {
-            z = collide(Direction.Axis.Z, pCollisionBox, pLevel, z, pSelectionContext, collidedWith::add);
+            z = collide(Direction.Axis.Z, pCollisionBox, pLevel, z, pSelectionContext, collision.blocks);
 //            if (z != 0) {
 //                pCollisionBox = pCollisionBox.move(0, 0, z);
 //            }
         }
 
         if (x != 0) {
-            x = collide(Direction.Axis.X, pCollisionBox, pLevel, x, pSelectionContext, collidedWith::add);
+            x = collide(Direction.Axis.X, pCollisionBox, pLevel, x, pSelectionContext, collision.blocks);
 //            if (!flag && x != 0) {
 //                pCollisionBox = pCollisionBox.move(x, 0, 0);
 //            }
         }
 
         if (!zAxisFirst && z != 0) {
-            z = collide(Direction.Axis.Z, pCollisionBox, pLevel, z, pSelectionContext, collidedWith::add);
+            z = collide(Direction.Axis.Z, pCollisionBox, pLevel, z, pSelectionContext, collision.blocks);
         }
-
-        return collidedWith;
+        
+        collision.x = x;
+        collision.y = y;
+        collision.z = z;
+        return collision;
     }
 
     private static double collide(Direction.Axis pMovementAxis, AxisAlignedBB pCollisionBox, 
-            IWorldReader pLevelReader, double pDesiredOffset, ISelectionContext pSelectionContext, Consumer<BlockPos> blockPosCollide) {
+            IWorldReader pLevelReader, double pDesiredOffset, ISelectionContext pSelectionContext, Collection<Pair<BlockPos, VoxelShape>> blockPosCollide) {
         return collide(pCollisionBox, pLevelReader, pDesiredOffset, pSelectionContext, AxisRotation.between(pMovementAxis, Direction.Axis.Z), blockPosCollide);
     }
 
-    private static double collide(AxisAlignedBB pCollisionBox, IWorldReader pLevelReader, 
-            double pDesiredOffset, ISelectionContext pSelectionContext, AxisRotation pRotationAxis, Consumer<BlockPos> blockPosCollide) {
+    public static double collide(AxisAlignedBB pCollisionBox, IWorldReader pLevelReader, 
+            double pDesiredOffset, ISelectionContext pSelectionContext, AxisRotation pRotationAxis, Collection<Pair<BlockPos, VoxelShape>> blockPosCollide) {
         if (!(pCollisionBox.getXsize() < 1.0E-6D) && !(pCollisionBox.getYsize() < 1.0E-6D) && !(pCollisionBox.getZsize() < 1.0E-6D)) {
             if (Math.abs(pDesiredOffset) < 1.0E-7D) {
                 return 0.0D;
@@ -84,7 +92,10 @@ public class CollideBlocks {
 
                 boolean collision = false;
                 double minOffsetCollided = pDesiredOffset;
+                double desiredOffset_abs = Math.abs(pDesiredOffset);
+                double minOffset_abs = desiredOffset_abs;
 
+                Collection<Pair<BlockPos, VoxelShape>> collidedWith = new ArrayList<>();
                 while(true) {
                     if (flag) {
                         if (l1 > j1) {
@@ -113,15 +124,26 @@ public class CollideBlocks {
                                 blockpos.set(axisrotation, i2, j2, l1);
                                 BlockState blockstate = pLevelReader.getBlockState(blockpos);
                                 if ((k2 != 1 || blockstate.hasLargeCollisionShape()) && (k2 != 2 || blockstate.is(Blocks.MOVING_PISTON))) {
-                                    double offsetCollided = blockstate.getCollisionShape(pLevelReader, blockpos, pSelectionContext)
-                                            .collide(direction$axis2, pCollisionBox.move(-blockpos.getX(), -blockpos.getY(), -blockpos.getZ()), pDesiredOffset);
-                                    if (Math.abs(offsetCollided) < 1.0E-7D) {
-                                        collision = true;
-                                        blockPosCollide.accept(blockpos.immutable());
+                                    VoxelShape collisionShape = blockstate.getCollisionShape(pLevelReader, blockpos, pSelectionContext);
+                                    double offsetCollided = collisionShape.collide(direction$axis2, pCollisionBox.move(-blockpos.getX(), -blockpos.getY(), -blockpos.getZ()), pDesiredOffset);
+                                    double offset_abs = Math.abs(offsetCollided);
+                                    if (offset_abs < 1.0E-7D) {
+                                        offsetCollided = 0;
+                                        offset_abs = 0;
                                     }
-
-                                    if (Math.abs(offsetCollided) < Math.abs(minOffsetCollided)) {
-                                        minOffsetCollided = offsetCollided;
+                                    if (!collision && offset_abs < desiredOffset_abs) {
+                                        collision = true;
+                                    }
+                                    
+                                    if (offset_abs <= minOffset_abs) {
+                                        if (offset_abs < minOffset_abs) {
+                                            collidedWith.clear();
+                                            minOffsetCollided = offsetCollided;
+                                            minOffset_abs = offset_abs;
+                                        }
+                                        else if (collision) {
+                                            collidedWith.add(Pair.of(blockpos.immutable(), collisionShape));
+                                        }
                                     }
                                     j1 = lastC(minOffsetCollided, d0, d1);
                                 }
@@ -131,8 +153,11 @@ public class CollideBlocks {
 
                     l1 += k1;
                 }
-
-                return collision ? 0 : minOffsetCollided;
+                
+                if (!collidedWith.isEmpty()) {
+                    blockPosCollide.addAll(collidedWith);
+                }
+                return minOffsetCollided;
             }
         } else {
             return pDesiredOffset;
@@ -141,6 +166,16 @@ public class CollideBlocks {
 
     private static int lastC(double pDesiredOffset, double pMin, double pMax) {
         return pDesiredOffset > 0.0D ? MathHelper.floor(pMax + pDesiredOffset) + 1 : MathHelper.floor(pMin + pDesiredOffset) - 1;
+    }
+    
+    public static class BlockCollisionResult {
+        public Collection<Pair<BlockPos, VoxelShape>> blocks = new ArrayList<>();
+        public double movementX;
+        public double movementY;
+        public double movementZ;
+        public double x;
+        public double y;
+        public double z;
     }
     
     

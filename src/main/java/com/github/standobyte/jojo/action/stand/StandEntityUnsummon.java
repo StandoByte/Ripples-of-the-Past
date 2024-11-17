@@ -12,7 +12,6 @@ import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public final class StandEntityUnsummon extends StandEntityAction {
@@ -49,9 +48,8 @@ public final class StandEntityUnsummon extends StandEntityAction {
             int unsummonDuration = standEntity.getUnsummonDuration();
             if (unsummonDuration == 0) return super.getOffsetFromUser(standPower, standEntity, task);
             
-            Vector3d offsetVec = standEntity.unsummonOffset.toRelativeVec();
-            offsetVec = offsetVec.scale(1 - ((double) task.getTick() / (double) unsummonDuration));
-            return standEntity.unsummonOffset.withRelativeVec(offsetVec);
+            double offsetScale = 1 - ((double) task.getTick() / (double) unsummonDuration);
+            return standEntity.unsummonOffset.copyScale(offsetScale, offsetScale, offsetScale);
         }
         return super.getOffsetFromUser(standPower, standEntity, task);
     }

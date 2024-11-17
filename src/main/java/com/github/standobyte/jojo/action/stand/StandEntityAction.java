@@ -26,17 +26,21 @@ import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.type.EntityStandType;
+import com.github.standobyte.jojo.util.general.ObjectWrapper;
 import com.github.standobyte.jojo.util.general.OptionalUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Hand;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceContext;
+import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
@@ -166,6 +170,24 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
             return ActionConditionResult.noMessage(targetEntity instanceof LivingEntity && canStandTargetEntity(standEntity, (LivingEntity) targetEntity, standPower));
         default:
             return ActionConditionResult.POSITIVE;
+        }
+    }
+    
+    @Override
+    public void overrideVanillaMouseTarget(ObjectWrapper<ActionTarget> targetContainer, World world, LivingEntity user, IStandPower power) {
+        if (getTargetRequirement().checkTargetType(TargetType.ENTITY)) {
+            ActionTarget target = targetContainer.get();
+            if (target.getType() == TargetType.BLOCK) {
+                BlockPos blockPos = target.getBlockPos();
+                BlockState blockState = world.getBlockState(blockPos);
+                if (blockState.getCollisionShape(world, blockPos).isEmpty()) {
+                    LivingEntity performer = getPerformer(user, power);
+                    RayTraceResult noTallGrass = JojoModUtil.rayTraceMultipleEntities(performer, MCUtil.getPickRange(performer), 
+                            null, RayTraceContext.BlockMode.COLLIDER, 
+                            0, 0)[0];
+                    targetContainer.set(ActionTarget.fromRayTraceResult(noTallGrass));
+                }
+            }
         }
     }
     

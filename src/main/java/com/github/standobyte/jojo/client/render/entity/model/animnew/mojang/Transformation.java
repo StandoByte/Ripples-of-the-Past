@@ -27,15 +27,35 @@ public class Transformation {
     }
     
     public static class Targets {
-        public static final Target TRANSLATE = ClientUtil::translateModelPart;
-        public static final Target ROTATE = ClientUtil::rotateModelPart;
+        public static final Target TRANSLATE = Transformation::translateModelPart;
+        public static final Target ROTATE = Transformation::rotateModelPart;
         /**
          * Placeholder - 1.16's ModelRenderers do not have scale fields
          */
-        public static final Target SCALE = ClientUtil::scaleModelPart;
+        public static final Target SCALE = Transformation::scaleModelPart;
+        
     }
     
     public static interface Interpolation {
         public Vector3f apply(Vector3f dest, float delta, Keyframe[] keyframes, int start, int end, float scale);
+    }
+    
+    
+    public static void translateModelPart(ModelRenderer modelRenderer, Vector3f tlVec) {
+        modelRenderer.x += tlVec.x();
+        modelRenderer.y += tlVec.y();
+        modelRenderer.z += tlVec.z();
+    }
+    
+    public static void rotateModelPart(ModelRenderer modelRenderer, Vector3f rotVec) {
+        modelRenderer.xRot += rotVec.x();
+        modelRenderer.yRot += rotVec.y();
+        modelRenderer.zRot += rotVec.z();
+    }
+    
+    /**
+     * Placeholder - 1.16's ModelRenderers do not have scale fields
+     */
+    public static void scaleModelPart(ModelRenderer modelRenderer, Vector3f scaleVec) {
     }
 }

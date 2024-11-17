@@ -1,7 +1,9 @@
 package com.github.standobyte.jojo.util.mc.entitysubtype;
 
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import com.github.standobyte.jojo.JojoMod;
@@ -27,9 +29,19 @@ public class EntityTypeToInstance {
     }
     
     private final Map<SubtypeResourceLocation, Entity> entityInstances = new HashMap<>();
+    private final Set<EntitySubtype<?>> tryLazyInit = new HashSet<>();
     
     private EntityTypeToInstance(Stream<EntitySubtype<?>> entityTypes, World world) {
-        entityTypes.forEach(subtype -> entityInstances.put(subtype.getId(), createInstance(subtype, world)));
+        entityTypes.forEach(subtype -> {
+            try {
+                Entity entity = createInstance(subtype, world);
+                entityInstances.put(subtype.getId(), entity);
+            }
+            catch (Exception e) {
+                tryLazyInit.add(subtype);
+                JojoMod.getLogger().warn("Failed to initialize an entity of type {} on world load. Will try lazy initialization.", subtype.getId());
+            }
+        });
     }
     
     @SuppressWarnings("unchecked")
@@ -38,7 +50,17 @@ public class EntityTypeToInstance {
             JojoMod.getLogger().error("An operation with {} entity type needed an Entity instance, but the map for them hasn't been created yet!", subType.vanillaType.getRegistryName());
             return null;
         }
-        return (T) instance.entityInstances.computeIfAbsent(subType.getId(), __ -> createInstance(subType, world));
+        Entity entity = null;
+        if (!instance.entityInstances.containsKey(subType) && instance.tryLazyInit.remove(subType)) {
+            entity = createInstance(subType, world);
+            if (entity != null) {
+                instance.entityInstances.put(subType.getId(), entity);
+            }
+        }
+        else {
+            entity = instance.entityInstances.get(subType);
+        }
+        return (T) entity;
     }
     
     private static <T extends Entity> T createInstance(EntitySubtype<T> type, World world) {

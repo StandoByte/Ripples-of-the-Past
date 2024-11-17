@@ -10,6 +10,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityPredicates;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.Explosion;
@@ -18,6 +19,10 @@ import net.minecraft.world.World;
 
 public class HamonBlastExplosion extends CustomExplosion {
     private float hamonDamage;
+
+    public HamonBlastExplosion(World pLevel, double pToBlowX, double pToBlowY, double pToBlowZ, float pRadius) {
+        super(pLevel, pToBlowX, pToBlowY, pToBlowZ, pRadius);
+    }
     
     public HamonBlastExplosion(World pLevel, Entity pSource, 
             ExplosionContext pDamageCalculator, 
@@ -91,5 +96,10 @@ public class HamonBlastExplosion extends CustomExplosion {
     @Override
     public DamageSource getDamageSource() {
         return DamageUtil.HAMON;
+    }
+    
+    @Override
+    public ResourceLocation getExplosionType() {
+        return CustomExplosion.Register.HAMON;
     }
 }

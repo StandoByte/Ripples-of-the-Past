@@ -1,6 +1,8 @@
 package com.github.standobyte.jojo.capability.chunk;
 
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -14,6 +16,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
+import com.github.standobyte.jojo.entity.damaging.projectile.BlockShardEntity;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.BrokenChunkBlocksPacket;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -118,6 +121,10 @@ public class ChunkCap {
 //        }
     }
     
+    public PrevBlockInfo getBrokenBlockAt(BlockPos blockPos) {
+        return brokenBlocks.get(blockPos);
+    }
+    
     public Stream<PrevBlockInfo> getBrokenBlocks() {
         return brokenBlocks.values().stream();
     }
@@ -127,7 +134,12 @@ public class ChunkCap {
     }
     
     public void setDroppedXp(BlockPos blockPos, int xp) {
-        brokenBlocksXp.put(blockPos, xp);
+        if (brokenBlocks.containsKey(blockPos)) {
+            brokenBlocks.get(blockPos).setDroppedXp(xp);
+        }
+        else {
+            brokenBlocksXp.put(blockPos, xp);
+        }
     }
     
     
@@ -161,10 +173,13 @@ public class ChunkCap {
     public static class PrevBlockInfo {
         public final BlockPos pos;
         public final BlockState state;
+        
         public final List<ItemStack> drops;
+        private int xp = 0;
+        private List<WeakReference<BlockShardEntity>> blockShards;
+        
         public final boolean keep;
         private int tickCount = 0;
-        private int xp = 0;
         
         private PrevBlockInfo(BlockPos pos, BlockState state, List<ItemStack> drops, boolean keep) {
             this.pos = pos;
@@ -185,6 +200,21 @@ public class ChunkCap {
             return xp;
         }
         
+        public void withBlockShards(BlockShardEntity[] blockShardEntities) {
+            this.blockShards = Arrays.stream(blockShardEntities).map(WeakReference::new).collect(Collectors.toList());
+        }
+        
+        public void onRestore() {
+            if (blockShards != null) {
+                for (WeakReference<BlockShardEntity> shardRef : blockShards) {
+                    BlockShardEntity shard = shardRef.get();
+                    if (shard != null && shard.isAlive()) {
+                        shard.setCrazyDRestored();
+                    }
+                }
+            }
+        }
+        
         private boolean forget() {
             return !keep && tickCount++ == 24000;
         }
@@ -200,8 +230,8 @@ public class ChunkCap {
             for (ItemStack stack : drops) {
                 itemsNBT.add(stack.save(new CompoundNBT()));
             }
-            nbt.putInt("Xp", xp);
             nbt.put("Drops", itemsNBT);
+            nbt.putInt("Xp", xp);
             
             return nbt;
         }

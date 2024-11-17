@@ -137,6 +137,7 @@ import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ChunkManager;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.ForgeMod;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 import net.minecraftforge.registries.IForgeRegistry;
@@ -619,6 +620,15 @@ public class MCUtil {
         }
     }
     
+    public static double getPickRange(LivingEntity entity) {
+        ModifiableAttributeInstance reachDist = entity.getAttribute(ForgeMod.REACH_DISTANCE.get());
+        double value = reachDist != null ? reachDist.getValue() : 5;
+        if (entity instanceof PlayerEntity && !((PlayerEntity) entity).isCreative()) {
+            value -= 0.5;
+        }
+        return value;
+    }
+    
     
     
     public static AxisAlignedBB scale(AxisAlignedBB aabb, double scale) {
@@ -1028,7 +1038,7 @@ public class MCUtil {
         }
     }
     
-    
+
     
     public static boolean hasAdvancement(ServerPlayerEntity player, ResourceLocation advancementPath) {
         Advancement advancement = player.server.getAdvancements().getAdvancement(advancementPath);
@@ -1041,14 +1051,20 @@ public class MCUtil {
     
     
     public static boolean isHandFree(LivingEntity entity, Hand hand) {
+        return areHandsFree(entity, hand);
+    }
+    
+    public static boolean areHandsFree(LivingEntity entity, Hand... hands) {
         if (entity.level.isClientSide() && entity.is(ClientUtil.getClientPlayer()) && ClientUtil.arePlayerHandsBusy()) {
             return false;
         }
-        if (hand == Hand.OFF_HAND && entity.getPassengers().stream()
-                    .anyMatch(passenger -> CocoJumboTurtleEntity.isCarriedTurtle(passenger, entity))) {
-            return false;
+        for (Hand hand : hands) {
+            if (!itemHandFree(entity.getItemInHand(hand))
+                    || hand == Hand.OFF_HAND && entity.getPassengers().stream().anyMatch(passenger -> CocoJumboTurtleEntity.isCarriedTurtle(passenger, entity))) {
+                return false;
+            }
         }
-        return itemHandFree(entity.getItemInHand(hand));
+        return true;
     }
     
     public static boolean itemHandFree(ItemStack item) {

@@ -72,7 +72,9 @@ public class BleedingEffect extends Effect implements IApplicableEffect {
         if (entity.getHealth() > entity.getMaxHealth()) {
             entity.setHealth(entity.getMaxHealth());
         }
-        
+    }
+    
+    public static void onAddedBleeding(LivingEntity entity, int pAmplifier) {
         if (!entity.level.isClientSide()) {
             IStandPower.getStandPowerOptional(entity).ifPresent(power -> {
                 if (ModStandsInit.CRAZY_DIAMOND_BLOOD_CUTTER.get().isUnlocked(power)) {

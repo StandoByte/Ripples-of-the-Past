@@ -27,7 +27,7 @@ public class StandBlockPunch implements IPunch {
     
     public StandBlockPunch(StandEntity stand, BlockPos targetPos, BlockState blockState, Direction face) {
         this.stand = stand;
-        this.blockPos = targetPos;
+        this.blockPos = targetPos.immutable();
         this.blockState = blockState;
         this.face = face;
     }

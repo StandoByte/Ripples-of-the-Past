@@ -15,6 +15,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.player.IPlayerAction;
 import com.github.standobyte.jojo.block.WoodenCoffinBlock;
+import com.github.standobyte.jojo.capability.entity.player.PlayerClientBroadcastedSettings;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -51,6 +52,8 @@ import net.minecraft.util.text.TranslationTextComponent;
 
 public class PlayerUtilCap {
     private final PlayerEntity player;
+    
+    private PlayerClientBroadcastedSettings broadcastedSettings = new PlayerClientBroadcastedSettings();
     
     public int knivesThrewTicks = 0;
     
@@ -124,6 +127,7 @@ public class PlayerUtilCap {
 
         this.metEntityTypes = old.metEntityTypes;
         this.geUIState.onPlayerClone(old.geUIState);
+        this.broadcastedSettings = old.broadcastedSettings;
         
         this.lastBedType = old.lastBedType;
         this.ticksNoSleep = old.ticksNoSleep;
@@ -167,6 +171,7 @@ public class PlayerUtilCap {
     }
     
     public void onTracking(ServerPlayerEntity tracking) {
+        broadcastedSettings.syncToTracking(player, tracking);
         PacketManager.sendToClient(new TrWalkmanEarbudsPacket(player.getId(), walkmanEarbuds), tracking);
         PacketManager.sendToClient(new TrPlayerVisualDetailPacket(player.getId(), ateInkPastaTicks), tracking);
     }
@@ -232,6 +237,10 @@ public class PlayerUtilCap {
     }
     
     
+    public PlayerClientBroadcastedSettings getBroadcastedSettings() {
+        return broadcastedSettings;
+    }
+    
     
     public void addDataForTSUnfreeze(Entity entity, Iterable<EntityDataManager.DataEntry<?>> newData) {
         Map<DataParameter<?>, EntityDataManager.DataEntry<?>> data = tsDelayedData.computeIfAbsent(entity, e -> new HashMap<>());
@@ -260,7 +269,7 @@ public class PlayerUtilCap {
     
     
     public void setContinuousAction(@Nullable ContinuousActionInstance<?, ?> action) {
-        continuousAction.ifPresent(ContinuousActionInstance::onStop);
+        continuousAction.ifPresent(ContinuousActionInstance::stopAction);
         if (action != null) {
             action.onStart();
         }
@@ -291,7 +300,7 @@ public class PlayerUtilCap {
         return continuousAction;
     }
     
-    public <T extends ContinuousActionInstance<T, P>, P extends IPower<P, ?>> Optional<T> getContinuousActionIfItIs(IPlayerAction<T, P> action) {
+    public <T extends ContinuousActionInstance<?, P>, P extends IPower<P, ?>> Optional<T> getContinuousActionIfItIs(IPlayerAction<T, P> action) {
         if (GeneralUtil.orElseFalse(continuousAction.map(ContinuousActionInstance::getAction), currentAction -> currentAction == action)) {
             return (Optional<T>) continuousAction;
         }

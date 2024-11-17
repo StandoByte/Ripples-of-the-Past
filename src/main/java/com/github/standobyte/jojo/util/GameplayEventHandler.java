@@ -18,7 +18,10 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.JojoModConfig.Common;
+import com.github.standobyte.jojo.action.non_stand.HamonPlantItemInfusion;
 import com.github.standobyte.jojo.action.non_stand.HamonRebuffOverdrive;
+import com.github.standobyte.jojo.action.non_stand.HamonRopeTrap;
+import com.github.standobyte.jojo.action.non_stand.HamonSnakeMuffler;
 import com.github.standobyte.jojo.action.non_stand.PillarmanUnnaturalAgility;
 import com.github.standobyte.jojo.action.non_stand.VampirismFreeze;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
@@ -35,7 +38,6 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
-import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.enchantment.GlovesSpeedEnchantment;
 import com.github.standobyte.jojo.entity.mob.CocoJumboTurtleEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -157,6 +159,7 @@ import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.IChunk;
 import net.minecraft.world.gen.feature.Feature;
 import net.minecraft.world.server.ServerChunkProvider;
 import net.minecraft.world.server.ServerWorld;
@@ -250,17 +253,6 @@ public class GameplayEventHandler {
                     }
                 }
             }
-            
-//            LazyOptional<PlayerUtilCap> liquidWalkingCap = player.getCapability(PlayerUtilCapProvider.CAPABILITY);
-//            if (!player.level.isClientSide() || player.isLocalPlayer()) {
-//                boolean liquidWalking = HamonUtil.liquidWalking(player);
-//                liquidWalkingCap.ifPresent(cap -> {
-//                    cap.setWaterWalking(liquidWalking);
-//                });
-//            }
-//            liquidWalkingCap.ifPresent(cap -> {
-//                cap.tickWaterWalking();
-//            });
             
             INonStandPower.getNonStandPowerOptional(player).ifPresent(power -> {
                 power.tick();
@@ -634,7 +626,7 @@ public class GameplayEventHandler {
         float dmgAmount = event.getAmount();
         if (GeneralUtil.orElseFalse(ContinuousActionInstance.getCurrentAction(entity), 
                 action -> action.cancelIncomingDamage(dmgSource, dmgAmount))
-                || HamonUtil.snakeMuffler(entity, dmgSource, dmgAmount)) {
+                || HamonSnakeMuffler.snakeMuffler(entity, dmgSource, dmgAmount)) {
             event.setCanceled(true);
         }
     }
@@ -729,12 +721,21 @@ public class GameplayEventHandler {
                 if (stand.isInvulnerableTo(dmgSource)) {
                     double standDurability = stand.getDurability();
                     if (standDurability > 0) {
-                        event.setAmount(Math.max(event.getAmount() - (float) standDurability / 2F, 0));
-                        NoKnockbackOnBlocking.setOneTickKbRes(stand);
                         stand.playAttackBlockSound();
+                        float reducedDamage = Math.max(event.getAmount() - (float) standDurability / 2F, 0);
+                        if (reducedDamage == 0) {
+                            event.setCanceled(true);
+                        }
+                        else {
+                            event.setAmount(reducedDamage);
+                        }
+                        NoKnockbackOnBlocking.setOneTickKbRes(stand);
                     }
                 }
             });
+        }
+        if (event.isCanceled()) {
+            return;
         }
         
         // block physical damage with hamon
@@ -828,14 +829,6 @@ public class GameplayEventHandler {
         for (PowerClassification powerClassification : PowerClassification.values()) {
             IPower.getPowerOptional(target, powerClassification).ifPresent(power -> 
             power.onUserGettingAttacked(dmgSource, dmgAmount));
-        }
-    }
-    
-    @SubscribeEvent
-    public static void clNoBobOnHurt(LivingAttackEvent event) {
-        LivingEntity target = event.getEntityLiving();
-        if (target.level.isClientSide() && target == ClientUtil.getClientPlayer()) {
-            NoKnockbackOnBlocking.onClientPlayerDamage(target);
         }
     }
 
@@ -941,10 +934,10 @@ public class GameplayEventHandler {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onPotionAdded(PotionAddedEvent event) {
-        EntityStandType.giveEffectSharedWithStand(event.getEntityLiving(), event.getPotionEffect());
-        
-        Entity entity = event.getEntity();
+        LivingEntity entity = event.getEntityLiving();
         EffectInstance effectInstance = event.getPotionEffect();
+        EntityStandType.giveEffectSharedWithStand(entity, effectInstance);
+        
         if (!entity.level.isClientSide()) {
             if (ModStatusEffects.isEffectTracked(effectInstance.getEffect())) {
                 ((ServerChunkProvider) entity.getCommandSenderWorld().getChunkSource()).broadcast(entity, 
@@ -957,6 +950,13 @@ public class GameplayEventHandler {
                 }
                 else if (effect == ModStatusEffects.SENSORY_OVERLOAD.get()) {
                     entity.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(PlayerUtilCap::setSendLifeshotNextTick);
+                }
+            }
+            if (effectInstance.getEffect() == ModStatusEffects.BLEEDING.get()) {
+                int effectLvl = effectInstance.getAmplifier();
+                EffectInstance prevEffect = entity.getEffect(effectInstance.getEffect());
+                if (prevEffect == null || prevEffect.getAmplifier() < effectLvl) {
+                    BleedingEffect.onAddedBleeding(entity, effectLvl);
                 }
             }
         }
@@ -1063,7 +1063,7 @@ public class GameplayEventHandler {
                                 event.setCanceled(true);
                                 event.setCancellationResult(ActionResultType.SUCCESS);
                                 if (!world.isClientSide()) {
-                                    HamonUtil.ropeTrap(player, pos, blockState, world, power, hamon);
+                                    HamonRopeTrap.ropeTrap(player, pos, blockState, world, power, hamon);
                                 }
                             }
                         });
@@ -1252,7 +1252,7 @@ public class GameplayEventHandler {
     
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onProjectileShot(EntityJoinWorldEvent event) {
-        HamonUtil.chargeShotProjectile(event.getEntity(), event.getWorld());
+        HamonUtil.chargeNewEntity(event.getEntity(), event.getWorld());
     }
     
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -1277,7 +1277,7 @@ public class GameplayEventHandler {
     
     @SubscribeEvent(priority = EventPriority.LOW)
     public static void onItemThrown(ItemTossEvent event) {
-        HamonUtil.chargeItemEntity(event.getPlayer(), event.getEntityItem());
+        HamonPlantItemInfusion.chargeItemEntity(event.getPlayer(), event.getEntityItem());
     }
     
     @SubscribeEvent(priority = EventPriority.HIGHEST)
@@ -1496,10 +1496,25 @@ public class GameplayEventHandler {
     
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onBlockBreak(BlockEvent.BreakEvent event) {
-        if (!event.getWorld().isClientSide() && event.getPlayer().abilities.instabuild) {
-            CrazyDiamondRestoreTerrain.rememberBrokenBlock((World) event.getWorld(), 
-                    event.getPos(), event.getState(), Optional.ofNullable(event.getWorld().getBlockEntity(event.getPos())), 
-                    Collections.emptyList());
+        if (!event.getWorld().isClientSide()) {
+            World world = (World) event.getWorld();
+            BlockPos pos = event.getPos();
+            
+            int xp = event.getExpToDrop();
+            if (xp > 0) {
+                IChunk chunk = world.getChunk(pos);
+                if (chunk instanceof Chunk) {
+                    ((Chunk) chunk).getCapability(ChunkCapProvider.CAPABILITY).ifPresent(cap -> {
+                        cap.setDroppedXp(pos, xp);
+                    });
+                }
+            }
+            
+            if (event.getPlayer().abilities.instabuild) {
+                CrazyDiamondRestoreTerrain.rememberBrokenBlock(world, 
+                        pos, event.getState(), Optional.ofNullable(world.getBlockEntity(pos)), 
+                        Collections.emptyList());
+            }
         }
     }
     

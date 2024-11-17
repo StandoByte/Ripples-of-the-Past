@@ -80,7 +80,7 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
         Instance sendoWaveKick = new Instance(user, userCap, power, this);
         
         float energyCost = Math.min(getEnergyCost(power, ActionTarget.EMPTY), power.getEnergy());
-        float efficiency = power.getTypeSpecificData(ModPowers.HAMON.get()).get().getActionEfficiency(energyCost, true);
+        float efficiency = power.getTypeSpecificData(ModPowers.HAMON.get()).get().getActionEfficiency(energyCost, true, getUnlockingSkill());
         sendoWaveKick.setEnergySpent(energyCost * efficiency);
         
         return sendoWaveKick;
@@ -88,7 +88,7 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
     
     
     
-    public static class Instance extends ContinuousActionInstance<Instance, INonStandPower> {
+    public static class Instance extends ContinuousActionInstance<HamonSendoWaveKick, INonStandPower> {
         private int positionWaitingTimer = 0;
         private boolean gavePoints = false;
         private float energySpent;
@@ -103,11 +103,6 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
         
         public void setEnergySpent(float energy) {
             this.energySpent = energy;
-        }
-
-        @Override
-        protected Instance getThis() {
-            return this;
         }
         
         public float getInitialYRot() {
@@ -181,15 +176,11 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
         }
         
         @Override
-        public boolean stopAction() {
-            if (super.stopAction()) {
-                if (user.level.isClientSide() && user instanceof PlayerEntity) {
-                    ModPlayerAnimations.sendoWaveKick.setAnimEnabled((PlayerEntity) user, false);
-                }
-                return true;
+        public void onStop() {
+            super.onStop();
+            if (user.level.isClientSide() && user instanceof PlayerEntity) {
+                ModPlayerAnimations.sendoWaveKick.setAnimEnabled((PlayerEntity) user, false);
             }
-            
-            return false;
         }
         
     }

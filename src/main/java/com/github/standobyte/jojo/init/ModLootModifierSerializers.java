@@ -2,7 +2,6 @@ package com.github.standobyte.jojo.init;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.util.mc.loot.AdditionalSingleItemLootModifier;
-import com.github.standobyte.jojo.util.mc.loot.BlockStateLootTracker;
 import com.github.standobyte.jojo.util.mc.loot.ReplaceItemNbtModifier;
 
 import net.minecraftforge.common.loot.GlobalLootModifierSerializer;
@@ -19,7 +18,4 @@ public class ModLootModifierSerializers {
     
     public static final RegistryObject<ReplaceItemNbtModifier.Serializer> REPLACE_ITEM_NBT = LOOT_MODIFIER_SERIALIZERS
             .register("replace_item_nbt", ReplaceItemNbtModifier.Serializer::new);
-    
-    public static final RegistryObject<BlockStateLootTracker.Serializer> BLOCK_LOOT_TRACKER = LOOT_MODIFIER_SERIALIZERS
-            .register("block_loot_tracker", BlockStateLootTracker.Serializer::new);
 }

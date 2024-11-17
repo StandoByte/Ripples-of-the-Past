@@ -27,13 +27,10 @@ public interface INonStandPower extends IPower<INonStandPower, NonStandPowerType
     <T extends NonStandPowerType<D>, D extends TypeSpecificData> Optional<D> getTypeSpecificData(@Nullable T requiredType);
     
     public static LazyOptional<INonStandPower> getNonStandPowerOptional(LivingEntity entity) {
-        if (entity instanceof PlayerEntity) {
-            return entity.getCapability(NonStandCapProvider.NON_STAND_CAP);
-        }
         if (entity instanceof IMobPowerUser) {
             return LazyOptional.of(() -> ((IMobPowerUser) entity).getPower());
         }
-        return LazyOptional.empty();
+        return entity.getCapability(NonStandCapProvider.NON_STAND_CAP);
     }
     
     public static INonStandPower getPlayerNonStandPower(PlayerEntity player) {

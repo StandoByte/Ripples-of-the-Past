@@ -59,10 +59,9 @@ public class HamonStatsTabGui extends HamonTabGui {
     private int strengthStatY;
     private int controlStatY;
     private int breathingStatY;
-    private int exercises1Y;
-    private int exercises2Y;
+    private int[] exerciseBarsY = new int[(Exercise.values().length + 1) / 2];
     private int exercisesAvgY;
-    private int exercises3Y;
+    private int exercises4Y;
 
     HamonStatsTabGui(Minecraft minecraft, HamonScreen screen, String title) {
         super(minecraft, screen, title, -1, 1);
@@ -166,19 +165,23 @@ public class HamonStatsTabGui extends HamonTabGui {
         }
 
         // exercise bars
-        drawExerciseBar(this, matrixStack, intScrollX + 15, exercises1Y, screen.hamon, Exercise.MINING, 1.0F, true);
-        drawExerciseBar(this, matrixStack, intScrollX + 111, exercises1Y, screen.hamon, Exercise.RUNNING, 1.0F, true);
-        drawExerciseBar(this, matrixStack, intScrollX + 15, exercises2Y, screen.hamon, Exercise.SWIMMING, 1.0F, true);
-        drawExerciseBar(this, matrixStack, intScrollX + 111, exercises2Y, screen.hamon, Exercise.MEDITATION, 1.0F, true);
+        drawExerciseBar(this, matrixStack, intScrollX + 15, exerciseBarsY[0], screen.hamon, Exercise.MINING, 1.0F, true);
+        drawExerciseBar(this, matrixStack, intScrollX + 111, exerciseBarsY[0], screen.hamon, Exercise.RUNNING, 1.0F, true);
+        drawExerciseBar(this, matrixStack, intScrollX + 15, exerciseBarsY[1], screen.hamon, Exercise.SWIMMING, 1.0F, true);
+        drawExerciseBar(this, matrixStack, intScrollX + 111, exerciseBarsY[1], screen.hamon, Exercise.MEDITATION, 1.0F, true);
+        if (!Exercise.TMP_HAS_PLACEHOLDERS) {
+            drawExerciseBar(this, matrixStack, intScrollX + 15, exerciseBarsY[2], screen.hamon, Exercise.PLACEHOLDER_1, 1.0F, true);
+            drawExerciseBar(this, matrixStack, intScrollX + 111, exerciseBarsY[2], screen.hamon, Exercise.PLACEHOLDER_2, 1.0F, true);
+        }
         if (screen.mouseInsideWindow(
                 mouseX + screen.windowPosX() + WINDOW_THIN_BORDER, 
                 mouseY + screen.windowPosY() + WINDOW_UPPER_BORDER)
                 && mouseAtMeditationBar(mouseX, mouseY)) {
-            ClientUtil.fillSingleRect(intScrollX + 112, exercises2Y + 1, 90, 5, 255, 255, 255, 79);
+            ClientUtil.fillSingleRect(intScrollX + 112, exerciseBarsY[1] + 1, 90, 5, 255, 255, 255, 79);
         }
 
         // total exercises bar
-        int exercisedCompleted = screen.hamon.getCompleteExercisesCount();
+        int exercisedCompleted = Math.min(screen.hamon.getCompleteExercisesCount(), HamonData.MAX_EXERCISES_NEEDED);
         float maxIncompleteExercise = screen.hamon.getMaxIncompleteExercise();
         int length = 48 * exercisedCompleted;
         blit(matrixStack, intScrollX + 13,          exercisesAvgY + 1,  1,          234,  length,       5);
@@ -196,7 +199,7 @@ public class HamonStatsTabGui extends HamonTabGui {
         // all exercises checkmark
         matrixStack.pushPose();
         matrixStack.scale(0.5F, 0.5F, 0.5F);
-        if (!screen.hamon.allExercisesCompleted()) {
+        if (!screen.hamon.has4ExercisesBonus()) {
             RenderSystem.color4f(0.0F, 0.0F, 0.0F, 1.0F);
         }
         blit(matrixStack, (intScrollX + 198) * 2, (exercisesAvgY - 1) * 2, 230, 188, 16, 16);
@@ -265,13 +268,19 @@ public class HamonStatsTabGui extends HamonTabGui {
         }
         
         textY += 11;
-        exercises1Y = textY;
-        AbstractGui.drawCenteredString(matrixStack, minecraft.font, new TranslationTextComponent("hamon.mining_exercise"), intScrollX + 60, textY, 0xFFFFFF);
-        AbstractGui.drawCenteredString(matrixStack, minecraft.font, new TranslationTextComponent("hamon.running_exercise"), intScrollX + 156, textY, 0xFFFFFF);
+        exerciseBarsY[0] = textY;
+        AbstractGui.drawCenteredString(matrixStack, minecraft.font, Exercise.MINING.getName(), intScrollX + 60, textY, 0xFFFFFF);
+        AbstractGui.drawCenteredString(matrixStack, minecraft.font, Exercise.RUNNING.getName(), intScrollX + 156, textY, 0xFFFFFF);
         textY += 9;
-        exercises2Y = textY;
-        AbstractGui.drawCenteredString(matrixStack, minecraft.font, new TranslationTextComponent("hamon.swimming_exercise"), intScrollX + 60, textY, 0xFFFFFF);
-        AbstractGui.drawCenteredString(matrixStack, minecraft.font, new TranslationTextComponent("hamon.meditation"), intScrollX + 156, textY, 0xFFFFFF);
+        exerciseBarsY[1] = textY;
+        AbstractGui.drawCenteredString(matrixStack, minecraft.font, Exercise.SWIMMING.getName(), intScrollX + 60, textY, 0xFFFFFF);
+        AbstractGui.drawCenteredString(matrixStack, minecraft.font, Exercise.MEDITATION.getName(), intScrollX + 156, textY, 0xFFFFFF);
+        if (!Exercise.TMP_HAS_PLACEHOLDERS) {
+            textY += 9;
+            exerciseBarsY[2] = textY;
+            AbstractGui.drawCenteredString(matrixStack, minecraft.font, Exercise.PLACEHOLDER_1.getName(), intScrollX + 60, textY, 0xFFFFFF);
+            AbstractGui.drawCenteredString(matrixStack, minecraft.font, Exercise.PLACEHOLDER_2.getName(), intScrollX + 156, textY, 0xFFFFFF);
+        }
         
         textY += 11;
         exercisesAvgY = textY;
@@ -291,7 +300,7 @@ public class HamonStatsTabGui extends HamonTabGui {
         }
         
         textY += 11;
-        exercises3Y = textY;
+        exercises4Y = textY;
         for (int i = 0; i < exercisesDescLines.size(); i++) {
             textY += minecraft.font.lineHeight;
             minecraft.font.draw(matrixStack, exercisesDescLines.get(i), (float) textX, (float) textY, 0xFFFFFF);
@@ -334,7 +343,7 @@ public class HamonStatsTabGui extends HamonTabGui {
     @Override
     boolean mouseClicked(double mouseX, double mouseY, int mouseButton, boolean mouseInsideWindow) {
         if (mouseInsideWindow && mouseAtMeditationBar((int) mouseX, (int) mouseY)) {
-            PacketManager.sendToServer(new ClHamonMeditationPacket(!screen.hamon.isMeditating()));
+            PacketManager.sendToServer(new ClHamonMeditationPacket());
             screen.onClose();
         }
         return false;
@@ -411,23 +420,22 @@ public class HamonStatsTabGui extends HamonTabGui {
         
         else if (mouseX >= 12 && mouseX < 207 && mouseY > exercisesAvgY && mouseY < exercisesAvgY + 8) {
             ITextComponent totalExercises1 = new TranslationTextComponent("hamon.exercise.all.count", 
-                    screen.hamon.getCompleteExercisesCount(), Exercise.values().length);
+                    screen.hamon.getCompleteExercisesCount(), HamonData.MAX_EXERCISES_NEEDED);
             
             ITextComponent totalExercises2 = null;
             if (breathingIncrease > 0) {
-                ITextComponent incWord = new TranslationTextComponent("hamon.exercise.all.tooltip_green").withStyle(TextFormatting.GREEN);
                 if (breathingBonus > 0) {
                     totalExercises2 = new TranslationTextComponent("hamon.exercise.all.day_end_increase.bonus", 
-                            incWord, decimalFormat.format(breathingIncrease - breathingBonus), decimalFormat.format(breathingBonus));
+                            decimalFormat.format(breathingIncrease - breathingBonus), decimalFormat.format(breathingBonus));
                 }
                 else {
                     totalExercises2 = new TranslationTextComponent("hamon.exercise.all.day_end_increase", 
-                            incWord, decimalFormat.format(breathingIncrease));
+                            decimalFormat.format(breathingIncrease));
                 }
             }
             else if (breathingIncrease < 0) {
                 totalExercises2 = new TranslationTextComponent("hamon.exercise.all.day_end_decrease", 
-                        new TranslationTextComponent("hamon.exercise.all.tooltip_red").withStyle(TextFormatting.RED), decimalFormat.format(-breathingIncrease));
+                        decimalFormat.format(-breathingIncrease));
             }
             else {
                 if (screen.hamon.getCanSkipTrainingDays() > 0 && screen.hamon.breathingCanGoDown(minecraft.player)) {
@@ -445,8 +453,9 @@ public class HamonStatsTabGui extends HamonTabGui {
         
         else {
             for (HamonData.Exercise exercise : HamonData.Exercise.values()) {
+                if (HamonData.Exercise.TMP_HAS_PLACEHOLDERS && exercise == HamonData.Exercise.PLACEHOLDER_1) break;
                 int x = intScrollX + 100 + exercise.ordinal() % 2 * 96;
-                int y = (exercise.ordinal() < 2 ? exercises1Y : exercises2Y) - 1;
+                int y = exerciseBarsY[exercise.ordinal() / 2] - 1;
                 if (mouseX >= x && mouseX < x + 8 && mouseY >= y && mouseY < y + 8) {
                     screen.renderTooltip(matrixStack, completedExerciseTooltip(exercise), mouseX, mouseY);
                     return;
@@ -458,7 +467,7 @@ public class HamonStatsTabGui extends HamonTabGui {
             }
         }
         
-        int exercisesDescLine = (mouseY - exercises3Y) / minecraft.font.lineHeight - 1;
+        int exercisesDescLine = (mouseY - exercises4Y) / minecraft.font.lineHeight - 1;
         boolean maskNameTooltip = false;
         if (exercisesDescLine >= 0 && exercisesDescLine < exercisesDescLines.size()) {
             Style style = minecraft.font.getSplitter().componentStyleAtWidth(exercisesDescLines.get(exercisesDescLine), mouseX - WINDOW_THIN_BORDER);
@@ -488,9 +497,9 @@ public class HamonStatsTabGui extends HamonTabGui {
         
         else {
             tooltip1Key = "hamon.exercise.full_completion_hint";
-            hasBuff = screen.hamon.allExercisesCompleted();
+            hasBuff = screen.hamon.has4ExercisesBonus();
             tooltip2.add(new TranslationTextComponent("hamon.exercise.full_completion_buff", 
-                    PERCENTAGE_FORMAT.format((HamonData.ALL_EXERCISES_EFFICIENCY_MULTIPLIER - 1F) * 100F), 
+                    PERCENTAGE_FORMAT.format(HamonData.ALL_EXERCISES_EFFICIENCY_ADD_MULTIPLIER * 100F), 
                     new TranslationTextComponent("hamon.exercise.completion_buff_hint2")));
             Collections.addAll(tooltip2,
                     new StringTextComponent(" "),
@@ -504,7 +513,7 @@ public class HamonStatsTabGui extends HamonTabGui {
             });
         }
         else {
-            tooltip.addAll(minecraft.font.split(new TranslationTextComponent(tooltip1Key), 150));
+            tooltip.addAll(minecraft.font.split(new TranslationTextComponent(tooltip1Key, HamonData.MAX_EXERCISES_NEEDED), 150));
             tooltip2.forEach(text -> {
                 text.withStyle(TextFormatting.GRAY, TextFormatting.ITALIC);
                 tooltip.addAll(minecraft.font.split(text, 150));
@@ -515,7 +524,7 @@ public class HamonStatsTabGui extends HamonTabGui {
     
     private boolean mouseAtMeditationBar(int mouseX, int mouseY) {
         return mouseX > 108 && mouseX <= 203 && 
-                mouseY > exercises2Y && mouseY <= exercises2Y + 7;
+                mouseY > exerciseBarsY[1] && mouseY <= exerciseBarsY[1] + 7;
     }
 
     @Override

@@ -7,6 +7,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.github.standobyte.jojo.action.non_stand.HamonWallClimbing2;
+import com.github.standobyte.jojo.util.mod.IPlayerLeap;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.CreatureAttribute;
@@ -17,10 +18,15 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 @Mixin(PlayerEntity.class)
-public abstract class PlayerEntityMixin extends LivingEntityMixin {
+public abstract class PlayerEntityMixin extends LivingEntityMixin implements IPlayerLeap {
     
     protected PlayerEntityMixin(EntityType<? extends LivingEntity> type, World world) {
         super(type, world);
+    }
+
+    @Override
+    public void jojoMixinTick(CallbackInfo ci) {
+        leapFlagTick();
     }
     
     @Override
@@ -38,4 +44,27 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin {
         }
     }
     
+
+    private boolean isDoingLeap;
+    @Override
+    public void setIsDoingLeap(boolean isDoingLeap) {
+        this.isDoingLeap = isDoingLeap;
+    }
+    
+    @Override
+    public boolean isDoingLeap() {
+        return isDoingLeap;
+    }
+    
+//    private boolean isDoingDash = false;
+    
+    @Inject(method = "isStayingOnGroundSurface", at = @At("HEAD"), cancellable = true)
+    public void jojoBackOffFromEdgeFlag(CallbackInfoReturnable<Boolean> ci) {
+        if (isDoingLeap) {
+            ci.setReturnValue(false);
+        }
+//        else if (isDoingDash) {
+//            ci.setReturnValue(true);
+//        }
+    }
 }

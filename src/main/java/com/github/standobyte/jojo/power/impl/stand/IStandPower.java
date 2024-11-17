@@ -86,13 +86,10 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     void onDash();
     
     public static LazyOptional<IStandPower> getStandPowerOptional(LivingEntity entity) {
-        if (entity instanceof PlayerEntity) {
-            return entity.getCapability(StandCapProvider.STAND_CAP);
-        }
         if (entity instanceof IMobStandUser) {
             return LazyOptional.of(() -> ((IMobStandUser) entity).getStandPower());
         }
-        return LazyOptional.empty();
+        return entity.getCapability(StandCapProvider.STAND_CAP);
     }
     
     public static IStandPower getPlayerStandPower(PlayerEntity player) {

@@ -322,7 +322,7 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
                 int color = parseColor(storyPartDefObj.get("color"));
                 name.withStyle(ClientUtil.textColor(color));
                 if (storyPartDefObj.has("sprite")) {
-                    name = new JojoTextComponentWrapper(name).setStoryPartSprite(new ResourceLocation(storyPartDefObj.get("sprite").getAsString()));
+                    name = new JojoTextComponentWrapper(name).addSprite(new ResourceLocation(storyPartDefObj.get("sprite").getAsString()));
                 }
                 return name;
             }

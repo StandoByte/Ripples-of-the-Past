@@ -46,7 +46,7 @@ public class StandStatsRenderer {
      * "∅" - 0
      */
     public static List<String> STAT_LETTERS = Util.make(new ArrayList<>(), list -> {
-        Collections.addAll(list, "∅", "E", "D", "C", "B", "A");
+        Collections.addAll(list, "∅", "E", "D", "C", "B", "A", "A", "S");
     });
     public static final String REFERENCE_MARK = "\u203B";
     

@@ -16,6 +16,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.config.ActionConfigField;
 import com.github.standobyte.jojo.action.config.ActionConfigSerialized;
+import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.BlitFloat;
@@ -135,6 +136,9 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     
     public ActionConditionResult checkConditions(LivingEntity user, P power, ActionTarget target) {
+        if (!ContinuousActionInstance.getCurrentAction(user).map(this::canBeUsedDuringPlayerAction).orElse(true)) {
+            return ActionConditionResult.NEGATIVE;
+        }
         ActionConditionResult itemCheck = checkHeldItems(user, power);
         if (!itemCheck.isPositive()) {
             return itemCheck;
@@ -223,6 +227,10 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, P power, ActionTarget target) {
         return ActionConditionResult.POSITIVE;
+    }
+    
+    protected boolean canBeUsedDuringPlayerAction(ContinuousActionInstance<?, ?> curPlayerAction) {
+        return false;
     }
     
     public abstract boolean isUnlocked(P power);
