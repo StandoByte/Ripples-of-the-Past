@@ -71,10 +71,12 @@ public class EnergyRippleLayer<T extends LivingEntity, M extends BipedModel<T>> 
         int particles = MathUtil.fractionRandomInc(handSparkIntensity * timeDelta);
         if (particles > 0) {
             float controlLevel = hamon.getHamonControlLevelRatio();
+            Optional<ContinuousActionInstance<?, ?>> curPlayerAction = ContinuousActionInstance.getCurrentAction(entity);
             
-            // hand sparks (wall climbing)
+            // hand sparks (wall climbing, hamon shock)
             ParticleType<?> particle = null;
-            if (LivingWallClimbing.getHandler(entity).map(LivingWallClimbing::isHamon).orElse(false)) {
+            if (LivingWallClimbing.getHandler(entity).map(LivingWallClimbing::isHamon).orElse(false)
+                    || curPlayerAction.map(action -> action.getAction() == ModHamonActions.HAMON_SHOCK.get()).orElse(false)) {
                 particle = ModParticles.HAMON_SPARK.get();
             }
             if (particle != null) {
@@ -90,7 +92,10 @@ public class EnergyRippleLayer<T extends LivingEntity, M extends BipedModel<T>> 
             }
             
             // elbow sparks (rebuff overdrive)
-            HamonRebuffOverdrive.getCurRebuff(entity).ifPresent(rebuff -> {
+            curPlayerAction
+            .filter(action -> action.getAction() == ModHamonActions.JOSEPH_REBUFF_OVERDRIVE.get())
+            .map(action -> (HamonRebuffOverdrive.Instance) action)
+            .ifPresent(rebuff -> {
                 if (rebuff.addSparksThisTick()) {
                     int rebuffParticles = MathUtil.fractionRandomInc(12 + hamon.getHamonStrengthLevelRatio() * 12 * timeDelta);
                     for (HandSide hand : HandSide.values()) {

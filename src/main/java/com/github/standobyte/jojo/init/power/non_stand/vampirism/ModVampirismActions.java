@@ -22,7 +22,7 @@ public class ModVampirismActions {
     public static void loadRegistryObjects() {}
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_CLAW_LACERATE = ACTIONS.register("vampirism_claw_lacerate", 
-            () -> new VampirismClawLacerate(new NonStandAction.Builder().needsFreeMainHand().swingHand().energyCost(45F).cooldown(40)));
+            () -> new VampirismClawLacerate(new NonStandAction.Builder().needsFreeMainHand().energyCost(45F)));
     
     public static final RegistryObject<VampirismAction> VAMPIRISM_BLOOD_DRAIN = ACTIONS.register("vampirism_blood_drain", 
             () -> new VampirismBloodDrain(new NonStandAction.Builder().needsFreeMainHand()));

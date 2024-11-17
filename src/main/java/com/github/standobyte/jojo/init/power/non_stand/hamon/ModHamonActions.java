@@ -49,7 +49,8 @@ public class ModHamonActions {
                     .needsFreeMainHand().swingHand()));
     
     public static final RegistryObject<HamonAction> HAMON_BEAT = ACTIONS.register("hamon_overdrive_beat", 
-            () -> new HamonOverdriveBeat(new HamonAction.Builder().energyCost(1500F).shiftVariationOf(HAMON_OVERDRIVE)));
+            () -> new HamonOverdriveBeat(new HamonAction.Builder().energyCost(1500F).heldWalkSpeed(0.5f)
+                    .needsFreeOffHand().shiftVariationOf(HAMON_OVERDRIVE)));
    
    public static final RegistryObject<HamonAction> HAMON_SENDO_OVERDRIVE = ACTIONS.register("hamon_sendo_overdrive", 
            () -> new HamonSendoOverdrive(new HamonAction.Builder().energyCost(900F)
@@ -61,7 +62,7 @@ public class ModHamonActions {
                     .needsFreeMainHand().swingHand()));
     
    public static final RegistryObject<HamonAction> HAMON_SUNLIGHT_YELLOW_OVERDRIVE = ACTIONS.register("hamon_sunlight_yellow_overdrive", 
-           () -> new HamonSunlightYellowOverdrive(new HamonAction.Builder().holdToFire(10, true).holdType(40).heldWalkSpeed(0)
+           () -> new HamonSunlightYellowOverdrive(new HamonAction.Builder().holdToFire(10, true).holdType(40).heldWalkSpeed(0).needsFreeMainHand()
                    .shout(ModHamonSkills.CHARACTER_JONATHAN, ModSounds.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE)
                    .shout(ModHamonSkills.CHARACTER_ZEPPELI, ModSounds.ZEPPELI_SUNLIGHT_YELLOW_OVERDRIVE)
                    .shout(ModHamonSkills.CHARACTER_JOSEPH, ModSounds.JOSEPH_SUNLIGHT_YELLOW_OVERDRIVE)
@@ -118,7 +119,7 @@ public class ModHamonActions {
             () -> new HamonHypnosis(new HamonAction.Builder().holdToFire(60, false).holdEnergyCost(15)));
     
     public static final RegistryObject<HamonAction> HAMON_SHOCK = ACTIONS.register("hamon_shock", 
-            () -> new HamonShock(new HamonAction.Builder().holdToFire(15, false).holdEnergyCost(180)));
+            () -> new HamonShock(new HamonAction.Builder().heldWalkSpeed(0)));
     
     
     
@@ -150,8 +151,8 @@ public class ModHamonActions {
     
     
     public static final RegistryObject<HamonAction> JONATHAN_SCARLET_OVERDRIVE = ACTIONS.register("jonathan_scarlet_overdrive", 
-            () -> new HamonScarletOverdrive(new HamonAction.Builder().needsFreeMainHand()
-                    .holdToFire(20, true).holdType(100).swingHand().shout(ModSounds.JONATHAN_SCARLET_OVERDRIVE)));
+            () -> new HamonScarletOverdrive(new HamonAction.Builder().holdToFire(8, true).holdType(32).heldWalkSpeed(0).needsFreeOffHand()
+                    .shout(ModSounds.JONATHAN_SCARLET_OVERDRIVE)));
     
     public static final RegistryObject<HamonAction> JONATHAN_METAL_SILVER_OVERDRIVE = ACTIONS.register("jonathan_metal_silver_overdrive", 
             () -> new HamonMetalSilverOverdrive(new HamonAction.Builder().energyCost(1000).swingHand().needsFreeMainHand()

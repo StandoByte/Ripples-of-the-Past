@@ -822,7 +822,7 @@
  "hamonSkill.hypnosis.name": "動物催眠",
  "hamonSkill.hypnosis.desc": "暫時馴服可馴服的動物。",
  "hamonSkill.hamon_shock.name": "波紋衝擊",
- "hamonSkill.hamon_shock.desc": "將波紋直接施加到生物的頭部擊暈，短時間內喪失行動能力。",
+ "hamonSkill.hamon_shock.desc": "將波紋直接施加到生物的頭部擊暈，短時間內喪失行動能力。 The shock wears off if the target takes damage.",
  "hamonSkill.hamon_spread.name": "波紋擴散",
  "hamonSkill.hamon_spread.desc": "當玩家用波紋攻擊不死生物、節肢生物等敵對生物時，它就會持續在對手的身體中擴散，造成額外的傷害。",
  
@@ -836,7 +836,7 @@
  "hamonSkill.natural_talent.name": "天賦",
  "hamonSkill.natural_talent.desc": "你的波紋訓練速度變成兩倍快。",
  "hamonSkill.scarlet_overdrive.name": "猩紅色波紋疾走",
- "hamonSkill.scarlet_overdrive.desc": "一種特殊類型的波紋攻擊，可造成額外波紋傷害並點燃目標",
+  "hamonSkill.scarlet_overdrive.desc": "A special type of Sunlight Yellow Overdrive attack that sets the target on fire.",
  "hamonSkill.metal_silver_overdrive.name": "銀白色波紋疾走",
  "hamonSkill.metal_silver_overdrive.desc": "你可以在武器和工具上纏繞波紋進行攻擊，可造成額外的波紋傷害",
  "hamonSkill.overdrive_barrage.name": "波紋疾走連打",

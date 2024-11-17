@@ -1,27 +1,98 @@
 package com.github.standobyte.jojo.action.non_stand;
 
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
+import com.github.standobyte.jojo.action.player.IPlayerAction;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
+import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.Hand;
 import net.minecraft.world.World;
 
-public class PillarmanHeavyPunch extends PillarmanAction {
+public class PillarmanHeavyPunch extends PillarmanAction implements IPlayerAction<PillarmanHeavyPunch.Instance, INonStandPower> {
 
     public PillarmanHeavyPunch(PillarmanAction.Builder builder) {
-        super(builder.withUserPunch());
-        stage = 1;
+        super(builder);
     }
     
-    @Override
-    public TargetRequirement getTargetRequirement() {
-        return TargetRequirement.ANY;
-    }
     
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
-    	VampirismClawLacerate.punchPerform(world, user, power, target, ModSounds.HAMON_SYO_PUNCH.get(), 1.5F, 0.8F); // TODO separate sound event
+        if (!world.isClientSide()) {
+            setPlayerAction(user, power);
+        }
+    }
+    
+    @Override
+    public PillarmanHeavyPunch.Instance createContinuousActionInstance(
+            LivingEntity user, PlayerUtilCap userCap, INonStandPower power) {
+        if (user.level.isClientSide() && user instanceof PlayerEntity) {
+            ModPlayerAnimations.pillarManPunch.setAnimEnabled((PlayerEntity) user, true);
+        }
+        return new Instance(user, userCap, power, this);
+    }
+    
+    
+    @Override
+    public void setCooldownOnUse(INonStandPower power) {}
+    
+    @Override
+    protected void consumeEnergy(World world, LivingEntity user, INonStandPower power, ActionTarget target) {}
+    
+    
+    public static class Instance extends ContinuousActionInstance<PillarmanHeavyPunch, INonStandPower> {
+        
+        public Instance(LivingEntity user, PlayerUtilCap userCap, 
+                INonStandPower playerPower, PillarmanHeavyPunch action) {
+            super(user, userCap, playerPower, action);
+        }
+        
+        @Override
+        public void playerTick() {
+            switch (getTick()) {
+            case 2:
+                if (user.level.isClientSide()) {
+                    user.level.playSound(ClientUtil.getClientPlayer(), user.getX(), user.getEyeY(), user.getZ(), 
+                            ModSounds.HAMON_SYO_SWING.get(), user.getSoundSource(), 1.0f, 1.25f); // TODO separate sound event
+                    user.swing(Hand.MAIN_HAND, true);
+                }
+                break;
+            case 5:
+                if (!user.level.isClientSide()) {
+                    ActionTarget target = playerPower.getMouseTarget();
+                    VampirismClawLacerate.punchPerform(user.level, user, playerPower, target, ModSounds.THE_WORLD_PUNCH_HEAVY_ENTITY.get(), 1.2F, 0.8F); // TODO separate sound event
+                }
+                break;
+            case 8:
+                stopAction();
+                break;
+            }
+        }
+        
+        @Override
+        public boolean updateTarget() {
+            return true;
+        }
+        
+        
+        @Override
+        public float getWalkSpeed() {
+            return 0.5f;
+        }
+        
+        @Override
+        public void onStop() {
+            super.onStop();
+            if (user.level.isClientSide() && user instanceof PlayerEntity) {
+                ModPlayerAnimations.pillarManPunch.setAnimEnabled((PlayerEntity) user, false);
+            }
+        }
+        
     }
 
 }

@@ -66,7 +66,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     private final float heldWalkSpeed;
     private final int cooldownTechnical;
     protected final int cooldown;
-    private final boolean needsFreeMainHand;
+    public final boolean needsFreeMainHand;
+    public final boolean needsFreeOffHand;
     private final boolean ignoresPerformerStun;
     private final boolean swingHand;
     private final boolean withUserPunch;
@@ -84,6 +85,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         this.cooldownTechnical = builder.cooldownTechnical;
         this.cooldown = builder.cooldownAdditional;
         this.needsFreeMainHand = builder.needsFreeMainHand;
+        this.needsFreeOffHand = builder.needsFreeOffHand;
         this.ignoresPerformerStun = builder.ignoresPerformerStun;
         this.swingHand = builder.swingHand;
         this.withUserPunch = builder.withUserPunch;
@@ -215,7 +217,13 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     public abstract float getCostToRender(P power, ActionTarget target);
     
     protected ActionConditionResult checkHeldItems(LivingEntity user, P power) {
+        if (needsFreeMainHand && needsFreeOffHand && !MCUtil.areHandsFree(user, Hand.MAIN_HAND, Hand.OFF_HAND)) {
+            return conditionMessage("hands");
+        }
         if (needsFreeMainHand && !MCUtil.isHandFree(user, Hand.MAIN_HAND)) {
+            return conditionMessage("hand");
+        }
+        if (needsFreeOffHand && !MCUtil.isHandFree(user, Hand.OFF_HAND)) {
             return conditionMessage("hand");
         }
         return ActionConditionResult.POSITIVE;
@@ -560,6 +568,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
 //        private double maxRangeSqBlockTarget = MAX_RANGE_BLOCK_TARGET * MAX_RANGE_BLOCK_TARGET;
         
         private boolean needsFreeMainHand = false;
+        private boolean needsFreeOffHand = false;
         private boolean ignoresPerformerStun = false;
         private boolean swingHand = false;
         private boolean withUserPunch = false;
@@ -579,6 +588,11 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         
         public T needsFreeMainHand() {
             this.needsFreeMainHand = true;
+            return getThis();
+        }
+        
+        public T needsFreeOffHand() {
+            this.needsFreeOffHand = true;
             return getThis();
         }
         

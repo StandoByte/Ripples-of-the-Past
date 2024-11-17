@@ -406,6 +406,10 @@ public class HamonData extends TypeSpecificData {
         noEnergyDecayTicks = 50 + MathUtil.fractionRandomInc(150F * getBreathingLevel() / HamonData.MAX_BREATHING_LEVEL);
     }
     
+    public float getEnergyRatio() {
+        return power.getEnergy() / getMaxBreathStability();
+    }
+    
     
     
     public static final float ALL_EXERCISES_EFFICIENCY_ADD_MULTIPLIER = 0.05F;

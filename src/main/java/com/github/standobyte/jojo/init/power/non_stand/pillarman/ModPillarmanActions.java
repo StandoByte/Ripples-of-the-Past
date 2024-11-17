@@ -32,7 +32,7 @@ public class ModPillarmanActions {
     public static void loadRegistryObjects() {}
 
     public static final RegistryObject<PillarmanAction> PILLARMAN_HEAVY_PUNCH = ACTIONS.register("pillarman_heavy_punch", 
-            () -> new PillarmanHeavyPunch(new NonStandAction.Builder().needsFreeMainHand().swingHand().energyCost(10F).cooldown(40)));
+            () -> new PillarmanHeavyPunch(new NonStandAction.Builder().needsFreeMainHand().swingHand().energyCost(10F)));
 
     public static final RegistryObject<PillarmanAction> PILLARMAN_ABSORPTION = ACTIONS.register("pillarman_absorption", 
             () -> new PillarmanAbsorption(new NonStandAction.Builder().needsFreeMainHand().ignoresPerformerStun()));

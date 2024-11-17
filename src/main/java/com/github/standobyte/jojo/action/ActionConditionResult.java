@@ -2,6 +2,10 @@ package com.github.standobyte.jojo.action;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.power.IPower;
+
+import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.text.ITextComponent;
 
 public class ActionConditionResult {
@@ -53,5 +57,15 @@ public class ActionConditionResult {
     @Nullable
     public ITextComponent getWarning() {
         return warning;
+    }
+    
+    public static <P extends IPower<P, ?>> void sendActionFailedMessage(Action<P> action, ActionConditionResult result, LivingEntity user) {
+        if (!user.level.isClientSide() && action.sendsConditionMessage()) {
+            ITextComponent message = result.getWarning();
+            
+            if (message != null && user instanceof ServerPlayerEntity) {
+                ((ServerPlayerEntity) user).displayClientMessage(message, true);
+            }
+        }
     }
 }

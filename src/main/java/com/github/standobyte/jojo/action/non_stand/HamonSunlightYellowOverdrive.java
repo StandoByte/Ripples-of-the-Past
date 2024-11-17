@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.action.player.IPlayerAction;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
+import com.github.standobyte.jojo.client.playeranim.anim.interfaces.WindupAttackAnim;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
@@ -30,7 +31,7 @@ import net.minecraft.world.World;
 public class HamonSunlightYellowOverdrive extends HamonAction implements IPlayerAction<HamonSunlightYellowOverdrive.Instance, INonStandPower> {
 
     public HamonSunlightYellowOverdrive(HamonAction.Builder builder) {
-        super(builder.needsFreeMainHand());
+        super(builder);
     }
     
     @Override
@@ -100,7 +101,7 @@ public class HamonSunlightYellowOverdrive extends HamonAction implements IPlayer
     
     @Override
     public boolean clHeldStartAnim(PlayerEntity user) {
-        return ModPlayerAnimations.sunlightYellowOverdrive.setWindupAnim(user);
+        return getPlayerAnim().setWindupAnim(user);
     }
     
     @Override
@@ -115,7 +116,7 @@ public class HamonSunlightYellowOverdrive extends HamonAction implements IPlayer
     public Instance createContinuousActionInstance(
             LivingEntity user, PlayerUtilCap userCap, INonStandPower power) {
         if (user.level.isClientSide() && user instanceof PlayerEntity) {
-            ModPlayerAnimations.sunlightYellowOverdrive.setAttackAnim((PlayerEntity) user);
+            getPlayerAnim().setAttackAnim((PlayerEntity) user);
         }
         return new Instance(user, userCap, power, this, getSpentEnergy(power));
     }
@@ -130,16 +131,20 @@ public class HamonSunlightYellowOverdrive extends HamonAction implements IPlayer
                 }
             }
             else if (user instanceof PlayerEntity) {
-                ModPlayerAnimations.sunlightYellowOverdrive.stopAnim((PlayerEntity) user);
+                getPlayerAnim().stopAnim((PlayerEntity) user);
             }
         }
+    }
+    
+    protected WindupAttackAnim getPlayerAnim() {
+        return ModPlayerAnimations.sunlightYellowOverdrive;
     }
     
     
     
     public static class Instance extends ContinuousActionInstance<HamonSunlightYellowOverdrive, INonStandPower> {
-        private float energySpentRatio;
-        private HamonData userHamon;
+        protected float energySpentRatio;
+        protected HamonData userHamon;
         
         public Instance(LivingEntity user, PlayerUtilCap userCap, 
                 INonStandPower playerPower, HamonSunlightYellowOverdrive action, float spentEnergy) {
@@ -162,7 +167,7 @@ public class HamonSunlightYellowOverdrive extends HamonAction implements IPlayer
                 if (!user.level.isClientSide()) {
                     ActionTarget target = playerPower.getMouseTarget();
                     if (target.getEntity() instanceof LivingEntity) {
-                        punch((LivingEntity) target.getEntity());
+                        performPunch((LivingEntity) target.getEntity());
                     }
                 }
                 break;
@@ -172,29 +177,13 @@ public class HamonSunlightYellowOverdrive extends HamonAction implements IPlayer
             }
         }
         
-        private void punch(LivingEntity target) {
+        protected void performPunch(LivingEntity target) {
             World world = user.level;
             
             if (!world.isClientSide()) {
                 HamonSunlightYellowOverdrive hamonAction = getAction();
                 if (hamonAction.checkHeldItems(user, playerPower).isPositive()) {
-                    float efficiency = userHamon.getActionEfficiency(0, true, hamonAction.getUnlockingSkill());
-                    float damage = 3.25F + 6.75F * energySpentRatio;
-                    damage *= efficiency;
-                    
-                    if (DamageUtil.dealHamonDamage(target, damage, user, null, attack -> attack.hamonParticle(ModParticles.HAMON_SPARK_YELLOW.get()))) {
-                        world.playSound(null, target.getX(), target.getEyeY(), target.getZ(), ModSounds.HAMON_SYO_PUNCH.get(), target.getSoundSource(), energySpentRatio, 1.0F);
-                        userHamon.hamonPointsFromAction(HamonStat.STRENGTH, getActualMaxEnergy(playerPower) * energySpentRatio * efficiency);
-                        target.knockback(2.5F, user.getX() - target.getX(), user.getZ() - target.getZ());
-                        boolean hamonSpread = userHamon.isSkillLearned(ModHamonSkills.HAMON_SPREAD.get());
-                        float punchDamage = damage;
-                        KnockbackCollisionImpact.getHandler(target).ifPresent(cap -> {
-                            cap.onPunchSetKnockbackImpact(target.getDeltaMovement(), user);
-                            if (hamonSpread) {
-                                cap.hamonDamage(punchDamage, 0, ModParticles.HAMON_SPARK_YELLOW.get());
-                            }
-                        });
-                    }
+                    doHamonAttack(target);
                 }
                 
                 HamonSunlightYellowOverdrive.doMeleeAttack(user, target);
@@ -202,6 +191,26 @@ public class HamonSunlightYellowOverdrive extends HamonAction implements IPlayer
             
             if (user instanceof PlayerEntity) {
                 ((PlayerEntity) user).resetAttackStrengthTicker();
+            }
+        }
+        
+        protected void doHamonAttack(LivingEntity target) {
+            float efficiency = userHamon.getActionEfficiency(0, true, getAction().getUnlockingSkill());
+            float damage = 3.25F + 6.75F * energySpentRatio;
+            damage *= efficiency;
+            
+            if (DamageUtil.dealHamonDamage(target, damage, user, null, attack -> attack.hamonParticle(ModParticles.HAMON_SPARK_YELLOW.get()))) {
+                target.level.playSound(null, target.getX(), target.getEyeY(), target.getZ(), ModSounds.HAMON_SYO_PUNCH.get(), target.getSoundSource(), energySpentRatio, 1.0F);
+                userHamon.hamonPointsFromAction(HamonStat.STRENGTH, getActualMaxEnergy(playerPower) * energySpentRatio * efficiency);
+                target.knockback(2.5F, user.getX() - target.getX(), user.getZ() - target.getZ());
+                boolean hamonSpread = userHamon.isSkillLearned(ModHamonSkills.HAMON_SPREAD.get());
+                float punchDamage = damage;
+                KnockbackCollisionImpact.getHandler(target).ifPresent(cap -> {
+                    cap.onPunchSetKnockbackImpact(target.getDeltaMovement(), user);
+                    if (hamonSpread) {
+                        cap.hamonDamage(punchDamage, 0, ModParticles.HAMON_SPARK_YELLOW.get());
+                    }
+                });
             }
         }
         
@@ -220,7 +229,7 @@ public class HamonSunlightYellowOverdrive extends HamonAction implements IPlayer
         public void onStop() {
             super.onStop();
             if (user.level.isClientSide() && user instanceof PlayerEntity) {
-                ModPlayerAnimations.sunlightYellowOverdrive.stopAnim((PlayerEntity) user);
+                getAction().getPlayerAnim().stopAnim((PlayerEntity) user);
             }
         }
         

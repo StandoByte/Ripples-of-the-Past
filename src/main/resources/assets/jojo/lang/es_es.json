@@ -989,7 +989,7 @@
   "hamonSkill.hypnosis.name": "Hipnosis animal",
   "hamonSkill.hypnosis.desc": "El usuario domestica temporalmente un animal domesticado.",
   "hamonSkill.hamon_shock.name": "Choque Hamon",
-  "hamonSkill.hamon_shock.desc": "El usuario aplica una carga de Hamon directamente a la cabeza de una criatura viviente, incapacitándola por un breve tiempo.",
+  "hamonSkill.hamon_shock.desc": "El usuario aplica una carga de Hamon directamente a la cabeza de una criatura viviente, incapacitándola por un breve tiempo. The shock wears off if the target takes damage.",
   "hamonSkill.hamon_spread.name": "Untable De Hamon",
   "hamonSkill.hamon_spread.desc": "Cada vez que el usuario ataca a un no-muerto con Hamon, este continúa propagándose por el cuerpo del objetivo, debilitándolo y ralentizando su regeneración.",
   
@@ -1008,7 +1008,7 @@
   "hamonSkill.natural_talent.name": "Talento natural",
   "hamonSkill.natural_talent.desc": "Tu entrenamiento de Hamon es 2 veces más rápido.",
   "hamonSkill.scarlet_overdrive.name": "Sobremarcha escarlata (WIP)",
-  "hamonSkill.scarlet_overdrive.desc": "Un tipo especial de ataque Sobremarcha que causa daño adicional y prende fuego al objetivo.",
+  "hamonSkill.scarlet_overdrive.desc": "Un tipo especial de Sobremarcha amarilla con luz solar que prende fuego al objetivo.",
   "hamonSkill.metal_silver_overdrive.name": "Sobremarcha de metal plateado",
   "hamonSkill.metal_silver_overdrive.desc": "Puedes realizar el ataque Sobremarcha con un arma o una herramienta.\nSin un arma, la Sobremarcha normal inflige más daño a los objetivos con armadura o un arma cuerpo a cuerpo equipada.",
   "hamonSkill.overdrive_barrage.name": "Bombardeo de sobremarcha",

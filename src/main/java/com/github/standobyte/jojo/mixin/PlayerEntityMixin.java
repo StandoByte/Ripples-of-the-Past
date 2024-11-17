@@ -36,6 +36,11 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements IPl
         }
     }
     
+    @Override
+    public boolean _isEntityOnGround() {
+        return isOnGround();
+    }
+    
     @Inject(method = "travel", at = @At("HEAD"), cancellable = true)
     public void jojoPlayerWallClimb(Vector3d pTravelVector, CallbackInfo ci) {
         PlayerEntity thisPlayer = (PlayerEntity) (Object) this;

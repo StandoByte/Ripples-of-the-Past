@@ -830,6 +830,8 @@ public class GameplayEventHandler {
             IPower.getPowerOptional(target, powerClassification).ifPresent(power -> 
             power.onUserGettingAttacked(dmgSource, dmgAmount));
         }
+        
+        target.removeEffect(ModStatusEffects.HAMON_SHOCK.get());
     }
 
 

@@ -544,7 +544,7 @@
 
   "hamonSkill.natural_talent.name": "天賦の才能",
   "hamonSkill.scarlet_overdrive.name": "緋色の波紋疾走（スカーレットオーバードライブ）",
-  "hamonSkill.scarlet_overdrive.desc": "追加ダメージを与え、対象を炎上させる特殊な波紋。",
+  "hamonSkill.scarlet_overdrive.desc": "対象を炎上させる特殊な波紋。",
   "hamonSkill.metal_silver_overdrive.name": "銀色の波紋疾走（メタルシルバーオーバードライブ）",
   "hamonSkill.metal_silver_overdrive.desc": "武器や道具を使って波紋攻撃を行うことができるようになる。\nWithout a weapon, the regular Overdrive deals more damage to targets with armor or an equipped melee weapon.",
   "hamonSkill.hamon_cutter.name": "波紋カッター",

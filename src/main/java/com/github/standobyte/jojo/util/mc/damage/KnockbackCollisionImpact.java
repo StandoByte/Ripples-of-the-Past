@@ -14,7 +14,6 @@ import org.apache.commons.lang3.mutable.MutableDouble;
 import org.apache.commons.lang3.mutable.MutableFloat;
 import org.apache.commons.lang3.tuple.Pair;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack.HeavyPunchBlockInstance.HeavyPunchExplosion;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCap;
@@ -250,10 +249,15 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
                     });
                 }
                 if (scarletOverdriveFireTicks > 0) {
-                    DamageUtil.setOnFire(targetEntity, scarletOverdriveFireTicks / 20, false);
+                    DamageUtil.dealDamageAndSetOnFire(targetEntity, 
+                            e -> DamageUtil.hurtThroughInvulTicks(e, new EntityDamageSource("entityFlewInto", entity), 
+                                    (float) getKnockbackImpactStrength() * 5), 
+                            scarletOverdriveFireTicks / 20, false);
                 }
-                DamageUtil.hurtThroughInvulTicks(targetEntity, new EntityDamageSource("entityFlewInto", entity), 
-                        (float) getKnockbackImpactStrength() * 5);
+                else {
+                    DamageUtil.hurtThroughInvulTicks(targetEntity, new EntityDamageSource("entityFlewInto", entity), 
+                            (float) getKnockbackImpactStrength() * 5);
+                }
                 if (asLiving != null) {
                     asLiving.knockback((float) getKnockbackImpactStrength(), -vec.x, -vec.z);
                 }
@@ -322,7 +326,6 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
                 
                 Vector3d collisionDir = new Vector3d(collision.movementX - collision.x, collision.movementY - collision.y, collision.movementZ - collision.z);
                 Direction faceHit = Direction.getNearest(collisionDir.x, collisionDir.y, collisionDir.z);
-                JojoMod.LOGGER.debug(faceHit);
                 if (faceHit != Direction.DOWN) {
                     if (breakBlocks) {
                         if (explosionRadius > 0) {

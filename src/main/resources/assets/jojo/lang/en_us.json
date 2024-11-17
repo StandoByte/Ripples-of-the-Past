@@ -998,7 +998,7 @@
   "hamonSkill.hypnosis.name": "Animal Hypnosis",
   "hamonSkill.hypnosis.desc": "The user temporarily tames a tameable animal.",
   "hamonSkill.hamon_shock.name": "Hamon Shock",
-  "hamonSkill.hamon_shock.desc": "The user applies a Hamon charge directly to a living creature's head, incapacitating them for a short time.",
+  "hamonSkill.hamon_shock.desc": "The user applies a Hamon charge directly to a living creature's head, incapacitating them for a short time. The shock wears off if the target takes damage.",
   "hamonSkill.hamon_spread.name": "Hamon Spread",
   "hamonSkill.hamon_spread.desc": "Whenever the user attack an undead with Hamon, it continues spreading through the target's body, weakening it and slowing down its regeneration.",
   
@@ -1017,7 +1017,7 @@
   "hamonSkill.natural_talent.name": "Natural Talent",
   "hamonSkill.natural_talent.desc": "Your Hamon training is 2x faster.",
   "hamonSkill.scarlet_overdrive.name": "Scarlet Overdrive",
-  "hamonSkill.scarlet_overdrive.desc": "A special type of Overdrive attack, which deals additional damage and sets the target on fire.",
+  "hamonSkill.scarlet_overdrive.desc": "A special type of Sunlight Yellow Overdrive attack that sets the target on fire.",
   "hamonSkill.metal_silver_overdrive.name": "Metal Silver Overdrive",
   "hamonSkill.metal_silver_overdrive.desc": "You can perform Overdrive attack with a weapon or a tool.\nWithout a weapon, the regular Overdrive deals more damage to targets with armor or an equipped melee weapon.",
   "hamonSkill.overdrive_barrage.name": "Overdrive Barrage",

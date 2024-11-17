@@ -37,7 +37,6 @@ import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -243,15 +242,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     }
     
     private void sendMessage(Action<P> action, ActionConditionResult result) {
-        if (!user.level.isClientSide() && action.sendsConditionMessage()) {
-            ITextComponent message = result.getWarning();
-            
-            if (message != null) {
-                serverPlayerUser.ifPresent(player -> {
-                    player.displayClientMessage(message, true);
-                });
-            }
-        }
+        ActionConditionResult.sendActionFailedMessage(action, result, user);
     }
 
     @Override

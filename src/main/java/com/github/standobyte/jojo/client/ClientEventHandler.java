@@ -11,6 +11,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Random;
@@ -19,10 +20,12 @@ import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
@@ -1098,8 +1101,15 @@ public class ClientEventHandler {
             if (hand == Hand.MAIN_HAND && !player.isInvisible()) {
                 ActionsOverlayGui hud = ActionsOverlayGui.getInstance();
                 
-                if (hud.isActionSelectedAndEnabled(ModHamonActions.HAMON_BEAT.get()) || ContinuousActionInstance.getCurrentAction(player).map(
-                        action -> action.getAction() == ModHamonActions.HAMON_BEAT.get()).orElse(false)) {
+                Stream<Action<? extends IPower<? extends IPower<?, ?>, ?>>> /* what the absolute fuck, java? */ curActions = Stream.concat(
+                        hud.getSelectedEnabledActions(),
+                        ContinuousActionInstance.getCurrentAction(player)
+                            .map(ContinuousActionInstance::getAction)
+                            .filter(action -> action instanceof Action<?>)
+                            .map(action -> (Action<?>) action)
+                            .map(Stream::of).orElseGet(Stream::empty))
+                        .filter(Objects::nonNull);
+                if (curActions.anyMatch(action -> !action.needsFreeMainHand && action.needsFreeOffHand)) {
                     renderOtherHand = true;
                 }
                 

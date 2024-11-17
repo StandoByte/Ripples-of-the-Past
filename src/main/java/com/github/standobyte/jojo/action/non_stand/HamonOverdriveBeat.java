@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.action.non_stand;
 
-import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.player.IPlayerAction;
@@ -12,7 +11,6 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
-import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.entity.LivingEntity;
@@ -24,14 +22,6 @@ public class HamonOverdriveBeat extends HamonAction implements IPlayerAction<Ham
 
     public HamonOverdriveBeat(HamonAction.Builder builder) {
         super(builder);
-    }
-    
-    @Override
-    protected ActionConditionResult checkHeldItems(LivingEntity user, INonStandPower power) {
-        if (!MCUtil.isHandFree(user, Hand.OFF_HAND)) {
-            return conditionMessage("offhand");
-        }
-        return ActionConditionResult.POSITIVE;
     }
     
     
@@ -123,10 +113,9 @@ public class HamonOverdriveBeat extends HamonAction implements IPlayerAction<Ham
             return true;
         }
         
-        
         @Override
         public float getWalkSpeed() {
-            return 0.5f;
+            return getAction().getHeldWalkSpeed();
         }
         
         @Override
