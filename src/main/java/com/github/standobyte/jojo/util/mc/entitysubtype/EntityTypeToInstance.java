@@ -51,14 +51,14 @@ public class EntityTypeToInstance {
             return null;
         }
         Entity entity = null;
-        if (!instance.entityInstances.containsKey(subType) && instance.tryLazyInit.remove(subType)) {
+        if (!instance.entityInstances.containsKey(subType.getId()) && instance.tryLazyInit.remove(subType)) {
             entity = createInstance(subType, world);
             if (entity != null) {
                 instance.entityInstances.put(subType.getId(), entity);
             }
         }
         else {
-            entity = instance.entityInstances.get(subType);
+            entity = instance.entityInstances.get(subType.getId());
         }
         return (T) entity;
     }
