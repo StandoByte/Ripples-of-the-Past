@@ -135,7 +135,7 @@ public class HungryZombieEntity extends ZombieEntity {
             UUID uuid = this.getOwnerUUID();
             if (uuid == null) return null;
             PlayerEntity owner = level.getPlayerByUUID(uuid);
-            if (INonStandPower.getNonStandPowerOptional(owner).map(
+            if (owner != null && INonStandPower.getNonStandPowerOptional(owner).map(
                     power -> power.getTypeSpecificData(ModPowers.VAMPIRISM.get()).map(
                     vampirism -> vampirism.getCuringStage() >= 4).orElse(true)).orElse(false)) {
                 setOwner(null);

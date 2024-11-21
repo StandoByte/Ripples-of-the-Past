@@ -1746,24 +1746,26 @@ public class ActionsOverlayGui extends AbstractGui {
         
         for (PowerClassification powerClass : PowerClassification.values()) {
             P power = (P) getHudMode(powerClass).getPower();
-            Action<P> heldAction = power.getHeldAction();
-            if (heldAction != null) {
-                int ticksToFire = heldAction.getHoldDurationToFire(power);
-                if (ticksToFire > 0) {
-                    float heldActionRatio = MathHelper.clamp(((float) power.getHeldActionTicks() + partialTick) / (float) ticksToFire, 0, 1);
-                    if (heldActionRatio > 0) {
-                        if (heldActionRatio < 1) {
-                            crosshairFillLastAction = null;
+            if (power != null) {
+                Action<P> heldAction = power.getHeldAction();
+                if (heldAction != null) {
+                    int ticksToFire = heldAction.getHoldDurationToFire(power);
+                    if (ticksToFire > 0) {
+                        float heldActionRatio = MathHelper.clamp(((float) power.getHeldActionTicks() + partialTick) / (float) ticksToFire, 0, 1);
+                        if (heldActionRatio > 0) {
+                            if (heldActionRatio < 1) {
+                                crosshairFillLastAction = null;
+                            }
+                            else if (crosshairFillLastAction != heldAction) {
+                                crosshairFillLastAction = heldAction;
+                                crosshairFillTransparency.reset();
+                            }
+                            
+                            float height = heldActionRatio == 1 ? 15 : 3 + 9 * heldActionRatio;
+                            BlitFloat.blitFloat(matrixStack, x, y + 15 - height, 88, 30 - height, 15, height, 256, 256);
+                            
+                            break;
                         }
-                        else if (crosshairFillLastAction != heldAction) {
-                            crosshairFillLastAction = heldAction;
-                            crosshairFillTransparency.reset();
-                        }
-                        
-                        float height = heldActionRatio == 1 ? 15 : 3 + 9 * heldActionRatio;
-                        BlitFloat.blitFloat(matrixStack, x, y + 15 - height, 88, 30 - height, 15, height, 256, 256);
-                        
-                        break;
                     }
                 }
             }

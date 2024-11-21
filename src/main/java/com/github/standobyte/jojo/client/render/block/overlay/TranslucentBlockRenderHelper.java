@@ -5,15 +5,18 @@ import java.util.stream.Stream;
 
 import com.github.standobyte.jojo.capability.chunk.ChunkCap.PrevBlockInfo;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.render.rendertype.ModifiedRenderType;
 import com.github.standobyte.jojo.client.render.rendertype.ModifiedRenderTypeBuffers;
-import com.github.standobyte.jojo.client.render.rendertype.TranslucencyRenderType;
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 
 import net.minecraft.block.BlockRenderType;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
+import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.model.IBakedModel;
@@ -37,8 +40,24 @@ public class TranslucentBlockRenderHelper {
     public static void renderCDRestorationTranslucentBlocks(MatrixStack matrixStack, Minecraft mc, 
             Stream<PrevBlockInfo> blocks, Predicate<PrevBlockInfo> inAbilityRange) {
         if (buffers == null) {
-            buffers = ModifiedRenderTypeBuffers.create(mc.renderBuffers().bufferSource(), TranslucencyRenderType::new);
+            buffers = ModifiedRenderTypeBuffers.create(new BufferBuilder(256), 
+                    mc.renderBuffers().bufferSource(), 
+                    renderType -> new ModifiedRenderType(renderType, 
+                            () -> {
+                                RenderSystem.disableDepthTest();
+                                RenderSystem.enableBlend();
+                                RenderSystem.blendFunc(GlStateManager.SourceFactor.CONSTANT_ALPHA, GlStateManager.DestFactor.ONE_MINUS_CONSTANT_ALPHA);
+                                RenderSystem.blendColor(1, 1, 1, 0.3f);
+                            }, 
+                            () -> {
+                                RenderSystem.blendColor(1, 1, 1, 1);
+                                RenderSystem.defaultBlendFunc();
+                                RenderSystem.disableBlend();
+                                RenderSystem.enableDepthTest();
+                            },
+                            "cd_blocks"));
         }
+        
         ActiveRenderInfo renderInfo = mc.gameRenderer.getMainCamera();
         Vector3d projectedView = renderInfo.getPosition();
         matrixStack.pushPose();

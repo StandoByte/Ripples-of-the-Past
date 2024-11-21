@@ -8,6 +8,7 @@ import java.util.UUID;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.entity.damaging.projectile.TommyGunBulletEntity;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
@@ -22,7 +23,6 @@ import com.google.common.collect.ImmutableMultimap.Builder;
 import com.google.common.collect.Multimap;
 
 import net.minecraft.client.util.ITooltipFlag;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -36,8 +36,10 @@ import net.minecraft.item.Items;
 import net.minecraft.item.UseAction;
 import net.minecraft.util.ActionResult;
 import net.minecraft.util.Hand;
+import net.minecraft.util.HandSide;
 import net.minecraft.util.NonNullList;
 import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.TextFormatting;
@@ -56,8 +58,7 @@ public class TommyGunItem extends Item {
     @Override
     public void onUseTick(World world, LivingEntity entity, ItemStack stack, int remainingTicks) {
         int ammo = getAmmo(stack);
-        int t = remainingTicks % 12;
-        boolean shotTick = t == 0 || t == 2 || t == 4 || t == 5 || t == 7 || t == 9 || t == 11;
+        boolean shotTick = remainingTicks % 2 == 0;
         if (remainingTicks <= 1) {
             entity.releaseUsingItem();
             return;
@@ -71,8 +72,9 @@ public class TommyGunItem extends Item {
                     TommyGunBulletEntity bullet = new TommyGunBulletEntity(entity, world);
                     bullet.shootFromRotation(entity, 20F, 0);
                     world.addFreshEntity(bullet);
-                    consumeAmmo(stack, 1);
-                    // TODO gun shot visual effect
+                    if (!(entity instanceof PlayerEntity && ((PlayerEntity) entity).abilities.instabuild)) {
+                        consumeAmmo(stack, 1);
+                    }
                 }
             }
             else {
@@ -83,11 +85,15 @@ public class TommyGunItem extends Item {
             if (shotTick) {
                 Random random = entity.getRandom();
                 entity.playSound(ModSounds.TOMMY_GUN_SHOT.get(), 1.0F, 1.0F + (random.nextFloat() - 0.5F) * 0.3F);
-                if (entity.getType() == EntityType.PLAYER ? world.isClientSide() : !world.isClientSide()) {
+                if (entity.isControlledByLocalInstance()) {
                     float recoil = 1F + Math.min((1F - (float) remainingTicks / (float) getUseDuration(stack)) * 6F, 3F);
                     entity.yRot += (random.nextFloat() - 0.5F) * 0.3F * recoil;
                     entity.xRot += -random.nextFloat() * 0.75F * recoil;
                 }
+//                if (world.isClientSide() && remainingTicks % 4 == 0) {
+//                    HandSide handSide = entity.getItemInHand(Hand.OFF_HAND) == stack ? HandSide.LEFT : HandSide.RIGHT;
+//                    CustomParticlesHelper.addGunshotParticle(entity, handSide, new Vector3d(0, -0.425, 0.275));
+//                }
             }
         }
         else {

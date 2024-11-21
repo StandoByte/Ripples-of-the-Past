@@ -54,39 +54,6 @@ public class PolaroidItem extends Item {
             }
         }
         
-//        /* Other classes necessary:
-//         *   network.packets.fromserver.PhotoForOtherPlayerPacket - makes the client of other player we're taking a spiritual photo of take the screenshot for us
-//         *   network.PacketManager - register the network packet
-//         */
-//        
-//        // can be a condition for the stand action
-//        boolean hasOtherPlayers = world.isClientSide() ? ClientUtil.hasOtherPlayers() : ((ServerWorld) world).getServer().getPlayerCount() > 1;
-//        if (!world.isClientSide() && hasOtherPlayers) {
-//            Vector3d lookVec = cameraPlayer.getLookAngle();
-//            Optional<ServerPlayerEntity> playerToDox = ((ServerWorld) world).getServer().getPlayerList().getPlayers()
-//                    // as an example, here we choose the player that is...
-//                    .stream()
-//                    // ...not ourselves
-//                    .filter(player -> player != cameraPlayer)
-//                    // ...is in the same dimension as us
-//                    .filter(player -> player.level == world)
-//                    // ...a Stand user
-//                    .filter(player -> IStandPower.getStandPowerOptional(player).map(IStandPower::hasPower).orElse(false))
-//                    // ...and is the closest to our look direction, no matter the distance
-//                    .max(Comparator.comparingDouble(player -> {
-//                        Vector3d vecToPlayer = player.position().subtract(cameraPlayer.position()).normalize();
-//                        return vecToPlayer.dot(lookVec);
-//                    }));
-//            playerToDox.ifPresent(player -> {
-//                PacketManager.sendToClient(new PhotoForOtherPlayerPacket(cameraPlayer.getId()), player);
-//            });
-//            if (!cameraPlayer.abilities.instabuild) { // or if you're DIO and can do the same thing using Jonathan's Stand and apparently not break the camera :rolling_eyes:
-//                stack.shrink(1);
-//                cameraPlayer.broadcastBreakEvent(EquipmentSlotType.MAINHAND);
-//            }
-//            return ActionResult.consume(stack);
-//        }
-        
         if (world.isClientSide()) {
             switch (MCUtil.getHandSide(cameraPlayer, hand)) {
             case RIGHT:

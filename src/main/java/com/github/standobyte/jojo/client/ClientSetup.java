@@ -13,6 +13,7 @@ import com.github.standobyte.jojo.client.particle.AirStreamParticle;
 import com.github.standobyte.jojo.client.particle.BloodParticle;
 import com.github.standobyte.jojo.client.particle.CDRestorationParticle;
 import com.github.standobyte.jojo.client.particle.DivineSandstormParticle;
+import com.github.standobyte.jojo.client.particle.GunshotParticle;
 import com.github.standobyte.jojo.client.particle.HamonAuraParticle;
 import com.github.standobyte.jojo.client.particle.HamonSparkParticle;
 import com.github.standobyte.jojo.client.particle.MeteoriteVirusParticle;
@@ -455,6 +456,7 @@ public class ClientSetup {
     public static void onMcConstructor(ParticleFactoryRegisterEvent event) {
         Minecraft mc = Minecraft.getInstance();
         mc.particleEngine.register(ModParticles.BLOOD.get(),                BloodParticle.Factory::new);
+        mc.particleEngine.register(ModParticles.GUNSHOT.get(),              GunshotParticle.Factory::new);
         mc.particleEngine.register(ModParticles.HAMON_SPARK.get(),          HamonSparkParticle.HamonParticleFactory::new);
         mc.particleEngine.register(ModParticles.HAMON_SPARK_BLUE.get(),     HamonSparkParticle.HamonParticleFactory::new);
         mc.particleEngine.register(ModParticles.HAMON_SPARK_YELLOW.get(),   HamonSparkParticle.HamonParticleFactory::new);

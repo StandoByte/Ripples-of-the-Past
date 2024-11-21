@@ -165,7 +165,7 @@ public class KosmXPlayerAnimatorInstalled extends PlayerAnimationHandler.PlayerA
             AnimationProcessor anim = ((IMutableModel) model).getEmoteSupplier().get();
             if (anim != null && anim.isActive()) {
                 Vec3f pos = anim.get3DTransform("body", TransformType.POSITION, Vec3f.ZERO);
-                float yRot = MathHelper.clamp(partialTick, player.yRotO, player.yRot);
+                float yRot = MathHelper.clamp(partialTick, player.yBodyRotO, player.yBodyRot);
                 yRot = -yRot * MathUtil.DEG_TO_RAD;
                 return new Vector3d(-pos.getX(), -pos.getY(), -pos.getZ()).yRot(yRot);
             }

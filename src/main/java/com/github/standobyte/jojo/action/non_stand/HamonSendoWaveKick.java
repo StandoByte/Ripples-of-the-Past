@@ -129,7 +129,7 @@ public class HamonSendoWaveKick extends HamonAction implements IPlayerAction<Ham
                         positionWaitingTimer++;
                     }
                 }
-                if (positionWaitingTimer < 0 && user.isOnGround()
+                if (positionWaitingTimer < 0 && (user.isOnGround() || !user.level.getFluidState(user.blockPosition()).isEmpty())
                         || positionWaitingTimer >= USUAL_SENDO_WAVE_KICK_DURATION) {
                     stopAction();
                     return;
