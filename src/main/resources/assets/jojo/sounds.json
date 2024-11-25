@@ -926,6 +926,14 @@
     "subtitle": "jojo.subtitle.fix",
     "sounds": [ "jojo:stand_user/josuke_fix" ]
   },
+  "josuke_pray_for_eternity": {
+    "subtitle": "jojo.subtitle.pray_for_eternity",
+    "sounds": [ "jojo:stand_user/josuke_pray_for_eternity" ]
+  },
+  "josuke_yo_angelo": {
+    "subtitle": "jojo.subtitle.yo_angelo",
+    "sounds": [ "jojo:stand_user/josuke_yo_angelo" ]
+  },
   "crazy_diamond_summon": {
     "subtitle": "jojo.subtitle.stand_summon",
     "sounds": [ "jojo:stand/crazy_diamond_summon", "jojo:stand/crazy_diamond_summon_2" ]

@@ -264,6 +264,7 @@
   "death.attack.explosion.stand.item": "%1$sは%2$sが使用した%3$sによって爆破された",
   "death.attack.roadRoller": "%sはパンケーキのように潰された",
   "death.attack.roadRoller.player": "%sは%sと戦いながらパンケーキのように潰された",
+  "death.attack.rockRespawn": "そのうち%sは考えるのやめた",
 
   "stat.jojo.vampire_animals_drained": "吸血した動物数",
   "stat.jojo.vampire_people_drained": "吸血した人間数",

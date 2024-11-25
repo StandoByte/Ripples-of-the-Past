@@ -189,6 +189,7 @@
   "entity.jojo.stand_arrow": "Arrow",
   "entity.jojo.block_shard": "Block Shard",
   "entity.jojo.soul": "Soul",
+  "entity.jojo.angelo_rock": "Rock",
   
   "effect.jojo.freeze": "Freeze",
   "item.minecraft.potion.effect.freeze": "Potion of Freeze",
@@ -433,6 +434,8 @@
   "death.attack.eyeOfEnderShards": "%s's insides were torn apart by an eye of ender shards",
   "death.attack.eyeOfEnderShards.player": "%s's insides were torn apart by an eye of ender shards",
   "death.attack.stoneMask": "%s's brain couldn't take the power of Stone Mask's needles",
+  "death.attack.rockRespawn": "Eventually, %s has stopped thinking",
+  "death.attack.rockBroken": "%s was mined",
   
   "stat.jojo.vampire_animals_drained": "Animals Drained",
   "stat.jojo.vampire_people_drained": "People Drained",
@@ -1342,6 +1345,8 @@
   "jojo.message.action_condition.item_block_origin": "You need an anchor block in your hand",
   "jojo.subtitle.crazy_diamond_name": "\"Crazy Diamond!\"",
   "jojo.subtitle.fix": "\"Fix!\"",
+  "jojo.subtitle.pray_for_eternity": "\"Pray for eternity!\"",
+  "jojo.subtitle.yo_angelo": "\"Yo, Angelo!\"",
   "jojo.subtitle.dora": "DORA",
   "jojo.subtitle.dorarara": "DORARARARARA",
   "jojo.subtitle.fixed": "Something being fixed",

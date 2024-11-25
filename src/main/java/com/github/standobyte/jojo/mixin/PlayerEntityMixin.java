@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.github.standobyte.jojo.action.non_stand.HamonWallClimbing2;
 import com.github.standobyte.jojo.capability.entity.player.PlayerMixinExtension;
+import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrPossessEntityPacket;
 import com.github.standobyte.jojo.util.mc.EntityOwnerResolver;
@@ -27,6 +28,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.GameType;
 import net.minecraft.world.World;
@@ -95,6 +97,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     private Optional<GameType> jojoPossessPrevGameMode = Optional.empty();
     private boolean jojoPossessingAsAlive;
     private IForgeRegistryEntry<?> jojoPossessionContext;
+    private boolean turnedIntoAngeloRock;
     
     /* TODO specific interactions when possessing someone with asAlive flag:
      *   render hp/hunger/etc.
@@ -107,6 +110,10 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     public void jojoPossessEntity(@Nullable Entity entity, boolean asAlive, IForgeRegistryEntry<?> context) {
         jojoPossessedEntity.setOwner(entity);
         if (!level.isClientSide()) {
+            if (turnedIntoAngeloRock) {
+                entity = null;
+            }
+            
             ServerPlayerEntity player = ((ServerPlayerEntity) (Entity) this);
             if (entity != null) {
                 jojoPossessPrevGameMode = Optional.of(player.gameMode.getGameModeForPlayer());
@@ -121,9 +128,18 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
             PacketManager.sendToClientsTrackingAndSelf(new TrPossessEntityPacket(
                     this.getId(), jojoPossessedEntity.getNetworkId(), jojoPossessingAsAlive, 
                     jojoPossessPrevGameMode, context), this);
+            
+            if (turnedIntoAngeloRock && player.isAlive()) {
+                player.invulnerableTime = 0;
+                player.hurt(new DamageSource("rockBroken").bypassArmor().bypassInvul(), Float.MAX_VALUE);
+                if (player.isDeadOrDying()) {
+                    player.remove(player instanceof ServerPlayerEntity);
+                }
+            }
         }
         this.jojoPossessingAsAlive = asAlive;
         this.jojoPossessionContext = context;
+        turnedIntoAngeloRock = entity != null && entity.getType() == ModEntityTypes.ANGELO_ROCK.get();
     }
     
     private void jojoTickEntityPossession() {
@@ -171,6 +187,9 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
             Entity possessedEntity = jojoGetPossessedEntity();
             if (possessedEntity != null) {
                 jojoPossessEntity(null, false, jojoPossessionContext);
+                if (possessedEntity.getType() == ModEntityTypes.ANGELO_ROCK.get()) {
+                    remove(((Entity) this) instanceof ServerPlayerEntity);
+                }
             }
         }
     }
@@ -190,6 +209,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
 //                forgeCapNbt.put("Ctx", ctxNbt);
 //            }
 //        }
+//        forgeCapNbt.putBoolean("AngeloRock", turnedIntoAngeloRock);
     }
     
     @Override
@@ -211,6 +231,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
 //            
 //            return null;
 //        }).orElse(null);
+//        turnedIntoAngeloRock = forgeCapNbt.getBoolean("AngeloRock");
     }
 
     @Override

@@ -66,6 +66,8 @@ import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.item.OilItem;
 import com.github.standobyte.jojo.modcompat.ModInteractionUtil;
 import com.github.standobyte.jojo.modcompat.OptionalDependencyHelper;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromclient.ClAngeloRockRespawnPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ServerIdPacket;
 import com.github.standobyte.jojo.potion.BleedingEffect;
 import com.github.standobyte.jojo.power.IPower;
@@ -78,6 +80,7 @@ import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
+import com.github.standobyte.jojo.util.mod.IPlayerPossess;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.google.common.base.MoreObjects;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -91,6 +94,7 @@ import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.IngameGui;
 import net.minecraft.client.gui.NewChatGui;
+import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.ControlsScreen;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.IngameMenuScreen;
@@ -1287,6 +1291,16 @@ public class ClientEventHandler {
                 index.ifPresent(i -> {
                     controlList.setScrollAmount(ClientReflection.getRowTop(controlList, i) - controlList.getTop());
                 });
+            }
+        }
+        
+        else if (screen instanceof ChatScreen) {
+            Entity possessed = IPlayerPossess.getPossessedEntity(mc.player);
+            if (possessed != null && possessed.getType() == ModEntityTypes.ANGELO_ROCK.get()) {
+                Button angeloRockDieButton = new Button(screen.width / 2 - 100, screen.height - 40, 200, 20, 
+                        new TranslationTextComponent(mc.level.getLevelData().isHardcore() ? "deathScreen.spectate" : "deathScreen.respawn"), 
+                        button -> PacketManager.sendToServer(new ClAngeloRockRespawnPacket()));
+                event.addWidget(angeloRockDieButton);
             }
         }
     }

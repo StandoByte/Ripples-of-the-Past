@@ -7,6 +7,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
+import com.github.standobyte.jojo.network.packets.fromclient.ClAngeloRockRespawnPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClBroadcastedModSettingsPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClClickActionPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClDoubleShiftPressPacket;
@@ -209,6 +210,7 @@ public class PacketManager {
         registerMessage(clientChannel, new ClMetEntityTypePacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClRPSGameInputPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClRPSPickThoughtsPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        registerMessage(clientChannel, new ClAngeloRockRespawnPacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_SERVER));
 
         packetIndex = 0;
         registerMessage(serverChannel, new TrPlayerModSettingsPacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_CLIENT));

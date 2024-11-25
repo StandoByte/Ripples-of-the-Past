@@ -431,6 +431,8 @@
   "death.attack.eyeOfEnderShards": "Внутренности %s были разорваны осколками Ока Эндера",
   "death.attack.eyeOfEnderShards.player": "Внутренности %s были разорваны осколками Ока Эндера",
   "death.attack.stoneMask": "Мозг %s не вынес силы игл Каменной маски",
+  "death.attack.rockRespawn": "В конце концов %s перестал мыслить",
+  "death.attack.rockBroken": "%s был вскопан",
   
   "stat.jojo.vampire_animals_drained": "Поглощено животных",
   "stat.jojo.vampire_people_drained": "Поглощено людей",
@@ -1324,6 +1326,8 @@
   "_jojo.message.action_condition.no_rock_broken": "The target did not collide with any solid blocks",
   "jojo.subtitle.crazy_diamond_name": "\"Crazy Diamond!\"",
   "jojo.subtitle.fix": "\"Восстанови!\"",
+  "jojo.subtitle.make_angelo_rock": "\"Раскаивайся вечно!\"",
+  "jojo.subtitle.yo_angelo": "\"Йо, Анджело!\"",
   "jojo.subtitle.dora": "ДОРА",
   "jojo.subtitle.dorarara": "ДОРАРАРАРАРА",
   "jojo.subtitle.fixed": "Что-то восстанавливается",

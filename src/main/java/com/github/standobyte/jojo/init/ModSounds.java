@@ -439,6 +439,10 @@ public class ModSounds {
 
     public static final RegistryObject<SoundEvent> JOSUKE_FIX = register("josuke_fix");
 
+    public static final RegistryObject<SoundEvent> JOSUKE_PRAY_FOR_ETERNITY = register("josuke_pray_for_eternity");
+
+    public static final RegistryObject<SoundEvent> JOSUKE_YO_ANGELO = register("josuke_yo_angelo");
+
     public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_SUMMON = register("crazy_diamond_summon");
     
     public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_UNSUMMON = register("crazy_diamond_unsummon");
