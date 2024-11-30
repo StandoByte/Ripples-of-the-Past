@@ -33,6 +33,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.tileentity.AbstractFurnaceTileEntity;
+import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.Explosion;
@@ -226,6 +227,11 @@ public class CommonReflection {
     private static final Method MOB_ENTITY_GET_AMBIENT_SOUND = ObfuscationReflectionHelper.findMethod(MobEntity.class, "func_184639_G");
     public static SoundEvent getAmbientSound(MobEntity entity) {
         return ReflectionUtil.invokeMethod(MOB_ENTITY_GET_AMBIENT_SOUND, entity);
+    }
+    
+    private static final Method LIVING_ENTITY_PLAY_HURT_SOUND = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "func_184581_c", DamageSource.class);
+    public static void playHurtSound(LivingEntity entity, DamageSource damageSource) {
+        ReflectionUtil.invokeMethod(LIVING_ENTITY_PLAY_HURT_SOUND, entity, damageSource);
     }
     
     

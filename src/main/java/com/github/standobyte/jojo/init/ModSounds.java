@@ -471,6 +471,9 @@ public class ModSounds {
     
     public static final OstSoundList CRAZY_DIAMOND_OST = new OstSoundList(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_ost"), SOUNDS);
     
+    // in case someone makes an Echoes addon, they'll be able to just put the sound to sounds.json
+    public static final RegistryObject<SoundEvent> KOICHI_YO_ANGELO = register("koichi_yo_angelo");
+    
     
     
     
