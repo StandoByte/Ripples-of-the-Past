@@ -1,7 +1,5 @@
 package com.github.standobyte.jojo.item;
 
-import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.entity.AngeloRockEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.ClackersEntity;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
@@ -14,7 +12,6 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.ImmutableMultimap.Builder;
 import com.google.common.collect.Multimap;
 
-import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
@@ -63,12 +60,6 @@ public class ClackersItem extends Item {
     }
     
     private void ding(World world, PlayerEntity player) {
-        if (!world.isClientSide()) {
-            ActionTarget target = ActionTarget.fromRayTraceResult(JojoModUtil.rayTrace(player, 8, e -> e instanceof LivingEntity));
-            Entity entity = target.getEntity();
-            if (entity == null) entity = player;
-            AngeloRockEntity.turnIntoRock(entity, null);
-        }
     }
 
     private static final float CHARGE_TICK_COST = 5;

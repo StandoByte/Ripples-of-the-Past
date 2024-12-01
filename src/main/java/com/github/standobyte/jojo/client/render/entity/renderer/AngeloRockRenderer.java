@@ -29,6 +29,7 @@ public class AngeloRockRenderer extends SimpleEntityRenderer<AngeloRockEntity, A
                 ResourceLocation texture = CDBlockBulletRenderer.getTexture(blockStateEntry.getKey(), TEXTURE);
                 IVertexBuilder vertexBuilder = buffer.getBuffer(model.renderType(texture));
                 model.setPiecesVisibility(blockStateEntry.getValue());
+                model.setCreationAnim(entity, entity.getCreationAnimProgress(partialTick));
                 model.renderToBuffer(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
             }
         }

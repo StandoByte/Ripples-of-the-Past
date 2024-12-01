@@ -10,6 +10,9 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.action.stand.CrazyDiamondHeal;
+import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
@@ -29,6 +32,7 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.monster.ShulkerEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.NBTUtil;
@@ -54,8 +58,12 @@ import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.registries.GameData;
 
+// TODO (angelo) render the entity during the creation anim too
 public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnData {
     protected static final DataParameter<Optional<BlockPos>> DATA_ATTACH_POS_ID = EntityDataManager.defineId(ShulkerEntity.class, DataSerializers.OPTIONAL_BLOCK_POS);
+    private static final int CREATION_ANIM_LEN = 30;
+    private int creationAnimTicks;
+    private boolean startedSound;
     /* fuck it, sure, yeah */ private MobEntity mob;
     private boolean useMobHurtSound;
     
@@ -64,7 +72,8 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
         super(pType, pLevel);
     }
     
-    public static void turnIntoRock(Entity entity, Map<BlockPos, BlockState> stoneBlocks) {
+    // TODO (angelo) item drops (+save them in NBT)
+    public static void turnIntoRock(Entity entity, @Nullable Map<BlockPos, BlockState> stoneBlocks, @Nullable List<ItemStack> drops) {
         if (!entity.level.isClientSide()) {
             AngeloRockEntity angeloRock = new AngeloRockEntity(ModEntityTypes.ANGELO_ROCK.get(), entity.level);
             int rotation = MathUtil.round(entity.yRot / 90);
@@ -76,6 +85,7 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
             }
             
             angeloRock.fillStoneBlockstates(stoneBlocks, rotation);
+            angeloRock.creationAnimTicks = CREATION_ANIM_LEN;
             
             entity.level.addFreshEntity(angeloRock);
             if (entity instanceof IPlayerPossess) {
@@ -149,6 +159,7 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
             pCompound.putInt("APY", blockpos.getY());
             pCompound.putInt("APZ", blockpos.getZ());
         }
+        pCompound.putInt("CreationAnim", creationAnimTicks);
         
         if (mob != null) {
             String s = mob.getEncodeId();
@@ -179,6 +190,7 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
         } else {
             this.entityData.set(DATA_ATTACH_POS_ID, Optional.empty());
         }
+        this.creationAnimTicks = pCompound.getInt("CreationAnim");
         
         Entity mobEntity = MCUtil.nbtGetCompoundOptional(pCompound, "AngeloMob").flatMap(mobNBT -> {
             try {
@@ -206,6 +218,27 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
     @Override
     public void tick() {
         super.tick();
+        
+        if (creationAnimTicks > 0) {
+            if (level.isClientSide()) {
+                if (ClientUtil.canSeeStands()) {
+                    CrazyDiamondHeal.addParticlesAround(this);
+                }
+                if (ClientUtil.canHearStands() && !this.isSilent()) {
+                    if (!startedSound) {
+                        ClientTickingSoundsHelper.playStoppableEntitySound(this, 
+                                ModSounds.CRAZY_DIAMOND_FIX_LOOP.get(), 1, 1, true, entity -> entity.creationAnimTicks > 0);
+                        startedSound = true;
+                    }
+                    if (creationAnimTicks == 1) {
+                        level.playSound(ClientUtil.getClientPlayer(), getX(), getY(), getZ(), 
+                                ModSounds.CRAZY_DIAMOND_FIX_ENDED.get(), getSoundSource(), 1, 1);
+                    }
+                }
+            }
+            --creationAnimTicks;
+        }
+        
         BlockPos attachPos = getAttachPosition();
         if (attachPos == null && !this.level.isClientSide) {
             attachPos = this.blockPosition();
@@ -297,6 +330,10 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
         this.entityData.set(DATA_ATTACH_POS_ID, Optional.ofNullable(pPos));
     }
     
+    public float getCreationAnimProgress(float partialTick) {
+        return creationAnimTicks == 0 ? 1 : (CREATION_ANIM_LEN - creationAnimTicks + partialTick) / CREATION_ANIM_LEN;
+    }
+    
     
     public static final int STONE_PIECES_COUNT = 16;
     private List<BlockState> stonePieces = NonNullList.withSize(STONE_PIECES_COUNT, Blocks.STONE.defaultBlockState());
@@ -319,6 +356,7 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
     
     @Override
     public void writeSpawnData(PacketBuffer buffer) {
+        buffer.writeVarInt(creationAnimTicks);
         for (int i = 0; i < STONE_PIECES_COUNT; i++) {
             BlockState block = stonePieces.get(i);
             buffer.writeVarInt(Block.getId(block));
@@ -327,6 +365,7 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
 
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
+        creationAnimTicks = additionalData.readVarInt();
         for (int i = 0; i < STONE_PIECES_COUNT; i++) {
             int blockId = additionalData.readVarInt();
             BlockState block = GameData.getBlockStateIDMap().byId(blockId);

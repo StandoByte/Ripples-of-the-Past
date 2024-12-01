@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.util.mc.damage;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
@@ -71,6 +72,7 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
     private float explosionRadius = 0;
     private DamageSource explosionDmgSource;
     private float explosionDamage;
+    public List<BlockPos> blocksDestroyedByLastExplosion;
     
     private float syoPunchBaseDamage = 0;
     private int scarletOverdriveFireTicks = 0;
@@ -86,7 +88,7 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
      * @return true if the block collision needs to be recalculated
      */
     public boolean collideBreakBlocks(Vector3d movementVec, Vector3d collidedVec, World world) {
-        if (knockbackVec == null || movementVec.lengthSqr() < 1E-07) {
+        if (!isActive() || movementVec.lengthSqr() < 1E-07) {
             return false;
         }
         
@@ -103,6 +105,7 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
         this.hadImpactWithBlock = false;
         this.attacker = attacker;
         this.attackerStandUser = attacker instanceof LivingEntity ? (StandUtil.getStandUser((LivingEntity) attacker)) : null;
+        this.blocksDestroyedByLastExplosion = null;
         return this;
     }
     
@@ -122,7 +125,7 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
     }
     
     public void tick() {
-        if (knockbackVec != null) {
+        if (isActive()) {
             if (knockbackImpactStrength <= 0) {
                 setKnockbackImpactStrength(0);
                 return;
@@ -169,9 +172,13 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
         return hadImpactWithBlock;
     }
     
+    public boolean isActive() {
+        return knockbackVec != null;
+    }
+    
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
-        if (knockbackVec != null) {
+        if (isActive()) {
             MCUtil.nbtPutVec3d(nbt, "Vec", knockbackVec);
             nbt.putDouble("Power", knockbackImpactStrength);
             nbt.putDouble("MinCos", minCos);
@@ -343,6 +350,7 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
                                     .aoeDamage(explosionDamage)
                                     .entityNoDamage(entity);
                             if (CustomExplosion.explode(explosion)) {
+                                this.blocksDestroyedByLastExplosion = explosion.getToBlow();
                                 if (doGlassBleeding.booleanValue()) {
                                     BlockShardEntity.glassShardBleeding(asLiving);
                                 }
