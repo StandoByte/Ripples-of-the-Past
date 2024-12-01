@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.item;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.AngeloRockEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.ClackersEntity;
@@ -68,8 +67,7 @@ public class ClackersItem extends Item {
             ActionTarget target = ActionTarget.fromRayTraceResult(JojoModUtil.rayTrace(player, 8, e -> e instanceof LivingEntity));
             Entity entity = target.getEntity();
             if (entity == null) entity = player;
-            JojoMod.LOGGER.debug("Yo, {}", entity.getName().getString());
-            AngeloRockEntity.turnIntoRock(entity);
+            AngeloRockEntity.turnIntoRock(entity, null);
         }
     }
 

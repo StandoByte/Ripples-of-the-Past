@@ -1,6 +1,12 @@
 package com.github.standobyte.jojo.entity;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -15,6 +21,7 @@ import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.mod.IPlayerPossess;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -23,6 +30,8 @@ import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.monster.ShulkerEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
@@ -33,12 +42,17 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
+import net.minecraft.util.NonNullList;
+import net.minecraft.util.Rotation;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
+import net.minecraftforge.registries.GameData;
 
 public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnData {
     protected static final DataParameter<Optional<BlockPos>> DATA_ATTACH_POS_ID = EntityDataManager.defineId(ShulkerEntity.class, DataSerializers.OPTIONAL_BLOCK_POS);
@@ -50,15 +64,18 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
         super(pType, pLevel);
     }
     
-    public static void turnIntoRock(Entity entity) {
+    public static void turnIntoRock(Entity entity, Map<BlockPos, BlockState> stoneBlocks) {
         if (!entity.level.isClientSide()) {
             AngeloRockEntity angeloRock = new AngeloRockEntity(ModEntityTypes.ANGELO_ROCK.get(), entity.level);
-            angeloRock.yRot = 90 * MathUtil.round(entity.yRot / 90);
+            int rotation = MathUtil.round(entity.yRot / 90);
+            angeloRock.yRot = 90 * rotation;
             angeloRock.setPos(entity.getX(), entity.getY(), entity.getZ());
             if (entity instanceof MobEntity) {
                 angeloRock.mob = (MobEntity) entity;
                 angeloRock.useMobHurtSound = CommonReflection.getAmbientSound(angeloRock.mob) == null;
             }
+            
+            angeloRock.fillStoneBlockstates(stoneBlocks, rotation);
             
             entity.level.addFreshEntity(angeloRock);
             if (entity instanceof IPlayerPossess) {
@@ -144,6 +161,12 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
                 pCompound.putBoolean("NoAmbient", useMobHurtSound);
             }
         }
+        
+        ListNBT stonePiecesNbt = new ListNBT();
+        for (BlockState blockState : stonePieces) {
+            stonePiecesNbt.add(NBTUtil.writeBlockState(blockState));
+        }
+        pCompound.put("RockPieces", stonePiecesNbt);
     }
 
     @Override
@@ -166,6 +189,18 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
         }).orElse(null);
         this.mob = mobEntity instanceof MobEntity ? (MobEntity) mobEntity : null;
         this.useMobHurtSound = pCompound.getBoolean("NoAmbient");
+        
+        MCUtil.getNbtElement(pCompound, "RockPieces", ListNBT.class).ifPresent(stonePiecesNbt -> {
+            if (stonePiecesNbt.getElementType() == Constants.NBT.TAG_COMPOUND) {
+                for (int i = 0; i < STONE_PIECES_COUNT; i++) {
+                    CompoundNBT blockNbt = stonePiecesNbt.getCompound(i);
+                    BlockState blockState = NBTUtil.readBlockState(blockNbt);
+                    if (blockState != null) {
+                        stonePieces.set(i, blockState);
+                    }
+                }
+            }
+        });
     }
     
     @Override
@@ -188,7 +223,6 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
                 this.entityData.set(DATA_ATTACH_POS_ID, moveWithPiston);
             }
         }
-
 
         if (attachPos != null) {
             setPosAndOldPos(attachPos.getX() + 0.5, attachPos.getY(), attachPos.getZ() + 0.5);
@@ -225,6 +259,7 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
         return Optional.empty();
     }
     
+    @Override
     public void setPos(double pX, double pY, double pZ) {
         super.setPos(pX, pY, pZ);
         if (this.entityData != null && this.tickCount != 0) {
@@ -261,18 +296,151 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
     public void setAttachPosition(@Nullable BlockPos pPos) {
         this.entityData.set(DATA_ATTACH_POS_ID, Optional.ofNullable(pPos));
     }
-
-
+    
+    
+    public static final int STONE_PIECES_COUNT = 16;
+    private List<BlockState> stonePieces = NonNullList.withSize(STONE_PIECES_COUNT, Blocks.STONE.defaultBlockState());
+    private Map<BlockState, int[]> stonePiecesRender;
+    
+    public Map<BlockState, int[]> getStonePiecesRender() {
+        if (stonePiecesRender == null && stonePieces != null) {
+            Map<BlockState, List<Integer>> stonePiecesRender = new HashMap<>();
+            for (int i = 0; i < stonePieces.size(); i++) {
+                BlockState blockState = stonePieces.get(i);
+                List<Integer> array = stonePiecesRender.computeIfAbsent(blockState, __ -> new ArrayList<>(STONE_PIECES_COUNT));
+                array.add(i);
+            }
+            this.stonePiecesRender = stonePiecesRender.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, 
+                    entry -> entry.getValue().stream().mapToInt(Integer::intValue).toArray()));
+        }
+        return stonePiecesRender;
+    }
+    
+    
     @Override
     public void writeSpawnData(PacketBuffer buffer) {
+        for (int i = 0; i < STONE_PIECES_COUNT; i++) {
+            BlockState block = stonePieces.get(i);
+            buffer.writeVarInt(Block.getId(block));
+        }
     }
 
     @Override
     public void readSpawnData(PacketBuffer additionalData) {
+        for (int i = 0; i < STONE_PIECES_COUNT; i++) {
+            int blockId = additionalData.readVarInt();
+            BlockState block = GameData.getBlockStateIDMap().byId(blockId);
+            if (block != null) {
+                stonePieces.set(i, block);
+            }
+        }
     }
 
     @Override
     public IPacket<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
+    }
+    
+    
+    private void fillStoneBlockstates(Map<BlockPos, BlockState> stoneBlocks, int rotationIndex) {
+        if (stoneBlocks != null && !stoneBlocks.isEmpty()) {
+            if (rotationIndex < 0) rotationIndex += 4 * ((-rotationIndex - 1) / 4 + 1);
+            rotationIndex %= 4;
+            Rotation rotation = Rotation.values()[rotationIndex];
+            int minX = Integer.MAX_VALUE;
+            int minY = Integer.MAX_VALUE;
+            int minZ = Integer.MAX_VALUE;
+            int maxX = Integer.MIN_VALUE;
+            int maxY = Integer.MIN_VALUE;
+            int maxZ = Integer.MIN_VALUE;
+            for (BlockPos blockPos : stoneBlocks.keySet()) {
+                minX = Math.min(minX, blockPos.getX());
+                minY = Math.min(minY, blockPos.getY());
+                minZ = Math.min(minZ, blockPos.getZ());
+                maxX = Math.max(maxX, blockPos.getX());
+                maxY = Math.max(maxY, blockPos.getY());
+                maxZ = Math.max(maxZ, blockPos.getZ());
+            }
+            
+            /*
+             *  y
+             *  0 x
+             * z
+             * 
+             *       8  9
+             * 0 1  10 11
+             * 2 3  12 13
+             * 4 5  14 15
+             * 6 7
+             */
+            List<List<BlockPos>> blockPosGrouped = Util.make(new ArrayList<>(), list -> {
+                for (int i = 0; i < stonePieces.size(); i++) {
+                    list.add(new ArrayList<>());
+                }
+            });
+            
+            float xDiff = (maxX - minX) / 2f;
+            float y0 = (maxY - minY) / 4f;
+            float y1 = (maxY - minY) / 2f;
+            float y2 = (maxY - minY) * 3 / 4f;
+            float zDiff = (maxZ - minZ) / 2f;
+            int flags;
+            int[] flagCombinations = new int[] {
+                    128+4+1,    64+4+1,
+                    128+8+1,    64+8+1,
+                    128+16+1,   64+16+1,
+                    128+32+1,   64+32+1,
+                    
+                    128+4+2,    64+4+2,
+                    128+8+2,    64+8+2,
+                    128+16+2,   64+16+2,
+                    128+32+2,   64+32+2,
+            };
+            for (Map.Entry<BlockPos, BlockState> block : stoneBlocks.entrySet()) {
+                BlockPos offset = block.getKey().offset(-minX, -minY, -minZ);
+                switch (rotation) {
+                case CLOCKWISE_90:
+                    offset = new BlockPos(offset.getZ(), offset.getY(), maxX - offset.getX());
+                    break;
+                case CLOCKWISE_180:
+                    offset = offset.rotate(rotation).offset(maxX, 0, maxZ);
+                    break;
+                case COUNTERCLOCKWISE_90:
+                    offset = new BlockPos(maxZ - offset.getZ(), offset.getY(), offset.getX());
+                    break;
+                default:
+                    break;
+                }
+                flags = 0;
+                if (offset.getX() <= xDiff)                     flags |= 128;
+                if (offset.getX() >= xDiff)                     flags |= 64;
+                if (offset.getY() <= y0)                        flags |= 32;
+                if (offset.getY() >= y0 && offset.getY() <= y1) flags |= 16;
+                if (offset.getY() >= y1 && offset.getY() <= y2) flags |= 8;
+                if (offset.getY() >= y2)                        flags |= 4;
+                if (offset.getZ() <= zDiff)                     flags |= 2;
+                if (offset.getZ() >= zDiff)                     flags |= 1;
+                for (int i = 0; i < flagCombinations.length; i++) {
+                    if ((flags & flagCombinations[i]) == flagCombinations[i]) {
+                        blockPosGrouped.get(i).add(block.getKey());
+                    }
+                }
+            }
+            // TODO fill in empty groups
+            
+            for (int i = 0; i < blockPosGrouped.size(); i++) {
+                List<BlockPos> posGroup = blockPosGrouped.get(i);
+                Optional<BlockState> mostCommonBlock = posGroup.stream()
+                        .map(stoneBlocks::get)
+                        .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
+                        .entrySet()
+                        .stream()
+                        .max(Map.Entry.comparingByValue())
+                        .map(Map.Entry::getKey);
+                if (mostCommonBlock.isPresent()) {
+                    stonePieces.set(i, mostCommonBlock.get());
+                }
+            }
+        }
     }
 }
