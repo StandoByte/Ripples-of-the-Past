@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.action.stand.effect.CDTurnIntoAngeloRockEffect
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.damage.KnockbackCollisionImpact;
 
 import net.minecraft.entity.Entity;
@@ -20,6 +21,7 @@ public class CrazyDiamondAngeloRock extends StandEntityActionModifier {
     }
     
     // TODO (angelo) lock the action if the stand can't break blocks due to config
+    // TODO (angelo) limit the entity types that can be affected by this
     @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
         if (power.isActive() && target.getEntity() instanceof LivingEntity) {
@@ -33,13 +35,16 @@ public class CrazyDiamondAngeloRock extends StandEntityActionModifier {
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (world.isClientSide() || task.getTarget().getType() != TargetType.ENTITY) return;
         Entity entity = task.getTarget().getEntity();
-        if (entity instanceof LivingEntity && entity.isAlive()) {
+        if (entity instanceof LivingEntity) {
             LivingEntity targetEntity = (LivingEntity) entity;
-            KnockbackCollisionImpact kbCollision = KnockbackCollisionImpact.getHandler(targetEntity).orElse(null);
-            if (kbCollision == null || !kbCollision.isActive()) {
-                return;
+            targetEntity = StandUtil.getStandUser(targetEntity);
+            if (entity.isAlive()) {
+                KnockbackCollisionImpact kbCollision = KnockbackCollisionImpact.getHandler(targetEntity).orElse(null);
+                if (kbCollision == null || !kbCollision.isActive()) {
+                    return;
+                }
+                userPower.getContinuousEffects().addEffect(new CDTurnIntoAngeloRockEffect().withTarget(targetEntity));
             }
-            userPower.getContinuousEffects().addEffect(new CDTurnIntoAngeloRockEffect().withTarget(targetEntity));
         }
     }
 }

@@ -23,7 +23,7 @@ public class EntityOwnerResolver {
         _setNewOwnerEntity(owner);
     }
     
-    public void setOwner(UUID ownerUuid) {
+    public void setOwnerUUID(UUID ownerUuid) {
         this.ownerUUID = ownerUuid;
     }
     
@@ -69,7 +69,7 @@ public class EntityOwnerResolver {
     }
     
     public void loadNbt(CompoundNBT nbt, String key) {
-        setOwner(nbt.hasUUID(key) ? nbt.getUUID(key) : null);
+        setOwnerUUID(nbt.hasUUID(key) ? nbt.getUUID(key) : null);
     }
     
     public void writeNetwork(PacketBuffer buf) {

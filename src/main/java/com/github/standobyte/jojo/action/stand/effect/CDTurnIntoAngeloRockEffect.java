@@ -109,9 +109,10 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
                 if (createRock.isPositive()) {
                     JojoModUtil.sayVoiceLine(user, ModSounds.JOSUKE_PRAY_FOR_ETERNITY.get(), null, 1, 1, 0, false);
                     // TODO (angelo) find the 2 blocks to use for angelo rock creation, restore the rest of the blocks destroyed by the explosion (non-rock blocks too)
-                    BlockState blockUpper = Blocks.GRANITE.defaultBlockState();
-                    BlockState blockLower = Blocks.DIORITE.defaultBlockState();
-                    AngeloRockEntity.turnIntoRock(target, blockUpper, blockLower, itemDrops);
+                    // TODO (angelo) set the pos of the stone to these two blocks rather than the entity's position
+                    BlockState blockUpper = Blocks.STONE.defaultBlockState();
+                    BlockState blockLower = Blocks.STONE.defaultBlockState();
+                    AngeloRockEntity.turnIntoRock(world, target, target.position(), blockUpper, blockLower, itemDrops);
                     createRock = ActionConditionResult.POSITIVE;
                 }
                 else if (user instanceof ServerPlayerEntity) {

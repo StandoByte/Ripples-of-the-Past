@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.util.mod.IPlayerPossess;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.potion.Effects;
 import net.minecraft.util.DamageSource;
 import net.minecraftforge.fml.network.NetworkEvent;
 
@@ -32,6 +33,7 @@ public class ClAngeloRockRespawnPacket {
             Entity possessed = IPlayerPossess.getPossessedEntity(player);
             if (possessed != null && possessed.getType() == ModEntityTypes.ANGELO_ROCK.get()) {
                 player.invulnerableTime = 0;
+                player.removeEffect(Effects.DAMAGE_RESISTANCE);
                 player.hurt(new DamageSource("rockRespawn").bypassArmor().bypassInvul(), Float.MAX_VALUE);
             }
         }
