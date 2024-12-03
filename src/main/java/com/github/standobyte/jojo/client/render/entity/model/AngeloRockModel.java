@@ -19,7 +19,8 @@ import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.math.MathHelper;
 
 public class AngeloRockModel extends EntityModel<AngeloRockEntity> {
-    private final ModelRenderer[] rockPieces;
+    public final ModelRenderer upperHalf;
+    public final ModelRenderer lowerHalf;
     private final Map<ModelRenderer, List<ModelRenderer.ModelBox>> allCubesByParts;
     private final List<ModelRenderer.ModelBox> allCubes;
     private float progress;
@@ -28,55 +29,46 @@ public class AngeloRockModel extends EntityModel<AngeloRockEntity> {
     public AngeloRockModel() {
         texWidth = 16;
         texHeight = 16;
-        
-        rockPieces = new ModelRenderer[AngeloRockEntity.STONE_PIECES_COUNT];
-        for (int i = 0; i < rockPieces.length; i++) {
-            rockPieces[i] = new ModelRenderer(this);
-            rockPieces[i].setPos(0.0F, 24.0F, 0.0F);
-        }
-        
-        rockPieces[0] .texOffs(-11, -6).addBox(-8.0F, -32.0F, -8.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
-        rockPieces[1] .texOffs(-11, -6).addBox(0.0F, -32.0F, -8.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
-        rockPieces[2] .texOffs(-11, -6).addBox(-8.0F, -24.0F, -8.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
-        rockPieces[3] .texOffs(-11, -6).addBox(0.0F, -24.0F, -8.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
-        rockPieces[4] .texOffs(-11, -6).addBox(-8.0F, -16.0F, -8.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
-        rockPieces[5] .texOffs(-11, -6).addBox(0.0F, -16.0F, -8.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
-        rockPieces[6] .texOffs(-11, -6).addBox(-8.0F, -8.0F, -8.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
-        rockPieces[7] .texOffs(-11, -6).addBox(0.0F, -8.0F, -8.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
-        rockPieces[8] .texOffs(-11, -6).addBox(-8.0F, -32.0F, 0.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
-        rockPieces[9] .texOffs(-11, -6).addBox(0.0F, -32.0F, 0.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
-        rockPieces[10].texOffs(-11, -6).addBox(-8.0F, -24.0F, 0.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
-        rockPieces[11].texOffs(-11, -6).addBox(0.0F, -24.0F, 0.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
-        rockPieces[12].texOffs(-11, -6).addBox(-8.0F, -16.0F, 0.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
-        rockPieces[13].texOffs(-11, -6).addBox(0.0F, -16.0F, 0.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
-        rockPieces[14].texOffs(-11, -6).addBox(-8.0F, -8.0F, 0.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
-        rockPieces[15].texOffs(-11, -6).addBox(0.0F, -8.0F, 0.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
-        
+
+        upperHalf = new ModelRenderer(this);
+        upperHalf.setPos(0.0F, 24.0F, 0.0F);
+        upperHalf.texOffs(-11, -6).addBox(-8.0F, -32.0F, -8.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
+        upperHalf.texOffs(-11, -6).addBox(0.0F, -32.0F, -8.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
+        upperHalf.texOffs(-11, -6).addBox(-8.0F, -24.0F, -8.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
+        upperHalf.texOffs(-11, -6).addBox(0.0F, -24.0F, -8.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
+        upperHalf.texOffs(-11, -6).addBox(-8.0F, -32.0F, 0.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
+        upperHalf.texOffs(-11, -6).addBox(0.0F, -32.0F, 0.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
+        upperHalf.texOffs(-11, -6).addBox(-8.0F, -24.0F, 0.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
+        upperHalf.texOffs(-11, -6).addBox(0.0F, -24.0F, 0.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
+
+        lowerHalf = new ModelRenderer(this);
+        lowerHalf.setPos(0.0F, 24.0F, 0.0F);
+        lowerHalf.texOffs(-11, -6).addBox(-8.0F, -16.0F, -8.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
+        lowerHalf.texOffs(-11, -6).addBox(0.0F, -16.0F, -8.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
+        lowerHalf.texOffs(-11, -6).addBox(-8.0F, -8.0F, -8.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
+        lowerHalf.texOffs(-11, -6).addBox(0.0F, -8.0F, -8.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
+        lowerHalf.texOffs(-11, -6).addBox(-8.0F, -16.0F, 0.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
+        lowerHalf.texOffs(-11, -6).addBox(0.0F, -16.0F, 0.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
+        lowerHalf.texOffs(-11, -6).addBox(-8.0F, -8.0F, 0.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
+        lowerHalf.texOffs(-11, -6).addBox(0.0F, -8.0F, 0.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
+
         allCubesByParts = new HashMap<>();
         allCubes = new ArrayList<>(100);
         visibleCubes = new HashSet<>();
-        for (ModelRenderer modelPart : rockPieces) {
-            allCubesByParts.put(modelPart, new ArrayList<>(modelPart.cubes));
-            allCubes.addAll(modelPart.cubes);
-        }
+        addCubesFrom(upperHalf);
+        addCubesFrom(lowerHalf);
+    }
+    
+    private void addCubesFrom(ModelRenderer modelPart) {
+        allCubesByParts.put(modelPart, new ArrayList<>(modelPart.cubes));
+        allCubes.addAll(modelPart.cubes);
     }
     
     @Override
     public void setupAnim(AngeloRockEntity pEntity, float pLimbSwing, float pLimbSwingAmount, float pAgeInTicks, float pNetHeadYaw, float pHeadPitch) {
-        for (ModelRenderer piece : rockPieces) {
-            piece.yRot = pNetHeadYaw * MathUtil.DEG_TO_RAD;
-        }
-    }
-    
-    public void setPiecesVisibility(int[] pieces) {
-        for (ModelRenderer piece : rockPieces) {
-            piece.visible = false;
-        }
-        for (int i : pieces) {
-            if (i >= 0 && i < rockPieces.length) {
-                rockPieces[i].visible = true;
-            }
-        }
+        float yRot = pNetHeadYaw * MathUtil.DEG_TO_RAD;
+        upperHalf.yRot = yRot;
+        lowerHalf.yRot = yRot;
     }
     
     public void setCreationAnim(AngeloRockEntity pEntity, float progress) {
@@ -111,9 +103,8 @@ public class AngeloRockModel extends EntityModel<AngeloRockEntity> {
         if (progress == 0) return;
         matrixStack.pushPose();
         matrixStack.translate(0, -1.5, 0);
-        for (ModelRenderer piece : rockPieces) {
-            piece.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
-        }
+        upperHalf.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
+        lowerHalf.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
         matrixStack.popPose();
     }
 

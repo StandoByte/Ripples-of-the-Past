@@ -23,6 +23,7 @@ import com.github.standobyte.jojo.util.mc.damage.KnockbackCollisionImpact;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.block.Blocks;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -107,7 +108,10 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
                 
                 if (createRock.isPositive()) {
                     JojoModUtil.sayVoiceLine(user, ModSounds.JOSUKE_PRAY_FOR_ETERNITY.get(), null, 1, 1, 0, false);
-                    AngeloRockEntity.turnIntoRock(target, blockMap, itemDrops);
+                    // TODO (angelo) find the 2 blocks to use for angelo rock creation, restore the rest of the blocks destroyed by the explosion (non-rock blocks too)
+                    BlockState blockUpper = Blocks.GRANITE.defaultBlockState();
+                    BlockState blockLower = Blocks.DIORITE.defaultBlockState();
+                    AngeloRockEntity.turnIntoRock(target, blockUpper, blockLower, itemDrops);
                     createRock = ActionConditionResult.POSITIVE;
                 }
                 else if (user instanceof ServerPlayerEntity) {

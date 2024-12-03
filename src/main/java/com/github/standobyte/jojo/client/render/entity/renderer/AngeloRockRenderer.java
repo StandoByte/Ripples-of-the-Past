@@ -1,7 +1,5 @@
 package com.github.standobyte.jojo.client.render.entity.renderer;
 
-import java.util.Map;
-
 import com.github.standobyte.jojo.client.render.entity.model.AngeloRockModel;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.CDBlockBulletRenderer;
 import com.github.standobyte.jojo.entity.AngeloRockEntity;
@@ -23,16 +21,29 @@ public class AngeloRockRenderer extends SimpleEntityRenderer<AngeloRockEntity, A
     
     @Override
     protected void doRender(AngeloRockEntity entity, AngeloRockModel model, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
-        Map<BlockState, int[]> blocksForPieces = entity.getStonePiecesRender();
-        if (blocksForPieces != null && !blocksForPieces.isEmpty()) {
-            for (Map.Entry<BlockState, int[]> blockStateEntry : blocksForPieces.entrySet()) {
-                ResourceLocation texture = CDBlockBulletRenderer.getTexture(blockStateEntry.getKey(), TEXTURE);
-                IVertexBuilder vertexBuilder = buffer.getBuffer(model.renderType(texture));
-                model.setPiecesVisibility(blockStateEntry.getValue());
-                model.setCreationAnim(entity, entity.getCreationAnimProgress(partialTick));
-                model.renderToBuffer(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
-            }
+        BlockState blockUpper = entity.getUpperBlock();
+        BlockState blockLower = entity.getLowerBlock();
+        if (blockUpper.equals(blockLower)) {
+            model.upperHalf.visible = true;
+            model.lowerHalf.visible = true;
+            renderRockPart(entity, blockUpper, model, partialTick, matrixStack, buffer, packedLight);
         }
+        else {
+            model.upperHalf.visible = true;
+            model.lowerHalf.visible = false;
+            renderRockPart(entity, blockUpper, model, partialTick, matrixStack, buffer, packedLight);
+            model.upperHalf.visible = false;
+            model.lowerHalf.visible = true;
+            renderRockPart(entity, blockLower, model, partialTick, matrixStack, buffer, packedLight);
+        }
+    }
+    
+    private void renderRockPart(AngeloRockEntity entity, BlockState blockState, AngeloRockModel model, 
+            float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
+        ResourceLocation texture = CDBlockBulletRenderer.getTexture(blockState, TEXTURE);
+        IVertexBuilder vertexBuilder = buffer.getBuffer(model.renderType(texture));
+        model.setCreationAnim(entity, entity.getCreationAnimProgress(partialTick));
+        model.renderToBuffer(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);
     }
     
 }

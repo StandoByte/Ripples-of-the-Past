@@ -1,12 +1,7 @@
 package com.github.standobyte.jojo.entity;
 
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
@@ -47,9 +42,7 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.NonNullList;
-import net.minecraft.util.Rotation;
 import net.minecraft.util.SoundEvent;
-import net.minecraft.util.Util;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
@@ -58,7 +51,7 @@ import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.registries.GameData;
 
-// TODO (angelo) render the entity during the creation anim too
+// TODO (angelo) render the entity during the creation anim
 public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnData {
     protected static final DataParameter<Optional<BlockPos>> DATA_ATTACH_POS_ID = EntityDataManager.defineId(ShulkerEntity.class, DataSerializers.OPTIONAL_BLOCK_POS);
     private static final int CREATION_ANIM_LEN = 30;
@@ -73,7 +66,7 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
     }
     
     // TODO (angelo) item drops (+save them in NBT)
-    public static void turnIntoRock(Entity entity, @Nullable Map<BlockPos, BlockState> stoneBlocks, @Nullable List<ItemStack> drops) {
+    public static void turnIntoRock(Entity entity, @Nullable BlockState upperBlock, @Nullable BlockState lowerBlock, @Nullable List<ItemStack> drops) {
         if (!entity.level.isClientSide()) {
             AngeloRockEntity angeloRock = new AngeloRockEntity(ModEntityTypes.ANGELO_ROCK.get(), entity.level);
             int rotation = MathUtil.round(entity.yRot / 90);
@@ -84,7 +77,8 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
                 angeloRock.useMobHurtSound = CommonReflection.getAmbientSound(angeloRock.mob) == null;
             }
             
-            angeloRock.fillStoneBlockstates(stoneBlocks, rotation);
+            angeloRock.setUpperBlock(upperBlock);
+            angeloRock.setLowerBlock(lowerBlock);
             angeloRock.creationAnimTicks = CREATION_ANIM_LEN;
             
             entity.level.addFreshEntity(angeloRock);
@@ -335,22 +329,23 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
     }
     
     
-    public static final int STONE_PIECES_COUNT = 16;
-    private List<BlockState> stonePieces = NonNullList.withSize(STONE_PIECES_COUNT, Blocks.STONE.defaultBlockState());
-    private Map<BlockState, int[]> stonePiecesRender;
+    private static final int STONE_PIECES_COUNT = 2;
+    private List<BlockState> stonePieces = NonNullList.withSize(2, Blocks.STONE.defaultBlockState());
     
-    public Map<BlockState, int[]> getStonePiecesRender() {
-        if (stonePiecesRender == null && stonePieces != null) {
-            Map<BlockState, List<Integer>> stonePiecesRender = new HashMap<>();
-            for (int i = 0; i < stonePieces.size(); i++) {
-                BlockState blockState = stonePieces.get(i);
-                List<Integer> array = stonePiecesRender.computeIfAbsent(blockState, __ -> new ArrayList<>(STONE_PIECES_COUNT));
-                array.add(i);
-            }
-            this.stonePiecesRender = stonePiecesRender.entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey, 
-                    entry -> entry.getValue().stream().mapToInt(Integer::intValue).toArray()));
-        }
-        return stonePiecesRender;
+    public BlockState getUpperBlock() {
+        return stonePieces.get(0);
+    }
+    
+    public BlockState getLowerBlock() {
+        return stonePieces.get(1);
+    }
+    
+    private void setUpperBlock(BlockState block) {
+        if (block != null) stonePieces.set(0, block);
+    }
+    
+    private void setLowerBlock(BlockState block) {
+        if (block != null) stonePieces.set(1, block);
     }
     
     
@@ -378,108 +373,5 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
     @Override
     public IPacket<?> getAddEntityPacket() {
         return NetworkHooks.getEntitySpawningPacket(this);
-    }
-    
-    
-    private void fillStoneBlockstates(Map<BlockPos, BlockState> stoneBlocks, int rotationIndex) {
-        if (stoneBlocks != null && !stoneBlocks.isEmpty()) {
-            if (rotationIndex < 0) rotationIndex += 4 * ((-rotationIndex - 1) / 4 + 1);
-            rotationIndex %= 4;
-            Rotation rotation = Rotation.values()[rotationIndex];
-            int minX = Integer.MAX_VALUE;
-            int minY = Integer.MAX_VALUE;
-            int minZ = Integer.MAX_VALUE;
-            int maxX = Integer.MIN_VALUE;
-            int maxY = Integer.MIN_VALUE;
-            int maxZ = Integer.MIN_VALUE;
-            for (BlockPos blockPos : stoneBlocks.keySet()) {
-                minX = Math.min(minX, blockPos.getX());
-                minY = Math.min(minY, blockPos.getY());
-                minZ = Math.min(minZ, blockPos.getZ());
-                maxX = Math.max(maxX, blockPos.getX());
-                maxY = Math.max(maxY, blockPos.getY());
-                maxZ = Math.max(maxZ, blockPos.getZ());
-            }
-            
-            /*
-             *  y
-             *  0 x
-             * z
-             * 
-             *       8  9
-             * 0 1  10 11
-             * 2 3  12 13
-             * 4 5  14 15
-             * 6 7
-             */
-            List<List<BlockPos>> blockPosGrouped = Util.make(new ArrayList<>(), list -> {
-                for (int i = 0; i < stonePieces.size(); i++) {
-                    list.add(new ArrayList<>());
-                }
-            });
-            
-            float xDiff = (maxX - minX) / 2f;
-            float y0 = (maxY - minY) / 4f;
-            float y1 = (maxY - minY) / 2f;
-            float y2 = (maxY - minY) * 3 / 4f;
-            float zDiff = (maxZ - minZ) / 2f;
-            int flags;
-            int[] flagCombinations = new int[] {
-                    128+4+1,    64+4+1,
-                    128+8+1,    64+8+1,
-                    128+16+1,   64+16+1,
-                    128+32+1,   64+32+1,
-                    
-                    128+4+2,    64+4+2,
-                    128+8+2,    64+8+2,
-                    128+16+2,   64+16+2,
-                    128+32+2,   64+32+2,
-            };
-            for (Map.Entry<BlockPos, BlockState> block : stoneBlocks.entrySet()) {
-                BlockPos offset = block.getKey().offset(-minX, -minY, -minZ);
-                switch (rotation) {
-                case CLOCKWISE_90:
-                    offset = new BlockPos(offset.getZ(), offset.getY(), maxX - offset.getX());
-                    break;
-                case CLOCKWISE_180:
-                    offset = offset.rotate(rotation).offset(maxX, 0, maxZ);
-                    break;
-                case COUNTERCLOCKWISE_90:
-                    offset = new BlockPos(maxZ - offset.getZ(), offset.getY(), offset.getX());
-                    break;
-                default:
-                    break;
-                }
-                flags = 0;
-                if (offset.getX() <= xDiff)                     flags |= 128;
-                if (offset.getX() >= xDiff)                     flags |= 64;
-                if (offset.getY() <= y0)                        flags |= 32;
-                if (offset.getY() >= y0 && offset.getY() <= y1) flags |= 16;
-                if (offset.getY() >= y1 && offset.getY() <= y2) flags |= 8;
-                if (offset.getY() >= y2)                        flags |= 4;
-                if (offset.getZ() <= zDiff)                     flags |= 2;
-                if (offset.getZ() >= zDiff)                     flags |= 1;
-                for (int i = 0; i < flagCombinations.length; i++) {
-                    if ((flags & flagCombinations[i]) == flagCombinations[i]) {
-                        blockPosGrouped.get(i).add(block.getKey());
-                    }
-                }
-            }
-            // TODO fill in empty groups
-            
-            for (int i = 0; i < blockPosGrouped.size(); i++) {
-                List<BlockPos> posGroup = blockPosGrouped.get(i);
-                Optional<BlockState> mostCommonBlock = posGroup.stream()
-                        .map(stoneBlocks::get)
-                        .collect(Collectors.groupingBy(Function.identity(), Collectors.counting()))
-                        .entrySet()
-                        .stream()
-                        .max(Map.Entry.comparingByValue())
-                        .map(Map.Entry::getKey);
-                if (mostCommonBlock.isPresent()) {
-                    stonePieces.set(i, mostCommonBlock.get());
-                }
-            }
-        }
     }
 }
