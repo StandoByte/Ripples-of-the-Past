@@ -247,6 +247,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
         if (cameraEntity != null) {
             thisAsPlayer.setCamera(cameraEntity);
         }
+        turnedIntoAngeloRock = cameraEntity != null && cameraEntity.getType() == ModEntityTypes.ANGELO_ROCK.get();
     }
 
     @Override
