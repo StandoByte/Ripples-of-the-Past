@@ -17,6 +17,7 @@ import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrPossessEntityPacket;
 import com.github.standobyte.jojo.util.mc.EntityOwnerResolver;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.IPlayerLeap;
 import com.github.standobyte.jojo.util.mod.IPlayerPossess;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -29,10 +30,15 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.DamageSource;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.GameType;
 import net.minecraft.world.World;
+import net.minecraftforge.common.util.Constants;
+import net.minecraftforge.registries.ForgeRegistry;
+import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
+import net.minecraftforge.registries.RegistryManager;
 
 @Mixin(PlayerEntity.class)
 public abstract class PlayerEntityMixin extends LivingEntityMixin implements PlayerMixinExtension, IPlayerLeap, IPlayerPossess {
@@ -197,41 +203,39 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
     
     @Override
     public void toNBT(CompoundNBT forgeCapNbt) {
-//        jojoPossessedEntity.saveNbt(forgeCapNbt, "Possessed");
-//        jojoPossessPrevGameMode.ifPresent(gameMode -> forgeCapNbt.putString("PossessPrevMode", gameMode.name()));
-//        forgeCapNbt.putBoolean("PossessAsAlive", jojoPossessingAsAlive);
-//        if (jojoPossessionContext != null) {
-//            CompoundNBT ctxNbt = new CompoundNBT();
-//            IForgeRegistry<?> retrievedRegistry = RegistryManager.ACTIVE.getRegistry(jojoPossessionContext.getRegistryType());
-//            if (retrievedRegistry != null) {
-//                ctxNbt.putString("Registry", retrievedRegistry.getRegistryName().toString());
-//                ctxNbt.putString("Obj", jojoPossessionContext.getRegistryName().toString());
-//                forgeCapNbt.put("Ctx", ctxNbt);
-//            }
-//        }
-//        forgeCapNbt.putBoolean("AngeloRock", turnedIntoAngeloRock);
+        jojoPossessedEntity.saveNbt(forgeCapNbt, "Possessed");
+        jojoPossessPrevGameMode.ifPresent(gameMode -> forgeCapNbt.putString("PossessPrevMode", gameMode.getName()));
+        forgeCapNbt.putBoolean("PossessAsAlive", jojoPossessingAsAlive);
+        if (jojoPossessionContext != null) {
+            CompoundNBT ctxNbt = new CompoundNBT();
+            IForgeRegistry<?> retrievedRegistry = RegistryManager.ACTIVE.getRegistry(jojoPossessionContext.getRegistryType());
+            if (retrievedRegistry != null) {
+                ctxNbt.putString("Registry", retrievedRegistry.getRegistryName().toString());
+                ctxNbt.putString("Obj", jojoPossessionContext.getRegistryName().toString());
+                forgeCapNbt.put("Ctx", ctxNbt);
+            }
+        }
     }
     
     @Override
     public void fromNBT(CompoundNBT forgeCapNbt) {
-//        jojoPossessedEntity.loadNbt(forgeCapNbt, "Possessed");
-//        jojoPossessPrevGameMode = Optional.ofNullable(GameType.byName(forgeCapNbt.getString("PossessPrevMode"), null));
-//        jojoPossessingAsAlive = forgeCapNbt.getBoolean("PossessAsAlive");
-//        jojoPossessionContext = MCUtil.nbtGetCompoundOptional(forgeCapNbt, "Ctx").map(ctxNbt -> {
-//            if (ctxNbt.contains("Registry", Constants.NBT.TAG_STRING) && ctxNbt.contains("Obj", Constants.NBT.TAG_STRING)) {
-//                ResourceLocation registryId = new ResourceLocation(ctxNbt.getString("Registry"));
-//                ForgeRegistry<?> registry = RegistryManager.ACTIVE.getRegistry(registryId);
-//                if (registry != null) {
-//                    ResourceLocation objId = new ResourceLocation(ctxNbt.getString("Obj"));
-//                    if (registry.containsKey(objId)) {
-//                        return registry.getValue(objId);
-//                    }
-//                }
-//            }
-//            
-//            return null;
-//        }).orElse(null);
-//        turnedIntoAngeloRock = forgeCapNbt.getBoolean("AngeloRock");
+        jojoPossessedEntity.loadNbt(forgeCapNbt, "Possessed");
+        jojoPossessPrevGameMode = Optional.ofNullable(GameType.byName(forgeCapNbt.getString("PossessPrevMode"), null));
+        jojoPossessingAsAlive = forgeCapNbt.getBoolean("PossessAsAlive");
+        jojoPossessionContext = MCUtil.nbtGetCompoundOptional(forgeCapNbt, "Ctx").map(ctxNbt -> {
+            if (ctxNbt.contains("Registry", Constants.NBT.TAG_STRING) && ctxNbt.contains("Obj", Constants.NBT.TAG_STRING)) {
+                ResourceLocation registryId = new ResourceLocation(ctxNbt.getString("Registry"));
+                ForgeRegistry<?> registry = RegistryManager.ACTIVE.getRegistry(registryId);
+                if (registry != null) {
+                    ResourceLocation objId = new ResourceLocation(ctxNbt.getString("Obj"));
+                    if (registry.containsKey(objId)) {
+                        return registry.getValue(objId);
+                    }
+                }
+            }
+            
+            return null;
+        }).orElse(null);
     }
 
     @Override
@@ -239,6 +243,10 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
         PacketManager.sendToClient(new TrPossessEntityPacket(this.getId(), 
                 jojoPossessedEntity.getNetworkId(), jojoPossessingAsAlive, 
                 jojoPossessPrevGameMode, jojoPossessionContext), thisAsPlayer);
+        Entity cameraEntity = jojoPossessedEntity.getEntity(level);
+        if (cameraEntity != null) {
+            thisAsPlayer.setCamera(cameraEntity);
+        }
     }
 
     @Override
