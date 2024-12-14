@@ -1,17 +1,17 @@
 package com.github.standobyte.jojo.action.stand.effect;
 
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-
-import org.apache.commons.lang3.tuple.Pair;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
-import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockBullet;
+import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.capability.chunk.ChunkCap;
 import com.github.standobyte.jojo.capability.chunk.ChunkCap.PrevBlockInfo;
 import com.github.standobyte.jojo.capability.chunk.ChunkCapProvider;
@@ -19,16 +19,23 @@ import com.github.standobyte.jojo.entity.AngeloRockEntity;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
+import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.damage.KnockbackCollisionImpact;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
+import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2IntMap;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
+import net.minecraft.block.material.Material;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
 // TODO (angelo) keep the effect while the rock is forming; remove it only when the rock is complete
@@ -62,64 +69,126 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
                 return;
             }
             else {
-                ActionConditionResult createRock = ActionConditionResult.POSITIVE;
-                List<BlockPos> brokenBlocks = kbCollision.blocksDestroyedByLastExplosion;
-                if (brokenBlocks == null || brokenBlocks.isEmpty()) {
-                    createRock = Action.conditionMessage("angelo_no_block_broken");
+                ActionConditionResult tryStartAngeloRock = tryStartAngeloRock(target, kbCollision);
+                if (tryStartAngeloRock.isPositive()) {
+                    remove();
                 }
-                
-                Map<BlockPos, BlockState> blockMap = null;
-                List<ItemStack> itemDrops = null;
-                if (createRock.isPositive()) {
-                    // TODO (angelo) item drops
-                    Map<ChunkPos, Optional<ChunkCap>> chunkCache = new HashMap<>();
-                    blockMap = brokenBlocks.stream()
-                            .map(blockPos -> {
-                                ChunkPos chunkPos = new ChunkPos(blockPos);
-                                Optional<ChunkCap> chunkData = chunkCache.computeIfAbsent(chunkPos, pos -> {
-                                    Chunk chunk = target.level.getChunk(pos.x, pos.z);
-                                    return Optional.ofNullable(chunk).flatMap(c -> c.getCapability(ChunkCapProvider.CAPABILITY).resolve());
-                                });
-                                PrevBlockInfo prevBlock = chunkData.map(chunk -> chunk.getBrokenBlockAt(blockPos)).orElse(null);
-                                if (prevBlock == null) return null;
-                                BlockState blockState = prevBlock.state;
-                                // TODO (angelo) should it be limited to solid blocks or rock blocks? (angelo_no_block_broken message)
-                                if (!CrazyDiamondBlockBullet.hardMaterial(blockState)) return null;
-                                // TODO (angelo) consume items and xp
-                                // TODO (angelo) btw mobs can also pick up dropped blocks
-                                prevBlock.onRestore();
-                                // TODO (angelo) adjust the alrogithm for block breaking from kb impact, then uncomment this
-//                                chunkData.ifPresent(chunk -> chunk.removeBrokenBlock(blockPos));
-                                return Pair.of(blockPos, prevBlock);
-                            })
-                            .filter(Objects::nonNull)
-                            .collect(Collectors.toMap(Pair::getKey, entry -> entry.getValue().state));
-                    if (blockMap.isEmpty()) {
-                        createRock = Action.conditionMessage("angelo_no_block_broken");
+                else {
+                    if (user instanceof ServerPlayerEntity) {
+                        ActionConditionResult.sendActionFailedMessage(ModStandsInit.CRAZY_DIAMOND_ANGELO_ROCK.get(), tryStartAngeloRock, user);
                     }
+                    remove();
                 }
-                
-                if (createRock.isPositive()) {
-                    // TODO (angelo) check the target's hp
-                    if (false) {
-                        createRock = Action.conditionMessage("target_too_many_health");
-                    }
-                }
-                
-                if (createRock.isPositive()) {
-                    JojoModUtil.sayVoiceLine(user, ModSounds.JOSUKE_PRAY_FOR_ETERNITY.get(), null, 1, 1, 0, false);
-                    // TODO (angelo) find the 2 blocks to use for angelo rock creation, restore the rest of the blocks destroyed by the explosion (non-rock blocks too)
-                    // TODO (angelo) set the pos of the stone to these two blocks rather than the entity's position
-                    BlockState blockUpper = Blocks.STONE.defaultBlockState();
-                    BlockState blockLower = Blocks.STONE.defaultBlockState();
-                    AngeloRockEntity.turnIntoRock(world, target, target.position(), blockUpper, blockLower, itemDrops);
-                    createRock = ActionConditionResult.POSITIVE;
-                }
-                else if (user instanceof ServerPlayerEntity) {
-                    ActionConditionResult.sendActionFailedMessage(ModStandsInit.CRAZY_DIAMOND_ANGELO_ROCK.get(), createRock, user);
-                }
-                remove();
             }
+        }
+    }
+    
+    @SuppressWarnings("deprecation")
+    private ActionConditionResult tryStartAngeloRock(LivingEntity target, KnockbackCollisionImpact kbCollision) {
+        List<BlockPos> brokenBlocksPos = kbCollision.blocksDestroyedByLastExplosion;
+        if (brokenBlocksPos == null || brokenBlocksPos.isEmpty()) {
+            return Action.conditionMessage("angelo_no_block_broken");
+        }
+        
+        // TODO (angelo) check the target's hp
+        if (false) {
+            return Action.conditionMessage("target_too_many_health");
+        }
+        
+        Direction angeloRockFace = Direction.fromYRot(MathUtil.round(target.yRot / 90));
+        Map<ChunkPos, Optional<ChunkCap>> chunkCache = new HashMap<>();
+        Map<BlockPos, PrevBlockInfo> brokenBlocks = brokenBlocksPos.stream()
+                .map(blockPos -> {
+                    ChunkPos chunkPos = new ChunkPos(blockPos);
+                    Optional<ChunkCap> chunkData = chunkCache.computeIfAbsent(chunkPos, pos -> {
+                        Chunk chunk = target.level.getChunk(pos.x, pos.z);
+                        return Optional.ofNullable(chunk).flatMap(c -> c.getCapability(ChunkCapProvider.CAPABILITY).resolve());
+                    });
+                    PrevBlockInfo prevBlock = chunkData.map(chunk -> chunk.getBrokenBlockAt(blockPos)).orElse(null);
+                    return prevBlock;
+                })
+                .filter(Objects::nonNull)
+                .collect(Collectors.toMap(block -> block.pos, Function.identity()));
+        
+        Object2IntMap<PrevBlockInfo> angeloStonePosPriority = new Object2IntArrayMap<>();
+        for (PrevBlockInfo brokenBlock : brokenBlocks.values()) {
+            // TODO (angelo) handle the case where there are no 2-block tall stone pillars, +the most prioritized spot can have a block at the upperBlock spot
+            if (brokenBlock.state.getMaterial() != Material.STONE) {
+                continue;
+            }
+            
+            BlockPos pos = brokenBlock.pos;
+            int priority = 0;
+            PrevBlockInfo topBlock = brokenBlocks.get(pos.above());
+            if (topBlock != null && topBlock.state.getMaterial() == Material.STONE) {
+                priority += 64;
+            }
+            
+            BlockPos checkPos = pos.below();
+            if (Block.isFaceFull(getBlockAfterRestore(world, checkPos, brokenBlocks).getCollisionShape(world, checkPos), Direction.UP)) {
+                priority += 32;
+            }
+            
+            checkPos = pos.offset(0, 2, 0);
+            if (getBlockAfterRestore(world, checkPos, brokenBlocks).isAir(world, checkPos)) {
+                priority += 1;
+            }
+            
+            for (Direction direction : Direction.Plane.HORIZONTAL) {
+                checkPos = pos.offset(direction.getNormal());
+                if (getBlockAfterRestore(world, checkPos, brokenBlocks).isAir(world, checkPos)) {
+                    priority += direction == angeloRockFace ? 8 : 2;
+                }
+                
+                checkPos = checkPos.above();
+                if (getBlockAfterRestore(world, checkPos, brokenBlocks).isAir(world, checkPos)) {
+                    priority += direction == angeloRockFace ? 8 : 2;
+                }
+            }
+            
+            angeloStonePosPriority.put(brokenBlock, priority);
+        }
+        if (angeloStonePosPriority.isEmpty()) {
+            return Action.conditionMessage("angelo_no_block_broken");
+        }
+        
+        PrevBlockInfo blockLower;
+        Optional<PrevBlockInfo> blockUpper;
+        Vector3d targetPos = target.position();
+        int maxPriority = angeloStonePosPriority.values().stream().max(Integer::compare).get();
+        blockLower = angeloStonePosPriority.object2IntEntrySet().stream()
+                .filter(entry -> entry.getIntValue() == maxPriority)
+                .min(Comparator.comparingDouble(entry -> Vector3d.atCenterOf(entry.getKey().pos).distanceToSqr(targetPos)))
+                .map(Object2IntMap.Entry::getKey)
+                .get();
+        blockUpper = Optional.ofNullable(brokenBlocks.get(blockLower.pos.above()));
+        
+        chunkCache.get(new ChunkPos(blockLower.pos)).ifPresent(blocksData -> {
+            blocksData.removeBrokenBlock(blockLower.pos);
+            blockUpper.ifPresent(block -> blocksData.removeBrokenBlock(block.pos));
+        });
+        brokenBlocks.remove(blockLower.pos);
+        blockUpper.ifPresent(block -> brokenBlocks.remove(block.pos));
+        // TODO (angelo) item drops
+        List<ItemStack> itemDrops = null;
+        
+        // TODO (angelo) restore the rest of the blocks destroyed by the explosion
+        // TODO (angelo) consume items and xp
+        // TODO (angelo) btw mobs can also pick up dropped blocks
+        
+        JojoModUtil.sayVoiceLine(user, ModSounds.JOSUKE_PRAY_FOR_ETERNITY.get(), null, 1, 1, 0, false);
+        AngeloRockEntity.turnIntoRock(world, target, Vector3d.atBottomCenterOf(blockLower.pos), angeloRockFace.toYRot(), 
+                blockUpper.map(block -> block.state).orElse(blockLower.state), blockLower.state, itemDrops);
+        return ActionConditionResult.POSITIVE;
+    }
+    
+    private static BlockState getBlockAfterRestore(World world, BlockPos blockPos, Map<BlockPos, PrevBlockInfo> brokenBlocks) {
+        PrevBlockInfo willRestore = brokenBlocks.get(blockPos);
+        if (willRestore != null && CrazyDiamondRestoreTerrain.blockCanBePlaced(world, blockPos, willRestore.state)) {
+            return willRestore.state;
+        }
+        else {
+            return world.getBlockState(blockPos);
         }
     }
 

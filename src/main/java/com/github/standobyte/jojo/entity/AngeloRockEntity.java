@@ -15,7 +15,6 @@ import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
-import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.EntityOwnerResolver;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
@@ -57,7 +56,12 @@ import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.registries.GameData;
 
-// TODO (angelo) if the Crazy D user dies and this is in the process of being made, remove this
+// TODO (angelo) if the Crazy D user dies and this is in the process of being made, break this
+// TODO (angelo) when it's broken:
+//                  particles and block break sound
+//                  remember as broken block for CD
+//                      only if the upper block wasn't copied from lower block
+//                  item drops
 public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnData {
     protected static final DataParameter<Optional<BlockPos>> DATA_ATTACH_POS_ID = EntityDataManager.defineId(AngeloRockEntity.class, DataSerializers.OPTIONAL_BLOCK_POS);
     protected static final DataParameter<Boolean> CREATION_COMPLETE = EntityDataManager.defineId(AngeloRockEntity.class, DataSerializers.BOOLEAN);
@@ -74,17 +78,14 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
     }
     
     // TODO (angelo) item drops (+save them in NBT)
-    public static AngeloRockEntity turnIntoRock(World world, Entity entity, Vector3d rockPos, 
+    public static AngeloRockEntity turnIntoRock(World world, Entity entity, Vector3d rockPos, float yRot, 
             @Nullable BlockState upperBlock, @Nullable BlockState lowerBlock, @Nullable List<ItemStack> drops) {
         if (world.isClientSide()) {
             return null;
         }
         
         AngeloRockEntity angeloRock = new AngeloRockEntity(ModEntityTypes.ANGELO_ROCK.get(), world);
-        if (entity != null) {
-            int rotation = MathUtil.round(entity.yRot / 90);
-            angeloRock.yRot = 90 * rotation;
-        }
+        angeloRock.yRot = yRot;
         angeloRock.setPos(rockPos.x, rockPos.y, rockPos.z);
         if (entity instanceof MobEntity) {
             angeloRock.mob = (MobEntity) entity;

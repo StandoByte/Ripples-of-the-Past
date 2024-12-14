@@ -1323,7 +1323,7 @@
   "jojo.message.action_condition.cd_heal_self": "Вы не можете исцелить самого себя",
   "jojo.message.action_condition.heal_target": "Эту сущность нельзя исцелить",
   "_jojo.message.action_condition.item_block_origin": "You need an anchor block in your hand",
-  "_jojo.message.action_condition.no_rock_broken": "The target did not collide with any solid blocks",
+  "_jojo.message.action_condition.angelo_no_block_broken": "The target did not collide with any stone blocks",
   "jojo.subtitle.crazy_diamond_name": "\"Crazy Diamond!\"",
   "jojo.subtitle.fix": "\"Восстанови!\"",
   "jojo.subtitle.pray_for_eternity": "\"Раскаивайся вечно!\"",

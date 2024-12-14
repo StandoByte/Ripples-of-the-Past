@@ -99,8 +99,6 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
             List<ItemEntity> itemsAround = world.getEntitiesOfClass(ItemEntity.class, 
                     cameraEntity.getBoundingBox().inflate(manhattanRange * 2),
                     entity -> entity.isAlive());
-            Set<BlockPos> blocksPlaced = new HashSet<>();
-            Set<BlockPos> blocksToForget = new HashSet<>();
             Vector3i eyePos = eyePos(cameraEntity);
             Vector3d lookVec = cameraEntity.getLookAngle();
             Vector3d eyePosD = cameraEntity.getEyePosition(1.0F);
@@ -112,35 +110,15 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
             Stream<PrevBlockInfo> blocks = getBlocksInRange(world, user, eyePos, manhattanRange, 
                     block -> blockPosSelectedForRestoration(block, cameraEntity, lookVec, eyePosD, eyePos, resolveEffect, onlyAimedAt));
             
-            blocks
-            .filter(block -> {
-                if (restorationExclude(block, world)) {
-                    return false;
-                }
-                if (blockCanBePlaced(world, block.pos, block.state)) {
-                    return true;
-                }
-                blocksToForget.add(block.pos);
-                return false;
-            })
-            .sorted(Comparator
+            Set<BlockPos> blocksPlaced = restoreBlocks(world, blocks, 
+                    Comparator
                     .comparingInt((PrevBlockInfo block) -> restorationPriority(block, world))
-                    .thenComparingInt((PrevBlockInfo block) -> block.pos.distManhattan(eyePos)))
-            .limit(blocksToRestore)
-            .forEach(block -> {
-                if (block.onRestore() && tryPlaceBlock(world, block.pos, block.state, blocksPlaced, 
-                        creative, block.drops, block.getDroppedXp(), playerUser, userInventory, itemsAround, 
-                        resolveEffect && !onlyAimedAt)) {
-                    blocksToForget.add(block.pos);
-                }
-            });
+                    .thenComparingInt((PrevBlockInfo block) -> block.pos.distManhattan(eyePos)), 
+                    blocksToRestore, 
+                    creative, resolveEffect && !onlyAimedAt, true, 
+                    playerUser, userInventory, itemsAround, standEntity);
             
             userPower.consumeStamina(staminaPerBlock * blocksPlaced.size());
-            
-            if (!blocksPlaced.isEmpty()) {
-                PacketManager.sendToClientsTracking(new CDBlocksRestoredPacket(blocksPlaced), standEntity);
-            }
-            forgetBrokenBlocks(world, blocksToForget);
         }
     }
     
@@ -179,7 +157,53 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
     
 
     private static final Random RANDOM = new Random();
-    private static boolean tryPlaceBlock(World world, BlockPos blockPos, BlockState blockState, Set<BlockPos> placedBlocks, boolean isCreative, 
+    public static Set<BlockPos> restoreBlocks(World world, Stream<PrevBlockInfo> blocks, 
+            Comparator<PrevBlockInfo> sort, long limit, 
+            boolean isCreative, boolean randomizePos, boolean forgetFailed, 
+            @Nullable PlayerEntity playerWithXp, @Nullable IInventory userInventory, List<ItemEntity> itemEntities, StandEntity standEntity) {
+        if (limit == 0) return new HashSet<>();
+        
+        Set<BlockPos> blocksPlaced = new HashSet<>();
+        Set<BlockPos> blocksToForget = new HashSet<>();
+        
+        blocks = blocks
+        .filter(block -> {
+            if (restorationExclude(block, world)) {
+                return false;
+            }
+            if (blockCanBePlaced(world, block.pos, block.state)) {
+                return true;
+            }
+            if (forgetFailed) {
+                blocksToForget.add(block.pos);
+            }
+            return false;
+        });
+        if (sort != null) {
+            blocks = blocks.sorted(sort);
+        }
+        if (limit >= 0) {
+            blocks = blocks.limit(limit);
+        }
+        
+        blocks.forEach(block -> {
+            if (block.onRestore() && tryPlaceBlock(world, block.pos, block.state, isCreative, 
+                    block.drops, block.getDroppedXp(), playerWithXp, userInventory, itemEntities, 
+                    randomizePos)) {
+                blocksPlaced.add(block.pos);
+                blocksToForget.add(block.pos);
+            }
+        });
+        
+        if (!blocksPlaced.isEmpty()) {
+            PacketManager.sendToClientsTracking(new CDBlocksRestoredPacket(blocksPlaced), standEntity);
+        }
+        forgetBrokenBlocks(world, blocksToForget);
+        
+        return blocksPlaced;
+    }
+    
+    private static boolean tryPlaceBlock(World world, BlockPos blockPos, BlockState blockState, boolean isCreative, 
             List<ItemStack> restorationCost, int xpCost, @Nullable PlayerEntity playerWithXp, @Nullable IInventory userInventory, List<ItemEntity> itemEntities, 
             boolean randomizePos) {
         if (xpCost > 0 && (playerWithXp == null || playerWithXp.totalExperience < xpCost)) {
@@ -204,7 +228,6 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
             }
             blockState = Block.updateFromNeighbourShapes(blockState, world, blockPos);
             world.setBlockAndUpdate(blockPos, blockState);
-            placedBlocks.add(blockPos);
             return true;
         }
         else {
@@ -328,7 +351,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         }
     }
     
-    private static void forgetBrokenBlocks(World world, Collection<BlockPos> posCollection) {
+    public static void forgetBrokenBlocks(World world, Collection<BlockPos> posCollection) {
         posCollection.stream()
         .map(pos -> world.getChunk(pos))
         .distinct()
