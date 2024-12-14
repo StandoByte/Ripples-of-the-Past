@@ -47,4 +47,9 @@ public class CrazyDiamondAngeloRock extends StandEntityActionModifier {
             }
         }
     }
+    
+    @Override
+    public boolean makesAttackNonLethal(LivingEntity target) {
+        return true;
+    }
 }

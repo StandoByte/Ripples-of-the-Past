@@ -74,29 +74,32 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
     }
     
     // TODO (angelo) item drops (+save them in NBT)
-    public static void turnIntoRock(World world, Entity entity, Vector3d rockPos, 
+    public static AngeloRockEntity turnIntoRock(World world, Entity entity, Vector3d rockPos, 
             @Nullable BlockState upperBlock, @Nullable BlockState lowerBlock, @Nullable List<ItemStack> drops) {
-        if (!world.isClientSide()) {
-            AngeloRockEntity angeloRock = new AngeloRockEntity(ModEntityTypes.ANGELO_ROCK.get(), world);
-            if (entity != null) {
-                int rotation = MathUtil.round(entity.yRot / 90);
-                angeloRock.yRot = 90 * rotation;
-            }
-            angeloRock.setPos(rockPos.x, rockPos.y, rockPos.z);
-            if (entity instanceof MobEntity) {
-                angeloRock.mob = (MobEntity) entity;
-                angeloRock.useMobHurtSound = CommonReflection.getAmbientSound(angeloRock.mob) == null;
-            }
-            
-            angeloRock.setUpperBlock(upperBlock);
-            angeloRock.setLowerBlock(lowerBlock);
-            angeloRock.creationAnimTicks = CREATION_ANIM_LEN;
-            if (entity instanceof LivingEntity) {
-                angeloRock.angeloEntity.setOwner(entity);
-            }
-            
-            world.addFreshEntity(angeloRock);
+        if (world.isClientSide()) {
+            return null;
         }
+        
+        AngeloRockEntity angeloRock = new AngeloRockEntity(ModEntityTypes.ANGELO_ROCK.get(), world);
+        if (entity != null) {
+            int rotation = MathUtil.round(entity.yRot / 90);
+            angeloRock.yRot = 90 * rotation;
+        }
+        angeloRock.setPos(rockPos.x, rockPos.y, rockPos.z);
+        if (entity instanceof MobEntity) {
+            angeloRock.mob = (MobEntity) entity;
+            angeloRock.useMobHurtSound = CommonReflection.getAmbientSound(angeloRock.mob) == null;
+        }
+        
+        angeloRock.setUpperBlock(upperBlock);
+        angeloRock.setLowerBlock(lowerBlock);
+        angeloRock.creationAnimTicks = CREATION_ANIM_LEN;
+        if (entity instanceof LivingEntity) {
+            angeloRock.angeloEntity.setOwner(entity);
+        }
+        
+        world.addFreshEntity(angeloRock);
+        return angeloRock;
     }
     
     @Override

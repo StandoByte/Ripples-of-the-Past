@@ -1065,7 +1065,30 @@ public class GameplayEventHandler {
             stand.getContinuousEffects().onStandUserLogout((ServerPlayerEntity) player);
         });
     }
-
+    
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void handleCheatDeath(LivingDeathEvent event) {
+        LivingEntity dead = event.getEntityLiving();
+        DamageSource damageSource = event.getSource();
+        if (!dead.level.isClientSide()) {
+            cheatDeath(event);
+            
+            if (!event.isCanceled()) {
+                if (damageSource instanceof IModdedDamageSource && ((IModdedDamageSource) damageSource).isNonLethal()) {
+                    event.setCanceled(true);
+                    event.getEntityLiving().setHealth(0.0001f);
+                }
+            }
+            
+            if (!event.isCanceled()) {
+                if (StandEffectsTracker.isTargetedBy(dead, ModStandEffects.TURN_INTO_ANGELO_ROCK.get())) {
+                    event.setCanceled(true);
+                    event.getEntityLiving().setHealth(0.0001f);
+                }
+            }
+        }
+    }
+    
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void beforeLivingDeath(LivingDeathEvent event) {
         LivingEntity dead = event.getEntityLiving();
@@ -1124,13 +1147,6 @@ public class GameplayEventHandler {
                 dead.level.playSound(null, dead.getX(), dead.getY(), dead.getZ(), SoundEvents.GLASS_BREAK, dead.getSoundSource(), 
                         (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
             }
-        }
-    }
-    
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void handleCheatDeath(LivingDeathEvent event) {
-        if (!event.getEntity().level.isClientSide()) {
-            cheatDeath(event);
         }
     }
 

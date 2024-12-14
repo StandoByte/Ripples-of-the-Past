@@ -31,7 +31,7 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.chunk.Chunk;
 
-// TODO (angelo) if the target entity dies while the stand has this modifier, keep them at minumum hp (cancel the death event)
+// TODO (angelo) keep the effect while the rock is forming; remove it only when the rock is complete
 public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
 
     public CDTurnIntoAngeloRockEffect() {
