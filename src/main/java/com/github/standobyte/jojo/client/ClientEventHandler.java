@@ -67,7 +67,7 @@ import com.github.standobyte.jojo.item.OilItem;
 import com.github.standobyte.jojo.modcompat.ModInteractionUtil;
 import com.github.standobyte.jojo.modcompat.OptionalDependencyHelper;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromclient.ClAngeloRockRespawnPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClAngeloRockButtonPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ServerIdPacket;
 import com.github.standobyte.jojo.potion.BleedingEffect;
 import com.github.standobyte.jojo.power.IPower;
@@ -89,6 +89,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
+import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
@@ -1297,10 +1298,20 @@ public class ClientEventHandler {
         else if (screen instanceof ChatScreen) {
             Entity possessed = IPlayerPossess.getPossessedEntity(mc.player);
             if (possessed != null && possessed.getType() == ModEntityTypes.ANGELO_ROCK.get()) {
-                Button angeloRockDieButton = new Button(screen.width / 2 - 100, screen.height - 40, 200, 20, 
+                int x = screen.width / 2 - 100;
+                int y = screen.height - 40;
+                Button angeloRockDieButton = new Button(x, y, 200, 20, 
                         new TranslationTextComponent(mc.level.getLevelData().isHardcore() ? "deathScreen.spectate" : "deathScreen.respawn"), 
-                        button -> PacketManager.sendToServer(new ClAngeloRockRespawnPacket()));
+                        button -> PacketManager.sendToServer(ClAngeloRockButtonPacket.respawn()));
                 event.addWidget(angeloRockDieButton);
+                
+                Button angeloRockGruntButton = new ImageVanillaButton(x - 24, y, 20, 20, 
+                        238, 150, 
+                        ClientUtil.ADDITIONAL_UI, 256, 256,
+                        button -> PacketManager.sendToServer(ClAngeloRockButtonPacket.grunt())) {
+                    @Override public void playDownSound(SoundHandler pHandler) {}
+                };
+                event.addWidget(angeloRockGruntButton);
             }
         }
     }

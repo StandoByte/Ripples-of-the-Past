@@ -990,5 +990,9 @@
         "type": "event"
       }
     ]
+  },
+  "angelo_rock_grunt": {
+    "subtitle": "jojo.subtitle.angelo_rock_grunt",
+    "sounds": [ "jojo:angelo_rock_grunt" ]
   }
 }

@@ -469,6 +469,8 @@ public class ModSounds {
     
     public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_BLOOD_CUTTER_SHOT = register("crazy_diamond_blood_cutter_shot");
     
+    public static final RegistryObject<SoundEvent> ANGELO_ROCK_GRUNT = register("angelo_rock_grunt");
+    
     public static final OstSoundList CRAZY_DIAMOND_OST = new OstSoundList(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_ost"), SOUNDS);
     
     // in case someone makes an Echoes addon, they'll be able to just put the sound to sounds.json
