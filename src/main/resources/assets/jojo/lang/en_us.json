@@ -435,6 +435,7 @@
   "death.attack.eyeOfEnderShards.player": "%s's insides were torn apart by an eye of ender shards",
   "death.attack.stoneMask": "%s's brain couldn't take the power of Stone Mask's needles",
   "death.attack.rockRespawn": "Eventually, %s has stopped thinking",
+  "death.attack.rockRespawn.player": "%1$s was fused with a rock whilst fighting %2$s",
   "death.attack.rockBroken": "%s was mined",
   
   "stat.jojo.vampire_animals_drained": "Animals Drained",

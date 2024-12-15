@@ -19,7 +19,6 @@ import com.github.standobyte.jojo.entity.AngeloRockEntity;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
-import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.damage.KnockbackCollisionImpact;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
@@ -95,7 +94,7 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
             return Action.conditionMessage("target_too_many_health");
         }
         
-        Direction angeloRockFace = Direction.fromYRot(MathUtil.round(target.yRot / 90));
+        Direction angeloRockFace = Direction.fromYRot(target.yRot);
         Map<ChunkPos, Optional<ChunkCap>> chunkCache = new HashMap<>();
         Map<BlockPos, PrevBlockInfo> brokenBlocks = brokenBlocksPos.stream()
                 .map(blockPos -> {

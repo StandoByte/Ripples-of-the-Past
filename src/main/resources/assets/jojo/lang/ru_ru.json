@@ -432,6 +432,7 @@
   "death.attack.eyeOfEnderShards.player": "Внутренности %s были разорваны осколками Ока Эндера",
   "death.attack.stoneMask": "Мозг %s не вынес силы игл Каменной маски",
   "death.attack.rockRespawn": "В конце концов %s перестал мыслить",
+  "death.attack.rockRespawn.player": "%1$s был слит с камнем, пока боролся с %2$s",
   "death.attack.rockBroken": "%s был вскопан",
   
   "stat.jojo.vampire_animals_drained": "Поглощено животных",
@@ -1298,6 +1299,7 @@
   "action.jojo.crazy_diamond_misshape_face": "Деформировать лицо",
   "action.jojo.crazy_diamond_misshape_arms": "Деформировать руки",
   "action.jojo.crazy_diamond_misshape_legs": "Деформировать ноги",
+  "action.jojo.crazy_diamond_angelo_rock": "Слить цель с камнем",
   "action.jojo.crazy_diamond_barrage": "Шквал ударов",
   "action.jojo.crazy_diamond_block_bullet": "Снаряд из блока",
   "action.jojo.crazy_diamond_block_bullet.homing": "Самонаводящийся снаряд",
