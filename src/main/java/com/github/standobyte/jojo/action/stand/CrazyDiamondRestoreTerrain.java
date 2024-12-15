@@ -111,43 +111,13 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
                     block -> blockPosSelectedForRestoration(block, cameraEntity, lookVec, eyePosD, eyePos, resolveEffect, onlyAimedAt));
             
             Set<BlockPos> blocksPlaced = restoreBlocks(world, blocks, 
-                    Comparator
-                    .comparingInt((PrevBlockInfo block) -> restorationPriority(block, world))
-                    .thenComparingInt((PrevBlockInfo block) -> block.pos.distManhattan(eyePos)), 
+                    Comparator.comparingInt((PrevBlockInfo block) -> block.pos.distManhattan(eyePos)), 
                     blocksToRestore, 
                     creative, resolveEffect && !onlyAimedAt, true, 
                     playerUser, userInventory, itemsAround, standEntity);
             
             userPower.consumeStamina(staminaPerBlock * blocksPlaced.size());
         }
-    }
-    
-    // this whole junk fixes janky restoration of sand blocks, e.g. explosions in a desert
-    private static boolean restorationExclude(PrevBlockInfo block, World world) {
-        if (block.state.getBlock() instanceof FallingBlock) {
-            BlockPos blockBelow = block.pos.below();
-            if (world.isEmptyBlock(blockBelow)) {
-                IChunk chunk = world.getChunk(block.pos);
-                if (chunk instanceof Chunk) {
-                    boolean blockBelowCanBeRestored = ((Chunk) chunk).getCapability(ChunkCapProvider.CAPABILITY).map(cap -> {
-                        return cap.getBrokenBlocks().anyMatch(brokenBlock -> blockBelow.equals(brokenBlock.pos));
-                    }).orElse(false);
-                    
-                    if (blockBelowCanBeRestored) {
-                        return true;
-                    }
-                }
-            }
-        }
-        
-        return false;
-    }
-    
-    private static int restorationPriority(PrevBlockInfo block, World world) {
-        if (block.state.getBlock() instanceof FallingBlock && !world.isEmptyBlock(block.pos.below())) {
-            return 1;
-        }
-        return 2;
     }
     
     
@@ -180,6 +150,8 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
             return false;
         });
         if (sort != null) {
+            sort = Comparator.comparingInt((PrevBlockInfo block) -> restorationPriority(block, world))
+                    .thenComparing(sort);
             blocks = blocks.sorted(sort);
         }
         if (limit >= 0) {
@@ -201,6 +173,34 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         forgetBrokenBlocks(world, blocksToForget);
         
         return blocksPlaced;
+    }
+    
+    // this whole junk fixes janky restoration of sand blocks, e.g. explosions in a desert
+    private static boolean restorationExclude(PrevBlockInfo block, World world) {
+        if (block.state.getBlock() instanceof FallingBlock) {
+            BlockPos blockBelow = block.pos.below();
+            if (world.isEmptyBlock(blockBelow)) {
+                IChunk chunk = world.getChunk(block.pos);
+                if (chunk instanceof Chunk) {
+                    boolean blockBelowCanBeRestored = ((Chunk) chunk).getCapability(ChunkCapProvider.CAPABILITY).map(cap -> {
+                        return cap.getBrokenBlocks().anyMatch(brokenBlock -> blockBelow.equals(brokenBlock.pos));
+                    }).orElse(false);
+                    
+                    if (blockBelowCanBeRestored) {
+                        return true;
+                    }
+                }
+            }
+        }
+        
+        return !block.state.canSurvive(world, block.pos);
+    }
+    
+    private static int restorationPriority(PrevBlockInfo block, World world) {
+        if (block.state.getBlock() instanceof FallingBlock && !world.isEmptyBlock(block.pos.below())) {
+            return 1;
+        }
+        return 2;
     }
     
     private static boolean tryPlaceBlock(World world, BlockPos blockPos, BlockState blockState, boolean isCreative, 
