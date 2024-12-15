@@ -1537,8 +1537,8 @@ public class ClientEventHandler {
     public void addTooltipLines(ItemTooltipEvent event) {
         PlayerEntity player = event.getPlayer();
         ItemStack item = event.getItemStack();
-        Optional<IStandPower> powerOptional = IStandPower.getStandPowerOptional(player).resolve();
         if (player != null) {
+            Optional<IStandPower> powerOptional = IStandPower.getStandPowerOptional(player).resolve();
             CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(player.level, item).ifPresent(pos -> {
                 if (powerOptional.map(power -> power.getType() == ModStands.CRAZY_DIAMOND.getStandType()).orElse(false)) {
                     event.getToolTip().add(new TranslationTextComponent("jojo.crazy_diamond.block_checkpoint.tooltip", 
