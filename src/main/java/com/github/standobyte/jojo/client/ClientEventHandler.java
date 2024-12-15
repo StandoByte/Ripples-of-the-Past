@@ -145,6 +145,7 @@ import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.world.GameType;
 import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.client.event.ClientChatEvent;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.GuiOpenEvent;
@@ -387,6 +388,7 @@ public class ClientEventHandler {
                     
                     FirstPersonHamonAura.getInstance().tick();
                     InventoryItemHighlight.tick();
+                    tickAfterChat();
                 }
                 
                 if (mc.player != null && mc.player.tickCount == 200) {
@@ -1472,5 +1474,36 @@ public class ClientEventHandler {
     public void clientLoggedOut(ClientPlayerNetworkEvent.LoggedOutEvent event) {
         PhotosCache.onLogOut(serverId);
         isLoggedIn = false;
+    }
+    
+    
+    private boolean setScreenNextTick = false;
+    @SubscribeEvent
+    public void onChat(ClientChatEvent event) {
+        if (event.getOriginalMessage().equals("//recording")) {
+            event.setCanceled(true);
+            mc.gui.getChat().clearMessages(false);
+            setScreenNextTick = true;
+        }
+    }
+    
+    private void tickAfterChat() {
+        if (setScreenNextTick) {
+            mc.setScreen(new DummyScreen());
+            setScreenNextTick = false;
+        }
+    }
+    
+    private static class DummyScreen extends Screen {
+
+        protected DummyScreen() {
+            super(StringTextComponent.EMPTY);
+        }
+        
+        @Override
+        public boolean isPauseScreen() {
+            return false;
+        }
+        
     }
 }
