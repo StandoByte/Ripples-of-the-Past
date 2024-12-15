@@ -189,7 +189,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
         forgeCapNbt.putBoolean("PossessAsAlive", jojoPossessingAsAlive);
         if (jojoPossessionContext != null) {
             CompoundNBT ctxNbt = new CompoundNBT();
-            IForgeRegistry<?> retrievedRegistry = RegistryManager.ACTIVE.getRegistry(jojoPossessionContext.getRegistryType());
+            IForgeRegistry<?> retrievedRegistry = MCUtil.getRegistry(jojoPossessionContext);
             if (retrievedRegistry != null) {
                 ctxNbt.putString("Registry", retrievedRegistry.getRegistryName().toString());
                 ctxNbt.putString("Obj", jojoPossessionContext.getRegistryName().toString());
