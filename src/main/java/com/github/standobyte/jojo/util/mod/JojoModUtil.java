@@ -62,6 +62,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceContext;
 import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.GameType;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.ForgeMod;
@@ -300,6 +301,27 @@ public class JojoModUtil {
                 : player.getCapability(PlayerUtilCapProvider.CAPABILITY).map(PlayerUtilCap::hasClientInput).orElse(false);
     }
     
+    
+    
+    /**
+     * In case the player temporarily has a specific game mode for gameplay reasons 
+     * (e.g. spectator mode when possessing an entity)
+     */
+    @Nullable
+    public static Optional<GameType> getActualGameModeWhilePossessing(PlayerEntity player) {
+        if (player instanceof IPlayerPossess) {
+            IPlayerPossess possessing = (IPlayerPossess) player;
+            if (possessing.jojoGetPossessedEntity() != null) {
+                return possessing.jojoGetPrePossessGameMode();
+            }
+        }
+        return Optional.empty();
+    }
+    
+    public static boolean seesInvisibleAsSpectator(PlayerEntity player) {
+        return getActualGameModeWhilePossessing(player).map(gameMode -> gameMode == GameType.SPECTATOR).orElse(player.isSpectator());
+    }
+    
 
 
     @Deprecated
@@ -382,13 +404,21 @@ public class JojoModUtil {
         entity.remove();
     }
     
+    @Deprecated
     public static void deflectProjectile(Entity projectile, @Nullable Vector3d deflectVec) {
-        projectile.setDeltaMovement(deflectVec != null ? 
-                deflectVec.scale(Math.sqrt(projectile.getDeltaMovement().lengthSqr() / deflectVec.lengthSqr()))
-                : projectile.getDeltaMovement().reverse());
+        deflectProjectile(projectile, deflectVec, null);
+    }
+    
+    public static void deflectProjectile(Entity projectile, @Nullable Vector3d deflectVec, @Nullable Vector3d deflectPos) {
+        if (deflectVec == null) {
+            deflectVec = projectile.getDeltaMovement().reverse();
+        }
+        projectile.setDeltaMovement(deflectVec);
         projectile.move(MoverType.SELF, projectile.getDeltaMovement());
-        if (projectile instanceof ModdedProjectileEntity) {
-            ((ModdedProjectileEntity) projectile).setIsDeflected();
+        deflectVec = projectile.getDeltaMovement();
+        if (!projectile.level.isClientSide() && projectile instanceof ModdedProjectileEntity) {
+            if (deflectPos == null) deflectPos = projectile.position();
+            ((ModdedProjectileEntity) projectile).setIsDeflected(deflectVec, deflectPos);
         }
     }
     

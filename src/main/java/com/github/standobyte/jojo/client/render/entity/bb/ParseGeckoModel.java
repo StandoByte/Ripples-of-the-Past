@@ -109,7 +109,8 @@ public class ParseGeckoModel {
                             modelCubes.add(cubeParsed.makeModelBox(texWidth, texHeight, this));
                         }
                     }
-                    ClientReflection.setCubes(modelPart, modelCubes);
+                    modelPart.cubes.clear();
+                    modelPart.cubes.addAll(modelCubes);
                 }
                 
                 return modelPart;
@@ -234,7 +235,7 @@ public class ParseGeckoModel {
                             x1y0z1, 
                             x1y1z1, 
                             x0y1z1}, f8, f11, f9, f12, texWidth, texHeight, mirror, Direction.SOUTH);
-                    ClientReflection.setPolygons(box, polygons);
+                    box.polygons = polygons;
                 }
                 
                 else if (uv instanceof PerFaceUV) {
@@ -303,7 +304,7 @@ public class ParseGeckoModel {
                     if (polygonsCount < polygons.length) {
                         polygons = Arrays.copyOf(polygons, polygonsCount);
                     }
-                    ClientReflection.setPolygons(box, polygons);
+                    box.polygons = polygons;
                 }
                 
                 return box;

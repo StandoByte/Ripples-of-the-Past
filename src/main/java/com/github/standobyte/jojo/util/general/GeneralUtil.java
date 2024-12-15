@@ -23,6 +23,7 @@ import javax.annotation.Nullable;
 import org.apache.commons.io.FileUtils;
 
 import com.google.common.collect.ObjectArrays;
+import com.mojang.datafixers.util.Either;
 
 import net.minecraft.util.Util;
 import net.minecraftforge.common.util.LazyOptional;
@@ -69,6 +70,10 @@ public class GeneralUtil {
         }
         
         return original -> predicate.test(function.apply(original));
+    }
+    
+    public static <T> T merge(Either<T, T> either) {
+        return either.left().orElseGet(either.right()::get);
     }
     
     public static <T> LinkedHashMap<Predicate<T>, List<T>> groupByPredicatesOrdered(Stream<T> elements, List<Predicate<T>> predicates, 

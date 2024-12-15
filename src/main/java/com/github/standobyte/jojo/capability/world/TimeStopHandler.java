@@ -44,6 +44,7 @@ import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.network.play.server.SPlayEntityEffectPacket;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
+import net.minecraft.world.GameType;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.TickEvent;
@@ -71,12 +72,13 @@ public class TimeStopHandler {
         this.world = world;
     }
     
+    @SuppressWarnings("deprecation")
     public void tick() {
         Iterator<Entity> entityIter = stoppedInTime.iterator();
         
         while (entityIter.hasNext()) {
             Entity entity = entityIter.next();
-            if (!entity.isAlive()) {
+            if (entity.removed) {
                 entityIter.remove();
             }
 
@@ -347,8 +349,14 @@ public class TimeStopHandler {
     }
     
     public static boolean canPlayerMoveInStoppedTime(PlayerEntity player, boolean checkEffect) {
-        return checkEffect && player.hasEffect(ModStatusEffects.TIME_STOP.get()) || player.isCreative() || player.isSpectator() || 
+        return checkEffect && player.hasEffect(ModStatusEffects.TIME_STOP.get()) || gamemodeIgnoresTimeStop(player) || 
                 player instanceof ServerPlayerEntity && ((ServerPlayerEntity) player).server.isSingleplayerOwner(player.getGameProfile());
+    }
+    
+    public static boolean gamemodeIgnoresTimeStop(PlayerEntity player) {
+        return JojoModUtil.getActualGameModeWhilePossessing(player)
+                .map(gameMode -> gameMode == GameType.CREATIVE || gameMode == GameType.SPECTATOR)
+                .orElseGet(() -> player.isCreative() || player.isSpectator());
     }
     
     public static boolean hasTimeStopAbility(LivingEntity entity) {

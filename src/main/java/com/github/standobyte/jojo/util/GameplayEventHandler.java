@@ -75,6 +75,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
+import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -94,6 +95,7 @@ import com.github.standobyte.jojo.util.mc.damage.ModdedDamageSourceWrapper;
 import com.github.standobyte.jojo.util.mc.damage.NoKnockbackOnBlocking;
 import com.github.standobyte.jojo.util.mc.damage.StandLinkDamageSource;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
+import com.github.standobyte.jojo.util.mod.IPlayerPossess;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.github.standobyte.jojo.world.gen.LoadMeFeature;
 import com.google.common.collect.Iterables;
@@ -111,6 +113,8 @@ import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.item.PaintingEntity;
 import net.minecraft.entity.item.PaintingType;
+import net.minecraft.entity.item.TNTEntity;
+import net.minecraft.entity.item.minecart.TNTMinecartEntity;
 import net.minecraft.entity.monster.StrayEntity;
 import net.minecraft.entity.passive.CowEntity;
 import net.minecraft.entity.passive.MooshroomEntity;
@@ -123,6 +127,7 @@ import net.minecraft.item.Food;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.item.SuspiciousStewItem;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.play.server.SChatPacket;
 import net.minecraft.network.play.server.SPlayEntityEffectPacket;
 import net.minecraft.network.play.server.SPlaySoundEffectPacket;
@@ -174,10 +179,12 @@ import net.minecraftforge.event.TickEvent.PlayerTickEvent;
 import net.minecraftforge.event.TickEvent.ServerTickEvent;
 import net.minecraftforge.event.TickEvent.WorldTickEvent;
 import net.minecraftforge.event.entity.EntityJoinWorldEvent;
+import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
 import net.minecraftforge.event.entity.PlaySoundAtEntityEvent;
 import net.minecraftforge.event.entity.ProjectileImpactEvent;
 import net.minecraftforge.event.entity.item.ItemTossEvent;
 import net.minecraftforge.event.entity.living.BabyEntitySpawnEvent;
+import net.minecraftforge.event.entity.living.EntityTeleportEvent;
 import net.minecraftforge.event.entity.living.LivingAttackEvent;
 import net.minecraftforge.event.entity.living.LivingConversionEvent;
 import net.minecraftforge.event.entity.living.LivingDamageEvent;
@@ -1018,37 +1025,60 @@ public class GameplayEventHandler {
         }
     }
     
-//    @SubscribeEvent(priority = EventPriority.LOWEST)
-//    public static void onPlayerAttack(AttackEntityEvent event) {
-//        overdrive was there
-//    }
+    @SubscribeEvent
+    public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
+        PlayerEntity player = event.getPlayer();
+        if (!player.level.isClientSide() && event.getHand() == Hand.MAIN_HAND) {
+            ServerWorld world = (ServerWorld) player.level;
+            Entity target = event.getTarget();
+            
+            INonStandPower.getNonStandPowerOptional(player).resolve()
+            .flatMap(power -> power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()))
+            .filter(pillarMan -> pillarMan.getMode() == PillarmanData.Mode.HEAT).ifPresent(acdc -> {
+                int fuse = -1;
+                if (target instanceof TNTEntity) {
+                    TNTEntity tnt = (TNTEntity) target;
+                    fuse = tnt.getLife();
+                    tnt.remove();
+                }
+                else if (target instanceof TNTMinecartEntity) {
+                    TNTMinecartEntity tntMinecart = (TNTMinecartEntity) target;
+                    if (tntMinecart.isPrimed()) {
+                        // mfw the getter is client-only
+                        fuse = CommonReflection.getFuse(tntMinecart);
+                        CompoundNBT nbt = new CompoundNBT();
+                        tntMinecart.saveWithoutId(nbt);
+                        nbt.putString("id", EntityType.MINECART.getRegistryName().toString());
+                        Entity regularMinecart = EntityType.loadEntityRecursive(nbt, world, e -> e);
+                        tntMinecart.remove();
+                        world.removeEntity(tntMinecart, false);
+                        if (regularMinecart != null) {
+                            world.tryAddFreshEntityWithPassengers(regularMinecart);
+                        }
+                    }
+                }
+                
+                if (fuse > -1) {
+                    Random random = world.random;
+                    world.playSound(null, 
+                            player.getX(), player.getY(), player.getZ(), 
+                            SoundEvents.GENERIC_EAT, SoundCategory.NEUTRAL, 
+                            1.0F, 1.0F + (random.nextFloat() - random.nextFloat()) * 0.4F);
+                    acdc.addEatenTntFuse(fuse);
+                    event.setCancellationResult(ActionResultType.SUCCESS);
+                }
+            });
+        }
+    }
     
-//    @SubscribeEvent(priority = EventPriority.LOW, receiveCanceled = true)
-//    public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
-//        if (event.getCancellationResult() == ActionResultType.PASS && event.getHand() == Hand.MAIN_HAND && !event.getPlayer().isShiftKeyDown()) {
-//            Entity target = event.getTarget();
-//            if (target instanceof PlayerEntity) {
-//                PlayerEntity targetPlayer = (PlayerEntity) target;
-//                INonStandPower targetPower = INonStandPower.getNonStandPowerOptional(targetPlayer).orElse(null);
-//                INonStandPower playerPower = INonStandPower.getNonStandPowerOptional(event.getPlayer()).orElse(null);
-//                if (targetPower != null && playerPower != null && 
-//                        targetPower.getType() == ModPowers.HAMON.get()
-//                        && (!playerPower.hasPower() || playerPower.getType().isReplaceableWith(ModPowers.HAMON.get()))) {
-//                    HamonUtil.interactWithHamonTeacher(target.level, event.getPlayer(), targetPlayer, 
-//                            targetPower.getTypeSpecificData(ModPowers.HAMON.get()).get());
-//                    event.setCanceled(true);
-//                    event.setCancellationResult(ActionResultType.sidedSuccess(target.level.isClientSide));
-//                }
-//                else {
-//                    playerPower.getTypeSpecificData(ModPowers.HAMON.get()).ifPresent(hamon -> {
-//                        hamon.interactWithNewLearner(targetPlayer);
-//                        event.setCanceled(true);
-//                        event.setCancellationResult(ActionResultType.sidedSuccess(target.level.isClientSide));
-//                    });
-//                }
-//            }
-//        }
-//    }
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void cancelChestOpenWhenPossessing(PlayerInteractEvent.RightClickBlock event) {
+        PlayerEntity player = event.getPlayer();
+        if (MCUtil.getGameMode(player) == GameType.SPECTATOR && IPlayerPossess.getPossessedEntity(player) != null) {
+            event.setCanceled(true);
+            event.setCancellationResult(ActionResultType.FAIL);
+        }
+    }
     
     @SubscribeEvent(priority = EventPriority.LOW, receiveCanceled = true)
     public static void tripwireInteract(PlayerInteractEvent.RightClickBlock event) {
@@ -1112,6 +1142,14 @@ public class GameplayEventHandler {
         IStandPower.getStandPowerOptional(player).ifPresent(stand -> {
             stand.getContinuousEffects().onStandUserLogout((ServerPlayerEntity) player);
         });
+    }
+
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void beforeLivingDeath(LivingDeathEvent event) {
+        LivingEntity dead = event.getEntityLiving();
+        if (dead instanceof IPlayerPossess) {
+            ((IPlayerPossess) dead).jojoOnPossessingDead();
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
@@ -1543,5 +1581,35 @@ public class GameplayEventHandler {
     @SubscribeEvent
     public static void anvilUnrepairableItems(AnvilUpdateEvent event) {
         GlovesItem.combineInAnvil(event);
+    }
+    
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void cancelTeleport(EntityTeleportEvent event) {
+        Entity entity = event.getEntity();
+        if (IPlayerPossess.getPossessedEntity(entity) != null) {
+            event.setCanceled(true);
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void cancelOtherDimensionTeleport(EntityTravelToDimensionEvent event) {
+        Entity entity = event.getEntity();
+        if (IPlayerPossess.getPossessedEntity(entity) != null) {
+            event.setCanceled(true);
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void cancelGameModeChange(PlayerEvent.PlayerChangeGameModeEvent event) {
+        if (event.getCurrentGameMode() == GameType.SPECTATOR || event.getNewGameMode() != GameType.SPECTATOR) {
+            Entity entity = event.getEntity();
+            if (entity instanceof IPlayerPossess) {
+                IPlayerPossess player = (IPlayerPossess) entity;
+                if (player.jojoGetPossessedEntity() != null) {
+                    player.jojoSetPrePossessGameMode(Optional.of(event.getNewGameMode()));
+                    event.setCanceled(true);
+                }
+            }
+        }
     }
 }

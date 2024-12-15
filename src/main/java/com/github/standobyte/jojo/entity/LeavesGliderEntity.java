@@ -4,9 +4,11 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.action.stand.CrazyDiamondHeal;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
@@ -48,6 +50,7 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -55,7 +58,7 @@ import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
 import net.minecraftforge.registries.GameData;
 
-public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawnData, IHasHealth {
+public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawnData, IHasHealth, EntityMadeFromBlock {
     private static final double GRAVITY = -0.01D;
     public static final float MAX_ENERGY = 200;
     private static final float MAX_HEALTH = 4F;
@@ -65,6 +68,7 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
     private static final DataParameter<Float> ENERGY = EntityDataManager.defineId(LeavesGliderEntity.class, DataSerializers.FLOAT);
     private static final DataParameter<Float> HEALTH = EntityDataManager.defineId(LeavesGliderEntity.class, DataSerializers.FLOAT);
     private static final DataParameter<Byte> HAMON_USERS_CHARGING = EntityDataManager.defineId(LeavesGliderEntity.class, DataSerializers.BYTE);
+    private static final DataParameter<Optional<BlockPos>> CRAZY_D_RESTORE = EntityDataManager.defineId(LeavesGliderEntity.class, DataSerializers.OPTIONAL_BLOCK_POS);
     
     private BlockState leavesBlock = Blocks.OAK_LEAVES.defaultBlockState();
     private ResourceLocation leavesBlockTex = null;
@@ -99,29 +103,10 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
         if (!level.isClientSide()) {
             updateFlying();
         }
-        if (isFlying() && isControlledByLocalInstance()) {
-            Vector3d prevMovement = getDeltaMovement().subtract(0, getDeltaMovement().y, 0);
-            if (level.isClientSide()) {
-                if (isVehicle()) {
-                    updateRotationDelta();
-                    yRot += yRotDelta;
-                    for (Entity passenger : getPassengers()) {
-                        // FIXME also turn passengers other than the controlling player
-                        passenger.yRot += yRotDelta;
-                        if (passenger instanceof LivingEntity) {
-                            ((LivingEntity) passenger).yBodyRot += yRotDelta;
-                        }
-                    }
-                    prevMovement = Vector3d.directionFromRotation(0, yRot).scale(prevMovement.length());
-                }
-            }
-            double gravity = isNoGravity() ? 0.0D : GRAVITY * (1 + getPassengers().size());
-            Vector3d movement = prevMovement.normalize().scale(Math.min(prevMovement.length() + 0.01D, 0.5D));
-            setDeltaMovement(movement.x, Math.max(getDeltaMovement().y, 0) + gravity, movement.z);
-            move(MoverType.SELF, getDeltaMovement());
-        }
+        moveGlider();
         
         if (!level.isClientSide()) {
+            tickCrazyDFlag();
             rechargeFromHamonUsers();
             
             if (getEnergy() <= 0) {
@@ -295,6 +280,38 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
             }
         }
         setIsFlying(isFlying);
+    }
+    
+    private void moveGlider() {
+        Optional<BlockPos> crazyDRestore = entityData.get(CRAZY_D_RESTORE);
+        if (crazyDRestore.isPresent()) {
+            CrazyDiamondHeal.addParticlesAround(this);
+            setDeltaMovement(Vector3d.atCenterOf(crazyDRestore.get()).subtract(position()).normalize().scale(0.75));
+            if (isControlledByLocalInstance()) {
+                move(MoverType.SELF, getDeltaMovement());
+            }
+        }
+        else if (isFlying() && isControlledByLocalInstance()) {
+            Vector3d prevMovement = getDeltaMovement().subtract(0, getDeltaMovement().y, 0);
+            if (level.isClientSide()) {
+                if (isVehicle()) {
+                    updateRotationDelta();
+                    yRot += yRotDelta;
+                    for (Entity passenger : getPassengers()) {
+                        // FIXME also turn passengers other than the controlling player
+                        passenger.yRot += yRotDelta;
+                        if (passenger instanceof LivingEntity) {
+                            ((LivingEntity) passenger).yBodyRot += yRotDelta;
+                        }
+                    }
+                    prevMovement = Vector3d.directionFromRotation(0, yRot).scale(prevMovement.length());
+                }
+            }
+            double gravity = isNoGravity() ? 0.0D : GRAVITY * (1 + getPassengers().size());
+            Vector3d movement = prevMovement.normalize().scale(Math.min(prevMovement.length() + 0.01D, 0.5D));
+            setDeltaMovement(movement.x, Math.max(getDeltaMovement().y, 0) + gravity, movement.z);
+            move(MoverType.SELF, getDeltaMovement());
+        }
     }
 
     private void updateRotationDelta() {
@@ -573,13 +590,34 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
                     getRandomZ(0.5F), 0, 0, 0);
         }
     }
-
+    
+    private int resetCrazyDTimer;
+    @Override
+    public boolean crazyDRestore(BlockPos blockPos) {
+        if (position().distanceToSqr(Vector3d.atCenterOf(blockPos)) < 0.25) {
+            remove();
+            return true;
+        }
+        else {
+            entityData.set(CRAZY_D_RESTORE, Optional.of(blockPos));
+            resetCrazyDTimer = 2;
+            return false;
+        }
+    }
+    
+    private void tickCrazyDFlag() {
+        if (resetCrazyDTimer > 0 && --resetCrazyDTimer == 0) {
+            entityData.set(CRAZY_D_RESTORE, Optional.empty());
+        }
+    }
+    
     @Override
     protected void defineSynchedData() {
         entityData.define(IS_FLYING, false);
         entityData.define(ENERGY, MAX_ENERGY);
         entityData.define(HEALTH, MAX_HEALTH);
         entityData.define(HAMON_USERS_CHARGING, (byte) 0);
+        entityData.define(CRAZY_D_RESTORE, Optional.empty());
     }
 
     @Override

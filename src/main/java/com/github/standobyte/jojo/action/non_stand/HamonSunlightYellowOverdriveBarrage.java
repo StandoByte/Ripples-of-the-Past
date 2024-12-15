@@ -197,7 +197,7 @@ public class HamonSunlightYellowOverdriveBarrage extends HamonAction implements 
                                 }
                             }
                             if (digDuration >= 0 && digDuration <= 2.5F * Math.sqrt(user.getAttributeValue(Attributes.ATTACK_DAMAGE))) {
-                                world.destroyBlock(pos, dropItem);
+                                MCUtil.destroyBlock(world, pos, dropItem, user);
                             }
                             else {
                                 SoundType soundType = blockState.getSoundType(world, pos, user);

@@ -16,6 +16,7 @@ import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.player.IPlayerAction;
 import com.github.standobyte.jojo.block.WoodenCoffinBlock;
 import com.github.standobyte.jojo.capability.entity.player.PlayerClientBroadcastedSettings;
+import com.github.standobyte.jojo.capability.entity.player.PlayerMixinExtension;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -52,6 +53,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 
 public class PlayerUtilCap {
     private final PlayerEntity player;
+    private final PlayerMixinExtension playerMixin;
     
     private PlayerClientBroadcastedSettings broadcastedSettings = new PlayerClientBroadcastedSettings();
     
@@ -96,6 +98,7 @@ public class PlayerUtilCap {
     
     public PlayerUtilCap(PlayerEntity player) {
         this.player = player;
+        this.playerMixin = player instanceof PlayerMixinExtension ? (PlayerMixinExtension) player : null;
         geUIState = new LifeformsUIState(player);
     }
     
@@ -149,6 +152,7 @@ public class PlayerUtilCap {
         
         nbt.putBoolean("CoffinRespawn", coffinPreventDayTimeSkip);
         
+        playerMixin.toNBT(nbt);
         return nbt;
     }
 
@@ -168,12 +172,15 @@ public class PlayerUtilCap {
         animalAgeCd = nbt.getInt("AnimalAgeCd");
         
         coffinPreventDayTimeSkip = nbt.getBoolean("CoffinRespawn");
+        
+        playerMixin.fromNBT(nbt);
     }
     
     public void onTracking(ServerPlayerEntity tracking) {
         broadcastedSettings.syncToTracking(player, tracking);
         PacketManager.sendToClient(new TrWalkmanEarbudsPacket(player.getId(), walkmanEarbuds), tracking);
         PacketManager.sendToClient(new TrPlayerVisualDetailPacket(player.getId(), ateInkPastaTicks), tracking);
+        playerMixin.syncToTracking(tracking);
     }
     
     public void syncWithClient() {

@@ -7,6 +7,8 @@ import com.github.standobyte.jojo.util.general.MathUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -41,7 +43,10 @@ public class SpaceRipperStingyEyesRenderer extends EntityRenderer<SpaceRipperSti
         matrixStack.mulPose(Vector3f.ZP.rotationDegrees(-xRot));
         float beamWidth = 0.15f;
         matrixStack.scale(1.0F, beamWidth, beamWidth);
-        matrixStack.last().normal().setIdentity();
+        Matrix3f lighting = matrixStack.last().normal();
+        lighting.setIdentity();
+        ActiveRenderInfo camera = Minecraft.getInstance().gameRenderer.getMainCamera();
+        lighting.mul(Vector3f.XP.rotationDegrees(camera.getXRot()));
         IVertexBuilder ivertexbuilder = buffer.getBuffer(RenderType.entityTranslucentCull(getTextureLocation(entity)));
         float length = (float) beamVec.length();
         

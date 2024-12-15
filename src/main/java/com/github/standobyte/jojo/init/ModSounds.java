@@ -41,7 +41,9 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> AJA_STONE_BEAM = register("aja_stone_beam");
     
     public static final RegistryObject<SoundEvent> CLACKERS = register("clackers");
-    
+
+    public static final RegistryObject<SoundEvent> TOMMY_GUN_LOOP = register("tommy_gun_loop");
+    @Deprecated
     public static final RegistryObject<SoundEvent> TOMMY_GUN_SHOT = register("tommy_gun_shot");
     
     public static final RegistryObject<SoundEvent> TOMMY_GUN_NO_AMMO = register("tommy_gun_no_ammo");

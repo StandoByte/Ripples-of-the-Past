@@ -111,7 +111,7 @@ public class StandDiscItem extends Item {
             boolean isClientSide = Thread.currentThread().getThreadGroup() == SidedThreadGroups.CLIENT;
             List<StandType<?>> legalStands = new ArrayList<>();
             for (StandType<?> standType : JojoCustomRegistries.STANDS.getRegistry()) {
-                if (standType.getSurvivalGameplayPool().addToCreativeTab(standType, group, isClientSide)) {
+                if (standType.getSurvivalGameplayPool().addToCreativeTab(this, standType, group, isClientSide)) {
                     legalStands.add(standType);
                 }
             }

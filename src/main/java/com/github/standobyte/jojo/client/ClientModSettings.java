@@ -32,10 +32,12 @@ public class ClientModSettings {
         public boolean showLockedSlots = false;
         
         public boolean resolveShaders = true;
-        public boolean menacingParticles = true;
         public boolean timeStopAnimation = true;
         public boolean _standMotionTilt = false;
+        public boolean poseOnLmbRmb = true;
+        public boolean autoResolveActivation = true;
         
+        public boolean menacingParticles = true;
         public boolean characterVoiceLines = true;
         
         public boolean toggleLmbHotbar = false;

@@ -2,7 +2,6 @@ package com.github.standobyte.jojo.client.render.armor.model;
 
 import java.util.Collections;
 
-import com.github.standobyte.jojo.client.ClientUtil;
 import com.google.common.collect.ImmutableList;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -22,7 +21,7 @@ public class SatiporojaScarfArmorModel extends BipedModel<LivingEntity> {
         texHeight = 32;
 
         head.setTexSize(texWidth, texHeight);
-        ClientUtil.clearCubes(head);
+        head.cubes.clear();
         head.setPos(0.0F, 0.5F, 0.0F);
         setRotationAngle(head, 0.0873F, 0.0F, 0.0F);
         head.texOffs(0, 7).addBox(-4.5F, -1.2F, -2.5F, 9.0F, 1.0F, 5.0F, 0.0F, false);

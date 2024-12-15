@@ -14,6 +14,7 @@ import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -128,6 +129,7 @@ public class HamonShock extends HamonAction implements IPlayerAction<HamonShock.
                         float efficiency = hamon.getActionEfficiency(0, false, getAction().getUnlockingSkill());
                         int duration = (int) (20 + (80 * controlLvl + 60 * energyRatio) * efficiency);
                         int amplifier = (int) (strengthLvl * 0.05F * efficiency);
+                        hamon.hamonPointsFromAction(HamonStat.CONTROL, playerPower.getEnergy() * efficiency);
                         playerPower.setEnergy(0);
                         shockedTarget = targetEntity;
                         targetEntity.addEffect(new EffectInstance(

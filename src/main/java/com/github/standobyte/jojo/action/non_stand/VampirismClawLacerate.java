@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.KnockbackCollisionImpact;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
@@ -179,7 +180,7 @@ public class VampirismClawLacerate extends VampirismAction implements IPlayerAct
                     }
                 }
                 if (digDuration >= 0 && digDuration <= 2.5F * Math.sqrt(user.getAttributeValue(Attributes.ATTACK_DAMAGE))) {
-                    world.destroyBlock(pos, dropItem);
+                    MCUtil.destroyBlock(world, pos, dropItem, user);
                 }
                 else {
                     SoundType soundType = blockState.getSoundType(world, pos, user);

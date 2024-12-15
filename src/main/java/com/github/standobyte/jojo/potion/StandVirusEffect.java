@@ -13,6 +13,7 @@ import com.github.standobyte.jojo.power.impl.stand.StandArrowHandler;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
+import com.mojang.datafixers.util.Either;
 
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -20,6 +21,7 @@ import net.minecraft.entity.ai.attributes.AttributeModifierManager;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.potion.EffectType;
+import net.minecraft.util.text.ITextComponent;
 
 public class StandVirusEffect extends StatusEffect implements IApplicableEffect {
     
@@ -50,18 +52,16 @@ public class StandVirusEffect extends StatusEffect implements IApplicableEffect 
                     }).orElse(false);
                 }
 
+                player.giveExperienceLevels(-1);
+                if (hasXpLevel) {
+                    damage /= 10;
+                    if (damage > entity.getHealth()) {
+                        damage = 0.001F;
+                    }
+                }
+                DamageUtil.hurtThroughInvulTicks(entity, DamageUtil.STAND_VIRUS, damage);
                 if (stopEffect) {
                     entity.removeEffect(this);
-                }
-                else {
-                    player.giveExperienceLevels(-1);
-                    if (hasXpLevel) {
-                        damage /= 10;
-                        if (damage > entity.getHealth()) {
-                            damage = 0.001F;
-                        }
-                    }
-                    DamageUtil.hurtThroughInvulTicks(entity, DamageUtil.STAND_VIRUS, damage);
                 }
             }
             
@@ -89,7 +89,9 @@ public class StandVirusEffect extends StatusEffect implements IApplicableEffect 
                             StandType<?> stand = power.getStandArrowHandler().getStandToGive();
                             power.getStandArrowHandler().clearStandToGive();
                             if (stand == null) {
-                                stand = StandUtil.randomStand(player, player.getRandom());
+                                Either<StandType<?>, ITextComponent> randomStandOrError = StandUtil.randomStandOrError(player, player.getRandom());
+                                stand = randomStandOrError.left().orElse(null);
+                                randomStandOrError.ifRight(error -> player.displayClientMessage(error, true));
                             }
                             if (stand != null) {
                                 StandArrowItem.giveStandFromArrow(player, power, stand);

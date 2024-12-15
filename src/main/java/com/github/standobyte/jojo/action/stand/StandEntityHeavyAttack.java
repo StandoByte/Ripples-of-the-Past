@@ -33,7 +33,6 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
-import com.github.standobyte.jojo.util.general.ObjectWrapper;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.KnockbackCollisionImpact;
 import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
@@ -66,15 +65,12 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     private final Supplier<? extends StandEntityHeavyAttack> finisherVariation;
     boolean isFinisher = false;
     
-    private final Supplier<? extends StandEntityActionModifier> recoveryAction;
-    
     private final Supplier<SoundEvent> punchSound;
     private final Supplier<SoundEvent> swingSound;
 
     public StandEntityHeavyAttack(StandEntityHeavyAttack.Builder builder) {
         super(builder);
         this.finisherVariation = builder.finisherVariation;
-        this.recoveryAction = builder.recoveryAction;
         this.punchSound = builder.punchSound;
         this.swingSound = builder.swingSound;
     }
@@ -88,16 +84,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
             return finisherVariation.replaceAction(power, target);
         }
         
-        StandEntityActionModifier followUp = getRecoveryFollowup(power, standEntity);
-        if (followUp != null && standEntity != null && standEntity.getCurrentTask().map(task -> {
-            return task.getAction() == this && 
-                    !task.getModifierActions().filter(action -> action == followUp).findAny().isPresent() &&
-                    power.checkRequirements(followUp, new ObjectWrapper<>(task.getTarget()), true).isPositive();
-        }).orElse(false)) {
-            return followUp;
-        };
-        
-        return this;
+        return super.replaceAction(power, target);
     }
     
     public StandEntityHeavyAttack getFinisherVariationIfPresent(IStandPower power, @Nullable StandEntity standEntity) {
@@ -129,11 +116,6 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     @Nullable
     public StandEntityHeavyAttack getFinisherVariation() {
         return finisherVariation.get();
-    }
-    
-    @Nullable
-    protected StandEntityActionModifier getRecoveryFollowup(IStandPower standPower, StandEntity standEntity) {
-        return recoveryAction.get();
     }
     
     @Override
@@ -277,7 +259,6 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     public static final float DEFAULT_STAMINA_COST = 50;
     public static class Builder extends StandEntityAction.AbstractBuilder<StandEntityHeavyAttack.Builder> {
         private Supplier<? extends StandEntityHeavyAttack> finisherVariation = () -> null;
-        private Supplier<? extends StandEntityActionModifier> recoveryAction = () -> null;
         private Supplier<SoundEvent> punchSound = ModSounds.STAND_PUNCH_HEAVY;
         private Supplier<SoundEvent> swingSound = ModSounds.STAND_PUNCH_HEAVY_SWING;
         
@@ -295,12 +276,9 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
             return getThis();
         }
         
+        @Deprecated
         public Builder setRecoveryFollowUpAction(Supplier<? extends StandEntityActionModifier> recoveryAction) {
-            if (recoveryAction != null) {
-                this.recoveryAction = recoveryAction;
-                addExtraUnlockable(this.recoveryAction);
-            }
-            return getThis();
+            return attackRecoveryFollowup(recoveryAction);
         }
         
         public Builder punchSound(Supplier<SoundEvent> punchSound) {
@@ -562,7 +540,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
                                 ((Chunk) chunk).getCapability(ChunkCapProvider.CAPABILITY).ifPresent(cap -> {
                                     PrevBlockInfo brokenBlock = cap.getBrokenBlockAt(pos);
                                     if (brokenBlock != null) {
-                                        brokenBlock.withBlockShards(shards);
+                                        brokenBlock.withEntities(shards);
                                     }
                                 });
                             }

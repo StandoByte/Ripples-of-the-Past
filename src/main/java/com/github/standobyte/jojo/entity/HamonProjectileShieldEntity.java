@@ -72,7 +72,7 @@ public class HamonProjectileShieldEntity extends Entity implements IEntityAdditi
         }
         updateShieldPos();
         
-        Vector3d shieldPlaneNormal = getLookAngle();
+        Vector3d shieldPlaneNormal = shieldPlane.normalVec;
         Vector3d shieldCenter = shieldPlane.center;
         level.getEntitiesOfClass(ProjectileEntity.class, getBoundingBox().inflate(8), 
                 entity -> entity.isAlive()).forEach(projectile -> {

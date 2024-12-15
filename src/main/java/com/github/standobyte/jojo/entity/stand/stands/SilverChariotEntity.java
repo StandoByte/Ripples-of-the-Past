@@ -218,7 +218,7 @@ public class SilverChariotEntity extends StandEntity {
     private boolean deflectProjectile(Entity projectile) {
         if (projectile == null || projectile instanceof ModdedProjectileEntity && !((ModdedProjectileEntity) projectile).canBeDeflected(this)) return false;
         
-        JojoModUtil.deflectProjectile(projectile, getLookAngle());
+        JojoModUtil.deflectProjectile(projectile, getLookAngle().normalize().scale(projectile.getDeltaMovement().length()), projectile.position());
         if (projectile instanceof DamagingEntity && ((DamagingEntity) projectile).isFiery()) {
             entityData.set(RAPIER_ON_FIRE, true);
             rapierFireTicks = 300;

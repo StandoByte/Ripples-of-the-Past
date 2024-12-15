@@ -74,6 +74,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
+import com.github.standobyte.jojo.entity.stand.TargetHitPart;
 import com.github.standobyte.jojo.entity.stand.stands.CrazyDiamondEntity;
 import com.github.standobyte.jojo.entity.stand.stands.GoldExperienceEntity;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
@@ -626,32 +627,36 @@ public class ModStandsInit {
                     .barrageHitSound(ModSounds.CRAZY_DIAMOND_PUNCH_BARRAGE)
                     .standSound(Phase.PERFORM, false, ModSounds.CRAZY_DIAMOND_DORARARA)));
     
+    public static final RegistryObject<StandEntityActionModifier> CRAZY_DIAMOND_MISSHAPE_FACE = ACTIONS.register("crazy_diamond_misshape_face", 
+            () -> new CrazyDiamondMisshapeBodyPart(new StandAction.Builder().staminaCost(50).resolveLevelToUnlock(1), TargetHitPart.HEAD));
+    
+    public static final RegistryObject<StandEntityActionModifier> CRAZY_DIAMOND_MISSHAPE_ARMS = ACTIONS.register("crazy_diamond_misshape_arms", 
+            () -> new CrazyDiamondMisshapeBodyPart(new StandAction.Builder().staminaCost(50).resolveLevelToUnlock(1), TargetHitPart.TORSO_ARMS));
+    
+    public static final RegistryObject<StandEntityActionModifier> CRAZY_DIAMOND_MISSHAPE_LEGS = ACTIONS.register("crazy_diamond_misshape_legs", 
+            () -> new CrazyDiamondMisshapeBodyPart(new StandAction.Builder().staminaCost(50).resolveLevelToUnlock(1), TargetHitPart.LEGS));
+    
     public static final RegistryObject<StandEntityHeavyAttack> CRAZY_DIAMOND_FINISHER_PUNCH = ACTIONS.register("crazy_diamond_misshaping_punch", 
             () -> new CrazyDiamondMisshapingPunch(new StandEntityHeavyAttack.Builder()
+                    .attackRecoveryFollowup(CRAZY_DIAMOND_MISSHAPE_FACE)
+                    .attackRecoveryFollowup(CRAZY_DIAMOND_MISSHAPE_ARMS)
+                    .attackRecoveryFollowup(CRAZY_DIAMOND_MISSHAPE_LEGS)
                     .resolveLevelToUnlock(1)
                     .punchSound(ModSounds.CRAZY_DIAMOND_PUNCH_HEAVY)
                     .standSound(Phase.WINDUP, false, ModSounds.CRAZY_DIAMOND_DORA_LONG)
                     .partsRequired(StandPart.ARMS)));
     
-    public static final RegistryObject<StandEntityActionModifier> CRAZY_DIAMOND_MISSHAPE_FACE = ACTIONS.register("crazy_diamond_misshape_face", 
-            () -> new CrazyDiamondMisshapeBodyPart(new StandAction.Builder().staminaCost(50)));
-    
-    public static final RegistryObject<StandEntityActionModifier> CRAZY_DIAMOND_MISSHAPE_ARMS = ACTIONS.register("crazy_diamond_misshape_arms", 
-            () -> new CrazyDiamondMisshapeBodyPart(new StandAction.Builder().staminaCost(50)));
-    
-    public static final RegistryObject<StandEntityActionModifier> CRAZY_DIAMOND_MISSHAPE_LEGS = ACTIONS.register("crazy_diamond_misshape_legs", 
-            () -> new CrazyDiamondMisshapeBodyPart(new StandAction.Builder().staminaCost(50)));
+    public static final RegistryObject<StandEntityActionModifier> CRAZY_DIAMOND_LEAVE_OBJECT = ACTIONS.register("crazy_diamond_leave_object", 
+            () -> new CrazyDiamondLeaveObject(new StandAction.Builder().staminaCost(50).resolveLevelToUnlock(1)));
     
     public static final RegistryObject<CrazyDiamondHeavyPunch> CRAZY_DIAMOND_HEAVY_PUNCH = ACTIONS.register("crazy_diamond_heavy_punch", 
             () -> new CrazyDiamondHeavyPunch(new StandEntityHeavyAttack.Builder()
+                    .attackRecoveryFollowup(CRAZY_DIAMOND_LEAVE_OBJECT)
                     .punchSound(ModSounds.CRAZY_DIAMOND_PUNCH_HEAVY)
                     .standSound(Phase.WINDUP, false, ModSounds.CRAZY_DIAMOND_DORA_LONG)
                     .partsRequired(StandPart.ARMS)
                     .setFinisherVariation(CRAZY_DIAMOND_FINISHER_PUNCH)
                     .shiftVariationOf(CRAZY_DIAMOND_PUNCH).shiftVariationOf(CRAZY_DIAMOND_BARRAGE)));
-    
-    public static final RegistryObject<StandEntityActionModifier> CRAZY_DIAMOND_LEAVE_OBJECT = ACTIONS.register("crazy_diamond_leave_object", 
-            () -> new CrazyDiamondLeaveObject(new StandAction.Builder().staminaCost(50)));
     
     public static final RegistryObject<CrazyDiamondBlockBullet> CRAZY_DIAMOND_BLOCK_BULLET = ACTIONS.register("crazy_diamond_block_bullet", 
             () -> new CrazyDiamondBlockBullet(new StandEntityAction.Builder().standWindupDuration(15).staminaCost(40).staminaCostTick(2F)
@@ -700,6 +705,7 @@ public class ModStandsInit {
     
     public static final RegistryObject<CrazyDiamondRestoreTerrain> CRAZY_DIAMOND_RESTORE_TERRAIN = ACTIONS.register("crazy_diamond_restore_terrain", 
             () -> new CrazyDiamondRestoreTerrain(new StandEntityAction.Builder().holdType().staminaCostTick(2) // cost per block rather than per tick
+                    .attackRecoveryFollowup(CRAZY_DIAMOND_FINISHER_PUNCH)
                     .resolveLevelToUnlock(2)
                     .shout(ModSounds.JOSUKE_FIX).standSound(Phase.PERFORM, ModSounds.CRAZY_DIAMOND_FIX_STARTED)
                     .partsRequired(StandPart.ARMS)));

@@ -87,18 +87,18 @@ public class HamonMasterModel extends BipedModel<HamonMasterEntity> {
         leftCape.addChild(lowLeftCape);
         
         if (isExtraLayer) {
-            ClientUtil.clearCubes(head);
-            ClientUtil.clearCubes(hat);
-            ClientUtil.clearCubes(body);
-            ClientUtil.clearCubes(jacket);
-            ClientUtil.clearCubes(leftArm);
-            ClientUtil.clearCubes(leftSleeve);
-            ClientUtil.clearCubes(rightArm);
-            ClientUtil.clearCubes(rightSleeve);
-            ClientUtil.clearCubes(leftLeg);
-            ClientUtil.clearCubes(leftPants);
-            ClientUtil.clearCubes(rightLeg);
-            ClientUtil.clearCubes(rightPants);
+            head.cubes.clear();
+            hat.cubes.clear();
+            body.cubes.clear();
+            jacket.cubes.clear();
+            leftArm.cubes.clear();
+            leftSleeve.cubes.clear();
+            rightArm.cubes.clear();
+            rightSleeve.cubes.clear();
+            leftLeg.cubes.clear();
+            leftPants.cubes.clear();
+            rightLeg.cubes.clear();
+            rightPants.cubes.clear();
             
 //            body.texOffs(16, 16).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 2.0F, 4.0F, 0.2F, false);
 //            body.texOffs(21, 22).addBox(-3.0F, 1.9F, -2.1F, 6.0F, 3.0F, 0.0F, 0.0F, false);

@@ -35,6 +35,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.boss.WitherEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.item.TNTEntity;
+import net.minecraft.entity.item.minecart.TNTMinecartEntity;
 import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.Item;
@@ -87,7 +88,8 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
             int resolveLevel = standPower.getResolveLevel();
             if (resolveLevel >= 3) {
                 if (
-                        targetEntity instanceof TNTEntity ||
+                        targetEntity instanceof TNTEntity || 
+                        targetEntity instanceof TNTMinecartEntity ||
                         targetEntity.getType() == EntityType.SNOW_GOLEM ||
                         targetEntity instanceof CreeperEntity && ((CreeperEntity) targetEntity).isPowered()) {
                     return ActionConditionResult.POSITIVE;
@@ -108,7 +110,8 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
     
     @Override
     public ActionConditionResult checkStandTarget(ActionTarget target, StandEntity standEntity, IStandPower standPower) {
-        if (target.getEntity() instanceof TNTEntity) {
+        Entity targetEntity = target.getEntity();
+        if (targetEntity instanceof TNTEntity || targetEntity instanceof TNTMinecartEntity) {
             return ActionConditionResult.POSITIVE;
         }
         return super.checkStandTarget(target, standEntity, standPower);
@@ -158,6 +161,22 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
                     }
                     CrazyDiamondHeal.addParticlesAround(targetEntity);
                     healTick = true;
+                }
+
+                else if (targetEntity instanceof TNTMinecartEntity) {
+                    TNTMinecartEntity tntMinecart = (TNTMinecartEntity) targetEntity;
+                    int fuse = CommonReflection.getFuse(tntMinecart);
+                    if (fuse >= 80) {
+                        CommonReflection.setFuse(tntMinecart, -1);
+                        healTick = true;
+                    }
+                    else if (fuse > -1) {
+                        CommonReflection.setFuse(tntMinecart, fuse + 2);
+                        healTick = true;
+                    }
+                    if (healTick) {
+                        CrazyDiamondHeal.addParticlesAround(targetEntity);
+                    }
                 }
 
                 else if (targetEntity.getType() == EntityType.SNOW_GOLEM) {

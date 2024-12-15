@@ -80,6 +80,7 @@ import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonActions;
+import com.github.standobyte.jojo.init.power.non_stand.pillarman.ModPillarmanActions;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.item.OilItem;
@@ -171,6 +172,7 @@ import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
+import net.minecraft.world.GameType;
 import net.minecraftforge.client.ForgeHooksClient;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
@@ -368,15 +370,18 @@ public class ClientEventHandler {
     @SubscribeEvent(priority = EventPriority.HIGH)
     public void onRenderPlayer(RenderPlayerEvent.Pre event) {
         if (mc.player != event.getPlayer()) {
+            float partialTick = event.getPartialRenderTick();
             event.getPlayer().getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                 cap.limitPlayerHeadRot();
             });
+            ContinuousActionInstance.getCurrentAction(event.getPlayer()).ifPresent(action -> action.onPreRender(partialTick));
         }
     }
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onRenderTick(RenderTickEvent event) {
         if (mc.level != null) {
+            float partialTick = ClientUtil.getPartialTick();
             switch (event.phase) {
             case START:
                 ClientUtil.canSeeStands = StandUtil.playerCanSeeStands(mc.player);
@@ -392,12 +397,21 @@ public class ClientEventHandler {
                     mc.player.getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                         cap.applyLockedRotation();
                     });
+                    ContinuousActionInstance.getCurrentAction(mc.player).ifPresent(action -> action.onPreRender(partialTick));
                 }
                 
-                PlayerAnimationHandler.getPlayerAnimator().onRenderFrameStart(ClientUtil.getPartialTick());
+                PlayerAnimationHandler.getPlayerAnimator().onRenderFrameStart(partialTick);
+                
+                if (mc.player.isSpectator() && mc.options.keySpectatorOutlines.isDown()) {
+                    JojoModUtil.getActualGameModeWhilePossessing(mc.player).ifPresent(actualGameMode -> {
+                        if (actualGameMode != GameType.SPECTATOR) {
+                            mc.options.keySpectatorOutlines.setDown(false);
+                        }
+                    });
+                }
                 break;
             case END:
-                PlayerAnimationHandler.getPlayerAnimator().onRenderFrameEnd(ClientUtil.getPartialTick());
+                PlayerAnimationHandler.getPlayerAnimator().onRenderFrameEnd(partialTick);
                 break;
             }
         }
@@ -1116,7 +1130,9 @@ public class ClientEventHandler {
                 if (MCUtil.areHandsFree(player, Hand.MAIN_HAND, Hand.OFF_HAND) && hud.isActionSelectedAndEnabled(
                         ModHamonActions.JONATHAN_OVERDRIVE_BARRAGE.get(), 
                         ModHamonActions.JONATHAN_SUNLIGHT_YELLOW_OVERDRIVE_BARRAGE.get(),
-                        ModHamonActions.HAMON_WALL_CLIMBING.get())
+                        ModHamonActions.HAMON_WALL_CLIMBING.get(),
+                        ModPillarmanActions.PILLARMAN_ERRATIC_BLAZE_KING.get(),
+                        ModPillarmanActions.PILLARMAN_DIVINE_SANDSTORM.get())
                         || LivingWallClimbing.getHandler(player).map(cap -> cap.isWallClimbing()).orElse(false)) {
                     renderHand(Hand.OFF_HAND, event.getMatrixStack(), event.getBuffers(), event.getLight(), 
                             event.getPartialTicks(), event.getInterpolatedPitch(), player);

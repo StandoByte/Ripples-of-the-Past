@@ -26,12 +26,12 @@ public class MeshModelBox extends ModelRenderer.ModelBox {
                 false, 1, 1);
         
         ModelRenderer.TexturedQuad[] quads = builder.quads.toArray(new ModelRenderer.TexturedQuad[0]);
-        ClientReflection.setPolygons(this, quads);
+        this.polygons = quads;
     }
     
     // a convenience method for chainable calls
     public void addCube(ModelRenderer modelRenderer) {
-        ClientReflection.addCube(modelRenderer, this);
+        modelRenderer.cubes.add(this);
     }
     
     

@@ -1,7 +1,8 @@
 package com.github.standobyte.jojo.command;
 
 import java.util.Collection;
-import java.util.function.Function;
+
+import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.command.argument.StandArgument;
 import com.github.standobyte.jojo.init.ModItems;
@@ -11,6 +12,7 @@ import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.datafixers.util.Either;
 
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
@@ -21,6 +23,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 
 public class StandDiscGiveCommand {
@@ -36,22 +39,30 @@ public class StandDiscGiveCommand {
     }
     
     private static int giveStandDisc(CommandSource source, StandType<?> standType, Collection<ServerPlayerEntity> targets) throws CommandSyntaxException {
-        return giveStandDiscItem(source, player -> standType, targets);
+        return giveStandDiscItem(source, standType, targets);
     }
     
     private static int giveRandomStandDiscs(CommandSource source, Collection<ServerPlayerEntity> targets) throws CommandSyntaxException {
-        return giveStandDiscItem(source, player -> StandUtil.randomStand(player, player.getRandom()), targets);
+        return giveStandDiscItem(source, null, targets);
     }
     
-    private static int giveStandDiscItem(CommandSource source, Function<ServerPlayerEntity, StandType<?>> standType, Collection<ServerPlayerEntity> targets) throws CommandSyntaxException {
+    /**
+     * @param standType - if the argument is null, a random Stand is picked instead
+     */
+    private static int giveStandDiscItem(CommandSource source, @Nullable StandType<?> standType, Collection<ServerPlayerEntity> targets) throws CommandSyntaxException {
         int i = 0;
+        boolean random = standType == null;
         for (ServerPlayerEntity player : targets) {
-            StandType<?> stand = standType.apply(player);
-            if (stand == null) {
+            if (random) {
+                Either<StandType<?>, ITextComponent> randomStandOrError = StandUtil.randomStandOrError(player, player.getRandom());
+                randomStandOrError.ifRight(error -> source.sendFailure(error));
+                standType = randomStandOrError.left().orElse(null);
+            }
+            if (standType == null) {
                 continue;
             }
             
-            ItemStack discItem = createItemStack(stand);
+            ItemStack discItem = createItemStack(standType);
             boolean added = player.inventory.add(discItem);
             if (added && discItem.isEmpty()) {
                 discItem.setCount(1);

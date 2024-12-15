@@ -26,13 +26,7 @@ public class PolaroidModel extends Model {
             photo.render(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
         }
     }
-
-    public void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
-        modelRenderer.xRot = x;
-        modelRenderer.yRot = y;
-        modelRenderer.zRot = z;
-    }
-
+    
     
     public void setRenderPhoto(boolean renderPhoto) {
         if (polaroid != null) {

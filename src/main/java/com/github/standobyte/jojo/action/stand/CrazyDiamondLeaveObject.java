@@ -21,7 +21,6 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStatusEffects;
-import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.item.StandArrowItem;
 import com.github.standobyte.jojo.modcompat.ModInteractionUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismUtil;
@@ -97,16 +96,11 @@ public class CrazyDiamondLeaveObject extends StandEntityActionModifier {
     }
     
     @Override
-    public boolean isUnlocked(IStandPower power) {
-        return ModStandsInit.CRAZY_DIAMOND_HEAL.get().isUnlocked(power);
-    }
-    
-    @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
-        if (power.isActive()) {
+        if (power.isActive() && target.getEntity() instanceof LivingEntity) {
             StandEntity standEntity = (StandEntity) power.getStandManifestation();
             ItemStack item = standEntity.getMainHandItem();
-            return ActionConditionResult.noMessage(!item.isEmpty() && canUseItem(item));
+            return ActionConditionResult.noMessage(!item.isEmpty() && canUseItem(item) && hasTaskWithNoModifiers(standEntity));
         }
         return ActionConditionResult.NEGATIVE;
     }

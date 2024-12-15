@@ -24,6 +24,7 @@ import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil.StandRandomPoolFilter;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
+import com.mojang.datafixers.util.Either;
 
 import net.minecraft.block.DispenserBlock;
 import net.minecraft.client.util.ITooltipFlag;
@@ -105,38 +106,40 @@ public class StandArrowItem extends ArrowItem {
             else if (livingEntity instanceof PlayerEntity) {
                 PlayerEntity player = (PlayerEntity) livingEntity;
                 return GeneralUtil.orElseFalse(IStandPower.getStandPowerOptional(livingEntity), standCap -> {
+                    Either<StandType<?>, ITextComponent> standOrError;
                     if (standCap.hasPower()) {
-                        player.displayClientMessage(new TranslationTextComponent("jojo.chat.message.already_have_stand"), true);
-                        return false;
-                    }
-                    
-                    if (player.abilities.instabuild) { // instantly give a stand in creative
-                        StandType<?> stand = StandUtil.randomStand(player, player.getRandom());
-                        return giveStandFromArrow(player, standCap, stand);
+                        standOrError = Either.right(new TranslationTextComponent("jojo.chat.message.already_have_stand"));
                     }
                     else {
-                        StandType<?> standToGive = StandUtil.randomStand(player, player.getRandom());
-                        if (standToGive == null) {
-                            return false;
-                        }
-                        standCap.getStandArrowHandler().startArrowEffectSetStand(standToGive);
-                        
-                        int virusEffectDuration = StandVirusEffect.getEffectDurationToApply(player);
-                        if (virusEffectDuration > 0) {
-                            int inhibitionLevel = EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.VIRUS_INHIBITION.get(), stack);
-                            int effectLevel = StandVirusEffect.getEffectLevelToApply(inhibitionLevel);
-                            player.addEffect(new EffectInstance(ModStatusEffects.STAND_VIRUS.get(), 
-                                    virusEffectDuration, effectLevel, false, false, true));
-                        }
-                        else { // instantly give a stand if there was no stand virus effect given
-                            StandType<?> stand = StandUtil.randomStand(player, player.getRandom());
-                            return giveStandFromArrow(player, standCap, stand);
-                        }
-                        
-                        rememberArrowShooter(livingEntity, arrowShooter, stack);
+                        standOrError = StandUtil.randomStandOrError(player, player.getRandom());
                     }
-                    
-                    return true;
+                    return GeneralUtil.merge(standOrError.mapBoth(
+                            standToGive -> {
+                                if (player.abilities.instabuild) { // instantly give a stand in creative
+                                    return giveStandFromArrow(player, standCap, standToGive);
+                                }
+                                else {
+                                    standCap.getStandArrowHandler().startArrowEffectSetStand(standToGive);
+
+                                    int virusEffectDuration = StandVirusEffect.getEffectDurationToApply(player);
+                                    if (virusEffectDuration > 0) {
+                                        int inhibitionLevel = EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.VIRUS_INHIBITION.get(), stack);
+                                        int effectLevel = StandVirusEffect.getEffectLevelToApply(inhibitionLevel);
+                                        player.addEffect(new EffectInstance(ModStatusEffects.STAND_VIRUS.get(), 
+                                                virusEffectDuration, effectLevel, false, false, true));
+                                    }
+                                    else { // instantly give a stand if there was no stand virus effect given
+                                        return giveStandFromArrow(player, standCap, standToGive);
+                                    }
+
+                                    rememberArrowShooter(livingEntity, arrowShooter, stack);
+                                }
+
+                                return true;
+                            }, error -> {
+                                player.displayClientMessage(error, true);
+                                return false;
+                            }));
                 });
             }
             else {
@@ -169,66 +172,6 @@ public class StandArrowItem extends ArrowItem {
         
         return false;
     }
-    
-//    public static boolean onPiercedByArrow(Entity entity, ItemStack stack, World world) {
-//        if (!world.isClientSide() && entity instanceof LivingEntity) {
-//            LivingEntity livingEntity = (LivingEntity) entity;
-//            LazyOptional<IStandPower> standPower = IStandPower.getStandPowerOptional(livingEntity);
-//            if (standPower.map(stand -> stand.hasPower() && !canPierceWithStand(stand)).orElse(false)) {
-//                return false;
-//            }
-//            boolean wasStandUser = standPower.map(stand -> stand.hasPower() || stand.hadStand()).orElse(false);
-//            DamageUtil.hurtThroughInvulTicks(livingEntity, DamageUtil.STAND_VIRUS, getVirusDamage(stack, livingEntity, !wasStandUser));
-//            if (!livingEntity.isAlive()) {
-//                return false;
-//            }
-//            boolean gaveStand = false;
-//            if (livingEntity instanceof PlayerEntity) {
-//                gaveStand = playerPiercedByArrow((PlayerEntity) livingEntity, stack, world);
-//            }
-//            else {
-//                gaveStand = StandArrowEntity.EntityPierce.onArrowPierce(livingEntity);
-//            }
-//            return gaveStand;
-//        }
-//        return false;
-//    }
-//    
-//    public static final int STAND_XP_REQUIREMENT = 40;
-//    private static boolean playerPiercedByArrow(PlayerEntity player, ItemStack stack, World world) {
-//        IStandPower power = IStandPower.getPlayerStandPower(player);
-//        if (!world.isClientSide()) {
-//            if (!power.hasPower()) {
-//                StandType<?> stand = null;
-//                if (player.experienceLevel < STAND_XP_REQUIREMENT) {
-//                    player.displayClientMessage(new TranslationTextComponent("jojo.chat.message.stand_not_enough_xp"), true);
-//                    return false;
-//                }
-//                
-//                stand = StandUtil.randomStand(player, random);
-//                if (stand != null && power.givePower(stand)) {
-//                    if (!player.abilities.instabuild) {
-//                        player.giveExperienceLevels(-STAND_XP_REQUIREMENT);
-//                    }
-//                    return true;
-//                }
-//            }
-//            else {
-//                player.displayClientMessage(new TranslationTextComponent("jojo.chat.message.already_have_stand"), true);
-//            }
-//        }
-//        return false;
-//    }
-//    
-//    private static float getVirusDamage(ItemStack arrow, LivingEntity entity, boolean canKill) {
-//        float damage = entity.getRandom().nextFloat() * 8F + 8;
-//        damage = Math.max(damage * (1 - 0.25F * EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.VIRUS_INHIBITION.get(), arrow)), 0);
-//        damage *= entity.getMaxHealth() / 20F;
-//        if (!canKill) {
-//            damage = Math.min(damage, entity.getHealth() - 1);
-//        }
-//        return damage;
-//    }
     
     @Override
     public void appendHoverText(ItemStack stack, @Nullable World world, List<ITextComponent> tooltip, ITooltipFlag flag) {

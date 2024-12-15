@@ -20,12 +20,11 @@ public class PillarmanAtmosphericRift extends PillarmanDivineSandstorm {
     }
     
     @Override
-    public void onHoldTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
-        if (requirementsFulfilled && world.isClientSide()) {
+    public void onHoldTickClientEffect(LivingEntity user, INonStandPower power, int ticksHeld, boolean reqFulfilled, boolean reqStateChanged) {
+        if (reqFulfilled) {
             auraEffect(user, ModParticles.HAMON_AURA_GREEN.get(), 12);
             auraEffect(user, ParticleTypes.LAVA, 1);
         }
-        super.onHoldTick(world, user, power, ticksHeld, target, requirementsFulfilled);
     }
     
     @Override

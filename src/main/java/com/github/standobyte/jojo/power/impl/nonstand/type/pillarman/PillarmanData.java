@@ -1,6 +1,11 @@
 package com.github.standobyte.jojo.power.impl.nonstand.type.pillarman;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
 import java.util.UUID;
+
+import org.apache.commons.lang3.mutable.MutableInt;
 
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.init.ModSounds;
@@ -18,6 +23,8 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeMod;
 
@@ -25,9 +32,10 @@ public class PillarmanData extends TypeSpecificData {
 	public static final int MAX_STAGE_LEVEL = 3;
     private int stage = 1;
     private boolean stoneForm = false;
-    private boolean invaded = false;
     private float lastEnergy = -999;
     private Mode mode = Mode.NONE;
+    private List<MutableInt> eatenTntFuse = new ArrayList<>();
+    private boolean bladesVisible = false;
     
     public enum Mode {
         NONE,
@@ -90,11 +98,25 @@ public class PillarmanData extends TypeSpecificData {
         if (!user.isAlive()) {
             stoneForm = false;
         }
-        if (isStoneFormEnabled()) {
-            user.addEffect(new EffectInstance(ModStatusEffects.STUN.get(), 20, 0, false, false, true));
-            user.addEffect(new EffectInstance(Effects.DAMAGE_RESISTANCE, 40, 3, false, false, true));
-            user.addEffect(new EffectInstance(Effects.BLINDNESS, 40, 0, false, false, true));
-            user.addEffect(new EffectInstance(Effects.FIRE_RESISTANCE, 40, 0, false, false, true));
+        if (!user.level.isClientSide()) {
+            if (isStoneFormEnabled()) {
+                user.addEffect(new EffectInstance(ModStatusEffects.STUN.get(), 20, 0, false, false, true));
+                user.addEffect(new EffectInstance(Effects.DAMAGE_RESISTANCE, 40, 3, false, false, true));
+                user.addEffect(new EffectInstance(Effects.BLINDNESS, 40, 0, false, false, true));
+                user.addEffect(new EffectInstance(Effects.FIRE_RESISTANCE, 40, 0, false, false, true));
+            }
+            if (!eatenTntFuse.isEmpty()) {
+                Iterator<MutableInt> iter = eatenTntFuse.iterator();
+                while (iter.hasNext()) {
+                    MutableInt fuseTimer = iter.next();
+                    if (fuseTimer.decrementAndGet() <= 0) {
+                        user.level.playSound(null, user.getX(), user.getY(), user.getZ(), 
+                                SoundEvents.GENERIC_EXPLODE, SoundCategory.BLOCKS, 
+                                0.1f, (1.0F + (user.level.random.nextFloat() - user.level.random.nextFloat()) * 0.2F) * 0.7F);
+                        iter.remove();
+                    }
+                }
+            }
         }
     }
     
@@ -177,18 +199,16 @@ public class PillarmanData extends TypeSpecificData {
         return stoneForm;
     }
     
-    public void setInvaded(boolean isEnabled) {
-        if (this.invaded != isEnabled) {
-            this.invaded = isEnabled;
-            LivingEntity user = power.getUser();
-            if (!user.level.isClientSide()) {
-                PacketManager.sendToClientsTrackingAndSelf(new TrPillarmanDataPacket(user.getId(), this), user);
-            }
+    public void setBladesVisible(boolean visible) {
+        this.bladesVisible = visible;
+        LivingEntity user = power.getUser();
+        if (!user.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(new TrPillarmanDataPacket(user.getId(), this), user);
         }
     }
     
-    public boolean isInvaded() {
-        return invaded;
+    public boolean getBladesVisible() {
+        return bladesVisible;
     }
     
     public Mode getMode() {
@@ -220,5 +240,11 @@ public class PillarmanData extends TypeSpecificData {
             PacketManager.sendToClientsTrackingAndSelf(new TrPillarmanDataPacket(user.getId(), this), user);
         }
         power.clUpdateHud();
+    }
+    
+    public void addEatenTntFuse(int fuse) {
+        if (fuse > 0) {
+            eatenTntFuse.add(new MutableInt(fuse));
+        }
     }
 }

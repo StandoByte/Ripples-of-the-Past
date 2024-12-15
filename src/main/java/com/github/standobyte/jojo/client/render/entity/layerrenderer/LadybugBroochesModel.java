@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.client.render.entity.layerrenderer;
 
-import com.github.standobyte.jojo.client.ClientUtil;
 import com.google.common.collect.ImmutableList;
 
 import net.minecraft.client.renderer.entity.model.BipedModel;
@@ -18,7 +17,7 @@ public class LadybugBroochesModel<T extends LivingEntity> extends BipedModel<T> 
         texWidth = 64;
         texHeight = 64;
 
-        ClientUtil.clearCubes(body);
+        body.cubes.clear();
         
         broochRight = new ModelRenderer(this);
         broochRight.setPos(-2.85F, 4.625F, -2.4F);

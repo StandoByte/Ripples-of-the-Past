@@ -17,7 +17,6 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.TargetHitPart;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
-import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 
 import net.minecraft.block.BlockState;
@@ -29,9 +28,6 @@ import net.minecraft.client.particle.ParticleManager;
 import net.minecraft.client.particle.SpriteTexturedParticle;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.entity.EntityRenderer;
-import net.minecraft.client.renderer.entity.LivingRenderer;
-import net.minecraft.client.renderer.entity.model.BipedModel;
-import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.client.world.ClientWorld;
@@ -100,29 +96,6 @@ public abstract class CustomParticlesHelper {
         BloodFromEntityParticle particle = BloodFromEntityParticle.createCustomParticle(
                 type, Minecraft.getInstance().level, entity, x, y, z, xSpeed, ySpeed, zSpeed);
         return addParticle(particle, new Vector3d(x, y, z), false, false);
-    }
-    
-    // TODO 1st person position
-    public static void addGunshotParticle(LivingEntity entity, HandSide gunSide, Vector3d gunMuzzlePos) {
-        Minecraft mc = Minecraft.getInstance();
-        EntityRenderer<?> renderer = mc.getEntityRenderDispatcher().getRenderer(entity);
-        if (renderer instanceof LivingRenderer) {
-            EntityModel<?> m = ((LivingRenderer<?, ?>) renderer).getModel();
-            if (m instanceof BipedModel) {
-                BipedModel<?> model = (BipedModel<?>) m;
-                ModelRenderer modelArm = gunSide == HandSide.LEFT ? model.leftArm : model.rightArm;
-                Vector3d armPos = new Vector3d(modelArm.x / 16, -modelArm.y / 16 + 1.5, modelArm.z / 16).scale(0.9375);
-                Vector3d armRot = new Vector3d(0, -0.75, 0).add(gunSide == HandSide.LEFT ? 0.075 : -0.075, 0, 0).add(gunMuzzlePos).scale(0.9375)
-                        .xRot(-modelArm.xRot)
-                        .yRot(-modelArm.yRot)
-                        .zRot(modelArm.zRot)
-                        ;
-                Vector3d pos = entity.position().add(armPos.add(armRot).yRot(-entity.yBodyRot * MathUtil.DEG_TO_RAD));
-                
-                entity.level.addParticle(ModParticles.GUNSHOT.get(), pos.x, pos.y, pos.z, 0, 0, 0);
-            }
-        }
-        
     }
     
     public static void createHamonAuraParticle(IParticleData type, 

@@ -128,6 +128,8 @@ public abstract class ContinuousActionInstance<T extends IPlayerAction<?, P>, P 
         return false;
     }
     
+    public void onPreRender(float partialTick) {}
+    
     @Deprecated
     protected boolean isMeleeAttack(DamageSource dmgSource) {
         return DamageUtil.isMeleeAttack(dmgSource);

@@ -540,7 +540,7 @@
   "jojo.layout_edit.locked.hamon_skill": "Se desbloquea con la habilidad %s",
   
   "jojo.command_description": "%s - %s",
-  "jojo.command.desc.jojoconfigpack": "Genera un paquete de datos para editar las estadísticas del Stand.",
+  "jojo.command.desc.jojoconfig": "Genera un paquete de datos para editar las estadísticas del Stand.",
   "jojo.command.desc.hamonstat": "Establece la estadística de Hamon de un jugador (entrenamiento de fuerza, control o respiración)",
   "jojo.command.desc.jojocontrols": "Tutorial de controles y HUD del mod",
   "jojo.command.desc.jojoenergy": "Comprueba o establece el valor del medidor de energía que no es de Stand de un jugador.",

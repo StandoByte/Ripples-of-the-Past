@@ -272,7 +272,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
                 ownerOrStandUser = ((StandEntity) ownerOrStandUser).getUser();
             }
             boolean dropItem = ownerOrStandUser instanceof PlayerEntity ? !((PlayerEntity) ownerOrStandUser).abilities.instabuild : true;
-            brokenBlock = level.destroyBlock(blockPos, dropItem, getOwner());
+            brokenBlock = MCUtil.destroyBlock(level, blockPos, dropItem, getOwner());
         }
         return brokenBlock;
     }
@@ -340,7 +340,8 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
 
     @Override
     public boolean isInvisibleTo(PlayerEntity player) {
-        return standVisibility() && !StandUtil.clStandEntityVisibleTo(player) || !player.isSpectator() && super.isInvisible();
+        return standVisibility() && !StandUtil.clStandEntityVisibleTo(player) 
+                || !JojoModUtil.seesInvisibleAsSpectator(player) && super.isInvisible();
     }
     
     @Override

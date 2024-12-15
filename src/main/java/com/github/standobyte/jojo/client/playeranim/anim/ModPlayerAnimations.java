@@ -30,6 +30,10 @@ public class ModPlayerAnimations {
     public static BasicToggleAnim stoneForm;
     public static BasicToggleAnim bladeBarrage;
     public static BasicToggleAnim bladeDash;
+    public static BasicToggleAnim pillarmanEvasion;
+    public static BasicToggleAnim giantCartwheelPrison;
+    public static BasicToggleAnim selfDetonation;
+    public static BasicToggleAnim erraticBlazeKing;
 
     /** 
      * This string must match the full name of the class and the package it's in.<br>
@@ -130,6 +134,22 @@ public class ModPlayerAnimations {
         bladeDash = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
                 "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXBladeDashLayer",
                 new ResourceLocation(JojoMod.MOD_ID, "blade_dash"), 1);
+        
+        pillarmanEvasion = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXPillarmanEvasionLayer",
+                new ResourceLocation(JojoMod.MOD_ID, "evasion"), 1);
+        
+        giantCartwheelPrison = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXGiantCartwheelPrisonLayer",
+                new ResourceLocation(JojoMod.MOD_ID, "giant_cartwheel_prison"), 1);
+        
+        selfDetonation = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXSelfDetonationLayer",
+                new ResourceLocation(JojoMod.MOD_ID, "self_detonation"), 1);
+        
+        erraticBlazeKing = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXErraticBlazeKingLayer",
+                new ResourceLocation(JojoMod.MOD_ID, "erratic_blaze_king"), 1);
     }
 
 }

@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.client.render.item.CustomIconItem;
 import com.github.standobyte.jojo.client.render.item.RoadRollerISTER;
 import com.github.standobyte.jojo.client.render.item.polaroid.PolaroidISTER;
 import com.github.standobyte.jojo.client.render.item.standdisc.StandDiscISTER;
+import com.github.standobyte.jojo.client.render.item.tommygun.TommyGunISTER;
 import com.github.standobyte.jojo.item.AjaStoneItem;
 import com.github.standobyte.jojo.item.BladeHatItem;
 import com.github.standobyte.jojo.item.BreathControlMaskItem;
@@ -131,7 +132,8 @@ public class ModItems {
                     .setISTER(() -> ClackersISTER::new)));
 
     public static final RegistryObject<TommyGunItem> TOMMY_GUN = ITEMS.register("tommy_gun",
-            () -> new TommyGunItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
+            () -> new TommyGunItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)
+                    .setISTER(() -> TommyGunISTER::new)));
     
     public static final Supplier<Item> MOLOTOV = ITEMS.register("molotov",
             () -> new MolotovItem(new Item.Properties().tab(MAIN_TAB).stacksTo(16)));

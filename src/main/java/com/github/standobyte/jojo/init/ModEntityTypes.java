@@ -35,8 +35,8 @@ import com.github.standobyte.jojo.entity.damaging.projectile.HamonTurquoiseBlueO
 import com.github.standobyte.jojo.entity.damaging.projectile.MRCrossfireHurricaneEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRFireballEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRFlameEntity;
-import com.github.standobyte.jojo.entity.damaging.projectile.PillarmanDivineSandstormEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MolotovEntity;
+import com.github.standobyte.jojo.entity.damaging.projectile.PillarmanDivineSandstormEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.SCFlameSwingEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.SCRapierEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.TommyGunBulletEntity;
@@ -187,7 +187,7 @@ public class ModEntityTypes {
             .build(new ResourceLocation(JojoMod.MOD_ID, "snake_muffler").toString()));
     
     public static final RegistryObject<EntityType<TommyGunBulletEntity>> TOMMY_GUN_BULLET = ENTITIES.register("tommy_gun_bullet", 
-            () -> EntityType.Builder.<TommyGunBulletEntity>of(TommyGunBulletEntity::new, EntityClassification.MISC).sized(0.0625F, 0.0625F).clientTrackingRange(4).setUpdateInterval(20).fireImmune()
+            () -> EntityType.Builder.<TommyGunBulletEntity>of(TommyGunBulletEntity::new, EntityClassification.MISC).sized(0.0625F, 0.0625F).clientTrackingRange(16).setUpdateInterval(1).fireImmune()
             .build(new ResourceLocation(JojoMod.MOD_ID, "tommy_gun_bullet").toString()));
     
     public static final RegistryObject<EntityType<MolotovEntity>> MOLOTOV = ENTITIES.register("molotov", 

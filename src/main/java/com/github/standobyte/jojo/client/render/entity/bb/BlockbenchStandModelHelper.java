@@ -16,7 +16,6 @@ import org.apache.commons.lang3.reflect.FieldUtils;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.render.entity.model.animnew.INamedModelParts;
 import com.github.standobyte.jojo.client.render.entity.pose.XRotationModelRenderer;
-import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 
 import it.unimi.dsi.fastutil.objects.ObjectList;
 import net.minecraft.client.renderer.model.Model;
@@ -109,13 +108,13 @@ public class BlockbenchStandModelHelper {
             field.setAccessible(true);
             ModelRenderer declaredPartNotInGecko = (ModelRenderer) field.get(inModModel);
             if (declaredPartNotInGecko != null) {
-                ClientReflection.getCubes(declaredPartNotInGecko).clear();
-                ClientReflection.getChildren(declaredPartNotInGecko).clear();
+                declaredPartNotInGecko.cubes.clear();
+                declaredPartNotInGecko.children.clear();
             }
         }
         
         for (ModelRenderer modelPart : editedParts) {
-            ObjectList<ModelRenderer> children = ClientReflection.getChildren(modelPart);
+            ObjectList<ModelRenderer> children = modelPart.children;
             if (!children.isEmpty()) {
                 remapParents.forEach((oldChild, newChild) -> {
                     Collections.replaceAll(children, oldChild, newChild);
@@ -140,8 +139,8 @@ public class BlockbenchStandModelHelper {
                     
                     inModPartField.setAccessible(true);
                     ModelRenderer inModModelPart = (ModelRenderer) inModPartField.get(inModModel);
-                    ObjectList<ModelRenderer.ModelBox> cubesReplacing = ClientReflection.getCubes(blockbenchPart);
-                    ClientReflection.setCubes(inModModelPart, cubesReplacing);
+                    inModModelPart.cubes.clear();
+                    inModModelPart.cubes.addAll(blockbenchPart.cubes);
                     
                     it.remove();
                 }
@@ -161,8 +160,8 @@ public class BlockbenchStandModelHelper {
         deepCopy.mirror = modelPart.mirror;
         deepCopy.visible = modelPart.visible;
         
-        ClientReflection.setCubes(deepCopy, ClientReflection.getCubes(modelPart));
-        ClientReflection.setChildren(deepCopy, ClientReflection.getChildren(modelPart));
+        deepCopy.cubes.addAll(modelPart.cubes);
+        deepCopy.children.addAll(modelPart.children);
         
         return deepCopy;
     }

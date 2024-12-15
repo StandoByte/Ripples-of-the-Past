@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.client.playeranim.kosmx.anim.modifier.KosmXHea
 
 import dev.kosmx.playerAnim.api.layered.IAnimation;
 import dev.kosmx.playerAnim.api.layered.ModifierLayer;
+import dev.kosmx.playerAnim.api.layered.modifier.SpeedModifier;
 import dev.kosmx.playerAnim.core.util.Ease;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -16,6 +17,7 @@ import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 
 public class KosmXUnnaturalAgilityLayer extends AnimLayerHandler<ModifierLayer<IAnimation>> implements BasicToggleAnim {
+	private static final float SPEED = 1.25F;
 
     public KosmXUnnaturalAgilityLayer(ResourceLocation id) {
         super(id);
@@ -23,7 +25,7 @@ public class KosmXUnnaturalAgilityLayer extends AnimLayerHandler<ModifierLayer<I
 
     @Override
     protected ModifierLayer<IAnimation> createAnimLayer(AbstractClientPlayerEntity player) {
-        return new ModifierLayer<>(null, new KosmXHeadRotationModifier(), new KosmXArmsRotationModifier(player, HandSide.LEFT, HandSide.RIGHT));
+        return new ModifierLayer<>(null, new SpeedModifier(SPEED));
     }
     
     

@@ -35,6 +35,10 @@ public abstract class StandEntityActionModifier extends StandAction implements I
         return false;
     }
     
+    protected static boolean hasTaskWithNoModifiers(StandEntity standEntity) {
+        return standEntity.getCurrentTask().map(task -> !task.hasModifierAction(null)).orElse(false);
+    }
+    
     
     
     protected class TriggeredFlag {}

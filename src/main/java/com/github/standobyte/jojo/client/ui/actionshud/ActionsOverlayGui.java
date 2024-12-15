@@ -1722,7 +1722,7 @@ public class ActionsOverlayGui extends AbstractGui {
                     mc.getTextureManager().bind(OVERLAY_LOCATION);
                     IStandManifestation stand = standPower.getStandManifestation();
                     if (stand instanceof StandEntity) {
-                        float finisherValue = ((StandEntity) stand).getFinisherMeter();
+                        float finisherValue = ((StandEntity) stand).getFinisherMeter(partialTick);
                         if (finisherValue > 0) {
                             int x = modeSelectorPosition.alignment == Alignment.LEFT ? xLeft - 1 : xRight + 1;
                             boolean heavyVariation = isFinisherVariationUnlocked && ((StandEntity) stand).willHeavyPunchBeFinisher();

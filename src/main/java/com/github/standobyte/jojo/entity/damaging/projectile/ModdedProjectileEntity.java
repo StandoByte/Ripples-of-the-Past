@@ -4,6 +4,8 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.damaging.DamagingEntity;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.DeflectedBulletPacket;
 import com.github.standobyte.jojo.util.general.MathUtil;
 
 import net.minecraft.entity.Entity;
@@ -184,18 +186,38 @@ public abstract class ModdedProjectileEntity extends DamagingEntity {
         return false;
     }
     
+    
     @Override
     public boolean canHitOwner() {
         return entityData.get(IS_DEFLECTED);
     }
     
+    @Deprecated
     public void setIsDeflected() {
-        entityData.set(IS_DEFLECTED, true);
+        setIsDeflected(null, this.position());
+    }
+    
+    public void setIsDeflected(Vector3d deflectVec, Vector3d deflectPos) {
+        if (!level.isClientSide()) {
+            entityData.set(IS_DEFLECTED, true);
+            if (hasDeflectedVisuals() && deflectVec != null) {
+                PacketManager.sendToClientsTracking(new DeflectedBulletPacket(getId(), deflectVec, deflectPos, position()), this);
+            }
+        }
     }
     
     public boolean canBeDeflected(@Nullable Entity context) {
         return true;
     }
+    
+    public boolean hasDeflectedVisuals() {
+        return false;
+    }
+    
+    public boolean canBeEvaded(@Nullable Entity context) {
+        return true;
+    }
+    
     
     @Override
     protected void onHitEntity(EntityRayTraceResult entityRayTraceResult) {

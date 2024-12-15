@@ -14,10 +14,10 @@ public class TommyGunBulletModel extends EntityModel<TommyGunBulletEntity> {
         texWidth = 8;
         texHeight = 8;
         bullet = new ModelRenderer(this);
-        bullet.setPos(0.0F, 0.0F, 0.0F);
-        bullet.texOffs(0, 0).addBox(-1.0F, -1.0F, 0.0F, 1.0F, 1.0F, 2.0F, -0.1F, false);
-        bullet.texOffs(0, 3).addBox(-1.0F, -1.0F, 1.3F, 1.0F, 1.0F, 1.0F, -0.2F, false);
-        bullet.texOffs(0, 0).addBox(-1.0F, -1.0F, 2.1F, 1.0F, 1.0F, 0.0F, -0.1F, false);
+        bullet.setPos(0.0F, -0.5F, 0.0F);
+        bullet.texOffs(0, 0).addBox(-0.5F, -0.5F, 0.0F, 1.0F, 1.0F, 2.0F, -0.1F, false);
+        bullet.texOffs(0, 3).addBox(-0.5F, -0.5F, 1.3F, 1.0F, 1.0F, 1.0F, -0.2F, false);
+        bullet.texOffs(0, 0).addBox(-0.5F, -0.5F, 2.1F, 1.0F, 1.0F, 0.0F, -0.1F, false);
     }
 
     @Override

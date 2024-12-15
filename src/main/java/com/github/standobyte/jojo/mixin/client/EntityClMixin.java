@@ -7,6 +7,7 @@ import javax.annotation.Nonnull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
@@ -15,8 +16,10 @@ import com.github.standobyte.jojo.client.ControllerConsciousness;
 import com.github.standobyte.jojo.client.ControllerStand;
 import com.github.standobyte.jojo.client.IEntityGlowColor;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.PlayerEntity;
 
 @Mixin(Entity.class)
 public class EntityClMixin implements IEntityGlowColor {
@@ -42,6 +45,13 @@ public class EntityClMixin implements IEntityGlowColor {
     @Override
     public OptionalInt getGlowColor() {
         return glowingColor;
+    }
+    
+    
+    @Redirect(method = "isInvisibleTo", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/entity/player/PlayerEntity;isSpectator()Z"))
+    public boolean jojoSpectatorVisibility(PlayerEntity player) {
+        return JojoModUtil.seesInvisibleAsSpectator(player);
     }
     
     

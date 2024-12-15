@@ -262,6 +262,7 @@ public class TimeStopInstant extends StandAction {
     
     @Override
     public void onCommonSetup() {
+        super.onCommonSetup();
         getBaseTimeStop().setInstantTSVariation(this);
         if (getBaseTimeStop().getShiftVariationIfPresent() instanceof TimeResume) {
             ((TimeResume) getBaseTimeStop().getShiftVariationIfPresent()).setInstantTSAction(this);

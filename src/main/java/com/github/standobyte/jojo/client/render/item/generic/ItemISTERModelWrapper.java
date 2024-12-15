@@ -1,18 +1,24 @@
 package com.github.standobyte.jojo.client.render.item.generic;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
+
 import net.minecraft.block.BlockState;
 import net.minecraft.client.renderer.model.BakedQuad;
 import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
+import net.minecraft.client.renderer.model.ItemOverride;
 import net.minecraft.client.renderer.model.ItemOverrideList;
+import net.minecraft.client.renderer.model.ModelResourceLocation;
 import net.minecraft.client.renderer.texture.TextureAtlasSprite;
 import net.minecraft.util.Direction;
+import net.minecraft.util.ResourceLocation;
 
 @SuppressWarnings("deprecation")
 public class ItemISTERModelWrapper implements IBakedModel {
@@ -25,6 +31,26 @@ public class ItemISTERModelWrapper implements IBakedModel {
     
     public ItemISTERModelWrapper setCaptureEntity() {
         captureEntityOverrides = new ISTERItemCaptureEntity();
+        return this;
+    }
+    
+    public ItemISTERModelWrapper refreshOverrides(Map<ResourceLocation, IBakedModel> registry) {
+        ItemOverrideList overridesList = existingModel.getOverrides();
+        if (overridesList != null) {
+            List<ItemOverride> overrides = ClientReflection.getOverrides(overridesList);
+            if (!overrides.isEmpty()) {
+                List<IBakedModel> overrideModels = ClientReflection.getOverrideModels(overridesList);
+                for (int i = 0; i < overrides.size(); i++) {
+                    ItemOverride override = overrides.get(i);
+                    ResourceLocation key = override.getModel();
+                    key = new ModelResourceLocation(new ResourceLocation(key.getNamespace(), key.getPath().replace("item/", "")), "inventory");
+                    IBakedModel replacementModel = registry.get(key);
+                    if (replacementModel != null) {
+                        overrideModels.set(i, replacementModel);
+                    }
+                }
+            }
+        }
         return this;
     }
 

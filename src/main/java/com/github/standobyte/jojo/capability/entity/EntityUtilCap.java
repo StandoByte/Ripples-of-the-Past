@@ -16,10 +16,15 @@ import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.KnockbackCollisionImpact;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.nbt.ByteNBT;
 import net.minecraft.nbt.CompoundNBT;
 
 public class EntityUtilCap {
     private final Entity entity;
+    private final MobEntity asMob;
+    private Boolean prevCanUpdate;
+    private Boolean prevNoAi;
     
     private KnockbackCollisionImpact kbImpact;
     
@@ -31,20 +36,30 @@ public class EntityUtilCap {
     
     public EntityUtilCap(Entity entity) {
         this.entity = entity;
+        this.asMob = entity instanceof MobEntity ? (MobEntity) entity : null;
         this.kbImpact = new KnockbackCollisionImpact(entity);
     }
     
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
-        if (wasStoppedInTime()) {
+        if (!entity.canUpdate() && wasStoppedInTime()) {
             nbt.putBoolean("StoppedInTime", true);
+            if (prevCanUpdate != null) nbt.putBoolean("PrevCanUpdate", prevCanUpdate);
+            if (prevNoAi != null) nbt.putBoolean("PrevNoAi", prevNoAi);
         }
         nbt.put("KbImpact", kbImpact.serializeNBT());
         return nbt;
     }
     
     public void deserializeNBT(CompoundNBT nbt) {
-        nbtSetWasStoppedInTime(nbt.getBoolean("StoppedInTime"));
+        stoppedInTime = nbt.getBoolean("StoppedInTime");
+        if (stoppedInTime) {
+            stoppedInTime = TimeStopHandler.isTimeStopped(entity.level, entity.blockPosition());
+            prevCanUpdate = MCUtil.getNbtElement(nbt, "PrevCanUpdate", ByteNBT.class).map(byteNbt -> byteNbt.getAsByte() != 0).orElse(null);
+            prevNoAi = MCUtil.getNbtElement(nbt, "PrevNoAi", ByteNBT.class).map(byteNbt -> byteNbt.getAsByte() != 0).orElse(null);
+            // updates the Entity#canUpdate field that Forge adds, since it is saved in NBT
+            updateEntityTimeStop(stoppedInTime);
+        }
         MCUtil.nbtGetCompoundOptional(nbt, "KbImpact").ifPresent(kbImpact::deserializeNBT);
     }
     
@@ -66,10 +81,28 @@ public class EntityUtilCap {
     public void updateEntityTimeStop(boolean stopInTime) {
         if (stopInTime) {
             stoppedInTime = true;
+            
+            prevCanUpdate = entity.canUpdate();
             entity.canUpdate(false);
+            
+            if (asMob != null) {
+                prevNoAi = asMob.isNoAi();
+                asMob.setNoAi(true);
+            }
         }
         else if (stoppedInTime) {
-            entity.canUpdate(true);
+            if (prevCanUpdate != null && prevCanUpdate) {
+                entity.canUpdate(true);
+            }
+            prevCanUpdate = null;
+            
+            if (asMob != null) {
+                if (prevNoAi != null && !prevNoAi) {
+                    asMob.setNoAi(false);
+                }
+                prevNoAi = null;
+            }
+            
             runOnTimeResume.forEach(Runnable::run);
             runOnTimeResume.clear();
         }
@@ -77,15 +110,6 @@ public class EntityUtilCap {
     
     public boolean wasStoppedInTime() {
         return stoppedInTime;
-    }
-    
-    // updates the Entity#canUpdate field that Forge adds, since it is saved in NBT
-    void nbtSetWasStoppedInTime(boolean wasStoppedInTime) {
-        if (wasStoppedInTime) {
-            stoppedInTime = true;
-            wasStoppedInTime = TimeStopHandler.isTimeStopped(entity.level, entity.blockPosition());
-            updateEntityTimeStop(wasStoppedInTime);
-        }
     }
     
     

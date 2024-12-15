@@ -2,6 +2,8 @@ package com.github.standobyte.jojo.util.mc;
 
 import java.util.UUID;
 
+import javax.annotation.Nullable;
+
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -10,11 +12,12 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
 public class EntityOwnerResolver {
-    private LivingEntity owner;
+    private Entity owner;
+    private LivingEntity ownerLiving;
     private UUID ownerUUID;
     private int ownerNetworkId;
     
-    public void setOwner(LivingEntity owner) {
+    public void setOwner(@Nullable Entity owner) {
         this.ownerUUID = owner != null ? owner.getUUID() : null;
         this.ownerNetworkId = owner != null ? owner.getId() : 0;
         _setNewOwnerEntity(owner);
@@ -24,10 +27,19 @@ public class EntityOwnerResolver {
         this.ownerUUID = ownerUuid;
     }
     
-    public LivingEntity getEntity(World world) {
+    public Entity getEntity(World world) {
+        updateEntity(world);
+        return owner;
+    }
+    
+    public LivingEntity getEntityLiving(World world) {
+        updateEntity(world);
+        return ownerLiving;
+    }
+    
+    protected void updateEntity(World world) {
         if (owner != null && !owner.isAlive()) {
-            owner = null;
-            ownerNetworkId = 0;
+            _setNewOwnerEntity(null);
         }
         if (owner == null) {
             if (ownerUUID != null && world instanceof ServerWorld) {
@@ -36,15 +48,16 @@ public class EntityOwnerResolver {
                 _setNewOwnerEntity(world.getEntity(ownerNetworkId));
             }
         }
-        
-        return owner;
     }
     
-    private void _setNewOwnerEntity(Entity entity) {
-        if (entity == null || entity instanceof LivingEntity) {
-            this.owner = (LivingEntity) entity;
-            this.ownerNetworkId = owner != null ? owner.getId() : 0;
-        }
+    public boolean hasEntityId() {
+        return ownerNetworkId > 0;
+    }
+    
+    protected void _setNewOwnerEntity(Entity entity) {
+        this.owner = entity;
+        this.ownerLiving = entity instanceof LivingEntity ? (LivingEntity) entity : null;
+        this.ownerNetworkId = owner != null ? owner.getId() : 0;
     }
     
     
@@ -65,5 +78,9 @@ public class EntityOwnerResolver {
     
     public void readNetwork(PacketBuffer buf) {
         ownerNetworkId = buf.readInt();
+    }
+    
+    public int getNetworkId() {
+        return ownerNetworkId;
     }
 }

@@ -79,6 +79,8 @@ import net.minecraft.entity.projectile.ProjectileItemEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.IInventory;
+import net.minecraft.item.Item;
+import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.TieredItem;
 import net.minecraft.nbt.ByteArrayNBT;
@@ -134,6 +136,7 @@ import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.IServerWorld;
+import net.minecraft.world.GameType;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ChunkManager;
 import net.minecraft.world.server.ServerWorld;
@@ -421,6 +424,17 @@ public class MCUtil {
     
     
     
+    public static GameType getGameMode(PlayerEntity player) {
+        if (!player.level.isClientSide()) {
+            return ((ServerPlayerEntity) player).gameMode.getGameModeForPlayer();
+        }
+        else {
+            return ClientUtil.getPlayerGameMode(player);
+        }
+    }
+    
+    
+    
     @Nonnull
     public static ItemStack findInInventory(IInventory inventory, Predicate<ItemStack> itemMatches) {
         int size = inventory.getContainerSize();
@@ -469,6 +483,15 @@ public class MCUtil {
             itemEntity.setOwner(entity.getUUID());
             return itemEntity;
         }
+    }
+    
+    
+    
+    // i ain't using access transformers for this, this is ridiculous
+    public static boolean itemAllowedIn(Item item, ItemGroup creativeTab) {
+        if (item.getCreativeTabs().stream().anyMatch(tab -> tab == creativeTab)) return true;
+        ItemGroup itemCategory = item.getItemCategory();
+        return itemCategory != null && (creativeTab == ItemGroup.TAB_SEARCH || creativeTab == itemCategory);
     }
     
 
@@ -799,6 +822,17 @@ public class MCUtil {
                     Optional.ofNullable(world.getBlockEntity(blockPos)), Collections.emptyList());
             world.removeBlock(blockPos, false);
         }
+    }
+    
+    public static boolean destroyBlock(World world, BlockPos blockPos, boolean dropBlock, @Nullable Entity entity) {
+        BlockState oldState = dropBlock ? null /*no need to call it in this case*/ : world.getBlockState(blockPos);
+        boolean res = world.destroyBlock(blockPos, dropBlock, entity);
+        if (!dropBlock) {
+            CrazyDiamondRestoreTerrain.rememberBrokenBlock(world, blockPos, oldState, 
+                    Optional.ofNullable(world.getBlockEntity(blockPos)), 
+                    Collections.emptyList());
+        }
+        return res;
     }
     
     

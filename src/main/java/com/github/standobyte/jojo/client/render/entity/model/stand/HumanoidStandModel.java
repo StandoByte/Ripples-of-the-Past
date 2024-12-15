@@ -30,7 +30,6 @@ import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.TargetHitPart;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.util.general.MathUtil;
-import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -725,14 +724,14 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
     
     public static void addChildrenRecursive(ModelRenderer modelPart, Collection<ModelRenderer> collection) {
         collection.add(modelPart);
-        for (ModelRenderer child : ClientReflection.getChildren(modelPart)) { // TODO don't use reflection here
+        for (ModelRenderer child : modelPart.children) {
             addChildrenRecursive(child, collection);
         }
     }
     
     public static List<ModelRenderer.ModelBox> allCubes(List<ModelRenderer> modelParts) {
         List<ModelRenderer.ModelBox> cubes = modelParts.stream()
-                .flatMap(modelPart -> ClientReflection.getCubes(modelPart).stream()) // TODO don't use reflection here
+                .flatMap(modelPart -> modelPart.cubes.stream())
                 .collect(Collectors.toList());
         return cubes;
     }
@@ -740,7 +739,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
     // TODO select quads with weight depending on their size
     public static ModelRenderer.TexturedQuad getRandomQuad(ModelRenderer.ModelBox cube) {
         if (cube == null) return null;
-        ModelRenderer.TexturedQuad[] polygons = ClientReflection.getPolygons(cube); // TODO don't use reflection here
+        ModelRenderer.TexturedQuad[] polygons = cube.polygons;
         ModelRenderer.TexturedQuad polygon = polygons[RANDOM.nextInt(polygons.length)];
         return polygon;
     }

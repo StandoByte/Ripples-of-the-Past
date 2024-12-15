@@ -1,7 +1,5 @@
 package com.github.standobyte.jojo.client.render;
 
-import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
-
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.Direction;
 
@@ -92,7 +90,7 @@ public class SlopeModelBox extends ModelRenderer.ModelBox {
                 x0y1z1}, 
                 f8, f11, f9, f12, pTexWidthScaled, pTexHeightScaled, pMirror, Direction.SOUTH);
 
-        ClientReflection.setPolygons(this, polygons);
+        this.polygons = polygons;
     }
     
     public static void addSlopeBox(ModelRenderer modelRenderer, 
@@ -114,7 +112,7 @@ public class SlopeModelBox extends ModelRenderer.ModelBox {
             float pDimensionX, float pDimensionY, float pDimensionY2, float pDimensionZ,
             float pGrowX, float pGrowY, float pGrowZ, 
             boolean pMirror, float xTexSize, float yTexSize) {
-        ClientReflection.addCube(modelRenderer, new SlopeModelBox(
+        modelRenderer.cubes.add(new SlopeModelBox(
                 pTexCoordU, pTexCoordV, 
                 pOriginX, pOriginY1, pOriginY2, pOriginZ, 
                 pDimensionX, pDimensionY, pDimensionY2, pDimensionZ,

@@ -18,11 +18,9 @@ import com.github.standobyte.jojo.util.general.GeneralUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
-import net.minecraft.world.GameType;
 import net.minecraft.world.World;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionRemoveEvent;
 
@@ -97,13 +95,6 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
         PillarmanData pillarman = power.getTypeSpecificData(this).get();
         pillarman.tick();
         if (!entity.level.isClientSide()) {
-            if (pillarman.isInvaded() && entity instanceof ServerPlayerEntity) {
-                ServerPlayerEntity player = (ServerPlayerEntity) entity;
-                if (player.isShiftKeyDown() || (player.getCamera() == player)) {
-                    player.setGameMode(GameType.SURVIVAL);
-                    pillarman.setInvaded(false);
-                }
-            }
             if (pillarman.getEvolutionStage() > 1) {
                 if (entity instanceof PlayerEntity) {
                     ((PlayerEntity) entity).getFoodData().setFoodLevel(17);
@@ -215,7 +206,8 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
             controlScheme.addIfMissing(ControlScheme.Hotbar.LEFT_CLICK, ModPillarmanActions.PILLARMAN_RIBS_BLADES.get());
             controlScheme.addIfMissing(ControlScheme.Hotbar.RIGHT_CLICK, ModPillarmanActions.PILLARMAN_REGENERATION.get());
             controlScheme.addIfMissing(ControlScheme.Hotbar.RIGHT_CLICK, ModPillarmanActions.PILLARMAN_ENHANCED_SENSES.get());
-            controlScheme.addIfMissing(ControlScheme.Hotbar.RIGHT_CLICK, ModPillarmanActions.PILLARMAN_UNNATURAL_AGILITY.get());
+            controlScheme.addIfMissing(ControlScheme.Hotbar.RIGHT_CLICK, ModPillarmanActions.PILLARMAN_HIDE_IN_ENTITY.get());
+            controlScheme.addIfMissing(ControlScheme.Hotbar.RIGHT_CLICK, ModPillarmanActions.PILLARMAN_EVASION.get());
         }
         switch (pillarman.getMode()) {
         case WIND:

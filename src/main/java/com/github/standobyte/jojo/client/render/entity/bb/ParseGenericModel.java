@@ -301,7 +301,7 @@ public class ParseGenericModel {
                 if (polygonsCount < polygons.length) {
                     polygons = Arrays.copyOf(polygons, polygonsCount);
                 }
-                ClientReflection.setPolygons(box, polygons);
+                box.polygons = polygons;
                 
                 return box;
             }
@@ -441,7 +441,8 @@ public class ParseGenericModel {
                     for (ModelParsed.BlockbenchObj child : group.children) {
                         addBlockbenchObjectRecursive(model, child, childModelCubes, modelPart, group);
                     }
-                    ClientReflection.setCubes(modelPart, childModelCubes);
+                    modelPart.cubes.clear();
+                    modelPart.cubes.addAll(childModelCubes);
                 }
             }
             else if (bbObj instanceof ModelParsed.ElementUUID && parent != null) {

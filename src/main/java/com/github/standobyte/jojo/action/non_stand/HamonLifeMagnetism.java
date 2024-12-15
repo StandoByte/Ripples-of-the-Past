@@ -3,6 +3,8 @@ package com.github.standobyte.jojo.action.non_stand;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.capability.chunk.ChunkCapProvider;
+import com.github.standobyte.jojo.capability.chunk.ChunkCap.PrevBlockInfo;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
@@ -22,6 +24,8 @@ import net.minecraft.util.HandSide;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
+import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.chunk.IChunk;
 
 public class HamonLifeMagnetism extends HamonAction {
 
@@ -58,8 +62,19 @@ public class HamonLifeMagnetism extends HamonAction {
                 BlockPos blockPos = target.getBlockPos();
                 BlockState blockState = user.level.getBlockState(blockPos);
                 if (blockState.getBlock() instanceof LeavesBlock) {
-                    world.destroyBlock(blockPos, false);
-                    summonGlider(world, user, power, Vector3d.atBottomCenterOf(blockPos), false, blockState);
+                    MCUtil.destroyBlock(world, blockPos, false, null);
+                    LeavesGliderEntity glider = summonGlider(world, user, power, Vector3d.atBottomCenterOf(blockPos), false, blockState);
+                    
+                    IChunk chunk = world.getChunk(blockPos);
+                    if (chunk instanceof Chunk) {
+                        ((Chunk) chunk).getCapability(ChunkCapProvider.CAPABILITY).ifPresent(cap -> {
+                            PrevBlockInfo brokenBlock = cap.getBrokenBlockAt(blockPos);
+                            if (brokenBlock != null) {
+                                brokenBlock.withEntities(glider);
+                            }
+                        });
+                    }
+                    
                     return;
                 }
             }
@@ -85,7 +100,7 @@ public class HamonLifeMagnetism extends HamonAction {
                 ((BlockItem) item.getItem()).getBlock() instanceof LeavesBlock;
     }
     
-    private void summonGlider(World world, LivingEntity user, INonStandPower power, Vector3d pos, boolean mount, BlockState leavesBlock) {
+    private LeavesGliderEntity summonGlider(World world, LivingEntity user, INonStandPower power, Vector3d pos, boolean mount, BlockState leavesBlock) {
         LeavesGliderEntity glider = new LeavesGliderEntity(world);
         glider.moveTo(pos.x, pos.y, pos.z, user.xRot, user.yRot);
         glider.setLeavesBlock(leavesBlock);
@@ -97,6 +112,7 @@ public class HamonLifeMagnetism extends HamonAction {
         HamonData hamon = power.getTypeSpecificData(ModPowers.HAMON.get()).get();
         hamon.hamonPointsFromAction(HamonStat.CONTROL, getEnergyCost(power, ActionTarget.EMPTY));
         HamonUtil.emitHamonSparkParticles(world, null, pos.x, glider.getY(1.0F), pos.z, 0.1F);
+        return glider;
     }
     
     @Override

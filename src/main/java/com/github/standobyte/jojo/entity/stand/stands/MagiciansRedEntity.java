@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
 import net.minecraft.block.AbstractFireBlock;
@@ -51,7 +52,7 @@ public class MagiciansRedEntity extends StandEntity {
                             blockPos.set(x, y, z);
                             BlockState blockState = world.getBlockState(blockPos);
                             if (!blockState.isAir(world, blockPos) && blockState.getBlock() instanceof AbstractFireBlock) {
-                                world.destroyBlock(blockPos, false);
+                                MCUtil.destroyBlock(world, blockPos, false, null);
                             }
                         }
                     }

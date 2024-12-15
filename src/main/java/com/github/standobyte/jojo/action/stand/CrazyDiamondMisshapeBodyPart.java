@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.action.stand;
 
+import com.github.standobyte.jojo.action.ActionConditionResult;
+import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.stand.punch.IPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
@@ -9,28 +11,42 @@ import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.TargetHitPart;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStatusEffects;
-import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.world.World;
 
 public class CrazyDiamondMisshapeBodyPart extends StandEntityActionModifier {
+    private final TargetHitPart partToHit;
 
-    public CrazyDiamondMisshapeBodyPart(Builder builder) {
+    public CrazyDiamondMisshapeBodyPart(Builder builder, TargetHitPart partToHit) {
         super(builder);
+        this.partToHit = partToHit;
     }
     
     @Override
-    public boolean isUnlocked(IStandPower power) {
-        return ModStandsInit.CRAZY_DIAMOND_HEAL.get().isUnlocked(power);
+    protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
+        if (power.isActive()) {
+            Entity targetEntity = target.getEntity();
+            // TODO misshaping body parts mob effects
+            if (targetEntity instanceof LivingEntity && StandUtil.getStandUser((LivingEntity) targetEntity) instanceof PlayerEntity) {
+                StandEntity standEntity = (StandEntity) power.getStandManifestation();
+                TargetHitPart hitPart = standEntity.getCurrentTask().map(task -> {
+                    if (task.hasModifierAction(null)) {
+                        return null;
+                    }
+                    return task.getAdditionalData().peekOrNull(TargetHitPart.class);
+                }).orElse(null);
+                return ActionConditionResult.noMessage(hitPart != null && hitPart == this.partToHit);
+            }
+        }
+        return ActionConditionResult.NEGATIVE;
     }
-    
-    // FIXME misshaping body parts mob effects
     
     @Override
     public void standTickRecovery(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {

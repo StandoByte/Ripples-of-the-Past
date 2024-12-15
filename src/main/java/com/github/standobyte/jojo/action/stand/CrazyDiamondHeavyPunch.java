@@ -5,7 +5,6 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
-import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
 
@@ -19,11 +18,6 @@ public class CrazyDiamondHeavyPunch extends StandEntityHeavyAttack {
 
     public CrazyDiamondHeavyPunch(Builder builder) {
         super(builder);
-    }
-    
-    @Override
-    protected StandEntityActionModifier getRecoveryFollowup(IStandPower standPower, StandEntity standEntity) {
-        return ModStandsInit.CRAZY_DIAMOND_LEAVE_OBJECT.get();
     }
     
     @Override

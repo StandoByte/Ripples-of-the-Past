@@ -408,7 +408,7 @@
  "jojo.layout_edit.locked.hamon_skill": "學習 %s 技能後解鎖",
   
  "jojo.command_description": "%s - %s",
- "jojo.command.desc.jojoconfigpack": "產生用於編輯『替身』資料的資源包",
+ "jojo.command.desc.jojoconfig": "產生用於編輯『替身』資料的資源包",
  "jojo.command.desc.hamonstat": "設定玩家的波紋數據（力量、控制以及呼吸技巧）",
  "jojo.command.desc.jojocontrols": "該模組的HUD和教程",
  "jojo.command.desc.jojoenergy": "檢查或設定玩家的非替身能量數量值",

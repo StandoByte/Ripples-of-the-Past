@@ -57,6 +57,8 @@ public class PlayerAnimationHandler {
         
         void setupLayerFirstPersonRender(BipedModel<?> layerModel);
         
+        void onItemLikeLayerRender(MatrixStack matrixStack, LivingEntity entity, HandSide side);
+        
         @Deprecated
         default void setBarrageAnim(PlayerEntity player, boolean val) {
             ModPlayerAnimations.playerBarrageAnim.setAnimEnabled(player, val);
@@ -157,6 +159,9 @@ public class PlayerAnimationHandler {
 
         @Override
         public void setupLayerFirstPersonRender(BipedModel<?> layerModel) {}
+        
+        @Override
+        public void onItemLikeLayerRender(MatrixStack matrixStack, LivingEntity entity, HandSide side) {}
     }
     
     public static enum BendablePart {

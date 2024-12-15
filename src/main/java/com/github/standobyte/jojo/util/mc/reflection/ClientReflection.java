@@ -42,6 +42,9 @@ import net.minecraft.client.renderer.entity.LivingRenderer;
 import net.minecraft.client.renderer.entity.layers.LayerRenderer;
 import net.minecraft.client.renderer.entity.model.AgeableModel;
 import net.minecraft.client.renderer.entity.model.EntityModel;
+import net.minecraft.client.renderer.model.IBakedModel;
+import net.minecraft.client.renderer.model.ItemOverride;
+import net.minecraft.client.renderer.model.ItemOverrideList;
 import net.minecraft.client.renderer.model.ModelBakery;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.renderer.model.RenderMaterial;
@@ -134,26 +137,31 @@ public class ClientReflection {
     }
     
     
-    private static final Field MODEL_RENDERER_CUBES = ObfuscationReflectionHelper.findField(ModelRenderer.class, "field_78804_l");
+    @Deprecated private static final Field MODEL_RENDERER_CUBES = ObfuscationReflectionHelper.findField(ModelRenderer.class, "field_78804_l");
+    @Deprecated
     public static void setCubes(ModelRenderer modelRenderer, ObjectList<ModelRenderer.ModelBox> cubes) {
         ReflectionUtil.setFieldValue(MODEL_RENDERER_CUBES, modelRenderer, cubes);
     }
     
+    @Deprecated
     public static void addCube(ModelRenderer modelRenderer, ModelRenderer.ModelBox cube) {
         List<ModelRenderer.ModelBox> cubes = ReflectionUtil.getFieldValue(MODEL_RENDERER_CUBES, modelRenderer);
         cubes.add(cube);
     }
     
+    @Deprecated
     public static ObjectList<ModelRenderer.ModelBox> getCubes(ModelRenderer modelRenderer) {
         return ReflectionUtil.getFieldValue(MODEL_RENDERER_CUBES, modelRenderer);
     }
     
     
-    private static final Field MODEL_RENDERER_CHILDREN = ObfuscationReflectionHelper.findField(ModelRenderer.class, "field_78805_m");
+    @Deprecated private static final Field MODEL_RENDERER_CHILDREN = ObfuscationReflectionHelper.findField(ModelRenderer.class, "field_78805_m");
+    @Deprecated
     public static ObjectList<ModelRenderer> getChildren(ModelRenderer modelRenderer) {
         return ReflectionUtil.getFieldValue(MODEL_RENDERER_CHILDREN, modelRenderer);
     }
     
+    @Deprecated
     public static void setChildren(ModelRenderer modelRenderer, ObjectList<ModelRenderer> children) {
         ReflectionUtil.setFieldValue(MODEL_RENDERER_CHILDREN, modelRenderer, children);
     }
@@ -185,11 +193,13 @@ public class ClientReflection {
     }
     
     
-    private static final Field MODEL_BOX_POLYGONS = ObfuscationReflectionHelper.findField(ModelRenderer.ModelBox.class, "field_78254_i");
+    @Deprecated private static final Field MODEL_BOX_POLYGONS = ObfuscationReflectionHelper.findField(ModelRenderer.ModelBox.class, "field_78254_i");
+    @Deprecated
     public static ModelRenderer.TexturedQuad[] getPolygons(ModelRenderer.ModelBox modelBox) {
         return ReflectionUtil.getFieldValue(MODEL_BOX_POLYGONS, modelBox);
     }
     
+    @Deprecated
     public static void setPolygons(ModelRenderer.ModelBox modelBox, ModelRenderer.TexturedQuad[] polygons) {
         ReflectionUtil.setFieldValue(MODEL_BOX_POLYGONS, modelBox, polygons);
     }
@@ -394,5 +404,16 @@ public class ClientReflection {
     private static final Field SOUND_ENGINE_SOUND_BUFFERS = ObfuscationReflectionHelper.findField(SoundEngine.class, "field_217939_i");
     public static AudioStreamManager getSoundBuffers(SoundEngine soundEngine) {
         return ReflectionUtil.getFieldValue(SOUND_ENGINE_SOUND_BUFFERS, soundEngine);
+    }
+    
+    
+    private static final Field ITEM_OVERRIDE_LIST_OVERRIDES = ObfuscationReflectionHelper.findField(ItemOverrideList.class, "field_188023_b");
+    public static List<ItemOverride> getOverrides(ItemOverrideList itemOverrideList) {
+        return ReflectionUtil.getFieldValue(ITEM_OVERRIDE_LIST_OVERRIDES, itemOverrideList);
+    }
+    
+    private static final Field ITEM_OVERRIDE_LIST_OVERRIDE_MODELS = ObfuscationReflectionHelper.findField(ItemOverrideList.class, "field_209582_c");
+    public static List<IBakedModel> getOverrideModels(ItemOverrideList itemOverrideList) {
+        return ReflectionUtil.getFieldValue(ITEM_OVERRIDE_LIST_OVERRIDE_MODELS, itemOverrideList);
     }
 }

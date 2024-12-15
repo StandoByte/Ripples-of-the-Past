@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondHeal;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
+import com.github.standobyte.jojo.entity.EntityMadeFromBlock;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
@@ -36,7 +37,7 @@ import net.minecraft.util.math.RayTraceResult;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
-public class BlockShardEntity extends ModdedProjectileEntity {
+public class BlockShardEntity extends ModdedProjectileEntity implements EntityMadeFromBlock {
     private static final DataParameter<Boolean> CRAZY_D_RESTORED = EntityDataManager.defineId(BlockShardEntity.class, DataSerializers.BOOLEAN);
     private BlockState blockState;
     private Optional<BlockPos> originBlockPos = Optional.empty();
@@ -119,8 +120,10 @@ public class BlockShardEntity extends ModdedProjectileEntity {
         return true;
     }
     
-    public void setCrazyDRestored() {
+    @Override
+    public boolean crazyDRestore(BlockPos blockPos) {
         entityData.set(CRAZY_D_RESTORED, true);
+        return true;
     }
     
     protected boolean isCrazyDRestored() {

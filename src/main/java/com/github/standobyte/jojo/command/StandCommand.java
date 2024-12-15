@@ -11,6 +11,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import com.mojang.datafixers.util.Either;
 
 import net.minecraft.command.CommandSource;
 import net.minecraft.command.Commands;
@@ -91,50 +92,51 @@ public class StandCommand {
     
     private static int giveRandomStands(CommandSource source, Collection<ServerPlayerEntity> targets, boolean replace) throws CommandSyntaxException {
         int i = 0;
-        StandType<?> stand = null;
         if (!targets.isEmpty()) {
             for (ServerPlayerEntity player : targets) {
+                ITextComponent errorMessage = null;
                 IStandPower power = IStandPower.getStandPowerOptional(player).orElse(null);
                 if (power != null) {
-                    stand = StandUtil.randomStand(player, player.getRandom());
-                    if (stand == null) {
-                        if (targets.size() == 1) {
-                            throw GIVE_SINGLE_EXCEPTION_RANDOM.create(targets.iterator().next().getName());
+                    Either<StandType<?>, ITextComponent> standOrError = null;
+                    if (!replace && power.hasPower()) {
+                        errorMessage = (ITextComponent) GIVE_SINGLE_EXCEPTION_ALREADY_HAS.create(player.getName()).getRawMessage();
+                    }
+                    else {
+                        standOrError = StandUtil.randomStandOrError(player, player.getRandom());
+                        if (standOrError.right().isPresent()) {
+                            errorMessage = new TranslationTextComponent("commands.list.nameAndId", 
+                                    GIVE_SINGLE_EXCEPTION_RANDOM.create(player.getName()).getRawMessage(), 
+                                    standOrError.right().get());
                         }
-                        else {
-                            throw GIVE_MULTIPLE_EXCEPTION_RANDOM.create(targets.size() - i);
+                    }
+                    
+                    if (errorMessage != null) {
+                        source.sendFailure(errorMessage);
+                        continue;
+                    }
+                    
+                    StandType<?> stand = standOrError.left().orElse(null);
+                    if (stand != null) {
+                        if (replace) {
+                            power.clear();
                         }
-                    }
-                    if (replace) {
-                        power.clear();
-                    }
-                    if (power.givePower(stand)) {
-                        i++;
-                    }
-                    else if (targets.size() == 1) {
-                        throw GIVE_SINGLE_EXCEPTION_ALREADY_HAS.create(targets.iterator().next().getName());
+                        if (power.givePower(stand)) {
+                            i++;
+                        }
                     }
                 }
             }
         }
-        if (i == 0) {
-            if (targets.size() == 1) {
-                throw GIVE_SINGLE_EXCEPTION_ALREADY_HAS.create(targets.iterator().next().getName());
-            } else {
-                throw GIVE_MULTIPLE_EXCEPTION_ALREADY_HAVE.create(targets.size());
-            }
-        }
-        else {
+        if (i > 0) {
             if (targets.size() == 1) {
                 source.sendSuccess(new TranslationTextComponent("commands.stand.give.success.single.random", 
                         targets.iterator().next().getDisplayName()), true);
             }
             else {
-                source.sendSuccess(new TranslationTextComponent(
-                        "commands.stand.give.success.multiple.random", i), true);
+                source.sendSuccess(new TranslationTextComponent("commands.stand.give.success.multiple.random", i), true);
             }
-            return i;
         }
+        return i;
     }
 
     private static int removeStands(CommandSource source, Collection<ServerPlayerEntity> targets) throws CommandSyntaxException {

@@ -4,17 +4,20 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.entity.mob.HungryZombieEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.modcompat.OptionalDependencyHelper;
-import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.AgeableEntity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
+import net.minecraft.util.Hand;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.World;
@@ -58,6 +61,17 @@ public class VampirismDarkAura extends VampirismAction {
                     zombie.addEffect(new EffectInstance(Effects.MOVEMENT_SPEED, 300, 1));
                     zombie.addEffect(new EffectInstance(Effects.DAMAGE_BOOST, 300, 0));
                     zombie.addEffect(new EffectInstance(Effects.DAMAGE_RESISTANCE, 300, 0));
+                }
+            }
+            for (Hand hand : Hand.values()) {
+                ItemStack item = user.getItemInHand(hand);
+                if (!item.isEmpty() && item.getItem() == Items.POPPY) {
+                    ItemStack witherRose = new ItemStack(Items.WITHER_ROSE);
+                    if (item.hasTag()) {
+                        witherRose.setTag(item.getTag().copy());
+                    }
+                    witherRose.setCount(item.getCount());
+                    user.setItemInHand(hand, witherRose);
                 }
             }
         }

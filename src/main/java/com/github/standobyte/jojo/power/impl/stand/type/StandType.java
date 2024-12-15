@@ -30,6 +30,7 @@ import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
 import com.github.standobyte.jojo.util.mc.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -38,6 +39,7 @@ import com.google.common.collect.Iterables;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.DamageSource;
@@ -504,9 +506,13 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     
     public static interface IStandPool {
         
+        default boolean addToCreativeTab(Item item, StandType<?> standType, ItemGroup creativeTab, boolean clientSide) {
+            return false;
+        }
+        
+        @Deprecated
         default boolean addToCreativeTab(StandType<?> standType, ItemGroup creativeTab, boolean clientSide) {
-            return ModItems.STAND_DISC.get().allowdedIn(creativeTab) // technically it's equivalent to `creativeTab == ModItems.MAIN_TAB`
-                    && accessibleToPlayer(standType, clientSide);
+            return addToCreativeTab(ModItems.STAND_DISC.get(), standType, creativeTab, clientSide);
         }
         
         default boolean accessibleToPlayer(StandType<?> standType, boolean clientSide) {
@@ -517,8 +523,8 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
     public static enum StandSurvivalGameplayPool implements IStandPool {
         PLAYER_ARROW {
             @Override
-            public boolean addToCreativeTab(StandType<?> standType, ItemGroup creativeTab, boolean clientSide) {
-                return ModItems.STAND_DISC.get().allowdedIn(creativeTab) && !StandUtil.isStandBanned(standType, clientSide);
+            public boolean addToCreativeTab(Item item, StandType<?> standType, ItemGroup creativeTab, boolean clientSide) {
+                return MCUtil.itemAllowedIn(item, creativeTab) && !StandUtil.isStandBanned(standType, clientSide);
             }
             
             @Override
@@ -528,8 +534,8 @@ public abstract class StandType<T extends StandStats> extends ForgeRegistryEntry
         },
         NON_ARROW { // Requiems, C-Moon, Made in Heaven, Acts depending on their implementation, etc.
             @Override
-            public boolean addToCreativeTab(StandType<?> standType, ItemGroup creativeTab, boolean clientSide) {
-                return ModItems.STAND_DISC.get().allowdedIn(creativeTab) && !StandUtil.isStandBanned(standType, clientSide);
+            public boolean addToCreativeTab(Item item, StandType<?> standType, ItemGroup creativeTab, boolean clientSide) {
+                return MCUtil.itemAllowedIn(item, creativeTab) && !StandUtil.isStandBanned(standType, clientSide);
             }
         },
         NPC_ENCOUNTER,

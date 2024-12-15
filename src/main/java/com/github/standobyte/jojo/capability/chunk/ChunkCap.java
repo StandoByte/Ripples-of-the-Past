@@ -16,7 +16,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
-import com.github.standobyte.jojo.entity.damaging.projectile.BlockShardEntity;
+import com.github.standobyte.jojo.entity.EntityMadeFromBlock;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.BrokenChunkBlocksPacket;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -176,7 +176,7 @@ public class ChunkCap {
         
         public final List<ItemStack> drops;
         private int xp = 0;
-        private List<WeakReference<BlockShardEntity>> blockShards;
+        private List<WeakReference<EntityMadeFromBlock>> blockShards;
         
         public final boolean keep;
         private int tickCount = 0;
@@ -200,19 +200,20 @@ public class ChunkCap {
             return xp;
         }
         
-        public void withBlockShards(BlockShardEntity[] blockShardEntities) {
+        public void withEntities(EntityMadeFromBlock... blockShardEntities) {
             this.blockShards = Arrays.stream(blockShardEntities).map(WeakReference::new).collect(Collectors.toList());
         }
         
-        public void onRestore() {
+        public boolean onRestore() {
             if (blockShards != null) {
-                for (WeakReference<BlockShardEntity> shardRef : blockShards) {
-                    BlockShardEntity shard = shardRef.get();
-                    if (shard != null && shard.isAlive()) {
-                        shard.setCrazyDRestored();
+                for (WeakReference<EntityMadeFromBlock> shardRef : blockShards) {
+                    EntityMadeFromBlock shard = shardRef.get();
+                    if (shard != null && shard.isEntityAlive()) {
+                        return shard.crazyDRestore(pos);
                     }
                 }
             }
+            return true;
         }
         
         private boolean forget() {

@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.entity.damaging.projectile;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.init.ModEntityTypes;
@@ -174,6 +176,16 @@ public class HamonTurquoiseBlueOverdriveEntity extends ModdedProjectileEntity {
 
     @Override
     public boolean standDamage() {
+        return false;
+    }
+    
+    @Override
+    public boolean canBeDeflected(@Nullable Entity context) {
+        return false;
+    }
+    
+    @Override
+    public boolean canBeEvaded(@Nullable Entity context) {
         return false;
     }
 

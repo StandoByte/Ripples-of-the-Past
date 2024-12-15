@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.HamonSparksLoopSound;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonCharge;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -74,7 +75,7 @@ public class HamonBlockChargeEntity extends Entity {
                         entity.hurt(DamageSource.CACTUS, 0.2F * (3F * range * range - (float) entity.distanceToSqr(pos)));
                     });
                     entityData.set(CACTUS_EXPLOSION, true);
-                    level.destroyBlock(blockPos, false);
+                    MCUtil.destroyBlock(level, blockPos, false, null);
                 }
             }
         }

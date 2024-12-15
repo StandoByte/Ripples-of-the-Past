@@ -75,14 +75,10 @@ public abstract class AbstractHamonSkill extends ForgeRegistryEntry<AbstractHamo
         hamon.addHamonSkill(user, this, true, true);
     }
     
-    private IFormattableTextComponent name;
     private List<IFormattableTextComponent> description;
     
     public IFormattableTextComponent getNameTranslated() {
-        if (name == null) {
-            name = new TranslationTextComponent("hamonSkill." + getName() + ".name");
-        }
-        return name;
+        return new TranslationTextComponent("hamonSkill." + getName() + ".name");
     }
     
     public List<IFormattableTextComponent> getDescTranslated() {

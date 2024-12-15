@@ -6,6 +6,7 @@ import java.util.List;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRFlameEntity;
 import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModParticles;
@@ -16,6 +17,7 @@ import com.github.standobyte.jojo.util.mc.damage.explosion.CustomExplosion;
 
 import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.block.BlockState;
+import net.minecraft.block.FlowingFluidBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -36,10 +38,10 @@ public class PillarmanSelfDetonation extends PillarmanAction {
         super(builder.holdType());
         mode = Mode.HEAT;
     }
- 
+    
     @Override
-    public void onHoldTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
-        if (requirementsFulfilled && world.isClientSide()) {
+    public void onHoldTickClientEffect(LivingEntity user, INonStandPower power, int ticksHeld, boolean reqFulfilled, boolean reqStateChanged) {
+        if (reqFulfilled) {
             PillarmanDivineSandstorm.auraEffect(user, ModParticles.HAMON_AURA_RED.get(), 12);
             PillarmanDivineSandstorm.auraEffect(user, ModParticles.BOILING_BLOOD_POP.get(), 1);
         }
@@ -61,6 +63,15 @@ public class PillarmanSelfDetonation extends PillarmanAction {
         }
     }
     
+    @Override
+    public boolean clHeldStartAnim(PlayerEntity user) {
+        return ModPlayerAnimations.selfDetonation.setAnimEnabled(user, true);
+    }
+    
+    @Override
+    public void clHeldStopAnim(PlayerEntity user) {
+        ModPlayerAnimations.selfDetonation.setAnimEnabled(user, false);
+    } 
     
     
     public static class PillarmanExplosion extends CustomExplosion {
@@ -96,8 +107,8 @@ public class PillarmanSelfDetonation extends PillarmanAction {
             if (acdc == null || ForgeEventFactory.getMobGriefingEvent(level, acdc)) {
                 for (BlockPos pos : getToBlow()) {
                     if (level.isEmptyBlock(pos)) {
-                        if (!level.isEmptyBlock(pos.below()) && Math.random() < 0.05f) {
-                            level.setBlockAndUpdate(pos, ModBlocks.BOILING_BLOOD.get().defaultBlockState());
+                        if (!level.isEmptyBlock(pos.below()) && Math.random() < 0.25f) {
+                            level.setBlockAndUpdate(pos, ModBlocks.BOILING_BLOOD.get().defaultBlockState().setValue(FlowingFluidBlock.LEVEL, 7));
                         } else {
                             level.setBlockAndUpdate(pos, AbstractFireBlock.getState(level, pos));
                         }

@@ -15,11 +15,13 @@ import com.mojang.serialization.Codec;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityPredicate;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.ai.goal.GoalSelector;
 import net.minecraft.entity.ai.goal.HurtByTargetGoal;
 import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
 import net.minecraft.entity.ai.goal.PrioritizedGoal;
 import net.minecraft.entity.ai.goal.TargetGoal;
+import net.minecraft.entity.item.minecart.TNTMinecartEntity;
 import net.minecraft.entity.merchant.IMerchant;
 import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.monster.ZombieVillagerEntity;
@@ -41,6 +43,7 @@ import net.minecraft.potion.Effect;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.tileentity.AbstractFurnaceTileEntity;
 import net.minecraft.util.RegistryKey;
+import net.minecraft.util.SoundEvent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.world.Explosion;
 import net.minecraft.world.GameRules;
@@ -198,6 +201,17 @@ public class CommonReflection {
     
     
     
+    private static final Field TNT_MINECART_ENTITY_FUSE = ObfuscationReflectionHelper.findField(TNTMinecartEntity.class, "field_94106_a");
+    public static int getFuse(TNTMinecartEntity entity) {
+        return ReflectionUtil.getIntFieldValue(TNT_MINECART_ENTITY_FUSE, entity);
+    }
+    
+    public static void setFuse(TNTMinecartEntity entity, int fuse) {
+        ReflectionUtil.setIntFieldValue(TNT_MINECART_ENTITY_FUSE, entity, fuse);
+    }
+    
+    
+    
     private static final Field LIVING_ENTITY_ATTACK_STRENGTH_TICKER = ObfuscationReflectionHelper.findField(LivingEntity.class, "field_184617_aD");
     public static int getAttackStrengthTicker(LivingEntity entity) {
         return ReflectionUtil.getIntFieldValue(LIVING_ENTITY_ATTACK_STRENGTH_TICKER, entity);
@@ -275,6 +289,13 @@ public class CommonReflection {
     public static void startConverting(ZombieVillagerEntity entity, @Nullable UUID conversionStarter, int villagerConversionTime) {
         ReflectionUtil.invokeMethod(ZOMBIE_VILLAGER_ENTITY_START_CONVERTING, entity, 
                 conversionStarter, villagerConversionTime);
+    }
+    
+    
+    
+    private static final Method MOB_ENTITY_GET_AMBIENT_SOUND = ObfuscationReflectionHelper.findMethod(MobEntity.class, "func_184639_G");
+    public static SoundEvent getAmbientSound(MobEntity entity) {
+        return ReflectionUtil.invokeMethod(MOB_ENTITY_GET_AMBIENT_SOUND, entity);
     }
     
     

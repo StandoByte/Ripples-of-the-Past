@@ -13,8 +13,6 @@ public class ModParticles {
     
     public static final RegistryObject<BasicParticleType> BLOOD = PARTICLES.register("blood", () -> new BasicParticleType(false));
     
-    public static final RegistryObject<BasicParticleType> GUNSHOT = PARTICLES.register("gunshot", () -> new BasicParticleType(false));
-    
     public static final RegistryObject<BasicParticleType> HAMON_SPARK = PARTICLES.register("hamon_spark", () -> new BasicParticleType(false));
     public static final RegistryObject<BasicParticleType> HAMON_SPARK_BLUE = PARTICLES.register("hamon_spark_blue", () -> new BasicParticleType(false));
     public static final RegistryObject<BasicParticleType> HAMON_SPARK_YELLOW = PARTICLES.register("hamon_spark_yellow", () -> new BasicParticleType(false));

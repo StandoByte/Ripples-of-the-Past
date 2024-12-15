@@ -215,6 +215,10 @@ public abstract class ClientTickingSoundsHelper {
         Minecraft.getInstance().getSoundManager().play(new BladeHatSound(entity));
     }
     
+    public static void playTommyGunLoop(LivingEntity entity, SoundEvent sound, float volume, ItemStack stack) {
+        Minecraft.getInstance().getSoundManager().play(new TommyGunLoopSound(sound, entity.getSoundSource(), volume, entity, stack));
+    }
+    
     public static void playItemUseSound(LivingEntity entity, SoundEvent sound, float volume, float pitch, boolean looping, ItemStack stack) {
         Minecraft.getInstance().getSoundManager().play(new StoppableEntityTickableSound<LivingEntity>(sound, 
                 entity.getSoundSource(), volume, pitch, looping, entity, 

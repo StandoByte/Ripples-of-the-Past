@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.entity.itemprojectile;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
@@ -66,7 +67,7 @@ public class BladeHatEntity extends ItemNbtProjectileEntity implements IEntityAd
                     BlockPos blockPos = ((BlockRayTraceResult) rayTraceResult).getBlockPos();
                     Block block = level.getBlockState(blockPos).getBlock();
                     if (block == Blocks.COBWEB || block == Blocks.TRIPWIRE || block instanceof BushBlock) {
-                        level.destroyBlock(blockPos, true);
+                        MCUtil.destroyBlock(level, blockPos, true, null);
                     }
                 }
             }

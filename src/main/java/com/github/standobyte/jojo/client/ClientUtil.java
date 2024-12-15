@@ -28,7 +28,6 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
-import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.GameSettings;
 import net.minecraft.client.MainWindow;
@@ -42,6 +41,7 @@ import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.button.Button;
+import net.minecraft.client.network.play.NetworkPlayerInfo;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.ItemModelMesher;
@@ -88,6 +88,7 @@ import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.world.GameType;
 import net.minecraft.world.IBlockDisplayReader;
 import net.minecraft.world.World;
 import net.minecraftforge.fml.client.gui.GuiUtils;
@@ -155,6 +156,17 @@ public class ClientUtil {
     
     public static float getPartialTick() {
         return ClientEventHandler.getInstance().getPartialTick();
+    }
+    
+    public static GameType getPlayerGameMode(PlayerEntity player) {
+        if (player.isLocalPlayer()) {
+            return Minecraft.getInstance().gameMode.getPlayerMode();
+        }
+        NetworkPlayerInfo networkPlayerInfo = Minecraft.getInstance().getConnection().getPlayerInfo(player.getGameProfile().getId());
+        if (networkPlayerInfo != null) {
+            return networkPlayerInfo.getGameMode();
+        }
+        return null;
     }
     
     public static String getCurrentLanguageCode() {
@@ -625,12 +637,32 @@ public class ClientUtil {
         return rotVec;
     }
     
+    @Deprecated
     public static void clearCubes(ModelRenderer modelRenderer) {
-        ClientReflection.setCubes(modelRenderer, new ObjectArrayList<>());
+        modelRenderer.cubes.clear();
+    }
+    
+    public static void clearBipedCubes(BipedModel<?> model) {
+        model.head.cubes.clear();
+        model.body.cubes.clear();
+        model.leftArm.cubes.clear();
+        model.rightArm.cubes.clear();
+        model.leftLeg.cubes.clear();
+        model.rightLeg.cubes.clear();
+    }
+    
+    public static void clearBipedCubes(PlayerModel<?> model) {
+        clearBipedCubes((BipedModel<?>) model);
+        model.hat.cubes.clear();
+        model.jacket.cubes.clear();
+        model.leftSleeve.cubes.clear();
+        model.rightSleeve.cubes.clear();
+        model.leftPants.cubes.clear();
+        model.rightPants.cubes.clear();
     }
     
     public static void editLatestCube(ModelRenderer modelRenderer, Consumer<ModelRenderer.ModelBox> edit) {
-        List<ModelRenderer.ModelBox> cubes = ClientReflection.getCubes(modelRenderer);
+        List<ModelRenderer.ModelBox> cubes = modelRenderer.cubes;
         if (cubes.isEmpty()) return;
         ModelRenderer.ModelBox box = cubes.get(cubes.size() - 1);
         edit.accept(box);
@@ -641,7 +673,7 @@ public class ClientUtil {
             faceDir = faceDir.getOpposite();
         }
         Vector3f faceNormal = faceDir.step();
-        Optional<ModelRenderer.TexturedQuad> faceOptional = Arrays.stream(ClientReflection.getPolygons(cube))
+        Optional<ModelRenderer.TexturedQuad> faceOptional = Arrays.stream(cube.polygons)
                 .filter(quad -> quad.normal.equals(faceNormal)).findFirst();
         if (faceOptional.isPresent()) {
             u0 /= model.texWidth;

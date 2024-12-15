@@ -5,15 +5,12 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.TargetHitPart;
-import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
-import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
@@ -25,29 +22,11 @@ public class CrazyDiamondMisshapingPunch extends StandEntityHeavyAttack {
     }
     
     @Override
-    protected StandEntityActionModifier getRecoveryFollowup(IStandPower standPower, StandEntity standEntity) {
-        if (standEntity == null) return null;
-        
-        TargetHitPart hitPart = standEntity.getCurrentTask().map(task -> task.getAdditionalData().peekOrNull(TargetHitPart.class)).orElse(null);
-        if (hitPart != null) {
-            switch (hitPart) {
-            case HEAD:
-                return ModStandsInit.CRAZY_DIAMOND_MISSHAPE_FACE.get();
-            case TORSO_ARMS:
-                return ModStandsInit.CRAZY_DIAMOND_MISSHAPE_ARMS.get();
-            case LEGS:
-                return ModStandsInit.CRAZY_DIAMOND_MISSHAPE_LEGS.get();
-            }
-        }
-        return null;
-    }
-    
-    @Override
     public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task, int ticks) {
         super.onTaskSet(world, standEntity, standPower, phase, task, ticks);
         if (!world.isClientSide() && task.getTarget().getType() == TargetType.ENTITY) {
             Entity target = task.getTarget().getEntity();
-            if (target instanceof LivingEntity && StandUtil.getStandUser((LivingEntity) target) instanceof PlayerEntity) {
+            if (target instanceof LivingEntity) {
                 LivingEntity aimingEntity = standPower.getUser();
                 if (aimingEntity == null) aimingEntity = standEntity;
                 

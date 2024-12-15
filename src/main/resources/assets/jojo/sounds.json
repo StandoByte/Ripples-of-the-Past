@@ -53,6 +53,10 @@
       }
     ]
   },
+  "tommy_gun_loop": {
+    "subtitle": "jojo.subtitle.tommy_gun_shot",
+    "sounds": [ "jojo:tommy_gun_loop" ]
+  },
   "tommy_gun_shot": {
     "subtitle": "jojo.subtitle.tommy_gun_shot",
     "sounds": [ "jojo:bullet_shot" ]

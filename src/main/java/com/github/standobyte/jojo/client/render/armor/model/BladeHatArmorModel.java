@@ -21,7 +21,7 @@ public class BladeHatArmorModel extends BipedModel<LivingEntity> {
         texHeight = 32;
 
         head.setTexSize(texWidth, texHeight);
-        ClientUtil.clearCubes(head);
+        head.cubes.clear();
         head.setPos(0.0F, 0.5F, 0.0F);
         head.texOffs(0, 0).addBox(-4.0F, -8.5F, -4.0F, 8.0F, 3.0F, 8.0F, 0.75F, false);
         head.texOffs(0, 25).addBox(-3.0F, -10.0F, -3.0F, 6.0F, 1.0F, 6.0F, 0.75F, false);

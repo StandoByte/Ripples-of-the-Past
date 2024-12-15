@@ -51,6 +51,7 @@
     "client.ItemRendererMixin",
     "client.SMapDataPacketMixin",
     "client.MapItemRendererMixin",
-    "client.LivingRendererInvoker"
+    "client.LivingRendererInvoker",
+    "client.SpectatorGuiMixin"
   ]
 }

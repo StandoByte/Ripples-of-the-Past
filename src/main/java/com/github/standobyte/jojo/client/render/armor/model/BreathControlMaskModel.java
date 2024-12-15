@@ -2,8 +2,6 @@ package com.github.standobyte.jojo.client.render.armor.model;
 
 import java.util.Collections;
 
-import com.github.standobyte.jojo.client.ClientUtil;
-
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.LivingEntity;
@@ -19,7 +17,7 @@ public class BreathControlMaskModel extends BipedModel<LivingEntity> {
         texHeight = 32;
 
         head.setTexSize(texWidth, texHeight);
-        ClientUtil.clearCubes(head);
+        head.cubes.clear();
         head.setPos(0.0F, 0.0F, 0.0F);
         head.texOffs(0, 0).addBox(-4.0F, -3.0F, -4.0F, 8.0F, 3.0F, 3.0F, 0.4F, false);
         head.texOffs(22, 0).addBox(-1.0F, -2.0F, -5.0F, 2.0F, 2.0F, 1.0F, 0.6F, false);

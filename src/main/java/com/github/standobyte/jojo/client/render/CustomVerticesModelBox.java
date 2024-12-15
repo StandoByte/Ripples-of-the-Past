@@ -4,7 +4,6 @@ import java.util.EnumMap;
 import java.util.Map;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.Direction;
@@ -79,7 +78,7 @@ public class CustomVerticesModelBox extends ModelRenderer.ModelBox {
                 x0y1z1}, 
                 uv.u0, uv.v0, uv.u1, uv.v1, texWidth, texHeight, mirror, Direction.SOUTH);
 
-        ClientReflection.setPolygons(this, polygons);
+        this.polygons = polygons;
     }
     
     
@@ -170,7 +169,7 @@ public class CustomVerticesModelBox extends ModelRenderer.ModelBox {
                 return;
             }
             CustomVerticesModelBox cube = new CustomVerticesModelBox(this, texWidth, texHeight, mirror);
-            ClientReflection.addCube(modelRenderer, cube);
+            modelRenderer.cubes.add(cube);
         }
     }
 }

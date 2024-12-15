@@ -11,6 +11,7 @@ public class PlaneRectangle {
     public final Vector3d pRU;
     public final Vector3d pRD;
     public final Vector3d center;
+    public final Vector3d normalVec;
     
     public static PlaneRectangle vertical(Vector3d pLD, Vector3d pRU) {
         return new PlaneRectangle(pLD, new Vector3d(pLD.x, pRU.y, pLD.z), pRU, new Vector3d(pRU.x, pLD.y, pRU.z));
@@ -26,6 +27,7 @@ public class PlaneRectangle {
         this.pRU = pRU;
         this.pRD = pRD;
         this.center = pLD.add(pLU.subtract(pLD).scale(0.5)).add(pRD.subtract(pLD).scale(0.5));
+        this.normalVec = pRU.subtract(pLD).cross(pLU.subtract(pRD)).normalize();
     }
     
     public PlaneRectangle scale(double scale) {

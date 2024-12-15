@@ -93,11 +93,11 @@ public class KnifeEntity extends ItemProjectileEntity {
                 BlockPos blockPos = ((BlockRayTraceResult) rayTraceResult).getBlockPos();
                 Block block = level.getBlockState(blockPos).getBlock();
                 if (block == Blocks.COBWEB) {
-                    level.destroyBlock(blockPos, true);
+                    MCUtil.destroyBlock(level, blockPos, true, null);
                     setDeltaMovement(getDeltaMovement().scale(0.8D));
                 }
                 if (block == Blocks.TRIPWIRE) {
-                    level.destroyBlock(blockPos, true);
+                    MCUtil.destroyBlock(level, blockPos, true, null);
                 }
             }
         }
