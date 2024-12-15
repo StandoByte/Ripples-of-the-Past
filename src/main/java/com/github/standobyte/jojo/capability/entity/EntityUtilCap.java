@@ -39,7 +39,7 @@ public class EntityUtilCap {
     
     public CompoundNBT serializeNBT() {
         CompoundNBT nbt = new CompoundNBT();
-        if (wasStoppedInTime()) {
+        if (!entity.canUpdate() && wasStoppedInTime()) {
             nbt.putBoolean("StoppedInTime", true);
             if (prevCanUpdate != null) nbt.putBoolean("PrevCanUpdate", prevCanUpdate);
             if (prevNoAi != null) nbt.putBoolean("PrevNoAi", prevNoAi);
@@ -51,10 +51,10 @@ public class EntityUtilCap {
     public void deserializeNBT(CompoundNBT nbt) {
         stoppedInTime = nbt.getBoolean("StoppedInTime");
         if (stoppedInTime) {
-            // updates the Entity#canUpdate field that Forge adds, since it is saved in NBT
             stoppedInTime = TimeStopHandler.isTimeStopped(entity.level, entity.blockPosition());
             prevCanUpdate = MCUtil.getNbtElement(nbt, "PrevCanUpdate", ByteNBT.class).map(byteNbt -> byteNbt.getAsByte() != 0).orElse(null);
             prevNoAi = MCUtil.getNbtElement(nbt, "PrevNoAi", ByteNBT.class).map(byteNbt -> byteNbt.getAsByte() != 0).orElse(null);
+            // updates the Entity#canUpdate field that Forge adds, since it is saved in NBT
             updateEntityTimeStop(stoppedInTime);
         }
         MCUtil.nbtGetCompoundOptional(nbt, "KbImpact").ifPresent(kbImpact::deserializeNBT);

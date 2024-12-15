@@ -12,7 +12,6 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
-import com.github.standobyte.jojo.capability.entity.power.StandCapProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ControllerStand;
@@ -133,7 +132,7 @@ public class StandUtil {
     }
     
     public static boolean isEntityStandUser(LivingEntity entity) {
-        return entity.getCapability(StandCapProvider.STAND_CAP).map(cap -> cap.hasPower()).orElse(false);
+        return IStandPower.getStandPowerOptional(entity).map(IPower::hasPower).orElse(false);
     }
     
     public static boolean clStandEntityVisibleTo(PlayerEntity player) {

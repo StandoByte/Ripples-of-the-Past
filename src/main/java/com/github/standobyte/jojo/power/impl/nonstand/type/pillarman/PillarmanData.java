@@ -35,6 +35,7 @@ public class PillarmanData extends TypeSpecificData {
     private float lastEnergy = -999;
     private Mode mode = Mode.NONE;
     private List<MutableInt> eatenTntFuse = new ArrayList<>();
+    private boolean bladesVisible = false;
     
     public enum Mode {
         NONE,
@@ -196,6 +197,18 @@ public class PillarmanData extends TypeSpecificData {
     
     public boolean isStoneFormEnabled() {
         return stoneForm;
+    }
+    
+    public void setBladesVisible(boolean visible) {
+        this.bladesVisible = visible;
+        LivingEntity user = power.getUser();
+        if (!user.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(new TrPillarmanDataPacket(user.getId(), this), user);
+        }
+    }
+    
+    public boolean getBladesVisible() {
+        return bladesVisible;
     }
     
     public Mode getMode() {

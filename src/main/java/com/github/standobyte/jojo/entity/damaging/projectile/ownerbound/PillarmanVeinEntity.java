@@ -1,17 +1,25 @@
 package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 
+import com.github.standobyte.jojo.entity.damaging.projectile.MRFlameEntity;
+import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
+import net.minecraft.block.BlockState;
+import net.minecraft.block.FlowingFluidBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.EntityRayTraceResult;
+import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
+import net.minecraftforge.event.ForgeEventFactory;
 
 public class PillarmanVeinEntity extends OwnerBoundProjectileEntity {
     private float yRotOffset;
@@ -19,13 +27,15 @@ public class PillarmanVeinEntity extends OwnerBoundProjectileEntity {
     protected float knockback = 0;
     private double yOriginOffset;
     private double xOriginOffset;
+    private double zOriginOffset;
 
-    public PillarmanVeinEntity(World world, LivingEntity entity, float angleXZ, float angleYZ, double offsetX, double offsetY) {
+    public PillarmanVeinEntity(World world, LivingEntity entity, float angleXZ, float angleYZ, double offsetX, double offsetY, double offsetZ) {
         super(ModEntityTypes.PILLARMAN_VEINS.get(), entity, world);
         this.xRotOffset = angleXZ;
         this.yRotOffset = angleYZ;
         this.xOriginOffset = offsetX;
         this.yOriginOffset = offsetY;
+        this.zOriginOffset = offsetZ;
     }
     
     public PillarmanVeinEntity(EntityType<? extends PillarmanVeinEntity> entityType, World world) {
@@ -88,6 +98,23 @@ public class PillarmanVeinEntity extends OwnerBoundProjectileEntity {
     }
     
     @Override
+    protected void afterBlockHit(BlockRayTraceResult blockRayTraceResult, boolean blockDestroyed) {
+        if (!level.isClientSide) {
+            if (ForgeEventFactory.getMobGriefingEvent(level, getEntity())) {
+                BlockPos blockPos = blockRayTraceResult.getBlockPos();
+                BlockState blockState = level.getBlockState(blockPos);
+                if (!MRFlameEntity.meltIceAndSnow(level, blockState, blockPos) && 
+                		blockState.getCollisionShape(level, blockPos) != VoxelShapes.empty()) {
+                    blockPos = blockPos.relative(blockRayTraceResult.getDirection());
+                    if (level.isEmptyBlock(blockPos) && !isRetracting()) {
+                        level.setBlockAndUpdate(blockPos, ModBlocks.BOILING_BLOOD.get().defaultBlockState().setValue(FlowingFluidBlock.LEVEL, 4));
+                    }
+                }
+            }
+        }
+    }
+    
+    @Override
     protected float knockbackMultiplier() {
         return 0F;
     }
@@ -115,7 +142,7 @@ public class PillarmanVeinEntity extends OwnerBoundProjectileEntity {
     
     @Override
     protected Vector3d getOwnerRelativeOffset() {
-        return new Vector3d(xOriginOffset, yOriginOffset, 0);
+        return new Vector3d(xOriginOffset, yOriginOffset, zOriginOffset);
     }
 
     @Override
@@ -129,8 +156,9 @@ public class PillarmanVeinEntity extends OwnerBoundProjectileEntity {
         nbt.putFloat("YRotOffset", yRotOffset);
         nbt.putFloat("XRotOffset", xRotOffset);
         nbt.putFloat("Knockback", knockback);
-        nbt.putDouble("YOriginOffset", yOriginOffset);
         nbt.putDouble("XOriginOffset", xOriginOffset);
+        nbt.putDouble("YOriginOffset", yOriginOffset);
+        nbt.putDouble("ZOriginOffset", zOriginOffset);
     }
 
     @Override
@@ -139,8 +167,9 @@ public class PillarmanVeinEntity extends OwnerBoundProjectileEntity {
         yRotOffset = nbt.getFloat("YRotOffset");
         xRotOffset = nbt.getFloat("XRotOffset");
         knockback = nbt.getFloat("Knockback");
-        yOriginOffset = nbt.getDouble("YOriginOffset");
         xOriginOffset = nbt.getDouble("XOriginOffset");
+        yOriginOffset = nbt.getDouble("YOriginOffset");
+        zOriginOffset = nbt.getDouble("ZOriginOffset");
     }
 
     @Override
@@ -150,6 +179,7 @@ public class PillarmanVeinEntity extends OwnerBoundProjectileEntity {
         buffer.writeFloat(xRotOffset);
         buffer.writeDouble(xOriginOffset);
         buffer.writeDouble(yOriginOffset);
+        buffer.writeDouble(zOriginOffset);
     }
 
     @Override
@@ -159,5 +189,6 @@ public class PillarmanVeinEntity extends OwnerBoundProjectileEntity {
         this.xRotOffset = additionalData.readFloat();
         this.xOriginOffset = additionalData.readDouble();
         this.yOriginOffset = additionalData.readDouble();
+        this.zOriginOffset = additionalData.readDouble();
     }
 }

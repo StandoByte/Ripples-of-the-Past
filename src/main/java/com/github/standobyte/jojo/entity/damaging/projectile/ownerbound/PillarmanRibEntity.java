@@ -20,6 +20,7 @@ public class PillarmanRibEntity extends OwnerBoundProjectileEntity {
     protected float knockback = 0;
     private double yOriginOffset;
     private double xOriginOffset;
+    private boolean dealtDamage;
 
     public PillarmanRibEntity(World world, LivingEntity entity, float angleXZ, float angleYZ, double offsetX, double offsetY) {
         super(ModEntityTypes.PILLARMAN_RIBS.get(), entity, world);
@@ -40,19 +41,19 @@ public class PillarmanRibEntity extends OwnerBoundProjectileEntity {
     
     @Override
     public float getBaseDamage() {
-        return 0.05F;
+        return 2.5F;
     }
 
     @Override
     protected boolean hurtTarget(Entity target, LivingEntity owner) {
-        return super.hurtTarget(target, owner);
+        return !dealtDamage ? super.hurtTarget(target, owner) : false;
     }
     
     @Override
     protected void afterEntityHit(EntityRayTraceResult entityRayTraceResult, boolean entityHurt) {
         if (entityHurt) {
+        	dealtDamage = true;
             Entity target = entityRayTraceResult.getEntity();
-            
             if (target instanceof LivingEntity) {
                 LivingEntity livingTarget = (LivingEntity) target;
                 if (!JojoModUtil.isTargetBlocking(livingTarget)) {
@@ -98,7 +99,7 @@ public class PillarmanRibEntity extends OwnerBoundProjectileEntity {
     
     @Override
     protected float movementSpeed() {
-        return 4 / (float) ticksLifespan();
+        return 8 / (float) ticksLifespan();
     }
     
     @Override

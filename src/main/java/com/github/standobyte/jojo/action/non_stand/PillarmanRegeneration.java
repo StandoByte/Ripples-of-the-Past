@@ -20,8 +20,8 @@ public class PillarmanRegeneration extends PillarmanAction {
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
         if (!world.isClientSide()) {
-            int duration = 80;
-            int level = 3;
+            int duration = 60;
+            int level = 4;
             duration = HamonHealing.updateRegenEffect(user, duration, level, Effects.REGENERATION);
             user.addEffect(new EffectInstance(Effects.REGENERATION, duration, level, false, false, true));
             world.playSound(null, user.getX(), user.getEyeY(), user.getZ(), ModSounds.VAMPIRE_BLOOD_DRAIN.get(), user.getSoundSource(), 1.5F, 1.2F); // TODO separate sound event

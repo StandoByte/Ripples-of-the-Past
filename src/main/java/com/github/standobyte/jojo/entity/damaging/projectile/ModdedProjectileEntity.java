@@ -214,6 +214,10 @@ public abstract class ModdedProjectileEntity extends DamagingEntity {
         return false;
     }
     
+    public boolean canBeEvaded(@Nullable Entity context) {
+        return true;
+    }
+    
     
     @Override
     protected void onHitEntity(EntityRayTraceResult entityRayTraceResult) {

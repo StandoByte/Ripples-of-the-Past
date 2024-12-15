@@ -582,6 +582,25 @@ public class ClientUtil {
         modelRenderer.cubes.clear();
     }
     
+    public static void clearBipedCubes(BipedModel<?> model) {
+        model.head.cubes.clear();
+        model.body.cubes.clear();
+        model.leftArm.cubes.clear();
+        model.rightArm.cubes.clear();
+        model.leftLeg.cubes.clear();
+        model.rightLeg.cubes.clear();
+    }
+    
+    public static void clearBipedCubes(PlayerModel<?> model) {
+        clearBipedCubes((BipedModel<?>) model);
+        model.hat.cubes.clear();
+        model.jacket.cubes.clear();
+        model.leftSleeve.cubes.clear();
+        model.rightSleeve.cubes.clear();
+        model.leftPants.cubes.clear();
+        model.rightPants.cubes.clear();
+    }
+    
     public static void editLatestCube(ModelRenderer modelRenderer, Consumer<ModelRenderer.ModelBox> edit) {
         List<ModelRenderer.ModelBox> cubes = modelRenderer.cubes;
         if (cubes.isEmpty()) return;

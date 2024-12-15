@@ -8,7 +8,9 @@ import com.github.standobyte.jojo.item.TommyGunItem;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.model.IBakedModel;
 import net.minecraft.client.renderer.model.ItemCameraTransforms;
 import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
@@ -30,8 +32,18 @@ public class TommyGunISTER extends CustomModelItemISTER<TommyGunModel> {
 
     @Override
     public void renderByItem(ItemStack itemStack, ItemCameraTransforms.TransformType transformType, MatrixStack matrixStack, 
-            IRenderTypeBuffer renderTypeBuffer, int light, int overlay) {
-        super.renderByItem(itemStack, transformType, matrixStack, renderTypeBuffer, light, overlay);
+            IRenderTypeBuffer buffer, int light, int overlay) {
+        switch (transformType) {
+        case GUI:
+        case GROUND:
+        case FIXED:
+            IBakedModel model = Minecraft.getInstance().getItemRenderer().getModel(itemStack, null, null);
+            CustomModelItemISTER.renderItemNormally(matrixStack, itemStack, transformType, buffer, light, overlay, model);
+            break;
+        default:
+            super.renderByItem(itemStack, transformType, matrixStack, buffer, light, overlay);
+            break;
+        }
     }
     
     @Override

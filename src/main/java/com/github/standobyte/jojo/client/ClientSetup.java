@@ -38,6 +38,7 @@ import com.github.standobyte.jojo.client.render.entity.layerrenderer.HamonBurnLa
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.InkLipsLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.KnifeLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.LadybugBroochLayer;
+import com.github.standobyte.jojo.client.render.entity.layerrenderer.PillarmanBladesLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.PillarmanLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.TornadoOverdriveEffectLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.WindCloakLayer;
@@ -347,7 +348,7 @@ public class ClientSetup {
         renderer.addLayer(new LadybugBroochLayer<>(renderer));
         renderer.addLayer(new InkLipsLayer<>(renderer));
         addLivingLayers(renderer);
-        addBipedLayers(renderer);
+        addBipedLayers(renderer, slim);
         renderer.addLayer(new GlovesLayer<>(renderer, new GlovesModel<>(0.3F, slim), slim));
         renderer.addLayer(new WindCloakLayer<>(renderer));
     }
@@ -357,7 +358,7 @@ public class ClientSetup {
             LivingRenderer<T, M> livingRenderer = (LivingRenderer<T, M>) renderer;
             addLivingLayers(livingRenderer);
             if (((LivingRenderer<?, ?>) renderer).getModel() instanceof BipedModel<?>) {
-                addBipedLayers(livingRenderer);
+                addBipedLayers(livingRenderer, false);
             }
             else {
                 livingRenderer.addLayer(new FrozenLayer<T, M>(livingRenderer, FrozenLayer.NON_BIPED_PATH));
@@ -369,10 +370,11 @@ public class ClientSetup {
         renderer.addLayer(new HamonBurnLayer<>(renderer));
     }
     
-    private static <T extends LivingEntity, M extends BipedModel<T>> void addBipedLayers(LivingRenderer<T, M> renderer) {
+    private static <T extends LivingEntity, M extends BipedModel<T>> void addBipedLayers(LivingRenderer<T, M> renderer, boolean slim) {
         renderer.addLayer(new ZombieLayer<>(renderer));
         renderer.addLayer(new PillarmanLayer<>(renderer));
         renderer.addLayer(new FrozenLayer<>(renderer, FrozenLayer.BIPED_PATH));
+        renderer.addLayer(new PillarmanBladesLayer<>(renderer, slim));
     }
 
     @SubscribeEvent

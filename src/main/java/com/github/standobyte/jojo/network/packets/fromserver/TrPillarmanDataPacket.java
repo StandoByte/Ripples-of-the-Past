@@ -18,16 +18,18 @@ import net.minecraftforge.fml.network.NetworkEvent;
 public class TrPillarmanDataPacket {
     private final int entityId;
     private final boolean stoneFormEnabled;
+    private final boolean bladesVisible;
     private final int stage;
     public PillarmanData.Mode mode;
     
     public TrPillarmanDataPacket(int entityId, PillarmanData pillarmanData) {
-        this(entityId, pillarmanData.isStoneFormEnabled(), pillarmanData.getEvolutionStage(), pillarmanData.getMode());
+        this(entityId, pillarmanData.isStoneFormEnabled(), pillarmanData.getBladesVisible(), pillarmanData.getEvolutionStage(), pillarmanData.getMode());
     }
     
-    public TrPillarmanDataPacket(int entityId, boolean stoneFormEnabled, int stage, PillarmanData.Mode mode) {
+    public TrPillarmanDataPacket(int entityId, boolean stoneFormEnabled, boolean bladesVisible, int stage, PillarmanData.Mode mode) {
         this.entityId = entityId;
         this.stoneFormEnabled = stoneFormEnabled;
+        this.bladesVisible = bladesVisible;
         this.stage = stage;
         this.mode = mode;
     }
@@ -40,13 +42,14 @@ public class TrPillarmanDataPacket {
         public void encode(TrPillarmanDataPacket msg, PacketBuffer buf) {
             buf.writeInt(msg.entityId);
             buf.writeBoolean(msg.stoneFormEnabled);
+            buf.writeBoolean(msg.bladesVisible);
             buf.writeVarInt(msg.stage);
             buf.writeEnum(msg.mode);
         }
 
         @Override
         public TrPillarmanDataPacket decode(PacketBuffer buf) {
-            return new TrPillarmanDataPacket(buf.readInt(), buf.readBoolean(), buf.readVarInt(), buf.readEnum(PillarmanData.Mode.class));
+            return new TrPillarmanDataPacket(buf.readInt(), buf.readBoolean(), buf.readBoolean(), buf.readVarInt(), buf.readEnum(PillarmanData.Mode.class));
         }
 
         @Override
@@ -58,14 +61,15 @@ public class TrPillarmanDataPacket {
                 .ifPresent(pillarman -> {
                     boolean prevStoneForm = pillarman.isStoneFormEnabled();
                     pillarman.setStoneFormEnabled(msg.stoneFormEnabled);
+                    pillarman.setBladesVisible(msg.bladesVisible);
                     pillarman.setEvolutionStage(msg.stage);
                     pillarman.setMode(msg.mode);
                     if (entity instanceof PlayerEntity) {
                         PlayerEntity userPlayer = (PlayerEntity) entity;
                         ModPlayerAnimations.stoneForm.setAnimEnabled(userPlayer, msg.stoneFormEnabled);
-                        if (!prevStoneForm && msg.stoneFormEnabled && userPlayer == ClientUtil.getClientPlayer()) {
+                        /*if (!prevStoneForm && msg.stoneFormEnabled && userPlayer == ClientUtil.getClientPlayer()) {
                             ClientUtil.setThirdPerson();
-                        }
+                        }*/
                     }
                 });
             }

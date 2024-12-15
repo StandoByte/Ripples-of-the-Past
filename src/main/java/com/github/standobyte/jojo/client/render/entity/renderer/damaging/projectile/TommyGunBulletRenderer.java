@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.github.standobyte.jojo.JojoMod;
@@ -18,6 +19,7 @@ import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererManager;
 import net.minecraft.client.renderer.texture.OverlayTexture;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Util;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.vector.Matrix3f;
 import net.minecraft.util.math.vector.Matrix4f;
@@ -26,6 +28,9 @@ import net.minecraft.util.math.vector.Vector3f;
 
 public class TommyGunBulletRenderer extends EntityRenderer<TommyGunBulletEntity> {
     protected double maxTrailLen = 4;
+    protected float V1 = 0.015625f;
+    protected float BEAM_WIDTH = 0.015f;
+    protected double BULLET_U = 0.015625;
 
     public TommyGunBulletRenderer(EntityRendererManager renderManager) {
         super(renderManager);
@@ -47,8 +52,13 @@ public class TommyGunBulletRenderer extends EntityRenderer<TommyGunBulletEntity>
     public void render(TommyGunBulletEntity entity, float yRotation, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
         List<Vector3d> trace = entity.tracePos;
         if (trace.isEmpty()) {
-            return;
+            trace = Util.make(new ArrayList<>(), list -> {
+                Vector3d pos = entity.position();
+                list.add(pos.subtract(entity.getDeltaMovement().normalize().scale(maxTrailLen * BULLET_U)));
+                list.add(pos);
+            });
         }
+        
         matrixStack.pushPose();
         matrixStack.translate(0, entity.getBbHeight() / 2, 0);
         IVertexBuilder vertexBuilder = buffer.getBuffer(RenderType.entityTranslucentCull(getTextureLocation(entity)));
@@ -66,10 +76,10 @@ public class TommyGunBulletRenderer extends EntityRenderer<TommyGunBulletEntity>
             double len = diffBack.length();
             
             // render the bullet if there is no trail long enough yet
-            double BULLET_START = maxTrailLen * 0.984375;
-            if (i == 1 && len < traceLen - BULLET_START) {
-                double ratio = (traceLen - BULLET_START) / len;
-                len = traceLen - BULLET_START;
+            double bulletStart = maxTrailLen * (1 - BULLET_U);
+            if (i == 1 && len < traceLen - bulletStart) {
+                double ratio = (traceLen - bulletStart) / len;
+                len = traceLen - bulletStart;
                 posPrev = posCur.add(diffBack.scale(ratio));
             }
             
@@ -119,8 +129,6 @@ public class TommyGunBulletRenderer extends EntityRenderer<TommyGunBulletEntity>
     }
     
     
-    private static final float V1 = 0.015625f;
-    private static final float BEAM_WIDTH = 0.015f;
     private void renderSide(MatrixStack matrixStack, Vector3f lightNormal, float length, float u0, float u1, IVertexBuilder vertexBuilder) {
         int packedLight = ClientUtil.MAX_MODEL_LIGHT;
         float v0 = 0;

@@ -3,6 +3,8 @@ package com.github.standobyte.jojo.entity.damaging.projectile;
 import java.util.Collections;
 import java.util.Optional;
 
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.init.ModBlocks;
@@ -158,6 +160,11 @@ public class MRFlameEntity extends ModdedProjectileEntity {
     @Override
     public boolean isFiery() {
         return true;
+    }
+    
+    @Override
+    public boolean canBeEvaded(@Nullable Entity context) {
+        return false;
     }
     
     @Override

@@ -16,10 +16,10 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 
-public class KosmXUnnaturalAgilityLayer extends AnimLayerHandler<ModifierLayer<IAnimation>> implements BasicToggleAnim {
-	private static final float SPEED = 1.25F;
+public class KosmXPillarmanEvasionLayer extends AnimLayerHandler<ModifierLayer<IAnimation>> implements BasicToggleAnim {
+	private static final float SPEED = 2F;
 
-    public KosmXUnnaturalAgilityLayer(ResourceLocation id) {
+    public KosmXPillarmanEvasionLayer(ResourceLocation id) {
         super(id);
     }
 
@@ -29,7 +29,7 @@ public class KosmXUnnaturalAgilityLayer extends AnimLayerHandler<ModifierLayer<I
     }
     
     
-    private static final ResourceLocation ANIM = new ResourceLocation(JojoMod.MOD_ID, "unnatural_agility");
+    private static final ResourceLocation ANIM = new ResourceLocation(JojoMod.MOD_ID, "evasion");
     @Override
     public boolean setAnimEnabled(PlayerEntity player, boolean enabled) {
         enabled &= !player.isPassenger();

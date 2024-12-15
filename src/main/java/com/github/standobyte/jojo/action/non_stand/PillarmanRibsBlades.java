@@ -33,7 +33,7 @@ public class PillarmanRibsBlades extends PillarmanAction {
 
     public static void addRibProjectile(World world, INonStandPower power, LivingEntity user, float xRotDelta, float yRotDelta, double offsetX, double offsetY) {
         PillarmanRibEntity string = new PillarmanRibEntity(world, user, xRotDelta, yRotDelta, offsetX, offsetY);
-        string.setLifeSpan(7);
+        string.setLifeSpan(21);
         world.addFreshEntity(string);
     }
     
