@@ -87,17 +87,19 @@ public class GECreatedLifeformEffect extends StandEffectInstance {
     @Override
     protected void setTargetEntity(Entity target) {
         super.setTargetEntity(target);
-        if (target instanceof MobEntity && user != null) {
-            MobEntity lifeformMob = (MobEntity) target;
-            MCUtil.makeMobNeutralTo(lifeformMob, user);
-        }
-        
-        ItemStack sourceItem = getSource().makeSourceItemView();
-        if (!sourceItem.isEmpty()) {
-            List<EffectInstance> effects = PotionUtils.getMobEffects(sourceItem);
-            if (!effects.isEmpty()) {
-                target.getCapability(LivingUtilCapProvider.CAPABILITY)
-                .ifPresent(entity -> entity.setProductEffects(effects));
+        if (target != null) {
+            if (target instanceof MobEntity && user != null) {
+                MobEntity lifeformMob = (MobEntity) target;
+                MCUtil.makeMobNeutralTo(lifeformMob, user);
+            }
+            
+            ItemStack sourceItem = getSource().makeSourceItemView();
+            if (!sourceItem.isEmpty()) {
+                List<EffectInstance> effects = PotionUtils.getMobEffects(sourceItem);
+                if (!effects.isEmpty()) {
+                    target.getCapability(LivingUtilCapProvider.CAPABILITY)
+                    .ifPresent(entity -> entity.setProductEffects(effects));
+                }
             }
         }
     }
