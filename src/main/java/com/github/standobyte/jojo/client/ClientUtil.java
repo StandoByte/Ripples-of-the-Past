@@ -50,7 +50,6 @@ import net.minecraft.client.renderer.model.SimpleBakedModel;
 import net.minecraft.client.renderer.texture.MissingTextureSprite;
 import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
 import net.minecraft.client.resources.I18n;
-import net.minecraft.client.settings.ParticleStatus;
 import net.minecraft.client.settings.PointOfView;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -456,8 +455,8 @@ public class ClientUtil {
                 0, 0, 0, true));
     }
     
-    public static boolean decreasedParticlesSetting() {
-        return Minecraft.getInstance().options.particles == ParticleStatus.DECREASED;
+    public static int particlesSetting() {
+        return Minecraft.getInstance().options.particles.getId();
     }
     
     public static float[] rgb(int color) {

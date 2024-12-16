@@ -11,21 +11,25 @@ import org.apache.logging.log4j.util.TriConsumer;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.network.NetworkUtil;
+import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
+import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.google.common.collect.Streams;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.SoundType;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.network.NetworkEvent;
 
 public class LotsOfBlocksBrokenPacket {
-    public final List<BrokenBlock> brokenBlocks;
+    public List<BrokenBlock> brokenBlocks;
     
     public LotsOfBlocksBrokenPacket() {
         this(new ArrayList<>());
@@ -37,6 +41,28 @@ public class LotsOfBlocksBrokenPacket {
     
     public void addBlock(BlockPos blockPos, BlockState blockState) {
         brokenBlocks.add(new BrokenBlock(blockPos, blockState));
+    }
+    
+    public void sendToPlayers(ServerWorld world, int minX, int minY, int minZ, int maxX, int maxY, int maxZ) {
+        if (brokenBlocks.isEmpty()) return;
+        
+        brokenBlocks = GeneralUtil.limitRandom(brokenBlocks, 256);
+        
+        final double radius = 64;
+        for (ServerPlayerEntity player : world.players()) {
+            if (player.level.dimension() == world.dimension()) {
+                double x = player.getX();
+                double y = player.getY();
+                double z = player.getZ();
+
+                double xDiff = x < minX ? minX - x : x > maxX ? x - maxX : 0;
+                double yDiff = y < minY ? minY - y : y > maxY ? y - maxY : 0;
+                double zDiff = z < minZ ? minZ - z : z > maxZ ? z - maxZ : 0;
+                if (xDiff * xDiff + yDiff * yDiff + zDiff * zDiff < radius * radius) {
+                    PacketManager.sendToClient(this, player);
+                }
+            }
+        }
     }
     
     
@@ -91,7 +117,10 @@ public class LotsOfBlocksBrokenPacket {
     public static void blockBreakVisuals(BlockPos blockPos, BlockState blockState, long i) {
         World world = ClientUtil.getClientWorld();
         if (!blockState.isAir(world, blockPos)) {
-            CustomParticlesHelper.addBlockBreakParticles(blockPos, blockState);
+            int particlesSetting = ClientUtil.particlesSetting();
+            if (particlesSetting < 2 && (particlesSetting < 1 || i % 2 == 0)) {
+                CustomParticlesHelper.addBlockBreakParticles(blockPos, blockState);
+            }
             SoundType soundType = blockState.getSoundType(world, blockPos, null);
             if (i % 8 == 0) {
                 world.playLocalSound(

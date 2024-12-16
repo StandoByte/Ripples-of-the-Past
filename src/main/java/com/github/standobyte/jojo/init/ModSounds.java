@@ -83,6 +83,10 @@ public class ModSounds {
 
     public static final RegistryObject<SoundEvent> VAMPIRE_BLOOD_DRAIN = register("vampire_blood_drain");
     
+    public static final RegistryObject<SoundEvent> VAMPIRE_SWIPE = register("vampire_swipe");
+    
+    public static final RegistryObject<SoundEvent> VAMPIRE_CLAW_LACERATE = register("vampire_claw_lacerate");
+    
     public static final RegistryObject<SoundEvent> VAMPIRE_FREEZE = register("vampire_freeze");
 
     public static final RegistryObject<SoundEvent> VAMPIRE_EVIL_ATMOSPHERE = register("vampire_dark_aura");
@@ -93,10 +97,24 @@ public class ModSounds {
     
     public static final RegistryObject<SoundEvent> ZOMBIE_DEVOUR = register("zombie_devour");
     
+    public static final RegistryObject<SoundEvent> ZOMBIE_SWIPE = register("zombie_swipe");
+    
+    public static final RegistryObject<SoundEvent> ZOMBIE_CLAW_LACERATE = register("zombie_claw_lacerate");
+    
+    public static final RegistryObject<SoundEvent> PILLAR_MAN_SWING = register("pillar_man_swing");
+    
+    public static final RegistryObject<SoundEvent> PILLAR_MAN_PUNCH = register("pillar_man_punch");
+
+    public static final RegistryObject<SoundEvent> PILLAR_MAN_STRONG_REGEN = register("pillar_man_strong_regen");
+
+    public static final RegistryObject<SoundEvent> PILLAR_MAN_EVASION = register("pillar_man_evasion");
+    
     public static final RegistryObject<SoundEvent> BUCKET_FILL_BOILING_BLOOD = register("bucket_fill_boiling_blood");
     public static final RegistryObject<SoundEvent> BUCKET_EMPTY_BOILING_BLOOD = register("bucket_empty_boiling_blood");
     public static final RegistryObject<SoundEvent> BOILING_BLOOD_POP = register("boiling_blood_pop");
     public static final RegistryObject<SoundEvent> BOILING_BLOOD_AMBIENT = register("boiling_blood_ambient");
+
+    public static final RegistryObject<SoundEvent> HEAVY_PUNCH = register("heavy_punch");
 
 
     public static final RegistryObject<SoundEvent> HAMON_PICK_JONATHAN = register("hamon_pick_jonathan");

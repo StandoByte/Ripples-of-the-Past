@@ -15,7 +15,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 
 public class KosmXVampireClawSwipeHandler extends AnimLayerHandler<ModifierLayer<IAnimation>> implements BasicToggleAnim {
-    private static final float SPEED = 3;
+    private static final float SPEED = 2;
 
     public KosmXVampireClawSwipeHandler(ResourceLocation id) {
         super(id);

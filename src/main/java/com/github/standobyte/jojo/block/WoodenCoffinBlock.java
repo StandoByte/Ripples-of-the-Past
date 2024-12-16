@@ -94,13 +94,16 @@ public class WoodenCoffinBlock extends HorizontalBlock {
         if (world.isClientSide) {
             if (!BedBlock.canSetSpawn(world)) {
                 Random random = world.random;
-                int particles = ClientUtil.decreasedParticlesSetting() ? 256 : 2560;
-                for (int i = 0; i < particles; i++) {
-                    ClientUtil.getClientWorld().addParticle(ModParticles.BLOOD.get(), 
-                            blockPos.getX() + 0.5D, blockPos.getY() + 0.5D, blockPos.getZ() + 0.5D, 
-                            (random.nextDouble() - 0.5) * 1.5, 
-                            (random.nextDouble() - 0.5) * 1.5, 
-                            (random.nextDouble() - 0.5) * 1.5);
+                int particlesSetting = ClientUtil.particlesSetting();
+                if (particlesSetting < 2) {
+                    int particles = particlesSetting == 1 ? 256 : 2560;
+                    for (int i = 0; i < particles; i++) {
+                        ClientUtil.getClientWorld().addParticle(ModParticles.BLOOD.get(), 
+                                blockPos.getX() + 0.5D, blockPos.getY() + 0.5D, blockPos.getZ() + 0.5D, 
+                                (random.nextDouble() - 0.5) * 1.5, 
+                                (random.nextDouble() - 0.5) * 1.5, 
+                                (random.nextDouble() - 0.5) * 1.5);
+                    }
                 }
             }
             return ActionResultType.CONSUME;

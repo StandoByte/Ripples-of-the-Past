@@ -15,7 +15,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 
 public class KosmXPillarManPunchHandler extends AnimLayerHandler<ModifierLayer<IAnimation>> implements BasicToggleAnim {
-    private static final float SPEED = 3;
+    private static final float SPEED = 2;
 
     public KosmXPillarManPunchHandler(ResourceLocation id) {
         super(id);

@@ -101,6 +101,20 @@
     "subtitle": "jojo.subtitle.blood_drain",
     "sounds": [ "jojo:vampire_blood_drain" ]
   },
+  "vampire_swipe": {
+    "subtitle": "jojo.subtitle.stand_punch_swing",
+    "sounds": [ 
+      {
+        "name": "jojo:stand_punch_swing",
+        "type": "event",
+        "pitch" : 0.5
+      }
+    ]
+  },
+  "vampire_claw_lacerate": {
+    "subtitle": "jojo.subtitle.stand_attack_strong",
+    "sounds": [ "jojo:attack_blood_splash" ]
+  },
   "vampire_freeze": {
     "subtitle": "jojo.subtitle.freeze",
     "sounds": [ "jojo:vampire_freeze" ]
@@ -119,6 +133,48 @@
   "zombie_devour": {
     "subtitle": "jojo.subtitle.devouring",
     "sounds": [ "jojo:zombie_devour" ]
+  },
+  "zombie_swipe": {
+    "subtitle": "jojo.subtitle.stand_punch_swing",
+    "sounds": [ 
+      {
+        "name": "jojo:stand_punch_swing",
+        "type": "event",
+        "pitch" : 0.5
+      }
+    ]
+  },
+  "zombie_claw_lacerate": {
+    "subtitle": "jojo.subtitle.stand_attack_strong",
+    "sounds": [ "jojo:attack_blood_splash" ]
+  },
+  "pillar_man_swing": {
+    "subtitle": "jojo.subtitle.stand_punch_swing",
+    "sounds": [ 
+      {
+        "name": "jojo:stand_punch_swing",
+        "type": "event",
+        "pitch" : 0.5
+      }
+    ]
+  },
+  "pillar_man_punch": {
+    "subtitle": "jojo.subtitle.stand_attack_strong",
+    "sounds": [ "jojo:punch_heavy" ]
+  },
+  "pillar_man_strong_regen": {
+    "subtitle": "jojo.subtitle.pillar_man_regen",
+    "sounds": [ "jojo:vampire_blood_drain" ]
+  },
+  "pillar_man_evasion": {
+    "subtitle": "jojo.subtitle.attack_evasion",
+    "sounds": [ 
+      {
+        "name": "jojo:stand_punch_swing",
+        "type": "event",
+        "pitch" : 0.5
+      }
+    ]
   },
   "bucket_fill_boiling_blood": {
     "subtitle": "subtitles.item.bucket.fill",
@@ -155,6 +211,10 @@
         "type": "event"
       }
     ]
+  },
+  "heavy_punch": {
+    "subtitle": "subtitles.entity.player.attack.strong",
+    "sounds": [ "jojo:punch_heavy" ]
   },
   "hamon_pick_jonathan": {
     "sounds": [ "jojo:hamon_pick_jonathan" ]
@@ -214,8 +274,9 @@
     "subtitle": "jojo.subtitle.stand_punch_swing",
     "sounds": [ 
       {
-        "name": "jojo:stand_punch_heavy_swing",
-        "type": "event"
+        "name": "jojo:stand_punch_swing",
+        "type": "event",
+        "pitch" : 0.5
       }
     ]
   },
@@ -708,7 +769,7 @@
   },
   "the_world_punch_heavy_entity": {
     "subtitle": "jojo.subtitle.stand_attack_strong",
-    "sounds": [ "jojo:stand/the_world_punch_heavy_entity" ]
+    "sounds": [ "jojo:attack_blood_splash" ]
   },
   "the_world_punch_heavy_ts_impact": {
     "sounds": [ "jojo:stand/the_world_punch_heavy_impact" ]

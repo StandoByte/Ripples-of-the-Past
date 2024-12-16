@@ -484,6 +484,12 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
             }
             
             @Override
+            public void finalizeExplosion(boolean pSpawnParticles) {
+                super.finalizeExplosion(pSpawnParticles);
+                remainingBlocksShockWave();
+            }
+            
+            @Override
             protected void explodeBlocks() {
                 if (level instanceof ServerWorld) {
                     ServerWorld world = (ServerWorld) level;
@@ -631,17 +637,35 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
                 return blocksToBlow;
             }
             
+            protected void remainingBlocksShockWave() {
+                if (!level.isClientSide()) {
+                    LotsOfBlocksBrokenPacket blocksShockwaveVisual = new LotsOfBlocksBrokenPacket();
+                    Vector3d pos = getPosition();
+                    double radius = this.radius;
+                    int minX = MathHelper.floor(pos.x - radius);
+                    int minY = MathHelper.floor(pos.y - radius);
+                    int minZ = MathHelper.floor(pos.z - radius);
+                    int maxX = MathHelper.ceil(pos.x + radius);
+                    int maxY = MathHelper.ceil(pos.y + radius);
+                    int maxZ = MathHelper.ceil(pos.z + radius);
+                    boolean test = true;
+                    MCUtil.iterateOverBlocks(minX, minY, minZ, maxX, maxY, maxZ, blockPos -> {
+                        if (test || pos.distanceToSqr(blockPos.getX() + 0.5, blockPos.getX() + 0.5, blockPos.getX() + 0.5) > radius + 0.5) {
+                            BlockState blockState = level.getBlockState(blockPos);
+                            if (!blockState.isAir(level, blockPos)) {
+                                blocksShockwaveVisual.addBlock(blockPos, blockState);
+                            }
+                        }
+                    });
+                    blocksShockwaveVisual.sendToPlayers((ServerWorld) level, minX, minY, minZ, maxX, maxY, maxZ);
+                }
+            }
+            
             @Override
             protected void playSound() {}
             
             @Override
-            protected void spawnParticles() {
-                if (level.isClientSide() && blockInteraction == Explosion.Mode.NONE) {
-                    LotsOfBlocksBrokenPacket blocks = new LotsOfBlocksBrokenPacket();
-                    calculateBlocksToBlow().forEach(blockPos -> blocks.addBlock(blockPos, level.getBlockState(blockPos)));
-                    blocks.forEachBlock(false, LotsOfBlocksBrokenPacket::blockBreakVisuals);
-                }
-            }
+            protected void spawnParticles() {}
             
             @Override
             public void toBuf(PacketBuffer buf) {

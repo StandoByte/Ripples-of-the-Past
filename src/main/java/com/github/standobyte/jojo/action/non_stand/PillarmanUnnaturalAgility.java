@@ -62,7 +62,7 @@ public class PillarmanUnnaturalAgility extends PillarmanAction {
 	                            (DamageUtil.getDamageWithoutHeldItem(targetLiving) * 0.75F));
                     	}
                     }
-                    world.playSound(null, attacker, ModSounds.HAMON_SYO_SWING.get(), attacker.getSoundSource(), 1.0F, 1.0F); // TODO separate sound event
+                    world.playSound(null, attacker, ModSounds.PILLAR_MAN_EVASION.get(), attacker.getSoundSource(), 1.0F, 1.0F);
                     return true;
                 }
                 return false;
@@ -74,7 +74,7 @@ public class PillarmanUnnaturalAgility extends PillarmanAction {
     @Override
     public void onHoldTickClientEffect(LivingEntity user, INonStandPower power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {
         if (stateRefreshed && requirementsFulfilled) {
-            ClientTickingSoundsHelper.playHeldActionSound(ModSounds.HAMON_SYO_SWING.get(), 1.0F, 1.25F, true, user, power, this); // TODO separate sound event
+            ClientTickingSoundsHelper.playHeldActionSound(ModSounds.PILLAR_MAN_EVASION.get(), 1.0F, 1.25F, true, user, power, this);
         }
     }
     

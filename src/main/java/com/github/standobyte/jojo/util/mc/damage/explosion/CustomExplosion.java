@@ -93,19 +93,23 @@ public abstract class CustomExplosion extends Explosion {
     public void explode() {
         getToBlow().addAll(calculateBlocksToBlow());
         
-        double diameter = radius * 2.0F;
-        Vector3d pos = getPosition();
-        AxisAlignedBB aabb = new AxisAlignedBB(
-                MathHelper.floor(pos.x - diameter - 1.0D), 
-                MathHelper.floor(pos.y - diameter - 1.0D), 
-                MathHelper.floor(pos.z - diameter - 1.0D), 
-                MathHelper.floor(pos.x + diameter + 1.0D), 
-                MathHelper.floor(pos.y + diameter + 1.0D), 
-                MathHelper.floor(pos.z + diameter + 1.0D));
-        List<Entity> entities = getAffectedEntities(aabb);
+        AxisAlignedBB area = entityDamageArea();
+        List<Entity> entities = getAffectedEntities(area);
         filterEntities(entities);
-        ForgeEventFactory.onExplosionDetonate(level, this, entities, diameter);
+        ForgeEventFactory.onExplosionDetonate(level, this, entities, radius * 2);
         hurtEntities(entities);
+    }
+    
+    protected AxisAlignedBB entityDamageArea() {
+        double diameter = radius * 2;
+        Vector3d pos = getPosition();
+        return new AxisAlignedBB(
+                MathHelper.floor(pos.x - diameter - 1), 
+                MathHelper.floor(pos.y - diameter - 1), 
+                MathHelper.floor(pos.z - diameter - 1), 
+                MathHelper.floor(pos.x + diameter + 1), 
+                MathHelper.floor(pos.y + diameter + 1), 
+                MathHelper.floor(pos.z + diameter + 1));
     }
     
     protected List<Entity> getAffectedEntities(AxisAlignedBB area) {

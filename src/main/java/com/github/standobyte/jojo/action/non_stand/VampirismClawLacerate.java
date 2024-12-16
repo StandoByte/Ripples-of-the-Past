@@ -70,17 +70,17 @@ public class VampirismClawLacerate extends VampirismAction implements IPlayerAct
         @Override
         public void playerTick() {
             switch (getTick()) {
-            case 2:
+            case 3:
                 if (user.level.isClientSide()) {
                     user.level.playSound(ClientUtil.getClientPlayer(), user.getX(), user.getEyeY(), user.getZ(), 
-                            ModSounds.HAMON_SYO_SWING.get(), user.getSoundSource(), 1.0f, 1.25f); // TODO separate sound event
+                            ModSounds.VAMPIRE_SWIPE.get(), user.getSoundSource(), 1.0f, 1.25f);
                     user.swing(Hand.MAIN_HAND, true);
                 }
                 break;
             case 5:
                 if (!user.level.isClientSide()) {
                     ActionTarget target = playerPower.getMouseTarget();
-                    punchPerform(user.level, user, playerPower, target, ModSounds.THE_WORLD_PUNCH_HEAVY_ENTITY.get(), 1.2F, 0.8F); // TODO separate sound event
+                    punchPerform(user.level, user, playerPower, target, ModSounds.VAMPIRE_CLAW_LACERATE.get(), 1.2F, 0.8F);
                 }
                 break;
             case 8:
@@ -135,7 +135,7 @@ public class VampirismClawLacerate extends VampirismAction implements IPlayerAct
 //                    CustomExplosion.explode(explosion);
             	}
             }
-        	world.playSound(null, user.getX(), user.getY(), user.getZ(), ModSounds.HAMON_SYO_PUNCH.get(), user.getSoundSource(), 1.5F, 1.2F);
+        	world.playSound(null, user.getX(), user.getY(), user.getZ(), ModSounds.HEAVY_PUNCH.get(), user.getSoundSource(), 1.5F, 1.2F);
             break;
         case ENTITY:
             if (!world.isClientSide() && target.getType() == TargetType.ENTITY) {

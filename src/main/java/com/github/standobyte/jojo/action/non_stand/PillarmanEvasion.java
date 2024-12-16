@@ -22,7 +22,7 @@ public class PillarmanEvasion extends PillarmanAction {
     @Override
     public void onHoldTickClientEffect(LivingEntity user, INonStandPower power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {
         if (stateRefreshed && requirementsFulfilled) {
-            ClientTickingSoundsHelper.playHeldActionSound(ModSounds.HAMON_SYO_SWING.get(), 1.0F, 1.25F, true, user, power, this); // TODO separate sound event
+            ClientTickingSoundsHelper.playHeldActionSound(ModSounds.PILLAR_MAN_EVASION.get(), 1.0F, 1.25F, true, user, power, this);
         }
     }
     

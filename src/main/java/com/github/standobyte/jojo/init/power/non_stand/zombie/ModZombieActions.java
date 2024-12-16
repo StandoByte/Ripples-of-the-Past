@@ -17,7 +17,7 @@ public class ModZombieActions {
     public static void loadRegistryObjects() {}
     
     public static final RegistryObject<ZombieAction> ZOMBIE_CLAW_LACERATE = ACTIONS.register("zombie_claw_lacerate", 
-            () -> new ZombieClawLacerate(new NonStandAction.Builder().needsFreeMainHand().swingHand().energyCost(60F).cooldown(30)));
+            () -> new ZombieClawLacerate(new NonStandAction.Builder().needsFreeMainHand().energyCost(60F)));
     
     public static final RegistryObject<ZombieAction> ZOMBIE_DEVOUR = ACTIONS.register("zombie_devour", 
             () -> new ZombieDevour(new NonStandAction.Builder().needsFreeMainHand()));

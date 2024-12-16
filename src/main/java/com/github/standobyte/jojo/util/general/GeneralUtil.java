@@ -11,9 +11,11 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import javax.annotation.Nonnull;
@@ -28,6 +30,7 @@ import net.minecraft.util.Util;
 import net.minecraftforge.common.util.LazyOptional;
 
 public class GeneralUtil {
+    private static final Random RANDOM = new Random();
     
     public static int doFractionTimes(Runnable action, double times) {
         return doFractionTimes(action, times, null);
@@ -90,6 +93,20 @@ public class GeneralUtil {
     @Nullable
     public static <E> E getOrLast(List<E> list, int index) {
         return list.isEmpty() ? null : list.get(Math.min(index, list.size() - 1));
+    }
+    
+    public static <E> List<E> limitRandom(List<E> randomAccessMutableList, int limit) {
+        int size = randomAccessMutableList.size();
+        if (size > limit) {
+            for (int i = 0; i < limit; i++){
+                int index = i + RANDOM.nextInt(size - i);
+                E tmp = randomAccessMutableList.get(index);
+                randomAccessMutableList.set(index, randomAccessMutableList.get(i));
+                randomAccessMutableList.set(i, tmp);
+            }
+            return randomAccessMutableList.stream().limit(limit).collect(Collectors.toList());
+        }
+        return randomAccessMutableList;
     }
     
     @Nullable
