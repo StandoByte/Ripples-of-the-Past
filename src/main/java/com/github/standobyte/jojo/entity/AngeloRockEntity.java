@@ -1,11 +1,13 @@
 package com.github.standobyte.jojo.entity;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.stand.CrazyDiamondHeal;
+import com.github.standobyte.jojo.capability.chunk.ChunkCap.PrevBlockInfo;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.init.ModEntityTypes;
@@ -22,7 +24,6 @@ import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.mod.IPlayerPossess;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.Entity;
@@ -31,10 +32,8 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.Pose;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
-import net.minecraft.nbt.NBTUtil;
 import net.minecraft.network.IPacket;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.network.datasync.DataParameter;
@@ -46,7 +45,6 @@ import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
-import net.minecraft.util.NonNullList;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -55,7 +53,6 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
-import net.minecraftforge.registries.GameData;
 
 // TODO (angelo) if the Crazy D user dies and this is in the process of being made, break this
 // TODO (angelo) when it's broken:
@@ -68,6 +65,7 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
     protected static final DataParameter<Boolean> CREATION_COMPLETE = EntityDataManager.defineId(AngeloRockEntity.class, DataSerializers.BOOLEAN);
     private static final int CREATION_ANIM_LEN = 40;
     private int creationAnimTicks;
+    private Map<BlockPos, PrevBlockInfo> angeloRockBlocks = new HashMap<>();
     private boolean startedSound;
     private EntityOwnerResolver angeloEntity = new EntityOwnerResolver();
     /* fuck it, sure, yeah */ private MobEntity mob;
@@ -79,9 +77,8 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
         super(pType, pLevel);
     }
     
-    // TODO (angelo) item drops (+save them in NBT)
     public static AngeloRockEntity turnIntoRock(World world, Entity entity, Vector3d rockPos, float yRot, 
-            @Nullable BlockState upperBlock, @Nullable BlockState lowerBlock, @Nullable List<ItemStack> drops) {
+            PrevBlockInfo... angeloRockBlocks) {
         if (world.isClientSide()) {
             return null;
         }
@@ -94,11 +91,17 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
             angeloRock.useMobHurtSound = CommonReflection.getAmbientSound(angeloRock.mob) == null;
         }
         
-        angeloRock.setUpperBlock(upperBlock);
-        angeloRock.setLowerBlock(lowerBlock);
         angeloRock.creationAnimTicks = CREATION_ANIM_LEN;
         if (entity instanceof LivingEntity) {
             angeloRock.angeloEntity.setOwner(entity);
+        }
+        
+        if (angeloRockBlocks != null) {
+            for (PrevBlockInfo block : angeloRockBlocks) {
+                if (block != null) {
+                    angeloRock.angeloRockBlocks.put(block.pos, block);
+                }
+            }
         }
         
         world.addFreshEntity(angeloRock);
@@ -154,6 +157,18 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
         }
     }
     
+    
+    // TODO (angelo rock)
+    private void onBreak() {
+        if (!level.isClientSide()) {
+//            playBreakSounds();
+//            addBreakParticles();
+//            dropItems();
+//            rememberForRestoreTerrain();
+        }
+    }
+    
+    
     @Override
     public boolean canBeCollidedWith() {
         return isAlive();
@@ -181,6 +196,14 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
         pCompound.putBoolean("Created", entityData.get(CREATION_COMPLETE));
         pCompound.putInt("CreationAnim", creationAnimTicks);
         
+        if (!angeloRockBlocks.isEmpty()) {
+            ListNBT blocksNbt = new ListNBT();
+            for (PrevBlockInfo block : angeloRockBlocks.values()) {
+                blocksNbt.add(block.toNBT());
+            }
+            pCompound.put("RockBlocks", blocksNbt);
+        }
+        
         if (mob != null) {
             String s = mob.getEncodeId();
             if (s != null) {
@@ -192,12 +215,6 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
                 pCompound.putBoolean("NoAmbient", useMobHurtSound);
             }
         }
-        
-        ListNBT stonePiecesNbt = new ListNBT();
-        for (BlockState blockState : stonePieces) {
-            stonePiecesNbt.add(NBTUtil.writeBlockState(blockState));
-        }
-        pCompound.put("RockPieces", stonePiecesNbt);
     }
 
     @Override
@@ -213,6 +230,16 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
         this.creationAnimTicks = pCompound.getInt("CreationAnim");
         entityData.set(CREATION_COMPLETE, pCompound.getBoolean("Created"));
         
+        MCUtil.getNbtElement(pCompound, "RockBlocks", ListNBT.class).ifPresent(blocksNbt -> {
+            if (blocksNbt.getElementType() != Constants.NBT.TAG_COMPOUND) return;
+            blocksNbt.forEach(blockNbt -> {
+                PrevBlockInfo block = PrevBlockInfo.fromNBT((CompoundNBT) blockNbt);
+                if (block != null) {
+                    angeloRockBlocks.put(block.pos, block);
+                }
+            });
+        });
+        
         Entity mobEntity = MCUtil.nbtGetCompoundOptional(pCompound, "AngeloMob").flatMap(mobNBT -> {
             try {
                 return EntityType.create(mobNBT, level);
@@ -222,18 +249,6 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
         }).orElse(null);
         this.mob = mobEntity instanceof MobEntity ? (MobEntity) mobEntity : null;
         this.useMobHurtSound = pCompound.getBoolean("NoAmbient");
-        
-        MCUtil.getNbtElement(pCompound, "RockPieces", ListNBT.class).ifPresent(stonePiecesNbt -> {
-            if (stonePiecesNbt.getElementType() == Constants.NBT.TAG_COMPOUND) {
-                for (int i = 0; i < STONE_PIECES_COUNT; i++) {
-                    CompoundNBT blockNbt = stonePiecesNbt.getCompound(i);
-                    BlockState blockState = NBTUtil.readBlockState(blockNbt);
-                    if (blockState != null) {
-                        stonePieces.set(i, blockState);
-                    }
-                }
-            }
-        });
     }
     
     @Override
@@ -390,23 +405,17 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
     }
     
     
-    private static final int STONE_PIECES_COUNT = 2;
-    private List<BlockState> stonePieces = NonNullList.withSize(2, Blocks.STONE.defaultBlockState());
-    
     public BlockState getUpperBlock() {
-        return stonePieces.get(0);
+        return getBlock(blockPosition().above());
     }
     
     public BlockState getLowerBlock() {
-        return stonePieces.get(1);
+        return getBlock(blockPosition());
     }
     
-    private void setUpperBlock(BlockState block) {
-        if (block != null) stonePieces.set(0, block);
-    }
-    
-    private void setLowerBlock(BlockState block) {
-        if (block != null) stonePieces.set(1, block);
+    public BlockState getBlock(BlockPos pos) {
+        PrevBlockInfo block = angeloRockBlocks.get(pos);
+        return block != null ? block.state : Blocks.STONE.defaultBlockState();
     }
     
     
@@ -414,10 +423,7 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
     public void writeSpawnData(PacketBuffer buffer) {
         NetworkUtil.writeOptionally(buffer, angeloEntity.getEntityLiving(level), entity -> buffer.writeInt(entity.getId()));
         buffer.writeVarInt(creationAnimTicks);
-        for (int i = 0; i < STONE_PIECES_COUNT; i++) {
-            BlockState block = stonePieces.get(i);
-            buffer.writeVarInt(Block.getId(block));
-        }
+        NetworkUtil.writeCollection(buffer, angeloRockBlocks.values(), PrevBlockInfo::toBuf, false);
     }
 
     @Override
@@ -427,13 +433,8 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
             this.angeloEntity.setOwner(angeloEntity);
         }
         creationAnimTicks = additionalData.readVarInt();
-        for (int i = 0; i < STONE_PIECES_COUNT; i++) {
-            int blockId = additionalData.readVarInt();
-            BlockState block = GameData.getBlockStateIDMap().byId(blockId);
-            if (block != null) {
-                stonePieces.set(i, block);
-            }
-        }
+        angeloRockBlocks.clear();
+        NetworkUtil.readCollection(additionalData, PrevBlockInfo::fromBuf).forEach(block -> angeloRockBlocks.put(block.pos, block));
     }
 
     @Override

@@ -29,7 +29,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -168,16 +167,13 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
         });
         brokenBlocks.remove(blockLower.pos);
         blockUpper.ifPresent(block -> brokenBlocks.remove(block.pos));
-        // TODO (angelo) item drops
-        List<ItemStack> itemDrops = null;
         
         // TODO (angelo) restore the rest of the blocks destroyed by the explosion
-        // TODO (angelo) consume items and xp
-        // TODO (angelo) btw mobs can also pick up dropped blocks
+        // TODO (angelo) consume items and xp (btw mobs can also pick up dropped blocks)
         
         JojoModUtil.sayVoiceLine(user, ModSounds.JOSUKE_PRAY_FOR_ETERNITY.get(), null, 1, 1, 0, false);
         AngeloRockEntity.turnIntoRock(world, target, Vector3d.atBottomCenterOf(blockLower.pos), angeloRockFace.toYRot(), 
-                blockUpper.map(block -> block.state).orElse(blockLower.state), blockLower.state, itemDrops);
+                blockLower, blockUpper.orElse(null));
         return ActionConditionResult.POSITIVE;
     }
     

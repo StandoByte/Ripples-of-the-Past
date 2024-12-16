@@ -222,7 +222,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
             }
         }
         if (blockCanBePlaced(world, blockPos, blockState) && blockState.canSurvive(world, blockPos)
-                && (consumeNeededItems(restorationCost, userInventory, itemEntities) || isCreative)) {
+                && (consumeNeededItems(restorationCost, itemEntities, userInventory) || isCreative)) {
             if (!isCreative && playerWithXp != null && xpCost > 0) {
                 playerWithXp.giveExperiencePoints(-xpCost);
             }
@@ -239,9 +239,9 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         return world.getBlockState(pos).getMaterial().isReplaceable();
     }
     
-    private static boolean consumeNeededItems(List<ItemStack> restorationCost, @Nullable IInventory userInventory, List<ItemEntity> itemEntities) {
+    private static boolean consumeNeededItems(List<ItemStack> restorationCost, List<ItemEntity> itemEntities, IInventory... inventories) {
         if (restorationCost.size() == 1 && restorationCost.get(0).getCount() == 1) {
-            return consumeSingleItem(restorationCost.get(0), userInventory, itemEntities);
+            return consumeSingleItem(restorationCost.get(0), itemEntities, inventories);
         }
 
         List<ItemStack> costCopied = restorationCost.stream().map(ItemStack::copy).collect(Collectors.toList());
@@ -254,11 +254,13 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
             sortItem(itemsSorted, costCopied, lyingStack);
         }
         
-        if (userInventory != null) {
-            int size = userInventory.getContainerSize();
-            for (int i = 0; i < size; i++) {
-                ItemStack inventoryItem = userInventory.getItem(i);
-                sortItem(itemsSorted, costCopied, inventoryItem);
+        for (IInventory inventory : inventories) {
+            if (inventory != null) {
+                int size = inventory.getContainerSize();
+                for (int i = 0; i < size; i++) {
+                    ItemStack inventoryItem = inventory.getItem(i);
+                    sortItem(itemsSorted, costCopied, inventoryItem);
+                }
             }
         }
         
@@ -283,7 +285,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         return false;
     }
     
-    private static boolean consumeSingleItem(ItemStack neededSingleItem, @Nullable IInventory userInventory, List<ItemEntity> itemEntities) {
+    private static boolean consumeSingleItem(ItemStack neededSingleItem, List<ItemEntity> itemEntities, IInventory... inventories) {
         for (ItemEntity itemEntity : itemEntities) {
             ItemStack lyingStack = itemEntity.getItem();
             if (stacksMatch(neededSingleItem, lyingStack)) {
@@ -292,13 +294,15 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
             }
         }
         
-        if (userInventory != null) {
-            int size = userInventory.getContainerSize();
-            for (int i = 0; i < size; i++) {
-                ItemStack inventoryItem = userInventory.getItem(i);
-                if (inventoryItem != null && stacksMatch(neededSingleItem, inventoryItem)) {
-                    inventoryItem.shrink(1);
-                    return true;
+        for (IInventory inventory : inventories) {
+            if (inventories != null) {
+                int size = inventory.getContainerSize();
+                for (int i = 0; i < size; i++) {
+                    ItemStack inventoryItem = inventory.getItem(i);
+                    if (inventoryItem != null && stacksMatch(neededSingleItem, inventoryItem)) {
+                        inventoryItem.shrink(1);
+                        return true;
+                    }
                 }
             }
         }

@@ -282,7 +282,7 @@ public class ModEntityTypes {
             .build(new ResourceLocation(JojoMod.MOD_ID, "firework_inside").toString()));
     
     public static final RegistryObject<EntityType<AngeloRockEntity>> ANGELO_ROCK = ENTITIES.register("angelo_rock", 
-            () -> EntityType.Builder.<AngeloRockEntity>of(AngeloRockEntity::new, EntityClassification.MISC).sized(1F, 2F).clientTrackingRange(10).updateInterval(Integer.MAX_VALUE)
+            () -> EntityType.Builder.<AngeloRockEntity>of(AngeloRockEntity::new, EntityClassification.MISC).sized(1F, 1.75F).clientTrackingRange(10).updateInterval(Integer.MAX_VALUE)
             .build(new ResourceLocation(JojoMod.MOD_ID, "angelo_rock").toString()));
     
     public static final RegistryObject<EntityType<PillarmanDivineSandstormEntity>> PILLARMAN_DIVINE_SANDSTORM = ENTITIES.register("pillarman_divine_sandstorm", 

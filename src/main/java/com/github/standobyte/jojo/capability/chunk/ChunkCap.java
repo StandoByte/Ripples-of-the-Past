@@ -21,6 +21,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.BrokenChunkBlocksPacket;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -30,6 +31,7 @@ import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.nbt.NBTUtil;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.chunk.Chunk;
@@ -220,7 +222,7 @@ public class ChunkCap {
             return !keep && tickCount++ == 24000;
         }
 
-        private CompoundNBT toNBT() {
+        public CompoundNBT toNBT() {
             CompoundNBT nbt = new CompoundNBT();
             nbt.put("Pos", NBTUtil.writeBlockPos(pos));
             nbt.put("State", NBTUtil.writeBlockState(state));
@@ -238,7 +240,7 @@ public class ChunkCap {
         }
 
         @Nullable
-        private static PrevBlockInfo fromNBT(CompoundNBT nbt) {
+        public static PrevBlockInfo fromNBT(CompoundNBT nbt) {
             if (!(
                     nbt.contains("Pos", MCUtil.getNbtId(CompoundNBT.class)) &&
                     nbt.contains("State", MCUtil.getNbtId(CompoundNBT.class)) && 
@@ -264,6 +266,15 @@ public class ChunkCap {
             block.tickCount = nbt.getInt("TickCount");
             block.xp = nbt.getInt("Xp");
             return block;
+        }
+        
+        public void toBuf(PacketBuffer buf) {
+            buf.writeBlockPos(pos);
+            buf.writeVarInt(Block.getId(state));
+        }
+        
+        public static PrevBlockInfo fromBuf(PacketBuffer buf) {
+            return new PrevBlockInfo(buf.readBlockPos(), Block.stateById(buf.readVarInt()), new ArrayList<>(), true);
         }
     }
 }
