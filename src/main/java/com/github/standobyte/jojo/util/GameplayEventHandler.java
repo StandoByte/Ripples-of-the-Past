@@ -94,6 +94,8 @@ import net.minecraft.block.AbstractFurnaceBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.SoundType;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -177,6 +179,7 @@ import net.minecraftforge.event.entity.living.LivingFallEvent;
 import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
+import net.minecraftforge.event.entity.living.LootingLevelEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionApplicableEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionExpiryEvent;
@@ -1227,6 +1230,18 @@ public class GameplayEventHandler {
         if (AngeloRockEntity.cancelPlayerHitSound && (sound == SoundEvents.PLAYER_ATTACK_STRONG || sound == SoundEvents.PLAYER_ATTACK_WEAK/* || sound == SoundEvents.PLAYER_ATTACK_KNOCKBACK*/ /* is played before AngeloRockEntity#hurt is called so nope */)) {
             AngeloRockEntity.cancelPlayerHitSound = false;
             event.setCanceled(true);
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void changeLooting(LootingLevelEvent event) {
+        LivingEntity usePickaxeFortune = AngeloRockEntity.mobLootFortune;
+        if (usePickaxeFortune != null && event.getEntityLiving() == usePickaxeFortune) {
+            Entity killer = event.getDamageSource().getEntity();
+            if (killer instanceof LivingEntity) {
+                int fortune = EnchantmentHelper.getEnchantmentLevel(Enchantments.BLOCK_FORTUNE, (LivingEntity) killer);
+                event.setLootingLevel(Math.max(event.getLootingLevel(), fortune));
+            }
         }
     }
     

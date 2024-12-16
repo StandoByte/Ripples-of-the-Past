@@ -60,6 +60,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.GameRules;
 import net.minecraft.world.World;
 import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
@@ -83,7 +84,7 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
         super(pType, pLevel);
     }
     
-    public static AngeloRockEntity turnIntoRock(World world, Entity entity, Vector3d rockPos, float yRot, 
+    public static AngeloRockEntity turnIntoRock(World world, Entity entity, MobEntity saveAsMob, Vector3d rockPos, float yRot, 
             PrevBlockInfo... angeloRockBlocks) {
         if (world.isClientSide()) {
             return null;
@@ -92,8 +93,8 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
         AngeloRockEntity angeloRock = new AngeloRockEntity(ModEntityTypes.ANGELO_ROCK.get(), world);
         angeloRock.yRot = yRot;
         angeloRock.setPos(rockPos.x, rockPos.y, rockPos.z);
-        if (entity instanceof MobEntity) {
-            angeloRock.mob = (MobEntity) entity;
+        if (saveAsMob != null) {
+            angeloRock.mob = saveAsMob;
             angeloRock.useMobHurtSound = CommonReflection.getAmbientSound(angeloRock.mob) == null;
         }
         
@@ -170,10 +171,14 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
         
         if ("player".equals(dmgSource.getMsgId()) && dmgSource.getEntity() instanceof LivingEntity) {
             LivingEntity attacker = (LivingEntity) dmgSource.getEntity();
-            if (attacker instanceof PlayerEntity && ((PlayerEntity) attacker).abilities.instabuild) {
+            boolean creative = attacker instanceof PlayerEntity && ((PlayerEntity) attacker).abilities.instabuild;
+            if (creative) {
                 dropMode = DropMode.NONE;
-                breakRock();
+                
+                lastAttack = dmgSource;
                 cancelPlayerHitSound = true;
+                
+                breakRock();
                 return true;
             }
             
@@ -197,24 +202,25 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
                 level.playSound(null, getX(), getY(0.5), getZ(), blockSound.getHitSound(), 
                         getSoundSource(), (blockSound.getVolume() + 1.0F) / 8.0F, blockSound.getPitch() * 0.5F);
                 
+                // TODO angelo rock silk touch
 //                if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SILK_TOUCH, item) > 0) {
 //                    dropMode = DropMode.SILK_TOUCH;
 //                }
                 
+                lastAttack = dmgSource;
+                cancelPlayerHitSound = true;
+                
                 entityData.set(DAMAGE, entityData.get(DAMAGE) + dmgAmount);
-                if (isBroken()) {
+                if (!creative && isBroken()) {
                     item.hurt(1, random, attacker instanceof ServerPlayerEntity ? (ServerPlayerEntity) attacker : null);
                 }
                 
-                cancelPlayerHitSound = true;
                 return true;
             }
         }
         
         return false;
     }
-    
-    public static boolean cancelPlayerHitSound = false;
     
     public void breakRock() {
         if (!level.isClientSide()) {
@@ -232,6 +238,7 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
         return entityData.get(DAMAGE) >= 40;
     }
     
+    private DamageSource lastAttack;
     private DropMode dropMode = DropMode.BLOCKS;
     
     private enum DropMode {
@@ -242,6 +249,9 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
     
     private void doBreakRock() {
         if (!level.isClientSide()) {
+            if (!level.getGameRules().getBoolean(GameRules.RULE_DOENTITYDROPS)) {
+                dropMode = DropMode.NONE;
+            }
             angeloRockBlocks.values().forEach(block -> {
                 CrazyDiamondRestoreTerrain.rememberBrokenBlock(level, block.pos, block.state, Optional.empty(), block.drops);
                 
@@ -263,6 +273,13 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
             if (dropMode == DropMode.SILK_TOUCH) {
                 
             }
+            else if (mob != null && mob.removed && lastAttack != null) {
+                mob.setPos(getX(), getY(), getZ());
+                mobLootFortune = mob;
+                CommonReflection.dropAllDeathLoot(mob, lastAttack);
+                mobLootFortune = null;
+            }
+            
             remove();
         }
         else {
@@ -282,6 +299,10 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
     public float getDamageRatio() {
         return entityData.get(DAMAGE) / (20 * angeloRockBlocks.size());
     }
+    
+    
+    public static boolean cancelPlayerHitSound = false;
+    public static MobEntity mobLootFortune;
     
     
     @Override

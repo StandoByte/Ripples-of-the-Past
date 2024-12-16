@@ -235,6 +235,12 @@ public class CommonReflection {
     }
     
     
+    private static final Method LIVING_ENTITY_DROP_ALL_DEATH_LOOT = ObfuscationReflectionHelper.findMethod(LivingEntity.class, "func_213345_d", DamageSource.class);
+    public static void dropAllDeathLoot(LivingEntity entity, DamageSource damageSource) {
+        ReflectionUtil.invokeMethod(LIVING_ENTITY_DROP_ALL_DEATH_LOOT, entity, damageSource);
+    }
+    
+    
     
     private static final Field ENTITY_DATA_CUSTOM_NAME_FIELD = ObfuscationReflectionHelper.findField(Entity.class, "field_184242_az");
     private static DataParameter<Optional<ITextComponent>> ENTITY_DATA_CUSTOM_NAME = null;

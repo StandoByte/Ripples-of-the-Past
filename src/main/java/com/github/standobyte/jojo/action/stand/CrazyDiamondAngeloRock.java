@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.action.stand;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.action.config.ActionConfigField;
 import com.github.standobyte.jojo.action.stand.effect.CDTurnIntoAngeloRockEffect;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
@@ -16,12 +17,12 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.world.World;
 
 public class CrazyDiamondAngeloRock extends StandEntityActionModifier {
+    @ActionConfigField private boolean keepMobsInside = true;
 
     public CrazyDiamondAngeloRock(Builder builder) {
         super(builder);
     }
     
-    // TODO (angelo) limit the entity types that can be affected by this
     @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
         if (!JojoModUtil.breakingBlocksEnabled(user.level)) {
@@ -46,7 +47,10 @@ public class CrazyDiamondAngeloRock extends StandEntityActionModifier {
                 if (kbCollision == null || !kbCollision.isActive()) {
                     return;
                 }
-                userPower.getContinuousEffects().addEffect(new CDTurnIntoAngeloRockEffect().withTarget(targetEntity));
+                CDTurnIntoAngeloRockEffect effect = new CDTurnIntoAngeloRockEffect();
+                effect.withTarget(targetEntity);
+                effect.keepMobsInside = this.keepMobsInside;
+                userPower.getContinuousEffects().addEffect(effect);
             }
         }
     }

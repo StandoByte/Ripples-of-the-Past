@@ -29,6 +29,7 @@ import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
@@ -39,6 +40,7 @@ import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
 public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
+    public boolean keepMobsInside;
     private boolean summonedRockEntity = false;
     private EntityOwnerResolver.Generic<AngeloRockEntity> angeloRockEntity = new EntityOwnerResolver.Generic<>(AngeloRockEntity.class);
 
@@ -99,8 +101,9 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
             return Action.conditionMessage("angelo_no_block_broken");
         }
         
-        // TODO (angelo) check the target's hp
-        if (false) {
+        // rebalance if necessary
+        float hpLimit = Math.max(10, target.getHealth() * 0.05f);
+        if (target.getHealth() > hpLimit) {
             return Action.conditionMessage("target_too_many_health");
         }
         
@@ -184,6 +187,7 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
         
         JojoModUtil.sayVoiceLine(user, ModSounds.JOSUKE_PRAY_FOR_ETERNITY.get(), null, 1, 1, 0, false);
         AngeloRockEntity angeloRock = AngeloRockEntity.turnIntoRock(world, target, 
+                keepMobsInside && target instanceof MobEntity ? (MobEntity) target : null, 
                 Vector3d.atBottomCenterOf(blockLower.pos), angeloRockFace.toYRot(), 
                 blockLower, blockUpper.orElse(null));
         this.angeloRockEntity.setOwner(angeloRock);
@@ -215,12 +219,14 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
     @Override
     protected void writeAdditionalSaveData(CompoundNBT nbt) {
         nbt.putBoolean("SummonedEntity", summonedRockEntity);
+        nbt.putBoolean("SaveMob", keepMobsInside);
         angeloRockEntity.saveNbt(nbt, "Entity");
     }
 
     @Override
     protected void readAdditionalSaveData(CompoundNBT nbt) {
         summonedRockEntity = nbt.getBoolean("SummonedEntity");
+        keepMobsInside = nbt.getBoolean("SaveMob");
         angeloRockEntity.loadNbt(nbt, "Entity");
     }
 
