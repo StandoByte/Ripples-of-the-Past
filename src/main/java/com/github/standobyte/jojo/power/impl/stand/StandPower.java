@@ -22,7 +22,7 @@ import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.modcompat.OptionalDependencyHelper;
 import com.github.standobyte.jojo.network.PacketManager;
-import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtStandEntityPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtEntityPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SkippedStandProgressionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SoulSpawnPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.StandActionLearningPacket;
@@ -736,7 +736,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
             StandEntity standEntity = (StandEntity) standManifestation;
             float volume = standEntity.getLeapStrength() / 2.4F;
             ServerPlayerEntity except = serverPlayerUser.map(player -> {
-                PacketManager.sendToClient(new PlaySoundAtStandEntityPacket(ModSounds.STAND_LEAP.get(), standEntity.getId(), 
+                PacketManager.sendToClient(new PlaySoundAtEntityPacket(ModSounds.STAND_LEAP.get(), standEntity.getId(), 
                         volume, 1.0F), player);
                 return player;
             }).orElse(null);

@@ -336,6 +336,16 @@ public class MCUtil {
     }
     
     
+    public static boolean isLocalServer(MinecraftServer server, Entity serverPlayer) {
+        if (server.isDedicatedServer() || !(serverPlayer instanceof ServerPlayerEntity)) {
+            return false;
+        }
+        ServerPlayerEntity player = (ServerPlayerEntity) serverPlayer;
+        PlayerEntity clientPlayer = ClientUtil.getClientPlayer();
+        return clientPlayer != null && player.getUUID().equals(clientPlayer.getUUID());
+    }
+    
+    
     
     public static Collection<BlockPos> explosionBlocks(BlockPos center, float radius, World world) {
         Set<BlockPos> set = new HashSet<>();

@@ -30,6 +30,8 @@ import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.StandRelativeOffset;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.network.NetworkUtil;
+import com.github.standobyte.jojo.network.packets.fromserver.LotsOfBlocksBrokenPacket;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
@@ -46,6 +48,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.fluid.FluidState;
+import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Direction;
 import net.minecraft.util.ResourceLocation;
@@ -482,7 +485,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
             
             @Override
             protected void explodeBlocks() {
-                if (JojoModUtil.breakingBlocksEnabled(level) && level instanceof ServerWorld) {
+                if (level instanceof ServerWorld) {
                     ServerWorld world = (ServerWorld) level;
                     List<BlockPos> toBlow = getToBlow();
                     LivingEntity standUser = StandUtil.getStandUser(attacker);
@@ -632,7 +635,25 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
             protected void playSound() {}
             
             @Override
-            protected void spawnParticles() {}
+            protected void spawnParticles() {
+                if (level.isClientSide() && blockInteraction == Explosion.Mode.NONE) {
+                    LotsOfBlocksBrokenPacket blocks = new LotsOfBlocksBrokenPacket();
+                    calculateBlocksToBlow().forEach(blockPos -> blocks.addBlock(blockPos, level.getBlockState(blockPos)));
+                    blocks.forEachBlock(false, LotsOfBlocksBrokenPacket::blockBreakVisuals);
+                }
+            }
+            
+            @Override
+            public void toBuf(PacketBuffer buf) {
+                NetworkUtil.writeVecApproximate(buf, explosionDirection);
+                buf.writeEnum(blockInteraction);
+            }
+            
+            @Override
+            public void fromBuf(PacketBuffer buf) {
+                explosionDirection = NetworkUtil.readVecApproximate(buf);
+                blockInteraction = buf.readEnum(Explosion.Mode.class);
+            }
             
             @Override
             public ResourceLocation getExplosionType() {

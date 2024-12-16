@@ -73,6 +73,7 @@ import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
 import net.minecraft.entity.effect.LightningBoltEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.passive.AnimalEntity;
+import net.minecraft.entity.passive.TameableEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
@@ -1563,7 +1564,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
 
     
     /**
-     * @deprecated use {@link StandEntity#aimWithThisOrUser(double, ActionTarget)}, which returns an {@link ActionTarget} instance
+     * @deprecated use {@link StandEntity#aimWithThisOrUser(double, ActionTarget, boolean)}, which returns an {@link ActionTarget} instance
      */
     @Deprecated
     public RayTraceResult aimWithStandOrUser(double reachDistance, ActionTarget currentTarget) {
@@ -1585,7 +1586,12 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         return aim;
     }
     
+    @Deprecated
     public ActionTarget aimWithThisOrUser(double reachDistance, ActionTarget currentTarget) {
+        return aimWithThisOrUser(reachDistance, currentTarget, true);
+    }
+    
+    public ActionTarget aimWithThisOrUser(double reachDistance, ActionTarget currentTarget, boolean friendlyFire) {
         ActionTarget target;
         if (currentTarget.getType() != TargetType.EMPTY && isTargetInReach(currentTarget)) {
             target = currentTarget;
@@ -1595,11 +1601,11 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             if (!isManuallyControlled()) {
                 LivingEntity user = getUser();
                 if (user != null) {
-                    aim = precisionRayTrace(user, reachDistance);
+                    aim = precisionRayTrace(user, reachDistance, 0, friendlyFire);
                 }
             }
             if (aim == null || aim.getType() == RayTraceResult.Type.MISS) {
-                aim = precisionRayTrace(this, reachDistance);
+                aim = precisionRayTrace(this, reachDistance, 0, friendlyFire);
             }
             
             target = ActionTarget.fromRayTraceResult(aim);
@@ -1642,8 +1648,17 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
 
     @Nonnull
     public RayTraceResult precisionRayTrace(Entity aimingEntity, double reachDistance, double rayTraceInflate) {
+        return precisionRayTrace(aimingEntity, reachDistance, rayTraceInflate, true);
+    }
+
+    @Nonnull
+    public RayTraceResult precisionRayTrace(Entity aimingEntity, double reachDistance, double rayTraceInflate, boolean friendlyFire) {
+        Predicate<Entity> filter = canTarget();
+        if (!friendlyFire) {
+            filter = filter.and(this::canHarm);
+        }
         RayTraceResult[] targets = JojoModUtil.rayTraceMultipleEntities(aimingEntity, 
-                reachDistance, canTarget(), rayTraceInflate, getPrecision());
+                reachDistance, filter, rayTraceInflate, getPrecision());
         if (targets.length == 1) {
             return targets[0];
         }
@@ -1691,7 +1706,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
 
     public boolean punch(StandEntityTask task, IHasStandPunch punch, ActionTarget target) {
         if (!level.isClientSide()) {
-            ActionTarget finalTarget = aimWithThisOrUser(getAimDistance(getUser()), target);
+            ActionTarget finalTarget = aimWithThisOrUser(getAimDistance(getUser()), target, false);
             target = finalTarget.getType() != TargetType.EMPTY && isTargetInReach(finalTarget) ? finalTarget : ActionTarget.EMPTY;
             setTaskTarget(target);
         }
@@ -1834,7 +1849,14 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         LivingEntity user = getUser();
         if (user != null) {
             boolean canHarm = MCUtil.canHarm(user, entity);
-            return canHarm && !(entity instanceof AnimalEntity && entity.isPassengerOfSameVehicle(user));
+            if (canHarm && entity instanceof AnimalEntity) {
+                canHarm &= !entity.isPassengerOfSameVehicle(user);
+                if (canHarm && entity instanceof TameableEntity) {
+                    LivingEntity tameableOwner = ((TameableEntity) entity).getOwner();
+                    canHarm &= !(tameableOwner != null && tameableOwner == user);
+                }
+            }
+            return canHarm;
         }
         
         return true;

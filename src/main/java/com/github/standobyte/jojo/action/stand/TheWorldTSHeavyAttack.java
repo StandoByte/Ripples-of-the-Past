@@ -82,7 +82,7 @@ public class TheWorldTSHeavyAttack extends StandEntityAction implements IHasStan
             StandEntity stand = (StandEntity) power.getStandManifestation();
             return ActionTarget.fromRayTraceResult(
                     stand.precisionRayTrace(stand.isManuallyControlled() ? stand : user, stand.getMaxRange(),
-                            stand.getPrecision() / 16F));
+                            stand.getPrecision() / 16F, false));
         }
         return super.targetBeforePerform(world, user, power, target);
     }

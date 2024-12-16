@@ -38,7 +38,7 @@ public class EntityOwnerResolver {
     }
     
     protected void updateEntity(World world) {
-        if (owner != null && !owner.isAlive()) {
+        if (owner != null && owner.removed) {
             _setNewOwnerEntity(null);
         }
         if (owner == null) {

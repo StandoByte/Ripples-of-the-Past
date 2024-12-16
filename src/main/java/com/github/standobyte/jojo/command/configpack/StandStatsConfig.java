@@ -40,10 +40,6 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.JSONUtils;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.util.text.event.ClickEvent;
-import net.minecraft.util.text.event.HoverEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.IForgeRegistry;
 
@@ -97,18 +93,13 @@ public class StandStatsConfig extends JsonDataConfig {
                     JojoCustomRegistries.STANDS.getRegistry().getValues().stream()
                     .filter(stand -> stand.getSurvivalGameplayPool() == StandSurvivalGameplayPool.PLAYER_ARROW)
                     .collect(Collectors.toList()));
-            source.sendSuccess(new TranslationTextComponent("commands.jojoconfigpack.standstats.all", 
-                    // clickable link to the files (in "jojo" namespace)
-                    new TranslationTextComponent("commands.jojoconfigpack.standstats.all.link_name").withStyle(TextFormatting.UNDERLINE).withStyle((style) -> {
-                        return style
-                                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, 
-                                        dataPackPath(source.getServer()).resolve(String.format("data/%s/%s", JojoMod.MOD_ID, RESOURCE_NAME)).normalize().toString()))
-                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
-                                        new TranslationTextComponent("commands.jojoconfigpack.standstats.all.folder_link", 
-                                                new StringTextComponent("datapacks").withStyle(TextFormatting.ITALIC)
-                                                )));
-                    }))
-                    .withStyle(TextFormatting.GRAY), true);
+            
+            source.sendSuccess(generatePackLink(source, 
+                    "commands.jojoconfigpack.standstats.all", 
+                    "commands.jojoconfigpack.standstats.all.link_name", 
+                    LOCAL_FILE_TOOLTIP, 
+                    dataPackPath(source.getServer()).resolve(String.format("data/%s/%s", JojoMod.MOD_ID, RESOURCE_NAME))), 
+                    true);
             
             return count;
         } catch (Throwable e) {
@@ -122,18 +113,14 @@ public class StandStatsConfig extends JsonDataConfig {
             genDataPackBase(source);
             
             int count = writeDefaultStandStats(source.getServer(), Collections.singletonList(standType));
-            source.sendSuccess(new TranslationTextComponent("commands.jojoconfigpack.standstats.single", 
-                    new TranslationTextComponent("commands.jojoconfigpack.standstats.single.link_name").withStyle(TextFormatting.UNDERLINE).withStyle((style) -> {
-                        return style
-                                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, 
-                                        dataPackPath(source.getServer()).resolve(String.format("data/%s/%s", standType.getRegistryName().getNamespace(), RESOURCE_NAME)).normalize().toString()))
-                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
-                                        new TranslationTextComponent("commands.jojoconfigpack.standstats.single.folder_link", 
-                                                new StringTextComponent("datapacks").withStyle(TextFormatting.ITALIC)
-                                                )));
-                    }),
-                    standType.getName())
-                    .withStyle(TextFormatting.GRAY), true);
+            
+            source.sendSuccess(generatePackLink(source, 
+                    "commands.jojoconfigpack.standstats.single", 
+                    "commands.jojoconfigpack.standstats.single.link_name", 
+                    LOCAL_FILE_TOOLTIP, 
+                    dataPackPath(source.getServer()).resolve(String.format("data/%s/%s", standType.getRegistryName().getNamespace(), RESOURCE_NAME)),
+                    standType.getName()), 
+                    true);
             
             return count;
         } catch (Throwable e) {
