@@ -12,10 +12,10 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
 public class EntityOwnerResolver {
-    private Entity owner;
-    private LivingEntity ownerLiving;
-    private UUID ownerUUID;
-    private int ownerNetworkId;
+    protected Entity owner;
+    protected LivingEntity ownerLiving;
+    protected UUID ownerUUID;
+    protected int ownerNetworkId;
     
     public void setOwner(@Nullable Entity owner) {
         this.ownerUUID = owner != null ? owner.getUUID() : null;
@@ -82,5 +82,26 @@ public class EntityOwnerResolver {
     
     public int getNetworkId() {
         return ownerNetworkId;
+    }
+    
+    
+    public static class Generic<T extends Entity> extends EntityOwnerResolver {
+        protected final Class<T> entityClass;
+        protected T castEntity;
+        
+        public Generic(Class<T> entityClass) {
+            this.entityClass = entityClass;
+        }
+        
+        public T getEntityCast(World world) {
+            updateEntity(world);
+            return castEntity;
+        }
+        
+        @Override
+        protected void _setNewOwnerEntity(Entity entity) {
+            super._setNewOwnerEntity(entity);
+            this.castEntity = entity != null && entityClass.isAssignableFrom(entity.getClass()) ? (T) entity : null;
+        }
     }
 }

@@ -1224,7 +1224,7 @@ public class GameplayEventHandler {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public static void cancelHitSound(PlaySoundAtEntityEvent event) {
         SoundEvent sound = event.getSound();
-        if ((sound == SoundEvents.PLAYER_ATTACK_STRONG || sound == SoundEvents.PLAYER_ATTACK_WEAK) && AngeloRockEntity.cancelPlayerHitSound) {
+        if (AngeloRockEntity.cancelPlayerHitSound && (sound == SoundEvents.PLAYER_ATTACK_STRONG || sound == SoundEvents.PLAYER_ATTACK_WEAK/* || sound == SoundEvents.PLAYER_ATTACK_KNOCKBACK*/ /* is played before AngeloRockEntity#hurt is called so nope */)) {
             AngeloRockEntity.cancelPlayerHitSound = false;
             event.setCanceled(true);
         }

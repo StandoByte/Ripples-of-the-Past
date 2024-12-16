@@ -19,6 +19,7 @@ import com.github.standobyte.jojo.entity.AngeloRockEntity;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
+import com.github.standobyte.jojo.util.mc.EntityOwnerResolver;
 import com.github.standobyte.jojo.util.mc.damage.KnockbackCollisionImpact;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
@@ -29,6 +30,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
@@ -36,8 +38,9 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
 
-// TODO (angelo) keep the effect while the rock is forming; remove it only when the rock is complete
 public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
+    private boolean summonedRockEntity = false;
+    private EntityOwnerResolver.Generic<AngeloRockEntity> angeloRockEntity = new EntityOwnerResolver.Generic<>(AngeloRockEntity.class);
 
     public CDTurnIntoAngeloRockEffect() {
         this(ModStandEffects.TURN_INTO_ANGELO_ROCK.get());
@@ -58,23 +61,31 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
     @Override
     protected void tickTarget(LivingEntity target) {
         if (!target.level.isClientSide()) {
-            KnockbackCollisionImpact kbCollision = KnockbackCollisionImpact.getHandler(target).orElse(null);
-            if (kbCollision == null) {
-                remove();
-                return;
-            }
-            if (kbCollision.isActive()) {
-                return;
-            }
-            else {
-                ActionConditionResult tryStartAngeloRock = tryStartAngeloRock(target, kbCollision);
-                if (tryStartAngeloRock.isPositive()) {
+            if (!summonedRockEntity) {
+                KnockbackCollisionImpact kbCollision = KnockbackCollisionImpact.getHandler(target).orElse(null);
+                if (kbCollision == null) {
                     remove();
+                    return;
+                }
+                if (kbCollision.isActive()) {
+                    return;
                 }
                 else {
-                    if (user instanceof ServerPlayerEntity) {
-                        ActionConditionResult.sendActionFailedMessage(ModStandsInit.CRAZY_DIAMOND_ANGELO_ROCK.get(), tryStartAngeloRock, user);
+                    ActionConditionResult tryStartAngeloRock = tryStartAngeloRock(target, kbCollision);
+                    if (tryStartAngeloRock.isPositive()) {
+                        summonedRockEntity = true;
                     }
+                    else {
+                        if (user instanceof ServerPlayerEntity) {
+                            ActionConditionResult.sendActionFailedMessage(ModStandsInit.CRAZY_DIAMOND_ANGELO_ROCK.get(), tryStartAngeloRock, user);
+                        }
+                        remove();
+                    }
+                }
+            }
+            else {
+                AngeloRockEntity angeloRock = angeloRockEntity.getEntityCast(world);
+                if (angeloRock == null || angeloRock.isFullyFormed()) {
                     remove();
                 }
             }
@@ -172,8 +183,10 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
         // TODO (angelo) consume items and xp (btw mobs can also pick up dropped blocks)
         
         JojoModUtil.sayVoiceLine(user, ModSounds.JOSUKE_PRAY_FOR_ETERNITY.get(), null, 1, 1, 0, false);
-        AngeloRockEntity.turnIntoRock(world, target, Vector3d.atBottomCenterOf(blockLower.pos), angeloRockFace.toYRot(), 
+        AngeloRockEntity angeloRock = AngeloRockEntity.turnIntoRock(world, target, Vector3d.atBottomCenterOf(blockLower.pos), angeloRockFace.toYRot(), 
                 blockLower, blockUpper.orElse(null));
+        this.angeloRockEntity.setOwner(angeloRock);
+        
         return ActionConditionResult.POSITIVE;
     }
     
@@ -191,6 +204,23 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
     protected void tick() {}
 
     @Override
-    protected void stop() {}
+    protected void stop() {
+        AngeloRockEntity angeloRock = angeloRockEntity.getEntityCast(world);
+        if (angeloRock != null && !angeloRock.isFullyFormed()) {
+            angeloRock.breakRock();
+        }
+    }
+
+    @Override
+    protected void writeAdditionalSaveData(CompoundNBT nbt) {
+        nbt.putBoolean("SummonedEntity", summonedRockEntity);
+        angeloRockEntity.saveNbt(nbt, "Entity");
+    }
+
+    @Override
+    protected void readAdditionalSaveData(CompoundNBT nbt) {
+        summonedRockEntity = nbt.getBoolean("SummonedEntity");
+        angeloRockEntity.loadNbt(nbt, "Entity");
+    }
 
 }

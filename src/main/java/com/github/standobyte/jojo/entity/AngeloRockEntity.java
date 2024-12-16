@@ -65,7 +65,6 @@ import net.minecraftforge.common.util.Constants;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
 
-// TODO (angelo) if the Crazy D user dies and this is in the process of being made, break this
 public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnData {
     protected static final DataParameter<Optional<BlockPos>> DATA_ATTACH_POS_ID = EntityDataManager.defineId(AngeloRockEntity.class, DataSerializers.OPTIONAL_BLOCK_POS);
     protected static final DataParameter<Boolean> CREATION_COMPLETE = EntityDataManager.defineId(AngeloRockEntity.class, DataSerializers.BOOLEAN);
@@ -117,7 +116,7 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
     
     @Override
     public ActionResultType interact(PlayerEntity pPlayer, Hand pHand) {
-        if (creationAnimTicks > 0) {
+        if (!isFullyFormed()) {
             return ActionResultType.FAIL;
         }
         if (level.isClientSide()) {
@@ -173,7 +172,7 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
             LivingEntity attacker = (LivingEntity) dmgSource.getEntity();
             if (attacker instanceof PlayerEntity && ((PlayerEntity) attacker).abilities.instabuild) {
                 dropMode = DropMode.NONE;
-                entityData.set(DAMAGE, Float.MAX_VALUE);
+                breakRock();
                 cancelPlayerHitSound = true;
                 return true;
             }
@@ -217,9 +216,15 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
     
     public static boolean cancelPlayerHitSound = false;
     
+    public void breakRock() {
+        if (!level.isClientSide()) {
+            entityData.set(DAMAGE, Float.MAX_VALUE);
+        }
+    }
+    
     private void onDamageApplied() {
         if (isBroken()) {
-            breakRock();
+            doBreakRock();
         }
     }
     
@@ -235,7 +240,7 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
         SILK_TOUCH
     }
     
-    public void breakRock() {
+    private void doBreakRock() {
         if (!level.isClientSide()) {
             angeloRockBlocks.values().forEach(block -> {
                 CrazyDiamondRestoreTerrain.rememberBrokenBlock(level, block.pos, block.state, Optional.empty(), block.drops);
@@ -520,7 +525,11 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
     }
     
     public float getCreationAnimProgress(float partialTick) {
-        return creationAnimTicks == 0 ? 1 : (CREATION_ANIM_LEN - creationAnimTicks + partialTick) / CREATION_ANIM_LEN;
+        return creationAnimTicks <= 0 ? 1 : (CREATION_ANIM_LEN - creationAnimTicks + partialTick) / CREATION_ANIM_LEN;
+    }
+    
+    public boolean isFullyFormed() {
+        return creationAnimTicks <= 0;
     }
     
     
