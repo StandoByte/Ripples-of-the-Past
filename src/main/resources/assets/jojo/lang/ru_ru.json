@@ -776,14 +776,20 @@
   "_commands.jojoconfigpack.base_created.link_name": "Generated",
   "_commands.jojoconfigpack.base_created": "%s config data pack named %s",
   "_commands.jojoconfigpack.folder_link": "%s data pack link",
-  "_commands.jojoconfigpack.folder_link.tooltip": "Click to open the data pack (inside the %s folder of this save).",
+  "_commands.jojoconfigpack.folder_link.tooltip": "Click to open the data pack (inside the %s folder of this save)",
+  "_commands.jojoconfigpack.standstats.all.folder_link": "Click to open the file path",
+  "_commands.jojoconfigpack.local_file_link": "Click to open the file path",
+  "_commands.jojoconfigpack.remote_server": "Go to the %s directory of the remote server to edit the config",
   
   "_commands.jojoconfigpack.standstats.all.link_name": "Generated",
   "_commands.jojoconfigpack.standstats.all": "%s default Stand stats files",
-  "_commands.jojoconfigpack.standstats.all.folder_link": "Click to open the file path",
   "_commands.jojoconfigpack.standstats.single.link_name": "Generated",
   "_commands.jojoconfigpack.standstats.single": "%s default Stand stats file for %s",
-  "_commands.jojoconfigpack.standstats.single.folder_link": "Click to open the file path",
+  
+  "_commands.jojoconfigpack.abilities.stand.link_name": "Generated",
+  "_commands.jojoconfigpack.abilities.stand": "(WIP) %s config files for all abilities of %s",
+  "_commands.jojoconfigpack.abilities.single.link_name": "Generated",
+  "_commands.jojoconfigpack.abilities.single": "(WIP) %s config file for %s",
   
   "commands.jojoconfigpack.stand_assign.added": "%s добавлен в список Стендов, предназначенных для %s",
   "commands.jojoconfigpack.stand_assign.removed": "%s убран из списка Стендов, предназначенных для %s",

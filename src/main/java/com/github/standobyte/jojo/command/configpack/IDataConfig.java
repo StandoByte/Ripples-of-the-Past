@@ -24,6 +24,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.FileUtil;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.ResourceLocationException;
+import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -74,19 +75,43 @@ public interface IDataConfig {
         }
         
         if (generatedPack) {
-            src.sendSuccess(new TranslationTextComponent("commands.jojoconfigpack.base_created", 
-                    new TranslationTextComponent("commands.jojoconfigpack.base_created.link_name").withStyle(TextFormatting.UNDERLINE).withStyle((style) -> {
-                        return style
-                                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, packPath.normalize().toString()))
-                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
-                                        new TranslationTextComponent("commands.jojoconfigpack.folder_link.tooltip", 
-                                                new StringTextComponent("datapacks").withStyle(TextFormatting.ITALIC)
-                                                )));
-                    }),
-                    new StringTextComponent(getDataPackName()).withStyle(TextFormatting.ITALIC))
-                    .withStyle(TextFormatting.GRAY), true);
+            src.sendSuccess(generatePackLink(src, 
+                    "commands.jojoconfigpack.base_created", 
+                    "commands.jojoconfigpack.base_created.link_name", 
+                    "commands.jojoconfigpack.folder_link.tooltip", 
+                    packPath, 
+                    new StringTextComponent(getDataPackName()).withStyle(TextFormatting.ITALIC)), 
+                    true);
         }
         return generatedPack;
+    }
+    
+    static final String LOCAL_FILE_TOOLTIP = "commands.jojoconfigpack.standstats.all.folder_link";
+    static final String REMOTE_FILE_TOOLTIP = "commands.jojoconfigpack.remote_server";
+    default ITextComponent generatePackLink(CommandSource source, String message, String fileLinkPart, 
+            String localFileLinkTooltip, Path path, Object... args) {
+        Object[] allArgs = new Object[args.length + 1];
+        if (args.length > 0) {
+            System.arraycopy(args, 0, allArgs, 1, args.length);
+        }
+        boolean isLocalServer = !source.getServer().isDedicatedServer();
+        ITextComponent tooltip;
+        if (isLocalServer) {
+            tooltip = new TranslationTextComponent(localFileLinkTooltip, 
+                    new StringTextComponent("datapacks").withStyle(TextFormatting.ITALIC));
+        }
+        else {
+            tooltip = new TranslationTextComponent(REMOTE_FILE_TOOLTIP, 
+                    new StringTextComponent("datapacks").withStyle(TextFormatting.ITALIC))
+                    .withStyle(TextFormatting.RED);
+        }
+        allArgs[0] = new TranslationTextComponent(fileLinkPart).withStyle(TextFormatting.UNDERLINE).withStyle((style) -> {
+            return style
+                    .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, path.normalize().toString()))
+                    .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, tooltip));
+        });
+        
+        return new TranslationTextComponent(message, allArgs).withStyle(TextFormatting.GRAY);
     }
     
     default boolean genJsonFromObj(Object object, ResourceLocation resourcePath, String resourceName, MinecraftServer server) throws JsonWriteException {

@@ -4,7 +4,6 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
-import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 
 import net.minecraft.entity.Entity;
@@ -13,13 +12,13 @@ import net.minecraft.util.SoundEvent;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
-public class PlaySoundAtStandEntityPacket {
+public class PlaySoundAtEntityPacket {
     private final SoundEvent sound;
     private final int entityId;
     private final float volume;
     private final float pitch;
 
-    public PlaySoundAtStandEntityPacket(SoundEvent sound, int entityId, float volume, float pitch) {
+    public PlaySoundAtEntityPacket(SoundEvent sound, int entityId, float volume, float pitch) {
         this.sound = sound;
         this.entityId = entityId;
         this.volume = volume;
@@ -28,10 +27,10 @@ public class PlaySoundAtStandEntityPacket {
     
     
     
-    public static class Handler implements IModPacketHandler<PlaySoundAtStandEntityPacket> {
+    public static class Handler implements IModPacketHandler<PlaySoundAtEntityPacket> {
 
         @Override
-        public void encode(PlaySoundAtStandEntityPacket msg, PacketBuffer buf) {
+        public void encode(PlaySoundAtEntityPacket msg, PacketBuffer buf) {
             buf.writeRegistryIdUnsafe(ForgeRegistries.SOUND_EVENTS, msg.sound);
             buf.writeInt(msg.entityId);
             buf.writeFloat(msg.volume);
@@ -39,21 +38,19 @@ public class PlaySoundAtStandEntityPacket {
         }
 
         @Override
-        public PlaySoundAtStandEntityPacket decode(PacketBuffer buf) {
-            return new PlaySoundAtStandEntityPacket(buf.readRegistryIdUnsafe(ForgeRegistries.SOUND_EVENTS), buf.readInt(), buf.readFloat(), buf.readFloat());
+        public PlaySoundAtEntityPacket decode(PacketBuffer buf) {
+            return new PlaySoundAtEntityPacket(buf.readRegistryIdUnsafe(ForgeRegistries.SOUND_EVENTS), buf.readInt(), buf.readFloat(), buf.readFloat());
         }
 
         @Override
-        public void handle(PlaySoundAtStandEntityPacket msg, Supplier<NetworkEvent.Context> ctx) {
+        public void handle(PlaySoundAtEntityPacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
-            if (entity instanceof StandEntity) {
-                ClientTickingSoundsHelper.playStandEntitySound((StandEntity) entity, msg.sound, msg.volume, msg.pitch);
-            }
+            ClientTickingSoundsHelper.playEntitySound(entity, msg.sound, msg.volume, msg.pitch);
         }
 
         @Override
-        public Class<PlaySoundAtStandEntityPacket> getPacketClass() {
-            return PlaySoundAtStandEntityPacket.class;
+        public Class<PlaySoundAtEntityPacket> getPacketClass() {
+            return PlaySoundAtEntityPacket.class;
         }
     }
 

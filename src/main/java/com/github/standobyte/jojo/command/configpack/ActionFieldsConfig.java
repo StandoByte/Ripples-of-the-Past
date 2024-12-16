@@ -78,19 +78,13 @@ public class ActionFieldsConfig extends JsonDataConfig {
             // generate the .json files
             int count = writeDefaultActionConfig(source.getServer(), standType.getAllUnlockableActions());
             
-            // FIXME chat message
-//            source.sendSuccess(new TranslationTextComponent("commands.jojoconfigpack.standstats.all", 
-//                    // clickable link to the files (in "jojo" namespace)
-//                    new TranslationTextComponent("commands.jojoconfigpack.standstats.all.link_name").withStyle(TextFormatting.UNDERLINE).withStyle((style) -> {
-//                        return style
-//                                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, 
-//                                        dataPackPath(source.getServer()).resolve(String.format("data/%s/%s", JojoMod.MOD_ID, RESOURCE_NAME)).normalize().toString()))
-//                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
-//                                        new TranslationTextComponent("commands.jojoconfigpack.standstats.all.folder_link", 
-//                                                new StringTextComponent("datapacks").withStyle(TextFormatting.ITALIC)
-//                                                )));
-//                    }))
-//                    .withStyle(TextFormatting.GRAY), true);
+            source.sendSuccess(generatePackLink(source, 
+                    "commands.jojoconfigpack.abilities.stand", 
+                    "commands.jojoconfigpack.abilities.stand.link_name", 
+                    LOCAL_FILE_TOOLTIP, 
+                    dataPackPath(source.getServer()).resolve(String.format("data/%s/%s", standType.getRegistryName().getNamespace(), RESOURCE_NAME)),
+                    standType.getName()), 
+                    true);
             
             return count;
         } catch (Throwable e) {
@@ -104,20 +98,14 @@ public class ActionFieldsConfig extends JsonDataConfig {
             genDataPackBase(source);
             
             int count = writeDefaultActionConfig(source.getServer(), Collections.singletonList(action));
-
-            // FIXME chat message
-//            source.sendSuccess(new TranslationTextComponent("commands.jojoconfigpack.standstats.single", 
-//                    new TranslationTextComponent("commands.jojoconfigpack.standstats.single.link_name").withStyle(TextFormatting.UNDERLINE).withStyle((style) -> {
-//                        return style
-//                                .withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_FILE, 
-//                                        dataPackPath(source.getServer()).resolve(String.format("data/%s/%s", standType.getRegistryName().getNamespace(), RESOURCE_NAME)).normalize().toString()))
-//                                .withHoverEvent(new HoverEvent(HoverEvent.Action.SHOW_TEXT, 
-//                                        new TranslationTextComponent("commands.jojoconfigpack.standstats.single.folder_link", 
-//                                                new StringTextComponent("datapacks").withStyle(TextFormatting.ITALIC)
-//                                                )));
-//                    }),
-//                    standType.getName())
-//                    .withStyle(TextFormatting.GRAY), true);
+            
+            source.sendSuccess(generatePackLink(source, 
+                    "commands.jojoconfigpack.abilities.single", 
+                    "commands.jojoconfigpack.abilities.single.link_name", 
+                    LOCAL_FILE_TOOLTIP, 
+                    dataPackPath(source.getServer()).resolve(String.format("data/%s/%s", action.getRegistryName().getNamespace(), RESOURCE_NAME)),
+                    new StringTextComponent(action.getRegistryName().toString())), 
+                    true);
             
             return count;
         } catch (Throwable e) {

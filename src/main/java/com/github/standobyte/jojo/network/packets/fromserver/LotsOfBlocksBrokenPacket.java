@@ -6,10 +6,13 @@ import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import org.apache.logging.log4j.util.TriConsumer;
+
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
+import com.google.common.collect.Streams;
 
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -49,6 +52,7 @@ public class LotsOfBlocksBrokenPacket {
         
         private BrokenBlock(BlockPos blockPos, BlockState blockState) {
             this(blockPos, Block.getId(blockState));
+            this.blockState = blockState;
         }
         
         void toBuf(PacketBuffer buffer) {
@@ -64,6 +68,39 @@ public class LotsOfBlocksBrokenPacket {
         
         void handleResolveBlockState() {
             this.blockState = Block.stateById(blockStateData);
+        }
+    }
+    
+    public void forEachBlock(boolean network, TriConsumer<BlockPos, BlockState, Long> action) {
+        Stream<BrokenBlock> stream = brokenBlocks.stream();
+        if (brokenBlocks.size() > 128) {
+            Vector3d cameraPos = ClientUtil.getCameraPos();
+            stream = stream
+                    .sorted(Comparator.comparingDouble(block -> block.blockPos.distSqr(cameraPos.x, cameraPos.y, cameraPos.z, true)))
+                    .limit(128);
+        }
+        Streams.mapWithIndex(stream, (block, index) -> {
+            if (network) {
+                block.handleResolveBlockState();
+            }
+            action.accept(block.blockPos, block.blockState, index);
+            return block;
+        }).forEach(block -> {});
+    }
+    
+    public static void blockBreakVisuals(BlockPos blockPos, BlockState blockState, long i) {
+        World world = ClientUtil.getClientWorld();
+        if (!blockState.isAir(world, blockPos)) {
+            CustomParticlesHelper.addBlockBreakParticles(blockPos, blockState);
+            SoundType soundType = blockState.getSoundType(world, blockPos, null);
+            if (i % 8 == 0) {
+                world.playLocalSound(
+                        blockPos.getX() + 0.5, 
+                        blockPos.getY() + 0.5, 
+                        blockPos.getZ() + 0.5, 
+                        soundType.getBreakSound(), SoundCategory.BLOCKS, 
+                        (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F, false);
+            }
         }
     }
     
@@ -83,29 +120,7 @@ public class LotsOfBlocksBrokenPacket {
 
         @Override
         public void handle(LotsOfBlocksBrokenPacket msg, Supplier<NetworkEvent.Context> ctx) {
-            World world = ClientUtil.getClientWorld();
-            
-            Stream<BrokenBlock> stream = msg.brokenBlocks.stream();
-            
-            if (msg.brokenBlocks.size() > 31) {
-                Vector3d cameraPos = ClientUtil.getCameraPos();
-                stream = stream
-                        .sorted(Comparator.comparingDouble(block -> block.blockPos.distSqr(cameraPos.x, cameraPos.y, cameraPos.z, true)))
-                        .limit(31);
-            }
-            stream.forEach(block -> {
-                block.handleResolveBlockState();
-                if (!block.blockState.isAir(world, block.blockPos)) {
-                    CustomParticlesHelper.addBlockBreakParticles(block.blockPos, block.blockState);
-                    SoundType soundType = block.blockState.getSoundType(world, block.blockPos, null);
-                    world.playLocalSound(
-                            block.blockPos.getX() + 0.5, 
-                            block.blockPos.getY() + 0.5, 
-                            block.blockPos.getZ() + 0.5, 
-                            soundType.getBreakSound(), SoundCategory.BLOCKS, 
-                            (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F, false);
-                }
-            });
+            msg.forEachBlock(true, LotsOfBlocksBrokenPacket::blockBreakVisuals);
         }
 
         @Override

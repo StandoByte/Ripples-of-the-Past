@@ -54,7 +54,7 @@ public class MagiciansRedCrossfireHurricane extends StandEntityAction {
             int n = special ? MathHelper.floor(8 * (fireConsumed + 1)) : 1;
             ActionTarget target = task.getTarget();
             if (special && target.getType() == TargetType.EMPTY) {
-                target = standEntity.aimWithThisOrUser(64, target);
+                target = standEntity.aimWithThisOrUser(64, target, false);
             }
             for (int i = 0; i < n; i++) {
                 MRCrossfireHurricaneEntity ankh = new MRCrossfireHurricaneEntity(special, standEntity, world, userPower);

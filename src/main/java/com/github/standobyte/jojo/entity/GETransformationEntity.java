@@ -290,7 +290,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         
         if (!level.isClientSide() && !isTurningBack()) {
             LivingEntity host = this.host.getEntityLiving(level);
-            if (host != null) {
+            if (host != null && host.isAlive()) {
                 if (getVehicle() != host) {
                     withHost(null);
                 }
@@ -560,7 +560,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
     private void hostBleeding() {
         if (!level.isClientSide()) {
             LivingEntity host = this.host.getEntityLiving(level);
-            if (host != null) {
+            if (host != null && host.isAlive()) {
                 if (hostFollowOffset != null) {
                     BleedingEffect.setNextParticlesPos(host, host.position().add(hostFollowOffset).add(0, 0.5, 0));
                 }
@@ -572,7 +572,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
     private void dealDamageToHost() {
         if (!level.isClientSide()) {
             LivingEntity host = this.host.getEntityLiving(level);
-            if (host != null) {
+            if (host != null && host.isAlive()) {
                 DamageUtil.hurtThroughInvulTicks(host, new DamageSource("arrowLifeform").bypassArmor(), 2);
             }
         }

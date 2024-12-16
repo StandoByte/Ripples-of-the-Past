@@ -111,6 +111,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
      */
     @Override
     public void jojoPossessEntity(@Nullable Entity entity, boolean asAlive, IForgeRegistryEntry<?> context) {
+        if (entity == this) return;
         jojoPossessedEntity.setOwner(entity);
         if (!level.isClientSide()) {
             ServerPlayerEntity player = ((ServerPlayerEntity) (Entity) this);
