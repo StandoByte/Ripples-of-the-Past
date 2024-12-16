@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
+import com.github.standobyte.jojo.util.general.TimerQueue;
 import com.github.standobyte.jojo.util.mc.EntityOwnerResolver;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
@@ -71,6 +72,7 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
     private EntityOwnerResolver angeloEntity = new EntityOwnerResolver();
     /* fuck it, sure, yeah */ private MobEntity mob;
     private boolean useMobHurtSound;
+    private TimerQueue responseSoundTimer = new TimerQueue(false);
     
     
     public AngeloRockEntity(EntityType<?> pType, World pLevel) {
@@ -105,6 +107,9 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
     
     @Override
     public ActionResultType interact(PlayerEntity pPlayer, Hand pHand) {
+        if (creationAnimTicks > 0) {
+            return ActionResultType.FAIL;
+        }
         if (level.isClientSide()) {
             return ActionResultType.SUCCESS;
         }
@@ -122,8 +127,8 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
                 }
                 return null;
             }).orElse(null);
-            // TODO (angelo) play mob sound after the voiceline
-            if (voiceline != null && JojoModUtil.sayVoiceLine(pPlayer, voiceline, null, 1, 1, 0, false)) {
+            if (voiceline != null && JojoModUtil.sayVoiceLine(pPlayer, voiceline, null, 1, 1, 0, true)) {
+                responseSoundTimer.add(30);
             }
             else {
                 playMobResponseSound();
@@ -132,7 +137,7 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
         }
     }
     
-    private void playMobResponseSound() {
+    public void playMobResponseSound() {
         if (mob != null) {
             if (useMobHurtSound) {
                 CommonReflection.playHurtSound(mob, DamageSource.GENERIC);
@@ -140,6 +145,12 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
             else {
                 mob.playAmbientSound();
             }
+        }
+    }
+    
+    private void tickResponseTimers() {
+        if (!level.isClientSide()) {
+            responseSoundTimer.tick(this::playMobResponseSound);
         }
     }
     
@@ -228,6 +239,10 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
     @Override
     public void tick() {
         super.tick();
+        
+        if (!level.isClientSide()) {
+            tickResponseTimers();
+        }
         
         if (creationAnimTicks > 0) {
             if (level.isClientSide()) {
