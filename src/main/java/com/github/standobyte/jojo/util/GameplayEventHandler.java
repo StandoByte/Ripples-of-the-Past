@@ -32,6 +32,7 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.enchantment.GlovesSpeedEnchantment;
+import com.github.standobyte.jojo.entity.AngeloRockEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
@@ -1218,6 +1219,15 @@ public class GameplayEventHandler {
         category = event.getCategory();
         volume = event.getVolume();
         player.connection.send(new SPlaySoundEffectPacket(sound, category, player.getX(), player.getY(), player.getZ(), volume, pitch));
+    }
+    
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void cancelHitSound(PlaySoundAtEntityEvent event) {
+        SoundEvent sound = event.getSound();
+        if ((sound == SoundEvents.PLAYER_ATTACK_STRONG || sound == SoundEvents.PLAYER_ATTACK_WEAK) && AngeloRockEntity.cancelPlayerHitSound) {
+            AngeloRockEntity.cancelPlayerHitSound = false;
+            event.setCanceled(true);
+        }
     }
     
     @SubscribeEvent(priority = EventPriority.LOWEST)

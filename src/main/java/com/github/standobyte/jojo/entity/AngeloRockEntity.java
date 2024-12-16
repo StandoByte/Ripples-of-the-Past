@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.entity;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
@@ -7,8 +9,10 @@ import java.util.Optional;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.stand.CrazyDiamondHeal;
+import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.capability.chunk.ChunkCap.PrevBlockInfo;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModSounds;
@@ -26,12 +30,19 @@ import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
+import net.minecraft.block.SoundType;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.Pose;
+import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.PickaxeItem;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.network.IPacket;
@@ -55,14 +66,10 @@ import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
 import net.minecraftforge.fml.network.NetworkHooks;
 
 // TODO (angelo) if the Crazy D user dies and this is in the process of being made, break this
-// TODO (angelo) when it's broken:
-//                  particles and block break sound
-//                  remember as broken block for CD
-//                      only if the upper block wasn't copied from lower block
-//                  item drops
 public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnData {
     protected static final DataParameter<Optional<BlockPos>> DATA_ATTACH_POS_ID = EntityDataManager.defineId(AngeloRockEntity.class, DataSerializers.OPTIONAL_BLOCK_POS);
     protected static final DataParameter<Boolean> CREATION_COMPLETE = EntityDataManager.defineId(AngeloRockEntity.class, DataSerializers.BOOLEAN);
+    protected static final DataParameter<Float> DAMAGE = EntityDataManager.defineId(AngeloRockEntity.class, DataSerializers.FLOAT);
     private static final int CREATION_ANIM_LEN = 40;
     private int creationAnimTicks;
     private Map<BlockPos, PrevBlockInfo> angeloRockBlocks = new HashMap<>();
@@ -158,14 +165,117 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
     }
     
     
-    // TODO (angelo rock)
-    private void onBreak() {
-        if (!level.isClientSide()) {
-//            playBreakSounds();
-//            addBreakParticles();
-//            dropItems();
-//            rememberForRestoreTerrain();
+    @Override
+    public boolean hurt(DamageSource dmgSource, float dmgAmount) {
+        if (level.isClientSide()) return false;
+        
+        if ("player".equals(dmgSource.getMsgId()) && dmgSource.getEntity() instanceof LivingEntity) {
+            LivingEntity attacker = (LivingEntity) dmgSource.getEntity();
+            if (attacker instanceof PlayerEntity && ((PlayerEntity) attacker).abilities.instabuild) {
+                dropMode = DropMode.NONE;
+                entityData.set(DAMAGE, Float.MAX_VALUE);
+                cancelPlayerHitSound = true;
+                return true;
+            }
+            
+            ItemStack item = attacker.getMainHandItem();
+            if (!item.isEmpty() && item.getItem() instanceof PickaxeItem) {
+                Collection<BlockState> blocks = new ArrayList<>();
+                blocks.add(getLowerBlock());
+                blocks.add(getUpperBlock());
+                dmgAmount = (float) blocks.stream().mapToDouble(item::getDestroySpeed).average().getAsDouble();
+                int i = EnchantmentHelper.getItemEnchantmentLevel(Enchantments.BLOCK_EFFICIENCY, item);
+                if (i > 0) {
+                    dmgAmount += (float)(i * i + 1);
+                }
+                if (blocks.stream().noneMatch(block -> !block.requiresCorrectToolForDrops() || item.isCorrectToolForDrops(block))) {
+                    dmgAmount *= 0.3f;
+                }
+                
+                dmgAmount = Math.max(dmgAmount, 1);
+                BlockState randomBlock = blocks.stream().skip(random.nextInt(blocks.size())).findFirst().get();
+                SoundType blockSound = randomBlock.getSoundType();
+                level.playSound(null, getX(), getY(0.5), getZ(), blockSound.getHitSound(), 
+                        getSoundSource(), (blockSound.getVolume() + 1.0F) / 8.0F, blockSound.getPitch() * 0.5F);
+                
+//                if (EnchantmentHelper.getItemEnchantmentLevel(Enchantments.SILK_TOUCH, item) > 0) {
+//                    dropMode = DropMode.SILK_TOUCH;
+//                }
+                
+                entityData.set(DAMAGE, entityData.get(DAMAGE) + dmgAmount);
+                if (isBroken()) {
+                    item.hurt(1, random, attacker instanceof ServerPlayerEntity ? (ServerPlayerEntity) attacker : null);
+                }
+                
+                cancelPlayerHitSound = true;
+                return true;
+            }
         }
+        
+        return false;
+    }
+    
+    public static boolean cancelPlayerHitSound = false;
+    
+    private void onDamageApplied() {
+        if (isBroken()) {
+            breakRock();
+        }
+    }
+    
+    private boolean isBroken() {
+        return entityData.get(DAMAGE) >= 40;
+    }
+    
+    private DropMode dropMode = DropMode.BLOCKS;
+    
+    private enum DropMode {
+        BLOCKS,
+        NONE,
+        SILK_TOUCH
+    }
+    
+    public void breakRock() {
+        if (!level.isClientSide()) {
+            angeloRockBlocks.values().forEach(block -> {
+                CrazyDiamondRestoreTerrain.rememberBrokenBlock(level, block.pos, block.state, Optional.empty(), block.drops);
+                
+                if (dropMode == DropMode.BLOCKS && !block.drops.isEmpty()) {
+                    Vector3d pos = Vector3d.atCenterOf(block.pos);
+                    for (ItemStack item : block.drops) {
+                        ItemEntity itemEntity = new ItemEntity(level, pos.x + 0.5, pos.y + 0.5, pos.z + 0.5, item);
+                        itemEntity.setDefaultPickUpDelay();
+                        if (captureDrops() != null) {
+                            captureDrops().add(itemEntity);
+                        }
+                        else {
+                            level.addFreshEntity(itemEntity);
+                        }
+                    }
+                }
+            });
+            // TODO angelo rock silk touch
+            if (dropMode == DropMode.SILK_TOUCH) {
+                
+            }
+            remove();
+        }
+        else {
+            clBreakBlockVisuals(getUpperBlock(), blockPosition());
+            clBreakBlockVisuals(getLowerBlock(), blockPosition().above());
+        }
+    }
+    
+    private void clBreakBlockVisuals(BlockState blockState, BlockPos blockPos) {
+        CustomParticlesHelper.addBlockBreakParticles(blockPos, blockState);
+        SoundType soundType = blockState.getSoundType();
+        SoundEvent sound = soundType.getBreakSound();
+        level.playLocalSound(blockPos.getX() + 0.5, blockPos.getY() + 0.5, blockPos.getZ() + 0.5,
+                sound, getSoundSource(), (soundType.getVolume() + 1.0F) / 2.0F, soundType.getPitch() * 0.8F, false);
+    }
+    
+    public float getDamageRatio() {
+        return entityData.get(DAMAGE) / (20 * angeloRockBlocks.size());
     }
     
     
@@ -183,6 +293,7 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
     protected void defineSynchedData() {
         this.entityData.define(DATA_ATTACH_POS_ID, Optional.empty());
         this.entityData.define(CREATION_COMPLETE, false);
+        this.entityData.define(DAMAGE, 0f);
     }
 
     @Override
@@ -195,6 +306,7 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
         }
         pCompound.putBoolean("Created", entityData.get(CREATION_COMPLETE));
         pCompound.putInt("CreationAnim", creationAnimTicks);
+        pCompound.putFloat("RockDamage", entityData.get(DAMAGE));
         
         if (!angeloRockBlocks.isEmpty()) {
             ListNBT blocksNbt = new ListNBT();
@@ -227,8 +339,9 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
         } else {
             this.entityData.set(DATA_ATTACH_POS_ID, Optional.empty());
         }
-        this.creationAnimTicks = pCompound.getInt("CreationAnim");
         entityData.set(CREATION_COMPLETE, pCompound.getBoolean("Created"));
+        this.creationAnimTicks = pCompound.getInt("CreationAnim");
+        entityData.set(DAMAGE, pCompound.getFloat("RockDamage"));
         
         MCUtil.getNbtElement(pCompound, "RockBlocks", ListNBT.class).ifPresent(blocksNbt -> {
             if (blocksNbt.getElementType() != Constants.NBT.TAG_COMPOUND) return;
@@ -254,6 +367,7 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
     @Override
     public void tick() {
         super.tick();
+        cancelPlayerHitSound = false;
         
         if (!level.isClientSide()) {
             tickResponseTimers();
@@ -337,7 +451,7 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
                     getY(), 
                     getZ() - 0.5, 
                     getX() + 0.5, 
-                    getY() + 2, 
+                    getY() + getBbHeight(), 
                     getZ() + 0.5));
         }
     }
@@ -381,11 +495,16 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
 
     @Override
     public void onSyncedDataUpdated(DataParameter<?> pKey) {
-        if (DATA_ATTACH_POS_ID.equals(pKey) && level.isClientSide && !isPassenger()) {
-            BlockPos blockpos = getAttachPosition();
-            if (blockpos != null) {
-                setPosAndOldPos(blockpos.getX() + 0.5, blockpos.getY(), blockpos.getZ() + 0.5);
+        if (DATA_ATTACH_POS_ID.equals(pKey)) {
+            if (level.isClientSide && !isPassenger()) {
+                BlockPos blockpos = getAttachPosition();
+                if (blockpos != null) {
+                    setPosAndOldPos(blockpos.getX() + 0.5, blockpos.getY(), blockpos.getZ() + 0.5);
+                }
             }
+        }
+        else if (DAMAGE.equals(pKey)) {
+            onDamageApplied();
         }
 
         super.onSyncedDataUpdated(pKey);
