@@ -385,6 +385,8 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
                 }
                 if (ClientUtil.canHearStands() && !this.isSilent()) {
                     if (!startedSound) {
+                        level.playSound(ClientUtil.getClientPlayer(), getX(), getY(), getZ(), 
+                                ModSounds.CRAZY_DIAMOND_FIX_STARTED.get(), getSoundSource(), 1, 1);
                         ClientTickingSoundsHelper.playStoppableEntitySound(this, 
                                 ModSounds.CRAZY_DIAMOND_FIX_LOOP.get(), 1, 1, true, entity -> entity.creationAnimTicks > 0);
                         startedSound = true;
@@ -407,11 +409,6 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
             angeloEntity.animationSpeedOld = 0;
             angeloEntity.addEffect(new EffectInstance(ModStatusEffects.IMMOBILIZE.get(), 10, 0, false, false, true));
             angeloEntity.setPosAndOldPos(getX(), getY(), getZ());
-            // TODO (angelo) lock player camera rotation
-            angeloEntity.yRot = this.yRot;
-            angeloEntity.yRot = this.yRot;
-            angeloEntity.xRotO = this.xRot;
-            angeloEntity.xRotO = this.xRot;
             angeloEntity.setPose(Pose.STANDING);
             if (creationAnimTicks <= 0) {
                 if (!level.isClientSide()) {

@@ -183,7 +183,8 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
         // TODO (angelo) consume items and xp (btw mobs can also pick up dropped blocks)
         
         JojoModUtil.sayVoiceLine(user, ModSounds.JOSUKE_PRAY_FOR_ETERNITY.get(), null, 1, 1, 0, false);
-        AngeloRockEntity angeloRock = AngeloRockEntity.turnIntoRock(world, target, Vector3d.atBottomCenterOf(blockLower.pos), angeloRockFace.toYRot(), 
+        AngeloRockEntity angeloRock = AngeloRockEntity.turnIntoRock(world, target, 
+                Vector3d.atBottomCenterOf(blockLower.pos), angeloRockFace.toYRot(), 
                 blockLower, blockUpper.orElse(null));
         this.angeloRockEntity.setOwner(angeloRock);
         
