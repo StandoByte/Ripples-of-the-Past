@@ -27,6 +27,7 @@ import com.github.standobyte.jojo.power.bowcharge.BowChargeEffectInstance;
 import com.github.standobyte.jojo.power.bowcharge.IBowChargeEffect;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.ObjectWrapper;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -305,7 +306,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     
     @Override
     public boolean canUsePower() {
-        return !user.isSpectator();
+        return !JojoModUtil.tmpSpectatorCantUsePowers(user);
     }
 
     @Override

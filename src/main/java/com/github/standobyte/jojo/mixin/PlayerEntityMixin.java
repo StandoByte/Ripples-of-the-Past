@@ -109,7 +109,7 @@ public abstract class PlayerEntityMixin extends LivingEntityMixin implements Pla
      *   render hp/hunger/etc.
      *   tick the player
      *     tick status effects
-     *   allow the power HUD to be opened
+     *   allow the power HUD to be opened (remove JojoModUtil.tmpSpectatorCantUsePowers(LivingEntity))
      *   ...?
      */
     @Override

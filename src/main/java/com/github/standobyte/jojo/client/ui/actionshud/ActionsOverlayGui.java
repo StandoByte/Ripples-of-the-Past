@@ -58,6 +58,7 @@ import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.general.ObjectWrapper;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
@@ -495,7 +496,7 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     protected boolean hudRenders() {
-        return mc.gameMode.getPlayerMode() != GameType.SPECTATOR && !mc.options.hideGui && !mc.player.isDeadOrDying();
+        return !JojoModUtil.tmpSpectatorCantUsePowers(mc.player) && !mc.options.hideGui && !mc.player.isDeadOrDying();
     }
     
     protected boolean[] hotbarIsRendered = new boolean[4];

@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
@@ -57,7 +58,7 @@ public class ClClickActionPacket {
         public void handle(ClClickActionPacket msg, Supplier<NetworkEvent.Context> ctx) {
             if (msg.action == null) return;
             PlayerEntity player = ctx.get().getSender();
-            if (player.isSpectator() || !player.isAlive()) return;
+            if (JojoModUtil.tmpSpectatorCantUsePowers(player) || !player.isAlive()) return;
             
             IPower.getPowerOptional(player, msg.power).ifPresent(power -> {
                 msg.target.resolveEntityId(player.level);

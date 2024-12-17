@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.item.StandArrowItem;
 import com.github.standobyte.jojo.util.general.MathUtil;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.enchantment.EnchantmentHelper;
@@ -33,6 +34,7 @@ import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.GameType;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.fml.network.NetworkHooks;
@@ -202,7 +204,7 @@ public class StandArrowEntity extends AbstractArrowEntity {
         if ((dealtDamage || isNoPhysics()) && owner != null) {
             int loyalty = entityData.get(LOYALTY);
             if (loyalty > 0) {
-                if (!owner.isAlive() || owner.isSpectator()) {
+                if (!owner.isAlive() || owner instanceof PlayerEntity && JojoModUtil.getGameModeConsiderPossessing((PlayerEntity) owner) == GameType.SPECTATOR) {
                     if (!level.isClientSide && pickup == AbstractArrowEntity.PickupStatus.ALLOWED) {
                         spawnAtLocation(getPickupItem(), 0.1F);
                     }

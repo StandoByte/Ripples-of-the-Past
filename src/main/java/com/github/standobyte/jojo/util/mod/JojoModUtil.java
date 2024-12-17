@@ -306,8 +306,17 @@ public class JojoModUtil {
         return Optional.empty();
     }
     
+    public static GameType getGameModeConsiderPossessing(PlayerEntity player) {
+        return getActualGameModeWhilePossessing(player).orElse(MCUtil.getGameMode(player));
+    }
+    
     public static boolean seesInvisibleAsSpectator(PlayerEntity player) {
         return getActualGameModeWhilePossessing(player).map(gameMode -> gameMode == GameType.SPECTATOR).orElse(player.isSpectator());
+    }
+    
+    // TODO let players possessing other entities use power HUD and certain abilities, depending on the possession context
+    public static boolean tmpSpectatorCantUsePowers(LivingEntity entity) {
+        return entity.isSpectator();
     }
     
 
