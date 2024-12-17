@@ -51,4 +51,16 @@ public class ModifiedRenderTypeBuffers extends IRenderTypeBuffer.Impl {
         return super.getBuffer(renderType);
     }
 
+    @Override
+    public void endBatch() {
+        lastState.ifPresent(renderType -> {
+            if (!fixedBuffers.containsKey(renderType)) {
+                endBatch(renderType);
+            }
+        });
+        for (RenderType renderType : fixedBuffers.keySet()) {
+            endBatch(renderType);
+        }
+    }
+
 }
