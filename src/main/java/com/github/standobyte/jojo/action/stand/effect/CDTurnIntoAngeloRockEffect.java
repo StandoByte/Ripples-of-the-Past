@@ -140,6 +140,7 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
                 .filter(block -> block.getValue() <= 3)
                 .min(Comparator.comparingDouble(Pair::getRight)).map(Pair::getKey)
                 .orElseGet(() -> brokenStoneBlocks.values().stream()
+                        // TODO (angelo) the block above might be occupied
                         // or just the closest block
                         .min(Comparator.comparingDouble(Pair::getRight)).map(Pair::getKey).get());
         brokenStoneBlocks.remove(blockLower.pos);
