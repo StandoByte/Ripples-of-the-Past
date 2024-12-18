@@ -9,6 +9,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang3.tuple.Pair;
+
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
@@ -23,9 +25,6 @@ import com.github.standobyte.jojo.util.mc.EntityOwnerResolver;
 import com.github.standobyte.jojo.util.mc.damage.KnockbackCollisionImpact;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
-import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
-import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.LivingEntity;
@@ -122,74 +121,52 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toMap(block -> block.pos, Function.identity()));
         
-        Object2IntMap<PrevBlockInfo> angeloStonePosPriority = new Object2IntArrayMap<>();
-        for (PrevBlockInfo brokenBlock : brokenBlocks.values()) {
-            // TODO (angelo) handle the case where there are no 2-block tall stone pillars, +the most prioritized spot can have a block at the upperBlock spot
-            if (brokenBlock.state.getMaterial() != Material.STONE) {
-                continue;
-            }
-            
-            BlockPos pos = brokenBlock.pos;
-            int priority = 0;
-            PrevBlockInfo topBlock = brokenBlocks.get(pos.above());
-            if (topBlock != null && topBlock.state.getMaterial() == Material.STONE) {
-                priority += 64;
-            }
-            
-            BlockPos checkPos = pos.below();
-            if (Block.isFaceFull(getBlockAfterRestore(world, checkPos, brokenBlocks).getCollisionShape(world, checkPos), Direction.UP)) {
-                priority += 32;
-            }
-            
-            checkPos = pos.offset(0, 2, 0);
-            if (getBlockAfterRestore(world, checkPos, brokenBlocks).isAir(world, checkPos)) {
-                priority += 1;
-            }
-            
-            for (Direction direction : Direction.Plane.HORIZONTAL) {
-                checkPos = pos.offset(direction.getNormal());
-                if (getBlockAfterRestore(world, checkPos, brokenBlocks).isAir(world, checkPos)) {
-                    priority += direction == angeloRockFace ? 8 : 2;
-                }
-                
-                checkPos = checkPos.above();
-                if (getBlockAfterRestore(world, checkPos, brokenBlocks).isAir(world, checkPos)) {
-                    priority += direction == angeloRockFace ? 8 : 2;
-                }
-            }
-            
-            angeloStonePosPriority.put(brokenBlock, priority);
-        }
-        if (angeloStonePosPriority.isEmpty()) {
+        Vector3d targetPos = target.position();
+        PrevBlockInfo blockLower;
+        PrevBlockInfo blockUpper;
+        
+        Map<BlockPos, Pair<PrevBlockInfo, Double>> brokenStoneBlocks = brokenBlocks.entrySet().stream()
+                .filter(entry -> entry.getValue().state.getMaterial() == Material.STONE)
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> {
+                    PrevBlockInfo block = entry.getValue();
+                    return Pair.of(block, targetPos.distanceToSqr(block.pos.getX() + 0.5, block.pos.getY(), block.pos.getZ() + 0.5));
+                }));
+        if (brokenStoneBlocks.size() < 2) {
             return Action.conditionMessage("angelo_no_block_broken");
         }
+        blockLower = brokenStoneBlocks.values().stream()
+                // a block with another stone block above it and that's close enough
+                .filter(block -> brokenStoneBlocks.containsKey(block.getKey().pos.above()))
+                .filter(block -> block.getValue() <= 3)
+                .min(Comparator.comparingDouble(Pair::getRight)).map(Pair::getKey)
+                .orElseGet(() -> brokenStoneBlocks.values().stream()
+                        // or just the closest block
+                        .min(Comparator.comparingDouble(Pair::getRight)).map(Pair::getKey).get());
+        brokenStoneBlocks.remove(blockLower.pos);
         
-        PrevBlockInfo blockLower;
-        Optional<PrevBlockInfo> blockUpper;
-        Vector3d targetPos = target.position();
-        int maxPriority = angeloStonePosPriority.values().stream().max(Integer::compare).get();
-        blockLower = angeloStonePosPriority.object2IntEntrySet().stream()
-                .filter(entry -> entry.getIntValue() == maxPriority)
-                .min(Comparator.comparingDouble(entry -> Vector3d.atCenterOf(entry.getKey().pos).distanceToSqr(targetPos)))
-                .map(Object2IntMap.Entry::getKey)
-                .get();
-        blockUpper = Optional.ofNullable(brokenBlocks.get(blockLower.pos.above()));
+        blockUpper = Optional.ofNullable(brokenStoneBlocks.get(blockLower.pos.above())).map(Pair::getKey)
+                .orElseGet(() -> brokenStoneBlocks.values().stream().map(Pair::getKey).min(Comparator.comparingDouble(block -> {
+                    return targetPos.distanceToSqr(block.pos.getX() + 0.5, block.pos.getY() + 1, block.pos.getZ() + 0.5);
+                })).get());
         
-        chunkCache.get(new ChunkPos(blockLower.pos)).ifPresent(blocksData -> {
+        ChunkCap blocksData = chunkCache.get(new ChunkPos(blockLower.pos)).orElse(null);
+        if (blocksData != null) {
             blocksData.removeBrokenBlock(blockLower.pos);
-            blockUpper.ifPresent(block -> blocksData.removeBrokenBlock(block.pos));
-        });
+            blocksData.removeBrokenBlock(blockUpper.pos);
+        }
         brokenBlocks.remove(blockLower.pos);
-        blockUpper.ifPresent(block -> brokenBlocks.remove(block.pos));
+        brokenBlocks.remove(blockUpper.pos);
         
         // TODO (angelo) restore the rest of the blocks destroyed by the explosion
-        // TODO (angelo) consume items and xp (btw mobs can also pick up dropped blocks)
+        // TODO (angelo) consume items (btw mobs can also pick up dropped blocks)
+        
+        blockUpper = new PrevBlockInfo(blockLower.pos.above(), blockUpper.state, blockUpper.drops, blockUpper.keep);
         
         JojoModUtil.sayVoiceLine(user, ModSounds.JOSUKE_PRAY_FOR_ETERNITY.get(), null, 1, 1, 0, false);
         AngeloRockEntity angeloRock = AngeloRockEntity.turnIntoRock(world, target, 
                 keepMobsInside && target instanceof MobEntity ? (MobEntity) target : null, 
                 Vector3d.atBottomCenterOf(blockLower.pos), angeloRockFace.toYRot(), 
-                blockLower, blockUpper.orElse(null));
+                blockLower, blockUpper);
         this.angeloRockEntity.setOwner(angeloRock);
         
         return ActionConditionResult.POSITIVE;
