@@ -23,6 +23,7 @@ import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.action.stand.effect.BoyIIManStandPartTakenEffect;
+import com.github.standobyte.jojo.action.stand.effect.CDTurnIntoAngeloRockEffect;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.block.WoodenCoffinBlock;
 import com.github.standobyte.jojo.capability.chunk.ChunkCapProvider;
@@ -1085,7 +1086,8 @@ public class GameplayEventHandler {
             }
             
             if (!event.isCanceled()) {
-                if (StandEffectsTracker.isTargetedBy(dead, ModStandEffects.TURN_INTO_ANGELO_ROCK.get())) {
+                if (StandEffectsTracker.getEffectsTargetedBy(dead, ModStandEffects.TURN_INTO_ANGELO_ROCK.get())
+                        .anyMatch(CDTurnIntoAngeloRockEffect::preventTargetDeath)) {
                     event.setCanceled(true);
                     event.getEntityLiving().setHealth(0.0001f);
                 }

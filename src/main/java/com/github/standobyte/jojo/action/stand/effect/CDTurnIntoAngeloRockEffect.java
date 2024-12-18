@@ -9,11 +9,13 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import org.apache.commons.lang3.tuple.Pair;
+import javax.annotation.Nonnull;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
+import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain.RestoreResult;
+import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain.SourceType;
 import com.github.standobyte.jojo.capability.chunk.ChunkCap;
 import com.github.standobyte.jojo.capability.chunk.ChunkCap.PrevBlockInfo;
 import com.github.standobyte.jojo.capability.chunk.ChunkCapProvider;
@@ -21,17 +23,23 @@ import com.github.standobyte.jojo.entity.AngeloRockEntity;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.CDBlocksRestoredPacket;
 import com.github.standobyte.jojo.util.mc.EntityOwnerResolver;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.KnockbackCollisionImpact;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.material.Material;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.Direction;
+import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.vector.Vector3d;
@@ -40,8 +48,9 @@ import net.minecraft.world.chunk.Chunk;
 
 public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
     public boolean keepMobsInside;
-    private boolean summonedRockEntity = false;
+    private boolean triedSummonRockEntity = false;
     private EntityOwnerResolver.Generic<AngeloRockEntity> angeloRockEntity = new EntityOwnerResolver.Generic<>(AngeloRockEntity.class);
+    private Map<BlockPos, PrevBlockInfo> brokenBlocks; // TODO (angelo) save in NBT?
 
     public CDTurnIntoAngeloRockEffect() {
         this(ModStandEffects.TURN_INTO_ANGELO_ROCK.get());
@@ -53,7 +62,7 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
     
     @Override
     protected boolean needsTarget() {
-        return true;
+        return brokenBlocks.isEmpty();
     }
 
     @Override
@@ -62,7 +71,7 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
     @Override
     protected void tickTarget(LivingEntity target) {
         if (!target.level.isClientSide()) {
-            if (!summonedRockEntity) {
+            if (!triedSummonRockEntity) {
                 KnockbackCollisionImpact kbCollision = KnockbackCollisionImpact.getHandler(target).orElse(null);
                 if (kbCollision == null) {
                     remove();
@@ -73,25 +82,71 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
                 }
                 else {
                     ActionConditionResult tryStartAngeloRock = tryStartAngeloRock(target, kbCollision);
-                    if (tryStartAngeloRock.isPositive()) {
-                        summonedRockEntity = true;
+                    if (!tryStartAngeloRock.isPositive()) {
+                        ActionConditionResult.sendActionFailedMessage(ModStandsInit.CRAZY_DIAMOND_ANGELO_ROCK.get(), tryStartAngeloRock, user);
                     }
-                    else {
-                        if (user instanceof ServerPlayerEntity) {
-                            ActionConditionResult.sendActionFailedMessage(ModStandsInit.CRAZY_DIAMOND_ANGELO_ROCK.get(), tryStartAngeloRock, user);
-                        }
-                        remove();
-                    }
+                    triedSummonRockEntity = true;
                 }
             }
             else {
                 AngeloRockEntity angeloRock = angeloRockEntity.getEntityCast(world);
-                if (angeloRock == null || angeloRock.isFullyFormed()) {
+                if ((angeloRock == null || angeloRock.isFullyFormed()) && (brokenBlocks == null || brokenBlocks.isEmpty())) {
                     remove();
                 }
             }
         }
     }
+    
+    private static boolean canUseBlock(BlockState blockState) {
+        return blockState.getMaterial() == Material.STONE;
+    }
+    
+    @Override
+    protected void tick() {
+        if (!world.isClientSide() && brokenBlocks != null && !brokenBlocks.isEmpty()) {
+            Entity entity = angeloRockEntity.getEntity(world);
+            if (entity == null) {
+                entity = getTarget();
+            }
+            if (entity == null) {
+                entity = getStandUser();
+            }
+            if (entity != null) {
+                restoreBrokenBlocks(entity.blockPosition());
+            }
+        }
+    }
+
+    @Override
+    protected void stop() {
+        AngeloRockEntity angeloRock = angeloRockEntity.getEntityCast(world);
+        if (angeloRock != null && !angeloRock.isFullyFormed()) {
+            angeloRock.breakRock();
+        }
+    }
+
+    @Override
+    protected void writeAdditionalSaveData(CompoundNBT nbt) {
+        nbt.putBoolean("TriedSummonRock", triedSummonRockEntity);
+        nbt.putBoolean("SaveMob", keepMobsInside);
+        angeloRockEntity.saveNbt(nbt, "Entity");
+    }
+
+    @Override
+    protected void readAdditionalSaveData(CompoundNBT nbt) {
+        triedSummonRockEntity = nbt.getBoolean("TriedSummonRock");
+        keepMobsInside = nbt.getBoolean("SaveMob");
+        angeloRockEntity.loadNbt(nbt, "Entity");
+    }
+    
+    public boolean preventTargetDeath() {
+        if (!triedSummonRockEntity) {
+            return true;
+        }
+        Entity angeloRock = angeloRockEntity.getEntity(world);
+        return angeloRock != null && angeloRock.isAlive();
+    }
+    
     
     @SuppressWarnings("deprecation")
     private ActionConditionResult tryStartAngeloRock(LivingEntity target, KnockbackCollisionImpact kbCollision) {
@@ -100,15 +155,8 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
             return Action.conditionMessage("angelo_no_block_broken");
         }
         
-        // rebalance if necessary
-        float hpLimit = Math.max(10, target.getHealth() * 0.05f);
-        if (target.getHealth() > hpLimit) {
-            return Action.conditionMessage("target_too_many_health");
-        }
-        
-        Direction angeloRockFace = Direction.fromYRot(target.yRot);
         Map<ChunkPos, Optional<ChunkCap>> chunkCache = new HashMap<>();
-        Map<BlockPos, PrevBlockInfo> brokenBlocks = brokenBlocksPos.stream()
+        brokenBlocks = brokenBlocksPos.stream()
                 .map(blockPos -> {
                     ChunkPos chunkPos = new ChunkPos(blockPos);
                     Optional<ChunkCap> chunkData = chunkCache.computeIfAbsent(chunkPos, pos -> {
@@ -121,36 +169,71 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
                 .filter(Objects::nonNull)
                 .collect(Collectors.toMap(block -> block.pos, Function.identity()));
         
-        Vector3d targetPos = target.position();
-        PrevBlockInfo blockLower;
-        PrevBlockInfo blockUpper;
-        
-        Map<BlockPos, Pair<PrevBlockInfo, Double>> brokenStoneBlocks = brokenBlocks.entrySet().stream()
-                .filter(entry -> entry.getValue().state.getMaterial() == Material.STONE)
-                .collect(Collectors.toMap(Map.Entry::getKey, entry -> {
-                    PrevBlockInfo block = entry.getValue();
-                    return Pair.of(block, targetPos.distanceToSqr(block.pos.getX() + 0.5, block.pos.getY(), block.pos.getZ() + 0.5));
-                }));
-        if (brokenStoneBlocks.size() < 2) {
-            return Action.conditionMessage("angelo_no_block_broken");
+        // rebalance if necessary
+        float hpLimit = Math.max(10, target.getHealth() * 0.05f);
+        if (target.getHealth() > hpLimit) {
+            return Action.conditionMessage("target_too_many_health");
         }
-        blockLower = brokenStoneBlocks.values().stream()
-                // a block with another stone block above it and that's close enough
-                .filter(block -> brokenStoneBlocks.containsKey(block.getKey().pos.above()))
-                .filter(block -> block.getValue() <= 3)
-                .min(Comparator.comparingDouble(Pair::getRight)).map(Pair::getKey)
-                .orElseGet(() -> brokenStoneBlocks.values().stream()
-                        // TODO (angelo) the block above might be occupied
-                        // or just the closest block
-                        .min(Comparator.comparingDouble(Pair::getRight)).map(Pair::getKey).get());
-        brokenStoneBlocks.remove(blockLower.pos);
         
-        blockUpper = Optional.ofNullable(brokenStoneBlocks.get(blockLower.pos.above())).map(Pair::getKey)
-                .orElseGet(() -> brokenStoneBlocks.values().stream().map(Pair::getKey).min(Comparator.comparingDouble(block -> {
-                    return targetPos.distanceToSqr(block.pos.getX() + 0.5, block.pos.getY() + 1, block.pos.getZ() + 0.5);
-                })).get());
+        Map<BlockPos, BlockWithDist> brokenStoneBlocks = brokenBlocks.entrySet().stream()
+                .filter(entry -> canUseBlock(entry.getValue().state))
+                .collect(Collectors.toMap(Map.Entry::getKey, entry -> new BlockWithDist(entry.getValue())));
+        if (brokenStoneBlocks.size() < 2) {
+            return Action.conditionMessage("angelo_no_stone_broken");
+        }
         
-        ChunkCap blocksData = chunkCache.get(new ChunkPos(blockLower.pos)).orElse(null);
+        Vector3d targetPos = target.position();
+        Optional<FindBlockEntry> closestAngeloRockBlocks = brokenStoneBlocks.values().stream()
+                .map(entry -> {
+                    PrevBlockInfo block = entry.block;
+
+                    BlockPos posAbove = block.pos.above();
+                    BlockPos posBelow = block.pos.below();
+
+                    BlockWithDist brokenBlockAbove = brokenStoneBlocks.get(posAbove);
+                    if (brokenBlockAbove != null && entry.getDistLower(targetPos) <= 3) {
+                        return new FindBlockEntry(entry, brokenBlockAbove, 1);
+                    }
+                    BlockWithDist brokenBlockBelow = brokenStoneBlocks.get(posBelow);
+                    if (brokenBlockBelow != null && brokenBlockBelow.getDistLower(targetPos) <= 3) {
+                        return new FindBlockEntry(brokenBlockBelow, entry, 1);
+                    }
+
+                    if (!brokenBlocks.containsKey(posAbove)) {
+                        BlockState curBlockAbove = world.getBlockState(posAbove);
+                        if (curBlockAbove.isAir(world, posAbove)) {
+                            return new FindBlockEntry(entry, null, 2);
+                        }
+                        else if (canUseBlock(curBlockAbove)) {
+                            return new FindBlockEntry(entry, null, 2).breakUpperBlock(posAbove);
+                        }
+                    }
+                    if (!brokenBlocks.containsKey(posBelow)) {
+                        BlockState curBlockBelow = world.getBlockState(posBelow);
+                        if (curBlockBelow.isAir(world, posBelow)) {
+                            return new FindBlockEntry(null, entry, 2);
+                        }
+                        else if (canUseBlock(curBlockBelow)) {
+                            return new FindBlockEntry(null, entry, 2).breakLowerBlock(posBelow);
+                        }
+                    }
+
+                    return null;
+                })
+                .filter(Objects::nonNull)
+                .sorted(Comparator.comparingInt((FindBlockEntry entry) -> entry.priority).thenComparing(
+                        Comparator.comparingDouble((FindBlockEntry entry) -> entry.getDist(targetPos))))
+                .findAny();
+        if (!closestAngeloRockBlocks.isPresent()) {
+            return Action.conditionMessage("angelo_no_stone_broken");
+        }
+        
+        FindBlockEntry angeloRockBlocks = closestAngeloRockBlocks.get();
+        ChunkCap blocksData = chunkCache.get(angeloRockBlocks.getChunkPos()).orElse(null);
+        angeloRockBlocks.resolveAngeloBlocks(world, brokenStoneBlocks, blocksData, targetPos, MCUtil.dropBrokenBlock(user));
+        
+        @Nonnull PrevBlockInfo blockLower = closestAngeloRockBlocks.get().lower.block;
+        @Nonnull PrevBlockInfo blockUpper = closestAngeloRockBlocks.get().upper.block;
         if (blocksData != null) {
             blocksData.removeBrokenBlock(blockLower.pos);
             blocksData.removeBrokenBlock(blockUpper.pos);
@@ -158,54 +241,154 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
         brokenBlocks.remove(blockLower.pos);
         brokenBlocks.remove(blockUpper.pos);
         
-        // TODO (angelo) restore the rest of the blocks destroyed by the explosion
-        // TODO (angelo) consume items (btw mobs can also pick up dropped blocks)
+        if (!blockUpper.pos.equals(blockLower.pos.above())) {
+            blockUpper = new PrevBlockInfo(blockLower.pos.above(), blockUpper.state, blockUpper.drops, blockUpper.keep);
+        }
+        if (!blockLower.pos.equals(blockUpper.pos.below())) {
+            blockLower = new PrevBlockInfo(blockUpper.pos.below(), blockLower.state, blockLower.drops, blockLower.keep);
+        }
         
-        blockUpper = new PrevBlockInfo(blockLower.pos.above(), blockUpper.state, blockUpper.drops, blockUpper.keep);
-        
+        // FIXME the drops don't match sometimes
         JojoModUtil.sayVoiceLine(user, ModSounds.JOSUKE_PRAY_FOR_ETERNITY.get(), null, 1, 1, 0, false);
+        Direction angeloRockFace = Direction.fromYRot(target.yRot);
         AngeloRockEntity angeloRock = AngeloRockEntity.turnIntoRock(world, target, 
                 keepMobsInside && target instanceof MobEntity ? (MobEntity) target : null, 
                 Vector3d.atBottomCenterOf(blockLower.pos), angeloRockFace.toYRot(), 
                 blockLower, blockUpper);
         this.angeloRockEntity.setOwner(angeloRock);
         
+        // TODO (angelo) only add the items into the angelo rock drops if they get consumed
+        List<ItemStack> itemsSource = itemsSource(angeloRock.blockPosition());
+        CrazyDiamondRestoreTerrain.consumeNeededItems(blockUpper.drops, itemsSource);
+        CrazyDiamondRestoreTerrain.consumeNeededItems(blockLower.drops, itemsSource);
+        
         return ActionConditionResult.POSITIVE;
     }
     
-    private static BlockState getBlockAfterRestore(World world, BlockPos blockPos, Map<BlockPos, PrevBlockInfo> brokenBlocks) {
-        PrevBlockInfo willRestore = brokenBlocks.get(blockPos);
-        if (willRestore != null && CrazyDiamondRestoreTerrain.blockCanBePlaced(world, blockPos, willRestore.state)) {
-            return willRestore.state;
+    private static class BlockWithDist {
+        public final PrevBlockInfo block;
+        private double distLower = -1;
+        private double distUpper = -1;
+        
+        private BlockWithDist(PrevBlockInfo block) {
+            this.block = block;
+        }
+        
+        public double getDistLower(Vector3d targetPos) {
+            if (distLower == -1) {
+                distLower = targetPos.distanceToSqr(block.pos.getX() + 0.5, block.pos.getY(), block.pos.getZ() + 0.5);
+            }
+            return distLower;
+        }
+        
+        public double getDistUpper(Vector3d targetPos) {
+            if (distUpper == -1) {
+                distUpper = targetPos.distanceToSqr(block.pos.getX() + 0.5, block.pos.getY() + 1, block.pos.getZ() + 0.5);
+            }
+            return distUpper;
+        }
+    }
+    
+    private static class FindBlockEntry {
+        public BlockWithDist lower;
+        public BlockWithDist upper;
+        public BlockPos breakLowerStone;
+        public BlockPos breakUpperStone;
+        public final int priority;
+        
+        private FindBlockEntry(BlockWithDist lower, BlockWithDist upper, int priority) {
+            this.lower = lower;
+            this.upper = upper;
+            this.priority = priority;
+        }
+        
+        public FindBlockEntry breakLowerBlock(BlockPos blockPos) {
+            breakLowerStone = blockPos;
+            return this;
+        }
+        
+        public FindBlockEntry breakUpperBlock(BlockPos blockPos) {
+            breakUpperStone = blockPos;
+            return this;
+        }
+        
+        public double getDist(Vector3d targetPos) {
+            if (lower != null) {
+                return lower.getDistLower(targetPos);
+            }
+            else if (upper != null) {
+                return upper.getDistUpper(targetPos);
+            }
+            throw new IllegalStateException();
+        }
+        
+        public ChunkPos getChunkPos() {
+            if (lower != null) {
+                return new ChunkPos(lower.block.pos);
+            }
+            else if (upper != null) {
+                return new ChunkPos(upper.block.pos);
+            }
+            throw new IllegalStateException();
+        }
+        
+        public void resolveAngeloBlocks(World world, Map<BlockPos, BlockWithDist> brokenStoneBlocks, 
+                ChunkCap blocksData, Vector3d targetPos, boolean dropBlock) {
+            if (lower == null && upper == null) {
+                throw new IllegalStateException();
+            }
+            if (lower == null) {
+                if (breakLowerStone != null) {
+                    world.destroyBlock(breakLowerStone, dropBlock);
+                    lower = new BlockWithDist(blocksData.getBrokenBlockAt(breakLowerStone));
+                }
+                else {
+                    brokenStoneBlocks.remove(upper.block.pos);
+                    lower = brokenStoneBlocks.values().stream().min(Comparator.comparingDouble(entry -> entry.getDistLower(targetPos))).get();
+                }
+            }
+            else if (upper == null) {
+                if (breakUpperStone != null) {
+                    world.destroyBlock(breakUpperStone, dropBlock);
+                    upper = new BlockWithDist(blocksData.getBrokenBlockAt(breakUpperStone));
+                }
+                else {
+                    brokenStoneBlocks.remove(lower.block.pos);
+                    upper = brokenStoneBlocks.values().stream().min(Comparator.comparingDouble(entry -> entry.getDistUpper(targetPos))).get();
+                }
+            }
+        }
+    }
+    
+    
+    protected void restoreBrokenBlocks(BlockPos center) {
+        LivingEntity user = getStandUser();
+        int limit = 2;
+        RestoreResult result = CrazyDiamondRestoreTerrain.restoreBlocks(world, user, brokenBlocks.values().stream(), 
+                Comparator.comparingInt((PrevBlockInfo block) -> block.pos.distManhattan(center)), 
+                limit, 
+                !MCUtil.dropBrokenBlock(user), false, true, 
+                null, itemsSource(center));
+        if (result.blocksToForget.size() == 0) {
+            brokenBlocks.clear();
         }
         else {
-            return world.getBlockState(blockPos);
+            result.blocksToForget.forEach(brokenBlocks::remove);
+        }
+        if (!result.blocksPlaced.isEmpty()) {
+            PacketManager.sendToClientsTrackingAndSelf(new CDBlocksRestoredPacket(result.blocksPlaced), user);
         }
     }
-
-    @Override
-    protected void tick() {}
-
-    @Override
-    protected void stop() {
-        AngeloRockEntity angeloRock = angeloRockEntity.getEntityCast(world);
-        if (angeloRock != null && !angeloRock.isFullyFormed()) {
-            angeloRock.breakRock();
-        }
+    
+    protected List<ItemStack> itemsSource(BlockPos center) {
+        AxisAlignedBB area = new AxisAlignedBB(center, center).inflate(8);
+        LivingEntity target = getTarget();
+        List<ItemStack> itemsSource = CrazyDiamondRestoreTerrain.sourceItemStacks(area, Vector3d.atBottomCenterOf(center), user, world, 
+                target instanceof PlayerEntity ? SourceType.PLAYER_INVENTORY.from(target) : null, 
+                SourceType.MOB_HELD.fromAllNearby(), 
+                SourceType.ITEM_ENTITY.fromAllNearby(), 
+                user instanceof PlayerEntity ? SourceType.PLAYER_INVENTORY.from(user) : null, 
+                ModStandsInit.CRAZY_DIAMOND_RESTORE_TERRAIN.get().useOtherPlayersInventories ? SourceType.PLAYER_INVENTORY.fromAllNearby().sort() : null);
+        return itemsSource;
     }
-
-    @Override
-    protected void writeAdditionalSaveData(CompoundNBT nbt) {
-        nbt.putBoolean("SummonedEntity", summonedRockEntity);
-        nbt.putBoolean("SaveMob", keepMobsInside);
-        angeloRockEntity.saveNbt(nbt, "Entity");
-    }
-
-    @Override
-    protected void readAdditionalSaveData(CompoundNBT nbt) {
-        summonedRockEntity = nbt.getBoolean("SummonedEntity");
-        keepMobsInside = nbt.getBoolean("SaveMob");
-        angeloRockEntity.loadNbt(nbt, "Entity");
-    }
-
 }

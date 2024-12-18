@@ -7,7 +7,9 @@ import com.github.standobyte.jojo.action.config.ActionConfigField;
 import com.github.standobyte.jojo.action.stand.effect.CDTurnIntoAngeloRockEffect;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.damage.KnockbackCollisionImpact;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -47,10 +49,12 @@ public class CrazyDiamondAngeloRock extends StandEntityActionModifier {
                 if (kbCollision == null || !kbCollision.isActive()) {
                     return;
                 }
-                CDTurnIntoAngeloRockEffect effect = new CDTurnIntoAngeloRockEffect();
-                effect.withTarget(targetEntity);
-                effect.keepMobsInside = this.keepMobsInside;
-                userPower.getContinuousEffects().addEffect(effect);
+                if (!StandEffectsTracker.getEffectOfType(targetEntity, ModStandEffects.TURN_INTO_ANGELO_ROCK.get()).isPresent()) {
+                    CDTurnIntoAngeloRockEffect effect = new CDTurnIntoAngeloRockEffect();
+                    effect.withTarget(targetEntity);
+                    effect.keepMobsInside = this.keepMobsInside;
+                    userPower.getContinuousEffects().addEffect(effect);
+                }
             }
         }
     }
