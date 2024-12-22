@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.entity;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -73,6 +74,7 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
     private static final int CREATION_ANIM_LEN = 40;
     private int creationAnimTicks;
     private Map<BlockPos, PrevBlockInfo> angeloRockBlocks = new HashMap<>();
+    private List<ItemStack> itemDrops = new ArrayList<>();
     private boolean startedSound;
     private EntityOwnerResolver angeloEntity = new EntityOwnerResolver();
     /* fuck it, sure, yeah */ private MobEntity mob;
@@ -113,6 +115,10 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
         
         world.addFreshEntity(angeloRock);
         return angeloRock;
+    }
+    
+    public void setBlockDrops(List<ItemStack> itemDrops) {
+        this.itemDrops = itemDrops;
     }
     
     @Override
@@ -254,11 +260,16 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
             }
             angeloRockBlocks.values().forEach(block -> {
                 CrazyDiamondRestoreTerrain.rememberBrokenBlock(level, block.pos, block.state, Optional.empty(), block.drops);
+            });
+            Vector3d pos = position();
+            // TODO angelo rock silk touch
+            if (dropMode == DropMode.SILK_TOUCH) {
                 
-                if (dropMode == DropMode.BLOCKS && !block.drops.isEmpty()) {
-                    Vector3d pos = Vector3d.atCenterOf(block.pos);
-                    for (ItemStack item : block.drops) {
-                        ItemEntity itemEntity = new ItemEntity(level, pos.x + 0.5, pos.y + 0.5, pos.z + 0.5, item);
+            }
+            else {
+                if (dropMode == DropMode.BLOCKS) {
+                    for (ItemStack item : itemDrops) {
+                        ItemEntity itemEntity = new ItemEntity(level, pos.x + 0.5, pos.y, pos.z + 0.5, item);
                         itemEntity.setDefaultPickUpDelay();
                         if (captureDrops() != null) {
                             captureDrops().add(itemEntity);
@@ -268,16 +279,13 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
                         }
                     }
                 }
-            });
-            // TODO angelo rock silk touch
-            if (dropMode == DropMode.SILK_TOUCH) {
                 
-            }
-            else if (mob != null && mob.removed && lastAttack != null) {
-                mob.setPos(getX(), getY(), getZ());
-                mobLootFortune = mob;
-                CommonReflection.dropAllDeathLoot(mob, lastAttack);
-                mobLootFortune = null;
+                if (level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT) && mob != null && mob.removed && lastAttack != null) {
+                    mob.setPos(getX(), getY(), getZ());
+                    mobLootFortune = mob;
+                    CommonReflection.dropAllDeathLoot(mob, lastAttack);
+                    mobLootFortune = null;
+                }
             }
             
             remove();
@@ -342,6 +350,16 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
             pCompound.put("RockBlocks", blocksNbt);
         }
         
+        if (!itemDrops.isEmpty()) {
+            ListNBT blockDropsNbt = new ListNBT();
+            for (ItemStack item : itemDrops) {
+                if (!item.isEmpty()) {
+                    blockDropsNbt.add(item.save(new CompoundNBT()));
+                }
+            }
+            pCompound.put("BlockDrops", blockDropsNbt);
+        }
+        
         if (mob != null) {
             String s = mob.getEncodeId();
             if (s != null) {
@@ -377,6 +395,14 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
                     angeloRockBlocks.put(block.pos, block);
                 }
             });
+        });
+        
+        itemDrops.clear();
+        pCompound.getList("BlockDrops", Constants.NBT.TAG_COMPOUND).forEach(itemNbt -> {
+            ItemStack item = ItemStack.of((CompoundNBT) itemNbt);
+            if (!item.isEmpty()) {
+                itemDrops.add(item);
+            }
         });
         
         Entity mobEntity = MCUtil.nbtGetCompoundOptional(pCompound, "AngeloMob").flatMap(mobNBT -> {

@@ -337,7 +337,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
             }
         }
         if (blockCanBePlaced(world, blockPos, blockState) && blockState.canSurvive(world, blockPos)
-                && (consumeNeededItems(restorationCost, itemsSource) || isCreative)) {
+                && (consumeNeededItems(restorationCost, itemsSource, null) || isCreative)) {
             if (!isCreative && consumeXpFrom != null && xpCost > 0) {
                 consumeXpFrom.giveExperiencePoints(-xpCost);
             }
@@ -354,9 +354,13 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         return world.getBlockState(pos).getMaterial().isReplaceable();
     }
     
-    public static boolean consumeNeededItems(List<ItemStack> restorationCost, List<ItemStack> itemsSource) {
+    public static boolean consumeNeededItems(List<ItemStack> restorationCost, List<ItemStack> itemsSource, 
+            @Nullable List<ItemStack> collectConsumedItems) {
+        if (restorationCost.isEmpty()) {
+            return true;
+        }
         if (restorationCost.size() == 1 && restorationCost.get(0).getCount() == 1) {
-            return consumeSingleItem(restorationCost.get(0), itemsSource);
+            return consumeSingleItem(restorationCost.get(0), itemsSource, collectConsumedItems);
         }
 
         List<ItemStack> costCopied = restorationCost.stream().map(ItemStack::copy).collect(Collectors.toList());
@@ -379,6 +383,10 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
                 Pair<List<ItemStack>, MutableInt> existingItems = entry.getValue();
                 existingItems.getLeft().stream().anyMatch(consumedItem -> {
                     int count = Math.min(neededItem.getCount(), consumedItem.getCount());
+                    if (collectConsumedItems != null) {
+                        ItemStack remembered = consumedItem.copy();
+                        remembered.setCount(count);
+                    }
                     consumedItem.shrink(count);
                     neededItem.shrink(count);
                     return neededItem.isEmpty();
@@ -389,9 +397,15 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         return false;
     }
     
-    private static boolean consumeSingleItem(ItemStack neededSingleItem, List<ItemStack> itemsSource) {
+    private static boolean consumeSingleItem(ItemStack neededSingleItem, List<ItemStack> itemsSource, 
+            @Nullable List<ItemStack> collectConsumedItems) {
         for (ItemStack item : itemsSource) {
             if (stacksMatch(neededSingleItem, item)) {
+                if (collectConsumedItems != null) {
+                    ItemStack remember = item.copy();
+                    remember.setCount(1);
+                    collectConsumedItems.add(remember);
+                }
                 item.shrink(1);
                 return true;
             }

@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.action.stand.effect;
 
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +39,7 @@ import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -45,12 +47,13 @@ import net.minecraft.util.math.ChunkPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.chunk.Chunk;
+import net.minecraftforge.common.util.Constants;
 
 public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
     public boolean keepMobsInside;
     private boolean triedSummonRockEntity = false;
     private EntityOwnerResolver.Generic<AngeloRockEntity> angeloRockEntity = new EntityOwnerResolver.Generic<>(AngeloRockEntity.class);
-    private Map<BlockPos, PrevBlockInfo> brokenBlocks; // TODO (angelo) save in NBT?
+    private Map<BlockPos, PrevBlockInfo> brokenBlocks;
 
     public CDTurnIntoAngeloRockEffect() {
         this(ModStandEffects.TURN_INTO_ANGELO_ROCK.get());
@@ -62,7 +65,7 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
     
     @Override
     protected boolean needsTarget() {
-        return brokenBlocks.isEmpty();
+        return brokenBlocks == null || brokenBlocks.isEmpty();
     }
 
     @Override
@@ -130,6 +133,14 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
         nbt.putBoolean("TriedSummonRock", triedSummonRockEntity);
         nbt.putBoolean("SaveMob", keepMobsInside);
         angeloRockEntity.saveNbt(nbt, "Entity");
+        
+        if (brokenBlocks != null && !brokenBlocks.isEmpty()) {
+            ListNBT blocksBrokenNbt = new ListNBT();
+            for (PrevBlockInfo block : brokenBlocks.values()) {
+                blocksBrokenNbt.add(block.toNBT());
+            }
+            nbt.put("FixBlocks", blocksBrokenNbt);
+        }
     }
 
     @Override
@@ -137,6 +148,18 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
         triedSummonRockEntity = nbt.getBoolean("TriedSummonRock");
         keepMobsInside = nbt.getBoolean("SaveMob");
         angeloRockEntity.loadNbt(nbt, "Entity");
+        
+        brokenBlocks = null;
+        ListNBT blocksBrokenNbt = nbt.getList("FixBlocks", Constants.NBT.TAG_COMPOUND);
+        if (!blocksBrokenNbt.isEmpty()) {
+            brokenBlocks = new HashMap<>();
+            blocksBrokenNbt.forEach(blockNBT -> {
+                PrevBlockInfo block = PrevBlockInfo.fromNBT((CompoundNBT) blockNBT);
+                if (block != null) {
+                    brokenBlocks.put(block.pos, block);
+                }
+            });
+        }
     }
     
     public boolean preventTargetDeath() {
@@ -255,7 +278,7 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
             blockLower = new PrevBlockInfo(blockUpper.pos.below(), blockLower.state, blockLower.drops, blockLower.keep);
         }
         
-        // FIXME the drops don't match sometimes
+        // FIXME test if the block drops match
         JojoModUtil.sayVoiceLine(user, ModSounds.JOSUKE_PRAY_FOR_ETERNITY.get(), null, 1, 1, 0, false);
         Direction angeloRockFace = Direction.fromYRot(target.yRot);
         AngeloRockEntity angeloRock = AngeloRockEntity.turnIntoRock(world, target, 
@@ -264,10 +287,11 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
                 blockLower, blockUpper);
         this.angeloRockEntity.setOwner(angeloRock);
         
-        // TODO (angelo) only add the items into the angelo rock drops if they get consumed
         List<ItemStack> itemsSource = itemsSource(angeloRock.blockPosition());
-        CrazyDiamondRestoreTerrain.consumeNeededItems(blockUpper.drops, itemsSource);
-        CrazyDiamondRestoreTerrain.consumeNeededItems(blockLower.drops, itemsSource);
+        List<ItemStack> blockDrops = new ArrayList<>();
+        CrazyDiamondRestoreTerrain.consumeNeededItems(blockUpper.drops, itemsSource, blockDrops);
+        CrazyDiamondRestoreTerrain.consumeNeededItems(blockLower.drops, itemsSource, blockDrops);
+        angeloRock.setBlockDrops(blockDrops);
         
         return ActionConditionResult.POSITIVE;
     }
