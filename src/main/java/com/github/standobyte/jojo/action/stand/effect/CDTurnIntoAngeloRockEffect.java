@@ -88,35 +88,35 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
                     triedSummonRockEntity = true;
                 }
             }
-            else {
+        }
+    }
+    
+    @Override
+    protected void tick() {
+        if (!world.isClientSide()) {
+            boolean hasBlocksToRestore = brokenBlocks != null && !brokenBlocks.isEmpty();
+            if (triedSummonRockEntity || getTarget() == null) {
                 AngeloRockEntity angeloRock = angeloRockEntity.getEntityCast(world);
-                if ((angeloRock == null || angeloRock.isFullyFormed()) && (brokenBlocks == null || brokenBlocks.isEmpty())) {
+                if ((angeloRock == null || angeloRock.isFullyFormed()) && !hasBlocksToRestore) {
                     remove();
+                    return;
+                }
+            }
+            if (hasBlocksToRestore) {
+                Entity entity = angeloRockEntity.getEntity(world);
+                if (entity == null) {
+                    entity = getTarget();
+                }
+                if (entity == null) {
+                    entity = getStandUser();
+                }
+                if (entity != null) {
+                    restoreBrokenBlocks(entity.blockPosition());
                 }
             }
         }
     }
     
-    private static boolean canUseBlock(BlockState blockState) {
-        return blockState.getMaterial() == Material.STONE;
-    }
-    
-    @Override
-    protected void tick() {
-        if (!world.isClientSide() && brokenBlocks != null && !brokenBlocks.isEmpty()) {
-            Entity entity = angeloRockEntity.getEntity(world);
-            if (entity == null) {
-                entity = getTarget();
-            }
-            if (entity == null) {
-                entity = getStandUser();
-            }
-            if (entity != null) {
-                restoreBrokenBlocks(entity.blockPosition());
-            }
-        }
-    }
-
     @Override
     protected void stop() {
         AngeloRockEntity angeloRock = angeloRockEntity.getEntityCast(world);
@@ -147,6 +147,10 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
         return angeloRock != null && angeloRock.isAlive();
     }
     
+    
+    private static boolean canUseBlock(BlockState blockState) {
+        return blockState.getMaterial() == Material.STONE;
+    }
     
     @SuppressWarnings("deprecation")
     private ActionConditionResult tryStartAngeloRock(LivingEntity target, KnockbackCollisionImpact kbCollision) {
@@ -232,8 +236,11 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
         ChunkCap blocksData = chunkCache.get(angeloRockBlocks.getChunkPos()).orElse(null);
         angeloRockBlocks.resolveAngeloBlocks(world, brokenStoneBlocks, blocksData, targetPos, MCUtil.dropBrokenBlock(user));
         
-        @Nonnull PrevBlockInfo blockLower = closestAngeloRockBlocks.get().lower.block;
-        @Nonnull PrevBlockInfo blockUpper = closestAngeloRockBlocks.get().upper.block;
+        if (angeloRockBlocks.lower == null || angeloRockBlocks.lower.block == null || angeloRockBlocks.upper == null || angeloRockBlocks.upper.block == null) {
+            return Action.conditionMessage("angelo_no_stone_broken");
+        }
+        @Nonnull PrevBlockInfo blockLower = angeloRockBlocks.lower.block;
+        @Nonnull PrevBlockInfo blockUpper = angeloRockBlocks.upper.block;
         if (blocksData != null) {
             blocksData.removeBrokenBlock(blockLower.pos);
             blocksData.removeBrokenBlock(blockUpper.pos);
@@ -339,7 +346,7 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
             }
             if (lower == null) {
                 if (breakLowerStone != null) {
-                    world.destroyBlock(breakLowerStone, dropBlock);
+                    MCUtil.destroyBlock(world, breakLowerStone, dropBlock, null);
                     lower = new BlockWithDist(blocksData.getBrokenBlockAt(breakLowerStone));
                 }
                 else {
@@ -349,7 +356,7 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
             }
             else if (upper == null) {
                 if (breakUpperStone != null) {
-                    world.destroyBlock(breakUpperStone, dropBlock);
+                    MCUtil.destroyBlock(world, breakUpperStone, dropBlock, null);
                     upper = new BlockWithDist(blocksData.getBrokenBlockAt(breakUpperStone));
                 }
                 else {
@@ -363,7 +370,7 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
     
     protected void restoreBrokenBlocks(BlockPos center) {
         LivingEntity user = getStandUser();
-        int limit = 2;
+        int limit = 1;
         RestoreResult result = CrazyDiamondRestoreTerrain.restoreBlocks(world, user, brokenBlocks.values().stream(), 
                 Comparator.comparingInt((PrevBlockInfo block) -> block.pos.distManhattan(center)), 
                 limit, 
