@@ -32,6 +32,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStatusEffects;
+import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.CDBlocksRestoredPacket;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -70,6 +71,10 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
     
     @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
+        if (power.getContinuousEffects().getEffects().anyMatch(
+                effect -> effect.effectType == ModStandEffects.TURN_INTO_ANGELO_ROCK.get())) {
+            return ActionConditionResult.NEGATIVE;
+        }
         Entity cameraEntity = restorationCenterEntity(user, power);
         Vector3i eyePosI = eyePos(cameraEntity);
         boolean hasResolveEffect = user.hasEffect(ModStatusEffects.RESOLVE.get());

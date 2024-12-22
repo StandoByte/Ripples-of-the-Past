@@ -27,7 +27,12 @@ public class CrazyDiamondAngeloRock extends StandEntityActionModifier {
     
     @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
+        // FIXME gamerules are not synced to the clients
         if (!JojoModUtil.breakingBlocksEnabled(user.level)) {
+            return ActionConditionResult.NEGATIVE;
+        }
+        if (power.getContinuousEffects().getEffects().anyMatch(
+                effect -> effect.effectType == ModStandEffects.TURN_INTO_ANGELO_ROCK.get())) {
             return ActionConditionResult.NEGATIVE;
         }
         if (power.isActive() && target.getEntity() instanceof LivingEntity) {
