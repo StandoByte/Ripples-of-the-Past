@@ -35,7 +35,7 @@ public class CrazyDiamondAngeloRock extends StandEntityActionModifier {
                 effect -> effect.effectType == ModStandEffects.TURN_INTO_ANGELO_ROCK.get())) {
             return ActionConditionResult.NEGATIVE;
         }
-        if (power.isActive() && target.getEntity() instanceof LivingEntity) {
+        if (power.isActive()) {
             StandEntity standEntity = (StandEntity) power.getStandManifestation();
             return ActionConditionResult.noMessage(hasTaskWithNoModifiers(standEntity));
         }

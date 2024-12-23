@@ -3,14 +3,17 @@ package com.github.standobyte.jojo.action.stand.effect;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
@@ -40,6 +43,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
+import net.minecraft.nbt.NBTUtil;
 import net.minecraft.util.Direction;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
@@ -53,7 +57,11 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
     public boolean keepMobsInside;
     private boolean triedSummonRockEntity = false;
     private EntityOwnerResolver.Generic<AngeloRockEntity> angeloRockEntity = new EntityOwnerResolver.Generic<>(AngeloRockEntity.class);
+    
     private Map<BlockPos, PrevBlockInfo> brokenBlocks;
+    private Set<BlockPos> failedToRestore = new HashSet<>();
+    private boolean restoreAllBlocksFailed;
+    @Nullable private BlockPos lastTargetPos;
 
     public CDTurnIntoAngeloRockEffect() {
         this(ModStandEffects.TURN_INTO_ANGELO_ROCK.get());
@@ -63,11 +71,6 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
         super(effectType);
     }
     
-    @Override
-    protected boolean needsTarget() {
-        return brokenBlocks == null || brokenBlocks.isEmpty();
-    }
-
     @Override
     protected void start() {}
     
@@ -97,7 +100,7 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
     @Override
     protected void tick() {
         if (!world.isClientSide()) {
-            boolean hasBlocksToRestore = brokenBlocks != null && !brokenBlocks.isEmpty();
+            boolean hasBlocksToRestore = hasBlocksToRestore();
             if (triedSummonRockEntity || getTarget() == null) {
                 AngeloRockEntity angeloRock = angeloRockEntity.getEntityCast(world);
                 if ((angeloRock == null || angeloRock.isFullyFormed()) && !hasBlocksToRestore) {
@@ -107,14 +110,27 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
             }
             if (hasBlocksToRestore) {
                 Entity entity = angeloRockEntity.getEntity(world);
+                BlockPos centerPos;
                 if (entity == null) {
                     entity = getTarget();
                 }
-                if (entity == null) {
-                    entity = getStandUser();
-                }
+                
                 if (entity != null) {
-                    restoreBrokenBlocks(entity.blockPosition());
+                    centerPos = entity.blockPosition();
+                }
+                else {
+                    centerPos = lastTargetPos;
+                }
+                
+                if (centerPos == null)  {
+                    entity = getStandUser();
+                    if (entity != null) {
+                        centerPos = entity.blockPosition();
+                    }
+                }
+                
+                if (centerPos != null) {
+                    restoreBrokenBlocks(centerPos);
                 }
             }
         }
@@ -141,6 +157,10 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
             }
             nbt.put("FixBlocks", blocksBrokenNbt);
         }
+        
+        if (lastTargetPos != null) {
+            nbt.put("LastTargetPos", NBTUtil.writeBlockPos(lastTargetPos));
+        }
     }
 
     @Override
@@ -160,6 +180,8 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
                 }
             });
         }
+        
+        lastTargetPos = MCUtil.nbtGetCompoundOptional(nbt, "LastTargetPos").map(blockPosNbt -> NBTUtil.readBlockPos(blockPosNbt)).orElse(null);
     }
     
     public boolean preventTargetDeath() {
@@ -392,20 +414,53 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
     }
     
     
+    @Override
+    protected boolean needsTarget() {
+        return !hasBlocksToRestore();
+    }
+    
+    @Override
+    protected void setTarget(@Nullable LivingEntity target) {
+        LivingEntity curTarget = getTarget();
+        if (curTarget != null && !curTarget.isAlive()) {
+            lastTargetPos = curTarget.blockPosition();
+        }
+        super.setTarget(target);
+    }
+    
+    private boolean hasBlocksToRestore() {
+        return brokenBlocks != null && !brokenBlocks.isEmpty();
+    }
+    
     protected void restoreBrokenBlocks(BlockPos center) {
         LivingEntity user = getStandUser();
-        int limit = 1;
-        RestoreResult result = CrazyDiamondRestoreTerrain.restoreBlocks(world, user, brokenBlocks.values().stream(), 
+        int limit = 2;
+        RestoreResult result = CrazyDiamondRestoreTerrain.restoreBlocks(world, user, 
+                brokenBlocks.values().stream().filter(block -> !failedToRestore.contains(block.pos)), 
                 Comparator.comparingInt((PrevBlockInfo block) -> block.pos.distManhattan(center)), 
                 limit, 
                 !MCUtil.dropBrokenBlock(user), false, true, 
                 null, itemsSource(center));
-        if (result.blocksToForget.size() == 0) {
-            brokenBlocks.clear();
+        
+        boolean restoredThisTick = !result.blocksToForget.isEmpty();
+        if (restoredThisTick && !result.blocksTried.isEmpty()) {
+            result.blocksToForget.forEach(brokenBlocks::remove);
+            restoreAllBlocksFailed = false;
         }
         else {
-            result.blocksToForget.forEach(brokenBlocks::remove);
+            restoreAllBlocksFailed |= failedToRestore.isEmpty();
+            failedToRestore.addAll(result.blocksTried);
+            if (result.blocksTried.isEmpty() || failedToRestore.size() >= brokenBlocks.size()) {
+                if (restoreAllBlocksFailed) {
+                    // one of the 2 conditions to remove the effect
+                    brokenBlocks.clear();
+                }
+                else {
+                    failedToRestore.clear();
+                }
+            }
         }
+        
         if (!result.blocksPlaced.isEmpty()) {
             PacketManager.sendToClientsTrackingAndSelf(new CDBlocksRestoredPacket(result.blocksPlaced), user);
         }

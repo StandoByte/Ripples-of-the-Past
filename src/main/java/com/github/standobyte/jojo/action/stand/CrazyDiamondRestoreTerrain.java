@@ -271,10 +271,13 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         }
         
         blocks.forEach(block -> {
-            if (block.onRestore() && tryPlaceBlock(world, block.pos, block.state, isCreative, randomizePos, 
+            if (block.onRestore()) {
+                result.blocksTried.add(block.pos);
+                if (tryPlaceBlock(world, block.pos, block.state, isCreative, randomizePos, 
                     block.drops, block.getDroppedXp(), playerWithXp, itemsSource)) {
-                result.blocksPlaced.add(block.pos);
-                result.blocksToForget.add(block.pos);
+                    result.blocksPlaced.add(block.pos);
+                    result.blocksToForget.add(block.pos);
+                }
             }
         });
         
@@ -287,6 +290,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
     }
     
     public static class RestoreResult {
+        public final Set<BlockPos> blocksTried = new HashSet<>();
         public final Set<BlockPos> blocksPlaced = new HashSet<>();
         public final Set<BlockPos> blocksToForget = new HashSet<>();
     }
