@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
@@ -21,6 +22,7 @@ import org.apache.commons.lang3.tuple.Pair;
 
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.config.ActionConfigField;
 import com.github.standobyte.jojo.capability.chunk.ChunkCap.PrevBlockInfo;
 import com.github.standobyte.jojo.capability.chunk.ChunkCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
@@ -30,6 +32,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStatusEffects;
+import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.CDBlocksRestoredPacket;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -42,11 +45,13 @@ import net.minecraft.block.FallingBlock;
 import net.minecraft.block.FireBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
 import net.minecraft.item.ItemStack;
 import net.minecraft.tileentity.TileEntity;
+import net.minecraft.util.EntityPredicates;
+import net.minecraft.util.Hand;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -58,6 +63,7 @@ import net.minecraft.world.chunk.Chunk;
 import net.minecraft.world.chunk.IChunk;
 
 public class CrazyDiamondRestoreTerrain extends StandEntityAction {
+    @ActionConfigField public boolean useOtherPlayersInventories;
 
     public CrazyDiamondRestoreTerrain(StandEntityAction.Builder builder) {
         super(builder);
@@ -65,6 +71,10 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
     
     @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
+        if (power.getContinuousEffects().getEffects().anyMatch(
+                effect -> effect.effectType == ModStandEffects.TURN_INTO_ANGELO_ROCK.get())) {
+            return ActionConditionResult.NEGATIVE;
+        }
         Entity cameraEntity = restorationCenterEntity(user, power);
         Vector3i eyePosI = eyePos(cameraEntity);
         boolean hasResolveEffect = user.hasEffect(ModStatusEffects.RESOLVE.get());
@@ -82,25 +92,11 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
     public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {
             LivingEntity user = userPower.getUser();
-            IInventory userInventory;
-            boolean creative;
             PlayerEntity playerUser = user instanceof PlayerEntity ? (PlayerEntity) user : null;
-            if (playerUser != null) {
-                userInventory = playerUser.inventory;
-                creative = playerUser.abilities.instabuild;
-            }
-            else {
-                userInventory = null;
-                creative = false;
-            }
+            boolean creative = playerUser != null ? playerUser.abilities.instabuild : false;
             Entity cameraEntity = restorationCenterEntity(user, userPower);
             boolean resolveEffect = user.hasEffect(ModStatusEffects.RESOLVE.get());
             int manhattanRange = restorationDistManhattan(resolveEffect);
-            List<ItemEntity> itemsAround = world.getEntitiesOfClass(ItemEntity.class, 
-                    cameraEntity.getBoundingBox().inflate(manhattanRange * 2),
-                    entity -> entity.isAlive());
-            Set<BlockPos> blocksPlaced = new HashSet<>();
-            Set<BlockPos> blocksToForget = new HashSet<>();
             Vector3i eyePos = eyePos(cameraEntity);
             Vector3d lookVec = cameraEntity.getLookAngle();
             Vector3d eyePosD = cameraEntity.getEyePosition(1.0F);
@@ -112,36 +108,191 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
             Stream<PrevBlockInfo> blocks = getBlocksInRange(world, user, eyePos, manhattanRange, 
                     block -> blockPosSelectedForRestoration(block, cameraEntity, lookVec, eyePosD, eyePos, resolveEffect, onlyAimedAt));
             
-            blocks
-            .filter(block -> {
-                if (restorationExclude(block, world)) {
-                    return false;
-                }
-                if (blockCanBePlaced(world, block.pos, block.state)) {
-                    return true;
-                }
-                blocksToForget.add(block.pos);
-                return false;
-            })
-            .sorted(Comparator
-                    .comparingInt((PrevBlockInfo block) -> restorationPriority(block, world))
-                    .thenComparingInt((PrevBlockInfo block) -> block.pos.distManhattan(eyePos)))
-            .limit(blocksToRestore)
-            .forEach(block -> {
-                if (block.onRestore() && tryPlaceBlock(world, block.pos, block.state, blocksPlaced, 
-                        creative, block.drops, block.getDroppedXp(), playerUser, userInventory, itemsAround, 
-                        resolveEffect && !onlyAimedAt)) {
-                    blocksToForget.add(block.pos);
-                }
-            });
+            AxisAlignedBB area = cameraEntity.getBoundingBox().inflate(manhattanRange * 2);
+            Vector3d center = area.getCenter();
+            List<ItemStack> itemsSource = sourceItemStacks(area, center, user, world, 
+                    SourceType.MOB_HELD.fromAllNearby(), 
+                    SourceType.ITEM_ENTITY.fromAllNearby(), 
+                    playerUser != null ? SourceType.PLAYER_INVENTORY.from(playerUser) : null, 
+                    useOtherPlayersInventories ? SourceType.PLAYER_INVENTORY.fromAllNearby().sort() : null);
+            
+            Set<BlockPos> blocksPlaced = restoreBlocks(world, standEntity, blocks, 
+                    Comparator.comparingInt((PrevBlockInfo block) -> block.pos.distManhattan(eyePos)), 
+                    blocksToRestore, 
+                    creative, resolveEffect && !onlyAimedAt, true, 
+                    playerUser, itemsSource).blocksPlaced;
             
             userPower.consumeStamina(staminaPerBlock * blocksPlaced.size());
-            
-            if (!blocksPlaced.isEmpty()) {
-                PacketManager.sendToClientsTracking(new CDBlocksRestoredPacket(blocksPlaced), standEntity);
-            }
-            forgetBrokenBlocks(world, blocksToForget);
         }
+    }
+    
+    
+    public static enum SourceType {
+        MOB_HELD {
+            @Override
+            protected void addItems(List<ItemStack> items, Stream<Entity> entities) {
+                entities.map(entity -> ((LivingEntity) entity)).forEach(mob -> {
+                    for (Hand hand : Hand.values()) {
+                        ItemStack item = mob.getItemInHand(hand);
+                        if (!item.isEmpty()) {
+                            items.add(item);
+                        }
+                    }
+                });
+            }
+        },
+        ITEM_ENTITY {
+            @Override
+            protected void addItems(List<ItemStack> items, Stream<Entity> entities) {
+                entities.map(entity -> ((ItemEntity) entity).getItem())
+                .filter(item -> !item.isEmpty())
+                .forEach(items::add);
+            }
+        },
+        PLAYER_INVENTORY {
+            @Override
+            protected void addItems(List<ItemStack> items, Stream<Entity> entities) {
+                entities.map(entity -> ((PlayerEntity) entity).inventory)
+                .forEach(inventory -> {
+                    int size = inventory.getContainerSize();
+                    for (int i = 0; i < size; i++) {
+                        ItemStack inventoryItem = inventory.getItem(i);
+                        if (inventoryItem != null && !inventoryItem.isEmpty()) {
+                            items.add(inventoryItem);
+                        }
+                    }
+                });
+            }
+        },
+        OTHER {
+            @Override
+            protected void addItems(List<ItemStack> items, Stream<Entity> entities) {}
+        };
+        
+        public ItemsSource fromAllNearby() {
+            return new ItemsSource(this, (Entity[]) null);
+        }
+        
+        public ItemsSource from(Entity... entity) {
+            return new ItemsSource(this, entity);
+        }
+        
+        protected abstract void addItems(List<ItemStack> items, Stream<Entity> from);
+    }
+    
+    public static class ItemsSource {
+        protected final SourceType type;
+        protected boolean sort = false;
+        @Nullable protected final Stream<Entity> entity;
+        
+        protected ItemsSource(SourceType type, Entity... entities) {
+            this.type = type;
+            this.entity = entities != null ? Stream.of(entities) : null;
+        }
+        
+        public ItemsSource sort() {
+            this.sort = true;
+            return this;
+        }
+    }
+    
+    public static List<ItemStack> sourceItemStacks(AxisAlignedBB entitiesArea, Vector3d center, LivingEntity user, World world, 
+            ItemsSource... order) {
+        Map<SourceType, List<Entity>> entitiesAround = world.getEntities(user, entitiesArea,
+                EntityPredicates.NO_SPECTATORS.and(e -> !e.removed))
+                .stream().collect(Collectors.groupingBy(e -> {
+                    if (e instanceof ItemEntity) {
+                        return SourceType.ITEM_ENTITY;
+                    }
+                    if (e instanceof LivingEntity) {
+                        if (e instanceof PlayerEntity) {
+                            return SourceType.PLAYER_INVENTORY;
+                        }
+                        if (e instanceof MobEntity) {
+                            return SourceType.MOB_HELD;
+                        }
+                    }
+                    return SourceType.OTHER;
+                }));
+        List<ItemStack> itemsSource = new ArrayList<>();
+        
+        for (ItemsSource itemsHandler : order) {
+            if (itemsHandler == null) continue;
+            
+            Stream<Entity> entities = itemsHandler.entity;
+            if (entities == null && entitiesAround.containsKey(itemsHandler.type)) {
+                entities = entitiesAround.get(itemsHandler.type).stream();
+            }
+            if (entities == null) continue;
+            
+            entities = entities.filter(Objects::nonNull);
+            if (itemsHandler.sort) {
+                entities = entities.sorted(Comparator.comparingDouble(entity -> entity.distanceToSqr(center)));
+            }
+            itemsHandler.type.addItems(itemsSource, entities);
+        }
+        
+        return itemsSource;
+    }
+    
+    
+    private int blocksPerTick(StandEntity standEntity) {
+        return MathUtil.fractionRandomInc(CrazyDiamondHeal.healingSpeed(standEntity) * 3);
+    }
+    
+    private static final Random RANDOM = new Random();
+    public static RestoreResult restoreBlocks(World world, Entity trackedEntity, Stream<PrevBlockInfo> blocks, 
+            Comparator<PrevBlockInfo> sort, long limit, 
+            boolean isCreative, boolean randomizePos, boolean forgetFailed, 
+            @Nullable PlayerEntity playerWithXp, List<ItemStack> itemsSource) {
+        RestoreResult result = new RestoreResult();
+        if (limit == 0) return result;
+        
+        blocks = blocks
+        .filter(block -> {
+            if (restorationExclude(block, world)) {
+                return false;
+            }
+            if (blockCanBePlaced(world, block.pos, block.state)) {
+                return true;
+            }
+            if (forgetFailed) {
+                result.blocksToForget.add(block.pos);
+            }
+            return false;
+        });
+        if (sort != null) {
+            sort = Comparator.comparingInt((PrevBlockInfo block) -> restorationPriority(block, world))
+                    .thenComparing(sort);
+            blocks = blocks.sorted(sort);
+        }
+        if (limit >= 0) {
+            blocks = blocks.limit(limit);
+        }
+        
+        blocks.forEach(block -> {
+            if (block.onRestore()) {
+                result.blocksTried.add(block.pos);
+                if (tryPlaceBlock(world, block.pos, block.state, isCreative, randomizePos, 
+                    block.drops, block.getDroppedXp(), playerWithXp, itemsSource)) {
+                    result.blocksPlaced.add(block.pos);
+                    result.blocksToForget.add(block.pos);
+                }
+            }
+        });
+        
+        if (!result.blocksPlaced.isEmpty()) {
+            PacketManager.sendToClientsTrackingAndSelf(new CDBlocksRestoredPacket(result.blocksPlaced), trackedEntity);
+        }
+        forgetBrokenBlocks(world, result.blocksToForget);
+        
+        return result;
+    }
+    
+    public static class RestoreResult {
+        public final Set<BlockPos> blocksTried = new HashSet<>();
+        public final Set<BlockPos> blocksPlaced = new HashSet<>();
+        public final Set<BlockPos> blocksToForget = new HashSet<>();
     }
     
     // this whole junk fixes janky restoration of sand blocks, e.g. explosions in a desert
@@ -162,7 +313,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
             }
         }
         
-        return false;
+        return !block.state.canSurvive(world, block.pos);
     }
     
     private static int restorationPriority(PrevBlockInfo block, World world) {
@@ -172,17 +323,9 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         return 2;
     }
     
-    
-    private int blocksPerTick(StandEntity standEntity) {
-        return MathUtil.fractionRandomInc(CrazyDiamondHeal.healingSpeed(standEntity) * 3);
-    }
-    
-
-    private static final Random RANDOM = new Random();
-    private static boolean tryPlaceBlock(World world, BlockPos blockPos, BlockState blockState, Set<BlockPos> placedBlocks, boolean isCreative, 
-            List<ItemStack> restorationCost, int xpCost, @Nullable PlayerEntity playerWithXp, @Nullable IInventory userInventory, List<ItemEntity> itemEntities, 
-            boolean randomizePos) {
-        if (xpCost > 0 && (playerWithXp == null || playerWithXp.totalExperience < xpCost)) {
+    private static boolean tryPlaceBlock(World world, BlockPos blockPos, BlockState blockState, boolean isCreative, boolean randomizePos, 
+            List<ItemStack> restorationCost, int xpCost, @Nullable PlayerEntity consumeXpFrom, List<ItemStack> itemsSource) {
+        if (xpCost > 0 && (consumeXpFrom == null || consumeXpFrom.totalExperience < xpCost)) {
             return false;
         }
         if (randomizePos) {
@@ -198,13 +341,12 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
             }
         }
         if (blockCanBePlaced(world, blockPos, blockState) && blockState.canSurvive(world, blockPos)
-                && (consumeNeededItems(restorationCost, userInventory, itemEntities) || isCreative)) {
-            if (!isCreative && playerWithXp != null && xpCost > 0) {
-                playerWithXp.giveExperiencePoints(-xpCost);
+                && (consumeNeededItems(restorationCost, itemsSource, null) || isCreative)) {
+            if (!isCreative && consumeXpFrom != null && xpCost > 0) {
+                consumeXpFrom.giveExperiencePoints(-xpCost);
             }
             blockState = Block.updateFromNeighbourShapes(blockState, world, blockPos);
             world.setBlockAndUpdate(blockPos, blockState);
-            placedBlocks.add(blockPos);
             return true;
         }
         else {
@@ -216,40 +358,39 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         return world.getBlockState(pos).getMaterial().isReplaceable();
     }
     
-    private static boolean consumeNeededItems(List<ItemStack> restorationCost, @Nullable IInventory userInventory, List<ItemEntity> itemEntities) {
+    public static boolean consumeNeededItems(List<ItemStack> restorationCost, List<ItemStack> itemsSource, 
+            @Nullable List<ItemStack> collectConsumedItems) {
+        if (restorationCost.isEmpty()) {
+            return true;
+        }
         if (restorationCost.size() == 1 && restorationCost.get(0).getCount() == 1) {
-            return consumeSingleItem(restorationCost.get(0), userInventory, itemEntities);
+            return consumeSingleItem(restorationCost.get(0), itemsSource, collectConsumedItems);
         }
 
         List<ItemStack> costCopied = restorationCost.stream().map(ItemStack::copy).collect(Collectors.toList());
-        Map<ItemStack, Pair<List<ItemStack>, MutableInt>> itemsSorted = Util.make(new HashMap<>(), map -> {
+        Map<ItemStack, Pair<List<ItemStack>, MutableInt>> itemsFound = Util.make(new HashMap<>(), map -> {
             costCopied.forEach(item -> map.put(item, Pair.of(new ArrayList<>(), new MutableInt())));
         });
         
-        for (ItemEntity itemEntity : itemEntities) {
-            ItemStack lyingStack = itemEntity.getItem();
-            sortItem(itemsSorted, costCopied, lyingStack);
-        }
-        
-        if (userInventory != null) {
-            int size = userInventory.getContainerSize();
-            for (int i = 0; i < size; i++) {
-                ItemStack inventoryItem = userInventory.getItem(i);
-                sortItem(itemsSorted, costCopied, inventoryItem);
-            }
+        for (ItemStack item : itemsSource) {
+            sortItem(itemsFound, costCopied, item);
         }
         
         
-        if (itemsSorted.entrySet().stream().allMatch(entry -> {
+        if (itemsFound.entrySet().stream().allMatch(entry -> {
             ItemStack neededItem = entry.getKey();
             Pair<List<ItemStack>, MutableInt> existingItems = entry.getValue();
             return existingItems.getRight().getValue() >= neededItem.getCount();
         })) {
-            itemsSorted.entrySet().stream().forEach(entry -> {
+            itemsFound.entrySet().stream().forEach(entry -> {
                 ItemStack neededItem = entry.getKey();
                 Pair<List<ItemStack>, MutableInt> existingItems = entry.getValue();
                 existingItems.getLeft().stream().anyMatch(consumedItem -> {
                     int count = Math.min(neededItem.getCount(), consumedItem.getCount());
+                    if (collectConsumedItems != null) {
+                        ItemStack remembered = consumedItem.copy();
+                        remembered.setCount(count);
+                    }
                     consumedItem.shrink(count);
                     neededItem.shrink(count);
                     return neededItem.isEmpty();
@@ -260,23 +401,17 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         return false;
     }
     
-    private static boolean consumeSingleItem(ItemStack neededSingleItem, @Nullable IInventory userInventory, List<ItemEntity> itemEntities) {
-        for (ItemEntity itemEntity : itemEntities) {
-            ItemStack lyingStack = itemEntity.getItem();
-            if (stacksMatch(neededSingleItem, lyingStack)) {
-                lyingStack.shrink(1);
-                return true;
-            }
-        }
-        
-        if (userInventory != null) {
-            int size = userInventory.getContainerSize();
-            for (int i = 0; i < size; i++) {
-                ItemStack inventoryItem = userInventory.getItem(i);
-                if (inventoryItem != null && stacksMatch(neededSingleItem, inventoryItem)) {
-                    inventoryItem.shrink(1);
-                    return true;
+    private static boolean consumeSingleItem(ItemStack neededSingleItem, List<ItemStack> itemsSource, 
+            @Nullable List<ItemStack> collectConsumedItems) {
+        for (ItemStack item : itemsSource) {
+            if (stacksMatch(neededSingleItem, item)) {
+                if (collectConsumedItems != null) {
+                    ItemStack remember = item.copy();
+                    remember.setCount(1);
+                    collectConsumedItems.add(remember);
                 }
+                item.shrink(1);
+                return true;
             }
         }
 
@@ -328,7 +463,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         }
     }
     
-    private static void forgetBrokenBlocks(World world, Collection<BlockPos> posCollection) {
+    public static void forgetBrokenBlocks(World world, Collection<BlockPos> posCollection) {
         posCollection.stream()
         .map(pos -> world.getChunk(pos))
         .distinct()
@@ -419,7 +554,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         return 0;
     }
     
-    private float getStaminaCostPerBlock(IStandPower power) {
+    public float getStaminaCostPerBlock(IStandPower power) {
         return super.getStaminaCostTicking(power);
     }
     

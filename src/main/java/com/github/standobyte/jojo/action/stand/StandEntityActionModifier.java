@@ -36,6 +36,10 @@ public abstract class StandEntityActionModifier extends StandAction implements I
         return standEntity.getCurrentTask().map(task -> !task.hasModifierAction(null)).orElse(false);
     }
     
+    public boolean makesAttackNonLethal(LivingEntity target) {
+        return false;
+    }
+    
     
     
     protected class TriggeredFlag {}

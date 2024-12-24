@@ -28,6 +28,7 @@ import net.minecraftforge.event.ForgeEventFactory;
 public class StandEntityPunch implements IPunch {
     public final StandEntity stand;
     public final Entity target;
+    @Nullable public final LivingEntity targetAsLiving;
     public final StandEntityDamageSource dmgSource;
     private boolean targetHit;
     private float damageDealtToLiving;
@@ -47,6 +48,7 @@ public class StandEntityPunch implements IPunch {
     public StandEntityPunch(StandEntity stand, Entity target, StandEntityDamageSource dmgSource) {
         this.stand = stand;
         this.target = target;
+        this.targetAsLiving = target instanceof LivingEntity ? (LivingEntity) target : null;
         this.dmgSource = dmgSource;
     }
     
@@ -204,6 +206,12 @@ public class StandEntityPunch implements IPunch {
     public boolean doHit(StandEntityTask task) {
         if (stand.level.isClientSide()) return false;
         
+        if (targetAsLiving != null && task.getModifierActions()
+                .filter(modifier -> modifier.makesAttackNonLethal(targetAsLiving))
+                .findAny().isPresent()) {
+            dmgSource.setNonLethal();
+        }
+        
         targetHit = stand.attackEntity(() -> doAttack(stand, target, dmgSource, damage), this, task);
         afterAttack(stand, target, dmgSource, task, targetHit, !target.isAlive());
         
@@ -215,17 +223,16 @@ public class StandEntityPunch implements IPunch {
             }
         }
         
-        if (!targetHit && target instanceof LivingEntity) {
-            LivingEntity targetLiving = (LivingEntity) target;
-            boolean isTargetBlocking = targetLiving.isBlocking();
+        if (!targetHit && targetAsLiving != null) {
+            boolean isTargetBlocking = targetAsLiving.isBlocking();
             if (isTargetBlocking) {
-                ItemStack targetShield = targetLiving.getUseItem();
-                if (targetShield.isShield(targetLiving) && damage < 3.0F && targetLiving instanceof PlayerEntity) {
+                ItemStack targetShield = targetAsLiving.getUseItem();
+                if (targetShield.isShield(targetAsLiving) && damage < 3.0F && targetAsLiving instanceof PlayerEntity) {
                     int shieldItemDamage = MathUtil.fractionRandomInc(damage * 0.5F);
-                    targetShield.hurtAndBreak(shieldItemDamage, targetLiving, e -> {
-                        e.broadcastBreakEvent(targetLiving.getUsedItemHand());
-                        ForgeEventFactory.onPlayerDestroyItem((PlayerEntity) targetLiving, 
-                                targetShield, targetLiving.getUsedItemHand());
+                    targetShield.hurtAndBreak(shieldItemDamage, targetAsLiving, e -> {
+                        e.broadcastBreakEvent(targetAsLiving.getUsedItemHand());
+                        ForgeEventFactory.onPlayerDestroyItem((PlayerEntity) targetAsLiving, 
+                                targetShield, targetAsLiving.getUsedItemHand());
                     });
                 }
             }

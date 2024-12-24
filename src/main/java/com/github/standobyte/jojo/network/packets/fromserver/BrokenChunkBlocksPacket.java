@@ -12,7 +12,6 @@ import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
-import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.world.World;
@@ -35,17 +34,13 @@ public class BrokenChunkBlocksPacket {
 
         @Override
         public void encode(BrokenChunkBlocksPacket msg, PacketBuffer buf) {
-            NetworkUtil.writeCollection(buf, msg.blocks, block -> {
-                buf.writeBlockPos(block.pos);
-                buf.writeVarInt(Block.getId(block.state));
-            }, true);
+            NetworkUtil.writeCollection(buf, msg.blocks, PrevBlockInfo::toBuf, true);
             buf.writeBoolean(msg.reset);
         }
 
         @Override
         public BrokenChunkBlocksPacket decode(PacketBuffer buf) {
-            return new BrokenChunkBlocksPacket(NetworkUtil.readCollection(buf, () -> 
-            PrevBlockInfo.clientInstance(buf.readBlockPos(), Block.stateById(buf.readVarInt()))), 
+            return new BrokenChunkBlocksPacket(NetworkUtil.readCollection(buf, PrevBlockInfo::fromBuf), 
                     buf.readBoolean());
         }
 

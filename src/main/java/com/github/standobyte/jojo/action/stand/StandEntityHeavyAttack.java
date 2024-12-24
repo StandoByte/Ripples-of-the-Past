@@ -417,6 +417,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
             private ActionTarget hitBlock;
             private Vector3d explosionDirection;
             private float aoeDamage;
+            public boolean dropBlocks;
             
             private boolean createBlockShards = false;
             private double strength;
@@ -533,7 +534,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
                         }
                     }
                     
-                    boolean dropBlocks = !(standUser instanceof PlayerEntity && ((PlayerEntity) standUser).abilities.instabuild);
+                    dropBlocks = !(standUser instanceof PlayerEntity && ((PlayerEntity) standUser).abilities.instabuild);
                     MCUtil.destroyBlocksInBulk(toBlow, world, attacker, dropBlocks);
                     
                     if (!blockShardEntities.isEmpty()) {
