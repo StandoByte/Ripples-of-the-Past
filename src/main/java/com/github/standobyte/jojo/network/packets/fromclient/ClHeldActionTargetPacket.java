@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
@@ -93,7 +94,7 @@ public class ClHeldActionTargetPacket {
         @Override
         public void handle(ClHeldActionTargetPacket msg, Supplier<NetworkEvent.Context> ctx) {
             PlayerEntity player = ctx.get().getSender();
-            if (!player.isSpectator()) {
+            if (!JojoModUtil.tmpSpectatorCantUsePowers(player)) {
                 IPower.getPowerOptional(player, msg.classification).ifPresent(power -> {
                     ActionTarget target = msg.targetEntityId == -1 ? msg.targetBlock == null ? 
                             ActionTarget.EMPTY

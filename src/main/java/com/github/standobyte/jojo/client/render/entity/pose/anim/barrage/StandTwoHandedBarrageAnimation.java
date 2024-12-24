@@ -9,6 +9,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.HandSide;
 
+@Deprecated
 public class StandTwoHandedBarrageAnimation<T extends StandEntity> extends TwoHandedBarrageAnimation<T, StandEntityModel<T>> {
 
     public StandTwoHandedBarrageAnimation(StandEntityModel<T> model, IModelPose<T> loop, 

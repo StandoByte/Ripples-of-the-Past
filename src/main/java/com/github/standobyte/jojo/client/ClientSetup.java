@@ -15,6 +15,7 @@ import com.github.standobyte.jojo.client.particle.CDRestorationParticle;
 import com.github.standobyte.jojo.client.particle.DivineSandstormParticle;
 import com.github.standobyte.jojo.client.particle.HamonAuraParticle;
 import com.github.standobyte.jojo.client.particle.HamonSparkParticle;
+import com.github.standobyte.jojo.client.particle.LightModeFlashParticle;
 import com.github.standobyte.jojo.client.particle.MeteoriteVirusParticle;
 import com.github.standobyte.jojo.client.particle.OneTickFlameParticle;
 import com.github.standobyte.jojo.client.particle.OnomatopoeiaParticle;
@@ -46,6 +47,7 @@ import com.github.standobyte.jojo.client.render.entity.layerrenderer.WindCloakLa
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.ZombieLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.barrage.BarrageFistAfterimagesLayer;
 import com.github.standobyte.jojo.client.render.entity.renderer.AfterimageRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.AngeloRockRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.CocoJumboTurtleRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.ConsciousnessRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.CrimsonBubbleRenderer;
@@ -232,6 +234,7 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.CD_BLOCK_BULLET.get(), CDBlockBulletRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.EYE_OF_ENDER_INSIDE.get(), manager -> new SpriteRenderer<>(manager, Minecraft.getInstance().getItemRenderer(), 1.0F, true));
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.FIREWORK_INSIDE.get(), manager -> new FireworkRocketRenderer(manager, Minecraft.getInstance().getItemRenderer()));
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.ANGELO_ROCK.get(), AngeloRockRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.GE_LIFEFORM_TRANSFORMATION.get(), GETransformationRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HUNGRY_ZOMBIE.get(), HungryZombieRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HAMON_MASTER.get(), HamonMasterRenderer::new);
@@ -484,7 +487,8 @@ public class ClientSetup {
         mc.particleEngine.register(ModParticles.RPS_ROCK.get(),             RPSPickPartile.Factory::new);
         mc.particleEngine.register(ModParticles.RPS_PAPER.get(),            RPSPickPartile.Factory::new);
         mc.particleEngine.register(ModParticles.RPS_SCISSORS.get(),         RPSPickPartile.Factory::new);
-        mc.particleEngine.register(ModParticles.SANDSTORM.get(),         DivineSandstormParticle.Factory::new);
+        mc.particleEngine.register(ModParticles.SANDSTORM.get(),            DivineSandstormParticle.Factory::new);
+        mc.particleEngine.register(ModParticles.LIGHT_MODE_FLASH.get(),     LightModeFlashParticle.Factory::new);
 
         CustomParticlesHelper.saveSprites(mc);
         // yep...

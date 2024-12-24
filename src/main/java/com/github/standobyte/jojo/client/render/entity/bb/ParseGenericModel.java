@@ -63,6 +63,8 @@ public class ParseGenericModel {
         
         
         public static abstract class Element {
+            boolean export = true;
+            
             String name;
             UUID uuid;
             boolean visibility;
@@ -123,7 +125,7 @@ public class ParseGenericModel {
                     bone.children = new ArrayList<>();
                     bone.children.add(cube);
                     
-                    bone.export = true;
+                    bone.export = this.export;
                     
                     return Optional.of(bone);
                 }
@@ -153,6 +155,7 @@ public class ParseGenericModel {
                     if (face.vertices.length > 2) {
                         // FIXME mesh face normal (cross product)
                         MeshFaceBuilder faceBuilder = meshBuilder.startFaceCalcNormal();
+                        
                         for (int i = 0; i < face.vertices.length; ++i) {
                             // FIXME mesh vertices order
                             String vertexId = face.vertices[i];
@@ -308,12 +311,12 @@ public class ParseGenericModel {
         }
         
         
-        static class GroupParsed implements BlockbenchObj {
+        static class GroupParsed extends BlockbenchObj {
             String name;
             float[] origin;
             @Nullable float[] rotation;
             UUID uuid;
-            boolean export;
+            boolean export = true;
             boolean mirror_uv;
             boolean visibility;
             int autoUv;
@@ -357,7 +360,7 @@ public class ParseGenericModel {
             }
         }
         
-        static interface BlockbenchObj {
+        static abstract class BlockbenchObj {
             
             static final JsonDeserializer<BlockbenchObj> DESERIALIZER = new JsonDeserializer<BlockbenchObj>() {
 
@@ -370,18 +373,20 @@ public class ParseGenericModel {
                     }
                     catch (JsonParseException e) {}
 
+                    BlockbenchObj obj;
                     if (uuid != null) {
                         ElementUUID uuidChild = new ElementUUID(uuid);
-                        return uuidChild;
+                        obj = uuidChild;
                     }
                     else {
-                        return context.deserialize(json, GroupParsed.class);
+                        obj = context.deserialize(json, GroupParsed.class);
                     }
+                    return obj;
                 }
             };
         }
         
-        static class ElementUUID implements BlockbenchObj {
+        static class ElementUUID extends BlockbenchObj {
             UUID uuid;
             
             private ElementUUID() {}
@@ -416,7 +421,9 @@ public class ParseGenericModel {
             EntityModelUnbaked model = new EntityModelUnbaked(resolution.width, resolution.height);
             
             for (ModelParsed.Element element : elements) {
-                initElements.put(element.uuid, element);
+                if (element.export) {
+                    initElements.put(element.uuid, element);
+                }
             }
 
             for (ModelParsed.BlockbenchObj bbObj : outliner) {
@@ -447,6 +454,7 @@ public class ParseGenericModel {
             }
             else if (bbObj instanceof ModelParsed.ElementUUID && parent != null) {
                 ModelParsed.Element element = initElements.get(((ModelParsed.ElementUUID) bbObj).uuid);
+                if (element == null || !element.export) return;
 
                 Optional<GroupParsed> cubeRotated = element.convertRotated(parentParsed);
                 if (cubeRotated.isPresent()) {

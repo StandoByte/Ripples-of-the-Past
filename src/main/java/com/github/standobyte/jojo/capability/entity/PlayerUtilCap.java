@@ -35,7 +35,6 @@ import com.github.standobyte.jojo.util.mc.PlayerStatListener;
 import com.github.standobyte.jojo.util.mc.entitysubtype.EntitySubtype;
 import com.github.standobyte.jojo.util.mc.entitysubtype.SubtypeResourceLocation;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
-import com.github.standobyte.jojo.util.mod.JojoModVersion;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -147,8 +146,6 @@ public class PlayerUtilCap {
         }
         nbt.put("GE_UI", geUIState.toNBT());
         nbt.putInt("AnimalAgeCd", animalAgeCd);
-        
-        nbt.put("RotpVersion", JojoModVersion.getCurrentVersion().toNBT());
         
         nbt.putBoolean("CoffinRespawn", coffinPreventDayTimeSkip);
         

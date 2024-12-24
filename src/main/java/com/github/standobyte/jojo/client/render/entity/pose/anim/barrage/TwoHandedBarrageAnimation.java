@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.HandSide;
 
+@Deprecated
 public abstract class TwoHandedBarrageAnimation<T extends LivingEntity, M extends EntityModel<T>> extends ArmsBarrageAnimation<T, M> {
     public TwoHandedBarrageAnimation(M model, IModelPose<T> loop, IModelPose<T> recovery) {
         super(model, loop, recovery, 4);

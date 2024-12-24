@@ -3,27 +3,25 @@ package com.github.standobyte.jojo.client.render.entity.model.animnew;
 import java.util.Comparator;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.IntFunction;
 import java.util.stream.StreamSupport;
 
 import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Animation;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Keyframe;
 import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Transformation;
 import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Transformation.Interpolation;
-import com.github.standobyte.jojo.util.general.MathUtil;
+import com.github.standobyte.jojo.client.render.entity.model.animnew.molang.KeyframeWithQuery;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import it.unimi.dsi.fastutil.floats.Float2ObjectArrayMap;
 import it.unimi.dsi.fastutil.floats.Float2ObjectMap;
-import net.minecraft.util.math.vector.Vector3f;
 
-public class ParseAnims {
+public class ParseGeckoAnims {
     
-    
-    
+    // "geckolib_format_version": 2
     public static Animation parseAnim(JsonObject animJson) {
-        float lengthSecs = animJson.get("animation_length").getAsFloat();
+        float lengthSecs = animJson.has("animation_length") ? animJson.get("animation_length").getAsFloat() : 0;
         Animation.Builder builder = Animation.Builder.create(lengthSecs);
 
         boolean loop = false;
@@ -47,6 +45,8 @@ public class ParseAnims {
             for (Map.Entry<String, JsonElement> bone : boneAnims.entrySet()) {
                 JsonObject tfJson = bone.getValue().getAsJsonObject();
                 parseKeyframes(builder, tfJson, "rotation", Transformation.Targets.ROTATE, bone.getKey());
+                parseKeyframes(builder, tfJson, "position", Transformation.Targets.TRANSLATE, bone.getKey());
+                parseKeyframes(builder, tfJson, "scale", Transformation.Targets.SCALE, bone.getKey());
             }
         }
         
@@ -56,18 +56,24 @@ public class ParseAnims {
     private static void parseKeyframes(Animation.Builder anim, JsonObject boneTfJson, String targetName, Transformation.Target target, String boneName) {
         JsonObject keyframesJson = boneTfJson.getAsJsonObject(targetName);
         if (keyframesJson != null) {
-            Float2ObjectMap<Keyframe> timeline = new Float2ObjectArrayMap<>();
+            Float2ObjectMap<KeyframeWithQuery> timeline = new Float2ObjectArrayMap<>();
             for (Map.Entry<String, JsonElement> rotationJson : keyframesJson.entrySet()) {
-                float time = Float.parseFloat(rotationJson.getKey());
+                float time;
+                JsonObject rotation;
+                try {
+                    time = Float.parseFloat(rotationJson.getKey());
+                    rotation = rotationJson.getValue().getAsJsonObject();
+                }
+                catch (NumberFormatException singleKeyframe) {
+                    time = 0;
+                    rotation = keyframesJson; // in this case this object is not actually a json object mapping time to keyframes, but the keyframe itself
+                }
                 
-                JsonObject rotation = rotationJson.getValue().getAsJsonObject();
                 JsonElement rotVecJsonElem = rotation.get("vector");
                 if (rotVecJsonElem == null && rotation.has("post")) rotVecJsonElem = rotation.get("post").getAsJsonObject().get("vector");
                 JsonArray rotVecJson = rotVecJsonElem.getAsJsonArray();
-                Vector3f rotVec = fromJson(rotVecJson);
-                if ("rotation".equals(targetName)) {
-                    rotVec.mul(MathUtil.DEG_TO_RAD);
-                }
+                
+                KeyframeWithQuery rotVec = KeyframeWithQuery.parseJsonVec(rotVecJson);
                 
                 String easingName = Optional.ofNullable(rotation.get("easing"))
                         .map(JsonElement::getAsString)
@@ -81,21 +87,19 @@ public class ParseAnims {
                         })
                         .orElse(new double[0]);
                 Interpolation lerp = Interpolations.getLerpMode(easingName, easingArgs);
-                timeline.put(time, new Keyframe(time, rotVec, lerp));
+                timeline.put(time, rotVec.withKeyframe(time, lerp));
             }
             
-            Keyframe[] keyframes = timeline.float2ObjectEntrySet().stream()
-                    .sorted(Comparator.comparingDouble(e -> e.getFloatKey()))
-                    .map(e -> e.getValue())
-                    .toArray(Keyframe[]::new);
+            KeyframeWithQuery[] keyframes = keyframesToArray(timeline, KeyframeWithQuery[]::new);
             anim.addBoneAnimation(boneName, new Transformation(target, keyframes));
         }
     }
     
-    private static Vector3f fromJson(JsonArray array) {
-        return new Vector3f(
-                array.get(0).getAsFloat(),
-                array.get(1).getAsFloat(),
-                array.get(2).getAsFloat());
+    public static <T> T[] keyframesToArray(Float2ObjectMap<T> parsedTimeline, IntFunction<T[]> arrayConstructor) {
+        return parsedTimeline.float2ObjectEntrySet().stream()
+                .sorted(Comparator.comparingDouble(e -> e.getFloatKey()))
+                .map(e -> e.getValue())
+                .toArray(arrayConstructor);
     }
+    
 }

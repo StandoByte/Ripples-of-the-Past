@@ -15,6 +15,7 @@ public class ModdedDamageSourceWrapper extends DamageSource implements IModdedDa
     private boolean stackKnockback = false;
     private boolean bypassInvulTicks = false;
     private boolean preventDamagingArmor = false;
+    private boolean nonLethal = false;
     protected boolean showStandUserName;
     protected boolean canHurtStands;
 
@@ -70,6 +71,18 @@ public class ModdedDamageSourceWrapper extends DamageSource implements IModdedDa
     @Override
     public boolean preventsDamagingArmor() {
         return preventDamagingArmor;
+    }
+    
+    
+    @Override
+    public ModdedDamageSourceWrapper setNonLethal() {
+        this.nonLethal = true;
+        return this;
+    }
+    
+    @Override
+    public boolean isNonLethal() {
+        return nonLethal;
     }
     
     

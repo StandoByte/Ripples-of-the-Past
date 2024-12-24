@@ -4,8 +4,6 @@ import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.client.render.entity.bb.BlockbenchStandModelHelper;
 import com.github.standobyte.jojo.client.resources.models.ResourceEntityModels;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
@@ -44,16 +42,7 @@ public class CustomModelItemISTER<M extends Model> extends ItemStackTileEntityRe
         this.texture = texture;
         this.item = item;
         this.modelObjConstructor = modelObjConstructor;
-        ResourceEntityModels.addListener(this.modelResource, parsedModel -> {
-            try {
-                M newModel = this.modelObjConstructor.get();
-                BlockbenchStandModelHelper.replaceModelParts(newModel, parsedModel.getNamedModelParts());
-                this.model = newModel;
-            } catch (IllegalArgumentException | IllegalAccessException e) {
-                JojoMod.getLogger().error("Failed to load model {}", this.modelResource);
-                e.printStackTrace();
-            }
-        });
+        ResourceEntityModels.addModelLoader(modelResource, modelObjConstructor, newModel -> this.model = newModel);
     }
     
     @Override

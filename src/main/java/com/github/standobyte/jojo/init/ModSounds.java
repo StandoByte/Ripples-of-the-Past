@@ -83,6 +83,10 @@ public class ModSounds {
 
     public static final RegistryObject<SoundEvent> VAMPIRE_BLOOD_DRAIN = register("vampire_blood_drain");
     
+    public static final RegistryObject<SoundEvent> VAMPIRE_SWIPE = register("vampire_swipe");
+    
+    public static final RegistryObject<SoundEvent> VAMPIRE_CLAW_LACERATE = register("vampire_claw_lacerate");
+    
     public static final RegistryObject<SoundEvent> VAMPIRE_FREEZE = register("vampire_freeze");
 
     public static final RegistryObject<SoundEvent> VAMPIRE_EVIL_ATMOSPHERE = register("vampire_dark_aura");
@@ -93,10 +97,24 @@ public class ModSounds {
     
     public static final RegistryObject<SoundEvent> ZOMBIE_DEVOUR = register("zombie_devour");
     
+    public static final RegistryObject<SoundEvent> ZOMBIE_SWIPE = register("zombie_swipe");
+    
+    public static final RegistryObject<SoundEvent> ZOMBIE_CLAW_LACERATE = register("zombie_claw_lacerate");
+    
+    public static final RegistryObject<SoundEvent> PILLAR_MAN_SWING = register("pillar_man_swing");
+    
+    public static final RegistryObject<SoundEvent> PILLAR_MAN_PUNCH = register("pillar_man_punch");
+
+    public static final RegistryObject<SoundEvent> PILLAR_MAN_STRONG_REGEN = register("pillar_man_strong_regen");
+
+    public static final RegistryObject<SoundEvent> PILLAR_MAN_EVASION = register("pillar_man_evasion");
+    
     public static final RegistryObject<SoundEvent> BUCKET_FILL_BOILING_BLOOD = register("bucket_fill_boiling_blood");
     public static final RegistryObject<SoundEvent> BUCKET_EMPTY_BOILING_BLOOD = register("bucket_empty_boiling_blood");
     public static final RegistryObject<SoundEvent> BOILING_BLOOD_POP = register("boiling_blood_pop");
     public static final RegistryObject<SoundEvent> BOILING_BLOOD_AMBIENT = register("boiling_blood_ambient");
+
+    public static final RegistryObject<SoundEvent> HEAVY_PUNCH = register("heavy_punch");
 
 
     public static final RegistryObject<SoundEvent> HAMON_PICK_JONATHAN = register("hamon_pick_jonathan");
@@ -439,6 +457,10 @@ public class ModSounds {
 
     public static final RegistryObject<SoundEvent> JOSUKE_FIX = register("josuke_fix");
 
+    public static final RegistryObject<SoundEvent> JOSUKE_PRAY_FOR_ETERNITY = register("josuke_pray_for_eternity");
+
+    public static final RegistryObject<SoundEvent> JOSUKE_YO_ANGELO = register("josuke_yo_angelo");
+
     public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_SUMMON = register("crazy_diamond_summon");
     
     public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_UNSUMMON = register("crazy_diamond_unsummon");
@@ -464,6 +486,8 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_BULLET_SHOT = register("crazy_diamond_bullet_shot");
     
     public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_BLOOD_CUTTER_SHOT = register("crazy_diamond_blood_cutter_shot");
+    
+    public static final RegistryObject<SoundEvent> ANGELO_ROCK_GRUNT = register("angelo_rock_grunt");
     
     public static final OstSoundList CRAZY_DIAMOND_OST = new OstSoundList(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_ost"), SOUNDS);
 
@@ -500,6 +524,9 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> GOLD_EXPERIENCE_HEAL = register("gold_experience_heal");
     
     public static final OstSoundList GOLD_EXPERIENCE_OST = new OstSoundList(new ResourceLocation(JojoMod.MOD_ID, "gold_experience_ost"), SOUNDS);
+    
+    // in case someone makes an Echoes addon, they'll be able to just put the sound to sounds.json
+    public static final RegistryObject<SoundEvent> KOICHI_YO_ANGELO = register("koichi_yo_angelo");
     
     
     

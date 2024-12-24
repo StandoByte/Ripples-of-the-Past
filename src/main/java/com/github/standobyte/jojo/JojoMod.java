@@ -35,7 +35,6 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractH
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkillTree;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.ForgeBusEventSubscriber;
-import com.github.standobyte.jojo.util.mod.JojoModVersion;
 import com.github.standobyte.jojo.world.dimension.ModDimensions;
 
 import net.minecraft.entity.ai.attributes.Attributes;
@@ -53,8 +52,6 @@ import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 public class JojoMod {
     public static final String MOD_ID = "jojo";
     public static final Logger LOGGER = LogManager.getLogger();
-    // implemented a simple class so that mod version is available in debug too
-    public static final JojoModVersion CURRENT_VERSION = new JojoModVersion(2, 2, 0);
     
     @Deprecated
     // Use the field in ModItems

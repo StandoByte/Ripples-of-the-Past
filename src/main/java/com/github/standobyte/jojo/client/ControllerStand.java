@@ -76,7 +76,7 @@ public class ControllerStand {
 
     public boolean isControllingStand() {
         if (isProbablyControllingStand) {
-            isProbablyControllingStand = mc.getCameraEntity() instanceof StandEntity && !mc.player.isSpectator();
+            isProbablyControllingStand = mc.getCameraEntity() instanceof StandEntity;
             if (!isProbablyControllingStand) {
                 stand = null;
             }

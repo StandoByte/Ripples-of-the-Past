@@ -35,7 +35,7 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.world.World;
 
 public class CrazyDiamondBlockBullet extends StandEntityAction {
-    public static final StandPose BLOCK_BULLET_SHOT_POSE = new StandPose("CD_BLOCK_BULLET");
+    public static final StandPose BLOCK_BULLET_SHOT_POSE = new StandPose("blockBullet");
     public static final double PLAYER_TRACKING_RANGE = 64;
     private final StandRelativeOffset userOffsetLeftArm;
 

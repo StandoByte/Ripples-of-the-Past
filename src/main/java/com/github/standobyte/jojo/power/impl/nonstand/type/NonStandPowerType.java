@@ -94,7 +94,8 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
                 
                 if (amplifier >= 0) {
                     EffectInstance currentEffect = entity.getEffect(effect);
-                    if (currentEffect == null || currentEffect.getAmplifier() != amplifier) {
+                    if (currentEffect == null || currentEffect.getAmplifier() < amplifier
+                            || currentEffect.getAmplifier() != amplifier && !currentEffect.isVisible()) {
                         effectUpdated = true;
                         entity.removeEffectNoUpdate(effect);
                         entity.addEffect(new EffectInstance(effect, Integer.MAX_VALUE, amplifier, false, false));

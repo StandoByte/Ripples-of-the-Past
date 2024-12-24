@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.init.power.stand;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.effect.BoyIIManStandPartTakenEffect;
+import com.github.standobyte.jojo.action.stand.effect.CDTurnIntoAngeloRockEffect;
 import com.github.standobyte.jojo.action.stand.effect.DriedBloodDrops;
 import com.github.standobyte.jojo.action.stand.effect.GECreatedLifeformEffect;
 import com.github.standobyte.jojo.action.stand.effect.GEHealingEffect;
@@ -19,6 +20,9 @@ public class ModStandEffects {
     
     public static final RegistryObject<StandEffectType<DriedBloodDrops>> DRIED_BLOOD_DROPS = STAND_EFFECTS.register("dried_blood_drops", 
             () -> new StandEffectType<>(DriedBloodDrops::new));
+    
+    public static final RegistryObject<StandEffectType<CDTurnIntoAngeloRockEffect>> TURN_INTO_ANGELO_ROCK = STAND_EFFECTS.register("angelo_rock", 
+            () -> new StandEffectType<>(CDTurnIntoAngeloRockEffect::new));
     
     public static final RegistryObject<StandEffectType<GECreatedLifeformEffect>> GE_CREATED_LIFEFORM = STAND_EFFECTS.register("ge_created_lifeform", 
             () -> new StandEffectType<>(GECreatedLifeformEffect::new));

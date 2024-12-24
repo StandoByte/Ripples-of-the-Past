@@ -17,6 +17,7 @@ public class ModPlayerAnimations {
     public static BasicToggleAnim hamonBreath;
     public static BasicToggleAnim hamonBeat;
     public static BasicToggleAnim vampireClawSwipe;
+    public static BasicToggleAnim zombieClawSwipe;
     public static BasicToggleAnim pillarManPunch;
     public static WindupAttackAnim sunlightYellowOverdrive;
     public static WindupAttackAnim scarletOverdrive;
@@ -70,6 +71,10 @@ public class ModPlayerAnimations {
         vampireClawSwipe = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
                 "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.vampire.KosmXVampireClawSwipeHandler",
                 new ResourceLocation(JojoMod.MOD_ID, "vampire_claw_swipe"), 1);
+        
+        zombieClawSwipe = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.vampire.KosmXVampireClawSwipeHandler",
+                new ResourceLocation(JojoMod.MOD_ID, "zombie_claw_swipe"), 1);
         
         pillarManPunch = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
                 "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXPillarManPunchHandler",

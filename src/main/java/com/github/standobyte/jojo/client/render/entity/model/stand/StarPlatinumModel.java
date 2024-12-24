@@ -4,19 +4,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import com.github.standobyte.jojo.action.stand.StandEntityAction;
-import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.render.entity.pose.IModelPose;
-import com.github.standobyte.jojo.client.render.entity.pose.ModelPose;
-import com.github.standobyte.jojo.client.render.entity.pose.ModelPoseTransition;
-import com.github.standobyte.jojo.client.render.entity.pose.ModelPoseTransitionMultiple;
-import com.github.standobyte.jojo.client.render.entity.pose.RotationAngle;
-import com.github.standobyte.jojo.client.render.entity.pose.anim.PosedActionAnimation;
-import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.entity.stand.stands.StarPlatinumEntity;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
-import net.minecraft.util.Direction;
 import net.minecraft.util.math.MathHelper;
 
 //Made with Blockbench 4.8.3
@@ -81,8 +71,13 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
         ModelRenderer hair47;
         ModelRenderer hair48;
 
+        root = new ModelRenderer(this);
+        root.setPos(0.0F, 0.0F, 0.0F);
+        
+
         head = new ModelRenderer(this);
         head.setPos(0.0F, 0.0F, 0.0F);
+        root.addChild(head);
         head.texOffs(0, 0).addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
         head.texOffs(45, 14).addBox(-4.0F, -6.0F, -4.0F, 8.0F, 1.0F, 8.0F, 0.075F, false);
         head.texOffs(24, 0).addBox(-4.5F, -4.0F, -3.0F, 1.0F, 2.0F, 2.0F, 0.0F, false);
@@ -384,6 +379,7 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
 
         body = new ModelRenderer(this);
         body.setPos(0.0F, 0.0F, 0.0F);
+        root.addChild(body);
         
 
         upperPart = new ModelRenderer(this);
@@ -431,94 +427,106 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
         torso.addChild(backFabric);
         backFabric.texOffs(0, 92).addBox(-2.0F, -0.5F, 0.0F, 4.0F, 5.0F, 0.0F, 0.0F, false);
 
-        leftArm = convertLimb(new ModelRenderer(this));
-        leftArm.setPos(6.0F, -10.0F, 0.0F);
-        upperPart.addChild(leftArm);
-        leftArm.texOffs(32, 108).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
-        leftArm.texOffs(50, 105).addBox(-1.0F, -2.0F, -2.0F, 3.0F, 6.0F, 4.0F, 0.1F, true);
-        leftArm.texOffs(44, 109).addBox(-1.0F, 3.0F, 1.5F, 2.0F, 2.0F, 1.0F, 0.0F, false);
+        leftArmXRot = new ModelRenderer(this);
+        leftArmXRot.setPos(6.0F, -10.0F, 0.0F);
+        upperPart.addChild(leftArmXRot);
+        
+
+        leftArmBone = new ModelRenderer(this);
+        leftArmBone.setPos(0.0F, 0.0F, 0.0F);
+        leftArmXRot.addChild(leftArmBone);
+        leftArmBone.texOffs(32, 108).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
+        leftArmBone.texOffs(50, 105).addBox(-1.0F, -2.0F, -2.0F, 3.0F, 6.0F, 4.0F, 0.1F, true);
+        leftArmBone.texOffs(44, 109).addBox(-1.0F, 3.0F, 1.5F, 2.0F, 2.0F, 1.0F, 0.0F, false);
 
         leftArmJoint = new ModelRenderer(this);
         leftArmJoint.setPos(0.0F, 4.0F, 0.0F);
-        leftArm.addChild(leftArmJoint);
+        leftArmBone.addChild(leftArmJoint);
         leftArmJoint.texOffs(32, 102).addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.1F, true);
 
         leftForeArm = new ModelRenderer(this);
         leftForeArm.setPos(0.0F, 4.0F, 0.0F);
-        leftArm.addChild(leftForeArm);
+        leftArmBone.addChild(leftForeArm);
         leftForeArm.texOffs(32, 118).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false);
         leftForeArm.texOffs(48, 95).addBox(-2.0F, -0.1F, -2.0F, 4.0F, 2.0F, 4.0F, 0.185F, false);
-        leftForeArm.texOffs(48, 98).addBox(-2.0F, 3.0F, -2.0F, 4.0F, 3.0F, 4.0F, 0.15F, false);
-        ClientUtil.editLatestCube(leftForeArm, gloveBox -> {
-            ClientUtil.setFaceUv(gloveBox, Direction.UP,   48, 99, 52, 95, this);
-            ClientUtil.setFaceUv(gloveBox, Direction.DOWN, 60, 95, 64, 99, this);
-        });
+        leftForeArm.texOffs(48, 95).addBox(-2.0F, 3.0F, -2.0F, 4.0F, 3.0F, 4.0F, 0.15F, false);
         leftForeArm.texOffs(48, 114).addBox(1.6F, 3.2F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, true);
         leftForeArm.texOffs(48, 116).addBox(1.6F, 3.8F, -1.0F, 1.0F, 1.0F, 2.0F, -0.2F, true);
         leftForeArm.texOffs(48, 119).addBox(1.6F, 4.4F, -1.5F, 1.0F, 1.0F, 3.0F, -0.2F, true);
         leftForeArm.texOffs(48, 123).addBox(1.6F, 5.0F, -2.0F, 1.0F, 1.0F, 4.0F, -0.2F, true);
 
-        rightArm = convertLimb(new ModelRenderer(this));
-        rightArm.setPos(-6.0F, -10.0F, 0.0F);
-        upperPart.addChild(rightArm);
-        rightArm.texOffs(0, 108).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
-        rightArm.texOffs(18, 105).addBox(-2.0F, -2.0F, -2.0F, 3.0F, 6.0F, 4.0F, 0.1F, false);
-        rightArm.texOffs(12, 109).addBox(-1.0F, 3.0F, 1.5F, 2.0F, 2.0F, 1.0F, 0.0F, false);
+        rightArmXRot = new ModelRenderer(this);
+        rightArmXRot.setPos(-6.0F, -10.0F, 0.0F);
+        upperPart.addChild(rightArmXRot);
+        
+
+        rightArmBone = new ModelRenderer(this);
+        rightArmBone.setPos(0.0F, 0.0F, 0.0F);
+        rightArmXRot.addChild(rightArmBone);
+        rightArmBone.texOffs(0, 108).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
+        rightArmBone.texOffs(18, 105).addBox(-2.0F, -2.0F, -2.0F, 3.0F, 6.0F, 4.0F, 0.1F, false);
+        rightArmBone.texOffs(12, 109).addBox(-1.0F, 3.0F, 1.5F, 2.0F, 2.0F, 1.0F, 0.0F, false);
 
         rightArmJoint = new ModelRenderer(this);
         rightArmJoint.setPos(0.0F, 4.0F, 0.0F);
-        rightArm.addChild(rightArmJoint);
+        rightArmBone.addChild(rightArmJoint);
         rightArmJoint.texOffs(0, 102).addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.1F, false);
 
         rightForeArm = new ModelRenderer(this);
         rightForeArm.setPos(0.0F, 4.0F, 0.0F);
-        rightArm.addChild(rightForeArm);
+        rightArmBone.addChild(rightForeArm);
         rightForeArm.texOffs(0, 118).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false);
         rightForeArm.texOffs(16, 95).addBox(-2.0F, -0.1F, -2.0F, 4.0F, 2.0F, 4.0F, 0.185F, false);
-        rightForeArm.texOffs(16, 98).addBox(-2.0F, 3.0F, -2.0F, 4.0F, 3.0F, 4.0F, 0.15F, false);
-        ClientUtil.editLatestCube(rightForeArm, gloveBox -> {
-            ClientUtil.setFaceUv(gloveBox, Direction.UP,   16, 99, 20, 95, this);
-            ClientUtil.setFaceUv(gloveBox, Direction.DOWN, 28, 95, 32, 99, this);
-        });
+        rightForeArm.texOffs(16, 95).addBox(-2.0F, 3.0F, -2.0F, 4.0F, 3.0F, 4.0F, 0.15F, false);
         rightForeArm.texOffs(16, 114).addBox(-2.6F, 3.2F, -0.5F, 1.0F, 1.0F, 1.0F, -0.2F, false);
         rightForeArm.texOffs(16, 116).addBox(-2.6F, 3.8F, -1.0F, 1.0F, 1.0F, 2.0F, -0.2F, false);
         rightForeArm.texOffs(16, 119).addBox(-2.6F, 4.4F, -1.5F, 1.0F, 1.0F, 3.0F, -0.2F, false);
         rightForeArm.texOffs(16, 123).addBox(-2.6F, 5.0F, -2.0F, 1.0F, 1.0F, 4.0F, -0.2F, false);
 
-        leftLeg = convertLimb(new ModelRenderer(this));
-        leftLeg.setPos(2.0F, 12.0F, 0.0F);
-        body.addChild(leftLeg);
-        leftLeg.texOffs(96, 108).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
-        leftLeg.texOffs(112, 108).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.1F, false);
-        leftLeg.texOffs(108, 119).addBox(-1.15F, 4.5F, -2.5F, 2.0F, 2.0F, 1.0F, 0.0F, true);
+        leftLegXRot = new ModelRenderer(this);
+        leftLegXRot.setPos(2.0F, 12.0F, 0.0F);
+        body.addChild(leftLegXRot);
+        
+
+        leftLegBone = new ModelRenderer(this);
+        leftLegBone.setPos(0.0F, 0.0F, 0.0F);
+        leftLegXRot.addChild(leftLegBone);
+        leftLegBone.texOffs(96, 108).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
+        leftLegBone.texOffs(112, 108).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.1F, false);
+        leftLegBone.texOffs(108, 119).addBox(-1.15F, 4.5F, -2.5F, 2.0F, 2.0F, 1.0F, 0.0F, true);
 
         leftLegJoint = new ModelRenderer(this);
         leftLegJoint.setPos(0.0F, 6.0F, 0.0F);
-        leftLeg.addChild(leftLegJoint);
+        leftLegBone.addChild(leftLegJoint);
         leftLegJoint.texOffs(96, 102).addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.1F, true);
 
         leftLowerLeg = new ModelRenderer(this);
         leftLowerLeg.setPos(0.0F, 6.0F, 0.0F);
-        leftLeg.addChild(leftLowerLeg);
+        leftLegBone.addChild(leftLowerLeg);
         leftLowerLeg.texOffs(96, 118).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false);
         leftLowerLeg.texOffs(112, 118).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.15F, false);
         leftLowerLeg.texOffs(108, 102).addBox(-2.0F, 0.8F, -2.0F, 4.0F, 1.0F, 4.0F, 0.1F, true);
 
-        rightLeg = convertLimb(new ModelRenderer(this));
-        rightLeg.setPos(-2.0F, 12.0F, 0.0F);
-        body.addChild(rightLeg);
-        rightLeg.texOffs(64, 108).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
-        rightLeg.texOffs(80, 108).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.1F, false);
-        rightLeg.texOffs(76, 119).addBox(-0.85F, 4.5F, -2.5F, 2.0F, 2.0F, 1.0F, 0.0F, false);
+        rightLegXRot = new ModelRenderer(this);
+        rightLegXRot.setPos(-2.0F, 12.0F, 0.0F);
+        body.addChild(rightLegXRot);
+        
+
+        rightLegBone = new ModelRenderer(this);
+        rightLegBone.setPos(0.0F, 0.0F, 0.0F);
+        rightLegXRot.addChild(rightLegBone);
+        rightLegBone.texOffs(64, 108).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
+        rightLegBone.texOffs(80, 108).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.1F, false);
+        rightLegBone.texOffs(76, 119).addBox(-0.85F, 4.5F, -2.5F, 2.0F, 2.0F, 1.0F, 0.0F, false);
 
         rightLegJoint = new ModelRenderer(this);
         rightLegJoint.setPos(0.0F, 6.0F, 0.0F);
-        rightLeg.addChild(rightLegJoint);
+        rightLegBone.addChild(rightLegJoint);
         rightLegJoint.texOffs(64, 102).addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.1F, false);
 
         rightLowerLeg = new ModelRenderer(this);
         rightLowerLeg.setPos(0.0F, 6.0F, 0.0F);
-        rightLeg.addChild(rightLowerLeg);
+        rightLegBone.addChild(rightLowerLeg);
         rightLowerLeg.texOffs(64, 118).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false);
         rightLowerLeg.texOffs(80, 118).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.15F, false);
         rightLowerLeg.texOffs(76, 102).addBox(-2.0F, 0.8F, -2.0F, 4.0F, 1.0F, 4.0F, 0.1F, false);
@@ -532,131 +540,18 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
     }
     
     @Override
+    public void afterInit() {
+        super.afterInit();
+        putNamedModelPart("leftShoulder", leftShoulder);
+        putNamedModelPart("rightShoulder", rightShoulder);
+        putNamedModelPart("frontFabric", frontFabric);
+        putNamedModelPart("backFabric", backFabric);
+    }
+    
+    @Override
     public void setupAnim(StarPlatinumEntity entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
         super.setupAnim(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
         manualAnimateHair();
-//        rotateShoulderPad(rightShoulder, rightArm);
-//        rotateShoulderPad(leftShoulder, leftArm);
-    }
-    
-//    private void rotateShoulderPad(ModelRenderer shoulderPad, ModelRenderer arm) {
-//        if (shoulderPad != null && arm != null) {
-//            shoulderPad.zRot = arm.zRot / 2;
-//        }
-//    }
-
-    @Override
-    protected RotationAngle[][] initSummonPoseRotations() {
-        return new RotationAngle[][] {
-            new RotationAngle[] {
-                    new RotationAngle(head, -0.2618F, 0.0F, 0.2618F),
-                    new RotationAngle(body, 0.0F, 0.5236F, 0.0F),
-                    new RotationAngle(upperPart, 0.0F, 0.5236F, 0.0F),
-                    new RotationAngle(leftArm, 0.7854F, 0.0F, -1.2217F),
-                    new RotationAngle(leftForeArm, -1.5708F, 0.0F, 0.7854F),
-                    new RotationAngle(rightArm, 0.0F, 0.0F, 1.8326F),
-                    new RotationAngle(rightForeArm, -1.9199F, 0.0F, -1.5708F),
-                    new RotationAngle(leftLeg, -1.0472F, 0.0F, 0.0F),
-                    new RotationAngle(leftLowerLeg, 2.0944F, 0.0F, 0.0F),
-                    new RotationAngle(rightLeg, 0.3491F, 0.0F, 0.0F)
-            },
-            new RotationAngle[] {
-                    new RotationAngle(head, -0.3491F, 1.2217F, 0.0F),
-                    new RotationAngle(body, 0.0F, 0.7854F, 0.0F),
-                    new RotationAngle(leftArm, -0.6981F, 0.0F, -0.5236F),
-                    new RotationAngle(leftForeArm, -0.7854F, -0.7854F, 1.5708F),
-                    new RotationAngle(rightArm, -1.0472F, 0.0F, 1.8326F),
-                    new RotationAngle(rightForeArm, -1.5708F, 0.2618F, -0.2618F),
-                    new RotationAngle(leftLeg, -0.1745F, 0.0F, -0.0873F),
-                    new RotationAngle(rightLeg, 0.0873F, 0.0F, 0.0873F)
-            },
-            new RotationAngle[] {
-                    new RotationAngle(head, 0.3491F, 1.0472F, 0.0F),
-                    new RotationAngle(body, 0.0F, -0.1745F, -0.1745F),
-                    new RotationAngle(upperPart, 0.0F, 0.2618F, 0.0F),
-                    new RotationAngle(leftArm, 0.0F, 0.0F, -0.2618F),
-                    new RotationAngle(rightArm, 0.3874F, -0.3608F, 0.1886F),
-                    new RotationAngle(rightForeArm, -0.7505F, 0.2618F, -0.1571F),
-                    new RotationAngle(leftLeg, 0.1745F, -0.2618F, 0.2618F),
-                    new RotationAngle(leftLowerLeg, 0.2618F, 0.0F, 0.0F),
-                    new RotationAngle(rightLeg, -0.0873F, -0.2618F, 0.5236F),
-                    new RotationAngle(rightLowerLeg, 0.6981F, 0.0F, 0.0F)
-            }
-        };
-    }
-    
-    @Override
-    protected void initActionPoses() {
-        actionAnim.put(StandPose.RANGED_ATTACK, new PosedActionAnimation.Builder<StarPlatinumEntity>()
-                .addPose(StandEntityAction.Phase.BUTTON_HOLD, new ModelPose<>(new RotationAngle[] {
-                        new RotationAngle(body, 0.0F, -0.48F, 0.0F),
-                        new RotationAngle(leftArm, 0.0F, 0.0F, -0.7854F),
-                        new RotationAngle(leftForeArm, 0.0F, 0.0F, 0.6109F),
-                        new RotationAngle(rightArm, -1.0908F, 0.0F, 1.5708F), 
-                        new RotationAngle(rightForeArm, 0.0F, 0.0F, 0.0F)
-                }))
-                .build(idlePose));
-        
-
-        IModelPose<StarPlatinumEntity> uppercutPose1 = new ModelPose<>(new RotationAngle[] {
-                RotationAngle.fromDegrees(upperPart, 0F, 15F, 0F), 
-                RotationAngle.fromDegrees(leftArm, 10F, 0F, -60F),
-                RotationAngle.fromDegrees(leftForeArm, -90F, 15F, 90F),
-                RotationAngle.fromDegrees(rightArm, 45F, 0F, 15F), 
-                RotationAngle.fromDegrees(rightForeArm, -90F, 0, -90F)
-        });
-        IModelPose<StarPlatinumEntity> uppercutPose2 = new ModelPose<>(new RotationAngle[] {
-                RotationAngle.fromDegrees(upperPart, 0F, -30F, 0F), 
-                RotationAngle.fromDegrees(leftArm, 0F, 0F, -90F),
-                RotationAngle.fromDegrees(leftForeArm, -105F, 0F, 0F),
-                RotationAngle.fromDegrees(rightArm, -135F, 45F, 0F), 
-                RotationAngle.fromDegrees(rightForeArm, -90F, 60F, -90F)
-        });
-        actionAnim.put(StandPose.HEAVY_ATTACK_FINISHER, new PosedActionAnimation.Builder<StarPlatinumEntity>()
-                .addPose(StandEntityAction.Phase.WINDUP, new ModelPoseTransition<>(idlePose, uppercutPose1))
-                .addPose(StandEntityAction.Phase.PERFORM, new ModelPoseTransition<>(uppercutPose1, uppercutPose2))
-                .addPose(StandEntityAction.Phase.RECOVERY, new ModelPoseTransitionMultiple.Builder<>(uppercutPose2)
-                        .addPose(0.5F, uppercutPose2)
-                        .build(idlePose))
-                .build(idlePose));
-        
-        super.initActionPoses();
-    }
-    
-    
-
-    @Override
-    protected ModelPose<StarPlatinumEntity> initIdlePose() {
-        return new ModelPose<>(new RotationAngle[] {
-                new RotationAngle(upperPart, 0, 0, 0),
-                RotationAngle.fromDegrees(body,             -4.7383,    -22.5834,   -0.01776),
-                RotationAngle.fromDegrees(leftArm,          -14.7822,   2.5759,     -35.3342),
-                RotationAngle.fromDegrees(leftForeArm,      -96.9094,   -29.4684,   58.8207),
-                RotationAngle.fromDegrees(rightArm,         -24.1671,   25.3512,    16.7207),
-                RotationAngle.fromDegrees(rightForeArm,     -90,        60,         -90),
-                RotationAngle.fromDegrees(leftLeg,          0.7499,     -16.8861,   -12.3022),
-                RotationAngle.fromDegrees(leftLowerLeg,     17,         0,          0),
-                RotationAngle.fromDegrees(rightLeg,         10.8417,    24.2139,    17.8699),
-                RotationAngle.fromDegrees(rightLowerLeg,    21.3261,    0,          0),
-                RotationAngle.fromDegrees(frontFabric,      -12,        0,          0),
-                RotationAngle.fromDegrees(backFabric,       7.5,        0,          0)
-        });
-    }
-
-    @Override
-    protected ModelPose<StarPlatinumEntity> initIdlePose2Loop() {
-        return new ModelPose<>(new RotationAngle[] {
-                RotationAngle.fromDegrees(leftArm,          -4.7822,    2.5759,     -35.3342),
-                RotationAngle.fromDegrees(leftForeArm,      -101.2948,  -20.4915,   61.558),
-                RotationAngle.fromDegrees(rightArm,         -14.1671,   25.3512,    16.7207),
-                RotationAngle.fromDegrees(rightForeArm,     -90,        47.5,       -90),
-                RotationAngle.fromDegrees(leftLeg,          5.7499,     -16.8861,   -12.3022),
-                RotationAngle.fromDegrees(leftLowerLeg,     19.5,       0,          0),
-                RotationAngle.fromDegrees(rightLeg,         15.8417,    24.2139,    17.8699),
-                RotationAngle.fromDegrees(rightLowerLeg,    21.3261,    0,          0),
-                RotationAngle.fromDegrees(frontFabric,      -10.5,      0,          0),
-                RotationAngle.fromDegrees(backFabric,       11,         0,          0)
-        });
     }
     
     
@@ -664,6 +559,7 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
     private final List<ModelRenderer> hairToAnimateManually;
     private static final float TWO_PI = (float) Math.PI * 2;
     private float ticksPrev;
+    @Deprecated
     private void manualAnimateHair() {
         for (int i = 0; i < hairToAnimateManually.size(); i++) {
             ModelRenderer hair = hairToAnimateManually.get(i);
@@ -686,4 +582,5 @@ public class StarPlatinumModel extends HumanoidStandModel<StarPlatinumEntity> {
         }
         ticksPrev = ticks;
     }
+    
 }

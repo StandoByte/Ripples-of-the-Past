@@ -6,6 +6,7 @@ import com.mojang.blaze3d.vertex.IVertexBuilder;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.entity.Entity;
 
+@Deprecated
 public abstract class AdditionalBarrageSwing<T extends Entity, M extends EntityModel<T>> {
     protected final IBarrageAnimation<T, M> barrageAnim;
     protected float ticks;

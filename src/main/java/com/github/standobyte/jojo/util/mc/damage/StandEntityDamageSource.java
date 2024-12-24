@@ -19,6 +19,7 @@ public class StandEntityDamageSource extends EntityDamageSource implements IStan
     private boolean stackKnockback = false;
     private boolean bypassInvulTicks = false;
     private boolean preventDamagingArmor = false;
+    private boolean nonLethal = false;
     protected boolean showStandUserName;
     private int barrageHits = 0;
     private int standInvulTicks = 0;
@@ -107,6 +108,18 @@ public class StandEntityDamageSource extends EntityDamageSource implements IStan
     @Override
     public boolean preventsDamagingArmor() {
         return preventDamagingArmor;
+    }
+    
+    
+    @Override
+    public StandEntityDamageSource setNonLethal() {
+        this.nonLethal = true;
+        return this;
+    }
+    
+    @Override
+    public boolean isNonLethal() {
+        return nonLethal;
     }
     
     

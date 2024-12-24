@@ -75,6 +75,7 @@ import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.IPlayerLeap;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil.Direction2D;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
@@ -247,7 +248,7 @@ public class InputHandler {
             return;
         }
 
-        if (actionsOverlay.isActive() && !mc.player.isSpectator()) {
+        if (actionsOverlay.isActive() && !JojoModUtil.tmpSpectatorCantUsePowers(mc.player)) {
             boolean scrollAttack = controlsAreOnHotbar(ControlScheme.Hotbar.LEFT_CLICK);
             boolean scrollAbility = controlsAreOnHotbar(ControlScheme.Hotbar.RIGHT_CLICK);
             if (scrollAttack || scrollAbility) {
@@ -327,7 +328,7 @@ public class InputHandler {
     public void handleKeyBindings(ClientTickEvent event) {
         if (mc.overlay != null || (mc.screen != null && !mc.screen.passEvents)
                 || mc.level == null || standPower == null || nonStandPower == null
-                || actionsOverlay == null || mc.player.isSpectator()) {
+                || actionsOverlay == null || JojoModUtil.tmpSpectatorCantUsePowers(mc.player)) {
             return;
         }
         
@@ -803,7 +804,7 @@ public class InputHandler {
     public void modActionClick(ClickInputEvent event) {
         doubleShift.reset();
         
-        if (mc.player.isSpectator() || event.getHand() == Hand.OFF_HAND) {
+        if (JojoModUtil.tmpSpectatorCantUsePowers(mc.player) || event.getHand() == Hand.OFF_HAND) {
             return;
         }
 
@@ -900,7 +901,7 @@ public class InputHandler {
     
     private <P extends IPower<P, ?>> HudClickResult handleMouseClickPowerHud(ActionKey key, KeyBinding keyBinding) {
         HudClickResult result = new HudClickResult();
-        if (mc.player.isSpectator()) {
+        if (JojoModUtil.tmpSpectatorCantUsePowers(mc.player)) {
             return result;
         }
 

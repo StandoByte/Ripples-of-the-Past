@@ -223,7 +223,7 @@ public class TommyGunItem extends Item {
     
     @Override
     public void inventoryTick(ItemStack stack, World world, Entity entity, int itemSlot, boolean isSelected) {
-        if (!world.isClientSide()) {
+        if (!world.isClientSide() && stack.hasTag()) {
             CompoundNBT tag = stack.getTag();
             byte textureTicks = tag.getByte("GunshotTick");
             if (textureTicks > 0) {

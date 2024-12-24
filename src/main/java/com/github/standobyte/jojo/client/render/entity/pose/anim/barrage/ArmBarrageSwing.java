@@ -12,6 +12,7 @@ import net.minecraft.util.HandSide;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 
+@Deprecated
 public abstract class ArmBarrageSwing<T extends Entity, M extends EntityModel<T>> extends AdditionalBarrageSwing<T, M> {
     private static final Random RANDOM = new Random();
     private final HandSide side;
@@ -27,12 +28,9 @@ public abstract class ArmBarrageSwing<T extends Entity, M extends EntityModel<T>
         if (side == HandSide.RIGHT) {
             leftOffset *= -1;
         }
-        zRot = MathUtil.wrapRadians((float) (Math.PI / 2 - MathHelper.atan2(upOffset, leftOffset)));
+        double atan = MathHelper.atan2(upOffset, leftOffset);
+        zRot = maxOffset == 0 ? 0 : MathUtil.wrapRadians((float) (Math.PI / 2 - atan));
         offset = new Vector3d(leftOffset, upOffset, frontOffset);
-    }
-    
-    public HandSide getSide() {
-        return side;
     }
     
     @Override
@@ -40,12 +38,13 @@ public abstract class ArmBarrageSwing<T extends Entity, M extends EntityModel<T>
             float yRotOffsetRad, float xRotRad, 
             int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
         setArmOnlyModelVisibility(entity, model, side);
-        double zAdditional = (0.5F - Math.abs(0.5F - ticks / ticksMax));
+        float animRatio = ticks / ticksMax;
+        double zAdditional = (0.5F - Math.abs(0.5F - animRatio));
         Vector3d offsetRot = new Vector3d(offset.x, -offset.y, offset.z + zAdditional).xRot(xRotRad);
         matrixStack.pushPose();
         matrixStack.translate(offsetRot.x, offsetRot.y, -offsetRot.z);
-        barrageAnim.animateSwing(entity, model, ticks / ticksMax, side, yRotOffsetRad, xRotRad, zRot);
-        barrageAnim.beforeSwingAfterimageRender(matrixStack, model, ticks / ticksMax, side);
+        barrageAnim.animateSwing(entity, model, animRatio, side, yRotOffsetRad, xRotRad, zRot);
+        barrageAnim.beforeSwingAfterimageRender(matrixStack, model, animRatio, side);
         model.renderToBuffer(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha * 0.75F);
         matrixStack.popPose();
     }

@@ -49,7 +49,7 @@ public class PillarmanLightFlash extends PillarmanAction {
             }
         }
         user.playSound(ModSounds.AJA_STONE_BEAM.get(), (float) (range + 16) / 16F, 1.0F); // TODO replace the light flash sound
-        HamonUtil.createHamonSparkParticlesEmitter(user, 2F, 0, ParticleTypes.FLASH);
+        HamonUtil.createHamonSparkParticlesEmitter(user, 2F, 0, ModParticles.LIGHT_MODE_FLASH.get());
     }
     
 }

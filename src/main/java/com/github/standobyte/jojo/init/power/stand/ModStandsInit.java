@@ -6,6 +6,7 @@ import static com.github.standobyte.jojo.init.power.ModCommonRegisters.ACTIONS;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.action.stand.CrazyDiamondAngeloRock;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockBullet;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMove;
@@ -150,6 +151,7 @@ public class ModStandsInit {
     public static final RegistryObject<StandEntityHeavyAttack> STAR_PLATINUM_UPPERCUT = ACTIONS.register("star_platinum_uppercut", 
             () -> new StarPlatinumUppercut(new StandEntityHeavyAttack.Builder()
                     .resolveLevelToUnlock(1)
+                    .standPose(StarPlatinumUppercut.UPPERCUT_POSE)
                     .punchSound(ModSounds.STAR_PLATINUM_PUNCH_HEAVY)
                     .standSound(Phase.WINDUP, false, ModSounds.STAR_PLATINUM_ORA_LONG)
                     .partsRequired(StandPart.ARMS)));
@@ -165,7 +167,7 @@ public class ModStandsInit {
     public static final RegistryObject<StarPlatinumStarFinger> STAR_PLATINUM_STAR_FINGER = ACTIONS.register("star_platinum_star_finger", 
             () -> new StarPlatinumStarFinger(new StandEntityAction.Builder().staminaCost(375).standPerformDuration(20).cooldown(20, 60)
                     .ignoresPerformerStun().resolveLevelToUnlock(3)
-                    .standOffsetFront().standPose(StandPose.RANGED_ATTACK)
+                    .standOffsetFront().standPose(StarPlatinumStarFinger.STAR_FINGER_POSE)
                     .shout(ModSounds.JOTARO_STAR_FINGER).standSound(Phase.PERFORM, ModSounds.STAR_PLATINUM_STAR_FINGER)
                     .partsRequired(StandPart.ARMS)));
     
@@ -181,6 +183,7 @@ public class ModStandsInit {
     public static final RegistryObject<StarPlatinumInhale> STAR_PLATINUM_INHALE = ACTIONS.register("star_platinum_inhale", 
             () -> new StarPlatinumInhale(new StandEntityAction.Builder().holdType(80).staminaCostTick(2F).cooldown(80)
                     .ignoresPerformerStun().resolveLevelToUnlock(2)
+                    .standPose(StarPlatinumInhale.INHALE_POSE)
                     .standOffsetFromUser(0, -0.25).standSound(ModSounds.STAR_PLATINUM_INHALE)
                     .partsRequired(StandPart.MAIN_BODY)));
     
@@ -265,6 +268,7 @@ public class ModStandsInit {
     public static final RegistryObject<StandEntityHeavyAttack> THE_WORLD_KICK = ACTIONS.register("the_world_kick", 
             () -> new TheWorldKick(new StandEntityHeavyAttack.Builder()
                     .resolveLevelToUnlock(1)
+                    .standPose(TheWorldKick.KICK_POSE)
                     .punchSound(ModSounds.THE_WORLD_KICK_HEAVY)
                     .shout(ModSounds.DIO_DIE)
                     .partsRequired(StandPart.LEGS)));
@@ -703,8 +707,12 @@ public class ModStandsInit {
                     .standAutoSummonMode(AutoSummonMode.MAIN_ARM)
                     .partsRequired(StandPart.ARMS)));
     
+    public static final RegistryObject<StandEntityActionModifier> CRAZY_DIAMOND_ANGELO_ROCK = ACTIONS.register("crazy_diamond_angelo_rock", 
+            () -> new CrazyDiamondAngeloRock(new StandAction.Builder().staminaCost(50).resolveLevelToUnlock(2)));
+    
     public static final RegistryObject<CrazyDiamondRestoreTerrain> CRAZY_DIAMOND_RESTORE_TERRAIN = ACTIONS.register("crazy_diamond_restore_terrain", 
             () -> new CrazyDiamondRestoreTerrain(new StandEntityAction.Builder().holdType().staminaCostTick(2) // cost per block rather than per tick
+                    .attackRecoveryFollowup(CRAZY_DIAMOND_ANGELO_ROCK, CRAZY_DIAMOND_FINISHER_PUNCH)
                     .resolveLevelToUnlock(2)
                     .shout(ModSounds.JOSUKE_FIX).standSound(Phase.PERFORM, ModSounds.CRAZY_DIAMOND_FIX_STARTED)
                     .partsRequired(StandPart.ARMS)));

@@ -9,6 +9,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.GoldExperienceChooseLifeform;
 import com.github.standobyte.jojo.entity.AfterimageEntity;
+import com.github.standobyte.jojo.entity.AngeloRockEntity;
 import com.github.standobyte.jojo.entity.CrimsonBubbleEntity;
 import com.github.standobyte.jojo.entity.EyeOfEnderInsideEntity;
 import com.github.standobyte.jojo.entity.FireworkInsideEntity;
@@ -296,6 +297,10 @@ public class ModEntityTypes {
     public static final RegistryObject<EntityType<FireworkInsideEntity>> FIREWORK_INSIDE = ENTITIES.register("firework_inside", 
             () -> EntityType.Builder.<FireworkInsideEntity>of(FireworkInsideEntity::new, EntityClassification.MISC).sized(0.25F, 0.25F).clientTrackingRange(4).updateInterval(10)
             .build(new ResourceLocation(JojoMod.MOD_ID, "firework_inside").toString()));
+    
+    public static final RegistryObject<EntityType<AngeloRockEntity>> ANGELO_ROCK = ENTITIES.register("angelo_rock", 
+            () -> EntityType.Builder.<AngeloRockEntity>of(AngeloRockEntity::new, EntityClassification.MISC).sized(1F, 1.75F).clientTrackingRange(10).updateInterval(Integer.MAX_VALUE)
+            .build(new ResourceLocation(JojoMod.MOD_ID, "angelo_rock").toString()));
     
     public static final RegistryObject<EntityType<GETransformationEntity>> GE_LIFEFORM_TRANSFORMATION = ENTITIES.register("ge_lifeform", 
             () -> EntityType.Builder.<GETransformationEntity>of(GETransformationEntity::new, EntityClassification.MISC).sized(1.0F, 1.0F).noSummon()

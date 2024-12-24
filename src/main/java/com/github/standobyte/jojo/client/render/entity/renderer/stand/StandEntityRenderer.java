@@ -20,6 +20,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.init.power.stand.ModStands;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
@@ -98,7 +99,7 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
     }
     
     protected boolean visibleForSpectator(T entity) {
-        return entity.underInvisibilityEffect() && Minecraft.getInstance().player.isSpectator();
+        return entity.underInvisibilityEffect() && JojoModUtil.seesInvisibleAsSpectator(Minecraft.getInstance().player);
     }
 
     protected RenderType getRenderType(T entity, ResourceLocation modelTexture) {
@@ -296,14 +297,12 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
             IVertexBuilder vertexBuilder = buffer.getBuffer(RenderType.outline(texture));
             
             model.render(entity, matrixStack, vertexBuilder, packedLight, packedOverlay, 1, 1, 1, 1);
-            if (!entity.isSpectator()) {
-                for (LayerRenderer<T, M> layerRenderer : this.layers) {
-                    if (layerRenderer instanceof StandModelLayerRenderer) {
-                        StandModelLayerRenderer<T, M> standLayerRenderer = (StandModelLayerRenderer<T, M>) layerRenderer;
-                        RenderType renderType = standLayerRenderer.getRenderType(entity, RenderType::outline);
-                        standLayerRenderer.render(matrixStack, buffer, renderType, packedLight, entity, 
-                                walkAnimPos, walkAnimSpeed, partialTick, ticks, yRotationOffset, xRotation);
-                    }
+            for (LayerRenderer<T, M> layerRenderer : this.layers) {
+                if (layerRenderer instanceof StandModelLayerRenderer) {
+                    StandModelLayerRenderer<T, M> standLayerRenderer = (StandModelLayerRenderer<T, M>) layerRenderer;
+                    RenderType renderType = standLayerRenderer.getRenderType(entity, RenderType::outline);
+                    standLayerRenderer.render(matrixStack, buffer, renderType, packedLight, entity, 
+                            walkAnimPos, walkAnimSpeed, partialTick, ticks, yRotationOffset, xRotation);
                 }
             }
         }
@@ -317,13 +316,10 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
         if (renderType != null) {
             IVertexBuilder vertexBuilder = buffer.getBuffer(renderType);
             model.render(entity, matrixStack, vertexBuilder, packedLight, packedOverlay, 1, 1, 1, alpha);
-            model.renderBarrageSwings(entity, matrixStack, vertexBuilder, packedLight, packedOverlay, 1, 1, 1, alpha);
         }
-        if (!entity.isSpectator()) {
-            for (LayerRenderer<T, M> layerRenderer : this.layers) {
-                layerRenderer.render(matrixStack, buffer, packedLight, entity, 
-                        walkAnimPos, walkAnimSpeed, partialTick, ticks, yRotationOffset, xRotation);
-            }
+        for (LayerRenderer<T, M> layerRenderer : this.layers) {
+            layerRenderer.render(matrixStack, buffer, packedLight, entity, 
+                    walkAnimPos, walkAnimSpeed, partialTick, ticks, yRotationOffset, xRotation);
         }
 
         matrixStack.popPose();

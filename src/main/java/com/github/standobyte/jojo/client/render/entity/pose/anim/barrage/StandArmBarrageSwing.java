@@ -6,6 +6,7 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 
 import net.minecraft.util.HandSide;
 
+@Deprecated
 public class StandArmBarrageSwing<T extends StandEntity, M extends StandEntityModel<T>> extends ArmBarrageSwing<T, M> {
 
     public StandArmBarrageSwing(IBarrageAnimation<T, M> barrageAnim, 

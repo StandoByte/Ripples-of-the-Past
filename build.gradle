@@ -11,6 +11,9 @@ buildscript {
         classpath group: 'org.spongepowered', name: 'mixingradle', version: '0.7-SNAPSHOT'
     }
 }
+plugins {
+    id 'com.github.johnrengelman.shadow' version '7.1.2'
+}
 apply plugin: 'net.minecraftforge.gradle'
 apply plugin: 'org.parchmentmc.librarian.forgegradle'
 apply plugin: 'eclipse'
@@ -109,6 +112,11 @@ repositories {
     }
 }
 
+configurations {
+    shade
+    implementation.extendsFrom shade
+}
+
 dependencies {
     minecraft "net.minecraftforge:forge:${mc_version}-${forge_version}"
     annotationProcessor 'org.spongepowered:mixin:0.8.4:processor'
@@ -122,9 +130,12 @@ dependencies {
     compileOnly fg.deobf("de.teamlapen.vampirism:Vampirism:${mc_version}-${vampirism_version}")
     
     compileOnly fg.deobf("be.florens:expandability-forge:${expandability_version}")
+    
+    shade 'team.unnamed:mocha:3.0.0'
 }
 
 jar {
+	archiveClassifier = ''
     manifest {
         attributes([
             "Specification-Title": "Ripples of the Past",
@@ -135,6 +146,20 @@ jar {
             "Implementation-Vendor" :"StandoByte",
         ])
     }
+}
+
+shadowJar {
+    archiveClassifier = 'fat'
+    configurations = [project.configurations.shade]
+    relocate 'team.unnamed.mocha', "dependency.${project.group}.mocha"
+    relocate 'javassist', "dependency.${project.group}.javassist"
+    finalizedBy 'reobfShadowJar'
+}
+
+assemble.dependsOn shadowJar
+
+reobf {
+    shadowJar {}
 }
 
 // Example configuration to allow publishing using the maven-publish task

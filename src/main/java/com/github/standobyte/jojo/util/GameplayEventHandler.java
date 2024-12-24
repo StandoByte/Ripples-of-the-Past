@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.util;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,7 @@ import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.action.stand.effect.BoyIIManStandPartTakenEffect;
+import com.github.standobyte.jojo.action.stand.effect.CDTurnIntoAngeloRockEffect;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.block.WoodenCoffinBlock;
@@ -39,6 +41,7 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.enchantment.GlovesSpeedEnchantment;
+import com.github.standobyte.jojo.entity.AngeloRockEntity;
 import com.github.standobyte.jojo.entity.mob.CocoJumboTurtleEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
@@ -67,6 +70,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.SpawnParticlePacket
 import com.github.standobyte.jojo.potion.BleedingEffect;
 import com.github.standobyte.jojo.potion.HamonSpreadEffect;
 import com.github.standobyte.jojo.potion.IApplicableEffect;
+import com.github.standobyte.jojo.potion.StatusEffect;
 import com.github.standobyte.jojo.potion.VampireSunBurnEffect;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
@@ -104,6 +108,8 @@ import net.minecraft.block.AbstractFurnaceBlock;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.Blocks;
 import net.minecraft.block.SoundType;
+import net.minecraft.enchantment.EnchantmentHelper;
+import net.minecraft.enchantment.Enchantments;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
@@ -115,6 +121,7 @@ import net.minecraft.entity.item.PaintingEntity;
 import net.minecraft.entity.item.PaintingType;
 import net.minecraft.entity.item.TNTEntity;
 import net.minecraft.entity.item.minecart.TNTMinecartEntity;
+import net.minecraft.entity.monster.CreeperEntity;
 import net.minecraft.entity.monster.StrayEntity;
 import net.minecraft.entity.passive.CowEntity;
 import net.minecraft.entity.passive.MooshroomEntity;
@@ -198,6 +205,7 @@ import net.minecraftforge.event.entity.living.LivingHealEvent;
 import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.minecraftforge.event.entity.living.LivingKnockBackEvent;
 import net.minecraftforge.event.entity.living.LivingSpawnEvent;
+import net.minecraftforge.event.entity.living.LootingLevelEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionAddedEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionApplicableEvent;
 import net.minecraftforge.event.entity.living.PotionEvent.PotionExpiryEvent;
@@ -1143,7 +1151,31 @@ public class GameplayEventHandler {
             stand.getContinuousEffects().onStandUserLogout((ServerPlayerEntity) player);
         });
     }
-
+    
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void handleCheatDeath(LivingDeathEvent event) {
+        LivingEntity dead = event.getEntityLiving();
+        DamageSource damageSource = event.getSource();
+        if (!dead.level.isClientSide()) {
+            cheatDeath(event);
+            
+            if (!event.isCanceled()) {
+                if (damageSource instanceof IModdedDamageSource && ((IModdedDamageSource) damageSource).isNonLethal()) {
+                    event.setCanceled(true);
+                    event.getEntityLiving().setHealth(0.0001f);
+                }
+            }
+            
+            if (!event.isCanceled()) {
+                if (StandEffectsTracker.getEffectsTargetedBy(dead, ModStandEffects.TURN_INTO_ANGELO_ROCK.get())
+                        .anyMatch(CDTurnIntoAngeloRockEffect::preventTargetDeath)) {
+                    event.setCanceled(true);
+                    event.getEntityLiving().setHealth(0.0001f);
+                }
+            }
+        }
+    }
+    
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void beforeLivingDeath(LivingDeathEvent event) {
         LivingEntity dead = event.getEntityLiving();
@@ -1202,13 +1234,6 @@ public class GameplayEventHandler {
                 dead.level.playSound(null, dead.getX(), dead.getY(), dead.getZ(), SoundEvents.GLASS_BREAK, dead.getSoundSource(), 
                         (soundtype.getVolume() + 1.0F) / 2.0F, soundtype.getPitch() * 0.8F);
             }
-        }
-    }
-    
-    @SubscribeEvent(priority = EventPriority.HIGHEST)
-    public static void handleCheatDeath(LivingDeathEvent event) {
-        if (!event.getEntity().level.isClientSide()) {
-            cheatDeath(event);
         }
     }
 
@@ -1290,6 +1315,27 @@ public class GameplayEventHandler {
         }
     }
     
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public static void cancelHitSound(PlaySoundAtEntityEvent event) {
+        SoundEvent sound = event.getSound();
+        if (AngeloRockEntity.cancelPlayerHitSound && (sound == SoundEvents.PLAYER_ATTACK_STRONG || sound == SoundEvents.PLAYER_ATTACK_WEAK/* || sound == SoundEvents.PLAYER_ATTACK_KNOCKBACK*/ /* is played before AngeloRockEntity#hurt is called so nope */)) {
+            AngeloRockEntity.cancelPlayerHitSound = false;
+            event.setCanceled(true);
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.HIGH)
+    public static void changeLooting(LootingLevelEvent event) {
+        LivingEntity usePickaxeFortune = AngeloRockEntity.mobLootFortune;
+        if (usePickaxeFortune != null && event.getEntityLiving() == usePickaxeFortune) {
+            Entity killer = event.getDamageSource().getEntity();
+            if (killer instanceof LivingEntity) {
+                int fortune = EnchantmentHelper.getEnchantmentLevel(Enchantments.BLOCK_FORTUNE, (LivingEntity) killer);
+                event.setLootingLevel(Math.max(event.getLootingLevel(), fortune));
+            }
+        }
+    }
+    
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onProjectileShot(EntityJoinWorldEvent event) {
         HamonUtil.chargeNewEntity(event.getEntity(), event.getWorld());
@@ -1300,8 +1346,22 @@ public class GameplayEventHandler {
         HamonUtil.onProjectileImpact(event.getEntity(), event.getRayTraceResult());
     }
     
-    @SubscribeEvent(priority = EventPriority.LOWEST)
+    @SubscribeEvent
     public static void onExplosionDetonate(ExplosionEvent.Detonate event) {
+        Explosion explosion = event.getExplosion();
+        if (explosion.getExploder() instanceof CreeperEntity) {
+            CreeperEntity creeper = (CreeperEntity) explosion.getExploder();
+            Collection<Effect> effects = new ArrayList<>(creeper.getActiveEffectsMap().keySet());
+            effects.forEach(effect -> {
+                if (effect == ModStatusEffects.BLEEDING.get() || effect instanceof StatusEffect && ((StatusEffect) effect).isUncurable()) {
+                    creeper.removeEffect(effect);
+                }
+            });
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.LOWEST)
+    public static void onExplosionDetonate2(ExplosionEvent.Detonate event) {
         Explosion explosion = event.getExplosion();
         
         event.getAffectedEntities().forEach(entity -> {

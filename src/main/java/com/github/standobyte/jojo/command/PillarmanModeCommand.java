@@ -6,7 +6,6 @@ import java.util.Optional;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanData;
-import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanPowerType;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -50,7 +49,6 @@ public class PillarmanModeCommand {
                 Optional<PillarmanData> pillarmanOptional = power.getTypeSpecificData(ModPowers.PILLAR_MAN.get());
                 pillarmanOptional.ifPresent(pillarman -> {
                     pillarman.setEvolutionStage(stage);
-                    PillarmanPowerType.effectsCheck(power);
                 });
                 return pillarmanOptional.isPresent() ? 1 : 0;
             }).orElse(0);

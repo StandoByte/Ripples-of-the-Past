@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.client.ui.actionshud;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
 import net.minecraft.client.Minecraft;
 import net.minecraftforge.client.settings.IKeyConflictContext;
@@ -24,7 +25,7 @@ public class QuickAccess<P extends IPower<P, ?>> {
         @Override
         public boolean isActive() {
             Minecraft mc = Minecraft.getInstance();
-            if (mc.player == null || mc.player.isSpectator()) return false;
+            if (mc.player == null || JojoModUtil.tmpSpectatorCantUsePowers(mc.player)) return false;
             
             ActionsOverlayGui actionsHud = ActionsOverlayGui.getInstance();
             if (actionsHud == null) return false;

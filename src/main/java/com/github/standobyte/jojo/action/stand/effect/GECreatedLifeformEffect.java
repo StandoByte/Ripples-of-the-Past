@@ -44,7 +44,7 @@ public class GECreatedLifeformEffect extends StandEffectInstance {
     
     public void setSource(GETransformationData source) {
         this.source = source;
-        followTarget.setOwner(source.getFollowTarget());
+        followTarget.setOwnerUUID(source.getFollowTarget());
     }
     
     public ItemStack getItemView() {

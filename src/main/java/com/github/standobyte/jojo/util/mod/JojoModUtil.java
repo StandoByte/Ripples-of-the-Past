@@ -318,8 +318,17 @@ public class JojoModUtil {
         return Optional.empty();
     }
     
+    public static GameType getGameModeConsiderPossessing(PlayerEntity player) {
+        return getActualGameModeWhilePossessing(player).orElse(MCUtil.getGameMode(player));
+    }
+    
     public static boolean seesInvisibleAsSpectator(PlayerEntity player) {
         return getActualGameModeWhilePossessing(player).map(gameMode -> gameMode == GameType.SPECTATOR).orElse(player.isSpectator());
+    }
+    
+    // TODO let players possessing other entities use power HUD and certain abilities, depending on the possession context
+    public static boolean tmpSpectatorCantUsePowers(LivingEntity entity) {
+        return entity.isSpectator();
     }
     
 
@@ -461,13 +470,14 @@ public class JojoModUtil {
         sayVoiceLine(entity, sound, character, volume, pitch, 200, interrupt);
     }
 
-    public static void sayVoiceLine(LivingEntity entity, SoundEvent sound, 
+    public static boolean sayVoiceLine(LivingEntity entity, SoundEvent sound, 
             @Nullable ClothesSet character, float volume, float pitch, int voiceLineDelay, boolean interrupt) {
         if (entity.level.isClientSide() || entity.hasEffect(Effects.INVISIBILITY) ||
                 character != null && character != ClothesSet.getClothesSet(entity)) {
-            return;
+            return false;
         }
         SoundCategory category = SoundCategory.VOICE;
+        boolean triggered = false;
         if (entity instanceof PlayerEntity) {
             PlayVoiceLinePacket packet;
             if (!canPlayVoiceLine((PlayerEntity) entity, sound, voiceLineDelay)) {
@@ -483,13 +493,16 @@ public class JojoModUtil {
                     category = event.getCategory();
                     volume = event.getVolume();
                     packet = new PlayVoiceLinePacket(sound, category, entity.getId(), volume, pitch, interrupt);
+                    triggered = true;
                 }
             }
             PacketManager.sendToNearby(packet, null, entity.getX(), entity.getY(), entity.getZ(), 
                     volume > 1.0F ? (double) (16.0F * volume) : 16.0D, entity.level.dimension());
+            return triggered;
         }
         else {
             entity.level.playSound(null, entity, sound, category, volume, pitch);
+            return true;
         }
     }
 

@@ -10,6 +10,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.math.MathHelper;
 
+@Deprecated
 public abstract class ArmsBarrageAnimation<T extends LivingEntity, M extends EntityModel<T>> implements IBarrageAnimation<T, M> {
     protected final M model;
     private final IModelPose<T> loop;
@@ -87,7 +88,7 @@ public abstract class ArmsBarrageAnimation<T extends LivingEntity, M extends Ent
         
         for (int i = 0; i < swingsToAdd; i++) {
             float f = ((float) i / (float) swingsToAdd
-                    + (entity.getRandom().nextFloat() - 0.5F) * 0.4F / hits)
+                    + (entity.getRandom().nextFloat() - 0.5F) * 0.4F / (float) swingsToAdd)
                     * getLoopLen() * 0.5F;
             if (switchesArms()) side = side.getOpposite();
             addSwing(entity, swings, side, f, maxOffset);

@@ -132,11 +132,6 @@ public class MeshModelBox extends ModelRenderer.ModelBox {
             
             public MeshModelBox.Builder createFace() {
                 if (vertices.size() > 2) {
-                    if (vertices.size() > 3) {
-                        ModelRenderer.PositionTextureVertex swap = vertices.get(3);
-                        vertices.set(3, vertices.get(2));
-                        vertices.set(2, swap);
-                    }
                     ModelRenderer.PositionTextureVertex[] verticesDummy = new ModelRenderer.PositionTextureVertex[] {
                             new ModelRenderer.PositionTextureVertex(0, 0, 0, 0, 0),
                             new ModelRenderer.PositionTextureVertex(0, 0, 0, 0, 0),

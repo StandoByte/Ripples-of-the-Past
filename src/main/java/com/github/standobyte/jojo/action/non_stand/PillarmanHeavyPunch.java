@@ -55,17 +55,17 @@ public class PillarmanHeavyPunch extends PillarmanAction implements IPlayerActio
         @Override
         public void playerTick() {
             switch (getTick()) {
-            case 2:
+            case 3:
                 if (user.level.isClientSide()) {
                     user.level.playSound(ClientUtil.getClientPlayer(), user.getX(), user.getEyeY(), user.getZ(), 
-                            ModSounds.HAMON_SYO_SWING.get(), user.getSoundSource(), 1.0f, 1.25f); // TODO separate sound event
+                            ModSounds.PILLAR_MAN_SWING.get(), user.getSoundSource(), 1.0f, 1.25f);
                     user.swing(Hand.MAIN_HAND, true);
                 }
                 break;
             case 5:
                 if (!user.level.isClientSide()) {
                     ActionTarget target = playerPower.getMouseTarget();
-                    VampirismClawLacerate.punchPerform(user.level, user, playerPower, target, ModSounds.THE_WORLD_PUNCH_HEAVY_ENTITY.get(), 1.2F, 0.8F); // TODO separate sound event
+                    VampirismClawLacerate.punchPerform(user.level, user, playerPower, target, ModSounds.PILLAR_MAN_PUNCH.get(), 1.2F, 0.8F);
                 }
                 break;
             case 8:
