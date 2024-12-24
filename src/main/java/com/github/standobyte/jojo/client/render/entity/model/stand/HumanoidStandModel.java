@@ -1,10 +1,12 @@
 package com.github.standobyte.jojo.client.render.entity.model.stand;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -15,6 +17,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.client.ClientModSettings;
+import com.github.standobyte.jojo.client.particle.custom.StandCrumbleParticle;
 import com.github.standobyte.jojo.client.render.entity.pose.IModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose.ModelAnim;
@@ -33,7 +36,10 @@ import com.github.standobyte.jojo.util.general.MathUtil;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
 
+import it.unimi.dsi.fastutil.objects.ObjectList;
+import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.HandSide;
@@ -45,20 +51,29 @@ import net.minecraft.util.math.vector.Vector3d;
 
 
 public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<T> {
+    protected ModelRenderer root;
     protected ModelRenderer head;
     protected ModelRenderer body;
     protected ModelRenderer upperPart;
     protected ModelRenderer torso;
-    protected XRotationModelRenderer leftArm;
+    @Deprecated protected XRotationModelRenderer leftArm;
+    protected ModelRenderer leftArmXRot;
+    protected ModelRenderer leftArmBone;
     protected ModelRenderer leftArmJoint;
     protected ModelRenderer leftForeArm;
-    protected XRotationModelRenderer rightArm;
+    @Deprecated protected XRotationModelRenderer rightArm;
+    protected ModelRenderer rightArmXRot;
+    protected ModelRenderer rightArmBone;
     protected ModelRenderer rightArmJoint;
     protected ModelRenderer rightForeArm;
-    protected XRotationModelRenderer leftLeg;
+    @Deprecated protected XRotationModelRenderer leftLeg;
+    protected ModelRenderer leftLegXRot;
+    protected ModelRenderer leftLegBone;
     protected ModelRenderer leftLegJoint;
     protected ModelRenderer leftLowerLeg;
-    protected XRotationModelRenderer rightLeg;
+    @Deprecated protected XRotationModelRenderer rightLeg;
+    protected ModelRenderer rightLegXRot;
+    protected ModelRenderer rightLegBone;
     protected ModelRenderer rightLegJoint;
     protected ModelRenderer rightLowerLeg;
     
@@ -165,6 +180,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
                 .build();
     }
     
+    @Deprecated
     protected final XRotationModelRenderer convertLimb(ModelRenderer limbModelPart) {
         return new XRotationModelRenderer(this);
     }
@@ -173,20 +189,37 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
     public void afterInit() {
         super.afterInit();
         
-        namedModelParts.put("head", head);
-        namedModelParts.put("body", body);
-        namedModelParts.put("upperPart", upperPart);
-        namedModelParts.put("torso", torso);
-        namedModelParts.put("leftArm", leftArm);
-        namedModelParts.put("leftForeArm", leftForeArm);
-        namedModelParts.put("rightArm", rightArm);
-        namedModelParts.put("rightForeArm", rightForeArm);
-        namedModelParts.put("leftLeg", leftLeg);
-        namedModelParts.put("leftLowerLeg", leftLowerLeg);
-        namedModelParts.put("rightLeg", rightLeg);
-        namedModelParts.put("rightLowerLeg", rightLowerLeg);
+        if (root == null) {
+            root = new ModelRenderer(this);
+            root.setPos(0.0F, 0.0F, 0.0F);
+            root.addChild(head);
+            root.addChild(body);
+        }
+        
+        putNamedModelPart("head", head);
+        putNamedModelPart("body", body);
+        putNamedModelPart("upperPart", upperPart);
+        putNamedModelPart("torso", torso);
+        putNamedModelPart("leftArm", leftArm);
+        putNamedModelPart("leftArmXRot", leftArmXRot);
+        putNamedModelPart("leftArmBone", leftArmBone);
+        putNamedModelPart("leftForeArm", leftForeArm);
+        putNamedModelPart("rightArm", rightArm);
+        putNamedModelPart("rightArmXRot", rightArmXRot);
+        putNamedModelPart("rightArmBone", rightArmBone);
+        putNamedModelPart("rightForeArm", rightForeArm);
+        putNamedModelPart("leftLeg", leftLeg);
+        putNamedModelPart("leftLegXRot", leftLegXRot);
+        putNamedModelPart("leftLegBone", leftLegBone);
+        putNamedModelPart("leftLowerLeg", leftLowerLeg);
+        putNamedModelPart("rightLeg", rightLeg);
+        putNamedModelPart("rightLegXRot", rightLegXRot);
+        putNamedModelPart("rightLegBone", rightLegBone);
+        putNamedModelPart("rightLowerLeg", rightLowerLeg);
     }
 
+    @Deprecated private final Map<Supplier<ModelRenderer>, Consumer<ModelRenderer>> baseHumanoidBoxGenerators;
+    @Deprecated
     protected final void addHumanoidBaseBoxes(@Nullable Predicate<ModelRenderer> partPredicate) {
         for (Map.Entry<Supplier<ModelRenderer>, Consumer<ModelRenderer>> entry : baseHumanoidBoxGenerators.entrySet()) {
             ModelRenderer modelRenderer = entry.getKey().get();
@@ -195,13 +228,17 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
             }
         }
     }
-    
-    private final Map<Supplier<ModelRenderer>, Consumer<ModelRenderer>> baseHumanoidBoxGenerators;
 
     @Override
     public void updatePartsVisibility(VisibilityMode mode) {
         VisibilityMode baseMode = mode.baseMode;
         boolean setVisible = !mode.isInverted;
+        
+        ModelRenderer leftArm = getArm(HandSide.LEFT);
+        ModelRenderer rightArm = getArm(HandSide.RIGHT);
+        ModelRenderer leftLeg = getLeg(HandSide.LEFT);
+        ModelRenderer rightLeg = getLeg(HandSide.RIGHT);
+        
         if (baseMode == VisibilityMode.ALL) {
             head.visible = setVisible;
             torso.visible = setVisible;
@@ -245,17 +282,99 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
             torso.visible = false;
             break;
         case ARMS:
-            leftArm.visible = false;
-            rightArm.visible = false;
+            getArm(HandSide.LEFT).visible = false;
+            getArm(HandSide.RIGHT).visible = false;
             break;
         case LEGS:
-            leftLeg.visible = false;
-            rightLeg.visible = false;
+            getLeg(HandSide.LEFT).visible = false;
+            getLeg(HandSide.RIGHT).visible = false;
             break;
         }
     }
 
     @Override
+    public void renderToBuffer(MatrixStack pMatrixStack, IVertexBuilder pBuffer, int pPackedLight, 
+            int pPackedOverlay, float pRed, float pGreen, float pBlue, float pAlpha) {
+        if (root.visible) {
+            pMatrixStack.pushPose();
+            root.translateAndRotate(pMatrixStack);
+            super.renderToBuffer(pMatrixStack, pBuffer, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
+            pMatrixStack.popPose();
+        }
+    }
+    
+    
+    
+    public void addCrumbleParticleAt(HumanoidPart humanoidPart, ResourceLocation texture, Vector3d pos) {
+        Minecraft mc = Minecraft.getInstance();
+        StandCrumbleParticle particle = new StandCrumbleParticle(mc.level, pos.x, pos.y, pos.z, 0, 0, 0);
+        
+        ModelRenderer mainPart;
+        switch (humanoidPart) {
+        case HEAD: 
+            mainPart = head;
+            break;
+        case TORSO: 
+            mainPart = torso;
+            break;
+        case LEFT_ARM: 
+            mainPart = leftArm;
+            break;
+        case RIGHT_ARM: 
+            mainPart = rightArm;
+            break;
+        case LEFT_LEG: 
+            mainPart = leftLeg;
+            break;
+        case RIGHT_LEG: 
+            mainPart = rightLeg;
+            break;
+        default:
+            throw new IllegalArgumentException();
+        }
+        Random random = new Random();
+        List<ModelRenderer> allModelParts = new ArrayList<>();
+        addChildren(mainPart, allModelParts);
+        ModelRenderer randomPart = allModelParts.get(random.nextInt(allModelParts.size()));
+        ObjectList<ModelRenderer.ModelBox> cubes = randomPart.cubes;
+        if (!cubes.isEmpty()) {
+            ModelRenderer.ModelBox cube = cubes.get(random.nextInt(cubes.size()));
+            ModelRenderer.TexturedQuad[] polygons = cube.polygons;
+            ModelRenderer.TexturedQuad polygon = polygons[random.nextInt(polygons.length)];
+            if (polygon != null) {
+                ModelRenderer.PositionTextureVertex[] vertices = polygon.vertices;
+                if (vertices.length > 0) {
+                    float u0 = (float) Arrays.stream(vertices).mapToDouble(vertex -> vertex.u).min().getAsDouble();
+                    float v0 = (float) Arrays.stream(vertices).mapToDouble(vertex -> vertex.v).min().getAsDouble();
+                    float u1 = (float) Arrays.stream(vertices).mapToDouble(vertex -> vertex.u).max().getAsDouble();
+                    float v1 = (float) Arrays.stream(vertices).mapToDouble(vertex -> vertex.v).max().getAsDouble();
+                    particle.setTextureAndUv(texture, u0, v0, u1, v1);
+                    mc.particleEngine.add(particle);
+                }
+            }
+        }
+    }
+    
+    private void addChildren(ModelRenderer parent, Collection<ModelRenderer> collection) {
+        collection.add(parent);
+        for (ModelRenderer child : parent.children) {
+            addChildren(child, collection);
+        }
+    }
+    
+    private enum HumanoidPart {
+        HEAD,
+        TORSO,
+        LEFT_ARM,
+        RIGHT_ARM,
+        LEFT_LEG,
+        RIGHT_LEG;
+    }
+    
+    
+    
+    @Override
+    @Deprecated
     protected void initActionPoses() {
         super.initActionPoses();
         
@@ -485,13 +604,24 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
     public ModelRenderer getArm(HandSide side) {
         switch (side) {
         case LEFT:
-            return leftArm;
+            return leftArmXRot != null ? leftArmXRot : leftArm;
         case RIGHT:
-            return rightArm;
+            return rightArmXRot != null ? rightArmXRot : rightArm;
         }
         return null;
     }
-
+    
+    @Override
+    public ModelRenderer getArmNoXRot(HandSide side) {
+        switch (side) {
+        case LEFT:
+            return leftArmBone != null ? leftArmBone : leftArm;
+        case RIGHT:
+            return rightArmBone != null ? rightArmBone : rightArm;
+        }
+        return null;
+    }
+    
     protected ModelRenderer getForeArm(HandSide side) {
         switch (side) {
         case LEFT:
@@ -513,9 +643,19 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
     public ModelRenderer getLeg(HandSide side) {
         switch (side) {
         case LEFT:
-            return leftLeg;
+            return leftLegXRot != null ? leftLegXRot : leftLeg;
         case RIGHT:
-            return rightLeg;
+            return rightLegXRot != null ? rightLegXRot : rightLeg;
+        }
+        return null;
+    }
+    
+    public ModelRenderer getLegNoXRot(HandSide side) {
+        switch (side) {
+        case LEFT:
+            return leftLegBone != null ? leftLegBone : leftLeg;
+        case RIGHT:
+            return rightLegBone != null ? rightLegBone : rightLeg;
         }
         return null;
     }
@@ -657,12 +797,12 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
     }
 
     @Override
-    protected Iterable<ModelRenderer> headParts() {
+    public Iterable<ModelRenderer> headParts() {
         return ImmutableList.of(head);
     }
 
     @Override
-    protected Iterable<ModelRenderer> bodyParts() {
+    public Iterable<ModelRenderer> bodyParts() {
         return ImmutableList.of(body);
     }
     

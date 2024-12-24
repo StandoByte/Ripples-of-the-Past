@@ -16,7 +16,7 @@ import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeMod;
 
 public class MagiciansRedFlameBurst extends StandEntityAction {
-    public static final StandPose FLAME_BURST_POSE = new StandPose("MR_FLAME_BURST", true);
+    public static final StandPose FLAME_BURST_POSE = new StandPose("flameBurst", true);
 
     public MagiciansRedFlameBurst(StandEntityAction.Builder builder) {
         super(builder);

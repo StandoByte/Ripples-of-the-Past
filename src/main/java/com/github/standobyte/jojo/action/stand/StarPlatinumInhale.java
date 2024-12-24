@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.action.stand;
 
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
@@ -13,6 +14,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class StarPlatinumInhale extends StandEntityAction {
+    public static final StandPose INHALE_POSE = new StandPose("inhale");
 
     public StarPlatinumInhale(StandEntityAction.Builder builder) {
         super(builder);

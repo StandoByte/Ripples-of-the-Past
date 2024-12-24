@@ -38,7 +38,7 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
 public class CrazyDiamondBlockBullet extends StandEntityAction {
-    public static final StandPose BLOCK_BULLET_SHOT_POSE = new StandPose("CD_BLOCK_BULLET");
+    public static final StandPose BLOCK_BULLET_SHOT_POSE = new StandPose("blockBullet");
     private final StandRelativeOffset userOffsetLeftArm;
 
     public CrazyDiamondBlockBullet(StandEntityAction.Builder builder) {

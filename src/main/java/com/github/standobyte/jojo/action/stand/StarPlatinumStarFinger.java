@@ -3,11 +3,13 @@ package com.github.standobyte.jojo.action.stand;
 import com.github.standobyte.jojo.entity.damaging.projectile.ownerbound.SPStarFingerEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
+import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
 import net.minecraft.world.World;
 
 public class StarPlatinumStarFinger extends StandEntityAction {
+    public static final StandPose STAR_FINGER_POSE = new StandPose("starFinger");
 
     public StarPlatinumStarFinger(StandEntityAction.Builder builder) {
         super(builder);

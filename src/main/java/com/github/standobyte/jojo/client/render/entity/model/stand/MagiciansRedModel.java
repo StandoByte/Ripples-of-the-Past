@@ -23,85 +23,93 @@ import net.minecraft.util.math.vector.Vector3f;
 
 
 public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
-    private ModelRenderer headLeft;
-    private ModelRenderer headRight;
     private ModelRenderer beakUpper;
-    private ModelRenderer beakUpperLeft;
-    private ModelRenderer beakUpperRight;
-    private ModelRenderer beakUpper2;
-    private ModelRenderer beakUpper3;
     private ModelRenderer beakLower;
-    private ModelRenderer beakLowerLeft;
-    private ModelRenderer beakLowerRight;
     private ModelRenderer feather;
     private ModelRenderer feather2;
-
+    
     public MagiciansRedModel() {
-        super();
-        addLayerSpecificBoxes();
+        this(RenderType::entityTranslucent, 128, 128);
     }
 
-    protected MagiciansRedModel(Function<ResourceLocation, RenderType> renderType, int textureWidth, int textureHeight) {
-        super(renderType, textureWidth, textureHeight);
-        addLayerSpecificBoxes();
-    }
+    public MagiciansRedModel(Function<ResourceLocation, RenderType> renderType, int texWidth, int texHeight) {
+        super(renderType, texWidth, texHeight);
 
-    protected void addLayerSpecificBoxes() {
-        head.texOffs(0, 0).addBox(-3.5F, -7.0F, -4.0F, 7.0F, 7.0F, 8.0F, 0.0F, false);
-        addHumanoidBaseBoxes(part -> part != head);
+        root = new ModelRenderer(this);
+        root.setPos(0.0F, 24.0F, 0.0F);
         
+
+        head = new ModelRenderer(this);
+        head.setPos(0.0F, -24.0F, 0.0F);
+        root.addChild(head);
+        head.texOffs(0, 0).addBox(-3.5F, -7.0F, -4.0F, 7.0F, 7.0F, 8.0F, 0.0F, false);
         head.texOffs(0, 15).addBox(-4.1F, -7.4F, -4.4F, 1.0F, 7.0F, 2.0F, -0.4F, false);
         head.texOffs(0, 24).addBox(-4.1F, -1.6F, -4.4F, 1.0F, 2.0F, 2.0F, -0.4F, false);
         head.texOffs(20, 15).addBox(3.1F, -7.4F, -4.4F, 1.0F, 7.0F, 2.0F, -0.4F, true);
         head.texOffs(20, 24).addBox(3.1F, -1.6F, -4.4F, 1.0F, 2.0F, 2.0F, -0.4F, true);
         head.texOffs(80, 26).addBox(-2.5F, -1.0F, -4.5F, 5.0F, 1.0F, 2.0F, 0.25F, false);
 
-        headLeft = new ModelRenderer(this);
-        headLeft.setPos(3.7F, -3.5F, -2.8F);
-        head.addChild(headLeft);
-        setRotationAngle(headLeft, 0.0F, -0.0478F, 0.0F);
-        headLeft.texOffs(26, 15).addBox(-0.6F, -3.9F, -0.4F, 1.0F, 3.0F, 5.0F, -0.4F, true);
-        headLeft.texOffs(26, 23).addBox(-0.6F, -0.5F, -0.4F, 1.0F, 2.0F, 5.0F, -0.4F, true);
-        headLeft.texOffs(26, 30).addBox(-0.6F, 1.9F, -0.4F, 1.0F, 2.0F, 5.0F, -0.4F, true);
+        ModelRenderer headRight_r1;
+        ModelRenderer headLeft_r1;
+        
+        headRight_r1 = new ModelRenderer(this);
+        headRight_r1.setPos(0.1296F, 24.0F, -0.18F);
+        head.addChild(headRight_r1);
+        setRotationAngle(headRight_r1, 0.0F, 0.0478F, 0.0F);
+        headRight_r1.texOffs(6, 15).addBox(-4.1F, -31.4F, -3.2F, 1.0F, 3.0F, 5.0F, -0.4F, false);
+        headRight_r1.texOffs(6, 23).addBox(-4.1F, -28.0F, -3.2F, 1.0F, 2.0F, 5.0F, -0.4F, false);
+        headRight_r1.texOffs(6, 30).addBox(-4.1F, -25.6F, -3.2F, 1.0F, 2.0F, 5.0F, -0.4F, false);
 
-        headRight = new ModelRenderer(this);
-        headRight.setPos(-3.7F, -3.5F, -2.8F);
-        head.addChild(headRight);
-        setRotationAngle(headRight, 0.0F, 0.0478F, 0.0F);
-        headRight.texOffs(6, 15).addBox(-0.4F, -3.9F, -0.4F, 1.0F, 3.0F, 5.0F, -0.4F, false);
-        headRight.texOffs(6, 23).addBox(-0.4F, -0.5F, -0.4F, 1.0F, 2.0F, 5.0F, -0.4F, false);
-        headRight.texOffs(6, 30).addBox(-0.4F, 1.9F, -0.4F, 1.0F, 2.0F, 5.0F, -0.4F, false);
+        headLeft_r1 = new ModelRenderer(this);
+        headLeft_r1.setPos(-0.1296F, 24.0F, -0.18F);
+        head.addChild(headLeft_r1);
+        setRotationAngle(headLeft_r1, 0.0F, -0.0478F, 0.0F);
+        headLeft_r1.texOffs(26, 15).addBox(3.1F, -31.4F, -3.2F, 1.0F, 3.0F, 5.0F, -0.4F, true);
+        headLeft_r1.texOffs(26, 23).addBox(3.1F, -28.0F, -3.2F, 1.0F, 2.0F, 5.0F, -0.4F, true);
+        headLeft_r1.texOffs(26, 30).addBox(3.1F, -25.6F, -3.2F, 1.0F, 2.0F, 5.0F, -0.4F, true);
 
         beakUpper = new ModelRenderer(this);
         beakUpper.setPos(0.0F, -1.0F, -4.0F);
         head.addChild(beakUpper);
-        setRotationAngle(beakUpper, 0.1745F, 0.0F, 0.0F);
-        beakUpper.texOffs(78, 7).addBox(-1.0F, -1.0F, -5.5F, 2.0F, 1.0F, 7.0F, 0.25F, false);
-        beakUpper.texOffs(66, 12).addBox(-1.5F, -1.0F, -0.5F, 3.0F, 1.0F, 2.0F, 0.25F, false);
+
+        ModelRenderer beakUpper2;
+        ModelRenderer beakUpperLeft;
+        ModelRenderer beakUpperRight;
+        ModelRenderer beakUpper3;
+        ModelRenderer beakUpper4;
+        ModelRenderer beakLowerLeft;
+        ModelRenderer beakLowerRight;
+
+        beakUpper2 = new ModelRenderer(this);
+        beakUpper2.setPos(0.0F, 0.0F, 0.0F);
+        beakUpper.addChild(beakUpper2);
+        setRotationAngle(beakUpper2, 0.1745F, 0.0F, 0.0F);
+        beakUpper2.texOffs(78, 7).addBox(-1.0F, -1.0F, -5.5F, 2.0F, 1.0F, 7.0F, 0.25F, false);
+        beakUpper2.texOffs(66, 12).addBox(-1.5F, -1.0F, -0.5F, 3.0F, 1.0F, 2.0F, 0.25F, false);
 
         beakUpperLeft = new ModelRenderer(this);
         beakUpperLeft.setPos(1.25F, -0.5F, -5.75F);
-        beakUpper.addChild(beakUpperLeft);
+        beakUpper2.addChild(beakUpperLeft);
         setRotationAngle(beakUpperLeft, 0.0F, 0.2618F, 0.0F);
         beakUpperLeft.texOffs(89, 8).addBox(-1.25F, -0.5F, 0.25F, 1.0F, 1.0F, 7.0F, 0.25F, true);
 
         beakUpperRight = new ModelRenderer(this);
         beakUpperRight.setPos(-1.25F, -0.5F, -5.75F);
-        beakUpper.addChild(beakUpperRight);
+        beakUpper2.addChild(beakUpperRight);
         setRotationAngle(beakUpperRight, 0.0F, -0.2618F, 0.0F);
         beakUpperRight.texOffs(69, 8).addBox(0.25F, -0.5F, 0.25F, 1.0F, 1.0F, 7.0F, 0.25F, false);
 
-        beakUpper2 = new ModelRenderer(this);
-        beakUpper2.setPos(0.0F, -1.25F, -5.75F);
-        beakUpper.addChild(beakUpper2);
-        setRotationAngle(beakUpper2, 0.7854F, 0.0F, 0.0F);
-        beakUpper2.texOffs(87, 4).addBox(-0.5F, 0.25F, 0.25F, 1.0F, 1.0F, 1.0F, 0.25F, false);
-
         beakUpper3 = new ModelRenderer(this);
-        beakUpper3.setPos(0.0F, 0.0F, 1.5F);
+        beakUpper3.setPos(0.0F, -1.25F, -5.75F);
         beakUpper2.addChild(beakUpper3);
-        setRotationAngle(beakUpper3, -0.7854F, 0.0F, 0.0F);
-        beakUpper3.texOffs(79, 0).addBox(-0.5F, 0.25F, 0.25F, 1.0F, 1.0F, 6.0F, 0.25F, false);
+        setRotationAngle(beakUpper3, 0.7854F, 0.0F, 0.0F);
+        beakUpper3.texOffs(87, 4).addBox(-0.5F, 0.25F, 0.25F, 1.0F, 1.0F, 1.0F, 0.25F, false);
+
+        beakUpper4 = new ModelRenderer(this);
+        beakUpper4.setPos(0.0F, 0.0F, 1.5F);
+        beakUpper3.addChild(beakUpper4);
+        setRotationAngle(beakUpper4, -0.7854F, 0.0F, 0.0F);
+        beakUpper4.texOffs(79, 0).addBox(-0.5F, 0.25F, 0.25F, 1.0F, 1.0F, 6.0F, 0.25F, false);
 
         beakLower = new ModelRenderer(this);
         beakLower.setPos(0.0F, -0.75F, -4.75F);
@@ -136,8 +144,82 @@ public class MagiciansRedModel extends HumanoidStandModel<MagiciansRedEntity> {
         feather2.texOffs(30, 0).addBox(-1.0F, -0.5F, 0.0F, 2.0F, 1.0F, 6.0F, 0.0F, false);
         feather2.texOffs(40, 4).addBox(-1.0F, 0.5F, 5.0F, 2.0F, 1.0F, 1.0F, 0.0F, false);
 
+        body = new ModelRenderer(this);
+        body.setPos(0.0F, -24.0F, 0.0F);
+        root.addChild(body);
+        
+
+        upperPart = new ModelRenderer(this);
+        upperPart.setPos(0.0F, 12.0F, 0.0F);
+        body.addChild(upperPart);
+        
+
+        torso = new ModelRenderer(this);
+        torso.setPos(0.0F, -12.0F, 0.0F);
+        upperPart.addChild(torso);
+        torso.texOffs(0, 64).addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, 0.0F, false);
         torso.texOffs(20, 64).addBox(-3.5F, 1.1F, -2.0F, 7.0F, 3.0F, 1.0F, 0.4F, false);
         torso.texOffs(24, 73).addBox(-2.5F, 4.0F, -2.3F, 5.0F, 6.0F, 1.0F, 0.0F, false);
+
+        leftArm = convertLimb(new ModelRenderer(this));
+        leftArm.setPos(6.0F, -10.0F, 0.0F);
+        upperPart.addChild(leftArm);
+        leftArm.texOffs(32, 108).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
+
+        leftArmJoint = new ModelRenderer(this);
+        leftArmJoint.setPos(0.0F, 4.0F, 0.0F);
+        leftArm.addChild(leftArmJoint);
+        leftArmJoint.texOffs(32, 102).addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.1F, true);
+
+        leftForeArm = new ModelRenderer(this);
+        leftForeArm.setPos(0.0F, 4.0F, 0.0F);
+        leftArm.addChild(leftForeArm);
+        leftForeArm.texOffs(32, 118).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
+
+        rightArm = convertLimb(new ModelRenderer(this));
+        rightArm.setPos(-6.0F, -10.0F, 0.0F);
+        upperPart.addChild(rightArm);
+        rightArm.texOffs(0, 108).addBox(-2.0F, -2.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
+
+        rightArmJoint = new ModelRenderer(this);
+        rightArmJoint.setPos(0.0F, 4.0F, 0.0F);
+        rightArm.addChild(rightArmJoint);
+        rightArmJoint.texOffs(0, 102).addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.1F, false);
+
+        rightForeArm = new ModelRenderer(this);
+        rightForeArm.setPos(0.0F, 4.0F, 0.0F);
+        rightArm.addChild(rightForeArm);
+        rightForeArm.texOffs(0, 118).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
+
+        leftLeg = convertLimb(new ModelRenderer(this));
+        leftLeg.setPos(1.9F, 12.0F, 0.0F);
+        body.addChild(leftLeg);
+        leftLeg.texOffs(96, 108).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
+
+        leftLegJoint = new ModelRenderer(this);
+        leftLegJoint.setPos(0.0F, 6.0F, 0.0F);
+        leftLeg.addChild(leftLegJoint);
+        leftLegJoint.texOffs(96, 102).addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.1F, true);
+
+        leftLowerLeg = new ModelRenderer(this);
+        leftLowerLeg.setPos(0.0F, 6.0F, 0.0F);
+        leftLeg.addChild(leftLowerLeg);
+        leftLowerLeg.texOffs(96, 118).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
+
+        rightLeg = convertLimb(new ModelRenderer(this));
+        rightLeg.setPos(-1.9F, 12.0F, 0.0F);
+        body.addChild(rightLeg);
+        rightLeg.texOffs(64, 108).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
+
+        rightLegJoint = new ModelRenderer(this);
+        rightLegJoint.setPos(0.0F, 6.0F, 0.0F);
+        rightLeg.addChild(rightLegJoint);
+        rightLegJoint.texOffs(64, 102).addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.1F, false);
+
+        rightLowerLeg = new ModelRenderer(this);
+        rightLowerLeg.setPos(0.0F, 6.0F, 0.0F);
+        rightLeg.addChild(rightLowerLeg);
+        rightLowerLeg.texOffs(64, 118).addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
     }
 
     @Override

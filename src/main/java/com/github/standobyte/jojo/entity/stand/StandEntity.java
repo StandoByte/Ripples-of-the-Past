@@ -27,6 +27,9 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.player.PlayerClientBroadcastedSettings;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
+import com.github.standobyte.jojo.client.render.entity.model.animnew.BarrageSwings;
+import com.github.standobyte.jojo.client.render.entity.model.animnew.stand.StandPoseData;
+import com.github.standobyte.jojo.client.render.entity.model.animnew.stand.StandPoseData.StandPoseDataFill;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.barrage.BarrageSwingsHolder;
 import com.github.standobyte.jojo.client.sound.barrage.BarrageHitSoundHandler;
@@ -172,6 +175,8 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     private ManualStandMovementLock manualMovementLocks = new ManualStandMovementLock(this);
     
     protected StandPose standPose = StandPose.SUMMON;
+    protected int setPoseTime;
+    public int punchComboCount = 0;
     public int gradualSummonWeaknessTicks;
     public int unsummonTicks;
     public StandRelativeOffset unsummonOffset = offsetDefault.copy();
@@ -182,8 +187,10 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     private int alphaTicks;
 
     private IPunch lastPunch;
-    private BarrageSwingsHolder<?, ?> barrageSwings;
+    private BarrageSwingsHolder<?, ?> barrageSwingsOld;
+    private BarrageSwings barrageSwings;
     private final BarrageHitSoundHandler barrageSounds;
+    public boolean animWasBarraging = false;
     
     public ActionTarget clFrontTarget = ActionTarget.EMPTY;
 
@@ -213,10 +220,12 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         if (level.isClientSide()) {
             this.alphaTicks = this.summonLockTicks;
             this.barrageSounds = initBarrageHitSoundHandler();
+            this.barrageSwings = initBarrageSwings();
         }
         else {
             this.summonPoseRandomByte = random.nextInt(128);
             this.barrageSounds = null;
+            this.barrageSwings = null;
         }
         init(this);
     }
@@ -228,10 +237,10 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     
     private <T extends StandEntity> void init(T thisEntity) {
         if (level.isClientSide()) {
-            this.barrageSwings = new BarrageSwingsHolder<T, StandEntityModel<T>>();
+            this.barrageSwingsOld = new BarrageSwingsHolder<T, StandEntityModel<T>>();
         }
         else {
-            this.barrageSwings = null;
+            this.barrageSwingsOld = null;
         }
     }
     
@@ -691,8 +700,11 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
 
     public void setStandPose(StandPose pose) {
         if (this.standPose != pose) {
-            if (level.isClientSide() && pose == StandPose.BARRAGE) {
-                getBarrageSwingsHolder().resetSwingTime();
+            if (level.isClientSide()) {
+                this.setPoseTime = tickCount;
+                if (pose == StandPose.BARRAGE) {
+                    getBarrageSwingsHolder().resetSwingTime();
+                }
             }
             this.standPose = pose;
         }
@@ -704,6 +716,32 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
 
     public int getSummonPoseRandomByte() {
         return summonPoseRandomByte;
+    }
+    
+    public StandPoseData getCurPose(float partialTick) {
+        StandPose pose = getStandPose();
+        if (pose == StandPose.SUMMON && this.isArmsOnlyMode()) {
+            setStandPose(StandPose.IDLE);
+            pose = StandPose.IDLE;
+        }
+        Optional<StandEntityTask> curTask = getCurrentTask();
+        StandPoseDataFill poseData = StandPoseData.start()
+                .standPose(pose)
+                .animTime(tickCount - setPoseTime + partialTick);
+        curTask.ifPresent(task -> {
+            poseData
+            .actionPhase(Optional.of(task.getPhase()))
+            .phaseCompletion(task.getPhaseCompletion(partialTick))
+            .animTime(task.getTick() + partialTick);
+        });
+        return poseData.end();
+    }
+    
+    public void onSetPoseAnimEnded() {
+        setStandPose(getCurrentTask().map(task -> {
+            IStandPower userPower = getUserPower();
+            return userPower != null ? task.getAction().getStandPose(userPower, this, task) : null;
+        }).orElse(StandPose.IDLE));
     }
 
 
@@ -2029,7 +2067,19 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
     }
     
 
+    @Deprecated
     public BarrageSwingsHolder<?, ?> getBarrageSwingsHolder() {
+        if (!level.isClientSide()) {
+            throw new IllegalStateException("Barrage swing animating class is only available on the client!");
+        }
+        return this.barrageSwingsOld;
+    }
+    
+    protected BarrageSwings initBarrageSwings() {
+        return new BarrageSwings();
+    }
+    
+    public BarrageSwings getBarrageSwings() {
         if (!level.isClientSide()) {
             throw new IllegalStateException("Barrage swing animating class is only available on the client!");
         }

@@ -7,6 +7,7 @@ import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.entity.Entity;
 import net.minecraft.util.HandSide;
 
+@Deprecated
 public interface IBarrageAnimation<T extends Entity, M extends EntityModel<T>> extends IActionAnimation<T> {
     void addSwings(T entity, HandSide side, float ticks);
     void animateSwing(T entity, M model, float loopCompletion, HandSide side, float yRotOffsetRad, float xRotRad, float zRotOffsetRad);

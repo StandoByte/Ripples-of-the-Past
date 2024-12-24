@@ -124,6 +124,15 @@ public class MathUtil {
         return numInt;
     }
     
+    private static final Random RANDOM = new Random();
+    public static int fractionRandomInc(float num) {
+        int numInt = MathHelper.floor(num);
+        if (RANDOM.nextFloat() < num - (float) numInt) {
+            numInt++;
+        }
+        return numInt;
+    }
+    
     public static int round(double value) {
         int i = (int) value;
         double frac = value > i ? value - i : i - value;
