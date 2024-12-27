@@ -4,7 +4,10 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -24,6 +27,7 @@ import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
+import com.github.standobyte.jojo.util.general.ObjectWrapper;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.network.PacketBuffer;
@@ -56,8 +60,67 @@ public abstract class StandAction extends Action<IStandPower> {
         this.staminaCostTick = builder.staminaCostTick;
         this.partsRequired = builder.partsRequired;
         this.extraUnlockables = builder.extraUnlockables;
+        this._recoveryFollowUpPreInit = builder.recoveryFollowUp;
     }
-
+    
+    
+    private Map<Supplier<? extends StandAction>, List<Supplier<? extends StandAction>>> _recoveryFollowUpPreInit;
+    private Map<? extends StandAction, List<? extends StandAction>> recoveryFollowUp;
+    
+    protected void initRecoveryFollowUp() {
+        if (_recoveryFollowUpPreInit != null) {
+            recoveryFollowUp = _recoveryFollowUpPreInit.entrySet().stream().collect(Collectors.toMap(
+                    entry -> entry.getKey() != null ? entry.getKey().get() : this, 
+                    entry -> entry.getValue().stream().map(Supplier::get).collect(Collectors.toList())));
+        }
+    }
+    
+    @Override
+    protected Action<IStandPower> replaceActionKostyl(IStandPower power, ActionTarget target) {
+        if (power.getStandManifestation() instanceof StandEntity) {
+            StandEntity standEntity = (StandEntity) power.getStandManifestation();
+            Optional<StandEntityTask> curTask = standEntity.getCurrentTask();
+            
+            StandAction oldFollowUp = getRecoveryFollowup(power, standEntity);
+            StandAction attackFollowUp = oldFollowUp;
+            
+            if (oldFollowUp != null && !curTask.filter(task -> {
+                return task.getAction() == this && canSetFollowUp(task, oldFollowUp, power);
+            }).isPresent()) {
+                attackFollowUp = null;
+            }
+            
+            if (attackFollowUp == null && recoveryFollowUp != null) {
+                attackFollowUp = curTask.map(task -> {
+                    List<? extends StandAction> availableFollowUps = recoveryFollowUp.get(task.getAction());
+                    if (availableFollowUps != null) {
+                        return availableFollowUps.stream()
+                                .filter(action -> canSetFollowUp(task, action, power))
+                                .findFirst()
+                                .orElse(null);
+                    }
+                    return null;
+                }).orElse(null);
+            }
+            
+            if (attackFollowUp != null) {
+                return attackFollowUp;
+            }
+        }
+        return super.replaceActionKostyl(power, target);
+    }
+    
+    protected static boolean canSetFollowUp(StandEntityTask task, StandAction followUp, IStandPower power) {
+        return !task.hasModifierAction(followUp) && power.checkRequirements(followUp, new ObjectWrapper<>(task.getTarget()), true).isPositive();
+    }
+    
+    @Deprecated
+    @Nullable
+    protected StandEntityActionModifier getRecoveryFollowup(IStandPower standPower, StandEntity standEntity) {
+        return null;
+    }
+    
+    
     @Override
     public PowerClassification getPowerClassification() {
         return PowerClassification.STAND;
@@ -236,6 +299,7 @@ public abstract class StandAction extends Action<IStandPower> {
         private float staminaCostTick = 0;
         private final Set<StandPart> partsRequired = EnumSet.noneOf(StandPart.class);
         private final List<Supplier<? extends StandAction>> extraUnlockables = new ArrayList<>();
+        protected Map<Supplier<? extends StandAction>, List<Supplier<? extends StandAction>>> recoveryFollowUp;
 
         public T noResolveUnlock() {
             return resolveLevelToUnlock(-1);
@@ -287,6 +351,24 @@ public abstract class StandAction extends Action<IStandPower> {
         
         public T partsRequired(StandPart... parts) {
             Collections.addAll(partsRequired, parts);
+            return getThis();
+        }
+        
+        public T attackRecoveryFollowup(Supplier<? extends StandAction> followUp) {
+            return attackRecoveryFollowup(followUp, null);
+        }
+        
+        /**
+         * @param attack - if equals to null, the attack is the action being constructed, if not - this action will be replaced when the Stand is performing the attack
+         * (made this way because you can't have a supplier of the action that is currently being constructed by the builder)
+         */
+        public T attackRecoveryFollowup(Supplier<? extends StandAction> followUp, @Nullable Supplier<? extends StandAction> attack) {
+            if (recoveryFollowUp == null) {
+                recoveryFollowUp = new HashMap<>();
+            }
+            List<Supplier<? extends StandAction>> followUps = recoveryFollowUp.computeIfAbsent(attack, __ -> new ArrayList<>());
+            followUps.add(followUp);
+            addExtraUnlockable(followUp);
             return getThis();
         }
     }

@@ -255,6 +255,13 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         }
     }
     
+    @Override
+    @Deprecated
+    @Nullable
+    protected StandEntityActionModifier getRecoveryFollowup(IStandPower standPower, StandEntity standEntity) {
+        return null;
+    }
+    
     public boolean canBeParried() {
         return true;
     }
@@ -279,11 +286,6 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
                 addExtraUnlockable(this.finisherVariation);
             }
             return getThis();
-        }
-        
-        @Deprecated
-        public Builder setRecoveryFollowUpAction(Supplier<? extends StandEntityActionModifier> recoveryAction) {
-            return attackRecoveryFollowup(recoveryAction);
         }
         
         public Builder punchSound(Supplier<SoundEvent> punchSound) {
