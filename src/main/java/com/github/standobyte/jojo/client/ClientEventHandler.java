@@ -78,6 +78,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandArrowHandler;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
+import com.github.standobyte.jojo.util.general.OptionalFloat;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
@@ -106,6 +107,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.AbstractSlider;
 import net.minecraft.client.gui.widget.button.Button;
 import net.minecraft.client.gui.widget.list.KeyBindingList;
+import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.FirstPersonRenderer;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.entity.model.BipedModel;
@@ -405,6 +407,7 @@ public class ClientEventHandler {
                 break;
             case END:
                 ShaderEffectApplier.getInstance().shaderTick();
+                tickDodgeCameraRoll();
                 
                 // FIXME make stand actions clickable when player hands are busy
                 if (mc.level != null && mc.player != null && (
@@ -567,6 +570,44 @@ public class ClientEventHandler {
             ost = null;
         }
     }
+    
+    
+    private HandSide dodgeCameraRollSide;
+    private float dodgeCameraRollMaxAngle;
+    private float dodgeCameraRollLength;
+    private int dodgeCameraRollTimer;
+    public void setDodgeCameraRoll(HandSide side, float maxAngle, float length) {
+        this.dodgeCameraRollSide = side;
+        this.dodgeCameraRollMaxAngle = maxAngle;
+        this.dodgeCameraRollLength = length;
+        this.dodgeCameraRollTimer = 0;
+    }
+    
+    private void tickDodgeCameraRoll() {
+        if (dodgeCameraRollSide != null && ++dodgeCameraRollTimer >= dodgeCameraRollLength) {
+            this.dodgeCameraRollSide = null;
+            this.dodgeCameraRollMaxAngle = 0;
+            this.dodgeCameraRollLength = 0;
+            this.dodgeCameraRollTimer = 0;
+        }
+    }
+    
+    private OptionalFloat calcDodgeCameraRoll(float partialTick) {
+        if (dodgeCameraRollSide == null) return OptionalFloat.empty();
+        
+        float tick = dodgeCameraRollTimer + partialTick;
+        if (tick >= dodgeCameraRollLength) return OptionalFloat.empty();
+        
+        float angle = tick / dodgeCameraRollLength;
+        if (angle < 0.5f) angle = 2 * angle;
+        else              angle = (1 - angle) * 2;
+        angle *= angle;
+        angle *= dodgeCameraRollMaxAngle;
+        if (dodgeCameraRollSide == HandSide.RIGHT) {
+            angle *= -1;
+        }
+        return OptionalFloat.of(angle);
+    }
 
 
 
@@ -585,7 +626,21 @@ public class ClientEventHandler {
     
     @SubscribeEvent
     public void cameraSetup(EntityViewRenderEvent.CameraSetup event) {
-        PolaroidHelper.pictureCameraSetup(event);
+        if (PolaroidHelper.pictureCameraSetup(event)) {
+            return;
+        }
+        if (mc.options.getCameraType().isFirstPerson()) {
+            OptionalFloat cameraRoll = calcDodgeCameraRoll((float) event.getRenderPartialTicks());
+            cameraRoll.ifPresent(roll -> {
+                event.setRoll(roll);
+                
+                ActiveRenderInfo camera = event.getInfo();
+                Vector3d look = new Vector3d(camera.getLookVector());
+                look = look.scale(1.25 * Math.abs(roll) / dodgeCameraRollMaxAngle);
+                look = look.yRot(dodgeCameraRollSide == HandSide.LEFT ? (float)-Math.PI / 2 : (float)Math.PI / 2);
+                camera.setPosition(camera.getPosition().add(look));
+            });
+        }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)

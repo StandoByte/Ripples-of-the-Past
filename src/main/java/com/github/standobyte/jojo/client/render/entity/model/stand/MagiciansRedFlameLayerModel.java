@@ -8,15 +8,10 @@ import net.minecraft.client.renderer.Atlases;
 public class MagiciansRedFlameLayerModel extends MagiciansRedModel {
 
     public MagiciansRedFlameLayerModel() {
-        this(64, 64);
-    }
-
-    public MagiciansRedFlameLayerModel(int textureWidth, int textureHeight) {
-        super(tex -> Atlases.translucentCullBlockSheet(), textureWidth, textureHeight);
-    }
-    
-    @Override
-    protected void addLayerSpecificBoxes() {
+        super(tex -> Atlases.translucentCullBlockSheet(), 64, 64);
+        isLayerModel = true;
+        
+        clearAllCubes();
         leftForeArm.addChild(new FlameModelRenderer(this).setFireSprites(MagiciansRedRenderer.FIRE_0_SPRITE, MagiciansRedRenderer.FIRE_1_SPRITE)
                 .addFlame(3.0F, 4.0F, 3.0F));
         rightForeArm.addChild(new FlameModelRenderer(this).setFireSprites(MagiciansRedRenderer.FIRE_0_SPRITE, MagiciansRedRenderer.FIRE_1_SPRITE)

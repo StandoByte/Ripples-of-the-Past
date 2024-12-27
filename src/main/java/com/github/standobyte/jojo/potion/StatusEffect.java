@@ -27,4 +27,8 @@ public class StatusEffect extends Effect {
         }
         return super.getCurativeItems();
     }
+    
+    public boolean isUncurable() {
+        return isUncurable;
+    }
 }

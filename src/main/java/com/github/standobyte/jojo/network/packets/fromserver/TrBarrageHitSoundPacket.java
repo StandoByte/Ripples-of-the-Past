@@ -14,7 +14,6 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraftforge.fml.network.NetworkEvent;
 import net.minecraftforge.registries.ForgeRegistries;
 
-//FIXME causes client logs getting spammed with network exceptions (either the payload is an EmptyByteBuf or "Received invalid discriminator byte" error)
 public class TrBarrageHitSoundPacket {
     private final int standEntityId;
     private final boolean hit;

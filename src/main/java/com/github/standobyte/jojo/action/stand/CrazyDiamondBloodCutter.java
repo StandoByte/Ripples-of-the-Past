@@ -17,7 +17,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public class CrazyDiamondBloodCutter extends StandEntityAction {
-    public static final StandPose BLOOD_CUTTER_SHOT_POSE = new StandPose("CD_BLOOD_CUTTER");
+    public static final StandPose BLOOD_CUTTER_SHOT_POSE = new StandPose("bloodCutter");
 
     public CrazyDiamondBloodCutter(StandEntityAction.Builder builder) {
         super(builder);

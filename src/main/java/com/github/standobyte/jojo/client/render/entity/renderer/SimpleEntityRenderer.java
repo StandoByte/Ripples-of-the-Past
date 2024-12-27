@@ -14,7 +14,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 
 public abstract class SimpleEntityRenderer<T extends Entity, M extends EntityModel<T>> extends EntityRenderer<T> {
-    protected final M model;
+    protected M model;
     protected final ResourceLocation texPath;
 
     public SimpleEntityRenderer(EntityRendererManager renderManager, M model, ResourceLocation texPath) {
@@ -35,9 +35,10 @@ public abstract class SimpleEntityRenderer<T extends Entity, M extends EntityMod
     @Override
     public void render(T entity, float yRotation, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
         if (shouldRender(entity)) {
+            M model = getEntityModel();
+            if (model == null) return;
             matrixStack.pushPose();
             matrixStack.scale(1.0F, -1.0F, -1.0F);
-            M model = getEntityModel();
             float xRotation = MathHelper.lerp(partialTick, entity.xRotO, entity.xRot);
             rotateModel(model, entity, partialTick, yRotation, xRotation, matrixStack);
             doRender(entity, model, partialTick, matrixStack, buffer, packedLight);

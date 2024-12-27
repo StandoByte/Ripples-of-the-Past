@@ -544,12 +544,6 @@ public class ClientUtil {
         }
     }
     
-    /**
-     * Placeholder - 1.16's ModelRenderers do not have scale fields
-     */
-    public static void scaleModelPart(ModelRenderer modelRenderer, Vector3f scaleVec) {
-    }
-    
     public static void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
         modelRenderer.xRot = x;
         modelRenderer.yRot = y;

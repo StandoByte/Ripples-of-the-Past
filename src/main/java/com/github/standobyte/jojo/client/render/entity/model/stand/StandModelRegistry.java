@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.client.render.entity.model.stand;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -7,6 +8,8 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.client.render.entity.model.animnew.stand.GeckoStandAnimator;
+import com.github.standobyte.jojo.client.render.entity.model.animnew.stand.StandActionAnimation;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 
 import net.minecraft.util.ResourceLocation;
@@ -17,9 +20,15 @@ public class StandModelRegistry {
     
     public static <T extends StandEntity, M extends StandEntityModel<T>> M registerModel(
             ResourceLocation modelId, Supplier<? extends M> constructor) {
-        M model = constructor.get();
-        registerStandModel(model, modelId, constructor);
-        return model;
+        try {
+            M model = constructor.get();
+            registerStandModel(model, modelId, constructor);
+            return model;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
     
     @Nullable
@@ -41,10 +50,16 @@ public class StandModelRegistry {
                 JojoMod.getLogger().error("Using duplicate id {} for a Stand model!", modelId);
             }
             else {
-                STAND_MODELS.put(modelId, new StandModelRegistryObj(modelId, baseModel, constructor));
+                StandModelRegistryObj registryObj = new StandModelRegistryObj(modelId, baseModel, constructor);
+                STAND_MODELS.put(modelId, registryObj);
                 baseModel.modelId = modelId;
+                baseModel.registryObj = registryObj;
             }
         }
+    }
+    
+    public static Collection<StandModelRegistryObj> values() {
+        return STAND_MODELS.values();
     }
     
     
@@ -53,6 +68,7 @@ public class StandModelRegistry {
         public final ResourceLocation id;
         public final StandEntityModel<?> baseModel;
         private final Supplier<? extends StandEntityModel<?>> modelConstructor;
+        private GeckoStandAnimator anims;
         
         StandModelRegistryObj(ResourceLocation id, StandEntityModel<?> baseModel, Supplier<? extends StandEntityModel<?>> modelConstructor) {
             this.id = id;
@@ -61,7 +77,30 @@ public class StandModelRegistry {
         }
         
         public StandEntityModel<?> createNewModelCopy() {
-            return modelConstructor.get();
+            StandEntityModel<?> model = modelConstructor.get();
+            model.modelId = id;
+            model.registryObj = baseModel.registryObj;
+            return model;
         }
+        
+        
+        @Nullable
+        public GeckoStandAnimator getDefaultGeckoAnims() {
+            return anims;
+        }
+        
+        
+        public void beforeGeckoAnimReload() {
+            this.anims = null;
+        }
+        
+        public void onGeckoAnimLoaded(GeckoStandAnimator anims) {
+            this.anims = anims;
+        }
+        
+//        @Nullable
+//        public StandActionAnimation getAnim(String animName) {
+//            return anims != null ? anims.getNamedAnim(animName) : null;
+//        }
     }
 }

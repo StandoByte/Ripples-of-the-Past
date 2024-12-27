@@ -26,7 +26,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.LazyOptional;
 
-// TODO implement IStandEffect?
 public class TimeStopInstance {
     private static int i = 0;
     private final World world;

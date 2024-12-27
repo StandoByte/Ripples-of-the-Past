@@ -33,7 +33,6 @@ import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.PlayerStatListener;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
-import com.github.standobyte.jojo.util.mod.JojoModVersion;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntityType;
@@ -141,8 +140,6 @@ public class PlayerUtilCap {
             metEntityTypesId.forEach(entityTypeId -> metEntities.add(StringNBT.valueOf(entityTypeId.toString())));
             nbt.put("MetEntityTypes", metEntities);
         }
-        
-        nbt.put("RotpVersion", JojoModVersion.getCurrentVersion().toNBT());
         
         nbt.putBoolean("CoffinRespawn", coffinPreventDayTimeSkip);
         

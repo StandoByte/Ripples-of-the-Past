@@ -10,11 +10,14 @@ import java.util.function.UnaryOperator;
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.controls.HudControlSettings;
 import com.github.standobyte.jojo.client.particle.AirStreamParticle;
+import com.github.standobyte.jojo.client.particle.AtmosphericRiftParticle;
 import com.github.standobyte.jojo.client.particle.BloodParticle;
 import com.github.standobyte.jojo.client.particle.CDRestorationParticle;
 import com.github.standobyte.jojo.client.particle.DivineSandstormParticle;
 import com.github.standobyte.jojo.client.particle.HamonAuraParticle;
 import com.github.standobyte.jojo.client.particle.HamonSparkParticle;
+import com.github.standobyte.jojo.client.particle.LightGlintParticle;
+import com.github.standobyte.jojo.client.particle.LightModeFlashParticle;
 import com.github.standobyte.jojo.client.particle.MeteoriteVirusParticle;
 import com.github.standobyte.jojo.client.particle.OneTickFlameParticle;
 import com.github.standobyte.jojo.client.particle.OnomatopoeiaParticle;
@@ -41,6 +44,7 @@ import com.github.standobyte.jojo.client.render.entity.layerrenderer.LadybugBroo
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.PillarmanBladesLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.PillarmanLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.TornadoOverdriveEffectLayer;
+import com.github.standobyte.jojo.client.render.entity.layerrenderer.VampireEyesLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.WindCloakLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.ZombieLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.barrage.BarrageFistAfterimagesLayer;
@@ -351,6 +355,7 @@ public class ClientSetup {
         addBipedLayers(renderer, slim);
         renderer.addLayer(new GlovesLayer<>(renderer, new GlovesModel<>(0.3F, slim), slim));
         renderer.addLayer(new WindCloakLayer<>(renderer));
+        renderer.addLayer(new VampireEyesLayer<>(renderer));
     }
     
     private static <T extends LivingEntity, M extends BipedModel<T>> void addLayersToEntities(EntityRenderer<?> renderer) {
@@ -476,6 +481,9 @@ public class ClientSetup {
         mc.particleEngine.register(ModParticles.RPS_PAPER.get(),            RPSPickPartile.Factory::new);
         mc.particleEngine.register(ModParticles.RPS_SCISSORS.get(),         RPSPickPartile.Factory::new);
         mc.particleEngine.register(ModParticles.SANDSTORM.get(),         DivineSandstormParticle.Factory::new);
+        mc.particleEngine.register(ModParticles.RIFT.get(),         AtmosphericRiftParticle.Factory::new);
+        mc.particleEngine.register(ModParticles.LIGHT_SPARK.get(),       LightGlintParticle.Factory::new);
+        mc.particleEngine.register(ModParticles.LIGHT_MODE_FLASH.get(),     LightModeFlashParticle.Factory::new);
 
         CustomParticlesHelper.saveSprites(mc);
         // yep...

@@ -66,7 +66,6 @@ public abstract class BarsRenderer {
 
         float attackCost = 0;
         float abilityCost = 0;
-        // FIXME get energy/stamina costs
 //        if (currentMode != null) {
 //            boolean shift = InputHandler.useShiftActionVariant(mc);
 //            attackCost = getActionCost(currentMode, ActionType.ATTACK, mc.player, shift);
@@ -217,7 +216,6 @@ public abstract class BarsRenderer {
             drawBarElement(matrixStack, x, y, borderTexX, borderTexY, width, length + 2);
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, barAlpha);
             // cost
-            // FIXME cost
             float costAlpha = ClientUtil.getHighlightAlpha(costTick + 40F, 80F, 60F, 0.15F, 0.6F);
             renderCost(matrixStack, x, y, alignment, 
                     width, length, cost1Fill, fill, 0, 

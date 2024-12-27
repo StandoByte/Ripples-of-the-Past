@@ -34,7 +34,7 @@ public class ModStatusEffects {
     
     // TODO update invisibility status
     public static final RegistryObject<Effect> FULL_INVISIBILITY = EFFECTS.register("full_invisibility", 
-            () -> new StatusEffect(EffectType.BENEFICIAL, Effects.INVISIBILITY.getColor()));
+            () -> new StatusEffect(EffectType.BENEFICIAL, Effects.INVISIBILITY.getColor()).setUncurable());
     
     public static final RegistryObject<FreezeEffect> FREEZE = EFFECTS.register("freeze", 
             () -> new FreezeEffect(EffectType.HARMFUL, 0xD6D6FF));
@@ -67,7 +67,7 @@ public class ModStatusEffects {
             () -> new StatusEffect(EffectType.BENEFICIAL, 0xEADB84).setUncurable());
     
     public static final RegistryObject<StaminaRegenEffect> STAMINA_REGEN = EFFECTS.register("stamina_regen", 
-            () -> new StaminaRegenEffect(EffectType.BENEFICIAL, 0x149900));
+            () -> new StaminaRegenEffect(EffectType.BENEFICIAL, 0x149900).setUncurable());
 
     public static final RegistryObject<Effect> TIME_STOP = EFFECTS.register("time_stop", 
             () -> new StatusEffect(EffectType.BENEFICIAL, 0x707070).setUncurable());
@@ -79,13 +79,13 @@ public class ModStatusEffects {
             () -> new ResolveEffect(EffectType.BENEFICIAL, 0xC6151F).setUncurable());
     
     public static final RegistryObject<Effect> SUN_RESISTANCE = EFFECTS.register("sun_resistance", 
-            () -> new StatusEffect(EffectType.BENEFICIAL, 0xFFD54A));
+            () -> new StatusEffect(EffectType.BENEFICIAL, 0xFFD54A).setUncurable());
     
     public static final RegistryObject<Effect> SPIRIT_VISION = EFFECTS.register("spirit_vision", 
-            () -> new StatusEffect(EffectType.BENEFICIAL, 0x8E45FF));
+            () -> new StatusEffect(EffectType.BENEFICIAL, 0x8E45FF).setUncurable());
     
     public static final RegistryObject<Effect> INTEGRATED_STAND = EFFECTS.register("integrated_stand", 
-            () -> new StatusEffect(EffectType.BENEFICIAL, 0x8E45FF));
+            () -> new StatusEffect(EffectType.BENEFICIAL, 0x8E45FF).setUncurable());
     
     public static final RegistryObject<Effect> MISSHAPEN_FACE = EFFECTS.register("misshapen_face", 
             () -> new StatusEffect(EffectType.HARMFUL, 0x808080));

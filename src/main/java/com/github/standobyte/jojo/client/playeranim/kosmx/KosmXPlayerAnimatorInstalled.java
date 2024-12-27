@@ -10,7 +10,6 @@ import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
 import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler.BendablePart;
 import com.github.standobyte.jojo.client.playeranim.kosmx.anim.KosmXKeyframeAnimPlayer;
 import com.github.standobyte.jojo.client.playeranim.kosmx.anim.modifier.KosmXFixedFadeModifier;
-import com.github.standobyte.jojo.client.playeranim.kosmx.anim.playermotion.KosmXFrontMotionModifier;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
@@ -65,12 +64,10 @@ public class KosmXPlayerAnimatorInstalled extends PlayerAnimationHandler.PlayerA
     
     @Override
     public void onRenderFrameStart(float partialTick) {
-        KosmXFrontMotionModifier.onRenderFrameStart();
     }
     
     @Override
     public void onRenderFrameEnd(float partialTick) {
-        KosmXFrontMotionModifier.onRenderFrameEnd(partialTick);
     }
     
     @Override

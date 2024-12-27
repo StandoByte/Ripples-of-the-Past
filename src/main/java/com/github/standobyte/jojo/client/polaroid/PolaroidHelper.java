@@ -143,7 +143,7 @@ public class PolaroidHelper {
         RenderSystem.popMatrix();
     }
     
-    public static void pictureCameraSetup(EntityViewRenderEvent.CameraSetup event) {
+    public static boolean pictureCameraSetup(EntityViewRenderEvent.CameraSetup event) {
         if (isTakingPhoto()) {
             ActiveRenderInfo camera = event.getInfo();
             if (cameraPos != null) {
@@ -158,7 +158,9 @@ public class PolaroidHelper {
                 event.setRoll(angles.z());
             }
             ClientReflection.setMirror(camera, false);
+            return true;
         }
+        return false;
     }
     
     

@@ -210,18 +210,18 @@ public class DamageUtil {
             }
             
             final float dmgAmount = amount;
+            Optional<HamonData> attackerHamon;
+            float hamonMultiplier;
             if (attack.srcEntityHamonMultiplier && dmgSource.getEntity() instanceof LivingEntity) {
                 LivingEntity sourceLiving = (LivingEntity) dmgSource.getEntity();
-                float hamonMultiplier = INonStandPower.getNonStandPowerOptional(sourceLiving).map(power -> 
-                power.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> {
-                    float hamonStrengthMultiplier = hamon.getHamonDamageMultiplier();
-                    if (undeadTarget && !scarf && hamon.isSkillLearned(ModHamonSkills.HAMON_SPREAD.get())) {
-                        livingTarget.getCapability(LivingUtilCapProvider.CAPABILITY)
-                        .ifPresent(cap -> cap.hamonSpread(dmgAmount * hamonStrengthMultiplier));
-                    }
-                    return hamonStrengthMultiplier;
-                }).orElse(1F)).orElse(1F);
+                attackerHamon = INonStandPower.getNonStandPowerOptional(sourceLiving).resolve().flatMap(
+                        power -> power.getTypeSpecificData(ModPowers.HAMON.get()));
+                hamonMultiplier = attackerHamon.map(HamonData::getHamonDamageMultiplier).orElse(1F);
                 amount *= hamonMultiplier;
+            }
+            else {
+                attackerHamon = Optional.empty();
+                hamonMultiplier = 1;
             }
             amount *= JojoModConfig.getCommonConfigInstance(false).hamonDamageMultiplier.get().floatValue();
             
@@ -232,6 +232,12 @@ public class DamageUtil {
                 if (scarf && undeadTarget && livingTarget instanceof ServerPlayerEntity) {
                     ModCriteriaTriggers.VAMPIRE_HAMON_DAMAGE_SCARF.get().trigger((ServerPlayerEntity) livingTarget);
                 }
+                attackerHamon.ifPresent(hamon -> {
+                    if (undeadTarget && !scarf && hamon.isSkillLearned(ModHamonSkills.HAMON_SPREAD.get())) {
+                        livingTarget.getCapability(LivingUtilCapProvider.CAPABILITY)
+                        .ifPresent(cap -> cap.hamonSpread(dmgAmount * hamonMultiplier));
+                    }
+                });
                 return true;
             }
         }

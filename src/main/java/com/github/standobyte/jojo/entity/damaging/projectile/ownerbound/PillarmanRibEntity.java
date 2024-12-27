@@ -41,7 +41,7 @@ public class PillarmanRibEntity extends OwnerBoundProjectileEntity {
     
     @Override
     public float getBaseDamage() {
-        return 2.5F;
+        return 0.5F;
     }
 
     @Override

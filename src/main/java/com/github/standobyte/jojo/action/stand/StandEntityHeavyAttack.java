@@ -234,11 +234,6 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     }
     
     @Override
-    public StandPose getStandPose(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
-        return isFinisher ? StandPose.HEAVY_ATTACK_FINISHER : super.getStandPose(standPower, standEntity, task);
-    }
-    
-    @Override
     public boolean greenSelection(IStandPower power, ActionConditionResult conditionCheck) {
         return isFinisher && conditionCheck.isPositive();
     }
@@ -250,6 +245,21 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     @Override
     public boolean isLegalInHud(IStandPower power) {
         return !isFinisher;
+    }
+    
+    @Deprecated
+    void setIsFinisher() {
+        isFinisher = true;
+        if (standPose == StandPose.HEAVY_ATTACK) {
+            standPose = StandPose.HEAVY_ATTACK_FINISHER;
+        }
+    }
+    
+    @Override
+    @Deprecated
+    @Nullable
+    protected StandEntityActionModifier getRecoveryFollowup(IStandPower standPower, StandEntity standEntity) {
+        return null;
     }
     
     public boolean canBeParried() {
@@ -272,15 +282,10 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         public Builder setFinisherVariation(Supplier<? extends StandEntityHeavyAttack> variation) {
             if (variation != null) {
                 this.finisherVariation = variation;
-                variation.get().isFinisher = true;
+                variation.get().setIsFinisher();
                 addExtraUnlockable(this.finisherVariation);
             }
             return getThis();
-        }
-        
-        @Deprecated
-        public Builder setRecoveryFollowUpAction(Supplier<? extends StandEntityActionModifier> recoveryAction) {
-            return attackRecoveryFollowup(recoveryAction);
         }
         
         public Builder punchSound(Supplier<SoundEvent> punchSound) {
@@ -309,7 +314,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
         
         @Override
         protected boolean onAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, float damage) {
-            // FIXME heavy punch clashes
+            // TODO heavy punch clashes
 //            if (target instanceof StandEntity) {
 //                StandEntity targetStand = (StandEntity) target;
 //                StandEntityAction opponentTask = targetStand.getCurrentTaskAction();
@@ -318,9 +323,9 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
 //                    if (opponentAttack.canBeParried()
 //                            && targetStand.getCurrentTaskPhase().get() == StandEntityAction.Phase.WINDUP
 //                            && targetStand.canBlockOrParryFromAngle(dmgSource.getSourcePosition())) {
-//                        // TODO MORE spark particles
-//                        // TODO "loser gets knocked back" what did i mean?
-//                        // TODO a few ticks of freeze?
+//                        // MORE spark particles
+//                        // "loser gets knocked back" what did i mean?
+//                        // a few ticks of freeze?
 //                        targetStand.stopTask(true);
 //                        
 //                        SoundEvent thisSound = this.getImpactSound();

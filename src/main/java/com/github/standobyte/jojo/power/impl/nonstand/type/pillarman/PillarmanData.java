@@ -12,6 +12,7 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrPillarmanDataPacket;
+import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.TypeSpecificData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -33,6 +34,7 @@ public class PillarmanData extends TypeSpecificData {
     private int stage = 1;
     private boolean stoneForm = false;
     private float lastEnergy = -999;
+    private int lastStage = -1;
     private Mode mode = Mode.NONE;
     private List<MutableInt> eatenTntFuse = new ArrayList<>();
     private boolean bladesVisible = false;
@@ -92,11 +94,11 @@ public class PillarmanData extends TypeSpecificData {
         super.onPowerGiven(oldType, oldData);
     }
     
-    // TODO
     public void tick() {
         LivingEntity user = power.getUser();
         if (!user.isAlive()) {
             stoneForm = false;
+            bladesVisible = false;
         }
         if (!user.level.isClientSide()) {
             if (isStoneFormEnabled()) {
@@ -120,10 +122,13 @@ public class PillarmanData extends TypeSpecificData {
         }
     }
     
-    public boolean refreshEnergy(float energy) {
+    public boolean needsEffectsRefresh(INonStandPower power) {
+        float energy = power.getEnergy();
         boolean energyChanged = this.lastEnergy != energy;
+        boolean stageChanged = this.lastStage != stage;
         this.lastEnergy = energy;
-        return energyChanged;
+        this.lastStage = stage;
+        return energyChanged || stageChanged;
     }
 
     @Override
@@ -224,14 +229,19 @@ public class PillarmanData extends TypeSpecificData {
         	    ServerPlayerEntity player = (ServerPlayerEntity) user;
         	    switch (mode) {
         	    case WIND:
-        	        // TODO make a single trigger with a mod predicate for that
+        	        // TODO make a single trigger with a mode predicate for that
         	        ModCriteriaTriggers.PILLARMAN_WIND_MODE.get().trigger(player);
+        	        user.level.playSound(null, user, ModSounds.PILLAR_MAN_WIND_MODE.get(), user.getSoundSource(), 1.0F, 1.0F);
+        	        bladesVisible = false;
         	        break;
         	    case HEAT:
         	        ModCriteriaTriggers.PILLARMAN_HEAT_MODE.get().trigger(player);
+        	        user.level.playSound(null, user, ModSounds.PILLAR_MAN_HEAT_MODE.get(), user.getSoundSource(), 1.0F, 1.0F);
+        	        bladesVisible = false;
         	        break;
         	    case LIGHT:
         	        ModCriteriaTriggers.PILLARMAN_LIGHT_MODE.get().trigger(player);
+        	        user.level.playSound(null, user, ModSounds.PILLAR_MAN_LIGHT_MODE.get(), user.getSoundSource(), 1.0F, 1.0F);
         	        break;
     	        default:
     	            break;

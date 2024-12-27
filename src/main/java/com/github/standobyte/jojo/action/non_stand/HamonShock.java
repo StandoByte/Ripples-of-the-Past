@@ -150,6 +150,11 @@ public class HamonShock extends HamonAction implements IPlayerAction<HamonShock.
         }
         
         @Override
+        public float getWalkSpeed() {
+            return 0.25f;
+        }
+        
+        @Override
         public void onStop() {
             super.onStop();
             if (user.level.isClientSide() && user instanceof PlayerEntity) {

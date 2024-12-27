@@ -28,6 +28,7 @@
 	"client.LivingRendererMixin",
 	"client.PlayerRendererMixin",
     "client.BipedModelMixin",
+    "client.ModelRendererScaleMixin",
     "client.PlayerModelAnimationMixin",
     "client.ItemRendererMixin",
     "client.SMapDataPacketMixin",

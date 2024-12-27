@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.action.stand;
 
+import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -12,6 +13,7 @@ import com.github.standobyte.jojo.action.stand.punch.StandBlockPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandMissedPunch;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.render.entity.model.animnew.stand.StandActionAnimation;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandPose;
@@ -31,6 +33,13 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 
 public class StandEntityLightAttack extends StandEntityAction implements IHasStandPunch {
+    public static final StandPose STAND_POSE = new StandPose("attack") {
+        @Override
+        public StandActionAnimation getAnim(List<StandActionAnimation> variants, StandEntity standEntity) {
+            return standEntity != null ? variants.get((standEntity.punchComboCount - 1) % variants.size()) : super.getAnim(variants, standEntity);
+        }
+    };
+    
     private final Supplier<SoundEvent> punchSound;
     private final Supplier<SoundEvent> swingSound;
     
@@ -43,14 +52,6 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
     @Override
     protected ActionConditionResult checkStandConditions(StandEntity stand, IStandPower power, ActionTarget target) {
         return !stand.canAttackMelee() ? ActionConditionResult.NEGATIVE : super.checkStandConditions(stand, power, target);
-    }
-    
-    @Override
-    public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task, int ticks) {
-        if (standEntity.isArmsOnlyMode() && standEntity.swingingArm == Hand.OFF_HAND) {
-            standEntity.setArmsOnlyMode(true, true);
-        }
-        standEntity.alternateHands();
     }
     
     @Override
@@ -128,6 +129,24 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
     }
     
     @Override
+    public void onTaskSet(World world, StandEntity standEntity, IStandPower standPower, Phase phase, StandEntityTask task, int ticks) {
+        if (standEntity.isArmsOnlyMode() && standEntity.swingingArm == Hand.OFF_HAND) {
+            standEntity.setArmsOnlyMode(true, true);
+        }
+        standEntity.alternateHands();
+        if (world.isClientSide()) {
+            standEntity.punchComboCount++;
+        }
+    }
+    
+    @Override
+    protected void onTaskStopped(World world, StandEntity standEntity, IStandPower standPower, StandEntityTask task, @Nullable StandEntityAction newAction) {
+        if (world.isClientSide() && newAction != this) {
+            standEntity.punchComboCount = 0;
+        }
+    }
+    
+    @Override
     protected boolean isChainable(IStandPower standPower, StandEntity standEntity) {
         return true;
     }
@@ -170,7 +189,7 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
         public Builder() {
             staminaCost(10F).standUserWalkSpeed(1.0F)
             .standOffsetFront().standOffsetFromUser(-0.75, 0.75)
-            .standPose(StandPose.LIGHT_ATTACK)
+            .standPose(STAND_POSE)
             .standAutoSummonMode(AutoSummonMode.MAIN_ARM)
             .partsRequired(StandPart.ARMS);
         }
@@ -199,7 +218,7 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
         
         @Override
         protected boolean onAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, float damage) {
-            // FIXME light punch clashes
+            // TODO light punch clashes
 //            if (!target.level.isClientSide() && target instanceof StandEntity) {
 //                StandEntity targetStand = (StandEntity) target;
 //                StandEntityAction opponentTask = targetStand.getCurrentTaskAction();
@@ -207,8 +226,8 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
 //                    StandEntityLightAttack opponentAttack = (StandEntityLightAttack) opponentTask;
 //                    if (targetStand.getCurrentTaskPhase().get() == StandEntityAction.Phase.WINDUP
 //                            && targetStand.canBlockOrParryFromAngle(dmgSource.getSourcePosition())) {
-//                        // TODO slight knockback
-//                        // TODO spark particles
+//                        // add slight knockback
+//                        // add spark particles
 //                        targetStand.stopTask(true);
 //                        
 //                        SoundEvent thisSound = this.getImpactSound();

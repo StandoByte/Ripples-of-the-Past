@@ -21,7 +21,6 @@ public class AfterimageRenderer<T extends AfterimageEntity> extends EntityRender
         return null;
     }
 
-    // FIXME afterimage rotation
     @Override
     public void render(T entity, float yRotation, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
         Entity originEntity = entity.getOriginEntity();

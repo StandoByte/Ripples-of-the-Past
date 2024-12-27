@@ -11,7 +11,7 @@ import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 
 public class CrazyDiamondBloodHomingMarker extends MarkerRenderer {
@@ -33,7 +33,7 @@ public class CrazyDiamondBloodHomingMarker extends MarkerRenderer {
         IStandPower.getStandPowerOptional(mc.player).ifPresent(stand -> {
             Optional<StandEffectInstance> outlined = CrazyDiamondBlockBullet.getTarget(CrazyDiamondBlockBullet.targets(stand), mc.player);
             CrazyDiamondBlockBullet.targets(stand).forEach(effect -> {
-                LivingEntity target = effect.getTarget();
+                Entity target = effect.getTarget();
                 list.add(new MarkerInstance(target.getPosition(partialTick).add(0, target.getBbHeight() * 1.1, 0), 
                         outlined.map(outlinedEffect -> effect == outlinedEffect).orElse(false)));
             });

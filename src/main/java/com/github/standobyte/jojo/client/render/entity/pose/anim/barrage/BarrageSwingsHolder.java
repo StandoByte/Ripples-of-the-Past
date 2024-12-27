@@ -11,6 +11,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.entity.model.EntityModel;
 import net.minecraft.entity.Entity;
 
+@Deprecated
 public class BarrageSwingsHolder<T extends Entity, M extends EntityModel<T>> {
     private List<AdditionalBarrageSwing<T, M>> barrageSwings = new LinkedList<>();
     private float loopLast = -1;
@@ -20,7 +21,7 @@ public class BarrageSwingsHolder<T extends Entity, M extends EntityModel<T>> {
     }
     
     public void updateSwings(Minecraft mc) {
-        if (!mc.isPaused() && hasSwings()) {
+        if (!mc.isPaused() && !barrageSwings.isEmpty()) {
             float timeDelta = mc.getDeltaFrameTime();
             Iterator<AdditionalBarrageSwing<T, M>> iter = barrageSwings.iterator();
             while (iter.hasNext()) {

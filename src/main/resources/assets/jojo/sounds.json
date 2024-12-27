@@ -148,6 +148,10 @@
     "subtitle": "jojo.subtitle.stand_attack_strong",
     "sounds": [ "jojo:attack_blood_splash" ]
   },
+  "pillar_man_absorption": {
+    "subtitle": "jojo.subtitle.blood_drain",
+    "sounds": [ "jojo:vampire_blood_drain" ]
+  },
   "pillar_man_swing": {
     "subtitle": "jojo.subtitle.stand_punch_swing",
     "sounds": [ 

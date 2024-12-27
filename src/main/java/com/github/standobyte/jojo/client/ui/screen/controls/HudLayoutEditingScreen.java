@@ -62,7 +62,7 @@ import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraftforge.client.settings.KeyModifier;
 
 /* 
- * FIXME !!!! (layout editing) close the window when the player's power being changed/replaced
+ * FIXME close the window when the player's power being changed/replaced
  */
 // TODO saving layout variants
 @SuppressWarnings("deprecation")

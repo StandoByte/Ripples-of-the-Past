@@ -31,8 +31,8 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 
-// FIXME ! (hamon 2) sparks wave anim on hamon damage
-// FIXME ! (hamon) dislocated bones sound
+// FIXME sparks wave anim on hamon damage
+// FIXME dislocated bones sound
 public class ZoomPunchEntity extends OwnerBoundProjectileEntity {
     private HandSide side;
     private float speed;

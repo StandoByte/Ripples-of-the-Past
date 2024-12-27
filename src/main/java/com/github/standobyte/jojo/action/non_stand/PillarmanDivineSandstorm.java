@@ -7,12 +7,14 @@ import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
 import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
 import com.github.standobyte.jojo.entity.damaging.projectile.PillarmanDivineSandstormEntity;
 import com.github.standobyte.jojo.init.ModParticles;
+import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanData.Mode;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.particles.IParticleData;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.world.World;
 
 public class PillarmanDivineSandstorm extends PillarmanAction {
@@ -44,8 +46,8 @@ public class PillarmanDivineSandstorm extends PillarmanAction {
     
     @Override
     public void onHoldTickClientEffect(LivingEntity user, INonStandPower power, int ticksHeld, boolean reqFulfilled, boolean reqStateChanged) {
-        if (reqFulfilled) {
-            auraEffect(user, ModParticles.HAMON_AURA_GREEN.get(), 12);
+        if (reqFulfilled && ticksHeld < 40) {
+            auraEffect(user, ModParticles.HAMON_AURA_GREEN.get(), 6);
         }
     }
 
@@ -53,13 +55,22 @@ public class PillarmanDivineSandstorm extends PillarmanAction {
     protected void holdTick(World world, LivingEntity user, INonStandPower power, int ticksHeld, ActionTarget target, boolean requirementsFulfilled) {
         if (!world.isClientSide()) {
             int maxTicks = Math.max(getHoldDurationToFire(power), 1);
-            if (ticksHeld >= maxTicks && power.getEnergy() > 0) {
-                PillarmanDivineSandstormEntity sanstormWave = new PillarmanDivineSandstormEntity(world, user)
+            if (ticksHeld >= maxTicks && power.getEnergy() > 0 && ticksHeld % 2 == 0) {
+                PillarmanDivineSandstormEntity sanstormWave = new PillarmanDivineSandstormEntity(world, user, 0)
+                		.setAtmospheric(false)
                         .setRadius(1.5F)
                         .setDamage(2F)
                         .setDuration(10);
-                sanstormWave.shootFromRotation(user, 0.9F, 15F);
+                sanstormWave.shootFromRotation(user, 0.9F, 2F);
                 world.addFreshEntity(sanstormWave);
+                world.playSound(null, user.getX(), user.getY(), user.getZ(), ModSounds.MAGICIANS_RED_FIRE_BLAST.get(), 
+                        SoundCategory.AMBIENT, 0.2F, 1.0F);
+                /*PillarmanDivineSandstormEntity sanstormWave2 = new PillarmanDivineSandstormEntity(world, user, -2F)
+                        .setRadius(1.5F)
+                        .setDamage(1F)
+                        .setDuration(10);
+                sanstormWave2.shootFromRotation(user, 0.9F, 2F);
+                world.addFreshEntity(sanstormWave2);*/
             }
         }
     }

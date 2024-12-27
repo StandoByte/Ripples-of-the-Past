@@ -2,11 +2,13 @@ package com.github.standobyte.jojo.action.stand;
 
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
+import com.github.standobyte.jojo.entity.stand.StandPose;
 import com.github.standobyte.jojo.util.mc.damage.StandEntityDamageSource;
 
 import net.minecraft.entity.Entity;
 
 public class TheWorldKick extends StandEntityHeavyAttack {
+    public static final StandPose KICK_POSE = new StandPose("kick");
 
     public TheWorldKick(StandEntityHeavyAttack.Builder builder) {
         super(builder);

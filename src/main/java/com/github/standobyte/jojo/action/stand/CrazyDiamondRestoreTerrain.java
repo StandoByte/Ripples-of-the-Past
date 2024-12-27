@@ -87,7 +87,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         return super.checkSpecificConditions(user, power, target);
     }
     
-    // TODO try to mitigate the fps drops when lots of blocks are restored simultaneously
+    // FIXME try to mitigate the fps drops when lots of blocks are restored simultaneously
     @Override
     public void standTickPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
         if (!world.isClientSide()) {

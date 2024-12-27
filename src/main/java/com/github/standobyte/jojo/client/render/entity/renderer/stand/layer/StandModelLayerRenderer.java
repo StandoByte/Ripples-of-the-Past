@@ -18,8 +18,8 @@ import net.minecraft.util.ResourceLocation;
 
 public abstract class StandModelLayerRenderer<T extends StandEntity, M extends StandEntityModel<T>> extends LayerRenderer<T, M> {
     protected final StandEntityRenderer<T, M> entityRenderer;
-    private final boolean useParentModel;
-    private final M model;
+    protected final boolean useParentModel;
+    protected final M model;
     protected final ResourceLocation texture;
 
     public StandModelLayerRenderer(IEntityRenderer<T, M> entityRenderer, M model, ResourceLocation texture) {
@@ -36,8 +36,11 @@ public abstract class StandModelLayerRenderer<T extends StandEntity, M extends S
         this.model = model;
         this.texture = texture;
         this.useParentModel = useParentModel;
-        if (!useParentModel && model != null) {
-            model.afterInit();
+        if (model != null) {
+            model.setAnimatorSupplier(getParentModel().getGeckoAnimator());
+            if (!useParentModel) {
+                model.afterInit();
+            }
         }
     }
 

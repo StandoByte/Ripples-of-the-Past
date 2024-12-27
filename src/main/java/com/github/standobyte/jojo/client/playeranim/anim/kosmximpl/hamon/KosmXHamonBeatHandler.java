@@ -15,7 +15,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.ResourceLocation;
 
 public class KosmXHamonBeatHandler extends AnimLayerHandler<ModifierLayer<IAnimation>> implements BasicToggleAnim {
-    private static final float SPEED = 3;
+    private static final float SPEED = 2.25F;
 
     public KosmXHamonBeatHandler(ResourceLocation id) {
         super(id);

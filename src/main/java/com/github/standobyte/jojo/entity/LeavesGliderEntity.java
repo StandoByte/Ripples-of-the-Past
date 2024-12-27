@@ -379,7 +379,7 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
 
             Vector3d riderMovement = entity.getDeltaMovement().multiply(1, 0, 1);
             Vector3d gliderRotVec = Vector3d.directionFromRotation(0, yRot);
-            // FIXME add the entity's movement (when making a glider after leap)
+            // TODO add the entity's movement (when making a glider after leap)
             setDeltaMovement(gliderRotVec.scale(Math.max(riderMovement.dot(gliderRotVec), 0.05D)));
         }
         super.addPassenger(entity);

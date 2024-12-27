@@ -982,7 +982,10 @@ public class MCUtil {
         return areHandsFree(entity, hand);
     }
     
-    // TODO areBothHandsFree method?
+    public static boolean areBothHandsFree(LivingEntity entity) {
+        return areHandsFree(entity, Hand.MAIN_HAND, Hand.OFF_HAND);
+    }
+    
     public static boolean areHandsFree(LivingEntity entity, Hand... hands) {
         if (entity.level.isClientSide() && entity.is(ClientUtil.getClientPlayer()) && ClientUtil.arePlayerHandsBusy()) {
             return false;

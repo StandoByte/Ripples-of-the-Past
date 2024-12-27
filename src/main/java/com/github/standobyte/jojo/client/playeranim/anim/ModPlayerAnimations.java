@@ -30,11 +30,16 @@ public class ModPlayerAnimations {
     public static BasicToggleAnim unnaturalAgility;
     public static BasicToggleAnim stoneForm;
     public static BasicToggleAnim bladeBarrage;
-    public static BasicToggleAnim bladeDash;
+    public static WindupAttackAnim bladeDash;
     public static BasicToggleAnim pillarmanEvasion;
     public static BasicToggleAnim giantCartwheelPrison;
     public static BasicToggleAnim selfDetonation;
     public static BasicToggleAnim erraticBlazeKing;
+    public static BasicToggleAnim bladeSlash;
+    public static BasicToggleAnim lightFlash;
+    public static BasicToggleAnim lightFlashDecoy;
+    public static BasicToggleAnim atmosphericRift;
+    public static BasicToggleAnim pillarmanPossession;
 
     /** 
      * This string must match the full name of the class and the package it's in.<br>
@@ -121,40 +126,61 @@ public class ModPlayerAnimations {
                 Object::new);
         
         divineSandstorm = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
-                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXDivineSandstormLayer",
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXDivineSandstormHandler",
                 new ResourceLocation(JojoMod.MOD_ID, "divine_sandstorm"), 1);
         
         unnaturalAgility = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
-                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXUnnaturalAgilityLayer",
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXUnnaturalAgilityHandler",
                 new ResourceLocation(JojoMod.MOD_ID, "unnatural_agility"), 1);
         
         stoneForm = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
-                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXStoneFormLayer",
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXStoneFormHandler",
                 new ResourceLocation(JojoMod.MOD_ID, "stone_form_1"), 1);
         
         bladeBarrage = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
-                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXBladeBarrageLayer",
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXBladeBarrageHandler",
                 new ResourceLocation(JojoMod.MOD_ID, "blade_barrage"), 1);
         
-        bladeDash = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
-                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXBladeDashLayer",
-                new ResourceLocation(JojoMod.MOD_ID, "blade_dash"), 1);
+        bladeDash = PlayerAnimationHandler.getPlayerAnimator().registerAnimLayer(
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXBladeDashHandler",
+                new ResourceLocation(JojoMod.MOD_ID, "blade_dash"), 1, 
+                WindupAttackAnim.NoPlayerAnimator::new);
         
         pillarmanEvasion = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
-                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXPillarmanEvasionLayer",
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXPillarmanEvasionHandler",
                 new ResourceLocation(JojoMod.MOD_ID, "evasion"), 1);
         
         giantCartwheelPrison = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
-                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXGiantCartwheelPrisonLayer",
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXGiantCartwheelPrisonHandler",
                 new ResourceLocation(JojoMod.MOD_ID, "giant_cartwheel_prison"), 1);
         
         selfDetonation = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
-                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXSelfDetonationLayer",
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXSelfDetonationHandler",
                 new ResourceLocation(JojoMod.MOD_ID, "self_detonation"), 1);
         
         erraticBlazeKing = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
-                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXErraticBlazeKingLayer",
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXErraticBlazeKingHandler",
                 new ResourceLocation(JojoMod.MOD_ID, "erratic_blaze_king"), 1);
+        
+        bladeSlash = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXBladeSlashHandler",
+                new ResourceLocation(JojoMod.MOD_ID, "blade_slash"), 1);
+        
+        lightFlash = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXLightFlashHandler",
+                new ResourceLocation(JojoMod.MOD_ID, "light_flash"), 1);
+        
+        lightFlashDecoy = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXLightFlashDecoyHandler",
+                new ResourceLocation(JojoMod.MOD_ID, "light_flash_decoy"), 1);
+        
+        atmosphericRift = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXAtmosphericRiftHandler",
+                new ResourceLocation(JojoMod.MOD_ID, "atmospheric_rift"), 1);
+        
+        pillarmanPossession = PlayerAnimationHandler.getPlayerAnimator().registerBasicAnimLayer(
+                "com.github.standobyte.jojo.client.playeranim.anim.kosmximpl.pillarman.KosmXPillarmanPossessionHandler",
+                new ResourceLocation(JojoMod.MOD_ID, "pillar_man_possession"), 1);
     }
 
 }

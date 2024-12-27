@@ -9,15 +9,15 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-import javax.annotation.Nullable;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.ParseAnims;
+import com.github.standobyte.jojo.client.render.entity.model.animnew.ParseGeckoAnims;
 import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Animation;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.stand.StandAnimator;
+import com.github.standobyte.jojo.client.render.entity.model.animnew.molang.MolangInterpreter;
+import com.github.standobyte.jojo.client.render.entity.model.animnew.stand.GeckoStandAnimator;
+import com.github.standobyte.jojo.client.render.entity.model.stand.StandModelRegistry;
+import com.github.standobyte.jojo.client.render.entity.model.stand.StandModelRegistry.StandModelRegistryObj;
 import com.google.common.collect.Maps;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
@@ -34,7 +34,7 @@ import net.minecraft.util.ResourceLocation;
 public class GeckoAnimLoader extends ReloadListener<Map<ResourceLocation, JsonElement>> {
     private static final Logger LOGGER = LogManager.getLogger();
     private final Gson gson;
-    private final Map<ResourceLocation, StandAnimator> loadedAnims = new HashMap<>();
+    private final Map<ResourceLocation, GeckoStandAnimator> loadedAnims = new HashMap<>();
     
     public GeckoAnimLoader(Gson gson) {
         this.gson = gson;
@@ -47,8 +47,6 @@ public class GeckoAnimLoader extends ReloadListener<Map<ResourceLocation, JsonEl
         Map<ResourceLocation, JsonElement> map = Maps.newHashMap();
         
         for (ResourceLocation path : pResourceManager.listResources(DIRECTORY, p -> p.endsWith(SUFFIX))) {
-            if (!JojoMod.MOD_ID.equals(path.getNamespace())) continue;
-            
             String fileName = path.getPath();
             fileName = fileName.substring(DIRECTORY.length() + 1, fileName.length() - SUFFIX.length());
             ResourceLocation preparedPath = new ResourceLocation(path.getNamespace(), fileName);
@@ -77,31 +75,43 @@ public class GeckoAnimLoader extends ReloadListener<Map<ResourceLocation, JsonEl
 
     @Override
     protected void apply(Map<ResourceLocation, JsonElement> pObject, IResourceManager pResourceManager, IProfiler pProfiler) {
+        MolangInterpreter.init();
         loadedAnims.clear();
+        StandModelRegistry.values().forEach(StandModelRegistryObj::beforeGeckoAnimReload);
         
         for (Map.Entry<ResourceLocation, JsonElement> rawModelEntry : pObject.entrySet()) {
+            ResourceLocation key = rawModelEntry.getKey();
+            StandModelRegistryObj standModel = StandModelRegistry.getRegisteredModel(key);
+            GeckoStandAnimator standModelAnims = new GeckoStandAnimator();
+            standModelAnims.setExists();
+            
             JsonObject modelAnimsJson = rawModelEntry.getValue().getAsJsonObject().getAsJsonObject("animations");
-            StandAnimator singleModelAnims = new StandAnimator();
-            for (Map.Entry<String, JsonElement> animJson : modelAnimsJson.entrySet()) {
+            for (Map.Entry<String, JsonElement> animJsonEntry : modelAnimsJson.entrySet()) {
                 try {
-                    Animation animation = ParseAnims.parseAnim(animJson.getValue().getAsJsonObject());
-                    singleModelAnims.putNamedAnim(animJson.getKey(), animation);
+                    JsonObject animJson = animJsonEntry.getValue().getAsJsonObject();
+                    Animation animation = ParseGeckoAnims.parseAnim(animJson);
+                    standModelAnims.animFromJson(animation, animJson, animJsonEntry.getKey());
                 }
                 catch (Exception e) {
-                    LOGGER.error("Failed to load animation {} from {}", animJson.getKey(), rawModelEntry.getKey());
-                    e.printStackTrace();
+                    LOGGER.error("Failed to load animation {} from {}", animJsonEntry.getKey(), rawModelEntry.getKey(), e);
+                    continue;
                 }
             }
-            loadedAnims.put(rawModelEntry.getKey(), singleModelAnims);
+            loadedAnims.put(key, standModelAnims);
+            
+            standModelAnims.onLoad();
+            if (standModel != null) {
+                standModel.onGeckoAnimLoaded(standModelAnims);
+            }
         }
     }
     
     
-    @Nullable
-    public Animation getAnim(ResourceLocation modelId, String animName) {
-        StandAnimator modelAnims = loadedAnims.get(modelId);
-        return modelAnims != null ? modelAnims.getNamedAnim(animName) : null;
-    }
+//    @Nullable
+//    public StandActionAnimation getAnim(ResourceLocation modelId, String animName) {
+//        GeckoStandAnimator modelAnims = loadedAnims.get(modelId);
+//        return modelAnims != null ? modelAnims.getNamedAnim(animName) : null;
+//    }
     
 
 }
