@@ -791,7 +791,7 @@ public class ModStandsInit {
     public static final RegistryObject<StandEntityHeavyAttack> GOLD_EXPERIENCE_LIFESHOT_PUNCH = ACTIONS.register("gold_experience_lifeshot_punch", 
             () -> new GoldExperienceLifeshotPunch(new StandEntityHeavyAttack.Builder()
                     .resolveLevelToUnlock(1)
-                    .setRecoveryFollowUpAction(GOLD_EXPERIENCE_ENTITY_LIFESHOT)
+                    .attackRecoveryFollowup(GOLD_EXPERIENCE_ENTITY_LIFESHOT)
                     .punchSound(ModSounds.GOLD_EXPERIENCE_PUNCH_HEAVY)
                     .standSound(Phase.WINDUP, false, ModSounds.GOLD_EXPERIENCE_MUDA_LONG)
                     .standSound(Phase.PERFORM, ModSounds.GOLD_EXPERIENCE_PUNCH_HEAVY_EXTRA)
@@ -802,7 +802,7 @@ public class ModStandsInit {
     
     public static final RegistryObject<GoldExperienceHeavyPunch> GOLD_EXPERIENCE_HEAVY_PUNCH = ACTIONS.register("gold_experience_heavy_punch", 
             () -> new GoldExperienceHeavyPunch(new StandEntityHeavyAttack.Builder()
-                    .setRecoveryFollowUpAction(GOLD_EXPERIENCE_TOOTH_LIFEFORM)
+                    .attackRecoveryFollowup(GOLD_EXPERIENCE_TOOTH_LIFEFORM)
                     .punchSound(ModSounds.GOLD_EXPERIENCE_PUNCH_HEAVY)
                     .standSound(Phase.WINDUP, false, ModSounds.GOLD_EXPERIENCE_MUDA_LONG)
                     .standSound(Phase.PERFORM, ModSounds.GOLD_EXPERIENCE_PUNCH_HEAVY_EXTRA)
