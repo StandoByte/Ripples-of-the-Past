@@ -34,12 +34,12 @@ public class TheWorldTimeStop extends TimeStop {
     }
     
     @Override
-    public int getHoldDurationToFire(IStandPower power) { 
+    public int getHoldDurationToFire(IStandPower power) {
         return shortenedHoldDuration(power, super.getHoldDurationToFire(power));
     }
     
     private int shortenedHoldDuration(IStandPower power, int ticks) {
-        return ticks > 0 && power.getResolveLevel() >= 4 ? 20 : ticks;
+        return ticks > 0 && power.getResolveLevel() >= 4 ? Math.max(ticks - 10, 0) : ticks;
     }
     
     @Override

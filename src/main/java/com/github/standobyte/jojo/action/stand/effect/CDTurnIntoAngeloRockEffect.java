@@ -420,12 +420,12 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
     }
     
     @Override
-    protected void setTarget(@Nullable LivingEntity target) {
-        LivingEntity curTarget = getTarget();
+    protected void setTargetEntity(@Nullable Entity target) {
+        Entity curTarget = getTarget();
         if (curTarget != null && !curTarget.isAlive()) {
             lastTargetPos = curTarget.blockPosition();
         }
-        super.setTarget(target);
+        super.setTargetEntity(target);
     }
     
     private boolean hasBlocksToRestore() {
@@ -468,7 +468,7 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
     
     protected List<ItemStack> itemsSource(BlockPos center) {
         AxisAlignedBB area = new AxisAlignedBB(center, center).inflate(8);
-        LivingEntity target = getTarget();
+        Entity target = getTarget();
         List<ItemStack> itemsSource = CrazyDiamondRestoreTerrain.sourceItemStacks(area, Vector3d.atBottomCenterOf(center), user, world, 
                 target instanceof PlayerEntity ? SourceType.PLAYER_INVENTORY.from(target) : null, 
                 SourceType.MOB_HELD.fromAllNearby(), 

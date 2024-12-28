@@ -814,7 +814,7 @@
   "commands.jojoconfigpack.standstats.single": "%s default Stand stats file for %s",
   
   "commands.jojoconfigpack.abilities.stand.link_name": "Generated",
-  "commands.jojoconfigpack.abilities.stand": "(WIP) %s config files for all abilities of %s",
+  "commands.jojoconfigpack.abilities.stand": "(WIP) %s config files for all configurable abilities of %s",
   "commands.jojoconfigpack.abilities.single.link_name": "Generated",
   "commands.jojoconfigpack.abilities.single": "(WIP) %s config file for %s",
   
