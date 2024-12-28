@@ -75,9 +75,10 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
     protected void start() {}
     
     @Override
-    protected void tickTarget(LivingEntity target) {
-        if (!target.level.isClientSide()) {
-            if (!triedSummonRockEntity) {
+    protected void tick() {
+        if (!world.isClientSide()) {
+            LivingEntity target = getTargetLiving();
+            if (target != null && !triedSummonRockEntity) {
                 KnockbackCollisionImpact kbCollision = KnockbackCollisionImpact.getHandler(target).orElse(null);
                 if (kbCollision == null) {
                     remove();
@@ -94,14 +95,9 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
                     triedSummonRockEntity = true;
                 }
             }
-        }
-    }
-    
-    @Override
-    protected void tick() {
-        if (!world.isClientSide()) {
+            
             boolean hasBlocksToRestore = hasBlocksToRestore();
-            if (triedSummonRockEntity || getTarget() == null) {
+            if (triedSummonRockEntity || target == null) {
                 AngeloRockEntity angeloRock = angeloRockEntity.getEntityCast(world);
                 if ((angeloRock == null || angeloRock.isFullyFormed()) && !hasBlocksToRestore) {
                     remove();
@@ -112,7 +108,7 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
                 Entity entity = angeloRockEntity.getEntity(world);
                 BlockPos centerPos;
                 if (entity == null) {
-                    entity = getTarget();
+                    entity = target;
                 }
                 
                 if (entity != null) {
@@ -422,7 +418,7 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
     @Override
     protected void setTargetEntity(@Nullable Entity target) {
         Entity curTarget = getTarget();
-        if (curTarget != null && !curTarget.isAlive()) {
+        if (target == null && curTarget != null && !curTarget.isAlive()) {
             lastTargetPos = curTarget.blockPosition();
         }
         super.setTargetEntity(target);
