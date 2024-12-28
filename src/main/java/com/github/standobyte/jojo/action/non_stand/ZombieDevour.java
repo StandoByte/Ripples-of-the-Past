@@ -64,7 +64,7 @@ public class ZombieDevour extends ZombieAction {
     @Override
     public void onHoldTickClientEffect(LivingEntity user, INonStandPower power, int ticksHeld, boolean requirementsFulfilled, boolean stateRefreshed) {
         if (stateRefreshed && requirementsFulfilled) {
-            ClientTickingSoundsHelper.playHeldActionSound(ModSounds.ZOMBIE_DEVOUR.get(), 1.0F, 1.0F, true, user, power, this); // TODO jojo.subtitle.devouring
+            ClientTickingSoundsHelper.playHeldActionSound(ModSounds.ZOMBIE_DEVOUR.get(), 1.0F, 1.0F, true, user, power, this);
         }
     }
     

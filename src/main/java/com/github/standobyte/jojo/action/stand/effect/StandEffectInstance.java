@@ -242,6 +242,9 @@ public abstract class StandEffectInstance {
         return effect;
     }
     
+    @Deprecated public void writeAdditionalPacketData(PacketBuffer buf) {}
+    @Deprecated public void readAdditionalPacketData(PacketBuffer buf) {}
+    
     public void writeAdditionalPacketData(PacketBuffer buf, boolean sendingToUser) {}
     
     public void readAdditionalPacketData(PacketBuffer buf, boolean clientIsUser) {}

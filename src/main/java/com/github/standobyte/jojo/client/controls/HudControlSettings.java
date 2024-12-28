@@ -3,11 +3,8 @@ package com.github.standobyte.jojo.client.controls;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
-
-import org.apache.commons.io.FileUtils;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.power.IPower;
@@ -128,26 +125,11 @@ public class HudControlSettings {
         if (subDirs == null) return;
         
         for (File namespaceDir : subDirs) {
-            // TODO remove beta legacy controls loading
-            if (namespaceDir.getName().contains(",")) {
-                ResourceLocation powerId = new ResourceLocation(namespaceDir.getName().replace(",", ":"));
-                loadControls(namespaceDir, powerId);
-                try {
-                    saveForPowerType(powerId);
-                    FileUtils.deleteDirectory(namespaceDir);
-                } catch (IOException e) {
-                    JojoMod.getLogger().error("Failed to delete legacy controls folder");
-                    e.printStackTrace();
-                }
-            }
-            //
-            else {
-                File[] powerTypePathDirs = namespaceDir.listFiles(File::isDirectory);
-                if (powerTypePathDirs != null) {
-                    for (File pathDir : powerTypePathDirs) {
-                        ResourceLocation powerId = new ResourceLocation(namespaceDir.getName(), pathDir.getName());
-                        loadControls(pathDir, powerId);
-                    }
+            File[] powerTypePathDirs = namespaceDir.listFiles(File::isDirectory);
+            if (powerTypePathDirs != null) {
+                for (File pathDir : powerTypePathDirs) {
+                    ResourceLocation powerId = new ResourceLocation(namespaceDir.getName(), pathDir.getName());
+                    loadControls(pathDir, powerId);
                 }
             }
         }

@@ -728,12 +728,21 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         StandPoseDataFill poseData = StandPoseData.start()
                 .standPose(pose)
                 .animTime(tickCount - setPoseTime + partialTick);
-        curTask.ifPresent(task -> {
+        if (curTask.isPresent()) {
+            StandEntityTask task = curTask.get();
+            int ticksMax = task.getStartingTicks();
+            if (task.getPhase() == StandEntityAction.Phase.BUTTON_HOLD && getUserPower() != null) {
+                int holdToFire = task.getAction().getHoldDurationToFire(userPower);
+                if (holdToFire > 0) {
+                    ticksMax = holdToFire;
+                }
+            }
+            
             poseData
             .actionPhase(Optional.of(task.getPhase()))
-            .phaseCompletion(task.getPhaseCompletion(partialTick))
+            .phaseCompletion(StandEntityTask.getPhaseCompletion(ticksMax - task.getTick(), ticksMax, partialTick))
             .animTime(task.getTick() + partialTick);
-        });
+        }
         return poseData.end();
     }
     

@@ -213,36 +213,39 @@ public class StandEffectsTracker {
     
     
     
-    /**
-     * @return Optional of stream with StandEffectInstance of that type. Instead of an empty stream returns empty optional.
-     */
-    @SuppressWarnings("unchecked")
     public static <T extends StandEffectInstance> Stream<T> getEffectsOfType(LivingEntity user, StandEffectType<T> type) {
-        return IStandPower.getStandPowerOptional(user).resolve()
-                .map(power -> power.getContinuousEffects().getEffects()
-                        .filter(effect -> effect.effectType == type)
-                        .map(standEffectInstance -> (T) standEffectInstance))
+        return getEffectsOfType(IStandPower.getStandPowerOptional(user).resolve(), type);
+    }
+
+    public static <T extends StandEffectInstance> Optional<T> getEffectOfType(LivingEntity user, StandEffectType<T> type) {
+        return getEffectOfType(IStandPower.getStandPowerOptional(user).resolve(), type);
+    }
+    
+    @SuppressWarnings("unchecked")
+    public static <T extends StandEffectInstance> Stream<T> getEffectsOfType(Optional<IStandPower> userPower, StandEffectType<T> type) {
+        return userPower.map(power -> power.getContinuousEffects().getEffects()
+                .filter(effect -> effect.effectType == type)
+                .map(standEffectInstance -> (T) standEffectInstance))
                 .orElse(Stream.empty());
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends StandEffectInstance> Optional<T> getEffectOfType(LivingEntity user, StandEffectType<T> type) {
-        return IStandPower.getStandPowerOptional(user).resolve()
-                .flatMap(power -> power.getContinuousEffects().getEffects()
-                        .filter(effect -> effect.effectType == type)
-                        .findFirst()
-                        .map(standEffectInstance -> (T) standEffectInstance));
+    public static <T extends StandEffectInstance> Optional<T> getEffectOfType(Optional<IStandPower> userPower, StandEffectType<T> type) {
+        return userPower.flatMap(power -> power.getContinuousEffects().getEffects()
+                .filter(effect -> effect.effectType == type)
+                .findFirst()
+                .map(standEffectInstance -> (T) standEffectInstance));
     }
     
 
     @SuppressWarnings("unchecked")
-    public static <T extends StandEffectInstance> Stream<T> getEffectsOfType(IStandPower power, StandEffectType<T> type, double range) {
-        double rangeSq = range * range;
+    public static <T extends StandEffectInstance> Stream<T> getEffectsOfType(IStandPower power, StandEffectType<T> type, double targetRange) {
+        double rangeSq = targetRange * targetRange;
         return power.getContinuousEffects()
                 .getEffects()
                 .filter(effect -> effect.effectType == type)
                 .filter(effect -> effect.getTarget() != null
-                        && (range <= 0 || effect.getTarget().distanceToSqr(power.getUser()) < rangeSq))
+                        && (targetRange <= 0 || effect.getTarget().distanceToSqr(power.getUser()) < rangeSq))
                 .map(effect -> (T) effect);
     }
     

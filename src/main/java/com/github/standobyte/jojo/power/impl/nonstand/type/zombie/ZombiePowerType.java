@@ -62,6 +62,12 @@ public class ZombiePowerType extends NonStandPowerType<ZombieData> {
     private static int bloodLevel(INonStandPower power) {
         return bloodLevel(power, power.getUser().level.getDifficulty().getId());
     }
+
+    public boolean isHighSaturation(LivingEntity entity) {
+        return INonStandPower.getNonStandPowerOptional(entity).map(power -> {
+            return power.getType() == this && power.getEnergy() / power.getMaxEnergy() >= 0.8F;
+        }).orElse(false);
+    }
     
     public static int bloodLevel(INonStandPower power, int difficulty) {
         if (difficulty == 0) {

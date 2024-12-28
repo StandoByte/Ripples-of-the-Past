@@ -15,7 +15,7 @@ import net.minecraft.util.math.vector.Matrix4f;
 public class RadialBar {
     private static final float PI = (float) Math.PI;
 
-    // FIXME breaks when using non-zero angle0 with fill > 0.5 (not planning to do that anyway, but when i've got nothing else to do might as well fix that)
+    // TODO breaks when using non-zero angle0 with fill > 0.5 (not planning to do that anyway, but when i've got nothing else to do might as well fix that)
     public static void render(MatrixStack matrixStack, float x, float y, 
             float angle0, float fill, 
             float emptyTexU, float emptyTexV, float filledTexU, float filledTexV, 

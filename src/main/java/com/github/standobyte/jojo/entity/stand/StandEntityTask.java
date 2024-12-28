@@ -241,7 +241,11 @@ public class StandEntityTask {
     }
     
     public float getPhaseCompletion(float partialTick) {
-        return Math.min(1F - ((float) ticksLeft - partialTick) / (float) startingTicks, 1F);
+        return getPhaseCompletion(ticksLeft, startingTicks, partialTick);
+    }
+    
+    public static float getPhaseCompletion(int ticksLeft, int ticksTotal, float partialTick) {
+        return Math.min(1F - ((float) ticksLeft - partialTick) / (float) ticksTotal, 1F);
     }
     
     public StandEntityAction.Phase getPhase() {

@@ -71,6 +71,16 @@ public class StandRelativeOffset {
         else {
             vec = new Vector3d(left, (doYOffset ? y : yDefault) + yOffset, forward).yRot(-yRot * MathUtil.DEG_TO_RAD);
         }
+        
+        float standWidth = user.getBbWidth();
+        float defaultWidth = user.getType().getWidth();
+        float standHeight = user.getBbHeight();
+        float defaultHeight = user.getType().getHeight();
+        if (standWidth != defaultWidth || standHeight != defaultHeight) {
+            double widthRatio = standWidth / defaultWidth;
+            double heightRatio = standHeight / defaultHeight;
+            vec = new Vector3d(vec.x * widthRatio, vec.y * heightRatio, vec.z * widthRatio);
+        }
         return vec;
     }
 

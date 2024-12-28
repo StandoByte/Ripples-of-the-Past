@@ -23,6 +23,7 @@ import com.github.standobyte.jojo.action.non_stand.HamonPlantItemInfusion;
 import com.github.standobyte.jojo.action.non_stand.HamonRebuffOverdrive;
 import com.github.standobyte.jojo.action.non_stand.HamonRopeTrap;
 import com.github.standobyte.jojo.action.non_stand.HamonSnakeMuffler;
+import com.github.standobyte.jojo.action.non_stand.PillarmanBladeBarrage;
 import com.github.standobyte.jojo.action.non_stand.PillarmanUnnaturalAgility;
 import com.github.standobyte.jojo.action.non_stand.VampirismFreeze;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
@@ -624,6 +625,9 @@ public class GameplayEventHandler {
         }
         if (PillarmanUnnaturalAgility.onUserAttacked(event)) {
             event.setCanceled(true);
+        }
+        if (PillarmanBladeBarrage.onUserAttacked(event)) {
+        	event.setCanceled(true);
         }
         
         if (GeneralUtil.orElseFalse(target.getSleepingPos(), sleepingPos -> {

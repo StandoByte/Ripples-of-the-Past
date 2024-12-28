@@ -3,7 +3,6 @@ package com.github.standobyte.jojo.action.stand;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -12,6 +11,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.Action;
@@ -51,7 +51,6 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     protected final int standRecoveryDuration;
     private final AutoSummonMode autoSummonMode;
     private final float userWalkSpeed;
-    protected StandPose standPose;
     @Nullable
     protected final StandRelativeOffset userOffset;
     @Nullable
@@ -68,13 +67,11 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         this.standRecoveryDuration = builder.standRecoveryDuration;
         this.autoSummonMode = builder.autoSummonMode;
         this.userWalkSpeed = builder.userWalkSpeed;
-        this.standPose = builder.standPose;
         this.userOffset = builder.userOffset;
         this.userOffsetArmsOnly = builder.userOffsetArmsOnly;
         this.enablePhysics = builder.enablePhysics;
         this.standSounds = builder.standSounds;
         this.barrageVisuals = builder.barrageVisuals;
-        this._recoveryFollowUpPreInit = builder.recoveryFollowUp;
     }
     
     @Override
@@ -284,7 +281,14 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         if (!willFire) {
             invokeForStand(power, stand -> {
                 if (stand.getCurrentTaskAction() == this) {
-                    stand.stopTaskWithRecovery();
+                    stand.getCurrentTask().ifPresent(task -> {
+                        if (task.getAction().holdOnly(power)) {
+                            task.moveToPhase(StandEntityAction.Phase.RECOVERY, power, stand);
+                        }
+                        else {
+                            stand.stopTask();
+                        }
+                    });
                 }
             });
         }
@@ -538,51 +542,6 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
     }
     
     
-    private Map<Supplier<? extends StandEntityAction>, List<Supplier<? extends StandAction>>> _recoveryFollowUpPreInit;
-    private Map<? extends StandEntityAction, List<? extends StandAction>> recoveryFollowUp;
-    
-    protected void initRecoveryFollowUp() {
-        if (_recoveryFollowUpPreInit != null) {
-            recoveryFollowUp = _recoveryFollowUpPreInit.entrySet().stream().collect(Collectors.toMap(
-                    entry -> entry.getKey() != null ? entry.getKey().get() : this, 
-                    entry -> entry.getValue().stream().map(Supplier::get).collect(Collectors.toList())));
-        }
-    }
-    
-    @Override
-    protected Action<IStandPower> replaceAction(IStandPower power, ActionTarget target) {
-        if (recoveryFollowUp != null && power.getStandManifestation() instanceof StandEntity) {
-            StandEntity standEntity = (StandEntity) power.getStandManifestation();
-            
-            Optional<StandAction> attackFollowUp = Optional.ofNullable(getRecoveryFollowup(power, standEntity));
-            if (!attackFollowUp.isPresent()) {
-                attackFollowUp = standEntity.getCurrentTask().map(task -> {
-                    List<? extends StandAction> availableFollowUps = recoveryFollowUp.get(task.getAction());
-                    if (availableFollowUps != null) {
-                        return availableFollowUps.stream()
-                                .filter(action -> !task.hasModifierAction(action)
-                                        && power.checkRequirements(action, new ObjectWrapper<>(task.getTarget()), true).isPositive())
-                                .findFirst()
-                                .orElse(null);
-                    }
-                    return null;
-                });
-            }
-            
-            if (attackFollowUp.isPresent()) {
-                return attackFollowUp.get();
-            }
-        }
-        return super.replaceAction(power, target);
-    }
-    
-    @Deprecated
-    @Nullable
-    protected StandEntityActionModifier getRecoveryFollowup(IStandPower standPower, StandEntity standEntity) {
-        return null;
-    }
-    
-    
     public float getStandAlpha(StandEntity standEntity, int ticksLeft, float partialTick) {
         return 1F;
     }
@@ -591,11 +550,11 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         return task.getPhase() == Phase.RECOVERY ? 1F : userWalkSpeed;
     }
     
-    public StandPose getStandPose(IStandPower standPower, StandEntity standEntity, StandEntityTask task) {
+    public StandPose getStandPose(IStandPower standPower, StandEntity standEntity, @Nonnull StandEntityTask task) {
         if (barrageVisuals(standEntity, standPower, task)) {
             return barrageVisuals.get().getStandPose(standPower, standEntity, task);
         }
-        return standPose;
+        return super.getStandPose(standPower, standEntity, task);
     }
     
     public void rotateStandTowardsTarget(StandEntity standEntity, ActionTarget target, StandEntityTask task) {
@@ -637,7 +596,6 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         protected int standRecoveryDuration = 0;
         protected AutoSummonMode autoSummonMode = AutoSummonMode.FULL;
         protected float userWalkSpeed = 0.5F;
-        protected StandPose standPose = StandPose.IDLE;
         @Nullable
         protected StandRelativeOffset userOffset = null;
         @Nullable
@@ -645,7 +603,6 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         protected boolean enablePhysics = true;
         protected final Map<Phase, List<StandSound>> standSounds = new EnumMap<>(Phase.class);
         protected Supplier<StandEntityMeleeBarrage> barrageVisuals = () -> null;
-        protected Map<Supplier<? extends StandEntityAction>, List<Supplier<? extends StandAction>>> recoveryFollowUp;
 
         @Override
         public T autoSummonStand() {
@@ -679,11 +636,9 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
             return getThis();
         }
         
+        @Override
         public T standPose(StandPose pose) {
-            if (pose != null) {
-                this.standPose = pose;
-            }
-            return getThis();
+            return super.standPose(pose);
         }
 
         public T standOffsetFront() {
@@ -746,24 +701,6 @@ public abstract class StandEntityAction extends StandAction implements IStandPha
         
         public T barrageVisuals(Supplier<StandEntityMeleeBarrage> barrageAttack) {
             this.barrageVisuals = barrageAttack != null ? barrageAttack : () -> null;
-            return getThis();
-        }
-        
-        public T attackRecoveryFollowup(Supplier<? extends StandAction> followUp) {
-            return attackRecoveryFollowup(followUp, null);
-        }
-        
-        /**
-         * @param attack - if equals to null, the attack is the action being constructed, if not - this action will be replaced when the Stand is performing the attack
-         * (made this way because you can't have a supplier of the action that is currently being constructed by the builder)
-         */
-        public T attackRecoveryFollowup(Supplier<? extends StandAction> followUp, @Nullable Supplier<? extends StandEntityAction> attack) {
-            if (recoveryFollowUp == null) {
-                recoveryFollowUp = new HashMap<>();
-            }
-            List<Supplier<? extends StandAction>> followUps = recoveryFollowUp.computeIfAbsent(attack, __ -> new ArrayList<>());
-            followUps.add(followUp);
-            addExtraUnlockable(followUp);
             return getThis();
         }
     }

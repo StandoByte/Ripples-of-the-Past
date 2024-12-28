@@ -36,6 +36,8 @@ import com.github.standobyte.jojo.action.non_stand.HamonWallClimbing2;
 import com.github.standobyte.jojo.action.non_stand.HamonZoomPunch;
 import com.github.standobyte.jojo.entity.LeavesGliderEntity;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
+import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonPowerType;
 
 import net.minecraftforge.fml.RegistryObject;
@@ -119,35 +121,32 @@ public class ModHamonActions {
             () -> new HamonHypnosis(new HamonAction.Builder().holdToFire(60, false).holdEnergyCost(15)));
     
     public static final RegistryObject<HamonAction> HAMON_SHOCK = ACTIONS.register("hamon_shock", 
-            () -> new HamonShock(new HamonAction.Builder().heldWalkSpeed(0)));
-    
-    
+            () -> new HamonShock(new HamonAction.Builder().heldWalkSpeed(0.25F)));
     
     public static final RegistryObject<HamonPowerType> HAMON = NON_STAND_POWERS.register("hamon", 
             () -> new HamonPowerType(
                     new HamonAction[] {
-                            HAMON_OVERDRIVE.get(), 
-                            HAMON_SENDO_OVERDRIVE.get(), 
-                            HAMON_SUNLIGHT_YELLOW_OVERDRIVE.get(), 
-                            HAMON_PLANT_INFUSION.get(), 
-                            HAMON_ZOOM_PUNCH.get(), 
+                            HAMON_OVERDRIVE.get(),
+                            HAMON_SENDO_OVERDRIVE.get(),
+                            HAMON_SUNLIGHT_YELLOW_OVERDRIVE.get(),
+                            HAMON_PLANT_INFUSION.get(),
+                            HAMON_ZOOM_PUNCH.get(),
                             HAMON_TURQUOISE_BLUE_OVERDRIVE.get()
-                            }, 
+                            },
                     new HamonAction[] {
-                            HAMON_BREATH.get(), 
-                            HAMON_HEALING.get(), 
-                            HAMON_SPEED_BOOST.get(), 
-                            HAMON_WALL_CLIMBING.get(), 
-                            HAMON_LIFE_MAGNETISM.get(), 
-                            HAMON_PROJECTILE_SHIELD.get(), 
-                            HAMON_PROTECTION.get(), 
-                            HAMON_DETECTOR.get(), 
-                            HAMON_HYPNOSIS.get(), 
+                            HAMON_BREATH.get(),
+                            HAMON_HEALING.get(),
+                            HAMON_SPEED_BOOST.get(),
+                            HAMON_WALL_CLIMBING.get(),
+                            HAMON_LIFE_MAGNETISM.get(),
+                            HAMON_PROJECTILE_SHIELD.get(),
+                            HAMON_PROTECTION.get(),
+                            HAMON_DETECTOR.get(),
+                            HAMON_HYPNOSIS.get(),
                             HAMON_SHOCK.get()
                             },
                     HAMON_BREATH.get()
                     ).withColor(HamonPowerType.COLOR));
-    
     
     
     public static final RegistryObject<HamonAction> JONATHAN_SCARLET_OVERDRIVE = ACTIONS.register("jonathan_scarlet_overdrive", 

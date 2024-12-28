@@ -42,7 +42,7 @@ import net.minecraftforge.fml.network.NetworkHooks;
 public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser, IEntityAdditionalSpawnData {
     private final INonStandPower hamonPower = new NonStandPower(this);
     @Deprecated
-    private boolean reAddBaseHamon; // TODO remove in v0.2.3
+    private boolean reAddBaseHamon; // FIXME remove in v0.2.3
     
     public HamonMasterEntity(EntityType<? extends HamonMasterEntity> type, World world) {
         super(type, world);
@@ -81,7 +81,7 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser,
             if (!fluidHeight.isEmpty()) {
                 for (Map.Entry<ITag<Fluid>, Double> entry : fluidHeight.object2DoubleEntrySet()) {
                     if (entry.getValue() > 0 && entry.getValue() < 0.4) {
-                        // FIXME !!!!!! (hamon) npc liquid walking sfx
+                        // FIXME hamon master liquid walking sfx
                         HamonUtil.emitHamonSparkParticles(level, ClientUtil.getClientPlayer(), position(), 0.1F);
                         break;
                     }
@@ -91,7 +91,7 @@ public class HamonMasterEntity extends MobEntity implements INPC, IMobPowerUser,
         getPower().postTick();
     }
 
-    // FIXME !!!!!! (hamon) npc liquid walking
+    // FIXME hamon master liquid walking
     @Override
     public boolean canStandOnFluid(Fluid fluid) {
         return hamonPower.getTypeSpecificData(ModPowers.HAMON.get()).map(hamon -> 

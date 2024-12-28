@@ -16,6 +16,8 @@ import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
+import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.impl.nonstand.type.zombie.ZombiePowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.EffectInstance;
@@ -38,6 +40,7 @@ public class TimeStop extends StandAction {
     public static final StandPose ANIM = new StandPose("timeStop");
     
     @ActionConfigField private final int timeStopMaxTicks;
+    @ActionConfigField private final int timeStopMaxTicksZombie;
     @ActionConfigField private final int timeStopMaxTicksVampire;
     @ActionConfigField private final int timeStopMaxTicksPillarman;
     @ActionConfigField public final float timeStopLearningPerTick;
@@ -55,6 +58,7 @@ public class TimeStop extends StandAction {
     public TimeStop(TimeStop.Builder builder) {
         super(builder);
         this.timeStopMaxTicks = builder.timeStopMaxTicks;
+        this.timeStopMaxTicksZombie = builder.timeStopMaxTicksZombie;
         this.timeStopMaxTicksVampire = builder.timeStopMaxTicksVampire;
         this.timeStopMaxTicksPillarman = builder.timeStopMaxTicksPillarman;
         this.timeStopLearningPerTick = builder.timeStopLearningPerTick;
@@ -214,7 +218,7 @@ public class TimeStop extends StandAction {
     
     public int getMaxTimeStopTicks(IStandPower standPower) {
         LivingEntity livingEntity = standPower.getUser();
-        return TimeStop.pillarmanTimeStopDuration(livingEntity) ? timeStopMaxTicksPillarman : TimeStop.vampireTimeStopDuration(livingEntity) ? timeStopMaxTicksVampire : timeStopMaxTicks;
+        return TimeStop.zombieTimeStopDuration(livingEntity) ? timeStopMaxTicksZombie : TimeStop.pillarmanTimeStopDuration(livingEntity) ? timeStopMaxTicksPillarman : TimeStop.vampireTimeStopDuration(livingEntity) ? timeStopMaxTicksVampire : timeStopMaxTicks;
     }
     
     public static boolean vampireTimeStopDuration(LivingEntity entity) {
@@ -224,11 +228,15 @@ public class TimeStop extends StandAction {
     public static boolean pillarmanTimeStopDuration(LivingEntity entity) {
         return ModPowers.PILLAR_MAN.get().isHighLifeForce(entity);
     }
-    
+
+    public static boolean zombieTimeStopDuration(LivingEntity entity) {
+        return ModPowers.ZOMBIE.get().isHighSaturation(entity);
+    }
     
     
     public static class Builder extends StandAction.AbstractBuilder<Builder> {
         private int timeStopMaxTicks = 100;
+        private int timeStopMaxTicksZombie = 120;
         private int timeStopMaxTicksVampire = 180;
         private int timeStopMaxTicksPillarman = 180;
         private float timeStopLearningPerTick = 0.1F;
@@ -243,18 +251,20 @@ public class TimeStop extends StandAction {
         private ResourceLocation shaderWithAnim = new ResourceLocation(JojoMod.MOD_ID, "shaders/post/time_stop_tw.json");
         private ResourceLocation shaderOld = new ResourceLocation(JojoMod.MOD_ID, "shaders/post/time_stop_tw_old.json");
 
-        public Builder timeStopMaxTicks(int forHuman, int forVampire, int forPillarman) {
+        public Builder timeStopMaxTicks(int forHuman, int forVampire, int forPillarman, int forZombie) {
             forHuman = Math.max(TimeStop.MIN_TIME_STOP_TICKS, forHuman);
+            forZombie = Math.max(forHuman, forZombie);
             forVampire = Math.max(forHuman, forVampire);
             forPillarman = Math.max(forHuman, forPillarman);
             this.timeStopMaxTicks = forHuman;
+            this.timeStopMaxTicksZombie = forZombie;
             this.timeStopMaxTicksVampire = forVampire;
             this.timeStopMaxTicksPillarman = forVampire;
             return getThis();
         }
 
         public Builder timeStopMaxTicks(int forHuman, int forVampire) {
-            return timeStopMaxTicks(forHuman, forVampire, forVampire);
+            return timeStopMaxTicks(forHuman, forVampire, forVampire, forVampire);
         }
         
         public Builder timeStopLearningPerTick(float points) {

@@ -134,8 +134,24 @@ dependencies {
     shade 'team.unnamed:mocha:3.0.0'
 }
 
+
+// Minifies json resource files
+import groovy.json.JsonSlurper
+import groovy.json.JsonOutput
+
+processResources {
+	inputs.property "version", project.version
+
+    doLast {
+        fileTree(dir: outputs.files.asPath, include: "**/*.json").each {
+            File file -> file.text = JsonOutput.toJson(new JsonSlurper().parse(file))
+        }
+    }
+}
+
+
 jar {
-	archiveClassifier = ''
+	archiveClassifier = 'no-gecko'
     manifest {
         attributes([
             "Specification-Title": "Ripples of the Past",
@@ -149,7 +165,7 @@ jar {
 }
 
 shadowJar {
-    archiveClassifier = 'fat'
+    archiveClassifier = ''
     configurations = [project.configurations.shade]
     relocate 'team.unnamed.mocha', "dependency.${project.group}.mocha"
     relocate 'javassist', "dependency.${project.group}.javassist"

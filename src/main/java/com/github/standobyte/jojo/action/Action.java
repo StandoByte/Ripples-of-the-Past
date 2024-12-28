@@ -258,6 +258,14 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     @Nullable
     protected Action<P> replaceAction(P power, ActionTarget target) {
+        return replaceActionKostyl(power, target);
+    }
+    
+    /**
+     * Thank you, Java, very cool.
+     * Please don't override this in addons, this method going to be reserved for the main mod.
+     */
+    protected Action<P> replaceActionKostyl(P power, ActionTarget target) {
         return this;
     }
     

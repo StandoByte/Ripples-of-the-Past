@@ -100,6 +100,8 @@ public class ModSounds {
     public static final RegistryObject<SoundEvent> ZOMBIE_SWIPE = register("zombie_swipe");
     
     public static final RegistryObject<SoundEvent> ZOMBIE_CLAW_LACERATE = register("zombie_claw_lacerate");
+
+    public static final RegistryObject<SoundEvent> PILLAR_MAN_ABSORPTION = register("pillar_man_absorption");
     
     public static final RegistryObject<SoundEvent> PILLAR_MAN_SWING = register("pillar_man_swing");
     

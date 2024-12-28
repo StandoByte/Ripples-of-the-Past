@@ -199,7 +199,7 @@ public class HamonWallClimbing2 extends HamonAction {
                     if (isJumping) {
                         stopWallClimbing(player, wallClimbData);
                         if (canPullUp) {
-                            // TODO pulling up animation
+                            // TODO pulling up animation?
                             player.move(MoverType.SELF, new Vector3d(0, player.getBbHeight(), 0));
 //                            Vector3d pullUpMovement = new Vector3d(0, player.getBbHeight() + 0.1, 0);
 //                            player.setDeltaMovement(pullUpMovement);

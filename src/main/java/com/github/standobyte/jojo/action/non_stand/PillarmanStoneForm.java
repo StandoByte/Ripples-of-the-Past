@@ -26,7 +26,9 @@ public class PillarmanStoneForm extends PillarmanAction {
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {  
         if (!world.isClientSide()) {
-            power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).get().toggleStoneForm();
+        	PillarmanData pillarman = power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).get();
+            pillarman.toggleStoneForm();
+            pillarman.setBladesVisible(false);
         }
     }
     

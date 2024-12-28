@@ -836,8 +836,7 @@
 				},
 				"heartLargeAbdomen": {
 					"rotation": {
-						"vector": [-10.24427, 3.40577, 0],
-						"easing": "linear"
+						"vector": [-10.24427, 3.40577, 0]
 					}
 				},
 				"leftArmBone": {
@@ -1231,8 +1230,7 @@
 				},
 				"heartLargeAbdomen": {
 					"rotation": {
-						"vector": [-10.24427, 3.40577, 0],
-						"easing": "linear"
+						"vector": [-10.24427, 3.40577, 0]
 					}
 				},
 				"leftArmXRot": {
@@ -2049,8 +2047,7 @@
 				},
 				"heartLargeAbdomen": {
 					"rotation": {
-						"vector": [-10.24427, 3.40577, 0],
-						"easing": "linear"
+						"vector": [-10.24427, 3.40577, 0]
 					}
 				},
 				"leftArmBone": {
@@ -4008,8 +4005,7 @@
 				},
 				"heartLargeAbdomen": {
 					"rotation": {
-						"vector": [-10.24427, 3.40577, 0],
-						"easing": "linear"
+						"vector": [-10.24427, 3.40577, 0]
 					}
 				}
 			},

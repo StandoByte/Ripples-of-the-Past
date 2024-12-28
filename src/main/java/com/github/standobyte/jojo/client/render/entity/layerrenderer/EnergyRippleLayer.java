@@ -65,7 +65,7 @@ public class EnergyRippleLayer<T extends LivingEntity, M extends BipedModel<T>> 
         super(renderer);
     }
     
-    // TODO refactor this to be able to add particles from the abilities themselves
+    // FIXME refactor this to be able to add particles from the abilities themselves
     private static void addHamonSparks(LivingEntity entity, HamonData hamon, BipedModel<?> model, float timeDelta, HamonEnergyRippleHandler sparks) {
         float handSparkIntensity = 4 + hamon.getHamonStrengthLevelRatio() * 12;
         int particles = MathUtil.fractionRandomInc(handSparkIntensity * timeDelta);

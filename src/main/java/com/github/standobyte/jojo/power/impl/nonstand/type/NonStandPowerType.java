@@ -1,10 +1,6 @@
 package com.github.standobyte.jojo.power.impl.nonstand.type;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.OptionalInt;
+import java.util.*;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -40,7 +36,7 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
     
     private final Supplier<T> dataFactory;
 
-    public NonStandPowerType(Action<INonStandPower>[] startingAttacks, Action<INonStandPower>[] startingAbilities, 
+    public NonStandPowerType(Action<INonStandPower>[] startingAttacks, Action<INonStandPower>[] startingAbilities,
             Action<INonStandPower> defaultQuickAccess, Supplier<T> dataFactory) {
         this.attacks = startingAttacks;
         this.abilities = startingAbilities;
@@ -231,5 +227,35 @@ public abstract class NonStandPowerType<T extends TypeSpecificData> extends Forg
             iconTexture = JojoModUtil.makeTextureLocation("power", getRegistryName().getNamespace(), getRegistryName().getPath());
         }
         return this.iconTexture;
+    }
+
+    public Action<INonStandPower>[] getAttacks() {
+        return attacks;
+    }
+
+    public Action<INonStandPower>[] getAbilities() {
+        return abilities;
+    }
+
+    public Action<INonStandPower> getDefaultQuickAccess() {
+        return defaultQuickAccess;
+    }
+
+    /**
+     * This method will only return actions that are added to the HUD by default.
+     * This does <u>not</u> include Hamon technique skills and Pillar Man actions.
+     */
+    public List<Action<INonStandPower>> getDefaultActions() {
+        List<Action<INonStandPower>> allActions = new ArrayList<>();
+        Collections.addAll(allActions, attacks);
+        Collections.addAll(allActions, abilities);
+        return allActions;
+    }
+
+    public List<Action<INonStandPower>> getUnlockedDefaultActions(INonStandPower power) {
+        List<Action<INonStandPower>> allActions = new ArrayList<>();
+        Collections.addAll(allActions, attacks);
+        Collections.addAll(allActions, abilities);
+        return allActions.stream().filter(action -> action.isUnlocked(power)).collect(Collectors.toList());
     }
 }

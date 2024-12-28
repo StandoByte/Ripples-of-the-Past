@@ -72,6 +72,7 @@ public class TrStandEffectPacket {
                 buf.writeBoolean(msg.isUser);
                 
                 buf.writeVarInt(msg.effect.tickCount);
+                msg.effect.writeAdditionalPacketData(buf);
                 msg.effect.writeAdditionalPacketData(buf, msg.isUser);
                 break;
             case REMOVE:
@@ -117,6 +118,7 @@ public class TrStandEffectPacket {
                         }
                         
                         newEffect.tickCount = msg.buf.readVarInt();
+                        newEffect.readAdditionalPacketData(msg.buf);
                         newEffect.readAdditionalPacketData(msg.buf, msg.isUser);
                         stand.getContinuousEffects().addEffect(newEffect);
                         break;

@@ -119,7 +119,7 @@ public class PillarmanAbsorption extends PillarmanAction {
     @Override
     public void onHoldTickClientEffect(LivingEntity user, INonStandPower power, int ticksHeld, boolean reqFulfilled, boolean reqStateChanged) {
         if (reqStateChanged && reqFulfilled) {
-            ClientTickingSoundsHelper.playHeldActionSound(ModSounds.VAMPIRE_BLOOD_DRAIN.get(), 1.25F, 0.8F, true, user, power, this); // TODO separate SoundEvent
+            ClientTickingSoundsHelper.playHeldActionSound(ModSounds.PILLAR_MAN_ABSORPTION.get(), 1.25F, 0.8F, true, user, power, this);
         }
     }
     

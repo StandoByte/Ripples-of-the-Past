@@ -218,7 +218,7 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
         
         @Override
         protected boolean onAttack(StandEntity stand, Entity target, StandEntityDamageSource dmgSource, float damage) {
-            // FIXME light punch clashes
+            // TODO light punch clashes
 //            if (!target.level.isClientSide() && target instanceof StandEntity) {
 //                StandEntity targetStand = (StandEntity) target;
 //                StandEntityAction opponentTask = targetStand.getCurrentTaskAction();
@@ -226,8 +226,8 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
 //                    StandEntityLightAttack opponentAttack = (StandEntityLightAttack) opponentTask;
 //                    if (targetStand.getCurrentTaskPhase().get() == StandEntityAction.Phase.WINDUP
 //                            && targetStand.canBlockOrParryFromAngle(dmgSource.getSourcePosition())) {
-//                        // TODO slight knockback
-//                        // TODO spark particles
+//                        // add slight knockback
+//                        // add spark particles
 //                        targetStand.stopTask(true);
 //                        
 //                        SoundEvent thisSound = this.getImpactSound();

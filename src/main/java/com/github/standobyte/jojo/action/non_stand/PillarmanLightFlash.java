@@ -1,10 +1,12 @@
 package com.github.standobyte.jojo.action.non_stand;
 
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStatusEffects;
+import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanData.Mode;
@@ -26,8 +28,11 @@ public class PillarmanLightFlash extends PillarmanAction {
     
     @Override
     public void onHoldTickClientEffect(LivingEntity user, INonStandPower power, int ticksHeld, boolean reqFulfilled, boolean reqStateChanged) {
-        if (reqFulfilled) {
-            PillarmanDivineSandstorm.auraEffect(user, ModParticles.HAMON_AURA_RAINBOW.get(), 12);
+        if (reqFulfilled && ticksHeld > 10) {
+        	for (int i = 0; i <= 24; i++) {
+        		user.level.addParticle(ModParticles.LIGHT_SPARK.get(), true, user.getX(), user.getY() + 0.8, user.getZ(), 
+        				(Math.random() - 0.5F) / 4, (Math.random() - 0.5F) / 4, (Math.random() - 0.5F) / 4);
+            }
         }
     }
     
@@ -52,4 +57,25 @@ public class PillarmanLightFlash extends PillarmanAction {
         HamonUtil.createHamonSparkParticlesEmitter(user, 2F, 0, ModParticles.LIGHT_MODE_FLASH.get());
     }
     
+    @Override
+    public void startedHolding(World world, LivingEntity user, INonStandPower power, ActionTarget target, boolean requirementsFulfilled) {
+    	if (requirementsFulfilled) {
+        	power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).get().setBladesVisible(true);
+    	}
+    }
+
+    @Override
+    public void stoppedHolding(World world, LivingEntity user, INonStandPower power, int ticksHeld, boolean willFire) {
+    	power.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).get().setBladesVisible(false);
+    }
+    
+    @Override
+    public boolean clHeldStartAnim(PlayerEntity user) {
+        return ModPlayerAnimations.lightFlash.setAnimEnabled(user, true);
+    }
+    
+    @Override
+    public void clHeldStopAnim(PlayerEntity user) {
+        ModPlayerAnimations.lightFlash.setAnimEnabled(user, false);
+    }
 }

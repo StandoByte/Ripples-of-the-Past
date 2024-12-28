@@ -224,15 +224,12 @@ public class BleedingEffect extends Effect implements IApplicableEffect {
                             switch (entity.getRandom().nextInt(3)) {
                             case 0:
                                 pillarman.setMode(Mode.WIND);
-                                entity.level.playSound(null, entity, ModSounds.PILLAR_MAN_WIND_MODE.get(), entity.getSoundSource(), 1.0F, 1.0F);
                                 break;
                             case 1:
                                 pillarman.setMode(Mode.HEAT);
-                                entity.level.playSound(null, entity, ModSounds.PILLAR_MAN_HEAT_MODE.get(), entity.getSoundSource(), 1.0F, 1.0F);
                                 break;
                             case 2:
                                 pillarman.setMode(Mode.LIGHT);
-                                entity.level.playSound(null, entity, ModSounds.PILLAR_MAN_LIGHT_MODE.get(), entity.getSoundSource(), 1.0F, 1.0F);
                                 break;
                             }
                             applyMaskEffect(entity, headStack);

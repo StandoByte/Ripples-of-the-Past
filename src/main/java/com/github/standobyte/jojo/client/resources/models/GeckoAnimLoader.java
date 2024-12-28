@@ -12,7 +12,6 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.render.entity.model.animnew.ParseGeckoAnims;
 import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Animation;
 import com.github.standobyte.jojo.client.render.entity.model.animnew.molang.MolangInterpreter;
@@ -48,8 +47,6 @@ public class GeckoAnimLoader extends ReloadListener<Map<ResourceLocation, JsonEl
         Map<ResourceLocation, JsonElement> map = Maps.newHashMap();
         
         for (ResourceLocation path : pResourceManager.listResources(DIRECTORY, p -> p.endsWith(SUFFIX))) {
-            if (!JojoMod.MOD_ID.equals(path.getNamespace())) continue;
-            
             String fileName = path.getPath();
             fileName = fileName.substring(DIRECTORY.length() + 1, fileName.length() - SUFFIX.length());
             ResourceLocation preparedPath = new ResourceLocation(path.getNamespace(), fileName);

@@ -127,7 +127,7 @@ public abstract class BoilingBloodFluid extends LavaFluid {
 
     @Override
     public IParticleData getDripParticle() {
-        return ParticleTypes.DRIPPING_LAVA; // TODO particle
+        return ParticleTypes.DRIPPING_LAVA; // FIXME particle
     }
 //
 //    @Override

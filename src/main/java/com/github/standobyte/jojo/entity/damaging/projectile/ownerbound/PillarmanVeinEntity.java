@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.entity.damaging.projectile.ownerbound;
 
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.damaging.projectile.MRFlameEntity;
 import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModEntityTypes;
@@ -13,6 +14,8 @@ import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.util.SoundCategory;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.EntityRayTraceResult;
@@ -108,6 +111,9 @@ public class PillarmanVeinEntity extends OwnerBoundProjectileEntity {
                     blockPos = blockPos.relative(blockRayTraceResult.getDirection());
                     if (level.isEmptyBlock(blockPos) && !isRetracting()) {
                         level.setBlockAndUpdate(blockPos, ModBlocks.BOILING_BLOOD.get().defaultBlockState().setValue(FlowingFluidBlock.LEVEL, 4));
+                        Vector3d center = getBoundingBox().getCenter();
+                        level.playSound(ClientUtil.getClientPlayer(), center.x, center.y, center.z, SoundEvents.LAVA_EXTINGUISH, 
+                                SoundCategory.AMBIENT, 0.2F, 1.0F);
                     }
                 }
             }
