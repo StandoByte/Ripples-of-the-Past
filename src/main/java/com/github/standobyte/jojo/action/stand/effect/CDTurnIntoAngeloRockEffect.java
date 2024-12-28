@@ -38,7 +38,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -300,9 +299,9 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
         JojoModUtil.sayVoiceLine(user, ModSounds.JOSUKE_PRAY_FOR_ETERNITY.get(), null, 1, 1, 0, false);
         Direction angeloRockFace = Direction.fromYRot(target.yRot);
         AngeloRockEntity angeloRock = AngeloRockEntity.turnIntoRock(world, target, 
-                keepMobsInside && target instanceof MobEntity ? (MobEntity) target : null, 
                 Vector3d.atBottomCenterOf(blockLower.pos), angeloRockFace.toYRot(), 
                 blockLower, blockUpper);
+        angeloRock.keepMobInside = keepMobsInside;
         this.angeloRockEntity.setOwner(angeloRock);
         
         List<ItemStack> itemsSource = itemsSource(angeloRock.blockPosition());

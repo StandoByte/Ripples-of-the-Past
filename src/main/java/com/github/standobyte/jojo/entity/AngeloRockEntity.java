@@ -77,6 +77,7 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
     private List<ItemStack> itemDrops = new ArrayList<>();
     private boolean startedSound;
     private EntityOwnerResolver angeloEntity = new EntityOwnerResolver();
+    public boolean keepMobInside;
     /* fuck it, sure, yeah */ private MobEntity mob;
     private boolean useMobHurtSound;
     private TimerQueue responseSoundTimer = new TimerQueue(false);
@@ -86,7 +87,7 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
         super(pType, pLevel);
     }
     
-    public static AngeloRockEntity turnIntoRock(World world, Entity entity, MobEntity saveAsMob, Vector3d rockPos, float yRot, 
+    public static AngeloRockEntity turnIntoRock(World world, Entity entity, Vector3d rockPos, float yRot, 
             PrevBlockInfo... angeloRockBlocks) {
         if (world.isClientSide()) {
             return null;
@@ -95,10 +96,6 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
         AngeloRockEntity angeloRock = new AngeloRockEntity(ModEntityTypes.ANGELO_ROCK.get(), world);
         angeloRock.yRot = yRot;
         angeloRock.setPos(rockPos.x, rockPos.y, rockPos.z);
-        if (saveAsMob != null) {
-            angeloRock.mob = saveAsMob;
-            angeloRock.useMobHurtSound = CommonReflection.getAmbientSound(angeloRock.mob) == null;
-        }
         
         angeloRock.creationAnimTicks = CREATION_ANIM_LEN;
         if (entity instanceof LivingEntity) {
@@ -283,6 +280,7 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
                 if (level.getGameRules().getBoolean(GameRules.RULE_DOMOBLOOT) && mob != null && mob.removed && lastAttack != null) {
                     mob.setPos(getX(), getY(), getZ());
                     mobLootFortune = mob;
+                    mob.lastHurtByPlayerTime = 1;
                     CommonReflection.dropAllDeathLoot(mob, lastAttack);
                     mobLootFortune = null;
                 }
@@ -360,6 +358,7 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
             pCompound.put("BlockDrops", blockDropsNbt);
         }
         
+        pCompound.putBoolean("KeepMob", keepMobInside);
         if (mob != null) {
             String s = mob.getEncodeId();
             if (s != null) {
@@ -405,6 +404,7 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
             }
         });
         
+        keepMobInside = pCompound.getBoolean("KeepMob");
         Entity mobEntity = MCUtil.nbtGetCompoundOptional(pCompound, "AngeloMob").flatMap(mobNBT -> {
             try {
                 return EntityType.create(mobNBT, level);
@@ -413,6 +413,9 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
             }
         }).orElse(null);
         this.mob = mobEntity instanceof MobEntity ? (MobEntity) mobEntity : null;
+        if (mob != null) {
+            mob.removed = true;
+        }
         this.useMobHurtSound = pCompound.getBoolean("NoAmbient");
     }
     
@@ -465,6 +468,10 @@ public class AngeloRockEntity extends Entity implements IEntityAdditionalSpawnDa
                     }
                     else {
                         angeloEntity.remove();
+                        if (keepMobInside && angeloEntity instanceof MobEntity) {
+                            this.mob = (MobEntity) angeloEntity;
+                            useMobHurtSound = CommonReflection.getAmbientSound(mob) == null;
+                        }
                     }
                 }
                 entityData.set(CREATION_COMPLETE, true);
