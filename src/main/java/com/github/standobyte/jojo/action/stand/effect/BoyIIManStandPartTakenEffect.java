@@ -31,9 +31,6 @@ public class BoyIIManStandPartTakenEffect extends StandEffectInstance {
     
     @Override
     protected void start() {}
-
-    @Override
-    protected void tickTarget(LivingEntity target) {}
     
     @Override
     protected void tick() {}
