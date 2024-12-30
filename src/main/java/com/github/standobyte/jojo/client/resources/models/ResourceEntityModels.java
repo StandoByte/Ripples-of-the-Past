@@ -31,8 +31,7 @@ public class ResourceEntityModels {
                 BlockbenchStandModelHelper.replaceModelParts(newModel, parsedModel.getNamedModelParts());
                 applyModel.accept(newModel);
             } catch (IllegalArgumentException | IllegalAccessException e) {
-                JojoMod.getLogger().error("Failed to load model {}", modelPath);
-                e.printStackTrace();
+                JojoMod.getLogger().error("Failed to load model {}", modelPath, e);
             }
         });
     }

@@ -44,19 +44,19 @@ public class OptionalDependencyHelper {
                 JojoMod.getLogger().debug("{}: {} compatibility initialized.", JojoMod.MOD_ID, loggingModName);
                 return instance;
             } catch (ClassNotFoundException e) {
-                e.printStackTrace();
+                JojoMod.getLogger().error(e);
             } catch (NoSuchMethodException e) {
-                e.printStackTrace();
+                JojoMod.getLogger().error(e);
             } catch (SecurityException e) {
-                e.printStackTrace();
+                JojoMod.getLogger().error(e);
             } catch (InstantiationException e) {
-                e.printStackTrace();
+                JojoMod.getLogger().error(e);
             } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                JojoMod.getLogger().error(e);
             } catch (IllegalArgumentException e) {
-                e.printStackTrace();
+                JojoMod.getLogger().error(e);
             } catch (InvocationTargetException e) {
-                e.getCause().printStackTrace();
+                JojoMod.getLogger().error(e.getCause());
             }
         }
         else {
@@ -77,19 +77,19 @@ public class OptionalDependencyHelper {
                 JojoMod.getLogger().debug("{}: {} compatibility initialized.", JojoMod.MOD_ID, loggingModName);
                 return instance;
             } catch (ClassNotFoundException e) {
-                e.printStackTrace();
+                JojoMod.getLogger().error(e);
             } catch (NoSuchMethodException e) {
-                e.printStackTrace();
+                JojoMod.getLogger().error(e);
             } catch (SecurityException e) {
-                e.printStackTrace();
+                JojoMod.getLogger().error(e);
             } catch (InstantiationException e) {
-                e.printStackTrace();
+                JojoMod.getLogger().error(e);
             } catch (IllegalAccessException e) {
-                e.printStackTrace();
+                JojoMod.getLogger().error(e);
             } catch (IllegalArgumentException e) {
-                e.printStackTrace();
+                JojoMod.getLogger().error(e);
             } catch (InvocationTargetException e) {
-                e.getCause().printStackTrace();
+                JojoMod.getLogger().error(e.getCause());
             }
         }
         else {

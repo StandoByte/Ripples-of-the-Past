@@ -54,7 +54,18 @@ public class ParseGeckoAnims {
     }
     
     private static void parseKeyframes(Animation.Builder anim, JsonObject boneTfJson, String targetName, Transformation.Target target, String boneName) {
-        JsonObject keyframesJson = boneTfJson.getAsJsonObject(targetName);
+        JsonObject keyframesJson = null;
+        JsonElement element = boneTfJson.get(targetName);
+        if (element != null) {
+            if (element.isJsonObject()) {
+                keyframesJson = element.getAsJsonObject();
+            }
+            else if (element.isJsonArray()) {
+                keyframesJson = new JsonObject();
+                keyframesJson.add("vector", element.getAsJsonArray());
+            }
+        }
+        
         if (keyframesJson != null) {
             Float2ObjectMap<KeyframeWithQuery> timeline = new Float2ObjectArrayMap<>();
             for (Map.Entry<String, JsonElement> rotationJson : keyframesJson.entrySet()) {

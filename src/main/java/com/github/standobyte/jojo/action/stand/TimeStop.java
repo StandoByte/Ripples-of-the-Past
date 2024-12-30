@@ -1,9 +1,16 @@
 package com.github.standobyte.jojo.action.stand;
 
+import java.util.Comparator;
+import java.util.Optional;
+import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
+
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.config.ActionConfig;
 import com.github.standobyte.jojo.action.config.ActionConfigField;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
@@ -16,9 +23,8 @@ import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.PlaySoundAtClientPacket;
-import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
-import com.github.standobyte.jojo.power.impl.nonstand.type.zombie.ZombiePowerType;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.potion.EffectInstance;
 import net.minecraft.util.ResourceLocation;
@@ -31,21 +37,17 @@ import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.world.World;
 
-import javax.annotation.Nullable;
-import java.util.Comparator;
-import java.util.Optional;
-import java.util.function.Supplier;
-
+@ActionConfig({ "holdDurationToFire", "heldWalkSpeed" })
 public class TimeStop extends StandAction {
     public static final StandPose ANIM = new StandPose("timeStop");
     
     @ActionConfigField private final int timeStopMaxTicks;
-    @ActionConfigField private final int timeStopMaxTicksZombie;
     @ActionConfigField private final int timeStopMaxTicksVampire;
     @ActionConfigField private final int timeStopMaxTicksPillarman;
+    @ActionConfigField private final int timeStopMaxTicksZombie;
+    @ActionConfigField public final float timeStopCooldownPerTick;
     @ActionConfigField public final float timeStopLearningPerTick;
     @ActionConfigField public final float timeStopDecayPerDay;
-    @ActionConfigField public final float timeStopCooldownPerTick;
     
     private final Supplier<SoundEvent> voiceLineWithStandSummoned;
     private final Supplier<SoundEvent> timeStopSound;

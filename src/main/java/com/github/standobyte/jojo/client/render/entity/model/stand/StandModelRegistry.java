@@ -9,7 +9,6 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.render.entity.model.animnew.stand.GeckoStandAnimator;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.stand.StandActionAnimation;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 
 import net.minecraft.util.ResourceLocation;
@@ -26,7 +25,7 @@ public class StandModelRegistry {
             return model;
         }
         catch (Exception e) {
-            e.printStackTrace();
+            JojoMod.getLogger().error(e);
             throw e;
         }
     }

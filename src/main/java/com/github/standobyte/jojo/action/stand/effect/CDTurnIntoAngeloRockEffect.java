@@ -38,7 +38,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
@@ -74,9 +73,11 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
     @Override
     protected void start() {}
     
-    protected void tickTarget(LivingEntity target) {
-        if (!target.level.isClientSide()) {
-            if (!triedSummonRockEntity) {
+    @Override
+    protected void tick() {
+        if (!world.isClientSide()) {
+            LivingEntity target = getTargetLiving();
+            if (target != null && !triedSummonRockEntity) {
                 KnockbackCollisionImpact kbCollision = KnockbackCollisionImpact.getHandler(target).orElse(null);
                 if (kbCollision == null) {
                     remove();
@@ -93,22 +94,9 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
                     triedSummonRockEntity = true;
                 }
             }
-        }
-    }
-    
-    @Override
-    protected void tick() {
-        if (!world.isClientSide()) {
-            LivingEntity target = getTargetLiving();
-            if (target != null) {
-                tickTarget(target);
-                if (toBeRemoved()) {
-                    return;
-                }
-            }
             
             boolean hasBlocksToRestore = hasBlocksToRestore();
-            if (triedSummonRockEntity || getTarget() == null) {
+            if (triedSummonRockEntity || target == null) {
                 AngeloRockEntity angeloRock = angeloRockEntity.getEntityCast(world);
                 if ((angeloRock == null || angeloRock.isFullyFormed()) && !hasBlocksToRestore) {
                     remove();
@@ -119,7 +107,7 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
                 Entity entity = angeloRockEntity.getEntity(world);
                 BlockPos centerPos;
                 if (entity == null) {
-                    entity = getTarget();
+                    entity = target;
                 }
                 
                 if (entity != null) {
@@ -311,9 +299,9 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
         JojoModUtil.sayVoiceLine(user, ModSounds.JOSUKE_PRAY_FOR_ETERNITY.get(), null, 1, 1, 0, false);
         Direction angeloRockFace = Direction.fromYRot(target.yRot);
         AngeloRockEntity angeloRock = AngeloRockEntity.turnIntoRock(world, target, 
-                keepMobsInside && target instanceof MobEntity ? (MobEntity) target : null, 
                 Vector3d.atBottomCenterOf(blockLower.pos), angeloRockFace.toYRot(), 
                 blockLower, blockUpper);
+        angeloRock.keepMobInside = keepMobsInside;
         this.angeloRockEntity.setOwner(angeloRock);
         
         List<ItemStack> itemsSource = itemsSource(angeloRock.blockPosition());
@@ -427,9 +415,9 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
     }
     
     @Override
-    protected void setTargetEntity(Entity target) {
+    protected void setTargetEntity(@Nullable Entity target) {
         Entity curTarget = getTarget();
-        if (curTarget != null && !curTarget.isAlive()) {
+        if (target == null && curTarget != null && !curTarget.isAlive()) {
             lastTargetPos = curTarget.blockPosition();
         }
         super.setTargetEntity(target);
@@ -475,7 +463,7 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
     
     protected List<ItemStack> itemsSource(BlockPos center) {
         AxisAlignedBB area = new AxisAlignedBB(center, center).inflate(8);
-        LivingEntity target = getTargetLiving();
+        Entity target = getTarget();
         List<ItemStack> itemsSource = CrazyDiamondRestoreTerrain.sourceItemStacks(area, Vector3d.atBottomCenterOf(center), user, world, 
                 target instanceof PlayerEntity ? SourceType.PLAYER_INVENTORY.from(target) : null, 
                 SourceType.MOB_HELD.fromAllNearby(), 

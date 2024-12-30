@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.capability.entity;
 
 import java.util.UUID;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -78,7 +79,7 @@ public class MerchantData implements INBTSerializable<CompoundNBT> {
                     });
                 }
                 catch (Exception e) {
-                    e.printStackTrace();
+                    JojoMod.getLogger().error(e);
                 }
             });
         });

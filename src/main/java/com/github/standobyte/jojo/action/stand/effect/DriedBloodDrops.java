@@ -15,18 +15,19 @@ public class DriedBloodDrops extends StandEffectInstance {
 
     @Override
     protected void tick() {
-        if (!world.isClientSide() && disappearTicks >= 6000) {
-            remove();
-            return;
-        }
-        
-        Entity target = getTarget();
-        if (target != null) {
-            if (target.isInWaterOrBubble()) {
-                disappearTicks += 29;
+        if (!world.isClientSide()) {
+            Entity target = getTarget();
+            if (target != null) {
+                ++disappearTicks;
+                if (target.isInWaterOrBubble()) {
+                    disappearTicks += 29;
+                }
+                else if (target.isInWaterOrRain()) {
+                    ++disappearTicks;
+                }
             }
-            else if (target.isInWaterOrRain()) {
-                disappearTicks++;
+            if (disappearTicks >= 6000) {
+                remove();
             }
         }
     }

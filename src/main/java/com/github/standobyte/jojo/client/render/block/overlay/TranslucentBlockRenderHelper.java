@@ -16,7 +16,6 @@ import net.minecraft.block.BlockState;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.renderer.ActiveRenderInfo;
 import net.minecraft.client.renderer.BlockRendererDispatcher;
-import net.minecraft.client.renderer.BufferBuilder;
 import net.minecraft.client.renderer.IRenderTypeBuffer;
 import net.minecraft.client.renderer.RenderTypeLookup;
 import net.minecraft.client.renderer.model.IBakedModel;
@@ -40,7 +39,7 @@ public class TranslucentBlockRenderHelper {
     public static void renderCDRestorationTranslucentBlocks(MatrixStack matrixStack, Minecraft mc, 
             Stream<PrevBlockInfo> blocks, Predicate<PrevBlockInfo> inAbilityRange) {
         if (buffers == null) {
-            buffers = ModifiedRenderTypeBuffers.create(new BufferBuilder(256), 
+            buffers = ModifiedRenderTypeBuffers.create(
                     mc.renderBuffers().bufferSource(), 
                     renderType -> new ModifiedRenderType(renderType, 
                             () -> {

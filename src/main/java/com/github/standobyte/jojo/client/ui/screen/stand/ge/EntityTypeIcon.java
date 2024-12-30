@@ -5,6 +5,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ui.BlitFloat;
 import com.github.standobyte.jojo.util.mc.entitysubtype.EntitySubtype;
 import com.github.standobyte.jojo.util.mc.entitysubtype.EntityTypeToInstance;
@@ -109,7 +110,7 @@ public class EntityTypeIcon {
             return renderer.getTextureLocation(entity);
         }
         catch (Exception e) {
-            e.printStackTrace();
+            JojoMod.getLogger().error(e);
             return null;
         }
     }

@@ -487,8 +487,7 @@ public class WalkmanSoundHandler {
                             return unpackSoundsRecursive(soundManager, soundEvent, nextAccessor);
                         }
                     } catch (IllegalArgumentException | IllegalAccessException e) {
-                        JojoMod.getLogger().error("Couldn't read track list from a cassette");
-                        e.printStackTrace();
+                        JojoMod.getLogger().error("Couldn't read track list from a cassette", e);
                     }
                 }
             }

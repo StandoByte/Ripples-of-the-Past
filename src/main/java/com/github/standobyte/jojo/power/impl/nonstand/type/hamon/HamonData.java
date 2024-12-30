@@ -181,11 +181,11 @@ public class HamonData extends TypeSpecificData {
         updateHeight = false;
         LivingEntity user = power.getUser();
         if (user.isAlive()) {
-            if (hamonProtection) {
+            /*if (hamonProtection) {
                 if (user.level.isClientSide) {
                     tickHamonProtection();
                 }
-            }
+            }*/
             
             HamonWallClimbing2.tickWallClimbing(power, this, user);
             tickNewPlayerLearners(user);

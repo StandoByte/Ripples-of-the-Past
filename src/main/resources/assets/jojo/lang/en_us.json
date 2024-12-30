@@ -56,7 +56,6 @@
   "block.jojo.wooden_coffin_oak_green": "Wooden Coffin",
   "block.jojo.wooden_coffin_oak_red": "Wooden Coffin",
   "block.jojo.wooden_coffin_oak_black": "Wooden Coffin",
-  "block.jojo.wooden_coffin.full_time_skip_fix": "You do not feel tired",
   "item.jojo.knife": "Knife",
   "item.jojo.road_roller": "Road Roller",
   "block.jojo.meteoric_iron": "Meteoric Iron",
@@ -816,7 +815,7 @@
   "commands.jojoconfigpack.standstats.single": "%s default Stand stats file for %s",
   
   "commands.jojoconfigpack.abilities.stand.link_name": "Generated",
-  "commands.jojoconfigpack.abilities.stand": "(WIP) %s config files for all abilities of %s",
+  "commands.jojoconfigpack.abilities.stand": "(WIP) %s config files for all configurable abilities of %s",
   "commands.jojoconfigpack.abilities.single.link_name": "Generated",
   "commands.jojoconfigpack.abilities.single": "(WIP) %s config file for %s",
   
