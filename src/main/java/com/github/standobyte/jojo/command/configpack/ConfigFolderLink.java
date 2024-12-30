@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.command.configpack;
 import java.io.IOException;
 import java.nio.file.Path;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
@@ -57,7 +58,7 @@ public class ConfigFolderLink implements IDataConfig {
                 return 0;
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            JojoMod.getLogger().error(e);
             SimpleCommandExceptionType exceptionType = new SimpleCommandExceptionType(new StringTextComponent(e.getMessage()));
             throw exceptionType.create();
         }

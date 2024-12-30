@@ -20,7 +20,6 @@ import net.minecraft.nbt.CompoundNBT;
 public class EntityUtilCap {
     private final Entity entity;
     private final MobEntity asMob;
-    private Boolean prevCanUpdate;
     private Boolean prevNoAi;
     
     private KnockbackCollisionImpact kbImpact;
@@ -41,7 +40,6 @@ public class EntityUtilCap {
         CompoundNBT nbt = new CompoundNBT();
         if (!entity.canUpdate() && wasStoppedInTime()) {
             nbt.putBoolean("StoppedInTime", true);
-            if (prevCanUpdate != null) nbt.putBoolean("PrevCanUpdate", prevCanUpdate);
             if (prevNoAi != null) nbt.putBoolean("PrevNoAi", prevNoAi);
         }
         nbt.put("KbImpact", kbImpact.serializeNBT());
@@ -51,12 +49,12 @@ public class EntityUtilCap {
     public void deserializeNBT(CompoundNBT nbt) {
         stoppedInTime = nbt.getBoolean("StoppedInTime");
         if (stoppedInTime) {
-            stoppedInTime = TimeStopHandler.isTimeStopped(entity.level, entity.blockPosition());
-            prevCanUpdate = MCUtil.getNbtElement(nbt, "PrevCanUpdate", ByteNBT.class).map(byteNbt -> byteNbt.getAsByte() != 0).orElse(null);
+            boolean isStoppedInTime = TimeStopHandler.isTimeStopped(entity.level, entity.blockPosition());
             prevNoAi = MCUtil.getNbtElement(nbt, "PrevNoAi", ByteNBT.class).map(byteNbt -> byteNbt.getAsByte() != 0).orElse(null);
             // updates the Entity#canUpdate field that Forge adds, since it is saved in NBT
-            updateEntityTimeStop(stoppedInTime);
+            updateEntityTimeStop(isStoppedInTime);
         }
+        
         MCUtil.nbtGetCompoundOptional(nbt, "KbImpact").ifPresent(kbImpact::deserializeNBT);
     }
     
@@ -78,8 +76,6 @@ public class EntityUtilCap {
     public void updateEntityTimeStop(boolean stopInTime) {
         if (stopInTime) {
             stoppedInTime = true;
-            
-            prevCanUpdate = entity.canUpdate();
             entity.canUpdate(false);
             
             if (asMob != null) {
@@ -88,10 +84,7 @@ public class EntityUtilCap {
             }
         }
         else if (stoppedInTime) {
-            if (prevCanUpdate != null && prevCanUpdate) {
-                entity.canUpdate(true);
-            }
-            prevCanUpdate = null;
+            entity.canUpdate(true);
             
             if (asMob != null) {
                 if (prevNoAi != null && !prevNoAi) {

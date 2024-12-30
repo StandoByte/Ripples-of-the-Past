@@ -31,7 +31,6 @@ import net.minecraft.block.material.PushReaction;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerEntity.SleepResult;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.BlockItemUseContext;
 import net.minecraft.item.DyeColor;
@@ -65,7 +64,6 @@ import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.event.entity.player.PlayerEvent.PlayerRespawnEvent;
 import net.minecraftforge.event.entity.player.PlayerSetSpawnEvent;
-import net.minecraftforge.event.entity.player.PlayerSleepInBedEvent;
 import net.minecraftforge.event.entity.player.SleepingTimeCheckEvent;
 import net.minecraftforge.event.world.SleepFinishedTimeEvent;
 import net.minecraftforge.eventbus.api.Event.Result;
@@ -201,22 +199,6 @@ public class WoodenCoffinBlock extends HorizontalBlock {
             }
         }
         
-        @SubscribeEvent(priority = EventPriority.HIGH)
-        public static void preventBedCoffinAlternating(PlayerSleepInBedEvent event) {
-            PlayerEntity player = event.getPlayer();
-            boolean isCoffin = isBlockCoffin(player.level, event.getOptionalPos());
-            boolean preventingDayTimeSkip = isCoffin && player.getCapability(PlayerUtilCapProvider.CAPABILITY)
-                    .map(playerData -> playerData.coffinPreventDayTimeSkip).orElse(false);
-            if (!preventingDayTimeSkip) {
-                boolean canSleep = player.getCapability(PlayerUtilCapProvider.CAPABILITY)
-                        .map(cap -> cap.canGoToSleep(isCoffin)).orElse(true);
-                if (!canSleep) {
-                    event.setResult(SleepResult.OTHER_PROBLEM);
-                    player.displayClientMessage(new TranslationTextComponent("block.jojo.wooden_coffin.full_time_skip_fix"), true);
-                }
-            }
-        }
-        
         @SubscribeEvent
         public static void canSleepAtTime(SleepingTimeCheckEvent event) {
             if (isBlockCoffin(event.getEntityLiving().level, event.getSleepingLocation())) {
@@ -258,11 +240,6 @@ public class WoodenCoffinBlock extends HorizontalBlock {
                             ModCriteriaTriggers.SLEPT_IN_COFFIN.get().trigger(player);
                         }
                     }
-    
-                    long oldTime = event.getWorld().dayTime();
-                    int timeAdded = (int) Math.max(event.getNewTime() - oldTime, 0);
-                    player.getCapability(PlayerUtilCapProvider.CAPABILITY)
-                            .ifPresent(cap -> cap.onSleep(isCoffin, timeAdded));
                 });
             }
         }

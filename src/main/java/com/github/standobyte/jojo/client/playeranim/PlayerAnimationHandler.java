@@ -92,9 +92,8 @@ public class PlayerAnimationHandler {
         public <I> I registerAnimLayer(String classNameWithKosmXMod, ResourceLocation id, int priority, 
                 Supplier<? extends I> fallbackEmptyConstructor) {
             if (animationLayers.containsKey(id)) {
-                JojoMod.getLogger().error("An animation layer with id {} is already present!", id);
                 IllegalArgumentException e = new IllegalArgumentException();
-                e.printStackTrace();
+                JojoMod.getLogger().error("An animation layer with id {} is already present!", id, e);
                 throw e;
             }
             
@@ -180,9 +179,8 @@ public class PlayerAnimationHandler {
     
     public static void initAnimator() {
         if (instance != null) {
-            JojoMod.getLogger().error("Player animation interface is already initialized!");
             Exception e = new RedundantAddonCodeException();
-            e.printStackTrace();
+            JojoMod.getLogger().error("Player animation interface is already initialized!", e);
             return;
         }
         instance = OptionalDependencyHelper.initModHandlingInterface(

@@ -29,6 +29,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrWalkmanEarbudsPac
 import com.github.standobyte.jojo.network.packets.fromserver.VampireSleepInCoffinPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.MetEntityTypesPacket;
 import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismUtil;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.PlayerStatListener;
@@ -75,10 +76,6 @@ public class PlayerUtilCap {
     private boolean hasClientInput;
     private int noClientInputTimer;
     
-    private BedType lastBedType;
-    private int ticksNoSleep;
-    private long lastSleepTime;
-    private long nextSleepTime;
     public boolean coffinPreventDayTimeSkip = false;
     
     private Set<ResourceLocation> metEntityTypesId = new HashSet<>();
@@ -108,7 +105,6 @@ public class PlayerUtilCap {
             tickKnivesRemoval();
             tickVoiceLines();
             tickClientInputTimer();
-            tickNoSleepTimer();
             tickStatUpdates();
             tickQueuedOnScreenClose();
             
@@ -125,10 +121,6 @@ public class PlayerUtilCap {
     public void onClone(PlayerUtilCap old, boolean wasDeath) {
         this.notificationsSent = old.notificationsSent;
         this.broadcastedSettings = old.broadcastedSettings;
-        
-        this.lastBedType = old.lastBedType;
-        this.ticksNoSleep = old.ticksNoSleep;
-        this.nextSleepTime = old.nextSleepTime;
     }
     
     public CompoundNBT toNBT() {
@@ -455,37 +447,6 @@ public class PlayerUtilCap {
     
     
     
-    private void tickNoSleepTimer() {
-        if (ticksNoSleep > 0) ticksNoSleep--;
-    }
-    
-    public void onSleep(boolean isCoffin, int ticksSkipped) {
-        this.lastBedType = isCoffin ? BedType.COFFIN : BedType.BED;
-        this.lastSleepTime = player.level.dayTime();
-        this.ticksNoSleep = ticksSkipped * 2;
-        this.nextSleepTime = player.level.dayTime() + ticksNoSleep;
-    }
-    
-    public boolean canGoToSleep(boolean isCoffin) {
-        return 
-                this.lastBedType == null || 
-                !this.lastBedType.isCoffin && !isCoffin || 
-                ticksNoSleep <= 0 || 
-                nextSleepTime < player.level.dayTime() || player.level.dayTime() < lastSleepTime;
-    }
-    
-    private static enum BedType {
-        BED(false),
-        COFFIN(true);
-        
-        private final boolean isCoffin;
-        
-        private BedType(boolean isCoffin) {
-            this.isCoffin = isCoffin;
-        }
-    }
-    
-    
     public void onSleepingInCoffin(boolean isVampireRespawning) {
         this.coffinPreventDayTimeSkip = isVampireRespawning;
         if (!player.level.isClientSide()) {
@@ -501,7 +462,7 @@ public class PlayerUtilCap {
     }
     
     private void tickCoffinSleepTimer() {
-        if (coffinPreventDayTimeSkip && WoodenCoffinBlock.isSleepingInCoffin(player)) {
+        if (coffinPreventDayTimeSkip && WoodenCoffinBlock.isSleepingInCoffin(player) && !VampirismUtil.isSunny(player.level)) {
             CommonReflection.setSleepCounter(player, 0);
         }
     }

@@ -150,7 +150,7 @@ public class PhotosCache {
                 byte[] data = photo.asByteArray();
                 this.photoSender = new ClPhotoSender(data, serverId, photoId);
             } catch (IOException e) {
-                e.printStackTrace();
+                JojoMod.getLogger().error(e);
             }
         }
         
@@ -230,7 +230,7 @@ public class PhotosCache {
                     status = Status.CACHED;
                     saveToFile();
                 } catch (Exception e) {
-                    e.printStackTrace();
+                    JojoMod.getLogger().error(e);
                     setFailed();
                 }
                 break;

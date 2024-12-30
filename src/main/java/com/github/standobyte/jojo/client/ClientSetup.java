@@ -38,6 +38,7 @@ import com.github.standobyte.jojo.client.render.entity.layerrenderer.EnergyRippl
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.FrozenLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.GlovesLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.HamonBurnLayer;
+import com.github.standobyte.jojo.client.render.entity.layerrenderer.HamonProtectionLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.InkLipsLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.KnifeLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.LadybugBroochLayer;
@@ -356,6 +357,7 @@ public class ClientSetup {
         renderer.addLayer(new GlovesLayer<>(renderer, new GlovesModel<>(0.3F, slim), slim));
         renderer.addLayer(new WindCloakLayer<>(renderer));
         renderer.addLayer(new VampireEyesLayer<>(renderer));
+        renderer.addLayer(new HamonProtectionLayer<>(renderer));
     }
     
     private static <T extends LivingEntity, M extends BipedModel<T>> void addLayersToEntities(EntityRenderer<?> renderer) {

@@ -130,8 +130,7 @@ public class StandModelOverrides extends ReloadListener<Map<StandModelOverrides.
             try {
                 BlockbenchStandModelHelper.replaceModelParts(modelCopy, modelOverride.getNamedModelParts());
             } catch (Exception e) {
-                JojoMod.getLogger().error("Failed to import Geckolib format model as {}", modelCopy.getClass().getName());
-                e.printStackTrace();
+                JojoMod.getLogger().error("Failed to import Geckolib format model as {}", modelCopy.getClass().getName(), e);
             }
             modelCopy.afterInit();
             return Optional.of(Pair.of(modelId, modelCopy));

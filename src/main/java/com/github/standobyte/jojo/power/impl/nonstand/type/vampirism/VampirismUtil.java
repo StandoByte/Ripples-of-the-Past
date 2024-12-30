@@ -61,16 +61,7 @@ public class VampirismUtil {
 //    private static final float MIN_SUN_DAMAGE = 2;
     private static float getSunDamage(LivingEntity entity) {
         World world = entity.level;
-        if (
-                world.dimensionType().hasSkyLight()
-                && !world.dimensionType().hasCeiling()
-                && world.isDay()
-//                && !world.isRainingAt(new BlockPos(
-//                        entity.blockPosition().getX(), 
-//                        entity.getBoundingBox().maxY,
-//                        entity.blockPosition().getZ()))
-                && !world.isRaining()
-                && !world.isThundering()) {
+        if (isSunny(world)) {
             float brightness = entity.getBrightness();
             BlockPos blockPos = entity.getVehicle() instanceof BoatEntity ? 
                     (new BlockPos(entity.getX(), (double)Math.round(entity.getY(1.0)), entity.getZ())).above()
@@ -98,6 +89,17 @@ public class VampirismUtil {
             }
         }
         return 0;
+    }
+    
+    public static boolean isSunny(World world) {
+        if (world.isClientSide()) {
+            world.updateSkyBrightness();
+        }
+        return world.dimensionType().hasSkyLight()
+                && !world.dimensionType().hasCeiling()
+                && world.isDay()
+                && !world.isRaining()
+                && !world.isThundering();
     }
     
     

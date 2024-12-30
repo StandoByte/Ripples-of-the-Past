@@ -12,6 +12,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.render.MeshModelBox;
 import com.github.standobyte.jojo.client.render.MeshModelBox.Builder.MeshFaceBuilder;
 import com.github.standobyte.jojo.util.general.MathUtil;
@@ -100,7 +101,7 @@ public class ParseGenericModel {
                                         }
                                     }
                                     catch (Exception e) {
-                                        e.printStackTrace();
+                                        JojoMod.getLogger().error(e);
                                         throw e;
                                     }
                                 }

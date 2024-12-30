@@ -48,8 +48,7 @@ public class BlockbenchStandModelHelper {
             
             replaceModelParts(inModModel, bbModelParts);
         } catch (Exception e) {
-            JojoMod.getLogger().error("Failed to add model parts to {} via Blockbench helper", inModModel.getClass().getName());
-            e.printStackTrace();
+            JojoMod.getLogger().error("Failed to add model parts to {} via Blockbench helper", inModModel.getClass().getName(), e);
         }
         
         inModModel.texWidth = bbSourceModel.texWidth;
@@ -81,7 +80,6 @@ public class BlockbenchStandModelHelper {
                         }
                         else {
                             RuntimeException e = new ClassCastException(blockbenchPart.getClass() + " can't be cast to " + inModPartField.getType());
-                            e.printStackTrace();
                             throw e;
                         }
                     }
@@ -172,8 +170,7 @@ public class BlockbenchStandModelHelper {
         try {
             replaceModelParts(inModModel, model.getNamedModelParts());
         } catch (Exception e) {
-            JojoMod.getLogger().error("Failed to import Geckolib format model as {}", inModModel.getClass().getName());
-            e.printStackTrace();
+            JojoMod.getLogger().error("Failed to import Geckolib format model as {}", inModModel.getClass().getName(), e);
         }
     }
 }

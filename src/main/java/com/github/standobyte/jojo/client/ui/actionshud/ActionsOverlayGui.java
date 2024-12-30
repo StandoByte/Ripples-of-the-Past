@@ -178,7 +178,7 @@ public class ActionsOverlayGui extends AbstractGui {
                 MinecraftForge.EVENT_BUS.register(instance);
             }
             catch (Throwable e) {
-                e.printStackTrace();
+                JojoMod.getLogger().error(e);
             }
         }
     }

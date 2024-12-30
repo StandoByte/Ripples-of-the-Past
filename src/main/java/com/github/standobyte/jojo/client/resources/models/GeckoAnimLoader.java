@@ -82,28 +82,34 @@ public class GeckoAnimLoader extends ReloadListener<Map<ResourceLocation, JsonEl
         for (Map.Entry<ResourceLocation, JsonElement> rawModelEntry : pObject.entrySet()) {
             ResourceLocation key = rawModelEntry.getKey();
             StandModelRegistryObj standModel = StandModelRegistry.getRegisteredModel(key);
-            GeckoStandAnimator standModelAnims = new GeckoStandAnimator();
-            standModelAnims.setExists();
-            
-            JsonObject modelAnimsJson = rawModelEntry.getValue().getAsJsonObject().getAsJsonObject("animations");
-            for (Map.Entry<String, JsonElement> animJsonEntry : modelAnimsJson.entrySet()) {
-                try {
-                    JsonObject animJson = animJsonEntry.getValue().getAsJsonObject();
-                    Animation animation = ParseGeckoAnims.parseAnim(animJson);
-                    standModelAnims.animFromJson(animation, animJson, animJsonEntry.getKey());
+            if (standModel != null || loadAnims(key)) {
+                GeckoStandAnimator standModelAnims = new GeckoStandAnimator();
+                standModelAnims.setExists();
+                
+                JsonObject modelAnimsJson = rawModelEntry.getValue().getAsJsonObject().getAsJsonObject("animations");
+                for (Map.Entry<String, JsonElement> animJsonEntry : modelAnimsJson.entrySet()) {
+                    try {
+                        JsonObject animJson = animJsonEntry.getValue().getAsJsonObject();
+                        Animation animation = ParseGeckoAnims.parseAnim(animJson);
+                        standModelAnims.animFromJson(animation, animJson, animJsonEntry.getKey());
+                    }
+                    catch (Exception e) {
+                        LOGGER.error("Failed to load animation {} from {}", animJsonEntry.getKey(), rawModelEntry.getKey(), e);
+                        continue;
+                    }
                 }
-                catch (Exception e) {
-                    LOGGER.error("Failed to load animation {} from {}", animJsonEntry.getKey(), rawModelEntry.getKey(), e);
-                    continue;
+                loadedAnims.put(key, standModelAnims);
+                
+                standModelAnims.onLoad();
+                if (standModel != null) {
+                    standModel.onGeckoAnimLoaded(standModelAnims);
                 }
-            }
-            loadedAnims.put(key, standModelAnims);
-            
-            standModelAnims.onLoad();
-            if (standModel != null) {
-                standModel.onGeckoAnimLoaded(standModelAnims);
             }
         }
+    }
+    
+    private static boolean loadAnims(ResourceLocation key) {
+        return false;
     }
     
     

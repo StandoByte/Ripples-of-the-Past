@@ -88,8 +88,7 @@ public class ActionConfigSerialized<A extends Action<?>> {
                 try {
                     field.set(action, value);
                 } catch (IllegalArgumentException | IllegalAccessException e) {
-                    JojoMod.getLogger().error("Failed to apply config to field {} of action {}", fieldName, action.getRegistryName());
-                    e.printStackTrace();
+                    JojoMod.getLogger().error("Failed to apply config to field {} of action {}", fieldName, action.getRegistryName(), e);
                 }
             }
         }
@@ -109,8 +108,7 @@ public class ActionConfigSerialized<A extends Action<?>> {
             applyFromJson(json);
         }
         catch (JsonParseException e) {
-            JojoMod.getLogger().error("Failed to read config for action {}", action.getRegistryName());
-            e.printStackTrace();
+            JojoMod.getLogger().error("Failed to read config for action {}", action.getRegistryName(), e);
         }
     }
     

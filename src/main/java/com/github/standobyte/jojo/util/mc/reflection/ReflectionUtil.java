@@ -167,7 +167,6 @@ public class ReflectionUtil {
         
         static UnableToAccessFieldException onIllegalAccessException(IllegalAccessException e, Field field, Object instance) {
             LOGGER.error(REFLECTION, "Unable to access field {} on an object of type {}", field.getName(), instance.getClass().getName(), e);
-            e.printStackTrace();
             return new UnableToAccessFieldException(e);
         }
         
