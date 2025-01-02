@@ -120,14 +120,9 @@ public class PillarmanPowerType extends NonStandPowerType<PillarmanData> {
         return false;
     }
 
-    // TODO
     @Override
     public float getTargetResolveMultiplier(INonStandPower power, IStandPower attackingStand) {
-        LivingEntity entity = power.getUser();
-        if (entity != null) {
-            return (float) Math.pow(2, Math.max(entity.level.getDifficulty().getId() - 1, 0));
-        }
-        return 1;
+        return power.getTypeSpecificData(this).map(PillarmanData::getEvolutionStage).orElse(1);
     }
     
     @Override

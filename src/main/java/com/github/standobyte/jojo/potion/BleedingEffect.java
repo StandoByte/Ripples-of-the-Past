@@ -218,8 +218,8 @@ public class BleedingEffect extends Effect implements IApplicableEffect {
                         return false;
                     } else {
                         PillarmanData pillarman = pillarmanOptional.get();
-                        if (pillarmanOptional.get().getEvolutionStage() < 3) {
-                            pillarman.setEvolutionStage(3);
+                        if (pillarmanOptional.get().getEvolutionStage() < 4) {
+                            pillarman.setEvolutionStage(4);
                             //Gives a random Mode
                             switch (entity.getRandom().nextInt(3)) {
                             case 0:

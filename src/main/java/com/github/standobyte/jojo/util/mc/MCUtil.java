@@ -972,6 +972,10 @@ public class MCUtil {
         }
     }
     
+    public static AttributeModifier modifierWithAmount(AttributeModifier modifier, double amount) {
+        return new AttributeModifier(modifier.getId(), modifier.getName(), amount, modifier.getOperation());
+    }
+    
 
     
     public static boolean isHandFree(LivingEntity entity, Hand hand) {

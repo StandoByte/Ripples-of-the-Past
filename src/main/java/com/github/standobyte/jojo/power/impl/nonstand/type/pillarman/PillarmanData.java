@@ -26,11 +26,23 @@ import net.minecraft.potion.EffectInstance;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvents;
-import net.minecraft.world.World;
 import net.minecraftforge.common.ForgeMod;
 
 public class PillarmanData extends TypeSpecificData {
-	public static final int MAX_STAGE_LEVEL = 3;
+	public static final int MAX_STAGE_LEVEL = 4;
+	/**
+     * Currently:
+     * <dd>1 - Non-Stone Mask Pillar Man</dd>
+     * <dd>2 - Stone Mask (+Santana)</dd>
+     * <dd>3 - unused</dd>
+     * <dd>4 - Stone Mask with regular Aja (+mode)</dd><br>
+	 * After the update:
+	 * <dd>1 - Non-Stone Mask Pillar Man</dd>
+	 * <dd>2 - Stone Mask prototype (+Santana)</dd>
+	 * <dd>3 - Stone Mask (+mode)</dd>
+	 * <dd>4 - Stone Mask with regular Aja</dd>
+	 * <dd>5 - Stone Mask with Super Aja (Ultimate Thing)</dd>
+	 */
     private int stage = 1;
     private boolean stoneForm = false;
     private float lastEnergy = -999;
@@ -61,8 +73,10 @@ public class PillarmanData extends TypeSpecificData {
 
     private void updatePillarmanBuffs(LivingEntity entity) {
         if (!entity.level.isClientSide()) {
-            World world = entity.level;
-            int lvl = (world.getDifficulty().getId() * stage);
+            int lvl = 2 * stage;
+            // I've added an intermediate stage, that will be used later. So this is to keep the passive buffs the same for now.
+            if (stage == 3) --lvl;
+            if (stage > 3) lvl -= 2;
             MCUtil.applyAttributeModifierMultiplied(entity, Attributes.ATTACK_DAMAGE, ATTACK_DAMAGE, lvl);
             MCUtil.applyAttributeModifierMultiplied(entity, Attributes.ATTACK_SPEED, ATTACK_SPEED, lvl);
             MCUtil.applyAttributeModifierMultiplied(entity, Attributes.MOVEMENT_SPEED, MOVEMENT_SPEED, lvl);
