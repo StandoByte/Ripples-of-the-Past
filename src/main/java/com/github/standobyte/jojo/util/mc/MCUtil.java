@@ -414,7 +414,7 @@ public class MCUtil {
         ChunkManager chunkMap = ((ServerWorld) entity.level).getChunkSource().chunkMap;
         Int2ObjectMap<ChunkManager.EntityTracker> entityMap = chunkMap.entityMap;
         ChunkManager.EntityTracker tracker = entityMap.get(entity.getId());
-        return tracker.seenBy;
+        return tracker != null ? tracker.seenBy : Collections.emptySet();
     }
     
     
