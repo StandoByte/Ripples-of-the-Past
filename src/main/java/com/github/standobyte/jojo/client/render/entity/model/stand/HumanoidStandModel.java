@@ -88,7 +88,99 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
     
     public static <T extends StandEntity> HumanoidStandModel<T> createBasic() {
         HumanoidStandModel<T> model = new HumanoidStandModel<>();
-        model.addHumanoidBaseBoxes(null);
+
+        model.head = new ModelRenderer(model);
+        model.head.setPos(0.0F, 0.0F, 0.0F);
+
+        model.body = new ModelRenderer(model);
+        model.body.setPos(0.0F, 0.0F, 0.0F);
+
+        model.upperPart = new ModelRenderer(model);
+        model.upperPart.setPos(0.0F, 12.0F, 0.0F);
+        model.body.addChild(model.upperPart);
+
+        model.torso = new ModelRenderer(model);
+        model.torso.setPos(0.0F, -12.0F, 0.0F);
+        model.upperPart.addChild(model.torso);
+
+        model.leftArmXRot = new ModelRenderer(model);
+        model.leftArmXRot.setPos(6.0F, -10.0F, 0.0F);
+        model.upperPart.addChild(model.leftArmXRot);
+
+        model.leftArmBone = new ModelRenderer(model);
+        model.leftArmBone.setPos(0.0F, 0.0F, 0.0F);
+        model.leftArmXRot.addChild(model.leftArmBone);
+
+        model.leftArmJoint = new ModelRenderer(model);
+        model.leftArmJoint.setPos(0.0F, 4.0F, 0.0F);
+        model.leftArmBone.addChild(model.leftArmJoint);
+
+        model.leftForeArm = new ModelRenderer(model);
+        model.leftForeArm.setPos(0.0F, 4.0F, 0.0F);
+        model.leftArmBone.addChild(model.leftForeArm);
+
+        model.rightArmXRot = new ModelRenderer(model);
+        model.rightArmXRot.setPos(-6.0F, -10.0F, 0.0F);
+        model.upperPart.addChild(model.rightArmXRot);
+
+        model.rightArmBone = new ModelRenderer(model);
+        model.rightArmBone.setPos(0.0F, 0.0F, 0.0F);
+        model.rightArmXRot.addChild(model.rightArmBone);
+
+        model.rightArmJoint = new ModelRenderer(model);
+        model.rightArmJoint.setPos(0.0F, 4.0F, 0.0F);
+        model.rightArmBone.addChild(model.rightArmJoint);
+
+        model.rightForeArm = new ModelRenderer(model);
+        model.rightForeArm.setPos(0.0F, 4.0F, 0.0F);
+        model.rightArmBone.addChild(model.rightForeArm);
+
+        model.leftLegXRot = new ModelRenderer(model);
+        model.leftLegXRot.setPos(2.0F, 12.0F, 0.0F);
+        model.body.addChild(model.leftLegXRot);
+
+        model.leftLegBone = new ModelRenderer(model);
+        model.leftLegBone.setPos(0.0F, 0.0F, 0.0F);
+        model.leftLegXRot.addChild(model.leftLegBone);
+
+        model.leftLegJoint = new ModelRenderer(model);
+        model.leftLegJoint.setPos(0.0F, 6.0F, 0.0F);
+        model.leftLegBone.addChild(model.leftLegJoint);
+
+        model.leftLowerLeg = new ModelRenderer(model);
+        model.leftLowerLeg.setPos(0.0F, 6.0F, 0.0F);
+        model.leftLegBone.addChild(model.leftLowerLeg);
+
+        model.rightLegXRot = new ModelRenderer(model);
+        model.rightLegXRot.setPos(-2.0F, 12.0F, 0.0F);
+        model.body.addChild(model.rightLegXRot);
+
+        model.rightLegBone = new ModelRenderer(model);
+        model.rightLegBone.setPos(0.0F, 0.0F, 0.0F);
+        model.rightLegXRot.addChild(model.rightLegBone);
+
+        model.rightLegJoint = new ModelRenderer(model);
+        model.rightLegJoint.setPos(0.0F, 6.0F, 0.0F);
+        model.rightLegBone.addChild(model.rightLegJoint);
+
+        model.rightLowerLeg = new ModelRenderer(model);
+        model.rightLowerLeg.setPos(0.0F, 6.0F, 0.0F);
+        model.rightLegBone.addChild(model.rightLowerLeg);
+
+        model.head          .texOffs(0, 0)    .addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
+        model.torso         .texOffs(0, 64)   .addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, 0.0F, false);
+        model.leftArmBone   .texOffs(32, 108) .addBox(-2.0F, -2.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
+        model.leftArmJoint  .texOffs(32, 102) .addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.125F, true);
+        model.leftForeArm   .texOffs(32, 118) .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false);
+        model.rightArmBone  .texOffs(0, 108)  .addBox(-2.0F, -2.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
+        model.rightArmJoint .texOffs(0, 102)  .addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.125F, false);
+        model.rightForeArm  .texOffs(0, 118)  .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false);
+        model.leftLegBone   .texOffs(96, 108) .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
+        model.leftLegJoint  .texOffs(96, 102) .addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.125F, true);
+        model.leftLowerLeg  .texOffs(96, 118) .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false);
+        model.rightLegBone  .texOffs(64, 108) .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
+        model.rightLegJoint .texOffs(64, 102) .addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.125F, false);
+        model.rightLowerLeg .texOffs(64, 118) .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false);
         return model;
     }
     
@@ -138,7 +230,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
         rightArm.addChild(rightForeArm);
 
         leftLeg = convertLimb(new ModelRenderer(this));
-        leftLeg.setPos(1.9F, 12.0F, 0.0F);
+        leftLeg.setPos(2.0F, 12.0F, 0.0F);
         body.addChild(leftLeg);
 
         leftLegJoint = new ModelRenderer(this);
@@ -150,7 +242,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
         leftLeg.addChild(leftLowerLeg);
 
         rightLeg = convertLimb(new ModelRenderer(this));
-        rightLeg.setPos(-1.9F, 12.0F, 0.0F);
+        rightLeg.setPos(-2.0F, 12.0F, 0.0F);
         body.addChild(rightLeg);
 
         rightLegJoint = new ModelRenderer(this);
