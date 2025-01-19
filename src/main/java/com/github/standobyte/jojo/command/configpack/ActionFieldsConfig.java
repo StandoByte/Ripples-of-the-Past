@@ -76,7 +76,7 @@ public class ActionFieldsConfig extends JsonDataConfig {
             // generate base datapack
             genDataPackBase(source);
             // generate the .json files
-            int count = writeDefaultActionConfig(source.getServer(), standType.getAllUnlockableActions());
+            int count = writeDefaultActionConfig(source.getServer(), standType.getAllUnlockableActions(), false);
             
             source.sendSuccess(generatePackLink(source, 
                     "commands.jojoconfigpack.abilities.stand", 
@@ -97,7 +97,7 @@ public class ActionFieldsConfig extends JsonDataConfig {
         try {
             genDataPackBase(source);
             
-            int count = writeDefaultActionConfig(source.getServer(), Collections.singletonList(action));
+            int count = writeDefaultActionConfig(source.getServer(), Collections.singletonList(action), true);
             
             source.sendSuccess(generatePackLink(source, 
                     "commands.jojoconfigpack.abilities.single", 
@@ -116,13 +116,13 @@ public class ActionFieldsConfig extends JsonDataConfig {
     
     
     
-    private int writeDefaultActionConfig(MinecraftServer server, Iterable<? extends Action<?>> actions) throws Throwable {
+    private int writeDefaultActionConfig(MinecraftServer server, Iterable<? extends Action<?>> actions, boolean genEmpty) throws Throwable {
         int i = 0;
         
         for (Action<?> action : actions) {
             ResourceLocation key = action.getRegistryName();
             try {
-                if (genJsonFromAction(action, key, RESOURCE_NAME, server)) {
+                if (genJsonFromAction(action, key, RESOURCE_NAME, server, genEmpty)) {
                     i++;
                 }
             }
@@ -135,7 +135,7 @@ public class ActionFieldsConfig extends JsonDataConfig {
         return i;
     }
     
-    public boolean genJsonFromAction(Action<?> action, ResourceLocation resourcePath, String resourceName, MinecraftServer server) throws JsonWriteException {
+    public boolean genJsonFromAction(Action<?> action, ResourceLocation resourcePath, String resourceName, MinecraftServer server, boolean genEmpty) throws JsonWriteException {
         Path folderPath = dataPackPath(server);
         
         Path dataFolderPath = folderPath.resolve("data");
@@ -147,19 +147,17 @@ public class ActionFieldsConfig extends JsonDataConfig {
         
         JsonObject json = action.getOrCreateConfigs().defaultSettings;
         
-        if (json.size() > 0) {
-            try (OutputStream outputStream = new FileOutputStream(jsonFile);
-                    Writer writer = new OutputStreamWriter(outputStream, Charsets.UTF_8.newEncoder())) {
-                getGson().toJson(json, writer);
-            } catch (IOException e) {
-                JsonWriteException exception = new IDataConfig.JsonWriteException(jsonFile);
-                exception.initCause(e);
-                throw exception;
-            }
-            return true;
-        }
+//        if (json.size() == 0) return false;
         
-        return false;
+        try (OutputStream outputStream = new FileOutputStream(jsonFile);
+                Writer writer = new OutputStreamWriter(outputStream, Charsets.UTF_8.newEncoder())) {
+            getGson().toJson(json, writer);
+        } catch (IOException e) {
+            JsonWriteException exception = new IDataConfig.JsonWriteException(jsonFile);
+            exception.initCause(e);
+            throw exception;
+        }
+        return true;
     }
     
     
@@ -178,7 +176,7 @@ public class ActionFieldsConfig extends JsonDataConfig {
                         srvActionsToSync.add(action);
                     }
                     catch (IllegalArgumentException | JsonParseException jsonparseexception) {
-                        IDataConfig.LOGGER.error("Parsing error loading custom stand stats {}: {}", location, jsonparseexception.getMessage());
+                        IDataConfig.LOGGER.error("Parsing error loading configs for action {}: {}", location, jsonparseexception.getMessage());
                     }
                 }
             }
