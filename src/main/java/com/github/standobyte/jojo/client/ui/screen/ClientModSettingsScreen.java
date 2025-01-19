@@ -85,6 +85,10 @@ public class ClientModSettingsScreen extends SettingsScreen {
                 new TranslationTextComponent("jojo.options.client.hamon"), 
                 button -> minecraft.setScreen(new HamonSettings(this, settings, button.getMessage()))));
         
+        addButton(new Button(calcButtonX(i), calcButtonY(i++) + 6, 150, 20, 
+                new TranslationTextComponent("jojo.options.client.vampirism"), 
+                button -> minecraft.setScreen(new VampirismSettings(this, settings, button.getMessage()))));
+        
         addBackButton(DialogTexts.GUI_DONE, i);
     }
     
@@ -284,6 +288,32 @@ public class ClientModSettingsScreen extends SettingsScreen {
                 }
             };
             addButton(hamonAuraBlur.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this, i));
+            
+            addBackButton(DialogTexts.GUI_BACK, i);
+        }
+        
+    }
+    
+    public static class VampirismSettings extends ClientModSettingsScreen {
+
+        public VampirismSettings(Screen lastScreen, ClientModSettings settings, ITextComponent title) {
+            super(lastScreen, settings, title);
+        }
+        
+        @Override
+        protected void addButtons() {
+            int i = 0;
+            
+            BooleanSetting glowingEyes = new BooleanSetting(settings, 
+                    new TranslationTextComponent("jojo.config.client.vampireGlowingEyes"), 
+                    new TranslationTextComponent("jojo.config.client.vampireGlowingEyes.tooltip")
+                    ) {
+                @Override public Boolean get() { return settingsValues.broadcasted.vampireGlowingEyes; }
+                @Override public void set(Boolean value) { 
+                    settingsValues.broadcasted.vampireGlowingEyes = value;
+                }
+            };
+            addButton(glowingEyes.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this, i));
             
             addBackButton(DialogTexts.GUI_BACK, i);
         }

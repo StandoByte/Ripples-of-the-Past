@@ -630,7 +630,6 @@
  "jojo.options.client.hud": "HUD...",
  "jojo.options.client.stand": "替身...",
  "jojo.options.client.hamon": "波纹...",
- "jojo.options.client.misc": "声音...",
  "jojo.config.client.barsPosition": "能量条所在位置",
  "jojo.config.client.barsPosition.tooltip": "经验值、精神力值等在HUD中所展示的位置",
  "jojo.config.client.hotbarsPosition": "热键位置",

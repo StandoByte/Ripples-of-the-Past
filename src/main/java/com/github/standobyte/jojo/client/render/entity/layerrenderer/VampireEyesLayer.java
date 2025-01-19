@@ -1,12 +1,16 @@
 package com.github.standobyte.jojo.client.render.entity.layerrenderer;
 
+import java.util.Optional;
+
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.capability.entity.player.PlayerClientBroadcastedSettings;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.impl.nonstand.type.zombie.ZombieData;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
@@ -33,6 +37,16 @@ public class VampireEyesLayer<T extends LivingEntity, M extends PlayerModel<T>> 
             T player, float walkAnimPos, float walkAnimSpeed, float partialTick, 
             float ticks, float headYRotation, float headXRotation) {
     	if (!player.isInvisible()) {
+    	    boolean eyesEnabled = INonStandPower.getNonStandPowerOptional(player).resolve().filter(power -> {
+    	        return ModPowers.VAMPIRISM.get().isHighOnBlood(power) || 
+    	                power.getTypeSpecificData(ModPowers.ZOMBIE.get()).filter(ZombieData::isDisguiseEnabled).isPresent();
+    	    }).isPresent();
+    	    if (eyesEnabled && player instanceof PlayerEntity) {
+    	        Optional<PlayerClientBroadcastedSettings> settings = PlayerClientBroadcastedSettings.getPlayerSettings((PlayerEntity) player);
+    	        eyesEnabled = settings.map(s -> s.vampireGlowingEyes).orElse(true);
+    	    }
+    	    if (!eyesEnabled) return;
+    	    
             M model = getParentModel();
             ResourceLocation texture = getTexture(model, player);
             if (texture == null) return;
@@ -43,14 +57,6 @@ public class VampireEyesLayer<T extends LivingEntity, M extends PlayerModel<T>> 
     
     @Nullable
     private ResourceLocation getTexture(EntityModel<?> model, LivingEntity entity) {
-        if (INonStandPower.getNonStandPowerOptional(entity).resolve().flatMap(
-                power -> power.getTypeSpecificData(ModPowers.ZOMBIE.get())
-                .map(zombie -> !zombie.isDisguiseEnabled())).orElse(false) || 
-        		INonStandPower.getNonStandPowerOptional(entity).resolve().flatMap(
-                        power -> power.getTypeSpecificData(ModPowers.VAMPIRISM.get())
-                        .map(vampire -> power.getEnergy() >= 400)).orElse(false)) {
-            return TEXTURE;
-        }
-        return null;
+        return TEXTURE;
     } 
 }

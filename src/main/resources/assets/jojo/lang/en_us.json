@@ -683,7 +683,7 @@
   "jojo.options.client.hud": "HUD...",
   "jojo.options.client.stand": "Stand...",
   "jojo.options.client.hamon": "Hamon...",
-  "jojo.options.client.misc": "Misc...",
+  "jojo.options.client.vampirism": "Vampirism...",
   "jojo.config.client.barsPosition": "Bars position",
   "jojo.config.client.barsPosition.tooltip": "Position of Energy, Stamina and Resolve bars in the HUD.",
   "jojo.config.client.hotbarsPosition": "Hotbars position",
@@ -723,6 +723,8 @@
   "jojo.config.client.firstPersonHamonAura.tooltip": "Render Hamon aura particles around the player's hand",
   "jojo.config.client.hamonAuraBlur": "Hamon aura blur",
   "jojo.config.client.hamonAuraBlur.tooltip": "Blur Hamon aura particles",
+  "jojo.config.client.vampireGlowingEyes": "Glowing eyes",
+  "jojo.config.client.vampireGlowingEyes.tooltip": "Red eyes glowing in the dark in 3rd person when you have 80% or more energy",
   
 
   "stand.unknown": "Unknown Stand: %s",

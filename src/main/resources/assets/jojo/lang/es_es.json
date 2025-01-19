@@ -672,7 +672,6 @@
   "jojo.options.client.hud": "HUD...",
   "jojo.options.client.stand": "Stand...",
   "jojo.options.client.hamon": "Hamon...",
-  "jojo.options.client.misc": "Varios...",
   "jojo.config.client.barsPosition": "Posición de las barras",
   "jojo.config.client.barsPosition.tooltip": "Posición de las barras de Energía, Resistencia y Resolución en el HUD.",
   "jojo.config.client.hotbarsPosition": "Posición de las barras de acceso rápido",
