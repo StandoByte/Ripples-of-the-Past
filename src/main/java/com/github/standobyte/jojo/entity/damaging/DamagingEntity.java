@@ -55,6 +55,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     // only used for OwnerBoundProjectileEntity
     protected double speedFactor = 1F;
     private LivingEntity livingEntityOwner = null;
+    private LivingEntity powerUser = null;
     private LazyOptional<IStandPower> userStandPower = LazyOptional.empty();
     private LazyOptional<INonStandPower> userNonStandPower = LazyOptional.empty();
     private Optional<ResourceLocation> standSkin = Optional.empty();
@@ -63,7 +64,7 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
         this(entityType, world);
         if (owner != null) {
             setOwner(owner);
-            this.livingEntityOwner = owner;
+            setLivingOwner(owner);
             Vector3d pos = getPos(owner, 1.0F, owner.yRot, owner.xRot);
             setPos(pos.x, pos.y, pos.z);
             setRot(owner.yRot, owner.xRot);
@@ -107,10 +108,15 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
                 return null;
             }
             if (owner instanceof LivingEntity) {
-                livingEntityOwner = (LivingEntity) owner;
+                setLivingOwner((LivingEntity) owner);
             }
         }
         return livingEntityOwner;
+    }
+    
+    private void setLivingOwner(LivingEntity entity) {
+        this.livingEntityOwner = entity;
+        this.powerUser = StandUtil.getStandUser(entity);
     }
     
     @Override
@@ -122,14 +128,14 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     
     protected LazyOptional<IStandPower> getUserStandPower() {
         if (!userStandPower.isPresent()) {
-            userStandPower = IStandPower.getStandPowerOptional(StandUtil.getStandUser(getOwner()));
+            userStandPower = IStandPower.getStandPowerOptional(powerUser);
         }
         return userStandPower;
     }
     
     protected LazyOptional<INonStandPower> getUserNonStandPower() {
         if (!userNonStandPower.isPresent()) {
-            userNonStandPower = INonStandPower.getNonStandPowerOptional(StandUtil.getStandUser(getOwner()));
+            userNonStandPower = INonStandPower.getNonStandPowerOptional(powerUser);
         }
         return userNonStandPower;
     }
@@ -198,8 +204,13 @@ public abstract class DamagingEntity extends ProjectileEntity implements IEntity
     }
     
     protected DamageSource getDamageSource(LivingEntity owner) { // TODO damage sources/death messages
-        DamageSource damageSource = standDamage() ? new IndirectStandEntityDamageSource("arrow", this, owner).setProjectile() :
-            new IndirectEntityDamageSource("arrow", this, owner).setProjectile();
+        DamageSource damageSource;
+        if (standDamage() && owner != null) {
+            damageSource = new IndirectStandEntityDamageSource("arrow", this, owner).setProjectile();
+        }
+        else {
+            damageSource = new IndirectEntityDamageSource("arrow", this, owner).setProjectile();
+        }
         
         float knockbackReduction = knockbackMultiplier();
         if (knockbackReduction < 1) {
