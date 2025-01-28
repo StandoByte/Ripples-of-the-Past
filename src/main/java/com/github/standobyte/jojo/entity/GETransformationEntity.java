@@ -509,6 +509,7 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         if (from.hasCustomName() && !(to instanceof ItemEntity)) {
             to.setCustomName(from.getCustomName());
         }
+        to.setDeltaMovement(from.getDeltaMovement());
     }
     
     
