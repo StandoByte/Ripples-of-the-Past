@@ -16,6 +16,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrackedItemPacket;
 import net.minecraft.block.BlockState;
 import net.minecraft.block.JukeboxBlock;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.item.ItemFrameEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
@@ -152,6 +153,13 @@ public class TrackerItemStack {
                 jukebox.clearContent();
                 blockState = blockState.setValue(JukeboxBlock.HAS_RECORD, Boolean.valueOf(false));
                 world.setBlock(positionBlock, blockState, 2);
+            }
+        }
+        else if (positionEntity.isPresent()) {
+            Entity entity = getAtEntity(world);
+            if (entity instanceof ItemFrameEntity) {
+                ItemFrameEntity itemFrame = (ItemFrameEntity) entity;
+                itemFrame.setItem(ItemStack.EMPTY);
             }
         }
     }

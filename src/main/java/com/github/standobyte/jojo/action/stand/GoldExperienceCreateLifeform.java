@@ -62,6 +62,7 @@ import net.minecraft.entity.item.BoatEntity;
 import net.minecraft.entity.item.EnderCrystalEntity;
 import net.minecraft.entity.item.EnderPearlEntity;
 import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.entity.item.ItemFrameEntity;
 import net.minecraft.entity.item.TNTEntity;
 import net.minecraft.entity.monster.SlimeEntity;
 import net.minecraft.entity.passive.horse.AbstractHorseEntity;
@@ -324,6 +325,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                                 
                                 switch (itemState) {
                                 case ENTITY_HAS_ITEM:
+                                    tf.moveTo(pos.x, pos.y, pos.z, itemEntity.yRot, 0);
                                     mobFromInventory(tf, itemTracker, world, 
                                             livingItemHolder != null ? livingItemHolder : user, 
                                             itemEntity.blockPosition(), customName);
@@ -331,17 +333,15 @@ public class GoldExperienceCreateLifeform extends StandAction {
                                         nonUserItemHolder.set(itemEntity);
                                     }
                                     
-                                    tf.moveTo(pos.x, pos.y, pos.z, itemEntity.yRot, 0);
-                                    
                                     break;
                                 case ENTITY_IS_ITEM:
                                     mobFromEntity(tf, itemEntity, user);
                                     break;
                                 case STUCK_ARROW:
+                                    tf.moveTo(pos.x, pos.y, pos.z, itemEntity.yRot, itemEntity.xRot);
                                     AbstractArrowEntity arrow = new ArrowEntity(world, user);
                                     arrow.pickup = AbstractArrowEntity.PickupStatus.ALLOWED;
                                     tf.getTfSourceData().withEntitySource(arrow);
-                                    tf.moveTo(pos.x, pos.y, pos.z, itemEntity.yRot, itemEntity.xRot);
                                     if (livingItemHolder != null) {
                                         decrementStuckArrow(livingItemHolder);
                                         tf.withHost(livingItemHolder);
@@ -349,10 +349,10 @@ public class GoldExperienceCreateLifeform extends StandAction {
                                     }
                                     break;
                                 case STUCK_KNIFE:
+                                    tf.moveTo(pos.x, pos.y, pos.z, itemEntity.yRot, itemEntity.xRot);
                                     AbstractArrowEntity knife = new KnifeEntity(world, user);
                                     knife.pickup = AbstractArrowEntity.PickupStatus.ALLOWED;
                                     tf.getTfSourceData().withEntitySource(knife);
-                                    tf.moveTo(pos.x, pos.y, pos.z, itemEntity.yRot, itemEntity.xRot);
                                     if (livingItemHolder != null) {
                                         decrementStuckKnife(livingItemHolder);
                                         tf.withHost(livingItemHolder);
@@ -380,10 +380,9 @@ public class GoldExperienceCreateLifeform extends StandAction {
                                     
                                     switch (itemState) {
                                     case BLOCK_HAS_ITEM:
+                                        tf.moveTo(itemPos.getX(), itemPos.getY() + 1, itemPos.getZ(), 0, 0);
                                         mobFromInventory(tf, itemTracker, world, 
                                                 user, itemPos.above(), customName);
-                                        
-                                        tf.moveTo(itemPos.getX(), itemPos.getY() + 1, itemPos.getZ(), 0, 0);
                                         break;
                                     case BLOCK_IS_ITEM:
                                         tfTargetFound = false;
@@ -413,14 +412,15 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     ItemStack heldItem = user.getItemInHand(Hand.OFF_HAND);
                     if (!heldItem.isEmpty() && canGiveLifeTo(heldItem)) {
                         tfTargetFound = true;
-                        mobFromInventory(tf, heldItem, world, 
-                                user, performer.blockPosition(), customName);
                         
                         Vector3d pos = performer.position();
                         Vector3d lookVec = performer.getLookAngle();
                         double distScale = lifeFormCreated.getBbWidth() + 1;
                         pos = pos.add(lookVec.x * distScale, 0, lookVec.z * distScale);
                         tf.moveTo(pos.x, pos.y, pos.z, performer.yRot, 0);
+                        
+                        mobFromInventory(tf, heldItem, world, 
+                                user, performer.blockPosition(), customName);
                     }
                 }
                 
@@ -511,6 +511,10 @@ public class GoldExperienceCreateLifeform extends StandAction {
     
     private void mobFromInventory(GETransformationEntity tf, TrackerItemStack itemTracker, World world, 
             @Nonnull LivingEntity wouldBeThrower, BlockPos fishBucketPos, ObjectWrapper<ITextComponent> mobName) {
+        Entity holder = itemTracker.getAtEntity(world);
+        if (holder instanceof ItemFrameEntity) {
+            tf.moveTo(tf.position().add(holder.getLookAngle().scale(0.5)));
+        }
         mobFromInventory(tf, itemTracker.getItem(), world, wouldBeThrower, fishBucketPos, mobName);
         itemTracker.onShrink((ServerWorld) world);
     }
