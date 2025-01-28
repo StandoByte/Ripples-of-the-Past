@@ -119,10 +119,6 @@ public class TrackerItemStack {
         });
     }
     
-    public void setItemStillThereCheck(Predicate<UUID> check) {
-        this.itemStillThere = check;
-    }
-    
     public static Predicate<ItemStack> trackerIdCheck(UUID trackerId) {
         return invItem -> hasTrackerId(invItem, trackerId);
     }
@@ -186,6 +182,10 @@ public class TrackerItemStack {
         }
     }
     
+    public void setItemStillThereCheck(@Nullable Predicate<UUID> check) {
+        this.itemStillThere = check;
+    }
+    
     public void setDisappeared(ServerWorld world) {
         this.positionEntity = OptionalInt.empty();
         this.positionBlock = null;
@@ -201,8 +201,12 @@ public class TrackerItemStack {
         return positionEntity.isPresent() ? world.getEntity(positionEntity.getAsInt()) : null;
     }
     
+    public OptionalInt getAtEntityId() {
+        return positionEntity;
+    }
+    
     @Nullable
-    public BlockPos getAtBlockPos(World world) {
+    public BlockPos getAtBlockPos() {
         return positionBlock;
     }
     
@@ -237,6 +241,15 @@ public class TrackerItemStack {
         }
         
         return itemStillThere == null || itemStillThere.test(trackerUuid);
+    }
+    
+    public void copy(TrackerItemStack oldTracker) {
+        this.positionDimension = oldTracker.positionDimension;
+        this.positionEntity = oldTracker.positionEntity;
+        this.positionBlock = oldTracker.positionBlock;
+        this.containerBlockState = oldTracker.containerBlockState;
+        this.itemStillThere = oldTracker.itemStillThere;
+        this.itemState = oldTracker.itemState;
     }
     
     public void clear() {

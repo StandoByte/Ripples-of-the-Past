@@ -22,6 +22,7 @@
     "MerchantResultSlotMixin",
     "MapDataMixin",
     "TheMostUnnecessaryMixin",
+    "itemtracking.equip.LivingEntityMixin",
     "itemtracking.equip.MobEntityMixin",
     "itemtracking.equip.ArmorStandEntityMixin",
     "itemtracking.inventory.PlayerInventoryMixin",

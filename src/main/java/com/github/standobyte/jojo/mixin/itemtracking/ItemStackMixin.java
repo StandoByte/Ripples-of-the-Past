@@ -5,6 +5,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack.KnownItemState;
@@ -29,5 +30,16 @@ public class ItemStackMixin {
                 });
             }
         }
+    }
+    
+    @Inject(method = "copy", at = @At("TAIL"))
+    public void onCopy(CallbackInfoReturnable<ItemStack> ci) {
+        ItemStack newItem = ci.getReturnValue();
+        TrackerItemStack.getItemTracker(newItem).ifPresent(tracker -> {
+            ItemStack oldItem = (ItemStack) (Object) this;
+            TrackerItemStack.getItemTracker(oldItem, true).ifPresent(oldTracker -> {
+                tracker.copy(oldTracker);
+            });
+        });
     }
 }

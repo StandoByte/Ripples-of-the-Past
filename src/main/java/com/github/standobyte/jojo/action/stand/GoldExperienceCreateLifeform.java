@@ -370,7 +370,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                         }
                         else {
                             // ...or from block
-                            BlockPos itemPos = itemTracker.getAtBlockPos(world);
+                            BlockPos itemPos = itemTracker.getAtBlockPos();
                             if (itemPos != null) {
                                 BlockState blockState = world.getBlockState(itemPos);
                                 KnownItemState itemState = itemTracker.getItemState();
