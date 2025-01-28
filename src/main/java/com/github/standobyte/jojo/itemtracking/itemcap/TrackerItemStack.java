@@ -14,6 +14,7 @@ import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrackedItemPacket;
 
 import net.minecraft.block.BlockState;
+import net.minecraft.block.JukeboxBlock;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -21,6 +22,8 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.INBT;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.tileentity.JukeboxTileEntity;
+import net.minecraft.tileentity.TileEntity;
 import net.minecraft.util.RegistryKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.MathHelper;
@@ -120,7 +123,11 @@ public class TrackerItemStack {
     }
     
     public static Predicate<ItemStack> trackerIdCheck(UUID trackerId) {
-        return invItem -> trackerId.equals(TrackerItemStack.getItemTracker(invItem).map(TrackerItemStack::getTrackerId).orElse(null));
+        return invItem -> hasTrackerId(invItem, trackerId);
+    }
+    
+    public static boolean hasTrackerId(ItemStack item, UUID trackerId) {
+        return trackerId.equals(TrackerItemStack.getItemTracker(item).map(TrackerItemStack::getTrackerId).orElse(null));
     }
     
     public void onUpdate(ServerWorld world) {
@@ -131,6 +138,20 @@ public class TrackerItemStack {
                 PacketManager.sendToClient(new TrackedItemPacket(
                         trackerUuid, itemStack, positionEntity, Optional.ofNullable(positionBlock)), 
                         (ServerPlayerEntity) player);
+            }
+        }
+    }
+    
+    public void onShrink(ServerWorld world) {
+        if (positionBlock != null) {
+            TileEntity tileEntity = world.getBlockEntity(positionBlock);
+            if (tileEntity instanceof JukeboxTileEntity) {
+                JukeboxTileEntity jukebox = (JukeboxTileEntity) tileEntity;
+                BlockState blockState = world.getBlockState(positionBlock);
+                world.levelEvent(1010, positionBlock, 0);
+                jukebox.clearContent();
+                blockState = blockState.setValue(JukeboxBlock.HAS_RECORD, Boolean.valueOf(false));
+                world.setBlock(positionBlock, blockState, 2);
             }
         }
     }

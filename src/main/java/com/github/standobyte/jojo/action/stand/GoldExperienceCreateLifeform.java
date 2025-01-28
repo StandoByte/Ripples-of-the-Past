@@ -324,7 +324,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                                 
                                 switch (itemState) {
                                 case ENTITY_HAS_ITEM:
-                                    mobFromInventory(tf, itemTracker.getItem(), world, 
+                                    mobFromInventory(tf, itemTracker, world, 
                                             livingItemHolder != null ? livingItemHolder : user, 
                                             itemEntity.blockPosition(), customName);
                                     if (itemEntity != user) {
@@ -380,7 +380,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                                     
                                     switch (itemState) {
                                     case BLOCK_HAS_ITEM:
-                                        mobFromInventory(tf, itemTracker.getItem(), world, 
+                                        mobFromInventory(tf, itemTracker, world, 
                                                 user, itemPos.above(), customName);
                                         
                                         tf.moveTo(itemPos.getX(), itemPos.getY() + 1, itemPos.getZ(), 0, 0);
@@ -507,6 +507,12 @@ public class GoldExperienceCreateLifeform extends StandAction {
                 tf.getTfSourceData().withFollowTarget(thrower, GETransformationEntity.FollowTargetMode.TRACK, geUser);
             }
         }
+    }
+    
+    private void mobFromInventory(GETransformationEntity tf, TrackerItemStack itemTracker, World world, 
+            @Nonnull LivingEntity wouldBeThrower, BlockPos fishBucketPos, ObjectWrapper<ITextComponent> mobName) {
+        mobFromInventory(tf, itemTracker.getItem(), world, wouldBeThrower, fishBucketPos, mobName);
+        itemTracker.onShrink((ServerWorld) world);
     }
     
     private void mobFromInventory(GETransformationEntity tf, ItemStack item, World world, 
