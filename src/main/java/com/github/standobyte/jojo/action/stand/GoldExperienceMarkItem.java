@@ -14,6 +14,7 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.stand.effect.GEItemMarkEffect;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.render.rendertype.CustomRenderType;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
@@ -23,10 +24,20 @@ import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.mojang.blaze3d.matrix.MatrixStack;
+import com.mojang.blaze3d.vertex.IVertexBuilder;
+import com.mojang.blaze3d.vertex.MatrixApplyingVertexBuilder;
+import com.mojang.blaze3d.vertex.VertexBuilderUtils;
 
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.renderer.Atlases;
+import net.minecraft.client.renderer.IRenderTypeBuffer;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.item.ShootableItem;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Hand;
@@ -156,6 +167,53 @@ public class GoldExperienceMarkItem extends StandAction {
         }
         else {
             return super.getTranslatedName(power, key);
+        }
+    }
+    
+    
+    public static class ClientStuff {
+        
+        public static IVertexBuilder qwe(IVertexBuilder vertexBuilder, ItemStack item, boolean direct, 
+                IRenderTypeBuffer pBuffer, RenderType pRenderType, MatrixStack.Entry pMatrixEntry) {
+            PlayerEntity player = Minecraft.getInstance().player;
+            if (player != null && GEItemMarkEffect.isItemMarked(item, player)) {
+                if (item.getItem() == Items.COMPASS) {
+                    if (direct) {
+                        vertexBuilder = getCompassFoilBufferDirect(pBuffer, pRenderType, pMatrixEntry);
+                    } else {
+                        vertexBuilder = getCompassFoilBuffer(pBuffer, pRenderType, pMatrixEntry);
+                    }
+                }
+                else if (direct) {
+                    vertexBuilder = getFoilBufferDirect(pBuffer, pRenderType);
+                } else {
+                    vertexBuilder = getFoilBuffer(pBuffer, pRenderType);
+                }
+            }
+            return vertexBuilder;
+        }
+        
+        public static IVertexBuilder getCompassFoilBuffer(IRenderTypeBuffer pBuffer, RenderType pRenderType, MatrixStack.Entry pMatrixEntry) {
+            return VertexBuilderUtils.create(new MatrixApplyingVertexBuilder(
+                    pBuffer.getBuffer(CustomRenderType.geImbuedGlint()), pMatrixEntry.pose(), pMatrixEntry.normal()), pBuffer.getBuffer(pRenderType));
+        }
+
+        public static IVertexBuilder getCompassFoilBufferDirect(IRenderTypeBuffer pBuffer, RenderType pRenderType, MatrixStack.Entry pMatrixEntry) {
+            return VertexBuilderUtils.create(new MatrixApplyingVertexBuilder(
+                    pBuffer.getBuffer(CustomRenderType.geImbuedGlintDirect()), pMatrixEntry.pose(), pMatrixEntry.normal()), pBuffer.getBuffer(pRenderType));
+        }
+
+        public static IVertexBuilder getFoilBuffer(IRenderTypeBuffer pBuffer, RenderType pRenderType) {
+            if (Minecraft.useShaderTransparency() && pRenderType == Atlases.translucentItemSheet()) {
+                return VertexBuilderUtils.create(pBuffer.getBuffer(CustomRenderType.geImbuedGlintTranslucent()), pBuffer.getBuffer(pRenderType));
+            }
+            else {
+                return VertexBuilderUtils.create(pBuffer.getBuffer(CustomRenderType.geImbuedGlint()), pBuffer.getBuffer(pRenderType));
+            }
+        }
+
+        public static IVertexBuilder getFoilBufferDirect(IRenderTypeBuffer pBuffer, RenderType pRenderType) {
+            return VertexBuilderUtils.create(pBuffer.getBuffer(CustomRenderType.geImbuedGlintDirect()), pBuffer.getBuffer(pRenderType));
         }
     }
     

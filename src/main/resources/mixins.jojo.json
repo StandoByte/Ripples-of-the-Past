@@ -28,6 +28,7 @@
     "itemtracking.inventory.LockableLootTileEntityMixin",
     "itemtracking.inventory.HopperTileEntityMixin",
     "itemtracking.inventory.InventoryMixin",
+    "itemtracking.inventory.JukeboxTileEntityMixin",
     "itemtracking.ContainerSlotMixin",
     "itemtracking.projectile.BowItemMixin",
 	"itemtracking.projectile.CrossbowItemMixin",

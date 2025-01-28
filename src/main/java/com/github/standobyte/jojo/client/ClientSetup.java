@@ -117,6 +117,7 @@ import com.github.standobyte.jojo.client.render.item.RoadRollerBakedModel;
 import com.github.standobyte.jojo.client.render.item.generic.ItemISTERModelWrapper;
 import com.github.standobyte.jojo.client.render.item.standdisc.StandDiscISTERModel;
 import com.github.standobyte.jojo.client.render.item.standdisc.StandDiscOverrideList;
+import com.github.standobyte.jojo.client.render.rendertype.CustomRenderType;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.loopplayer.LoopPlayerHandler;
@@ -499,8 +500,8 @@ public class ClientSetup {
         mc.particleEngine.register(ModParticles.LIGHT_MODE_FLASH.get(),     LightModeFlashParticle.Factory::new);
 
         CustomParticlesHelper.saveSprites(mc);
-        // yep...
         CustomResources.initCustomResourceManagers(mc);
+        CustomRenderType.addExtraFixedBuffers(mc);
     }
 
     private static class SoulCloudParticleFactory extends CloudParticle.Factory {
