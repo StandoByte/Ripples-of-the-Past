@@ -248,6 +248,9 @@ public class TrackerItemStack {
     }
     
     public void copy(TrackerItemStack oldTracker) {
+        this.trackerUuid = oldTracker.trackerUuid;
+        this.trackingPlayerId = oldTracker.trackingPlayerId;
+        
         this.positionDimension = oldTracker.positionDimension;
         this.positionEntity = oldTracker.positionEntity;
         this.positionBlock = oldTracker.positionBlock;
@@ -257,7 +260,25 @@ public class TrackerItemStack {
     }
     
     public void clear() {
-        trackerUuid = null;
+        this.trackerUuid = null;
+        
+        this.trackingPlayerId = null;
+        
+        this.positionDimension = null;
+        this.positionEntity = OptionalInt.empty();
+        this.positionBlock = null;
+        this.containerBlockState = null;
+        this.itemStillThere = null;
+        this.itemState = null;
+    }
+    
+    public void moveToItem(ItemStack newItem, ServerWorld world) {
+        TrackerItemStack.getItemTracker(newItem).ifPresent(newTracker -> {
+            newTracker.copy(this);
+            SaveFileUtilCapProvider.getSaveFileCap(world.getServer()).getItemsTracker().updateTracker(newTracker.getTrackerId(), newTracker, world);
+        });
+//        forceOldItemNbtToSync();
+        this.clear();
     }
     
     public Vector3d markerPos(World world, float partialTick) {

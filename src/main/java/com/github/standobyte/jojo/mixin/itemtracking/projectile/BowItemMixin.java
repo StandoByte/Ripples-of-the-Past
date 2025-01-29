@@ -18,6 +18,7 @@ import net.minecraft.item.BowItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.ShootableItem;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 
 @Mixin(BowItem.class)
 public abstract class BowItemMixin extends ShootableItem {
@@ -38,6 +39,9 @@ public abstract class BowItemMixin extends ShootableItem {
                 tracker.setItemStillThereCheck(null);
                 if (arrowEntity instanceof ITrackedArrowEntity) {
                     ((ITrackedArrowEntity) arrowEntity).saveItemTrackerNBT(tracker.toNBT());
+                }
+                if (infinity) {
+                    tracker.moveToItem(projectileItem.copy(), (ServerWorld) world);
                 }
             }
         });

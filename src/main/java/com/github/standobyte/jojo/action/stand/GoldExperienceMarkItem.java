@@ -76,8 +76,8 @@ public class GoldExperienceMarkItem extends StandAction {
                     markedStack = heldItem;
                     ItemStack mainHandItem = user.getItemInHand(Hand.MAIN_HAND);
                     // keep the bow/crossbow in main hand
-                    if (!mainHandItem.isEmpty() && 
-                            mainHandItem.getItem() instanceof ShootableItem && ((ShootableItem) mainHandItem.getItem()).getAllSupportedProjectiles().test(heldItem)) {
+                    if (!mainHandItem.isEmpty()
+                            /*&& mainHandItem.getItem() instanceof ShootableItem && ((ShootableItem) mainHandItem.getItem()).getAllSupportedProjectiles().test(heldItem)*/) {
                         user.setItemInHand(Hand.OFF_HAND, ItemStack.EMPTY);
                         give = true;
                     }
