@@ -102,8 +102,8 @@ public class TrackerItemStack {
     /* when an item is being added to inventory, the original ItemStack's count is being taken from (to split the item between slots),
      * so we have to find the new ItemStack inside the inventory first
      */
-    public static Optional<TrackerItemStack> getItemTrackerInInventory(ItemStack originalItemStack, Stream<ItemStack> inventoryItems) {
-        return getItemTracker(originalItemStack, true).flatMap(oldTracker -> {
+    public static Optional<TrackerItemStack> getItemTrackerInInventory(ItemStack originalItemStack, Stream<ItemStack> inventoryItems, boolean allowEmpty) {
+        return getItemTracker(originalItemStack, allowEmpty).flatMap(oldTracker -> {
             UUID trackerId = oldTracker.getTrackerId();
             Optional<TrackerItemStack> newTracker = inventoryItems
                     .map(movedItem -> movedItem.getCapability(TrackerItemStackProvider.CAPABILITY).resolve().map(tracker -> {
