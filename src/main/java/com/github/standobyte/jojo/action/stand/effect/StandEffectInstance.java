@@ -144,7 +144,7 @@ public abstract class StandEffectInstance {
         setTargetEntity(null);
     }
     
-    protected void setTargetEntity(Entity target) {
+    public void setTargetEntity(Entity target) {
         if (this.target != target) {
             if (this.targetLiving != null) {
                 this.targetLiving.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.removeEffectTargetedBy(this));
