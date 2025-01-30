@@ -85,7 +85,7 @@ public class GECreatedLifeformEffect extends StandEffectInstance {
     }
     
     @Override
-    protected void setTargetEntity(Entity target) {
+    public void setTargetEntity(Entity target) {
         super.setTargetEntity(target);
         if (target != null) {
             if (target instanceof MobEntity && user != null) {

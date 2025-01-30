@@ -415,7 +415,7 @@ public class CDTurnIntoAngeloRockEffect extends StandEffectInstance {
     }
     
     @Override
-    protected void setTargetEntity(@Nullable Entity target) {
+    public void setTargetEntity(@Nullable Entity target) {
         Entity curTarget = getTarget();
         if (target == null && curTarget != null && !curTarget.isAlive()) {
             lastTargetPos = curTarget.blockPosition();

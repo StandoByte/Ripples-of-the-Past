@@ -512,6 +512,25 @@ public class GameplayEventHandler {
         VampirismUtil.consumeEnergyOnHeal(event);
     }
     
+    @SubscribeEvent()
+    public static void transferStandEffects(LivingConversionEvent.Post event) {
+        LivingEntity original = event.getEntityLiving();
+        LivingEntity newEntity = event.getOutcome();
+        original.revive(); // bruh
+        original.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(oldData -> {
+            List<StandEffectInstance> _standEffects = oldData.getEffectsTargetedBy();
+            if (!_standEffects.isEmpty()) {
+                // we need to make a deep copy, because changing the effects target removes the elements
+                // from the original list, which would throw ConcurrentModificationException in this case
+                List<StandEffectInstance> standEffects = new ArrayList<>(_standEffects);
+                for (StandEffectInstance effect : standEffects) {
+                    effect.setTargetEntity(newEntity);
+                }
+            }
+        });
+        original.remove(false);
+    }
+    
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void releaseStun(LivingConversionEvent.Post event) {
         if (event.getOutcome() instanceof MobEntity) {

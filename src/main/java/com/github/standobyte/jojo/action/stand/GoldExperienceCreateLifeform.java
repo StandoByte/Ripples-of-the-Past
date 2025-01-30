@@ -258,6 +258,9 @@ public class GoldExperienceCreateLifeform extends StandAction {
         Entity lifeFormCreated = type.create(world);
         CompoundNBT nbt = new CompoundNBT();
         nbt.putString("DeathLootTable", "empty");
+        if (!world.dimensionType().piglinSafe()) {
+            nbt.putBoolean("IsImmuneToZombification", true);
+        }
         lifeFormCreated.load(nbt);
         
         if (lifeFormCreated instanceof MobEntity) {
