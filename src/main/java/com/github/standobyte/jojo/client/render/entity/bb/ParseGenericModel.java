@@ -160,6 +160,7 @@ public class ParseGenericModel {
                     if (face.vertices.length > 2) {
                         visitedVertices.clear();
                         for (String vertex : face.vertices) {
+                            // using an ordered set in case a mesh face uses the same vertex twice for whatever f-ing reason
                             visitedVertices.add(vertex);
                         }
                         Vertex[] verticesArr = new Vertex[visitedVertices.size()];
