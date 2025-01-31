@@ -55,4 +55,13 @@ public class CustomRegistryHolder<V extends IForgeRegistryEntry<V>> {
         return ((ForgeRegistry<V>) getRegistry()).getID(regName);
     }
     
+    /**
+     * @deprecated A long time ago I made two methods that do the same thing on accident. 
+     * Please use {@link CustomRegistryHolder#getValue(ResourceLocation)} instead.
+     */
+    @Deprecated
+    public V fromId(ResourceLocation id) {
+        return getValue(id);
+    }
+    
 }

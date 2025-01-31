@@ -297,7 +297,7 @@
   "advancements.jojo.pillarman_evolve.description": "Use a Stone Mask to unleash your potential",
   "advancements.jojo.pillarman_evolve_aja.title": "More... I Need More Power!",
   "advancements.jojo.pillarman_evolve_aja.description": "Combine a Stone Mask with an Aja Red Stone and use it",
-  "advancements.jojo.mask_suicide.title": "A Little Too Much?",
+  "advancements.jojo.mask_suicide.title": "Primitive Human...",
   "advancements.jojo.mask_suicide.description": "Use a Stone Mask with Aja Red Stone while not being a Pillar Man",
   "advancements.jojo.kill_pillarman.title": "Die with the Power You Stole!",
   "advancements.jojo.kill_pillarman.description": "Destroy one of the most powerful Pillar Men",
@@ -689,7 +689,7 @@
   "jojo.options.client.hud": "HUD...",
   "jojo.options.client.stand": "Stand...",
   "jojo.options.client.hamon": "Hamon...",
-  "jojo.options.client.misc": "Misc...",
+  "jojo.options.client.vampirism": "Vampirism...",
   "jojo.config.client.barsPosition": "Bars position",
   "jojo.config.client.barsPosition.tooltip": "Position of Energy, Stamina and Resolve bars in the HUD.",
   "jojo.config.client.hotbarsPosition": "Hotbars position",
@@ -729,6 +729,8 @@
   "jojo.config.client.firstPersonHamonAura.tooltip": "Render Hamon aura particles around the player's hand",
   "jojo.config.client.hamonAuraBlur": "Hamon aura blur",
   "jojo.config.client.hamonAuraBlur.tooltip": "Blur Hamon aura particles",
+  "jojo.config.client.vampireGlowingEyes": "Glowing eyes",
+  "jojo.config.client.vampireGlowingEyes.tooltip": "Red eyes glowing in the dark in 3rd person when you have 80% or more energy",
   
 
   "stand.unknown": "Unknown Stand: %s",

@@ -15,6 +15,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonPrimitive;
 
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.JSONUtils;
@@ -49,6 +50,13 @@ public class ActionConfigSerialized<A extends Action<?>> {
             }
         });
         
+        if (action.holdDurationToFire > 0) {
+            json.add("holdDurationToFire", new JsonPrimitive(action.holdDurationToFire));
+        }
+        if (action.cooldown > 0) {
+            json.add("cooldown", new JsonPrimitive(action.cooldown));
+        }
+        
         return json;
     }
     
@@ -81,7 +89,11 @@ public class ActionConfigSerialized<A extends Action<?>> {
         }
         for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
             String fieldName = entry.getKey();
-            Field field = configFieldsCacheClient.computeIfAbsent(fieldName, name -> FieldUtils.getField(action.getClass(), name, true));
+            Field field = configFieldsCacheClient.computeIfAbsent(fieldName, name -> {
+                Field f = FieldUtils.getField(action.getClass(), name, true /* doesn't work with public final fields */);
+                f.setAccessible(true);
+                return f;
+            });
             if (field != null) {
                 JsonElement jsonElement = entry.getValue();
                 Object value = getGson().fromJson(jsonElement, field.getType());

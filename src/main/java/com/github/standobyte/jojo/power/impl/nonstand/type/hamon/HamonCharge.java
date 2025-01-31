@@ -57,6 +57,7 @@ public class HamonCharge {
             for (LivingEntity target : entities) {
                 if (!target.is(chargedEntity) && target.isAlive() && !target.getUUID().equals(hamonUserId)) {
                     Entity user = getUser((ServerWorld) world);
+                    LivingEntity userLiving = user instanceof LivingEntity ? (LivingEntity) user : null;
                     float dmgAmount = this.damage;
                     if (!doLargeChargeDmg) {
                         dmgAmount *= 0.1F;
@@ -67,13 +68,11 @@ public class HamonCharge {
                         if (!target.isAlive() && user instanceof ServerPlayerEntity) {
                             ModCriteriaTriggers.HAMON_CHARGE_KILL.get().trigger((ServerPlayerEntity) user, target, chargedEntity, chargedBlock);
                         }
-                        if (!gavePoints) {
-                            if (user instanceof LivingEntity) {
-                                INonStandPower.getNonStandPowerOptional((LivingEntity) user).resolve()
-                                .flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get())).ifPresent(hamon -> {
-                                    hamon.hamonPointsFromAction(HamonStat.STRENGTH, energySpent);
-                                });
-                            }
+                        if (!gavePoints && userLiving != null) {
+                            INonStandPower.getNonStandPowerOptional(userLiving).resolve()
+                            .flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get())).ifPresent(hamon -> {
+                                hamon.hamonPointsFromAction(HamonStat.STRENGTH, energySpent);
+                            });
                         }
                         
                         Vector3d chargePos = null;
@@ -95,17 +94,15 @@ public class HamonCharge {
                                     target.knockback(0.75F, knockbackVec.x, knockbackVec.z);
                                 }
                                 // If Hamon Shock is learned Entity Infuse will shock aswell
-                                boolean isLiving = HamonUtil.isLiving(target);
-                                INonStandPower.getNonStandPowerOptional((LivingEntity) user).resolve()
-                                .flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get())).ifPresent(hamon -> {
-                                    if (hamon.isSkillLearned(ModHamonSkills.HAMON_SHOCK.get())) {
-                                        if (isLiving && !ModStatusEffects.isStunned(target)) {
-                                            if (chargedEntity != null && chargedEntity instanceof LivingEntity) {
-                                                target.addEffect(new EffectInstance(ModStatusEffects.HAMON_SHOCK.get(), 30, 0, false, false));
-                                            }
+                                if (userLiving != null && HamonUtil.isLiving(target) && !ModStatusEffects.isStunned(target)
+                                        && chargedEntity instanceof LivingEntity) {
+                                    INonStandPower.getNonStandPowerOptional(userLiving).resolve()
+                                    .flatMap(power -> power.getTypeSpecificData(ModPowers.HAMON.get())).ifPresent(hamon -> {
+                                        if (hamon.isSkillLearned(ModHamonSkills.HAMON_SHOCK.get())) {
+                                            target.addEffect(new EffectInstance(ModStatusEffects.HAMON_SHOCK.get(), 30, 0, false, false));
                                         }
-                                    }
-                                });
+                                    });
+                                }
                             }
                             if (chargedBlock != null) {
                                 if (doLargeChargeDmg && world.getBlockState(chargedBlock).getBlock() != Blocks.COBWEB) {

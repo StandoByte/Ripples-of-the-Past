@@ -442,7 +442,7 @@ public class MCUtil {
         ChunkManager chunkMap = ((ServerWorld) entity.level).getChunkSource().chunkMap;
         Int2ObjectMap<ChunkManager.EntityTracker> entityMap = chunkMap.entityMap;
         ChunkManager.EntityTracker tracker = entityMap.get(entity.getId());
-        return tracker.seenBy;
+        return tracker != null ? tracker.seenBy : Collections.emptySet();
     }
     
     
@@ -1083,6 +1083,10 @@ public class MCUtil {
                         pos.x, pos.y, pos.z, motion.x, motion.y + 0.05D, motion.z);
             }
         }
+    }
+    
+    public static AttributeModifier modifierWithAmount(AttributeModifier modifier, double amount) {
+        return new AttributeModifier(modifier.getId(), modifier.getName(), amount, modifier.getOperation());
     }
     
 

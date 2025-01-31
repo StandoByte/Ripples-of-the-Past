@@ -12,11 +12,12 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import org.apache.commons.lang3.ArrayUtils;
+
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.render.MeshModelBox;
 import com.github.standobyte.jojo.client.render.MeshModelBox.Builder.MeshFaceBuilder;
 import com.github.standobyte.jojo.util.general.MathUtil;
-import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
@@ -155,25 +156,48 @@ public class ParseGenericModel {
                     MeshFace face = meshFace.getValue();
                     if (face.vertices.length > 2) {
                         // FIXME mesh face normal (cross product)
-                        MeshFaceBuilder faceBuilder = meshBuilder.startFaceCalcNormal();
-                        
-                        for (int i = 0; i < face.vertices.length; ++i) {
-                            // FIXME mesh vertices order
+                        Vertex[] verticesArr = new Vertex[face.vertices.length];
+                        for (int i = 0; i < verticesArr.length; ++i) {
                             String vertexId = face.vertices[i];
-                            
-                            float[] vertexPos = vertices.get(vertexId);
-                            float[] vertexUv = face.uv.get(vertexId);
+                            verticesArr[i] = new Vertex(vertices.get(vertexId), face.uv.get(vertexId));
+                        }
+                        sortVertices(verticesArr);
+                        
+                        MeshFaceBuilder faceBuilder = meshBuilder.startFaceCalcNormal();
+                        for (Vertex vertex : verticesArr) {
                             faceBuilder.withVertex(
-                                    vertexPos[0] + origin[0] - parentOrigin[0], 
-                                    vertexPos[1] + origin[1] - parentOrigin[1], 
-                                    vertexPos[2] + origin[2] - parentOrigin[2], 
-                                    vertexUv[0], vertexUv[1]);
+                                    vertex.pos[0] + origin[0] - parentOrigin[0], 
+                                    vertex.pos[1] + origin[1] - parentOrigin[1], 
+                                    vertex.pos[2] + origin[2] - parentOrigin[2], 
+                                    vertex.uv[0], vertex.uv[1]);
                         }
                         faceBuilder.createFace();
                     }
                 }
                 
                 return meshBuilder.buildCube();
+            }
+        }
+        
+        // record moment
+        private static class Vertex {
+            final float[] pos;
+            final float[] uv;
+            
+            Vertex(final float[] pos, final float[] uv) {
+                this.pos = pos;
+                this.uv = uv;
+            }
+        }
+        
+        private static void sortVertices(Vertex[] vertices) {
+            if (vertices.length < 4) return;
+
+            if (MeshVerticesHelper.magicFunction(vertices[1].pos, vertices[2].pos, vertices[0].pos, vertices[3].pos)) {
+                ArrayUtils.swap(vertices, 0, 1);
+                ArrayUtils.swap(vertices, 0, 2);
+            } else if (MeshVerticesHelper.magicFunction(vertices[0].pos, vertices[1].pos, vertices[2].pos, vertices[3].pos)) {
+                ArrayUtils.swap(vertices, 1, 2);
             }
         }
         

@@ -25,7 +25,7 @@ public class ParseGeckoAnims {
         Animation.Builder builder = Animation.Builder.create(lengthSecs);
 
         boolean loop = false;
-        boolean holdOnLastFrame = false; // TODO gecko animation parsing
+        boolean holdOnLastFrame = false;
         JsonElement loopJson = animJson.get("loop");
         if (loopJson != null && loopJson.isJsonPrimitive()) {
             String loopMode = loopJson.getAsString();
@@ -54,56 +54,64 @@ public class ParseGeckoAnims {
     }
     
     private static void parseKeyframes(Animation.Builder anim, JsonObject boneTfJson, String targetName, Transformation.Target target, String boneName) {
-        JsonObject keyframesJson = null;
         JsonElement element = boneTfJson.get(targetName);
-        if (element != null) {
-            if (element.isJsonObject()) {
-                keyframesJson = element.getAsJsonObject();
-            }
-            else if (element.isJsonArray()) {
-                keyframesJson = new JsonObject();
-                keyframesJson.add("vector", element.getAsJsonArray());
-            }
-        }
+        if (element == null) return;
+        Float2ObjectMap<KeyframeWithQuery> timeline = new Float2ObjectArrayMap<>();
         
-        if (keyframesJson != null) {
-            Float2ObjectMap<KeyframeWithQuery> timeline = new Float2ObjectArrayMap<>();
+        if (element.isJsonObject()) {
+            JsonObject keyframesJson = element.getAsJsonObject();
             for (Map.Entry<String, JsonElement> rotationJson : keyframesJson.entrySet()) {
                 float time;
-                JsonObject rotation;
+                JsonElement rotation;
                 try {
                     time = Float.parseFloat(rotationJson.getKey());
-                    rotation = rotationJson.getValue().getAsJsonObject();
+                    rotation = rotationJson.getValue();
                 }
-                catch (NumberFormatException singleKeyframe) {
+                catch (NumberFormatException singleKeyframeFormat) {
                     time = 0;
-                    rotation = keyframesJson; // in this case this object is not actually a json object mapping time to keyframes, but the keyframe itself
+                    rotation = keyframesJson;
                 }
-                
-                JsonElement rotVecJsonElem = rotation.get("vector");
-                if (rotVecJsonElem == null && rotation.has("post")) rotVecJsonElem = rotation.get("post").getAsJsonObject().get("vector");
-                JsonArray rotVecJson = rotVecJsonElem.getAsJsonArray();
-                
-                KeyframeWithQuery rotVec = KeyframeWithQuery.parseJsonVec(rotVecJson);
-                
-                String easingName = Optional.ofNullable(rotation.get("easing"))
-                        .map(JsonElement::getAsString)
-                        .orElse(rotation.has("lerp_mode") ? rotation.get("lerp_mode").getAsString() : "linear");
-                double[] easingArgs = Optional.ofNullable(rotation.get("easingArgs"))
-                        .map(JsonElement::getAsJsonArray)
-                        .map(json -> {
-                            return StreamSupport.stream(json.spliterator(), false)
-                            .mapToDouble(JsonElement::getAsDouble)
-                            .toArray();
-                        })
-                        .orElse(new double[0]);
-                Interpolation lerp = Interpolations.getLerpMode(easingName, easingArgs);
-                timeline.put(time, rotVec.withKeyframe(time, lerp));
+                parseKeyframe(timeline, time, rotation);
             }
-            
-            KeyframeWithQuery[] keyframes = keyframesToArray(timeline, KeyframeWithQuery[]::new);
-            anim.addBoneAnimation(boneName, new Transformation(target, keyframes));
         }
+        else {
+            parseKeyframe(timeline, 0, element);
+        }
+        
+        KeyframeWithQuery[] keyframes = keyframesToArray(timeline, KeyframeWithQuery[]::new);
+        anim.addBoneAnimation(boneName, new Transformation(target, keyframes));
+    }
+    
+    private static void parseKeyframe(Float2ObjectMap<KeyframeWithQuery> keyframesTimeline, float time, JsonElement keyframeValue) {
+        Optional<JsonObject> keyframeObj = keyframeValue.isJsonObject() ? Optional.of(keyframeValue.getAsJsonObject()) : Optional.empty();
+        
+        JsonArray rotVecJson = keyframeObj.map(keyframe -> {
+            JsonElement rotVecJsonElem = keyframe.get("vector");
+            if (rotVecJsonElem == null && keyframe.has("post")) rotVecJsonElem = keyframe.get("post").getAsJsonObject().get("vector");
+            return rotVecJsonElem.getAsJsonArray();
+        }).orElseGet(() -> keyframeValue.isJsonArray() ? keyframeValue.getAsJsonArray() : null);
+        
+        String easingName = keyframeObj.map(keyframe -> {
+            if (keyframe.has("easing")) {
+                return keyframe.get("easing").getAsString();
+            }
+            if (keyframe.has("lerp_mode")) {
+                return keyframe.get("lerp_mode").getAsString();
+            }
+            return null;
+        }).orElse("linear");
+        double[] easingArgs = keyframeObj.map(keyframe -> keyframe.get("easingArgs"))
+                .map(JsonElement::getAsJsonArray)
+                .map(json -> {
+                    return StreamSupport.stream(json.spliterator(), false)
+                    .mapToDouble(JsonElement::getAsDouble)
+                    .toArray();
+                })
+                .orElse(new double[0]);
+        
+        KeyframeWithQuery rotVec = KeyframeWithQuery.parseJsonVec(rotVecJson);
+        Interpolation lerp = Interpolations.getLerpMode(easingName, easingArgs);
+        keyframesTimeline.put(time, rotVec.withKeyframe(time, lerp));
     }
     
     public static <T> T[] keyframesToArray(Float2ObjectMap<T> parsedTimeline, IntFunction<T[]> arrayConstructor) {

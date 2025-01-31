@@ -17,14 +17,17 @@ import net.minecraft.util.HandSide;
 
 public class PlayerClientBroadcastedSettings {
     public HandSide standSide = HandSide.RIGHT;
+    public boolean vampireGlowingEyes = true;
     
     
     public void toBuf(PacketBuffer buf) {
         buf.writeEnum(standSide);
+        buf.writeBoolean(vampireGlowingEyes);
     }
     
     public void fromBuf(PacketBuffer buf) {
         standSide = buf.readEnum(HandSide.class);
+        vampireGlowingEyes = buf.readBoolean();
     }
     
     
