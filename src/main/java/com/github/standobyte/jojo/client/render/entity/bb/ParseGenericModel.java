@@ -5,9 +5,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
@@ -146,6 +148,7 @@ public class ParseGenericModel {
                 int texture;
             }
 
+            private static final Set<String> visitedVertices = new LinkedHashSet<>(4);
             @Override
             public ModelRenderer.ModelBox makeCube(float[] parentOrigin, int texWidth, int texHeight) {
                 if (origin == null) origin = new float[] { 0, 0, 0 };
@@ -155,11 +158,14 @@ public class ParseGenericModel {
                 for (Map.Entry<String, MeshFace> meshFace : faces.entrySet()) {
                     MeshFace face = meshFace.getValue();
                     if (face.vertices.length > 2) {
-                        // FIXME mesh face normal (cross product)
-                        Vertex[] verticesArr = new Vertex[face.vertices.length];
-                        for (int i = 0; i < verticesArr.length; ++i) {
-                            String vertexId = face.vertices[i];
-                            verticesArr[i] = new Vertex(vertices.get(vertexId), face.uv.get(vertexId));
+                        visitedVertices.clear();
+                        for (String vertex : face.vertices) {
+                            visitedVertices.add(vertex);
+                        }
+                        Vertex[] verticesArr = new Vertex[visitedVertices.size()];
+                        int i = 0;
+                        for (String vertexId : visitedVertices) {
+                            verticesArr[i++] = new Vertex(vertices.get(vertexId), face.uv.get(vertexId));
                         }
                         sortVertices(verticesArr);
                         
