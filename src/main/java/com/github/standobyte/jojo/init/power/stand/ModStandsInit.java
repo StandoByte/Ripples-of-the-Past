@@ -871,7 +871,7 @@ public class ModStandsInit {
             new EntityStandRegistryObject<>("gold_experience", 
                     STAND_TYPES, 
                     () -> new EntityStandType.Builder<>()
-                    .color(0xD88F1F)
+                    .color(0xD7933B)
                     .storyPartName(StoryPart.GOLDEN_WIND.getName())
                     .leftClickHotbar(
                             GOLD_EXPERIENCE_PUNCH.get(), 
