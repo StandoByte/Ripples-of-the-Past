@@ -14,6 +14,8 @@ import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.itemtracking.SidedItemTrackerMap;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.TrackedItemPacket;
+import com.github.standobyte.jojo.util.ForgeBusEventSubscriber;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.block.BlockState;
 import net.minecraft.block.JukeboxBlock;
@@ -33,6 +35,7 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
+import net.minecraftforge.common.util.Constants;
 
 /**
  * Currently item stacks are being tracked in:
@@ -67,7 +70,9 @@ public class TrackerItemStack {
     public TrackerItemStack(ItemStack itemStack, UUID trackerId) {
         this.itemStack = itemStack;
         this.trackerUuid = trackerId;
+        updateSyncedTag();
     }
+    
     
     @Nullable
     public static TrackerItemStack setTracked(ItemStack itemStack, ServerPlayerEntity player) {
@@ -83,6 +88,7 @@ public class TrackerItemStack {
             if (cap.trackerUuid == null) {
                 cap.trackerUuid = trackerId;
                 cap.trackingPlayerId = player.getUUID();
+                cap.updateSyncedTag();
                 SidedItemTrackerMap serverItemTracking = SaveFileUtilCapProvider.getSaveFileCap(player).getItemsTracker();
                 serverItemTracking.addServerTrackedId(cap.trackerUuid);
                 serverItemTracking.updateTracker(cap.trackerUuid, cap, player.level);
@@ -90,6 +96,7 @@ public class TrackerItemStack {
             return cap;
         }).orElse(null);
     }
+    
     
     public static Optional<TrackerItemStack> getItemTracker(ItemStack itemStack) {
         return getItemTracker(itemStack, false);
@@ -260,6 +267,7 @@ public class TrackerItemStack {
         this.containerBlockState = oldTracker.containerBlockState;
         this.itemStillThere = oldTracker.itemStillThere;
         this.itemState = oldTracker.itemState;
+        updateSyncedTag();
     }
     
     public void clear() {
@@ -273,6 +281,8 @@ public class TrackerItemStack {
         this.containerBlockState = null;
         this.itemStillThere = null;
         this.itemState = null;
+        updateSyncedTag();
+//        forceItemNbtToSync();
     }
     
     public void moveToItem(ItemStack newItem, ServerWorld world) {
@@ -280,7 +290,6 @@ public class TrackerItemStack {
             newTracker.copy(this);
             SaveFileUtilCapProvider.getSaveFileCap(world.getServer()).getItemsTracker().updateTracker(newTracker.getTrackerId(), newTracker, world);
         });
-//        forceOldItemNbtToSync();
         this.clear();
     }
     
@@ -316,9 +325,13 @@ public class TrackerItemStack {
     public UUID getTrackerId() {
         return trackerUuid;
     }
-    
+
     
     public INBT toNBT() {
+        return toNBT(true);
+    }
+    
+    public INBT toNBT(boolean savePlayerId) {
         CompoundNBT nbt = new CompoundNBT();
         if (trackerUuid != null) {
             nbt.putUUID("Id", trackerUuid);
@@ -331,12 +344,15 @@ public class TrackerItemStack {
     
     public void fromNBT(INBT inbt) {
         CompoundNBT nbt = (CompoundNBT) inbt;
+        trackerUuid = null;
+        trackingPlayerId = null;
         if (nbt.hasUUID("Id")) {
             trackerUuid = nbt.getUUID("Id");
             if (nbt.hasUUID("Player")) {
                 trackingPlayerId = nbt.getUUID("Player");
             }
         }
+        updateSyncedTag();
     }
     
     
@@ -347,5 +363,50 @@ public class TrackerItemStack {
         STUCK_KNIFE,
         BLOCK_IS_ITEM,
         BLOCK_HAS_ITEM
+    }
+    
+    
+    // the shit below is cursed, but it seems like the only way to get this shit to sync properly from remote servers to the client
+    // i hate hacking into forge's systems, but i hate the implementation of item capabilities more
+    
+    private static final String CAP_NBT_KEY = ForgeBusEventSubscriber.ITEM_TRACK_CAP.toString();
+    private void updateSyncedTag() {
+        if (trackerUuid == null) {
+            CompoundNBT itemNBT = itemStack.getTag();
+            if (itemNBT != null && !itemNBT.isEmpty()) {
+                MCUtil.nbtGetCompoundOptional(itemNBT, "ForgeCaps").ifPresent(capsNBT -> {
+                    if (capsNBT.contains(CAP_NBT_KEY)) {
+                        capsNBT.remove(CAP_NBT_KEY);
+                        if (capsNBT.isEmpty()) {
+                            itemNBT.remove("ForgeCaps");
+                        }
+                    }
+                });
+                itemNBT.remove("ReadCapOnSet");
+                if (itemNBT.isEmpty()) {
+                    itemStack.setTag(null); // so that this stack is once again stackable
+                }
+            }
+        }
+        else {
+            CompoundNBT itemNBT = itemStack.getOrCreateTag();
+            CompoundNBT capsNBT = MCUtil.nbtGetOrCreateCompound(itemNBT, "ForgeCaps");
+            capsNBT.put(CAP_NBT_KEY, this.toNBT(false));
+            setDeserializeForgeCaps(itemNBT);
+        }
+    }
+    
+    /**
+     * Is called on the server to let the client know that we want to deserialize the ForgeCaps tag (item tracking) too
+     */
+    public static void setDeserializeForgeCaps(CompoundNBT itemTag) {
+        itemTag.putByte("ReadCapOnSet", (byte) 0);
+    }
+    
+    /**
+     * Is intended as a check for when the ItemStack is deserialized on client side, to tell if we need to also deserialize ForgeCaps
+     */
+    public static boolean deserializesForgeCaps(CompoundNBT itemTag) {
+        return itemTag != null && itemTag.contains("ReadCapOnSet") && itemTag.contains("ForgeCaps", Constants.NBT.TAG_COMPOUND);
     }
 }

@@ -1,5 +1,7 @@
 package com.github.standobyte.jojo.mixin.itemtracking;
 
+import javax.annotation.Nullable;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -13,9 +15,16 @@ import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack.KnownIte
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.item.ItemStack;
+import net.minecraft.nbt.CompoundNBT;
+import net.minecraftforge.common.capabilities.CapabilityProvider;
 
 @Mixin(ItemStack.class)
-public class ItemStackMixin {
+public abstract class ItemStackMixin extends CapabilityProvider<ItemStack> {
+    
+    protected ItemStackMixin(Class<ItemStack> baseClass) {
+        super(baseClass);
+    }
+
     @Shadow private Entity entityRepresentation;
     
     @Inject(method = "setEntityRepresentation", at = @At("HEAD"))
@@ -41,5 +50,12 @@ public class ItemStackMixin {
                 tracker.copy(oldTracker);
             });
         });
+    }
+    
+    @Inject(method = "setTag", at = @At("TAIL"))
+    public void onSetTag(@Nullable CompoundNBT tag, CallbackInfo ci) {
+        if (TrackerItemStack.deserializesForgeCaps(tag)) {
+            deserializeCaps(tag.getCompound("ForgeCaps"));
+        }
     }
 }

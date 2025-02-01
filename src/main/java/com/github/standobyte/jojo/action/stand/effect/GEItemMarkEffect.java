@@ -113,7 +113,6 @@ public class GEItemMarkEffect extends StandEffectInstance {
     }
     
     
-    // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! item tracker capability isn't synced from a remote server
     public static boolean isItemMarked(ItemStack item, LivingEntity player) {
         return TrackerItemStack.getItemTracker(item).flatMap(tracker -> {
             if (tracker.isTracked()) {

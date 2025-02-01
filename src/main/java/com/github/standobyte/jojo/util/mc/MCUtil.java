@@ -259,6 +259,15 @@ public class MCUtil {
         return Optional.empty();
     }
     
+    public static CompoundNBT nbtGetOrCreateCompound(CompoundNBT nbt, String key) {
+        if (nbt.contains(key, getNbtId(CompoundNBT.class))) {
+            return nbt.getCompound(key);
+        }
+        CompoundNBT element = new CompoundNBT();
+        nbt.put(key, element);
+        return element;
+    }
+    
     public static Optional<ListNBT> nbtGetList(CompoundNBT nbt, String key, Class<? extends INBT> nbtClass) {
         if (nbt.contains(key, getNbtId(ListNBT.class))) {
             return Optional.of(nbt.getList(key, getNbtId(nbtClass)));
