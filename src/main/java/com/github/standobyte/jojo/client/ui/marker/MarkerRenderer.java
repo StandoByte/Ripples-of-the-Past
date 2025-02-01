@@ -175,12 +175,16 @@ public abstract class MarkerRenderer {
         matrixStack.last().normal().setIdentity(); 
         matrixStack.last().normal().mul(Vector3f.XP.rotationDegrees(mc.gameRenderer.getMainCamera().getXRot() - 90));
         matrixStack.last().normal().mul(Vector3f.YP.rotationDegrees(45));
+        matrixStack.last().normal().mul(Vector3f.ZP.rotationDegrees(45));
 
-        RenderSystem.disableDepthTest();
+//        RenderSystem.disableDepthTest();
+//        RenderSystem.disableCull();
         IRenderTypeBuffer.Impl buffer = mc.renderBuffers().bufferSource();
         // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! the item model isn't rendered behind blocks/entities
         itemRenderer.renderStatic(item, ItemCameraTransforms.TransformType.GUI, 
                 ClientUtil.MAX_MODEL_LIGHT, OverlayTexture.NO_OVERLAY, matrixStack, buffer);
+//        RenderSystem.enableDepthTest();
+//        RenderSystem.enableCull();
         
         matrixStack.popPose();
         buffer.endBatch();

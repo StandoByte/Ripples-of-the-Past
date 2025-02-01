@@ -1,5 +1,8 @@
 package com.github.standobyte.jojo.action.stand;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ui.screen.stand.ge.ChooseLifeformScreen;
@@ -32,6 +35,8 @@ import net.minecraft.entity.monster.piglin.AbstractPiglinEntity;
 import net.minecraft.entity.passive.AmbientEntity;
 import net.minecraft.entity.passive.GolemEntity;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.Util;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ServerWorld;
 
@@ -109,7 +114,8 @@ public class GoldExperienceChooseLifeform extends StandAction {
                 return false;
             }
             
-            if (DISABLE_SUMMON_MANUALLY.contains(entity.getType().getRegistryName())) {
+            ResourceLocation typeId = entity.getType().getRegistryName();
+            if (DISABLE_SUMMON_MANUALLY_NAMESPACES.contains(typeId.getNamespace()) || DISABLE_SUMMON_MANUALLY.contains(typeId)) {
                 return false;
             }
             
@@ -118,6 +124,11 @@ public class GoldExperienceChooseLifeform extends StandAction {
         
         return false;
     }
+    
+    private static final Set<String> DISABLE_SUMMON_MANUALLY_NAMESPACES = Util.make(new HashSet<>(), set -> {
+        set.add("rotp_zbc");
+        set.add("rotp_harvest");
+    });
     
     private static final ResLocSet DISABLE_SUMMON_MANUALLY = new ResLocSet()
             .add("twilightforest", 
