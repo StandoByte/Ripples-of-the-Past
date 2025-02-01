@@ -229,10 +229,10 @@ public abstract class StandEffectInstance {
         return nbt;
     }
     
-    public static StandEffectInstance fromNBT(CompoundNBT nbt) {
+    public static StandEffectInstance fromNBT(CompoundNBT nbt, World world) {
         StandEffectType<?> effectType = JojoCustomRegistries.STAND_EFFECTS.getRegistry().getValue(new ResourceLocation(nbt.getString("Type")));
         if (effectType == null) return null;
-        StandEffectInstance effect = effectType.create();
+        StandEffectInstance effect = effectType.create(world);
         effect.tickCount = nbt.getInt("TickCount");
         if (nbt.hasUUID("Target")) {
             effect.targetUUID = nbt.getUUID("Target");

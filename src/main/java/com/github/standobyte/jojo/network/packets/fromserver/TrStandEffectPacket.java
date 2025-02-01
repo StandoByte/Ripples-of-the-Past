@@ -112,7 +112,7 @@ public class TrStandEffectPacket {
                 IStandPower.getStandPowerOptional(livingEntity).ifPresent(stand -> {
                     switch (msg.packetType) {
                     case ADD:
-                        StandEffectInstance newEffect = msg.effectFactory.create().withId(msg.effectId).withStand(stand);
+                        StandEffectInstance newEffect = msg.effectFactory.create(entity.level).withId(msg.effectId).withStand(stand);
                         if (msg.targetId != -1) {
                             newEffect.withTargetEntityId(msg.targetId);
                         }

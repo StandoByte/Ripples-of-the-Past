@@ -90,6 +90,9 @@ public class GEItemMarkEffect extends StandEffectInstance {
     protected void readAdditionalSaveData(CompoundNBT nbt) {
         if (nbt.hasUUID("ItemTracker")) {
             itemTrackerId = nbt.getUUID("ItemTracker");
+            if (world == null) {
+                throw new IllegalStateException();
+            }
             SidedItemTrackerMap serverItemTracking = SaveFileUtilCapProvider.getSaveFileCap((ServerWorld) world).getItemsTracker();
             serverItemTracking.addServerTrackedId(itemTrackerId);
         }

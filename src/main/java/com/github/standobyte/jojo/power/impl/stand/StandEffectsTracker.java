@@ -28,6 +28,7 @@ import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.ListNBT;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.world.World;
 
 public class StandEffectsTracker {
     public static final AtomicInteger EFFECTS_COUNTER = new AtomicInteger();
@@ -158,7 +159,7 @@ public class StandEffectsTracker {
             return effect.get();
         }
         else {
-            T newEffect = effectType.create();
+            T newEffect = effectType.create(standPower.getUser().level);
             addEffect(newEffect.withTarget(target));
             return newEffect;
         }
@@ -202,8 +203,9 @@ public class StandEffectsTracker {
     
     public void fromNBT(CompoundNBT nbt) {
         if (nbt.contains("Effects", MCUtil.getNbtId(ListNBT.class))) {
+            World world = standPower.getUser().level;
             nbt.getList("Effects", MCUtil.getNbtId(CompoundNBT.class)).forEach(effectNBT -> {
-                StandEffectInstance effect = StandEffectInstance.fromNBT((CompoundNBT) effectNBT);
+                StandEffectInstance effect = StandEffectInstance.fromNBT((CompoundNBT) effectNBT, world);
                 if (effect != null) {
                     putEffectInstance(effect.withId(EFFECTS_COUNTER.incrementAndGet()));
                 }
