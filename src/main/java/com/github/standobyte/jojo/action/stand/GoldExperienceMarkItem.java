@@ -38,7 +38,6 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
-import net.minecraft.item.ShootableItem;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.vector.Vector3d;
@@ -146,16 +145,15 @@ public class GoldExperienceMarkItem extends StandAction {
     
     public static List<Pair<GEItemMarkEffect, Vector3d>> getTargets(IStandPower stand, LivingEntity player) {
         double range = ModStandsInit.GOLD_EXPERIENCE_CREATE_LIFEFORM.get().maxLifeformDistance;
+        float partialTick = player.level.isClientSide() ? ClientUtil.getPartialTick() : 1;
         List<Pair<GEItemMarkEffect, Vector3d>> targets = stand.getContinuousEffects()
                 .getEffects()
                 .filter(effect -> effect.effectType == ModStandEffects.GE_ITEM_MARK.get())
                 .map(effect -> (GEItemMarkEffect) effect)
                 .filter(effect -> effect.getItemTracker(true) != null && effect.getItemTracker(false).getAtEntity(player.level) != player)
-                .map(effect -> Pair.of(effect, effect.getItemTracker(false).markerPos(player.level, ClientUtil.getPartialTick())))
+                .map(effect -> Pair.of(effect, effect.getItemTracker(false).markerPos(player.level, partialTick)))
                 .filter(entry -> entry.getRight() != null && entry.getRight().distanceToSqr(player.position()) < range * range)
                 .collect(Collectors.toList());
-//        return targets;
-        // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! make sure only one marked item can exist at the same time
         return targets.size() > 1 ? Collections.singletonList(targets.get(targets.size() - 1)) : targets;
     }
     

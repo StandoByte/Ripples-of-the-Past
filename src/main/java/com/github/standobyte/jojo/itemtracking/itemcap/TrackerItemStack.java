@@ -9,6 +9,7 @@ import java.util.stream.Stream;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.itemtracking.SidedItemTrackerMap;
 import com.github.standobyte.jojo.network.PacketManager;
@@ -164,6 +165,7 @@ public class TrackerItemStack {
     }
     
     public void setAtEntity(int entityId, World world, KnownItemState itemState) {
+        JojoMod.LOGGER.debug("entity {}", entityId);
         this.positionEntity = OptionalInt.of(entityId);
         this.positionBlock = null;
         this.containerBlockState = null;
@@ -175,6 +177,7 @@ public class TrackerItemStack {
     }
     
     public void setAtBlockPos(BlockPos blockPos, World world, KnownItemState itemState) {
+        JojoMod.LOGGER.debug("block {}", blockPos);
         this.positionEntity = OptionalInt.empty();
         this.positionBlock = blockPos;
         this.containerBlockState = world.getBlockState(blockPos);
@@ -190,6 +193,7 @@ public class TrackerItemStack {
     }
     
     public void setDisappeared(ServerWorld world) {
+        JojoMod.LOGGER.debug("a gde");
         this.positionEntity = OptionalInt.empty();
         this.positionBlock = null;
         this.containerBlockState = null;
@@ -284,7 +288,14 @@ public class TrackerItemStack {
         if (positionEntity.isPresent()) {
             Entity entity = world.getEntity(positionEntity.getAsInt());
             if (entity != null) {
-                return entity.getPosition(partialTick).add(0, entity.getBbHeight() + 0.25, 0);
+                Vector3d position;
+                if (entity.level.isClientSide()) {
+                    position = entity.getPosition(partialTick);
+                }
+                else {
+                    position = entity.position();
+                }
+                return position.add(0, entity.getBbHeight() + 0.25, 0);
             }
         }
         if (positionBlock != null) {
