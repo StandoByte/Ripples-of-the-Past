@@ -458,7 +458,6 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     
                     if (itemTrackerId != null) {
                         StandEffectsTracker.getEffectsOfType(Optional.of(power), ModStandEffects.GE_ITEM_MARK.get())
-                        .filter(itemMarkEffect -> itemTrackerId.equals(itemMarkEffect.getItemTrackerId()))
                         .forEach(StandEffectInstance::remove);
                     }
                     
