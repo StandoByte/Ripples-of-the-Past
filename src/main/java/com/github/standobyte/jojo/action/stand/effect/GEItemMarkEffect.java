@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.itemtracking.SidedItemTrackerMap;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
@@ -15,6 +16,7 @@ import net.minecraft.entity.LivingEntity;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
+import net.minecraft.world.server.ServerWorld;
 
 public class GEItemMarkEffect extends StandEffectInstance {
     private UUID itemTrackerId = null;
@@ -66,7 +68,8 @@ public class GEItemMarkEffect extends StandEffectInstance {
         if (!world.isClientSide()) {
             TrackerItemStack tracker = getItemTracker(true);
             if (tracker != null) {
-                tracker.clear();
+                SidedItemTrackerMap serverItemTracking = SaveFileUtilCapProvider.getSaveFileCap((ServerWorld) world).getItemsTracker();
+                serverItemTracking.removeTracker(tracker.getTrackerId());
             }
         }
     }
@@ -82,11 +85,13 @@ public class GEItemMarkEffect extends StandEffectInstance {
             nbt.putUUID("ItemTracker", itemTrackerId);
         }
     }
-
+    
     @Override
     protected void readAdditionalSaveData(CompoundNBT nbt) {
         if (nbt.hasUUID("ItemTracker")) {
             itemTrackerId = nbt.getUUID("ItemTracker");
+            SidedItemTrackerMap serverItemTracking = SaveFileUtilCapProvider.getSaveFileCap((ServerWorld) world).getItemsTracker();
+            serverItemTracking.addServerTrackedId(itemTrackerId);
         }
     }
 

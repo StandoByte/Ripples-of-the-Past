@@ -41,6 +41,10 @@ public class SaveFileUtilCapProvider implements ICapabilitySerializable<INBT>{
                 () -> new IllegalArgumentException("Save file capability LazyOptional is not attached."));
     }
     
+    public static SaveFileUtilCap getSaveFileCap(ServerWorld serverWorld) {
+        return getSaveFileCap(serverWorld.getServer());
+    }
+    
     public static SaveFileUtilCap getSaveFileCap(ServerPlayerEntity serverPlayer) {
         return getSaveFileCap(serverPlayer.server);
     }

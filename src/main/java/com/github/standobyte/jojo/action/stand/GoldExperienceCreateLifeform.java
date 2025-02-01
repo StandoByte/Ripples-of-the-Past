@@ -19,6 +19,7 @@ import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.action.config.ActionConfigField;
 import com.github.standobyte.jojo.action.non_stand.HamonOrganismInfusion;
 import com.github.standobyte.jojo.action.stand.effect.GECreatedLifeformEffect;
+import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
 import com.github.standobyte.jojo.capability.entity.LifeformsMetMobs;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
@@ -295,7 +296,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
     public void perform(World world, LivingEntity user, IStandPower power, ActionTarget target, @Nullable PacketBuffer extraInput) {
         if (!world.isClientSide() && extraInput != null) {
             EntitySubtype<?> type = NetworkUtil.readOptional(extraInput, EntitySubtype::fromBuf).orElse(null);
-            Optional<UUID> itemTrackerId = NetworkUtil.readOptional(extraInput, extraInput::readUUID);
+            UUID itemTrackerId = NetworkUtil.readOptional(extraInput, extraInput::readUUID).orElse(null);
             if (type != null
                     && GeneralUtil.orElseFalse(user.getCapability(PlayerUtilCapProvider.CAPABILITY), 
                             cap -> cap.metEntityType(type))
@@ -313,8 +314,8 @@ public class GoldExperienceCreateLifeform extends StandAction {
                 ObjectWrapper<Entity> nonUserItemHolder = new ObjectWrapper<>(null);
                 
                 // marked item...
-                if (itemTrackerId.isPresent()) {
-                    TrackerItemStack itemTracker = SidedItemTrackerMap.getSidedTrackers(world).getTracker(itemTrackerId.get());
+                if (itemTrackerId != null) {
+                    TrackerItemStack itemTracker = SidedItemTrackerMap.getSidedTrackers(world).getTracker(itemTrackerId);
                     if (itemTracker != null && itemTracker.checkItemIsThere((ServerWorld) world)) {
                         // ...from entity
                         Entity itemEntity = itemTracker.getAtEntity(world);
@@ -323,7 +324,6 @@ public class GoldExperienceCreateLifeform extends StandAction {
                             KnownItemState itemState = itemTracker.getItemState();
                             if (itemState != null) {
                                 tfTargetFound = true;
-                                itemTracker.clear();
                                 Vector3d pos = itemEntity.position();
                                 
                                 switch (itemState) {
@@ -379,7 +379,6 @@ public class GoldExperienceCreateLifeform extends StandAction {
                                 KnownItemState itemState = itemTracker.getItemState();
                                 if (itemState != null) {
                                     tfTargetFound = true;
-                                    itemTracker.clear();
                                     
                                     switch (itemState) {
                                     case BLOCK_HAS_ITEM:
@@ -456,6 +455,12 @@ public class GoldExperienceCreateLifeform extends StandAction {
                         lifeFormCreated.setCustomName(customName.get());
                     }
                     world.addFreshEntity(tf);
+                    
+                    if (itemTrackerId != null) {
+                        StandEffectsTracker.getEffectsOfType(Optional.of(power), ModStandEffects.GE_ITEM_MARK.get())
+                        .filter(itemMarkEffect -> itemTrackerId.equals(itemMarkEffect.getItemTrackerId()))
+                        .forEach(StandEffectInstance::remove);
+                    }
                     
                     if (lifeFormCreated instanceof LivingEntity) {
                         IStandPower.getStandPowerOptional((LivingEntity) lifeFormCreated).ifPresent(mobStand -> {
