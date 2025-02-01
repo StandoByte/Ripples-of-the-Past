@@ -19,7 +19,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.PacketBuffer;
 import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.PotionUtils;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
@@ -93,13 +92,10 @@ public class GECreatedLifeformEffect extends StandEffectInstance {
                 MCUtil.makeMobNeutralTo(lifeformMob, user);
             }
             
-            ItemStack sourceItem = getSource().makeSourceItemView();
-            if (!sourceItem.isEmpty()) {
-                List<EffectInstance> effects = PotionUtils.getMobEffects(sourceItem);
-                if (!effects.isEmpty()) {
-                    target.getCapability(LivingUtilCapProvider.CAPABILITY)
-                    .ifPresent(entity -> entity.setProductEffects(effects));
-                }
+            List<EffectInstance> effects = getSource().getItemEffects();
+            if (!effects.isEmpty()) {
+                target.getCapability(LivingUtilCapProvider.CAPABILITY)
+                .ifPresent(entity -> entity.setProductEffects(effects));
             }
         }
     }
@@ -202,7 +198,7 @@ public class GECreatedLifeformEffect extends StandEffectInstance {
     public void readAdditionalPacketData(PacketBuffer buf, boolean clientIsUser) {
         if (clientIsUser) {
             source.fromBuf(buf, world);
-            originalAsItem = source.makeSourceItemView();
+            originalAsItem = source.clMakeSourceItemView();
             originalName = source.clMakeSourceName();
         }
     }

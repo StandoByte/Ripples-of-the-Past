@@ -40,14 +40,19 @@ import net.minecraftforge.common.util.Constants;
 /**
  * Currently item stacks are being tracked in:
  *   ItemEntity
+ *   ItemFrameEntity
  *   LockableLootTileEntity
  *   Hoppers
+ *   Jukeboxes
  *   Player inventory
  *   Horse chest inventory
  *   Minecart with chest inventory
  *   Mobs equipment
  *   Armor stands equipment
+ *   Items picked up by mobs
  *   Shot arrows, knives, clackers, blade hats
+ *   Thrown ender pearls, snowballs, eggs, splash/lingering potions
+ *   Fireworks
  *
  */
 public class TrackerItemStack {

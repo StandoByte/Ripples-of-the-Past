@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.entity;
 
 import java.io.IOException;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +31,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.EntitySize;
 import net.minecraft.entity.EntityType;
+import net.minecraft.entity.IRendersAsItem;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
 import net.minecraft.entity.MoverType;
@@ -54,6 +56,7 @@ import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.potion.PotionUtils;
 import net.minecraft.state.DirectionProperty;
 import net.minecraft.tags.FluidTags;
 import net.minecraft.tileentity.TileEntity;
@@ -713,29 +716,27 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         
         
         
-        public ItemStack makeSourceItemView() {
+        public List<EffectInstance> getItemEffects() {
+            ItemStack item = ItemStack.EMPTY;
+            if (sourceEntity instanceof ItemEntity) {
+                item = ((ItemEntity) sourceEntity).getItem();
+            }
+            else if (sourceEntity instanceof PotionEntity) {
+                item = MCUtil.getItemOnServer((PotionEntity) sourceEntity);
+            }
+            return !item.isEmpty() && item.hasTag() ? PotionUtils.getMobEffects(item) : Collections.emptyList();
+        }
+        
+        public ItemStack clMakeSourceItemView() {
             if (sourceEntity != null) {
                 if (sourceEntity instanceof ItemEntity) {
                     return ((ItemEntity) sourceEntity).getItem().copy();
                 }
+                else if (sourceEntity instanceof IRendersAsItem) {
+                    return ((IRendersAsItem) sourceEntity).getItem().copy();
+                }
                 else if (sourceEntity instanceof TNTEntity) {
                     return new ItemStack(Items.TNT);
-                }
-                else if (sourceEntity instanceof PotionEntity) {
-                    ItemStack potionItem;
-                    if (sourceEntity.level.isClientSide()) {
-                        potionItem = ((PotionEntity) sourceEntity).getItem();
-                    }
-                    else {
-                        potionItem = MCUtil.getItemOnServer((PotionEntity) sourceEntity);
-                    }
-                    return potionItem.copy();
-                }
-                else if (sourceEntity.getType() == EntityType.ENDER_PEARL) {
-                    return new ItemStack(Items.ENDER_PEARL);
-                }
-                else if (sourceEntity.getType() == ModEntityTypes.MOLOTOV.get()) {
-                    return new ItemStack(ModItems.MOLOTOV.get());
                 }
                 else if (sourceEntity.getType() == ModEntityTypes.ROAD_ROLLER.get()) {
                     return new ItemStack(ModItems.ROAD_ROLLER.get());
