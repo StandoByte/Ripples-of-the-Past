@@ -75,8 +75,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     @Deprecated protected IModelPose<T> idleLoop;
     @Deprecated private List<IModelPose<T>> summonPoses;
     @Deprecated protected final Map<StandPose, IActionAnimation<T>> actionAnim = new HashMap<>();
-    
-    private Map<ModelRenderer, MutableFloat> secondXRotMap = new HashMap<>();
+    @Deprecated private Map<ModelRenderer, MutableFloat> secondXRotMap = new HashMap<>();
     
     protected StandEntityModel(boolean scaleHead, float yHeadOffset, float zHeadOffset) {
         this(scaleHead, yHeadOffset, zHeadOffset, 2.0F, 2.0F, 24.0F);
@@ -333,18 +332,22 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     
     
     
+    @Deprecated
     protected final void setSecondXRot(ModelRenderer modelPart, float xRot) {
         secondXRotMap.computeIfAbsent(modelPart, part -> new MutableFloat()).setValue(xRot);
     }
     
+    @Deprecated
     protected final void addSecondXRot(ModelRenderer modelPart, float xRot) {
         secondXRotMap.computeIfAbsent(modelPart, part -> new MutableFloat()).add(xRot);
     }
     
+    @Deprecated
     public void resetXRotation() {
         secondXRotMap.forEach((modelPart, xRotMutable) -> xRotMutable.setValue(0));
     }
     
+    @Deprecated
     public void applyXRotation() {
         secondXRotMap.forEach((modelPart, xRotMutable) -> {
             float xRot = xRotMutable.getValue();

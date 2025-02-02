@@ -91,16 +91,13 @@ public class PillarmanAbsorption extends PillarmanAction {
         
         boolean hurt = DamageUtil.dealPillarmanAbsorptionDamage(target, absorbDamage, null);
         if (hurt) {
-            int effectsLvl = attacker.level.getDifficulty().getId() - 1;
-            if (effectsLvl >= 0) {
-                for (Effect effect : BLOOD_DRAIN_EFFECTS) {
-                    int duration = MathHelper.floor(20F * absorbDamage);
-                    EffectInstance effectInstance = target.getEffect(effect);
-                    EffectInstance newInstance = effectInstance == null ? 
-                            new EffectInstance(effect, duration, effectsLvl)
-                            : new EffectInstance(effect, effectInstance.getDuration() + duration, effectsLvl);
-                    target.addEffect(newInstance);
-                }
+            for (Effect effect : BLOOD_DRAIN_EFFECTS) {
+                int duration = MathHelper.floor(20F * absorbDamage);
+                EffectInstance effectInstance = target.getEffect(effect);
+                EffectInstance newInstance = effectInstance == null ? 
+                        new EffectInstance(effect, duration, 1)
+                        : new EffectInstance(effect, effectInstance.getDuration() + duration, 1);
+                target.addEffect(newInstance);
             }
         }
         return hurt;

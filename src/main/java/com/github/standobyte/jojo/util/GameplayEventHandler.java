@@ -75,6 +75,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.pillarman.PillarmanDa
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.ResolveCounter;
 import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
@@ -86,7 +87,6 @@ import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
-import com.github.standobyte.jojo.util.mc.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.mc.damage.ModdedDamageSourceWrapper;
 import com.github.standobyte.jojo.util.mc.damage.NoKnockbackOnBlocking;
 import com.github.standobyte.jojo.util.mc.damage.StandLinkDamageSource;
@@ -594,23 +594,7 @@ public class GameplayEventHandler {
         }
         
         if (!target.level.isClientSide()) {
-            DamageSource damageSrc = event.getSource();
-            if (target.is(damageSrc.getEntity())) return;
-            float points = Math.min(event.getAmount(), target.getHealth());
-            
-            if (damageSrc instanceof IStandDamageSource) {
-                IStandDamageSource standDamageSrc = (IStandDamageSource) damageSrc;
-                IStandPower attackerStand = standDamageSrc.getStandPower();
-                StandUtil.addResolve(attackerStand, target, points);
-            }
-            
-            else if (damageSrc.getEntity() instanceof LivingEntity) {
-                IStandPower.getStandPowerOptional(StandUtil.getStandUser((LivingEntity) damageSrc.getEntity())).ifPresent(attackerStand -> {
-                    if (attackerStand.isActive()) {
-                        StandUtil.addResolve(attackerStand, target, points * 0.5F);
-                    }
-                });
-            }
+            ResolveCounter.resolveOnHurtEvent(event.getSource(), target, event.getAmount());
         }
     }
     

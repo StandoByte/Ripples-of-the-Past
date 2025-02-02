@@ -212,8 +212,10 @@ public class VampirismPowerType extends NonStandPowerType<VampirismData> {
     
     
     public boolean isHighOnBlood(LivingEntity entity) {
-        return INonStandPower.getNonStandPowerOptional(entity).map(power -> {
-            return power.getType() == this && power.getEnergy() / power.getMaxEnergy() >= 0.8F;
-        }).orElse(false);
+        return INonStandPower.getNonStandPowerOptional(entity).map(this::isHighOnBlood).orElse(false);
+    }
+    
+    public boolean isHighOnBlood(INonStandPower power) {
+        return power.getType() == this && power.getEnergy() / power.getMaxEnergy() >= 0.8F;
     }
 }

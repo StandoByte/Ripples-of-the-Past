@@ -22,7 +22,6 @@ import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.StandControlStatusPacket;
 import com.github.standobyte.jojo.power.IPower;
-import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType.StandSurvivalGameplayPool;
 import com.github.standobyte.jojo.util.general.MathUtil;
@@ -31,11 +30,7 @@ import com.mojang.datafixers.util.Either;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityClassification;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.monster.MonsterEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.text.ITextComponent;
@@ -188,49 +183,22 @@ public class StandUtil {
         return standOrUser;
     }
     
+    /**
+     * @deprecated Use {@link ResolveCounter#addResolve(IStandPower, LivingEntity, float)}
+     */
+    @Deprecated
     public static void addResolve(IStandPower stand, LivingEntity target, float points) {
-        target = getStandUser(target);
-        boolean hitSelf = target != null && stand.getUser() != null && getStandUser(target).is(stand.getUser());
-        if (!hitSelf && attackingTargetGivesResolve(target)) {
-            for (PowerClassification classification : PowerClassification.values()) {
-                points *= IPower.getPowerOptional(target, classification).map(power -> {
-                    if (power.hasPower()) {
-                        return power.getTargetResolveMultiplier(stand);
-                    }
-                    return 1F;
-                }).orElse(1F);
-            }
-            if (target.hasEffect(ModStatusEffects.RESOLVE.get())) {
-                points *= Math.max(1 / (stand.getResolveRatio() + 0.2F), 1);
-            }
-            
-            stand.getResolveCounter().addResolveOnAttack(points);
-        }
+        ResolveCounter.addResolve(stand, target, points);
     }
     
+    /**
+     * @deprecated Use {@link ResolveCounter#attackingTargetGivesResolve(Entity)}
+     */
+    @Deprecated
     public static boolean attackingTargetGivesResolve(Entity target) {
-        if (!target.isAlive()) {
-            return false;
-        }
-        if (target.getClassification(false) == EntityClassification.MONSTER || target.getType() == EntityType.PLAYER) {
-            return true;
-        }
-        if (target instanceof LivingEntity) {
-            LivingEntity livingEntity = (LivingEntity) target;
-            if (livingEntity instanceof StandEntity) {
-                return true;
-            }
-            if (livingEntity instanceof MobEntity) {
-                if (livingEntity instanceof MonsterEntity) {
-                    return true;
-                }
-                MobEntity mobEntity = (MobEntity) livingEntity;
-                return mobEntity.isAggressive();
-            }
-        }
-        return false;
+        return ResolveCounter.attackingTargetGivesResolve(target);
     }
-
+    
     public static boolean isFinisherMechanicUnlocked(IStandPower stand) {
         return stand.hasPower() && (stand.getResolveLevel() >= 1
                 || stand.getType().getStandFinisherPunch().map(action -> action.isUnlocked(stand)).orElse(false));

@@ -59,12 +59,12 @@ import net.minecraftforge.registries.ForgeRegistryEntry;
 public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<Action<?>> {
     private static final Map<Supplier<? extends Action<?>>, Supplier<? extends Action<?>>> SHIFT_VARIATIONS = new HashMap<>(); 
     
-    private final int holdDurationToFire;
+    public final int holdDurationToFire;
     private final int holdDurationMax;
     protected final boolean continueHolding;
     private final float heldWalkSpeed;
     private final int cooldownTechnical;
-    protected final int cooldown;
+    public final int cooldown;
     public final boolean needsFreeMainHand;
     public final boolean needsFreeOffHand;
     private final boolean ignoresPerformerStun;
@@ -421,7 +421,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     public int getHoldDurationMax(P power) {
-        return holdOnly(power) || continueHolding ? holdDurationMax : getHoldDurationToFire(power);
+        int holdToFire = getHoldDurationToFire(power);
+        return Math.max(holdToFire, holdDurationMax);
     }
     
     public boolean holdOnly(P power) {
@@ -630,13 +631,10 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         public T holdToFire(int ticksToFire, boolean continueHolding) {
             if (ticksToFire > 0) {
                 this.holdDurationToFire = ticksToFire;
-                this.holdDurationMax = Integer.MAX_VALUE;
                 this.continueHolding = continueHolding;
-            }
-            else {
-                this.holdDurationToFire = 0;
-                this.holdDurationMax = 0;
-                this.continueHolding = false;
+                if (continueHolding) {
+                    this.holdDurationMax = Integer.MAX_VALUE;
+                }
             }
             return getThis();
         }
