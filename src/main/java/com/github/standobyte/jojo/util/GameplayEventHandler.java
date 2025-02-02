@@ -31,6 +31,7 @@ import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.action.stand.effect.BoyIIManStandPartTakenEffect;
 import com.github.standobyte.jojo.action.stand.effect.CDTurnIntoAngeloRockEffect;
+import com.github.standobyte.jojo.action.stand.effect.GECreatedLifeformEffect;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.block.WoodenCoffinBlock;
@@ -577,13 +578,15 @@ public class GameplayEventHandler {
             }
             
             // redirect attacks on mobs created by Gold Experience
-            if (StandEffectsTracker.isTargetedBy(target, ModStandEffects.GE_CREATED_LIFEFORM.get())
-                    && !StandEffectsTracker.isTargetedBy(attackerLiving, ModStandEffects.GE_CREATED_LIFEFORM.get())) {
+            Optional<GECreatedLifeformEffect> targetLifeform = StandEffectsTracker.getEffectsTargetedBy(target, ModStandEffects.GE_CREATED_LIFEFORM.get()).findAny();
+            if (targetLifeform.isPresent() && !StandEffectsTracker.isTargetedBy(attackerLiving, ModStandEffects.GE_CREATED_LIFEFORM.get())) {
                 if (dmgSource instanceof IStandDamageSource) {
                     ((IStandDamageSource) dmgSource).setStandCanHitSelf();
                 }
                 attackerLiving.hurt(dmgSource, event.getAmount());
                 event.setCanceled(true);
+                IStandPower geUserPower = targetLifeform.get().getUserPower();
+                ResolveCounter.addResolve(geUserPower, target, event.getAmount());
                 return;
             }
         }
