@@ -11,18 +11,25 @@ import com.github.standobyte.jojo.network.packets.fromserver.MaxAchievedResolveP
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveBoostsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrResolveLevelPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrResolvePacket;
+import com.github.standobyte.jojo.power.IPower;
+import com.github.standobyte.jojo.power.IPower.PowerClassification;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.general.DiscardingSortedMultisetWrapper;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
+import com.github.standobyte.jojo.util.mc.damage.IStandDamageSource;
 import com.github.standobyte.jojo.util.mod.LegacyUtil;
 import com.google.common.collect.BoundType;
 import com.google.common.collect.Multiset;
 import com.google.common.collect.SortedMultiset;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityClassification;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.monster.MonsterEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.FloatNBT;
@@ -486,5 +493,69 @@ public class ResolveCounter {
         resolveNbt.putFloat("MaxAchieved", maxAchievedValue);
         
         return resolveNbt;
+    }
+    
+    
+    public static void resolveOnHurtEvent(DamageSource dmgSource, LivingEntity target, float dmgAmount) {
+        if (target.is(dmgSource.getEntity()) || !target.isAlive()) return;
+        float points = dmgAmount;
+//        float points = Math.min(dmgAmount, target.getHealth());
+        
+        if (dmgSource instanceof IStandDamageSource) {
+            IStandDamageSource standDamageSrc = (IStandDamageSource) dmgSource;
+            IStandPower attackerStand = standDamageSrc.getStandPower();
+            addResolve(attackerStand, target, points);
+        }
+        
+        else if (dmgSource.getEntity() instanceof LivingEntity) {
+            IStandPower.getStandPowerOptional(StandUtil.getStandUser((LivingEntity) dmgSource.getEntity())).ifPresent(attackerStand -> {
+                if (attackerStand.isActive()) {
+                    addResolve(attackerStand, target, points * 0.5F);
+                }
+            });
+        }
+    }
+    
+    public static void addResolve(IStandPower stand, LivingEntity target, float points) {
+        target = StandUtil.getStandUser(target);
+        boolean hitSelf = target != null && stand.getUser() != null && target.is(stand.getUser());
+        if (!hitSelf && attackingTargetGivesResolve(target)) {
+            for (PowerClassification classification : PowerClassification.values()) {
+                points *= IPower.getPowerOptional(target, classification).map(power -> {
+                    if (power.hasPower()) {
+                        return power.getTargetResolveMultiplier(stand);
+                    }
+                    return 1F;
+                }).orElse(1F);
+            }
+            if (target.hasEffect(ModStatusEffects.RESOLVE.get())) {
+                points *= Math.max(1 / (stand.getResolveRatio() + 0.2F), 1);
+            }
+            
+            stand.getResolveCounter().addResolveOnAttack(points);
+        }
+    }
+    
+    public static boolean attackingTargetGivesResolve(Entity target) {
+        if (!target.isAlive()) {
+            return false;
+        }
+        if (target.getClassification(false) == EntityClassification.MONSTER || target.getType() == EntityType.PLAYER) {
+            return true;
+        }
+        if (target instanceof LivingEntity) {
+            LivingEntity livingEntity = (LivingEntity) target;
+            if (livingEntity instanceof StandEntity) {
+                return true;
+            }
+            if (livingEntity instanceof MobEntity) {
+                if (livingEntity instanceof MonsterEntity) {
+                    return true;
+                }
+                MobEntity mobEntity = (MobEntity) livingEntity;
+                return mobEntity.isAggressive();
+            }
+        }
+        return false;
     }
 }

@@ -19,7 +19,10 @@ import com.github.standobyte.jojo.action.stand.StandEntityHeavyAttack.HeavyPunch
 import com.github.standobyte.jojo.capability.entity.EntityUtilCap;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.entity.damaging.projectile.BlockShardEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandStatFormulas;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.ResolveCounter;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.mc.CollideBlocks;
 import com.github.standobyte.jojo.util.mc.CollideBlocks.BlockCollisionResult;
@@ -63,6 +66,7 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
 
     private LivingEntity attacker;
     private LivingEntity attackerStandUser;
+    private boolean attackerIsStand;
     private Vector3d knockbackVec = null;
     private double knockbackImpactStrength;
     private double minCos;
@@ -103,6 +107,7 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
         this.hadImpactWithBlock = false;
         this.attacker = attacker;
         this.attackerStandUser = attacker instanceof LivingEntity ? (StandUtil.getStandUser((LivingEntity) attacker)) : null;
+        this.attackerIsStand = attacker instanceof StandEntity;
         return this;
     }
     
@@ -250,12 +255,12 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
                 }
                 if (scarletOverdriveFireTicks > 0) {
                     DamageUtil.dealDamageAndSetOnFire(targetEntity, 
-                            e -> DamageUtil.hurtThroughInvulTicks(e, new EntityDamageSource("entityFlewInto", entity), 
+                            e -> hurtTarget(e, new EntityDamageSource("entityFlewInto", entity), 
                                     (float) getKnockbackImpactStrength() * 5), 
                             scarletOverdriveFireTicks / 20, false);
                 }
                 else {
-                    DamageUtil.hurtThroughInvulTicks(targetEntity, new EntityDamageSource("entityFlewInto", entity), 
+                    hurtTarget(targetEntity, new EntityDamageSource("entityFlewInto", entity), 
                             (float) getKnockbackImpactStrength() * 5);
                 }
                 if (asLiving != null) {
@@ -311,7 +316,7 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
                             doGlassBleeding.setTrue();
                         }
                         if (blockState.getMaterial() == Material.CACTUS) {
-                            DamageUtil.hurtThroughInvulTicks(entity, DamageSource.CACTUS, 1);
+                            hurtTarget(entity, DamageSource.CACTUS, 1);
                         }
                         if (entity.isOnFire()) {
                             MCUtil.blockCatchFire(world, blockPos, blockState, null, asLiving);
@@ -351,12 +356,21 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
                     }
                     
                     if (wallDamage.floatValue() > 0) {
-                        DamageUtil.hurtThroughInvulTicks(entity, DamageSource.FLY_INTO_WALL, wallDamage.floatValue());
+                        hurtTarget(entity, DamageSource.FLY_INTO_WALL, wallDamage.floatValue());
                     }
                 }
             }
         }
         
+    }
+    
+    private boolean hurtTarget(Entity target, DamageSource dmgSource, float amount) {
+        boolean hurt = DamageUtil.hurtThroughInvulTicks(target, dmgSource, amount);
+        if (attackerIsStand && attackerStandUser != null && target instanceof LivingEntity) {
+            IStandPower.getStandPowerOptional(attackerStandUser).ifPresent(
+                    attackerStand -> ResolveCounter.addResolve(attackerStand, (LivingEntity) target, amount));
+        }
+        return hurt;
     }
     
     

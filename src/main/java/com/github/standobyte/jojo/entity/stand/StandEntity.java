@@ -47,6 +47,7 @@ import com.github.standobyte.jojo.network.packets.fromserver.TrSetStandEntityPac
 import com.github.standobyte.jojo.network.packets.fromserver.TrStandTaskTargetPacket;
 import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.ResolveCounter;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
 import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
@@ -871,13 +872,13 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
                     setBarrageClashOpponent(attacker);
 
                     if (punchesCanParry == punchesIncoming) {
-                        StandUtil.addResolve(dmgSource.getStandPower(), this, dmgAmount);
+                        ResolveCounter.addResolve(dmgSource.getStandPower(), this, dmgAmount);
                         return 0;
                     }
                     else {
                         float damageParried = dmgAmount * (float) punchesCanParry / (float) punchesIncoming;
                         dmgAmount -= damageParried;
-                        StandUtil.addResolve(dmgSource.getStandPower(), this, damageParried);
+                        ResolveCounter.addResolve(dmgSource.getStandPower(), this, damageParried);
                         return dmgAmount;
                     }
                 }
@@ -1725,7 +1726,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
                     if (targetEntity instanceof PlayerEntity || targetEntity instanceof StandEntity) {
                         priority = 0;
                     }
-                    else if (StandUtil.attackingTargetGivesResolve(targetEntity)) {
+                    else if (ResolveCounter.attackingTargetGivesResolve(targetEntity)) {
                         priority = 1;
                     }
                 }
