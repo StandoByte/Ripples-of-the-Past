@@ -170,7 +170,6 @@ public class ParseGenericModel {
                         for (String vertexId : visitedVertices) {
                             verticesArr[i++] = new Vertex(vertices.get(vertexId), face.uv.get(vertexId));
                         }
-                        MeshVerticesHelper.sortVertices(verticesArr);
                         
                         MeshFaceBuilder faceBuilder = meshBuilder.startFaceCalcNormal();
                         for (Vertex vertex : verticesArr) {
@@ -185,16 +184,16 @@ public class ParseGenericModel {
                 }
                 modelCubesCollection.add(meshBuilder.buildCube());
             }
-        }
-        
-        // record moment
-        static class Vertex {
-            final float[] pos;
-            final float[] uv;
             
-            Vertex(final float[] pos, final float[] uv) {
-                this.pos = pos;
-                this.uv = uv;
+            // record moment
+            private static class Vertex {
+                final float[] pos;
+                final float[] uv;
+                
+                Vertex(final float[] pos, final float[] uv) {
+                    this.pos = pos;
+                    this.uv = uv;
+                }
             }
         }
         

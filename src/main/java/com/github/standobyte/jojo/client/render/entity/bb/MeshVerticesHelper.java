@@ -2,8 +2,7 @@ package com.github.standobyte.jojo.client.render.entity.bb;
 
 import org.apache.commons.lang3.ArrayUtils;
 
-import com.github.standobyte.jojo.client.render.entity.bb.ParseGenericModel.ModelParsed.Vertex;
-
+import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.math.vector.Vector3f;
 
 /**
@@ -13,7 +12,7 @@ import net.minecraft.util.math.vector.Vector3f;
  */
 public class MeshVerticesHelper {
     
-    static void sortVertices(Vertex[] vertices) {
+    public static void sortVertices(ModelRenderer.PositionTextureVertex[] vertices) {
         if (vertices.length < 4) return;
 
         if (MeshVerticesHelper.magicFunction(vertices[1].pos, vertices[2].pos, vertices[0].pos, vertices[3].pos)) {
@@ -24,27 +23,18 @@ public class MeshVerticesHelper {
         }
     }
     
-    private static Vector3f base1 = new Vector3f();
-    private static Vector3f base2 = new Vector3f();
-    private static Vector3f top = new Vector3f();
-    private static Vector3f check = new Vector3f();
     private static Vector3f _startP = new Vector3f();
     private static Vector3f _startEnd = new Vector3f();
     private static Vector3f normal = new Vector3f();
     
-    private static boolean magicFunction(float[] _base1, float[] _base2, float[] _top, float[] _check) {
+    private static boolean magicFunction(Vector3f base1, Vector3f base2, Vector3f top, Vector3f check) {
         // Construct a plane with coplanar points "base1" and "base2" with a normal towards "top"
-        base1.set(_base1);
-        base2.set(_base2);
-        top.set(_top);
-        check.set(_check);
-        
-        subVectors(_startP, _top, _base1);
-        subVectors(_startEnd, _base2, _base1);
+        subVectors(_startP, top, base1);
+        subVectors(_startEnd, base2, base1);
         float startEnd2 = _startEnd.dot(_startEnd);
         float startEnd_startP = _startEnd.dot(_startP);
         float t = startEnd_startP / startEnd2;
-        subVectors(normal, _base2, _base1);
+        subVectors(normal, base2, base1);
         normal.mul(t);
         normal.add(base1);
         normal.sub(top);
@@ -54,11 +44,9 @@ public class MeshVerticesHelper {
         return distance > 0;
     }
 
-    private static Vector3f tmp = new Vector3f();
-    private static void subVectors(Vector3f target, float[] a, float[] b) {
-        target.set(a);
-        tmp.set(b);
-        target.sub(tmp);
+    private static void subVectors(Vector3f target, Vector3f a, Vector3f b) {
+        target.set(a.x(), a.y(), a.z());
+        target.sub(b);
     }
     
 }
