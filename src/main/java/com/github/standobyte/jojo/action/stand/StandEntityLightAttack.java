@@ -56,7 +56,7 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
     
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-        standEntity.addFinisherMeter(0.05F, StandEntity.FINISHER_NO_DECAY_TICKS);
+        standEntity.addFinisherMeter(0.125F, StandEntity.FINISHER_NO_DECAY_TICKS);
         standEntity.punch(task, this, task.getTarget());
     }
     
@@ -65,7 +65,7 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
         return IHasStandPunch.super.punchEntity(stand, target, dmgSource)
                 .damage(StandStatFormulas.getLightAttackDamage(stand.getAttackDamage()))
                 .addKnockback(stand.guardCounter())
-                .addFinisher(0.15F)
+                .addFinisher(0.075F)
                 .impactSound(punchSound);
     }
     
