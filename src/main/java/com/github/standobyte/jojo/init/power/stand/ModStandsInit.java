@@ -792,6 +792,7 @@ public class ModStandsInit {
             () -> new GoldExperienceLifeshotPunch(new StandEntityHeavyAttack.Builder()
                     .resolveLevelToUnlock(1)
                     .attackRecoveryFollowup(GOLD_EXPERIENCE_ENTITY_LIFESHOT)
+                    .standPose(StandPose.HEAVY_ATTACK_FINISHER)
                     .punchSound(ModSounds.GOLD_EXPERIENCE_PUNCH_HEAVY)
                     .standSound(Phase.WINDUP, false, ModSounds.GOLD_EXPERIENCE_MUDA_LONG)
                     .standSound(Phase.PERFORM, ModSounds.GOLD_EXPERIENCE_PUNCH_HEAVY_EXTRA)
