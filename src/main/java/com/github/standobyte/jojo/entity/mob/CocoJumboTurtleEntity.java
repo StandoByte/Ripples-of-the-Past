@@ -31,18 +31,23 @@ import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.passive.TurtleEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.fluid.Fluid;
 import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
+import net.minecraft.item.ShootableItem;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.DataSerializers;
 import net.minecraft.network.datasync.EntityDataManager;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.ITag;
 import net.minecraft.util.ActionResultType;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.KeybindTextComponent;
@@ -97,6 +102,7 @@ public class CocoJumboTurtleEntity extends TurtleEntity implements IMobStandUser
     @Override
     public void tick() {
         standPower.tick();
+        bandAidPreTick();
         super.tick();
         
         if (!level.isClientSide()) {
@@ -116,6 +122,9 @@ public class CocoJumboTurtleEntity extends TurtleEntity implements IMobStandUser
             }
         }
         
+        if (!level.isClientSide() && getVehicle() == null) {
+            entityData.set(IS_CARRIED, false);
+        }
         LivingEntity carrier = getCarrier(); // FIXME sometimes doesn't trigger on client (IS_CARRIED has already been synced to client)
         if (carrier != null) {
             if (!MCUtil.itemHandFree(carrier.getItemInHand(Hand.OFF_HAND)) || carrier.isSpectator()) {
@@ -191,7 +200,7 @@ public class CocoJumboTurtleEntity extends TurtleEntity implements IMobStandUser
             }
             return ActionResultType.SUCCESS;
         }
-        else if (pHand == Hand.MAIN_HAND && !player.isShiftKeyDown() && !this.isPassenger()) {
+        else if (pHand == Hand.MAIN_HAND && !player.isShiftKeyDown() && !this.isPassenger() && !(heldItem.getItem() instanceof ShootableItem)) {
             if (MCUtil.isHandFree(player, Hand.OFF_HAND)) {
                 if (this.startRiding(player, true)) {
                     if (!level.isClientSide()) {
@@ -200,7 +209,7 @@ public class CocoJumboTurtleEntity extends TurtleEntity implements IMobStandUser
                                 new KeybindTextComponent("key.swapOffhand"), getDisplayName()), true);
                     }
                 }
-                return ActionResultType.CONSUME;
+                return ActionResultType.sidedSuccess(this.level.isClientSide);
             }
             else {
                 if (level.isClientSide()) {
@@ -270,6 +279,9 @@ public class CocoJumboTurtleEntity extends TurtleEntity implements IMobStandUser
     
     @Override
     public void stopRiding() {
+        if (cancelStopRiding()) {
+            return;
+        }
         super.stopRiding();
         if (!level.isClientSide() && getVehicle() == null) {
             entityData.set(IS_CARRIED, false);
@@ -282,6 +294,12 @@ public class CocoJumboTurtleEntity extends TurtleEntity implements IMobStandUser
         if (IS_CARRIED.equals(key) && !entityData.get(IS_CARRIED)) {
             stopRiding();
         }
+    }
+    
+    @Override
+    public boolean startRiding(Entity vehicle, boolean force) {
+        boolean res = super.startRiding(vehicle, force);
+        return res;
     }
     
     @Override
@@ -322,7 +340,7 @@ public class CocoJumboTurtleEntity extends TurtleEntity implements IMobStandUser
         return pDamageSource == DamageSource.IN_WALL || super.isInvulnerableTo(pDamageSource);
     }
     
-
+    
     public static final ResourceLocation GOT_ARROW_ADVANCEMENT = new ResourceLocation(JojoMod.MOD_ID, "jojo/stand_arrow");
     public static final ResourceLocation MET_TURTLE_ADVANCEMENT = new ResourceLocation(JojoMod.MOD_ID, "jojo/coco_jumbo");
     private static long lastSpawnTime;
@@ -383,5 +401,41 @@ public class CocoJumboTurtleEntity extends TurtleEntity implements IMobStandUser
         }
         
     }
+    
+    
+    // the shit below prevents the turtle from dismounting when the player gets into water
+    // (the actual logic for that in in LivingEntity#baseTick, and i ain't whipping out a mixin for that)
+    private byte stopRidingIsDueToWater;
+    
+    private void bandAidPreTick() {
+        stopRidingIsDueToWater = 0;
+    }
+    
+    @Override
+    public boolean isEyeInFluid(ITag<Fluid> tag) {
+        if (stopRidingIsDueToWater == 0 && tag == FluidTags.WATER) {
+            stopRidingIsDueToWater = 1;
+        }
+        return super.isEyeInFluid(tag);
+    }
+    
+    @Override
+    public boolean canBreatheUnderwater() {
+        if (stopRidingIsDueToWater == 1) {
+            stopRidingIsDueToWater = 2;
+        }
+        return super.canBreatheUnderwater();
+    }
+
+    @Override
+    protected void onChangedBlock(BlockPos pos) {
+        stopRidingIsDueToWater = -1;
+        super.onChangedBlock(pos);
+    }
+    
+    private boolean cancelStopRiding() {
+        return stopRidingIsDueToWater == 2;
+    }
+    // the stupid band-aid code is over
 
 }
