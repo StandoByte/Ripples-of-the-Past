@@ -27,9 +27,11 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.screen.stand.ge.EntityTypeIcon;
 import com.github.standobyte.jojo.entity.GETransformationEntity;
+import com.github.standobyte.jojo.entity.GETransformationEntity.GETransformationData;
 import com.github.standobyte.jojo.entity.RoadRollerEntity;
 import com.github.standobyte.jojo.entity.damaging.projectile.MolotovEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.KnifeEntity;
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
@@ -348,7 +350,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                                     if (livingItemHolder != null) {
                                         decrementStuckArrow(livingItemHolder);
                                         tf.withHost(livingItemHolder);
-                                        tf.getTfSourceData().withFollowTarget(livingItemHolder.getUUID(), GETransformationEntity.FollowTargetMode.AGGRO, user);
+                                        tf.getTfSourceData().withFollowTarget(livingItemHolder.getUUID(), GETransformationEntity.FollowTargetMode.AGGRO_TRACK, user);
                                     }
                                     break;
                                 case STUCK_KNIFE:
@@ -359,7 +361,7 @@ public class GoldExperienceCreateLifeform extends StandAction {
                                     if (livingItemHolder != null) {
                                         decrementStuckKnife(livingItemHolder);
                                         tf.withHost(livingItemHolder);
-                                        tf.getTfSourceData().withFollowTarget(livingItemHolder.getUUID(), GETransformationEntity.FollowTargetMode.AGGRO, user);
+                                        tf.getTfSourceData().withFollowTarget(livingItemHolder.getUUID(), GETransformationEntity.FollowTargetMode.AGGRO_TRACK, user);
                                     }
                                     break;
                                 default:
@@ -444,9 +446,22 @@ public class GoldExperienceCreateLifeform extends StandAction {
                     .withDuration(ticks)
                     .withOwner(user);
                     
+                    GETransformationData sourceData = tf.getTfSourceData();
+                    LivingEntity targetEntity = getLastHurtTarget(user, power.getStandManifestation() instanceof StandEntity ? (StandEntity) power.getStandManifestation() : null);
+                    if (targetEntity != null) {
+                        UUID targetAlreadySet = sourceData.getFollowTarget();
+                        UUID hitTargetId = targetEntity.getUUID();
+                        boolean setAggroTarget = targetAlreadySet == null || 
+                                targetAlreadySet.equals(hitTargetId) 
+                                && sourceData.getFollowTargetMode() != GETransformationEntity.FollowTargetMode.AGGRO_TRACK;
+                        if (setAggroTarget) {
+                            sourceData.withFollowTarget(targetEntity.getUUID(), GETransformationEntity.FollowTargetMode.AGGRO_FORGETFUL, user);
+                        }
+                    }
+                    
                     GECreatedLifeformEffect effect = new GECreatedLifeformEffect();
                     effect.withStand(power).withTarget(tf);
-                    effect.setSource(tf.getTfSourceData());
+                    effect.setSource(sourceData);
                     power.getContinuousEffects().addEffect(effect);
                     
                     lifeFormCreated.copyPosition(tf);
@@ -494,6 +509,25 @@ public class GoldExperienceCreateLifeform extends StandAction {
     }
     
     public static final Stack<TileEntity> KEEP_ITEMS = new Stack<>();
+    
+    @Nullable
+    private static LivingEntity getLastHurtTarget(LivingEntity standUser, @Nullable StandEntity standEntity) {
+        if (standEntity == null) {
+            return standUser.getLastHurtMob();
+        }
+        
+        if (standUser.getLastHurtMob() == null) {
+            return standEntity.getLastHurtMob();
+        }
+        else if (standEntity.getLastHurtMob() == null) {
+            return standUser.getLastHurtMob();
+        }
+        else {
+            int hurtByUserTime = standUser.tickCount - standUser.getLastHurtMobTimestamp();
+            int hurtByStandTime = standEntity.tickCount - standEntity.getLastHurtMobTimestamp();
+            return hurtByUserTime < hurtByStandTime ? standUser.getLastHurtMob() : standEntity.getLastHurtMob();
+        }
+    }
     
     
     private void mobFromEntity(GETransformationEntity tf, Entity entity, LivingEntity geUser) {

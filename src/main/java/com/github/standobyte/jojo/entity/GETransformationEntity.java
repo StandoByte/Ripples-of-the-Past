@@ -70,6 +70,7 @@ import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.World;
+import net.minecraft.world.server.ServerWorld;
 import net.minecraftforge.common.util.BlockSnapshot;
 import net.minecraftforge.event.ForgeEventFactory;
 import net.minecraftforge.fml.common.registry.IEntityAdditionalSpawnData;
@@ -190,10 +191,19 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
                 if (entityToSummon instanceof MobEntity) {
                     MobEntity mob = (MobEntity) entityToSummon;
                     mob.playAmbientSound();
-                    if (source.followTarget != null) {
-                        boolean aggro = source.followTargetMode == FollowTargetMode.AGGRO;
-                        if (aggro) {
+                    if (source.followTarget != null && source.followTargetMode != null) {
+                        switch (source.followTargetMode) {
+                        case AGGRO_TRACK:
                             mob.targetSelector.addGoal(0, new SpecificTargetGoal(mob, source.followTarget, false, false));
+                            break;
+                        case AGGRO_FORGETFUL:
+                            Entity target = ((ServerWorld) level).getEntity(source.followTarget);
+                            if (target instanceof LivingEntity) {
+                                mob.setTarget((LivingEntity) target);
+                            }
+                            break;
+                        default:
+                            break;
                         }
                     }
                 }
@@ -657,7 +667,8 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
     
     public enum FollowTargetMode {
         TRACK,
-        AGGRO,
+        AGGRO_TRACK,
+        AGGRO_FORGETFUL,
         DELIVERY
     }
     
@@ -687,10 +698,19 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         }
         
         public GETransformationData withFollowTarget(UUID entity, FollowTargetMode mode, LivingEntity standUser) {
-            this.followTarget = entity;
-            if (mode == FollowTargetMode.AGGRO && standUser != null && standUser.getUUID().equals(entity)) {
-                mode = FollowTargetMode.TRACK;
+            if (standUser != null && standUser.getUUID().equals(entity)) {
+                switch (mode) {
+                case AGGRO_TRACK:
+                    mode = FollowTargetMode.TRACK;
+                    break;
+                case AGGRO_FORGETFUL:
+                    mode = null;
+                    break;
+                default:
+                    break;
+                }
             }
+            this.followTarget = mode != null ? entity : null;
             this.followTargetMode = mode;
             return this;
         }
