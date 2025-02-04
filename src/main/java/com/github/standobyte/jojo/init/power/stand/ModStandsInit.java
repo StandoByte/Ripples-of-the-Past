@@ -840,8 +840,9 @@ public class ModStandsInit {
     
     public static final RegistryObject<GoldExperienceLifeDetector> GOLD_EXPERIENCE_LIFE_DETECTOR = ACTIONS.register("gold_experience_life_detector", 
             () -> new GoldExperienceLifeDetector(new StandEntityAction.Builder()
-                    .holdType().staminaCostTick(1.25F)
+                    .holdType().staminaCostTick(0.5F)
                     .resolveLevelToUnlock(2)
+                    .standAutoSummonMode(AutoSummonMode.OFF_ARM)
                     .partsRequired(StandPart.MAIN_BODY)));
     
     public static final RegistryObject<GoldExperienceHeal> GOLD_EXPERIENCE_HEAL = ACTIONS.register("gold_experience_heal", 
