@@ -145,20 +145,20 @@ public class VampirismBloodDrain extends VampirismAction {
     };
     public static boolean drainBlood(LivingEntity attacker, LivingEntity target, float bloodDrainDamage) {
         boolean hurt = target.hurt(DamageUtil.bloodDrainDamage(attacker), bloodDrainDamage);
-        if (hurt) {
+        if (hurt || target.hurtTime > 0) {
             int effectsLvl = attacker.level.getDifficulty().getId() - 1;
             if (effectsLvl >= 0) {
                 for (Effect effect : BLOOD_DRAIN_EFFECTS) {
                     int duration = MathHelper.floor(20F * bloodDrainDamage);
                     EffectInstance effectInstance = target.getEffect(effect);
-                    EffectInstance newInstance = effectInstance == null ? 
+                    EffectInstance newInstance = effectInstance == null ?
                             new EffectInstance(effect, duration, effectsLvl)
                             : new EffectInstance(effect, effectInstance.getDuration() + duration, effectsLvl);
                     target.addEffect(newInstance);
                 }
             }
         }
-        return hurt;
+        return hurt || target.hurtTime > 0;
     }
     
     @Override
