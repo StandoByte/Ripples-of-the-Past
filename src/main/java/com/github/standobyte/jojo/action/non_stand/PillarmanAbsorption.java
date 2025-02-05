@@ -59,9 +59,9 @@ public class PillarmanAbsorption extends PillarmanAction {
                     boolean hurt = absorb(world, user, targetEntity, 2);
                     if (hurt) {
                         float bloodAndHealModifier = GeneralUtil.getOrLast(
-                                JojoModConfig.getCommonConfigInstance(false).bloodDrainMultiplier.get(), 
+                                JojoModConfig.getCommonConfigInstance(false).bloodDrainMultiplier.get(),
                                 world.getDifficulty().getId()).floatValue();
-                        power.addEnergy(bloodAndHealModifier * 35F);
+                        power.addEnergy(bloodAndHealModifier * 4F);
                     }
                 }
             }
@@ -74,36 +74,36 @@ public class PillarmanAbsorption extends PillarmanAction {
             Effects.WEAKNESS,
             Effects.CONFUSION
     };
-    
+
     public static boolean absorb(World world, LivingEntity attacker, LivingEntity target, float absorbDamage) {
-        if (HamonUtil.preventBlockDamage(target, attacker.level, null, null, 
+        if (HamonUtil.preventBlockDamage(target, attacker.level, null, null,
                 new EntityDamageSource(DamageUtil.PILLAR_MAN_ABSORPTION.getMsgId(), attacker), absorbDamage)) {
             Vector3d userPos = attacker.getEyePosition(1.0F);
             double distanceToTarget = JojoModUtil.getDistance(attacker, target.getEntity().getBoundingBox());
             Vector3d targetPos = attacker.getEyePosition(1.0F).add(attacker.getLookAngle().scale(distanceToTarget));
             Vector3d particlesPos = userPos.add(targetPos.subtract(userPos).scale(0.5));
             if (world.isClientSide()) {
-            	HamonSparksLoopSound.playSparkSound(attacker, particlesPos, 1.0F, true);
-            	CustomParticlesHelper.createHamonSparkParticles(null, particlesPos, 1);
+                HamonSparksLoopSound.playSparkSound(attacker, particlesPos, 1.0F, true);
+                CustomParticlesHelper.createHamonSparkParticles(null, particlesPos, 1);
             }
             return false;
         }
-        
+
         boolean hurt = DamageUtil.dealPillarmanAbsorptionDamage(target, absorbDamage, null);
-        if (hurt) {
+        if (hurt || target.hurtTime > 0) {
             int effectsLvl = attacker.level.getDifficulty().getId() - 1;
             if (effectsLvl >= 0) {
                 for (Effect effect : BLOOD_DRAIN_EFFECTS) {
                     int duration = MathHelper.floor(20F * absorbDamage);
                     EffectInstance effectInstance = target.getEffect(effect);
-                    EffectInstance newInstance = effectInstance == null ? 
+                    EffectInstance newInstance = effectInstance == null ?
                             new EffectInstance(effect, duration, effectsLvl)
                             : new EffectInstance(effect, effectInstance.getDuration() + duration, effectsLvl);
                     target.addEffect(newInstance);
                 }
             }
         }
-        return hurt;
+        return hurt || target.hurtTime > 0;
     }
     
     @Override
