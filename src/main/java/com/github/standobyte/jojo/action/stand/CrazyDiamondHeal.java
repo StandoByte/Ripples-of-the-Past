@@ -5,6 +5,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
+import com.github.standobyte.jojo.action.config.ActionConfigField;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.IHasHealth;
@@ -27,10 +28,12 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public class CrazyDiamondHeal extends StandEntityAction {
+    @ActionConfigField protected final boolean healWithStandVirusEffect;
 
     public CrazyDiamondHeal(StandEntityAction.Builder builder) {
         super(builder);
         friendlyFire = true;
+        this.healWithStandVirusEffect = true;
     }
     
     @Override
@@ -43,6 +46,8 @@ public class CrazyDiamondHeal extends StandEntityAction {
                 || targetEntity instanceof IHasHealth
                 || targetEntity instanceof BoatEntity)) {
             return conditionMessage("heal_target");
+        } else if (targetEntity instanceof LivingEntity && !this.healWithStandVirusEffect) {
+        	return ((LivingEntity) targetEntity).hasEffect(ModStatusEffects.STAND_VIRUS.get()) ? conditionMessage("heal_target") : ActionConditionResult.POSITIVE;
         }
         return ActionConditionResult.POSITIVE;
     }
