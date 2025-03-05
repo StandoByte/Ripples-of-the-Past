@@ -875,6 +875,11 @@ public class MCUtil {
         }
     }
     
+    public static double getValueIfPresent(LivingEntity entity, Attribute attribute, double or) {
+        ModifiableAttributeInstance instance = entity.getAttribute(attribute);
+        return instance != null ? instance.getValue() : or;
+    }
+    
     
     
     
