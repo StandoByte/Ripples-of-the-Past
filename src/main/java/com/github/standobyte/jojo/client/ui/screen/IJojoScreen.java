@@ -539,7 +539,7 @@ public interface IJojoScreen {
     public static enum GeneralTab implements TabSupplier {
         WIP_CATEGORY(new Tab(null, 
                 0, 0, 16, 16, new StringTextComponent("TBA"))
-                .withScreen(PlaceholderScreen::new));
+                .withScreen(PlaceholderScreen::new).disable());
         
         
         private final Tab tab;

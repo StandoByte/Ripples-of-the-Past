@@ -89,6 +89,11 @@ public class KeyframeWithQuery {
                 return value;
             }
             
+            @Override
+            public boolean isNumericLiteral() {
+                return true;
+            }
+            
         }
         
         public static class Molang implements IFloatSupplier {
