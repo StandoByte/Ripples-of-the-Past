@@ -480,6 +480,10 @@ public class ClientEventHandler {
             standStatsTick = mc.screen instanceof IngameMenuScreen && doStandStatsRender(mc.screen) ? standStatsTick + 1 : 0;
             
             NetworkUtil.blockPacketsToServer = mc.player != null && mc.player.hasEffect(ModStatusEffects.SENSORY_OVERLOAD.get());
+            
+            if (!mc.isPaused()) {
+                if (overlayMessageTime > 0) overlayMessageTime--;
+            }
         }
     }
     
@@ -487,9 +491,6 @@ public class ClientEventHandler {
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.isCancelable() && NetworkUtil.blockPacketsToServer) {
             event.setCanceled(true);
-            if (!mc.isPaused()) {
-                if (overlayMessageTime > 0) overlayMessageTime--;
-            }
         }
     }
     
