@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.render.entity.model.animnew;
+package com.github.standobyte.jojo.client.render.entity.animnew;
 
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;
 import net.minecraft.util.math.MathHelper;

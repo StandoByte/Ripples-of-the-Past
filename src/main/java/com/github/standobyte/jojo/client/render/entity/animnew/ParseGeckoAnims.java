@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.render.entity.model.animnew;
+package com.github.standobyte.jojo.client.render.entity.animnew;
 
 import java.util.Comparator;
 import java.util.Map;
@@ -6,10 +6,10 @@ import java.util.Optional;
 import java.util.function.IntFunction;
 import java.util.stream.StreamSupport;
 
-import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Animation;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Transformation;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Transformation.Interpolation;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.molang.KeyframeWithQuery;
+import com.github.standobyte.jojo.client.render.entity.animnew.mojang.Animation;
+import com.github.standobyte.jojo.client.render.entity.animnew.mojang.Transformation;
+import com.github.standobyte.jojo.client.render.entity.animnew.mojang.Transformation.Interpolation;
+import com.github.standobyte.jojo.client.render.entity.animnew.molang.KeyframeWithQuery;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;

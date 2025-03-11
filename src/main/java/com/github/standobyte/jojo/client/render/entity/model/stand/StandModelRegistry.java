@@ -8,7 +8,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.stand.GeckoStandAnimator;
+import com.github.standobyte.jojo.client.render.entity.animnew.stand.GeckoStandAnimator;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 
 import net.minecraft.util.ResourceLocation;

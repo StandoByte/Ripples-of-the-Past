@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.render.entity.model.animnew.stand;
+package com.github.standobyte.jojo.client.render.entity.animnew.stand;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -10,14 +10,13 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.client.render.entity.model.animnew.BarrageSwings;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.BarrageSwings.BarrageSwing;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Animation;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Keyframe;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Transformation;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Transformation.Targets;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.molang.AnimContext;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.stand.StandActionAnimation.TimelineKeys;
+import com.github.standobyte.jojo.client.render.entity.animnew.BarrageSwings;
+import com.github.standobyte.jojo.client.render.entity.animnew.BarrageSwings.BarrageSwing;
+import com.github.standobyte.jojo.client.render.entity.animnew.mojang.Animation;
+import com.github.standobyte.jojo.client.render.entity.animnew.mojang.Keyframe;
+import com.github.standobyte.jojo.client.render.entity.animnew.mojang.Transformation;
+import com.github.standobyte.jojo.client.render.entity.animnew.mojang.Transformation.Targets;
+import com.github.standobyte.jojo.client.render.entity.animnew.stand.StandActionAnimation.TimelineKeys;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandPose;
@@ -142,12 +141,12 @@ public class GeckoStandAnimator implements IStandAnimator {
     }
     
     protected static final Vector3f TEMP = new Vector3f();
-    public static void animate(StandEntityModel<?> model, Animation animation, float ticks, float animSpeed, AnimContext animContext) {
+    public static void animate(StandEntityModel<?> model, Animation animation, float ticks, float animSpeed) {
         float seconds = animation.looping() ? (ticks / 20.0f) % animation.lengthInSeconds() : ticks / 20.0f;
-        animateSecs(model, animation, seconds, animSpeed, animContext);
+        animateSecs(model, animation, seconds, animSpeed);
     }
     
-    public static void animateSecs(StandEntityModel<?> model, Animation animation, float seconds, float animSpeed, AnimContext animContext) {
+    public static void animateSecs(StandEntityModel<?> model, Animation animation, float seconds, float animSpeed) {
         for (Map.Entry<String, List<Transformation>> entry : animation.boneAnimations().entrySet()) {
             ModelRenderer modelPart = model.getModelPart(entry.getKey());
             if (modelPart != null) {

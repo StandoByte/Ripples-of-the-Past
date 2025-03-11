@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.render.entity.model.animnew.mojang;
+package com.github.standobyte.jojo.client.render.entity.animnew.mojang;
 
 import net.minecraft.util.math.vector.Vector3f;
 

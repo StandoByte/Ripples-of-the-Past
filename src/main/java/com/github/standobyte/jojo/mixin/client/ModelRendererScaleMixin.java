@@ -5,7 +5,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-import com.github.standobyte.jojo.client.render.entity.model.animnew.IModelRendererScale;
+import com.github.standobyte.jojo.client.render.entity.animnew.IModelRendererScale;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import net.minecraft.client.renderer.model.ModelRenderer;

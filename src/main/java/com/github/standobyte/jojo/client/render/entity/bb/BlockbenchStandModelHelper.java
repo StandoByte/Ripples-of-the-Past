@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import org.apache.commons.lang3.reflect.FieldUtils;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.INamedModelParts;
+import com.github.standobyte.jojo.client.render.entity.animnew.INamedModelParts;
 import com.github.standobyte.jojo.client.render.entity.pose.XRotationModelRenderer;
 
 import it.unimi.dsi.fastutil.objects.ObjectList;

@@ -12,10 +12,10 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import com.github.standobyte.jojo.client.render.entity.model.animnew.ParseGeckoAnims;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Animation;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.molang.MolangInterpreter;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.stand.GeckoStandAnimator;
+import com.github.standobyte.jojo.client.render.entity.animnew.ParseGeckoAnims;
+import com.github.standobyte.jojo.client.render.entity.animnew.mojang.Animation;
+import com.github.standobyte.jojo.client.render.entity.animnew.molang.MolangInterpreter;
+import com.github.standobyte.jojo.client.render.entity.animnew.stand.GeckoStandAnimator;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandModelRegistry;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandModelRegistry.StandModelRegistryObj;
 import com.google.common.collect.Maps;

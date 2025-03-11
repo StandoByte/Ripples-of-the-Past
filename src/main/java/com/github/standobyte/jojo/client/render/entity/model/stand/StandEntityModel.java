@@ -16,11 +16,11 @@ import javax.annotation.Nullable;
 import org.apache.commons.lang3.mutable.MutableFloat;
 
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.INamedModelParts;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.ModelPartDefaultState;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.stand.IStandAnimator;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.stand.LegacyStandAnimator;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.stand.StandPoseData;
+import com.github.standobyte.jojo.client.render.entity.animnew.INamedModelParts;
+import com.github.standobyte.jojo.client.render.entity.animnew.ModelPartDefaultState;
+import com.github.standobyte.jojo.client.render.entity.animnew.stand.IStandAnimator;
+import com.github.standobyte.jojo.client.render.entity.animnew.stand.LegacyStandAnimator;
+import com.github.standobyte.jojo.client.render.entity.animnew.stand.StandPoseData;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandModelRegistry.StandModelRegistryObj;
 import com.github.standobyte.jojo.client.render.entity.pose.IModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose;

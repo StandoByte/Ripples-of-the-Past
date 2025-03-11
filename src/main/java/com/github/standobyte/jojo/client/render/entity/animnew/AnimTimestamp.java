@@ -1,16 +1,16 @@
-package com.github.standobyte.jojo.client.render.entity.model.animnew;
+package com.github.standobyte.jojo.client.render.entity.animnew;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Animation;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Keyframe;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Transformation;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.molang.AnimContext;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.molang.KeyframeWithQuery;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.stand.GeckoStandAnimator;
+import com.github.standobyte.jojo.client.render.entity.animnew.mojang.Animation;
+import com.github.standobyte.jojo.client.render.entity.animnew.mojang.Keyframe;
+import com.github.standobyte.jojo.client.render.entity.animnew.mojang.Transformation;
+import com.github.standobyte.jojo.client.render.entity.animnew.molang.AnimMolangQuery;
+import com.github.standobyte.jojo.client.render.entity.animnew.molang.KeyframeWithQuery;
+import com.github.standobyte.jojo.client.render.entity.animnew.stand.GeckoStandAnimator;
 
 import net.minecraft.util.math.vector.Vector3f;
 
@@ -34,7 +34,8 @@ public class AnimTimestamp {
         }
         
         Map<String, List<Transformation>> boneAnimations = new HashMap<>();
-        AnimContext.clearContext();
+        LivingEntityRenderState.clear();
+        AnimMolangQuery.instance.fillContext(LivingEntityRenderState.reusedState);
         for (Map.Entry<String, List<Transformation>> entry : anim.boneAnimations().entrySet()) {
             List<Transformation> timestampTransforms = new ArrayList<>();
             for (Transformation tf : entry.getValue()) {

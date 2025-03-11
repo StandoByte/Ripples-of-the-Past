@@ -1,9 +1,9 @@
-package com.github.standobyte.jojo.client.render.entity.model.animnew.mojang;
+package com.github.standobyte.jojo.client.render.entity.animnew.mojang;
 
 import java.util.Arrays;
 
-import com.github.standobyte.jojo.client.render.entity.model.animnew.IModelRendererScale;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.molang.KeyframeWithQuery;
+import com.github.standobyte.jojo.client.render.entity.animnew.IModelRendererScale;
+import com.github.standobyte.jojo.client.render.entity.animnew.molang.KeyframeWithQuery;
 
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.util.math.vector.Vector3f;
