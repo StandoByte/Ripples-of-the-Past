@@ -318,11 +318,19 @@ public class HamonData extends TypeSpecificData {
             // go down when not using hamon breath for even longer (20s)
             else {
                 inc = maxStability / 1200 * breathMaskHandicap;
+                
+                // do not go down below 20%
+                float stabLowerCap = 0.2F;
+                boolean stabIsReallyLow = (breathStability + inc) / maxStability < stabLowerCap;
+                if (stabIsReallyLow) {
+                    inc = MathHelper.clamp(inc, stabLowerCap * maxStability - breathStability, 0);
+                }
+                
                 maskNoBreath = true;
                 
                 if (canIndicateInHud) {
                     BarsRenderer.getBarEffects(BarType.ENERGY_HAMON).triggerRedHighlight(999999);
-                    if ((ticksMaskWithNoHamonBreath - ticksCanBreatheWithMask > 400 || (breathStability + inc) / maxStability < 0.2F)
+                    if ((ticksMaskWithNoHamonBreath - ticksCanBreatheWithMask > 400 || stabIsReallyLow)
                             && breathStability + inc > 0
                             && ModHamonActions.HAMON_BREATH.get().checkConditions(user, power, ActionTarget.EMPTY).isPositive()) {
                         ClientUtil.setOverlayMessage(new TranslationTextComponent("hamon.breath_control_mask.restore_stab"));
