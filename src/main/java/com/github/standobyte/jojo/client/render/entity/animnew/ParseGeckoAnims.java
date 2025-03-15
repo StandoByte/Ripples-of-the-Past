@@ -43,10 +43,11 @@ public class ParseGeckoAnims {
         JsonObject boneAnims = animJson.getAsJsonObject("bones");
         if (boneAnims != null) {
             for (Map.Entry<String, JsonElement> bone : boneAnims.entrySet()) {
+                String boneName = bone.getKey();
                 JsonObject tfJson = bone.getValue().getAsJsonObject();
-                parseKeyframes(builder, tfJson, "rotation", Transformation.Targets.ROTATE, bone.getKey());
-                parseKeyframes(builder, tfJson, "position", Transformation.Targets.TRANSLATE, bone.getKey());
-                parseKeyframes(builder, tfJson, "scale", Transformation.Targets.SCALE, bone.getKey());
+                parseKeyframes(builder, tfJson, "rotation", Transformation.Targets.ROTATE, boneName);
+                parseKeyframes(builder, tfJson, "position", Transformation.Targets.TRANSLATE, boneName);
+                parseKeyframes(builder, tfJson, "scale", Transformation.Targets.SCALE, boneName);
             }
         }
         

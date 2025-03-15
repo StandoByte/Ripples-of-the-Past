@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Random;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -77,6 +78,8 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     @Deprecated protected final Map<StandPose, IActionAnimation<T>> actionAnim = new HashMap<>();
     @Deprecated private Map<ModelRenderer, MutableFloat> secondXRotMap = new HashMap<>();
     
+    protected ModelRenderer root;
+    
     protected StandEntityModel(boolean scaleHead, float yHeadOffset, float zHeadOffset) {
         this(scaleHead, yHeadOffset, zHeadOffset, 2.0F, 2.0F, 24.0F);
     }
@@ -110,11 +113,17 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
             }
             initialized = true;
         }
+        
+        if (root == null) {
+            root = new ModelRenderer(this);
+            root.setPos(0.0F, 0.0F, 0.0F);
+            forEachModelPart(root::addChild);
+        }
+        putNamedModelPart("root", root);
     }
     
     protected void clearAllCubes() {
-        headParts().forEach(this::clearAllCubes);
-        bodyParts().forEach(this::clearAllCubes);
+        forEachModelPart(this::clearAllCubes);
     }
     
     protected void clearAllCubes(ModelRenderer modelPart) {
@@ -330,6 +339,11 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     @Override
     public abstract Iterable<ModelRenderer> bodyParts();
     
+    public void forEachModelPart(Consumer<ModelRenderer> action) {
+        headParts().forEach(action);
+        bodyParts().forEach(action);
+    }
+    
     
     
     @Deprecated
@@ -369,16 +383,25 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
                 matrixStack, buffer, 
                 packedLight, packedOverlay, red, green, blue, alpha);
     }
+
+    public void renderToBuffer(MatrixStack pMatrixStack, IVertexBuilder pBuffer, int pPackedLight, int pPackedOverlay, float pRed, float pGreen, float pBlue, float pAlpha) {
+        if (root.visible) {
+            pMatrixStack.pushPose();
+            root.translateAndRotate(pMatrixStack);
+            super.renderToBuffer(pMatrixStack, pBuffer, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
+            pMatrixStack.popPose();
+        }
+   }
     
     protected void initOpposites() {}
     
     @Override
-    public ModelRenderer putNamedModelPart(String name, ModelRenderer modelPart) {
+    public void putNamedModelPart(String name, ModelRenderer modelPart) {
+        if (modelPart == null) return;
         ModelPartDefaultState modelPartState = ModelPartDefaultState.fromModelPart(modelPart);
         if (modelPartState != null) {
             namedModelParts.put(name, modelPartState);
         }
-        return modelPart;
     }
     
     protected final BiMap<ModelRenderer, ModelRenderer> oppositeHandside = HashBiMap.create();

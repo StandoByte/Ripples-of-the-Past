@@ -40,6 +40,11 @@ public class GeckoStandAnimator implements IStandAnimator {
     
     public GeckoStandAnimator() {}
     
+    @Override
+    public boolean isLegacy() {
+        return false;
+    }
+    
     
     public void setExists() {
         this.exists = true;

@@ -1156,13 +1156,13 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             return animStep;
         }
         else {
-            if (isFollowingUser()) {
-                LivingEntity user = getUser();
-                if (user != null) {
-                    this.yBodyRot = user.yBodyRot;
-                    return animStep;
-                }
-            }
+//            if (isFollowingUser()) {
+//                LivingEntity user = getUser();
+//                if (user != null) {
+//                    this.yBodyRot = user.yBodyRot;
+//                    return animStep;
+//                }
+//            }
             
             return super.tickHeadTurn(yRot, animStep);
         }

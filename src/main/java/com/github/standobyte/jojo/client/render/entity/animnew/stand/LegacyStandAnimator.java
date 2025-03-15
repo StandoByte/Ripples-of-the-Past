@@ -46,6 +46,11 @@ public class LegacyStandAnimator<T extends StandEntity> implements IStandAnimato
         this.summonPoses = summonPoses;
         this.actionAnim = actionAnim;
     }
+    
+    @Override
+    public boolean isLegacy() {
+        return true;
+    }
 
     @Override
     public <A extends StandEntity> boolean poseStand(@Nullable A standEntity, StandEntityModel<A> standEntityModel, StandPoseData poseData, 
@@ -57,8 +62,7 @@ public class LegacyStandAnimator<T extends StandEntity> implements IStandAnimato
         currentActionAnim = null;
         
         model.resetXRotation();
-        model.headParts().forEach(part -> ClientUtil.setRotationAngle(part, 0, 0, 0));
-        model.bodyParts().forEach(part -> ClientUtil.setRotationAngle(part, 0, 0, 0));
+        model.forEachModelPart(part -> ClientUtil.setRotationAngle(part, 0, 0, 0));
         
         StandPose standPose = poseData.standPose;
         if (standPose == StandPose.SUMMON && ticks > SUMMON_ANIMATION_LENGTH) {

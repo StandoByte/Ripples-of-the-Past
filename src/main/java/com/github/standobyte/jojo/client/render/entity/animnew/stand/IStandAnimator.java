@@ -8,6 +8,7 @@ import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 public interface IStandAnimator {
+    boolean isLegacy();
     <T extends StandEntity> boolean poseStand(@Nullable T entity, StandEntityModel<T> model, StandPoseData pose, 
             float ticks, float yRotOffsetDeg, float xRotDeg);
     
