@@ -58,7 +58,7 @@ public class HamonOrganismInfusion extends HamonAction {
             if (!isLiving) {
                 return conditionMessage("living_mob");
             }
-            return ActionConditionResult.POSITIVE;
+            return super.checkTarget(target, user, power);
         case BLOCK:
             BlockPos blockPos = target.getBlockPos();
             BlockState blockState = user.level.getBlockState(blockPos);

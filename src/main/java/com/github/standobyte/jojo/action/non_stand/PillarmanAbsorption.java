@@ -37,7 +37,7 @@ public class PillarmanAbsorption extends PillarmanAction {
     public ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, INonStandPower power) {
         Entity entityTarget = target.getEntity();
         if (entityTarget instanceof LivingEntity) {
-            return ActionConditionResult.POSITIVE;
+            return super.checkTarget(target, user, power);
         }
         return ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
     }

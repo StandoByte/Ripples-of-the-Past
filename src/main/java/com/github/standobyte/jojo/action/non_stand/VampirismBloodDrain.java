@@ -49,7 +49,7 @@ public class VampirismBloodDrain extends VampirismAction {
                 return conditionMessage("blood");
 //                return livingTarget.tickCount > 20 ? conditionMessageContinueHold("blood") : ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
             }
-            return ActionConditionResult.POSITIVE;
+            return super.checkTarget(target, user, power);
         }
         return ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
     }

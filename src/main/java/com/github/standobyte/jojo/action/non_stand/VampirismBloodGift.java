@@ -31,7 +31,7 @@ public class VampirismBloodGift extends VampirismAction {
         if (targetLiving.getHealth() > 6.0F) {
             return conditionMessage("target_too_many_health");
         }
-        return ActionConditionResult.POSITIVE;
+        return super.checkTarget(target, user, power);
     }
     
     @Override

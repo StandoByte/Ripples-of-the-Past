@@ -33,7 +33,7 @@ public class ZombieDevour extends ZombieAction {
             if (!JojoModUtil.canBleed(livingTarget) || JojoModUtil.isUndeadOrVampiric(livingTarget)) {
                 return conditionMessage("blood");
             }
-            return ActionConditionResult.POSITIVE;
+            return super.checkTarget(target, user, power);
         }
         return ActionConditionResult.NEGATIVE_CONTINUE_HOLD;
     }
