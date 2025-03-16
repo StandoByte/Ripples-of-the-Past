@@ -174,7 +174,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
     
     
     private int blocksPerTick(StandEntity standEntity) {
-        return MathUtil.fractionRandomInc(CrazyDiamondHeal.healingSpeed(standEntity) * 3);
+        return MathUtil.fractionRandomInc(CrazyDiamondHeal.crazyDRestorationSpeed(standEntity) * 3);
     }
     
 

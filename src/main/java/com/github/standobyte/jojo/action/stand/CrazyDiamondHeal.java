@@ -27,9 +27,11 @@ import net.minecraft.util.math.MathHelper;
 import net.minecraft.world.World;
 
 public class CrazyDiamondHeal extends StandEntityAction {
+    private final double healSpeed;
 
     public CrazyDiamondHeal(StandEntityAction.Builder builder) {
         super(builder);
+        healSpeed = 1;
         friendlyFire = true;
     }
     
@@ -72,7 +74,7 @@ public class CrazyDiamondHeal extends StandEntityAction {
             IHasHealth toHeal = (IHasHealth) targetEntity;
             if (toHeal.getHealth() < toHeal.getMaxHealth()) {
                 if (!world.isClientSide()) {
-                    toHeal.setHealth(toHeal.getHealth() + toHeal.getMaxHealth() / 40 * (float) healingSpeed(standEntity));
+                    toHeal.setHealth(toHeal.getHealth() + toHeal.getMaxHealth() / 40 * (float) healSpeedWithConfig(standEntity));
                 }
                 healedThisTick = true;
                 addParticlesAround(targetEntity);
@@ -83,7 +85,7 @@ public class CrazyDiamondHeal extends StandEntityAction {
             BoatEntity toHeal = (BoatEntity) targetEntity;
             if (toHeal.getDamage() > 0) {
                 if (!world.isClientSide()) {
-                    toHeal.setDamage(Math.max(toHeal.getDamage() - (float) healingSpeed(standEntity), 0));
+                    toHeal.setDamage(Math.max(toHeal.getDamage() - (float) healSpeedWithConfig(standEntity), 0));
                 }
                 healedThisTick = true;
                 addParticlesAround(targetEntity);
@@ -96,11 +98,7 @@ public class CrazyDiamondHeal extends StandEntityAction {
         }
     }
 
-    public static double healingSpeed(StandEntity standEntity) {
-        return standEntity.getAttackSpeed() * 0.05F + 0.55;
-    }
-
-    public static boolean healLivingEntity(World world, LivingEntity entity, StandEntity standEntity, StandEntityTask task) {
+    public boolean healLivingEntity(World world, LivingEntity entity, StandEntity standEntity, StandEntityTask task) {
         LivingEntity toHeal = StandUtil.getStandUser(entity);
         // FIXME disable it if the target is a dead body already
         if (entity.deathTime > 0) {
@@ -122,7 +120,7 @@ public class CrazyDiamondHeal extends StandEntityAction {
             }
             return true;
         }
-        float healingSpeed = (float) healingSpeed(standEntity);
+        float healingSpeed = (float) healSpeedWithConfig(standEntity);
         boolean healed = toHeal.getHealth() < toHeal.getMaxHealth() || toHeal.hasEffect(ModStatusEffects.BLEEDING.get());
         
         if (toHeal.getHealth() < toHeal.getMaxHealth()) {
@@ -148,6 +146,14 @@ public class CrazyDiamondHeal extends StandEntityAction {
         }
         
         return false;
+    }
+
+    public static double crazyDRestorationSpeed(StandEntity standEntity) {
+        return standEntity.getAttackSpeed() * 0.05F + 0.55;
+    }
+    
+    protected double healSpeedWithConfig(StandEntity standEntity) {
+        return crazyDRestorationSpeed(standEntity) * healSpeed;
     }
     
     private static class BleedingTimer {
