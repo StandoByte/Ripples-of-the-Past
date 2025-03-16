@@ -1073,7 +1073,9 @@ public class HamonData extends TypeSpecificData {
         for (int i = 0; i < exercises.length; i++) {
             setExerciseValue(exercises[i], ticks[i], clientSide);
         }
-        updateExerciseAttributes(power.getUser());
+        if (power != null) {
+            updateExerciseAttributes(power.getUser());
+        }
     }
     
     private void setExerciseValue(Exercise exercise, int value, boolean clientSide) {
