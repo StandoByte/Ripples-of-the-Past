@@ -241,6 +241,15 @@ public class ClientModSettingsScreen extends SettingsScreen {
             };
 //            addButton(standMotionTilt.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this, i));
             
+            BooleanSetting standOutline = new BooleanSetting(settings, 
+                    new TranslationTextComponent("jojo.config.client.standOutline"), 
+                    new TranslationTextComponent("jojo.config.client.standOutline.tooltip")
+                    ) {
+                @Override public Boolean get() { return settingsValues.standOutline; }
+                @Override public void set(Boolean value) { settingsValues.standOutline = value; }
+            };
+            addButton(standOutline.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this, i));
+            
             addBackButton(DialogTexts.GUI_BACK, i);
         }
         

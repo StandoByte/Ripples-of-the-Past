@@ -34,6 +34,7 @@ public class ClientModSettings {
         public boolean _standMotionTilt = false;
         public boolean poseOnLmbRmb = true;
         public boolean autoResolveActivation = true;
+        public boolean standOutline = true;
         
         public boolean menacingParticles = true;
         public boolean characterVoiceLines = true;

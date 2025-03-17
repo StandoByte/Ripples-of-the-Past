@@ -6,6 +6,7 @@ import java.util.OptionalInt;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCap;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientEventHandler;
+import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.IEntityGlowColor;
 import com.github.standobyte.jojo.client.render.entity.animnew.stand.IStandAnimator;
@@ -139,17 +140,17 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
             Entity user = entity.getUser();
             if (mc.cameraEntity != null && mc.cameraEntity.is(user)) {
                 if (ClientEventHandler.getInstance().isZooming) {
-                    return ViewObstructionPrevention.ARMS_ONLY_OUTLINE;
+                    return ClientModSettings.getSettingsReadOnly().standOutline ? ViewObstructionPrevention.ARMS_ONLY_OUTLINE : ViewObstructionPrevention.ARMS_ONLY;
                 }
-                if (entity.isFollowingUser() && !entity.isArmsOnlyMode()) {
+                if (!entity.isArmsOnlyMode()) {
                     Vector3d diffVec = entity.getPosition(partialTick).subtract(user.getPosition(partialTick));
                     Vector3d lookVec = Vector3d.directionFromRotation(0, user.getViewYRot(partialTick));
                     
                     diffVec = new Vector3d(diffVec.x, 0, diffVec.z);
                     lookVec = new Vector3d(lookVec.x, 0, lookVec.z);
                     double distanceSqr = diffVec.lengthSqr();
-                    if (distanceSqr < 0.25 || distanceSqr < 1 && lookVec.dot(diffVec) > distanceSqr / 2) {
-                        return ViewObstructionPrevention.ARMS_ONLY_OUTLINE;
+                    if (distanceSqr < 0.25 || distanceSqr < 9 && lookVec.dot(diffVec) > distanceSqr / 2) {
+                        return ClientModSettings.getSettingsReadOnly().standOutline ? ViewObstructionPrevention.ARMS_ONLY_OUTLINE : ViewObstructionPrevention.ARMS_ONLY;
                     }
                 }
             }

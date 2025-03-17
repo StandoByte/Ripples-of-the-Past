@@ -720,6 +720,8 @@
   "jojo.config.client.option.stand_right": "Right",
   "jojo.config.client.standMotionTilt": "(WIP) Stand motion tilt",
   "jojo.config.client.standMotionTilt.tooltip": "Enables humanoid Stand model's tilt when the Stand is moving. Early version - this will be improved in later updates.",
+  "jojo.config.client.standOutline": "Stand front outline",
+  "jojo.config.client.standOutline.tooltip": "When your Stand is in front of you, the game only renders its arms to not block the view, and a glowing outline in a shape of the Stand. Disabling this setting with remove this outline and only keep the arms.",
   "jojo.config.client.characterVoiceLines": "Character voice lines",
   "jojo.config.client.characterVoiceLines.tooltip": "Whether or not voice lines of the JoJo characters whose powers the players use are played.",
   "jojo.config.client.thirdPersonHamonAura": "Hamon aura in 3rd person",
