@@ -459,6 +459,10 @@ public class ModSounds {
 
     public static final RegistryObject<SoundEvent> JOSUKE_FIX = register("josuke_fix");
 
+    public static final RegistryObject<SoundEvent> JOSUKE_PRAY_FOR_ETERNITY = register("josuke_pray_for_eternity");
+
+    public static final RegistryObject<SoundEvent> JOSUKE_YO_ANGELO = register("josuke_yo_angelo");
+
     public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_SUMMON = register("crazy_diamond_summon");
     
     public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_UNSUMMON = register("crazy_diamond_unsummon");
@@ -485,7 +489,12 @@ public class ModSounds {
     
     public static final RegistryObject<SoundEvent> CRAZY_DIAMOND_BLOOD_CUTTER_SHOT = register("crazy_diamond_blood_cutter_shot");
     
+    public static final RegistryObject<SoundEvent> ANGELO_ROCK_GRUNT = register("angelo_rock_grunt");
+    
     public static final OstSoundList CRAZY_DIAMOND_OST = new OstSoundList(new ResourceLocation(JojoMod.MOD_ID, "crazy_diamond_ost"), SOUNDS);
+    
+    // in case someone makes an Echoes addon, they'll be able to just put the sound to sounds.json
+    public static final RegistryObject<SoundEvent> KOICHI_YO_ANGELO = register("koichi_yo_angelo");
     
     
     

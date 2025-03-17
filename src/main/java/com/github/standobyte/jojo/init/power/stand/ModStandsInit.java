@@ -6,6 +6,7 @@ import static com.github.standobyte.jojo.init.power.ModCommonRegisters.ACTIONS;
 import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.JojoMod;
+import com.github.standobyte.jojo.action.stand.CrazyDiamondAngeloRock;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockBullet;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMove;
@@ -688,8 +689,12 @@ public class ModStandsInit {
                     .standAutoSummonMode(AutoSummonMode.MAIN_ARM)
                     .partsRequired(StandPart.ARMS)));
     
+    public static final RegistryObject<StandEntityActionModifier> CRAZY_DIAMOND_ANGELO_ROCK = ACTIONS.register("crazy_diamond_angelo_rock", 
+            () -> new CrazyDiamondAngeloRock(new StandAction.Builder().staminaCost(50).resolveLevelToUnlock(2)));
+    
     public static final RegistryObject<CrazyDiamondRestoreTerrain> CRAZY_DIAMOND_RESTORE_TERRAIN = ACTIONS.register("crazy_diamond_restore_terrain", 
             () -> new CrazyDiamondRestoreTerrain(new StandEntityAction.Builder().holdType().staminaCostTick(2) // cost per block rather than per tick
+                    .attackRecoveryFollowup(CRAZY_DIAMOND_ANGELO_ROCK, CRAZY_DIAMOND_FINISHER_PUNCH)
                     .resolveLevelToUnlock(2)
                     .shout(ModSounds.JOSUKE_FIX).standSound(Phase.PERFORM, ModSounds.CRAZY_DIAMOND_FIX_STARTED)
                     .partsRequired(StandPart.ARMS)));

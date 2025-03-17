@@ -12,6 +12,9 @@ public interface IModdedDamageSource {
 
     IModdedDamageSource setPreventDamagingArmor();
     boolean preventsDamagingArmor();
-    
+
     boolean canHurtStands();
+
+    IModdedDamageSource setNonLethal();
+    boolean isNonLethal();
 }

@@ -752,6 +752,10 @@ public class MCUtil {
         return res;
     }
     
+    public static boolean dropBrokenBlock(LivingEntity entity) {
+        return !(entity instanceof PlayerEntity && ((PlayerEntity) entity).abilities.instabuild);
+    }
+    
     
     
     

@@ -67,6 +67,8 @@ import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.item.OilItem;
 import com.github.standobyte.jojo.modcompat.ModInteractionUtil;
 import com.github.standobyte.jojo.modcompat.OptionalDependencyHelper;
+import com.github.standobyte.jojo.network.PacketManager;
+import com.github.standobyte.jojo.network.packets.fromclient.ClAngeloRockButtonPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ServerIdPacket;
 import com.github.standobyte.jojo.potion.BleedingEffect;
 import com.github.standobyte.jojo.power.IPower;
@@ -80,6 +82,7 @@ import com.github.standobyte.jojo.util.general.OptionalFloat;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
+import com.github.standobyte.jojo.util.mod.IPlayerPossess;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.google.common.base.MoreObjects;
 import com.mojang.blaze3d.matrix.MatrixStack;
@@ -88,11 +91,13 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
+import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
 import net.minecraft.client.gui.FontRenderer;
 import net.minecraft.client.gui.IngameGui;
 import net.minecraft.client.gui.NewChatGui;
+import net.minecraft.client.gui.screen.ChatScreen;
 import net.minecraft.client.gui.screen.ControlsScreen;
 import net.minecraft.client.gui.screen.DeathScreen;
 import net.minecraft.client.gui.screen.IngameMenuScreen;
@@ -143,6 +148,7 @@ import net.minecraft.util.text.event.ClickEvent;
 import net.minecraft.util.text.event.HoverEvent;
 import net.minecraft.world.GameType;
 import net.minecraftforge.client.ForgeHooksClient;
+import net.minecraftforge.client.event.ClientChatEvent;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.client.event.EntityViewRenderEvent;
 import net.minecraftforge.client.event.GuiOpenEvent;
@@ -389,6 +395,7 @@ public class ClientEventHandler {
                     
                     FirstPersonHamonAura.getInstance().tick();
                     InventoryItemHighlight.tick();
+                    tickAfterChat();
                 }
                 
                 if (mc.player != null && mc.player.tickCount == 200) {
@@ -1351,6 +1358,26 @@ public class ClientEventHandler {
                 });
             }
         }
+        
+        else if (screen instanceof ChatScreen) {
+            Entity possessed = IPlayerPossess.getPossessedEntity(mc.player);
+            if (possessed != null && possessed.getType() == ModEntityTypes.ANGELO_ROCK.get()) {
+                int x = screen.width / 2 - 100;
+                int y = screen.height - 40;
+                Button angeloRockDieButton = new Button(x, y, 200, 20, 
+                        new TranslationTextComponent(mc.level.getLevelData().isHardcore() ? "deathScreen.spectate" : "deathScreen.respawn"), 
+                        button -> PacketManager.sendToServer(ClAngeloRockButtonPacket.respawn()));
+                event.addWidget(angeloRockDieButton);
+                
+                Button angeloRockGruntButton = new ImageVanillaButton(x - 24, y, 20, 20, 
+                        238, 150, 
+                        ClientUtil.ADDITIONAL_UI, 256, 256,
+                        button -> PacketManager.sendToServer(ClAngeloRockButtonPacket.grunt())) {
+                    @Override public void playDownSound(SoundHandler pHandler) {}
+                };
+                event.addWidget(angeloRockGruntButton);
+            }
+        }
     }
 
     @SubscribeEvent
@@ -1509,5 +1536,36 @@ public class ClientEventHandler {
     public void clientLoggedOut(ClientPlayerNetworkEvent.LoggedOutEvent event) {
         PhotosCache.onLogOut(serverId);
         isLoggedIn = false;
+    }
+    
+    
+    private boolean setScreenNextTick = false;
+    @SubscribeEvent
+    public void onChat(ClientChatEvent event) {
+        if (event.getOriginalMessage().equals("//recording")) {
+            event.setCanceled(true);
+            mc.gui.getChat().clearMessages(false);
+            setScreenNextTick = true;
+        }
+    }
+    
+    private void tickAfterChat() {
+        if (setScreenNextTick) {
+            mc.setScreen(new DummyScreen());
+            setScreenNextTick = false;
+        }
+    }
+    
+    private static class DummyScreen extends Screen {
+
+        protected DummyScreen() {
+            super(StringTextComponent.EMPTY);
+        }
+        
+        @Override
+        public boolean isPauseScreen() {
+            return false;
+        }
+        
     }
 }
