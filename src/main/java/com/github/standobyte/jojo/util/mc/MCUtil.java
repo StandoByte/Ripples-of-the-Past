@@ -992,6 +992,11 @@ public class MCUtil {
         }
     }
     
+    public static double getValueIfPresent(LivingEntity entity, Attribute attribute, double or) {
+        ModifiableAttributeInstance instance = entity.getAttribute(attribute);
+        return instance != null ? instance.getValue() : or;
+    }
+    
     
     
     
@@ -1188,7 +1193,7 @@ public class MCUtil {
     
     
     
-    public static void onEntityResurrect(LivingEntity entity) {
+    public static void onLivingResurrect(LivingEntity entity) {
         entity.deathTime = 0;
         if (!entity.level.isClientSide()) {
             PacketManager.sendToClientsTrackingAndSelf(new TrResetDeathTimePacket(entity.getId()), entity);

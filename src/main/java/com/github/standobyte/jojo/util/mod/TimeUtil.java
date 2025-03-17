@@ -1,6 +1,5 @@
 package com.github.standobyte.jojo.util.mod;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.capability.world.TimeStopHandler;
 import com.github.standobyte.jojo.capability.world.TimeStopInstance;
 
@@ -9,9 +8,7 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.ChunkPos;
 import net.minecraft.world.World;
-import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
-@EventBusSubscriber(modid = JojoMod.MOD_ID)
 @Deprecated
 public class TimeUtil {
 

@@ -13,7 +13,7 @@ import com.github.standobyte.jojo.action.stand.punch.StandBlockPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandMissedPunch;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.stand.StandActionAnimation;
+import com.github.standobyte.jojo.client.render.entity.animnew.stand.StandActionAnimation;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandPose;
@@ -56,7 +56,7 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
     
     @Override
     public void standPerform(World world, StandEntity standEntity, IStandPower userPower, StandEntityTask task) {
-        standEntity.addFinisherMeter(0.125F, StandEntity.FINISHER_NO_DECAY_TICKS);
+        standEntity.addFinisherMeter(0.1F, StandEntity.FINISHER_NO_DECAY_TICKS);
         standEntity.punch(task, this, task.getTarget());
     }
     
@@ -65,7 +65,7 @@ public class StandEntityLightAttack extends StandEntityAction implements IHasSta
         return IHasStandPunch.super.punchEntity(stand, target, dmgSource)
                 .damage(StandStatFormulas.getLightAttackDamage(stand.getAttackDamage()))
                 .addKnockback(stand.guardCounter())
-                .addFinisher(0.075F)
+                .addFinisher(0.1F)
                 .impactSound(punchSound);
     }
     

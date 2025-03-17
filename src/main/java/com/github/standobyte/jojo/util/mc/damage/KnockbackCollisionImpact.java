@@ -35,6 +35,7 @@ import net.minecraft.block.BlockState;
 import net.minecraft.block.material.Material;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.nbt.StringNBT;
 import net.minecraft.particles.BasicParticleType;
@@ -103,8 +104,12 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
     }
     
     public KnockbackCollisionImpact onPunchSetKnockbackImpact(Vector3d knockbackVec, LivingEntity attacker) {
+        double kbMultiplier = 1 - (asLiving != null ? MCUtil.getValueIfPresent(asLiving, Attributes.KNOCKBACK_RESISTANCE, 0) : 0);
+        if (kbMultiplier <= 0) return this;
+        
         this.knockbackImpactStrength = knockbackVec.length();
         this.knockbackVec = knockbackVec.scale(1 / knockbackImpactStrength);
+        this.knockbackImpactStrength *= kbMultiplier;
         this.minCos = 1;
         this.hadImpactWithBlock = false;
         this.attacker = attacker;
@@ -115,6 +120,8 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
     }
     
     public KnockbackCollisionImpact withImpactExplosion(float radius, DamageSource aoeDamageSource, float aoeDamage) {
+        if (this.knockbackVec == null) return this;
+        
         this.explosionRadius = radius;
         if (aoeDamageSource != null) aoeDamageSource.setExplosion();
         this.explosionDmgSource = aoeDamageSource;
@@ -123,22 +130,44 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
     }
     
     public KnockbackCollisionImpact hamonDamage(float punchBaseDamage, int fireTicks, IParticleData sparkParticles) {
+        if (this.knockbackVec == null) return this;
+        
         this.syoPunchBaseDamage = punchBaseDamage;
         this.scarletOverdriveFireTicks = fireTicks;
         this.hamonParticles = sparkParticles;
         return this;
     }
     
+    public void reset() {
+        this.knockbackVec = null;
+        this.knockbackImpactStrength = 0;
+        this.explosionRadius = 0;
+        this.explosionDmgSource = null;
+        this.explosionDamage = 0;
+        this.syoPunchBaseDamage = 0;
+        this.scarletOverdriveFireTicks = 0;
+        this.hamonParticles = null;
+    }
+    
+    public void setKnockbackImpactStrength(double strength) {
+        if (strength <= 0) {
+            reset();
+        }
+        else {
+            this.knockbackImpactStrength = strength;
+        }
+    }
+    
     public void tick() {
         if (isActive()) {
             if (knockbackImpactStrength <= 0) {
-                setKnockbackImpactStrength(0);
+                reset();
                 return;
             }
             
             Vector3d deltaMovement = entity.getDeltaMovement();
             if (Math.abs(deltaMovement.x) < 1E-7 && Math.abs(deltaMovement.z) < 1E-7) {
-                setKnockbackImpactStrength(0);
+                reset();
                 return;
             }
             
@@ -146,22 +175,12 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
             Vector3d deltaMovementNormalized = deltaMovement.scale(1 / deltaMovementLen);
             double cos = deltaMovementNormalized.dot(knockbackVec);
             if (cos <= 0) {
-                setKnockbackImpactStrength(0);
+                reset();
                 return;
             }
             
             minCos = Math.min(minCos, cos);
             knockbackImpactStrength = Math.min(knockbackImpactStrength, deltaMovementLen);
-        }
-    }
-    
-    public void setKnockbackImpactStrength(double strength) {
-        if (strength <= 0) {
-            this.knockbackVec = null;
-            this.knockbackImpactStrength = 0;
-        }
-        else {
-            this.knockbackImpactStrength = strength;
         }
     }
     
@@ -334,7 +353,6 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
                     
                     return getKnockbackImpactStrength() > 0;
                 });
-                setKnockbackImpactStrength(0);
                 
                 Vector3d collisionDir = new Vector3d(collision.movementX - collision.x, collision.movementY - collision.y, collision.movementZ - collision.z);
                 Direction faceHit = Direction.getNearest(collisionDir.x, collisionDir.y, collisionDir.z);
@@ -367,6 +385,8 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
                         hurtTarget(entity, DamageSource.FLY_INTO_WALL, wallDamage.floatValue());
                     }
                 }
+                
+                reset();
             }
         }
         

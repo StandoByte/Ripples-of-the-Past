@@ -1,10 +1,10 @@
-package com.github.standobyte.jojo.client.render.entity.model.animnew.molang;
+package com.github.standobyte.jojo.client.render.entity.animnew.molang;
 
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Keyframe;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Transformation;
+import com.github.standobyte.jojo.client.render.entity.animnew.mojang.Keyframe;
+import com.github.standobyte.jojo.client.render.entity.animnew.mojang.Transformation;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
@@ -73,7 +73,7 @@ public class KeyframeWithQuery {
             }
             catch (NumberFormatException e) {
                 String string = jsonPrimitive.getAsString();
-                return new IFloatSupplier.Molang(string);
+                return new IFloatSupplier.Molang(string, !string.contains(AnimMolangQuery.NAMESPACE));
             }
         }
         
@@ -89,37 +89,34 @@ public class KeyframeWithQuery {
                 return value;
             }
             
+            @Override
+            public boolean isNumericLiteral() {
+                return true;
+            }
+            
         }
         
         public static class Molang implements IFloatSupplier {
             protected final MochaFunction function;
+            protected boolean compile;
             
-            public Molang(String expression) {
-                this.function = makeFunction(expression);
+            public Molang(String expression, boolean compile) {
+                this.function = makeFunction(expression, compile);
             }
             
-            private static boolean badBytecodeError;
-            private static MochaFunction makeFunction(String molang) {
+            private static MochaFunction makeFunction(String molang, boolean compile) {
                 MochaEngine<?> interpreter = MolangInterpreter.get();
-                if (badBytecodeError) {
-                    return interpreter.prepareEval(molang);
-                }
-                else {
+                if (compile) {
                     try {
-                        return interpreter.compile(molang);
-                    }
-                    catch (Exception eCompile) {
-                        /*
-                         * Стою на асфальте я в лыжи обутый - 
-                         * То ли лыжи не едут, то ли я е***утый.
-                         */
-                        // TODO Do more testing with Mocha to figure out if it's me using bad practices, or it's a bug and I should open an issue on their GitHub
-                        MochaFunction function = interpreter.prepareEval(molang);
-                        badBytecodeError = true;
-                        JojoMod.getLogger().error("Failed to compile a Molang expression ({}) into bytecode. From now on they will be interpreted.", molang/*, eCompile*/);
+                        MochaFunction function = interpreter.compile(molang);
                         return function;
                     }
+                    catch (Exception e) {
+                        JojoMod.getLogger().error("Failed to compile a Molang expression ({}) into bytecode.", molang, e);
+                    }
                 }
+                MochaFunction function = interpreter.prepareEval(molang);
+                return function;
             }
             
             @Override

@@ -1,11 +1,11 @@
-package com.github.standobyte.jojo.client.render.entity.model.animnew;
+package com.github.standobyte.jojo.client.render.entity.animnew;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Keyframe;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Transformation.Interpolation;
+import com.github.standobyte.jojo.client.render.entity.animnew.mojang.Keyframe;
+import com.github.standobyte.jojo.client.render.entity.animnew.mojang.Transformation.Interpolation;
 import com.github.standobyte.jojo.util.general.MathUtil;
 
 import it.unimi.dsi.fastutil.floats.Float2FloatFunction;

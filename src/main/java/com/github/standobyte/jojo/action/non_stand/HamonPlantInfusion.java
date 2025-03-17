@@ -35,7 +35,7 @@ public class HamonPlantInfusion extends HamonOrganismInfusion {
         if (!(isBlockLiving(blockState) || block instanceof FlowerPotBlock && blockState.getBlock() != Blocks.FLOWER_POT)) {
             return conditionMessage("living_plant");
         }
-        return ActionConditionResult.POSITIVE;
+        return super.checkTarget(target, user, power);
     }
     
     @Override

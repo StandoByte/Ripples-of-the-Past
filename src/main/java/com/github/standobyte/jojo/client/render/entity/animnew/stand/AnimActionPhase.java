@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.render.entity.model.animnew.stand;
+package com.github.standobyte.jojo.client.render.entity.animnew.stand;
 
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 

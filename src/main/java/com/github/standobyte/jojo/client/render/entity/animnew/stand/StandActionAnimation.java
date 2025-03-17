@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.render.entity.model.animnew.stand;
+package com.github.standobyte.jojo.client.render.entity.animnew.stand;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -9,8 +9,9 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.stand.StandEntityAction.Phase;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.mojang.Animation;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.molang.AnimContext;
+import com.github.standobyte.jojo.client.render.entity.animnew.LivingEntityRenderState;
+import com.github.standobyte.jojo.client.render.entity.animnew.mojang.Animation;
+import com.github.standobyte.jojo.client.render.entity.animnew.molang.AnimMolangQuery;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 
@@ -84,8 +85,9 @@ public class StandActionAnimation {
             animTime = anim.looping() ? (poseData.animTime / 20f) % anim.lengthInSeconds() : poseData.animTime / 20f;
         }
         
-        AnimContext animContext = AnimContext.fillContext(entity, yRotOffsetDeg, xRotDeg);
-        GeckoStandAnimator.animateSecs(model, anim, animTime, ANIM_SPEED, animContext);
+        LivingEntityRenderState.extract(entity, yRotOffsetDeg, xRotDeg);
+        AnimMolangQuery.instance.fillContext(LivingEntityRenderState.reusedState);
+        GeckoStandAnimator.animateSecs(model, anim, animTime, ANIM_SPEED);
     }
     
     

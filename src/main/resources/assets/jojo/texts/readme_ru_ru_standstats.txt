@@ -19,15 +19,6 @@ Each Stand also has two range parameters, relevant for the manual control mode:
     rangeMax - the Stand cannot move beyond that range
     
 The setting called "randomWeight" determines how likely the Stand is to get from an Arrow. By default most Stands have it on 2, but such Stands as Star Platinum or The World have it at 1, so they are twice as rare.
-
-Currently, The World and Star Platinum have additional settings which affect their time stop abilities:
-    timeStopMaxTicks - maximum time stop duration limit you can go up to while not being a vampire 
-    timeStopMaxTicksVampire - maximum time stop duration limit for vampires with >= 80% vampire energy
-    timeStopLearningPerTick - how many ticks of maximum time stop you add to your time stop limit for each tick in time stop
-        Example: if you only can stop time for 2 seconds, and this value is set to 0.5, after stopping time for 2 seconds your limit will increase by 2 * 0.5 = 1 second (going up to 3 seconds).
-    timeStopDecayPerDay - time stop duration limit (in ticks) subtracted by the end of the day, if you haven't used a time stop ability that day at least once.
-    timeStopCooldownPerTick - time stop ability cooldown multiplier
-        Example: after stopping time for 5 seconds, if this value is set to 3.0, time stop will go on 15 seconds cooldown.
 ----
 3) Save the edited file(s).
 4) Open the Minecraft world, or type /reload command in the chat if you're editing it while playing in that world (basically the standard process of data pack loading).

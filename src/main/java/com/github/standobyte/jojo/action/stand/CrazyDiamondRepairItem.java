@@ -151,7 +151,7 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
             dropExperience(user, itemStack);
             itemStack.removeTagKey("Enchantments");
             itemStack.removeTagKey("StoredEnchantments");
-            int damageToRestore = Math.min(itemStack.getDamageValue(), (int) (CrazyDiamondHeal.healingSpeed(standEntity) * 40));
+            int damageToRestore = Math.min(itemStack.getDamageValue(), (int) (CrazyDiamondHeal.crazyDRestorationSpeed(standEntity) * 40));
             damage += damageToRestore;
             if (itemStack.isDamageableItem()) {
                 itemStack.setDamageValue(itemStack.getDamageValue() - damageToRestore);
@@ -169,7 +169,7 @@ public class CrazyDiamondRepairItem extends StandEntityAction {
     }
     
     public static boolean itemTransformationTick(int taskTicks, StandEntity standEntity) {
-        int ticks = (int) (10 / CrazyDiamondHeal.healingSpeed(standEntity));
+        int ticks = (int) (10 / CrazyDiamondHeal.crazyDRestorationSpeed(standEntity));
         return taskTicks % ticks == ticks - 1;
     }
     

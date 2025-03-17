@@ -230,7 +230,6 @@ public class PacketManager {
         registerMessage(serverChannel, new SyncSingleFlagPacket.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrDoubleShiftPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new MultiLineOverlayMsgPacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        registerMessage(serverChannel, new TrResetDeathTimePacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new KnockbackResTickPacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrTypeNonStandPowerPacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrTypeStandInstancePacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_CLIENT));
@@ -261,7 +260,7 @@ public class PacketManager {
         registerMessage(serverChannel, new VampireSleepInCoffinPacket.Handler(),           Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrZombieDataPacket.Handler(),                   Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrPillarmanDataPacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
-        registerMessage(serverChannel, new TrPillarmanParticlesPacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(serverChannel, new TrPillarmanParticlesPacket.Handler(),           Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrStaminaPacket.Handler(),                      Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new ArrowXpLevelsDataPacket.Handler(),              Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new PreviousStandTypesPacket.Handler(),             Optional.of(NetworkDirection.PLAY_TO_CLIENT));
@@ -286,6 +285,7 @@ public class PacketManager {
         registerMessage(serverChannel, new UpdateClientCapCachePacket.Handler(),           Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new SoulSpawnPacket.Handler(),                      Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrPossessEntityPacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_CLIENT));
+        registerMessage(serverChannel, new TrResetDeathTimePacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrPlayerContinuousActionPacket.Handler(),       Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrKnivesCountPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_CLIENT));
         registerMessage(serverChannel, new TrCosmeticItemsPacket.Handler(),                Optional.of(NetworkDirection.PLAY_TO_CLIENT));

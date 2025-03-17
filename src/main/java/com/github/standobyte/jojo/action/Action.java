@@ -202,7 +202,8 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     }
     
     protected ActionConditionResult checkTarget(ActionTarget target, LivingEntity user, P power) {
-        return ActionConditionResult.POSITIVE;
+        Entity targetEntity = target.getEntity();
+        return ActionConditionResult.noMessage(targetEntity == null || !targetEntity.is(user));
     }
     
     public double getMaxRangeSqEntityTarget() {
