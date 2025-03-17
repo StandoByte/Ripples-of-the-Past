@@ -18,34 +18,36 @@ public class StandRelativeOffset {
     private final boolean doYOffset;
     public final double y;
     private final boolean useXRot;
+    public boolean canInvertSide;
 //    private final float yRotOffset;
     
     public static StandRelativeOffset noYOffset(double left, double forward) {
-        return new StandRelativeOffset(left, 0, forward, false, false);
+        return new StandRelativeOffset(left, 0, forward, false, false, true);
     }
     
     public static StandRelativeOffset withYOffset(double left, double y, double forward) {
-        return new StandRelativeOffset(left, y, forward, true, false);
+        return new StandRelativeOffset(left, y, forward, true, false, true);
     }
     
     public static StandRelativeOffset withXRot(double left, double forward) {
-        return new StandRelativeOffset(left, 0, forward, false, true);
+        return new StandRelativeOffset(left, 0, forward, false, true, true);
     }
     
     public StandRelativeOffset copy() {
-        return new StandRelativeOffset(this.left, this.y, this.forward, this.doYOffset, this.useXRot);
+        return new StandRelativeOffset(this.left, this.y, this.forward, this.doYOffset, this.useXRot, this.canInvertSide);
     }
     
     public StandRelativeOffset copyScale(double leftScale, double yScale, double forwardScale) {
-        return new StandRelativeOffset(this.left * leftScale, this.y * yScale, this.forward * forwardScale, this.doYOffset, this.useXRot);
+        return new StandRelativeOffset(this.left * leftScale, this.y * yScale, this.forward * forwardScale, this.doYOffset, this.useXRot, this.canInvertSide);
     }
     
-    private StandRelativeOffset(double left, double y, double forward, boolean doYOffset, boolean useXRot) {
+    private StandRelativeOffset(double left, double y, double forward, boolean doYOffset, boolean useXRot, boolean canInvertSide) {
         this.left = left;
         this.forward = forward;
         this.doYOffset = doYOffset;
         this.y = y;
         this.useXRot = useXRot;
+        this.canInvertSide = canInvertSide;
     }
     
     @Deprecated
@@ -61,7 +63,9 @@ public class StandRelativeOffset {
         }
         Vector3d vec;
         double left = this.left;
-        if (userSettings.map(settings -> settings.standSide == HandSide.LEFT).orElse(false)) {
+        
+        boolean invertSide = canInvertSide && userSettings.map(settings -> settings.standSide == HandSide.LEFT).orElse(false);
+        if (invertSide) {
             left = -left;
         }
         
@@ -91,7 +95,7 @@ public class StandRelativeOffset {
 
     @Deprecated
     public StandRelativeOffset withRelativeVec(Vector3d vec) {
-        return new StandRelativeOffset(vec.x, vec.y, vec.z, this.doYOffset, this.useXRot);
+        return new StandRelativeOffset(vec.x, vec.y, vec.z, this.doYOffset, this.useXRot, this.canInvertSide);
     }
     
     @Deprecated
@@ -109,7 +113,7 @@ public class StandRelativeOffset {
         if (this.doYOffset) {
             return this;
         }
-        return new StandRelativeOffset(this.left, y, this.forward, true, this.useXRot);
+        return new StandRelativeOffset(this.left, y, this.forward, true, this.useXRot, this.canInvertSide);
     }
     
     public StandRelativeOffset makeSnapshot(double yDefault, float xRot) {
@@ -126,10 +130,13 @@ public class StandRelativeOffset {
             y = vec.y;
             z = vec.z;
         }
-        return new StandRelativeOffset(x, y, z, true, false);
+        return new StandRelativeOffset(x, y, z, true, false, this.canInvertSide);
     }
     
     public StandRelativeOffset lerp(StandRelativeOffset prev, double lerp, double yDefault, float xRot) {
+        if (prev.canInvertSide != this.canInvertSide) {
+            return this;
+        }
         StandRelativeOffset offset0 = prev.makeSnapshot(yDefault, xRot);
         StandRelativeOffset offset1 = this.makeSnapshot(yDefault, xRot);
         
@@ -137,7 +144,7 @@ public class StandRelativeOffset {
                 MathHelper.lerp(lerp, offset0.left,    offset1.left),
                 MathHelper.lerp(lerp, offset0.y,       offset1.y),
                 MathHelper.lerp(lerp, offset0.forward, offset1.forward),
-                true, false);
+                true, false, canInvertSide);
     }
     
 
@@ -147,10 +154,11 @@ public class StandRelativeOffset {
         buf.writeDouble(forward);
         buf.writeBoolean(doYOffset);
         buf.writeBoolean(useXRot);
+        buf.writeBoolean(canInvertSide);
     }
     
     public static StandRelativeOffset readFromBuf(PacketBuffer buf) {
-        StandRelativeOffset offset = new StandRelativeOffset(buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readBoolean(), buf.readBoolean());
+        StandRelativeOffset offset = new StandRelativeOffset(buf.readDouble(), buf.readDouble(), buf.readDouble(), buf.readBoolean(), buf.readBoolean(), buf.readBoolean());
         return offset;
     }
 }

@@ -65,7 +65,8 @@ public class CrazyDiamondPreviousState extends StandEntityAction {
 
     public CrazyDiamondPreviousState(StandEntityAction.Builder builder) {
         super(builder);
-        this.userOffsetLeftArm = builder.userOffset.copyScale(-1, 1, 1);
+        this.userOffset.canInvertSide = false;
+        this.userOffsetLeftArm = this.userOffset.copyScale(-1, 1, 1);
     }
 
     @Override
