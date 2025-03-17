@@ -117,13 +117,13 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         if (root == null) {
             root = new ModelRenderer(this);
             root.setPos(0.0F, 0.0F, 0.0F);
-            forEachModelPart(root::addChild);
+            forEachTopModelPart(root::addChild);
         }
         putNamedModelPart("root", root);
     }
     
     protected void clearAllCubes() {
-        forEachModelPart(this::clearAllCubes);
+        forEachTopModelPart(this::clearAllCubes);
     }
     
     protected void clearAllCubes(ModelRenderer modelPart) {
@@ -339,7 +339,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     @Override
     public abstract Iterable<ModelRenderer> bodyParts();
     
-    public void forEachModelPart(Consumer<ModelRenderer> action) {
+    public void forEachTopModelPart(Consumer<ModelRenderer> action) {
         headParts().forEach(action);
         bodyParts().forEach(action);
     }

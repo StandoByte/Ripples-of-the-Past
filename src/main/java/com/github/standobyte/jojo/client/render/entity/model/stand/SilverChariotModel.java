@@ -373,6 +373,7 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
                         new ModelPose<SilverChariotEntity>(new RotationAngle[] {
                                 new RotationAngle(body, 0.0F, -0.2618F, 0.0F),
                                 new RotationAngle(torso, 0.0F, 0.0F, 0.0F),
+                                new RotationAngle(upperPart, 0.0F, 0.0F, 0.0F),
                                 new RotationAngle(leftArm, 0.9163F, -0.2618F, -0.2182F),
                                 new RotationAngle(leftForeArm, -1.309F, 0.0F, 0.0F),
                                 new RotationAngle(rightArm, 0.5236F, 0.0F, 0.1309F),
@@ -387,6 +388,7 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
                         new ModelPose<SilverChariotEntity>(new RotationAngle[] {
                                 new RotationAngle(body, 0.0F, -0.2618F, 0.0F),
                                 new RotationAngle(torso, 0.0F, 0.0F, 0.0F),
+                                new RotationAngle(upperPart, 0.0F, 0.0F, 0.0F),
                                 new RotationAngle(leftArm, 0.9163F, -0.2618F, 0.1309F),
                                 new RotationAngle(leftForeArm, -1.309F, 0.0F, 0.0F),
                                 new RotationAngle(rightArm, -0.5236F, 0.0F, -0.2618F),
@@ -400,6 +402,7 @@ public class SilverChariotModel extends HumanoidStandModel<SilverChariotEntity> 
                 .addPose(chariot -> chariot != null && chariot.hasRapier() && !chariot.hasArmor(), 
                         new ModelPose<SilverChariotEntity>(new RotationAngle[] {
                                 new RotationAngle(body, 0.2618F, 0.7854F, 0.0436F),
+                                new RotationAngle(torso, 0.0F, 0.0F, 0.0F),
                                 new RotationAngle(upperPart, 0.0F, -0.5236F, 0.0F),
                                 new RotationAngle(leftArm, -0.6109F, 0.3927F, -1.0472F),
                                 new RotationAngle(leftForeArm, -1.3963F, 0.2618F, 0.2618F),
