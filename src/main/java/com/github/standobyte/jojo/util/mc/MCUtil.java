@@ -28,6 +28,7 @@ import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.LotsOfBlocksBrokenPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.SpawnParticlePacket;
+import com.github.standobyte.jojo.network.packets.fromserver.TrResetDeathTimePacket;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mc.damage.explosion.CustomExplosion;
@@ -1037,10 +1038,17 @@ public class MCUtil {
     
     
     
-    public static void onPlayerResurrect(ServerPlayerEntity player) {
-        if (!player.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY) && !player.isSpectator()) {
-            player.setExperienceLevels(0);
-            player.setExperiencePoints(0);
+    public static void onLivingResurrect(LivingEntity entity) {
+        entity.deathTime = 0;
+        if (!entity.level.isClientSide()) {
+            PacketManager.sendToClientsTrackingAndSelf(new TrResetDeathTimePacket(entity.getId()), entity);
+        }
+        if (entity instanceof ServerPlayerEntity) {
+            ServerPlayerEntity player = (ServerPlayerEntity) entity;
+            if (!player.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY) && !player.isSpectator()) {
+                player.setExperienceLevels(0);
+                player.setExperiencePoints(0);
+            }
         }
     }
     

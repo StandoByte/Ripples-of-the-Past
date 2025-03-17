@@ -112,11 +112,9 @@ public class CrazyDiamondHeal extends StandEntityAction {
             
             toHeal.deathTime = Math.max(toHeal.deathTime - 2, 0);
             entity.deathTime = toHeal.deathTime;
-            if (!world.isClientSide() && toHeal.deathTime <= 0) {
+            if (!world.isClientSide() && toHeal.deathTime <= 0 && toHeal.getHealth() <= 0) {
                 toHeal.setHealth(0.001F);
-                if (toHeal instanceof ServerPlayerEntity) {
-                    MCUtil.onPlayerResurrect((ServerPlayerEntity) toHeal);
-                }
+                MCUtil.onLivingResurrect(toHeal);
             }
             return true;
         }

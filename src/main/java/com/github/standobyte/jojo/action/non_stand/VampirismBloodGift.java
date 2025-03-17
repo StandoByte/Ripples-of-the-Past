@@ -1,9 +1,13 @@
 package com.github.standobyte.jojo.action.non_stand;
 
+import java.util.Optional;
+
 import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
+import com.github.standobyte.jojo.power.impl.nonstand.type.NonStandPowerType;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
@@ -25,8 +29,18 @@ public class VampirismBloodGift extends VampirismAction {
             return conditionMessage("player_target");
         }
         LivingEntity targetLiving = (LivingEntity) targetEntity;
-        if (INonStandPower.getNonStandPowerOptional(targetLiving).map(targetPower -> targetPower.hasPower()).orElse(true)) {
+        Optional<INonStandPower> powerData = INonStandPower.getNonStandPowerOptional(targetLiving).resolve();
+        if (!powerData.isPresent()) {
             return conditionMessage("cant_become_vampire");
+        }
+        Optional<NonStandPowerType<?>> curType = powerData.map(targetPower -> targetPower.getType());
+        if (curType.isPresent()) {
+            if (curType.get() == ModPowers.VAMPIRISM.get()) {
+                return conditionMessage("already_vampire");
+            }
+            else {
+                return conditionMessage("cant_become_vampire");
+            }
         }
         if (targetLiving.getHealth() > 6.0F) {
             return conditionMessage("target_too_many_health");
@@ -50,12 +64,22 @@ public class VampirismBloodGift extends VampirismAction {
 
     @Override
     protected void perform(World world, LivingEntity user, INonStandPower power, ActionTarget target) {
-        if (!world.isClientSide()) {
-            PlayerEntity targetPlayer = (PlayerEntity) target.getEntity();
-            if (INonStandPower.getNonStandPowerOptional(targetPlayer).map(
-                    targetPower -> targetPower.givePower(ModPowers.VAMPIRISM.get())).orElse(false)) {
-                user.hurt(new DamageSource("blood_gift").bypassArmor(), 10.0F);
-                targetPlayer.heal(targetPlayer.getMaxHealth());
+        Entity targetEntity = target.getEntity();
+        if (targetEntity instanceof LivingEntity) {
+            LivingEntity targetLiving = (LivingEntity) targetEntity;
+
+            if (!world.isClientSide()) {
+                if (INonStandPower.getNonStandPowerOptional(targetLiving).map(
+                        targetPower -> targetPower.givePower(ModPowers.VAMPIRISM.get())).orElse(false)) {
+                    user.hurt(new DamageSource("blood_gift").bypassArmor(), 10.0F);
+                    boolean wasDead = targetLiving.getHealth() <= 0;
+                    targetLiving.heal(targetLiving.getMaxHealth());
+                    if (wasDead) {
+                        MCUtil.onLivingResurrect(targetLiving);
+                    }
+                }
+
+                targetLiving.deathTime = 0;
             }
         }
     }
