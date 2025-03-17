@@ -77,6 +77,10 @@ public abstract class StandEffectInstance {
         return this;
     }
     
+    public IStandPower getUserPower() {
+        return userPower;
+    }
+    
     public LivingEntity getStandUser() {
         return user;
     }

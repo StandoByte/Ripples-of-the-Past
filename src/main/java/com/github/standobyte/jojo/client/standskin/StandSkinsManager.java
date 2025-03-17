@@ -307,12 +307,15 @@ public class StandSkinsManager extends ReloadListener<Map<ResourceLocation, Stan
         if (storyPartDef.isJsonPrimitive()) {
             if (storyPartDef.getAsJsonPrimitive().isNumber()) {
                 int num = storyPartDef.getAsInt();
-                if (num > 0 && num <= StoryPart.values().length) {
-                    return StoryPart.values()[num - 1].getName();
+                if (num > 0 && num <= StoryPart.CANON_PARTS.length) {
+                    return StoryPart.CANON_PARTS[num - 1].getName();
                 }
+                return StoryPart.OTHER.getName();
             }
             else if (storyPartDef.getAsJsonPrimitive().isString()) {
-                return new TranslationTextComponent(storyPartDef.getAsString());
+                String name = storyPartDef.getAsString();
+                StoryPart existing = StoryPart.getFromName(name);
+                return existing != null ? existing.getName() : new TranslationTextComponent(name);
             }
         }
         else if (storyPartDef.isJsonObject()) {

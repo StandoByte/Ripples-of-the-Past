@@ -55,7 +55,7 @@ public class ParseGenericModel {
     
     
     
-    private static class ModelParsed implements IParsedModel {
+    public static class ModelParsed implements IParsedModel {
         Resolution resolution;
         List<Element> elements;
         List<BlockbenchObj> outliner;
@@ -170,7 +170,6 @@ public class ParseGenericModel {
                         for (String vertexId : visitedVertices) {
                             verticesArr[i++] = new Vertex(vertices.get(vertexId), face.uv.get(vertexId));
                         }
-                        sortVertices(verticesArr);
                         
                         MeshFaceBuilder faceBuilder = meshBuilder.startFaceCalcNormal();
                         for (Vertex vertex : verticesArr) {
@@ -185,31 +184,20 @@ public class ParseGenericModel {
                 }
                 modelCubesCollection.add(meshBuilder.buildCube());
             }
-        }
-        
-        // record moment
-        private static class Vertex {
-            final float[] pos;
-            final float[] uv;
             
-            Vertex(final float[] pos, final float[] uv) {
-                this.pos = pos;
-                this.uv = uv;
+            // record moment
+            private static class Vertex {
+                final float[] pos;
+                final float[] uv;
+                
+                Vertex(final float[] pos, final float[] uv) {
+                    this.pos = pos;
+                    this.uv = uv;
+                }
             }
         }
         
-        private static void sortVertices(Vertex[] vertices) {
-            if (vertices.length < 4) return;
-
-            if (MeshVerticesHelper.magicFunction(vertices[1].pos, vertices[2].pos, vertices[0].pos, vertices[3].pos)) {
-                ArrayUtils.swap(vertices, 0, 1);
-                ArrayUtils.swap(vertices, 0, 2);
-            } else if (MeshVerticesHelper.magicFunction(vertices[0].pos, vertices[1].pos, vertices[2].pos, vertices[3].pos)) {
-                ArrayUtils.swap(vertices, 1, 2);
-            }
-        }
-        
-        static class ElementCube extends Element {
+        public static class ElementCube extends Element {
             boolean box_uv;
             boolean rescale;
             float[] from;

@@ -36,7 +36,7 @@ public class HamonHypnosis extends HamonAction {
             HypnosisTargetCheck check = LivingUtilCap.canBeHypnotized((LivingEntity) target.getEntity(), user);
             switch (check) {
             case CORRECT:
-                return ActionConditionResult.POSITIVE;
+                return super.checkTarget(target, user, power);
             case INVALID:
                 return conditionMessage("hypnosis");
             case ALREADY_TAMED_BY_USER:

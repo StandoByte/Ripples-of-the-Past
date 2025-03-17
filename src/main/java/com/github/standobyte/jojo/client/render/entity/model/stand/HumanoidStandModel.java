@@ -18,6 +18,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.particle.custom.StandCrumbleParticle;
+import com.github.standobyte.jojo.client.render.entity.animnew.stand.IStandAnimator;
 import com.github.standobyte.jojo.client.render.entity.pose.IModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose.ModelAnim;
@@ -51,29 +52,25 @@ import net.minecraft.util.math.vector.Vector3d;
 
 
 public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<T> {
-    protected ModelRenderer root;
     protected ModelRenderer head;
+    protected ModelRenderer headRot;
     protected ModelRenderer body;
     protected ModelRenderer upperPart;
     protected ModelRenderer torso;
-    @Deprecated protected XRotationModelRenderer leftArm;
     protected ModelRenderer leftArmXRot;
-    protected ModelRenderer leftArmBone;
+    protected XRotationModelRenderer leftArm;
     protected ModelRenderer leftArmJoint;
     protected ModelRenderer leftForeArm;
-    @Deprecated protected XRotationModelRenderer rightArm;
     protected ModelRenderer rightArmXRot;
-    protected ModelRenderer rightArmBone;
+    protected XRotationModelRenderer rightArm;
     protected ModelRenderer rightArmJoint;
     protected ModelRenderer rightForeArm;
-    @Deprecated protected XRotationModelRenderer leftLeg;
     protected ModelRenderer leftLegXRot;
-    protected ModelRenderer leftLegBone;
+    protected XRotationModelRenderer leftLeg;
     protected ModelRenderer leftLegJoint;
     protected ModelRenderer leftLowerLeg;
-    @Deprecated protected XRotationModelRenderer rightLeg;
     protected ModelRenderer rightLegXRot;
-    protected ModelRenderer rightLegBone;
+    protected XRotationModelRenderer rightLeg;
     protected ModelRenderer rightLegJoint;
     protected ModelRenderer rightLowerLeg;
     
@@ -107,78 +104,78 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
         model.leftArmXRot.setPos(6.0F, -10.0F, 0.0F);
         model.upperPart.addChild(model.leftArmXRot);
 
-        model.leftArmBone = new ModelRenderer(model);
-        model.leftArmBone.setPos(0.0F, 0.0F, 0.0F);
-        model.leftArmXRot.addChild(model.leftArmBone);
+        model.leftArm = new XRotationModelRenderer(model);
+        model.leftArm.setPos(0.0F, 0.0F, 0.0F);
+        model.leftArmXRot.addChild(model.leftArm);
 
         model.leftArmJoint = new ModelRenderer(model);
         model.leftArmJoint.setPos(0.0F, 4.0F, 0.0F);
-        model.leftArmBone.addChild(model.leftArmJoint);
+        model.leftArm.addChild(model.leftArmJoint);
 
         model.leftForeArm = new ModelRenderer(model);
         model.leftForeArm.setPos(0.0F, 4.0F, 0.0F);
-        model.leftArmBone.addChild(model.leftForeArm);
+        model.leftArm.addChild(model.leftForeArm);
 
         model.rightArmXRot = new ModelRenderer(model);
         model.rightArmXRot.setPos(-6.0F, -10.0F, 0.0F);
         model.upperPart.addChild(model.rightArmXRot);
 
-        model.rightArmBone = new ModelRenderer(model);
-        model.rightArmBone.setPos(0.0F, 0.0F, 0.0F);
-        model.rightArmXRot.addChild(model.rightArmBone);
+        model.rightArm = new XRotationModelRenderer(model);
+        model.rightArm.setPos(0.0F, 0.0F, 0.0F);
+        model.rightArmXRot.addChild(model.rightArm);
 
         model.rightArmJoint = new ModelRenderer(model);
         model.rightArmJoint.setPos(0.0F, 4.0F, 0.0F);
-        model.rightArmBone.addChild(model.rightArmJoint);
+        model.rightArm.addChild(model.rightArmJoint);
 
         model.rightForeArm = new ModelRenderer(model);
         model.rightForeArm.setPos(0.0F, 4.0F, 0.0F);
-        model.rightArmBone.addChild(model.rightForeArm);
+        model.rightArm.addChild(model.rightForeArm);
 
         model.leftLegXRot = new ModelRenderer(model);
         model.leftLegXRot.setPos(2.0F, 12.0F, 0.0F);
         model.body.addChild(model.leftLegXRot);
 
-        model.leftLegBone = new ModelRenderer(model);
-        model.leftLegBone.setPos(0.0F, 0.0F, 0.0F);
-        model.leftLegXRot.addChild(model.leftLegBone);
+        model.leftLeg = new XRotationModelRenderer(model);
+        model.leftLeg.setPos(0.0F, 0.0F, 0.0F);
+        model.leftLegXRot.addChild(model.leftLeg);
 
         model.leftLegJoint = new ModelRenderer(model);
         model.leftLegJoint.setPos(0.0F, 6.0F, 0.0F);
-        model.leftLegBone.addChild(model.leftLegJoint);
+        model.leftLeg.addChild(model.leftLegJoint);
 
         model.leftLowerLeg = new ModelRenderer(model);
         model.leftLowerLeg.setPos(0.0F, 6.0F, 0.0F);
-        model.leftLegBone.addChild(model.leftLowerLeg);
+        model.leftLeg.addChild(model.leftLowerLeg);
 
         model.rightLegXRot = new ModelRenderer(model);
         model.rightLegXRot.setPos(-2.0F, 12.0F, 0.0F);
         model.body.addChild(model.rightLegXRot);
 
-        model.rightLegBone = new ModelRenderer(model);
-        model.rightLegBone.setPos(0.0F, 0.0F, 0.0F);
-        model.rightLegXRot.addChild(model.rightLegBone);
+        model.rightLeg = new XRotationModelRenderer(model);
+        model.rightLeg.setPos(0.0F, 0.0F, 0.0F);
+        model.rightLegXRot.addChild(model.rightLeg);
 
         model.rightLegJoint = new ModelRenderer(model);
         model.rightLegJoint.setPos(0.0F, 6.0F, 0.0F);
-        model.rightLegBone.addChild(model.rightLegJoint);
+        model.rightLeg.addChild(model.rightLegJoint);
 
         model.rightLowerLeg = new ModelRenderer(model);
         model.rightLowerLeg.setPos(0.0F, 6.0F, 0.0F);
-        model.rightLegBone.addChild(model.rightLowerLeg);
+        model.rightLeg.addChild(model.rightLowerLeg);
 
         model.head          .texOffs(0, 0)    .addBox(-4.0F, -8.0F, -4.0F, 8.0F, 8.0F, 8.0F, 0.0F, false);
         model.torso         .texOffs(0, 64)   .addBox(-4.0F, 0.0F, -2.0F, 8.0F, 12.0F, 4.0F, 0.0F, false);
-        model.leftArmBone   .texOffs(32, 108) .addBox(-2.0F, -2.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
+        model.leftArm       .texOffs(32, 108) .addBox(-2.0F, -2.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
         model.leftArmJoint  .texOffs(32, 102) .addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.125F, true);
         model.leftForeArm   .texOffs(32, 118) .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false);
-        model.rightArmBone  .texOffs(0, 108)  .addBox(-2.0F, -2.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
+        model.rightArm      .texOffs(0, 108)  .addBox(-2.0F, -2.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
         model.rightArmJoint .texOffs(0, 102)  .addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.125F, false);
         model.rightForeArm  .texOffs(0, 118)  .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false);
-        model.leftLegBone   .texOffs(96, 108) .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
+        model.leftLeg       .texOffs(96, 108) .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
         model.leftLegJoint  .texOffs(96, 102) .addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.125F, true);
         model.leftLowerLeg  .texOffs(96, 118) .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false);
-        model.rightLegBone  .texOffs(64, 108) .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
+        model.rightLeg      .texOffs(64, 108) .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, 0.0F, false);
         model.rightLegJoint .texOffs(64, 102) .addBox(-1.5F, -1.5F, -1.5F, 3.0F, 3.0F, 3.0F, -0.125F, false);
         model.rightLowerLeg .texOffs(64, 118) .addBox(-2.0F, 0.0F, -2.0F, 4.0F, 6.0F, 4.0F, -0.001F, false);
         return model;
@@ -280,33 +277,26 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
     @Override
     public void afterInit() {
         super.afterInit();
-        
-        if (root == null) {
-            root = new ModelRenderer(this);
-            root.setPos(0.0F, 0.0F, 0.0F);
-            root.addChild(head);
-            root.addChild(body);
-        }
-        
         putNamedModelPart("head", head);
+        putNamedModelPart("headRot", headRot);
         putNamedModelPart("body", body);
         putNamedModelPart("upperPart", upperPart);
         putNamedModelPart("torso", torso);
         putNamedModelPart("leftArm", leftArm);
         putNamedModelPart("leftArmXRot", leftArmXRot);
-        putNamedModelPart("leftArmBone", leftArmBone);
+        putNamedModelPart("leftArm", leftArm);
         putNamedModelPart("leftForeArm", leftForeArm);
         putNamedModelPart("rightArm", rightArm);
         putNamedModelPart("rightArmXRot", rightArmXRot);
-        putNamedModelPart("rightArmBone", rightArmBone);
+        putNamedModelPart("rightArm", rightArm);
         putNamedModelPart("rightForeArm", rightForeArm);
         putNamedModelPart("leftLeg", leftLeg);
         putNamedModelPart("leftLegXRot", leftLegXRot);
-        putNamedModelPart("leftLegBone", leftLegBone);
+        putNamedModelPart("leftLeg", leftLeg);
         putNamedModelPart("leftLowerLeg", leftLowerLeg);
         putNamedModelPart("rightLeg", rightLeg);
         putNamedModelPart("rightLegXRot", rightLegXRot);
-        putNamedModelPart("rightLegBone", rightLegBone);
+        putNamedModelPart("rightLeg", rightLeg);
         putNamedModelPart("rightLowerLeg", rightLowerLeg);
     }
 
@@ -383,18 +373,6 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
             break;
         }
     }
-
-    @Override
-    public void renderToBuffer(MatrixStack pMatrixStack, IVertexBuilder pBuffer, int pPackedLight, 
-            int pPackedOverlay, float pRed, float pGreen, float pBlue, float pAlpha) {
-        if (root.visible) {
-            pMatrixStack.pushPose();
-            root.translateAndRotate(pMatrixStack);
-            super.renderToBuffer(pMatrixStack, pBuffer, pPackedLight, pPackedOverlay, pRed, pGreen, pBlue, pAlpha);
-            pMatrixStack.popPose();
-        }
-    }
-    
     
     
     public void addCrumbleParticleAt(HumanoidPart humanoidPart, ResourceLocation texture, Vector3d pos) {
@@ -692,6 +670,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
         return mirrored;
     }
     
+    
     @Override
     public ModelRenderer getArm(HandSide side) {
         switch (side) {
@@ -707,9 +686,9 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
     public ModelRenderer getArmNoXRot(HandSide side) {
         switch (side) {
         case LEFT:
-            return leftArmBone != null ? leftArmBone : leftArm;
+            return leftArm != null ? leftArm : leftArm;
         case RIGHT:
-            return rightArmBone != null ? rightArmBone : rightArm;
+            return rightArm != null ? rightArm : rightArm;
         }
         return null;
     }
@@ -745,13 +724,14 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
     public ModelRenderer getLegNoXRot(HandSide side) {
         switch (side) {
         case LEFT:
-            return leftLegBone != null ? leftLegBone : leftLeg;
+            return leftLeg != null ? leftLeg : leftLeg;
         case RIGHT:
-            return rightLegBone != null ? rightLegBone : rightLeg;
+            return rightLeg != null ? rightLeg : rightLeg;
         }
         return null;
     }
-
+    
+    
     @Override
     protected ModelPose<T> initPoseReset() {
         return new ModelPose<T>(
@@ -777,11 +757,14 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
         if (ClientModSettings.getSettingsReadOnly()._standMotionTilt) {
             motionTilt(entity, ticks);
         }
-        
-        rotateJoint(leftArmJoint, leftForeArm);
-        rotateJoint(rightArmJoint, rightForeArm);
-        rotateJoint(leftLegJoint, leftLowerLeg);
-        rotateJoint(rightLegJoint, rightLowerLeg);
+
+        IStandAnimator standAnimator = getAnimator();
+        if (standAnimator != null && standAnimator.isLegacy()) {
+            rotateJoint(leftArmJoint, leftForeArm);
+            rotateJoint(rightArmJoint, rightForeArm);
+            rotateJoint(leftLegJoint, leftLowerLeg);
+            rotateJoint(rightLegJoint, rightLowerLeg);
+        }
     }
 
     protected void motionTilt(T entity, float ticks) {

@@ -517,6 +517,7 @@ public class ResolveCounter {
     }
     
     public static void addResolve(IStandPower stand, LivingEntity target, float points) {
+        if (stand == null) return;
         target = StandUtil.getStandUser(target);
         boolean hitSelf = target != null && stand.getUser() != null && target.is(stand.getUser());
         if (!hitSelf && attackingTargetGivesResolve(target)) {

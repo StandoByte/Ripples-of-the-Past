@@ -27,9 +27,9 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.player.PlayerClientBroadcastedSettings;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.particle.custom.CustomParticlesHelper;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.BarrageSwings;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.stand.StandPoseData;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.stand.StandPoseData.StandPoseDataFill;
+import com.github.standobyte.jojo.client.render.entity.animnew.BarrageSwings;
+import com.github.standobyte.jojo.client.render.entity.animnew.stand.StandPoseData;
+import com.github.standobyte.jojo.client.render.entity.animnew.stand.StandPoseData.StandPoseDataFill;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.render.entity.pose.anim.barrage.BarrageSwingsHolder;
 import com.github.standobyte.jojo.client.sound.barrage.BarrageHitSoundHandler;
@@ -1156,13 +1156,13 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
             return animStep;
         }
         else {
-            if (isFollowingUser()) {
-                LivingEntity user = getUser();
-                if (user != null) {
-                    this.yBodyRot = user.yBodyRot;
-                    return animStep;
-                }
-            }
+//            if (isFollowingUser()) {
+//                LivingEntity user = getUser();
+//                if (user != null) {
+//                    this.yBodyRot = user.yBodyRot;
+//                    return animStep;
+//                }
+//            }
             
             return super.tickHeadTurn(yRot, animStep);
         }

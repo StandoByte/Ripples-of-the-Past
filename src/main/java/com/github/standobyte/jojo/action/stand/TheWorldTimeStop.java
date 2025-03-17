@@ -1,6 +1,7 @@
 package com.github.standobyte.jojo.action.stand;
 
 import com.github.standobyte.jojo.action.ActionTarget;
+import com.github.standobyte.jojo.action.config.ActionConfigField;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
@@ -12,9 +13,11 @@ import net.minecraft.util.DamageSource;
 import net.minecraft.util.SoundEvent;
 
 public class TheWorldTimeStop extends TimeStop {
+    @ActionConfigField public final int holdDurationToFireMaxLevel; // Don't initialize here, the config won't work. Why? No fucking idea!
 
     public TheWorldTimeStop(Builder builder) {
         super(builder);
+        holdDurationToFireMaxLevel = 20;
     }
 
     @Override
@@ -39,7 +42,7 @@ public class TheWorldTimeStop extends TimeStop {
     }
     
     private int shortenedHoldDuration(IStandPower power, int ticks) {
-        return ticks > 0 && power.getResolveLevel() >= 4 ? Math.max(ticks - 10, 0) : ticks;
+        return ticks > 0 && power.getResolveLevel() >= 4 ? holdDurationToFireMaxLevel : ticks;
     }
     
     @Override

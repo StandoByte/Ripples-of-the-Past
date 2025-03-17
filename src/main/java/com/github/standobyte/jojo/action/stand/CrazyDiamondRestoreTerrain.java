@@ -237,7 +237,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
     
     
     private int blocksPerTick(StandEntity standEntity) {
-        return MathUtil.fractionRandomInc(CrazyDiamondHeal.healingSpeed(standEntity) * 3);
+        return MathUtil.fractionRandomInc(CrazyDiamondHeal.crazyDRestorationSpeed(standEntity) * 3);
     }
     
     private static final Random RANDOM = new Random();
@@ -322,6 +322,7 @@ public class CrazyDiamondRestoreTerrain extends StandEntityAction {
         }
         return 2;
     }
+    
     
     private static boolean tryPlaceBlock(World world, BlockPos blockPos, BlockState blockState, boolean isCreative, boolean randomizePos, 
             List<ItemStack> restorationCost, int xpCost, @Nullable PlayerEntity consumeXpFrom, List<ItemStack> itemsSource) {

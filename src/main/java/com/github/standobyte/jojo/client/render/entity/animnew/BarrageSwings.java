@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.client.render.entity.model.animnew;
+package com.github.standobyte.jojo.client.render.entity.animnew;
 
 import java.util.HashMap;
 import java.util.Iterator;
@@ -8,8 +8,8 @@ import java.util.Map;
 import java.util.Random;
 
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.stand.StandActionAnimation;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.stand.StandPoseData;
+import com.github.standobyte.jojo.client.render.entity.animnew.stand.StandActionAnimation;
+import com.github.standobyte.jojo.client.render.entity.animnew.stand.StandPoseData;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel.VisibilityMode;
 import com.github.standobyte.jojo.entity.stand.StandEntity;

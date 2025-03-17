@@ -42,7 +42,7 @@ public class HamonLifeMagnetism extends HamonAction {
             user instanceof PlayerEntity && !MCUtil.findInInventory(((PlayerEntity) user).inventory, 
                     item -> !item.isEmpty() && item.getItem() instanceof BlockItem && 
                     ((BlockItem) item.getItem()).getBlock() instanceof LeavesBlock).isEmpty()) {
-            return super.checkTarget(target, user, power);
+            return ActionConditionResult.POSITIVE;
         }
         return conditionMessage("leaves");
     }

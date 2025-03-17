@@ -47,7 +47,6 @@ import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
-import com.github.standobyte.jojo.init.power.non_stand.pillarman.ModPillarmanActions;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClDoubleShiftPressPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonInteractAskTeacherPacket;
@@ -895,9 +894,20 @@ public class InputHandler {
     }
     
     public void mcPlayerAttack() {
-        if (mc.hitResult != null && !mc.player.isHandsBusy() && mc.hitResult.getType() == RayTraceResult.Type.ENTITY) {
+        if (mc.hitResult != null && !mc.player.isHandsBusy() && 
+                mc.hitResult.getType() == RayTraceResult.Type.ENTITY && isValidPlayerAttackTarget(mc.hitResult)) {
             mc.gameMode.attack(mc.player, ((EntityRayTraceResult) mc.hitResult).getEntity());
         }
+    }
+    
+    public boolean isValidPlayerAttackTarget(RayTraceResult hitResult) {
+        if (hitResult.getType() == RayTraceResult.Type.ENTITY) {
+            Entity entity = ((EntityRayTraceResult) hitResult).getEntity();
+            if (entity == mc.player || entity instanceof ItemProjectileEntity) {
+                return false;
+            }
+        }
+        return true;
     }
     
     private <P extends IPower<P, ?>> HudClickResult handleMouseClickPowerHud(ActionKey key, KeyBinding keyBinding) {
@@ -1009,11 +1019,8 @@ public class InputHandler {
     
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public void fixArrowPunchKick(ClickInputEvent event) {
-        if (event.isAttack() && mc.hitResult.getType() == Type.ENTITY) {
-            Entity entity = ((EntityRayTraceResult) mc.hitResult).getEntity();
-            if (entity == mc.player || entity instanceof ItemProjectileEntity) {
-                event.setCanceled(true); // prevents kick for "Attempting to attack an invalid entity"
-            }
+        if (event.isAttack() && !isValidPlayerAttackTarget(mc.hitResult)) {
+            event.setCanceled(true); // prevents kick for "Attempting to attack an invalid entity"
         }
     }
 

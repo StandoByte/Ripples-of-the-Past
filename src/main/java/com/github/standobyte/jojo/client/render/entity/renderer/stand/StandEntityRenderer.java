@@ -8,6 +8,7 @@ import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientEventHandler;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.IEntityGlowColor;
+import com.github.standobyte.jojo.client.render.entity.animnew.stand.IStandAnimator;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel.VisibilityMode;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.layer.StandGlowLayer;
@@ -373,6 +374,8 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
     
     protected void idlePoseSwaying(T entity, float ticks, MatrixStack matrixStack) {
         M model = getModel(entity);
+        IStandAnimator anim = model.getAnimator();
+        if (anim != null && !anim.isLegacy()) return;
         if (!entity.isVisibleForAll() && entity.getStandPose() == StandPose.IDLE && 
                 model.attackTime == 0 && entity.isFollowingUser()) {
             LivingEntity user = entity.getUser();

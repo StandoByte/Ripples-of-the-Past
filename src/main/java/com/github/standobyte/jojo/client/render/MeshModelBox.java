@@ -3,6 +3,7 @@ package com.github.standobyte.jojo.client.render;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.github.standobyte.jojo.client.render.entity.bb.MeshVerticesHelper;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 
 import net.minecraft.client.renderer.model.Model;
@@ -130,6 +131,7 @@ public class MeshModelBox extends ModelRenderer.ModelBox {
                 return this;
             }
             
+            private static final int MAX_VERTICES = 4;
             public MeshModelBox.Builder createFace() {
                 if (vertices.size() > 2) {
                     ModelRenderer.PositionTextureVertex[] verticesDummy = new ModelRenderer.PositionTextureVertex[] {
@@ -141,19 +143,22 @@ public class MeshModelBox extends ModelRenderer.ModelBox {
                     ModelRenderer.TexturedQuad quad = new ModelRenderer.TexturedQuad(verticesDummy, 
                             0, 0, 0, 0, 1, 1, false, direction != null ? direction : Direction.UP);
                     
-                    ModelRenderer.PositionTextureVertex[] verticesArr = vertices.toArray(new ModelRenderer.PositionTextureVertex[4]);
-                    if (this.vertices.size() < verticesArr.length) {
+                    ModelRenderer.PositionTextureVertex[] verticesArr = vertices.toArray(new ModelRenderer.PositionTextureVertex[MAX_VERTICES]);
+                    if (this.vertices.size() < MAX_VERTICES) {
                         PositionTextureVertex lastVertex = verticesArr[this.vertices.size() - 1];
                         for (int i = this.vertices.size(); i < verticesArr.length; i++) {
                             verticesArr[i] = lastVertex;
                         }
                     }
+                    else {
+                        MeshVerticesHelper.sortVertices(verticesArr);
+                    }
                     ClientReflection.setVertices(quad, verticesArr);
                     
                     if (calcNormalFromVertices) {
-                        Vector3f pos0 = vertices.get(0).pos.copy();
-                        Vector3f vec1 = vertices.get(1).pos.copy();
-                        Vector3f vec2 = vertices.get(2).pos.copy();
+                        Vector3f pos0 = verticesArr[0].pos.copy();
+                        Vector3f vec1 = verticesArr[1].pos.copy();
+                        Vector3f vec2 = verticesArr[2].pos.copy();
                         vec1.sub(pos0);
                         vec2.sub(pos0);
                         vec1.cross(vec2);

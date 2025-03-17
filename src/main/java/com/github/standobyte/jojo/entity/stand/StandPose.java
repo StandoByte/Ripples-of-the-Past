@@ -8,8 +8,8 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.StandEntityLightAttack;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.stand.StandActionAnimation;
-import com.github.standobyte.jojo.client.render.entity.model.animnew.stand.StandPoseData;
+import com.github.standobyte.jojo.client.render.entity.animnew.stand.StandActionAnimation;
+import com.github.standobyte.jojo.client.render.entity.animnew.stand.StandPoseData;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
 
 public class StandPose {
