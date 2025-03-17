@@ -1042,12 +1042,12 @@ public class MCUtil {
         entity.deathTime = 0;
         if (!entity.level.isClientSide()) {
             PacketManager.sendToClientsTrackingAndSelf(new TrResetDeathTimePacket(entity.getId()), entity);
-        }
-        if (entity instanceof ServerPlayerEntity) {
-            ServerPlayerEntity player = (ServerPlayerEntity) entity;
-            if (!player.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY) && !player.isSpectator()) {
-                player.setExperienceLevels(0);
-                player.setExperiencePoints(0);
+            if (entity instanceof ServerPlayerEntity) {
+                ServerPlayerEntity player = (ServerPlayerEntity) entity;
+                if (!player.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY) && !player.isSpectator()) {
+                    player.setExperienceLevels(0);
+                    player.setExperiencePoints(0);
+                }
             }
         }
     }

@@ -12,7 +12,7 @@ import net.minecraftforge.fml.network.NetworkEvent;
 
 public class TrResetDeathTimePacket {
     private final int entityId;
-    
+
     public TrResetDeathTimePacket(int entityId) {
         this.entityId = entityId;
     }
@@ -35,7 +35,14 @@ public class TrResetDeathTimePacket {
         public void handle(TrResetDeathTimePacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity instanceof LivingEntity) {
-                ((LivingEntity) entity).deathTime = 0;
+                LivingEntity living = ((LivingEntity) entity);
+                if (living.isDeadOrDying()) { /*  new health value might not yet sync at this point, 
+                                               *  which will cause the deathTime timer to tick up a bit more
+                                               *  unless i do smth like this
+                                               */
+                    living.setHealth(0.0001F);
+                }
+                living.deathTime = 0;
             }
         }
 
@@ -44,4 +51,5 @@ public class TrResetDeathTimePacket {
             return TrResetDeathTimePacket.class;
         }
     }
+
 }
