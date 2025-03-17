@@ -379,9 +379,13 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     public void render(T entity, MatrixStack matrixStack, IVertexBuilder buffer, 
             int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
         renderToBuffer(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
-        getAnimator().renderBarrageSwings(entity, this, yRotDeg, xRotDeg, 
-                matrixStack, buffer, 
-                packedLight, packedOverlay, red, green, blue, alpha);
+        ModelRenderer leftArm = getArm(HandSide.LEFT);
+        ModelRenderer rightArm = getArm(HandSide.RIGHT);
+        if (leftArm != null && leftArm.visible && rightArm != null && rightArm.visible) {
+            getAnimator().renderBarrageSwings(entity, this, yRotDeg, xRotDeg, 
+                    matrixStack, buffer, 
+                    packedLight, packedOverlay, red, green, blue, alpha);
+        }
     }
 
     public void renderToBuffer(MatrixStack pMatrixStack, IVertexBuilder pBuffer, int pPackedLight, int pPackedOverlay, float pRed, float pGreen, float pBlue, float pAlpha) {
