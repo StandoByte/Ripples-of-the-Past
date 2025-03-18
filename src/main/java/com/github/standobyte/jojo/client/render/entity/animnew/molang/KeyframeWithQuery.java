@@ -106,15 +106,16 @@ public class KeyframeWithQuery {
             
             private static MochaFunction makeFunction(String molang, boolean compile) {
                 MochaEngine<?> interpreter = MolangInterpreter.get();
-                if (compile) {
-                    try {
-                        MochaFunction function = interpreter.compile(molang);
-                        return function;
-                    }
-                    catch (Exception e) {
-                        JojoMod.getLogger().error("Failed to compile a Molang expression ({}) into bytecode.", molang, e);
-                    }
-                }
+//                if (compile) {
+//                    try {
+//                        MochaFunction function = interpreter.compile(molang);
+//                        return function;
+//                    }
+//                    catch (Exception e) {
+//                        // FIXME (!!) (mocha) java.lang.IllegalStateException: CtClass not found for Java class: interface dependency.standobyte.jojo.mocha.runtime.MochaFunction
+//                        JojoMod.getLogger().error("Failed to compile a Molang expression ({}) into bytecode.", molang, e);
+//                    }
+//                }
                 MochaFunction function = interpreter.prepareEval(molang);
                 return function;
             }

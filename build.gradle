@@ -131,7 +131,7 @@ dependencies {
     
     compileOnly fg.deobf("be.florens:expandability-forge:${expandability_version}")
     
-    shade 'team.unnamed:mocha:3.0.0'
+    shade 'team.unnamed:mocha:3.0.1'
 }
 
 
