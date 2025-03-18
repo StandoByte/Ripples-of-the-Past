@@ -436,6 +436,7 @@
   "death.attack.rockRespawn": "В конце концов %s перестал мыслить",
   "death.attack.rockRespawn.player": "%1$s был слит с камнем, пока боролся с %2$s",
   "death.attack.rockBroken": "%s был вскопан",
+  "death.attack.rockBroken.player": "%s был вскопан, пока боролся с %s",
   
   "stat.jojo.vampire_animals_drained": "Поглощено животных",
   "stat.jojo.vampire_people_drained": "Поглощено людей",
