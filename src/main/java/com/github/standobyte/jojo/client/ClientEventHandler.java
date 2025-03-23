@@ -219,9 +219,12 @@ public class ClientEventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onPlaySound(PlaySoundEvent event) {
-        ISound sound = event.getResultSound();
-        if (ClientTimeStopHandler.getInstance().shouldCancelSound(sound)) {
-            event.setResultSound(null);
+        ClientTimeStopHandler ts = ClientTimeStopHandler.getInstance();
+        if (ts != null) {
+            ISound sound = event.getResultSound();
+            if (ts.shouldCancelSound(sound)) {
+                event.setResultSound(null);
+            }
         }
     }
     
@@ -342,9 +345,11 @@ public class ClientEventHandler {
                 ClientUtil.canSeeStands = StandUtil.playerCanSeeStands(mc.player);
                 ClientUtil.canHearStands = /*StandUtil.playerCanHearStands(mc.player)*/ ClientUtil.canSeeStands;
                 
-                ClientTimeStopHandler timeStopHandler = ClientTimeStopHandler.getInstance();
                 if (mc.player.isAlive()) {
-                    timeStopHandler.setConstantPartialTick(clientTimer);
+                    ClientTimeStopHandler timeStopHandler = ClientTimeStopHandler.getInstance();
+                    if (timeStopHandler != null) {
+                        timeStopHandler.setConstantPartialTick(clientTimer);
+                    }
                     
                     mc.player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                         cap.limitPlayerHeadRot();
@@ -419,7 +424,10 @@ public class ClientEventHandler {
         }
         
         if (event.phase == TickEvent.Phase.START) {
-            ClientTimeStopHandler.getInstance().tickPauseIrrelevant();
+            ClientTimeStopHandler ts = ClientTimeStopHandler.getInstance();
+            if (ts != null) {
+                ts.tickPauseIrrelevant();
+            }
             
             ++tickCount;
             deathScreenTick = mc.screen instanceof DeathScreen ? deathScreenTick + 1 : 0;
