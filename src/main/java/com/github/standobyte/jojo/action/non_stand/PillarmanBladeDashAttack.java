@@ -108,11 +108,12 @@ public class PillarmanBladeDashAttack extends PillarmanAction implements IPlayer
      
     public static class Instance extends ContinuousActionInstance<PillarmanBladeDashAttack, INonStandPower> {
         private Set<UUID> damagedEntities = new HashSet<>();
-        PillarmanData pillarman = playerPower.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).get();
+        PillarmanData pillarman;
 
         public Instance(LivingEntity user, PlayerUtilCap userCap, 
                 INonStandPower playerPower, PillarmanBladeDashAttack action, float spentEnergy) {
             super(user, userCap, playerPower, action);
+            pillarman = playerPower.getTypeSpecificData(ModPowers.PILLAR_MAN.get()).get();
         }
         
         @Override
