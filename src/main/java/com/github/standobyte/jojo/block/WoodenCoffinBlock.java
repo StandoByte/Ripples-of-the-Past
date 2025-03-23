@@ -223,7 +223,6 @@ public class WoodenCoffinBlock extends HorizontalBlock {
         
         @SubscribeEvent(priority = EventPriority.LOWEST)
         public static void skippedToNight(SleepFinishedTimeEvent event) {
-            int time = (int) (event.getNewTime() % 24000L);
             if (event.getWorld() instanceof ServerWorld) {
                 ServerWorld world = (ServerWorld) event.getWorld();
                 world.players().stream()
@@ -236,7 +235,11 @@ public class WoodenCoffinBlock extends HorizontalBlock {
                             player.removeEffect(ModStatusEffects.VAMPIRE_SUN_BURN.get());
                             player.removeEffect(Effects.WEAKNESS);
                         }
-                        if (time >= 12600 && time < 23500) {
+                        long oldTime = event.getWorld().getLevelData().getDayTime();
+                        int oldDayTime = (int) (oldTime % 24000L);
+                        int newDayTime = (int) (event.getNewTime() % 24000L);
+                        if (newDayTime >= 12600 && newDayTime < 23500 && 
+                                (oldDayTime < 12600 || oldDayTime >= 23500)) {
                             ModCriteriaTriggers.SLEPT_IN_COFFIN.get().trigger(player);
                         }
                     }

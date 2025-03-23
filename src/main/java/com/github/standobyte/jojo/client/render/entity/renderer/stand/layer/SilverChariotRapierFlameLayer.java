@@ -1,13 +1,16 @@
 package com.github.standobyte.jojo.client.render.entity.renderer.stand.layer;
 
 import java.util.Optional;
+import java.util.function.Function;
 
 import com.github.standobyte.jojo.client.render.entity.model.stand.SilverChariotRapierFlameLayerModel;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.SilverChariotRenderer;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
 
+import net.minecraft.client.renderer.Atlases;
 import net.minecraft.client.renderer.LightTexture;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.inventory.container.PlayerContainer;
 import net.minecraft.util.ResourceLocation;
 
@@ -20,6 +23,17 @@ public class SilverChariotRapierFlameLayer extends StandModelLayerRenderer<Silve
     @Override
     public int getPackedLight(int packedLight) {
         return LightTexture.pack(15, 15);
+    }
+    
+    @Override
+    public RenderType getRenderType(SilverChariotEntity entity) {
+        return Atlases.translucentCullBlockSheet();
+    }
+
+    @Override
+    public RenderType getRenderType(SilverChariotEntity entity, Function<ResourceLocation, RenderType> renderTYPE) {
+        return Atlases.translucentCullBlockSheet();
+        
     }
 
     @Deprecated

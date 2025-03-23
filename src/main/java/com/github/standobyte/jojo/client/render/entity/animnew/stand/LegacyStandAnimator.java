@@ -7,7 +7,6 @@ import java.util.Map;
 import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.stand.StandEntityAction.Phase;
-import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.render.entity.pose.IModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose;
@@ -62,7 +61,7 @@ public class LegacyStandAnimator<T extends StandEntity> implements IStandAnimato
         currentActionAnim = null;
         
         model.resetXRotation();
-        model.forEachModelPart(part -> ClientUtil.setRotationAngle(part, 0, 0, 0));
+        model.resetPose(entity);
         
         StandPose standPose = poseData.standPose;
         if (standPose == StandPose.SUMMON && ticks > SUMMON_ANIMATION_LENGTH) {

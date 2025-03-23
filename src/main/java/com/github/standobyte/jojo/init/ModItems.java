@@ -23,6 +23,7 @@ import com.github.standobyte.jojo.item.GEBodyTissueItem;
 import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.item.KnifeItem;
 import com.github.standobyte.jojo.item.ModArmorMaterials;
+import com.github.standobyte.jojo.item.ModCreativeTab;
 import com.github.standobyte.jojo.item.MrPresidentKeyItem;
 import com.github.standobyte.jojo.item.MolotovItem;
 import com.github.standobyte.jojo.item.OilItem;
@@ -42,14 +43,12 @@ import com.github.standobyte.jojo.item.WalkmanItem;
 import com.google.common.collect.ImmutableMap;
 
 import net.minecraft.block.Block;
-import net.minecraft.enchantment.EnchantmentType;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.BucketItem;
 import net.minecraft.item.DyeColor;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemGroup;
-import net.minecraft.item.ItemStack;
 import net.minecraft.item.ItemTier;
 import net.minecraft.item.Rarity;
 import net.minecraft.item.SpawnEggItem;
@@ -61,12 +60,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 public class ModItems {
     public static final DeferredRegister<Item> ITEMS = DeferredRegister.create(ForgeRegistries.ITEMS, JojoMod.MOD_ID);
     
-    public static final ItemGroup MAIN_TAB = (new ItemGroup("jojo_tab") {
-        @Override
-        public ItemStack makeIcon() {
-            return CustomIconItem.makeIconItem(CustomIconItem.CustomModelIcon.MOD_LOGO);
-        }
-    }).setEnchantmentCategories(new EnchantmentType[]{ ModEnchantments.STAND_ARROW, ModEnchantments.GLOVES });
+    public static final ItemGroup MAIN_TAB = new ModCreativeTab("jojo_tab");
     
     
     

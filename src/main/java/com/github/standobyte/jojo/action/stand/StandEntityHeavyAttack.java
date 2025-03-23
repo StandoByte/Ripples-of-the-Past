@@ -376,7 +376,7 @@ public class StandEntityHeavyAttack extends StandEntityAction implements IHasSta
     }
     
     public static float calcExplosionRadius(StandEntity stand) {
-        return Math.min((float) stand.getAttackDamage() * 0.2f, 10);
+        return Math.min((float) stand.getAttackDamage() * 0.175f, 10);
     }
     
     public static float calcExplosionDamage(StandEntity stand) {

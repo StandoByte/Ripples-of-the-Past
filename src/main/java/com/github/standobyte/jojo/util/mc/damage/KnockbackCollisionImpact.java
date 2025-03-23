@@ -73,6 +73,7 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
     private double knockbackImpactStrength;
     private double minCos;
     private boolean hadImpactWithBlock = false;
+    private Vector3d prevTickPos;
     
     private float explosionRadius = 0;
     private DamageSource explosionDmgSource;
@@ -181,6 +182,13 @@ public class KnockbackCollisionImpact implements INBTSerializable<CompoundNBT> {
             
             minCos = Math.min(minCos, cos);
             knockbackImpactStrength = Math.min(knockbackImpactStrength, deltaMovementLen);
+            
+            // spiders get stuck in cave corners not triggering the impact, so we try to manually trigger it here
+            Vector3d entityPos = entity.position();
+            if (prevTickPos != null && Math.abs(prevTickPos.x - entityPos.x) < 1E-7 && Math.abs(prevTickPos.z - entityPos.z) < 1E-7) {
+                collideBreakBlocks(deltaMovement, deltaMovement, entity.level);
+            }
+            prevTickPos = entityPos;
         }
     }
     

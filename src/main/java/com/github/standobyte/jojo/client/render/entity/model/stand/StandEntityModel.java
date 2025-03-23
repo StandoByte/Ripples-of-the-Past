@@ -117,13 +117,13 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         if (root == null) {
             root = new ModelRenderer(this);
             root.setPos(0.0F, 0.0F, 0.0F);
-            forEachModelPart(root::addChild);
+            forEachTopModelPart(root::addChild);
         }
         putNamedModelPart("root", root);
     }
     
     protected void clearAllCubes() {
-        forEachModelPart(this::clearAllCubes);
+        forEachTopModelPart(this::clearAllCubes);
     }
     
     protected void clearAllCubes(ModelRenderer modelPart) {
@@ -339,7 +339,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     @Override
     public abstract Iterable<ModelRenderer> bodyParts();
     
-    public void forEachModelPart(Consumer<ModelRenderer> action) {
+    public void forEachTopModelPart(Consumer<ModelRenderer> action) {
         headParts().forEach(action);
         bodyParts().forEach(action);
     }
@@ -379,9 +379,13 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     public void render(T entity, MatrixStack matrixStack, IVertexBuilder buffer, 
             int packedLight, int packedOverlay, float red, float green, float blue, float alpha) {
         renderToBuffer(matrixStack, buffer, packedLight, packedOverlay, red, green, blue, alpha);
-        getAnimator().renderBarrageSwings(entity, this, yRotDeg, xRotDeg, 
-                matrixStack, buffer, 
-                packedLight, packedOverlay, red, green, blue, alpha);
+        ModelRenderer leftArm = getArm(HandSide.LEFT);
+        ModelRenderer rightArm = getArm(HandSide.RIGHT);
+        if (leftArm != null && leftArm.visible && rightArm != null && rightArm.visible) {
+            getAnimator().renderBarrageSwings(entity, this, yRotDeg, xRotDeg, 
+                    matrixStack, buffer, 
+                    packedLight, packedOverlay, red, green, blue, alpha);
+        }
     }
 
     public void renderToBuffer(MatrixStack pMatrixStack, IVertexBuilder pBuffer, int pPackedLight, int pPackedOverlay, float pRed, float pGreen, float pBlue, float pAlpha) {

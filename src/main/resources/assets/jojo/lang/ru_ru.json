@@ -435,6 +435,7 @@
   "death.attack.rockRespawn": "В конце концов %s перестал мыслить",
   "death.attack.rockRespawn.player": "%1$s был слит с камнем, пока боролся с %2$s",
   "death.attack.rockBroken": "%s был вскопан",
+  "death.attack.rockBroken.player": "%s был вскопан, пока боролся с %s",
   
   "stat.jojo.vampire_animals_drained": "Поглощено животных",
   "stat.jojo.vampire_people_drained": "Поглощено людей",
@@ -700,6 +701,8 @@
   "jojo.config.client.option.stand_right": "Справа",
   "_jojo.config.client.standMotionTilt": "(WIP) Stand motion tilt",
   "_jojo.config.client.standMotionTilt.tooltip": "Enables humanoid Stand model's tilt when the Stand is moving. Early version - this will be improved in later updates.",
+  "jojo.config.client.standOutline": "Свечение Стенда перед экраном",
+  "jojo.config.client.standOutline.tooltip": "Когда Стенд находится перед экраном, отображаются только его руки, чтобы Стенд не загораживал обзор, и обводка свечения в форме Стенда. Если отключить эту настройку, будут отображаться только руки, без обводки.",
   "jojo.config.client.characterVoiceLines": "Реплики персонажей",
   "jojo.config.client.characterVoiceLines.tooltip": "Проигрываются ли реплики персонажей из ДжоДжо, чьи способности используют игроки",
   "jojo.config.client.thirdPersonHamonAura": "Аура Хамона от 3 лица",

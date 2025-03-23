@@ -1187,6 +1187,7 @@ public class GameplayEventHandler {
         }
     }
     
+    // FIXME (!!!) corpse mod doesn't trigger (WHY)
     @SubscribeEvent(priority = EventPriority.HIGH)
     public static void beforeLivingDeath(LivingDeathEvent event) {
         LivingEntity dead = event.getEntityLiving();
