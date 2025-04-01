@@ -63,10 +63,16 @@ public class MCRecog {
         if (queue.isEmpty()) return;
         
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player == null) return;
+        if (mc.player == null) {
+            queue.clear();
+            return;
+        }
         IStandPower stand = IStandPower.getStandPowerOptional(mc.player).orElse(null);
         INonStandPower power = INonStandPower.getNonStandPowerOptional(mc.player).orElse(null);
-        if ((stand == null || !stand.hasPower()) && (power == null || !power.hasPower())) return;
+        if ((stand == null || !stand.hasPower()) && (power == null || !power.hasPower())) {
+            queue.clear();
+            return;
+        }
         
         String msg;
         while ((msg = queue.poll()) != null) {

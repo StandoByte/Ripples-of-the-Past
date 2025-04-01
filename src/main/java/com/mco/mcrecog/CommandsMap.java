@@ -235,15 +235,6 @@ public class CommandsMap extends ReloadListener<JsonObject> {
                     dontStopHeld = true;
                 }
             }
-            
-            // TODO NSP actions
-            
-            // TODO test the inputs more
-            // TODO disable the Tmp chat activation
-            
-            // TODO make the installation instruction
-            // TODO send to the beta testers
-            // TODO make the update post
         }
         
         return true;

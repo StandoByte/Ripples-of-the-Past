@@ -172,5 +172,39 @@
     "summon": [ "softandwet" ],
     "rotp_sw:soft_and_wet_barrage": [ "oraoraora" ],
     "rotp_sw:soft_and_wet_heavy_punch": [ "ora" ]
+  },
+  
+  "jojo:hamon": {
+    "jojo:hamon_overdrive_beat": [ "overdrive" ],
+    "jojo:hamon_sendo_overdrive": [ "sendooverdrive" ],
+    "jojo:hamon_turquoise_blue_overdrive": [ "turquoiseblueoverdrive" ],
+    "jojo:hamon_sunlight_yellow_overdrive": [ "sunlightyellowoverdrive" ],
+    "jojo:hamon_zoom_punch": [ "zoompunch" ],
+    "jojo:jonathan_scarlet_overdrive": [ "scarletoverdrive" ],
+    "jojo:jonathan_metal_silver_overdrive": [ "metalsilveroverdrive" ],
+    "jojo:jonathan_overdrive_barrage": [ "overdrivebarrage" ],
+    "jojo:zeppeli_hamon_cutter": [ "hamoncutter" ],
+    "jojo:zeppeli_sendo_wave_kick": [ "sendowavekick" ],
+    "jojo:zeppeli_tornado_overdrive": [ "tornadooverdrive" ],
+    "jojo:joseph_rebuff_overdrive": [ "rebuffoverdrive" ],
+    "jojo:caesar_bubble_launcher": [ "bubblelauncher" ],
+    "jojo:caesar_bubble_barrier": [ "bubblebarrier" ],
+    "jojo:caesar_bubble_cutter": [ "bubblecutter" ],
+    "jojo:caesar_bubble_cutter_gliding": [ "bubblecuttergliding" ]
+  },
+  
+  "jojo:vampirism": {
+    "jojo:vampirism_blood_drain": [ "wryyyy" ],
+    "jojo:vampirism_space_ripper_stingy_eyes": [ "spaceripperstingyeyes" ]
+  },
+  
+  "jojo:pillarman": {
+    "jojo:pillarman_blade_dash_attack": [ "brilliantboneblade" ],
+    "jojo:pillarman_divine_sandstorm": [ "divinesandstorm" ],
+    "jojo:pillarman_erratic_blaze_king": [ "erraticblazeking" ]
+  },
+  
+  "jojo:zombie": {
+    "jojo:zombie_devour": [ "wryyyy" ]
   }
 }
