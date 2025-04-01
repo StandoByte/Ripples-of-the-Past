@@ -1,0 +1,17 @@
+{
+  "type": "jojo:additional_single_item",
+  "conditions": [
+    {
+      "condition": "forge:loot_table_id",
+      "loot_table_id": "minecraft:gameplay/fishing/junk"
+    },
+    {
+      "condition": "random_chance",
+      "chance": 0.05
+    }
+  ],
+  "additional_item": {
+    "name": "jojo:wooden_coffin_oak_red"
+  },
+  "replace": true
+}
