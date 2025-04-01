@@ -20,14 +20,19 @@ import net.minecraftforge.registries.ForgeRegistries;
 
 public class AdditionalSingleItemLootModifier extends LootModifier {
     private final ItemStack additionalItem;
+    private final boolean replace;
 
-    public AdditionalSingleItemLootModifier(ILootCondition[] conditions, ItemStack additionalItem) {
+    public AdditionalSingleItemLootModifier(ILootCondition[] conditions, ItemStack additionalItem, boolean replace) {
         super(conditions);
         this.additionalItem = additionalItem;
+        this.replace = replace;
     }
 
     @Override
     protected List<ItemStack> doApply(List<ItemStack> generatedLoot, LootContext context) {
+        if (replace) {
+            generatedLoot.clear();
+        }
         generatedLoot.add(additionalItem.copy());
         return generatedLoot;
     }
@@ -48,8 +53,9 @@ public class AdditionalSingleItemLootModifier extends LootModifier {
                     throw new JsonSyntaxException("Invalid nbt tag: " + commandsyntaxexception.getMessage());
                 }
             }
+            boolean replace = JSONUtils.getAsBoolean(object, "replace", false);
             
-            return new AdditionalSingleItemLootModifier(conditions, itemStack);
+            return new AdditionalSingleItemLootModifier(conditions, itemStack, replace);
         }
 
         @Override
