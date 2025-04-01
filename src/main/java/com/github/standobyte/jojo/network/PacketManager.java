@@ -11,6 +11,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClAllGELifeformsBut
 import com.github.standobyte.jojo.network.packets.fromclient.ClAngeloRockButtonPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClBroadcastedModSettingsPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClClickActionPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClClickActionPacket2;
 import com.github.standobyte.jojo.network.packets.fromclient.ClDoubleShiftPressPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClGEUiDataPacket;
 import com.github.standobyte.jojo.network.packets.fromclient.ClHamonAbandonButtonPacket;
@@ -190,6 +191,7 @@ public class PacketManager {
         registerMessage(clientChannel, new ClToggleStandSummonPacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClToggleStandManualControlPacket.Handler(),     Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClClickActionPacket.Handler(),                  Optional.of(NetworkDirection.PLAY_TO_SERVER));
+        registerMessage(clientChannel, new ClClickActionPacket2.Handler(),                 Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClHeldActionTargetPacket.Handler(),             Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClStopHeldActionPacket.Handler(),               Optional.of(NetworkDirection.PLAY_TO_SERVER));
         registerMessage(clientChannel, new ClHamonWindowOpenedPacket.Handler(),            Optional.of(NetworkDirection.PLAY_TO_SERVER));

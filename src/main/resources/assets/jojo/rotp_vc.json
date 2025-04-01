@@ -1,0 +1,210 @@
+{
+  "jojo:star_platinum": {
+    "summon": [ "starplatinum" ],
+    "jojo:star_platinum_barrage": [ "oraoraora" ],
+    "jojo:star_platinum_heavy_punch": [ "ora" ],
+    "jojo:star_platinum_star_finger": [ "starfinger" ],
+    "jojo:star_platinum_inhale": [ "succ" ],
+    "jojo:star_platinum_time_stop": [ "starplatinum theworld", "timestop" ],
+    "rejojo:star_platinum_heavy_punch": [ "ora" ],
+    "rejojo:star_platinum_time_stop": [ "starplatinum theworld", "timestop" ]
+  },
+
+  "jojo:the_world": {
+    "summon": [ "theworld" ],
+    "jojo:the_world_barrage": [ "mudamudamuda" ],
+    "jojo:the_world_heavy_punch": [ "muda" ],
+    "jojo:the_world_time_stop": [ "theworld", "tokiyotomare", "tomaretokiyo", "timestop" ],
+    "rejojo:the_world_time_stop": [ "theworld", "tokiyotomare", "tomaretokiyo", "timestop" ]
+  },
+
+  "jojo:hierophant_green": {
+    "summon": [ "hierophant" ],
+    "jojo:hierophant_green_emerald_splash": [ "emeraldsplash" ]
+  },
+  "jojo:silver_chariot": {
+    "summon": [ "chariot" ],
+    "jojo:silver_chariot_barrage": [ "horahorahora" ]
+  },
+
+  "jojo:magicians_red": {
+    "summon": [ "magiciansred" ],
+    "jojo:magicians_red_crossfire_hurricane": [ "crossfirehurricane" ],
+    "jojo:magicians_red_ch_special": [ "crossfirehurricanespecial" ]
+  },
+
+  "jojo:crazy_diamond": {
+    "summon": [ "crazydiamond" ],
+    "jojo:crazy_diamond_barrage": [ "dorarara" ],
+    "jojo:crazy_diamond_heavy_punch": [ "dora" ],
+    "jojo:crazy_diamond_angelo_rock": [ "yoangelo" ]
+  },
+
+  "jojo:gold_experience": {
+    "summon": [ "goldexperience" ],
+    "jojo:gold_experience_heavy_punch": [ "muda" ],
+    "jojo:gold_experience_barrage": [ "mudamudamuda" ]
+  },
+
+  "rotp_ova_addon:the_world_ova": {
+    "summon": [ "theworld" ],
+    "rotp_ova_addon:the_world_ova_barrage": [ "mudamudamuda" ],
+    "rotp_ova_addon:the_world_ova_heavy_punch": [ "muda" ],
+    "rotp_ova_addon:the_world_ova_time_stop": [ "theworld", "tokiyotomare", "tomaretokiyo", "timestop" ]
+  },
+
+  "rotp_zhp:hermito_purple": {
+    "summon": [ "hermitpurple" ]
+  },
+
+  "rotp_zemperor:the_emperor": {
+    "summon": [ "emperor" ]
+  },
+
+  "rotp_lovers:lovers": {
+    "summon": [ "lovers" ]
+  },
+
+  "rotp_th:the_hand": {
+    "summon": [ "thehand" ]
+  },
+
+  "rotp_zkq:killer_queen": {
+    "summon": [ "killerqueen" ]
+  },
+
+  "rotp_pj:pearl_jam": {
+    "summon": [ "pearljam" ]
+  },
+
+  "rotp_zbc:bad_company": {
+    "summon": [ "badcompany" ]
+  },
+
+  "rotp_harvest:harvest_stand": {
+    "summon": [ "harvest" ]
+  },
+
+  "rotp_cr:chariot_requiem": {
+    "summon": [ "chariot", "requiem" ]
+  },
+
+  "rotp_zwa:white_album": {
+    "summon": [ "whitealbum" ]
+  },
+
+  "rotp_sg:spice_girl": {
+    "summon": [ "spicegirl" ]
+  },
+
+  "rotp_ph:purple_haze": {
+    "summon": [ "purplehaze" ]
+  },
+
+  "rotp_metallica:metallica": {
+    "summon": [ "metallica" ]
+  },
+
+  "rotp_kw:kraft_work": {
+    "summon": [ "kraftwork" ]
+  },
+
+  "rotp_littlefeet:little_feet": {
+    "summon": [ "littlefeet" ]
+  },
+
+  "rotp_kingcrimson:kingcrimson": {
+    "summon": [ "kingcrimson" ],
+    "rotp_kingcrimson:kingcrimson_epitaph": [ "epitaph" ],
+    "rotp_kingcrimson:kingcrimson_timeerase": [ "kingcrimson" ]
+  },
+
+  "rotp_sf:stone_free": {
+    "summon": [ "stonefree" ],
+    "rotp_sf:stone_free_barrage": [ "oraoraora" ],
+    "rotp_sf:stone_free_heavy_punch": [ "ora" ]
+  },
+
+  "rotp_wr:weather_report": {
+    "summon": [ "weatherreport" ]
+  },
+
+  "rotp_dd:diver_down": {
+    "summon": [ "diverdown" ]
+  },
+
+  "rotp_whitesnake:whitesnake": {
+    "summon": [ "whitesnake" ]
+  },
+
+  "rotp_cm:cmoon": {
+    "summon": [ "cmoon" ]
+  },
+
+  "rotp_mih:madeinheaven": {
+    "summon": [ "madeinheaven" ]
+  },
+
+  "rotp_pw:pw": {
+    "summon": [ "planetwaves" ]
+  },
+
+  "rotp_theworld:the_world": {
+    "summon": [ "theworld" ],
+    "rotp_theworld:the_world_barrage": [ "mudamudamuda" ],
+    "rotp_theworld:the_world_heavy_punch": [ "muda" ],
+    "rotp_theworld:the_world_time_stop": [ "theworld", "tokiyotomare", "tomaretokiyo", "timestop" ]
+  },
+
+  "rotp_ctr:catch_the_rainbow": {
+    "summon": [ "catchtherainbow" ]
+  },
+
+  "rotp_zcs:cream_starter": {
+    "summon": [ "creamstarter" ]
+  },
+
+  "rotp_mandom:mandom": {
+    "summon": [ "mandom" ]
+  },
+
+  "rotp_sw:soft_and_wet": {
+    "summon": [ "softandwet" ],
+    "rotp_sw:soft_and_wet_barrage": [ "oraoraora" ],
+    "rotp_sw:soft_and_wet_heavy_punch": [ "ora" ]
+  },
+  
+  "jojo:hamon": {
+    "jojo:hamon_overdrive_beat": [ "overdrive" ],
+    "jojo:hamon_sendo_overdrive": [ "sendooverdrive" ],
+    "jojo:hamon_turquoise_blue_overdrive": [ "turquoiseblueoverdrive" ],
+    "jojo:hamon_sunlight_yellow_overdrive": [ "sunlightyellowoverdrive" ],
+    "jojo:hamon_zoom_punch": [ "zoompunch" ],
+    "jojo:jonathan_scarlet_overdrive": [ "scarletoverdrive" ],
+    "jojo:jonathan_metal_silver_overdrive": [ "metalsilveroverdrive" ],
+    "jojo:jonathan_overdrive_barrage": [ "overdrivebarrage" ],
+    "jojo:zeppeli_hamon_cutter": [ "hamoncutter" ],
+    "jojo:zeppeli_sendo_wave_kick": [ "sendowavekick" ],
+    "jojo:zeppeli_tornado_overdrive": [ "tornadooverdrive" ],
+    "jojo:joseph_rebuff_overdrive": [ "rebuffoverdrive" ],
+    "jojo:caesar_bubble_launcher": [ "bubblelauncher" ],
+    "jojo:caesar_bubble_barrier": [ "bubblebarrier" ],
+    "jojo:caesar_bubble_cutter": [ "bubblecutter" ],
+    "jojo:caesar_bubble_cutter_gliding": [ "bubblecuttergliding" ]
+  },
+  
+  "jojo:vampirism": {
+    "jojo:vampirism_blood_drain": [ "wryyyy" ],
+    "jojo:vampirism_space_ripper_stingy_eyes": [ "spaceripperstingyeyes" ]
+  },
+  
+  "jojo:pillarman": {
+    "jojo:pillarman_blade_dash_attack": [ "brilliantboneblade" ],
+    "jojo:pillarman_divine_sandstorm": [ "divinesandstorm" ],
+    "jojo:pillarman_erratic_blaze_king": [ "erraticblazeking" ]
+  },
+  
+  "jojo:zombie": {
+    "jojo:zombie_devour": [ "wryyyy" ]
+  }
+}
