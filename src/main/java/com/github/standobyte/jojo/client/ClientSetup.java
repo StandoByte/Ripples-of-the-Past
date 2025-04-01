@@ -135,6 +135,7 @@ import com.github.standobyte.jojo.item.StandDiscItem;
 import com.github.standobyte.jojo.item.StoneMaskItem;
 import com.github.standobyte.jojo.item.cassette.CassetteCap;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
+import com.mco.mcrecog.MCRecog;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.ScreenManager;
@@ -327,6 +328,8 @@ public class ClientSetup {
             MarkerRenderer.Handler.addRenderer(new CrazyDiamondBloodHomingMarker(mc));
             
             statsStatsOverrideExamples();
+
+            MCRecog.init();
         });
     }
 

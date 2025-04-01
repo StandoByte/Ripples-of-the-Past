@@ -234,7 +234,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         }
     }
     
-    private void sendMessage(Action<P> action, ActionConditionResult result) {
+    public void sendMessage(Action<P> action, ActionConditionResult result) {
         ActionConditionResult.sendActionFailedMessage(action, result, user);
     }
 
@@ -314,7 +314,7 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
         return action.isUnlocked(getThis()) ? 1 : -1;
     }
     
-    protected void performAction(Action<P> action, ActionTarget target, @Nullable PacketBuffer extraInput) {
+    public void performAction(Action<P> action, ActionTarget target, @Nullable PacketBuffer extraInput) {
         if (!action.holdOnly(getThis())) {
             World world = user.level;
             target = action.targetBeforePerform(world, user, getThis(), target);

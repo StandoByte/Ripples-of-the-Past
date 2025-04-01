@@ -2044,7 +2044,7 @@ public class ActionsOverlayGui extends AbstractGui {
         return baseAction;
     }
 
-    protected final PacketBuffer extraInputBuf = new PacketBuffer(Unpooled.buffer());
+    public final PacketBuffer _extraInputBuf = new PacketBuffer(Unpooled.buffer());
     // sends the packet which fires the action to the server
     @Nullable
     public <P extends IPower<P, ?>> Pair<Action<P>, Boolean> onActionClick(P power, Action<P> action, boolean sneak) {
@@ -2056,9 +2056,9 @@ public class ActionsOverlayGui extends AbstractGui {
             ClClickActionPacket packet = new ClClickActionPacket(
                     power.getPowerClassification(), action, mouseTarget, sneak);
             PacketManager.sendToServer(packet);
-            action.clWriteExtraData(extraInputBuf);
-            boolean actionWentOff = power.clickAction(action, sneak, mouseTarget, extraInputBuf);
-            extraInputBuf.clear();
+            action.clWriteExtraData(_extraInputBuf);
+            boolean actionWentOff = power.clickAction(action, sneak, mouseTarget, _extraInputBuf);
+            _extraInputBuf.clear();
             return Pair.of(action, actionWentOff);
         }
         return null;

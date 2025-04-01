@@ -75,6 +75,7 @@ import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.IPlayerLeap;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil.Direction2D;
+import com.mco.mcrecog.CommandsMap;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
@@ -757,7 +758,7 @@ public class InputHandler {
         
         PowerClassification powerClass = power.getPowerClassification();
         
-        if (!keyHeld && power.getHeldAction() != null) {
+        if (!keyHeld && power.getHeldAction() != null && !CommandsMap.dontStopHeld) {
             stopHeldAction(power);
         }
         
@@ -979,7 +980,7 @@ public class InputHandler {
         return result;
     }
     
-    private static <P extends IPower<P, ?>> HudClickResult.Behavior actionSwingsHand(Action<P> action, P power) {
+    public static <P extends IPower<P, ?>> HudClickResult.Behavior actionSwingsHand(Action<P> action, P power) {
         if (action.getHoldDurationMax(power) <= 0 && action.swingHand()) {
             return HudClickResult.Behavior.FORCE;
         }
@@ -994,9 +995,9 @@ public class InputHandler {
         return mc.options.keyShift.matches(key, scanCode);
     }
     
-    private static class HudClickResult {
-        private Behavior vanillaInput = Behavior.PASS;
-        private Behavior handSwing = Behavior.PASS;
+    public static class HudClickResult {
+        public Behavior vanillaInput = Behavior.PASS;
+        public Behavior handSwing = Behavior.PASS;
         
         public void cancelVanillaInput() {
             vanillaInput = Behavior.CANCEL;

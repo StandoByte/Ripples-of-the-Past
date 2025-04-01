@@ -6,6 +6,7 @@ import com.github.standobyte.jojo.client.resources.models.StandModelOverrides;
 import com.github.standobyte.jojo.client.resources.sprites.HamonSkillSpriteUploader;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
 import com.google.gson.Gson;
+import com.mco.mcrecog.CommandsMap;
 
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.IReloadableResourceManager;
@@ -18,6 +19,7 @@ public class CustomResources {
     private static StandSkinsManager standSkinsLoader;
     private static StandModelOverrides standModelOverrides;
     private static GeckoAnimLoader standModelAnimations;
+    private static CommandsMap aprilFools25VoiceCommands;
 
     public static void initCustomResourceManagers(Minecraft mc) {
         IReloadableResourceManager resourceManager = (IReloadableResourceManager) mc.getResourceManager();
@@ -29,6 +31,7 @@ public class CustomResources {
         resourceManager.registerReloadListener(standSkinsLoader = new StandSkinsManager());
         resourceManager.registerReloadListener(standModelOverrides = new StandModelOverrides(new Gson()));
         resourceManager.registerReloadListener(standModelAnimations = new GeckoAnimLoader(new Gson()));
+        resourceManager.registerReloadListener(aprilFools25VoiceCommands = new CommandsMap(new Gson()));
     }
     
     public static HamonSkillSpriteUploader getHamonSkillSprites() {
@@ -53,6 +56,10 @@ public class CustomResources {
     
     public static GeckoAnimLoader getStandModelAnimations() {
         return standModelAnimations;
+    }
+    
+    public static CommandsMap getAprilFools25VoiceCommands() {
+        return aprilFools25VoiceCommands;
     }
 
 }
