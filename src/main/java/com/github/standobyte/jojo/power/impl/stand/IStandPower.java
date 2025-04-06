@@ -86,6 +86,7 @@ public interface IStandPower extends IPower<IStandPower, StandType<?>> {
     void onDash();
     
     public static LazyOptional<IStandPower> getStandPowerOptional(LivingEntity entity) {
+        if (entity == null) return LazyOptional.empty();
         if (entity instanceof IMobStandUser) {
             return LazyOptional.of(() -> ((IMobStandUser) entity).getStandPower());
         }

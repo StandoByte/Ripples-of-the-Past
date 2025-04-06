@@ -27,6 +27,7 @@ public interface INonStandPower extends IPower<INonStandPower, NonStandPowerType
     <T extends NonStandPowerType<D>, D extends TypeSpecificData> Optional<D> getTypeSpecificData(@Nullable T requiredType);
     
     public static LazyOptional<INonStandPower> getNonStandPowerOptional(LivingEntity entity) {
+        if (entity == null) return LazyOptional.empty();
         if (entity instanceof IMobPowerUser) {
             return LazyOptional.of(() -> ((IMobPowerUser) entity).getPower());
         }
