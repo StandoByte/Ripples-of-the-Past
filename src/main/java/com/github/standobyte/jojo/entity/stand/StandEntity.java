@@ -53,6 +53,7 @@ import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
+import com.github.standobyte.jojo.util.mc.CollisionUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mc.damage.IModdedDamageSource;
@@ -1366,7 +1367,7 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
                     collisionBox.maxY, 
                     collisionBox.maxZ);
         }
-        return position().add(MCUtil.collide(this, collisionBox, pos.subtract(position())));
+        return position().add(CollisionUtil.collide(this, collisionBox, pos.subtract(position())));
     }
     
     

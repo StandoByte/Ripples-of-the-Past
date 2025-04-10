@@ -16,7 +16,9 @@
     "FireBlockMixin",
     "MerchantResultSlotMixin",
     "MapDataMixin",
-    "TheMostUnnecessaryMixin"
+    "TheMostUnnecessaryMixin",
+    "AbstractBlockMixin",
+    "BarrierBlockWallClimbMixin"
   ],
   "client": [
     "client.GameRendererMixin",
