@@ -540,7 +540,9 @@ public class GoldExperienceCreateLifeform extends StandAction {
         if (entity.isOnFire()) {
             tf.setSecondsOnFire((entity.getRemainingFireTicks() + 19) / 20);
         }
-        tf.setDeltaMovement(entity.getDeltaMovement());
+        if (!(entity instanceof AbstractArrowEntity && ((AbstractArrowEntity) entity).inGround)) {
+            tf.setDeltaMovement(entity.getDeltaMovement());
+        }
         
         if (entity instanceof ItemEntity) {
             UUID thrower = ((ItemEntity) entity).getThrower();

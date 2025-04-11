@@ -283,22 +283,22 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
         else if (!isNoGravity()) {
             setDeltaMovement(deltaMovement.add(0, -0.04, 0));
         }
-        
-        if (!onGround || getHorizontalDistanceSqr(getDeltaMovement()) > 1.0E-5 || (tickCount + getId()) % 4 == 0) {
-            move(MoverType.SELF, getDeltaMovement());
+
+        deltaMovement = getDeltaMovement();
+        if (!onGround || getHorizontalDistanceSqr(deltaMovement) > 1.0E-5 || (tickCount + getId()) % 4 == 0) {
+            move(MoverType.SELF, deltaMovement);
             double inertia = 0.98;
             if (onGround) {
                 inertia = level.getBlockState(new BlockPos(getX(), getY() - 1.0, getZ()))
                         .getSlipperiness(level, new BlockPos(getX(), getY() - 1.0, getZ()), this) * 0.98;
             }
+            deltaMovement = deltaMovement.multiply(inertia, 0.98, inertia);
             
-            setDeltaMovement(getDeltaMovement().multiply(inertia, 0.98, inertia));
-            if (onGround) {
-                deltaMovement = getDeltaMovement();
-                if (deltaMovement.y < 0.0D) {
-                    setDeltaMovement(deltaMovement.multiply(1.0, -0.5, 1.0));
-                }
+            if (onGround && deltaMovement.y < 0.0D) {
+                deltaMovement = deltaMovement.multiply(1.0, -0.5, 1.0);
             }
+            
+            setDeltaMovement(deltaMovement);
         }
         
         if (!level.isClientSide() && !isTurningBack()) {
