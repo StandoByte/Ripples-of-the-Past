@@ -65,7 +65,7 @@ https://modrinth.com/mod/ripples-of-the-past
 [[dependencies.jojo]]
     modId="playeranimator"
     mandatory=false
-    versionRange="[0.4.0+1.16.5,)"
+    versionRange="[0.4.0+1.16.5]"
     ordering="NONE"
     side="CLIENT"
 
