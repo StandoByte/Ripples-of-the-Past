@@ -7,6 +7,7 @@ import com.github.standobyte.jojo.capability.world.MrPresidentWorldDataProvider;
 import com.github.standobyte.jojo.init.ModStructures;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.server.ServerWorld;
@@ -45,6 +46,11 @@ public class MrPresidentInsideTeleporter implements ITeleporter {
         }
         
         return entity;
+    }
+    
+    @Override
+    public boolean playTeleportSound(ServerPlayerEntity player, ServerWorld sourceWorld, ServerWorld destWorld) {
+        return false;
     }
 
 }
