@@ -22,9 +22,9 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.entity.mob.CocoJumboTurtleEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.item.GlovesItem;
+import com.github.standobyte.jojo.mrpresident.CocoJumboTurtleEntity;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.LotsOfBlocksBrokenPacket;

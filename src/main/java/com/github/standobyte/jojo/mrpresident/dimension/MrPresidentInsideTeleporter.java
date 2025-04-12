@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.world.dimension.mr_president;
+package com.github.standobyte.jojo.mrpresident.dimension;
 
 import java.util.UUID;
 import java.util.function.Function;

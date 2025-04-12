@@ -1,11 +1,11 @@
-package com.github.standobyte.jojo.world.dimension.mr_president;
+package com.github.standobyte.jojo.mrpresident.dimension;
 
 import java.util.UUID;
 import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.world.dimension.mr_president.MrPresidentWorldData.MrPresidentTurtlePos;
+import com.github.standobyte.jojo.mrpresident.dimension.MrPresidentWorldData.MrPresidentTurtlePos;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.server.MinecraftServer;

@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.client.render.entity.renderer;
 
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.render.entity.model.mob.CocoJumboTurtleModel;
-import com.github.standobyte.jojo.entity.mob.CocoJumboTurtleEntity;
+import com.github.standobyte.jojo.mrpresident.CocoJumboTurtleEntity;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 

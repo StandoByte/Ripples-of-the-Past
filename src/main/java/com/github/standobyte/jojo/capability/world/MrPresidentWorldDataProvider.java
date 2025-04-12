@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.capability.world;
 
-import com.github.standobyte.jojo.world.dimension.mr_president.MrPresidentWorldData;
+import com.github.standobyte.jojo.mrpresident.dimension.MrPresidentWorldData;
 
 import net.minecraft.nbt.INBT;
 import net.minecraft.util.Direction;

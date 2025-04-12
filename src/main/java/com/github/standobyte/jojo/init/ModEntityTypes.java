@@ -58,11 +58,11 @@ import com.github.standobyte.jojo.entity.itemprojectile.BladeHatEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.ClackersEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.KnifeEntity;
 import com.github.standobyte.jojo.entity.itemprojectile.StandArrowEntity;
-import com.github.standobyte.jojo.entity.mob.CocoJumboTurtleEntity;
 import com.github.standobyte.jojo.entity.mob.HamonMasterEntity;
 import com.github.standobyte.jojo.entity.mob.HungryZombieEntity;
 import com.github.standobyte.jojo.entity.mob.StandUserDummyEntity;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsKidEntity;
+import com.github.standobyte.jojo.mrpresident.CocoJumboTurtleEntity;
 
 import net.minecraft.entity.EntityClassification;
 import net.minecraft.entity.EntityType;

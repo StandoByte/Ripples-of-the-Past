@@ -56,6 +56,7 @@ import com.github.standobyte.jojo.init.ModStructures;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStackProvider;
 import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStackStorage;
+import com.github.standobyte.jojo.mrpresident.dimension.MrPresidentWorldData;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCachePacket;
 import com.github.standobyte.jojo.power.IPower;
@@ -68,7 +69,6 @@ import com.github.standobyte.jojo.util.mc.entitysubtype.EntityTypeToInstance;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 import com.github.standobyte.jojo.world.dimension.ModDimensions;
-import com.github.standobyte.jojo.world.dimension.mr_president.MrPresidentWorldData;
 import com.mojang.brigadier.CommandDispatcher;
 
 import net.minecraft.command.CommandSource;

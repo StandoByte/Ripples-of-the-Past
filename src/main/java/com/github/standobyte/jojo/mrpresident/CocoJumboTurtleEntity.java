@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.entity.mob;
+package com.github.standobyte.jojo.mrpresident;
 
 import javax.annotation.Nullable;
 
@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.render.item.InventoryItemHighlight;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.entity.IPassengerMixinReposition;
+import com.github.standobyte.jojo.entity.mob.IMobStandUser;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModStatusEffects;

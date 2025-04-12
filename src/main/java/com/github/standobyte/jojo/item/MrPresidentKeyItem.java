@@ -7,10 +7,10 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.standskin.StandSkinsManager;
+import com.github.standobyte.jojo.mrpresident.dimension.MrPresidentInsideTeleporter;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance;
 import com.github.standobyte.jojo.power.impl.stand.StandInstance.StandPart;
 import com.github.standobyte.jojo.world.dimension.ModDimensions;
-import com.github.standobyte.jojo.world.dimension.mr_president.MrPresidentInsideTeleporter;
 
 import net.minecraft.client.util.ITooltipFlag;
 import net.minecraft.entity.player.PlayerEntity;

@@ -9,8 +9,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
+import com.github.standobyte.jojo.mrpresident.dimension.MrPresidentWorldData.ChunkSectionPos;
 import com.github.standobyte.jojo.world.dimension.ModDimensions;
-import com.github.standobyte.jojo.world.dimension.mr_president.MrPresidentWorldData.ChunkSectionPos;
 
 import net.minecraft.advancements.criterion.PlacedBlockTrigger;
 import net.minecraft.block.BlockState;

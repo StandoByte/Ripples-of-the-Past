@@ -1,4 +1,4 @@
-package com.github.standobyte.jojo.power.impl.stand.type;
+package com.github.standobyte.jojo.mrpresident;
 
 import java.util.Collection;
 import java.util.List;
@@ -7,13 +7,13 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.entity.mob.CocoJumboTurtleEntity;
+import com.github.standobyte.jojo.mrpresident.dimension.MrPresidentInsideTeleporter;
+import com.github.standobyte.jojo.mrpresident.dimension.MrPresidentWorldData;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
+import com.github.standobyte.jojo.power.impl.stand.type.NoSummonStandType;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.world.dimension.ModDimensions;
-import com.github.standobyte.jojo.world.dimension.mr_president.MrPresidentInsideTeleporter;
-import com.github.standobyte.jojo.world.dimension.mr_president.MrPresidentWorldData;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
