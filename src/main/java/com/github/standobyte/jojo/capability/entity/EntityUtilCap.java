@@ -14,6 +14,7 @@ import com.github.standobyte.jojo.util.mc.damage.KnockbackCollisionImpact;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.nbt.ByteNBT;
 import net.minecraft.nbt.CompoundNBT;
 
@@ -76,7 +77,9 @@ public class EntityUtilCap {
     public void updateEntityTimeStop(boolean stopInTime) {
         if (stopInTime) {
             stoppedInTime = true;
-            entity.canUpdate(false);
+            if (!(entity instanceof ProjectileEntity && ((ProjectileEntity)entity).getOwner() != null)){
+                entity.canUpdate(false);
+            }
             
             if (asMob != null) {
                 prevNoAi = asMob.isNoAi();

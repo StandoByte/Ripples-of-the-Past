@@ -16,7 +16,8 @@
     "FireBlockMixin",
     "MerchantResultSlotMixin",
     "MapDataMixin",
-    "TheMostUnnecessaryMixin"
+    "TheMostUnnecessaryMixin",
+    "ProjectileEntityMixin"
   ],
   "client": [
     "client.GameRendererMixin",
