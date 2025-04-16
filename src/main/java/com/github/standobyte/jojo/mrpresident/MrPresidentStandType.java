@@ -16,6 +16,7 @@ import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.world.dimension.ModDimensions;
 
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.EntityPredicates;
@@ -44,7 +45,7 @@ public class MrPresidentStandType<T extends StandStats> extends NoSummonStandTyp
                 if (canTeleport) {
                     List<Entity> entities = findTargets(user, entity -> 
                             !entity.isOnGround() && entity.getDeltaMovement().y < 0 && entity.getY() > user.getY(1)
-                            && entity.tickCount >= 20 && !MCUtil.hasIndirectPassenger(entity, user));
+                            && (entity.tickCount >= 20 || entity.getType() == EntityType.ITEM) && !MCUtil.hasIndirectPassenger(entity, user));
                     teleportEntities(user, power, entities);
                 }
             }
