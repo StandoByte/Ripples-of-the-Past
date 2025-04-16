@@ -7,6 +7,8 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
+import com.github.standobyte.jojo.mrpresident.dimension.MrPresidentBackTeleporter;
 import com.github.standobyte.jojo.mrpresident.dimension.MrPresidentInsideTeleporter;
 import com.github.standobyte.jojo.mrpresident.dimension.MrPresidentWorldData;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
@@ -70,12 +72,12 @@ public class MrPresidentStandType<T extends StandStats> extends NoSummonStandTyp
         if (mrPresidentWorld != null) {
             for (Entity entity : entities) {
                 UUID turtleId = turtle.getUUID();
-                teleportToRoom(entity, turtleId, server);
+                teleportToRoom(entity, turtleId, server, power);
             }
         }
     }
     
-    private static void teleportToRoom(Entity entity, UUID roomId, MinecraftServer server) {
+    private static void teleportToRoom(Entity entity, UUID roomId, MinecraftServer server, IStandPower turtleStand) {
         ServerWorld mrPresidentWorld = server.getLevel(ModDimensions.MR_PRESIDENT);
         ITeleporter teleporter = new MrPresidentInsideTeleporter(roomId);
         /* can't call changeDimension right away, 
@@ -83,7 +85,30 @@ public class MrPresidentStandType<T extends StandStats> extends NoSummonStandTyp
          * which can't be done while the entities are ticking */
         server.tell(new TickDelayedTask(server.getTickCount(), () -> {
             entity.changeDimension(mrPresidentWorld, teleporter);
+            if (turtleStand != null) {
+                MrPresidentEnteredRoomEffect room = turtleStand.getContinuousEffects()
+                        .getOrCreateEffect(ModStandEffects.MR_PRESIDENT_ENTITIES_ENTERED.get());
+                room.roomId = roomId;
+                room.onEntityEntered(entity);
+            }
         }));
+    }
+    
+    public static void teleportFromRoom(Entity entity, UUID roomId, MinecraftServer server) {
+        MrPresidentBackTeleporter teleporter = MrPresidentBackTeleporter.teleportBackToTurtle(server, roomId);
+        if (teleporter != null) {
+            entity.changeDimension(teleporter.world, teleporter);
+            if (teleporter.turtle instanceof LivingEntity) {
+                LivingEntity turtle = (LivingEntity) teleporter.turtle;
+                IStandPower.getStandPowerOptional(turtle).ifPresent(stand -> {
+                    stand.getContinuousEffects()
+                    .getEffectsOfType(ModStandEffects.MR_PRESIDENT_ENTITIES_ENTERED.get())
+                    .forEach(room -> {
+                        room.onEntityQuit(entity);
+                    });
+                });
+            }
+        }
     }
 
 }

@@ -180,6 +180,10 @@ public class ForgeBusEventSubscriber {
             if (entity instanceof IMerchant) {
                 event.addCapability(MERCHANT_CAP, new MerchantDataProvider(living, (IMerchant) living));
             }
+            event.addListener(() -> {
+                IStandPower.getStandPowerOptional(living).ifPresent(
+                        stand -> stand.getContinuousEffects().onStandUserRemoved(living));
+            });
         }
         if (entity instanceof ProjectileEntity && (HamonUtil.ProjectileChargeProperties.canBeChargedWithHamon(entity))) {
             event.addCapability(PROJECTILE_HAMON_CAP, new ProjectileHamonChargeCapProvider(entity));

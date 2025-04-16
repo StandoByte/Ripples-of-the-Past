@@ -20,6 +20,7 @@ import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.potion.BleedingEffect;
+import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.mc.EntityOwnerResolver;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
@@ -452,6 +453,12 @@ public class GETransformationEntity extends Entity implements IEntityAdditionalS
             GETransformationEntity tfEntity = (GETransformationEntity) entity;
             tfEntity.entityData.set(IS_TURNING_BACK, true);
             tfEntity.entityData.set(REVERSE_SIGNAL, true);
+            if (tfEntity.target instanceof LivingEntity) {
+                LivingEntity turtle = (LivingEntity) tfEntity.target;
+                IStandPower.getStandPowerOptional(turtle).ifPresent(turtleStand -> {
+                    turtleStand.getContinuousEffects().onStandUserRemoved(turtle);
+                });
+            }
         }
         else {
             World world = entity.level;

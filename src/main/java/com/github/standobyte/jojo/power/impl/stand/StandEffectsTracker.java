@@ -100,6 +100,12 @@ public class StandEffectsTracker {
         }
     }
     
+    public void onStandUserRemoved(LivingEntity user) {
+        for (StandEffectInstance effect : effects.values()) {
+            onEffectRemoved(effect);
+        }
+    }
+    
     public void onStandUserLogout(ServerPlayerEntity user) {
         if (!user.server.isPublished()) return;
         
@@ -165,6 +171,31 @@ public class StandEffectsTracker {
         }
     }
     
+    public <T extends StandEffectInstance> T getOrCreateEffect(StandEffectType<T> effectType) {
+        Optional<T> effect = getEffects()
+                .filter(e -> e.effectType == effectType)
+                .findFirst().map(e -> (T) e);
+        if (effect.isPresent()) {
+            return effect.get();
+        }
+        else {
+            T newEffect = effectType.create(standPower.getUser().level);
+            addEffect(newEffect);
+            return newEffect;
+        }
+    }
+    
+    @SuppressWarnings("unchecked")
+    public <T extends StandEffectInstance> Stream<T> getEffectsOfType(StandEffectType<T> type) {
+        return getEffects()
+                .filter(effect -> effect.effectType == type)
+                .map(standEffectInstance -> (T) standEffectInstance);
+    }
+    
+    public <T extends StandEffectInstance> Optional<T> getEffectOfType(StandEffectType<T> type) {
+        return getEffectsOfType(type).findFirst();
+    }
+    
     @Deprecated
     public List<StandEffectInstance> getEffects(@Nullable Predicate<StandEffectInstance> filter) {
         if (filter == null) {
@@ -223,20 +254,16 @@ public class StandEffectsTracker {
         return getEffectOfType(IStandPower.getStandPowerOptional(user).resolve(), type);
     }
     
-    @SuppressWarnings("unchecked")
     public static <T extends StandEffectInstance> Stream<T> getEffectsOfType(Optional<IStandPower> userPower, StandEffectType<T> type) {
-        return userPower.map(power -> power.getContinuousEffects().getEffects()
-                .filter(effect -> effect.effectType == type)
-                .map(standEffectInstance -> (T) standEffectInstance))
+        return userPower.map(power -> power.getContinuousEffects()
+                .getEffectsOfType(type))
                 .orElse(Stream.empty());
     }
 
-    @SuppressWarnings("unchecked")
     public static <T extends StandEffectInstance> Optional<T> getEffectOfType(Optional<IStandPower> userPower, StandEffectType<T> type) {
-        return userPower.flatMap(power -> power.getContinuousEffects().getEffects()
-                .filter(effect -> effect.effectType == type)
-                .findFirst()
-                .map(standEffectInstance -> (T) standEffectInstance));
+        return userPower.map(power -> power.getContinuousEffects()
+                .getEffectOfType(type))
+                .orElse(Optional.empty());
     }
     
 
