@@ -75,4 +75,13 @@ public class GoldExperienceHealOther extends GoldExperienceHeal {
         return key;
     }
     
+    @Override
+    protected String getPostfix(LivingEntity entityToHeal) {
+        if (entityToHeal.isDeadOrDying()) {
+            return ".dying";
+        }
+        
+        return super.getPostfix(entityToHeal);
+    }
+    
 }

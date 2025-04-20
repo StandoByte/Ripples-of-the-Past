@@ -129,7 +129,7 @@ public class GoldExperienceHeal extends StandEntityAction {
     public static void spendAndHeal(World world, LivingEntity entity, 
             LivingEntity user, IStandPower userPower, StandEntity standEntity) {
         if (entity != null && !world.isClientSide()) {
-            if (entity.isDeadOrDying()) {
+            if (entity.isDeadOrDying() && entity != user) {
                 boolean resurrect = entity.getCapability(LivingUtilCapProvider.CAPABILITY).map(data -> {
                     if (data.soulEntity != null && data.soulEntity.isAlive()) {
                         int timeLeft = data.soulEntity.lifeSpan - data.soulEntity.tickCount;
@@ -246,10 +246,6 @@ public class GoldExperienceHeal extends StandEntityAction {
     }
     
     protected String getPostfix(LivingEntity entityToHeal) {
-        if (entityToHeal.isDeadOrDying()) {
-            return ".dying";
-        }
-        
         if (GoldExperienceCreateLifeform.getStuckArrows(entityToHeal) > 0) {
             return ".arrow";
         }
