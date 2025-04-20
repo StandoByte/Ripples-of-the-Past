@@ -105,8 +105,8 @@ public class ResolveCounter {
                 if (effectLevel < 0) {
                     effectLevel = 255;
                 }
-                resolve = Math.max(resolve - getMaxResolveValue() / 
-                        (float) RESOLVE_EFFECT_MIN[Math.min(effectLevel, RESOLVE_EFFECT_MIN.length)], 0);
+                effectLevel = Math.min(effectLevel, RESOLVE_EFFECT_MIN.length - 1);
+                resolve = Math.max(resolve - getMaxResolveValue() / (float) RESOLVE_EFFECT_MIN[effectLevel], 0);
                 if (!user.level.isClientSide() && resolve == 0) {
                     user.removeEffect(ModStatusEffects.RESOLVE.get());
                 }
