@@ -1833,6 +1833,10 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         boolean attacked = doAttack.get();
         if (attacked && !isManuallyControlled()) {
             setLastHurtMob(punch.target);
+            LivingEntity user = getUser();
+            if (user != null) {
+                user.setLastHurtMob(punch.target);
+            }
         }
         return attacked;
     }
