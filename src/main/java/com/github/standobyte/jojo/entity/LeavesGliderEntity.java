@@ -20,6 +20,7 @@ import com.github.standobyte.jojo.network.packets.fromclient.ClLeavesGliderColor
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.general.MathUtil;
+import com.github.standobyte.jojo.util.mc.CollisionUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
@@ -371,7 +372,7 @@ public class LeavesGliderEntity extends Entity implements IEntityAdditionalSpawn
             entity.setYBodyRot(entity.yRot);
             
             float minGap = 1;
-            double groundGap = -MCUtil.collide(this, new Vector3d(0, -minGap, 0)).y;
+            double groundGap = -CollisionUtil.collide(this, new Vector3d(0, -minGap, 0)).y;
             if (groundGap < minGap) {
                 float liftUp = minGap - (float) groundGap;
                 move(MoverType.SELF, new Vector3d(0, entity.getBbHeight() + liftUp, 0));

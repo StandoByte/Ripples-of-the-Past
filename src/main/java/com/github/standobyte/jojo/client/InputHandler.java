@@ -72,6 +72,7 @@ import com.github.standobyte.jojo.power.impl.stand.IStandManifestation;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
+import com.github.standobyte.jojo.util.mc.CollisionUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mod.IPlayerLeap;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -1194,7 +1195,7 @@ public class InputHandler {
                         if (playerVehicle != null && playerVehicle.getType() != ModEntityTypes.ROAD_ROLLER.get()) {
                             onGround = playerVehicle.isOnGround()
                                     || playerVehicle.getType() == ModEntityTypes.LEAVES_GLIDER.get()
-                                    && MCUtil.collide(playerVehicle, new Vector3d(0, -1, 0)).y > -1;
+                                    && CollisionUtil.collide(playerVehicle, new Vector3d(0, -1, 0)).y > -1;
                         }
                         onGround |= mc.player.isOnGround();
                         // TODO wall leap
@@ -1301,7 +1302,7 @@ public class InputHandler {
         player.hasImpulse = true;
         Vector3d inputVec = new Vector3d(player.xxa, 0, player.zza)
                 .yRot((-player.yRot) * MathUtil.DEG_TO_RAD);
-        Vector3d collide = MCUtil.collide(player, inputVec);
+        Vector3d collide = CollisionUtil.collide(player, inputVec);
         Vector3d leap = collide.subtract(inputVec).normalize().scale(strength);
         float leapYRot = (float) -MathHelper.atan2(leap.x, leap.z);
         leap = leap.yRot(leapYRot)

@@ -28,6 +28,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 
+import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.client.resources.ReloadListener;
 import net.minecraft.profiler.IProfiler;
 import net.minecraft.resources.IResource;
@@ -128,7 +129,11 @@ public class StandModelOverrides extends ReloadListener<Map<StandModelOverrides.
             EntityModelUnbaked modelOverride = readJson.createModel(modelId);
             
             try {
-                BlockbenchStandModelHelper.replaceModelParts(modelCopy, modelOverride.getNamedModelParts());
+                Map<String, ModelRenderer> modelParts = modelOverride.getNamedModelParts();
+                BlockbenchStandModelHelper.replaceModelParts(modelCopy, modelParts);
+                for (Map.Entry<String, ModelRenderer> entry : modelParts.entrySet()) {
+                    modelCopy.putNamedModelPart(entry.getKey(), entry.getValue());
+                }
             } catch (Exception e) {
                 JojoMod.getLogger().error("Failed to import Geckolib format model as {}", modelCopy.getClass().getName(), e);
             }

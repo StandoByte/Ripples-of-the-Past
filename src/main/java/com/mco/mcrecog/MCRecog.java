@@ -35,27 +35,27 @@ public class MCRecog {
         // Connect to the server
         try {
             server = new ServerSocket(7777);
-        } catch (IOException e){
-            JojoMod.LOGGER.error(e.getMessage());
-        }
+            
+            JojoMod.getLogger().debug("Starting the socket...");
+            // Spawn a new thread that reads from the socket on the specified localhost:port and adds it to the blocking queue
+            new Thread(() -> {
+                try {
+                    Socket client = server.accept();
+                    BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
 
-        JojoMod.LOGGER.debug("Starting the socket...");
-        // Spawn a new thread that reads from the socket on the specified localhost:port and adds it to the blocking queue
-        new Thread(() -> {
-            try {
-                Socket client = server.accept();
-                BufferedReader in = new BufferedReader(new InputStreamReader(client.getInputStream()));
-
-                // Receive input while the program is running
-                while (true) {
-                    String fromClient = in.readLine();
-                    if (fromClient != null)
-                        queue.put(fromClient);
+                    // Receive input while the program is running
+                    while (true) {
+                        String fromClient = in.readLine();
+                        if (fromClient != null)
+                            queue.put(fromClient);
+                    }
+                } catch (IOException | InterruptedException e) {
+                    JojoMod.getLogger().error(e.getMessage());
                 }
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-            }
-        }).start();
+            }).start();
+        } catch (Exception e){
+            JojoMod.getLogger().error(e.getMessage());
+        }
     }
 
     @SubscribeEvent

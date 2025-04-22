@@ -22,6 +22,8 @@
     "MerchantResultSlotMixin",
     "MapDataMixin",
     "TheMostUnnecessaryMixin",
+    "AbstractBlockMixin",
+    "BarrierBlockWallClimbMixin",
     "itemtracking.equip.LivingEntityMixin",
     "itemtracking.equip.MobEntityMixin",
     "itemtracking.equip.ArmorStandEntityMixin",

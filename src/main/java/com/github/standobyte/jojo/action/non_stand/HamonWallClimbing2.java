@@ -21,16 +21,24 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonData;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkill.HamonStat;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.general.OptionalFloat;
+import com.github.standobyte.jojo.util.mc.CollisionUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 
 import net.minecraft.client.entity.player.ClientPlayerEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MoverType;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.fluid.FlowingFluid;
+import net.minecraft.fluid.FluidState;
+import net.minecraft.item.Item;
 import net.minecraft.util.Direction;
 import net.minecraft.util.Hand;
 import net.minecraft.util.math.AxisAlignedBB;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.shapes.ISelectionContext;
+import net.minecraft.util.math.shapes.VoxelShape;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.TranslationTextComponent;
@@ -60,7 +68,7 @@ public class HamonWallClimbing2 extends HamonAction {
 //                    return ActionConditionResult.POSITIVE;
 //                }
                 Vector3d vecToBlock = Vector3d.atLowerCornerOf(blockFace.getOpposite().getNormal()).scale(MAX_WALL_DISTANCE);
-                Vector3d collide = MCUtil.collide(user, vecToBlock);
+                Vector3d collide = collide(user, user.getBoundingBox(), vecToBlock, true);
                 if (!collide.equals(vecToBlock)) {
                     return ActionConditionResult.POSITIVE;
                 }
@@ -85,7 +93,7 @@ public class HamonWallClimbing2 extends HamonAction {
                     float yRot = 180 - face.toYRot();
                     if (!cap.isWallClimbing() || cap.getWallClimbYRot().orElseGet(() -> yRot) != yRot) {
                         Vector3d vecToBlock = Vector3d.atLowerCornerOf(face.getOpposite().getNormal()).scale(MAX_WALL_DISTANCE);
-                        Vector3d collide = MCUtil.collide(user, vecToBlock);
+                        Vector3d collide = collide(user, user.getBoundingBox(), vecToBlock, true);
                         double distanceFromWall = user.getBbWidth() * 0.15;
                         Vector3d moveTo = user.position().add(collide).add(Vector3d.atLowerCornerOf(face.getNormal()).scale(distanceFromWall));
                         user.teleportTo(moveTo.x, moveTo.y, moveTo.z);
@@ -122,8 +130,8 @@ public class HamonWallClimbing2 extends HamonAction {
                 stopWallClimbing(player, wallClimbData);
                 return false;
             }
-            
-            Vector3d collide = MCUtil.collide(player, gripVec);
+
+            Vector3d collide = collide(player, player.getBoundingBox(), gripVec, true);
             if (collide.subtract(gripVec).lengthSqr() < 1E-7) {
                 stopWallClimbing(player, wallClimbData);
                 return false;
@@ -166,9 +174,9 @@ public class HamonWallClimbing2 extends HamonAction {
                     }
                     else {
                         // make sure the player doesn't fall down
-                        collideAfterMove = MCUtil.collide(player, 
+                        collideAfterMove = collide(player, 
                                 gripBox.move(0, -gripBox.getYsize() + movement.y, 0), 
-                                gripVec);
+                                gripVec, true);
                         if (collideAfterMove.subtract(gripVec).lengthSqr() < 1E-7) {
                             movement = horizontalMovementOnly;
                         }
@@ -176,7 +184,7 @@ public class HamonWallClimbing2 extends HamonAction {
                 }
                 
                 // check if the player is at the top of a wall
-                collideAfterMove = MCUtil.collide(player, gripBox.move(0, gripBox.getYsize(), 0), gripVec);
+                collideAfterMove = collide(player, gripBox.move(0, gripBox.getYsize(), 0), gripVec, true);
                 if (collideAfterMove.subtract(gripVec).lengthSqr() < 1E-7) {
                     if (movement.y > 0) {
                         movement = horizontalMovementOnly;
@@ -185,10 +193,10 @@ public class HamonWallClimbing2 extends HamonAction {
                 }
                 
                 // make sure the player doesn't fall while moving to the left/right if a horizontal end of a wall is reached
-                collideAfterMove = MCUtil.collide(player, 
+                collideAfterMove = collide(player, 
                         gripBox.move(horizontalMovementOnly.normalize()
                                 .scale(horizontalMovementOnly.length() + player.getBbWidth() + 0.1)),
-                        gripVec);
+                        gripVec, true);
                 if (collideAfterMove.subtract(gripVec).lengthSqr() < 1E-7) {
                     movement = new Vector3d(0, movement.y, 0);
                 }
@@ -198,6 +206,8 @@ public class HamonWallClimbing2 extends HamonAction {
                     boolean isJumping = clientPlayer.input.jumping;
                     if (isJumping) {
                         stopWallClimbing(player, wallClimbData);
+                        // the only check that also has to consider barriers, since the player is not supposed to be able to pull up
+                        canPullUp &= collide(player, gripBox.move(0, gripBox.getYsize(), 0), gripVec, false).subtract(gripVec).lengthSqr() < 1E-7;
                         if (canPullUp) {
                             // TODO pulling up animation?
                             player.move(MoverType.SELF, new Vector3d(0, player.getBbHeight(), 0));
@@ -232,6 +242,24 @@ public class HamonWallClimbing2 extends HamonAction {
         return false;
     }
     private static final float MIN_MOVEMENT_SPEED = 0.06f;
+    
+    public static final ISelectionContext NO_CLIMBING_ON_BARRIERS = new ISelectionContext() {
+        @Override public boolean isDescending() { return false; }
+        @Override public boolean isAbove(VoxelShape pShape, BlockPos pPos, boolean pCanAscend) { return false; }
+        @Override public boolean isHoldingItem(Item pItem) { return false; }
+        @Override public boolean canStandOnFluid(FluidState pState, FlowingFluid pFlowing) { return false; }
+    };
+    
+    private static Vector3d collide(Entity entity, AxisAlignedBB collisionBox, Vector3d offsetVec, boolean excludeBarriers) {
+        return CollisionUtil.collide(entity, collisionBox, offsetVec, excludeBarriers ? NO_CLIMBING_ON_BARRIERS : null);
+    }
+    
+    /**
+     * Called from {@link com.github.standobyte.jojo.mixin.BarrierBlockWallClimbMixin#changeCollisionShape}
+     */
+    public static boolean disableBlockCollisionShape(ISelectionContext ctx) {
+        return ctx == NO_CLIMBING_ON_BARRIERS;
+    }
     
     private static void stopWallClimbing(PlayerEntity player, LivingWallClimbing wallClimbing) {
         if (!player.level.isClientSide()) {
