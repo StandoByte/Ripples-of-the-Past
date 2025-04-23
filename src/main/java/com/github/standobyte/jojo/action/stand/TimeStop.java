@@ -78,11 +78,15 @@ public class TimeStop extends StandAction {
     
     @Override
     protected ActionConditionResult checkSpecificConditions(LivingEntity user, IStandPower power, ActionTarget target) {
-        if (power.getStandManifestation() instanceof StandEntity) {
+        boolean isInvasion = TimeStopHandler.isTimeStopped(power.getUser().level, power.getUser().blockPosition());
+        if (!isInvasion && power.getStandManifestation() instanceof StandEntity) {
             StandEntity standEntity = (StandEntity) power.getStandManifestation();
-            return ActionConditionResult.noMessage(standEntity.getCurrentTask().map(task -> {
-                return task.getAction().canBeCanceled(power, standEntity, task.getPhase(), null);
-            }).orElse(true));
+            boolean doingUncancellableAction = standEntity.getCurrentTask().map(task -> {
+                return !task.getAction().canBeCanceled(power, standEntity, task.getPhase(), null);
+            }).orElse(false);
+            if (doingUncancellableAction) {
+                return ActionConditionResult.NEGATIVE;
+            }
         }
         return super.checkSpecificConditions(user, power, target);
     }
