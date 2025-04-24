@@ -60,7 +60,6 @@ public class LegacyStandAnimator<T extends StandEntity> implements IStandAnimato
         StandEntityModel<T> model = (StandEntityModel<T>) standEntityModel;
         currentActionAnim = null;
         
-        model.resetXRotation();
         model.resetPose(entity);
         
         StandPose standPose = poseData.standPose;

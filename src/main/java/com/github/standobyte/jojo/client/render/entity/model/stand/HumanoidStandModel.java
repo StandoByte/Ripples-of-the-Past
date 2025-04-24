@@ -15,11 +15,9 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.particle.custom.StandCrumbleParticle;
-import com.github.standobyte.jojo.client.render.entity.animnew.stand.IStandAnimator;
 import com.github.standobyte.jojo.client.render.entity.pose.IModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose.ModelAnim;
@@ -52,27 +50,27 @@ import net.minecraft.util.math.vector.Vector3d;
 
 
 public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<T> {
-    protected ModelRenderer head;
-    protected ModelRenderer headRot;
-    protected ModelRenderer body;
-    protected ModelRenderer upperPart;
-    protected ModelRenderer torso;
-    protected ModelRenderer leftArmXRot;
-    protected XRotationModelRenderer leftArm;
-    protected ModelRenderer leftArmJoint;
-    protected ModelRenderer leftForeArm;
-    protected ModelRenderer rightArmXRot;
-    protected XRotationModelRenderer rightArm;
-    protected ModelRenderer rightArmJoint;
-    protected ModelRenderer rightForeArm;
-    protected ModelRenderer leftLegXRot;
-    protected XRotationModelRenderer leftLeg;
-    protected ModelRenderer leftLegJoint;
-    protected ModelRenderer leftLowerLeg;
-    protected ModelRenderer rightLegXRot;
-    protected XRotationModelRenderer rightLeg;
-    protected ModelRenderer rightLegJoint;
-    protected ModelRenderer rightLowerLeg;
+    public ModelRenderer head;
+    public ModelRenderer headRot;
+    public ModelRenderer body;
+    public ModelRenderer upperPart;
+    public ModelRenderer torso;
+    public ModelRenderer leftArmXRot;
+    public XRotationModelRenderer leftArm;
+    public ModelRenderer leftArmJoint;
+    public ModelRenderer leftForeArm;
+    public ModelRenderer rightArmXRot;
+    public XRotationModelRenderer rightArm;
+    public ModelRenderer rightArmJoint;
+    public ModelRenderer rightForeArm;
+    public ModelRenderer leftLegXRot;
+    public XRotationModelRenderer leftLeg;
+    public ModelRenderer leftLegJoint;
+    public ModelRenderer leftLowerLeg;
+    public ModelRenderer rightLegXRot;
+    public XRotationModelRenderer rightLeg;
+    public ModelRenderer rightLegJoint;
+    public ModelRenderer rightLowerLeg;
     
 
     public HumanoidStandModel() {
@@ -758,8 +756,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
             motionTilt(entity, this, ticks);
         }
 
-        IStandAnimator standAnimator = getAnimator();
-        if (standAnimator != null && standAnimator.isLegacy()) {
+        if (!usesGeckoAnims()) {
             rotateJoint(leftArmJoint, leftForeArm);
             rotateJoint(rightArmJoint, rightForeArm);
             rotateJoint(leftLegJoint, leftLowerLeg);
