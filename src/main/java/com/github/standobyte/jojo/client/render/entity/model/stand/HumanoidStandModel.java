@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.particle.custom.StandCrumbleParticle;
@@ -754,7 +755,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
         super.setupAnim(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
         
         if (ClientModSettings.getSettingsReadOnly()._standMotionTilt) {
-            motionTilt(entity, ticks);
+            motionTilt(entity, this, ticks);
         }
 
         IStandAnimator standAnimator = getAnimator();
@@ -766,7 +767,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
         }
     }
 
-    protected void motionTilt(T entity, float ticks) {
+    public static void motionTilt(StandEntity entity, HumanoidStandModel<?> model, float ticks) {
         if (entity.getStandPose() != StandPose.SUMMON) {
             Vector3d tiltVec;
             if (MathHelper.floor(entity.lastMotionTiltTick) != MathHelper.floor(ticks)) {
@@ -817,46 +818,48 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
                 double d1 = MathHelper.clamp(1 - tilt / Math.PI * 4, 0, 1);
                 boolean idlePose = entity.getStandPose() == StandPose.IDLE;
 
-                body.xRot += tiltVec.x;
+                model.body.xRot += tiltVec.x;
                 if (idlePose) {
-                    body.zRot += tiltVec.z;
-                    body.yRot *= d1;
+                    model.body.zRot += tiltVec.z;
+                    model.body.yRot *= d1;
                 }
 
                 double d = MathHelper.clamp(1 - 1.5 * tilt / Math.PI, 0, 1);
-                leftLowerLeg.xRot *= d;
-                rightLowerLeg.xRot *= d;
-                leftLowerLeg.yRot *= d;
-                rightLowerLeg.yRot *= d;
-                leftLowerLeg.zRot *= d;
-                rightLowerLeg.zRot *= d;
+                model.leftLowerLeg.xRot *= d;
+                model.rightLowerLeg.xRot *= d;
+                model.leftLowerLeg.yRot *= d;
+                model.rightLowerLeg.yRot *= d;
+                model.leftLowerLeg.zRot *= d;
+                model.rightLowerLeg.zRot *= d;
                 if (idlePose) {
-                    leftForeArm.xRot *= d;
-                    rightForeArm.xRot *= d;
-                    leftForeArm.yRot *= d;
-                    rightForeArm.yRot *= d;
-                    leftForeArm.zRot *= d;
-                    rightForeArm.zRot *= d;
+                    model.leftForeArm.xRot *= d;
+                    model.rightForeArm.xRot *= d;
+                    model.leftForeArm.yRot *= d;
+                    model.rightForeArm.yRot *= d;
+                    model.leftForeArm.zRot *= d;
+                    model.rightForeArm.zRot *= d;
                 }
                 
                 double d2 = MathHelper.clamp(1 - tilt / (2 * Math.PI), 0, 1);
-                leftLeg.xRot *= d2;
-                rightLeg.xRot *= d2;
-                leftLeg.yRot *= d2;
-                rightLeg.yRot *= d2;
-                leftLeg.zRot *= d2;
-                rightLeg.zRot *= d2;
+                model.leftLeg.xRot *= d2;
+                model.rightLeg.xRot *= d2;
+                model.leftLeg.yRot *= d2;
+                model.rightLeg.yRot *= d2;
+                model.leftLeg.zRot *= d2;
+                model.rightLeg.zRot *= d2;
                 if (idlePose) {
-                    leftArm.xRot *= d2;
-                    rightArm.xRot *= d2;
-                    leftArm.yRot *= d2;
-                    rightArm.yRot *= d2;
-                    leftArm.zRot *= d2;
-                    rightArm.zRot *= d2;
+                    model.leftArm.xRot *= d2;
+                    model.rightArm.xRot *= d2;
+                    model.leftArm.yRot *= d2;
+                    model.rightArm.yRot *= d2;
+                    model.leftArm.zRot *= d2;
+                    model.rightArm.zRot *= d2;
                 }
                 else {
-                    addSecondXRot(leftArm, (float) -tiltVec.x);
-                    addSecondXRot(rightArm, (float) -tiltVec.x);
+                    model.addSecondXRot(model.leftArm, (float) -tiltVec.x);
+                    model.addSecondXRot(model.rightArm, (float) -tiltVec.x);
+                    if (model.leftArmXRot != null) model.leftArmXRot.xRot -= tiltVec.x;
+                    if (model.rightArmXRot != null) model.rightArmXRot.xRot -= tiltVec.x;
                 }
             }
         }

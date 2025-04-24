@@ -11,6 +11,7 @@ public interface IStandAnimator {
     boolean isLegacy();
     <T extends StandEntity> boolean poseStand(@Nullable T entity, StandEntityModel<T> model, StandPoseData pose, 
             float ticks, float yRotOffsetDeg, float xRotDeg);
+    <T extends StandEntity> void poseStandPost(@Nullable T standEntity, StandEntityModel<T> standEntityModel);
     
     <T extends StandEntity> void addBarrageSwings(T entity, StandEntityModel<T> model, float ticks);
     <T extends StandEntity> void renderBarrageSwings(T entity, StandEntityModel<T> model, float yRotOffsetDeg, float xRotDeg, 
