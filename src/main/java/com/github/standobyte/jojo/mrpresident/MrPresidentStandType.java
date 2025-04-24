@@ -7,11 +7,13 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.mrpresident.dimension.MrPresidentBackTeleporter;
 import com.github.standobyte.jojo.mrpresident.dimension.MrPresidentInsideTeleporter;
 import com.github.standobyte.jojo.mrpresident.dimension.MrPresidentWorldData;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
+import com.github.standobyte.jojo.power.impl.stand.StandEffectsTracker;
 import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import com.github.standobyte.jojo.power.impl.stand.type.NoSummonStandType;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -46,8 +48,11 @@ public class MrPresidentStandType<T extends StandStats> extends NoSummonStandTyp
                 }
                 if (canTeleport) {
                     List<Entity> entities = findTargets(user, entity -> 
-                            !entity.isOnGround() && entity.getDeltaMovement().y < 0 && entity.getY() > user.getY(1)
-                            && (entity.tickCount >= 20 || entity.getType() == EntityType.ITEM) && !MCUtil.hasIndirectPassenger(entity, user));
+                               !entity.isOnGround() && entity.getDeltaMovement().y < 0 && entity.getY() > user.getY(1)
+                            && !(entity.tickCount < 20 && entity.getType() == EntityType.PLAYER)
+                            && !(entity instanceof StandEntity)
+                            && !MCUtil.hasIndirectPassenger(entity, user)
+                            && !(StandEffectsTracker.getEffectsTargetedBy(user, ModStandEffects.GE_CREATED_LIFEFORM.get()).findAny().filter(geEffect -> geEffect.getStandUser() == entity).isPresent()));
                     teleportEntities(user, power, entities);
                 }
             }
