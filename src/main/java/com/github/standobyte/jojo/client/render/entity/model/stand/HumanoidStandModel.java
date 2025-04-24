@@ -752,7 +752,7 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
     public void setupAnim(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
         super.setupAnim(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
         
-        if (ClientModSettings.getSettingsReadOnly()._standMotionTilt) {
+        if (ClientModSettings.getSettingsReadOnly().standMotionTilt) {
             motionTilt(entity, this, ticks);
         }
 
@@ -764,10 +764,14 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
         }
     }
 
+    private static final int TICKS_MOTION_TILT_LERP = 5;
     public static void motionTilt(StandEntity entity, HumanoidStandModel<?> model, float ticks) {
         if (entity.getStandPose() != StandPose.SUMMON) {
             Vector3d tiltVec;
-            if (MathHelper.floor(entity.lastMotionTiltTick) != MathHelper.floor(ticks)) {
+            List<Vector3d> vecQueue = entity.tiltVecQueue;
+            while (vecQueue.size() > TICKS_MOTION_TILT_LERP) vecQueue.remove(vecQueue.size() - 1);
+            boolean fillQueue = vecQueue.size() < TICKS_MOTION_TILT_LERP;
+            if (fillQueue || MathHelper.floor(entity.lastMotionTiltTick) != MathHelper.floor(ticks)) {
                 Vector3d motion = entity.position().subtract(entity.xOld, entity.yOld, entity.zOld);
                 
                 tiltVec = motion.yRot(entity.yBodyRot * MathUtil.DEG_TO_RAD).scale(2);
@@ -777,37 +781,21 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
                     tiltVec = tiltVec.normalize().scale(Math.PI / 4);
                 }
                 
-//                Vector3d tiltDiff = tiltVec.subtract(entity.prevTiltVec);
-//                if (tiltDiff.lengthSqr() > 1.0E-4) {
-//                    double maxDiff;
-//                    if (entity.motionDist >= entity.prevMotionDist) {
-//                        maxDiff = 0.1;
-//                    }
-//                    else {
-//                        maxDiff = 0.4;
-//                    }
-//                    if (tiltDiff.lengthSqr() > maxDiff * maxDiff) {
-//                        tiltDiff = tiltDiff.normalize().scale(maxDiff);
-//                    }
-//                    tiltVec = entity.prevTiltVec.add(tiltDiff);
-//                }
+                if (fillQueue) {
+                    for (int i = vecQueue.size(); i < TICKS_MOTION_TILT_LERP; i++) {
+                        vecQueue.add(tiltVec);
+                    }
+                }
+                else {
+                    vecQueue.remove(0);
+                    vecQueue.add(tiltVec);
+                }
                 
-//                entity.prevMotionDist = entity.motionDist;
-//                entity.motionVec = motion;
-//                entity.motionDist = motion.length();
-                entity.prevTiltVec = entity.tiltVec;
-                entity.tiltVec = tiltVec;
                 entity.lastMotionTiltTick = ticks;
-            }
-            else {
-                tiltVec = entity.tiltVec;
             }
             
             float partialTick = MathHelper.frac(ticks);
-            tiltVec = new Vector3d(
-                    MathHelper.lerp(partialTick, entity.prevTiltVec.x, entity.tiltVec.x),
-                    MathHelper.lerp(partialTick, entity.prevTiltVec.y, entity.tiltVec.y),
-                    MathHelper.lerp(partialTick, entity.prevTiltVec.z, entity.tiltVec.z));
+            tiltVec = lerpVecs(vecQueue, partialTick);
             
             double tiltSqr = tiltVec.lengthSqr();
             if (tiltSqr > 1.0E-4) {
@@ -860,6 +848,23 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
                 }
             }
         }
+    }
+    
+    private static Vector3d lerpVecs(List<Vector3d> vecs, float partialTick) {
+        double x = 0;
+        double y = 0;
+        double z = 0;
+        Vector3d prevVec = vecs.get(0);
+        Vector3d vec;
+        float n = vecs.size();
+        for (int i = 1; i < n; i++) {
+            vec = vecs.get(i);
+            x += MathHelper.lerp(partialTick, prevVec.x, vec.x);
+            y += MathHelper.lerp(partialTick, prevVec.y, vec.y);
+            z += MathHelper.lerp(partialTick, prevVec.z, vec.z);
+            prevVec = vec;
+        }
+        return new Vector3d(x / n, y / n, z / n);
     }
 
     protected void rotateJoint(ModelRenderer joint, ModelRenderer limbPart) {

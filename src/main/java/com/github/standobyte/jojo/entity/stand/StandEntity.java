@@ -202,8 +202,9 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
 //    public double motionDist = 0;
 //    public double prevMotionDist = 0;
     
-    public Vector3d prevTiltVec = Vector3d.ZERO;
-    public Vector3d tiltVec = Vector3d.ZERO;
+    public List<Vector3d> tiltVecQueue = new ArrayList<>();
+//    public Vector3d prevTiltVec = Vector3d.ZERO;
+//    public Vector3d tiltVec = Vector3d.ZERO;
     public boolean refreshGlowing = false;
     
     public static final DataParameter<Optional<ResourceLocation>> DATA_PARAM_STAND_SKIN = EntityDataManager.defineId(StandEntity.class, 

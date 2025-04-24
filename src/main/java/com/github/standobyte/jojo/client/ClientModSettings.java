@@ -33,7 +33,7 @@ public class ClientModSettings {
         
         public boolean resolveShaders = true;
         public boolean timeStopAnimation = true;
-        public boolean _standMotionTilt = false;
+        public boolean standMotionTilt = true;
         public boolean poseOnLmbRmb = true;
         public boolean autoResolveActivation = true;
         public boolean standOutline = true;
