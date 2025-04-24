@@ -20,7 +20,6 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.util.ResourceLocation;
 
-// TODO yellow glint on an item imbued with life
 public abstract class GELifeImbueGlint extends RenderType {
     private static final ResourceLocation GLINT_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/item_imbued_with_life.png");
     

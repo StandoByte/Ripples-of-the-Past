@@ -25,9 +25,7 @@ public class WasdAllowingScreen extends Screen {
     /* 
      * TODO
      * sprint
-     * shift toggle
-     * sprint toggle
-     * mouse wheel scroll
+     * keep the previous motion
      */
 
     public WasdAllowingScreen(ITextComponent pTitle) {
