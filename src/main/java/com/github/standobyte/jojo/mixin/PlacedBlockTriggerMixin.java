@@ -9,6 +9,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
+import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.mrpresident.dimension.MrPresidentWorldData.ChunkSectionPos;
 import com.github.standobyte.jojo.world.dimension.ModDimensions;
 
@@ -29,8 +30,10 @@ public class PlacedBlockTriggerMixin {
     }
 
     private static final List<BlockPos> BLOCK_OFFSETS;
+    private static final List<BlockPos> BLOCK_OFFSETS_TOP;
     static {
         BLOCK_OFFSETS = new ArrayList<>();
+        BLOCK_OFFSETS_TOP = new ArrayList<>();
         for (int x = 4; x <= 11; x++) {
             for (int y = 6; y <= 9; y++) {
                 BLOCK_OFFSETS.add(new BlockPos(x, y, 3));
@@ -46,19 +49,31 @@ public class PlacedBlockTriggerMixin {
         for (int x = 4; x <= 11; x++) {
             for (int z = 4; z <= 11; z++) {
                 BLOCK_OFFSETS.add(new BlockPos(x, 5, z));
-                BLOCK_OFFSETS.add(new BlockPos(x, 10, z));
+                BLOCK_OFFSETS_TOP.add(new BlockPos(x, 10, z));
             }
         }
     }
     private static void checkRoomAdvancement(ServerPlayerEntity player, BlockPos blockPos) {
         boolean hasWalls = true;
         ChunkSectionPos roomPos = new ChunkSectionPos(blockPos);
+        BlockPos checkBlockPos;
+        BlockState blockState;
         for (BlockPos offset : BLOCK_OFFSETS) {
-            BlockPos checkBlockPos = roomPos.blockPosition(offset);
-            BlockState blockState = player.level.getBlockState(checkBlockPos);
+            checkBlockPos = roomPos.blockPosition(offset);
+            blockState = player.level.getBlockState(checkBlockPos);
             if (blockState.isAir(player.level, checkBlockPos)) {
                 hasWalls = false;
                 break;
+            }
+        }
+        if (hasWalls) {
+            for (BlockPos offset : BLOCK_OFFSETS_TOP) {
+                checkBlockPos = roomPos.blockPosition(offset);
+                blockState = player.level.getBlockState(checkBlockPos);
+                if (blockState.isAir(player.level, checkBlockPos) && player.level.getBlockState(checkBlockPos.above()).getBlock() != ModBlocks.MR_PRESIDENT_EXIT.get()) {
+                    hasWalls = false;
+                    break;
+                }
             }
         }
         if (hasWalls) {

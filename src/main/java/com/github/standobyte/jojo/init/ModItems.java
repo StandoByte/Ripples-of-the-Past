@@ -264,8 +264,8 @@ public class ModItems {
     public static final RegistryObject<BlockItem> COCO_JUMBO_SHELL = ITEMS.register("coco_jumbo_shell", 
             () -> new BlockItem(ModBlocks.COCO_JUMBO_SHELL.get(), new Item.Properties()));
 
-    public static final RegistryObject<BlockItem> MR_PRESIDENT_GEM = ITEMS.register("mr_president_gem", 
-            () -> new BlockItem(ModBlocks.MR_PRESIDENT_GEM.get(), new Item.Properties()));
+    public static final RegistryObject<BlockItem> MR_PRESIDENT_EXIT = ITEMS.register("mr_president_exit", 
+            () -> new BlockItem(ModBlocks.MR_PRESIDENT_EXIT.get(), new Item.Properties()));
 //
 //    public static final RegistryObject<StonePendantItem> STONE_PENDANT = ITEMS.register("stone_pendant", 
 //            () -> new StonePendantItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));

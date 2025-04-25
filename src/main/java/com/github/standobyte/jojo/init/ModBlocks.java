@@ -57,7 +57,7 @@ public class ModBlocks {
     public static final RegistryObject<Block> COCO_JUMBO_SHELL = BLOCKS.register("coco_jumbo_shell", 
             () -> new Block(AbstractBlock.Properties.of(Material.STONE).strength(-1.0F, 3600000.0F).noDrops().isValidSpawn((state, reader, pos, entityType) -> false)));
     
-    public static final RegistryObject<Block> MR_PRESIDENT_GEM = BLOCKS.register("mr_president_gem", 
+    public static final RegistryObject<Block> MR_PRESIDENT_EXIT = BLOCKS.register("mr_president_gem", 
             () -> new MrPresidentGemBlock(AbstractBlock.Properties.of(Material.METAL).strength(-1.0F, 3600000.0F)
                     .lightLevel(state -> 15).noDrops().isValidSpawn((state, reader, pos, entityType) -> false)));
     
