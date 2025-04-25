@@ -81,7 +81,7 @@ public class EntityUtilCap {
             stoppedInTime = true;
             entity.canUpdate(false);
             
-            if (asMob != null) {
+            if (asMob != null && prevNoAi == null) {
                 prevNoAi = asMob.isNoAi();
                 asMob.setNoAi(true);
             }

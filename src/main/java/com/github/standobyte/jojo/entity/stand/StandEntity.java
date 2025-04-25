@@ -2376,6 +2376,11 @@ public class StandEntity extends LivingEntity implements IStandManifestation, IE
         return false;
     }
     
+    @Override
+    public boolean isPushedByFluid() {
+        return false;
+    }
+    
     
     
     protected void onStandDying() {

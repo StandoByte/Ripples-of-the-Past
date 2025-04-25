@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.apache.commons.lang3.reflect.FieldUtils;
 
@@ -27,7 +28,7 @@ public class ActionConfigSerialized<A extends Action<?>> {
     public final JsonObject defaultSettings;
     protected JsonObject appliedSettings;
     protected String settingsToSend = "{}";
-    protected Map<String, Field> configFieldsCacheClient;
+    protected Map<String, Optional<Field>> configFieldsCacheClient;
     
     public ActionConfigSerialized(A action) {
         this.action = action;
@@ -89,12 +90,21 @@ public class ActionConfigSerialized<A extends Action<?>> {
         }
         for (Map.Entry<String, JsonElement> entry : json.entrySet()) {
             String fieldName = entry.getKey();
-            Field field = configFieldsCacheClient.computeIfAbsent(fieldName, name -> {
-                Field f = FieldUtils.getField(action.getClass(), name, true /* doesn't work with public final fields */);
-                f.setAccessible(true);
-                return f;
+            Optional<Field> fieldFound = configFieldsCacheClient.computeIfAbsent(fieldName, name -> {
+                Field f = FieldUtils.getField(action.getClass(), name, true 
+                        /* setting the forceAccess access parameter to true lets it return non-public fields,
+                         * the issue is that it still doesn't call Field#setAccessible for public final fields, 
+                         * so we call setAccessible later manually */);
+                if (f != null) {
+                    f.setAccessible(true);
+                }
+                else {
+                    JojoMod.getLogger().error("Illegal field ({}) in ability config {}", name, action.getRegistryName());
+                }
+                return Optional.ofNullable(f);
             });
-            if (field != null) {
+            if (fieldFound.isPresent()) {
+                Field field = fieldFound.get();
                 JsonElement jsonElement = entry.getValue();
                 Object value = getGson().fromJson(jsonElement, field.getType());
                 try {
