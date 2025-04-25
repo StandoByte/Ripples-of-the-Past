@@ -802,8 +802,12 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
                 double tilt = Math.sqrt(tiltSqr);
                 double d1 = MathHelper.clamp(1 - tilt / Math.PI * 4, 0, 1);
                 boolean idlePose = entity.getStandPose() == StandPose.IDLE;
+                
+                float tiltX = (float) tiltVec.x;
+                float bodyTiltX = tiltX * 0.75f;
+                float legsTiltX = tiltX - bodyTiltX;
 
-                model.body.xRot += tiltVec.x;
+                model.body.xRot += bodyTiltX;
                 if (idlePose) {
                     model.body.zRot += tiltVec.z;
                     model.body.yRot *= d1;
@@ -826,12 +830,6 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
                 }
                 
                 double d2 = MathHelper.clamp(1 - tilt / (2 * Math.PI), 0, 1);
-                model.leftLeg.xRot *= d2;
-                model.rightLeg.xRot *= d2;
-                model.leftLeg.yRot *= d2;
-                model.rightLeg.yRot *= d2;
-                model.leftLeg.zRot *= d2;
-                model.rightLeg.zRot *= d2;
                 if (idlePose) {
                     model.leftArm.xRot *= d2;
                     model.rightArm.xRot *= d2;
@@ -841,11 +839,23 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
                     model.rightArm.zRot *= d2;
                 }
                 else {
-                    model.addSecondXRot(model.leftArm, (float) -tiltVec.x);
-                    model.addSecondXRot(model.rightArm, (float) -tiltVec.x);
-                    if (model.leftArmXRot != null) model.leftArmXRot.xRot -= tiltVec.x;
-                    if (model.rightArmXRot != null) model.rightArmXRot.xRot -= tiltVec.x;
+                    model.addSecondXRot(model.leftArm, (float) -bodyTiltX);
+                    model.addSecondXRot(model.rightArm, (float) -bodyTiltX);
+                    if (model.leftArmXRot != null) model.leftArmXRot.xRot -= bodyTiltX;
+                    if (model.rightArmXRot != null) model.rightArmXRot.xRot -= bodyTiltX;
                 }
+                
+                model.leftLeg.xRot *= d2;
+                model.rightLeg.xRot *= d2;
+                model.leftLeg.yRot *= d2;
+                model.rightLeg.yRot *= d2;
+                model.leftLeg.zRot *= d2;
+                model.rightLeg.zRot *= d2;
+                
+                model.addSecondXRot(model.leftLeg, (float) legsTiltX);
+                model.addSecondXRot(model.rightLeg, (float) legsTiltX);
+                if (model.leftLegXRot != null) model.leftLegXRot.xRot += legsTiltX;
+                if (model.rightLegXRot != null) model.rightLegXRot.xRot += legsTiltX;
             }
         }
     }
