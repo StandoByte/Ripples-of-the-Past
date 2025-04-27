@@ -7,7 +7,6 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.render.item.InventoryItemHighlight;
-import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.entity.IPassengerMixinReposition;
 import com.github.standobyte.jojo.entity.mob.IMobStandUser;
 import com.github.standobyte.jojo.init.ModEntityTypes;
@@ -113,8 +112,7 @@ public class CocoJumboTurtleEntity extends TurtleEntity implements IMobStandUser
                 }
             }
         }
-        else if (ActionsOverlayGui.getInstance().getMouseTarget().getEntity() == this
-                && !standPower.hasPower() && !this.hasEffect(ModStatusEffects.STAND_VIRUS.get())) {
+        else if (!standPower.hasPower() && !this.hasEffect(ModStatusEffects.STAND_VIRUS.get())) {
             if (ClientUtil.getClientPlayer().distanceToSqr(this) < 36) {
                 InventoryItemHighlight.highlightItem(Items.BOW, 20);
                 InventoryItemHighlight.highlightItem(Items.CROSSBOW, 20);
