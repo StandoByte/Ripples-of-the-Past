@@ -75,7 +75,7 @@ public class ItemRendererMixin {
     @ModifyVariable(method = "render", remap = false, at = @At("HEAD"), argsOnly = true, ordinal = 1)
     public int jojoItemHighlight(int pCombinedOverlay, ItemStack pItemStack, ItemCameraTransforms.TransformType pTransformType, boolean pLeftHand, 
             MatrixStack pMatrixStack, IRenderTypeBuffer pBuffer, int pCombinedLight, int pCombinedOverlayArg, IBakedModel pModel) {
-        if (pTransformType == ItemCameraTransforms.TransformType.GUI && !pItemStack.isEmpty()) {
+        if (!pItemStack.isEmpty()) {
             float partialTick = Minecraft.getInstance().getDeltaFrameTime();
             float overlayAmount = InventoryItemHighlight.getHighlightAmount(pItemStack.getItem(), partialTick);
             if (overlayAmount >= 0) {

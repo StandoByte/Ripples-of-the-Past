@@ -1641,6 +1641,9 @@ public class ClientEventHandler {
                         new TranslationTextComponent("jojo.ge_item_marked")
                         .withStyle(Style.EMPTY.withColor(
                                 Color.fromRgb(ActionsOverlayGui.getPowerUiColor(powerOptional.get())))));
+                event.getToolTip().add(
+                        new TranslationTextComponent("jojo.ge_item_marked.2")
+                        .withStyle(TextFormatting.DARK_GRAY));
             }
             
             OilItem.remainingOiledUses(item).ifPresent(uses -> {

@@ -1428,6 +1428,7 @@
   "ge_new_lifeform.toast.title": "New lifeform unlocked!",
   "ge_new_lifeform.toast.title.subtype": "New subtype unlocked",
   "jojo.ge_item_marked": "Imbued with life",
+  "jojo.ge_item_marked.2": "(You can track this item's location and turn it into a lifeform remotely)",
   "jojo.message.action_condition.choose_lifeform": "You have to choose a lifeform first",
   "jojo.message.action_condition.ge_lifeform_material": "You need a non-living block or an item in your off-hand",
   "jojo.message.action_condition.ge_lifeform_material_only_item": "You need a non-living item in your off-hand",
