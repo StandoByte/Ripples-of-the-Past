@@ -7,6 +7,7 @@ import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.client.renderer.entity.model.PlayerModel;
 import net.minecraft.util.HandSide;
 
+@Deprecated
 public class PlayerArmBarrageSwing extends ArmBarrageSwing<AbstractClientPlayerEntity, PlayerModel<AbstractClientPlayerEntity>> {
     private final BarrageFistAfterimagesLayer effectLayer;
 

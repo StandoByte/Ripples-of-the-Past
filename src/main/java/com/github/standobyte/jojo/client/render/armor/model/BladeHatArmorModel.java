@@ -2,8 +2,6 @@ package com.github.standobyte.jojo.client.render.armor.model;
 
 import java.util.Collections;
 
-import com.github.standobyte.jojo.client.ClientUtil;
-
 import net.minecraft.client.renderer.entity.model.BipedModel;
 import net.minecraft.client.renderer.model.ModelRenderer;
 import net.minecraft.entity.LivingEntity;

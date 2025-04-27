@@ -2,7 +2,6 @@ package com.github.standobyte.jojo.action.non_stand;
 
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
-import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.damaging.projectile.ModdedProjectileEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModSounds;

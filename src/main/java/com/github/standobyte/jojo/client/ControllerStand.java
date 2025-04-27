@@ -140,6 +140,7 @@ public class ControllerStand {
     
     
 
+    @SuppressWarnings("rawtypes")
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void renderStandHands(RenderHandEvent event) {
         if (!isControllingStand()) {

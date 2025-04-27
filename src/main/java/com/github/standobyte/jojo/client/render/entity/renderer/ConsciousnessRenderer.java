@@ -38,7 +38,6 @@ public class ConsciousnessRenderer extends EntityRenderer<ClientConsciousnessEnt
         return null;
     }
 
-    @SuppressWarnings("resource")
     @Override
     public void render(ClientConsciousnessEntity entity, float yRotation, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
         ClientConsciousnessEntity csnsEntity = (ClientConsciousnessEntity) entity;

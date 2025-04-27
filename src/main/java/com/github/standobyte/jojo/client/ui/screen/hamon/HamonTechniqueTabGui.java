@@ -18,9 +18,7 @@ import javax.annotation.Nullable;
 
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.ui.screen.widgets.utils.IExtendedWidget;
-import com.github.standobyte.jojo.client.ui.text.JojoTextComponentWrapper;
 import com.github.standobyte.jojo.init.power.JojoCustomRegistries;
 import com.github.standobyte.jojo.init.power.non_stand.hamon.ModHamonSkills;
 import com.github.standobyte.jojo.network.PacketManager;

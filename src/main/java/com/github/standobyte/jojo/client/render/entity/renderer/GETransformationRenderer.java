@@ -9,6 +9,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.projectile.CDBlockBulletRenderer;
 import com.github.standobyte.jojo.client.render.rendertype.CustomRenderType;
@@ -61,6 +62,7 @@ public class GETransformationRenderer<T extends GETransformationEntity> extends 
         return null;
     }
 
+    @SuppressWarnings({ "unchecked", "rawtypes" })
     @Override
     public void render(T entity, float yRotation, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
         if (entity.getVehicle() != null && entity.getVehicle() == ClientUtil.getClientPlayer()) {
@@ -231,7 +233,7 @@ public class GETransformationRenderer<T extends GETransformationEntity> extends 
     private static Map<ModelRenderer, float[]> createStateZero(Collection<ModelRenderer> modelParts) {
         Map<ModelRenderer, float[]> map = new HashMap<>();
         modelParts.forEach(modelPart -> {
-            ObjectList<ModelRenderer.ModelBox> boxes = ClientReflection.getCubes(modelPart);
+            ObjectList<ModelRenderer.ModelBox> boxes = modelPart.cubes;
             float minX = boxes.stream().map(box -> box.minX).min(Float::compare).orElse(0f);
             float maxX = boxes.stream().map(box -> box.maxX).max(Float::compare).orElse(0f);
             float minY = boxes.stream().map(box -> box.minY).min(Float::compare).orElse(0f);
@@ -255,7 +257,6 @@ public class GETransformationRenderer<T extends GETransformationEntity> extends 
     
     private static final Map<EntityModel<?>, ModelStateEntry> MODEL_PARTS_CACHE = new HashMap<>();
     private static class ModelStateEntry {
-        // TODO replace with a singular map
         private final Map<ModelRenderer, ModelRendererState> state;
         
         private ModelStateEntry(EntityModel<?> model) {
@@ -365,8 +366,7 @@ public class GETransformationRenderer<T extends GETransformationEntity> extends 
                             addSubPartsAndSelf(modelParts, modelPart);
                         }
                     } catch (IllegalArgumentException | IllegalAccessException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        JojoMod.getLogger().error("Failed to create the lifeform creation animation for model {}", model.getClass().getSimpleName(), e);
                     }
                 }
                 else if (ModelRenderer[].class.isAssignableFrom(field.getType())) {
@@ -378,8 +378,7 @@ public class GETransformationRenderer<T extends GETransformationEntity> extends 
                             addSubPartsAndSelf(modelParts, modelPart);
                         }
                     } catch (IllegalArgumentException | IllegalAccessException e) {
-                        // TODO Auto-generated catch block
-                        e.printStackTrace();
+                        JojoMod.getLogger().error("Failed to create the lifeform creation animation for model {}", model.getClass().getSimpleName(), e);
                     }
                 }
             });
@@ -390,7 +389,7 @@ public class GETransformationRenderer<T extends GETransformationEntity> extends 
     
     private static void addSubPartsAndSelf(Set<ModelRenderer> modelParts, ModelRenderer modelRenderer) {
         modelParts.add(modelRenderer);
-        ObjectList<ModelRenderer> children = ClientReflection.getChildren(modelRenderer);
+        ObjectList<ModelRenderer> children = modelRenderer.children;
         children.forEach(child -> addSubPartsAndSelf(modelParts, child));
     }
     

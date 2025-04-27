@@ -9,7 +9,6 @@ import com.github.standobyte.jojo.client.playeranim.kosmx.anim.modifier.KosmXHea
 
 import dev.kosmx.playerAnim.api.layered.IAnimation;
 import dev.kosmx.playerAnim.api.layered.ModifierLayer;
-import dev.kosmx.playerAnim.api.layered.modifier.SpeedModifier;
 import dev.kosmx.playerAnim.core.util.Ease;
 import net.minecraft.client.entity.player.AbstractClientPlayerEntity;
 import net.minecraft.entity.player.PlayerEntity;

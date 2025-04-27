@@ -293,7 +293,6 @@ public class GoldExperienceCreateLifeform extends StandAction {
         return lifeFormCreated;
     }
     
-    @SuppressWarnings("unchecked")
     @Override
     public void perform(World world, LivingEntity user, IStandPower power, ActionTarget target, @Nullable PacketBuffer extraInput) {
         if (!world.isClientSide() && extraInput != null) {

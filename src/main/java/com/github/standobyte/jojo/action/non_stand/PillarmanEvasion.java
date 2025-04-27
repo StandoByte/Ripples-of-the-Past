@@ -1,16 +1,11 @@
 package com.github.standobyte.jojo.action.non_stand;
 
 import com.github.standobyte.jojo.action.ActionTarget;
-import com.github.standobyte.jojo.client.ClientEventHandler;
-import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.playeranim.anim.ModPlayerAnimations;
-import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
-import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.power.impl.nonstand.INonStandPower;
 
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.HandSide;
 import net.minecraft.world.World;
 
 // TODO when the player walks a certain distance, add afterimages with the previous pose
