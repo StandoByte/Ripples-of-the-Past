@@ -180,7 +180,7 @@ public abstract class MarkerRenderer {
 //        RenderSystem.disableDepthTest();
 //        RenderSystem.disableCull();
         IRenderTypeBuffer.Impl buffer = mc.renderBuffers().bufferSource();
-        // FIXME !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! the item model isn't rendered behind blocks/entities
+        // FIXME the item model isn't rendered behind blocks/entities
         itemRenderer.renderStatic(item, ItemCameraTransforms.TransformType.GUI, 
                 ClientUtil.MAX_MODEL_LIGHT, OverlayTexture.NO_OVERLAY, matrixStack, buffer);
 //        RenderSystem.enableDepthTest();
