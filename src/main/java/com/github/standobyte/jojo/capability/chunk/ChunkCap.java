@@ -17,6 +17,7 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.entity.EntityMadeFromBlock;
+import com.github.standobyte.jojo.init.ModTileEntities;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.BrokenChunkBlocksPacket;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -51,7 +52,7 @@ public class ChunkCap {
 
     public void saveBrokenBlock(BlockPos pos, BlockState state, Optional<TileEntity> tileEntity, List<ItemStack> drops) {
         // FIXME remember blocks with inventory
-        if (tileEntity.map(te -> te instanceof IInventory).orElse(false)) return;
+        if (tileEntity.filter(te -> te instanceof IInventory || te.getType() == ModTileEntities.STONE_MASK.get()).isPresent()) return;
         
         saveBrokenBlock(new PrevBlockInfo(pos, state, drops, false));
     }
