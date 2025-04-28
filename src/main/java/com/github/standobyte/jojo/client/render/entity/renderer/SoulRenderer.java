@@ -44,6 +44,8 @@ public class SoulRenderer<T extends SoulEntity> extends EntityRenderer<T> {
     
     private <E extends LivingEntity, M extends EntityModel<E>> void renderSoul(E entity, T soulEntity, 
             float yRotation, float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
+        EntityRenderer<? super E> entityRenderer = entityRenderDispatcher.getRenderer(entity);
+        if (!(entityRenderer instanceof LivingRenderer)) return;
         LivingRenderer<E, M> renderer = (LivingRenderer<E, M>) entityRenderDispatcher.getRenderer(entity);
         if (MinecraftForge.EVENT_BUS.post(new RenderLivingEvent.Pre<E, M>(entity, renderer, partialTick, matrixStack, buffer, packedLight))) return;
         
