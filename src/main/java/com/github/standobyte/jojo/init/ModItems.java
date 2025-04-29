@@ -19,10 +19,12 @@ import com.github.standobyte.jojo.item.CassetteBlankItem;
 import com.github.standobyte.jojo.item.CassetteRecordedItem;
 import com.github.standobyte.jojo.item.ClackersItem;
 import com.github.standobyte.jojo.item.CustomModelArmorItem;
+import com.github.standobyte.jojo.item.GEBodyTissueItem;
 import com.github.standobyte.jojo.item.GlovesItem;
 import com.github.standobyte.jojo.item.KnifeItem;
 import com.github.standobyte.jojo.item.ModArmorMaterials;
 import com.github.standobyte.jojo.item.ModCreativeTab;
+import com.github.standobyte.jojo.item.MrPresidentKeyItem;
 import com.github.standobyte.jojo.item.MolotovItem;
 import com.github.standobyte.jojo.item.OilItem;
 import com.github.standobyte.jojo.item.PhotoItem;
@@ -155,6 +157,9 @@ public class ModItems {
 
     public static final RegistryObject<Item> CRAZY_DIAMOND_NON_BLOCK_ANCHOR = ITEMS.register("crazy_diamond_non_block_anchor", 
             () -> new Item(new Item.Properties()));
+    
+    public static final RegistryObject<Item> GOLD_EXPERIENCE_BODY_TISSUE = ITEMS.register("gold_experience_body_tissue", 
+            () -> new GEBodyTissueItem(new Item.Properties().stacksTo(1)));
 
 //    public static final RegistryObject<SpawnEggItem> ROCK_PAPER_SCISSORS_KID_SPAWN_EGG = ITEMS.register("rps_kid_spawn_egg", 
 //            () -> new ForgeSpawnEggItem(ModEntityTypes.ROCK_PAPER_SCISSORS_KID, 0x563C33, 0xBD8B72, new Item.Properties().tab(MAIN_TAB)));
@@ -246,6 +251,21 @@ public class ModItems {
 //
 //    public static final RegistryObject<MistaRevolverItem> MISTA_REVOLVER = ITEMS.register("mista_revolver",
 //            () -> new MistaRevolverItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));
+
+    public static final RegistryObject<SpawnEggItem> COCO_JUMBO_SPAWN_EGG = ITEMS.register("coco_jumbo_spawn_egg", 
+            () -> new ForgeSpawnEggItem(ModEntityTypes.COCO_JUMBO_TURTLE, 0xE7E7E7, 0x00AFAF, new Item.Properties().tab(MAIN_TAB)));
+    
+    public static final RegistryObject<Item> MR_PRESIDENT_KEY = ITEMS.register("mr_president_key", 
+            () -> new MrPresidentKeyItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1), false));
+    
+    public static final RegistryObject<Item> MR_PRESIDENT_MASTER_KEY = ITEMS.register("mr_president_master_key", 
+            () -> new MrPresidentKeyItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1), true));
+
+    public static final RegistryObject<BlockItem> COCO_JUMBO_SHELL = ITEMS.register("coco_jumbo_shell", 
+            () -> new BlockItem(ModBlocks.COCO_JUMBO_SHELL.get(), new Item.Properties()));
+
+    public static final RegistryObject<BlockItem> MR_PRESIDENT_EXIT = ITEMS.register("mr_president_exit", 
+            () -> new BlockItem(ModBlocks.MR_PRESIDENT_EXIT.get(), new Item.Properties()));
 //
 //    public static final RegistryObject<StonePendantItem> STONE_PENDANT = ITEMS.register("stone_pendant", 
 //            () -> new StonePendantItem(new Item.Properties().tab(MAIN_TAB).stacksTo(1)));

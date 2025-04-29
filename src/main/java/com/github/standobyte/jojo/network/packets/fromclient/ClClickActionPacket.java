@@ -49,6 +49,7 @@ public class ClClickActionPacket {
             Action<?> action = buf.readRegistryIdUnsafe(JojoCustomRegistries.ACTIONS.getRegistry());
             ActionTarget target = ActionTarget.readFromBuf(buf);
             boolean sneak = buf.readBoolean();
+            
             ClClickActionPacket packet = new ClClickActionPacket(power, action, target, sneak);
             packet.extraInputData = buf;
             return packet;

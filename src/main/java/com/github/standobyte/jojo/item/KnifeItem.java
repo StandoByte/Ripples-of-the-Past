@@ -3,6 +3,8 @@ package com.github.standobyte.jojo.item;
 import com.github.standobyte.jojo.entity.itemprojectile.KnifeEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack.KnownItemState;
 import com.github.standobyte.jojo.potion.BleedingEffect;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.google.common.collect.ImmutableMultimap;
@@ -73,6 +75,15 @@ public class KnifeItem extends Item {
                 KnifeEntity knifeEntity = new KnifeEntity(world, player);
                 knifeEntity.setTimeStopFlightTicks(5);
                 knifeEntity.shootFromRotation(player, 1.5F, i == 0 ? 1.0F : 16.0F);
+                
+                TrackerItemStack.getItemTracker(handStack).ifPresent(tracker -> {
+                    if (tracker.isTracked()) {
+                        tracker.setAtEntity(knifeEntity.getId(), world, KnownItemState.ENTITY_IS_ITEM);
+                        tracker.setItemStillThereCheck(null);
+                        knifeEntity.saveItemTrackerNBT(tracker.toNBT());
+                    }
+                });
+                
                 world.addFreshEntity(knifeEntity);
             }
             

@@ -1,7 +1,6 @@
 package com.github.standobyte.jojo.client.particle;
 
 import com.github.standobyte.jojo.client.ClientUtil;
-import com.github.standobyte.jojo.client.particle.custom.HamonAuraParticleRenderType;
 import com.mojang.blaze3d.vertex.IVertexBuilder;
 
 import net.minecraft.client.particle.IAnimatedSprite;

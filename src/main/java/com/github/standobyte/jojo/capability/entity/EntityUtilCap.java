@@ -5,8 +5,11 @@ import java.util.OptionalInt;
 import java.util.Queue;
 
 import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.action.stand.GoldExperienceLifeDetector;
 import com.github.standobyte.jojo.capability.world.TimeStopHandler;
+import com.github.standobyte.jojo.client.ClientEventHandler;
 import com.github.standobyte.jojo.client.IEntityGlowColor;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
@@ -124,10 +127,15 @@ public class EntityUtilCap {
     
     
     public void setClGlowingColor(@Nonnull OptionalInt color, int ticks) {
+        setClGlowingColor(color, ticks, null);
+    }
+    
+    public void setClGlowingColor(@Nonnull OptionalInt color, int ticks, @Nullable Object additionalCtx) {
         if (entity instanceof IEntityGlowColor) {
             this.glowingColor = color;
             this.glowColorTicks = ticks;
             ((IEntityGlowColor) entity).setGlowColor(glowingColor);
+            setShowHpGEDetector(color.isPresent() && additionalCtx == GoldExperienceLifeDetector.GE_DETECTOR_CTX);
         }
     }
     
@@ -150,7 +158,18 @@ public class EntityUtilCap {
         if (glowingColor.isPresent() && glowColorTicks > 0 && --glowColorTicks == 0 && entity instanceof IEntityGlowColor) {
             IEntityGlowColor colorData = (IEntityGlowColor) entity;
             if (colorData.getGlowColor() == this.glowingColor) {
-                colorData.setGlowColor(OptionalInt.empty());
+                resetClGlowingColor();
+            }
+        }
+    }
+    
+    private void setShowHpGEDetector(boolean value) {
+        if (entity.level.isClientSide()) {
+            if (value) {
+                ClientEventHandler.getInstance().addGEDetectedEntity(entity);
+            }
+            else {
+                ClientEventHandler.getInstance().removeGEDetectedEntity(entity);
             }
         }
     }

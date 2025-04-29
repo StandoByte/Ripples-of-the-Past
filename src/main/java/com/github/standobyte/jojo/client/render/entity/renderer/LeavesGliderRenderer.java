@@ -22,7 +22,10 @@ public class LeavesGliderRenderer extends SimpleEntityRenderer<LeavesGliderEntit
     public ResourceLocation getTextureLocation(LeavesGliderEntity entity) {
         ResourceLocation tex = entity.getLeavesTexture();
         if (tex == null) {
-            tex = CDBlockBulletRenderer.getTexture(entity.getLeavesBlock(), DEFAULT_OAK_LEAVES);
+            tex = CDBlockBulletRenderer.getBlockTexture(entity.getLeavesBlock());
+            if (tex == null) {
+                tex = DEFAULT_OAK_LEAVES;
+            }
             entity.setLeavesTex(tex);
         }
         return tex;

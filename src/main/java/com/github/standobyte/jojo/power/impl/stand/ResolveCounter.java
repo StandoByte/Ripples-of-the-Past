@@ -6,6 +6,7 @@ import com.github.standobyte.jojo.JojoModConfig;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.init.power.non_stand.ModPowers;
+import com.github.standobyte.jojo.init.power.stand.ModStandEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.MaxAchievedResolvePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ResolveBoostsPacket;
@@ -508,7 +509,13 @@ public class ResolveCounter {
         }
         
         else if (dmgSource.getEntity() instanceof LivingEntity) {
-            IStandPower.getStandPowerOptional(StandUtil.getStandUser((LivingEntity) dmgSource.getEntity())).ifPresent(attackerStand -> {
+            LivingEntity attacker = (LivingEntity) dmgSource.getEntity();
+            StandEffectsTracker.getEffectsTargetedBy(attacker, ModStandEffects.GE_CREATED_LIFEFORM.get()).findAny().ifPresent(geLifeform -> {
+                IStandPower geUserPower = geLifeform.getUserPower();
+                addResolve(geUserPower, target, points * 1.25F);
+            });
+            
+            IStandPower.getStandPowerOptional(StandUtil.getStandUser(attacker)).ifPresent(attackerStand -> {
                 if (attackerStand.isActive()) {
                     addResolve(attackerStand, target, points * 0.5F);
                 }

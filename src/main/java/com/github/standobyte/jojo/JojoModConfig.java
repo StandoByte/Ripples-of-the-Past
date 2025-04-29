@@ -90,6 +90,7 @@ public class JojoModConfig {
         
         public final ForgeConfigSpec.BooleanValue endermenBeyondTimeSpace;
         public final ForgeConfigSpec.BooleanValue saveDestroyedBlocks;
+        public final ForgeConfigSpec.BooleanValue spawnCocoJumboTurtle;
         
         private Common(ForgeConfigSpec.Builder builder) {
             this(builder, null);
@@ -320,6 +321,11 @@ public class JojoModConfig {
                              "     It may cause longer saving & loading time for larger worlds.")
                     .translation("jojo.config.saveDestroyedBlocks")
                     .define("saveDestroyedBlocks", false);
+            
+            spawnCocoJumboTurtle = builder
+                    .comment("    Whether or not a turtle mob that can get Mr.President Stand spawns naturally.")
+                    .translation("jojo.config.spawnCocoJumboTurtle")
+                    .define("spawnCocoJumboTurtle", true);
             
             endermenBeyondTimeSpace = builder
                     .comment("    Disable this to make endermen also be frozen in stopped time.",

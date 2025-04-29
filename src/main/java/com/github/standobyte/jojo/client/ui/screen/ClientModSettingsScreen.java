@@ -236,10 +236,10 @@ public class ClientModSettingsScreen extends SettingsScreen {
                     new TranslationTextComponent("jojo.config.client.standMotionTilt"), 
                     new TranslationTextComponent("jojo.config.client.standMotionTilt.tooltip")
                     ) {
-                @Override public Boolean get() { return settingsValues._standMotionTilt; }
-                @Override public void set(Boolean value) { settingsValues._standMotionTilt = value; }
+                @Override public Boolean get() { return settingsValues.standMotionTilt; }
+                @Override public void set(Boolean value) { settingsValues.standMotionTilt = value; }
             };
-//            addButton(standMotionTilt.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this, i));
+            addButton(standMotionTilt.createButton(calcButtonX(i), calcButtonY(i++), 150, 20, this, i));
             
             BooleanSetting standOutline = new BooleanSetting(settings, 
                     new TranslationTextComponent("jojo.config.client.standOutline"), 

@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.init.power.stand;
 
 import com.github.standobyte.jojo.entity.stand.StandEntityType;
 import com.github.standobyte.jojo.entity.stand.stands.CrazyDiamondEntity;
+import com.github.standobyte.jojo.entity.stand.stands.GoldExperienceEntity;
 import com.github.standobyte.jojo.entity.stand.stands.HierophantGreenEntity;
 import com.github.standobyte.jojo.entity.stand.stands.MagiciansRedEntity;
 import com.github.standobyte.jojo.entity.stand.stands.SilverChariotEntity;
@@ -38,4 +39,7 @@ public class ModStands {
 
     public static final EntityStandSupplier<EntityStandType<StandStats>, StandEntityType<CrazyDiamondEntity>> 
     CRAZY_DIAMOND = new EntityStandSupplier<>(ModStandsInit.STAND_CRAZY_DIAMOND);
+
+    public static final EntityStandSupplier<EntityStandType<StandStats>, StandEntityType<GoldExperienceEntity>> 
+    GOLD_EXPERIENCE = new EntityStandSupplier<>(ModStandsInit.STAND_GOLD_EXPERIENCE);
 }

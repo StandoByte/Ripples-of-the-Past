@@ -35,6 +35,7 @@ import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.AbstractH
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.skill.BaseHamonSkillTree;
 import com.github.standobyte.jojo.power.impl.stand.type.StandType;
 import com.github.standobyte.jojo.util.ForgeBusEventSubscriber;
+import com.github.standobyte.jojo.world.dimension.ModDimensions;
 
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.item.ItemGroup;
@@ -90,6 +91,7 @@ public class JojoMod {
         ModRecipeSerializers.SERIALIZERS.register(modEventBus);
         ModSounds.SOUNDS.register(modEventBus);
         ModStructures.STRUCTURES.register(modEventBus);
+        ModStructures.FEATURES.register(modEventBus);
         ModTileEntities.TILE_ENTITIES.register(modEventBus);
     }
     
@@ -97,6 +99,7 @@ public class JojoMod {
     
     private void preInit(FMLCommonSetupEvent event) {
         event.enqueueWork(() -> {
+            ModDimensions.init();
             ForgeBusEventSubscriber.registerCapabilities();
             
             StandArgument.commonSetupRegister();

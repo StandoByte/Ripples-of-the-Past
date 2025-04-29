@@ -8,6 +8,7 @@ import java.util.OptionalInt;
 import java.util.Queue;
 import java.util.Set;
 
+import com.github.standobyte.jojo.util.general.LazyCacheSupplier;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
 import it.unimi.dsi.fastutil.objects.ObjectList;
@@ -53,6 +54,7 @@ import net.minecraft.client.shader.Framebuffer;
 import net.minecraft.client.shader.Shader;
 import net.minecraft.client.shader.ShaderGroup;
 import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Timer;
@@ -99,6 +101,11 @@ public class ClientReflection {
     private static final Field MINECRAFT_TIMER = ObfuscationReflectionHelper.findField(Minecraft.class, "field_71428_T");
     public static Timer getTimer(Minecraft minecraft) {
         return ReflectionUtil.getFieldValue(MINECRAFT_TIMER, minecraft);
+    }
+
+    private static final Field TIMER_MS_PER_TICK = ObfuscationReflectionHelper.findField(Timer.class, "field_194149_e");
+    public static void setMsPerTick(Timer timer, float msPerTick) {
+        ReflectionUtil.setFloatFieldValue(TIMER_MS_PER_TICK, timer, msPerTick);
     }
     
     
@@ -243,6 +250,17 @@ public class ClientReflection {
     }
     
     
+    private static final Field MOUSE_HELPER_X_POS = ObfuscationReflectionHelper.findField(MouseHelper.class, "field_198040_e");
+    public static void setXPos(MouseHelper mouseHelper, double xPos) {
+        ReflectionUtil.setFieldValue(MOUSE_HELPER_X_POS, mouseHelper, xPos);
+    }
+    
+    private static final Field MOUSE_HELPER_Y_POS = ObfuscationReflectionHelper.findField(MouseHelper.class, "field_198041_f");
+    public static void setYPos(MouseHelper mouseHelper, double yPos) {
+        ReflectionUtil.setFieldValue(MOUSE_HELPER_Y_POS, mouseHelper, yPos);
+    }
+    
+    
     private static final Field SHADER_GROUP_PASSES = ObfuscationReflectionHelper.findField(ShaderGroup.class, "field_148031_d");
     public static List<Shader> getShaderGroupPasses(ShaderGroup shaderGroup) {
         return ReflectionUtil.getFieldValue(SHADER_GROUP_PASSES, shaderGroup);
@@ -269,6 +287,36 @@ public class ClientReflection {
         ReflectionUtil.setBooleanFieldValue(CLIENT_PLAYER_ENTITY_HANDS_BUSY, player, handsBusy);
     }
     
+    
+    private static final Field CLIENT_PLAYER_ENTITY_FLASH_ON_SET_HEALTH = ObfuscationReflectionHelper.findField(ClientPlayerEntity.class, "field_175169_bQ");
+    public static void setFlashOnSetHealth(PlayerEntity player, boolean flashOnSetHealth) {
+        ReflectionUtil.setBooleanFieldValue(CLIENT_PLAYER_ENTITY_FLASH_ON_SET_HEALTH, player, flashOnSetHealth);
+    }
+    
+    
+    private static final Field KEY_BINDING_IS_DOWN = ObfuscationReflectionHelper.findField(KeyBinding.class, "field_74513_e");
+    /*
+     * Doesn't check the conflict context and Shift/Ctrl/... modifiers
+     */
+    public static boolean isDownFieldOnly(KeyBinding key) {
+        return ReflectionUtil.getBooleanFieldValue(KEY_BINDING_IS_DOWN, key);
+    }
+
+    private static final Field KEY_BINDING_ALL_MAP = ObfuscationReflectionHelper.findField(KeyBinding.class, "field_74516_a");
+    private static final LazyCacheSupplier<Map<String, KeyBinding>> keyBindingsMapSupplier = new LazyCacheSupplier<>(
+            () -> ReflectionUtil.getFieldValue(KEY_BINDING_ALL_MAP, null));
+    public static Map<String, KeyBinding> getKeyBindingsMap() {
+        return keyBindingsMapSupplier.get();
+    }
+
+    private static final Field KEY_BINDING_CLICK_COUNT = ObfuscationReflectionHelper.findField(KeyBinding.class, "field_151474_i");
+    public static int getClickCount(KeyBinding key) {
+        return ReflectionUtil.getIntFieldValue(KEY_BINDING_CLICK_COUNT, key);
+    }
+    
+    public static void setClickCount(KeyBinding key, int clickCount) {
+        ReflectionUtil.setIntFieldValue(KEY_BINDING_CLICK_COUNT, key, clickCount);
+    }
     
     private static final Field KEY_BINDING_ALL_FIELD = ObfuscationReflectionHelper.findField(KeyBinding.class, "field_74516_a");
     private static Map<String, KeyBinding> KEY_BINDINGS_ALL;

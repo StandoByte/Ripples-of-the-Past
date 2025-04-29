@@ -52,7 +52,8 @@ public class AngeloRockRenderer extends SimpleEntityRenderer<AngeloRockEntity, A
     
     private void renderRockPart(AngeloRockEntity entity, BlockState blockState, AngeloRockModel model, 
             float partialTick, MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight) {
-        ResourceLocation texture = CDBlockBulletRenderer.getTexture(blockState, TEXTURE);
+        ResourceLocation texture = CDBlockBulletRenderer.getBlockTexture(blockState);
+        if (texture == null) texture = TEXTURE;
         IVertexBuilder vertexBuilder = buffer.getBuffer(model.renderType(texture));
         model.setCreationAnim(entity, entity.getCreationAnimProgress(partialTick));
         model.renderToBuffer(matrixStack, vertexBuilder, packedLight, OverlayTexture.NO_OVERLAY, 1.0F, 1.0F, 1.0F, 1.0F);

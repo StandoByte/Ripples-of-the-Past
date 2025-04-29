@@ -42,6 +42,7 @@ import com.github.standobyte.jojo.client.render.entity.layerrenderer.HamonProtec
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.InkLipsLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.KnifeLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.LadybugBroochLayer;
+import com.github.standobyte.jojo.client.render.entity.layerrenderer.MobStuckArrowLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.PillarmanBladesLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.PillarmanLayer;
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.TornadoOverdriveEffectLayer;
@@ -51,7 +52,10 @@ import com.github.standobyte.jojo.client.render.entity.layerrenderer.ZombieLayer
 import com.github.standobyte.jojo.client.render.entity.layerrenderer.barrage.BarrageFistAfterimagesLayer;
 import com.github.standobyte.jojo.client.render.entity.renderer.AfterimageRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.AngeloRockRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.CocoJumboTurtleRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.ConsciousnessRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.CrimsonBubbleRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.GETransformationRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.HamonBlockChargeRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.HamonProjectileShieldRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.LeavesGliderRenderer;
@@ -61,6 +65,7 @@ import com.github.standobyte.jojo.client.render.entity.renderer.PillarmanTempleE
 import com.github.standobyte.jojo.client.render.entity.renderer.RoadRollerRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.SendoHamonOverdriveRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.SoulRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.SpriteObjectEntityRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.TurquoiseBlueOverdriveRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.MRFlameRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.damaging.SCFlameRenderer;
@@ -101,6 +106,7 @@ import com.github.standobyte.jojo.client.render.entity.renderer.mob.HungryZombie
 import com.github.standobyte.jojo.client.render.entity.renderer.mob.RockPaperScissorsKidRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.mob.StandUserDummyRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.CrazyDiamondRenderer;
+import com.github.standobyte.jojo.client.render.entity.renderer.stand.GoldExperienceRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.HierophantGreenRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.MagiciansRedRenderer;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.SilverChariotRenderer;
@@ -111,13 +117,11 @@ import com.github.standobyte.jojo.client.render.item.RoadRollerBakedModel;
 import com.github.standobyte.jojo.client.render.item.generic.ItemISTERModelWrapper;
 import com.github.standobyte.jojo.client.render.item.standdisc.StandDiscISTERModel;
 import com.github.standobyte.jojo.client.render.item.standdisc.StandDiscOverrideList;
+import com.github.standobyte.jojo.client.render.rendertype.CustomRenderType;
 import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier;
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.loopplayer.LoopPlayerHandler;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
-import com.github.standobyte.jojo.client.ui.marker.CrazyDiamondAnchorMarker;
-import com.github.standobyte.jojo.client.ui.marker.CrazyDiamondBloodHomingMarker;
-import com.github.standobyte.jojo.client.ui.marker.HierophantGreenBarrierDetectionMarker;
 import com.github.standobyte.jojo.client.ui.marker.MarkerRenderer;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
 import com.github.standobyte.jojo.client.ui.screen.vampirism.VampirismScreen;
@@ -186,6 +190,8 @@ public class ClientSetup {
         return !ClientUtil.canSeeStands() ? 1 : 0;
     };
     
+    public static ConsciousnessRenderer xxd;
+    
     @SubscribeEvent
     public static void onFMLClientSetup(FMLClientSetupEvent event) {
         Minecraft mc = event.getMinecraftSupplier().get();
@@ -235,14 +241,19 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.EYE_OF_ENDER_INSIDE.get(), manager -> new SpriteRenderer<>(manager, Minecraft.getInstance().getItemRenderer(), 1.0F, true));
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.FIREWORK_INSIDE.get(), manager -> new FireworkRocketRenderer(manager, Minecraft.getInstance().getItemRenderer()));
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.ANGELO_ROCK.get(), AngeloRockRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.GE_LIFEFORM_TRANSFORMATION.get(), GETransformationRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HUNGRY_ZOMBIE.get(), HungryZombieRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.HAMON_MASTER.get(), HamonMasterRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.COCO_JUMBO_TURTLE.get(), CocoJumboTurtleRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.ROCK_PAPER_SCISSORS_KID.get(), RockPaperScissorsKidRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.STAND_USER_DUMMY.get(), StandUserDummyRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.PILLARMAN_HORN.get(), PillarmanHornRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.PILLARMAN_DIVINE_SANDSTORM.get(), PillarmanDivineSandstormRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.PILLARMAN_VEINS.get(), PillarmanVeinRenderer::new);
         RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.PILLARMAN_RIBS.get(), PillarmanRibRenderer::new);
+        RenderingRegistry.registerEntityRenderingHandler(ModEntityTypes.OBJECT.get(), SpriteObjectEntityRenderer::new);
+        
+        xxd = new ConsciousnessRenderer(mc.getEntityRenderDispatcher());
         
         RenderingRegistry.registerEntityRenderingHandler(ModStands.STAR_PLATINUM.getEntityType(), ClientUtil.logException(StarPlatinumRenderer::new));
         RenderingRegistry.registerEntityRenderingHandler(ModStands.THE_WORLD.getEntityType(), ClientUtil.logException(TheWorldRenderer::new));
@@ -250,6 +261,7 @@ public class ClientSetup {
         RenderingRegistry.registerEntityRenderingHandler(ModStands.SILVER_CHARIOT.getEntityType(), ClientUtil.logException(SilverChariotRenderer::new));
         RenderingRegistry.registerEntityRenderingHandler(ModStands.MAGICIANS_RED.getEntityType(), ClientUtil.logException(MagiciansRedRenderer::new));
         RenderingRegistry.registerEntityRenderingHandler(ModStands.CRAZY_DIAMOND.getEntityType(), ClientUtil.logException(CrazyDiamondRenderer::new));
+        RenderingRegistry.registerEntityRenderingHandler(ModStands.GOLD_EXPERIENCE.getEntityType(), ClientUtil.logException(GoldExperienceRenderer::new));
         
         PlayerAnimationHandler.initAnimator();
         
@@ -310,6 +322,7 @@ public class ClientSetup {
             ActionsOverlayGui.init(mc);
             ControllerStand.init(mc);
             ControllerSoul.init(mc);
+            ControllerConsciousness.init(mc);
             InputHandler.init(mc);
             InputHandler.getInstance().setActionsOverlay(ActionsOverlayGui.getInstance());
             LoopPlayerHandler.init();
@@ -322,10 +335,8 @@ public class ClientSetup {
             addLayers(skinMap.get("default"), false);
             addLayers(skinMap.get("slim"), true);
             mc.getEntityRenderDispatcher().renderers.values().forEach(ClientSetup::addLayersToEntities);
-
-            MarkerRenderer.Handler.addRenderer(new HierophantGreenBarrierDetectionMarker(mc));
-            MarkerRenderer.Handler.addRenderer(new CrazyDiamondAnchorMarker(mc));
-            MarkerRenderer.Handler.addRenderer(new CrazyDiamondBloodHomingMarker(mc));
+            
+            MarkerRenderer.registerMarkers(mc);
             
             statsStatsOverrideExamples();
 
@@ -373,6 +384,7 @@ public class ClientSetup {
             else {
                 livingRenderer.addLayer(new FrozenLayer<T, M>(livingRenderer, FrozenLayer.NON_BIPED_PATH));
             }
+            livingRenderer.addLayer(new MobStuckArrowLayer<>(livingRenderer));
         }
     }
     
@@ -491,8 +503,8 @@ public class ClientSetup {
         mc.particleEngine.register(ModParticles.LIGHT_MODE_FLASH.get(),     LightModeFlashParticle.Factory::new);
 
         CustomParticlesHelper.saveSprites(mc);
-        // yep...
         CustomResources.initCustomResourceManagers(mc);
+        CustomRenderType.addExtraFixedBuffers(mc);
     }
 
     private static class SoulCloudParticleFactory extends CloudParticle.Factory {

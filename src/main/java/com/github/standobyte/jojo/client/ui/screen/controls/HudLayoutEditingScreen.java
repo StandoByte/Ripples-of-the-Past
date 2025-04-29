@@ -352,10 +352,14 @@ public class HudLayoutEditingScreen extends Screen implements IJojoScreen {
             
             boolean isUnlocked = action.isUnlocked(power);
             float alpha = isEnabled ? isUnlocked ? 1.0F : 0.6F : 0.2F;
-            float color = isEnabled && isUnlocked ? 1.0F : 0.0F;
-            RenderSystem.color4f(color, color, color, alpha);
+            float brightness = isEnabled && isUnlocked ? 1.0F : 0.0F;
+            
+            boolean changeColor = brightness < 1 || alpha < 1;
+            if (changeColor) RenderSystem.color4f(brightness, brightness, brightness, alpha);
+            
             action.renderActionIcon(matrixStack, power, x, y);
-            RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+            
+            if (changeColor) RenderSystem.color4f(1, 1, 1, 1);
         }
     }
     

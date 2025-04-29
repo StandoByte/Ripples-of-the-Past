@@ -1,5 +1,6 @@
 package com.github.standobyte.jojo.action.stand;
 
+import java.util.List;
 import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
@@ -14,6 +15,7 @@ import com.github.standobyte.jojo.action.stand.punch.StandEntityPunch;
 import com.github.standobyte.jojo.action.stand.punch.StandMissedPunch;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
+import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntityTask;
 import com.github.standobyte.jojo.entity.stand.StandPose;
@@ -41,11 +43,22 @@ import net.minecraft.world.World;
 public class StandEntityMeleeBarrage extends StandEntityAction implements IHasStandPunch {
     protected final Supplier<SoundEvent> hitSound;
     protected final Supplier<SoundEvent> swingSound;
+    private Supplier<SoundEvent> standCry;
 
     public StandEntityMeleeBarrage(StandEntityMeleeBarrage.Builder builder) {
         super(builder);
         this.hitSound = builder.hitSound;
         this.swingSound = builder.swingSound;
+        
+        this.standCry = ((Supplier<Supplier<SoundEvent>>) () -> {
+            if (this.standSounds.containsKey(Phase.PERFORM)) {
+                List<StandSound> sounds = standSounds.get(Phase.PERFORM);
+                if (!sounds.isEmpty()) {
+                    return sounds.get(0).sound;
+                }
+            }
+            return () -> null;
+        }).get();
     }
 
     @Override
@@ -243,6 +256,19 @@ public class StandEntityMeleeBarrage extends StandEntityAction implements IHasSt
         
         LivingEntity user = standPower.getUser();
         return user != null && user.hasEffect(ModStatusEffects.RESOLVE.get());
+    }
+    
+    @Override
+    protected void playSoundAtStand(World world, StandEntity standEntity, SoundEvent sound, IStandPower standPower, Phase phase) {
+        if (world.isClientSide() && sound != null && sound == standCry.get()) {
+            LivingEntity user = standPower.getUser();
+            if (user != null && user.hasEffect(ModStatusEffects.RESOLVE.get())) {
+                ClientTickingSoundsHelper.playEndlessStandCrySound(standEntity, sound, this, phase, 1.0F, 1.0F);
+                return;
+            }
+        }
+        
+        super.playSoundAtStand(world, standEntity, sound, standPower, phase);
     }
     
     

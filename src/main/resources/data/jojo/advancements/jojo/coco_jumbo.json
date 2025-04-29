@@ -1,0 +1,40 @@
+{
+  "parent": "jojo:jojo/stand_arrow",
+  "display": {
+    "icon": {
+      "item": "jojo:meteoric_scrap",
+      "nbt": "{Icon:22}"
+    },
+    "title": {
+      "translate": "advancements.jojo.coco_jumbo.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.coco_jumbo.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": true
+  },
+  "criteria": {
+    "met_coco_jumbo": {
+      "trigger": "jojo:met_modded_mob",
+      "conditions": {
+        "entity": [
+          {
+            "condition": "minecraft:entity_properties",
+            "predicate": {
+              "type": "jojo:coco_jumbo_turtle"
+            },
+            "entity": "this"
+          }
+        ]
+      }
+    }
+  },
+  "requirements": [
+    [
+      "met_coco_jumbo"
+    ]
+  ]
+}

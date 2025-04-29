@@ -1,10 +1,12 @@
 package com.github.standobyte.jojo.entity.itemprojectile;
 
 import com.github.standobyte.jojo.JojoMod;
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModSounds;
+import com.github.standobyte.jojo.itemtracking.SidedItemTrackerMap;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack.KnownItemState;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.damage.DamageUtil;
 
@@ -48,7 +50,7 @@ public class KnifeEntity extends ItemProjectileEntity {
     
     @Override
     protected ItemStack getPickupItem() {
-        return new ItemStack(ModItems.KNIFE.get());
+        return withPickupItemTracking(new ItemStack(ModItems.KNIFE.get()));
     }
 
     @Override
@@ -137,8 +139,14 @@ public class KnifeEntity extends ItemProjectileEntity {
     @Override
     protected void doPostHurtEffects(LivingEntity entity) {
         if (!level.isClientSide()) {
-            entity.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-                cap.addKnife();
+            entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                SidedItemTrackerMap.getSidedTrackers(level).values().stream()
+                .filter(tracker -> tracker.getAtEntity(level) == this)
+                .forEach(tracker -> {
+                    tracker.setAtEntity(entity.getId(), level, KnownItemState.STUCK_KNIFE);
+                });
+                
+                cap.getStuckObjects().getKnives().increment();
             });
         }
     }

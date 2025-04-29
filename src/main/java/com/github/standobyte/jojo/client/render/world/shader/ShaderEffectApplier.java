@@ -27,6 +27,7 @@ import net.minecraft.entity.Entity;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix4f;
+import net.minecraft.util.math.vector.Vector3d;
 
 public class ShaderEffectApplier {
     private static final ShaderResLocation DUMMY = new ShaderResLocation(new ResourceLocation("dummy", "dummy"), false);
@@ -191,13 +192,14 @@ public class ShaderEffectApplier {
         }
     }
     
-    public void updateTimeStopperScreenPos(MatrixStack matrixStack, Matrix4f projection, ActiveRenderInfo camera) {
+    public void updateTimeStopperScreenPos(MatrixStack matrixStack, Matrix4f projection, ActiveRenderInfo camera, float partialTick) {
         if (ClientTimeStopHandler.getInstance().isTimeStopped()) {
             if (timeStopper == mc.player) {
                 tsPosOnScreen = ClientUtil.PosOnScreen.SCREEN_CENTER;
             }
             else if (timeStopper != null) {
-                tsPosOnScreen = ClientUtil.posOnScreen(timeStopper.getBoundingBox().getCenter(), camera, matrixStack, projection);
+                Vector3d entityPos = timeStopper.getPosition(partialTick).add(0, timeStopper.getBbHeight() * 0.5f, 0);
+                tsPosOnScreen = ClientUtil.posOnScreen(entityPos, camera, matrixStack, projection);
                 if (tsShaderStarted) {
                     if (tsPosOnScreen == null || !tsPosOnScreen.isOnScreen) {
                         tsPosOnScreen = null;

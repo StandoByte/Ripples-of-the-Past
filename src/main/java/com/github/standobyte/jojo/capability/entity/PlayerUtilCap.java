@@ -18,25 +18,26 @@ import com.github.standobyte.jojo.block.WoodenCoffinBlock;
 import com.github.standobyte.jojo.capability.entity.player.PlayerClientBroadcastedSettings;
 import com.github.standobyte.jojo.capability.entity.player.PlayerMixinExtension;
 import com.github.standobyte.jojo.entity.mob.rps.RockPaperScissorsGame;
+import com.github.standobyte.jojo.init.ModStatusEffects;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.NotificationSyncPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDirectEntityDataPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrDoubleShiftPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.TrKnivesCountPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerContinuousActionPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrPlayerVisualDetailPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.TrWalkmanEarbudsPacket;
 import com.github.standobyte.jojo.network.packets.fromserver.VampireSleepInCoffinPacket;
-import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.MetEntityTypesPacket;
+import com.github.standobyte.jojo.network.packets.fromserver.ability_specific.GESplitConsciousnessPacket;
 import com.github.standobyte.jojo.power.IPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.vampirism.VampirismUtil;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.PlayerStatListener;
+import com.github.standobyte.jojo.util.mc.entitysubtype.EntitySubtype;
+import com.github.standobyte.jojo.util.mc.entitysubtype.SubtypeResourceLocation;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 
 import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityType;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.nbt.CompoundNBT;
@@ -45,7 +46,6 @@ import net.minecraft.nbt.StringNBT;
 import net.minecraft.network.datasync.DataParameter;
 import net.minecraft.network.datasync.EntityDataManager;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
 import net.minecraft.util.text.ITextComponent;
@@ -68,17 +68,12 @@ public class PlayerUtilCap {
     
     private Set<OneTimeNotification> notificationsSent = new HashSet<>();
     
-    private int knives;
-    private int removeKnifeTime;
-    
     private int ateInkPastaTicks = 0;
     
     private boolean hasClientInput;
     private int noClientInputTimer;
     
     public boolean coffinPreventDayTimeSkip = false;
-    
-    private Set<ResourceLocation> metEntityTypesId = new HashSet<>();
     
     private Optional<RockPaperScissorsGame> currentGame = Optional.empty();
     
@@ -90,26 +85,33 @@ public class PlayerUtilCap {
     
     private final List<PlayerStatListener<?>> statChangeListeners = new ArrayList<>();
     private final List<TimedAction> sendWhenScreenClosed = new ArrayList<>();
+
+    private LifeformsMetMobs metEntityTypes = new LifeformsMetMobs();
+    private final LifeformsUIState geUIState;
+    public int animalAgeCd;
     
     
     
     public PlayerUtilCap(PlayerEntity player) {
         this.player = player;
         this.playerMixin = player instanceof PlayerMixinExtension ? (PlayerMixinExtension) player : null;
+        geUIState = new LifeformsUIState(player);
     }
     
     
     
     public void tick() {
         if (!player.level.isClientSide()) {
-            tickKnivesRemoval();
             tickVoiceLines();
             tickClientInputTimer();
             tickStatUpdates();
             tickQueuedOnScreenClose();
+            tickLifeshotKnockback();
+            metEntityTypes.serverTick();
             
             if (knivesThrewTicks > 0) knivesThrewTicks--;
             if (chatSpamTickCount > 0) chatSpamTickCount--;
+            if (animalAgeCd > 0) animalAgeCd--;
         }
 
         if (ateInkPastaTicks > 0) --ateInkPastaTicks;
@@ -120,6 +122,9 @@ public class PlayerUtilCap {
     
     public void onClone(PlayerUtilCap old, boolean wasDeath) {
         this.notificationsSent = old.notificationsSent;
+
+        this.metEntityTypes = old.metEntityTypes;
+        this.geUIState.onPlayerClone(old.geUIState);
         this.broadcastedSettings = old.broadcastedSettings;
     }
     
@@ -127,11 +132,12 @@ public class PlayerUtilCap {
         CompoundNBT nbt = new CompoundNBT();
         nbt.put("NotificationsSent", notificationsToNBT());
         
-        if (!metEntityTypesId.isEmpty()) {
-            ListNBT metEntities = new ListNBT();
-            metEntityTypesId.forEach(entityTypeId -> metEntities.add(StringNBT.valueOf(entityTypeId.toString())));
+        if (!metEntityTypes.isEmpty()) {
+            ListNBT metEntities = metEntityTypes.toNBT();
             nbt.put("MetEntityTypes", metEntities);
         }
+        nbt.put("GE_UI", geUIState.toNBT());
+        nbt.putInt("AnimalAgeCd", animalAgeCd);
         
         nbt.putBoolean("CoffinRespawn", coffinPreventDayTimeSkip);
         
@@ -149,14 +155,10 @@ public class PlayerUtilCap {
         
         if (nbt.contains("MetEntityTypes", MCUtil.getNbtId(ListNBT.class))) {
             ListNBT metEntitiesId = nbt.getList("MetEntityTypes", MCUtil.getNbtId(StringNBT.class));
-            metEntitiesId.forEach(idNBT -> {
-                String idString = ((StringNBT) idNBT).getAsString(); 
-                if (!idString.isEmpty()) {
-                    ResourceLocation registryName = new ResourceLocation(idString);
-                    metEntityTypesId.add(registryName);
-                }
-            });
+            metEntityTypes.fromNBT(metEntitiesId);
         }
+        MCUtil.nbtGetCompoundOptional(nbt, "GE_UI").ifPresent(geUIState::fromNBT);
+        animalAgeCd = nbt.getInt("AnimalAgeCd");
         
         coffinPreventDayTimeSkip = nbt.getBoolean("CoffinRespawn");
         
@@ -165,7 +167,6 @@ public class PlayerUtilCap {
     
     public void onTracking(ServerPlayerEntity tracking) {
         broadcastedSettings.syncToTracking(player, tracking);
-        PacketManager.sendToClient(new TrKnivesCountPacket(player.getId(), knives), tracking);
         PacketManager.sendToClient(new TrWalkmanEarbudsPacket(player.getId(), walkmanEarbuds), tracking);
         PacketManager.sendToClient(new TrPlayerVisualDetailPacket(player.getId(), ateInkPastaTicks), tracking);
         playerMixin.syncToTracking(tracking);
@@ -174,14 +175,12 @@ public class PlayerUtilCap {
     public void syncWithClient() {
         ServerPlayerEntity player = (ServerPlayerEntity) this.player;
         PacketManager.sendToClient(new NotificationSyncPacket(notificationsSent), player);
-        PacketManager.sendToClient(new TrKnivesCountPacket(player.getId(), knives), player);
+        metEntityTypes.syncToClient(player);
+        PacketManager.sendToClient(geUIState.makePacket(), player);
+        
         PacketManager.sendToClient(new TrWalkmanEarbudsPacket(player.getId(), walkmanEarbuds), player);
         PacketManager.sendToClient(new TrPlayerVisualDetailPacket(player.getId(), ateInkPastaTicks), player);
         PacketManager.sendToClient(new VampireSleepInCoffinPacket(coffinPreventDayTimeSkip), player);
-        if (!metEntityTypesId.isEmpty()) {
-            PacketManager.sendToClient(new MetEntityTypesPacket(metEntityTypesId), player);
-        }
-        playerMixin.syncToClient(player);
     }
     
     
@@ -375,34 +374,15 @@ public class PlayerUtilCap {
     
     
     
-    public void setKnives(int knives) {
-        knives = Math.max(knives, 0);
-        if (this.knives != knives) {
-            this.knives = knives;
-            if (!player.level.isClientSide()) {
-                PacketManager.sendToClientsTrackingAndSelf(new TrKnivesCountPacket(player.getId(), knives), player);
-            }
-        }
-    }
-    
-    public void addKnife() {
-        setKnives(knives + 1);
-    }
-    
+    @Deprecated
+    public void setKnives(int knives) {}
+
+    @Deprecated
+    public void addKnife() {}
+
+    @Deprecated
     public int getKnivesCount() {
-        return knives;
-    }
-    
-    private void tickKnivesRemoval() {
-        if (knives > 0) {
-            if (removeKnifeTime <= 0) {
-                removeKnifeTime = 20 * (30 - knives);
-            }
-            removeKnifeTime--;
-            if (removeKnifeTime <= 0) {
-                setKnives(knives - 1);
-            }
-        }
+        return 0;
     }
     
 
@@ -503,16 +483,28 @@ public class PlayerUtilCap {
     
     
     
-    public boolean addMetEntityType(EntityType<?> entityType) {
-        return metEntityTypesId.add(entityType.getRegistryName());
+    public LifeformsMetMobs getMetMobs() {
+        return metEntityTypes;
     }
     
-    public boolean metEntityType(EntityType<?> entityType) {
-        return metEntityTypesId.contains(entityType.getRegistryName());
+    public LifeformsUIState getGELifeformsUIState() {
+        return geUIState;
     }
     
-    public void addMetEntityTypeId(ResourceLocation id) {
-        metEntityTypesId.add(id);
+    public boolean addMetEntityType(EntitySubtype<?> entityType) {
+        boolean added = metEntityTypes.add(entityType.getId());
+        if (added) {
+            geUIState.newUnseenMobs.add(entityType.vanillaType.getRegistryName());
+        }
+        return added;
+    }
+    
+    public boolean metEntityType(EntitySubtype<?> entityType) {
+        return metEntityTypes.contains(entityType.getId());
+    }
+    
+    public void addMetEntityTypeId(SubtypeResourceLocation id) {
+        metEntityTypes.add(id);
     }
     
     
@@ -579,6 +571,19 @@ public class PlayerUtilCap {
                 return true;
             }
             return false;
+        }
+    }
+    
+    
+    
+    public void setSendLifeshotNextTick() {
+        sendLifeshotKBTicks = 2;
+    }
+    
+    private int sendLifeshotKBTicks = 0;
+    private void tickLifeshotKnockback() {
+        if (sendLifeshotKBTicks > 0 && --sendLifeshotKBTicks == 0 && player.hasEffect(ModStatusEffects.SENSORY_OVERLOAD.get())) {
+            PacketManager.sendToClient(new GESplitConsciousnessPacket(player.getDeltaMovement()), (ServerPlayerEntity) player);
         }
     }
 

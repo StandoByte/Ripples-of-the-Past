@@ -55,7 +55,6 @@ public class HamonHealing extends HamonAction {
         super(builder);
     }
     
-    @Override
     public void onHoldTickClientEffect(LivingEntity user, INonStandPower power, int ticksHeld, boolean reqFulfilled, boolean reqStateChanged) {
         if (reqStateChanged && reqFulfilled) {
             ClientTickingSoundsHelper.playHeldActionSound(ModSounds.HAMON_HEALING.get(), 

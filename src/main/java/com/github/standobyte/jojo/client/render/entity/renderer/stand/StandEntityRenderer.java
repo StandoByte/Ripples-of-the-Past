@@ -9,7 +9,6 @@ import com.github.standobyte.jojo.client.ClientEventHandler;
 import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.IEntityGlowColor;
-import com.github.standobyte.jojo.client.render.entity.animnew.stand.IStandAnimator;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel;
 import com.github.standobyte.jojo.client.render.entity.model.stand.StandEntityModel.VisibilityMode;
 import com.github.standobyte.jojo.client.render.entity.renderer.stand.layer.StandGlowLayer;
@@ -263,6 +262,7 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
         
         model.prepareMobModel(entity, walkAnimPos, walkAnimSpeed, partialTick);
         model.setupAnim(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
+        model.getAnimator().poseStandPost(entity, model);
         entity.getBarrageSwingsHolder().updateSwings(Minecraft.getInstance());
         model.addBarrageSwings(entity);
         int packedOverlay = getOverlayCoords(entity, getWhiteOverlayProgress(entity, partialTick));
@@ -340,9 +340,9 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
             float ticks, float yRotationOffset, float xRotation, M model) {
         getModel(entity).copyPropertiesTo(model);
         model.setVisibility(entity, visibilityMode(entity).invert(isVisibilityInverted), viewObstructionPrevention.armsOnly, firstPersonRender);
-        // TODO get rid of these two method calls?
         model.prepareMobModel(entity, walkAnimSpeed, walkAnimPos, partialTick);
         model.setupAnim(entity, walkAnimSpeed, walkAnimPos, ticks, yRotationOffset, xRotation);
+        model.getAnimator().poseStandPost(entity, model);
         
         int packedOverlay = getOverlayCoords(entity, getWhiteOverlayProgress(entity, partialTick));
         model.render(entity, matrixStack, vertexBuilder, packedLight, packedOverlay, 1.0F, 1.0F, 1.0F, alpha);
@@ -375,8 +375,7 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
     
     protected void idlePoseSwaying(T entity, float ticks, MatrixStack matrixStack) {
         M model = getModel(entity);
-        IStandAnimator anim = model.getAnimator();
-        if (anim != null && !anim.isLegacy()) return;
+        if (model.usesGeckoAnims()) return;
         if (!entity.isVisibleForAll() && entity.getStandPose() == StandPose.IDLE && 
                 model.attackTime == 0 && entity.isFollowingUser()) {
             LivingEntity user = entity.getUser();
@@ -439,6 +438,7 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
         matrixStack.translate(0, 0.75F, 0);
         model.prepareMobModel(entity, walkAnimSpeed, walkAnimPos, partialTick); 
         model.setupAnim(entity, walkAnimSpeed, walkAnimPos, ticks, yRotationOffset, 0);
+        model.getAnimator().poseStandPost(entity, model);
         if (model.attackTime > 0 || entity.getStandPose() != StandPose.IDLE && entity.getStandPose() != StandPose.SUMMON) {
             matrixStack.translate(0, -entity.getEyeHeight(), -0.25D);
             matrixStack.scale(-1.0F, -1.0F, 1.0F);
@@ -455,6 +455,7 @@ public class StandEntityRenderer<T extends StandEntity, M extends StandEntityMod
             matrixStack.mulPose(Vector3f.YP.rotationDegrees(f * -135.0F));
             matrixStack.translate((double)(f * 5.6F), 0.0D, 0.0D);
             model.setupAnim(entity, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F);
+            model.getAnimator().poseStandPost(entity, model);
             doRenderFirstPersonArm(model, handSide, matrixStack, vertexBuilder, packedLight, entity, partialTick);
         }
         matrixStack.popPose();

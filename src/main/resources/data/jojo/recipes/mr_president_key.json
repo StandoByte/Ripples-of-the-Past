@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    " nr",
+    " nn",
+    "n  "
+  ],
+  "key": {
+    "n": {
+      "tag": "forge:nuggets/gold"
+    },
+    "r": {
+      "tag": "forge:storage_blocks/redstone"
+    }
+  },
+  "result": {
+    "item": "jojo:mr_president_key"
+  }
+}

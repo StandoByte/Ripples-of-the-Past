@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.action.stand.effect;
 
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.entity.Entity;
 import net.minecraft.nbt.CompoundNBT;
 
 public class DriedBloodDrops extends StandEffectInstance {
@@ -16,7 +16,7 @@ public class DriedBloodDrops extends StandEffectInstance {
     @Override
     protected void tick() {
         if (!world.isClientSide()) {
-            LivingEntity target = getTargetLiving();
+            Entity target = getTarget();
             if (target != null) {
                 ++disappearTicks;
                 if (target.isInWaterOrBubble()) {
@@ -54,6 +54,7 @@ public class DriedBloodDrops extends StandEffectInstance {
         nbt.putInt("BloodTicks", disappearTicks);
     }
 
+    @Override
     protected void readAdditionalSaveData(CompoundNBT nbt) {
         disappearTicks = nbt.getInt("BloodTicks");
     }

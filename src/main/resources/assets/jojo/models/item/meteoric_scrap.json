@@ -129,6 +129,12 @@
         "jojo:icon": 21
       },
       "model": "jojo:item/item_icon_pillarman_explode"
+    },
+    {
+      "predicate": {
+        "jojo:icon": 22
+      },
+      "model": "jojo:item/item_icon_turtle_model"
     }
   ]
 }

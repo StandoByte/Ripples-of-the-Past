@@ -19,8 +19,6 @@ import java.util.stream.Stream;
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
-import org.apache.commons.lang3.tuple.Pair;
-
 import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.ActionConditionResult;
@@ -39,6 +37,7 @@ import com.github.standobyte.jojo.client.ui.actionshud.ActionsModeConfig.Selecte
 import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer.BarType;
 import com.github.standobyte.jojo.client.ui.actionshud.hotbar.HotbarFold;
 import com.github.standobyte.jojo.client.ui.actionshud.hotbar.HotbarRenderer;
+import com.github.standobyte.jojo.client.ui.screen.WasdAllowingScreen;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonScreen;
 import com.github.standobyte.jojo.client.ui.screen.hamon.HamonStatsTabGui;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
@@ -274,13 +273,18 @@ public class ActionsOverlayGui extends AbstractGui {
     }
     
     
-
+    
+    
+    public static boolean noHudRender(Minecraft mc) {
+        return JojoModUtil.tmpSpectatorCantUsePowers(mc.player) || mc.options.hideGui || mc.screen instanceof WasdAllowingScreen
+                || mc.player.isDeadOrDying();
+    }
     
     protected ActionTarget _target;
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public void render(RenderGameOverlayEvent.Pre event) {
         _target = null;
-        if (!hudRenders()) {
+        if (noHudRender(mc)) {
             return;
         }
         RenderGameOverlayEvent.ElementType elementTypeRender = event.getType();
@@ -472,7 +476,7 @@ public class ActionsOverlayGui extends AbstractGui {
     
     @SubscribeEvent(priority = EventPriority.NORMAL)
     public void renderPost(RenderGameOverlayEvent.Post event) {
-        if (!hudRenders()) {
+        if (!noHudRender(mc)) {
             return;
         }
         
@@ -492,10 +496,6 @@ public class ActionsOverlayGui extends AbstractGui {
         default:
             break;
         }
-    }
-    
-    protected boolean hudRenders() {
-        return !JojoModUtil.tmpSpectatorCantUsePowers(mc.player) && !mc.options.hideGui && !mc.player.isDeadOrDying();
     }
     
     protected boolean[] hotbarIsRendered = new boolean[4];
@@ -526,6 +526,14 @@ public class ActionsOverlayGui extends AbstractGui {
                     .orElse(-1);
         }
         return -1;
+    }
+    
+    public static int getPowerUiColor(PowerClassification powerClassification) {
+        IPower<?, ?> power = getInstance().getHudMode(powerClassification).getPower();
+        if (power == null) {
+            return -1;
+        }
+        return getPowerUiColor(power);
     }
 
     
@@ -560,6 +568,16 @@ public class ActionsOverlayGui extends AbstractGui {
                 }
             }
         }
+    }
+    
+    public boolean hasAvailableHotkey(Action<?> action) {
+        return hotkeyInHudActions.stream().filter(hotkey -> {
+            Action<?> hotkeyAction = hotkey.actionEntry.getAction();
+            if (InputHandler.useShiftActionVariant(mc)) {
+                hotkeyAction = hotkeyAction.getShiftVariationIfPresent();
+            }
+            return hotkeyAction == action;
+        }).findAny().isPresent();
     }
     
     List<ActionKeybindEntry> heldThisTick = new ArrayList<>();
@@ -1170,7 +1188,8 @@ public class ActionsOverlayGui extends AbstractGui {
                 
                 ClientUtil.disableGlScissor();
             }
-        } else {
+        }
+        else {
             if (cutWidth > 0) {
                 ClientUtil.enableGlScissor(x + leftCut, y, cutWidth, 16);
                 
@@ -1205,6 +1224,43 @@ public class ActionsOverlayGui extends AbstractGui {
             HotbarRenderer.renderSlotSelection(matrixStack, mc, x, y, hotbarAlpha, greenSelection);
         }
     }
+    
+//    @Deprecated
+//    public static <P extends IPower<P, ?>> void renderActionIcon(MatrixStack matrixStack, Action<P> action, P power, 
+//            float x, float y, float brightness, float alpha) {
+//        boolean changeColor = brightness < 1 || alpha < 1;
+//        if (changeColor) RenderSystem.color4f(brightness, brightness, brightness, alpha);
+//
+//        Minecraft mc = Minecraft.getInstance();
+//        boolean specialRender = false;
+//        
+//        if (action == ModStandsInit.GOLD_EXPERIENCE_CREATE_LIFEFORM.get()
+//                || action == ModStandsInit.GOLD_EXPERIENCE_TOOTH_LIFEFORM.get()) {
+//            EntitySubtype<?> selectedMob = GoldExperienceCreateLifeform.getChosenEntityType(mc.player);
+//            if (selectedMob != null) {
+//                EntityTypeIcon.renderIcon(selectedMob, matrixStack, x, y);
+//                specialRender = true;
+//            }
+//        }
+//        else if (action == ModStandsInit.GOLD_EXPERIENCE_REVERT_LIFEFORM.get()) {
+//            ItemStack sourceItem = StandEffectsTracker.getTargetLookedAt((IStandPower) power, 
+//                    ModStandEffects.GE_CREATED_LIFEFORM.get(), GoldExperienceRevertLifeform.MARKER_DISTANCE, mc.player)
+//                    .map(effect -> ((GECreatedLifeformEffect) effect).getItemView())
+//                    .orElse(ItemStack.EMPTY);
+//            if (!sourceItem.isEmpty()) {
+//                mc.getItemRenderer().renderAndDecorateFakeItem(sourceItem, (int) x, (int) y);
+//                specialRender = true;
+//            }
+//        }
+//        
+//        if (!specialRender) {
+//            ResourceLocation icon = action.getIconTexture(power);
+//            mc.getTextureManager().bind(icon);
+//            BlitFloat.blitFloat(matrixStack, x, y, 0, 0, 16, 16, 16, 16);
+//        }
+//        
+//        if (changeColor) RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
+//    }
     
     protected <P extends IPower<P, ?>> ActionConditionResult actionAvailability(Action<P> action, ActionsModeConfig<P> mode, 
             SelectedTargetIcon targetIcon, ActionTarget mouseTarget, boolean isSelected) {
@@ -1511,12 +1567,16 @@ public class ActionsOverlayGui extends AbstractGui {
             if (alpha < 1) {
                 RenderSystem.color4f(1.0F, 1.0F, 1.0F, alpha);
             }
-            mc.getTextureManager().bind(RADIAL_INDICATOR);
-//            int deg = (int) (ratio * 360F);
-//            blitFloat(matrixStack, x, y, deg % 19 * 13, deg / 19 * 13, 13, 13);
-            RadialBar.render(matrixStack, x, y, 0, ratio, 0, 0, 234, 234, 13, 13, 256, 256, getBlitOffset());
+            renderRadialIndicator(matrixStack, x - 1, y - 1, ratio);
             RenderSystem.color4f(1.0F, 1.0F, 1.0F, 1.0F);
         }
+    }
+    
+    public static void renderRadialIndicator(MatrixStack matrixStack, float x, float y, float ratio) {
+        Minecraft.getInstance().getTextureManager().bind(RADIAL_INDICATOR);
+//        int deg = (int) (ratio * 360F);
+//        BlitFloat.blitFloat(matrixStack, x + 1.5F, y + 1.5F, deg % 19 * 13, deg / 19 * 13, 13, 13, 256, 256);
+        RadialBar.render(matrixStack, x, y, 0, ratio, 0, 0, 234, 234, 13, 13, 256, 256, 0);
     }
     
     
@@ -2005,24 +2065,25 @@ public class ActionsOverlayGui extends AbstractGui {
 
 
     @Nullable
-    public <P extends IPower<P, ?>> Pair<Action<P>, Boolean> onClick(P power, ControlScheme.Hotbar mouseButton, boolean shiftVariant, boolean sneak) {
+    public <P extends IPower<P, ?>> ActionUseTry<P> onClick(
+            P power, ControlScheme.Hotbar mouseButton, boolean shiftVariant, boolean sneak, KeyBinding keyPressed) {
         if (currentMode != null) {
             int selectedIndex = currentMode.getSelectedSlot(mouseButton);
             if (selectedIndex >= 0) {
-                return onClick(power, mouseButton, shiftVariant, sneak, selectedIndex);
+                return onClick(power, mouseButton, shiftVariant, sneak, selectedIndex, keyPressed);
             }
         }
 
-        return Pair.of(null, false);
+        return new ActionUseTry<>(null, false, false);
     }
 
     @Nullable
-    public <P extends IPower<P, ?>> Pair<Action<P>, Boolean> onClick(
-            P power, ControlScheme.Hotbar hotbar, boolean shiftVariant, boolean sneak, int index) {
+    public <P extends IPower<P, ?>> ActionUseTry<P> onClick(
+            P power, ControlScheme.Hotbar hotbar, boolean shiftVariant, boolean sneak, int index, KeyBinding keyPressed) {
         ControlScheme controlScheme = HudControlSettings.getInstance().getControlScheme(getCurrentMode());
         Action<P> action = (Action<P>) controlScheme.getActionsHotbar(hotbar).getBaseActionInSlot(index);
         action = resolveVisibleActionInSlot(action, shiftVariant, power, getMouseTarget());
-        return onActionClick(power, action, sneak);
+        return onActionClick(power, action, sneak, keyPressed);
     }
     
     @Nullable
@@ -2047,10 +2108,16 @@ public class ActionsOverlayGui extends AbstractGui {
     public final PacketBuffer _extraInputBuf = new PacketBuffer(Unpooled.buffer());
     // sends the packet which fires the action to the server
     @Nullable
-    public <P extends IPower<P, ?>> Pair<Action<P>, Boolean> onActionClick(P power, Action<P> action, boolean sneak) {
+    public <P extends IPower<P, ?>> ActionUseTry<P> onActionClick(
+            P power, Action<P> action, boolean sneak, KeyBinding keyPressed) {
         if (power != null && action != null) {
+            InputHandler.lastActionKey = keyPressed;
+            if (action.clientOnly()) {
+                return new ActionUseTry<>(action, true, true);
+            }
+            
             if (power.getHeldAction() != null && action.getHoldDurationMax(power) > 0) {
-                return Pair.of(action, true);
+                return new ActionUseTry<>(action, true, false);
             }
             ActionTarget mouseTarget = getMouseTarget();
             ClClickActionPacket packet = new ClClickActionPacket(
@@ -2059,9 +2126,21 @@ public class ActionsOverlayGui extends AbstractGui {
             action.clWriteExtraData(_extraInputBuf);
             boolean actionWentOff = power.clickAction(action, sneak, mouseTarget, _extraInputBuf);
             _extraInputBuf.clear();
-            return Pair.of(action, actionWentOff);
+            return new ActionUseTry<>(action, actionWentOff, false);
         }
         return null;
+    }
+    
+    public static class ActionUseTry<P extends IPower<P, ?>> {
+        public final Action<P> action;
+        public final boolean wentOff;
+        public final boolean clientOnly;
+        
+        public ActionUseTry(Action<P> action, boolean wentOff, boolean clientOnly) {
+            this.action = action;
+            this.wentOff = wentOff;
+            this.clientOnly = clientOnly;
+        }
     }
     
     
@@ -2191,7 +2270,7 @@ public class ActionsOverlayGui extends AbstractGui {
     }
 
     protected static final ResourceLocation VIGNETTE_LOCATION = new ResourceLocation(JojoMod.MOD_ID, "textures/vignette.png");
-    protected void renderVignette(MatrixStack matrixStack, float r, float g, float b) {
+    public void renderVignette(MatrixStack matrixStack, float r, float g, float b) {
         RenderSystem.disableDepthTest();
         RenderSystem.depthMask(false);
         RenderSystem.blendFuncSeparate(GlStateManager.SourceFactor.ZERO, GlStateManager.DestFactor.ONE_MINUS_SRC_COLOR, GlStateManager.SourceFactor.ONE, GlStateManager.DestFactor.ZERO);
@@ -2260,7 +2339,7 @@ public class ActionsOverlayGui extends AbstractGui {
         RIGHT
     }
     
-    enum BarsOrientation {
+    public enum BarsOrientation {
         VERTICAL,
         HORIZONTAL
     }

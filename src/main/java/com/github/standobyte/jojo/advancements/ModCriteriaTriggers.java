@@ -12,6 +12,7 @@ import com.github.standobyte.jojo.advancements.criterion.HamonStatsTrigger;
 import com.github.standobyte.jojo.advancements.criterion.KilledPillarManUserTrigger;
 import com.github.standobyte.jojo.advancements.criterion.KilledPowerUserTrigger;
 import com.github.standobyte.jojo.advancements.criterion.LastHamonTrigger;
+import com.github.standobyte.jojo.advancements.criterion.MetEntityTrigger;
 import com.github.standobyte.jojo.advancements.criterion.PeopleDrainedTrigger;
 import com.github.standobyte.jojo.advancements.criterion.RPSGameTrigger;
 import com.github.standobyte.jojo.advancements.criterion.SoulAscensionTrigger;
@@ -64,6 +65,12 @@ public class ModCriteriaTriggers {
             new CriteriaTriggerSupplier<>(() -> new StandArrowHitTrigger(new ResourceLocation(JojoMod.MOD_ID, "stand_arrow_hit")));
     public static final CriteriaTriggerSupplier<SoulAscensionTrigger> SOUL_ASCENSION = 
             new CriteriaTriggerSupplier<>(() -> new SoulAscensionTrigger(new ResourceLocation(JojoMod.MOD_ID, "soul_ascension")));
+    public static final CriteriaTriggerSupplier<MetEntityTrigger> MEET_ENTITY = 
+            new CriteriaTriggerSupplier<>(() -> new MetEntityTrigger(new ResourceLocation(JojoMod.MOD_ID, "met_modded_mob")));
+    public static final CriteriaTriggerSupplier<UnconditionalTrigger> COCO_JUMBO_KEY = 
+            new CriteriaTriggerSupplier<>(() -> new UnconditionalTrigger(new ResourceLocation(JojoMod.MOD_ID, "coco_jumbo_key")));
+    public static final CriteriaTriggerSupplier<UnconditionalTrigger> MR_PRESIDENT_ROOM_WALLS = 
+            new CriteriaTriggerSupplier<>(() -> new UnconditionalTrigger(new ResourceLocation(JojoMod.MOD_ID, "mr_president_walls")));
     // TODO (BIIM) un-hide the achievement
     public static final CriteriaTriggerSupplier<RPSGameTrigger> ROCK_PAPER_SCISSORS_GAME = 
             new CriteriaTriggerSupplier<>(() -> new RPSGameTrigger(new ResourceLocation(JojoMod.MOD_ID, "rps_game")));

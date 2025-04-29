@@ -24,6 +24,7 @@ import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.item.GlovesItem;
+import com.github.standobyte.jojo.mrpresident.CocoJumboTurtleEntity;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.LotsOfBlocksBrokenPacket;
@@ -46,6 +47,7 @@ import com.mojang.datafixers.util.Pair;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.advancements.Advancement;
 import net.minecraft.block.AbstractFireBlock;
 import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
@@ -58,16 +60,23 @@ import net.minecraft.crash.CrashReportCategory;
 import net.minecraft.crash.ReportedException;
 import net.minecraft.dispenser.IBlockSource;
 import net.minecraft.entity.Entity;
+import net.minecraft.entity.EntityPredicate;
+import net.minecraft.entity.EntityType;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.MobEntity;
+import net.minecraft.entity.SpawnReason;
 import net.minecraft.entity.ai.attributes.Attribute;
 import net.minecraft.entity.ai.attributes.AttributeModifier;
 import net.minecraft.entity.ai.attributes.Attributes;
 import net.minecraft.entity.ai.attributes.ModifiableAttributeInstance;
+import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
+import net.minecraft.entity.ai.goal.PrioritizedGoal;
 import net.minecraft.entity.item.ItemEntity;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.PotionEntity;
+import net.minecraft.entity.projectile.ProjectileItemEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.inventory.EquipmentSlotType;
 import net.minecraft.inventory.IInventory;
@@ -107,8 +116,8 @@ import net.minecraft.util.Direction;
 import net.minecraft.util.EntityPredicates;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
+import net.minecraft.util.RegistryKey;
 import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.ReuseableStream;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.math.AxisAlignedBB;
@@ -117,15 +126,13 @@ import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
-import net.minecraft.util.math.shapes.IBooleanFunction;
-import net.minecraft.util.math.shapes.ISelectionContext;
-import net.minecraft.util.math.shapes.VoxelShape;
-import net.minecraft.util.math.shapes.VoxelShapes;
 import net.minecraft.util.math.vector.Vector3d;
+import net.minecraft.util.registry.Registry;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.StringTextComponent;
 import net.minecraft.world.GameRules;
 import net.minecraft.world.GameType;
+import net.minecraft.world.IServerWorld;
 import net.minecraft.world.World;
 import net.minecraft.world.server.ChunkManager;
 import net.minecraft.world.server.ServerWorld;
@@ -234,12 +241,7 @@ public class MCUtil {
     public static <T extends IForgeRegistryEntry<T>> Optional<T> nbtGetRegistryEntry(CompoundNBT nbt, String key, IForgeRegistry<T> registry) {
         if (nbt.contains(key, getNbtId(StringNBT.class))) {
             String idString = nbt.getString(key);
-            if (!idString.isEmpty()) {
-                ResourceLocation id = new ResourceLocation(idString);
-                if (registry.containsKey(id)) {
-                    return Optional.of(registry.getValue(id));
-                }
-            }
+            return registryEntryFromId(idString, registry);
         }
         
         return Optional.empty();
@@ -249,6 +251,35 @@ public class MCUtil {
         if (nbt.contains(key, getNbtId(CompoundNBT.class))) {
             return Optional.of(nbt.getCompound(key));
         }
+        return Optional.empty();
+    }
+    
+    public static CompoundNBT nbtGetOrCreateCompound(CompoundNBT nbt, String key) {
+        if (nbt.contains(key, getNbtId(CompoundNBT.class))) {
+            return nbt.getCompound(key);
+        }
+        CompoundNBT element = new CompoundNBT();
+        nbt.put(key, element);
+        return element;
+    }
+    
+    public static Optional<ListNBT> nbtGetList(CompoundNBT nbt, String key, Class<? extends INBT> nbtClass) {
+        if (nbt.contains(key, getNbtId(ListNBT.class))) {
+            return Optional.of(nbt.getList(key, getNbtId(nbtClass)));
+        }
+        return Optional.empty();
+    }
+    
+    
+    
+    public static <T extends IForgeRegistryEntry<T>> Optional<T> registryEntryFromId(String idString, IForgeRegistry<T> registry) {
+        if (!idString.isEmpty()) {
+            ResourceLocation id = new ResourceLocation(idString);
+            if (registry.containsKey(id)) {
+                return Optional.of(registry.getValue(id));
+            }
+        }
+        
         return Optional.empty();
     }
     
@@ -491,7 +522,14 @@ public class MCUtil {
     }
     
 
-
+    
+    public static Optional<Entity> cloneEntity(Entity entity) {
+        CompoundNBT entityNbt = entity.serializeNBT();
+        return EntityType.create(entityNbt, entity.level);
+    }
+    
+    
+    
     @Deprecated
     public static Vector3d collide(Entity entity, Vector3d offsetVec) {
         return CollisionUtil.collide(entity, offsetVec);
@@ -528,6 +566,64 @@ public class MCUtil {
     
     public static Vector3d getEntityPosition(Entity entity, float partialTick) {
         return partialTick == 1.0F ? entity.position() : entity.getPosition(partialTick);
+    }
+    
+    
+    public static boolean hasIndirectPassenger(Entity vehicle, Entity passenger) {
+        for (Entity entity : vehicle.getPassengers()) {
+            if (entity.equals(passenger)) {
+                return true;
+            }
+            
+            if (entity.hasIndirectPassenger(passenger)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    
+    public static void trySpawnMob(IServerWorld world, EntityType<?> type, SpawnReason spawnReason, Random random) {
+//        boolean spawned = false;
+//
+//        for (int tryNum = 0; !spawned && tryNum < 4; ++tryNum) {
+//            BlockPos blockPos = WorldEntitySpawner.getTopNonCollidingPos(world, type, l, i1);
+//            if (type.canSummon() && WorldEntitySpawner.isSpawnPositionOk(EntitySpawnPlacementRegistry.getPlacementType(type), world, blockPos, type)) {
+//                float width = type.getWidth();
+//                double x = MathHelper.clamp((double)l, (double)i + (double)width, (double)i + 16.0D - (double)width);
+//                double z = MathHelper.clamp((double)i1, (double)j + (double)width, (double)j + 16.0D - (double)width);
+//                if (!world.noCollision(type.getAABB(x, (double)blockPos.getY(), z)) || !EntitySpawnPlacementRegistry.checkSpawnRules(
+//                        type, world, spawnReason, new BlockPos(x, (double)blockPos.getY(), z), world.getRandom())) {
+//                    continue;
+//                }
+//
+//                Entity entity;
+//                try {
+//                    entity = type.create(world.getLevel());
+//                } catch (Exception exception) {
+//                    JojoMod.getLogger().warn("Failed to create mob", (Throwable)exception);
+//                    continue;
+//                }
+//
+//                entity.moveTo(x, (double)blockPos.getY(), z, random.nextFloat() * 360.0F, 0.0F);
+//                if (entity instanceof MobEntity) {
+//                    MobEntity mobentity = (MobEntity)entity;
+//                    if (ForgeHooks.canEntitySpawn(mobentity, world, x, blockPos.getY(), z, null, spawnReason) == -1) continue;
+//                    if (mobentity.checkSpawnRules(world, spawnReason) && mobentity.checkSpawnObstruction(world)) {
+//                        entityData = mobentity.finalizeSpawn(world, world.getCurrentDifficultyAt(mobentity.blockPosition()), spawnReason, entityData, (CompoundNBT)null);
+//                        world.addFreshEntityWithPassengers(mobentity);
+//                        spawned = true;
+//                    }
+//                }
+//            }
+//
+//            l += random.nextInt(5) - random.nextInt(5);
+//
+//            for(i1 += random.nextInt(5) - random.nextInt(5); l < i || l >= i + 16 || i1 < j || i1 >= j + 16; i1 = k1 + random.nextInt(5) - random.nextInt(5)) {
+//                l = j1 + random.nextInt(5) - random.nextInt(5);
+//            }
+//        }
     }
     
     
@@ -808,6 +904,17 @@ public class MCUtil {
         return false;
     }
     
+    public static void multipliedAttrModifier(LivingEntity entity, Attribute attribute, AttributeModifier modifier, float mult) {
+        ModifiableAttributeInstance attributeInstance = entity.getAttribute(attribute);
+        if (attributeInstance != null) {
+            attributeInstance.removeModifier(modifier);
+            if (mult != 0) {
+                attributeInstance.addTransientModifier(new AttributeModifier(modifier.getId(), 
+                        modifier.getName() + " " + mult, modifier.getAmount() * mult, modifier.getOperation()));
+            }
+        }
+    }
+    
     public static double calcValueWithoutModifiers(ModifiableAttributeInstance entityAttribute, UUID... modifierIds) {
         return calcValueWithoutModifiers(entityAttribute, Arrays.stream(modifierIds));
     }
@@ -873,6 +980,11 @@ public class MCUtil {
         return false;
     }
     
+    public static int getEffectLevel(LivingEntity entity, Effect effect) {
+        EffectInstance effInstance = entity.getEffect(effect);
+        return effInstance != null ? effInstance.getAmplifier() : -1;
+    }
+
     public static boolean reduceEffect(LivingEntity entity, Effect effect, int reduceDuration, int reduceAmplifier) {
         EffectInstance mainEffectInstance = entity.getEffect(effect);
         if (mainEffectInstance == null) {
@@ -966,6 +1078,16 @@ public class MCUtil {
     
 
     
+    public static boolean hasAdvancement(ServerPlayerEntity player, ResourceLocation advancementPath) {
+        Advancement advancement = player.server.getAdvancements().getAdvancement(advancementPath);
+        if (advancement != null) {
+            return player.getAdvancements().getOrStartProgress(advancement).isDone();
+        }
+        return false;
+    }
+    
+    
+    
     public static boolean isHandFree(LivingEntity entity, Hand hand) {
         return areHandsFree(entity, hand);
     }
@@ -979,7 +1101,8 @@ public class MCUtil {
             return false;
         }
         for (Hand hand : hands) {
-            if (!itemHandFree(entity.getItemInHand(hand))) {
+            if (!itemHandFree(entity.getItemInHand(hand))
+                    || hand == Hand.OFF_HAND && entity.getPassengers().stream().anyMatch(passenger -> CocoJumboTurtleEntity.isCarriedTurtle(passenger, entity))) {
                 return false;
             }
         }
@@ -1018,6 +1141,29 @@ public class MCUtil {
         }
     }
     
+    public static void makeMobNeutralTo(MobEntity mob, LivingEntity neutralTo) {
+        Class<? extends LivingEntity> clazz = neutralTo.getClass();
+        UUID userUuid = neutralTo.getUUID();
+        Set<PrioritizedGoal> goals = CommonReflection.getGoalsSet(mob.targetSelector);
+        for (PrioritizedGoal prGoal : goals) {
+            Goal goal = prGoal.getGoal();
+            if (goal instanceof NearestAttackableTargetGoal) {
+                NearestAttackableTargetGoal<?> targetGoal = (NearestAttackableTargetGoal<?>) goal;
+                Class<? extends LivingEntity> targetClass = CommonReflection.getTargetClass(targetGoal);
+                
+                if (targetClass == null || targetClass.isAssignableFrom(clazz)) {
+                    EntityPredicate selector = CommonReflection.getTargetConditions(targetGoal);
+                    if (selector != null) {
+                        Predicate<LivingEntity> oldPredicate = CommonReflection.getTargetSelector(selector);
+                        Predicate<LivingEntity> geUserPredicate = target -> !userUuid.equals(target.getUUID());
+                        CommonReflection.setTargetConditions(targetGoal, new EntityPredicate().range(CommonReflection.getTargetDistance(targetGoal)).selector(
+                                oldPredicate != null ? oldPredicate.and(geUserPredicate) : geUserPredicate));
+                    }
+                }
+            }
+        }
+    }
+    
     
     
     public static void onLivingResurrect(LivingEntity entity) {
@@ -1039,6 +1185,11 @@ public class MCUtil {
     public static boolean isPotionWaterBottle(PotionEntity entity) {
         ItemStack potionItem = entity.getItem();
         return PotionUtils.getPotion(potionItem) == Potions.WATER && PotionUtils.getMobEffects(potionItem).isEmpty();
+    }
+    
+    public static ItemStack getItemOnServer(ProjectileItemEntity entity) {
+        ItemStack item = CommonReflection.getItemRaw(entity);
+        return item.isEmpty() ? new ItemStack(CommonReflection.getDefaultItem(entity)) : item;
     }
     
     
@@ -1063,6 +1214,14 @@ public class MCUtil {
     public static <V extends IForgeRegistryEntry<V>> IForgeRegistry<V> getRegistry(IForgeRegistryEntry<?> regEntry) {
         return RegistryManager.ACTIVE.getRegistry(((IForgeRegistryEntry<V>) regEntry).getRegistryType());
     }
+    
+    
+    @Nullable
+    public static <T> RegistryKey<T> getRegistryKeyIfPresent(RegistryKey<? extends Registry<T>> parent, ResourceLocation location) {
+        String s = (parent.location() + ":" + location).intern();
+        return (RegistryKey<T>) CommonReflection.registryKeyValues().get(s);
+    }
+    
     
     
     public static class EntityEvents { // TODO entity event constants

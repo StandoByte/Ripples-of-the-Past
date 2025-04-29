@@ -2,6 +2,7 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 
 import java.util.function.Supplier;
 
+import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.InputHandler;
 import com.github.standobyte.jojo.client.ControllerSoul;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
@@ -29,6 +30,7 @@ public class UpdateClientCapCachePacket {
             ActionsOverlayGui.getInstance().updatePowersCache();
             InputHandler.getInstance().updatePowersCache();
             ControllerSoul.getInstance().updateStandCache();
+            ClientUtil.updatePowersCapCache();
         }
 
         @Override

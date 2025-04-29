@@ -283,6 +283,10 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.message.action_condition." + postfix));
     }
     
+    public static ActionConditionResult conditionMessage(String postfix, Object... args) {
+        return ActionConditionResult.createNegative(new TranslationTextComponent("jojo.message.action_condition." + postfix, args));
+    }
+    
     public Action<P> getShiftVariationIfPresent() {
         return hasShiftVariation() ? shiftVariation : this;
     }
@@ -298,6 +302,10 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     public boolean isShiftVariation() {
         return baseVariation != null;
+    }
+    
+    public boolean clientOnly() {
+        return false;
     }
     
     public void onClick(World world, LivingEntity user, P power) {}
@@ -352,6 +360,7 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
     
     public void onHoldTickClientEffect(LivingEntity user, P power, int ticksHeld, boolean reqFulfilled, boolean reqStateChanged) {}
     
+    @Nonnull
     public LivingEntity getPerformer(LivingEntity user, P power) {
         return user;
     }
@@ -400,11 +409,17 @@ public abstract class Action<P extends IPower<P, ?>> extends ForgeRegistryEntry<
         return shoutSupplier.get();
     }
     
+    protected Integer voiceLineDelay = null;
     public void playVoiceLine(LivingEntity user, P power, ActionTarget target, boolean wasActive, boolean sneak) {
         if (!sneak || playsVoiceLineOnSneak()) {
             SoundEvent shout = getShout(user, power, target, wasActive);
             if (shout != null) {
-                JojoModUtil.sayVoiceLine(user, shout);
+                if (voiceLineDelay == null) {
+                    JojoModUtil.sayVoiceLine(user, shout);
+                }
+                else {
+                    JojoModUtil.sayVoiceLine(user, shout, voiceLineDelay.intValue());
+                }
             }
         }
     }

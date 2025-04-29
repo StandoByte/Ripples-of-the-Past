@@ -7,6 +7,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -25,6 +26,8 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ObjectArrays;
 
 import io.netty.handler.codec.DecoderException;
+import net.minecraft.block.Block;
+import net.minecraft.block.BlockState;
 import net.minecraft.client.network.play.IClientPlayNetHandler;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.PlayerEntity;
@@ -36,11 +39,13 @@ import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.world.World;
 import net.minecraftforge.common.extensions.IForgePacketBuffer;
 import net.minecraftforge.registries.ForgeRegistry;
+import net.minecraftforge.registries.GameData;
 import net.minecraftforge.registries.IForgeRegistry;
 import net.minecraftforge.registries.IForgeRegistryEntry;
 import net.minecraftforge.registries.RegistryManager;
 
 public class NetworkUtil {
+    public static boolean blockPacketsToServer = false;
 
     public static void broadcastWithCondition(List<ServerPlayerEntity> players, @Nullable PlayerEntity clientHandled, 
             double x, double y, double z, double radius, World world, 
@@ -107,6 +112,15 @@ public class NetworkUtil {
                 throw new IllegalArgumentException("Attempted to read an registryValue of the wrong type from the Buffer!");
         }
         return values;
+    }
+    
+    
+    public static void writeBlockState(PacketBuffer buf, BlockState blockState) {
+        buf.writeVarInt(Block.getId(blockState));
+    }
+    
+    public static BlockState readBlockState(PacketBuffer buf) {
+        return GameData.getBlockStateIDMap().byId(buf.readVarInt());
     }
     
     
@@ -239,6 +253,26 @@ public class NetworkUtil {
     
     public static <T> Optional<T> readOptional(PacketBuffer buf, Function<PacketBuffer, T> read) {
         return buf.readBoolean() ? Optional.ofNullable(read.apply(buf)) : Optional.empty();
+    }
+    
+    public static void writeOptionalInt(PacketBuffer buf, OptionalInt optional, boolean varInt) {
+        buf.writeBoolean(optional.isPresent());
+        optional.ifPresent(value -> {
+            if (varInt) {
+                buf.writeVarInt(value);
+            }
+            else {
+                buf.writeInt(value);
+            }
+        });
+    }
+    
+    public static OptionalInt readOptionalInt(PacketBuffer buf, boolean varInt) {
+        if (!buf.readBoolean()) {
+            return OptionalInt.empty();
+        }
+        int value = varInt ? buf.readVarInt() : buf.readInt();
+        return OptionalInt.of(value);
     }
     
     

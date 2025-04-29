@@ -2,7 +2,7 @@ package com.github.standobyte.jojo.network.packets.fromserver;
 
 import java.util.function.Supplier;
 
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
 
@@ -38,7 +38,8 @@ public class TrKnivesCountPacket {
         public void handle(TrKnivesCountPacket msg, Supplier<NetworkEvent.Context> ctx) {
             Entity entity = ClientUtil.getEntityById(msg.entityId);
             if (entity != null) {
-                entity.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> cap.setKnives(msg.knives));
+                entity.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(
+                        cap -> cap.getStuckObjects().getKnives().setCount(msg.knives));
             }
         }
 

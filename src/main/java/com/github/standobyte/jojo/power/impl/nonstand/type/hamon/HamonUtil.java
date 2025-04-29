@@ -28,6 +28,7 @@ import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.entity.CrimsonBubbleEntity;
 import com.github.standobyte.jojo.entity.stand.StandEntity;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModParticles;
 import com.github.standobyte.jojo.init.ModSounds;
 import com.github.standobyte.jojo.init.ModStatusEffects;
@@ -66,12 +67,16 @@ import net.minecraft.entity.projectile.ProjectileEntity;
 import net.minecraft.fluid.FluidState;
 import net.minecraft.item.BlockItem;
 import net.minecraft.item.EggItem;
+import net.minecraft.item.FishBucketItem;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.particles.IParticleData;
 import net.minecraft.potion.EffectInstance;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.util.DamageSource;
 import net.minecraft.util.Hand;
+import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
 import net.minecraft.util.Util;
@@ -562,8 +567,12 @@ public class HamonUtil {
             return HamonOrganismInfusion.isBlockLiving(((BlockItem) item).getBlock().defaultBlockState());
         }
         
-        return item instanceof EggItem;
+        return item == ModItems.GOLD_EXPERIENCE_BODY_TISSUE.get() ||
+                item instanceof EggItem || 
+                ItemTags.getAllTags().getTagOrEmpty(RAW_FISH_TAG).contains(item) || item == Items.COD || item == Items.SALMON || item == Items.TROPICAL_FISH || item == Items.PUFFERFISH ||
+                item instanceof FishBucketItem;
     }
+    private static final ResourceLocation RAW_FISH_TAG = new ResourceLocation("forge", "raw_fishes");
     
     
     

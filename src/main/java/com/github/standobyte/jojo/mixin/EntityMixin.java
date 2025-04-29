@@ -5,9 +5,11 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import com.github.standobyte.jojo.capability.world.TimeStopHandler;
+import com.github.standobyte.jojo.entity.IPassengerMixinReposition;
 import com.github.standobyte.jojo.util.mc.damage.KnockbackCollisionImpact;
 
 import net.minecraft.entity.Entity;
@@ -61,5 +63,20 @@ public abstract class EntityMixin {
             return Vector3d.ZERO;
         }
         return fluidState.getFlow(world, blockPos);
+    }
+    
+    
+    
+    @Inject(method = "Lnet/minecraft/entity/Entity;positionRider("
+            + "Lnet/minecraft/entity/Entity;"
+            + "Lnet/minecraft/entity/Entity$IMoveCallback;)V", at = @At("TAIL"))
+    public void jojoRepositionPassenger(Entity passenger, Entity.IMoveCallback moveMethod, CallbackInfo ci) {
+        Entity thisAsEntity = (Entity) (Object) this;
+        if (passenger instanceof IPassengerMixinReposition && thisAsEntity.hasPassenger(passenger)) {
+            Vector3d passengerPosition = ((IPassengerMixinReposition) passenger).repositionPassenger(thisAsEntity);
+            if (passengerPosition != null) {
+                moveMethod.accept(passenger, passengerPosition.x, passengerPosition.y, passengerPosition.z);
+            }
+        }
     }
 }

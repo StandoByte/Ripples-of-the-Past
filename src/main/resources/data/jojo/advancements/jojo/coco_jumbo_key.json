@@ -1,0 +1,29 @@
+{
+  "parent": "jojo:jojo/coco_jumbo",
+  "display": {
+    "icon": {
+      "item": "jojo:mr_president_key"
+    },
+    "title": {
+      "translate": "advancements.jojo.coco_jumbo_key.title"
+    },
+    "description": {
+      "translate": "advancements.jojo.coco_jumbo_key.description"
+    },
+    "frame": "task",
+    "show_toast": true,
+    "announce_to_chat": true,
+    "hidden": false
+  },
+  "criteria": {
+    "put_key": {
+      "trigger": "jojo:coco_jumbo_key",
+      "conditions": {}
+    }
+  },
+  "requirements": [
+    [
+      "put_key"
+    ]
+  ]
+}

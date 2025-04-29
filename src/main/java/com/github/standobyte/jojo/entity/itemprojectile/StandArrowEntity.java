@@ -6,6 +6,8 @@ import java.util.Optional;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.item.StandArrowItem;
+import com.github.standobyte.jojo.potion.StandVirusEffect;
+import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.general.MathUtil;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
 
@@ -142,12 +144,23 @@ public class StandArrowEntity extends AbstractArrowEntity {
         }
         dealtDamage = true;
         
+        if (target instanceof LivingEntity) {
+            LivingEntity targetLiving = (LivingEntity) target;
+            if (StandUtil.isEntityStandUser(targetLiving) || StandVirusEffect.mobMayGetStand(targetLiving)) {
+                damage /= 4;
+            }
+        }
+        
         boolean dodge = target.getType() == EntityType.ENDERMAN;
         int prevTargetFireTimer = target.getRemainingFireTicks();
         if (isOnFire() && !dodge) {
             target.setSecondsOnFire(5);
         }
-
+        
+        if (shooter != null) {
+            arrowItem.hurtAndBreak(1, (LivingEntity) shooter, entity -> remove());
+        }
+        
         if (target.hurt(damageSource, (float) damage)) {
             if (dodge) {
                 return;

@@ -10,8 +10,8 @@ import com.github.standobyte.jojo.action.ActionConditionResult;
 import com.github.standobyte.jojo.action.ActionTarget;
 import com.github.standobyte.jojo.action.ActionTarget.TargetType;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCap.OneTimeNotification;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.command.JojoControlsCommand;
 import com.github.standobyte.jojo.init.ModStatusEffects;
@@ -103,12 +103,15 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     @Override
     public void tick() {
         if (hasPower()) {
+            LivingEntity user = getUser();
+            P power = getThis();
+            
             tickHeldAction();
             tickCooldown();
             if (leapCooldown > 0) {
                 leapCooldown--;
             }
-            getType().tickUser(getUser(), getThis());
+            getType().tickUser(user, power);
             tickBowCharge();
         }
         newDayCheck();
@@ -149,6 +152,11 @@ public abstract class PowerBaseImpl<P extends IPower<P, T>, T extends IPowerType
     @Override
     public final float getCooldownRatio(Action<?> action, float partialTick) {
         return cooldowns.getCooldownPercent(action, partialTick);
+    }
+
+    @Override
+    public int getCooldownTimer(Action<?> action) {
+        return cooldowns.getCooldownTimer(action);
     }
 
     @Override

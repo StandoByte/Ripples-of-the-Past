@@ -4,6 +4,7 @@ import java.util.function.Supplier;
 
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
+import com.github.standobyte.jojo.util.mc.entitysubtype.EntitySubtype;
 
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.player.ServerPlayerEntity;
@@ -37,7 +38,7 @@ public class ClMetEntityTypePacket {
             player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                 Entity entity = player.level.getEntity(msg.entityId);
                 if (entity != null && entity.distanceToSqr(player) <= 144) {
-                    cap.addMetEntityType(entity.getType());
+                    EntitySubtype.getMatchingSubtypes(entity).forEach(cap::addMetEntityType);
                 }
             });
         }

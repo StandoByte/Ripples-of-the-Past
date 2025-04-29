@@ -183,6 +183,16 @@ public class StandUtil {
         return standOrUser;
     }
     
+    public static LivingEntity getStandIfInManualControl(IStandPower power) {
+        if (power.getStandManifestation() instanceof StandEntity) {
+            StandEntity stand = (StandEntity) power.getStandManifestation();
+            if (stand.isManuallyControlled()) {
+                return stand;
+            }
+        }
+        return power.getUser();
+    }
+    
     /**
      * @deprecated Use {@link ResolveCounter#addResolve(IStandPower, LivingEntity, float)}
      */

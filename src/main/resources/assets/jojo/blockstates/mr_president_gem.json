@@ -1,0 +1,13 @@
+{
+  "variants": {
+    "border_variant=0": { "model": "jojo:block/mr_president_exit" },
+    "border_variant=1": { "model": "jojo:block/mr_president_exit_u" },
+    "border_variant=2": { "model": "jojo:block/mr_president_exit_r" },
+    "border_variant=3": { "model": "jojo:block/mr_president_exit_d" },
+    "border_variant=4": { "model": "jojo:block/mr_president_exit_l" },
+    "border_variant=5": { "model": "jojo:block/mr_president_exit_lu" },
+    "border_variant=6": { "model": "jojo:block/mr_president_exit_ru" },
+    "border_variant=7": { "model": "jojo:block/mr_president_exit_rd" },
+    "border_variant=8": { "model": "jojo:block/mr_president_exit_ld" }
+  }
+}

@@ -9,14 +9,15 @@ import com.github.standobyte.jojo.power.impl.stand.stats.StandStats;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.util.text.ITextComponent;
 
-public class NoManifestationStandType<T extends StandStats> extends StandType<T> {
-
-    public NoManifestationStandType(int color, ITextComponent partName, StandAction[] attacks, StandAction[] abilities,
+public class NoSummonStandType<T extends StandStats> extends StandType<T> {
+    
+    public NoSummonStandType(int color, ITextComponent partName, 
+            StandAction[] attacks, StandAction[] abilities, 
             Class<T> statsClass, T defaultStats, @Nullable StandTypeOptionals additions) {
-        super(color, partName, attacks, abilities, abilities.length > 0 ? abilities[0] : null, statsClass, defaultStats, additions);
+        super(color, partName, attacks, abilities, null, statsClass, defaultStats, additions);
     }
 
-    protected NoManifestationStandType(Builder<T> builder) {
+    protected NoSummonStandType(Builder<T> builder) {
         super(builder);
     }
 
@@ -41,10 +42,9 @@ public class NoManifestationStandType<T extends StandStats> extends StandType<T>
         }
         
         @Override
-        public NoManifestationStandType<T> build() {
-            return new NoManifestationStandType<>(this);
+        public NoSummonStandType<T> build() {
+            return new NoSummonStandType<>(this);
         }
         
     }
-
 }

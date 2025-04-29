@@ -8,6 +8,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import com.github.standobyte.jojo.block.WoodenCoffinBlock;
 import com.github.standobyte.jojo.init.ModEntityTypes;
+import com.github.standobyte.jojo.mrpresident.CocoJumboTurtleEntity;
 
 import net.minecraft.client.renderer.entity.model.AgeableModel;
 import net.minecraft.client.renderer.entity.model.BipedModel;
@@ -39,6 +40,22 @@ public abstract class BipedModelMixin<T extends LivingEntity> extends AgeableMod
             leftArm.zRot = 0;
             rightArm.xRot = 0;
             rightArm.zRot = 0;
+        }
+        
+        for (Entity passenger : entity.getPassengers()) {
+            if (CocoJumboTurtleEntity.isCarriedTurtle(passenger, entity)) {
+                switch (entity.getMainArm()) {
+                case LEFT:
+                    rightArm.xRot = -(float)Math.PI / 10f;
+                    rightArm.zRot = 0;
+                    break;
+                case RIGHT:
+                    leftArm.xRot = -(float)Math.PI / 10f;
+                    leftArm.zRot = 0;
+                    break;
+                }
+                break;
+            }
         }
     }
     

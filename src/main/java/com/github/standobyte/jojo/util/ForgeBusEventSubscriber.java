@@ -34,6 +34,7 @@ import com.github.standobyte.jojo.capability.entity.power.NonStandCapProvider;
 import com.github.standobyte.jojo.capability.entity.power.NonStandCapStorage;
 import com.github.standobyte.jojo.capability.entity.power.StandCapProvider;
 import com.github.standobyte.jojo.capability.entity.power.StandCapStorage;
+import com.github.standobyte.jojo.capability.world.MrPresidentWorldDataProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCap;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapStorage;
@@ -52,6 +53,10 @@ import com.github.standobyte.jojo.command.StandCommand;
 import com.github.standobyte.jojo.command.StandDiscGiveCommand;
 import com.github.standobyte.jojo.command.StandLevelCommand;
 import com.github.standobyte.jojo.init.ModStructures;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStack;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStackProvider;
+import com.github.standobyte.jojo.itemtracking.itemcap.TrackerItemStackStorage;
+import com.github.standobyte.jojo.mrpresident.dimension.MrPresidentWorldData;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromserver.UpdateClientCapCachePacket;
 import com.github.standobyte.jojo.power.IPower;
@@ -60,9 +65,10 @@ import com.github.standobyte.jojo.power.impl.nonstand.NonStandPower;
 import com.github.standobyte.jojo.power.impl.nonstand.type.hamon.HamonUtil;
 import com.github.standobyte.jojo.power.impl.stand.IStandPower;
 import com.github.standobyte.jojo.power.impl.stand.StandPower;
-import com.github.standobyte.jojo.util.mc.EntityTypeToInstance;
+import com.github.standobyte.jojo.util.mc.entitysubtype.EntityTypeToInstance;
 import com.github.standobyte.jojo.util.mc.reflection.CommonReflection;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
+import com.github.standobyte.jojo.world.dimension.ModDimensions;
 import com.mojang.brigadier.CommandDispatcher;
 
 import net.minecraft.command.CommandSource;
@@ -73,6 +79,7 @@ import net.minecraft.entity.merchant.IMerchant;
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.entity.player.ServerPlayerEntity;
 import net.minecraft.entity.projectile.ProjectileEntity;
+import net.minecraft.item.ItemStack;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.registry.Registry;
 import net.minecraft.world.World;
@@ -101,18 +108,20 @@ import net.minecraftforge.fml.common.Mod.EventBusSubscriber;
 
 @EventBusSubscriber(modid = JojoMod.MOD_ID)
 public class ForgeBusEventSubscriber {
-    private static final ResourceLocation STAND_CAP = new ResourceLocation(JojoMod.MOD_ID, "stand");
-    private static final ResourceLocation NON_STAND_CAP = new ResourceLocation(JojoMod.MOD_ID, "non_stand");
-    private static final ResourceLocation PLAYER_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "player_util");
-    private static final ResourceLocation CLIENT_PLAYER_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "client_player_util");
-    private static final ResourceLocation LIVING_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "living_util");
-    private static final ResourceLocation ENTITY_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "entity_util");
-    private static final ResourceLocation ENTITY_HAMON_CHARGE_CAP = new ResourceLocation(JojoMod.MOD_ID, "entity_hamon_charge");
-    private static final ResourceLocation PROJECTILE_HAMON_CAP = new ResourceLocation(JojoMod.MOD_ID, "projectile_hamon");
-    private static final ResourceLocation MERCHANT_CAP = new ResourceLocation(JojoMod.MOD_ID, "merchant");
-    private static final ResourceLocation WORLD_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "world_util");
-    private static final ResourceLocation SAVE_FILE_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "save_file_util");
-    private static final ResourceLocation CHUNK_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "chunk_util");
+    public static final ResourceLocation STAND_CAP = new ResourceLocation(JojoMod.MOD_ID, "stand");
+    public static final ResourceLocation NON_STAND_CAP = new ResourceLocation(JojoMod.MOD_ID, "non_stand");
+    public static final ResourceLocation PLAYER_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "player_util");
+    public static final ResourceLocation CLIENT_PLAYER_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "client_player_util");
+    public static final ResourceLocation LIVING_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "living_util");
+    public static final ResourceLocation ENTITY_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "entity_util");
+    public static final ResourceLocation ENTITY_HAMON_CHARGE_CAP = new ResourceLocation(JojoMod.MOD_ID, "entity_hamon_charge");
+    public static final ResourceLocation PROJECTILE_HAMON_CAP = new ResourceLocation(JojoMod.MOD_ID, "projectile_hamon");
+    public static final ResourceLocation MERCHANT_CAP = new ResourceLocation(JojoMod.MOD_ID, "merchant");
+    public static final ResourceLocation WORLD_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "world_util");
+    public static final ResourceLocation SAVE_FILE_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "save_file_util");
+    public static final ResourceLocation MR_PRESIDENT_CAP = new ResourceLocation(JojoMod.MOD_ID, "mr_president");
+    public static final ResourceLocation CHUNK_UTIL_CAP = new ResourceLocation(JojoMod.MOD_ID, "chunk_util");
+    public static final ResourceLocation ITEM_TRACK_CAP = new ResourceLocation(JojoMod.MOD_ID, "item_track");
     
     @SubscribeEvent
     public static void onRegisterCommands(RegisterCommandsEvent event) {
@@ -136,8 +145,13 @@ public class ForgeBusEventSubscriber {
     public static void onAttachCapabilitiesWorld(AttachCapabilitiesEvent<World> event) {
         World world = event.getObject();
         event.addCapability(WORLD_UTIL_CAP, new WorldUtilCapProvider(world));
-        if (!world.isClientSide() && world.dimension() == World.OVERWORLD) {
-            event.addCapability(SAVE_FILE_UTIL_CAP, new SaveFileUtilCapProvider((ServerWorld) world));
+        if (!world.isClientSide()) {
+            if (world.dimension() == World.OVERWORLD) {
+                event.addCapability(SAVE_FILE_UTIL_CAP, new SaveFileUtilCapProvider((ServerWorld) world));
+            }
+            else if (ModDimensions.MR_PRESIDENT != null && world.dimension() == ModDimensions.MR_PRESIDENT) {
+                event.addCapability(MR_PRESIDENT_CAP, new MrPresidentWorldDataProvider((ServerWorld) world));
+            }
         }
     }
     
@@ -154,7 +168,7 @@ public class ForgeBusEventSubscriber {
         if (entity instanceof LivingEntity) {
             LivingEntity living = (LivingEntity) entity;
             if (entity instanceof PlayerEntity) {
-                PlayerEntity player = (PlayerEntity) event.getObject();
+                PlayerEntity player = (PlayerEntity) living;
                 event.addCapability(STAND_CAP, new StandCapProvider(player));
                 event.addCapability(NON_STAND_CAP, new NonStandCapProvider(player));
                 event.addCapability(PLAYER_UTIL_CAP, new PlayerUtilCapProvider(player));
@@ -166,6 +180,10 @@ public class ForgeBusEventSubscriber {
             if (entity instanceof IMerchant) {
                 event.addCapability(MERCHANT_CAP, new MerchantDataProvider(living, (IMerchant) living));
             }
+            event.addListener(() -> {
+                IStandPower.getStandPowerOptional(living).ifPresent(
+                        stand -> stand.getContinuousEffects().onStandUserRemoved(living));
+            });
         }
         if (entity instanceof ProjectileEntity && (HamonUtil.ProjectileChargeProperties.canBeChargedWithHamon(entity))) {
             event.addCapability(PROJECTILE_HAMON_CAP, new ProjectileHamonChargeCapProvider(entity));
@@ -173,6 +191,11 @@ public class ForgeBusEventSubscriber {
         if (entity instanceof LivingEntity || entity instanceof ItemEntity) {
             event.addCapability(ENTITY_HAMON_CHARGE_CAP, new EntityHamonChargeCapProvider(entity));
         }
+    }
+    
+    @SubscribeEvent
+    public static void onAttachCapabilitiesItem(AttachCapabilitiesEvent<ItemStack> event) {
+        event.addCapability(ITEM_TRACK_CAP, new TrackerItemStackProvider(event.getObject()));
     }
     
     public static void registerCapabilities() { // moved the registration here just so that it's in the same place as the attachment
@@ -188,8 +211,11 @@ public class ForgeBusEventSubscriber {
         
         CapabilityManager.INSTANCE.register(WorldUtilCap.class, new WorldUtilCapStorage(), () -> new WorldUtilCap(null));
         CapabilityManager.INSTANCE.register(SaveFileUtilCap.class, new SaveFileUtilCapStorage(), () -> new SaveFileUtilCap(null));
+        CapabilityManager.INSTANCE.register(MrPresidentWorldData.class, JojoModUtil.makeSerializableStorage(), () -> new MrPresidentWorldData(null));
 
         CapabilityManager.INSTANCE.register(ChunkCap.class, new ChunkCapStorage(), () -> new ChunkCap(null));
+
+        CapabilityManager.INSTANCE.register(TrackerItemStack.class, new TrackerItemStackStorage(), () -> new TrackerItemStack(null));
     }
     
     
@@ -281,11 +307,11 @@ public class ForgeBusEventSubscriber {
     private static void syncPowerData(PlayerEntity player) {
         INonStandPower.getPlayerNonStandPower(player).syncWithUserOnly();
         IStandPower.getPlayerStandPower(player).syncWithUserOnly();
-        player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
-            cap.syncWithClient();
-        });
         player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
             cap.syncWithClient();
+        });
+        player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+            cap.syncWithClient((ServerPlayerEntity) player);
         });
         PacketManager.sendToClient(new UpdateClientCapCachePacket(), (ServerPlayerEntity) player);
     }
@@ -301,9 +327,12 @@ public class ForgeBusEventSubscriber {
     
     @SubscribeEvent
     public static void onWorldLoad(WorldEvent.Load event) {
-        if (event.getWorld() instanceof ServerWorld) {
-            ServerWorld serverWorld = (ServerWorld) event.getWorld();
-            addDimensionalSpacing(serverWorld);
+        if (event.getWorld() instanceof World) {
+            if (event.getWorld() instanceof ServerWorld) {
+                ServerWorld serverWorld = (ServerWorld) event.getWorld();
+                addDimensionalSpacing(serverWorld);
+            }
+            EntityTypeToInstance.init((World) event.getWorld());
         }
         EntityTypeToInstance.init((World) event.getWorld());
     }

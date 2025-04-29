@@ -72,7 +72,7 @@ public class ClackersEntity extends ItemProjectileEntity {
 
     @Override
     protected ItemStack getPickupItem() {
-        return new ItemStack(ModItems.CLACKERS.get());
+        return withPickupItemTracking(new ItemStack(ModItems.CLACKERS.get()));
     }
 
     @Override

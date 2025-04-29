@@ -7,16 +7,16 @@ import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.packets.IModPacketHandler;
+import com.github.standobyte.jojo.util.mc.entitysubtype.SubtypeResourceLocation;
 
 import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.network.PacketBuffer;
-import net.minecraft.util.ResourceLocation;
 import net.minecraftforge.fml.network.NetworkEvent.Context;
 
 public class MetEntityTypesPacket {
-    private final Collection<ResourceLocation> metEntityTypeIds;
+    private final Collection<SubtypeResourceLocation> metEntityTypeIds;
 
-    public MetEntityTypesPacket(Collection<ResourceLocation> metEntityTypeIds) {
+    public MetEntityTypesPacket(Collection<SubtypeResourceLocation> metEntityTypeIds) {
         this.metEntityTypeIds = metEntityTypeIds;
     }
     
@@ -26,12 +26,12 @@ public class MetEntityTypesPacket {
 
         @Override
         public void encode(MetEntityTypesPacket msg, PacketBuffer buf) {
-            NetworkUtil.writeCollection(buf, msg.metEntityTypeIds, buf::writeResourceLocation, false);
+            NetworkUtil.writeCollection(buf, msg.metEntityTypeIds, id -> buf.writeUtf(id.toString()), false);
         }
 
         @Override
         public MetEntityTypesPacket decode(PacketBuffer buf) {
-            return new MetEntityTypesPacket(NetworkUtil.readCollection(buf, PacketBuffer::readResourceLocation));
+            return new MetEntityTypesPacket(NetworkUtil.readCollection(buf, () -> new SubtypeResourceLocation(buf.readUtf())));
         }
 
         @Override

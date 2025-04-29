@@ -9,6 +9,8 @@ import java.util.function.Predicate;
 
 import javax.annotation.Nullable;
 
+import com.github.standobyte.jojo.capability.entity.LivingUtilCap;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
 import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.client.InputHandler;
@@ -139,10 +141,20 @@ public class JojoModUtil {
             double minDistance, World world, @Nullable Entity entity, 
             @Nullable Predicate<Entity> entityFilter, RayTraceContext.BlockMode blockMode, 
             double rayTraceInflate, double standPrecision) {
+        return rayTraceMultipleEntities(startPos, endPos, aabb, 
+                minDistance, world, entity, 
+                entityFilter, true, blockMode, 
+                rayTraceInflate, standPrecision);
+    }
+
+    public static RayTraceResult[] rayTraceMultipleEntities(Vector3d startPos, Vector3d endPos, AxisAlignedBB aabb, 
+            double minDistance, World world, @Nullable Entity entity, 
+            @Nullable Predicate<Entity> entityFilter, boolean checkPickable, RayTraceContext.BlockMode blockMode, 
+            double rayTraceInflate, double standPrecision) {
         aabb.inflate(rayTraceInflate);
         double minDistanceSqr = minDistance * minDistance;
         Map<EntityRayTraceResult, Double> rayTracedWithDistance = new HashMap<>();
-        List<Entity> entities = world.getEntities(entity, aabb, e -> !e.isSpectator() && e.isPickable() && (entityFilter == null || entityFilter.test(e)));
+        List<Entity> entities = world.getEntities(entity, aabb, e -> (!checkPickable || !e.isSpectator() && e.isPickable()) && (entityFilter == null || entityFilter.test(e)));
         for (Entity potentialTarget : entities) {
             AxisAlignedBB targetCollisionAABB = potentialTarget.getBoundingBox().inflate((double) potentialTarget.getPickRadius() + rayTraceInflate);
             targetCollisionAABB = standPrecisionTargetHitbox(targetCollisionAABB, standPrecision);
@@ -360,7 +372,7 @@ public class JojoModUtil {
             return powerType == ModPowers.VAMPIRISM.get() || powerType == ModPowers.PILLAR_MAN.get();
         }).orElse(false); 
     }
-    
+
     public static boolean isAffectedByHamon(LivingEntity entity) {
         if (ModTags.NO_HAMON_DAMAGE.contains(entity.getType())) {
             return false;
@@ -371,12 +383,19 @@ public class JojoModUtil {
         return JojoModUtil.isUndeadOrVampiric(entity) || OptionalDependencyHelper.vampirism().isEntityVampire(entity);
     }
 
+    public static boolean isDyingBody(LivingEntity entity) {
+        return entity.getCapability(LivingUtilCapProvider.CAPABILITY).map(LivingUtilCap::isDyingBody).orElse(false);
+    }
+
     public static boolean canBleed(LivingEntity entity) {
         if (entity.getMobType() == CreatureAttribute.UNDEAD) {
             return entity instanceof PlayerEntity
                     || entity instanceof ZombieEntity && !(entity instanceof HuskEntity)
                     || entity instanceof ZoglinEntity
                     || entity instanceof ZombieHorseEntity;
+        }
+        if (isDyingBody(entity)) {
+            return false;
         }
         return entity instanceof PlayerEntity
                 || entity instanceof AgeableEntity
@@ -430,6 +449,10 @@ public class JojoModUtil {
     
     public static void sayVoiceLine(LivingEntity entity, SoundEvent voiceLine) {
         sayVoiceLine(entity, voiceLine, null);
+    }
+    
+    public static void sayVoiceLine(LivingEntity entity, SoundEvent voiceLine, int voiceLineDelay) {
+        sayVoiceLine(entity, voiceLine, null, 1.0F, 1.0F, voiceLineDelay, false);
     }
 
     public static void sayVoiceLine(LivingEntity entity, SoundEvent voiceLine, 

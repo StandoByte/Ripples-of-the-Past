@@ -50,6 +50,7 @@ public interface IPower<P extends IPower<P, T>, T extends IPowerType<P, T>> {
     
     boolean isActionOnCooldown(Action<?> action);
     float getCooldownRatio(Action<?> action, float partialTick);
+    int getCooldownTimer(Action<?> action);
     void setCooldownTimer(Action<?> action, int value);
     void updateCooldownTimer(Action<?> action, int value, int totalCooldown);
     void resetCooldowns();

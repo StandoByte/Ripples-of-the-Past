@@ -2,7 +2,6 @@ package com.github.standobyte.jojo.client.render.entity.animnew.molang;
 
 import javax.annotation.Nullable;
 
-import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.client.render.entity.animnew.mojang.Keyframe;
 import com.github.standobyte.jojo.client.render.entity.animnew.mojang.Transformation;
 import com.google.gson.JsonArray;

@@ -18,7 +18,6 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.stand.StandEntityAction;
 import com.github.standobyte.jojo.client.ClientModSettings;
 import com.github.standobyte.jojo.client.particle.custom.StandCrumbleParticle;
-import com.github.standobyte.jojo.client.render.entity.animnew.stand.IStandAnimator;
 import com.github.standobyte.jojo.client.render.entity.pose.IModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose;
 import com.github.standobyte.jojo.client.render.entity.pose.ModelPose.ModelAnim;
@@ -51,27 +50,27 @@ import net.minecraft.util.math.vector.Vector3d;
 
 
 public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<T> {
-    protected ModelRenderer head;
-    protected ModelRenderer headRot;
-    protected ModelRenderer body;
-    protected ModelRenderer upperPart;
-    protected ModelRenderer torso;
-    protected ModelRenderer leftArmXRot;
-    protected XRotationModelRenderer leftArm;
-    protected ModelRenderer leftArmJoint;
-    protected ModelRenderer leftForeArm;
-    protected ModelRenderer rightArmXRot;
-    protected XRotationModelRenderer rightArm;
-    protected ModelRenderer rightArmJoint;
-    protected ModelRenderer rightForeArm;
-    protected ModelRenderer leftLegXRot;
-    protected XRotationModelRenderer leftLeg;
-    protected ModelRenderer leftLegJoint;
-    protected ModelRenderer leftLowerLeg;
-    protected ModelRenderer rightLegXRot;
-    protected XRotationModelRenderer rightLeg;
-    protected ModelRenderer rightLegJoint;
-    protected ModelRenderer rightLowerLeg;
+    public ModelRenderer head;
+    public ModelRenderer headRot;
+    public ModelRenderer body;
+    public ModelRenderer upperPart;
+    public ModelRenderer torso;
+    public ModelRenderer leftArmXRot;
+    public XRotationModelRenderer leftArm;
+    public ModelRenderer leftArmJoint;
+    public ModelRenderer leftForeArm;
+    public ModelRenderer rightArmXRot;
+    public XRotationModelRenderer rightArm;
+    public ModelRenderer rightArmJoint;
+    public ModelRenderer rightForeArm;
+    public ModelRenderer leftLegXRot;
+    public XRotationModelRenderer leftLeg;
+    public ModelRenderer leftLegJoint;
+    public ModelRenderer leftLowerLeg;
+    public ModelRenderer rightLegXRot;
+    public XRotationModelRenderer rightLeg;
+    public ModelRenderer rightLegJoint;
+    public ModelRenderer rightLowerLeg;
     
 
     public HumanoidStandModel() {
@@ -753,12 +752,11 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
     public void setupAnim(T entity, float walkAnimPos, float walkAnimSpeed, float ticks, float yRotationOffset, float xRotation) {
         super.setupAnim(entity, walkAnimPos, walkAnimSpeed, ticks, yRotationOffset, xRotation);
         
-        if (ClientModSettings.getSettingsReadOnly()._standMotionTilt) {
-            motionTilt(entity, ticks);
+        if (ClientModSettings.getSettingsReadOnly().standMotionTilt) {
+            motionTilt(entity, this, ticks);
         }
 
-        IStandAnimator standAnimator = getAnimator();
-        if (standAnimator != null && standAnimator.isLegacy()) {
+        if (!usesGeckoAnims()) {
             rotateJoint(leftArmJoint, leftForeArm);
             rotateJoint(rightArmJoint, rightForeArm);
             rotateJoint(leftLegJoint, leftLowerLeg);
@@ -766,10 +764,14 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
         }
     }
 
-    protected void motionTilt(T entity, float ticks) {
+    private static final int TICKS_MOTION_TILT_LERP = 5;
+    public static void motionTilt(StandEntity entity, HumanoidStandModel<?> model, float ticks) {
         if (entity.getStandPose() != StandPose.SUMMON) {
             Vector3d tiltVec;
-            if (MathHelper.floor(entity.lastMotionTiltTick) != MathHelper.floor(ticks)) {
+            List<Vector3d> vecQueue = entity.tiltVecQueue;
+            while (vecQueue.size() > TICKS_MOTION_TILT_LERP) vecQueue.remove(vecQueue.size() - 1);
+            boolean fillQueue = vecQueue.size() < TICKS_MOTION_TILT_LERP;
+            if (fillQueue || MathHelper.floor(entity.lastMotionTiltTick) != MathHelper.floor(ticks)) {
                 Vector3d motion = entity.position().subtract(entity.xOld, entity.yOld, entity.zOld);
                 
                 tiltVec = motion.yRot(entity.yBodyRot * MathUtil.DEG_TO_RAD).scale(2);
@@ -779,87 +781,100 @@ public class HumanoidStandModel<T extends StandEntity> extends StandEntityModel<
                     tiltVec = tiltVec.normalize().scale(Math.PI / 4);
                 }
                 
-//                Vector3d tiltDiff = tiltVec.subtract(entity.prevTiltVec);
-//                if (tiltDiff.lengthSqr() > 1.0E-4) {
-//                    double maxDiff;
-//                    if (entity.motionDist >= entity.prevMotionDist) {
-//                        maxDiff = 0.1;
-//                    }
-//                    else {
-//                        maxDiff = 0.4;
-//                    }
-//                    if (tiltDiff.lengthSqr() > maxDiff * maxDiff) {
-//                        tiltDiff = tiltDiff.normalize().scale(maxDiff);
-//                    }
-//                    tiltVec = entity.prevTiltVec.add(tiltDiff);
-//                }
+                if (fillQueue) {
+                    for (int i = vecQueue.size(); i < TICKS_MOTION_TILT_LERP; i++) {
+                        vecQueue.add(tiltVec);
+                    }
+                }
+                else {
+                    vecQueue.remove(0);
+                    vecQueue.add(tiltVec);
+                }
                 
-//                entity.prevMotionDist = entity.motionDist;
-//                entity.motionVec = motion;
-//                entity.motionDist = motion.length();
-                entity.prevTiltVec = entity.tiltVec;
-                entity.tiltVec = tiltVec;
                 entity.lastMotionTiltTick = ticks;
-            }
-            else {
-                tiltVec = entity.tiltVec;
             }
             
             float partialTick = MathHelper.frac(ticks);
-            tiltVec = new Vector3d(
-                    MathHelper.lerp(partialTick, entity.prevTiltVec.x, entity.tiltVec.x),
-                    MathHelper.lerp(partialTick, entity.prevTiltVec.y, entity.tiltVec.y),
-                    MathHelper.lerp(partialTick, entity.prevTiltVec.z, entity.tiltVec.z));
+            tiltVec = lerpVecs(vecQueue, partialTick);
             
             double tiltSqr = tiltVec.lengthSqr();
             if (tiltSqr > 1.0E-4) {
                 double tilt = Math.sqrt(tiltSqr);
                 double d1 = MathHelper.clamp(1 - tilt / Math.PI * 4, 0, 1);
                 boolean idlePose = entity.getStandPose() == StandPose.IDLE;
+                
+                float tiltX = (float) tiltVec.x;
+                float bodyTiltX = tiltX * 0.75f;
+                float legsTiltX = tiltX - bodyTiltX;
 
-                body.xRot += tiltVec.x;
+                model.body.xRot += bodyTiltX;
                 if (idlePose) {
-                    body.zRot += tiltVec.z;
-                    body.yRot *= d1;
+                    model.body.zRot += tiltVec.z;
+                    model.body.yRot *= d1;
                 }
 
                 double d = MathHelper.clamp(1 - 1.5 * tilt / Math.PI, 0, 1);
-                leftLowerLeg.xRot *= d;
-                rightLowerLeg.xRot *= d;
-                leftLowerLeg.yRot *= d;
-                rightLowerLeg.yRot *= d;
-                leftLowerLeg.zRot *= d;
-                rightLowerLeg.zRot *= d;
+                model.leftLowerLeg.xRot *= d;
+                model.rightLowerLeg.xRot *= d;
+                model.leftLowerLeg.yRot *= d;
+                model.rightLowerLeg.yRot *= d;
+                model.leftLowerLeg.zRot *= d;
+                model.rightLowerLeg.zRot *= d;
                 if (idlePose) {
-                    leftForeArm.xRot *= d;
-                    rightForeArm.xRot *= d;
-                    leftForeArm.yRot *= d;
-                    rightForeArm.yRot *= d;
-                    leftForeArm.zRot *= d;
-                    rightForeArm.zRot *= d;
+                    model.leftForeArm.xRot *= d;
+                    model.rightForeArm.xRot *= d;
+                    model.leftForeArm.yRot *= d;
+                    model.rightForeArm.yRot *= d;
+                    model.leftForeArm.zRot *= d;
+                    model.rightForeArm.zRot *= d;
                 }
                 
                 double d2 = MathHelper.clamp(1 - tilt / (2 * Math.PI), 0, 1);
-                leftLeg.xRot *= d2;
-                rightLeg.xRot *= d2;
-                leftLeg.yRot *= d2;
-                rightLeg.yRot *= d2;
-                leftLeg.zRot *= d2;
-                rightLeg.zRot *= d2;
                 if (idlePose) {
-                    leftArm.xRot *= d2;
-                    rightArm.xRot *= d2;
-                    leftArm.yRot *= d2;
-                    rightArm.yRot *= d2;
-                    leftArm.zRot *= d2;
-                    rightArm.zRot *= d2;
+                    model.leftArm.xRot *= d2;
+                    model.rightArm.xRot *= d2;
+                    model.leftArm.yRot *= d2;
+                    model.rightArm.yRot *= d2;
+                    model.leftArm.zRot *= d2;
+                    model.rightArm.zRot *= d2;
                 }
                 else {
-                    addSecondXRot(leftArm, (float) -tiltVec.x);
-                    addSecondXRot(rightArm, (float) -tiltVec.x);
+                    model.addSecondXRot(model.leftArm, (float) -bodyTiltX);
+                    model.addSecondXRot(model.rightArm, (float) -bodyTiltX);
+                    if (model.leftArmXRot != null) model.leftArmXRot.xRot -= bodyTiltX;
+                    if (model.rightArmXRot != null) model.rightArmXRot.xRot -= bodyTiltX;
                 }
+                
+                model.leftLeg.xRot *= d2;
+                model.rightLeg.xRot *= d2;
+                model.leftLeg.yRot *= d2;
+                model.rightLeg.yRot *= d2;
+                model.leftLeg.zRot *= d2;
+                model.rightLeg.zRot *= d2;
+                
+                model.addSecondXRot(model.leftLeg, (float) legsTiltX);
+                model.addSecondXRot(model.rightLeg, (float) legsTiltX);
+                if (model.leftLegXRot != null) model.leftLegXRot.xRot += legsTiltX;
+                if (model.rightLegXRot != null) model.rightLegXRot.xRot += legsTiltX;
             }
         }
+    }
+    
+    private static Vector3d lerpVecs(List<Vector3d> vecs, float partialTick) {
+        double x = 0;
+        double y = 0;
+        double z = 0;
+        Vector3d prevVec = vecs.get(0);
+        Vector3d vec;
+        float n = vecs.size();
+        for (int i = 1; i < n; i++) {
+            vec = vecs.get(i);
+            x += MathHelper.lerp(partialTick, prevVec.x, vec.x);
+            y += MathHelper.lerp(partialTick, prevVec.y, vec.y);
+            z += MathHelper.lerp(partialTick, prevVec.z, vec.z);
+            prevVec = vec;
+        }
+        return new Vector3d(x / n, y / n, z / n);
     }
 
     protected void rotateJoint(ModelRenderer joint, ModelRenderer limbPart) {

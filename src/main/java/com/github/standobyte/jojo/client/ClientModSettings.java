@@ -9,6 +9,7 @@ import com.github.standobyte.jojo.JojoMod;
 import com.github.standobyte.jojo.capability.entity.player.PlayerClientBroadcastedSettings;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.HudTextRender;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui.PositionConfig;
+import com.github.standobyte.jojo.client.ui.screen.stand.ge.ChooseLifeformScreen;
 import com.github.standobyte.jojo.util.general.GeneralUtil;
 import com.google.common.base.Charsets;
 import com.google.common.io.Files;
@@ -22,6 +23,7 @@ public class ClientModSettings {
     public static class Settings {
         public float standStatsTranslucency = 0.75F;
         public boolean standStatsInvertBnW = false;
+        public ChooseLifeformScreen.ViewMode viewModeGE = null;
         
         public PositionConfig barsPosition = PositionConfig.TOP_LEFT;
         public PositionConfig hotbarsPosition = PositionConfig.TOP_LEFT;
@@ -31,7 +33,7 @@ public class ClientModSettings {
         
         public boolean resolveShaders = true;
         public boolean timeStopAnimation = true;
-        public boolean _standMotionTilt = false;
+        public boolean standMotionTilt = true;
         public boolean poseOnLmbRmb = true;
         public boolean autoResolveActivation = true;
         public boolean standOutline = true;
@@ -51,6 +53,14 @@ public class ClientModSettings {
     }
     
     
+    
+    public static void edit(Consumer<Settings> edit) {
+        ClientModSettings instance = getInstance();
+        edit.accept(instance.settings);
+        instance.save();
+    }
+    
+    @Deprecated
     public void editSettings(Consumer<Settings> edit) {
         editSettings(edit, false);
     }

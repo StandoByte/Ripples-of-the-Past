@@ -1,6 +1,6 @@
 package com.github.standobyte.jojo.client.render.entity.layerrenderer;
 
-import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.entity.itemprojectile.KnifeEntity;
 import com.mojang.blaze3d.matrix.MatrixStack;
 
@@ -24,7 +24,8 @@ public class KnifeLayer<T extends LivingEntity, M extends PlayerModel<T>> extend
 
     @Override
     protected int numStuck(T entity) {
-        return entity.getCapability(PlayerUtilCapProvider.CAPABILITY).map(cap -> cap.getKnivesCount()).orElse(0);
+        return entity.getCapability(LivingUtilCapProvider.CAPABILITY).map(
+                cap -> cap.getStuckObjects().getKnives().getCount()).orElse(0);
     }
 
     protected void renderStuckItem(MatrixStack matrixStack, IRenderTypeBuffer buffer, int packedLight, 

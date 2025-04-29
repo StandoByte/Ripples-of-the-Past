@@ -148,6 +148,11 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     public Supplier<IStandAnimator> getGeckoAnimator() {
         return getDefaultGeckoAnimator;
     }
+    
+    public boolean usesGeckoAnims() {
+        IStandAnimator animator = getAnimator();
+        return animator != null && !animator.isLegacy();
+    }
 
     public static final void setRotationAngle(ModelRenderer modelRenderer, float x, float y, float z) {
         modelRenderer.xRot = x;
@@ -199,6 +204,7 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
         this.yRotRad = yRotOffsetDeg * MathUtil.DEG_TO_RAD;
         this.xRotRad = xRotDeg * MathUtil.DEG_TO_RAD;
         this.standPose = pose.standPose;
+        resetXRotation();
         
         IStandAnimator standAnimator = getAnimator();
         if (standAnimator != null && standAnimator.poseStand(entity, this, pose, ticks, yRotOffsetDeg, xRotDeg)) {}
@@ -363,12 +369,14 @@ public abstract class StandEntityModel<T extends StandEntity> extends AgeableMod
     
     @Deprecated
     public void applyXRotation() {
-        secondXRotMap.forEach((modelPart, xRotMutable) -> {
-            float xRot = xRotMutable.getValue();
-            if (xRot != 0) {
-                ClientUtil.rotateAngles(modelPart, xRot);
-            }
-        });
+        if (!usesGeckoAnims()) {
+            secondXRotMap.forEach((modelPart, xRotMutable) -> {
+                float xRot = xRotMutable.getValue();
+                if (xRot != 0) {
+                    ClientUtil.rotateAngles(modelPart, xRot);
+                }
+            });
+        }
     }
     
     public void addBarrageSwings(T entity) {

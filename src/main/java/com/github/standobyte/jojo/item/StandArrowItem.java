@@ -132,11 +132,7 @@ public class StandArrowItem extends ArrowItem {
                                         return giveStandFromArrow(player, standCap, standToGive);
                                     }
 
-                                    StandArrowHandler handler = standCap.getStandArrowHandler();
-                                    arrowShooter.ifPresent(shooter -> {
-                                        handler.setStandArrowShooter(shooter);
-                                    });
-                                    handler.setStandArrowItem(stack);
+                                    rememberArrowShooter(livingEntity, arrowShooter, stack);
                                 }
 
                                 return true;
@@ -146,8 +142,25 @@ public class StandArrowItem extends ArrowItem {
                             }));
                 });
             }
+            else {
+                int inhibitionLevel = EnchantmentHelper.getItemEnchantmentLevel(ModEnchantments.VIRUS_INHIBITION.get(), stack);
+                int effectLevel = StandVirusEffect.getEffectLevelToApply(inhibitionLevel);
+                livingEntity.addEffect(new EffectInstance(ModStatusEffects.STAND_VIRUS.get(), 
+                        600, effectLevel, false, false, true));
+                rememberArrowShooter(livingEntity, arrowShooter, stack);
+            }
         }
         return false;
+    }
+    
+    private static void rememberArrowShooter(LivingEntity target, Optional<Entity> arrowShooter, ItemStack arrow) {
+        IStandPower.getStandPowerOptional(target).ifPresent(power -> {
+            StandArrowHandler handler = power.getStandArrowHandler();
+            arrowShooter.ifPresent(shooter -> {
+                handler.setStandArrowShooter(shooter);
+            });
+            handler.setStandArrowItem(arrow);
+        });
     }
     
     public static boolean giveStandFromArrow(LivingEntity entity, IStandPower standCap, StandType<?> standType) {

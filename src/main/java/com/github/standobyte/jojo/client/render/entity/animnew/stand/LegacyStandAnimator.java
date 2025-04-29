@@ -60,7 +60,6 @@ public class LegacyStandAnimator<T extends StandEntity> implements IStandAnimato
         StandEntityModel<T> model = (StandEntityModel<T>) standEntityModel;
         currentActionAnim = null;
         
-        model.resetXRotation();
         model.resetPose(entity);
         
         StandPose standPose = poseData.standPose;
@@ -89,8 +88,12 @@ public class LegacyStandAnimator<T extends StandEntity> implements IStandAnimato
             poseIdleLoop(entity, model, ticks, yRotOffsetRad, xRotRad, swingingHand);
         }
         
-        model.applyXRotation();
         return true;
+    }
+    
+    @Override
+    public <A extends StandEntity> void poseStandPost(@Nullable A standEntity, StandEntityModel<A> standEntityModel) {
+        model.applyXRotation();
     }
     
     private static final float SUMMON_ANIMATION_LENGTH = 20.0F;

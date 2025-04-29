@@ -108,6 +108,9 @@ public class GeckoStandAnimator implements IStandAnimator {
         return exists;
     }
     
+    @Override
+    public <A extends StandEntity> void poseStandPost(@Nullable A standEntity, StandEntityModel<A> standEntityModel) {}
+    
     protected <T extends StandEntity> boolean applyAnim(StandActionAnimation anim, @Nullable T entity, 
             StandEntityModel<T> model, float yRotOffsetDeg, float xRotDeg, StandPose standPose, StandPoseData poseData) {
         curAnim = anim;

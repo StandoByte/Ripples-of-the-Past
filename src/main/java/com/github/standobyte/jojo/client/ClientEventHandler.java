@@ -3,15 +3,19 @@ package com.github.standobyte.jojo.client;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.AIR;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.EXPERIENCE;
 import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.FOOD;
+import static net.minecraftforge.client.event.RenderGameOverlayEvent.ElementType.HEALTH;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Random;
+import java.util.Set;
 import java.util.UUID;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -25,13 +29,18 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.player.ContinuousActionInstance;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondBlockCheckpointMake;
 import com.github.standobyte.jojo.action.stand.CrazyDiamondRestoreTerrain;
+import com.github.standobyte.jojo.action.stand.GoldExperienceChooseLifeform;
+import com.github.standobyte.jojo.action.stand.effect.GEItemMarkEffect;
 import com.github.standobyte.jojo.capability.entity.ClientPlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCap;
+import com.github.standobyte.jojo.capability.entity.PlayerUtilCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.EntityHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.hamonutil.ProjectileHamonChargeCapProvider;
 import com.github.standobyte.jojo.capability.entity.living.LivingWallClimbing;
 import com.github.standobyte.jojo.capability.world.WorldUtilCapProvider;
+import com.github.standobyte.jojo.client.ClientUtil.PosOnScreen;
 import com.github.standobyte.jojo.client.controls.ControlScheme;
 import com.github.standobyte.jojo.client.particle.custom.FirstPersonHamonAura;
 import com.github.standobyte.jojo.client.playeranim.PlayerAnimationHandler;
@@ -44,6 +53,7 @@ import com.github.standobyte.jojo.client.render.world.shader.ShaderEffectApplier
 import com.github.standobyte.jojo.client.resources.CustomResources;
 import com.github.standobyte.jojo.client.sound.ClientTickingSoundsHelper;
 import com.github.standobyte.jojo.client.sound.StandOstSound;
+import com.github.standobyte.jojo.client.sound.barrage.StandCrySoundHandler;
 import com.github.standobyte.jojo.client.ui.actionshud.ActionsOverlayGui;
 import com.github.standobyte.jojo.client.ui.screen.ClientModSettingsScreen;
 import com.github.standobyte.jojo.client.ui.screen.IJojoScreen;
@@ -56,6 +66,14 @@ import com.github.standobyte.jojo.client.ui.screen.widgets.ImageMutableButton;
 import com.github.standobyte.jojo.client.ui.screen.widgets.ImageVanillaButton;
 import com.github.standobyte.jojo.client.ui.standstats.StandStatsRenderer;
 import com.github.standobyte.jojo.client.ui.text.JojoTextComponentWrapper;
+import com.github.standobyte.jojo.client.ui.toasts.MetEntityTypeToast;
+import com.github.standobyte.jojo.client.ui.tooltip.CustomTooltipRender;
+import com.github.standobyte.jojo.client.ui.tooltip.ITooltipLine;
+import com.github.standobyte.jojo.client.ui.tooltip.IconTooltipLine;
+import com.github.standobyte.jojo.client.ui.tooltip.MultiTooltipLine;
+import com.github.standobyte.jojo.client.ui.tooltip.TextTooltipLine;
+import com.github.standobyte.jojo.entity.SoulEntity;
+import com.github.standobyte.jojo.entity.mob.IMobStandUser;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModStatusEffects;
@@ -67,8 +85,11 @@ import com.github.standobyte.jojo.init.power.stand.ModStandsInit;
 import com.github.standobyte.jojo.item.OilItem;
 import com.github.standobyte.jojo.modcompat.ModInteractionUtil;
 import com.github.standobyte.jojo.modcompat.OptionalDependencyHelper;
+import com.github.standobyte.jojo.mrpresident.CocoJumboTurtleEntity;
+import com.github.standobyte.jojo.network.NetworkUtil;
 import com.github.standobyte.jojo.network.PacketManager;
 import com.github.standobyte.jojo.network.packets.fromclient.ClAngeloRockButtonPacket;
+import com.github.standobyte.jojo.network.packets.fromclient.ClMetEntityTypePacket;
 import com.github.standobyte.jojo.network.packets.fromserver.ServerIdPacket;
 import com.github.standobyte.jojo.potion.BleedingEffect;
 import com.github.standobyte.jojo.power.IPower;
@@ -81,6 +102,7 @@ import com.github.standobyte.jojo.power.impl.stand.StandUtil;
 import com.github.standobyte.jojo.util.general.OptionalFloat;
 import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.util.mc.OstSoundList;
+import com.github.standobyte.jojo.util.mc.entitysubtype.EntitySubtype;
 import com.github.standobyte.jojo.util.mc.reflection.ClientReflection;
 import com.github.standobyte.jojo.util.mod.IPlayerPossess;
 import com.github.standobyte.jojo.util.mod.JojoModUtil;
@@ -91,6 +113,9 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
+import net.minecraft.client.audio.ISound.AttenuationType;
+import net.minecraft.client.audio.LocatableSound;
+import net.minecraft.client.audio.SimpleSound;
 import net.minecraft.client.audio.SoundHandler;
 import net.minecraft.client.entity.player.ClientPlayerEntity;
 import net.minecraft.client.gui.AbstractGui;
@@ -124,24 +149,30 @@ import net.minecraft.entity.player.PlayerEntity;
 import net.minecraft.item.EnchantedBookItem;
 import net.minecraft.item.ItemStack;
 import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.IntNBT;
 import net.minecraft.potion.Effects;
 import net.minecraft.util.Hand;
 import net.minecraft.util.HandSide;
 import net.minecraft.util.ResourceLocation;
+import net.minecraft.util.SoundCategory;
 import net.minecraft.util.SoundEvent;
+import net.minecraft.util.SoundEvents;
 import net.minecraft.util.Timer;
 import net.minecraft.util.Util;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
+import net.minecraft.util.math.vector.Matrix4f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
 import net.minecraft.util.math.vector.Vector3i;
+import net.minecraft.util.text.Color;
 import net.minecraft.util.text.IFormattableTextComponent;
 import net.minecraft.util.text.ITextComponent;
 import net.minecraft.util.text.ITextProperties;
 import net.minecraft.util.text.KeybindTextComponent;
 import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.util.text.Style;
 import net.minecraft.util.text.TextFormatting;
 import net.minecraft.util.text.TranslationTextComponent;
 import net.minecraft.util.text.event.ClickEvent;
@@ -172,6 +203,7 @@ import net.minecraftforge.event.TickEvent.ClientTickEvent;
 import net.minecraftforge.event.TickEvent.RenderTickEvent;
 import net.minecraftforge.event.entity.EntityMountEvent;
 import net.minecraftforge.event.entity.player.ItemTooltipEvent;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.ModList;
@@ -219,12 +251,31 @@ public class ClientEventHandler {
 
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public void onPlaySound(PlaySoundEvent event) {
+        ISound sound = event.getResultSound();
+        
         ClientTimeStopHandler ts = ClientTimeStopHandler.getInstance();
         if (ts != null) {
-            ISound sound = event.getResultSound();
             if (ts.shouldCancelSound(sound)) {
                 event.setResultSound(null);
             }
+        }
+        
+        if (mc.player != null && sound instanceof LocatableSound && sound.getAttenuation() == AttenuationType.LINEAR) {
+            mc.player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(player -> {
+                if (player.isDyingBody() && !mc.player.isSpectator() && !mc.player.isDeadOrDying()) {
+                    float progress = player.getDyingBodyProgress();
+                    if (progress > 0.8F) {
+                        float volumeMult;
+                        if (progress < 0.84F) {
+                            volumeMult = 20 * (1 - progress) - 3;
+                        }
+                        else {
+                            volumeMult = 1.25F * (1 - progress);
+                        }
+                        ((LocatableSound) sound).volume *= volumeMult;
+                    }
+                }
+            });
         }
     }
     
@@ -316,10 +367,11 @@ public class ClientEventHandler {
     @SubscribeEvent(priority = EventPriority.HIGHEST)
     public <T extends LivingEntity, M extends EntityModel<T>> void onRenderNameplate(RenderNameplateEvent event) {
         Entity entity = event.getEntity();
+        MatrixStack matrixStack = event.getMatrixStack();
         if (entity instanceof LivingEntity) {
             INonStandPower.getNonStandPowerOptional((LivingEntity) entity).ifPresent(power -> {
                 if (power.getHeldAction(true) == ModHamonActions.ZEPPELI_TORNADO_OVERDRIVE.get()) {
-                    event.getMatrixStack().mulPose(Vector3f.YP.rotation((power.getHeldActionTicks() + event.getPartialTicks()) * -2F % 360F));
+                    matrixStack.mulPose(Vector3f.YP.rotation((power.getHeldActionTicks() + event.getPartialTicks()) * -2F % 360F));
                 }
             });
         }
@@ -388,6 +440,8 @@ public class ClientEventHandler {
                     ClientTicking.tickAll();
                     ClientTickingSoundsHelper.tickBossMusic();
                     
+                    StandCrySoundHandler.tickAll();
+                    
                     mc.level.getCapability(WorldUtilCapProvider.CAPABILITY).ifPresent(cap -> {
                         cap.tick();
                     });
@@ -419,6 +473,7 @@ public class ClientEventHandler {
                         mc.player.getVehicle() != null && mc.player.getVehicle().getType() == ModEntityTypes.LEAVES_GLIDER.get())) {
                     ClientReflection.setHandsBusy(mc.player, true);
                 }
+                
                 break;
             }
         }
@@ -433,9 +488,18 @@ public class ClientEventHandler {
             deathScreenTick = mc.screen instanceof DeathScreen ? deathScreenTick + 1 : 0;
             standStatsTick = mc.screen instanceof IngameMenuScreen && doStandStatsRender(mc.screen) ? standStatsTick + 1 : 0;
             
+            NetworkUtil.blockPacketsToServer = mc.player != null && mc.player.hasEffect(ModStatusEffects.SENSORY_OVERLOAD.get());
+            
             if (!mc.isPaused()) {
                 if (overlayMessageTime > 0) overlayMessageTime--;
             }
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void onPlayerInteract(PlayerInteractEvent event) {
+        if (event.isCancelable() && NetworkUtil.blockPacketsToServer) {
+            event.setCanceled(true);
         }
     }
     
@@ -485,8 +549,11 @@ public class ClientEventHandler {
     }
     
     public static void onMouseTargetChanged(RayTraceResult newTarget) {
-        if (newTarget instanceof EntityRayTraceResult) {
+        Minecraft mc = Minecraft.getInstance();
+        if (newTarget.getType() == RayTraceResult.Type.ENTITY) {
             Entity entity = ((EntityRayTraceResult) newTarget).getEntity();
+            
+            // Hamon learning player interaction hints
             if (entity instanceof PlayerEntity) {
                 PlayerEntity clientPlayer = Minecraft.getInstance().player;
                 PlayerEntity targetPlayer = (PlayerEntity) entity;
@@ -518,6 +585,35 @@ public class ClientEventHandler {
                         }
                     }
                 }
+            }
+            
+            // learning new lifeforms for Gold Experience
+            mc.player.getCapability(PlayerUtilCapProvider.CAPABILITY).ifPresent(cap -> {
+                EntitySubtype.getMatchingSubtypes(entity)
+                .forEach(subType -> metNewMobSubtype(cap, subType, entity, mc.player));
+            });
+        }
+    }
+    
+    private static void metNewMobSubtype(PlayerUtilCap metMobsData, EntitySubtype<?> subtype, Entity entity, PlayerEntity player) {
+        if (metMobsData.addMetEntityType(subtype)) {
+            PacketManager.sendToServer(new ClMetEntityTypePacket(entity.getId()));
+
+            if (GoldExperienceChooseLifeform.isValidLifeform(subtype, entity.level)) {
+                IStandPower.getStandPowerOptional(player).ifPresent(power -> {
+                    if (ModStandsInit.GOLD_EXPERIENCE_CHOOSE_LIFEFORM.get().isUnlocked(power)) {
+                        Minecraft mc = Minecraft.getInstance();
+                        mc.getSoundManager().play(new SimpleSound(SoundEvents.UI_BUTTON_CLICK, 
+                                SoundCategory.MASTER, 0.5F, 2.0F, 
+                                entity.getX(), entity.getY(0.5), entity.getZ()));
+                        MetEntityTypeToast.addOrUpdate(mc.getToasts(), entity.getType());
+                    }
+                });
+            }
+
+            if (entity.getType() == ModEntityTypes.COCO_JUMBO_TURTLE.get()
+                    && !((IMobStandUser) entity).getStandPower().hasPower()) {
+                player.displayClientMessage(new TranslationTextComponent("coco_jumbo.stand_arrow_hint").withStyle(TextFormatting.ITALIC), false);
             }
         }
     }
@@ -669,6 +765,12 @@ public class ClientEventHandler {
                 }
             });
         }
+        if (JojoModUtil.isDyingBody(mc.player) && (
+                event.getType() == HEALTH || 
+                event.getType() == FOOD || 
+                event.getType() == AIR)) {
+            event.setCanceled(true);
+        }
         
         if (event.getType() == EXPERIENCE && mc.gameMode.hasExperience()) {
             if (mc.player.hasEffect(ModStatusEffects.STAND_VIRUS.get())) {
@@ -682,6 +784,20 @@ public class ClientEventHandler {
                     }
                 });
             }
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.NORMAL)
+    public void renderUI(RenderGameOverlayEvent.Pre event) {
+        switch (event.getType()) {
+        case HELMET:
+            renderLosingVision(event.getMatrixStack(), event.getPartialTicks());
+            break;
+        case ALL:
+            hudRenderEntityGEDetectorData(event.getMatrixStack());
+            break;
+        default:
+            break;
         }
     }
     
@@ -887,6 +1003,47 @@ public class ClientEventHandler {
             ForgeIngameGui.right_height += 10;
         }
         RenderSystem.disableBlend();
+    }
+    
+    private static final ResourceLocation WIDGETS_LOCATION = new ResourceLocation("textures/gui/widgets.png");
+    @SuppressWarnings("deprecation")
+    @SubscribeEvent(priority = EventPriority.LOW)
+    public void renderCarriedCocoJumboSlot(RenderGameOverlayEvent.Pre event) {
+        if (event.getType() == RenderGameOverlayEvent.ElementType.HOTBAR && !mc.player.isSpectator()) {
+            for (Entity passenger : mc.player.getPassengers()) {
+                if (CocoJumboTurtleEntity.isCarriedTurtle(passenger, mc.player)) {
+                    ItemStack turtleItemIcon = new ItemStack(ModItems.METEORIC_SCRAP.get());
+                    turtleItemIcon.getOrCreateTag().put("Icon", IntNBT.valueOf(22));
+                    
+                    MatrixStack matrixStack = event.getMatrixStack();
+                    HandSide offHand = mc.player.getMainArm().getOpposite();
+                    int screenHeight = event.getWindow().getGuiScaledHeight();
+                    int halfWidth = event.getWindow().getGuiScaledWidth() / 2;
+                    IngameGui gui = mc.gui;
+                    int blitOffs = gui.getBlitOffset();
+                    
+                    mc.getTextureManager().bind(WIDGETS_LOCATION);
+                    gui.setBlitOffset(-90);
+                    if (offHand == HandSide.LEFT) {
+                        gui.blit(matrixStack, halfWidth - 91 - 29, screenHeight - 23, 24, 22, 29, 24);
+                    } else {
+                        gui.blit(matrixStack, halfWidth + 91,      screenHeight - 23, 53, 22, 29, 24);
+                    }
+                    
+                    gui.setBlitOffset(blitOffs);
+                    RenderSystem.enableRescaleNormal();
+                    RenderSystem.enableBlend();
+                    RenderSystem.defaultBlendFunc();
+                    
+                    int itemX = offHand == HandSide.LEFT ? halfWidth - 91 - 26 : halfWidth + 91 + 10;
+                    int itemY = screenHeight - 16 - 3;
+                    mc.getItemRenderer().renderAndDecorateItem(mc.player, turtleItemIcon, itemX, itemY);
+//                    mc.getItemRenderer().renderGuiItemDecorations(mc.font, turtleItemIcon, itemX, itemY);
+                    
+                    break;
+                }
+            }
+        }
     }
     
     @SuppressWarnings("deprecation")
@@ -1454,8 +1611,12 @@ public class ClientEventHandler {
         }
         prevPause = paused;
         
-        ShaderEffectApplier.getInstance().updateTimeStopperScreenPos(
-                event.getMatrixStack(), event.getProjectionMatrix(), mc.gameRenderer.getMainCamera());
+        ActiveRenderInfo camera = mc.gameRenderer.getMainCamera();
+        MatrixStack matrixStack = event.getMatrixStack();
+        Matrix4f projMatrix = event.getProjectionMatrix();
+        float partialTick = event.getPartialTicks();
+        findEntitiesOnScreen(matrixStack, projMatrix, camera, partialTick);
+        ShaderEffectApplier.getInstance().updateTimeStopperScreenPos(matrixStack, projMatrix, camera, partialTick);
     }
     
     public float getPartialTick() {
@@ -1465,23 +1626,35 @@ public class ClientEventHandler {
     @SubscribeEvent
     public void addTooltipLines(ItemTooltipEvent event) {
         PlayerEntity player = event.getPlayer();
+        ItemStack item = event.getItemStack();
         if (player != null) {
-            CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(player.level, event.getItemStack()).ifPresent(pos -> {
-                if (IStandPower.getStandPowerOptional(player).map(power -> power.getType() == ModStands.CRAZY_DIAMOND.getStandType()).orElse(false)) {
+            Optional<IStandPower> powerOptional = IStandPower.getStandPowerOptional(player).resolve();
+            CrazyDiamondBlockCheckpointMake.getBlockPosMoveTo(player.level, item).ifPresent(pos -> {
+                if (powerOptional.map(power -> power.getType() == ModStands.CRAZY_DIAMOND.getStandType()).orElse(false)) {
                     event.getToolTip().add(new TranslationTextComponent("jojo.crazy_diamond.block_checkpoint.tooltip", 
                             pos.getX(), pos.getY(), pos.getZ()).withStyle(TextFormatting.RED));
                 }
             });
             
-           OilItem.remainingOiledUses(event.getItemStack()).ifPresent(uses -> {
+            if (GEItemMarkEffect.isItemMarked(item, player)) {
+                event.getToolTip().add(
+                        new TranslationTextComponent("jojo.ge_item_marked")
+                        .withStyle(Style.EMPTY.withColor(
+                                Color.fromRgb(ActionsOverlayGui.getPowerUiColor(powerOptional.get())))));
+                event.getToolTip().add(
+                        new TranslationTextComponent("jojo.ge_item_marked.2")
+                        .withStyle(TextFormatting.DARK_GRAY));
+            }
+            
+            OilItem.remainingOiledUses(item).ifPresent(uses -> {
                if (uses > 0) {
                    event.getToolTip().add(new TranslationTextComponent("item.jojo.oil.uses", uses).withStyle(TextFormatting.GOLD));
                }
            });
         }
 
-        if (event.getItemStack().getItem() instanceof EnchantedBookItem && !ModList.get().isLoaded("enchdesc")) {
-            EnchantedBookItem.getEnchantments(event.getItemStack()).forEach(nbt -> {
+        if (item.getItem() instanceof EnchantedBookItem && !ModList.get().isLoaded("enchdesc")) {
+            EnchantedBookItem.getEnchantments(item).forEach(nbt -> {
                 if (nbt.getId() == MCUtil.getNbtId(CompoundNBT.class)) {
                     CompoundNBT enchNbt = (CompoundNBT) nbt;
                     ResourceLocation enchId = ResourceLocation.tryParse(enchNbt.getString("id"));
@@ -1518,6 +1691,187 @@ public class ClientEventHandler {
             event.getEntityMounting().getCapability(ClientPlayerUtilCapProvider.CAPABILITY).ifPresent(
                     cap -> cap.setVehicleType(mountedType));
         }
+    }
+    
+    
+    
+    private void renderLosingVision(MatrixStack matrixStack, float partialTick) {
+        if (mc.player != null) {
+            mc.player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(player -> {
+                if (player.isDyingBody() && !mc.player.isSpectator() && !mc.player.isDeadOrDying()) {
+                    int timeLeft = player.getDyingBodyTicksLeft();
+                    if (timeLeft > 0) {
+                        --timeLeft;
+                        float vignette = 0;
+                        if (timeLeft <= 60) {
+                            float vignetteTime = (60 - timeLeft) + partialTick;
+                            if (timeLeft > 20) {
+                                vignette = (MathHelper.cos(vignetteTime / 10 * (float) Math.PI) + 1) / 2;
+                            }
+                            else {
+                                vignette = (MathHelper.cos(vignetteTime / 20 * (float) Math.PI) + 1) / 2;
+                            }
+                        }
+                        else {
+                            float progress = player.getDyingBodyProgress();
+                            if (progress > 0.8F) {
+                                vignette = 1 - 5 * (1 - progress);
+                            }
+                        }
+                        
+                        if (vignette > 0) {
+                            vignette = Math.min(vignette, 1);
+                            ActionsOverlayGui.getInstance().renderVignette(matrixStack, vignette, vignette, vignette);
+                        }
+                    }
+                }
+            });
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void dyingBodyLostVision(EntityViewRenderEvent.FogDensity event) {
+        if (mc.player != null) {
+            mc.player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(player -> {
+                if (player.isDyingBody() && !mc.player.isSpectator() && !mc.player.isDeadOrDying()) {
+                    int timeLeft = player.getDyingBodyTicksLeft();
+                    if (timeLeft > 0) {
+                        --timeLeft;
+                        if (timeLeft <= 20) {
+                            float lerp = (20 - timeLeft + (float) event.getRenderPartialTicks()) / 20.0F;
+                            event.setDensity(MathHelper.lerp(lerp, event.getDensity(), 1));
+                            event.setCanceled(true);
+                        }
+                    }
+                    else {
+                        event.setDensity(1);
+                        event.setCanceled(true);
+                    }
+                }
+            });
+        }
+    }
+    
+    @SubscribeEvent(priority = EventPriority.HIGHEST)
+    public void dyingBodyVisionDark(EntityViewRenderEvent.FogColors event) {
+        if (mc.player != null) {
+            mc.player.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(player -> {
+                if (player.isDyingBody() && !mc.player.isSpectator() && !mc.player.isDeadOrDying() && player.getDyingBodyTicksLeft() <= 21) {
+                    event.setRed(0);
+                    event.setGreen(0);
+                    event.setBlue(0);
+                }
+            });
+        }
+    }
+    
+    
+    private Set<Entity> GEDetectorEntities = new HashSet<>();
+    private Entity GEDetectorShowHpEntity;
+    private PosOnScreen GEDetectorShowHpEntityPos;
+
+    public void addGEDetectedEntity(Entity entity) {
+        this.GEDetectorEntities.add(entity);
+    }
+    
+    public void removeGEDetectedEntity(Entity entity) {
+        this.GEDetectorEntities.remove(entity);
+    }
+    
+    private void findEntitiesOnScreen(MatrixStack worldRenderMatrixStack, Matrix4f projectionMatrix, ActiveRenderInfo camera, float partialTick) {
+        GEDetectorShowHpEntity = getEntityGEDetectHp();
+        if (GEDetectorShowHpEntity != null) {
+            Entity entity = GEDetectorShowHpEntity;
+            Vector3d pos = entity.getPosition(partialTick).add(0, entity.getBbHeight() * 0.5f, 0);
+            GEDetectorShowHpEntityPos = ClientUtil.posOnScreen(pos, camera, worldRenderMatrixStack, projectionMatrix);
+        }
+    }
+    
+    @Nullable
+    private Entity getEntityGEDetectHp() {
+        if (mc.player != null) {
+            Vector3d cameraPos = mc.gameRenderer.getMainCamera().getPosition();
+            Vector3d lookVec = mc.player.getLookAngle();
+            return GEDetectorEntities.stream()
+                    .filter(Entity::isAlive)
+                    .max(Comparator.comparingDouble(entity -> {
+                        Vector3d entityPos = entity.getBoundingBox().getCenter();
+                        Vector3d vecToPos = entityPos.subtract(cameraPos).normalize();
+                        return vecToPos.dot(lookVec);
+                    }))
+                    .orElse(null);
+        }
+        return null;
+    }
+    
+    private void hudRenderEntityGEDetectorData(MatrixStack matrixStack) {
+        Entity entity = GEDetectorShowHpEntity;
+        PosOnScreen entityPos = GEDetectorShowHpEntityPos;
+        if (entity == null || entityPos == null || !entityPos.isOnScreen) return;
+
+        List<ITooltipLine> tooltip = new ArrayList<>();
+        if (entity instanceof LivingEntity) {
+            LivingEntity living = (LivingEntity) entity;
+            int iconWidth = 17;
+            
+            if (living.getMaxHealth() > 0) {
+                float hpRatio = living.getHealth() / living.getMaxHealth();
+                ITextComponent text = new StringTextComponent(String.valueOf((int) (hpRatio * 100) + "%"));
+                IconTooltipLine icon = new IconTooltipLine(IconTooltipLine.Icon.HEALTH);
+                ITooltipLine line = new MultiTooltipLine(icon.withRightSideSpace(iconWidth - icon.getWidth(mc.font)), new TextTooltipLine(text));
+                tooltip.add(line);
+            }
+            
+            INonStandPower.getNonStandPowerOptional(living).resolve().ifPresent(power -> {
+                if (power.hasPower() && power.getMaxEnergy() > 0) {
+                    float energyRatio = power.getEnergy() / power.getMaxEnergy();
+                    ITextComponent text = new StringTextComponent(String.valueOf((int) (energyRatio * 100) + "%"));
+                    IconTooltipLine icon = IconTooltipLine.powerEnergy(power.getType());
+                    ITooltipLine line = new MultiTooltipLine(icon.withRightSideSpace(iconWidth - icon.getWidth(mc.font)), new TextTooltipLine(text));
+                    tooltip.add(line);
+                }
+            });
+            
+            IStandPower.getStandPowerOptional(living).resolve().ifPresent(power -> {
+                if (power.hasPower() && power.usesStamina() && power.getMaxStamina() > 0) {
+                    float staminaRatio = power.getStamina() / power.getMaxStamina();
+                    ITextComponent text = new StringTextComponent(String.valueOf((int) (staminaRatio * 100) + "%"));
+                    IconTooltipLine icon = new IconTooltipLine(IconTooltipLine.Icon.STAND_STAMINA);
+                    ITooltipLine line = new MultiTooltipLine(icon.withRightSideSpace(iconWidth - icon.getWidth(mc.font)), new TextTooltipLine(text));
+                    tooltip.add(line);
+                }
+                if (power.hasPower() && power.usesResolve() && power.getMaxResolve() > 0) {
+                    float resolveRatio = living.hasEffect(ModStatusEffects.RESOLVE.get()) ? 1 : power.getResolve() / power.getMaxResolve();
+                    ITextComponent text = new StringTextComponent(String.valueOf((int) (resolveRatio * 100)) + "%");
+                    IconTooltipLine icon = new IconTooltipLine(IconTooltipLine.Icon.STAND_RESOLVE);
+                    ITooltipLine line = new MultiTooltipLine(icon.withRightSideSpace(iconWidth - icon.getWidth(mc.font)), new TextTooltipLine(text));
+                    tooltip.add(line);
+                }
+            });
+        }
+        else if (entity instanceof SoulEntity) {
+            SoulEntity soul = (SoulEntity) entity;
+            float seconds = soul.tickCount / 20f;
+            float maxTime = soul.lifeSpan / 20f;
+            
+            // TODO add soul time tooltip line
+        }
+        
+        int screenWidth = mc.getWindow().getGuiScaledWidth();
+        int screenHeight = mc.getWindow().getGuiScaledHeight();
+        int x = (int) (screenWidth * entityPos.pos.x);
+        int y = (int) (screenHeight * (1 - entityPos.pos.y));
+        
+        int uiColor = ActionsOverlayGui.getPowerUiColor(PowerClassification.STAND);
+        int[] rgb = ClientUtil.rgbInt(uiColor);
+        int color1 = (0xF0 << 24) + ClientUtil.fromRgbInt(rgb[0] / 5, rgb[1] / 5, rgb[2] / 5);
+        int color2 = (0x50 << 24) + uiColor;
+        int color3 = (color2 & 0xFEFEFE) >> 1 | color2 & 0xFF000000;
+        
+        CustomTooltipRender.drawHoveringText(matrixStack, tooltip, 
+                x, y, screenWidth, screenHeight, -1, 
+                color1, color2, color3, 
+                mc.font, false);
     }
     
     

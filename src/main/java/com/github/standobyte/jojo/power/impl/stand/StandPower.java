@@ -10,6 +10,7 @@ import com.github.standobyte.jojo.action.Action;
 import com.github.standobyte.jojo.action.stand.StandAction;
 import com.github.standobyte.jojo.advancements.ModCriteriaTriggers;
 import com.github.standobyte.jojo.capability.entity.EntityUtilCap;
+import com.github.standobyte.jojo.capability.entity.LivingUtilCapProvider;
 import com.github.standobyte.jojo.capability.world.SaveFileUtilCapProvider;
 import com.github.standobyte.jojo.client.ClientUtil;
 import com.github.standobyte.jojo.client.ui.actionshud.BarsRenderer;
@@ -349,6 +350,11 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
     @Override
     public float getStaminaTickGain() {
         float staminaRegen = getType().getStaminaRegen(this);
+        if (user != null && user.getCapability(LivingUtilCapProvider.CAPABILITY).map(
+                entity -> entity.isDyingBody() && entity.getDyingBodyTicksLeft() == 0).orElse(false)) {
+            staminaRegen -= 3.5F;
+        }
+        
         if (staminaRegen > 0) {
             staminaRegen *= INonStandPower.getNonStandPowerOptional(getUser()).map(power -> {
                 if (power.hasPower()) {
@@ -518,6 +524,7 @@ public class StandPower extends PowerBaseImpl<IStandPower, StandType<?>> impleme
                 if (killer != null) {
                     soulEntity.setNoResolveToEntity(StandUtil.getStandUser(killer));
                 }
+                user.getCapability(LivingUtilCapProvider.CAPABILITY).ifPresent(data -> data.soulEntity = soulEntity);
                 user.level.addFreshEntity(soulEntity);
             });
             return true;

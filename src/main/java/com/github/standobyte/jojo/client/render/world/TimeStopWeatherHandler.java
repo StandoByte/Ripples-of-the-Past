@@ -55,7 +55,6 @@ public class TimeStopWeatherHandler implements IWeatherRenderHandler, IWeatherPa
         }
     }
 
-    @SuppressWarnings("deprecation")
     @Override
     public void render(int pTicks, float pPartialTick, ClientWorld world, Minecraft mc, LightTexture lightmap,
             double x, double y, double z) {

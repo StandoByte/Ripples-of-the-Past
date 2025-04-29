@@ -1,13 +1,12 @@
 package com.github.standobyte.jojo.util.general;
 
-import java.lang.reflect.Field;
 import java.util.Optional;
 import java.util.Random;
 import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
 import java.util.stream.StreamSupport;
 
-import com.github.standobyte.jojo.util.mc.reflection.ReflectionUtil;
+import com.github.standobyte.jojo.mixin.Matrix4fAccessor;
 
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.vector.Matrix4f;
@@ -15,7 +14,6 @@ import net.minecraft.util.math.vector.Quaternion;
 import net.minecraft.util.math.vector.Vector2f;
 import net.minecraft.util.math.vector.Vector3d;
 import net.minecraft.util.math.vector.Vector3f;
-import net.minecraftforge.fml.common.ObfuscationReflectionHelper;
 
 public class MathUtil {
     public static final float DEG_TO_RAD = (float) (Math.PI / 180D);
@@ -212,42 +210,45 @@ public class MathUtil {
         Vector3f pointF = new Vector3f((float) point.x, (float) point.y, (float) point.z);
         Vector3f res = new Vector3f();
         float w;
-        res.setX(getM(matrix, 0, 0) * pointF.x() + getM(matrix, 0, 1) * pointF.y() + getM(matrix, 0, 2) * pointF.z() + getM(matrix, 0, 3));
-        res.setY(getM(matrix, 1, 0) * pointF.x() + getM(matrix, 1, 1) * pointF.y() + getM(matrix, 1, 2) * pointF.z() + getM(matrix, 1, 3));
-        res.setZ(getM(matrix, 2, 0) * pointF.x() + getM(matrix, 2, 1) * pointF.y() + getM(matrix, 2, 2) * pointF.z() + getM(matrix, 2, 3));
-        w = getM(matrix, 3, 0) * pointF.x() + getM(matrix, 3, 1) * pointF.y() + getM(matrix, 3, 2) * pointF.z() + getM(matrix, 3, 3);
+        Matrix4fAccessor matrixAccess = (Matrix4fAccessor) (Object) matrix;
+        res.setX(getM(matrixAccess, 0, 0) * pointF.x() + getM(matrixAccess, 0, 1) * pointF.y() + getM(matrixAccess, 0, 2) * pointF.z() + getM(matrixAccess, 0, 3));
+        res.setY(getM(matrixAccess, 1, 0) * pointF.x() + getM(matrixAccess, 1, 1) * pointF.y() + getM(matrixAccess, 1, 2) * pointF.z() + getM(matrixAccess, 1, 3));
+        res.setZ(getM(matrixAccess, 2, 0) * pointF.x() + getM(matrixAccess, 2, 1) * pointF.y() + getM(matrixAccess, 2, 2) * pointF.z() + getM(matrixAccess, 2, 3));
+        w = getM(matrixAccess, 3, 0) * pointF.x() + getM(matrixAccess, 3, 1) * pointF.y() + getM(matrixAccess, 3, 2) * pointF.z() + getM(matrixAccess, 3, 3);
         
         w = 1F / w;
         res.mul(w);
         return res;
     }
     
-    private static float getM(Matrix4f matrix, int i, int j) {
-        return ReflectionUtil.getFloatFieldValue(M_FIELDS[i][j], matrix);
+    public static float getM(Matrix4f matrix, int i, int j) {
+        return getM((Matrix4fAccessor) (Object) matrix, i, j);
     }
     
-    private static final Field M00 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226575_a_");
-    private static final Field M01 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226576_b_");
-    private static final Field M02 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226577_c_");
-    private static final Field M03 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226578_d_");
-    private static final Field M10 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226579_e_");
-    private static final Field M11 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226580_f_");
-    private static final Field M12 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226581_g_");
-    private static final Field M13 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226582_h_");
-    private static final Field M20 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226583_i_");
-    private static final Field M21 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226584_j_");
-    private static final Field M22 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226585_k_");
-    private static final Field M23 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226586_l_");
-    private static final Field M30 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226587_m_");
-    private static final Field M31 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226588_n_");
-    private static final Field M32 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226589_o_");
-    private static final Field M33 = ObfuscationReflectionHelper.findField(Matrix4f.class, "field_226590_p_");
-    private static final Field[][] M_FIELDS = new Field[][] {
-        {M00, M01, M02, M03},
-        {M10, M11, M12, M13},
-        {M20, M21, M22, M23},
-        {M30, M31, M32, M33}
-    };
+    public static float getM(Matrix4fAccessor matrix, int i, int j) {
+        if (i < 0 || i > 3 || j < 0 || j > 3) {
+            throw new ArrayIndexOutOfBoundsException();
+        }
+        switch (i * 4 + j) {
+        case 0:  return matrix.getM00();
+        case 1:  return matrix.getM01();
+        case 2:  return matrix.getM02();
+        case 3:  return matrix.getM03();
+        case 4:  return matrix.getM10();
+        case 5:  return matrix.getM11();
+        case 6:  return matrix.getM12();
+        case 7:  return matrix.getM13();
+        case 8:  return matrix.getM20();
+        case 9:  return matrix.getM21();
+        case 10: return matrix.getM22();
+        case 11: return matrix.getM23();
+        case 12: return matrix.getM30();
+        case 13: return matrix.getM31();
+        case 14: return matrix.getM32();
+        case 15: return matrix.getM33();
+        }
+        throw new ArrayIndexOutOfBoundsException();
+    }
     
     
     

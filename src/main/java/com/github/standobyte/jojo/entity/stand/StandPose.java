@@ -52,7 +52,7 @@ public class StandPose {
     public static final StandPose BLOCK = new StandPose("block");
     public static final StandPose LIGHT_ATTACK = StandEntityLightAttack.STAND_POSE;
     public static final StandPose HEAVY_ATTACK = new StandPose("heavyPunch");
-    @Deprecated public static final StandPose HEAVY_ATTACK_FINISHER = new StandPose("finisherPunch");
+    public static final StandPose HEAVY_ATTACK_FINISHER = new StandPose("finisherPunch");
     @Deprecated public static final StandPose RANGED_ATTACK = new StandPose("rangedAttack");
     public static final StandPose BARRAGE = new StandPose("barrage");
 }
