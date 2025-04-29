@@ -10,6 +10,7 @@
 	"LivingEntityArmorBreakMixin",
     "PlayerEntityMixin",
     "ServerPlayerEntityMixin",
+    "MobEntityMixin",
     "EntityLiquidWalkingMixin",
     "ServerChunkProviderMixin",
     "ServerPlayNetHandlerMixin",
