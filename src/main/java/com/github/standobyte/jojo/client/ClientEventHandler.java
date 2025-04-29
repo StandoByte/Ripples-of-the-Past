@@ -533,8 +533,8 @@ public class ClientEventHandler {
         if (mc.player.isAlive() && mc.player.hasEffect(ModStatusEffects.RESOLVE.get())) {
             ShaderEffectApplier.getInstance().setRandomResolveShader();
             
-            if (mc.player.getEffect(ModStatusEffects.RESOLVE.get()).getDuration() == 100) {
-                fadeAwayOst(150);
+            if (mc.player.getEffect(ModStatusEffects.RESOLVE.get()).getDuration() == 40) {
+                fadeAwayOst(100);
             }
             
             if (mc.player.tickCount % 100 == 0) {
