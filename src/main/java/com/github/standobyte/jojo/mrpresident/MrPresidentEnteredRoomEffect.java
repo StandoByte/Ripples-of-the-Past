@@ -10,8 +10,10 @@ import javax.annotation.Nullable;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectInstance;
 import com.github.standobyte.jojo.action.stand.effect.StandEffectType;
 import com.github.standobyte.jojo.mrpresident.dimension.MrPresidentInsideTeleporter;
+import com.github.standobyte.jojo.util.mc.MCUtil;
 import com.github.standobyte.jojo.world.dimension.ModDimensions;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.entity.Entity;
 import net.minecraft.entity.LivingEntity;
 import net.minecraft.entity.item.ArmorStandEntity;
@@ -76,7 +78,7 @@ public class MrPresidentEnteredRoomEffect extends StandEffectInstance {
                 mrPresidentWorld.getChunkSource()
                 .getChunkFuture(roomLowerCorner.getX(), roomLowerCorner.getZ(), ChunkStatus.FULL, true)
                 .thenRun(() -> {
-                    breakAndTeleportBlocks();
+                    breakAndTeleportBlocks(mrPresidentWorld, roomLowerCorner);
                     teleportEntitiesBack(mrPresidentWorld, roomLowerCorner, null);
                 });
             }
@@ -109,8 +111,24 @@ public class MrPresidentEnteredRoomEffect extends StandEffectInstance {
         }
     }
     
-    public void breakAndTeleportBlocks() {
-        // TODO
+    public void breakAndTeleportBlocks(ServerWorld mrPresidentWorld, BlockPos roomLowerCorner) {
+        if (mrPresidentWorld == null) return;
+        
+        int x0 = roomLowerCorner.getX();
+        int y0 = roomLowerCorner.getY();
+        int z0 = roomLowerCorner.getZ();
+        BlockPos.Mutable pos = new BlockPos.Mutable();
+        for (int x = 0; x < MrPresidentInsideTeleporter.ROOM_SIZE.getX(); x++) {
+            for (int y = 0; y < MrPresidentInsideTeleporter.ROOM_SIZE.getY(); y++) {
+                for (int z = 0; z < MrPresidentInsideTeleporter.ROOM_SIZE.getZ(); z++) {
+                    pos.set(x0 + x, y0 + y, z0 + z);
+                    BlockState blockState = mrPresidentWorld.getBlockState(pos);
+                    if (!blockState.isAir() && blockState.getDestroySpeed(world, pos) >= 0) {
+                        MCUtil.destroyBlock(mrPresidentWorld, pos, true, null);
+                    }
+                }
+            }
+        }
     }
 
     @Override
