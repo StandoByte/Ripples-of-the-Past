@@ -18,6 +18,7 @@ import net.minecraft.entity.item.ArmorStandEntity;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.util.math.AxisAlignedBB;
 import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.chunk.ChunkStatus;
 import net.minecraft.world.server.ServerWorld;
 
 public class MrPresidentEnteredRoomEffect extends StandEffectInstance {
@@ -46,7 +47,19 @@ public class MrPresidentEnteredRoomEffect extends StandEffectInstance {
         if (!world.isClientSide()) {
             boolean roomIsLocked = MrPresidentStandType.roomIsLocked(user);
             if (roomIsLocked && !prevTickRoomWasLocked) {
-                teleportEntitiesBack(entity -> entity instanceof LivingEntity && !(entity instanceof ArmorStandEntity));
+                if (!world.isClientSide()) {
+                    ServerWorld serverWorld = (ServerWorld) world;
+                    MinecraftServer server = serverWorld.getServer();
+                    ServerWorld mrPresidentWorld = server.getLevel(ModDimensions.MR_PRESIDENT);
+                    BlockPos roomLowerCorner = MrPresidentInsideTeleporter.getLowerCornerRoomPos(mrPresidentWorld, roomId);
+                    if (roomLowerCorner != null) {
+                        mrPresidentWorld.getChunkSource()
+                        .getChunkFuture(roomLowerCorner.getX(), roomLowerCorner.getZ(), ChunkStatus.FULL, true)
+                        .thenRun(() -> {
+                            teleportEntitiesBack(mrPresidentWorld, roomLowerCorner, entity -> entity instanceof LivingEntity && !(entity instanceof ArmorStandEntity));
+                        });
+                    }
+                }
             }
             prevTickRoomWasLocked = roomIsLocked;
         }
@@ -54,38 +67,45 @@ public class MrPresidentEnteredRoomEffect extends StandEffectInstance {
 
     @Override
     protected void stop() {
-        breakAndTeleportBlocks();
-        teleportEntitiesBack(null);
-    }
-    
-    public void teleportEntitiesBack(@Nullable Predicate<Entity> filter) {
         if (!world.isClientSide()) {
             ServerWorld serverWorld = (ServerWorld) world;
             MinecraftServer server = serverWorld.getServer();
             ServerWorld mrPresidentWorld = server.getLevel(ModDimensions.MR_PRESIDENT);
-            if (mrPresidentWorld != null) {
-                Set<Entity> entities = new HashSet<>();
-                
-                BlockPos roomCorner1 = MrPresidentInsideTeleporter.getCorner1RoomPos(mrPresidentWorld, roomId);
-                if (roomCorner1 != null) {
-                    AxisAlignedBB aabb = new AxisAlignedBB(roomCorner1, new BlockPos(
-                            roomCorner1.getX() + MrPresidentInsideTeleporter.ROOM_SIZE.getX(),
-                            roomCorner1.getY() + MrPresidentInsideTeleporter.ROOM_SIZE.getY(),
-                            roomCorner1.getZ() + MrPresidentInsideTeleporter.ROOM_SIZE.getZ()));
-                    entities.addAll(mrPresidentWorld.getEntities((Entity) null, aabb, filter));
-                }
-                
-                for (UUID entityId : enteredEntities) {
-                    Entity entity = mrPresidentWorld.getEntity(entityId);
-                    if (entity != null && (filter == null || filter.test(entity))) {
-                        entities.add(entity);
-                    }
-                }
-                
-                for (Entity entity : entities) {
-                    MrPresidentStandType.teleportFromRoom(entity, roomId, server);
-                }
+            BlockPos roomLowerCorner = MrPresidentInsideTeleporter.getLowerCornerRoomPos(mrPresidentWorld, roomId);
+            if (roomLowerCorner != null) {
+                mrPresidentWorld.getChunkSource()
+                .getChunkFuture(roomLowerCorner.getX(), roomLowerCorner.getZ(), ChunkStatus.FULL, true)
+                .thenRun(() -> {
+                    breakAndTeleportBlocks();
+                    teleportEntitiesBack(mrPresidentWorld, roomLowerCorner, null);
+                });
             }
+        }
+    }
+    
+    public void teleportEntitiesBack(ServerWorld mrPresidentWorld, BlockPos roomLowerCorner, @Nullable Predicate<Entity> filter) {
+        if (mrPresidentWorld == null) return;
+        
+        Set<Entity> entities = new HashSet<>();
+        
+        if (roomLowerCorner != null) {
+            AxisAlignedBB aabb = new AxisAlignedBB(roomLowerCorner, new BlockPos(
+                    roomLowerCorner.getX() + MrPresidentInsideTeleporter.ROOM_SIZE.getX(),
+                    roomLowerCorner.getY() + MrPresidentInsideTeleporter.ROOM_SIZE.getY(),
+                    roomLowerCorner.getZ() + MrPresidentInsideTeleporter.ROOM_SIZE.getZ()));
+            entities.addAll(mrPresidentWorld.getEntities((Entity) null, aabb, filter));
+        }
+        
+        for (UUID entityId : enteredEntities) {
+            Entity entity = mrPresidentWorld.getEntity(entityId);
+            if (entity != null && (filter == null || filter.test(entity))) {
+                entities.add(entity);
+            }
+        }
+        
+        MinecraftServer server = mrPresidentWorld.getServer();
+        for (Entity entity : entities) {
+            MrPresidentStandType.teleportFromRoom(entity, roomId, server);
         }
     }
     

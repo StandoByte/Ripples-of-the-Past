@@ -52,7 +52,7 @@ public class MrPresidentInsideTeleporter implements ITeleporter {
     }
     
     @Nullable
-    public static BlockPos getCorner1RoomPos(ServerWorld mrPresidentDimension, UUID roomId) {
+    public static BlockPos getLowerCornerRoomPos(ServerWorld mrPresidentDimension, UUID roomId) {
         MrPresidentWorldData rooms = mrPresidentDimension.getCapability(MrPresidentWorldDataProvider.CAPABILITY).orElse(null);
         if (rooms != null) {
             MrPresidentWorldData.ChunkSectionPos roomChunkSectionPos = rooms.getAllocatedRoom(roomId);
