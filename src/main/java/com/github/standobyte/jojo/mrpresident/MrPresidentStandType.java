@@ -41,12 +41,7 @@ public class MrPresidentStandType<T extends StandStats> extends NoSummonStandTyp
             LazyOptional<MrPresidentWorldData> mrPresidentTracker = MrPresidentWorldData.get(((ServerWorld) user.level).getServer());
             mrPresidentTracker.ifPresent(tracker -> tracker.rememberTurtlePosition(user));
             if (power.canUsePower()) {
-                boolean canTeleport = true;
-                if (user instanceof CocoJumboTurtleEntity) {
-                    CocoJumboTurtleEntity tutel = (CocoJumboTurtleEntity) user;
-                    canTeleport = tutel.hasKey() || !tutel.hasAssignedKey();
-                }
-                if (canTeleport) {
+                if (!roomIsLocked(user)) {
                     List<Entity> entities = findTargets(user, entity -> 
                                !entity.isOnGround() && entity.getDeltaMovement().y < 0 && entity.getY() > user.getY(1)
                             && !(entity.tickCount < 20 && entity.getType() == EntityType.PLAYER)
@@ -57,6 +52,14 @@ public class MrPresidentStandType<T extends StandStats> extends NoSummonStandTyp
                 }
             }
         }
+    }
+    
+    public static boolean roomIsLocked(LivingEntity user) {
+        if (user instanceof CocoJumboTurtleEntity) {
+            CocoJumboTurtleEntity tutel = (CocoJumboTurtleEntity) user;
+            return tutel.hasAssignedKey() && !tutel.hasKey();
+        }
+        return false;
     }
     
     public static List<Entity> findTargets(Entity turtle, @Nullable Predicate<Entity> filter) {
