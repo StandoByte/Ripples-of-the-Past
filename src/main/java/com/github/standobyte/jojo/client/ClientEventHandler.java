@@ -74,6 +74,7 @@ import com.github.standobyte.jojo.client.ui.tooltip.MultiTooltipLine;
 import com.github.standobyte.jojo.client.ui.tooltip.TextTooltipLine;
 import com.github.standobyte.jojo.entity.SoulEntity;
 import com.github.standobyte.jojo.entity.mob.IMobStandUser;
+import com.github.standobyte.jojo.init.ModBlocks;
 import com.github.standobyte.jojo.init.ModEntityTypes;
 import com.github.standobyte.jojo.init.ModItems;
 import com.github.standobyte.jojo.init.ModStatusEffects;
@@ -110,6 +111,7 @@ import com.google.common.base.MoreObjects;
 import com.mojang.blaze3d.matrix.MatrixStack;
 import com.mojang.blaze3d.systems.RenderSystem;
 
+import net.minecraft.block.BlockState;
 import net.minecraft.client.MainWindow;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.audio.ISound;
@@ -159,6 +161,8 @@ import net.minecraft.util.SoundEvent;
 import net.minecraft.util.SoundEvents;
 import net.minecraft.util.Timer;
 import net.minecraft.util.Util;
+import net.minecraft.util.math.BlockPos;
+import net.minecraft.util.math.BlockRayTraceResult;
 import net.minecraft.util.math.EntityRayTraceResult;
 import net.minecraft.util.math.MathHelper;
 import net.minecraft.util.math.RayTraceResult;
@@ -214,8 +218,9 @@ public class ClientEventHandler {
     private final Minecraft mc;
 
     private List<ITextComponent> multiLineOverlayMessage = new ArrayList<>();
-    private int overlayMessageTime;
-    private boolean animateOverlayMessageColor;
+    private int multiLineOverlayMessageTime;
+    private boolean multiLineOverlayFadeOut;
+    private boolean multiLineOverlayAnimateMessageColor;
     
     private float pausePartialTick;
     private boolean prevPause = false;
@@ -491,7 +496,24 @@ public class ClientEventHandler {
             NetworkUtil.blockPacketsToServer = mc.player != null && mc.player.hasEffect(ModStatusEffects.SENSORY_OVERLOAD.get());
             
             if (!mc.isPaused()) {
-                if (overlayMessageTime > 0) overlayMessageTime--;
+                if (multiLineOverlayMessageTime > 0) multiLineOverlayMessageTime--;
+                if (multiLineOverlayMessageTime == 0) {
+                    multiLineOverlayMessage.clear();
+                }
+            }
+            
+            aimedBlockMessage();
+        }
+    }
+    
+    private void aimedBlockMessage() {
+        if (mc.level != null && mc.hitResult != null && mc.hitResult.getType() == RayTraceResult.Type.BLOCK) {
+            BlockPos blockPos = ((BlockRayTraceResult) mc.hitResult).getBlockPos();
+            BlockState blockState = mc.level.getBlockState(blockPos);
+            if (blockState.getBlock() == ModBlocks.MR_PRESIDENT_EXIT.get()) {
+                setMultiLineOverlayMessage(Util.make(new ArrayList<>(), list -> list.add(new TranslationTextComponent("hint.mr_president_exit"))), false);
+                multiLineOverlayMessageTime = 1;
+                multiLineOverlayFadeOut = false;
             }
         }
     }
@@ -1109,8 +1131,8 @@ public class ClientEventHandler {
     public void setMultiLineOverlayMessage(Collection<ITextComponent> message, boolean animateColor) {
         multiLineOverlayMessage.clear();
         multiLineOverlayMessage.addAll(message);
-        overlayMessageTime = 60;
-        animateOverlayMessageColor = animateColor;
+        multiLineOverlayMessageTime = 60;
+        multiLineOverlayAnimateMessageColor = animateColor;
     }
     
     @SuppressWarnings("deprecation")
@@ -1118,13 +1140,21 @@ public class ClientEventHandler {
         if (!mc.options.hideGui) {
             IngameGui vanillaGui = mc.gui;
             if (vanillaGui.overlayMessageTime > 0 || multiLineOverlayMessage.isEmpty()) {
-                this.overlayMessageTime = 0;
+                this.multiLineOverlayMessageTime = 0;
                 return;
             }
             mc.getProfiler().push("overlayMessage");
-            float hue = (float)overlayMessageTime - partialTick;
-            int opacity = (int)(hue * 255.0F / 20.0F);
-            if (opacity > 255) opacity = 255;
+            int opacity;
+            float hue;
+            if (multiLineOverlayFadeOut) {
+                hue = (float)multiLineOverlayMessageTime - partialTick;
+                opacity = (int)(hue * 255.0F / 20.0F);
+                if (opacity > 255) opacity = 255;
+            }
+            else {
+                opacity = 255;
+                hue = 0;
+            }
 
             if (opacity > 8) {
                 RenderSystem.pushMatrix();
@@ -1132,7 +1162,7 @@ public class ClientEventHandler {
                 RenderSystem.enableBlend();
                 RenderSystem.defaultBlendFunc();
                 FontRenderer font = vanillaGui.getFont();
-                int color = (animateOverlayMessageColor ? MathHelper.hsvToRgb(hue / 50.0F, 0.7F, 0.6F) & 0xFFFFFF : 0xFFFFFF);
+                int color = (multiLineOverlayAnimateMessageColor ? MathHelper.hsvToRgb(hue / 50.0F, 0.7F, 0.6F) & 0xFFFFFF : 0xFFFFFF);
                 for (int i = multiLineOverlayMessage.size() - 1; i >= 0; i--) {
                     ITextComponent line = multiLineOverlayMessage.get(i);
                     int lineWidth = font.width(line);
